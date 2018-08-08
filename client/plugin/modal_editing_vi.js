@@ -1176,6 +1176,20 @@ console.warn("Only store commands starting with :");
 				EDITOR.closeFile(file.path);
 			}
 		}
+		else if(str == ":q") {
+			// Close file, but not if there are unsaved changes
+			if(file.isSaved) {
+				return function closeFile() {
+					EDITOR.closeFile(file.path);
+				}
+			}
+			else {
+				return function err37() {
+					showMessage("No write since last change (use ! to override)");
+					beep();
+				}
+			}
+		}
 		else return null;
 	}
 	
@@ -1902,7 +1916,7 @@ insertedString = "";
 		
 		//setTimeout(function() {oscillator.stop();},duration);
 		
-	};
+	}
 	
 	function clearCommandBuffer() {
 		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
