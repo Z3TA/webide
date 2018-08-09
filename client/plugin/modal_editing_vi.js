@@ -2978,7 +2978,7 @@ vimCommandBuffer = "";
 			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
 			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
-			// 03.1  Word movement
+			// ### 03.1  Word movement
 			EDITOR.mock("typing", "w");
 			if(file.caret.col != 5) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "w");
@@ -3042,7 +3042,7 @@ vimCommandBuffer = "";
 			if(file.caret.col != 43) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
 			
-			// 03.2  Moving to the start or end of a line
+			// ### 03.2  Moving to the start or end of a line
 			EDITOR.mock("typing", "$"); // Move to the last character
 			if(file.caret.col != 60) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "^"); // Move to the first non-blank character of the line
@@ -3052,6 +3052,24 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {charCode: HOME});
 			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			EDITOR.mock("typing", "ddi     This is a line with example text"); // Delete line
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "$"); // Move to the last character
+			if(file.caret.col != 36) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "^"); // Move to the first non-white-space character: |This
+			if(file.caret.col != 5) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "0"); // Move to the start of the line
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "oSecond line\nThird line");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "2k0");
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			EDITOR.mock("typing", "3$"); // Move three lines down
+			if(file.caret.row != 2) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			
+			
+			// ### 03.3  Moving to a character
 			
 			
 			
