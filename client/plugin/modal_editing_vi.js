@@ -144,6 +144,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var ESC = 27;
 	var R = 82;
 	var DELETE = 46;
+	var END = 35;
+	var HOME = 36;
 	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
@@ -216,6 +218,11 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Vim arrow right: Move caret right", fun: vimRightArrowKey, charCode: RIGHT, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow up", fun: vimUpArrowKey, charCode: UP, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDownArrowKey, charCode: DOWN, combo: 0, mode: "*"});
+			
+			EDITOR.bindKey({desc: "Vim HOME in Normal mode", fun: vimHome, charCode: HOME, combo: 0, mode: "*"});
+			
+			EDITOR.bindKey({desc: "Vim END in Normal mode", fun: vimEndNormal, charCode: END, combo: 0, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Vim END in Insert mode", fun: vimEndInsert, charCode: END, combo: 0, mode: "vimInsert"});
 			
 			if(EDITOR.settings.devMode) {
 				var ONE = 49;
@@ -808,6 +815,34 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 		else {
 			return true;
 		}
+	}
+	
+	function vimHome(file) {
+		// Does the same thing in both normal and insert mode
+		// Goes to the first character of the line
+		if(!VIM_ACTIVE) return true;
+		
+		file.moveCaretToStartOfLine();
+		showCursorPosition();
+		
+		return false; // Prevent (browser) default
+	}
+	
+	function vimEndNormal(file) {
+		// Goes to the last character of the line
+		file.moveCaretToEndOfLine();
+		file.moveCaretLeft();
+		showCursorPosition();
+		
+		return false; // Prevent (browser) default
+	}
+	
+	function vimEndInsert(file) {
+		// Goes to EOL
+		file.moveCaretToEndOfLine();
+		showCursorPosition();
+		
+		return false; // Prevent (browser) default
 	}
 	
 	function vimRedo(file) {
@@ -2995,6 +3030,28 @@ vimCommandBuffer = "";
 			if(file.caret.col != 29) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "7b"); // Move caret to |-a line
 			if(file.caret.col != 7) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "e"); // Move caret to |a line
+			if(file.caret.col != 8) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "gE"); // Move caret to Thi|s
+			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "3W"); // Move caret to |with
+			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "B"); // Move caret to |line
+			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "3E"); // Move caret to word|s
+			if(file.caret.col != 43) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			
+			// 03.2  Moving to the start or end of a line
+			EDITOR.mock("typing", "$"); // Move to the last character
+			if(file.caret.col != 60) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "^"); // Move to the first non-blank character of the line
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("keydown", {charCode: END});
+			if(file.caret.col != 60) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("keydown", {charCode: HOME});
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
 			
 			
 			
