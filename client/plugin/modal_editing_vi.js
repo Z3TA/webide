@@ -500,9 +500,9 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 					
 					insertedString = "";
 				}
-				
-				
-				
+				}
+			else if(command === null) {
+				clearCommandBuffer();
 			}
 			
 			if(vimCommandBuffer.indexOf("\n") != -1) throw new Error("Command buffer contains new-line character! vimCommandBuffer=" + UTIL.lbChars(vimCommandBuffer));
@@ -1258,6 +1258,12 @@ console.warn("Only store commands starting with :");
 		var change = false;
 		var replace = false;
 		var caretIndex = file.caret.index;
+		var lineBreak = file.lineBreak;
+		var firstLbChar = lineBreak[0];
+		var lastLbChar = lineBreak[lineBreak.length-1];
+		
+		// non-word that is not a white-space
+		var nwww = /[^A-Za-z0-9_ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]/
 		
 		for (var i=0; i<str.length; i++) {
 			lastChar = char;
@@ -1515,121 +1521,295 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			else if(char == "W") {
 				// Word movement forward by WORD
 				// A WORD ends strictly with a white-space. This may not be a word in normal sense, hence the uppercase.
-				return cursorMovement(function wordForwardByWORD() {
-					var toRepeat =  repeat * operatorRepeat;
-					while(toRepeat--) {
-						file.moveCaretRight();
-						for (var i=file.caret.index, char="", afterLineBreak=false, afterWhiteSpace=false; i<file.text.length; i++) {
-							char = file.text.charAt(file.caret.index);
-
-							// Stop if we got onto a new line. And it's empty or starts with a non-white-space
-							if( file.caret.col == 0 && (file.grid[file.caret.row].length == 0 || char.match(/\S/)) ) break;
-								
-							if(char.match(/\s/)) afterWhiteSpace = true;
-							else if(afterWhiteSpace) break;
-							
-							file.moveCaretRight();
-						}
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var char = "";
+				while(toRepeat--) {
+					var afterWhiteSpace = false;
+					var lastChar = file.text.charAt(index);
+					while(index<file.text.length) {
+						index++;
+						char = file.text.charAt(index);
+						
+						// Stop if we got onto a new line. And it's empty or starts with a non-white-space
+						if( lastChar == lastLbChar && (char == firstLbChar || char.match(/\S/)) ) break;
+						else if( char.match(/\s/) ) afterWhiteSpace = true;
+						else if(afterWhiteSpace) break; // Stop at antything if it's after white-space
+						
+						lastChar = char;
 					}
+				}
+				
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function WORD_forward() {
+					file.moveCaretToIndex(index);
 				});
+				
 			}
 			else if(char == "w") {
 				// Word movement forward by word
 				// A word ends at a non-word character, such as a ".", "-" or ")".
-				return cursorMovement(function wordForwardByWord() {
-					var toRepeat =  repeat * operatorRepeat;
-					while(toRepeat--) {
-						file.moveCaretRight();
-						for (var i=file.caret.index, char="", afterWhiteSpace=false, afterLineBreak=false; i<file.text.length; i++) {
-							char = file.text.charAt(file.caret.index);
-							
-							// Stop at anything if it's after a line-break'. Unless it's a white-space
-							if( afterLineBreak && !char.match(/\s/) ) break; 
-							
-							// Stop if we got onto a new line. And it's empty or starts with a word
-							if( file.caret.col == 0 && (file.grid[file.caret.row].length == 0 || char.match(/\w/)) ) break; 
-							
-							if(char == "\r" || char == "\n") afterLineBreak = true;
-							else if( char.match(/\s/) ) afterWhiteSpace = true;
-							else if( char.match(/\W/) ) break; // Stop at any character that is not a word (^A-Za-z0-9_)
-							else if(afterWhiteSpace) break; // Stop at antything if it's after white-space
-							
-							//console.log("col=" + file.caret.col + " char=" + UTIL.lbChars(char) + " afterLineBreak=" + afterLineBreak + " afterWhiteSpace=" + afterWhiteSpace);
-							
-							file.moveCaretRight();
-						}
+				
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var char = "";
+				while(toRepeat--) {
+					var lastChar = file.text.charAt(index);
+					while(index<file.text.length) {
+						index++;
+						char = file.text.charAt(index);
+						
+						// Stop on a word if last char was a white space
+						//if( char.match(/\w/) && lastChar.match(/\s/) ) break;
+						
+						// Stop on a word if last char was a non-word
+						if( char.match(/\w/) && lastChar.match(/\W/) ) break;
+						
+						// Stop if on a non-word-that-is-not-a-white-space if last char was a word or white-space
+						if( char.match(nwww) && lastChar.match(/\w|\s/) ) break;
+						
+						// Stop if we got onto a new line. And it's empty or starts with a non-white-space
+						if( lastChar == lastLbChar && (char == firstLbChar || char.match(/\S/)) ) break;
+						
+						lastChar = char;
 					}
+				}
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function wordForward() {
+					file.moveCaretToIndex(index);
 				});
 			}
 			else if(char == "B") {
-				// Word movement backwards (separated by space)
-				return cursorMovement(function backToStartOfWord() {
-					var toRepeat =  repeat * operatorRepeat;
-					while(toRepeat--) {
-						file.moveCaretLeft();
-						for (var i=file.caret.index-2, char="", afterLineBreak=false, afterWhiteSpace=false; i>-2; i--) {
-							if(afterLineBreak) break;
-							
-							char = file.text.charAt(file.caret.index);
-							
-							if(char == " ") afterWhiteSpace = true;
-							else if(char == "\r" || char == "\n") afterLineBreak = true;
-							else if(afterWhiteSpace) break;
-							
-							file.moveCaretLeft();
-						}
+				// WORD movement backwards (a WORD is anything separated by white-space)
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var leftChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index-1);
+					while(index>0) {
+						index--;
+						
+						leftChar = file.text.charAt(index-1);
+						
+						// Stop if before a white space and on a non-white-space
+						if( leftChar.match(/\s/) && char.match(/\S/) ) break;
+						
+						// Stop if before line-break. And on an empty line or the line starts with a non-white-space
+						if(leftChar == lastLbChar && (char == firstLbChar || char.match(/\S/)) ) break;
+						
+						char = leftChar;
 					}
+				}
+				
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" + 
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				
+				return cursorMovement(function backwardsByWORD() {
+					file.moveCaretToIndex(index);
 				});
 				
 			}
-			else if(char == "E" && lastChar == "g") {
-				// Moves to the previous end of a word (separated by space)
-				// Stop at empty lines!
-				return cursorMovement(function endOfPreviousWord() {
-					var toRepeat =  repeat * operatorRepeat;
-					while(toRepeat--) {
-						file.moveCaretLeft();
-						for (var i=file.caret.index+1, char="", afterLineBreak=false, afterWhiteSpace=false; i>1; i--) {
-							char = file.text.charAt(file.caret.index);
-							
-							if(char == " " || char == "\r" || char == "\n") break;
-							
-							file.moveCaretLeft();
-						}
+			else if(char == "b") {
+				// word movement backwards (stop at start of word)
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var leftChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index-1);
+					while(index>0) {
+						index--;
+						
+						leftChar = file.text.charAt(index-1);
+						
+						// Stop on a word if left char is a white-space
+						if( char.match(/\w/) && leftChar.match(/\s/) ) break;
+						
+						// Stop on a non-word-that-is-not-a-white-space if left char is a white space
+						if( char.match(nwww) && leftChar.match(/\s/) ) break;
+						
+						// Stop on a word if left char is a non-word
+						if( char.match(/\w/) && leftChar.match(/\W/) ) break;
+						
+						// Stop on a non-word-that-is-not-a-white-space if left char is a word
+						if( char.match(nwww) && leftChar.match(/\w/) ) break;
+						
+						// Stop on empty lines
+						if( char == firstLbChar && leftChar == lastLbChar ) break;
+						
+						char = leftChar;
 					}
-				});
-				
-			}
-			else if(char == "E") {
-				// Moves to the next end of a word (separated by space)
-				return cursorMovement(function endOfWordNext() {
-					var toRepeat =  repeat * operatorRepeat;
-					while(toRepeat--) {
-						file.moveCaretRight();
-						for (var i=file.caret.index+2, char="", afterLineBreak=false, afterWhiteSpace=false; i<file.text.length+2; i++) {
-							char = file.text.charAt(file.caret.index);
-							
-							if(char == " ") afterWhiteSpace = true;
-							else if(afterWhiteSpace) break;
-							
-							file.moveCaretRight();
-						}
-					}
+				}
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function backwardsByWord() {
+					file.moveCaretToIndex(index);
 				});
 			}
 			
-			// ### Move by white-space separated WORDs
 			else if(char == "E" && lastChar == "g") {
-				// Move back to the end of last word
+				// Moves to the previous end of a WORD
+				// Stop at empty lines!
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var leftChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index-1);
+					var rightChar =  file.text.charAt(index);
+					while(index>0) {
+						index--;
+						leftChar = file.text.charAt(index-1);
+						
+						// Stop on any non-white-space if right char is a white-space
+						if( char.match(/\S/) && rightChar.match(/\s/) ) break;
+						
+						// Stop on empty lines
+						if(char == firstLbChar && leftChar == lastLbChar) break;
+						
+						rightChar = char;
+						char = leftChar;
+					}
+				}
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function endOfWORD_backwards() {
+					file.moveCaretToIndex(index);
+				});
 			}
-			else if(char == "B") {
-				// Move back a word
+			
+			else if(char == "e" && lastChar == "g") {
+				// Moves to the previous end of a word
+				// Stop at empty lines!
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var leftChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index-1);
+					var rightChar =  file.text.charAt(index);
+					while(index>0) {
+						index--;
+						leftChar = file.text.charAt(index-1);
+						
+						// Stop on any non-white-space if right char is a white-space
+						if( char.match(/\S/) && rightChar.match(/\s/) ) break;
+						
+						// Stop on any non-character-that-is-not-a-white-space if right char is a word
+						if( char.match(nwww) && rightChar.match(/\w/) ) break;
+						
+						// Stop on any word if right char is not a word
+						if( char.match(/\w/) && rightChar.match(/\W/) ) break;
+						
+						// Stop on empty lines
+						if(char == firstLbChar && leftChar == lastLbChar) break;
+						
+						
+						rightChar = char;
+						char = leftChar;
+					}
+				}
+				
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function endOfWordBackwards() {
+					file.moveCaretToIndex(index);
+				});
 			}
-			else if(char == "W") {
-				// Move forward a word
+			
+			else if(char == "E") {
+				// Moves to the next end of a WORD (separated by space)
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var nextChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index+1);
+					while(index<file.text.length) {
+						index++;
+						
+						nextChar = file.text.charAt(index+1);
+						
+						// Stop on a non-white-space if next char is a white space
+						if( char.match(/\S/) && nextChar.match(/\s/) ) break;
+						
+						// Don't stop on empty lines!
+						
+						char = nextChar;
+					}
+				}
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function endOfWORDForward() {
+					file.moveCaretToIndex(index);
+				});
 			}
-			else if(char == "W") {
-				// Move forward to the next end of a word
+			else if(char == "e") {
+				// Move forward to the last end of word
+				var index = caretIndex;
+				var toRepeat = repeat * operatorRepeat;
+				var nextChar = "";
+				while(toRepeat--) {
+					var char = file.text.charAt(index+1);
+					while(index<file.text.length) {
+						index++;
+						
+						nextChar = file.text.charAt(index+1);
+						
+						// Stop on a non-white-space if next char is a white space
+						if( char.match(/\S/) && nextChar.match(/\s/) ) break;
+						
+						// Stop on a word if next char is a non-word
+						if( char.match(/\w/) && nextChar.match(/\W/) ) break;
+						
+						// Don't stop on empty lines!
+						
+						char = nextChar;
+					}
+				}
+				// Sanity check so we are not between line-break characters
+				if(lineBreak.length > 1 && file.text[index] == lastLbChar) {
+					throw new Error( "Character position " + index + " is between two line-break characters!\n" +
+					" i" + (index-1) + "=" + UTIL.lbChars(file.text[index-1]) + "\n" +
+					" i" + (index) + "=" + UTIL.lbChars(file.text[index]) + "\n" +
+					" i" + (index+1) + "=" + UTIL.lbChars(file.text[index+1]) );
+				}
+				return cursorMovement(function endOfWordForward() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			
 			/*
@@ -2638,8 +2818,126 @@ vimCommandBuffer = "";
 			
 			// http://vimhelp.appspot.com/usr_03.txt.html#usr_03.txt
 			
+			// First test edge cases before testing the happy path (tutorial)
+			//                      0 2   6   10  14  18      25     30  
+			EDITOR.mock("typing", "iab'!  c_d e9f --- 123 \n  gh\n \n\n");
+			EDITOR.mock("keydown", {charCode: ESC});
+			
+			// a "word" is any character that is not a underscore, number or white-space
+			
+			// Moving backwars by word
+			// Should jump over lines that only contains white-space
+			// Should stop at emty lines
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 30) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 25) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 18) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 14) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 10) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 6) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 2) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "b");
+			if(file.caret.index != 0) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			
+			// Moving forward by word
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 2) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 6) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 10) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 14) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 18) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 25) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "w");
+			if(file.caret.index != 30) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			
+			// Moving backwards strictly by WORD (a WORD is anything separated by white space)
+			//  0     6   10  14  18      25     30
+			//  ab'!  c_d e9f --- 123 \n  gh\n \n\n");
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 25) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 18) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 14) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 10) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 6) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "B");
+			if(file.caret.index != 0) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			
+			// Moving forward by WORD
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 6) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 10) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 14) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 18) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 25) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "W");
+			if(file.caret.index != 30) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			
+			// Moving backwards by end of word (also stops at empty lines which e doesn't)
+			//   1 3    8   12  16  20     26    30
+			//  ab'!  c_d e9f --- 123 \n  gh\n \n\n");
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 26) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 20) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 16) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 12) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 8) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 3) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 1) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "ge");
+			if(file.caret.index != 0) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			
+			// Moving forward by end of word (note: does NOT stop at empty lines!)
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 1) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 3) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 8) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 12) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 16) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 20) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(file.caret.index != 26) throw new Error("Unexpected file.caret.index=" + file.caret.index);
+			EDITOR.mock("typing", "e");
+			if(!file.caret.eof) throw new Error("Unexpected EOF! file.caret=" + JSON.stringify(file.caret));
+			
+			
+			
+			// Test the happy path (just to be sure)
+			
+			
+			
 			// Setup
-			EDITOR.mock("typing", "iThis is a line with example text");
+			EDITOR.mock("typing", "5k5ddiThis is a line with example text");
+			//EDITOR.mock("typing", "iThis is a line with example text");
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("typing", "32h");
 			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
