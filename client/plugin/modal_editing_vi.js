@@ -3278,6 +3278,22 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			EDITOR.mock("typing", "%"); // Move to matching parenthesis
 			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			// ### 03.5  Moving to a specific line
+			EDITOR.mock("typing", "oLine 2\nLine3");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "gg"); // Got to first line
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.col=" + file.caret.row);
+			EDITOR.mock("typing", "G"); // Got to last line
+			if(file.caret.row != 2) throw new Error("Unexpected file.caret.col=" + file.caret.row);
+			EDITOR.mock("typing", "2G"); // Got to second line
+			if(file.caret.row != 1) throw new Error("Unexpected file.caret.col=" + file.caret.row);
+			EDITOR.mock("typing", "1%"); // Go to start of file
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.col=" + file.caret.row);
+			EDITOR.mock("typing", "50%"); // Go to middle of file
+			if(file.caret.row != 1) throw new Error("Unexpected file.caret.col=" + file.caret.row);
+			
+			// move to one of the lines you can see
+			
 			
 			
 			
