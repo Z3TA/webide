@@ -153,6 +153,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var messageToShow = "ENTER COMMAND"; // Helper message to show if there is nothing in command buffer 
 	var insertedString = "";
 	var lastCommand = ""; // Used for repeating last command with .
+	var lastFind = ""; // Last f, F, t, T command so it can be repeated with ; or ,
 	var searchString = "";
 	var searchStringHistory = [];
 	var highlightAllSearchMatches = false;
@@ -437,6 +438,8 @@ return escapeFromInsert(file);
 				messageToShow = "";
 				EDITOR.renderNeeded();
 				
+				var searchCommandReg = /^(\d*)?([fFtT])(.)/;
+				
 				if(vimCommandBuffer == "u") {
 					// Undo
 				vimUndo(file);
@@ -446,6 +449,41 @@ return escapeFromInsert(file);
 				// Repeat last command
 					var command = parseNormalCommand(lastCommand);
 				}
+				// ### Repeat find command
+				else if(vimCommandBuffer == ";") {
+					// Repeat last find-command
+					if(lastFind == "") return showMessage("Yet no find command");
+					
+					var matchSearch = lastFind.match(searchCommandReg);
+					if(matchSearch == null || (matchSearch && matchSearch.length != 4 )) {
+						throw new Error("Unable to parse lastFind=" + lastFind + " searchCommandReg=" + searchCommandReg);
+					}
+					
+					var command = parseNormalCommand(lastFind);
+					
+				}
+				else if(vimCommandBuffer == ",") {
+					// Repeat last find-command, but in the other direction
+					if(lastFind == "") return showMessage("Yet no find command");
+					
+					var matchSearch = lastFind.match(searchCommandReg);
+					if(matchSearch == null || (matchSearch && matchSearch.length != 4 )) {
+						clearCommandBuffer();
+						return showMessage("Not a search command: " + lastCommand);
+					}
+					
+					var searchCommand = matchSearch[2];
+						if(searchCommand == "f") searchCommand = "F";
+						else if(searchCommand == "F") searchCommand = "f";
+						else if(searchCommand == "t") searchCommand = "T";
+						else if(searchCommand == "T") searchCommand = "t";
+						else throw new Error("Something wrong with searchCommandReg=" + searchCommandReg);
+					
+					var lastLastFind = lastFind;
+						var command = parseNormalCommand( (matchSearch[1] ? matchSearch[1] : "") + searchCommand + matchSearch[3] );
+					lastFind = lastLastFind; // So we can click , repeatable to search in the same direction
+					
+				}
 				else if(vimCommandBuffer.charAt(0) != ":") {
 					var command = parseNormalCommand(vimCommandBuffer);
 			}
@@ -453,7 +491,7 @@ return escapeFromInsert(file);
 			}
 			
 			if(command) {
-				clearCommandBuffer();
+				
 				
 				addHistory(file, undefined); // Start a new history entry
 				
@@ -478,6 +516,9 @@ command.redo(); // Runs the command
 					lastCommand = vimCommandBuffer;
 				}
 				
+				// When we clear the command buffer vimCommandBuffer will be "" and all messages will disappear
+				clearCommandBuffer();
+				
 				if(command.insert) {
 					// Insert some text
 					var text = command.insert;
@@ -491,7 +532,7 @@ command.redo(); // Runs the command
 EDITOR.renderNeeded();
 					insertedString = "";
 }
-
+				
 if(command.toInsert) {
 // Switch to insert mode
 EDITOR.setMode("vimInsert");
@@ -507,6 +548,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 					
 					insertedString = "";
 				}
+				
 				}
 			else if(command === null) {
 				clearCommandBuffer();
@@ -1326,6 +1368,11 @@ console.warn("Only store commands starting with :");
 			}
 			else if((char == "0" && !nr)) {
 				// moves to the very first character of the line
+				var index = file.grid[file.caret.row].startIndex;
+				
+				return cursorMovement(function zeroMoveTo() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			
 			/*
@@ -1337,23 +1384,50 @@ console.warn("Only store commands starting with :");
 			}
 			
 			// ## Quick search single letter
-else if(findRight) {
-				// Search right n times to find char
+			else if(findRight || findToRight) {
+				lastFind = str;
 				
-			}
-			else if(findLeft) {
-				// Search left n times to find char
+				if(file.caret.eof) return nil();
 				
-			}
-			else if(findToLeft) {
-				// Search left n times to find char, stops one character before the searched character
+				var lookFor = char;
+				console.log("findRight: lookFor=" + lookFor);
+				var char = "";
+				var toRepeat = repeat;
 				
-			}
-			else if(findToRight) {
-				// Search right n times to find char, stops one character before the searched character
+				for (var i=caretIndex+1+findToRight; i<file.text.length; i++) {
+					char = file.text.charAt(i);
+					console.log("findRight: i=" + i + " char=" + char + " lookFor=" + lookFor);
+					if(char == lookFor && !(--toRepeat)) break;
+					if(char == "\r" || char == "\n") return nil();
+				}
+				if(i == file.text.length-1) return nil();
 				
+				if(findRight) var index = i;
+				if(findToRight) var index = i-1;
+				return cursorMovement(function findRight() {
+					file.moveCaretToIndex(index);
+				});
 			}
-			
+			else if(findLeft || findToLeft) {
+				lastFind = str;
+				if(file.caret.col==0) return nil();
+				
+				var lookFor = char;
+				var char = "";
+				var toRepeat = repeat;
+				for (var i=caretIndex-1-findToLeft; i>-1; i--) {
+					char = file.text.charAt(i);
+					if(char == lookFor && !(--toRepeat)) break;
+					else if(char == "\r" || char == "\n") return nil();
+				}
+				if(i < 0) return nil();
+				
+				if(findLeft) var index = i;
+				if(findToLeft) var index = i+1;
+				return cursorMovement(function findLeft() {
+					file.moveCaretToIndex(index);
+				});
+			}
 			/*
 				## Search strings
 			*/
@@ -1859,18 +1933,51 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			*/ 
 			else if(char == "$") {
 				// moves the cursor to the end of a line
+				var toRepeat = repeat * operatorRepeat;
+				var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
+				while(--toRepeat) file.moveCaretDown(caret);
+				
+				var gridRow = file.grid[caret.row]
+				if(gridRow.length == 0) var lastCharIndex = caretIndex;
+				else var lastCharIndex = gridRow[gridRow.length-1].index;
+				
+				return cursorMovement(function endOfWordForward() {
+					file.moveCaretToIndex(lastCharIndex);
+				});
 				
 			}
 			else if(char == "^") {
 				// moves to the first non-blank character of the line
+				var gridRow = file.grid[file.caret.row]
+				if(gridRow.length == 0) {
+var lastCharIndex = caretIndex;
+					var index = file.caret.index;
+				}
+				else {
+var lastCharIndex = gridRow[gridRow.length-1].index;
+					var index = gridRow.startIndex;
+				}
+				
+				while(index < lastCharIndex) {
+					if(file.text.charAt(index).match(/\S/)) break;
+					index++;
+				}
+				
+				return cursorMovement(function endOfWordForward() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			
 			/*
 				## Moving to a character
 			*/
-			else if(char == "f") {
-				find = true;
+			else if(char == "F") {
+				findLeft = true;
 			}
+			else if(char == "f") {
+				findRight = true;
+			}
+			
 			
 			/*
 				## Matching a parenthesis
@@ -1999,12 +2106,6 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				}
 				else return nil();
 			}
-			else if(char == "0") {
-				// Move to column zero
-				return cursorMovement(function moveCursorToColumZero() {
-					file.moveCaret(undefined, file.caret.row, 0);
-				});
-			}
 			
 			// ## Misc
 			else if(char == "z" && lastChar == "z") {
@@ -2012,6 +2113,12 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			}
 			else if(char == "t" && lastChar == "z") {
 				// puts the cursor line at the top
+			}
+			else if(char == "T") {
+				findToLeft = true;
+			}
+			else if(char == "t") {
+				findToRight = true;
 			}
 			else if(char == "b" && lastChar == "z") {
 				// puts the cursor line at at the bottom.
@@ -2326,6 +2433,8 @@ vimCommandBuffer = "";
 		if(typeof msg != "string") msg = JSON.stringify(msg);
 		messageToShow = msg;
 		EDITOR.renderNeeded();
+		
+		return false; // So you can return to this in functions that needs to return a Boolean
 	}
 	
 	function showCommandBuffer(ctx) {
@@ -3035,7 +3144,7 @@ vimCommandBuffer = "";
 			EDITOR.mock("typing", "gE"); // Move caret to Thi|s
 			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "3W"); // Move caret to |with
-			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			if(file.caret.col != 16) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "B"); // Move caret to |line
 			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "3E"); // Move caret to word|s
@@ -3070,6 +3179,28 @@ vimCommandBuffer = "";
 			
 			
 			// ### 03.3  Moving to a character
+			EDITOR.mock("typing", "3k3ddiTo err is human.  To really foul up you need a computer.");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "0");
+			EDITOR.mock("typing", "fh"); // |human
+			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "fy"); // reall|y
+			if(file.caret.col != 26) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "Fh"); // |human
+			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "3fl"); // really fou|l
+			if(file.caret.col != 31) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "Th"); // backwards to: h|uman
+			if(file.caret.col != 11) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "tn"); // forward to: hum|an
+			if(file.caret.col != 13) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			// Repeat find
+			// Only seems to fork with f,F,t,T
+			EDITOR.mock("typing", ";"); // Repeat to n: you| need
+			if(file.caret.col != 39) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", ","); // Repeat to n in opposit direction: human|.
+			if(file.caret.col != 15) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
 			
 			

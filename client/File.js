@@ -2609,7 +2609,7 @@ var File; // File object is global
 			throw new Error("index is undefined!");
 		}
 		else if(index < 0) {
-			throw new Error("Index can not be less then zero!");
+			throw new Error("index=" + index + " can not be less then zero!");
 		}
 		else if(index > file.text.length) {
 			throw new Error("index=" + index + " can not be over file length=" + file.text.length + "");
