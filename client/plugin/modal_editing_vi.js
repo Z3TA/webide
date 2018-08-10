@@ -1997,6 +1997,68 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			else if(char == "%") {
 				if(nr == "") {
 					//  moves to the matching parenthesis
+					if(file.text.length <= 1) return nil(); // Don't match if the file has no or only one character
+					
+					var index = caretIndex < file.text.length ? caretIndex : caretIndex-1;
+					var charOn = file.text[index];
+					var bracketReg = /[{([\])}]/;
+					var direction = 0;
+					console.log("matchingBracket: index=" + index + " charOn=" + charOn + " match: ", charOn.match(bracketReg));
+					
+					if(charOn.match(bracketReg) == null) {
+						
+						// Seek to a bracket (both left and right)
+						var indexLeft = caretIndex-1;
+						var indexRight = caretIndex+1;
+						while(indexLeft > 0 || indexRight < file.text.length-1) {
+							console.log("matchingBracket: indexLeft=" + indexLeft + " (" + file.text[indexLeft] + ") indexRight=" + indexRight + " (" + file.text[indexRight] + ") file.text.length=" + file.text.length + " ");
+							if(file.text[indexLeft]) {
+								if(file.text[indexLeft].match(bracketReg) ) {
+								index = indexLeft;
+									break;
+							}
+								indexLeft--;
+							}
+							
+							if(file.text[indexRight]) {
+								if( file.text[indexRight].match(bracketReg) ) {
+								index = indexRight;
+									break;
+							}
+								indexRight++;
+							}
+						}
+						if(indexLeft <= 0 && indexRight >= file.text.length) return nil(); // Found no brackets
+					}
+					
+					
+					charOn = file.text[index];
+					console.log("matchingBracket: charOn=" + charOn + " index=" + index);
+					var lookFor
+					
+					if(     charOn == "(") { lookFor = ")"; direction=1;}
+					else if(charOn == ")") { lookFor = "("; direction=-1;}
+					else if(charOn == "[") { lookFor = "]"; direction=1;}
+					else if(charOn == "]") { lookFor = "["; direction=-1;}
+					else if(charOn == "{") { lookFor = "}"; direction=1;}
+					else if(charOn == "}") { lookFor = "{"; direction=-1;}
+					
+					if(direction == 0) throw new Error("direction=" + direction + " charOn=" + charOn + " index=" + index);
+					
+					var openBrackets = 1;
+					console.log("matchingBracket: direction=" + direction);
+					// todo: Don't match inside strings unless the caret is insade that string then only match in that string !?
+					for (var i=index+direction; i<file.text.length && i>0; i+=direction) {
+						console.log("matchingBracket: direction=" + direction + " i=" + i + " openBrackets=" + openBrackets + " file.text.length=" + file.text.length);
+						if(file.text[i] == lookFor && !(--openBrackets)) break;
+						else if(file.text[i] == charOn) openBrackets++;
+					}
+					if(i == -1 || i == file.text.length) return nil(); // Found no matching bracket
+					
+					return cursorMovement(function findMatchingBracket() {
+						file.moveCaretToIndex(i);
+					});
+					
 				}
 				else {
 					// moves to xx% of the file
@@ -2035,7 +2097,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					var colBefore = file.caret.col;
 					for (var i=0; i<repeat; i++) {
 						file.moveCaretDown();
-				}
+					}
 					var rowLength = file.grid[file.caret.row].length;
 					noEol(file);
 					
@@ -2055,7 +2117,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					var colBefore = file.caret.col;
 					for (var i=0; i<repeat; i++) {
 						file.moveCaretUp();
-				}
+					}
 					var rowLength = file.grid[file.caret.row].length;
 					noEol(file);
 					
@@ -2089,7 +2151,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 						file.deleteTextRange(caretIndex, caretIndex + moveLeft - 1);
 						//file.moveCaretRight(file.caret, moveLeft);
 					}, change);
-					}
+				}
 				else {
 					return cursorMovement(function moveCursorLeft() {
 						file.moveCaretLeft(file.caret, moveLeft);
@@ -2102,7 +2164,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					return cursorMovement(function moveCursorRight() {
 						file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length - file.caret.col - 1, repeat));
 						if(file.caret.eol) throw new Error("We should not move the caret to end-of-line! file.caret=" + JSON.stringify(file.caret));
-				});
+					});
 				}
 				else return nil();
 			}
@@ -2136,7 +2198,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				}, function addLineRedo() {
 					file.moveCaretToEndOfLine();
 					file.insertLineBreak();
-}, true, repeat);
+				}, true, repeat);
 			}
 			
 			else if(char == "r") {
@@ -2196,7 +2258,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			
 			else if(char == "i" && del || change) {
 				/*
-					 Deletes or changes inside something.
+					Deletes or changes inside something.
 					Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to insert mode
 				*/
 				var startIndex = file.text.lastIndexOf(char, file.caret.index);
@@ -2215,7 +2277,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					}, function changeInRedo() {
 						file.deleteTextRange(startIndex, EndIndex);
 						file.moveCaretToIndex(startIndex);
-}, true);
+					}, true);
 				}
 			}
 			else if(char == "i") {
@@ -2238,7 +2300,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					file.removeAllTextOnRow(row);
 					file.insertTextOnRow(oldContent, row);
 				});
-				}
+			}
 			else if(char == "Z" && lastChar == "Z") {
 				// Save the file and close it
 				return cmd(function saveAndCloseUndo() {
@@ -2252,7 +2314,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			}
 			else {
 				console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);
-				}
+			}
 			
 		}
 		
@@ -2272,26 +2334,26 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			if(typeof undo != "function") throw new Error("cmd() must be called with a undo function!");
 			if(typeof redo != "function") throw new Error("cmd() must be called with a redo function!");
 			
-				var command = {
-					undo: undo,
-					redo: redo,
+			var command = {
+				undo: undo,
+				redo: redo,
 				toInsert: !!toInsert,
 				repeat: repeat || 1
-				}
+			}
 			
 			if(toInsert && i < str.length-1) {
 				var text = str.slice(i+1);
 				command.insert = text;
 			}
-				
-				return command;
+			
+			return command;
 		}
 		
 		function toInsert(moveCursor, repeat) {
-/*
-Switch to insert mode
-insert remaining characters (str) if any
-*/
+			/*
+				Switch to insert mode
+				insert remaining characters (str) if any
+			*/
 			
 			if(moveCursor && typeof moveCursor != "function") throw new Error("First argument should be a move function that moves the cursors, or undefined");
 			if(repeat && typeof repeat != "number") throw new Error("Seceond parameter should be how many times the insert should be repeated");
@@ -2309,8 +2371,8 @@ insert remaining characters (str) if any
 			
 			return action;
 			
-insertedString = "";
-
+			insertedString = "";
+			
 		}
 		
 		function nil() {
@@ -2367,18 +2429,18 @@ insertedString = "";
 			return false; // We did nothing
 		}
 		else {
-
+			
 			if(vimCommandBuffer.charAt(0) == ":") addCommandHistory(vimCommandBuffer);
-		
-vimCommandBuffer = "";
-		commandCaretPosition = 0;
-		messageToShow = "";
-		EDITOR.renderNeeded();
-		
-		console.log("Cleared command buffer!");
-
+			
+			vimCommandBuffer = "";
+			commandCaretPosition = 0;
+			messageToShow = "";
+			EDITOR.renderNeeded();
+			
+			console.log("Cleared command buffer!");
+			
 			return true; // We did something
-	}
+		}
 	}
 	
 	function getNormalMap(char) {
@@ -2652,16 +2714,21 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {charCode: UP});
 			if(vimCommandBuffer != ":foo") throw new Error("Expected key up to toggle command history! vimCommandBuffer=" + vimCommandBuffer + " commandHistory.length=" + commandHistory.length);
 			
+			EDITOR.mock("keydown", {charCode: ESC});
 			
 			
-			EDITOR.mock("typing", ":set showmode?");
+			EDITOR.mock("typing", ":set noshowmode\n");
+			EDITOR.mock("typing", ":set showmode?\n");
 			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
+			EDITOR.mock("typing", ":set showmode\n");
+			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			if(typeof callback == "function") callback(true);
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest1 passed!");
+				EDITOR.mock("keydown", {charCode: ESC});
 			}
 			
 		});
@@ -2946,11 +3013,12 @@ vimCommandBuffer = "";
 			else {
 				EDITOR.mock("typing", "kkk4dd");
 				EDITOR.mock("typing", "aTest2 passed!");
+				EDITOR.mock("keydown", {charCode: ESC});
 			}
 		});
 		
 		if(typeof callback != "function") return false;
-		}
+	}
 	
 	function vimTest3(callback) {
 		EDITOR.openFile("vimTest3.txt", "\n", function(err, file) {
@@ -3203,12 +3271,22 @@ vimCommandBuffer = "";
 			if(file.caret.col != 15) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
 			
+			// ### 03.4  Matching a parenthesis
+			EDITOR.mock("typing", "ddiif (a == (b * c) / d)");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.caret.col != 20) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "%"); // Move to matching parenthesis
+			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			
+			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			if(typeof callback == "function") callback(true);
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest3 passed!");
+				EDITOR.mock("keydown", {charCode: ESC});
 			}
 			
 		});
@@ -3230,6 +3308,7 @@ vimCommandBuffer = "";
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest4 passed!");
+				EDITOR.mock("keydown", {charCode: ESC});
 			}
 		});
 		if(typeof callback != "function") return false;
