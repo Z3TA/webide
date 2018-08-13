@@ -2621,9 +2621,19 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 		if(file == undefined && EDITOR.currentFile == undefined) return;
 		else if(file == undefined) file = EDITOR.currentFile;
 		
+		if(option.ruler) {
+			// Show actual position line,column
+			var row = file.caret.row+1;
+			var col = file.caret.col + file.grid[row].indentationCharacters.length + 1;
+			var str = row + "," + col;
+		}
+		else {
+			// Show editors caret position
 		var str = "index=" + file.caret.index + " row=" + (file.caret.row) + " col=" + (file.caret.col);
 		if(file.caret.eol) str += " EOL";
 		if(file.caret.eof) str += " EOF";
+		}
+		
 		showMessage(str);
 	}
 	
