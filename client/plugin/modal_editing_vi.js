@@ -124,6 +124,8 @@
 	
 	Because the editor does auto indentation we could have Esc=Tab so it's easier to reach
 	
+	todo: Handle large files. Ex: gg goto first line of the "large" file, and not the first line of the file buffer.
+	
 */
 
 (function() {
@@ -146,6 +148,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var DELETE = 46;
 	var END = 35;
 	var HOME = 36;
+	var G = 71;
 	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
@@ -220,10 +223,12 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Vim arrow up", fun: vimUpArrowKey, charCode: UP, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDownArrowKey, charCode: DOWN, combo: 0, mode: "*"});
 			
-			EDITOR.bindKey({desc: "Vim HOME in Normal mode", fun: vimHome, charCode: HOME, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim HOME", fun: vimHome, charCode: HOME, combo: 0, mode: "*"});
 			
 			EDITOR.bindKey({desc: "Vim END in Normal mode", fun: vimEndNormal, charCode: END, combo: 0, mode: "vimNormal"});
 			EDITOR.bindKey({desc: "Vim END in Insert mode", fun: vimEndInsert, charCode: END, combo: 0, mode: "vimInsert"});
+			
+			EDITOR.bindKey({desc: "Vim where am I", fun: vimWhereAmI, charCode: G, combo: CTRL, mode: "vimNormal"});
 			
 			if(EDITOR.settings.devMode) {
 				var ONE = 49;
@@ -1041,6 +1046,15 @@ console.warn("Unable to undo! No recorded history!");
 		
 		// No need to have EDITOR.renderNeeded() inside each undo function
 		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimWhereAmI(file) {
+		var line = file.caret.row+1;
+		var totalLines = file.grid.length;
+		var percentage = Math.ceil( (line-1) / (totalLines-1) * 100 - 1 );
+		var column = file.caret.col + 1;
+		showMessage("Line " + line + " of " + totalLines + " --" + percentage + "%-- column " + column);
 		return false;
 	}
 	
@@ -1978,7 +1992,18 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				findRight = true;
 			}
 			
-			
+			else if(char == "%" && nr) {
+				// Goto percentage of file
+				var percentage = parseInt(nr) / 100;
+				var row = Math.floor(percentage * file.grid.length);
+				if(row > file.grid.length-1) row = file.grid.length-1;
+				if(row < 0) row = 0;
+				var index = file.grid[row].startIndex;
+				
+				return cursorMovement(function gotoPercentage() {
+					file.moveCaretToIndex(index);
+				});
+			}
 			/*
 				## Matching a parenthesis
 				
@@ -2071,21 +2096,64 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				## Moving to a specific line
 				With no argument, "G" positions you at the end of the file.
 			*/
-			else if(char == "G") {
+			else if(char == "G" && nr) {
 				// Goto line n
+				var line = parseInt(nr);
+				if(line > file.grid.length-1) line = file.grid.length-1;
+				var index = file.grid[line-1].startIndex;
 				
+				return cursorMovement(function gotoLine() {
+					file.moveCaretToIndex(index);
+				});
 			}
+			else if(char == "G") {
+				// Goto last line
+				if(file.grid.length <= 1) return nil();
+				
+				var lastRow = file.grid[file.grid.length-1];
+				var index = lastRow.startIndex;
+				
+				return cursorMovement(function gotoLastLine() {
+					file.moveCaretToIndex(index);
+				});
+			}
+			
 			else if(char == "g" && lastChar == "g") {
 				// go to the start of a file
+				var index = 0;
+				return cursorMovement(function gotoStart() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			else if(char == "H") {
 				// Moves to (home) top of screen
+				var firstRow = file.startRow;
+				var index = file.grid[firstRow].startIndex;
+				
+				return cursorMovement(function gotoHome() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			else if(char == "M") {
 				// Moves to middle of screen
+				var firstRow = file.startRow;
+				var lastRow = Math.min(file.startRow + EDITOR.view.visibleRows - 1, file.grid.length-1);
+				var middleRow = Math.round(firstRow + (lastRow - firstRow) / 2); // Vim: Line H25, M38, L50
+				var index = file.grid[middleRow].startIndex;
+				
+				return cursorMovement(function gotoMiddle() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			else if(char == "L") {
 				// Moves to last line of screen
+				var lastRow = Math.min(file.startRow + EDITOR.view.visibleRows - 1, file.grid.length-1);
+				console.log("lastRow=" + lastRow + " file.grid.length=" + file.grid.length + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				var index = file.grid[lastRow].startIndex;
+				
+				return cursorMovement(function gotoLast() {
+					file.moveCaretToIndex(index);
+				});
 			}
 			
 			/*
@@ -3281,18 +3349,20 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			// ### 03.5  Moving to a specific line
 			EDITOR.mock("typing", "oLine 2\nLine3");
 			EDITOR.mock("keydown", {charCode: ESC});
-			EDITOR.mock("typing", "gg"); // Got to first line
+			EDITOR.mock("typing", "gg"); // Goto first line
 			if(file.caret.row != 0) throw new Error("Unexpected file.caret.col=" + file.caret.row);
-			EDITOR.mock("typing", "G"); // Got to last line
+			EDITOR.mock("typing", "G"); // Goto last line
 			if(file.caret.row != 2) throw new Error("Unexpected file.caret.col=" + file.caret.row);
-			EDITOR.mock("typing", "2G"); // Got to second line
+			EDITOR.mock("typing", "2G"); // Goto second line
 			if(file.caret.row != 1) throw new Error("Unexpected file.caret.col=" + file.caret.row);
-			EDITOR.mock("typing", "1%"); // Go to start of file
+			EDITOR.mock("typing", "1%"); // Goto start of file
 			if(file.caret.row != 0) throw new Error("Unexpected file.caret.col=" + file.caret.row);
-			EDITOR.mock("typing", "50%"); // Go to middle of file
+			EDITOR.mock("typing", "50%"); // Goto middle of file
 			if(file.caret.row != 1) throw new Error("Unexpected file.caret.col=" + file.caret.row);
 			
-			// move to one of the lines you can see
+			// move to one of the lines you can see ? Hard to test, so test manually
+			
+			
 			
 			
 			
