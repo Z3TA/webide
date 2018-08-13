@@ -149,6 +149,12 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var END = 35;
 	var HOME = 36;
 	var G = 71;
+	var U = 85;
+	var D = 68;
+	var E = 69;
+	var Y = 89;
+	var F = 70;
+	var B = 66;
 	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
@@ -232,6 +238,13 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Vim where am I", fun: vimWhereAmI, charCode: G, combo: CTRL, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim Delete", fun: vimDelete, charCode: DELETE, combo: 0, mode: "*"});
+			
+			EDITOR.bindKey({desc: "Scroll half a window up", fun: vimScrollHalfScreenUp, charCode: U, combo: CTRL, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Scroll half a window down", fun: vimScrollHalfScreenDown, charCode: D, combo: CTRL, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Scroll one line up", fun: vimScrollOneLineUp, charCode: Y, combo: CTRL, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Scroll one line down", fun: vimScrollOneLineDown, charCode: E, combo: CTRL, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Scroll a whole a screen up", fun: vimScrollWholeScreenUp, charCode: B, combo: CTRL, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Scroll a whole a screen down", fun: vimScrollWholeScreenDown, charCode: F, combo: CTRL, mode: "vimNormal"});
 			
 			if(EDITOR.settings.devMode) {
 				var ONE = 49;
@@ -506,8 +519,11 @@ return escapeFromInsert(file);
 			
 			if(command) {
 				
-				
 				addHistory(file, undefined); // Start a new history entry
+				
+				if(command.scroll) {
+					file.scrollTo(command.scroll.x, command.scroll.y);
+				}
 				
 				if(command.moveCursor) {
 					command.moveCursor();
@@ -1107,6 +1123,82 @@ console.warn("Unable to undo! No recorded history!");
 			return false;
 		}
 		
+	}
+	
+	function vimScrollHalfScreenUp(file) {
+		clearCommandBuffer();
+		
+		var scrollStep = Math.round(EDITOR.view.visibleRows / 2);
+		// Vim also moves the cursor when scrolling
+		file.moveCaretToStartOfLine();
+		while(scrollStep--) file.moveCaretUp();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimScrollHalfScreenDown(file) {
+		clearCommandBuffer();
+		
+		var scrollStep = Math.round(EDITOR.view.visibleRows / 2);
+		// Vim also moves the cursor when scrolling
+		file.moveCaretToStartOfLine();
+		while(scrollStep--) file.moveCaretDown();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimScrollOneLineUp(file) {
+		clearCommandBuffer();
+		file.scroll(0, -1);
+		// Vim doesn't move the cursor unless it would go off screen
+		if(file.caret.row >= file.startRow + EDITOR.view.visibleRows) {
+			file.moveCaret(undefined, file.startRow + EDITOR.view.visibleRows - 1);
+		}
+		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimScrollOneLineDown(file) {
+		clearCommandBuffer();
+		file.scroll(0, 1);
+		
+		if(file.caret.row < file.startRow) {
+			file.moveCaret(undefined, file.startRow);
+		}
+		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimScrollWholeScreenUp(file) {
+		clearCommandBuffer();
+		
+		var scrollStep = Math.max(1, EDITOR.view.visibleRows-2);
+		file.scroll(0, -scrollStep);
+		
+		if(file.caret.row >= file.startRow + EDITOR.view.visibleRows) {
+			file.moveCaret(undefined, file.startRow + EDITOR.view.visibleRows - 1);
+			file.moveCaretToStartOfLine();
+		}
+		
+		EDITOR.renderNeeded();
+		return false;
+	}
+	
+	function vimScrollWholeScreenDown(file) {
+		clearCommandBuffer();
+		
+		var scrollStep = Math.max(1, EDITOR.view.visibleRows-2);
+		file.scroll(0, scrollStep);
+		
+		if(file.caret.row < file.startRow) {
+			file.moveCaret(undefined, file.startRow);
+			file.moveCaretToStartOfLine();
+		}
+		
+		EDITOR.renderNeeded();
+		return false;
 	}
 	
 	function updateHistory(file, ev) {
@@ -1819,6 +1911,10 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				});
 				
 			}
+			else if(char == "b" && lastChar == "z") {
+				// puts the cursor line at at the bottom.
+				return scroll(undefined, file.caret.row - EDITOR.view.visibleRows + 1);
+			}
 			else if(char == "b") {
 				// word movement backwards (stop at start of word)
 				var index = caretIndex;
@@ -2310,18 +2406,19 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			// ## Misc
 			else if(char == "z" && lastChar == "z") {
 				// Center the line that cursors at, scroll so the line with the cursors is in the center
+				return scroll(undefined, Math.round(file.caret.row - EDITOR.view.visibleRows/2));
 			}
 			else if(char == "t" && lastChar == "z") {
 				// puts the cursor line at the top
+				
+				return scroll(undefined, file.caret.row);
+				
 			}
 			else if(char == "T") {
 				findToLeft = true;
 			}
 			else if(char == "t") {
 				findToRight = true;
-			}
-			else if(char == "b" && lastChar == "z") {
-				// puts the cursor line at at the bottom.
 			}
 			else if(char == "o") {
 				// Adds a new line and goes into insert mode
@@ -2508,9 +2605,11 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			if(moveCursor) action.moveCursor = moveCursor;
 			
 			return action;
-			
-			insertedString = "";
-			
+			}
+		
+		function scroll(x, y) {
+			var action = {scroll: {x: x, y: y}};
+			return action;
 		}
 		
 		function nil() {
