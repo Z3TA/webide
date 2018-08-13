@@ -60,6 +60,7 @@ EDITOR.settings = {
 		color: "rgb(0,0,0)"
 	},
 	scrollZone: 80, // Scrollbar zone, right and bottom. When touching down in the zone we should scroll
+	showLineNumbers: true, // Can be used to toggle line-numbers on/off
 	leftMargin: 50,
 	rightMargin: 50,
 	topMargin: 10,

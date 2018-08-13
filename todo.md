@@ -48,23 +48,8 @@ What I'm working on
 
 Vim mode:
 
-Investigate why I get the wrong history branch 
-
-Getting undo/redo history to work in vim mode
-
-Moving cursor in vim editor command (left/right arrow)
-
-Toggling vim editor commands : up/down arrow keys
-
 Vim tests, continue with vim tutorial and write a test for each feature in the tutorial:
-http://vimdoc.sourceforge.net/htmldoc/usr_02.html
-
-problem (vim undo/redo):
-1. insert
-2. delete
-3. undo (delete)
-4. redo (delete) but redid the insert! (expected it to redo the delete)
-5. redo (insert) = should be back to the delete (vim: Already at newest change)
+http://vimdoc.sourceforge.net/htmldoc/usr_03.html
 
 
 Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?

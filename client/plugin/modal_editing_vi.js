@@ -179,7 +179,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			and the relative position of the cursor in the file (as a percentage).
 		*/
 		ignorecase: false, // Ignore case when searching
-		hlsearch: false // Highlight text when searching ??
+		hlsearch: false, // Highlight text when searching ??
+		number: true // Show line numbers (editor default)
 	}
 	
 	
@@ -229,6 +230,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Vim END in Insert mode", fun: vimEndInsert, charCode: END, combo: 0, mode: "vimInsert"});
 			
 			EDITOR.bindKey({desc: "Vim where am I", fun: vimWhereAmI, charCode: G, combo: CTRL, mode: "vimNormal"});
+			
+			EDITOR.bindKey({desc: "Vim Delete", fun: vimDelete, charCode: DELETE, combo: 0, mode: "*"});
 			
 			if(EDITOR.settings.devMode) {
 				var ONE = 49;
@@ -387,7 +390,7 @@ return escapeFromInsert(file);
 		
 		if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
 		
-		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode);
+		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode + " Enter?" + (char == "\n" || char == "\r") + " Delete?" + (char == String.fromCharCode(127)) );
 		
 		if(!VIM_ACTIVE) return true;
 		
@@ -438,7 +441,13 @@ return escapeFromInsert(file);
 			}
 			else {
 				
-				vimCommandBuffer += char;
+				if(commandCaretPosition < vimCommandBuffer.length) {
+					vimCommandBuffer = vimCommandBuffer.slice(0, commandCaretPosition) + char + vimCommandBuffer.slice(commandCaretPosition);
+				}
+				else {
+					vimCommandBuffer += char;
+				}
+				
 				commandCaretPosition++;
 				messageToShow = "";
 				EDITOR.renderNeeded();
@@ -567,6 +576,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			/*
 				The only "function" keys that get registered in keyPress in JavaScript is Enter and Delete!
 				We need to EDITOR.bindKey for example backspace and arrow keys.
+				In Firefox it only seems to be Enter that is captured by keyPress and everything else needed to be captured by EDITOR.bindKey!
 			*/
 			
 			console.log("VimInsert:");
@@ -582,18 +592,6 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 				},function redoNewLine() {
 					file.moveCaretToIndex(caretIndex);
 					file.insertLineBreak();
-				});
-			}
-			else if(char == String.fromCharCode(127)) { // Delete
-				console.log("DELETE");
-				insertedString = insertedString.slice(0,-1);
-				var deletedCharacter = file.text.charAt(file.caret.index);
-				return rdo(function deleteUndo() {
-					file.moveCaretToIndex(caretIndex);
-					file.putCharacter(deletedCharacter);
-				}, function deleteRedo() {
-					file.moveCaretToIndex(caretIndex);
-					file.deleteCharacter();
 				});
 			}
 			else {
@@ -628,6 +626,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 	function vimBackspace(file, combo) {
 		// Backspace is not captured by keyPress!
 		if(!VIM_ACTIVE) return true;
+		console.log("vim: Backspace");
 		if(EDITOR.mode == "vimInsert") {
 			
 			var backspaceRedo = function moveLeftAndDeleteCharacter() {
@@ -669,7 +668,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
 			}
 			else {
-				vimCommandBuffer = vimCommandBuffer.slice(0,commandCaretPosition) + vimCommandBuffer.slice(commandCaretPosition+1);
+				vimCommandBuffer = vimCommandBuffer.slice(0,commandCaretPosition-1) + vimCommandBuffer.slice(commandCaretPosition);
 			}
 			
 			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
@@ -1058,6 +1057,58 @@ console.warn("Unable to undo! No recorded history!");
 		return false;
 	}
 	
+	function vimDelete(file) {
+		if(!VIM_ACTIVE) return true;
+		console.log("vim: DELETE");
+		
+		if( EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":" ) {
+			// Pressing delete while editing command buffer
+			console.log("commandCaretPosition=" + commandCaretPosition);
+			console.log("vimCommandBuffer=" + vimCommandBuffer);
+			
+			if(commandCaretPosition == vimCommandBuffer.length-1) {
+				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
+			}
+			else {
+				vimCommandBuffer = vimCommandBuffer.slice(0,commandCaretPosition) + vimCommandBuffer.slice(commandCaretPosition+1);
+			}
+			
+			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			
+			EDITOR.renderNeeded();
+			
+			// Wait for Enter before parsing/executing the command !? Yes! Only commands starting with : can be edited!
+			
+			return false;
+		}
+		else { //if(EDITOR.mode == "vimInsert") {
+			// Delete in Vim always seem to delete in the text buffer unless you are inside a command buffer
+			insertedString = insertedString.slice(0,-1);
+			var caretIndex = file.caret.index;
+			var deletedCharacter = file.text.charAt(caretIndex);
+			return rdo(function deleteUndo() {
+				file.moveCaretToIndex(caretIndex);
+				file.putCharacter(deletedCharacter);
+			}, function deleteRedo() {
+				file.moveCaretToIndex(caretIndex);
+				file.deleteCharacter();
+			});
+		}
+		
+		
+		
+		// Function placed here so file will be in closure
+		function rdo(undo, redo, comment) {
+			var ev = {undo: undo, redo: redo, comment: comment};
+			ev.redo();
+			EDITOR.renderNeeded();
+			updateHistory(file, ev);
+			
+			return false;
+		}
+		
+	}
+	
 	function updateHistory(file, ev) {
 		// Adds to existing/current undo/redo history, when adding insert to current command
 		if(typeof ev != "object") throw new Error("Want a history object with undo and redo functions! ev=" + ev + " is not an object!");
@@ -1223,7 +1274,26 @@ console.warn("Only store commands starting with :");
 				a previous command and execute it again.  These two histories are separate.
 				
 			*/
-		if(str.slice(0, 5) == ":set ") {
+		
+		if(str == ":set number") {
+			return function showLineNumbers() {
+				EDITOR.settings.showLineNumbers = true;
+				EDITOR.settings.leftMargin = 50;
+			}
+		}
+		else if(str == ":set nonumber") {
+			// Turn off line numbers
+			return function hideLineNumbers() {
+				EDITOR.settings.showLineNumbers = false;
+				EDITOR.settings.leftMargin = 5;
+			}
+		}
+		else if(str == ":set number?" || str == ":set nonumber?") {
+			return function showIfLineNumbersVisible() {
+				showMessage( EDITOR.settings.showLineNumbers ? "number" : "nonumber" );
+			}
+		}
+		else if(str.slice(0, 5) == ":set ") {
 			/*
 				set: set some option ex: :set option or :set nooption to turn it off
 				a question mark shows if it's on or not: ex: :set compatible? shows compatible if its on or nocompatible if it's off
@@ -2789,6 +2859,24 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			EDITOR.mock("typing", ":set showmode?\n");
 			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
 			EDITOR.mock("typing", ":set showmode\n");
+			
+			
+			// Editing the command buffer
+			EDITOR.mock("typing", ":abcd");
+			EDITOR.mock("keydown", {charCode: LEFT});
+			EDITOR.mock("keydown", {charCode: LEFT});
+			EDITOR.mock("keydown", {charCode: LEFT});
+			EDITOR.mock("keydown", {charCode: DELETE}); // Delete b
+			if(vimCommandBuffer != ":acd") throw new Error("Unexpected vimCommandBuffer=" + vimCommandBuffer);
+			EDITOR.mock("typing", "b");
+			if(vimCommandBuffer != ":abcd") throw new Error("Unexpected vimCommandBuffer=" + vimCommandBuffer);
+			EDITOR.mock("typing", "123");
+			if(vimCommandBuffer != ":ab123cd") throw new Error("Unexpected vimCommandBuffer=" + vimCommandBuffer);
+			EDITOR.mock("keydown", {charCode: BACKSPACE});
+			EDITOR.mock("keydown", {charCode: BACKSPACE});
+			EDITOR.mock("keydown", {charCode: BACKSPACE});
+			if(vimCommandBuffer != ":abcd") throw new Error("Unexpected vimCommandBuffer=" + vimCommandBuffer);
+			EDITOR.mock("keydown", {charCode: ESC});
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
