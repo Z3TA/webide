@@ -340,6 +340,13 @@ Debugging Error: spawn EACCES
 3. Try running the command as that user: sudo -u ltest4 node -v
 
 
+Debugging Error: spawn ENOENT
+-----------------------------
+
+1. It's possible a Apparmor EACCESS in descuise. So try disabling apparmor
+2. The process starts, but tries to find a file and exits with an ENOENT. Try running in chroot.
+It has possible to do with no PATH env variable. So make sure PATH env exist var opt = {env: {PATH: "/bin/:/usr/bin"}}
+3. It might be because of cwd not being a directory or not found
 
 
 Moving user to another using ZFS

@@ -696,6 +696,7 @@ originalRow.push("");
 	},
 
 	getFilenameFromPath: function getFilenameFromPath(path) {
+		// Returns the file name, including the file extension part
 		if(path.indexOf("/") > -1) {
 			return path.substr(path.lastIndexOf('/')+1);
 		}
@@ -772,12 +773,13 @@ originalRow.push("");
 	},
 
 	getFileNameWithoutExtension: function getFileNameWithoutExtension(filePath) {
+		// Returns the file name, but WITHOUT the extension part: /foo/bar.baz => bar
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var fileExtension = UTIL.getFileExtension(fileName);
 		
-		if(fileExtension.lengt == 0) return fileName;
+		if(fileExtension.length == 0) return fileName;
 		
-		return fileName.slice(0, fileName.length - fileExtension.length);
+		return fileName.slice(0, fileName.length - fileExtension.length - 1);
 		
 	},
 	

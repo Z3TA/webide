@@ -790,7 +790,7 @@ idSuccess();
 							console.time("check mounts");
 							
 							var nginxProfileOK = false;
-							var foldersToMount = 15;
+							var foldersToMount = 21;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -963,12 +963,21 @@ idSuccess();
 								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
 								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
 								
+								mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+								mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
+								mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+								mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip seems to need it
+								mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
+								
 								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								
 								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+								
+								
 								
 								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 

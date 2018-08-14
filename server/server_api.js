@@ -33,6 +33,78 @@ API.countLines = function countLines(user, json, callback) {
 	
 }
 
+API.extract = function extract(user, json, callback) {
+	
+	var supportedFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
+	
+	var source = json.source;
+	var destination = json.destination;
+	
+	if(source == undefined) callback(new Error("source: " + source));
+	if(destination == undefined) destination = UTIL.getDirectoryFromPath(source) + UTIL.getFileNameWithoutExtension(source) + "/";
+	
+	var localSource = user.translatePath(source);
+	if(localSource instanceof Error) return callback(localSource);
+	
+	var localDestination = user.translatePath(destination);
+	if(localDestination instanceof Error) return callback(localDestination);
+	localDestination = UTIL.trailingSlash(localDestination);
+	
+	var runningDirectory = UTIL.getDirectoryFromPath(localSource);
+	
+	var fileType = UTIL.getFileExtension(localSource);
+	
+	if(supportedFileTypes.indexOf(fileType) == -1) callback( new Error("File type (" + fileType + ") not supported! Try " + JSON.stringify(supportedFileTypes)) );
+	
+	if(fileType == "zip") {
+var exe = "/usr/bin/unzip";
+		//var exe = "/bin/echo";
+		var args = [localSource, "-d", localDestination];
+	}
+	else if(fileType == "rar") {
+		var exe = "/usr/bin/unrar";
+		var args = ["e", localSource, localDestination];
+	}
+	else if(fileType == "gz") {
+		// A gz file is only one file! The .gz part will be removed, and the unpacked file will replace the packed file.
+		var exe = "/bin/gunzip";
+		//var exe = "gunzip";
+		var args = [localSource];
+		destination = source.slice(0, -3);
+	}
+	else if(fileType == "tar.gz" || fileType == "tgz") {
+		// It's a tarball that has been gzip'ed
+		var exe = "/bin/tar";
+		var args = ["zxvf", localSource, "-C " + localDestination];
+	}
+	else throw new Error("Unknown fileType=" + fileType);
+
+	var execFile = require('child_process').execFile;
+	var execFileOptions = {cwd: runningDirectory, env: {HOME: "/", PATH:"/bin/:/usr/bin/"}};
+	
+	console.log("user.homeDir=" + user.homeDir);
+	
+	execFile(exe, args, execFileOptions, function (err, stdout, stderr) {
+		
+		console.log(exe + " args=" + JSON.stringify(args) + " stderr=" + stderr + " stdout=" + stdout + " ");
+		
+		if(err) return callback(err);
+		else if(stderr) return callback(stderr);
+		else {
+			
+			if(exe == "/bin/gunzip" && json.destination) {
+				// Move the file after gunzip'ing
+				API.move(user, {}, function fileMoved(err, movedto) {
+					if(err) return callback(new Error("gunzip succeeded, but move failed: " + err.message));
+					else callback(null, {source: source, destination: movedto.path});
+				});
+			}
+			else return callback(null, {source: source, destination: destination});
+			
+		}
+	});
+}
+
 API.hash = function hash(user, json, callback) {
 	// Useful for example comparing files, so that files don't need to be uploaded to the client for comparison.
 	

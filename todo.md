@@ -43,6 +43,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Fiddling with Apparmor settings for gunzip, unzip, unrar, tar
+
+Able to extract packaged files. So that you can drag a .zip file to the editor and then extract it.
+
 
 ---
 
@@ -1583,6 +1587,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Make a folder/file path picker dialog for chosing a file path. For example for saving a file.
 
 Able to hide the function list, enabled by default.
 

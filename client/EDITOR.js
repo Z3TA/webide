@@ -1831,14 +1831,14 @@ return false;
 	}
 	
 	EDITOR.renderCaret = function(caret, colPlus, fillStyle) {
+		var file = EDITOR.currentFile;
+		if(file == undefined) return;
 		
 		if(colPlus == undefined) colPlus = 0;
 		if(fillStyle == undefined) fillStyle = EDITOR.settings.caret.color;
 		
 		var row = caret.row;
 		var col = caret.col + colPlus;
-		
-		var file = EDITOR.currentFile;
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
 		
@@ -4107,7 +4107,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				
 				if(parentNode.contains(widget.mainElement)) {
 					wasHidden = false;
-					if(parentNode.contains(widget.mainElement)) parentNode.removeChild(widget.mainElement);
+					if( parentNode.contains(widget.mainElement) ) parentNode.removeChild(widget.mainElement);
 				}
 				
 				/*
@@ -4127,7 +4127,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			if(widget.mainElement) {
 				widget.hide();
-				parentNode.removeChild(widget.mainElement);
+				if( parentNode.contains(widget.mainElement) ) parentNode.removeChild(widget.mainElement);
 			}
 			
 			return widget.mainElement;

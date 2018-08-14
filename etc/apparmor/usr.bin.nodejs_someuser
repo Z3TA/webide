@@ -64,11 +64,37 @@
   /usr/lib/** r,
   /usr/share/zoneinfo/** r,
 
+  # Need to be able to read executables in order to run them !?
+  /bin/** r,
+  /usr/bin/** r,
+
   # P means "use profile" (and clear enviroment), x means execute
   %HOME%%USERNAME%/usr/bin/hg px,
   %HOME%%USERNAME%/usr/bin/node px,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
   %HOME%%USERNAME%/bin/bash px,
+
+  %HOME%%USERNAME%/bin/tar Cx -> util,
+  %HOME%%USERNAME%/bin/gunzip Cx -> util,
+  %HOME%%USERNAME%/usr/bin/unzip Cx -> util,
+  %HOME%%USERNAME%/usr/bin/unrar Cx -> util,
+
+  profile util {
+    /bin/** r,
+    /usr/bin/** r,
+
+    signal receive set=cont peer=unconfined,
+    signal receive set=exists peer=unconfined,
+    signal receive set=int peer=/usr/bin/nodejs_%USERNAME%,
+    signal receive set=kill peer=unconfined,
+    signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
+    signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
+    signal receive set=term peer=unconfined,
+
+    %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** rwl,
+  }
+
 
 }
 

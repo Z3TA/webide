@@ -25,6 +25,7 @@
 	var maxNameLength = 40;
 	var lastMovedFrom = "";
 	var lastMovedTo = "";
+	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
 	
 	// Google API Client ID and API key from the Developer Console
 	var CLIENT_ID = '987730033948-rupie76gqs1f6ir3u45kg06isli8jnmt.apps.googleusercontent.com';
@@ -585,6 +586,28 @@ gapi.auth2.getAuthInstance().signOut();
 			
 			return false;
 		};
+		
+		if(extractableFileTypes.indexOf(UTIL.getFileExtension(path)) != -1) {
+			
+			var optExtract = document.createElement("li");
+			optExtract.innerText = "Extract";
+			fileItemMenu.appendChild(optExtract);
+			optExtract.onclick = function extractFile(clickEvent) {
+				clickEvent.preventDefault();
+				clickEvent.stopPropagation();
+				
+				CLIENT.cmd("extract", {source: path}, function(err, json) {
+					if(err) alertBox(err.message);
+					else {
+						exploreDir(json.destination);
+					}
+				});
+				
+				return hideMenu();
+			};
+			
+		}
+		
 		
 		// Open the menu after the item.
 		// If it's a folder item that is extended (has child nodes) we need to add the menu as the first child

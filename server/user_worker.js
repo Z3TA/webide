@@ -141,6 +141,7 @@ user.identify = function identify(info) {
 	user.name = info.name;
 	user.rootPath = info.rootPath;
 	user.defaultWorkingDirectory = info.homeDir;
+	user.homeDir = info.homeDir;
 	
 	console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
@@ -161,6 +162,7 @@ user.identify = function identify(info) {
 	if(USE_CHROOT) {
 		user.rootPath = null;
 		user.defaultWorkingDirectory = "/";
+		user.homeDir = "/";
 		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + ")");
 	}
 	

@@ -7,8 +7,8 @@
 
 %HOME%%USERNAME%/bin/bash {
 
-  signal receive set=hup peer= %HOME%%USERNAME%/bin/bash,
-  signal send set=hup peer= %HOME%%USERNAME%/bin/bash,
+  signal receive set=hup peer=%HOME%%USERNAME%/bin/bash,
+  signal send set=hup peer=%HOME%%USERNAME%/bin/bash,
 
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rwl,
@@ -27,6 +27,12 @@
   %HOME%%USERNAME%/usr/bin/ssh ix,
   %HOME%%USERNAME%/usr/bin/ssh-keygen ix,
   %HOME%%USERNAME%/bin/ls ix,
+  %HOME%%USERNAME%/bin/tar ix,
+  %HOME%%USERNAME%/bin/gunzip ix,
+  %HOME%%USERNAME%/bin/sh ix,
+  %HOME%%USERNAME%/bin/gzip ix,
+  %HOME%%USERNAME%/usr/bin/unzip ix,
+  %HOME%%USERNAME%/usr/bin/unrar ix,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
 
   profile scripts {

@@ -153,6 +153,12 @@ exec("apt-get update");
 exec("apt-get install python-certbot-nginx -y");
 
 
+console.log("Installing archive extractor utilities");
+exec("apt-add-repository multiverse && apt-get update");
+exec("apt-get install unzip unrar -y");
+
+
+
 console.log("Finish!");
 
 console.log("You might need to edit the following files:");

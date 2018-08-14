@@ -120,7 +120,13 @@ umount("/home/" + username + "/usr/bin/env");
 	umount("/home/" + username + "/usr/bin/node");
 umount("/home/" + username + "/usr/bin/ssh");
 	umount("/home/" + username + "/etc/ssl/certs");
-	
+umount("/home/" + username + "/usr/bin/unzip");
+umount("/home/" + username + "/usr/bin/unrar");
+umount("/home/" + username + "/bin/gunzip");
+umount("/home/" + username + "/bin/tar");
+umount("/home/" + username + "/bin/sh");
+umount("/home/" + username + "/bin/gzip");
+
 	if(!NOZFS) {
 		// Need to get the zfs pool
 		child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
