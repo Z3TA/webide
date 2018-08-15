@@ -967,7 +967,7 @@ idSuccess();
 								mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
 								mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
 								mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
-								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip seems to need it
+								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
 								mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
 								
 								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
