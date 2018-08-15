@@ -112,7 +112,12 @@ if(process.getuid) log("Running user worker process with uid=" + process.getuid(
 else log("Unable to get process uid!", 4);
 
 // Set default file permissions
-var newmask = parseInt("0022", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
+//var newmask = parseInt("0022", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
+/*
+	Group wwww-data needs needs to have write permission to files in /sock/
+	If we need another default umask we could reset the umask after the script has forked!
+*/
+var newmask = parseInt("0002", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 var oldmask = process.umask(newmask);
 log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 
