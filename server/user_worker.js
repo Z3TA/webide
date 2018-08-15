@@ -1393,6 +1393,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log("Forking " + patchedFilePath + " ...");
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
+			
+			
+			// Watch for new unix named pipes (unix sockets) so we can delete them when script stops
+			var fs = require("fs");
+			var sockWatcher = fs.watch('/sock/', sockEvent);
+			var createdSockets = [];
+
 			nodeScript = child_process.fork(patchedFilePath, nodeScriptArgs, nodeScriptOptions);
 			// The node worker will chroot to user's home dir, setegid and seteuid ????? HUH ?
 			
@@ -1409,8 +1416,15 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			// note: The worker process will not close/exit (unless there's an error) if it has to listen for messages from parent
 			
-			user.runningNodeJsScripts[filePath] = {childProcess: nodeScript, isDebugger: debugit};
+			user.runningNodeJsScripts[filePath] = {childProcess: nodeScript, isDebugger: debugit, sockWatcher: sockWatcher, createdSockets: createdSockets};
 			callback(null, {filePath: filePath});
+			
+			function sockEvent(eventType, filename) {
+				// filename is just the file name, not the whole path!
+				console.log("sockEvent: eventType=" + eventType + " filename=" + filename);
+				if(!filename) console.warn("sockEvent: eventType=" + eventType + " filename=" + filename);
+				else createdSockets.push("/sock/" + filename);
+			}
 		}
 		
 		function messageFromNodeScript(message, handle) {
@@ -1422,10 +1436,21 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		function nodejScriptClose(code, signal) {
 			console.log(user.name + ":" + filePath + ":close: code=" + code + " signal=" + signal);
 			
+			var script = user.runningNodeJsScripts[filePath];
+			
+			script.createdSockets.forEach(deleteFile); // Delete so user wont get "address in use" error next time the script is run
+			script.sockWatcher.close(); // Stop watching for changes!
+			
 			delete user.runningNodeJsScripts[filePath];
 			
 			user.send({nodejsMessage: {scriptName: filePath, close: {code: code, signal: signal}}});
 			
+			function deleteFile(filePath) {
+				var fs = require("fs");
+				fs.unlink(filePath, function localFileDeleted(err) {
+					if(err) console.warn("Failed to delete unix named pipe (socket): filePath=" + filePath);
+				});
+			}
 		}
 		
 		function nodeScriptError(err) {
