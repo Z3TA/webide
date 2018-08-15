@@ -53,6 +53,7 @@ log("process.env.uid=" + process.env.uid, 7);
 var npmOptions = {
 	env: {
 		HOME: "/",
+		PATH: "/usr/bin/:/bin/", // npm want node to be inside PATH
 		dev: true
 	},
 };
