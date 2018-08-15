@@ -21,3 +21,5 @@ EOF
 
 # rsync -rv
 
+echo "Now visit the site in incognito mode and make sure everything works!"
+
