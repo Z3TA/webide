@@ -1358,6 +1358,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		
 		var nodeScriptOptions = {
 			execPath: nodejsPath, 
+			cwd: directory,
 			env: {
 				myName: user.name,
 				dev: true
@@ -1660,6 +1661,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 
 function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, sourceFile, callback) {
 	/*
+		
+		--- DEPRECATED --- (code left for later when we want to use proper nodejs debugging)
 		
 		The Chrome Debugger Protocol, sometimes also called Chrome DevTools Protocol, or
 		Remote Debugging Protocol is used to inpsect the v8 JavaScript engine and web sites.
