@@ -422,11 +422,13 @@
 			inline = arr[2];
 		}
 		
+		console.log("reLine=" + reLine);
+		console.log("loc=" + loc);
 		console.log("loc.match(reLine)=" + loc.match(reLine));
 		console.log("point.trim()=" + point.trim() + "");
 		
-		if(loc.match(reLine) && point.trim().charAt(0) == "^") {
-			// Normal error message
+		if(point.trim().charAt(0) == "^") {
+			console.log("Normal error message: loc=" + loc + " inline=" + inline + " point=" + point + " desc=" + desc);
 
 			var inDebugStr = false;
 			
@@ -468,7 +470,13 @@
 			
 			if(col == -1) {
 				console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
-				/*
+				
+				var reCol = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+):(\\d+)");
+				var matchCol = text.match(reCol);
+				if(matchCol && matchCol.length == 4) col = parseInt(matchCol[3]);
+				
+				if(col == -1) {
+					/*
 					throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
 					
 					
@@ -495,6 +503,7 @@
 				
 				if(common.length > 1) col = rowText.indexOf(common);
 				else col = 0;
+				}
 			}
 			else {
 				if(inDebugStr && col >= 30) col = col - 30;
@@ -503,8 +512,9 @@
 			}
 		}
 		else {
+			console.log("Special error message!");
+			
 			/*
-				Special error message:
 				
 				TypeError: Cannot read property 'indexOf' of undefined\n
 				at /nodejs/minesweeper/server.js.tmp:37:34\n
@@ -704,7 +714,7 @@
 	function infoHas(obj) {
 		outer: for (var i=0; i<EDITOR.info.length; i++) {
 			for(var prop in obj) {
-				console.log("info " + 1 + " " + prop + "=" + EDITOR.info[i][prop] + " = " + obj[prop]);
+				console.log("info " + 1 + " " + prop + "='" + EDITOR.info[i][prop] + "' = '" + obj[prop] + "'");
 				if(EDITOR.info[i][prop] != obj[prop]) continue outer;
 			}
 			console.log("TRUE!");
@@ -740,6 +750,32 @@
 			},100);
 			
 		});
-	}, 2);
+	});
+	
+	EDITOR.addTest(function testNodeErroMessage3(callback) {
+		
+		var errMsg = "Error: My error";
+		
+		var msg = {
+			"scriptName":"/some_node_script3.js",
+			"stderr" : "events.js:182\n      throw er; // Unhandled 'error' event\n      ^\n" + errMsg + "\n    at Object._errnoException (util.js:1019:11)\n    at _exceptionWithHostPort (util.js:1041:20)\n    at Server.setupListenHandle [as _listen2] (net.js:1327:19)\n    at listenInCluster (net.js:1385:12)\n    at Server.listen (net.js:1480:5)\n    at Object.<anonymous> (/some_node_script3.js:2:8)\n    at Module._compile (module.js:624:30)\n    at Object.Module._extensions..js (module.js:635:10)\n    at Module.load (module.js:545:32)\n    at tryModuleLoad (module.js:508:12)\n"
+		};
+		
+		EDITOR.openFile("/some_node_script3.js", '\nserver.listen("/sock/_abc", () => console.log("server started"));\n', function(err, file) {
+			if(err) throw err;
+			
+			nodejsMessage(msg);
+			
+			setTimeout(function checkEditorInfo() {
+				if(!infoHas({file: file, str: errMsg, row: 1, col: 8})) throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
+				
+				EDITOR.removeAllInfo(file);
+				EDITOR.closeFile(file.path + ".stdout");
+				EDITOR.closeFile(file.path);
+				callback(true);
+			},100);
+			
+		});
+	}, 1);
 	
 })();

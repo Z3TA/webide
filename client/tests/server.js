@@ -378,7 +378,7 @@ var didReadString = false;
 			});
 		}
 		
-	}, 1);
+	});
 	
 	
 	
