@@ -666,15 +666,6 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			
 			return rdo(backspaceUndo, backspaceRedo);
 			
-			function rdo(undo, redo) {
-				var ev = {undo: undo, redo: redo};
-				ev.redo();
-				EDITOR.renderNeeded();
-				updateHistory(file, ev);
-				
-				return false;
-			}
-			
 		}
 		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
 			console.log("commandCaretPosition=" + commandCaretPosition);
@@ -702,6 +693,15 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 		}
 		else {
 			return true;
+		}
+		
+		function rdo(undo, redo) {
+			var ev = {undo: undo, redo: redo};
+			ev.redo();
+			EDITOR.renderNeeded();
+			updateHistory(file, ev);
+			
+			return false;
 		}
 	}
 	

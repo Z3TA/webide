@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit if anything fails
+set -e
+
 node semver.js
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
