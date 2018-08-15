@@ -33,10 +33,12 @@ server {
   #  add_header 'Access-Control-Allow-Origin' '*';
   #}
 
-  location ~/_([^/]+) {
+  #location ~/_([^/]+) {
+  location ~/_([^/]+)/?(.*) {
     # Anything starting with an underscore
     # Upgrade to websocket (if possible)
-    proxy_pass http://unix:%HOMEDIR%sock/_$1;
+    #proxy_pass http://unix:%HOMEDIR%sock/_$1;
+    proxy_pass http://unix:%HOMEDIR%sock/_$1:/$2;
     proxy_http_version 1.1;
     proxy_set_header host              $http_host;
     proxy_set_header x-real-ip         $remote_addr;
