@@ -598,12 +598,16 @@
 		var json = {filePath: filePath};
 		
 		CLIENT.cmd("stop_nodejs", json, function(err, json) {
-			if(err) alertBox(err.message);
-			else {
-				runningScripts.splice(filePath, 1);
-				console.log("Stopped script: " + json.filePath);
+			
+			if(err) {
+				console.log("stop_nodejs: err.code=" + err.code);
+				if(err.code == "NOT_RUNNING") alertBox("Script was not running: " + filePath);
+				else return alertBox(err.message);
 			}
-		});
+			
+			runningScripts.splice(filePath, 1);
+				console.log("Stopped script: " + json.filePath);
+			});
 		
 		return false;
 	}

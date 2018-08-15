@@ -101,7 +101,7 @@ var CLIENT = {}; // Client object is global
 					return;
 				}
 				
-				if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id);
+				if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
 				
 				if(json.resp) {
 					var resp = json.resp;

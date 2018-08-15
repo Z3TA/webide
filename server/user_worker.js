@@ -547,6 +547,7 @@ user.removeStorageItem = function removeStorageItem(itemName, callback) {
 
 
 process.on('message', function commandMessage(message) {
+	// # Process Message
 	
 	// We can not recive sockJS connection handles!
 	
@@ -607,7 +608,10 @@ process.on('message', function commandMessage(message) {
 						error: "API error: " + (err.message ? err.message : err) + ""
 					}
 					
-					if(err.code) msg.errorCode = err.code;
+					if(err.code) {
+						console.log("err.code=" + err.code);
+						msg.errorCode = err.code;
+					}
 					
 					if(answer) msg.resp = answer;
 					
@@ -708,8 +712,6 @@ API.stop_nodejs = function stop_nodejs(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);
 	if(filePath instanceof Error) return callback(filePath);
-	
-	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback("The script is not running: " + filePath, {filePath: filePath});
 	
 	stopNodeJsScript(filePath, function nodeJsScriptKilled(err) {
 		callback(err, {filePath: filePath});
@@ -1169,7 +1171,11 @@ function stopNodeJsScript(filePath, callback) {
 	
 	console.log(user.name + " killing NodeJS script: filePath=" + filePath);
 	
-	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback(new Error(filePath + " is not running"));
+	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
+		var error = new Error(filePath + " is not running");
+		error.code = "NOT_RUNNING";
+		return callback(error);
+	}
 	
 	var childProcess = user.runningNodeJsScripts[filePath].childProcess;
 	var isDebugger = user.runningNodeJsScripts[filePath].isDebugger;
