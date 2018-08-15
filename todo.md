@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Able to extract packaged files. So that you can drag a .zip file to the editor and then extract it.
+
 
 
 ---
@@ -2525,6 +2525,8 @@ Don't store username/password in localStorage!! third party modules/scripts will
 
 
 Make EDITOR.storage work like EDITOR.localStorage so they can easiliy replace each other !?
+
+When user drops a .zip file, ask where to extract it, then open it in file explorer, and also open any README.* or index.js 
 
 
 ### Debugging
