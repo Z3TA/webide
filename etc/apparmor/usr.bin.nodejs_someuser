@@ -75,6 +75,7 @@
   %HOME%%USERNAME%/bin/bash px,
 
   %HOME%%USERNAME%/bin/tar Cx -> util,
+  %HOME%%USERNAME%/bin/gzip Cx -> util,
   %HOME%%USERNAME%/bin/gunzip Cx -> util,
   %HOME%%USERNAME%/usr/bin/unzip Cx -> util,
   %HOME%%USERNAME%/usr/bin/unrar Cx -> util,
@@ -82,6 +83,8 @@
   profile util {
     /bin/** r,
     /usr/bin/** r,
+
+    %HOME%%USERNAME%/bin/gzip rix,
 
     signal receive set=cont peer=unconfined,
     signal receive set=exists peer=unconfined,
