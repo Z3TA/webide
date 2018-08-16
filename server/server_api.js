@@ -1133,14 +1133,15 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						"/etc/", 
 						"/proc/", 
 						"/run/", 
-						"/sock/", 
+						//"/sock/", 
 						"/.jzeditStorage/", 
 						"/.config/", 
 						"/.npm/", 
 						"/.ssh/",
 						"/.bash_history",
 						"/.jzeditpw",
-						"/.node_repl_history"
+						"/.node_repl_history",
+						"/.npm-packages/"
 					]; // Ignore mounted files and folders
 					if(!user.chrooted || systemFolders.indexOf(filePath) == -1) {
 						list.push({type: type, name: fileName, path: user.toVirtualPath(filePath), size: size, date: mtime, problem: problem});
