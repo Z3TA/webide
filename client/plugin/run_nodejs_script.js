@@ -5,7 +5,7 @@
 	
 	var runningScripts = [];
 	
-	var debugStr = "__C_S_L_O_G_O_R('\x02' + __line);";
+	var debugStr = "__C_S_L_O_G_O_R('\x02' + __line) || ";
 	
 	var LINE_DEBUG = 20;
 	
@@ -506,7 +506,6 @@
 				}
 			}
 			else {
-				if(inDebugStr && col >= 30) col = col - 30;
 				col = col + point.length - 1; // The marker
 				col = col - inlineTrim;
 			}
@@ -542,6 +541,8 @@
 			var col = parseInt(matchLine[3]);
 			
 		}
+		
+		if(inDebugStr && col >= debugStr.length) col-= debugStr.length;
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
