@@ -43,9 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-!!! OMG!!! GUEST_USER count is offf!!!!! Server restarts many times until the right guest counter!!!!
-
-Trying to get nodejs scripts using express to work nice
 
 
 ---
