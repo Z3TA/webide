@@ -16,52 +16,96 @@
 <p>This file is placed in your wwwpub folder, and all files placed there will be
 accessable from http://%USERNAME%.%DOMAIN%/ (this is the address to your web site)</p>
 
-<p>Try making some changes to this file, and save with <kbd>Ctrl + S</kbd>.</p>
+<p>Try making some changes to this file, and save with <kbd>Ctrl + S</kbd>
+or "Save file" in the menu.</p>
 
-<p>Now go ahead and open/copy/type in the address:
-http://%USERNAME%.%DOMAIN%/welcome.html in another browser/tab/window.</p>
+<p>Then open/copy/type in the following address in another browser/tab/window:
+http://%USERNAME%.%DOMAIN%/welcome.html</p>
 
-<p>PS. You have to refresh/reload <kbd>F5</kbd> the browser/tab/window 
+<p>You have to refresh/reload <kbd>F5</kbd> the browser/tab/window 
  to see changes after you have saved.</p>
 
+<p>This editor however has <b>live preview</b> support so that you do not have to refresh!<br>
+Select "Web Preview" in the menu. 
+Then try editing this page again, and you will see the changes live.</p>
+
+<p>The live preview can be used to quickly navigate in HTML or CSS code - 
+by clicking on any element in the preview window, the editor will scroll to that element/rule.</p>
 
 
 <h2>Static site Generator</h2>
 
-<p>To manage larger web sites, the editor has a Static Site Generator (SSG).<br>
-Show the SSG manager by hitting <kbd>F9</kbd>, or select "Static Site Generator" in
-the menu that comes up when you do a mouse right-click .</p>
+<p>To manage larger web sites, the editor has a built in Static Site Generator (SSG).<br>
+Show the SSG manager by hitting <kbd>F9</kbd>, or click "Static Site Generator" in the menu.</p>
 
 
 <h4>Using the SSG to write a new blog post</h4>
 
 <ol>
-	<li>In the SSG manager click <kbd>New Page</kbd> and <kbd>Ctrl + S</kbd> to 
-	save it in /my_web_site/source/<b>blog</b>/<i>name_of_file.html</i>. 
-	(make sure it's saved in the "blog" folder)
+	<li>In the SSG manager click <kbd>New Page</kbd> to create a new page from a template.</li>
+	
+	<li>Save the page using <kbd>Ctrl + S</kbd>. Save the file as:<br>
+		/my_web_site/source/<b>blog</b>/<i>name_of_file.html</i><br>
+		 Make sure it's saved in the "blog" folder!
 	</li>
-		
-		<li>Preview the page: <kbd>Ctrl + F9</kbd> or <kbd>Preview</kbd> in SSG manager.</li>
-		
+	
+	<li>Preview the page: <kbd>Ctrl + F9</kbd> or <kbd>Preview</kbd> in SSG manager.</li>
+	
 	<li>Write the blog post and hit <kbd>Ctrl + S</kbd> to save when you are done.</li>
-		
-		<li>Publish the site <kbd>Ctrl + Alt + Shift + F9</kbd> or <kbd>Publish</kbd> in SSG manager.</li>
-	</ol>
+	
+	<li>Publish the site <kbd>Ctrl + Alt + Shift + F9</kbd> or <kbd>Publish</kbd> in SSG manager.</li>
+</ol>
 
 
 
-		<h3>Adding images to a web page</h3>
-		
+<h3>Adding images to a web page</h3>
+
 <p>Drag a file from your computer to the editor, and select a path to save it as.</p>
 
 
-		<h2>Running Node.JS scripts</h2>
-		
-<p><kbd>Ctrl + O</kbd> then type hello.js and press <kbd>Enter</kbd>.<br>
-Then press <kbd>F1</kbd> to run the file/script.</p>
+<h2>Running Node.JS scripts</h2>
 
-		<p></p>
-		
-		</body>
-		</html>
-		
+<p>Open any JavaScript (Node.JS) file and press <kbd>F1</kbd> 
+(or "Run nodejs script" in the menu) to run it.<br>
+Try any of the example files in the /nodejs/ folder.</p>
+
+
+<h3>Unix sockets / named pipes</h3>
+
+<p>Use /sock/_somename instead of a <b>port</b>-number. 
+Eg. replace server.listen(80) with server.listen("_nameOfSocket") </p>
+
+<p>All HTTP (and websocket) request starting with 
+http://%USERNAME%.%DOMAIN%/_underscore 
+will be proxied to your /sock/_underscore unix socket.</p>
+
+<p>You might have to add the unix socket as a prefix/path when 
+using modules such as express and socket.io:</p>
+
+
+<h2>Source control</h2>
+
+<p>The editor has built in support for Mercurial "source control management" (SCM), 
+which is similar to Git. The .hggit Mercurial module is installed by default 
+and lets you push to Git repositories!</p>
+
+<p>The built in Static Site Generator (SSG) has a simplified SCM workflow with automatic 
+pull/merge/push to allow mere mortals to use SCM. (The SSG also supports WYSIWYG editing).<br>
+
+
+<h3>Hosting a repository on Github</h3>
+
+<ol>
+	<li>Go to Github in another browser window/tab to create a new repository (or use an existing one)</li>
+	<li>Go back to the editor and select "Clone/add Repo" in the menu.</li>
+	<li>Fill in the http or git url for the repository, and where the files should be saved.</li>
+	<li>Click <kbd>Clone repository</kbd></li>
+</ol>
+
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

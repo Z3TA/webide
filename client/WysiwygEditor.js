@@ -886,7 +886,16 @@ var WysiwygEditor;
 			var styleSheetFound = false;
 			
 			for (var i=0; i<styleSheets.length; i++) {
-				if(styleSheets[i].href.indexOf(fileName) != -1) {
+				if(styleSheets[i].href && styleSheets[i].href.indexOf(fileName) != -1) {
+					styleSheetFound = true;
+					break;
+				}
+			}
+			
+			// The stylesheet might have been replaced with a <style> element
+			var styleElements = doc.getElementsByTagName("style");
+			for (var i=0; i<styleElements.length; i++) {
+				if(styleElements[i].getAttribute("href").indexOf(fileName) != -1) {
 					styleSheetFound = true;
 					break;
 				}
