@@ -14,7 +14,7 @@
 <p>You are looking at the source code of a web page (html file).</p>
 
 <p>This file is placed in your wwwpub folder, and all files placed there will be
-accessable from http://%USERNAME%.%DOMAIN%/ (this is the address to your web site)</p>
+accessible from http://%USERNAME%.%DOMAIN%/ (this is the address to your web site)</p>
 
 <p>Try making some changes to this file, and save with <kbd>Ctrl + S</kbd>
 or "Save file" in the menu.</p>
@@ -80,7 +80,13 @@ http://%USERNAME%.%DOMAIN%/_underscore
 will be proxied to your /sock/_underscore unix socket.</p>
 
 <p>You might have to add the unix socket as a prefix/path when 
-using modules such as express and socket.io:</p>
+using modules such as express and socket.io: 
+Example: <i>express().use("/_unixSocket", express.static('public'));</i> or
+<i>socketio(server, {path: "/_unixSocket/something"});</i></p>
+
+<p>If you get <i>Error: EADDRINUSE /sock/_yoursock</i> simply delete the file.<br>
+(unix sockets created while running a node.js script are 
+normally deleted by the editor when a node.js script stops)</p>
 
 
 <h2>Source control</h2>
