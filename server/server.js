@@ -170,13 +170,13 @@ function main() {
 		process.exit();
 	}
 	
-	fs.readFile("./GUEST_COUNTER", "utf8", function(err, data) {
+	fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
 			// Create the file if it doesn't exist
-			fs.writeFile("./GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
+			fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
 				if (err) throw err;
-				console.log("Created GUEST_COUNTER file");
+				console.log("Created " + __dirname + "/GUEST_COUNTER");
 			});
 		}
 else {
@@ -239,7 +239,7 @@ function createGuestUser(callback) {
 // Save guest counter so that we can continue the number serie after server restarts
 	// It's not that bad if there are holes in the number serie. 
 	// We however don't want to give two people the same guest account!
-	fs.writeFile("./GUEST_COUNTER", guestId, function(err, data) {
+	fs.writeFile(__dirname + "/GUEST_COUNTER", guestId, function(err, data) {
 		if(err) return callback(err);
 
 		var username = "guest" + guestId;
