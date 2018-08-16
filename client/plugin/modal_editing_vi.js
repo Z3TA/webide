@@ -2701,9 +2701,14 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 	
 	function toggleVim() {
 		if(VIM_ACTIVE) {
+			messageToShow = '"MERE MORTAL" MODE';
+			showCommandBuffer(EDITOR.canvasContext);
+			// Need to be active to render message
 			VIM_ACTIVE = false;
+			
 			EDITOR.setMode("default");
 			EDITOR.updateMenuItem(vimMenuItem, false);
+			
 		}
 		else {
 			VIM_ACTIVE = true;
@@ -2711,8 +2716,10 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			EDITOR.updateMenuItem(vimMenuItem, true);
 			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
 			noEol();
+			showMessage("(VIM*) NORMAL MODE");
 		}
 		EDITOR.hideMenu();
+		
 		return false;
 	}
 	
