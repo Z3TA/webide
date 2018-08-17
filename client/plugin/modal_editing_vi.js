@@ -3564,8 +3564,12 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			EDITOR.mock("typing", "50%"); // Goto middle of file
 			if(file.caret.row != 1) throw new Error("Unexpected file.caret.col=" + file.caret.row);
 			
+			
+			// 03.7  Scrolling around
 			// move to one of the lines you can see ? Hard to test, so test manually
 			
+			
+			// 03.8  Simple searches
 			
 			
 			
