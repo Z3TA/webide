@@ -43,6 +43,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+OMG!!! Editor didn't load fresh file from disk! file was saved when closing down.
+
+---
+
 Does nodejs segfault because we did a lazy umount !!?!?
 
  1: node::Abort() [/usr/bin/nodejs_guest1]
@@ -51,7 +55,13 @@ Does nodejs segfault because we did a lazy umount !!?!?
  4: __libc_start_main [/lib/x86_64-linux-gnu/libc.so.6]
  5: 0x89b1b1 [/usr/bin/nodejs_guest1]
 
+(segfaults do go away after reboot. Investigate if it's lazy umount that is causing it)
 
+---
+
+First time logging in to an account is SLOW!! Show a spinner or something !??
+%s: %sms check mounts 2613.129
+optimize !?
 
 ---
 

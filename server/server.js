@@ -205,18 +205,24 @@ function recycleGuestAccounts(callback) {
 			}
 			else if(err) throw err;
 			else {
-				var lastLoginFile = UTIL.joinPaths([HOME_DIR, ".jzeditStorage", "lastLogin"]);
+				var lastLoginFile = UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]);
 				fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
-						// There must be something wrong if lastLogin file doesn't exist ...
-						return resetGuest(id);
+						// If no lastLogin file exist should mean the user has *never* logged in
+						console.log("guest" + id + ": " + err.code + " " + lastLoginFile);
+						log("Added guest" + id + " to guest pool!");
+						GUEST_POOL.push("guest" + id);
+						return processedGuestId(id);
 					}
 					else if(err) throw err;
 					else {
 						var lastLogin = parseInt(data);
 						var timeDiff = currentTime - lastLogin; // In seconds
 						var daysSinceLastLogin = Math.floor(timeDiff / (60 * 60 * 24));
-						if(daysSinceLastLogin > 14) return resetGuest(id);
+						if(daysSinceLastLogin > 14) {
+							console.log("guest" + id + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin);
+							return resetGuest(id);
+						}
 						else return processedGuestId(id);
 					}
 				});
@@ -285,9 +291,10 @@ function recycleGuestAccounts(callback) {
 	}
 	
 	function processedGuestId(id) {
-		console.log("Done recycling id=" + id);
 		countLeft--;
-		console.log("countLeft=" + countLeft);
+		
+		console.log("Done recycling id=" + id + " countLeft=" + countLeft);
+		
 		if(countLeft == 0) callback(null);
 	}
 	
@@ -2611,6 +2618,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 
 
 function mount(sourcePath, targetPath, callback) {
+	console.time("mounting " + targetPath);
 	var fs = require("fs");
 	
 	var abort = false;
@@ -2682,7 +2690,10 @@ function mount(sourcePath, targetPath, callback) {
 				
 				console.log("Target exist: " + targetPath);
 				
-				if(sourceStats.ino == targetStats.ino) return mountDone(null); // Already mounted!
+				if(sourceStats.ino == targetStats.ino) {
+					console.timeEnd("mounting " + targetPath);
+					return mountDone(null); // Already mounted!
+				}
 				
 				if(sourceStats.isDirectory()) {
 					
@@ -2718,6 +2729,7 @@ mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePa
 					if(stderr) return mountDone(new Error(stderr));
 					if(stdout) return mountDone(new Error(stdout));
 					
+					console.timeEnd("mounting " + targetPath);
 					return mountDone(null);
 				});
 				
