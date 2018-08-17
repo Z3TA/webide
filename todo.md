@@ -63,6 +63,14 @@ First time logging in to an account is SLOW!! Show a spinner or something !??
 %s: %sms check mounts 2613.129
 optimize !?
 
+idea: Check mounts and create the user worker as "warmup", then just hand over the user worker when user logs in !?
+
+---
+
+About recycling guest users:
+removeuser is likely to fail due to umount errors.
+if lazy umount is causing the segfaults there's really no point to recycling guest users.
+
 ---
 
 Vim mode:
