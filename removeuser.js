@@ -1,19 +1,18 @@
 #!/bin/sh
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
-var defaultGroupName = "jzedit_users";
-var defaultDomain = "webide.se";
+var DEFAULT = require("./server/default_settings.js");
 
 // Get arguments ...
 var getArg = require("./shared/getArg.js");
 
 var username = process.argv[2];
 
-var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
+var DOMAIN = getArg(["d", "domain"]) || DEFAULT.domain;
 
 var NOZFS = !!getArg(["nozfs", "nozfs"]);
 
-var HOME = getArg(["home", "home"]) || "/home/";
+var HOME = getArg(["home", "home"]) || DEFAULT.home_dir;
 
 var FORCE = !!getArg(["force", "force"]) || false;
 
@@ -29,7 +28,6 @@ var fs = require("fs");
 var child_process = require('child_process');
 
 
-
 if(!FORCE) {
 	// Make sure it's a jzedit user!
 	try {
@@ -43,7 +41,21 @@ catch(err) {
 	}
 }
 
-	// Remove nginx profile
+// Kill all processes owned by this user (for example scripts "in production")
+var ps = child_process.execSync("ps aux | grep ^" + username + " || true").toString(ENCODING).trim();
+if(ps) {
+	ps = ps.split("\n");
+	for (var i=0, pid; i<ps.length; i++) {
+		// The first number after the user name is the pid
+		console.log("ps[" + i + "]=" + ps[i]);
+		pid = ps[i].match(/ \d+ /)[0].trim();
+		child_process.execSync("kill " + pid);
+	}
+}
+// Note: nodejs_init_worker.js might restart the scripts before they have been deleted !
+
+
+// Remove nginx profile
 var url_user = UTIL.urlFriendly(username);
 var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
 var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
@@ -84,12 +96,22 @@ unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-c
 	2. Restart the jzedit.service to force a logout: systemctl restart jzedit
 	3. Do the unmounting and deletion of data : ./removeuser.js username
 	
-	Unmounting nodejs_username will fail if the user is still logged in:
-*/
-umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
-unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted""
+	Unmounting nodejs_username will fail if the user is still logged in!
 	
-	// We don't want to accidently mess with any of these, so just in case we are doing some debugging
+	If umount fails, try:
+	sudo lsof | grep '/home/username'
+	sudo lsof | grep '/bin/file'
+	
+	
+	sudo mount | grep '/home/ltest4/bin/bash'
+	sudo lsof | grep '/bin/bash'
+	sudo umount -lf /home/ltest4/bin/bash
+	
+	
+*/
+
+
+// We don't want to accidently mess with any of these, so just in case we are doing some debugging
 	/*
 		umount("/home/" + username + "/dev/", true);
 		umount("/home/" + username + "/lib/", true);
@@ -100,32 +122,52 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 	*/
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
-	umount("/home/" + username + "/dev/urandom");
-umount("/home/" + username + "/dev/null");
-	umount("/home/" + username + "/lib");
-	umount("/home/" + username + "/lib64");
-umount("/home/" + username + "/usr/lib");
-	umount("/home/" + username + "/usr/local/lib");
-	umount("/home/" + username + "/usr/share");
+
+umount("/home/" + username + "/etc/ssl/certs");
+
+umount("/home/" + username + "/usr/bin/env");
+umount("/home/" + username + "/usr/bin/hg");
+umount("/home/" + username + "/usr/bin/node");
+umount("/home/" + username + "/usr/bin/python");
+umount("/home/" + username + "/usr/bin/ssh");
+umount("/home/" + username + "/usr/bin/ssh-keygen");
+umount("/home/" + username + "/usr/bin/unrar");
+umount("/home/" + username + "/usr/bin/unzip");
+
+// -----------------------------------------------
+
 umount("/home/" + username + "/bin/bash");
+umount("/home/" + username + "/bin/gunzip");
+umount("/home/" + username + "/bin/gzip");
+umount("/home/" + username + "/bin/ln");
 umount("/home/" + username + "/bin/ls");
+umount("/home/" + username + "/bin/mkdir");
+umount("/home/" + username + "/bin/mv");
+umount("/home/" + username + "/bin/rm");
+umount("/home/" + username + "/bin/rmdir");
+umount("/home/" + username + "/bin/sh");
+umount("/home/" + username + "/bin/tar");
+
+umount("/home/" + username + "/dev/urandom");
+umount("/home/" + username + "/dev/null");
 umount("/home/" + username + "/dev/ptmx");
 umount("/home/" + username + "/dev/pts");
+
+	umount("/home/" + username + "/lib");
+	umount("/home/" + username + "/lib64");
+
 umount("/home/" + username + "/proc/cpuinfo");
 umount("/home/" + username + "/proc/stat");
 umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
-umount("/home/" + username + "/usr/bin/env");
-	umount("/home/" + username + "/usr/bin/hg");
-	umount("/home/" + username + "/usr/bin/python");
-	umount("/home/" + username + "/usr/bin/node");
-umount("/home/" + username + "/usr/bin/ssh");
-	umount("/home/" + username + "/etc/ssl/certs");
-umount("/home/" + username + "/usr/bin/unzip");
-umount("/home/" + username + "/usr/bin/unrar");
-umount("/home/" + username + "/bin/gunzip");
-umount("/home/" + username + "/bin/tar");
-umount("/home/" + username + "/bin/sh");
-umount("/home/" + username + "/bin/gzip");
+
+umount("/home/" + username + "/usr/lib");
+umount("/home/" + username + "/usr/local/lib");
+umount("/home/" + username + "/usr/share");
+
+// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
+umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
+unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
+
 
 	if(!NOZFS) {
 		// Need to get the zfs pool
@@ -170,7 +212,8 @@ umount("/home/" + username + "/bin/gzip");
 						// Try to restart jzedit server to see if it helps
 					// Last resort is to reboot to get rid of all the mounts
 					
-					restartEditorService();
+					// This script might be called from the editor service itself, so don't kill it!
+					//restartEditorService();
 					
 					console.log("Retrying zfs destroy " + zfsPool + userHomeDir);
 					
@@ -229,6 +272,8 @@ function userdel() {
 	}
 	
 	function unlink(path) {
+	// Only use this function if you want to ignore ENOENT's, otherwise use fs.unlinkSync directly.
+	// note: unlinking is the same as Removing a file!! So be careful
 		var fs = require("fs");
 		try {
 			fs.unlinkSync(path);
@@ -240,16 +285,31 @@ function userdel() {
 	}
 	
 	function umount(path, ignoreErrors) {
-		var child_process = require("child_process");
+	var child_process = require("child_process");
 		try {
-			child_process.execSync("umount " + path + " --force").toString(ENCODING);
+		child_process.execSync("umount " + path + " --force"); // .toString(ENCODING)
 		}
 		catch(err) {
 			if(!ignoreErrors) {
 				if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 				&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
-				&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) throw err;
+				&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
+				
+				if(err.message.indexOf("umount: " + path + ": target is busy") != -1) {
+					// Sometimes you can not umount because there are other mounts to the target!
+					// A lazy umount might be able to get rid of those mounts!
+					child_process.execSync("umount -lf " + path + " && sleep 1"); // we want to throw if this fails
+					// We want to sleep to make it sync
+					// can't use setTimeout because it would made the script continue
+					child_process.execSync("umount -f " + path + ""); // we want to throw if this fails
+					
+				}
+				else {
+					throw err;
 				// stderr message are already shown in the shell, no need to repeat them
+				}
+			}
+			
 			}
 		}
 		

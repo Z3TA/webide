@@ -43,6 +43,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Does nodejs segfault because we did a lazy umount !!?!?
+
+ 1: node::Abort() [/usr/bin/nodejs_guest1]
+ 2: node::PlatformInit() [/usr/bin/nodejs_guest1]
+ 3: node::Start(int, char**) [/usr/bin/nodejs_guest1]
+ 4: __libc_start_main [/lib/x86_64-linux-gnu/libc.so.6]
+ 5: 0x89b1b1 [/usr/bin/nodejs_guest1]
+
 
 
 ---

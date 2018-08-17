@@ -14,15 +14,16 @@ var getArg = require("./shared/getArg.js");
 
 var UTIL = require("./client/UTIL.js");
 
-var defaultHomeDir = "/home/";
+var DEFAULT = require("./server/default_settings.js");
+
+var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
-var nodejsDeamonManagerPort = 8200;
-var HTTP_PORT = getArg(["p", "port"]) || nodejsDeamonManagerPort; 
-var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
+var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.nodejs_deamon_manager_port; 
+var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 
 var NODE_INIT_WORKER = {}; // username:childProcess
 
@@ -38,7 +39,7 @@ var INFO = 6; // <6>This is an INFO level message
 var NOTICE = 5; // <5>This is a NOTICE level message
 var WARNING = 4; // <4>This is a WARNING level message
 var WARN = 4;
-var ERR = 3; // <3>This is an ERR level message
+var ERR = 3; // <3>This is an ERR level message (ONLY USE FOR FATAL ERRORS)
 var ERROR = 3;
 
 var HTTP_SERVER;
@@ -98,8 +99,7 @@ function getAuth(authorization_header_string) {
 	}
 	
 	return {username: username, password: password};
-	
-}
+	}
 
 function sigint() {
 	log("Received SIGINT!");
@@ -116,8 +116,6 @@ function sigint() {
 	}
 	
 	HTTP_SERVER.close();
-	
-	
 	
 	// The process should now exit by itself as there is nothing left to do
 }
@@ -237,6 +235,36 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 	restart();
 	
 	function restart() {
+		// Check if the home dir still exist
+		var fs = require("fs");
+		fs.readdir(homeDir, function(err, filesInHomeDir) {
+			if(err) {
+				log(err.message, NOTICE);
+				log("Failed to start init worker for " + name + " because we can't read the home dir " + homeDir + " !");
+				delete NODE_INIT_WORKER[name];
+				return;
+			}
+			
+			// Make sure there's a .prod folder
+			if(filesInHomeDir.indexOf(".prod") == -1) {
+				log("Can not find .prod folder: " + JSON.stringify(filesInHomeDir), NOTICE);
+				log("We will no longer retry restarting the init worker for " + name + " because there's no .prod folder  in home dir " + homeDir + " !");
+				delete NODE_INIT_WORKER[name];
+				return;
+			}
+			
+			// Make sure nodejs worker exec exist
+			fs.stat(nodeWorkerOptions.execPath, function(err, stats) {
+				
+				//console.log(nodeWorkerOptions.execPath + " stats=" + JSON.stringify(stats));
+				
+				if(err) {
+					log(err.message, NOTICE);
+					log("We will no longer retry restarting the init worker for " + name + " because " + err.code + " " + nodeWorkerOptions.execPath + " !");
+					delete NODE_INIT_WORKER[name];
+					return;
+				}
+				
 		var child_process = require("child_process");
 		
 		if(NODE_INIT_WORKER.hasOwnProperty(name)) {
@@ -248,8 +276,12 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		
 		var workerScript = "./nodejs_init_worker.js";
 		log("Starting init worker for " + JSON.stringify(name) + ": Forking " + workerScript + " nodeWorkerArgs=" + JSON.stringify(nodeWorkerArgs) + " nodeWorkerOptions=" + JSON.stringify(nodeWorkerOptions));
-		NODE_INIT_WORKER[name] = child_process.fork(workerScript, nodeWorkerArgs, nodeWorkerOptions);
-		var worker = NODE_INIT_WORKER[name];
+		
+				NODE_INIT_WORKER[name] = child_process.fork(workerScript, nodeWorkerArgs, nodeWorkerOptions);
+				// We might get a seg fault here - which we can not try-catch!
+				// Then try with a new version of nodejs ... lets hope this doesn't happen in prod
+				
+				var worker = NODE_INIT_WORKER[name];
 		
 		worker.on("close", workerClose);
 		worker.on("disconnect", workerDisconnect);
@@ -258,7 +290,10 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		worker.on("exit", workerExitHandler);
 		
 		worker.send({ping: firstPing});
-		}
+				
+			});
+		});
+	}
 	
 	function workerDisconnect() {
 		log(name + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[name].connected);

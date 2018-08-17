@@ -120,13 +120,36 @@
 					}
 					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin &&
 					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost" && !userValue) {
-						console.log("Logging in as guest because it's the first time using the editor ...");
-						userValue = "guest";
-						pwValue = "guest";
+						
+						var alreadyHaveAccount = "I already Have an account ...";
+						var createAccount = "Create a New account";
+						var loginAsGuest = "Login as Guest";
+						
+						return confirmBox("Welcome to " + window.location.hostname + "!\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+							if(answer == loginAsGuest) {
+								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
+								userValue = "guest";
+								pwValue = "guest";
+								attemptLogin();
+							}
+							else if(answer == createAccount) {
+								console.log("This is the first time using the editor, and the user wants to create an ccount");
+								window.onbeforeunload = null;
+								document.location = "/signup/signup.html" + window.location.search;
+							}
+							else if(answer == alreadyHaveAccount) {
+								console.log("This is the first time using the editor, but the users sais he/she already have an account. It's possible that the user has reset browser data or are on a new machine.");
+								showLoginDialog();
+							}
+							else throw new Error("Unknown answer: " + answer);
+						});
+						
+						
 					}
 					else {
 						console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);
 					}
+					
 					attemptLogin();
 				});
 			}
@@ -147,9 +170,14 @@
 					
 					if(err) {
 						console.error(err);
-						if(userValue == DEFAULT_USERNAME) alertBox("Failed to automatically login as " + userValue + "." +
-						" Fill in your username and password below, or <a href='/signup/signup.html'>create an account</a> !\n" +
-						"\n(" + err.message + ")");
+						if(userValue == DEFAULT_USERNAME) {
+alertBox("Failed to automatically login as " + userValue + "." +
+							" Fill in your username and password below, or <a href='/signup/signup.html'>Create a New account</a> !\n" +
+							"\n(" + err.message + ")");
+						}
+						else if( userValue.match(/^guest\d+$/) && pwValue != "guest" ) {
+							alertBox("Failed to login as " + userValue + ". It is likely that the guest account have been reset because of inactivity!");
+						}
 						else alertBox(err.message);
 						
 						showLoginDialog();
@@ -157,12 +185,39 @@
 					else {
 						hideLoginDialog();
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
+						
+						if( userValue.match(/^guest\d+$/) && pwValue != "guest") {
+							// User have logged in with a guest account
+							// It's Not the first time user logs in
+							
+							var alreadyHaveAccount = "Login to Another account";
+							var createAccount = "Create a New account";
+							var loginAsGuest = "Keep me logged in as Guest";
+							
+							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+								if(answer == loginAsGuest) {
+									console.log("User wants to continue using the guest account.");
+								}
+								else if(answer == createAccount) {
+									console.log("The user is currently logged in with a guest account. But want to create a new account.");
+									window.onbeforeunload = null;
+									document.location = "/signup/signup.html" + window.location.search;
+								}
+								else if(answer == alreadyHaveAccount) {
+									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
+									showLoginDialog();
+								}
+								else throw new Error("Unknown answer: " + answer);
+								
+							});
+						}
+						
 					}
 					
 				});
-				}
+			}
 			else {
-showLoginDialog();
+				showLoginDialog();
 				var serverLoginPw = document.getElementById("serverLoginPw");
 				if(serverLoginPw) serverLoginPw.focus();
 			}
@@ -217,7 +272,7 @@ showLoginDialog();
 		form.appendChild(labelUrl);
 		
 		if(RUNTIME == "nw.js") {
-var defaultUrl =  "http://localhost:8099/jzedit";
+			var defaultUrl =  "http://localhost:8099/jzedit";
 		}
 		else if(window.location.protocol == "file:") { // Firefox (chrome-less)
 			var defaultUrl = "http://localhost:8099/jzedit";
@@ -335,7 +390,7 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 				if(urlValue) url.value = urlValue;
 				if(userValue) user.value = userValue;
 				if(pwValue) pw.value = pwValue;
-				});
+			});
 		}
 		
 		

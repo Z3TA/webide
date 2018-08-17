@@ -151,6 +151,148 @@ process.on("exit", function () {
 	log("Program exit\n\n", 6, true);
 });
 
+function unixTimeStamp() {
+	return Math.floor(Date.now() / 1000);
+}
+
+function fillGuestPool(id, callback) {
+	if(typeof id == "function") {
+		callback = id;
+		id = undefined;
+	}
+	else if(typeof id != "number" && typeof id != "undefined") {
+		throw new Error("id=" + id + " needs to be a number or undefined!");
+	}
+	
+	// Increase the guest pool
+	createGuestUser(id, function guestUserCreatedMaybe(err, guestUser, guestPw) {
+		if(err) {
+			if(callback) return callback(err);
+			else if(err.code == "LOCK") {
+				console.warn("An account is already being created!");
+			}
+			else throw err;
+		}
+		else {
+			GUEST_POOL.push(guestUser);
+			console.log("Guest account " + guestUser + " added to GUEST_POOL.length=" + GUEST_POOL.length);
+			if(callback) callback(null);
+		}
+	});
+}
+
+function recycleGuestAccounts(callback) {
+	
+	log("Recycling guest accounts ...");
+	
+	var currentTime = unixTimeStamp();
+	var countLeft = GUEST_COUNTER-1;
+	
+	for (var i=1; i<GUEST_COUNTER; i++) tryRecycle(i);
+	
+	function tryRecycle(id) {
+		console.log("tryRecycle: id=" + id);
+		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
+		var fs = require("fs");
+		fs.readdir(homeDir, function dir(err, files) {
+			if(err && err.code == "ENOENT") {
+				console.log(homeDir + " doesn't exist! Attempting to re-create guest" + id + " ...");
+				// If the home dir doesn't exist usually mean there is a gap in the GUEST_COUNTER series, so try filling that gap
+				fillGuestPool(id, function guestPoolFilledMaybe(err) {
+					if(err && err.code != "LOCK") throw err;
+					else processedGuestId(id);
+				});
+			}
+			else if(err) throw err;
+			else {
+				var lastLoginFile = UTIL.joinPaths([HOME_DIR, ".jzeditStorage", "lastLogin"]);
+				fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
+					if(err && err.code == "ENOENT") {
+						// There must be something wrong if lastLogin file doesn't exist ...
+						return resetGuest(id);
+					}
+					else if(err) throw err;
+					else {
+						var lastLogin = parseInt(data);
+						var timeDiff = currentTime - lastLogin; // In seconds
+						var daysSinceLastLogin = Math.floor(timeDiff / (60 * 60 * 24));
+						if(daysSinceLastLogin > 14) return resetGuest(id);
+						else return processedGuestId(id);
+					}
+				});
+			}
+		});
+	}
+	
+	function resetGuest(id) {
+		/*
+			Just delete the user instead of trying to reset.
+			We could use ZFS to restore, but then it might not get all the latest features
+		*/
+		
+		var username = "guest" + id;
+		log("Removing guest user: " + username);
+		
+		var exec = require('child_process').exec;
+		
+		// Pass the arguments as JSON in case some hacker use a very clever password
+		var commandArg = {
+			username: username,
+			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
+			};
+		var path = require("path");
+		var options = {
+			cwd: path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+		}
+		//console.log("Running in options.cwd=" + options.cwd);
+		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
+		
+		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
+		var command = scriptPath + " " + username;
+		//console.log("command=" + command);
+		
+		exec(command, options, function removeuser(error, stdout, stderr) {
+			CREATE_USER_LOCK = false;
+			
+			if(error) {
+				log("Error when removing user: (error is probably in " + scriptPath + ")");
+				throw error;
+			}
+			
+			stderr = stderr.trim(); // Can be a new line (LF)
+			stdout = stdout.trim();
+			
+			if(stderr) log(stderr, NOTICE);
+			
+			if(!stdout) throw new Error("Problem when removing username=" + username + "! Exec command=" + command + " did not return anyting!");
+			
+			log("stdout=" + stdout, DEBUG);
+			
+			var checkre = /User (.*) deleted!/g;
+			var check = checkre.exec(stdout);
+			if(check == null) throw new Error("It seems command=" + command + " failed! error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
+			// Should have: User nameOfUser deleted!
+			var reG1User = check[1];
+			
+			if(reG1User != username) throw new Error("Wrong user deleted !? reG1User=" + reG1User + " username=" + username);
+			
+			// Do not re-create the user right away. Wait for next call to recycleGuestAccounts.
+			
+			processedGuestId(id);
+			
+		});
+		
+	}
+	
+	function processedGuestId(id) {
+		console.log("Done recycling id=" + id);
+		countLeft--;
+		console.log("countLeft=" + countLeft);
+		if(countLeft == 0) callback(null);
+	}
+	
+}
+
 function main() {
 	
 	// Get the current user (who runs this server)
@@ -170,20 +312,32 @@ function main() {
 		process.exit();
 	}
 	
+	if(!USERNAME && !NO_CHROOT) {
 	fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
 			// Create the file if it doesn't exist
-			fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
+			// Creating a guest account will create the GUEST_COUNTER file!
+			fillGuestPool(function guestPoolFilledMaybe(err) {
+				if(err && err.code != "LOCK") throw err;
+				else startServer();
+			});
+			/*
+				fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
 				if (err) throw err;
 				console.log("Created " + __dirname + "/GUEST_COUNTER");
 			});
+			*/
 		}
 else {
 			GUEST_COUNTER = parseInt(data);
+			recycleGuestAccounts(function guestAccountsRecycled(err) {
+				if(err) throw err;
+				startServer();
+			}); 
 		}
-		startServer();
 	});
+	}
 	
 	function startServer() {
 		
@@ -225,8 +379,16 @@ else {
 	}
 }
 
-function createGuestUser(callback) {
+function createGuestUser(id, callback) {
 	console.time("createAccount");
+	
+	if(typeof id == "function") {
+		callback = id;
+		id = undefined;
+	}
+	else if(typeof id != "number" && typeof id != "undefined") {
+		throw new Error("id=" + id + " needs to be a number or undefined!");
+	}
 	
 	if(CREATE_USER_LOCK) {
 		var err = new Error("A user is already about the be created!");
@@ -235,11 +397,19 @@ function createGuestUser(callback) {
 	}
 	CREATE_USER_LOCK = true;
 	
-	var guestId = ++GUEST_COUNTER;
+	if( id ) {
+var guestId = id;
+		guestCounterSaved(null);
+	}
+	else {
+var guestId = ++GUEST_COUNTER;
 // Save guest counter so that we can continue the number serie after server restarts
 	// It's not that bad if there are holes in the number serie. 
 	// We however don't want to give two people the same guest account!
-	fs.writeFile(__dirname + "/GUEST_COUNTER", guestId, function(err, data) {
+		fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
+	}
+	
+	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
 		var username = "guest" + guestId;
@@ -296,6 +466,8 @@ var path = require("path");
 			var reG1User = check[1];
 			var reG2Pw = check[2];
 			
+			console.timeEnd("createAccount");
+			
 			if(check == null) {
 				return callback(new Error("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout));
 			}
@@ -309,11 +481,8 @@ var path = require("path");
 				" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout));
 			}
 			
-			console.timeEnd("createAccount");
-			
-			
 		});
-	});
+	}
 }
 
 
@@ -511,6 +680,7 @@ function sockJsConnection(connection) {
 	}
 	
 	function unmountMounts(username, callback) {
+		throw new Error("DEPRECATED");
 		
 		var toUnmount = 9;
 		
@@ -600,7 +770,7 @@ function sockJsConnection(connection) {
 					}
 					else if(username == "guest") {
 // ### Login as guest
-// Asign a user from the guest pool
+// Assign a user from the guest pool
 if(GUEST_POOL.length == 0) {
 							// Need to wait until a new guest account is created
 							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
@@ -670,6 +840,7 @@ idSuccess();
 
 						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
 						
+						if(GUEST_POOL.length <= 0) {
 						// Increase the guest pool
 						createGuestUser(function guestPoolIncreased(err, guestUser, guestPw) {
 							if(err) {
@@ -680,6 +851,7 @@ idSuccess();
 								console.log("Guest account " + guestUser + " added to GUEST_POOL.length=" + GUEST_POOL.length);
 							}
 						});
+						}
 					}
 					
 					function checkPw() {
@@ -790,7 +962,7 @@ idSuccess();
 							console.time("check mounts");
 							
 							var nginxProfileOK = false;
-							var foldersToMount = 21;
+							var foldersToMount = 24;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -922,19 +1094,23 @@ idSuccess();
 									
 									Problem: Racing to create folders
 									Solution: Create folder before mounting
+									
+									Sort alpabetically. And don't forget to update removeuser.js !
 								*/
 								
 								if(!DEBUG_CHROOT) {
-									foldersToMount += 7;
-									mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+									foldersToMount += 9; // <-- Update
 									
-									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-									mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+									mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 									
 									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
 									mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+									mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+									mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+									mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
 									
 									// Be able to type npm in terminal:
 									fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
@@ -949,35 +1125,34 @@ idSuccess();
 									npmSymLinkCreated = true;
 								}
 								
+								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+								mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
+								mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
+								mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
+								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
+								mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
+								mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
+								mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
+								mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
+								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
+								mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+								
 								// Some programs don't like if we create them using mkdnod 
 								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
 								mount("/dev/null", homeDir + "dev/null", folderMounted);
-								
-								mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								
 								mount("/lib/", homeDir + "lib", folderMounted);
 								mount("/lib64/", homeDir + "lib64", folderMounted);
-								mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
-								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-								
-								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
-								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-								
-								mount("/bin/tar", homeDir + "bin/tar", folderMounted);
-								mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
-								mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
-								mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
-								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
-								mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
-								
-								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
-								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								
 								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 								
-								
+								mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
+								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+								mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
 								
 								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 
@@ -1351,7 +1526,7 @@ idSuccess();
 							}
 							
 							var fs = require("fs");
-							fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), Math.floor(Date.now() / 1000), function(err) {
+							fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
 								if(err) throw err;
 							});
 							

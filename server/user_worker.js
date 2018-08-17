@@ -9,7 +9,7 @@
 // Need to require non native modules here before we are chrooted
 
 var UTIL = require("../client/UTIL.js");
-
+var DEFAULT = require("./default_settings.js");
 var API = require("./server_api.js");
 
 // Server plugin API's
@@ -31,7 +31,7 @@ var log = logModule.log;
 
 var getArg = require("../shared/getArg.js");
 
-var nodejsDeamonManagerPort = 8200;
+var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);

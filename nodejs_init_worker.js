@@ -565,7 +565,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		
 		if(SHUTDOWN || STOP.indexOf(pathToFolder) != -1) return;
 		
-		var waitForRespawn = 0;
+		var waitForRespawn = 2000;
 		if(restarts < waitRestart.length-1) waitForRespawn = waitRestart[restarts];
 		else waitForRespawn = waitRestart[waitRestart.length-1];
 		
