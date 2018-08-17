@@ -338,6 +338,7 @@ else {
 		}
 	});
 	}
+	else startServer();
 	
 	function startServer() {
 		
