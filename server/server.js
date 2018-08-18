@@ -199,8 +199,16 @@ function recycleGuestAccounts(callback) {
 				console.log(homeDir + " doesn't exist! Attempting to re-create guest" + id + " ...");
 				// If the home dir doesn't exist usually mean there is a gap in the GUEST_COUNTER series, so try filling that gap
 				fillGuestPool(id, function guestPoolFilledMaybe(err) {
-					if(err && err.code != "LOCK") throw err;
-					else processedGuestId(id);
+					if(err) {
+						if(err.code != "LOCK") {
+							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
+							// We don't want the editor to fail to start because of those "nuked" accounts
+							log(err.message, WARN);
+							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message);
+						}
+					}
+					processedGuestId(id);
+					
 				});
 			}
 			else if(err) throw err;
@@ -400,6 +408,8 @@ function createGuestUser(id, callback) {
 		throw new Error("id=" + id + " needs to be a number or undefined!");
 	}
 	
+	if(typeof callback != "function") throw new Error("createGuestUser must have a callback function!");
+	
 	if(CREATE_USER_LOCK) {
 		var err = new Error("A user is already about the be created!");
 		err.code = "LOCK";
@@ -457,7 +467,7 @@ var path = require("path");
 			
 			if(error) {
 				log("Error when adding user: (error is probably in " + scriptPath + ")");
-				throw error;
+				return callback(error);
 			}
 			
 			console.log("stderr=" + UTIL.lbChars(stderr));
@@ -465,7 +475,7 @@ var path = require("path");
 			stderr = stderr.trim(); // Can be a new line (LF)
 			stdout = stdout.trim();
 			
-			if(stderr) throw new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")");
+			if(stderr) return callback(new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")"));
 			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
 
 			log("stdout=" + stdout, DEBUG);
@@ -482,7 +492,7 @@ var path = require("path");
 				return callback(new Error("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout));
 			}
 			else if(reG1User == username && reG2Pw == password) {
-				log("Account username=" + username + "! successfully created!");
+				log("Account username='" + username + "' successfully created!");
 				return callback(null, username, password);
 			}
 			else {
@@ -1406,7 +1416,7 @@ idSuccess();
 									}
 									else {
 										// profile already exist!
-										console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+										//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 										return callback(null);
 									}
 									
