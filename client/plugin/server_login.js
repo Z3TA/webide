@@ -97,7 +97,7 @@
 	}
 	
 	function serverLoginOnConnected(err) {
-		
+		// ## Automaitcally logging in when connected to server
 		console.log("Got connect callback! err=" + err);
 		if(err) {
 			if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
@@ -426,6 +426,9 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		
 		
 		function connectToServer() {
+			
+			// ## Manually logging in via login form
+			
 			clickedConnectLogin = true;
 			console.log("Login form submitted! Connecting to server ...");
 			
