@@ -60,8 +60,13 @@ Does nodejs segfault because we did a lazy umount !!?!?
 ---
 
 First time logging in to an account is SLOW!! Show a spinner or something !??
-%s: %sms check mounts 2613.129
+check mounts 2613.129
+check mounts 2700.964
 optimize !?
+
+It's however much faster when all mounts are already created: check mounts 17.414
+
+
 
 idea: Check mounts and create the user worker as "warmup", then just hand over the user worker when user logs in !?
 
@@ -151,6 +156,13 @@ Make it possible to install the editor via : npm install jzedit
 npm install -g ?
 
 ---
+
+Database support: 
+Integrated tools for managing a database, and hosted db on webide.se
+But which database ?? It must support push!
+RethingDB !?
+
+
 
 Open repo readme after cloning using query string
 
@@ -264,6 +276,10 @@ try on discorse
 
 What I'm thinking
 -----------------
+
+Should we run with low loglevel in the server so that we don't get slowed down by console.log's !?
+
+---
 
 Should opened files and their state be saved on the server ?
 So that when a user switch to another device, it will reopen the same files !?

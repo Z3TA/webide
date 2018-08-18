@@ -169,20 +169,20 @@ var UTIL = {
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
 		if(lastChar != "/" && lastChar != "\\") {
-			console.warn("getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
+			//console.warn("getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
 			// Check if the path contains a file, and remove it
-			console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
+			//console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
 			var delimiter = UTIL.getPathDelimiter(fullPath);
 			var filePart = fullPath.substr(fullPath.lastIndexOf(delimiter));
 			
-			console.log("filePart=" + filePart + " delimiter=" + delimiter);
+			//console.log("filePart=" + filePart + " delimiter=" + delimiter);
 			
 			if(filePart.indexOf(".") != -1) {
 				fullPath = fullPath.substr(0, fullPath.lastIndexOf(delimiter)+1); // Remove the file part
 				console.log("fullPath=" + fullPath +" (after removing file part)");
 				if(fullPath == "/") return ["/"];
 			}
-			else console.warn("Assuming " + filePart + " is a directory!");
+			//else console.warn("Assuming " + filePart + " is a directory!");
 			
 		}
 		

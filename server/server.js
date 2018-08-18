@@ -234,6 +234,8 @@ function recycleGuestAccounts(callback) {
 		/*
 			Just delete the user instead of trying to reset.
 			We could use ZFS to restore, but then it might not get all the latest features
+			
+			
 		*/
 		
 		var username = "guest" + id;
@@ -1103,8 +1105,13 @@ idSuccess();
 									Problem: Racing to create folders
 									Solution: Create folder before mounting
 									
+									Each mount takes ca 150ms, so only mount bare minimum for performance!
+									(it's better performance wise to mount a whole folder then many separate files in the same folder)
+									
 									Sort alpabetically. And don't forget to update removeuser.js !
 								*/
+								
+								console.time("Mount files and folders");
 								
 								if(!DEBUG_CHROOT) {
 									foldersToMount += 9; // <-- Update
@@ -1167,6 +1174,7 @@ idSuccess();
 								
 								
 								// Create apparmor profiles unless they already exist
+								console.time("Creating apparmor profiles");
 								createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
 								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.node", username, apparmorProfileCreated);
 								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
@@ -1180,7 +1188,7 @@ idSuccess();
 								var toChown = 0;
 								var toStat = 0;
 								
-								console.log("Checking user rights ...");
+								//console.log("Checking user rights ...");
 								console.time("Check user rights");
 								fs.stat(HOME_DIR + username, function (err, stats) {
 									if(err) throw err;
@@ -1282,10 +1290,13 @@ idSuccess();
 								apparmorProfilesToCreate--;
 								var counter = 0;
 								if(apparmorProfilesToCreate == 0 && reloadApparmor) {
+									console.timeEnd("Creating apparmor profiles");
+									console.time("Reloading apparmor");
 									var exec = require('child_process').exec;
 									console.log("exec: service apparmor reload ...");
 									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
 									exec("service apparmor reload", function(error, stdout, stderr) {
+										console.timeEnd("Reloading apparmor");
 										if(error) throw(error);
 										if(stderr) throw new Error(stderr);
 										if(stdout) throw new Error(stdout);
@@ -1315,16 +1326,21 @@ idSuccess();
 									//throw err;
 								}
 								if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
+								
+								if(foldersToMount == 0) console.timeEnd("Mount files and folders");
+								
 								checkMountsReadyMaybe();
 							}
 							
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
 								
-								console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
+								/*
+									console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
 								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
 								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
+								*/
 								
 								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
 									
@@ -1349,13 +1365,13 @@ idSuccess();
 									example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
 								*/
 								var dest = template.replace("someuser", username);
-								console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+								//console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 								
 								var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
 								dest = dest.replace("home.", homeDot);
 								dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
 								
-								console.log("Apparmor: template=" + template + " dest=" + dest);
+								//console.log("Apparmor: template=" + template + " dest=" + dest);
 								
 								// First check if the profile exist
 								fs.stat(dest, function (err, stats) {
@@ -1383,7 +1399,7 @@ idSuccess();
 													//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 												*/
-												console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+												//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 												return callback(null);
 											});
 										});
@@ -2618,7 +2634,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 
 
 function mount(sourcePath, targetPath, callback) {
-	console.time("mounting " + targetPath);
+	//console.time("mounting " + targetPath);
 	var fs = require("fs");
 	
 	var abort = false;
@@ -2629,7 +2645,7 @@ function mount(sourcePath, targetPath, callback) {
 		
 		if(err) return mountDone(err);
 		
-		console.log("Folder exist: " + sourcePath);
+		//console.log("Folder exist: " + sourcePath);
 		
 		// Does the target exist ?
 		fs.stat(targetPath, function(err, targetStats) {
@@ -2637,18 +2653,18 @@ function mount(sourcePath, targetPath, callback) {
 			if(err) {
 				if(err.code != "ENOENT") return mountDone(err);
 				
-				console.log("Target doesn't exist: " + targetPath);
+				//console.log("Target doesn't exist: " + targetPath);
 				
 				if(sourceStats.isDirectory()) {
-					console.log("Source is a directory: " + targetPath);
+					//console.log("Source is a directory: " + targetPath);
 					makeDirP(targetPath, function(err) {
 						if(err) return mountDone(err);
-						console.log("Target directory created: " + targetPath);
+						//console.log("Target directory created: " + targetPath);
 						targetCreated();
 					});
 				}
 				else {
-					console.log("Source is a file: " + targetPath);
+					//console.log("Source is a file: " + targetPath);
 					var parentFolder = UTIL.parentFolder(targetPath);
 					makeDirP(parentFolder, function(err) {
 						if(err) {
@@ -2666,20 +2682,20 @@ function mount(sourcePath, targetPath, callback) {
 						}
 						
 						// Create emty file
-						console.log("Creating emty file: " + targetPath);
+						//console.log("Creating emty file: " + targetPath);
 						fs.open(targetPath, 'w', function (err, fileDescriptor) {
 							if(err) {
 								console.log("fs.open targetPath=" + targetPath + " error: " + err.message);
 								return mountDone(err);
 							}
-							console.log("File opened for write: " + targetPath);
+							//console.log("File opened for write: " + targetPath);
 							
 							fs.close(fileDescriptor, function(err) {
 								if(err) {
 									console.log("fs.close targetPath=" + targetPath + " error: " + err.message);
 									return mountDone(err);
 								}
-								console.log("Emty file created: " + targetPath);
+								//console.log("Emty file created: " + targetPath);
 								targetCreated();
 							}); 
 						});
@@ -2688,10 +2704,10 @@ function mount(sourcePath, targetPath, callback) {
 			}
 			else {
 				
-				console.log("Target exist: " + targetPath);
+				//console.log("Target exist: " + targetPath);
 				
 				if(sourceStats.ino == targetStats.ino) {
-					console.timeEnd("mounting " + targetPath);
+					//console.timeEnd("mounting " + targetPath);
 					return mountDone(null); // Already mounted!
 				}
 				
@@ -2729,7 +2745,7 @@ mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePa
 					if(stderr) return mountDone(new Error(stderr));
 					if(stdout) return mountDone(new Error(stdout));
 					
-					console.timeEnd("mounting " + targetPath);
+					//console.timeEnd("mounting " + targetPath);
 					return mountDone(null);
 				});
 				
