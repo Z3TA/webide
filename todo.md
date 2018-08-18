@@ -66,6 +66,23 @@ optimize !?
 
 It's however much faster when all mounts are already created: check mounts 17.414
 
+check mounts 2705.932
+Reloading apparmor 2646.051 <!--- this!
+Mount files and folders 128.880
+
+
+time sudo service apparmor reload
+real	0m2.564s
+
+time sudo aa-enforce /etc/apparmor.d/usr.bin.nodejs_guest5
+Setting /etc/apparmor.d/usr.bin.nodejs_guest5 to enforce mode.
+real	0m1.091s
+
+time sudo apparmor_parser -r /etc/apparmor.d/usr.bin.nodejs_guest5
+real	0m0.046s
+
+Make sure apparmor_parser exists and works in prod!!
+
 
 
 idea: Check mounts and create the user worker as "warmup", then just hand over the user worker when user logs in !?
