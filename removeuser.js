@@ -298,45 +298,57 @@ function userdel() {
 				if(err.message.indexOf("umount: " + path + ": target is busy") != -1) {
 					// Sometimes you can not umount because there are other mounts to the target!
 					// A lazy umount might be able to get rid of those mounts!
+					console.log("umount " + path + ". Target is busy! Doing lazy umount -lf");
 					child_process.execSync("umount -lf " + path + " && sleep 1"); // we want to throw if this fails
 					// We want to sleep to make it sync
 					// can't use setTimeout because it would made the script continue
-					child_process.execSync("umount -f " + path + ""); // we want to throw if this fails
+					try {
+						child_process.execSync("umount -f " + path + ""); // we want to throw if this fails
+					}
+					catch(err) {
+if( err.message.indexOf("umount: " + path + ": not mounted") == -1
+						&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
+						&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
+							throw new Error("Lazy umount failed: " + err.message);
+						}
+						else console.log("hmm? Lazy umouny gave: " + err.message);
+					}
+					
 					
 				}
 				else {
 					throw err;
-				// stderr message are already shown in the shell, no need to repeat them
+					// stderr message are already shown in the shell, no need to repeat them
 				}
 			}
 			
-			}
 		}
-		
-		return;
-		// Server was unable to boot after adding stuff to fstab!!
-		// We made jzedit_user_mounts.service instead, that mounts the mount-points on system upstart
+	}
+	
+	return;
+	// Server was unable to boot after adding stuff to fstab!!
+	// We made jzedit_user_mounts.service instead, that mounts the mount-points on system upstart
 	// But then we got issues after re-installing server
 	// So we ended up with server.js being responsible for mounting the mount-points.
+}
+
+function regExpEsc(str) {
+	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
+function replaceInFileSync(filePath, arrSearchReplace) {
+	var fs = require("fs");
+	
+	// arrSearchReplace = [searchString, replaceString]
+	var text = fs.readFileSync(filePath, ENCODING);
+	
+	for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
+		searchString = arrSearchReplace[i][0];
+		replaceString = arrSearchReplace[i][1];
+		text = text.replace(searchString, replaceString);
 	}
 	
-	function regExpEsc(str) {
-		return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-	}
+	fs.writeFileSync(filePath, text, ENCODING);
 	
-	function replaceInFileSync(filePath, arrSearchReplace) {
-		var fs = require("fs");
-		
-		// arrSearchReplace = [searchString, replaceString]
-		var text = fs.readFileSync(filePath, ENCODING);
-		
-		for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
-			searchString = arrSearchReplace[i][0];
-			replaceString = arrSearchReplace[i][1];
-			text = text.replace(searchString, replaceString);
-		}
-		
-		fs.writeFileSync(filePath, text, ENCODING);
-		
-	}
-	
+}
+
