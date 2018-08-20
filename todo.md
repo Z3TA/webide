@@ -43,11 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Tutorial on how to embed !?
+What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
+---
 
-
-code that you can put into the console to turn any textarea into an editor
+Live colaboration with transform
 
 ---
 

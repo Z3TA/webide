@@ -3,6 +3,9 @@
 
 	/*
 		
+		Problem: How to get the current event.id for a file !?
+		Solution: Have the server keep track of event id's for each file
+		
 	*/
 	
 	var eventOrder = 0;
