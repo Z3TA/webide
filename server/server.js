@@ -1035,85 +1035,6 @@ idSuccess();
 									});
 								*/
 								
-								// Create a fake /etc/passwd that some programs use to lookup home dir and username
-								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
-								if(!DEBUG_CHROOT) {
-									fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
-										passwdCreated = true;
-										checkMountsReadyMaybe();
-									});
-								}
-								else passwdCreated = true;
-								
-								// Make sure nginx profile exist
-								var url_user = UTIL.urlFriendly(username);
-								var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-								fs.stat(nginxProfilePath, function (err, stats) {
-									if(checkMountsAbort) return;
-									
-									if(err) {
-										if(err.code != "ENOENT") throw err;
-										
-										fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
-											if(checkMountsAbort) return;
-											
-											if(err) throw err;
-											
-											nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
-											nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-											nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-											
-											fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
-												if(err) throw err;
-												checkNginxEnabled();
-											});
-											
-										});
-									}
-									else {
-										checkNginxEnabled();
-									}
-									
-									function checkNginxEnabled() {
-										console.time("Check Nginx enabled");
-										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
-										fs.stat(nginxProfileEnabledPath, function (err, stats) {
-											if(checkMountsAbort) return;
-											
-											if(err) {
-												if(err.code != "ENOENT") throw err;
-												
-												fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
-													if(err) throw err;
-													
-													var exec = require('child_process').exec;
-													exec("service nginx reload", function(error, stdout, stderr) {
-														if(error) throw(error);
-														if(stderr) throw new Error(stderr);
-														if(stdout) throw new Error(stdout);
-														
-														nginxProfileOK = true;
-														console.timeEnd("Check Nginx enabled");
-														
-														checkSslCert();
-														
-														checkMountsReadyMaybe();
-													});
-													
-												});
-											}
-											else {
-												nginxProfileOK = true;
-												console.timeEnd("Check Nginx enabled");
-												
-												checkSslCert();
-												
-												checkMountsReadyMaybe();
-											}
-										});
-									}
-									
-								});
 								
 								/*
 									Make sure mounts exist
@@ -1199,7 +1120,92 @@ idSuccess();
 									apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
 								}
 								
-							});
+								
+								// Create a fake /etc/passwd that some programs use to lookup home dir and username
+								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
+								if(!DEBUG_CHROOT) {
+									fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
+										passwdCreated = true;
+										checkMountsReadyMaybe();
+									});
+								}
+								else passwdCreated = true;
+								
+								// Make sure nginx profile exist
+								console.time("Check nginx profile")
+								var url_user = UTIL.urlFriendly(username);
+								var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+								fs.stat(nginxProfilePath, function (err, stats) {
+									if(checkMountsAbort) return;
+									
+									if(err) {
+										if(err.code != "ENOENT") throw err;
+										
+										fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+											if(checkMountsAbort) return;
+											
+											if(err) throw err;
+											
+											nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
+											nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+											nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+											
+											fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+												if(err) throw err;
+												console.log("Nginx profile created!");
+												console.timeEnd("Check nginx profile");
+												checkNginxEnabled();
+											});
+											
+										});
+									}
+									else {
+										console.timeEnd("Check nginx profile");
+										checkNginxEnabled();
+									}
+									
+									function checkNginxEnabled() {
+										console.time("Check Nginx enabled");
+										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
+										fs.stat(nginxProfileEnabledPath, function (err, stats) {
+											if(checkMountsAbort) return;
+											
+											if(err) {
+												if(err.code != "ENOENT") throw err;
+												
+												fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+													if(err) throw err;
+													
+													var exec = require('child_process').exec;
+													exec("service nginx reload", function(error, stdout, stderr) {
+														if(error) throw(error);
+														if(stderr) throw new Error(stderr);
+														if(stdout) throw new Error(stdout);
+														
+														nginxProfileOK = true;
+														console.timeEnd("Check Nginx enabled");
+														
+														checkSslCert();
+														
+														checkMountsReadyMaybe();
+													});
+													
+												});
+											}
+											else {
+												nginxProfileOK = true;
+												console.timeEnd("Check Nginx enabled");
+												
+												checkSslCert();
+												
+												checkMountsReadyMaybe();
+											}
+										});
+									}
+									
+								});
+								
+							}); // checked user rights
 							
 							function checkUserRights(username, callback) {
 								var toChown = 0;
@@ -1240,7 +1246,7 @@ idSuccess();
 												
 												console.log("checkUserRights: Checking file=" + file + " path=" + path);
 												
-												if(file=="dev" || file=="lib" || file=="lib64" || file=="usr") {
+												if(file=="dev" || file=="proc" || file=="bin" || file=="usr" || file=="lib" || file=="lib64") {
 													// Ignore these. Chown'ing these could be disastrous!
 													checkedUserRights();
 													return;

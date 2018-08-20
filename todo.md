@@ -60,30 +60,27 @@ Does nodejs segfault because we did a lazy umount !!?!?
 ---
 
 First time logging in to an account is SLOW!! Show a spinner or something !??
-check mounts 2613.129
-check mounts 2700.964
-optimize !?
-
-It's however much faster when all mounts are already created: check mounts 17.414
-
-check mounts 2705.932
-Reloading apparmor 2646.051 <!--- this!
-Mount files and folders 128.880
-
-
-time sudo service apparmor reload
-real	0m2.564s
-
-time sudo aa-enforce /etc/apparmor.d/usr.bin.nodejs_guest5
-Setting /etc/apparmor.d/usr.bin.nodejs_guest5 to enforce mode.
-real	0m1.091s
-
-time sudo apparmor_parser -r /etc/apparmor.d/usr.bin.nodejs_guest5
-real	0m0.046s
 
 check mounts 159.418
+--------------------
 Reloading apparmor 103.088
 
+check mounts 186.366
+--------------------
+Reloading apparmor 104.515
+Creating apparmor profiles 74.405
+
+check mounts 177.982
+--------------------
+Mount files and folders 168.825
+Reloading apparmor 142.086
+Creating apparmor profiles 17.100
+
+after moving things around:
+
+check mounts 177.854
+--------------------
+Creating apparmor profiles 60.865
 
 
 
