@@ -45,24 +45,6 @@ What I'm working on
 
 OMG!!! Editor didn't load fresh file from disk! file was saved when closing down.
 
----
-
-Does nodejs segfault because we did a lazy umount !!?!?
-
- 1: node::Abort() [/usr/bin/nodejs_guest1]
- 2: node::PlatformInit() [/usr/bin/nodejs_guest1]
- 3: node::Start(int, char**) [/usr/bin/nodejs_guest1]
- 4: __libc_start_main [/lib/x86_64-linux-gnu/libc.so.6]
- 5: 0x89b1b1 [/usr/bin/nodejs_guest1]
-
-(segfaults do go away after reboot. Investigate if it's lazy umount that is causing it)
-
----
-
-
-About recycling guest users:
-removeuser is likely to fail due to umount errors.
-if lazy umount is causing the segfaults there's really no point to recycling guest users.
 
 ---
 
