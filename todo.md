@@ -43,12 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-embedding ...
+Tutorial on how to embed !?
 
-Support embedding the editor at places ...
-https://oembed.com/
-try on discorse
 
+
+code that you can put into the console to turn any textarea into an editor
 
 ---
 
