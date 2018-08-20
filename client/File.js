@@ -1505,6 +1505,9 @@ var File; // File object is global
 	}
 	
 	File.prototype.replaceText = function(oldText, newText) {
+		
+		throw new Error("file.replaceText is DEPRECATED! Use deleteTextRange and insertText instead!");
+		
 		var file = this;
 		
 		var index = file.text.indexOf(oldText);

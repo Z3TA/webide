@@ -22,6 +22,8 @@ var DEFAULT_FOLDER_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = re
 var FIND_FILES_ABORTED = false;
 var FIND_FILES_IN_FLIGHT = 0;
 
+var ECHO_COUNTER = 0;
+
 API.countLines = function countLines(user, json, callback) {
 
 	API.readLines(user, json, function linesRead(err, json) {
@@ -1814,6 +1816,14 @@ API.mirror = function mirror(user, json, callback) {
 	user.send({mirror: json});
 	
 	//callback(null, json);
+	
+}
+
+API.echo = function echo(user, json, callback) {
+	
+	json.ECHO_COUNTER = ECHO_COUNTER++;
+	
+	user.send({echo: json});
 	
 }
 
