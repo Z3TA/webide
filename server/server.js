@@ -1310,7 +1310,7 @@ idSuccess();
 									console.timeEnd("Creating apparmor profiles");
 									console.time("Reloading apparmor");
 									var exec = require('child_process').exec;
-									console.log("exec: service apparmor reload ...");
+									
 									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
 									//var apparmorReloadCommand = "service apparmor reload";
 									//var apparmorReloadCommand = "apparmor_parser -r ";
@@ -1319,7 +1319,7 @@ idSuccess();
 										//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
 										apparmorReloadCommand += " " + apparmorProfiles[i];
 									}
-									
+									console.log("exec: " + apparmorReloadCommand);
 									exec(apparmorReloadCommand, function(error, stdout, stderr) {
 										console.timeEnd("Reloading apparmor");
 										if(error) throw(error);
@@ -1367,7 +1367,7 @@ idSuccess();
 								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
 								*/
 								
-								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated) {
 									
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
@@ -1451,7 +1451,7 @@ idSuccess();
 										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
 										console.timeEnd("Check SSL Cert");
-										return checkMountsReadyMaybe();
+										//return checkMountsReadyMaybe();
 									}
 									else if(err.code == 'ENOENT') {
 										console.log("ENOENT: certPath=" + certPath);
@@ -1460,12 +1460,14 @@ idSuccess();
 											log("Skipping SSL registration because of too many failed attempts!");
 											sslCertChecked = true;
 											console.timeEnd("Check SSL Cert");
-											return checkMountsReadyMaybe();
+											//return checkMountsReadyMaybe();
 										}
 										
 										// the cert does not exist. Try to register it
+										console.time("Register with letsencrypt");
 										var letsencrypt = require("../shared/letsencrypt.js");
 										letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+											console.timeEnd("Register with letsencrypt");
 											if(err) {
 												
 												if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) FAILED_SSL_REG[url_user + "." + DOMAIN]++;
@@ -1479,7 +1481,7 @@ idSuccess();
 												
 												sslCertChecked = true;
 												console.timeEnd("Check SSL Cert");
-												return checkMountsReadyMaybe();
+												//return checkMountsReadyMaybe();
 											}
 											else {
 												console.log("SSL certificate for " + url_user + "." + DOMAIN + " installed!");
@@ -1497,29 +1499,35 @@ idSuccess();
 														
 														console.log("SSL enabled: " + nginxProfilePath);
 														
+														
+														// Don't make the user wait for nginx config to reload (ca 70ms)
+														console.time("nginx reload");
 														var exec = require('child_process').exec;
 														exec("service nginx reload", function(error, stdout, stderr) {
+															console.timeEnd("nginx reload");
+															
 															if(error) throw(error);
 															if(stderr) throw new Error(stderr);
 															if(stdout) throw new Error(stdout);
 															
-															log("nginx reloaded!");
-															
 															sslCertChecked = true;
 															console.timeEnd("Check SSL Cert");
-															return checkMountsReadyMaybe();
+															//return checkMountsReadyMaybe();
+															
+															//log("nginx reloaded!");
+															
 														});
 													});
 												});
 											}
-										});
+										}); // letsencrypt.register
 									}
 									else {
-										// Another error
+										// Another fs.stat ssl file error
 										throw err;
 									}
 								});
-							}
+							} // checkSslCert
 							
 						} // checkMounts
 						
