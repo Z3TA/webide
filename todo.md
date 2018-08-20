@@ -48,6 +48,15 @@ OMG!!! Editor didn't load fresh file from disk! file was saved when closing down
 
 ---
 
+embedding ...
+
+Support embedding the editor at places ...
+https://oembed.com/
+try on discorse
+
+
+---
+
 Vim mode:
 
 Vim tests, continue with vim tutorial and write a test for each feature in the tutorial:
@@ -227,12 +236,6 @@ Easy merging
 (see how it's done on Github)
 Able to create new repositories and manage users piblic read or push access
 (in app purchase)
----
-
-Support embedding the editor at places ...
-https://oembed.com/
-try on discorse
-
 ---
 
 
