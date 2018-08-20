@@ -131,7 +131,25 @@ var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
 var GUEST_POOL = []; // Because it's a bit slow to create new users
 var CREATE_USER_LOCK = false; // Can only create one user at a time
 
-var fs = require("fs");
+// Declare modules here as a OPTIMIZATION
+var module = {};
+const module_fs = require("fs");
+module.child_process = require('child_process');
+module.path = require("path");
+module.letsencrypt = require("../shared/letsencrypt.js");
+module.os = require("os");
+module.sockJs = require("sockjs");
+module.http = require("http");
+module.generator = require('generate-password');
+module.dgram = require('dgram');
+
+module.pwHash = require("./pwHash.js");
+module.mimeMap = require("./mimeMap.js");
+module.httpProxy = require('http-proxy');
+module.ps = require('ps-node');
+module.nodemailer = require('nodemailer');
+module.smtpTransport = require('nodemailer-smtp-transport');
+
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
 
@@ -193,8 +211,7 @@ function recycleGuestAccounts(callback) {
 	function tryRecycle(id) {
 		console.log("tryRecycle: id=" + id);
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
-		var fs = require("fs");
-		fs.readdir(homeDir, function dir(err, files) {
+		module_fs.readdir(homeDir, function dir(err, files) {
 			if(err && err.code == "ENOENT") {
 				console.log(homeDir + " doesn't exist! Attempting to re-create guest" + id + " ...");
 				// If the home dir doesn't exist usually mean there is a gap in the GUEST_COUNTER series, so try filling that gap
@@ -214,7 +231,7 @@ function recycleGuestAccounts(callback) {
 			else if(err) throw err;
 			else {
 				var lastLoginFile = UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]);
-				fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
+				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
 						console.log("guest" + id + ": " + err.code + " " + lastLoginFile);
@@ -249,16 +266,16 @@ function recycleGuestAccounts(callback) {
 		var username = "guest" + id;
 		log("Removing guest user: " + username);
 		
-		var exec = require('child_process').exec;
+		var exec = module.child_process.exec;
 		
 		// Pass the arguments as JSON in case some hacker use a very clever password
 		var commandArg = {
 			username: username,
 			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
 			};
-		var path = require("path");
+		
 		var options = {
-			cwd: path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+			cwd: module.path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
 		}
 		//console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
@@ -313,8 +330,8 @@ function recycleGuestAccounts(callback) {
 function main() {
 	
 	// Get the current user (who runs this server)
-	var os = require("os");
-	var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+	
+	var info = module.os.userInfo ? module.os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 	var env = process.env;
 	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
@@ -330,7 +347,7 @@ function main() {
 	}
 	
 	if(!USERNAME && !NO_CHROOT) {
-	fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
+		module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
 			// Create the file if it doesn't exist
@@ -340,7 +357,7 @@ function main() {
 				else startServer();
 			});
 			/*
-				fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
+					module_fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
 				if (err) throw err;
 				console.log("Created " + __dirname + "/GUEST_COUNTER");
 			});
@@ -359,13 +376,10 @@ else {
 	
 	function startServer() {
 		
-		var sockJs = require("sockjs");
-		var wsServer = sockJs.createServer();
+		var wsServer = module.sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
 		
-		var http = require("http");
-		
-		HTTP_SERVER = http.createServer(handleHttpRequest);
+		HTTP_SERVER = module.http.createServer(handleHttpRequest);
 		
 		HTTP_SERVER.on("error", function(err) {
 			console.log("err.code=" + err.code);
@@ -426,22 +440,22 @@ var guestId = ++GUEST_COUNTER;
 // Save guest counter so that we can continue the number serie after server restarts
 	// It's not that bad if there are holes in the number serie. 
 	// We however don't want to give two people the same guest account!
-		fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
+		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
 	}
 	
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
 		var username = "guest" + guestId;
-var generator = require('generate-password');
-		var password = generator.generate({
+		
+		var password = module.generator.generate({
 			length: 10,
 			numbers: true
 		});
 
 		console.log("Creating guest user: " + username);
 		
-		var exec = require('child_process').exec;
+		var exec = module.child_process.exec;
 		
 		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
 		var commandArg = {
@@ -451,9 +465,9 @@ var generator = require('generate-password');
 			noCert: false
 		};
 		
-var path = require("path");
+		
 		var options = {
-			cwd: path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
+			cwd: module.path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
 		}
 		console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
@@ -521,9 +535,8 @@ function broadcast(myIp) {
 	
 	if(myIp == "0.0.0.0") {
 		// We'll have to find all broadcast addresses ...
-		var os = require('os');
 		
-		var interfaces = os.networkInterfaces();
+		var interfaces = module.os.networkInterfaces();
 		var addresses = [];
 		for (var k in interfaces) {
 			for (var k2 in interfaces[k]) {
@@ -540,10 +553,8 @@ function broadcast(myIp) {
 		
 		console.log("broadcastAddresses: ", broadcastAddresses);
 		
-		var dgram = require('dgram');
-		
 		// Server
-		var broadcastServer = dgram.createSocket("udp4");
+		var broadcastServer = module.dgram.createSocket("udp4");
 		broadcastServer.bind(function() {
 			broadcastServer.setBroadcast(true);
 			// We must send at least one broadcast message to be able to receive messages!
@@ -551,7 +562,7 @@ function broadcast(myIp) {
 		});
 		
 		// Client
-		var broadcastClient = dgram.createSocket('udp4');
+		var broadcastClient = module.dgram.createSocket('udp4');
 		
 		broadcastClient.on('listening', function () {
 			var address = broadcastClient.address();
@@ -777,8 +788,8 @@ function sockJsConnection(connection) {
 				(function checkUser(username, password) {
 					
 					if(!NO_PW_HASH && !PASSWORD) {
-						var pwHash = require("./pwHash.js");
-						password = pwHash(password);
+						
+						password = module.pwHash(password);
 					}
 					
 					if(USERNAME) {
@@ -811,19 +822,18 @@ if(GUEST_POOL.length == 0) {
 						else {
 							var guestUser = GUEST_POOL.shift();
 							console.log("Using guest account " + guestUser + " from GUEST_POOL");
-							var generator = require('generate-password');
-							var guestPw = generator.generate({
+							var guestPw = module.generator.generate({
 								length: 10,
 								numbers: true
 							});
 							loginAsGuest(guestUser, guestPw);
 							// Save/Reset the password
 							if(!NO_PW_HASH) {
-								var pwHash = require("./pwHash.js");
-								guestPw = pwHash(guestPw);
+								
+								guestPw = module.pwHash(guestPw);
 							}
-							var fs = require("fs");
-							fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
+							
+							module_fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
 								if(err) throw err;
 								console.log("Saved guest=" + guestUser + " new password");
 							});
@@ -831,8 +841,7 @@ if(GUEST_POOL.length == 0) {
 					}
 					else {
 						
-						var fs = require("fs");
-						fs.readdir(HOME_DIR, function readDir(err, files) {
+						module_fs.readdir(HOME_DIR, function readDir(err, files) {
 							if(err) throw err;
 							
 							var checkingPw = false;
@@ -876,7 +885,7 @@ idSuccess();
 					
 					function checkPw() {
 						
-						fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
+						module_fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
 							if(err) {
 								console.error(err);
 								idFail(err.message);
@@ -919,8 +928,7 @@ idSuccess();
 							
 							// Get home, uid and gid
 							
-							var fs = require("fs");
-							fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
+							module_fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
 						}
 						
 						function gotMoreUserInfo(err, etcPasswd) {
@@ -1011,10 +1019,10 @@ idSuccess();
 									// Check if cacerts need to be updated
 									var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
 									var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
-									fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
+									module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
 									if(err) return checkMountsError(err);
 									if(checkMountsAbort) return;
-									fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
+									module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
 									if(err) return checkMountsError(err);
 									console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
 									console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
@@ -1068,7 +1076,7 @@ idSuccess();
 									mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
 									
 									// Be able to type npm in terminal:
-									fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+									module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
 										if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
 										npmSymLinkCreated = true;
 									});
@@ -1101,7 +1109,7 @@ idSuccess();
 								mount("/lib/", homeDir + "lib", folderMounted);
 								mount("/lib64/", homeDir + "lib64", folderMounted);
 								
-								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
+								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 								
@@ -1124,7 +1132,7 @@ idSuccess();
 								// Create a fake /etc/passwd that some programs use to lookup home dir and username
 								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
 								if(!DEBUG_CHROOT) {
-									fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
+									module_fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
 										passwdCreated = true;
 										checkMountsReadyMaybe();
 									});
@@ -1135,13 +1143,13 @@ idSuccess();
 								console.time("Check nginx profile")
 								var url_user = UTIL.urlFriendly(username);
 								var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-								fs.stat(nginxProfilePath, function (err, stats) {
+								module_fs.stat(nginxProfilePath, function (err, stats) {
 									if(checkMountsAbort) return;
 									
 									if(err) {
 										if(err.code != "ENOENT") throw err;
 										
-										fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+										module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
 											if(checkMountsAbort) return;
 											
 											if(err) throw err;
@@ -1150,7 +1158,7 @@ idSuccess();
 											nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 											nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 											
-											fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+											module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 												if(err) throw err;
 												console.log("Nginx profile created!");
 												console.timeEnd("Check nginx profile");
@@ -1167,16 +1175,16 @@ idSuccess();
 									function checkNginxEnabled() {
 										console.time("Check Nginx enabled");
 										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
-										fs.stat(nginxProfileEnabledPath, function (err, stats) {
+										module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
 											if(checkMountsAbort) return;
 											
 											if(err) {
 												if(err.code != "ENOENT") throw err;
 												
-												fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+												module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
 													if(err) throw err;
 													
-													var exec = require('child_process').exec;
+													var exec = module.child_process.exec;
 													exec("service nginx reload", function(error, stdout, stderr) {
 														if(error) throw(error);
 														if(stderr) throw new Error(stderr);
@@ -1213,7 +1221,7 @@ idSuccess();
 								
 								//console.log("Checking user rights ...");
 								console.time("Check user rights");
-								fs.stat(HOME_DIR + username, function (err, stats) {
+								module_fs.stat(HOME_DIR + username, function (err, stats) {
 									if(err) throw err;
 									
 									if(stats.uid != uid || stats.gid != gid) {
@@ -1225,7 +1233,7 @@ idSuccess();
 										getGroupId("www-data", function(err, wwwgid) {
 											if(err) throw err;
 											
-											fs.readdir(HOME_DIR + username, function (err, files) {
+											module_fs.readdir(HOME_DIR + username, function (err, files) {
 												if(err) throw err;
 												
 												for (var i=0; i<files.length; i++) {
@@ -1235,7 +1243,7 @@ idSuccess();
 											});
 											
 											toChown++;
-											fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
+											module_fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
 												toChown--;
 												if(err) throw err;
 												checkedUserRights();
@@ -1265,7 +1273,7 @@ idSuccess();
 													
 													// Is it a folder ?
 													toStat++;
-													fs.stat(path, function (err, stats) {
+													module_fs.stat(path, function (err, stats) {
 														toStat--;
 														if(err) throw err;
 														
@@ -1279,7 +1287,7 @@ idSuccess();
 														}
 														else {
 															toChown++;
-															fs.chown(path, uid, gid, function chowned(err) {
+															module_fs.chown(path, uid, gid, function chowned(err) {
 																toChown--;
 																if(err) throw err;
 																checkedUserRights();
@@ -1315,7 +1323,7 @@ idSuccess();
 								if(apparmorProfilesToCreate == 0 && reloadApparmor) {
 									console.timeEnd("Creating apparmor profiles");
 									console.time("Reloading apparmor");
-									var exec = require('child_process').exec;
+									var exec = module.child_process.exec;
 									
 									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
 									//var apparmorReloadCommand = "service apparmor reload";
@@ -1405,12 +1413,12 @@ idSuccess();
 								//console.log("Apparmor: template=" + template + " dest=" + dest);
 								
 								// First check if the profile exist
-								fs.stat(dest, function (err, stats) {
+								module_fs.stat(dest, function (err, stats) {
 									
 									if(err) {
 										if(err.code != "ENOENT") throw err;
 										
-										fs.readFile(template, "utf8", function (err, apparmorProfile) {
+										module_fs.readFile(template, "utf8", function (err, apparmorProfile) {
 											if(err) throw err;
 											
 											apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
@@ -1418,7 +1426,7 @@ idSuccess();
 											apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, UTIL.parentFolder(__dirname));
 											
 											// Create the profile
-											fs.writeFile(dest, apparmorProfile, function (err) {
+											module_fs.writeFile(dest, apparmorProfile, function (err) {
 												if(err) throw err;
 												
 												reloadApparmor = true;
@@ -1427,7 +1435,7 @@ idSuccess();
 													var bin = dest.replace("/etc/apparmor.d", "");
 													bin = dest.replace(".", "/");
 													
-													//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
+													//var enforceApparmorProfileStdout = module.child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 												*/
 												//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
@@ -1452,7 +1460,7 @@ idSuccess();
 								var url_user = UTIL.urlFriendly(username);
 								
 								var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
-								fs.stat(certPath, function(err, stat) {
+								module_fs.stat(certPath, function(err, stat) {
 									if(err == null) {
 										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
@@ -1471,8 +1479,8 @@ idSuccess();
 										
 										// the cert does not exist. Try to register it
 										console.time("Register with letsencrypt");
-										var letsencrypt = require("../shared/letsencrypt.js");
-										letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+										
+										module.letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
 											console.timeEnd("Register with letsencrypt");
 											if(err) {
 												
@@ -1494,13 +1502,13 @@ idSuccess();
 												
 												// Enable SSL on the site
 												var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-												fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
+												module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
 													if(err) throw err;
 													data = data.replace(/#SSL#/g, "");
 													data = data.replace(/listen 80;#NOSSL#/g, "");
 													data = data.replace(/listen [::]:80;#NOSSL#/g, "");
 													
-													fs.writeFile(nginxProfilePath, data, function(err) {
+													module_fs.writeFile(nginxProfilePath, data, function(err) {
 														if(err) throw err;
 														
 														console.log("SSL enabled: " + nginxProfilePath);
@@ -1508,7 +1516,7 @@ idSuccess();
 														
 														// Don't make the user wait for nginx config to reload (ca 70ms)
 														console.time("nginx reload");
-														var exec = require('child_process').exec;
+														var exec = module.child_process.exec;
 														exec("service nginx reload", function(error, stdout, stderr) {
 															console.timeEnd("nginx reload");
 															
@@ -1529,7 +1537,7 @@ idSuccess();
 										}); // letsencrypt.register
 									}
 									else {
-										// Another fs.stat ssl file error
+										// Another module_fs.stat ssl file error
 										throw err;
 									}
 								});
@@ -1590,8 +1598,7 @@ idSuccess();
 								commandQueue.length = 0;
 							}
 							
-							var fs = require("fs");
-							fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
+							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
 								if(err) throw err;
 							});
 							
@@ -1774,8 +1781,7 @@ function createHttpEndpoint(username, folder, callback) {
 	}
 	
 	// Make sure the path exist
-	var fs = require("fs");
-	fs.stat(folder, function statResult(err, stats) {
+	module_fs.stat(folder, function statResult(err, stats) {
 		if(err) return callback(err);
 		
 		for(var endPoint in HTTP_ENDPOINTS) {
@@ -1835,8 +1841,6 @@ function handleHttpRequest(request, response) {
 	var secondDir = dirs[1] ? dirs[2] : dirs[1];
 	
 	
-	var path = require("path");
-	
 	var folder;
 	var localFolder;
 	
@@ -1895,7 +1899,7 @@ function handleHttpRequest(request, response) {
 		
 		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
-		localFolder = path.resolve("../client/");
+		localFolder = module.path.resolve("../client/");
 		
 		console.log("Serving from the jzedit client folder: " + localFolder);
 		
@@ -1918,12 +1922,12 @@ function handleHttpRequest(request, response) {
 	}
 	
 	
-	var filePath = path.join(localFolder, urlPath);
+	var filePath = module.path.join(localFolder, urlPath);
 	
 	
-	if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath)) {
+	if(filePath.indexOf(localFolder) != 0 || !module.path.isAbsolute(filePath)) {
 		if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
-		if(!path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+		if(!module.path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
 		
 		console.log("urlPath=" + urlPath);
 		
@@ -1937,9 +1941,9 @@ function handleHttpRequest(request, response) {
 	
 	var fileExtension = UTIL.getFileExtension(urlPath);
 	
-	var mimeMap = require("./mimeMap.js");
 	
-	if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
+	
+	if(fileExtension && !module.mimeMap.hasOwnProperty(fileExtension)) {
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 		response.end("Bad file type: '" + fileExtension + "'");
 		
@@ -1948,9 +1952,7 @@ function handleHttpRequest(request, response) {
 		return;
 	}
 	
-	var fs = require("fs");
-	
-	var stat = fs.stat(filePath, function(err, stats) {
+	var stat = module_fs.stat(filePath, function(err, stats) {
 		
 		if(err) {
 			responseHeaders['Access-Control-Allow-Origin'] = "*";
@@ -1981,12 +1983,12 @@ function handleHttpRequest(request, response) {
 		}
 		else {
 			
-			responseHeaders['Content-Type'] = mimeMap[fileExtension];
+			responseHeaders['Content-Type'] = module.mimeMap[fileExtension];
 			responseHeaders['Content-Length'] = stats.size;
 			
 			response.writeHead(200, responseHeaders);
 			
-			var readStream = fs.createReadStream(filePath);
+			var readStream = module_fs.createReadStream(filePath);
 			readStream.pipe(response);
 			
 		}
@@ -2022,8 +2024,7 @@ function makeUrl(endPoint) {
 	if(ip == "0.0.0.0" || ip == "::") {
 		// Find servers IP
 		var ipList = [];
-		var os = require('os');
-		var ifaces = os.networkInterfaces();
+		var ifaces = module.os.networkInterfaces();
 		log("Listening IP's:", 7);
 		Object.keys(ifaces).forEach(function (ifname) {
 			var alias = 0;
@@ -2082,8 +2083,6 @@ function randomString(letters) {
 }
 
 function createUserWorker(name, uid, gid) {
-	var childProcess = require("child_process");
-	
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
@@ -2122,7 +2121,7 @@ function createUserWorker(name, uid, gid) {
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
 	
 	try {
-		var worker = childProcess.fork("user_worker.js", args, options);
+		var worker = module.child_process.fork("user_worker.js", args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
@@ -2161,9 +2160,9 @@ function createUserWorker(name, uid, gid) {
 
 function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	
-	if(username == undefined && !CRAZY) throw new Error("username required!");
-	if(uid == undefined && !CRAZY) throw new Error("uid required!");
-	if(gid == undefined && !CRAZY) throw new Error("gid required!");
+	if(username == undefined && !CRAZY) throw new Error("username needed to start chromium browser!");
+	if(uid == undefined && !CRAZY) throw new Error("uid needed to start chromium browser!");
+	if(gid == undefined && !CRAZY) throw new Error("gid eeded to start chromium browser!");
 	
 	// If chromium-browser is already running on a display (by the same user ??),
 	// it will make a clean close (no useful message). Probabbly because it detects that the user is already runnig another chromium-browser
@@ -2181,7 +2180,6 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	
 	if(displayId >= 9999) throw new Error("Too many active VNC channels!");
 	
-	var httpProxy = require('http-proxy');
 	var vncUnixSocket =  HOME_DIR + username + "/sock/vnc";
 	// https://github.com/nodejitsu/node-http-proxy#proxying-websockets
 	VNC_CHANNEL[displayId] = {startedBy: username};
@@ -2189,11 +2187,11 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	
 	
 	// The proxy that will proxy requests to the x11vnc server (using websocket)
-	// unix socket (AF_UNIX) requires the modified libvncserver
+	// unix socket (AF_UNIX) needs the modified libvncserver
 	// bundled in the the x11vnc 0.9.13 tarball and later.
 	var modifiedLibvncserver = false;
 	if(modifiedLibvncserver) {
-		VNC_CHANNEL[displayId].proxy = new httpProxy.createProxyServer({
+		VNC_CHANNEL[displayId].proxy = new module.httpProxy.createProxyServer({
 			target: {
 				socketPath: vncUnixSocket
 			},
@@ -2201,7 +2199,6 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		});
 	}
 	
-	var childProcess = require("child_process");
 	var xvfbOptions = {};
 	var chromiumBrowserOptions = {};
 	var x11vncOptions = {};
@@ -2248,7 +2245,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		// debug: ps ax | grep Xvfb
 		
 		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
-		var xvfb = childProcess.spawn("Xvfb", xvfbArgs, xvfbOptions);
+		var xvfb = module.child_process.spawn("Xvfb", xvfbArgs, xvfbOptions);
 		
 		VNC_CHANNEL[displayId].xvfb = xvfb;
 		
@@ -2285,10 +2282,8 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 					Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
 					
 				*/
-				var ps = require('ps-node');
 				
-				
-				ps.lookup({
+				module.ps.lookup({
 					command: 'Xvfb',
 					arguments: xvfbArgs.join(" "),
 				}, function(err, resultList ) {
@@ -2299,7 +2294,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 					resultList.forEach(function( p ){
 						if( p ){
 							console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
-							ps.kill( p.pid, function( err ) {
+							module.ps.kill( p.pid, function( err ) {
 								if (err) {
 									throw new Error( err );
 								}
@@ -2328,7 +2323,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		function isXvfbRunning() {
 			
 			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+			module.child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
 				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
 				
 				if(++checkCounter > maxCheck) {
@@ -2383,7 +2378,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
 		+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
-		var chromiumBrowser = childProcess.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
+		var chromiumBrowser = module.child_process.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
 		
 		VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
 		
@@ -2420,7 +2415,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		function checkIfChromiumBrowserHasStarted() {
 			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+			module.child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
 				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
 				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
 				else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
@@ -2468,7 +2463,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
 		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
-		var x11vnc = childProcess.spawn("x11vnc", x11vncArgs, x11vncOptions);
+		var x11vnc = module.child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
 		
 		VNC_CHANNEL[displayId].x11vnc = x11vnc;
 		
@@ -2549,8 +2544,7 @@ function freeTcpPort(port) {
 }
 
 function getGroupId(groupName, callback) {
-	var fs = require("fs");
-	fs.readFile("/etc/group", "utf8", function(err, groupData) {
+	module_fs.readFile("/etc/group", "utf8", function(err, groupData) {
 		
 		if(err) return callback(err);
 		
@@ -2576,8 +2570,6 @@ function chownDirRecursive(path, uid, gid, callback) {
 	
 	if(typeof callback != "function") throw new Error("Expected fourth parameter callback=" + callback + " to be a callback function!");
 	
-	var fs = require("fs");
-	
 	path = UTIL.trailingSlash(path); // Path is always a directory, put a slash after it to ease concatenation
 	
 	var abort = false;
@@ -2588,7 +2580,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 	var arrPathsToChown = [];
 	
 	dirsToRead++;
-	fs.readdir(path, function readDir(err, files) {
+	module_fs.readdir(path, function readDir(err, files) {
 		dirsToRead--;
 		if(abort) return;
 		if(err) return chownDirRecursiveDone(err);
@@ -2602,7 +2594,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 	
 	pathsToChown++;
 	arrPathsToChown.push(path);
-	fs.chown(path, uid, gid, function chowned(err) {
+	module_fs.chown(path, uid, gid, function chowned(err) {
 		pathsToChown--;
 		arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
 		if(err) return chownDirRecursiveDone(err);
@@ -2615,7 +2607,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 		
 		// Check if it's a directory
 		pathsToStat++;
-		fs.stat(path, function statResult(err, stats) {
+		module_fs.stat(path, function statResult(err, stats) {
 			pathsToStat--;
 			if(abort) return;
 			if(err) return chownDirRecursiveDone(err);
@@ -2637,7 +2629,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 				// chown the file
 				pathsToChown++;
 				arrPathsToChown.push(path);
-				fs.chown(path, uid, gid, function chowned(err) {
+				module_fs.chown(path, uid, gid, function chowned(err) {
 					pathsToChown--;
 					arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
 					if(err) return chownDirRecursiveDone(err);
@@ -2676,20 +2668,18 @@ function chownDirRecursive(path, uid, gid, callback) {
 
 function mount(sourcePath, targetPath, callback) {
 	//console.time("mounting " + targetPath);
-	var fs = require("fs");
-	
 	var abort = false;
 	
 	// Are we mounting a file or a folder !?
 	
-	fs.stat(sourcePath, function(err, sourceStats) {
+	module_fs.stat(sourcePath, function(err, sourceStats) {
 		
 		if(err) return mountDone(err);
 		
 		//console.log("Folder exist: " + sourcePath);
 		
 		// Does the target exist ?
-		fs.stat(targetPath, function(err, targetStats) {
+		module_fs.stat(targetPath, function(err, targetStats) {
 			
 			if(err) {
 				if(err.code != "ENOENT") return mountDone(err);
@@ -2724,16 +2714,16 @@ function mount(sourcePath, targetPath, callback) {
 						
 						// Create emty file
 						//console.log("Creating emty file: " + targetPath);
-						fs.open(targetPath, 'w', function (err, fileDescriptor) {
+						module_fs.open(targetPath, 'w', function (err, fileDescriptor) {
 							if(err) {
-								console.log("fs.open targetPath=" + targetPath + " error: " + err.message);
+								console.log("module_fs.open targetPath=" + targetPath + " error: " + err.message);
 								return mountDone(err);
 							}
 							//console.log("File opened for write: " + targetPath);
 							
-							fs.close(fileDescriptor, function(err) {
+							module_fs.close(fileDescriptor, function(err) {
 								if(err) {
-									console.log("fs.close targetPath=" + targetPath + " error: " + err.message);
+									console.log("module_fs.close targetPath=" + targetPath + " error: " + err.message);
 									return mountDone(err);
 								}
 								//console.log("Emty file created: " + targetPath);
@@ -2758,7 +2748,7 @@ function mount(sourcePath, targetPath, callback) {
 					" targetPath=" + targetPath + " sourceStats=" + sourceStats + " targetStats=" + targetStats + " "));
 					
 					// Check if the target folder is emty
-					fs.readdir(targetPath, function readDir(err, files) {
+					module_fs.readdir(targetPath, function readDir(err, files) {
 						if(err) return mountDone(err);
 						
 						if(files.length > 0) return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
@@ -2779,7 +2769,7 @@ mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePa
 			
 			function targetCreated() {
 				
-				var exec = require('child_process').exec;
+				var exec = module.child_process.exec;
 				
 				exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
 					if(error) return mountDone(error);
@@ -2807,21 +2797,21 @@ mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePa
 	/*
 		
 		
-		if ( fs.lstatSync( source ).isDirectory() ) {
+		if ( module_fs.lstatSync( source ).isDirectory() ) {
 		// The source is a directory. Create a directory!
 		makeDirPsync(target);
 		
 		} else {
 		// The source is not a directory (it's a file!?). Check if the file exist, then create it
-		if ( fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
-		fs.closeSync(fs.openSync(target, 'w')); // Create emty file
+		if ( module_fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
+		module_fs.closeSync(module_fs.openSync(target, 'w')); // Create emty file
 		}
 		
-		var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
+		var mountResult = module.child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
 		if(mountResult != "") throw mountResult;
 		
 		// Append to /etc/fstab so it is re-mounted after reboot
-		//fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
+		//module_fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
 		// Server was unable to boot after adding stuff to fstab!!
 	*/
 }
@@ -2830,7 +2820,7 @@ mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePa
 function umount(path, callback) {
 	
 	
-	var exec = require('child_process').exec;
+	var exec = module.child_process.exec;
 	
 	exec("umount " + path + " --force --lazy" , function(error, stdout, stderr) {
 		
@@ -2875,12 +2865,12 @@ function makeDirP(path, callback) {
 	function checkFolder(folderPath) {
 		if(!folderPath) throw new Error("folderPath=" + folderPath + " path=" + path + " folders=" + JSON.stringify(folders)); // For sanity
 		
-		fs.stat(folderPath, function(err, stats) {
+		module_fs.stat(folderPath, function(err, stats) {
 			if(err) {
 				if(err.code != "ENOENT") return makeDirPDone(err);
 				
 				// The path does not exist. Create it!
-				fs.mkdir(folderPath, function (err) {
+				module_fs.mkdir(folderPath, function (err) {
 					if(err && err.code != "EEXIST") return makeDirPDone(err);
 					
 					if(folders.length > 0) checkFolder(folders.shift());
@@ -2908,11 +2898,11 @@ function makeDirP(path, callback) {
 function copyFile(source, target, cb) {
 	var cbCalled = false;
 	
-	var rd = fs.createReadStream(source);
+	var rd = module_fs.createReadStream(source);
 	rd.on("error", function(err) {
 		done(err);
 	});
-	var wr = fs.createWriteStream(target);
+	var wr = module_fs.createWriteStream(target);
 	wr.on("error", function(err) {
 		done(err);
 	});
@@ -2933,9 +2923,6 @@ function sendMail(from, to, subject, text) {
 	
 	log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
 	
-	var nodemailer = require('nodemailer');
-	var smtpTransport = require('nodemailer-smtp-transport');
-	
 	var mailSettings = {
 		port: SMTP_PORT,
 		host: SMTP_HOST
@@ -2943,7 +2930,7 @@ function sendMail(from, to, subject, text) {
 	
 	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
 	
-	var transporter = nodemailer.createTransport(smtpTransport(mailSettings));
+	var transporter = module.nodemailer.createTransport(module.smtpTransport(mailSettings));
 	
 	transporter.sendMail({
 		from: from,
