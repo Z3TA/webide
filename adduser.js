@@ -514,7 +514,7 @@ function adduser() {
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
 		*/
 		
-		console.log("User with username=" + username + " and password=" + password + " successfully added!");
+		console.log("User with username=" + username + ", password=" + password + ", uid=" + uid + ", gid=" + gid + ", homeDir=" + homeDir + " successfully added! ");
 		
 		console.timeEnd("Adding user");
 		

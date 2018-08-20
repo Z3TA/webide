@@ -174,16 +174,34 @@ function unixTimeStamp() {
 }
 
 function fillGuestPool(id, callback) {
+	// Increase the guest pool
+	
 	if(typeof id == "function") {
 		callback = id;
 		id = undefined;
 	}
-	else if(typeof id != "number" && typeof id != "undefined") {
+	
+	if(id == undefined) {
+		createGuestUser(id, guestUserCreatedMaybe);
+	}
+	else if(typeof id == "number") {
+		readPasswd("guest" + id, function(err, passwd) {
+			if(err) {
+				if(err.code == "USER_NOT_FOUND") {
+					createGuestUser(id, guestUserCreatedMaybe);
+				}
+				else throw err;
+			}
+			else {
+				guestUserCreatedMaybe(null, passwd);
+			}
+		});
+	}
+	else {
 		throw new Error("id=" + id + " needs to be a number or undefined!");
 	}
 	
-	// Increase the guest pool
-	createGuestUser(id, function guestUserCreatedMaybe(err, guestUser, guestPw) {
+	function guestUserCreatedMaybe(err, userInfo) {
 		if(err) {
 			if(callback) return callback(err);
 			else if(err.code == "LOCK") {
@@ -192,9 +210,60 @@ function fillGuestPool(id, callback) {
 			else throw err;
 		}
 		else {
-			GUEST_POOL.push(guestUser);
-			console.log("Guest account " + guestUser + " added to GUEST_POOL.length=" + GUEST_POOL.length);
-			if(callback) callback(null);
+			// Check mounts etc when filling the guest pool, instead of when logging in
+			checkMounts(userInfo.username, userInfo.homeDir, userInfo.uid, userInfo.gid, function checkedMounts(err) {
+				
+				GUEST_POOL.push(userInfo.username);
+				console.log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length);
+				if(callback) callback(null);
+				
+			});
+		}
+	}
+}
+
+function readPasswd(username, readPasswdCallback) {
+	if(username == undefined) throw new Error("username=" + username);
+	console.log("Check for username=" + username + " in /etc/passwd ...");
+	module_fs.readFile("/etc/passwd", "utf8", function readPasswdFile(err, etcPasswd) {
+		if(err) {
+			console.warn("Unable to read /etc/passwd !");
+return readPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
+		}
+		else {
+			// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
+			var rows = etcPasswd.trim().split("\n");
+			
+			for(var i=0, row, pName, pUid, pGid, pDir, pShell; i<rows.length; i++) {
+				row = rows[i].trim().split(":");
+				
+				var pName = row[0];
+				var pUid = row[2];
+				var pGid = row[3];
+				var pDir = row[5];
+				var pShell = row[6];
+				
+				if(pName == username) {
+					console.log("Found username=" + username + " in /etc/passwd");
+					
+					readPasswdCallback(null, {
+						username: username,
+						homeDir: UTIL.trailingSlash(pDir), 
+						uid: parseInt(pUid), 
+						gid: parseInt(pGid),
+						shell: pShell
+					});
+					
+					return;
+				}
+			}
+			
+			console.warn("Did not find username=" + username + " in /etc/passwd");
+			
+			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
+			error.code = "USER_NOT_FOUND";
+			readPasswdCallback(error);
+			// Add user account: sudo useradd -r -s /bin/false nameofuser
 		}
 	});
 }
@@ -235,8 +304,9 @@ function recycleGuestAccounts(callback) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
 						console.log("guest" + id + ": " + err.code + " " + lastLoginFile);
-						log("Added guest" + id + " to guest pool!");
-						GUEST_POOL.push("guest" + id);
+						
+						fillGuestPool(id);
+						
 						return processedGuestId(id);
 					}
 					else if(err) throw err;
@@ -259,9 +329,7 @@ function recycleGuestAccounts(callback) {
 		/*
 			Just delete the user instead of trying to reset.
 			We could use ZFS to restore, but then it might not get all the latest features
-			
-			
-		*/
+			*/
 		
 		var username = "guest" + id;
 		log("Removing guest user: " + username);
@@ -493,12 +561,16 @@ var guestId = ++GUEST_COUNTER;
 			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
 
 			log("stdout=" + stdout, DEBUG);
-			var checkre = /User with username=(.*) and password=(.*) successfully added/g;
+			var checkre = /User with username=(.*), password=(.*), uid=(.*), gid=(.*), homeDir=(.*) successfully added!/g;
+			
 			var check = checkre.exec(stdout);
 			if(check == null) throw new Error("It seems command=" + command + " failed! error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
 			// User with username=demo4 and password=demo4 successfully added!
 			var reG1User = check[1];
 			var reG2Pw = check[2];
+			var reG3Uid = parseInt(check[3]);
+			var reG4Gid = parseInt(check[4]);
+			var reG5HomeDir = UTIL.trailingSlash(check[5]);
 			
 			console.timeEnd("createAccount");
 			
@@ -507,7 +579,7 @@ var guestId = ++GUEST_COUNTER;
 			}
 			else if(reG1User == username && reG2Pw == password) {
 				log("Account username='" + username + "' successfully created!");
-				return callback(null, username, password);
+				return callback(null, {username: username, password: password, uid: reG3Uid, gid: reG4Gid, homeDir: reG5HomeDir});
 			}
 			else {
 				return callback(new Error("Problem when creating username=" + username + " with password=" + password +
@@ -628,6 +700,8 @@ function sockJsConnection(connection) {
 	var agent = connection.headers["user-agent"];
 	var commandQueue = [];
 	var awaitingMessagesFromWorker = {};
+	var recreateUserProcessSleepTime = 0;
+	var lastUserProcessCrash = new Date();
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
@@ -746,6 +820,7 @@ function sockJsConnection(connection) {
 	
 	
 	function handleUserMessage(message) { // A function so it can call itself from the queue
+		"use strict";
 		
 		if(message.indexOf(GS) == -1) {
 			return send({error: "Command does not contain " + GS + " separator : " + message});
@@ -787,6 +862,8 @@ function sockJsConnection(connection) {
 				
 				(function checkUser(username, password) {
 					
+					console.time("Login " + username);
+					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
 						password = module.pwHash(password);
@@ -816,7 +893,7 @@ if(GUEST_POOL.length == 0) {
 										checkUser(username, password);
 									}, 1000);
 								}
-								else loginAsGuest(guestUser, guestPw);
+								else loginAsGuest(guestUser, guestPw, false);
 							});
 						}
 						else {
@@ -826,7 +903,7 @@ if(GUEST_POOL.length == 0) {
 								length: 10,
 								numbers: true
 							});
-							loginAsGuest(guestUser, guestPw);
+							loginAsGuest(guestUser, guestPw, true);
 							// Save/Reset the password
 							if(!NO_PW_HASH) {
 								
@@ -858,28 +935,21 @@ if(GUEST_POOL.length == 0) {
 						});
 					}
 					
-					function loginAsGuest(guestUser, guestPassword) {
+					function loginAsGuest(guestUser, guestPassword, alreadyCheckedMounts) {
 
 						console.log("New guest login: " + guestUser);
 						
 						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: user=" + guestUser + " IP=" + IP);
 						
 username = guestUser;
-idSuccess();
+						idSuccess(alreadyCheckedMounts);
 
 						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
 						
 						if(GUEST_POOL.length <= 0) {
-						// Increase the guest pool
-						createGuestUser(function guestPoolIncreased(err, guestUser, guestPw) {
-							if(err) {
-								if(err.code != "LOCK") throw err;
-							}
-							else {
-								GUEST_POOL.push(guestUser);
-								console.log("Guest account " + guestUser + " added to GUEST_POOL.length=" + GUEST_POOL.length);
-							}
-						});
+							// Increase the guest pool
+							// But wait until user has logged in ()
+							setTimeout(fillGuestPool, 3000);
 						}
 					}
 					
@@ -907,9 +977,12 @@ idSuccess();
 						
 						send({error: errorMsg});
 						log("username=" + username + " failed to login: " + errorMsg);
+					
+						console.timeEnd("Login " + username);
+						
 					}
 					
-					function idSuccess() {
+					function idSuccess(alreadyCheckedMounts) {
 						
 						var rootPath; // The path to chroot into (currently same as home dir)
 						var uid, gid; // System user-id and group-id
@@ -925,626 +998,26 @@ idSuccess();
 							acceptUser();
 						}
 						else {
-							
 							// Get home, uid and gid
-							
-							module_fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
-						}
-						
-						function gotMoreUserInfo(err, etcPasswd) {
-							
-							if(err) {
-								console.warn("Unable to read /etc/passwd !");
-								throw new Error("Unable to read /etc/passwd: " + err.message);
-							}
-							else {
-								// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
-								var rows = etcPasswd.trim().split("\n");
-								
-								for(var i=0, row; i<rows.length; i++) {
-									row = rows[i].trim().split(":");
-									if(foundUserIn(row)) return checkMounts();
-								}
-								
-								idFail("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
-								// Add user account: sudo useradd -r -s /bin/false nameofuser
-							}
-							
-							function foundUserIn(row) {
-								var pName = row[0];
-								var pUid = row[2];
-								var pGid = row[3];
-								var pDir = row[5];
-								var pShell = row[6];
-								
-								var found = false;
-								if(pName == username) {
-									console.log("Found username=" + username + " in /etc/passwd");
-									
-									homeDir = UTIL.trailingSlash(pDir);
-									shell = pShell;
-									uid = parseInt(pUid);
-									gid = parseInt(pGid);
-									rootPath = pDir;
-									
-									return true;
-								}
-								else return false;
-							}
-							
-						}
-						
-						function checkMounts() {
-							// Make sure everything is mounted etc ...
-							
-							// When a user have been moved to another server, the user id will be different.
-							// So we have to reset the user permissions! 
-							// www-data user id might be the same though, depending on distro
-							
-							if(NO_CHROOT) {
-								console.log("Not checking mounts because -nochroot option in server parameters");
-								return acceptUser();
-							}
-							
-							console.log("Checking mounts ...");
-							console.time("check mounts");
-							
-							var nginxProfileOK = false;
-							var foldersToMount = 24;
-							var apparmorProfilesToCreate = 6;
-							var reloadApparmor = false;
-							var reloadedApparmor = false;
-							var checkMountsAbort = false;
-							var sslCertChecked = false;
-							var userAccepted = false;
-							var npmSymLinkCreated = false;
-							var hgrccacertsUptodate = true;
-							var passwdCreated = false;
-							
-							var apparmorProfiles = [
-								"../etc/apparmor/usr.bin.nodejs_someuser",
-								"../etc/apparmor/home.someuser.usr.bin.node",
-								"../etc/apparmor/home.someuser.usr.bin.python",
-								"../etc/apparmor/home.someuser.usr.bin.hg",
-								"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
-								"../etc/apparmor/home.someuser.bin.bash"
-							];
-							
-							checkUserRights(username, function checkedUserRights(err) {
-								if(err) return checkMountsError(err);
-								
-								console.log("User rights OK for username=" + username);
-								
-								/*
-									// Check if cacerts need to be updated
-									var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
-									var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
-									module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
-									if(err) return checkMountsError(err);
-									if(checkMountsAbort) return;
-									module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
-									if(err) return checkMountsError(err);
-									console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
-									console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
-									process.exit();
-									if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
-									// The cacerts.rc file is up to date or have been modified by the user
-									hgrccacertsUptodate = true;
-									checkMountsReadyMaybe();
-									}
-									else {
-									copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
-									if(err) return checkMountsError(err);
-									hgrccacertsUptodate = true;
-									checkMountsReadyMaybe();
-									});
-									}
-									});
-									});
-								*/
-								
-								
-								/*
-									Make sure mounts exist
-									----------------------
-									Mount these instead of copying to save hdd space
-									Don't forget to update var foldersToMount=
-									
-									Problem: Racing to create folders
-									Solution: Create folder before mounting
-									
-									Each mount takes ca 150ms, so only mount bare minimum for performance!
-									(it's better performance wise to mount a whole folder then many separate files in the same folder)
-									
-									Sort alpabetically. And don't forget to update removeuser.js !
-								*/
-								
-								console.time("Mount files and folders");
-								
-								if(!DEBUG_CHROOT) {
-									foldersToMount += 9; // <-- Update
-									
-									mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
-									
-									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-									mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
-									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-									mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
-									mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
-									mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
-									
-									// Be able to type npm in terminal:
-									module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-										if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-										npmSymLinkCreated = true;
-									});
-								}
-								else {
-									foldersToMount += 2;
-									mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
-									mount("/etc/", homeDir + "etc/", folderMounted);
-									npmSymLinkCreated = true;
-								}
-								
-								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
-								mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
-								mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
-								mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
-								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-								mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
-								mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
-								mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
-								mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
-								mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
-								mount("/bin/tar", homeDir + "bin/tar", folderMounted);
-								
-								// Some programs don't like if we create them using mkdnod 
-								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-								mount("/dev/null", homeDir + "dev/null", folderMounted);
-								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
-								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
-								
-								mount("/lib/", homeDir + "lib", folderMounted);
-								mount("/lib64/", homeDir + "lib64", folderMounted);
-								
-								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
-								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
-								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
-								
-								mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
-								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-								mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
-								
-								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
-								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 
-								
-								
-								// Create apparmor profiles unless they already exist
-								// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
-								console.time("Creating apparmor profiles");
-								for (var i=0; i<apparmorProfiles.length; i++) {
-									apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
-								}
-								
-								
-								// Create a fake /etc/passwd that some programs use to lookup home dir and username
-								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
-								if(!DEBUG_CHROOT) {
-									module_fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
-										passwdCreated = true;
-										checkMountsReadyMaybe();
-									});
-								}
-								else passwdCreated = true;
-								
-								// Make sure nginx profile exist
-								console.time("Check nginx profile")
-								var url_user = UTIL.urlFriendly(username);
-								var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-								module_fs.stat(nginxProfilePath, function (err, stats) {
-									if(checkMountsAbort) return;
-									
-									if(err) {
-										if(err.code != "ENOENT") throw err;
-										
-										module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
-											if(checkMountsAbort) return;
-											
-											if(err) throw err;
-											
-											nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
-											nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-											nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-											
-											module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
-												if(err) throw err;
-												console.log("Nginx profile created!");
-												console.timeEnd("Check nginx profile");
-												checkNginxEnabled();
-											});
-											
-										});
-									}
-									else {
-										console.timeEnd("Check nginx profile");
-										checkNginxEnabled();
-									}
-									
-									function checkNginxEnabled() {
-										console.time("Check Nginx enabled");
-										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
-										module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
-											if(checkMountsAbort) return;
-											
-											if(err) {
-												if(err.code != "ENOENT") throw err;
-												
-												module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
-													if(err) throw err;
-													
-													var exec = module.child_process.exec;
-													exec("service nginx reload", function(error, stdout, stderr) {
-														if(error) throw(error);
-														if(stderr) throw new Error(stderr);
-														if(stdout) throw new Error(stdout);
-														
-														nginxProfileOK = true;
-														console.timeEnd("Check Nginx enabled");
-														
-														checkSslCert();
-														
-														checkMountsReadyMaybe();
-													});
-													
-												});
-											}
-											else {
-												nginxProfileOK = true;
-												console.timeEnd("Check Nginx enabled");
-												
-												checkSslCert();
-												
-												checkMountsReadyMaybe();
-											}
-										});
-									}
-									
-								});
-								
-							}); // checked user rights
-							
-							function checkUserRights(username, callback) {
-								var toChown = 0;
-								var toStat = 0;
-								
-								//console.log("Checking user rights ...");
-								console.time("Check user rights");
-								module_fs.stat(HOME_DIR + username, function (err, stats) {
-									if(err) throw err;
-									
-									if(stats.uid != uid || stats.gid != gid) {
-										// Reset the fs user rights
-										// Don't chown all dirs though, chowning the mounted files could be disastrous!'
-										
-										// www user needs to have write access to /sock and read access to /wwwpub
-										// make sure the right www user id
-										getGroupId("www-data", function(err, wwwgid) {
-											if(err) throw err;
-											
-											module_fs.readdir(HOME_DIR + username, function (err, files) {
-												if(err) throw err;
-												
-												for (var i=0; i<files.length; i++) {
-													check(files[i]);
-												}
-												
-											});
-											
-											toChown++;
-											module_fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
-												toChown--;
-												if(err) throw err;
-												checkedUserRights();
-											});
-											
-											function check(file) { // Closure so we know which path
-												var path = UTIL.joinPaths([HOME_DIR, username, file]);
-												
-												console.log("checkUserRights: Checking file=" + file + " path=" + path);
-												
-												if(file=="dev" || file=="proc" || file=="bin" || file=="usr" || file=="lib" || file=="lib64") {
-													// Ignore these. Chown'ing these could be disastrous!
-													checkedUserRights();
-													return;
-												}
-												else if(file=="wwwpub" || file == "sock") {
-													// www-data should be the group
-													toChown++;
-													chownDirRecursive(path, uid, wwwgid, function(err) {
-														toChown--;
-														if(err) throw err;
-														checkedUserRights();
-													});
-													return;
-												}
-												else {
-													
-													// Is it a folder ?
-													toStat++;
-													module_fs.stat(path, function (err, stats) {
-														toStat--;
-														if(err) throw err;
-														
-														if(stats.isDirectory()) {
-															toChown++;
-															chownDirRecursive(path, uid, gid, function(err) {
-																toChown--;
-																if(err) throw err;
-																checkedUserRights();
-															});
-														}
-														else {
-															toChown++;
-															module_fs.chown(path, uid, gid, function chowned(err) {
-																toChown--;
-																if(err) throw err;
-																checkedUserRights();
-															});
-														}
-													});
-												}
-											}
-											
-										});
-									}
-									else {
-										checkedUserRights();
-									}
-								});
-								
-								function checkedUserRights() {
-									if(toChown == 0 && toStat == 0) {
-										if(callback) {
-											console.timeEnd("Check user rights");
-											callback(null);
-											callback = null;
-										}
-									}
-									else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
-								}
-							}
-							
-							function apparmorProfileCreated(err) {
+							readPasswd(username, function(err, passwd) {
 								if(err) throw err;
-								apparmorProfilesToCreate--;
-								var counter = 0;
-								if(apparmorProfilesToCreate == 0 && reloadApparmor) {
-									console.timeEnd("Creating apparmor profiles");
-									console.time("Reloading apparmor");
-									var exec = module.child_process.exec;
-									
-									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
-									//var apparmorReloadCommand = "service apparmor reload";
-									//var apparmorReloadCommand = "apparmor_parser -r ";
-									var apparmorReloadCommand = "apparmor_parser -r";
-									for (var i=0; i<apparmorProfiles.length; i++) {
-										//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
-										apparmorReloadCommand += " " + apparmorProfiles[i];
-									}
-									console.log("exec: " + apparmorReloadCommand);
-									exec(apparmorReloadCommand, function(error, stdout, stderr) {
-										console.timeEnd("Reloading apparmor");
-										if(error) throw(error);
-										if(stderr) throw new Error(stderr);
-										if(stdout) throw new Error(stdout);
-										
-										console.log("done: service apparmor reload");
-										
-										clearInterval(apparmorReloadTimer);
-										
-										reloadedApparmor = true;
-										checkMountsReadyMaybe();
-									});
-								} 
 								
-								checkMountsReadyMaybe();
+								homeDir = passwd.homeDir;
+								shell = passwd.shell;
+								uid = passwd.uid;
+								gid = passwd.gid;
+								rootPath = passwd.homeDir;
 								
-								function checkApparmorReloaded() {
-									console.log("Waiting for apparmor to reload ... " + ++counter);
-								}
+								if(alreadyCheckedMounts) acceptUser();
+								else checkMounts(username, homeDir, uid, gid, checkedMounts);
 								
-							}
-							
-							function folderMounted(err) {
-								foldersToMount--;
-								if(err) {
-									// Error: Target directory not empty! Can not mount to targetPath=/home/johan/etc/ssl/certs targetStats=[object Object]
-									return checkMountsError(err);
-									//throw err;
-								}
-								if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
-								
-								if(foldersToMount == 0) console.timeEnd("Mount files and folders");
-								
-								checkMountsReadyMaybe();
-							}
-							
-							function checkMountsReadyMaybe() {
-								if(checkMountsAbort) return;
-								
-								/*
-									console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
-								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
-								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
-								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
-								*/
-								
-								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated) {
-									
-									if(!userAccepted) { // Prevent double accept
-										acceptUser();
-										userAccepted = true;
-										console.timeEnd("check mounts");
-									}
-									else throw new Error("User already accepted!");
-								}
-							}
-							
-							
-							function checkMountsError(err) {
-								if(checkMountsAbort) return;
-								checkMountsAbort = true;
-								idFail("Problem creating mounts: " + err.message);
-							}
-							
-							function createApparmorProfile(template, username, callback) {
-								/*
-									example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
-								*/
-								var dest = template.replace("someuser", username);
-								//console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
-								
-								var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
-								dest = dest.replace("home.", homeDot);
-								dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
-								
-								//console.log("Apparmor: template=" + template + " dest=" + dest);
-								
-								// First check if the profile exist
-								module_fs.stat(dest, function (err, stats) {
-									
-									if(err) {
-										if(err.code != "ENOENT") throw err;
-										
-										module_fs.readFile(template, "utf8", function (err, apparmorProfile) {
-											if(err) throw err;
-											
-											apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
-											apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-											apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, UTIL.parentFolder(__dirname));
-											
-											// Create the profile
-											module_fs.writeFile(dest, apparmorProfile, function (err) {
-												if(err) throw err;
-												
-												reloadApparmor = true;
-												
-												/*
-													var bin = dest.replace("/etc/apparmor.d", "");
-													bin = dest.replace(".", "/");
-													
-													//var enforceApparmorProfileStdout = module.child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
-													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-												*/
-												//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
-												return callback(null);
-											});
-										});
-									}
-									else {
-										// profile already exist!
-										//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
-										return callback(null);
-									}
-									
-								});
-								
-								return dest;
-							}
-							
-							function checkSslCert() {
-								// Check ssl certificate
-								console.time("Check SSL Cert");
-								var url_user = UTIL.urlFriendly(username);
-								
-								var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
-								module_fs.stat(certPath, function(err, stat) {
-									if(err == null) {
-										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
-										sslCertChecked = true;
-										console.timeEnd("Check SSL Cert");
-										//return checkMountsReadyMaybe();
-									}
-									else if(err.code == 'ENOENT') {
-										console.log("ENOENT: certPath=" + certPath);
-										
-										if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
-											log("Skipping SSL registration because of too many failed attempts!");
-											sslCertChecked = true;
-											console.timeEnd("Check SSL Cert");
-											//return checkMountsReadyMaybe();
-										}
-										
-										// the cert does not exist. Try to register it
-										console.time("Register with letsencrypt");
-										
-										module.letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
-											console.timeEnd("Register with letsencrypt");
-											if(err) {
-												
-												if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) FAILED_SSL_REG[url_user + "." + DOMAIN]++;
-												else FAILED_SSL_REG[url_user + "." + DOMAIN] = 1;
-												
-												if(err.code == "ENOENT") console.warn("certbot not installed!");
-												else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
-												else {
-													console.warn(err.message);
-												}
-												
-												sslCertChecked = true;
-												console.timeEnd("Check SSL Cert");
-												//return checkMountsReadyMaybe();
-											}
-											else {
-												console.log("SSL certificate for " + url_user + "." + DOMAIN + " installed!");
-												
-												// Enable SSL on the site
-												var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-												module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
-													if(err) throw err;
-													data = data.replace(/#SSL#/g, "");
-													data = data.replace(/listen 80;#NOSSL#/g, "");
-													data = data.replace(/listen [::]:80;#NOSSL#/g, "");
-													
-													module_fs.writeFile(nginxProfilePath, data, function(err) {
-														if(err) throw err;
-														
-														console.log("SSL enabled: " + nginxProfilePath);
-														
-														
-														// Don't make the user wait for nginx config to reload (ca 70ms)
-														console.time("nginx reload");
-														var exec = module.child_process.exec;
-														exec("service nginx reload", function(error, stdout, stderr) {
-															console.timeEnd("nginx reload");
-															
-															if(error) throw(error);
-															if(stderr) throw new Error(stderr);
-															if(stdout) throw new Error(stdout);
-															
-															sslCertChecked = true;
-															console.timeEnd("Check SSL Cert");
-															//return checkMountsReadyMaybe();
-															
-															//log("nginx reloaded!");
-															
-														});
-													});
-												});
-											}
-										}); // letsencrypt.register
-									}
-									else {
-										// Another module_fs.stat ssl file error
-										throw err;
-									}
-								});
-							} // checkSslCert
-							
-						} // checkMounts
+							});
+						}
 						
+						function checkedMounts(err) {
+							if(err) idFail("Problem creating mounts: " + err.message);
+							else acceptUser();
+						}
 						
 						function acceptUser() {
 							
@@ -1600,6 +1073,8 @@ idSuccess();
 							
 							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
 								if(err) throw err;
+								
+								console.timeEnd("Login " + username);
 							});
 							
 							return true;
@@ -1681,16 +1156,26 @@ idSuccess();
 								var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
 								
 								if(code !== 0) {
-									msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
 									
 									log("Recreating user worker process for " + userConnectionName);
 									
-									userWorker = createUserWorker(userConnectionName, uid, gid);
+									var timeSinceLastCrash = new Date() - lastUserProcessCrash;
+									console.log("timeSinceLastCrash=" + timeSinceLastCrash);
+									if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
+									else recreateUserProcessSleepTime = 2000 + recreateUserProcessSleepTime * 2;
+									
+									lastUserProcessCrash = new Date();
+									
+									msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted in " + recreateUserProcessSleepTime/1000 + " seconds ...)";
+									
+									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
+									setTimeout(function restartWorkerProcess() {
+userWorker = createUserWorker(userConnectionName, uid, gid);
 									userWorker.send({identify: userInfo});
 									
 									userWorker.on("message", messageFromWorker);
 									userWorker.on("close", workerCloseHandler);
-									
+									}, recreateUserProcessSleepTime);
 								}
 								
 								send({msg: msg, id: 0});
@@ -1734,6 +1219,589 @@ idSuccess();
 	}
 	
 }
+
+
+function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
+	"use strict";
+	
+	if(username == undefined) throw new Error("username=" + username);
+	if(homeDir == undefined) throw new Error("homeDir=" + homeDir);
+	if(uid == undefined) throw new Error("uid=" + uid);
+	if(gid == undefined) throw new Error("gid=" + gid);
+	if(checkMountsCallback == undefined) throw new Error("checkMountsCallback=" + checkMountsCallback);
+	
+	// Make sure everything is mounted etc ...
+	
+	// When a user have been moved to another server, the user id will be different.
+	// So we have to reset the user permissions!
+	// www-data user id might be the same though, depending on distro
+	
+	if(NO_CHROOT) {
+		console.log("Not checking mounts because -nochroot option in server parameters");
+		return acceptUser();
+	}
+	
+	console.log("Checking mounts for username=" + username + " ...");
+	console.time("check mounts");
+	
+	var nginxProfileOK = false;
+	var foldersToMount = 24;
+	var apparmorProfilesToCreate = 6;
+	var reloadApparmor = false;
+	var reloadedApparmor = false;
+	var checkMountsReady = false;
+	var sslCertChecked = false;
+	var npmSymLinkCreated = false;
+	var hgrccacertsUptodate = true;
+	var passwdCreated = false;
+	var checkMountsAbort = false;
+	
+	var apparmorProfiles = [
+		"../etc/apparmor/usr.bin.nodejs_someuser",
+		"../etc/apparmor/home.someuser.usr.bin.node",
+		"../etc/apparmor/home.someuser.usr.bin.python",
+		"../etc/apparmor/home.someuser.usr.bin.hg",
+		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
+		"../etc/apparmor/home.someuser.bin.bash"
+	];
+	
+	checkUserRights(username, function checkedUserRights(err) {
+		if(err) return checkMountsError(err);
+		
+		console.log("User rights OK for username=" + username);
+		
+		/*
+			// Check if cacerts need to be updated
+			var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
+			var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
+			module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
+			if(err) return checkMountsError(err);
+			if(checkMountsAbort) return;
+			module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
+			if(err) return checkMountsError(err);
+			console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
+			console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
+			process.exit();
+			if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
+			// The cacerts.rc file is up to date or have been modified by the user
+			hgrccacertsUptodate = true;
+			checkMountsReadyMaybe();
+			}
+			else {
+			copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
+			if(err) return checkMountsError(err);
+			hgrccacertsUptodate = true;
+			checkMountsReadyMaybe();
+			});
+			}
+			});
+			});
+		*/
+		
+		
+		/*
+			Make sure mounts exist
+			----------------------
+			Mount these instead of copying to save hdd space
+			Don't forget to update var foldersToMount=
+			
+			Problem: Racing to create folders
+			Solution: Create folder before mounting
+			
+			Each mount takes ca 150ms, so only mount bare minimum for performance!
+			(it's better performance wise to mount a whole folder then many separate files in the same folder)
+			
+			Sort alpabetically. And don't forget to update removeuser.js !
+		*/
+		
+		console.time("Mount files and folders");
+		
+		if(!DEBUG_CHROOT) {
+			foldersToMount += 9; // <-- Update
+			
+			mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+			
+			mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+			mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+			mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+			mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+			mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+			mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+			mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+			mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+			
+			// Be able to type npm in terminal:
+			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+				npmSymLinkCreated = true;
+			});
+		}
+		else {
+			foldersToMount += 2;
+			mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
+			mount("/etc/", homeDir + "etc/", folderMounted);
+			npmSymLinkCreated = true;
+		}
+		
+		mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+		mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
+		mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
+		mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
+		mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
+		mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
+		mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
+		mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
+		mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
+		mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
+		mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+		
+		// Some programs don't like if we create them using mkdnod
+		mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
+		mount("/dev/null", homeDir + "dev/null", folderMounted);
+		mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+		mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+		
+		mount("/lib/", homeDir + "lib", folderMounted);
+		mount("/lib64/", homeDir + "lib64", folderMounted);
+		
+		mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
+		mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
+		mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+		
+		mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
+		mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+		mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+		
+		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
+		mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
+		
+		
+		// Create apparmor profiles unless they already exist
+		// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
+		console.time("Creating apparmor profiles");
+		for (var i=0; i<apparmorProfiles.length; i++) {
+			apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
+		}
+		
+		
+		// Create a fake /etc/passwd that some programs use to lookup home dir and username
+		// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
+		if(!DEBUG_CHROOT) {
+			module_fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
+				passwdCreated = true;
+				checkMountsReadyMaybe();
+			});
+		}
+		else passwdCreated = true;
+		
+		// Make sure nginx profile exist
+		console.time("Check nginx profile")
+		var url_user = UTIL.urlFriendly(username);
+		var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+		module_fs.stat(nginxProfilePath, function (err, stats) {
+			if(checkMountsAbort) return;
+			
+			if(err) {
+				if(err.code != "ENOENT") throw err;
+				
+				module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+					if(checkMountsAbort) return;
+					
+					if(err) throw err;
+					
+					nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
+					nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+					
+					module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+						if(err) throw err;
+						console.log("Nginx profile created!");
+						console.timeEnd("Check nginx profile");
+						checkNginxEnabled();
+					});
+					
+				});
+			}
+			else {
+				console.timeEnd("Check nginx profile");
+				checkNginxEnabled();
+			}
+			
+			function checkNginxEnabled() {
+				console.time("Check Nginx enabled");
+				var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
+				module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
+					if(checkMountsAbort) return;
+					
+					if(err) {
+						if(err.code != "ENOENT") throw err;
+						
+						module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+							if(err) throw err;
+							
+							var exec = module.child_process.exec;
+							exec("service nginx reload", function(error, stdout, stderr) {
+								if(error) throw(error);
+								if(stderr) throw new Error(stderr);
+								if(stdout) throw new Error(stdout);
+								
+								nginxProfileOK = true;
+								console.timeEnd("Check Nginx enabled");
+								
+								checkSslCert();
+								
+								checkMountsReadyMaybe();
+							});
+							
+						});
+					}
+					else {
+						nginxProfileOK = true;
+						console.timeEnd("Check Nginx enabled");
+						
+						checkSslCert();
+						
+						checkMountsReadyMaybe();
+					}
+				});
+			}
+			
+		});
+		
+	}); // checked user rights
+	
+	function checkUserRights(username, callback) {
+		var toChown = 0;
+		var toStat = 0;
+		
+		console.log("Checking user rights for username=" + username + " ...");
+		console.time("Check user rights");
+		module_fs.stat(HOME_DIR + username, function (err, stats) {
+			if(err) throw err;
+			
+			if(stats.uid != uid || stats.gid != gid) {
+				// Reset the fs user rights
+				// Don't chown all dirs though, chowning the mounted files could be disastrous!'
+				
+				// www user needs to have write access to /sock and read access to /wwwpub
+				// make sure the right www user id
+				getGroupId("www-data", function(err, wwwgid) {
+					if(err) throw err;
+					
+					module_fs.readdir(HOME_DIR + username, function (err, files) {
+						if(err) throw err;
+						
+						for (var i=0; i<files.length; i++) {
+							check(files[i]);
+						}
+						
+					});
+					
+					toChown++;
+					module_fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
+						toChown--;
+						if(err) throw err;
+						checkedUserRights();
+					});
+					
+					function check(file) { // Closure so we know which path
+						var path = UTIL.joinPaths([HOME_DIR, username, file]);
+						
+						console.log("checkUserRights: Checking file=" + file + " path=" + path);
+						
+						if(file=="dev" || file=="proc" || file=="bin" || file=="usr" || file=="lib" || file=="lib64") {
+							// Ignore these. Chown'ing these could be disastrous!
+							checkedUserRights();
+							return;
+						}
+						else if(file=="wwwpub" || file == "sock") {
+							// www-data should be the group
+							toChown++;
+							chownDirRecursive(path, uid, wwwgid, function(err) {
+								toChown--;
+								if(err) throw err;
+								checkedUserRights();
+							});
+							return;
+						}
+						else {
+							
+							// Is it a folder ?
+							toStat++;
+							module_fs.stat(path, function (err, stats) {
+								toStat--;
+								if(err) throw err;
+								
+								if(stats.isDirectory()) {
+									toChown++;
+									chownDirRecursive(path, uid, gid, function(err) {
+										toChown--;
+										if(err) throw err;
+										checkedUserRights();
+									});
+								}
+								else {
+									toChown++;
+									module_fs.chown(path, uid, gid, function chowned(err) {
+										toChown--;
+										if(err) throw err;
+										checkedUserRights();
+									});
+								}
+							});
+						}
+					}
+					
+				});
+			}
+			else {
+				checkedUserRights();
+			}
+		});
+		
+		function checkedUserRights() {
+			if(toChown == 0 && toStat == 0) {
+				if(callback) {
+					console.timeEnd("Check user rights");
+					callback(null);
+					callback = null;
+				}
+			}
+			else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
+		}
+	}
+	
+	function apparmorProfileCreated(err) {
+		if(err) throw err;
+		apparmorProfilesToCreate--;
+		var counter = 0;
+		if(apparmorProfilesToCreate == 0 && reloadApparmor) {
+			console.timeEnd("Creating apparmor profiles");
+			console.time("Reloading apparmor");
+			var exec = module.child_process.exec;
+			
+			var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
+			//var apparmorReloadCommand = "service apparmor reload";
+			//var apparmorReloadCommand = "apparmor_parser -r ";
+			var apparmorReloadCommand = "apparmor_parser -r";
+			for (var i=0; i<apparmorProfiles.length; i++) {
+				//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
+				apparmorReloadCommand += " " + apparmorProfiles[i];
+			}
+			console.log("exec: " + apparmorReloadCommand);
+			exec(apparmorReloadCommand, function(error, stdout, stderr) {
+				console.timeEnd("Reloading apparmor");
+				if(error) throw(error);
+				if(stderr) throw new Error(stderr);
+				if(stdout) throw new Error(stdout);
+				
+				console.log("done: service apparmor reload");
+				
+				clearInterval(apparmorReloadTimer);
+				
+				reloadedApparmor = true;
+				checkMountsReadyMaybe();
+			});
+		}
+		
+		checkMountsReadyMaybe();
+		
+		function checkApparmorReloaded() {
+			console.log("Waiting for apparmor to reload ... " + ++counter);
+		}
+		
+	}
+	
+	function folderMounted(err) {
+		foldersToMount--;
+		if(err) {
+			// Error: Target directory not empty! Can not mount to targetPath=/home/johan/etc/ssl/certs targetStats=[object Object]
+			return checkMountsError(err);
+			//throw err;
+		}
+		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
+		
+		if(foldersToMount == 0) console.timeEnd("Mount files and folders");
+		
+		checkMountsReadyMaybe();
+	}
+	
+	function checkMountsReadyMaybe() {
+		if(checkMountsAbort) return;
+		
+		/*
+			console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
+			" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
+			+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
+			+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
+		*/
+		
+		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated) {
+			
+			if(!checkMountsReady) { // Prevent double accept
+				checkMountsReady = true;
+				console.timeEnd("check mounts");
+				checkMountsCallback(null);
+			}
+			else throw new Error("checkMounts already callced checkMountsCallback!");
+			
+		}
+	}
+	
+	
+	function checkMountsError(err) {
+		if(checkMountsAbort) return;
+		checkMountsAbort = true;
+		
+		checkMountsCallback(err);
+		
+	}
+	
+	function createApparmorProfile(template, username, callback) {
+		/*
+			example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
+		*/
+		var dest = template.replace("someuser", username);
+		//console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+		
+		var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
+		dest = dest.replace("home.", homeDot);
+		dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
+		
+		//console.log("Apparmor: template=" + template + " dest=" + dest);
+		
+		// First check if the profile exist
+		module_fs.stat(dest, function (err, stats) {
+			
+			if(err) {
+				if(err.code != "ENOENT") throw err;
+				
+				module_fs.readFile(template, "utf8", function (err, apparmorProfile) {
+					if(err) throw err;
+					
+					apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
+					apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+					apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, UTIL.parentFolder(__dirname));
+					
+					// Create the profile
+					module_fs.writeFile(dest, apparmorProfile, function (err) {
+						if(err) throw err;
+						
+						reloadApparmor = true;
+						
+						/*
+							var bin = dest.replace("/etc/apparmor.d", "");
+							bin = dest.replace(".", "/");
+							
+							//var enforceApparmorProfileStdout = module.child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
+							//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+						*/
+						//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+						return callback(null);
+					});
+				});
+			}
+			else {
+				// profile already exist!
+				//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+				return callback(null);
+			}
+			
+		});
+		
+		return dest;
+	}
+	
+	function checkSslCert() {
+		// Check ssl certificate
+		console.time("Check SSL Cert");
+		var url_user = UTIL.urlFriendly(username);
+		
+		var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
+		module_fs.stat(certPath, function(err, stat) {
+			if(err == null) {
+				console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
+				sslCertChecked = true;
+				console.timeEnd("Check SSL Cert");
+				//return checkMountsReadyMaybe();
+			}
+			else if(err.code == 'ENOENT') {
+				console.log("ENOENT: certPath=" + certPath);
+				
+				if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
+					log("Skipping SSL registration because of too many failed attempts!");
+					sslCertChecked = true;
+					console.timeEnd("Check SSL Cert");
+					//return checkMountsReadyMaybe();
+				}
+				
+				// the cert does not exist. Try to register it
+				console.time("Register with letsencrypt");
+				
+				module.letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+					console.timeEnd("Register with letsencrypt");
+					if(err) {
+						
+						if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) FAILED_SSL_REG[url_user + "." + DOMAIN]++;
+						else FAILED_SSL_REG[url_user + "." + DOMAIN] = 1;
+						
+						if(err.code == "ENOENT") console.warn("certbot not installed!");
+						else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
+						else {
+							console.warn(err.message);
+						}
+						
+						sslCertChecked = true;
+						console.timeEnd("Check SSL Cert");
+						//return checkMountsReadyMaybe();
+					}
+					else {
+						console.log("SSL certificate for " + url_user + "." + DOMAIN + " installed!");
+						
+						// Enable SSL on the site
+						var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+						module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
+							if(err) throw err;
+							data = data.replace(/#SSL#/g, "");
+							data = data.replace(/listen 80;#NOSSL#/g, "");
+							data = data.replace(/listen [::]:80;#NOSSL#/g, "");
+							
+							module_fs.writeFile(nginxProfilePath, data, function(err) {
+								if(err) throw err;
+								
+								console.log("SSL enabled: " + nginxProfilePath);
+								
+								
+								// Don't make the user wait for nginx config to reload (ca 70ms)
+								console.time("nginx reload");
+								var exec = module.child_process.exec;
+								exec("service nginx reload", function(error, stdout, stderr) {
+									console.timeEnd("nginx reload");
+									
+									if(error) throw(error);
+									if(stderr) throw new Error(stderr);
+									if(stdout) throw new Error(stdout);
+									
+									sslCertChecked = true;
+									console.timeEnd("Check SSL Cert");
+									//return checkMountsReadyMaybe();
+									
+									//log("nginx reloaded!");
+									
+								});
+							});
+						});
+					}
+				}); // letsencrypt.register
+			}
+			else {
+				// Another module_fs.stat ssl file error
+				throw err;
+			}
+		});
+	} // checkSslCert
+	
+} // checkMounts
 
 // Overload console.log 
 console.log = function() {

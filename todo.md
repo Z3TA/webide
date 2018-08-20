@@ -81,6 +81,39 @@ after moving things around:
 check mounts 177.854
 --------------------
 Creating apparmor profiles 60.865
+Reloading apparmor 109.117
+Mount files and folders 174.643
+
+
+After moving all require to the top:
+
+check mounts 202.124
+--------------------
+Mount files and folders 198.273
+
+check mounts 193.139
+
+
+module_fs instead of module.fs (member lookup)
+check mounts 210.587
+
+after reverting
+Mount files and folders 233.729
+
+reverting to before moving stuff around:
+ check mounts 213.483
+Reloading apparmor 133.488
+Mount files and folders 206.171
+
+
+reverting back:
+
+check mounts 197.550
+
+Try to wait until creating a new user
+
+check mounts 178.616
+
 
 
 

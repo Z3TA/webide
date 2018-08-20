@@ -324,7 +324,7 @@ function createAccount(userData, callback) {
 		}
 		else if(stdout) {
 			log("stdout=" + stdout, DEBUG);
-			var checkre = /User with username=(.*) and password=(.*) successfully added/g;
+			var checkre = /User with username=(.*), password=(.*), uid=(.*), gid=(.*), homeDir=(.*) successfully added!/g;
 			var check = checkre.exec(stdout);
 			// User with username=demo4 and password=demo4 successfully added!
 			var reG1User = check[1];
