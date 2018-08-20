@@ -81,7 +81,15 @@ real	0m1.091s
 time sudo apparmor_parser -r /etc/apparmor.d/usr.bin.nodejs_guest5
 real	0m0.046s
 
-Make sure apparmor_parser exists and works in prod!!
+check mounts 159.418
+Reloading apparmor 103.088
+
+
+
+
+More optimization:
+time sudo service nginx reload
+real	0m1.105s
 
 
 

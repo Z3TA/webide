@@ -203,7 +203,7 @@ function recycleGuestAccounts(callback) {
 						if(err.code != "LOCK") {
 							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
 							// We don't want the editor to fail to start because of those "nuked" accounts
-							log(err.message, WARN);
+							log(err.message);
 							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message);
 						}
 					}
@@ -993,6 +993,15 @@ idSuccess();
 							var hgrccacertsUptodate = true;
 							var passwdCreated = false;
 							
+							var apparmorProfiles = [
+								"../etc/apparmor/usr.bin.nodejs_someuser",
+								"../etc/apparmor/home.someuser.usr.bin.node",
+								"../etc/apparmor/home.someuser.usr.bin.python",
+								"../etc/apparmor/home.someuser.usr.bin.hg",
+								"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
+								"../etc/apparmor/home.someuser.bin.bash"
+							];
+							
 							checkUserRights(username, function checkedUserRights(err) {
 								if(err) return checkMountsError(err);
 								
@@ -1184,13 +1193,11 @@ idSuccess();
 								
 								
 								// Create apparmor profiles unless they already exist
+								// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
 								console.time("Creating apparmor profiles");
-								createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.node", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.hg", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.bin.bash", username, apparmorProfileCreated);
+								for (var i=0; i<apparmorProfiles.length; i++) {
+									apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
+								}
 								
 							});
 							
@@ -1305,7 +1312,15 @@ idSuccess();
 									var exec = require('child_process').exec;
 									console.log("exec: service apparmor reload ...");
 									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
-									exec("service apparmor reload", function(error, stdout, stderr) {
+									//var apparmorReloadCommand = "service apparmor reload";
+									//var apparmorReloadCommand = "apparmor_parser -r ";
+									var apparmorReloadCommand = "apparmor_parser -r";
+									for (var i=0; i<apparmorProfiles.length; i++) {
+										//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
+										apparmorReloadCommand += " " + apparmorProfiles[i];
+									}
+									
+									exec(apparmorReloadCommand, function(error, stdout, stderr) {
 										console.timeEnd("Reloading apparmor");
 										if(error) throw(error);
 										if(stderr) throw new Error(stderr);
@@ -1421,6 +1436,8 @@ idSuccess();
 									}
 									
 								});
+								
+								return dest;
 							}
 							
 							function checkSslCert() {
@@ -1486,7 +1503,7 @@ idSuccess();
 															if(stderr) throw new Error(stderr);
 															if(stdout) throw new Error(stdout);
 															
-															console.log("nginx reloaded!");
+															log("nginx reloaded!");
 															
 															sslCertChecked = true;
 															console.timeEnd("Check SSL Cert");
