@@ -862,7 +862,8 @@ function sockJsConnection(connection) {
 				
 				(function checkUser(username, password) {
 					
-					console.time("Login " + username);
+					//console.log(IP + " loggingin as " + username + ": " + (new Date()).getTime());
+					console.time("Login " + IP);
 					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
@@ -978,7 +979,7 @@ username = guestUser;
 						send({error: errorMsg});
 						log("username=" + username + " failed to login: " + errorMsg);
 					
-						console.timeEnd("Login " + username);
+						console.timeEnd("Login " + IP);
 						
 					}
 					
@@ -1074,7 +1075,8 @@ username = guestUser;
 							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
 								if(err) throw err;
 								
-								console.timeEnd("Login " + username);
+								console.timeEnd("Login " + IP);
+								console.log(IP + " logged in as " + username + "");
 							});
 							
 							return true;
