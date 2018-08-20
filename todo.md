@@ -43,11 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-OMG!!! Editor didn't load fresh file from disk! file was saved when closing down.
-
-
----
-
 embedding ...
 
 Support embedding the editor at places ...

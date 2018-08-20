@@ -75,6 +75,7 @@
 			
 			EDITOR.removeEvent("fileOpen", addToOpenedFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
+			EDITOR.removeEvent("afterSave", saveStateOfFile);
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			EDITOR.removeEvent("afk", stopSavingState);
 			EDITOR.removeEvent("btk", continueSavingState);
@@ -119,6 +120,7 @@ console.log("reopenFiles!");
 		if(firstRun) {
 			EDITOR.on("fileOpen", addToOpenedFiles, 1);
 			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
+			EDITOR.on("afterSave", saveStateOfFile, 1);
 			
 			EDITOR.on("afk", stopSavingState);
 			EDITOR.on("btk", continueSavingState);
@@ -685,6 +687,19 @@ console.log("reopenFiles!");
 		return true;
 	}
 	
+	function saveStateOfFile(file, callback) {
+		saveSate(file.path, function stateSaved(err) {
+			if(err) {
+				// Don't let the user leave 
+				window.onbeforeunload = function() {
+					return "There was an error! Are you sure you want to close the editor ?"
+				}
+				return callback(err);
+			}
+			else return callback(null);
+		});
+	}
+	
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
 		//console.log("saveStateOfOpenFiles!");
@@ -693,7 +708,7 @@ console.log("reopenFiles!");
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
-if(openedFilesString == null || openedFilesString == "") {
+			if(openedFilesString == null || openedFilesString == "") {
 				console.warn("No open files!?");
 				if(callback) callback(null);
 				return;

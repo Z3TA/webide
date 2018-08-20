@@ -2177,7 +2177,9 @@ return false;
 	EDITOR.addEvent = function(eventName, options) {
 		
 		if(!(eventName in EDITOR.eventListeners)) {
-			throw new Error("eventName=" + eventName + " does not exist in EDITOR.eventListeners!");
+			var errorMsg = "eventName=" + eventName + " does not exist in EDITOR.eventListeners!";
+			if(eventName == "fileSave") errorMsg += " Did you mean afterSave ?";
+			throw new Error(errorMsg);
 		}
 		
 		if(arguments.length > 2) {
