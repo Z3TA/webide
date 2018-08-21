@@ -787,7 +787,7 @@ originalRow.push("");
 		
 		var filePath;
 		
-		console.log("url=" + url);
+		//console.log("url=" + url);
 		
 		if(url.charAt(0) == "/") {
 			filePath = url;
@@ -818,7 +818,7 @@ else {
 		
 		filePath = decodeURIComponent(filePath); // decode åäö etc
 		
-		console.log("filePath=" + filePath);
+		//console.log("filePath=" + filePath);
 		
 		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
 		if(filePath.indexOf("#") != -1) filePath = filePath.substring(0, filePath.indexOf("#"));

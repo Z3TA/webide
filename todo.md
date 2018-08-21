@@ -43,6 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Cannot save files on SSH because they can't be hashed!
+
+---
+
+
 What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
 ---

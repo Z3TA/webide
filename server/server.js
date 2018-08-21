@@ -1923,7 +1923,9 @@ function handleHttpRequest(request, response) {
 		var password=authParts[1];
 	*/
 	
-	log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host + " firstDir=" + firstDir + " secondDir=" + secondDir);
+	log("HTTP-req " + IP + ": " + request.url);
+	
+	//log("HTTP-req IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host + " firstDir=" + firstDir + " secondDir=" + secondDir);
 	
 	/*
 		http "endpoints" needs to pass same origin policy!
@@ -1965,13 +1967,13 @@ function handleHttpRequest(request, response) {
 	}
 	else {
 		
-		console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
+		//console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
 		
 		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
 		localFolder = module.path.resolve("../client/");
 		
-		console.log("Serving from the jzedit client folder: " + localFolder);
+		//console.log("Serving from the jzedit client folder: " + localFolder);
 		
 		/*
 			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
@@ -1981,8 +1983,8 @@ function handleHttpRequest(request, response) {
 		
 	}
 	
-	console.log("localFolder=" + localFolder);
-	console.log("urlPath=" + urlPath);
+	//console.log("localFolder=" + localFolder);
+	//console.log("urlPath=" + urlPath);
 	
 	
 	if(urlPath == "") {
@@ -3011,7 +3013,7 @@ function sendMail(from, to, subject, text) {
 	}, function(err, info){
 		if(err) {
 			//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
-			console.warn(err.message);
+			console.warn("Unable to send e-mail (" + subject + "): " + err.message);
 			//}
 			//else throw new Error(err);
 		}

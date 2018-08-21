@@ -35,8 +35,16 @@ server {
   gzip on;
   gzip_types text/plain text/javascript application/json;
 
+  # Serve the bundle on request's to / (root)
+  location = / {
+    gzip_static on;
+    alias /srv/jzedit/client/;
+    try_files bundle.htm =404;
+    expires 12h;
+  }
+
   location / {
-    
+
     # Allow cross domain requests (always adds the header to all, even 400 errors!)
     # Using always will create doublicates in 4xx errors
     # So for 4xx errors, 5xx, and others, Access-Control-Allow-Origin * will have to be added manually
@@ -57,12 +65,6 @@ server {
     
   }
   
-  location = / {
-    gzip_static on;
-    index bundle.htm;
-    alias /srv/jzedit/client/;
-    expires 12h;
-  }
 
   # These files are unlikely to change, so set a high expire date
   location ~* \.(jpg|jpeg|png|gif|ico|ttf|svg)$ {
