@@ -57,36 +57,10 @@ Show the SSG manager by hitting <kbd>F9</kbd>, or click "Static Site Generator" 
 </ol>
 
 
-
 <h3>Adding images to a web page</h3>
 
 <p>Drag a file from your computer to the editor, and select a path to save it as.</p>
 
-
-<h2>Running Node.JS scripts</h2>
-
-<p>Open any JavaScript (Node.JS) file and press <kbd>F1</kbd> 
-(or "Run nodejs script" in the menu) to run it.<br>
-Try any of the example files in the /nodejs/ folder.</p>
-
-
-<h3>Unix sockets / named pipes</h3>
-
-<p>Use /sock/_somename instead of a <b>port</b>-number. 
-Eg. replace server.listen(80) with server.listen("_nameOfSocket") </p>
-
-<p>All HTTP (and websocket) request starting with 
-http://%USERNAME%.%DOMAIN%/_underscore 
-will be proxied to your /sock/_underscore unix socket.</p>
-
-<p>You might have to add the unix socket as a prefix/path when 
-using modules such as express and socket.io: 
-Example: <i>express().use("/_unixSocket", express.static('public'));</i> or
-<i>socketio(server, {path: "/_unixSocket/something"});</i></p>
-
-<p>If you get <i>Error: EADDRINUSE /sock/_yoursock</i> simply delete the file.<br>
-(unix sockets created while running a node.js script are 
-normally deleted by the editor when a node.js script stops)</p>
 
 
 <h2>Source control</h2>
@@ -110,6 +84,14 @@ pull/merge/push to allow mere mortals to use SCM. (The SSG also supports WYSIWYG
 
 
 <p>&nbsp;</p>
+
+<hr>
+
+<p>For more info see:</p>
+
+<ul>
+	<li><a href="nodejs.htm">Using the editor to develop Node.JS applications</li>
+</ul>
 
 <p>&nbsp;</p>
 

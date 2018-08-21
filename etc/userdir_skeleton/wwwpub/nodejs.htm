@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="welcome.css">
+	
+	<title>Running Node.JS</title>
+	
+</head>
+<body>
+
+<h1>Running Node.JS scripts</h1>
+
+<p>Open any JavaScript (Node.JS) file and press <kbd>F1</kbd>
+(or "Run nodejs script" in the menu) to run it.<br>
+Try any of the example files in the /nodejs/ folder.</p>
+
+
+<h2>Unix sockets / named pipes</h2>
+
+<p>Use /sock/_somename instead of a <b>port</b>-number.
+Eg. replace server.listen(80) with server.listen("/sock/_nameOfSocket") </p>
+
+<p>All HTTP (and websocket) request starting with
+http://%USERNAME%.%DOMAIN%/_underscore
+will be proxied to your /sock/_underscore unix socket.</p>
+
+<p>You might have to add the unix socket as a prefix/path when
+using modules such as express and socket.io:
+Example: <i>express().use("/_unixSocket", express.static('public'));</i> or
+<i>socketio(server, {path: "/_unixSocket/something"});</i></p>
+
+<p>If you get <i>Error: EADDRINUSE /sock/_yoursock</i> simply delete the file.<br>
+(unix sockets created while running a node.js script are
+normally deleted by the editor when a node.js script stops)</p>
+
+<h3>Relative paths</h3>
+
+<p>For example when using the express module to serve static content,
+the url will be http://%USERNAME%.%DOMAIN%/_sockName<br>
+So make sure all paths are relative (not hardcoded with / infront).
+If you use relative paths you can later change the socket name, 
+for example when putting the app in production.<br>
+Example: Linking to /assets/sound/bird.wav from /game/index.htm the 
+url should be ../assets/sound/bird.wav.<br>
+Or if index.htm was in the root, the 
+url would be assets/sound/bird.wav (no slash infront)</p>
+
+
+<h2>Deploying to production</h2>
+
+<p>Your nodejs scrips will automatically stop when you disconnect from the editor.
+It's however possible to make the run forever, and have them automatically restart on errors.</p>
+
+<p>Press <kbd>Ctrl + F1</kbd> to deploy the current script "to production".<br>
+This will copy the entire project into a "production" enviroment and (re)start the script.<br>
+Make sure you test the script before deploying it.</p>
+
+<ul>
+	<li><kbd>Ctrl + F1</kbd> deployes the script to "production".</li>
+	<li><kbd>Shift + Ctrl + F1</kbd> restart script "in proction"</li>
+	<li><kbd>Ctrl + F3</kbd> stop the script "in proction"</li>
+	<li><kbd>Shift + Ctrl + F3</kbd> remove the script from "proction"</li>
+</ul>
+
+<h3>Production vs Development enviroment</h3>
+
+<p>The "production" enviroment will append prod: true, 
+and myName: %USERNAME% to the process.env (enviroment variables).<br>
+While normal (development) will have dev: true (no prod variable).</p>
+
+<p>This can be useful if you for example want to use a different 
+unix socket for production then in development.</p>
+
+
+
+<p>&nbsp;</p>
+
+</body>
+</html>

@@ -43,6 +43,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When dragging an zip file to the editor, and typing in a location that doesn't exist.
+Ask to create it.
+
+
+---
+
 What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
 ---
