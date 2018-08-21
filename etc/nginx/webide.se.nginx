@@ -58,9 +58,9 @@ server {
     expires 0;
     
     # Can not set proxy header inside if-statement
-    proxy_set_header        host            $http_host;
-    proxy_set_header        x-real-ip       $remote_addr;
-    
+    proxy_set_header        host              $http_host;
+    proxy_set_header        x-real-ip         $remote_addr;
+    proxy_set_header        x-forwarded-proto $scheme;
     proxy_pass http://127.0.0.1:8099;
     
   }

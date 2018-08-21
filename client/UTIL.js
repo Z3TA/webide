@@ -667,8 +667,19 @@ originalRow.push("");
 			Useful for events like click etc.
 		*/
 		console.log("######################## OBJ INFO #########################");
+		var val;
 		for(var p in o) {
-			console.log(p + "=" + o[p]);
+			try {
+				// Try to convert to string, prevent: TypeError: Cannot convert object to primitive value
+				if(o[p] == undefined) continue;
+				else if(typeof o[p] == "function") val = "function: " + UTIL.getFunctionName(o[p]);
+				else val = o[p].toString ? o[p].toString() : o[p] + "";
+			}
+			catch(err) {
+				val = "???"
+				console.log(err.message);
+			}
+			console.log(p + "=" + val);
 		}
 	},
 

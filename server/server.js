@@ -1896,20 +1896,20 @@ function removeHttpEndpoint(username, folder, callback) {
 
 function handleHttpRequest(request, response) {
 	
-	
-	// socketPath
-	
-	
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+	var protocol = request.headers["x-forwarded-proto"] || "https";
+	console.log("header: " + request.headers["x-forwarded-proto"] + " request.protocol=" + request.protocol);
+	
+	console.log("request.url=" + request.url);
+	
+	console.log("query/search?" + UTIL.objInfo(request.headers));
+	
 	var urlPath = UTIL.getPathFromUrl(request.url);
-	
-	
 	
 	var dirs = urlPath.split("/");
 	
 	var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
 	var secondDir = dirs[1] ? dirs[2] : dirs[1];
-	
 	
 	var folder;
 	var localFolder;
@@ -1950,6 +1950,21 @@ function handleHttpRequest(request, response) {
 			
 		}
 		
+		return;
+	}
+	else if(firstDir == "oembed") {
+		/*
+			https://embed.ly/providers/validate/oembed
+			
+			
+		*/
+		
+		var url = request.url.replace("oembed/", "");
+		if(url.indexOf("?") == -1) url += "?embed=true";
+		else url += "&embed=true";
+		
+		response.writeHead(200, "OK", {'Content-Type': 'application/json; charset=utf-8'});
+		response.end('{"type": "rich", "width": 500, "height": 200, "html": "<iframe src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
 		return;
 	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
