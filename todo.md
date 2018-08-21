@@ -43,10 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Cannot save files on SSH because they can't be hashed!
-
----
-
 
 What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
@@ -1598,6 +1594,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Test more scripts to see if the editor can inline all console.log's
+
+More formatting ? Inline breaks after ) and conditionals ? foo : bar !?
+
+---
 
 Make a folder/file path picker dialog for chosing a file path. For example for saving a file.
 

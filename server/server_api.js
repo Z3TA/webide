@@ -114,12 +114,56 @@ API.hash = function hash(user, json, callback) {
 	if(path instanceof Error) return callback(path);
 	
 	var crypto = require('crypto');
-	var fs = require('fs');
+	
 	
 	var hash = crypto.createHash('sha256');
 	
-	var input = fs.createReadStream(path);
-	input.on('readable', function readStream() {
+	
+	// Check path for protocol
+	var url = require("url");
+	var parse = url.parse(path);
+	
+	var input; // Read stream
+	
+	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			var c = user.remoteConnections[parse.hostname].client;
+			console.log("Getting file hash from FTP server: " + parse.pathname);
+			c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
+				if(err) throw err;
+				input = fileReadStream;
+				input.on("readable", readStream);
+				input.on('error', streamError);
+});
+}
+else {
+			callback(new Error("No connection open to FTP on " + parse.hostname + " !"));
+		}
+	}
+else if(parse.protocol == "sftp:") {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			var c = user.remoteConnections[parse.hostname].client;
+			console.log("Getting file hash from SFTP server: " + parse.pathname);
+			
+			input = c.createReadStream(parse.pathname);
+			input.on("readable", readStream);
+			input.on('error', streamError);
+			
+		}
+		else {
+			callback(new Error("No connection open to SFTP on " + parse.hostname + " !"));
+		}
+	}
+	else {
+		// Asume local file system
+		var fs = require('fs');
+		
+		input = fs.createReadStream(path);
+		input.on('readable', readStream);
+		input.on('error', streamError);
+	}
+	
+	function readStream() {
 		//console.log("Stream readable! path=" + path);
 		var data = input.read();
 		//console.log("Stream data: " + data);
@@ -128,14 +172,16 @@ API.hash = function hash(user, json, callback) {
 		else {
 			if(callback) {
 				callback(null, hash.digest('hex'));
+				callback = null;
 			}
 		}
-	});
-	input.on('error', function streamError(err){ 
+	}
+	
+	function streamError(err){ 
 		//console.log("Stream error! path=" + path);
 		callback(new Error("Unable to hash file: " + path + "\n " + err.message));
 		callback = null;
-	});
+	}
 }
 
 API.httpGet = function httpGet(user, options, callback) {

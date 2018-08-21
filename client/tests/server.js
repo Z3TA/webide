@@ -290,8 +290,6 @@
 	
 	EDITOR.addTest(function testHash(callback) {
 		
-		// Todo: Also test the hash when reading from ftp/sftp (need to implement ftp/sftp support for the hash function)
-		
 		var testFolder = "/testHash/";
 		var testFile = "testHash.txt";
 		var testText = "";
@@ -380,7 +378,96 @@ var didReadString = false;
 		
 	});
 	
-	
+	EDITOR.addTest(function testHashOnSftp(callback) {
+		
+		// Todo: Also test on FTP!
+		
+		var protocol = "sftp";
+		var serverAddress = "ben.100m.se";
+		var testFolder = protocol + "://" + serverAddress + "/uploads/testHashOnSftp/";
+		var testFile = "testHash.txt";
+		var testText = "";
+		var testRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789\n";
+		var connJson = {protocol: protocol, serverAddress: serverAddress,  user: "sftptest", passw: "12345"};
+
+		var didReadString = false;
+		var didHash = false;
+
+for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
+		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
+
+		CLIENT.cmd("connect", connJson, function(err, json) {
+			if(err) throw err;
+			
+			EDITOR.createPath(testFolder, function folderCreated(err, path) {
+				if(err) throw err;
+				EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+			});
+
+		});
+		
+		function fileCreated(err, path) {
+			if(err) throw err;
+			
+			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: false, encoding: "utf8"}, readString);
+			CLIENT.cmd("hash", {path: path}, readHash);
+		}
+		
+		function readString(err, json) {
+			didReadString = true;
+			if(err) throw err
+			
+			console.log("readString hash=" + json.hash);
+			
+			if(json.hash != correctHash) throw new Error("json.hash=" + json.hash + " correctHash=" + correctHash);
+			
+			checkDone();
+			
+		}
+		
+		function readHash(err, hash) {
+			didHash = true;
+			if(err) throw err
+			
+			console.log("readHash hash=" + hash);
+			
+			if(hash != correctHash) throw new Error("hash=" + hash + " correctHash=" + correctHash);
+			
+			checkDone();
+		}
+		
+		function checkDone() {
+			if(didReadString && didHash) cleanup();
+			else console.log("didReadString=" + didReadString + " didHash=" + didHash);
+		}
+		
+		function cleanup() {
+			// Cleanup
+			CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
+				if(err) throw err
+				else {
+					
+					// Cleanup
+					CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+						if(err) throw err
+						else {
+							
+CLIENT.cmd("disconnect", connJson, function(err, json) {
+								if(err) throw new Error("Failed to disconnect from " + protocol + "! err=" + (err.msg ? err.msg : err) + " json=" + JSON.stringify(json));
+								
+								callback(true);
+								callback = null;
+
+							});
+
+						}
+					});
+					
+				}
+			});
+		}
+		
+	}, 1);
 	
 	
 })();
