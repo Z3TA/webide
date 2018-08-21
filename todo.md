@@ -43,9 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-When dragging an zip file to the editor, and typing in a location that doesn't exist.
-Ask to create it.
-
+After extracting a file via file editor, all folders are dublicated!
 
 ---
 

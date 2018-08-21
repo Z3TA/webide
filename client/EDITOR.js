@@ -155,7 +155,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		showMenu: [],
 		voiceCommand: [],
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
-		previewTool: []
+		previewTool: [],
+	pathPicker: [] // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPicker
 	};
 
 EDITOR.renderFunctions = [];
@@ -1268,8 +1269,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 					confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
 						if(answer == overwrite) reOpen(file.path, path);
 						else {
-							var err = new Error("You aborted the save (as) to prevent overwriting existing file");
-							err.code = "ABORT";
+								var err = new Error("You canceled the save (as) to prevent overwriting existing file");
+								err.code = "CANCEL";
 							callback(err);
 						}
 					});
@@ -3841,6 +3842,110 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		});
 	}
 	
+	EDITOR.checkPath = function checkPath(fullPath, dontMsg, callback) {
+		// Check if path exists
+		// And ask's to create the path if it doesn't exist
+		
+		if(typeof dontMsg == "function") {
+			callback = dontMsg;
+			dontMsg = undefined;
+		}
+		
+		if(typeof callback != "function") throw new Error("callback=" + callback + " should be a function!");
+		
+		if(dontMsg == undefined) dontMsg = "Cancel";
+		
+		var includeHostInfo = true;
+		var folderDelimiter = UTIL.getPathDelimiter(fullPath);
+		var folderPath = fullPath.slice(0, fullPath.lastIndexOf(folderDelimiter)) + folderDelimiter;
+		var folderPaths = UTIL.getFolders(folderPath, includeHostInfo);
+		
+		console.log("folderPaths=" + JSON.stringify(folderPaths));
+		
+		if(folderPaths.length > 1) {
+			var pathToParentFolder = folderPaths[folderPaths.length-2];
+			var pathToCreate = folderPaths[folderPaths.length-1];
+			var folderName = UTIL.getFolderName(pathToCreate);
+			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(folderPath) {
+				if(folderPath === false) {
+					
+					var create = "Create the path";
+					var another = "Choose another path";
+					var msg = "The path does not exist:\n" + pathToCreate;
+					confirmBox(msg, [create, another, dontMsg], function (answer) {
+						if(answer == create) {
+							EDITOR.createPath(pathToCreate, function createPathCallback(err, path) {
+								if(err) {
+									var error = new Error("Unable to create the path: " + pathToCreate + "\n" + err.message);
+									return callback(error);
+								}
+								else return callback(null, fullPath);
+							});
+						}
+						else if(answer == dontMsg) {
+							var error = new Error(msg + ": " + dontMsg);
+							error.code = "CANCEL";
+							return callback(error);
+						}
+						else if(answer == another) {
+							EDITOR.pathPicker(fullPath, function changedPath(err, newPath) {
+								if(err) {
+									return callback(err);
+								}
+								else {
+									// Check the path again
+									return EDITOR.checkPath(newPath, dontMsg, callback);
+								}
+							});
+						}
+						else throw new Error("Unknown answer=" + answer);
+					});
+					
+				}
+				else {
+					// The parent path exist
+					return callback(null, fullPath);
+				}
+			});
+		}
+		else {
+			// it's in the root
+			return callback(null, fullPath);
+		}
+	}
+	
+	EDITOR.pathPicker = function pathPicker(defaultPath, callback) {
+		// Fill show a tool for picking a file path, which will callback with the chosen path
+		
+		if(typeof defaultPath == "function") {
+			callback = defaultPath;
+			defaultPath = undefined;
+		}
+		
+		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
+		
+		console.log("Calling pathPicker listeners (" + EDITOR.eventListeners.pathPicker.length + ") ");
+		
+		var ret = false;
+		
+		for(var i=0, f; i<EDITOR.eventListeners.pathPicker.length; i++) {
+			ret = EDITOR.eventListeners.pathPicker[i].fun(defaultPath, callback);
+			if(ret === true) return true; // Only open one tool, hope it will call back!
+		}
+		
+		// If no path picker wanted to handle it: Use the stone-age path picker
+		promptBox("Choose a file path:", false, defaultPath, function(path) {
+			if(!path) {
+				var error = new Error("Aborted when picking path");
+				error.code = "CANCEL";
+				return callback(error);
+			}
+			else return callback(null, path);
+		});
+		
+		return true; // True as in "we found a path picker"
+	}
+	
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
 		/*
 			Returns all files in a directory as an array. Each item is an object with these properties:
@@ -3886,7 +3991,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 					name:     "Name of file"
 					
 					We do however want to keep the list as compatible as possible to avaid special case code everywhere
-				 */
+				*/
 				
 				for (var i=0; i<files.length; i++) {
 					if(files[i].mimeType == "application/vnd.google-apps.folder") files[i].type = "d";
@@ -4228,9 +4333,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 	
 	/*
 		// Test if there's a popup stopper:
-	setTimeout(function() {
+		setTimeout(function() {
 		EDITOR.createWindow();
-	}, 2000);
+		}, 2000);
 	*/
 	
 	EDITOR.openWindows = [];
@@ -4254,7 +4359,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			Tip: You can set url to about:blank and then close/reopen the window when you know what url to load. 
 			Some browsers (Chrome) will allow the popup if another window is closed prior.
-			*/ 
+		*/ 
 		
 		console.warn("Creating new window url=" + url);
 		
@@ -4276,7 +4381,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		if(url == undefined) url = "about:blank";
 		
 		var theWindow = open(url);
-			
+		
 		if(theWindow != null) testWindow(theWindow);
 		else {
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
@@ -4289,19 +4394,19 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			/*
 				// native confirm dialog did not enable the window!
 				var tryAgain = confirm(failText);
-			if(tryAgain) theWindow = open(url);
+				if(tryAgain) theWindow = open(url);
 			*/
 			
 			var ok = "OK";
 			confirmBox(failText, [ok], function(answer) {
-			if(answer == ok) {
+				if(answer == ok) {
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
 					if(!theWindow) return callback(new Error(errorText));
 					else return testWindow(theWindow);
 				}
 				else callback(new Error(errorText));
-				});
+			});
 		}
 		
 		function testWindow(theWindow) {
@@ -4318,8 +4423,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			try {
 				var test = theWindow.document.domain;
-				}
-				catch(err) {
+			}
+			catch(err) {
 				
 				var origin = UTIL.getLocation(document.location.href);
 				var other = UTIL.getLocation(url);
@@ -4330,7 +4435,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				if(origin.port != other.port) diff.push("port: " + origin.port + " vs " + other.port);
 				
 				return callback(new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) ));
-				}
+			}
 			
 			/*
 				Problem: It's impossible to tell if the window has finished loading. eg. if we attach a load event listener to it, it might never fire!
@@ -4345,7 +4450,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			console.log("theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
 			
 			if(theWindow.location.href == "about:blank") theWindow.loaded = false; 
-else theWindow.loaded = true;
+			else theWindow.loaded = true;
 			
 			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
 			if(url == "about:blank") theWindow.isBlankUrl = true;
@@ -4361,7 +4466,7 @@ else theWindow.loaded = true;
 					What if the window was loaded until we got here (theWindow.addEventListener("load") ? Nightmare!
 					
 				*/
-if(theWindow.loaded === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
+				if(theWindow.loaded === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
 				theWindow.loaded = true; 
 				if(waitUntilLoaded) callback(null, theWindow);
 			}, false);
@@ -4370,26 +4475,26 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 				console.log("theWindow.location.href = " + theWindow.location.href);
 			}, false);
 			
-				console.log("theWindow.document.domain=" + theWindow.document.domain);
-				console.log("document.domain=" + document.domain);
-				
-				if(!url) {
+			console.log("theWindow.document.domain=" + theWindow.document.domain);
+			console.log("document.domain=" + document.domain);
+			
+			if(!url) {
 				theWindow.document.open();
 				theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
 				theWindow.document.close();
-				}
-				
-			EDITOR.openWindows.push(theWindow); // So that they can be conveniently closed on reload
-				
-			if(!waitUntilLoaded) return callback(null, theWindow);
 			}
+			
+			EDITOR.openWindows.push(theWindow); // So that they can be conveniently closed on reload
+			
+			if(!waitUntilLoaded) return callback(null, theWindow);
+		}
 		
 		function open(url) {
 			if(!url) url = "about:blank";
 			var windowId = "previewWindow" + (EDITOR.openWindows.length + 1);
 			
 			return window.open(url, windowId, "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
-			}
+		}
 		
 	}
 	
@@ -5008,7 +5113,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 					
 				}
 			}
-			});
+		});
 		
 		EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
 			
@@ -5016,7 +5121,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 			EDITOR.removeAllInfo(file);
 			
 			if(caret == file.caret && EDITOR.collaborationMode) {
-CLIENT.cmd("mirror", {
+				CLIENT.cmd("mirror", {
 					object: "FILE", 
 					path: file.path, 
 					method: "moveCaret", 
@@ -5031,7 +5136,7 @@ CLIENT.cmd("mirror", {
 		getVersion(function(version) {
 			console.log("Editor version: " + version);
 			bootstrap();
-			});
+		});
 		
 		canvas = document.getElementById("canvas");
 		
@@ -5218,12 +5323,12 @@ CLIENT.cmd("mirror", {
 					fun = EDITOR.eventListeners.storageReady[i].fun;
 					fun(_serverStorage);
 				}
-				});
 			});
+		});
 		
 		CLIENT.on("connectionLost", function() {
 			EDITOR.user = null;
-			});
+		});
 		
 		//console.log("main function loaded");
 		
@@ -5302,7 +5407,7 @@ CLIENT.cmd("mirror", {
 				EDITOR.virtualKeyboard.show();
 				EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
 			}
-			}
+		}
 		
 		if(RUNTIME == "nw.js") {
 			/*
@@ -5372,7 +5477,7 @@ CLIENT.cmd("mirror", {
 				
 				gui.Window.get().menu = menu;
 			*/
-			}
+		}
 		
 		console.log("Setting mainLoopInterval because first load!");
 		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
@@ -5645,7 +5750,7 @@ CLIENT.cmd("mirror", {
 		
 		
 		if(!captured && EDITOR.lastElementWithFocus && (
-		( EDITOR.lastElementWithFocus.nodeName == "INPUT" &&
+			( EDITOR.lastElementWithFocus.nodeName == "INPUT" &&
 		(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
 		) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
 			
@@ -5830,10 +5935,15 @@ CLIENT.cmd("mirror", {
 			}
 			
 			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
-				if(path) saveFile(file, path, false, function(err, path) {
-					if(err) alertBox(err.message);
-					else alertBox("The file has been saved: " + path);
-				});
+				if(path) {
+					EDITOR.checkPath(path, function(err, path) {
+						if(err && err.code != "CANCEL") return alertBox(err.message);
+						else if(!err) saveFile(file, path, false, function(err, path) {
+							if(err) alertBox(err.message);
+							else alertBox("The file has been saved: " + path);
+						});
+					});
+				}
 			});
 			
 		}
@@ -5874,7 +5984,7 @@ CLIENT.cmd("mirror", {
 		
 		function fileSaved(err, path) {
 			if(err) {
-console.error(err);
+				console.error(err);
 				uploadErrors.push(err);
 			}
 			filesSaved++;
@@ -6261,72 +6371,72 @@ console.error(err);
 			in order to prevent characters from being inserted to the document. 
 		*/
 		
-			if(file && EDITOR.input && !preventDefault) {
-				// Put character at current caret position:
+		if(file && EDITOR.input && !preventDefault) {
+			// Put character at current caret position:
+			
+			if(EDITOR.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
+				// Makes characters appear on the screen faster ...
 				
-				if(EDITOR.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
-					// Makes characters appear on the screen faster ...
+				/*
+					var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+					//var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+					var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+					ctx.fillStyle = "rgb(0,0,0)";
+					ctx.fillText(character, left, top);
+					tempTest++;
+				*/
+				
+				// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
+				
+				// What will happen if we clear the canvas before? No impact on performace!
+				EDITOR.clearColumn(file.caret.row, file.caret.col);
+				
+				// There's a higher "chance" to get faster responses if this function is inlined
+				EDITOR.renderColumn(file.caret.row, file.caret.col, character);
+				
+				// Repaint the caret
+				EDITOR.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
+				
+				/*
+					Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
+					And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
 					
-					/*
-						var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
-						//var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-						var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-						ctx.fillStyle = "rgb(0,0,0)";
-						ctx.fillText(character, left, top);
-						tempTest++;
-					*/
+					note: Canvas size didn't have an impact when only writing one character
 					
-					// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
+					Benchmark results are all over the place 2-20ms probably because of vsync or refresh syncing not in sync with the benchmark tool (Typometer)
 					
-					// What will happen if we clear the canvas before? No impact on performace!
-					EDITOR.clearColumn(file.caret.row, file.caret.col);
+					THIS OPTIMIZATION SEEMS TO HAVE VERY LITTLE EFFECT!
 					
-					// There's a higher "chance" to get faster responses if this function is inlined
-					EDITOR.renderColumn(file.caret.row, file.caret.col, character);
 					
-					// Repaint the caret
-					EDITOR.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
+					We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
 					
-					/*
-						Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
-						And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
-						
-						note: Canvas size didn't have an impact when only writing one character
-						
-						Benchmark results are all over the place 2-20ms probably because of vsync or refresh syncing not in sync with the benchmark tool (Typometer)
-						
-						THIS OPTIMIZATION SEEMS TO HAVE VERY LITTLE EFFECT!
-						
-						
-						We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
-						
-					*/
-					
-					//setTimeout(function waitforrender() {
-					
-					file.putCharacter(character);
-					// No render needed!
-					
-					//}, 22);
-					
-				}
-				else {
-					file.putCharacter(character);
-					EDITOR.renderNeeded();
-				}
-				}
+				*/
+				
+				//setTimeout(function waitforrender() {
+				
+				file.putCharacter(character);
+				// No render needed!
+				
+				//}, 22);
+				
+			}
+			else {
+				file.putCharacter(character);
+				EDITOR.renderNeeded();
+			}
+		}
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
 		
 		if(typeof keyPressEvent.preventDefault == "function") {
-		// Prevent Firefox's quick search (/ slash)
-		if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
-		
-		// Prevent Firefox's quick find (' single quote)
-		if(EDITOR.input && charCode == 39) keyPressEvent.preventDefault();
-		
-		// Prevent scrolling down when hitting space in Firefox
-		if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
+			// Prevent Firefox's quick search (/ slash)
+			if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
+			
+			// Prevent Firefox's quick find (' single quote)
+			if(EDITOR.input && charCode == 39) keyPressEvent.preventDefault();
+			
+			// Prevent scrolling down when hitting space in Firefox
+			if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
 		}
 	}
 	
@@ -6444,11 +6554,11 @@ console.error(err);
 				binding = keyBindings[i];
 				
 				/*
-				console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
-				" char=" + (binding.char == character || binding.charCode == charCode) +
-				" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
-				" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
-				" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
+					console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
+					" char=" + (binding.char == character || binding.charCode == charCode) +
+					" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
+					" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
+					" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
 				*/
 				
 				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
@@ -6989,10 +7099,10 @@ console.error(err);
 			
 			// Touch events only have pageX with is the whole page. We only want the position on the canvas !?
 			if(mouseEvent.target == canvas) {
-			var rect = canvas.getBoundingClientRect();
-			//console.log(rect.top, rect.right, rect.bottom, rect.left);
-			mouseX = mouseX - rect.left;
-			mouseY = mouseY - rect.top;
+				var rect = canvas.getBoundingClientRect();
+				//console.log(rect.top, rect.right, rect.bottom, rect.left);
+				mouseX = mouseX - rect.left;
+				mouseY = mouseY - rect.top;
 				
 				EDITOR.canvasMouseX = mouseX;
 				EDITOR.canvasMouseY = mouseY;
@@ -7012,10 +7122,10 @@ console.error(err);
 			}
 			else {
 				mouseX = EDITOR.mouseX;
-			mouseY = EDITOR.mouseY;
+				mouseY = EDITOR.mouseY;
 			}
 			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
-			}
+		}
 		
 		//console.log("mouseX=" + mouseX);
 		//console.log("mouseY=" + mouseY);
@@ -7274,7 +7384,7 @@ console.error(err);
 			console.log("SVG image created!");
 			callback(img);
 			if(url) DOMURL.revokeObjectURL(url);
-			}
+		}
 		
 		var browser = UTIL.checkBrowser();
 		
@@ -7289,7 +7399,7 @@ console.error(err);
 			img.src = data;
 		}
 		
-		}
+	}
 	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc

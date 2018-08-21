@@ -1198,8 +1198,8 @@ updateCommitFileSelect();
 			if(repo.value.indexOf("github.com") != -1 && repo.value.slice(-4) != ".git") {
 				var yes = "Yes";
 				var no = "No";
-				var abort = "Abort";
-				confirmBox("Did you mean " + repo.value + ".git ?", [yes, no, abort], function(answer) {
+				var cancel = "Cancel";
+				confirmBox("Did you mean " + repo.value + ".git ?", [yes, no, cancel], function(answer) {
 					if(answer == yes) {
 						repo.value = repo.value + ".git";
 						checkFolders();

@@ -64,8 +64,6 @@
 		hideSaveDialog();
 	}
 	
-	
-	
 	function buildSaveDialog() {
 		
 		console.log("Building save dialog");
@@ -92,7 +90,6 @@
 		buttonSaveAs.setAttribute("value", "Save as");
 		saveDialog.appendChild(buttonSaveAs);
 		//buttonSaveAs.addEventListener("click", saveFileInPath, false);
-		
 		
 		if(RUNTIME == "browser") {
 			var buttonDownload = document.createElement("input");
@@ -126,12 +123,7 @@
 		saveDialog.appendChild(cancel);
 		
 		
-		
-		
-		
 		footer.appendChild(saveDialog);
-		
-		
 		
 		
 		// todo: inputPath.keyUp, if it's not a slash, auto suggest the path by checking existing paths
@@ -172,51 +164,19 @@
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
-		// First check if the folder exist
-		var fullPath = inputPath.value;
-		var includeHostInfo = true;
-		var folderDelimiter = UTIL.getPathDelimiter(fullPath);
-		var folderPath = fullPath.slice(0, fullPath.lastIndexOf(folderDelimiter)) + folderDelimiter;
-		var folderPaths = UTIL.getFolders(folderPath, includeHostInfo);
-		
-		console.log("folderPaths=" + JSON.stringify(folderPaths));
-		
-		if(folderPaths.length > 1) {
-			var pathToParentFolder = folderPaths[folderPaths.length-2];
-			var pathToCreate = folderPaths[folderPaths.length-1];
-			var folderName = UTIL.getFolderName(pathToCreate);
-			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(folderPath) {
-				if(folderPath === false) {
-					
-					var create = "Create the path";
-					var dontSave = "Do not save the file";
-					var msg = "The path does not exist:\n" + pathToCreate;
-					confirmBox(msg, [create, dontSave], function (answer) {
-						if(answer == create) {
-							
-							EDITOR.createPath(pathToCreate, function createPathCallback(err, path) {
-								if(err) alertBox("Unable to create the path: " + pathToCreate + "\n" + err.message);
-								else save();
-							});
-						}
-					});
-					
-				}
-				else save();
-			});
-		}
-		else save();
+		EDITOR.checkPath(inputPath.value, "Do not save the file", save);
 		
 		return false;
 		
-		function save() {
-			EDITOR.saveFile(file, inputPath.value, function fileSaved(err, path) {
+		function save(err, path) {
+			if(err && err.code != "CANCEL") return alertBox(err.message);
+			else if(!err) EDITOR.saveFile(file, path, function fileSaved(err, path) {
 				if(err) {
 					// Most likely cause is that the folder does not exist!
 					
 					//if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
 					
-					if(err.code == "ABORT") return console.warn("The save was aborted: " + err.message);
+					if(err.code == "CANCEL") return console.warn("The save was canceled: " + err.message);
 					
 					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
 					}
