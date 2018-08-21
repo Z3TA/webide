@@ -50,8 +50,10 @@ self.addEventListener('install', function(event) {
 			'/gfx/icon/html.svg',
 			'/gfx/icon/js.svg',
 			
-			// Logo for A2HS
+			// Logos for A2HS and other stuff
+			'/gfx/jz64.png',
 			'/gfx/jz192.png',
+			'/gfx/jz512.png',
 			
 			'/manifest.webmanifest', // Loaded at every page load, needed for A2HS
 			
