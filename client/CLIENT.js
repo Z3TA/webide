@@ -88,6 +88,7 @@ var CLIENT = {}; // Client object is global
 			var msg = e.data;
 			
 			console.log("Server: " + UTIL.shortString(msg));
+			//console.log( "Server: " + msg );
 			
 			CLIENT.connected = true;
 			

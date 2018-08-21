@@ -160,6 +160,8 @@ gapi.auth2.getAuthInstance().signOut();
 		
 		while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
 		
+		openFolders.length = 0; // Reset open folders
+		
 		var domain = document.domain;
 		if(domain == "localhost" || domain == "127.0.0.1") {
 			var localName = "Local file-system";
@@ -199,7 +201,7 @@ gapi.auth2.getAuthInstance().signOut();
 		
 		
 		
-		// We want to start from the root, then work our way towards the actual dir
+		// We want to start from the root, then work our way towards fullPath
 		
 		var folders = UTIL.getFolders(fullPath, true);
 		
@@ -300,7 +302,7 @@ gapi.auth2.getAuthInstance().signOut();
 	
 	function buildList(dir, parent, findDir, callback) {
 		
-		console.warn("Building file explorer tree for dir=" + dir + "in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
+		console.warn("Building file explorer tree for dir=" + dir + " in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
 		
 		var dirFound = null;
 		

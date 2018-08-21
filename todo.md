@@ -43,10 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-After extracting a file via file editor, all folders are dublicated!
-
----
-
 What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
 ---
