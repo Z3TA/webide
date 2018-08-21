@@ -60,7 +60,7 @@ function appLaunched() {
 		}
 		else {
 			console.log("No username saved! Showing signup");
-			chrome.app.window.create('signup/signup.html', {id: 'signup', innerBounds: { width: 850, height: 900 }});
+			chrome.app.window.create('signup/signup.htm', {id: 'signup', innerBounds: { width: 850, height: 900 }});
 		}
 	});
 }

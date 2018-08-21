@@ -382,10 +382,15 @@ function adduser() {
 		fs.writeFileSync(homeDir + "my_web_site/source/rss_en.xml", rss_file);
 		
 	// Update welcome file
-	var welcome_file = fs.readFileSync(homeDir + "wwwpub/welcome.html", ENCODING);
+	var welcome_file = fs.readFileSync(homeDir + "wwwpub/welcome.htm", ENCODING);
 	welcome_file = welcome_file.replace(/%USERNAME%/g, username);
 	welcome_file = welcome_file.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + "wwwpub/welcome.html", welcome_file);
+	fs.writeFileSync(homeDir + "wwwpub/welcome.htm", welcome_file);
+		
+		var nodeinfo_file = fs.readFileSync(homeDir + "wwwpub/nodejs.htm", ENCODING);
+		nodeinfo_file = nodeinfo_file.replace(/%USERNAME%/g, username);
+		nodeinfo_file = nodeinfo_file.replace(/%DOMAIN%/g, DOMAIN);
+		fs.writeFileSync(homeDir + "wwwpub/nodejs.htm", nodeinfo_file);
 		
 	
 	// add wwwpub

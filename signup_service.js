@@ -124,7 +124,7 @@ function handleHttpRequest(request, response){
 		} 
 		else {
 			response.writeHead(404, "Not found", responseHeaders);
-			response.end('This is the signup service for ' + HOSTNAME + ' editor.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
+			response.end('This is the signup service for ' + HOSTNAME + ' editor.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.htm\n');
 }
 	}
 	else if(request.method === "POST") {

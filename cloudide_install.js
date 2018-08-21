@@ -85,9 +85,9 @@ fs.writeFileSync("/etc/systemd/system/jzedit.service", jzedit_service);
 
 
 // Signup service to let users signup
-	// If you enable automatic signup you probably also want to edit client/signup/signup.html
+	// If you enable automatic signup you probably also want to edit client/signup/signup.htm
 console.log("Installing jzedit_signup.service");
-console.log("Automatic signup available at: http://" + HOSTNAME + "/signup/signup.html");
+console.log("Automatic signup available at: http://" + HOSTNAME + "/signup/signup.htm");
 var signup_service = fs.readFileSync("etc/systemd/jzedit_signup.service", ENCODING);
 signup_service = signup_service.replace(/webide\.se/g, HOSTNAME);
 fs.writeFileSync("/etc/systemd/system/jzedit_signup.service", signup_service);

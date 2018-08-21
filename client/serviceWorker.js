@@ -68,7 +68,7 @@ self.addEventListener('install', function(event) {
 			'/gfx/clouds/6.png',
 			
 			// Signup
-			'/signup/signup.html',
+			'/signup/signup.htm',
 			'/UTIL.js',
 			'/global.js',
 			'/sockjs-0.3.4.js',

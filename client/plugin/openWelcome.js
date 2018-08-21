@@ -37,7 +37,7 @@
 	}
 	
 	function openWelcomeFile() {
-		EDITOR.openFile("/wwwpub/welcome.html", undefined, function fileOpened(err, file) {
+		EDITOR.openFile("/wwwpub/welcome.htm", undefined, function fileOpened(err, file) {
 			
 			if(err) console.warn(err);
 			

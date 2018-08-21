@@ -51,7 +51,7 @@
 					console.log("First time we run the editor!");
 					console.log("Go directly to signup page.");
 					window.onbeforeunload = null;
-					document.location = "/signup/signup.html" + window.location.search;
+					document.location = "/signup/signup.htm" + window.location.search;
 					}
 				*/
 				
@@ -135,7 +135,7 @@
 							else if(answer == createAccount) {
 								console.log("This is the first time using the editor, and the user wants to create an ccount");
 								window.onbeforeunload = null;
-								document.location = "/signup/signup.html" + window.location.search;
+								document.location = "/signup/signup.htm" + window.location.search;
 							}
 							else if(answer == alreadyHaveAccount) {
 								console.log("This is the first time using the editor, but the users sais he/she already have an account. It's possible that the user has reset browser data or are on a new machine.");
@@ -172,7 +172,7 @@
 						console.error(err);
 						if(userValue == DEFAULT_USERNAME) {
 alertBox("Failed to automatically login as " + userValue + "." +
-							" Fill in your username and password below, or <a href='/signup/signup.html'>Create a New account</a> !\n" +
+							" Fill in your username and password below, or <a href='/signup/signup.htm'>Create a New account</a> !\n" +
 							"\n(" + err.message + ")");
 						}
 						else if( userValue.match(/^guest\d+$/) && pwValue != "guest" ) {
@@ -201,7 +201,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 								else if(answer == createAccount) {
 									console.log("The user is currently logged in with a guest account. But want to create a new account.");
 									window.onbeforeunload = null;
-									document.location = "/signup/signup.html" + window.location.search;
+									document.location = "/signup/signup.htm" + window.location.search;
 								}
 								else if(answer == alreadyHaveAccount) {
 									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
@@ -368,7 +368,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		var signupLink = document.createElement("a");
 		signupLink.appendChild(document.createTextNode("Signup"));
 		signupLink.setAttribute("title", "Click here to create an account");
-		signupLink.setAttribute("href", "/signup/signup.html");
+		signupLink.setAttribute("href", "/signup/signup.htm");
 		signupLink.setAttribute("class", "signup link");
 		form.appendChild(signupLink);
 		
