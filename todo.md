@@ -75,9 +75,6 @@ Save file when hitting Ctrl+S in WYSIWYG !?
 
 ---
 
-What do I have to do to make it possible to embed the editor in a discourse forum post !?
-
----
 
 Live colaboration with transform
 
