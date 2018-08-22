@@ -1958,7 +1958,7 @@ function handleHttpRequest(request, response) {
 		else url += "&embed=true";
 		
 		response.writeHead(200, "OK", {'Content-Type': 'application/json; charset=utf-8'});
-		response.end('{"type": "rich", "width": 500, "height": 200, "html": "<iframe src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
+		response.end('{"type": "rich", "provider_name": "' + DOMAIN + '", "provider_url": "' + protocol + '://' + DOMAIN + '/", "width": 800, "height": 500, "html": "<iframe width=\\\"800\\\" height=\\\"500\\\" src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
 		return;
 	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
