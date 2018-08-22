@@ -28,7 +28,7 @@ var DEFAULT = require("./server/default_settings.js");
 
 // Don't allow these usernames
 var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "www", "ftp", "mail", "log", "smtp", "user", 
-"users", "signup", "dashboard", "webdide", "email"]; 
+"users", "signup", "dashboard", "webdide", "email", "guestundefined", "guest"]; 
 
 var getArg = require("./shared/getArg.js");
 

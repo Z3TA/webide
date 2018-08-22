@@ -208,6 +208,7 @@ function fillGuestPool(id, callback) {
 			else throw err;
 		}
 		else {
+			if(!userInfo.username) throw new Error("No username in userInfo=" + JSON.stringify(userInfo));
 			// Check mounts etc when filling the guest pool, instead of when logging in
 			checkMounts(userInfo.username, userInfo.homeDir, userInfo.uid, userInfo.gid, function checkedMounts(err) {
 				
@@ -496,16 +497,17 @@ function createGuestUser(id, callback) {
 	}
 	CREATE_USER_LOCK = true;
 	
-	var username = "guest" + guestId;
-	
-	console.time("Create " + username + " account");
-	
 	if( id ) {
 var guestId = id;
+		var username = "guest" + id;
+		console.time("Create " + username + " account");
 		guestCounterSaved(null);
 	}
 	else {
 var guestId = ++GUEST_COUNTER;
+		var username = "guest" + id;
+		console.time("Create " + username + " account");
+		
 // Save guest counter so that we can continue the number serie after server restarts
 	// It's not that bad if there are holes in the number serie. 
 	// We however don't want to give two people the same guest account!
@@ -515,6 +517,8 @@ var guestId = ++GUEST_COUNTER;
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
+		if(username == undefined || username == "guestundefined") throw new Error("username=" + username);
+		
 		var password = module_generator.generate({
 			length: 10,
 			numbers: true
@@ -1226,6 +1230,8 @@ userWorker = createUserWorker(userConnectionName, uid, gid);
 
 function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 	"use strict";
+	
+	if(username == "guestundefined") throw new Error("username=" + username);
 	
 	if(username == undefined) throw new Error("username=" + username);
 	if(homeDir == undefined) throw new Error("homeDir=" + homeDir);
