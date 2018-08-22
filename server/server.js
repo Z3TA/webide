@@ -1897,11 +1897,6 @@ function handleHttpRequest(request, response) {
 	
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
 	var protocol = request.headers["x-forwarded-proto"] || "https";
-	console.log("header: " + request.headers["x-forwarded-proto"] + " request.protocol=" + request.protocol);
-	
-	console.log("request.url=" + request.url);
-	
-	console.log("query/search?" + UTIL.objInfo(request.headers));
 	
 	var urlPath = UTIL.getPathFromUrl(request.url);
 	
@@ -1958,7 +1953,7 @@ function handleHttpRequest(request, response) {
 			
 		*/
 		
-		var url = request.url.replace("oembed/", "");
+		var url = JSON.stringify( request.url.replace("oembed/", "") ).slice(1,-1);
 		if(url.indexOf("?") == -1) url += "?embed=true";
 		else url += "&embed=true";
 		
