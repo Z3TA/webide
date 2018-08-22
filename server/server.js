@@ -478,7 +478,6 @@ else {
 }
 
 function createGuestUser(id, callback) {
-	console.time("createAccount");
 	
 	if(typeof id == "function") {
 		callback = id;
@@ -509,11 +508,13 @@ var guestId = ++GUEST_COUNTER;
 		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
 	}
 	
+	var username = "guest" + guestId;
+	
+	console.time("Create " + username + " account");
+	
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
-		var username = "guest" + guestId;
-		
 		var password = module_generator.generate({
 			length: 10,
 			numbers: true
@@ -570,7 +571,7 @@ var guestId = ++GUEST_COUNTER;
 			var reG4Gid = parseInt(check[4]);
 			var reG5HomeDir = UTIL.trailingSlash(check[5]);
 			
-			console.timeEnd("createAccount");
+			console.timeEnd("Create " + username + " account");
 			
 			if(check == null) {
 				return callback(new Error("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout));
@@ -861,7 +862,7 @@ function sockJsConnection(connection) {
 				(function checkUser(username, password) {
 					
 					//console.log(IP + " loggingin as " + username + ": " + (new Date()).getTime());
-					console.time("Login " + IP);
+					console.time("Login " + IP + " as " + username);
 					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
@@ -977,7 +978,7 @@ username = guestUser;
 						send({error: errorMsg});
 						log("username=" + username + " failed to login: " + errorMsg);
 					
-						console.timeEnd("Login " + IP);
+						console.timeEnd("Login " + IP + " as " + username);
 						
 					}
 					
@@ -1073,7 +1074,7 @@ username = guestUser;
 							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
 								if(err) throw err;
 								
-								console.timeEnd("Login " + IP);
+								console.timeEnd("Login " + IP + " as " + username);
 								console.log(IP + " logged in as " + username + "");
 							});
 							
@@ -1242,7 +1243,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 	}
 	
 	console.log("Checking mounts for username=" + username + " ...");
-	console.time("check mounts");
+	console.time("check " + username + " mounts");
 	
 	var nginxProfileOK = false;
 	var foldersToMount = 24;
@@ -1314,7 +1315,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			Sort alpabetically. And don't forget to update removeuser.js !
 		*/
 		
-		console.time("Mount files and folders");
+		console.time("Mount " + username + " files and folders");
 		
 		if(!DEBUG_CHROOT) {
 			foldersToMount += 9; // <-- Update
@@ -1378,7 +1379,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		
 		// Create apparmor profiles unless they already exist
 		// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
-		console.time("Creating apparmor profiles");
+		console.time("Creating " + username + " apparmor profiles");
 		for (var i=0; i<apparmorProfiles.length; i++) {
 			apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
 		}
@@ -1395,7 +1396,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		else passwdCreated = true;
 		
 		// Make sure nginx profile exist
-		console.time("Check nginx profile")
+		console.time("Check " + username + " nginx profile");
 		var url_user = UTIL.urlFriendly(username);
 		var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
 		module_fs.stat(nginxProfilePath, function (err, stats) {
@@ -1416,19 +1417,19 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 					module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 						if(err) throw err;
 						console.log("Nginx profile created!");
-						console.timeEnd("Check nginx profile");
+						console.timeEnd("Check " + username + " nginx profile");
 						checkNginxEnabled();
 					});
 					
 				});
 			}
 			else {
-				console.timeEnd("Check nginx profile");
+				console.timeEnd("Check " + username + " nginx profile");
 				checkNginxEnabled();
 			}
 			
 			function checkNginxEnabled() {
-				console.time("Check Nginx enabled");
+				console.time("Check " + username + " Nginx enabled");
 				var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
 				module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
 					if(checkMountsAbort) return;
@@ -1446,7 +1447,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 								if(stdout) throw new Error(stdout);
 								
 								nginxProfileOK = true;
-								console.timeEnd("Check Nginx enabled");
+								console.timeEnd("Check " + username + " Nginx enabled");
 								
 								checkSslCert();
 								
@@ -1457,7 +1458,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 					}
 					else {
 						nginxProfileOK = true;
-						console.timeEnd("Check Nginx enabled");
+						console.timeEnd("Check " + username + " Nginx enabled");
 						
 						checkSslCert();
 						
@@ -1475,7 +1476,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		var toStat = 0;
 		
 		console.log("Checking user rights for username=" + username + " ...");
-		console.time("Check user rights");
+		console.time("Check " + username + " user rights");
 		module_fs.stat(HOME_DIR + username, function (err, stats) {
 			if(err) throw err;
 			
@@ -1562,7 +1563,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		function checkedUserRights() {
 			if(toChown == 0 && toStat == 0) {
 				if(callback) {
-					console.timeEnd("Check user rights");
+					console.timeEnd("Check " + username + " user rights");
 					callback(null);
 					callback = null;
 				}
@@ -1576,8 +1577,9 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		apparmorProfilesToCreate--;
 		var counter = 0;
 		if(apparmorProfilesToCreate == 0 && reloadApparmor) {
-			console.timeEnd("Creating apparmor profiles");
-			console.time("Reloading apparmor");
+			console.timeEnd("Creating " + username + " apparmor profiles");
+			
+			console.time(username + " Reloading apparmor");
 			var exec = module_child_process.exec;
 			
 			var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
@@ -1590,7 +1592,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			}
 			console.log("exec: " + apparmorReloadCommand);
 			exec(apparmorReloadCommand, function(error, stdout, stderr) {
-				console.timeEnd("Reloading apparmor");
+				console.timeEnd(username + " Reloading apparmor");
 				if(error) throw(error);
 				if(stderr) throw new Error(stderr);
 				if(stdout) throw new Error(stdout);
@@ -1621,7 +1623,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		}
 		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
 		
-		if(foldersToMount == 0) console.timeEnd("Mount files and folders");
+		if(foldersToMount == 0) console.timeEnd("Mount " + username + " files and folders");
 		
 		checkMountsReadyMaybe();
 	}
@@ -1640,7 +1642,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
-				console.timeEnd("check mounts");
+				console.timeEnd("check " + username + " mounts");
 				checkMountsCallback(null);
 			}
 			else throw new Error("checkMounts already callced checkMountsCallback!");
@@ -1662,7 +1664,6 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
 		*/
 		var dest = template.replace("someuser", username);
-		//console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 		
 		var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
 		dest = dest.replace("home.", homeDot);
@@ -1696,14 +1697,13 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 							//var enforceApparmorProfileStdout = module_child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 							//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 						*/
-						//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+						
 						return callback(null);
 					});
 				});
 			}
 			else {
 				// profile already exist!
-				//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 				return callback(null);
 			}
 			
@@ -1714,7 +1714,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 	
 	function checkSslCert() {
 		// Check ssl certificate
-		console.time("Check SSL Cert");
+		console.time("Check " + username + " SSL Cert");
 		var url_user = UTIL.urlFriendly(username);
 		
 		var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
@@ -1722,7 +1722,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			if(err == null) {
 				console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 				sslCertChecked = true;
-				console.timeEnd("Check SSL Cert");
+				console.timeEnd("Check " + username + " SSL Cert");
 				//return checkMountsReadyMaybe();
 			}
 			else if(err.code == 'ENOENT') {
@@ -1731,19 +1731,20 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 				if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
 					log("Skipping SSL registration because of too many failed attempts!");
 					sslCertChecked = true;
-					console.timeEnd("Check SSL Cert");
+					console.timeEnd("Check " + username + " SSL Cert");
 					//return checkMountsReadyMaybe();
 				}
 				
 				// the cert does not exist. Try to register it
-				console.time("Register with letsencrypt");
+				var userDomain = url_user + "." + DOMAIN;
+				console.time("Register " + userDomain + " with letsencrypt");
 				
-				module_letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
-					console.timeEnd("Register with letsencrypt");
+				module_letsencrypt.register(userDomain, ADMIN_EMAIL, function(err) {
+					console.timeEnd("Register " + userDomain + " with letsencrypt");
 					if(err) {
 						
-						if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) FAILED_SSL_REG[url_user + "." + DOMAIN]++;
-						else FAILED_SSL_REG[url_user + "." + DOMAIN] = 1;
+						if(FAILED_SSL_REG.hasOwnProperty(userDomain)) FAILED_SSL_REG[userDomain]++;
+						else FAILED_SSL_REG[userDomain] = 1;
 						
 						if(err.code == "ENOENT") console.warn("certbot not installed!");
 						else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
@@ -1752,14 +1753,14 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 						}
 						
 						sslCertChecked = true;
-						console.timeEnd("Check SSL Cert");
+						console.timeEnd("Check " + username + " SSL Cert");
 						//return checkMountsReadyMaybe();
 					}
 					else {
-						console.log("SSL certificate for " + url_user + "." + DOMAIN + " installed!");
+						console.log("SSL certificate for " + userDomain + " installed!");
 						
 						// Enable SSL on the site
-						var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+						var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
 						module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
 							if(err) throw err;
 							data = data.replace(/#SSL#/g, "");
@@ -1773,17 +1774,17 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 								
 								
 								// Don't make the user wait for nginx config to reload (ca 70ms)
-								console.time("nginx reload");
+								console.time(username + " nginx reload");
 								var exec = module_child_process.exec;
 								exec("service nginx reload", function(error, stdout, stderr) {
-									console.timeEnd("nginx reload");
+									console.timeEnd(username + " nginx reload");
 									
 									if(error) throw(error);
 									if(stderr) throw new Error(stderr);
 									if(stdout) throw new Error(stdout);
 									
 									sslCertChecked = true;
-									console.timeEnd("Check SSL Cert");
+									console.timeEnd("Check " + username + " SSL Cert");
 									//return checkMountsReadyMaybe();
 									
 									//log("nginx reloaded!");
