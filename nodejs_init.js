@@ -33,6 +33,7 @@ var SHUTDOWN = false;
 
 var TIMERS = [];
 
+
 // Systemd console message leveles
 var DEBUG = 7; // <7>This is a DEBUG level message
 var INFO = 6; // <6>This is an INFO level message
@@ -48,9 +49,21 @@ process.on("SIGINT", sigint);
 
 var fs = require("fs");
 
-var eachUser = require("./shared/eachUser.js");
+var module_mount = require("./shared/mount.js");
 
-eachUser(HOME_DIR, userFound, allUsersFound);
+// Get the node inode id
+var NODE_INODE = 0;
+var usrBinNode = "/usr/bin/node";
+fs.stat(usrBinNode, function(err, stats) {
+	if(err) throw err; // fatal
+	
+	NODE_INODE = stats.ino;
+	
+	// Start a nodejs init worker for each user
+	var eachUser = require("./shared/eachUser.js");
+	eachUser(HOME_DIR, userFound, allUsersFound);
+	
+});
 
 function userFound(user) {
 	startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
@@ -235,20 +248,20 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 	restart();
 	
 	function restart() {
-		// Check if the home dir still exist
+		// Check the .prod folder
+		var prodFolder = homeDir + ".prod";
 		var fs = require("fs");
-		fs.readdir(homeDir, function(err, filesInHomeDir) {
+		fs.readdir(prodFolder, function(err, filesInProdDir) {
 			if(err) {
 				log(err.message, NOTICE);
-				log("Failed to start init worker for " + name + " because we can't read the home dir " + homeDir + " !");
+				log("Failed to start init worker for " + name + " because we can't find " + prodFolder + " !");
 				delete NODE_INIT_WORKER[name];
 				return;
 			}
 			
-			// Make sure there's a .prod folder
-			if(filesInHomeDir.indexOf(".prod") == -1) {
-				log("Can not find .prod folder: " + JSON.stringify(filesInHomeDir), NOTICE);
-				log("We will no longer retry restarting the init worker for " + name + " because there's no .prod folder  in home dir " + homeDir + " !");
+			// Don't bother starting the worker if prod is empty
+			if(filesInProdDir.length == 0) {
+				log("No files in " + prodFolder + " wont bother to start the init worker for " + name);
 				delete NODE_INIT_WORKER[name];
 				return;
 			}
@@ -260,36 +273,52 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 				
 				if(err) {
 					log(err.message, NOTICE);
-					log("We will no longer retry restarting the init worker for " + name + " because " + err.code + " " + nodeWorkerOptions.execPath + " !");
+					log("We will no longer retry restarting the init worker for " + name + " because " + err.code + " " + nodeWorkerOptions.execPath + " !", NOTICE);
 					delete NODE_INIT_WORKER[name];
 					return;
 				}
 				
-		var child_process = require("child_process");
-		
-		if(NODE_INIT_WORKER.hasOwnProperty(name)) {
-			// Make sure it's dead
-			log("Making sure init worker for " + name + " is dead ...");
-			if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
-			NODE_INIT_WORKER[name].kill('SIGKILL');
-		}
-		
-		var workerScript = "./nodejs_init_worker.js";
-		log("Starting init worker for " + JSON.stringify(name) + ": Forking " + workerScript + " nodeWorkerArgs=" + JSON.stringify(nodeWorkerArgs) + " nodeWorkerOptions=" + JSON.stringify(nodeWorkerOptions));
-		
+				if(stats.ino != NODE_INODE) {
+					log(nodeWorkerOptions.execPath + " has inode " + stats.ino + " but it should be " + NODE_INODE);
+					log("Mounting " + usrBinNode + " to " + nodeWorkerOptions.execPath + " ...", DEBUG)
+					module_mount(usrBinNode, nodeWorkerOptions.execPath, function mounted(err) {
+						if(err) {
+							log("Failed to mount " + usrBinNode + " to " + nodeWorkerOptions.execPath + ": " + err.message, NOTICE);
+							// Should this be fatal !? eg throw ?
+							delete NODE_INIT_WORKER[name];
+							return;
+						}
+						else {
+							return restart(); // Try again
+						}
+					});
+				}
+				
+				var child_process = require("child_process");
+				
+				if(NODE_INIT_WORKER.hasOwnProperty(name)) {
+					// Make sure it's dead
+					log("Making sure init worker for " + name + " is dead ...");
+					if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
+					NODE_INIT_WORKER[name].kill('SIGKILL');
+				}
+				
+				var workerScript = "./nodejs_init_worker.js";
+				log("Starting init worker for " + JSON.stringify(name) + ": Forking " + workerScript + " nodeWorkerArgs=" + JSON.stringify(nodeWorkerArgs) + " nodeWorkerOptions=" + JSON.stringify(nodeWorkerOptions));
+				
 				NODE_INIT_WORKER[name] = child_process.fork(workerScript, nodeWorkerArgs, nodeWorkerOptions);
 				// We might get a seg fault here - which we can not try-catch!
 				// Then try with a new version of nodejs ... lets hope this doesn't happen in prod
 				
 				var worker = NODE_INIT_WORKER[name];
-		
-		worker.on("close", workerClose);
-		worker.on("disconnect", workerDisconnect);
-		worker.on("error", workerError);
-		worker.on("message", messageFromWorker);
-		worker.on("exit", workerExitHandler);
-		
-		worker.send({ping: firstPing});
+				
+				worker.on("close", workerClose);
+				worker.on("disconnect", workerDisconnect);
+				worker.on("error", workerError);
+				worker.on("message", messageFromWorker);
+				worker.on("exit", workerExitHandler);
+				
+				worker.send({ping: firstPing});
 				
 			});
 		});

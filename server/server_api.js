@@ -584,19 +584,19 @@ str = decoder.write(data);
 		// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 				
 				fs.readFile(path, function(err, buffer) {
-					if(err) console.warn(err.message);
-					
+			if(err) return callback(err);
+			else {
 			//shasum.update(buffer.toString(encoding));
 			shasum.update(buffer); // Doesn't seem to matter if you pass it buffer or utf8 string!
-			
-			if(encoding == undefined) encoding = "utf8";
+				
+				if(encoding == undefined) encoding = "utf8";
 			
 			callback(err, {
 				path: user.toVirtualPath(path), 
 				data: returnBuffer ? buffer : buffer.toString(encoding), 
 				hash: shasum.digest('hex')
 			});
-					
+			}
 				});
 			
 		/*

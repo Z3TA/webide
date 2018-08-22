@@ -21,7 +21,7 @@
 
 var getArg = require("./shared/getArg.js");
 
-var DEFAULT = require("./default.js");
+var DEFAULT = require("./server/default_settings.js");
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
@@ -469,7 +469,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 			prod: true,
 			myName: USERNAME
 		},
-		execPath: "/usr/bin/nodejs" // note: we are in chroot!
+		execPath: "/usr/bin/node" // note: we are in chroot!
 	};
 	var childProcess;
 	
