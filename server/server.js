@@ -1958,7 +1958,7 @@ function handleHttpRequest(request, response) {
 		/*
 			https://embed.ly/providers/validate/oembed
 			
-			
+			https://iframely.com/embed
 		*/
 		
 		var url = JSON.stringify( request.url.replace("oembed/", "") ).slice(1,-1);
