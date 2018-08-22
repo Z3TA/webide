@@ -43,6 +43,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When in SSG preview and you click a link, the window closes !!?
+
+Save file when hitting Ctrl+S in WYSIWYG !?
+
+
+---
 
 What do I have to do to make it possible to embed the editor in a discourse forum post !?
 
