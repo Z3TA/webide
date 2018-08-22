@@ -132,23 +132,22 @@ var GUEST_POOL = []; // Because it's a bit slow to create new users
 var CREATE_USER_LOCK = false; // Can only create one user at a time
 
 // Declare modules here as a OPTIMIZATION
-var module = {};
 const module_fs = require("fs");
-module.child_process = require('child_process');
-module.path = require("path");
-module.letsencrypt = require("../shared/letsencrypt.js");
-module.os = require("os");
-module.sockJs = require("sockjs");
-module.http = require("http");
-module.generator = require('generate-password');
-module.dgram = require('dgram');
-module.pwHash = require("./pwHash.js");
-module.mimeMap = require("./mimeMap.js");
-module.httpProxy = require('http-proxy');
-module.ps = require('ps-node');
-module.nodemailer = require('nodemailer');
-module.smtpTransport = require('nodemailer-smtp-transport');
-var module_mount = require("../shared/mount.js");
+const module_child_process = require('child_process');
+const module_path = require("path");
+const module_letsencrypt = require("../shared/letsencrypt.js");
+const module_os = require("os");
+const module_sockJs = require("sockjs");
+const module_http = require("http");
+const module_generator = require('generate-password');
+const module_dgram = require('dgram');
+const module_pwHash = require("./pwHash.js");
+const module_mimeMap = require("./mimeMap.js");
+const module_httpProxy = require('http-proxy');
+const module_ps = require('ps-node');
+const module_nodemailer = require('nodemailer');
+const module_smtpTransport = require('nodemailer-smtp-transport');
+const module_mount = require("../shared/mount.js");
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
 
@@ -333,7 +332,7 @@ function recycleGuestAccounts(callback) {
 		var username = "guest" + id;
 		log("Removing guest user: " + username);
 		
-		var exec = module.child_process.exec;
+		var exec = module_child_process.exec;
 		
 		// Pass the arguments as JSON in case some hacker use a very clever password
 		var commandArg = {
@@ -342,7 +341,7 @@ function recycleGuestAccounts(callback) {
 			};
 		
 		var options = {
-			cwd: module.path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
 		}
 		//console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
@@ -398,7 +397,7 @@ function main() {
 	
 	// Get the current user (who runs this server)
 	
-	var info = module.os.userInfo ? module.os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 	var env = process.env;
 	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
@@ -443,10 +442,10 @@ else {
 	
 	function startServer() {
 		
-		var wsServer = module.sockJs.createServer();
+		var wsServer = module_sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
 		
-		HTTP_SERVER = module.http.createServer(handleHttpRequest);
+		HTTP_SERVER = module_http.createServer(handleHttpRequest);
 		
 		HTTP_SERVER.on("error", function(err) {
 			console.log("err.code=" + err.code);
@@ -515,14 +514,14 @@ var guestId = ++GUEST_COUNTER;
 
 		var username = "guest" + guestId;
 		
-		var password = module.generator.generate({
+		var password = module_generator.generate({
 			length: 10,
 			numbers: true
 		});
 
 		console.log("Creating guest user: " + username);
 		
-		var exec = module.child_process.exec;
+		var exec = module_child_process.exec;
 		
 		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
 		var commandArg = {
@@ -534,7 +533,7 @@ var guestId = ++GUEST_COUNTER;
 		
 		
 		var options = {
-			cwd: module.path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
+			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
 		}
 		console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
@@ -607,7 +606,7 @@ function broadcast(myIp) {
 	if(myIp == "0.0.0.0") {
 		// We'll have to find all broadcast addresses ...
 		
-		var interfaces = module.os.networkInterfaces();
+		var interfaces = module_os.networkInterfaces();
 		var addresses = [];
 		for (var k in interfaces) {
 			for (var k2 in interfaces[k]) {
@@ -625,7 +624,7 @@ function broadcast(myIp) {
 		console.log("broadcastAddresses: ", broadcastAddresses);
 		
 		// Server
-		var broadcastServer = module.dgram.createSocket("udp4");
+		var broadcastServer = module_dgram.createSocket("udp4");
 		broadcastServer.bind(function() {
 			broadcastServer.setBroadcast(true);
 			// We must send at least one broadcast message to be able to receive messages!
@@ -633,7 +632,7 @@ function broadcast(myIp) {
 		});
 		
 		// Client
-		var broadcastClient = module.dgram.createSocket('udp4');
+		var broadcastClient = module_dgram.createSocket('udp4');
 		
 		broadcastClient.on('listening', function () {
 			var address = broadcastClient.address();
@@ -866,7 +865,7 @@ function sockJsConnection(connection) {
 					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
-						password = module.pwHash(password);
+						password = module_pwHash(password);
 					}
 					
 					if(USERNAME) {
@@ -899,7 +898,7 @@ if(GUEST_POOL.length == 0) {
 						else {
 							var guestUser = GUEST_POOL.shift();
 							console.log("Using guest account " + guestUser + " from GUEST_POOL");
-							var guestPw = module.generator.generate({
+							var guestPw = module_generator.generate({
 								length: 10,
 								numbers: true
 							});
@@ -907,7 +906,7 @@ if(GUEST_POOL.length == 0) {
 							// Save/Reset the password
 							if(!NO_PW_HASH) {
 								
-								guestPw = module.pwHash(guestPw);
+								guestPw = module_pwHash(guestPw);
 							}
 							
 							module_fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
@@ -1440,7 +1439,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 						module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
 							if(err) throw err;
 							
-							var exec = module.child_process.exec;
+							var exec = module_child_process.exec;
 							exec("service nginx reload", function(error, stdout, stderr) {
 								if(error) throw(error);
 								if(stderr) throw new Error(stderr);
@@ -1579,7 +1578,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		if(apparmorProfilesToCreate == 0 && reloadApparmor) {
 			console.timeEnd("Creating apparmor profiles");
 			console.time("Reloading apparmor");
-			var exec = module.child_process.exec;
+			var exec = module_child_process.exec;
 			
 			var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
 			//var apparmorReloadCommand = "service apparmor reload";
@@ -1694,7 +1693,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 							var bin = dest.replace("/etc/apparmor.d", "");
 							bin = dest.replace(".", "/");
 							
-							//var enforceApparmorProfileStdout = module.child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
+							//var enforceApparmorProfileStdout = module_child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 							//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 						*/
 						//console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
@@ -1739,7 +1738,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 				// the cert does not exist. Try to register it
 				console.time("Register with letsencrypt");
 				
-				module.letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+				module_letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
 					console.timeEnd("Register with letsencrypt");
 					if(err) {
 						
@@ -1775,7 +1774,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 								
 								// Don't make the user wait for nginx config to reload (ca 70ms)
 								console.time("nginx reload");
-								var exec = module.child_process.exec;
+								var exec = module_child_process.exec;
 								exec("service nginx reload", function(error, stdout, stderr) {
 									console.timeEnd("nginx reload");
 									
@@ -1985,7 +1984,7 @@ function handleHttpRequest(request, response) {
 		
 		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
-		localFolder = module.path.resolve("../client/");
+		localFolder = module_path.resolve("../client/");
 		
 		//console.log("Serving from the jzedit client folder: " + localFolder);
 		
@@ -2008,12 +2007,12 @@ function handleHttpRequest(request, response) {
 	}
 	
 	
-	var filePath = module.path.join(localFolder, urlPath);
+	var filePath = module_path.join(localFolder, urlPath);
 	
 	
-	if(filePath.indexOf(localFolder) != 0 || !module.path.isAbsolute(filePath)) {
+	if(filePath.indexOf(localFolder) != 0 || !module_path.isAbsolute(filePath)) {
 		if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
-		if(!module.path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+		if(!module_path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
 		
 		console.log("urlPath=" + urlPath);
 		
@@ -2029,7 +2028,7 @@ function handleHttpRequest(request, response) {
 	
 	
 	
-	if(fileExtension && !module.mimeMap.hasOwnProperty(fileExtension)) {
+	if(fileExtension && !module_mimeMap.hasOwnProperty(fileExtension)) {
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 		response.end("Bad file type: '" + fileExtension + "'");
 		
@@ -2069,7 +2068,7 @@ function handleHttpRequest(request, response) {
 		}
 		else {
 			
-			responseHeaders['Content-Type'] = module.mimeMap[fileExtension];
+			responseHeaders['Content-Type'] = module_mimeMap[fileExtension];
 			responseHeaders['Content-Length'] = stats.size;
 			
 			response.writeHead(200, responseHeaders);
@@ -2110,7 +2109,7 @@ function makeUrl(endPoint) {
 	if(ip == "0.0.0.0" || ip == "::") {
 		// Find servers IP
 		var ipList = [];
-		var ifaces = module.os.networkInterfaces();
+		var ifaces = module_os.networkInterfaces();
 		log("Listening IP's:", 7);
 		Object.keys(ifaces).forEach(function (ifname) {
 			var alias = 0;
@@ -2207,7 +2206,7 @@ function createUserWorker(name, uid, gid) {
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
 	
 	try {
-		var worker = module.child_process.fork("user_worker.js", args, options);
+		var worker = module_child_process.fork("user_worker.js", args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
@@ -2277,7 +2276,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	// bundled in the the x11vnc 0.9.13 tarball and later.
 	var modifiedLibvncserver = false;
 	if(modifiedLibvncserver) {
-		VNC_CHANNEL[displayId].proxy = new module.httpProxy.createProxyServer({
+		VNC_CHANNEL[displayId].proxy = new module_httpProxy.createProxyServer({
 			target: {
 				socketPath: vncUnixSocket
 			},
@@ -2331,7 +2330,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		// debug: ps ax | grep Xvfb
 		
 		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
-		var xvfb = module.child_process.spawn("Xvfb", xvfbArgs, xvfbOptions);
+		var xvfb = module_child_process.spawn("Xvfb", xvfbArgs, xvfbOptions);
 		
 		VNC_CHANNEL[displayId].xvfb = xvfb;
 		
@@ -2369,7 +2368,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 					
 				*/
 				
-				module.ps.lookup({
+				module_ps.lookup({
 					command: 'Xvfb',
 					arguments: xvfbArgs.join(" "),
 				}, function(err, resultList ) {
@@ -2380,7 +2379,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 					resultList.forEach(function( p ){
 						if( p ){
 							console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
-							module.ps.kill( p.pid, function( err ) {
+							module_ps.kill( p.pid, function( err ) {
 								if (err) {
 									throw new Error( err );
 								}
@@ -2409,7 +2408,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		function isXvfbRunning() {
 			
 			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			module.child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+			module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
 				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
 				
 				if(++checkCounter > maxCheck) {
@@ -2464,7 +2463,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
 		+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
-		var chromiumBrowser = module.child_process.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
+		var chromiumBrowser = module_child_process.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
 		
 		VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
 		
@@ -2501,7 +2500,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		function checkIfChromiumBrowserHasStarted() {
 			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			module.child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+			module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
 				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
 				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
 				else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
@@ -2549,7 +2548,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
 		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
-		var x11vnc = module.child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
+		var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
 		
 		VNC_CHANNEL[displayId].x11vnc = x11vnc;
 		
@@ -2757,7 +2756,7 @@ function chownDirRecursive(path, uid, gid, callback) {
 function umount(path, callback) {
 	
 	
-	var exec = module.child_process.exec;
+	var exec = module_child_process.exec;
 	
 	exec("umount " + path + " --force --lazy" , function(error, stdout, stderr) {
 		
@@ -2823,7 +2822,7 @@ function sendMail(from, to, subject, text) {
 	
 	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
 	
-	var transporter = module.nodemailer.createTransport(module.smtpTransport(mailSettings));
+	var transporter = module_nodemailer.createTransport(module_smtpTransport(mailSettings));
 	
 	transporter.sendMail({
 		from: from,
