@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-replace module.foo with module_foo because module is a nodejs variable
+
 
 ---
 
