@@ -496,6 +496,10 @@ function createGuestUser(id, callback) {
 	}
 	CREATE_USER_LOCK = true;
 	
+	var username = "guest" + guestId;
+	
+	console.time("Create " + username + " account");
+	
 	if( id ) {
 var guestId = id;
 		guestCounterSaved(null);
@@ -508,10 +512,6 @@ var guestId = ++GUEST_COUNTER;
 		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
 	}
 	
-	var username = "guest" + guestId;
-	
-	console.time("Create " + username + " account");
-	
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
@@ -521,6 +521,8 @@ var guestId = ++GUEST_COUNTER;
 		});
 
 		console.log("Creating guest user: " + username);
+		
+		if(!username) throw new Error("username=" + username);
 		
 		var exec = module_child_process.exec;
 		
@@ -547,7 +549,7 @@ var guestId = ++GUEST_COUNTER;
 			CREATE_USER_LOCK = false;
 			
 			if(error) {
-				log("Error when adding user: (error is probably in " + scriptPath + ")");
+				log("Error when adding username=" + username + " user: (error is probably in " + scriptPath + ")");
 				return callback(error);
 			}
 			
