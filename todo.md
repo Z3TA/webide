@@ -43,10 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-When in SSG preview and you click a link, the window closes !!?
+When in SSG preview and you click a link, the window closes !!? Only in Firefox
 
-Save file when hitting Ctrl+S in WYSIWYG !?
-
+WYSIWYG appends and extra new-line padding inside <body> 
 
 ---
 

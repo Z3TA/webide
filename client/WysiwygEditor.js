@@ -834,10 +834,29 @@ var WysiwygEditor;
 		else return saveEventCallback(null);
 	}
 	
+	WysiwygEditor.prototype.previewKeyDown = function previewKeyDown(keyDownEvent) {
+		var wysiwygEditor = this;
+		
+		console.log("previewKeyDown! EDITOR.input=" + EDITOR.input + " keyDownEvent.keyCode=" + keyDownEvent.keyCode + " keyDownEvent.ctrlKey=" + keyDownEvent.ctrlKey);
+		var key_S = 83;
+		
+		// It seems you can only know if Ctrl was pressed on keydown (not on keyup) !
+		
+		if(!EDITOR.input && keyDownEvent.keyCode == key_S && keyDownEvent.ctrlKey) {
+			// The user hit Ctrl+S while in the preview window
+			EDITOR.saveFile(wysiwygEditor.sourceFile);
+			
+			// Try to prevent the default "save document"
+			keyDownEvent.preventDefault();
+			return false;
+		}
+		
+		return true;
+	}
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
 		var wysiwygEditor = this;
-		console.log("previewKeyup! EDITOR.input=" + EDITOR.input + " previewInputFired=" + previewInputFired);
+		console.log("previewKeyup! EDITOR.input=" + EDITOR.input + " previewInputFired=" + previewInputFired + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + "");
 		
 		//keyUpEvent = keyUpEvent || window.event;
 		
@@ -848,10 +867,6 @@ var WysiwygEditor;
 		console.log("(keyUpEvent.keyCode=" + keyUpEvent.keyCode);
 		if(!EDITOR.input && (keyUpEvent.keyCode == 37 || keyUpEvent.keyCode == 38 || keyUpEvent.keyCode == 39 || keyUpEvent.keyCode == 40)) {
 			wysiwygEditor.placeCaretInSourceCode(keyUpEvent.target);
-		}
-		else if(!EDITOR.input && keyUpEvent.keyCode == key_S && keyUpEvent.ctrlKey) {
-			// The user hit Ctrl+S while in the preview window
-			EDITOR.saveFile(wysiwygEditor.sourceFile);
 		}
 		// Internet Explorer doesn't fire change events on content-editable
 		else if(!previewInputFired) {
@@ -1716,6 +1731,7 @@ var WysiwygEditor;
 				
 				body.setAttribute("contenteditable", "true");
 				
+				body.onkeydown = function(e) {wysiwygEditor.previewKeyDown(e)};
 				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
 				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
 				body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
