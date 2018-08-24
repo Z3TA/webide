@@ -1,14 +1,29 @@
+#!/bin/bash
 
 #
+# This is an example script for backing up the user files when running the editor as a cloud IDE
+# It asumes the user directories are ZFS file systems
+# Send the files to at least one other server!!
+#
+# Use example:
+# sudo crontab -e
+# 30 2 * * * ssh user@server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" && scp user@server:/somewhere/backup/* /local/backup/directory/
+#
+# How to recover from a backup:
+# gunzip -c /path/to/user.gz | ssh root@server.hostname zfs recv pool/home/user
+# 
 #
 
-POOL=${1:-"ben"}
+POOL=${1:-"tank"}
 HOME=${2:-"/home/"}
 BACKUP_FOLDER=${3:-"$(pwd)/backup/"}
 
+echo "POOL=$POOL"
+echo "HOME=$HOME"
+echo "BACKUP_FOLDER=$BACKUP_FOLDER"
+
 [[ ${HOME} != "/"*"/" ]] &&  echo "$HOME directory must start and end with a slash!" && exit 1
 [[ ${BACKUP_FOLDER} != "/"*"/" ]] &&  echo "$BACKUP_FOLDER directory must start and end with a slash!" && exit 1
-
 
 mkdir $BACKUP_FOLDER
 
@@ -19,13 +34,12 @@ ZFS_SNAPS=$(zfs list -t snapshot)
 
 cd $HOME || exit 1
 
-for D in *; do
-    # for each directory that does not start with guest
-    if [ -d "${D}" ] && [[ ${D} != "guest"* ]]; then
-       FS="$POOL$HOME$D"
+for USER in *; do
+    if [ -d "${USER}" ] && [[ ${USER} != "guest"* ]]; then
+       FS="$POOL$HOME$USER"
 
        # Skip folders that are not listed as a zfs file-system
-       [[ $ZFS_LIST != *"$FS "* ]] && echo "Not a ZFS: $D" && continue
+       [[ $ZFS_LIST != *"$FS "* ]] && echo "Not a ZFS: $USER" && continue
        
        SNAP="$FS@backup"
 
@@ -35,8 +49,8 @@ for D in *; do
        # Make new snapshop
        zfs snapshot $SNAP
        
-       echo "Backing up $D"
-       zfs send $SNAP | gzip > $BACKUP_FOLDER$D.gz
+       echo "Backing up $USER"
+       zfs send $SNAP | gzip > $BACKUP_FOLDER$USER.gz
        
        #echo "${D}"
     fi
