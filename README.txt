@@ -201,6 +201,44 @@ Or turn it off in your operating system! (It's already turned off if you have a 
 
 
 
+Re-compiling dependencies for other version of Node.JS
+=======================================================
+node-gyp rebuild --target=1.2.3
+
+
+
+
+
+Misc
+=====
+
+How to hide the annoying menu in Android that covers the virtual keyboard
+-------------------------------------------------------------------------
+Go into settings... Look for browser bar (General settings: Toolbar).. Select to turn it off. 
+
+
+
+
+Problems cloning from Github
+----------------------------
+Make sure the server has hggit installed!
+python -c "import hggit"
+(should not give an error if it's installed)
+How to install:
+apt-get install python-pip
+easy_install hg-git
+
+
+Problems running apt 
+--------------------
+You might get an error like this:
+unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
+
+This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
+
+
+
+
 Running as a cloud editor
 =========================
 You can use the editor "natively" running on your desktop via nw.js or in the browser. 
@@ -354,7 +392,7 @@ Moving user to another using ZFS
 Run this command from the server you want to move the user TO:
 ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
 
-(The same method can be used to make backups)
+(The same method can be used to make backups, see backup.sh)
 
 # Enable the user on the new server by adding a new system account: 
 sudo useradd -r -s /bin/false nameofuser
@@ -380,43 +418,21 @@ sudo apt autoremove
 # You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
 
 
+Regully run zpool scrub
+-----------------------
 
-Compiling dependencies for old nw.js
-====================================
+You want to check the hard drives from time to time:
+sudo zpool scrub tank
 
-For running jzedit in older versions of nw.js
+Also install smartctl to monitor hdd errors:
+sudo apt-get install smartmontools 
 
-node-gyp rebuild --target=1.2.0 --msvs_version=2015
-
-
-
-
-Misc
-=====
-
-How to hide the annoying menu in Android that covers the virtual keyboard
--------------------------------------------------------------------------
-Go into settings... Look for browser bar (General settings: Toolbar).. Select to turn it off. 
+See disk info:
+sudo smartctl -x /dev/disk/by-id/wwn-0x5000039fe6de28b7
 
 
 
 
-Problems cloning from Github
-----------------------------
-Make sure the server has hggit installed!
-python -c "import hggit"
-(should not give an error if it's installed)
-How to install:
-apt-get install python-pip
-easy_install hg-git
-
-
-Problems running apt 
---------------------
-You might get an error like this:
-unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
-
-This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
 
 
 

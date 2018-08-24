@@ -44,22 +44,6 @@ What I'm working on
 -------------------
 
 
-BACKUPS!!! Need to take backup of user dirs in prod
-
-issues with ZFS that are several GB big ... takes a lot of time to backup
-
-do NOT use rsync or it would copy all the mounted folders too (several extra GB per user)
-
-ssh root@ben.100m.se zfs send ben/home/guest36@backup | gzip > /tank/backup/ben/home/guest36.gz
-
-recover:
-gunzip -c /tank/backup/ben/home/guest36.gz | ssh root@ben.100m.se zfs recv ben/home/guest36
-
-Make a script that makes @night @sunday @firstDayOfMonth snapshots
-
-don't bother backuing up guest users
-
-
 zpool scrub more often!!!
 
 

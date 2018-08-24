@@ -1,17 +1,20 @@
 #!/bin/bash
 
 #
+# do NOT use rsync or it would copy all the mounted folders too (several extra GB per user)
 # This is an example script for backing up the user files when running the editor as a cloud IDE
 # It asumes the user directories are ZFS file systems
 # Send the files to at least one other server!!
 #
-# Use example:
+# Use example (on a server where you want to store the backups):
 # sudo crontab -e
-# 30 2 * * * ssh user@server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" && scp user@server:/somewhere/backup/* /local/backup/directory/
+# 30 2 * * * ssh user@ide.server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" && scp user@ide.server:/somewhere/backup/* /local/backup/directory/
 #
 # How to recover from a backup:
 # gunzip -c /path/to/user.gz | ssh root@server.hostname zfs recv pool/home/user
 # 
+#
+#
 #
 
 POOL=${1:-"tank"}
