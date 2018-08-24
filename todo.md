@@ -43,26 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
-zpool scrub more often!!!
-
-
-
-Need to have a plan for when server wont start after an apt upgrade ...
-
-Automatically copy over users to another server and shut down the service before apt upgrade and reboot !?
-
-Or have a distributed server farm, for when non-guest user logs in, his files are copied from a central file storage to a jzedit server !?
-Or make the file system remote, so that you can use *any* server !?
-
-Have a load balancer infront, that takes the user to a working server !?
-
-rsync when user logs out, then rsync again when user logs in ?
-
-
-
----
-
 When in SSG preview and you click a link, the window closes !!?
 
 Save file when hitting Ctrl+S in WYSIWYG !?

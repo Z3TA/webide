@@ -418,8 +418,8 @@ sudo apt autoremove
 # You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
 
 
-Regully run zpool scrub
------------------------
+Regularly run zpool scrub
+-------------------------
 
 You want to check the hard drives from time to time:
 sudo zpool scrub tank
@@ -428,7 +428,8 @@ Also install smartctl to monitor hdd errors:
 sudo apt-get install smartmontools 
 
 See disk info:
-sudo smartctl -x /dev/disk/by-id/wwn-0x5000039fe6de28b7
+ls /dev/disk/by-id/
+sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
 
 
 
