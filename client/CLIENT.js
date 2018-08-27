@@ -17,6 +17,7 @@ var CLIENT = {}; // Client object is global
 	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
 	var idCounter = 0;
 	var callbackWaitList = {};
+	var noCallbackList = {};
 	var cache = {};
 	var connection = {readyState: 0};
 	var loggedIn = null;
@@ -131,10 +132,13 @@ var CLIENT = {}; // Client object is global
 						callbackWaitList[json.id](err, json.resp);
 						delete callbackWaitList[json.id];
 					}
-					
-					else throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
+					else if( noCallbackList.hasOwnProperty(json.id)) {
+						throw noCallbackList[json.id];
+}
+					else {
+						throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
-					
+					}
 				}
 				else if(json.msg) {
 					console.warn(json.msg);
@@ -220,8 +224,14 @@ var CLIENT = {}; // Client object is global
 			}
 		}
 		
-		if(callback) callbackWaitList[id] = callback;
-		else console.warn("No callback defined in req=" + req);
+		if(callback) {
+callbackWaitList[id] = callback;
+		}
+		else {
+			// This error will be thrown if the server callbacks with this id
+			noCallbackList[id] = new Error(req + " seems to want a callback function!");
+			console.warn("No callback defined in req=" + req);
+		}
 		
 		connSend(string, function sendMessageToServer(err) {
 			if(err) {

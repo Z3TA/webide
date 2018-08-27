@@ -43,6 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Unable to auto-complete directly after: if(|
+Also cant autocomplete when next to a character: |xxx
+
 Doesn't open welcome.htm when logging in for the first time!
 
 
