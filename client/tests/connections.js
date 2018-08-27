@@ -83,15 +83,13 @@
 									if(err) throw err
 									else {
 										
+										// Don't disconnect right away because other tests might depend on the connection
+										callback(true);
+										
 										// Cleanup
-										CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}, function(err, json) {
-											if(err) throw err
-											else {
-												
-												callback(true);
-												
-											}
-										});
+										setTimeout(function disconnectFromSftp() {
+											CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}); // , function(err, json) {}
+										}, 10000);
 										
 									}
 								});

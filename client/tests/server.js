@@ -452,14 +452,16 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 						if(err) throw err
 						else {
 							
+							// Don't disconnect right away because other tests might depend on the connection
+							callback(true);
+							callback = null;
+							
+							setTimeout(function disconnectFromSftp() {
 CLIENT.cmd("disconnect", connJson, function(err, json) {
 								if(err) throw new Error("Failed to disconnect from " + protocol + "! err=" + (err.msg ? err.msg : err) + " json=" + JSON.stringify(json));
-								
-								callback(true);
-								callback = null;
-
-							});
-
+								});
+							}, 10000);
+							
 						}
 					});
 					
