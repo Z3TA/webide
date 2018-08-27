@@ -469,7 +469,7 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 			});
 		}
 		
-	}, 1);
+	});
 	
 	
 })();

@@ -74,7 +74,20 @@
 		});
 	});
 	
-	
+	EDITOR.addTest(function autocompleteAfterIf(callback) {
+		EDITOR.openFile("autocompleteAfterIf.js", 'var foobar = 1\nif(foo\n', function(err, file) {
+			
+			var index = 21;
+			
+			var atCaret = autoComplete(file, index);
+			
+			UTIL.assert(atCaret.word, "foobar");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
 	
 	function autoComplete(file, index) {
 		

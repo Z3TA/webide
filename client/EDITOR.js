@@ -3011,23 +3011,38 @@ EDITOR.fireEvent("btk");
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		
-		var wordDelimiters = " {}+-/<>\r\n!";
+		var wordDelimitersLeft = " {}+-/<>\r\n\t!;";
+		var wordDelimitersRight = " {}+-/<>\r\n\t!;()";
 		var char = "";
-		var word = "";
+		var left1 = file.text.charAt(file.caret.index-1);
+		var left2 = file.text.charAt(file.caret.index-2);
+var word = "";
 		var options = []; // Word options
 		var mcl = []; // Move caret left
 		
 		// Go left to get the word
+		var dotInWord = false;
 		for(var i=file.caret.index-1; i>-1; i--) {
-			char = file.text.charAt(i);
+			char = left1;
+			left1 = left2;
+			left2 = file.text.charAt(i-2);
+			
+			//if(char == "") continue; // "abc".indexOf("") = 0
 			
 			console.log("char=" + char);
 			
-			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
+			if(wordDelimitersLeft.indexOf(char) > -1) break; // Exit loop
+			
+			// don't include if(
+			if(char == "(" && left2 == "i" && left1 == "f") {
+				console.log("break because of if(");
+				break;
+			}
 			
 			//if(isWhiteSpace(char) || char == ",") break;
 			
 			word = char + word;
+			console.log("word=" + word);
 		}
 		// Also go right just in case we are inside a word
 		
@@ -3036,7 +3051,7 @@ EDITOR.fireEvent("btk");
 			
 			console.log("char=" + char);
 			
-			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
+			if(wordDelimitersRight.indexOf(char) > -1) break; // Exit loop
 			
 			//if(isWhiteSpace(char) || char == ",") break;
 			

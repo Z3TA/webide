@@ -43,15 +43,16 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Unable to auto-complete directly after: if(|
-Also cant autocomplete when next to a character: |xxx
+Cant autocomplete when next to a character: |xxx
 
-Doesn't open welcome.htm when logging in for the first time!
 
 
 When in SSG preview and you click a link, the window closes !!? Only in Firefox
 
-WYSIWYG appends and extra new-line padding inside <body> 
+WYSIWYG appends an extra new-line padding inside <body> 
+
+
+Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
 
 ---
 
@@ -1598,6 +1599,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When annotations are on, show a "see diff" link that shows the diff if you click on it
 
 Test more scripts to see if the editor can inline all console.log's
 
