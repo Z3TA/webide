@@ -88,7 +88,9 @@
 										
 										// Cleanup
 										setTimeout(function disconnectFromSftp() {
-											CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}); // , function(err, json) {}
+											CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}, function(err, json) {
+												
+											});
 										}, 10000);
 										
 									}
