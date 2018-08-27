@@ -43,7 +43,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Cant autocomplete when next to a character: |xxx
+Doesn't do the right thing: if(|abc)
+(hitting autocomplete when caret is at a)
+should insert abcdef but inserts defabc
+do nothing !?
 
 
 
