@@ -499,13 +499,13 @@ function createGuestUser(id, callback) {
 	
 	if( id ) {
 var guestId = id;
-		var username = "guest" + id;
+		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
 		guestCounterSaved(null);
 	}
 	else {
 var guestId = ++GUEST_COUNTER;
-		var username = "guest" + id;
+		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
 		
 // Save guest counter so that we can continue the number serie after server restarts
@@ -517,7 +517,9 @@ var guestId = ++GUEST_COUNTER;
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
 
-		if(username == undefined || username == "guestundefined") throw new Error("username=" + username);
+		if(username == undefined || username == "guestundefined" || username == "[object Object]") {
+throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
+		}
 		
 		var password = module_generator.generate({
 			length: 10,
@@ -888,7 +890,7 @@ function sockJsConnection(connection) {
 if(GUEST_POOL.length == 0) {
 							// Need to wait until a new guest account is created
 							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
-							createGuestUser(function guestUserCreated(err, guestUser, guestPw) {
+							createGuestUser(function guestUserCreated(err, createdUser) {
 								if(err) {
 									if(err.code != "LOCK") throw err;
 									if(++createUserRetries > 3) {
@@ -899,7 +901,7 @@ if(GUEST_POOL.length == 0) {
 										checkUser(username, password);
 									}, 1000);
 								}
-								else loginAsGuest(guestUser, guestPw, false);
+								else loginAsGuest(createdUser.username, createdUser.password, false);
 							});
 						}
 						else {

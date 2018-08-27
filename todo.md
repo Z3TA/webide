@@ -43,6 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Doesn't open welcome.htm when logging in for the first time!
+
+
 When in SSG preview and you click a link, the window closes !!? Only in Firefox
 
 WYSIWYG appends and extra new-line padding inside <body> 
@@ -113,10 +116,6 @@ If not running in Chrome app mode, you must click on Google drive in the menu.
 
 ---
 
-It took fucking 25s for a guest user to be created and logged in!!
-
-Instead of fixing the perf issues :P  as it's only on first load. Show a loading bar or spinner with BS messages like:
-"Downloading modules", "Running tests", "Optimizing binaries", "Applying patches"
 
 
 
