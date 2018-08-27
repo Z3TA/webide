@@ -8,10 +8,10 @@
 #
 # Use example (on a server where you want to store the backups):
 # sudo crontab -e
-# 30 2 * * * ssh user@ide.server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" && scp user@ide.server:/somewhere/backup/* /local/backup/directory/
+# 30 2 * * * ssh user@ide.server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" > /dev/null && scp user@ide.server:/somewhere/backup/* /local/backup/directory/
 #
 # How to recover from a backup:
-# gunzip -c /path/to/user.gz | ssh root@server.hostname zfs recv pool/home/user
+# gunzip -c /path/to/user.gz | ssh root@ide.server zfs recv pool/home/user
 # 
 #
 #
@@ -28,7 +28,7 @@ echo "BACKUP_FOLDER=$BACKUP_FOLDER"
 [[ ${HOME} != "/"*"/" ]] &&  echo "$HOME directory must start and end with a slash!" && exit 1
 [[ ${BACKUP_FOLDER} != "/"*"/" ]] &&  echo "$BACKUP_FOLDER directory must start and end with a slash!" && exit 1
 
-mkdir $BACKUP_FOLDER
+mkdir -p $BACKUP_FOLDER
 
 zpool status $POOL > /dev/null || exit 1
 
