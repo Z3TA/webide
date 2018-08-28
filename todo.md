@@ -43,6 +43,18 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Not implemented !? CLIENT.event fileMove
+Get error when moving a file using file explorer
+
+Editor also "bugged out" and couln't save "todo.md" after the move,
+also couln't open any files.
+
+---
+
+Reloaded using F5 and got an old version of a file!!
+
+---
+
 Doesn't do the right thing: if(|abc)
 (hitting autocomplete when caret is at a)
 should insert abcdef but inserts defabc
@@ -1602,6 +1614,16 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+---
+
+"hunk patch" with version control. eg. select parts/hunks of a file to commit
+
+probably a good idea to make the editor able to fold and show extra (the deleted) rows)
+So the "diff" can be the actual file. (allow edits in diff mode ?) button to go out of "diff mode".
+Then mark the "hunks" in the margin.
+
+---
 
 When annotations are on, show a "see diff" link that shows the diff if you click on it
 

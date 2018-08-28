@@ -150,7 +150,7 @@ var CLIENT = {}; // Client object is global
 						if(eventListeners.hasOwnProperty(method)) {
 							CLIENT.fireEvent(method, json[method]);
 						}
-						else throw new Error("Unexpected server response (method=" + method + "): " + JSON.stringify(json, null, 2));
+						else throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
 						// Might be an event without a listener!
 					}
 
