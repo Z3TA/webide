@@ -927,7 +927,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		else {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
-				if(err) callback(err);
+				if(err) callback(new Error("Unable to get file size for: " + path + "\n" + err.message));
 				else callback(null, json.size);
 			});
 			}
@@ -963,7 +963,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		function gotSize(err, size) {
 			
 			if(err) {
-				if(err.code === 'ENOENT') {
+				if(err.code === 'ENOENT' || err.message.indexOf("No such file") != -1) {
 					callback(false);
 				}
 				else {
