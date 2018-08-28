@@ -927,7 +927,11 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		else {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
-				if(err) callback(new Error("Unable to get file size for: " + path + "\n" + err.message));
+				if(err) {
+					var error = new Error("Unable to get file size for: " + path + "\n" + err.message);
+					error.code = err.code;
+					callback(error);
+				}
 				else callback(null, json.size);
 			});
 			}
