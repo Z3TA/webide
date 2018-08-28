@@ -205,7 +205,7 @@
 				if(type=="delete") charactersLength = -1;
 					var oldParse = file.parsed;
 				// Update functions
-				updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
+				if(oldParse.functions) updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
 				
 				// Update quotes
 				for(var i=0; i<oldParse.quotes.length; i++) {
