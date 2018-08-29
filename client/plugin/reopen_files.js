@@ -104,7 +104,7 @@ console.log("reopenFiles!");
 		console.log("reopenFiles: serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
 		
 		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
-			
+			// Logged in as another user
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			clearInterval(saveStateIntervalTimer);
 			clearInterval(insaneBugCatcherInterval);
@@ -722,6 +722,7 @@ console.log("reopenFiles!");
 					
 					var openFiles = openedFilesString.split(fileDelimiter);
 					var statesSaved = 0;
+					var errors = [];
 					
 					// note: "".split(fileDelimiter).length == 1 !! (an empty string gives one item in the array)
 					if(openedFilesString != "") {
@@ -734,10 +735,16 @@ console.log("reopenFiles!");
 					else if(callback) callback(null);
 					
 					function stateSaved(err, path) {
-						if(err) console.warn("Problem saving state for path=" + path + ": " + err.message);
+						if(err) {
+console.warn("Problem saving state for path=" + path + ": " + err.message);
+							errors.push(err.message);
+						}
 						if(++statesSaved == openFiles.length) {
 							//console.log("Done saving state!");
-							if(callback) callback(null);
+							if(!callback) return;
+							
+							if(errors.length > 0) callback(new Error(errors.join("\n")));
+							else callback(null);
 						}
 					}
 				});
