@@ -43,7 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
+how to register wildcard via letsencrypt ?
+using letsEncryptDns.js on the dns server.
+prehook ?
 
 
 So that you don't need to put _socket as prefix in express, socket.io etc
