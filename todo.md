@@ -43,6 +43,41 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+
+
+So that you don't need to put _socket as prefix in express, socket.io etc
+register wildcard socket.user.webide.se SSL
+proxy *.user. to the socket!
+
+---
+
+When renaming a folder via file explorer it gets a blank name 
+(the rename however succeeds)
+
+---
+
+npm WARN lifecycle npm is using node but there is no node binary in the current PATH
+
+(add node binary to PATH env.)
+
+---
+
+Some nodejs scripts wants to automatically open up a new browser tab,
+detect this and open a new window.
+
+Example: https://github.com/okwolf/srvs.git
+
+---
+
+Permission denied when trying to clone a git repo using git@github.com:user/repo.git
+
+works when using https url! (auto convert github git urls to github https urls !?)
+
+automatically open readme or browser files after cloning!
+
+---
+
 Not implemented !? CLIENT.event fileMove
 Get error when moving a file using file explorer
 
@@ -264,6 +299,10 @@ Able to create new repositories and manage users piblic read or push access
 
 What I'm thinking
 -----------------
+
+Rigester æo domain for unix sockets !?
+
+---
 
 Should we run with low loglevel in the server so that we don't get slowed down by console.log's !?
 

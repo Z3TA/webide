@@ -16,6 +16,13 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 		
 		certonly = Don't mess with nginx config files
 		
+		certbot certonly --manual --preferred-challenges dns --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se'
+		
+		note: when updating zone file, you need to add the user subdomain wildards! example:
+		_acme-challenge.johan.webide.se. IN TXT "LJQIGP1nHSfxPHq8_KfhnWWl9gscmT_7yw4GJv7dwdo"
+		*.johan     IN      CNAME        webide.se.
+		johan       IN      CNAME        webide.se.
+		
 	*/
 	
 	var args = ["certonly", "--nginx", "--noninteractive", "--agree-tos", "--email", adminEmail, "-d", domain];
