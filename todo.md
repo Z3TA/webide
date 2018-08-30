@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+And now TXT records are not even showing up on the localhost/main DNS server, WTF DNS SERVER!!
+
 Problem with DNS not propagating to slave servers
 
 Problem with certbot sending many auth challange request for the *same* domain (which is correct, we just need to handle it)
