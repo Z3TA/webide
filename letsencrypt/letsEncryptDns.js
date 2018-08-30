@@ -7,12 +7,21 @@
 	
 	LJQIGP1nHSfxPHq8_KfhnWWl9gscmT_7yw4GJv7dwdo
 	
+Note: Certbot currently don't support hooks with automaitcally renwing, so you need to use crontab!
+
+	certbot renew --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+
+certbot certonly --manual --preferred-challenges dns --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se'
+
+
+
 */
 
 var IP_OK = ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
 var TLDS = ["webide.se"]; // Domains we handle
-var HTTP_PORT = "8001"
+var HTTP_PORT = "8102";
 var HTTP_IP = "127.0.0.1";
+var SECRET = "changeme"; // Change this to prevent a malicious user to add custom TXT records to your TLD's!!
 
 const module_http = require("http");
 const module_fs = require("fs");
@@ -29,13 +38,16 @@ function handleHttpRequest(req, resp) {
 	
 	if(IP_OK.indexOf(IP) == -1) return resp.end("IP not authorized: " + IP);
 	
-	var match = req.url.match(/\?stage=(before|after)&name=([A-Za-z0-9_.]*)&value=([A-Za-z0-9_.]*)/);
+	var match = req.url.match(/\?stage=(before|after)&name=([A-Za-z0-9_.]*)&value=([A-Za-z0-9_.]*)&secret=([A-Za-z0-9_.]*)/);
 	
 	if(match == null) return resp.end("Malformed request url: " + req.url);
 	
 	var stage = match[1];
 	var name = match[2];
 	var value = match[3];
+	var secret = match[4];
+	
+	if(secret != SECRET) return resp.end("Bad secret: " + secret);
 	
 	var domainParts = name.split(".");
 	
@@ -151,9 +163,10 @@ if(stdout) console.log(stdout);
 			});
 		});
 		
-	}
-	
-	
+	});
+
+}
+
 	
 	
 	

@@ -1,0 +1,43 @@
+#
+# Service to run on the DNS master server
+# We assume the DNS master runs bind9 and use zone files stored in /etc/bind/zones/db.tld
+# And that the zone files are formatted in a certain way (see letsEncryptDns.js)
+# 
+# It's higly recommended to run Nginx or another HTTPS proxy 
+# that will proxy requests to the IP and port specified in letsEncryptDns.js
+# Example nginx config (inside a server thing):
+#
+#	location = /DNS/txt {
+#		proxy_pass http://127.0.0.1:8102;
+#		proxy_set_header        Host            $http_host;
+#		proxy_set_header        X-Real-IP       $remote_addr;
+#		proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+#	}
+#
+# Install/Update
+# --------------
+# 1. Copy this file and letsEncryptDns.js to the dns server and cd into the folder:
+# scp letsEncryptDns.service letsEncryptDns.js user@dnsserver:/tank/nodejs/letsEncryptDns/
+#
+# 2. SSH into the dns server and Enable the letsEncryptDns.service:
+# sudo cp letsEncryptDns.service /etc/systemd/system/letsEncryptDns.service
+# sudo systemctl enable letsEncryptDns   or   sudo systemctl daemon-reload
+#
+
+[Unit]
+Description=Letsencypt DNS auth
+After=network.target
+OnFailure=status-email-user@%n.service
+
+[Service]
+User=root
+
+# Change to where letsEncryptDns.js is located
+WorkingDirectory=/tank/nodejs/letsEncryptDns/
+
+ExecStart=/usr/bin/nodejs letsEncryptDns.js
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

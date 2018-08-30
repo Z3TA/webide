@@ -43,6 +43,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+
+
+
 how to register wildcard via letsencrypt ?
 using letsEncryptDns.js on the dns server.
 prehook ?
@@ -301,6 +305,15 @@ Able to create new repositories and manage users piblic read or push access
 
 What I'm thinking
 -----------------
+
+If you start new files while offline, then close the editor, 
+and next time you open the editor up the files you created while offline are gone !!!
+
+Have a web based file system that is synced with the server once online !?
+
+Many tools depends on the server, make as much as possible work offline !?
+
+---
 
 Rigester æo domain for unix sockets !?
 
@@ -783,6 +796,25 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+
+---
+
+Editor sometimes crashes when pasting into another file with devMode on!
+Example pasing some nginx config from one nginx config file to another.
+
+---
+
+Uncaught Error: path=null
+
+Error: path=null
+    at HTMLLIElement.gotoFile (http://127.0.0.1:8099/plugin/goto_file.js:570:12)
+
+How to repeat:
+Searching for .service and trying to open etc/systemd/status-email-user@.service
+
+
+---
 
 Issue when calling CLIENT.cmd but it never recives an answer, eg the socket has been closed but appear open.
 
