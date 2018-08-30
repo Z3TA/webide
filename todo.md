@@ -43,9 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Problem with DNS not propagating to slave servers
 
-
-
+Problem with certbot sending many auth challange request for the *same* domain (which is correct, we just need to handle it)
 
 how to register wildcard via letsencrypt ?
 using letsEncryptDns.js on the dns server.

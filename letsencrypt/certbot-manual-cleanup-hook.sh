@@ -2,7 +2,7 @@
 
 SECRET="changeme"
 STAGE="after"
-NAME="${CHALLENGE_DOMAIN}"
+NAME="${CERTBOT_DOMAIN}"
 VALUE="${CERTBOT_VALIDATION}"
 SERVER_URL="https://zetafiles.org/DNS/txt"
 URL="$SERVER_URL?stage=$STAGE&name=$NAME&value=$VALUE&secret=$SECRET"
