@@ -6,20 +6,45 @@
 	_acme-challenge.johan.webide.se with the following value:
 	
 	LJQIGP1nHSfxPHq8_KfhnWWl9gscmT_7yw4GJv7dwdo
+	---------------------------------------------------------------------------------------------------
 	
 	Note: Certbot currently don't support hooks with automaitcally renewing, so you need to use crontab!
-
+	Add the following command to crontab:
 	certbot renew --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
-
-certbot certonly --manual --preferred-challenges dns --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se'
-	certbot certonly --nginx --noninteractive --agree-tos --email zeta@zetafiles.org -d johan.webide.se
 	
+	
+	How to test on the IDE server:
 	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
-
 	
-	Problem:
-	We need to register two domains *.user.webide.se and user.webide.se and Letsencrypt wants us to add TWO txt records,
-	both for user.webide.se
+	(remove --staging for live production)
+	
+	---------------------------------------------------------------------------------------------------
+	Problem 1: 
+	We need to register two domains ! (*.user.webide.se and user.webide.se)
+	so Letsencrypt wants us to add TWO txt records for user.webide.se 
+	
+	Solution: Make a queue and only run one dns-update query at any time
+	(Not allowing many writes to the same file at once also solves the problem with file corruption)
+	---------------------------------------------------------------------------------------------------
+	Problem 2:
+	When adding a TXT record for user.webide.se it becomes "specific" and 
+	*.webide.se no longer works for user.webide.se
+	
+	Solution: We need to add records for user and *.user
+	---------------------------------------------------------------------------------------------------
+	Problem 3: 
+	We can not have both TXT and CNAME records!
+	
+	Solution: Copy the A and AAAA records from the tld
+	
+	(This was not actually a problem, but we'll keep using A and AAAA records instead of CNAME just in case)
+	---------------------------------------------------------------------------------------------------
+	
+	Check bind9 for zone file errors:
+	named-checkconf -z
+	
+	
+	Hint: Make sure *all* DNS slave server gets the new records in a timely manner
 	
 	
 */
@@ -32,6 +57,7 @@ var SECRET = "changeme"; // Change this to prevent a malicious user to add custo
 
 var IN_PROGRESS = false; // We can only process one request at a time
 var QUEUE = [];
+var PROGRESS_COUNTER = 0;
 
 const module_http = require("http");
 const module_fs = require("fs");
@@ -40,11 +66,12 @@ const module_child_process = require('child_process');
 var httpServer = module_http.createServer(handleHttpRequest);
 httpServer.listen(HTTP_PORT, HTTP_IP);
 
+
 function handleHttpRequest(req, resp) {
 	
 	var IP = req.headers["x-real-ip"] || req.connection.remoteAddress;
 	
-	console.log("Request from " + IP + ": " + req.url);
+	log("Request from " + IP + ": " + req.url);
 	
 	if(IP_OK.indexOf(IP) == -1) return resp.end("IP not authorized: " + IP);
 	
@@ -62,8 +89,8 @@ function handleHttpRequest(req, resp) {
 	var work = {stage: stage, name: name, value: value, resp: resp, time: new Date()};
 	
 	// Make stage:after wait 30 seconds !?
-	if(
-		
+	
+	
 	QUEUE.push(work);
 	
 	workQueue();
@@ -73,7 +100,7 @@ function handleHttpRequest(req, resp) {
 function workQueue() {
 	
 	if(IN_PROGRESS) {
-		console.log("Work in progress, waiting ... queue=" + QUEUE.length + "");
+		log("Work in progress, waiting ... queue=" + QUEUE.length + "");
 		setTimeout(workQueue, 1000);
 	}
 	
@@ -106,9 +133,10 @@ function processWork(work) {
 		return;
 	}
 	
+	PROGRESS_COUNTER++;
 	IN_PROGRESS = true;
 	
-	console.log("Processing: stage=" + stage + " name=" + name + " value=" + value);
+	log("Processing: stage=" + stage + " name=" + name + " value=" + value);
 	
 var domainParts = name.split(".");
 	
@@ -126,21 +154,45 @@ var domainParts = name.split(".");
 	var paddingStart = "; Start Letsencrypt challange for " + subname + "\n";
 	var paddingEnd = "; End Letsencrypt challange for " + subname + "\n\n";
 	
-	var challangeString = name + '. 60 IN TXT "' + value + '"\n';
-	var specificString = "*." + subname + " IN CNAME " + tld + ".\n" + subname + " IN CNAME " + tld + ".\n";
+	var challangeString = "_acme-challenge." + name + '. 20 IN TXT "' + value + '"\n';
+	var specificString = "*." + subname + " IN CNAME " + tld + ".\n";
 	
-	//console.log(appendString);
+	
+	
+	//log(appendString);
 	
 	var zoneFile = "/etc/bind/zones/db." + tld;
 	
 	module_fs.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
 		if(err) {
 			resp.end("Error: Problem reading zone file: " + zoneFile);
-			console.log(err.message);
+			log(err.message);
 			IN_PROGRESS = false;
 			return;
 		}
 		
+		// Find A and AAAA records for tld
+		var matchA = zoneData.match(/[@*]\s+IN\s+A\s+([0-9.]*)/i);
+		var matchAAAA = zoneData.match(/[@*]\s+IN\s+AAAA\s+([0-9a-f:]*)/i);
+		
+		if(!matchA) {
+			resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
+			console.error("Error: Unable match A record in " + zoneFile);
+		}
+		
+		var aRecord = matchA[1];
+		specificString += subname + " IN A " + aRecord + "\n";
+		
+		if(matchAAAA) {
+var aaaaRecord = matchAAAA[1];
+			specificString += subname + " IN AAAA " + aaaaRecord + "\n";
+		}
+		
+		/*
+			All user's data is grouped so you can easliy remove all of them
+			*.webide.se will catch foo.bar.baz.webide.se so we only need the user.webide.se records
+			when doing a Letsencrypt challange
+		*/
 		var start = zoneData.indexOf(paddingStart);
 		var end = zoneData.indexOf(paddingEnd) + paddingEnd.length;
 		
@@ -167,8 +219,7 @@ var domainParts = name.split(".");
 				// We can also remove the padding
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
 			}
-			
-		}
+			}
 		
 		if(stage == "before") {
 			
@@ -224,7 +275,7 @@ var domainParts = name.split(".");
 		module_fs.writeFile(zoneFile, zoneData, function writeZoneFile(err) {
 			if(err) {
 				resp.end("Problem writing to zone file: " + zoneFile);
-				console.log(err.message);
+				log(err.message);
 				IN_PROGRESS = false;
 				return;
 			}
@@ -239,9 +290,28 @@ var domainParts = name.split(".");
 					return;
 				}
 				
-				if(stdout) console.log(stdout);
+				if(stdout) log(stdout);
 				
-				resp.end("OK");
+				/*
+					Letsencrypt seem to use 8.8.8.8 which is a bit slow.
+					Lets make the Letsencrypt script wait to give all DNS servers a chance to fetch the recrods
+					
+					Certbot seem to send off both stage=before but waits for *both* before requesting the TXT records,
+					(problem: Letsencrypt challange only succeeds on *one* of the TXT entries)
+					so we only (should) have to make Certbot wait on the *seconds* request.
+				*/
+				
+				if(stage == "before" && PROGRESS_COUNTER % 2 == 0) {
+					setTimeout(function wait() {
+						resp.end("OK");
+						//IN_PROGRESS = false;
+					}, 30000);
+					
+				}
+				else {
+resp.end("OK");
+					
+				}
 				
 				IN_PROGRESS = false;
 				
@@ -252,6 +322,26 @@ var domainParts = name.split(".");
 
 }
 
+function log(msg) {
+	console.log(myDate() + " " + msg);
 	
-	
-	
+	function myDate() {
+		var d = new Date();
+		
+		var hour = addZero(d.getHours());
+		var minute = addZero(d.getMinutes());
+		var second = addZero(d.getSeconds());
+		
+		var day = addZero(d.getDate());
+		var month = addZero(1+d.getMonth());
+		var year = d.getFullYear();
+		
+		return year + "-" + month + "-" + day + " (" + hour + ":" + minute + ":" + second + ")";
+		
+		function addZero(n) {
+			if(n < 10) return "0" + n;
+			else return n;
+		}
+	}
+}
+
