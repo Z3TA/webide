@@ -43,9 +43,10 @@
 	Check bind9 for zone file errors:
 	named-checkconf -z
 	
-	
 	Hint: Make sure *all* DNS slave server gets the new records in a timely manner
 	
+	Check each slave server if it has the TXT records:
+	dig _acme-challenge.user.webide.se -t TXT @8.8.8.8
 	
 */
 
@@ -68,7 +69,6 @@ httpServer.listen(HTTP_PORT, HTTP_IP);
 
 
 function handleHttpRequest(req, resp) {
-	
 	var IP = req.headers["x-real-ip"] || req.connection.remoteAddress;
 	
 	log("Request from " + IP + ": " + req.url);
@@ -88,17 +88,12 @@ function handleHttpRequest(req, resp) {
 	
 	var work = {stage: stage, name: name, value: value, resp: resp, time: new Date()};
 	
-	// Make stage:after wait 30 seconds !?
-	
-	
 	QUEUE.push(work);
 	
 	workQueue();
-	
 }
 
 function workQueue() {
-	
 	if(IN_PROGRESS) {
 		log("Work in progress, waiting ... queue=" + QUEUE.length + "");
 		setTimeout(workQueue, 1000);
@@ -117,12 +112,9 @@ function workQueue() {
 	if(!work) throw new Error("No work to do!");
 	
 	processWork(work);
-	
 }
 
-
 function processWork(work) {
-
 	var stage = work.stage;
 	var name = work.name;
 	var value = work.value;
@@ -138,7 +130,7 @@ function processWork(work) {
 	
 	log("Processing: stage=" + stage + " name=" + name + " value=" + value);
 	
-var domainParts = name.split(".");
+	var domainParts = name.split(".");
 	
 	var tld = domainParts[domainParts.length-2] + "." +  domainParts[domainParts.length-1];
 	
@@ -158,11 +150,7 @@ var domainParts = name.split(".");
 	var specificString = "*." + subname + " IN CNAME " + tld + ".\n";
 	
 	
-	
-	//log(appendString);
-	
 	var zoneFile = "/etc/bind/zones/db." + tld;
-	
 	module_fs.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
 		if(err) {
 			resp.end("Error: Problem reading zone file: " + zoneFile);
@@ -184,7 +172,7 @@ var domainParts = name.split(".");
 		specificString += subname + " IN A " + aRecord + "\n";
 		
 		if(matchAAAA) {
-var aaaaRecord = matchAAAA[1];
+			var aaaaRecord = matchAAAA[1];
 			specificString += subname + " IN AAAA " + aaaaRecord + "\n";
 		}
 		
@@ -196,7 +184,7 @@ var aaaaRecord = matchAAAA[1];
 		var start = zoneData.indexOf(paddingStart);
 		var end = zoneData.indexOf(paddingEnd) + paddingEnd.length;
 		
-		if(stage == "afterx") {
+		if(stage == "after") {
 			// Clean up
 			if(start == -1) {
 				resp.end("Error: Cannot find start padding for " + subname + " in zone file: " + zoneFile);
@@ -219,10 +207,9 @@ var aaaaRecord = matchAAAA[1];
 				// We can also remove the padding
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
 			}
-			}
+		}
 		
 		if(stage == "before") {
-			
 			if(start == -1) {
 				zoneData += paddingStart;
 				zoneData += challangeString;
@@ -282,7 +269,6 @@ var aaaaRecord = matchAAAA[1];
 			
 			// Reload bind9/named
 			module_child_process.exec("service bind9 reload", function reloadNS(error, stdout, stderr) {
-				
 				if(error || stderr) {
 					resp.end("Error: Failed to reload name servers");
 					console.error(error || stderr);
@@ -306,20 +292,15 @@ var aaaaRecord = matchAAAA[1];
 						resp.end("OK");
 						//IN_PROGRESS = false;
 					}, 30000);
-					
 				}
 				else {
-resp.end("OK");
-					
+					resp.end("OK");
 				}
 				
 				IN_PROGRESS = false;
-				
 			});
 		});
-		
 	});
-
 }
 
 function log(msg) {
@@ -344,4 +325,3 @@ function log(msg) {
 		}
 	}
 }
-
