@@ -1,4 +1,6 @@
 
+log_format %USERNAME% '[$time_local] $remote_addr $remote_user $host "$request" $status $body_bytes_sent "$http_user_agent"';
+
 # Redirect to https:
 #SSL#server {
   #SSL#listen 80;
@@ -19,20 +21,14 @@ server {
   #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
   #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
 
-  access_log %HOMEDIR%log/access.log combined;
+  access_log %HOMEDIR%log/access.log %USERNAME%;
 
   location / {
     charset	utf-8;
     try_files $uri $uri/ =404;
   }
   
-  #location ~/_http(\d+) {
-  #  proxy_set_header  host       $http_host;
-  #  proxy_set_header  x-real-ip  $remote_addr;
-  #  proxy_pass http://unix:%HOMEDIR%sock/_http$1;
-  #  add_header 'Access-Control-Allow-Origin' '*';
-  #}
-
+  # Old way to reach unix socket
   location ~/_([^/]+) {
     # Anything starting with an underscore
     # Upgrade to websocket (if possible)
@@ -50,17 +46,32 @@ server {
 
 }
 
+
+#
+# Proxy socket.%USERNAME%.%DOMAIN% to unix-socket at %HOMEDIR%sock/socket
+#
+
+#SSL#server {
+  #SSL#listen 80;
+  #SSL#listen [::]:80;
+  #SSL#server_name ~^(.*)\.%USERNAME%.%DOMAIN%$;
+  #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
+#SSL#}
+
 server {
   server_name ~^(.*)\.%USERNAME%.%DOMAIN%$;
-
+  listen 80;#NOSSL#
+  listen [::]:80;#NOSSL#
   #SSL#listen 443 ssl;
   #SSL#listen [::]:443 ssl;
   #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
   #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
 
+  access_log %HOMEDIR%log/access.log %USERNAME%;
+
   location / {
     charset	utf-8;
-    proxy_pass http://unix:%HOMEDIR%sock/_$1;
+    proxy_pass http://unix:%HOMEDIR%sock/$1;
     proxy_http_version 1.1;
     proxy_set_header host              $http_host;
     proxy_set_header x-real-ip         $remote_addr;

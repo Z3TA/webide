@@ -5,7 +5,8 @@
 # 
 # It's higly recommended to run Nginx or another HTTPS proxy 
 # that will proxy requests to the IP and port specified in letsEncryptDns.js
-# Example nginx config (inside a server thing):
+#
+# Example nginx config (inside a server block):
 #
 #	location = /DNS/txt {
 #		proxy_pass http://127.0.0.1:8102;
@@ -17,11 +18,13 @@
 # Install/Update
 # --------------
 # 1. Copy this file and letsEncryptDns.js to the dns server and cd into the folder:
-# scp letsEncryptDns.service letsEncryptDns.js user@dnsserver:/tank/nodejs/letsEncryptDns/
+# scp letsEncryptDns.service letsEncryptDns.js root@dnsserver:/etc/systemd/system/
 #
 # 2. SSH into the dns server and Enable the letsEncryptDns.service:
-# sudo cp letsEncryptDns.service /etc/systemd/system/letsEncryptDns.service
-# sudo systemctl enable letsEncryptDns   or   sudo systemctl daemon-reload
+# sudo systemctl enable letsEncryptDns   (or if you updated letsEncryptDns.service) sudo systemctl daemon-reload
+# sudo service letsEncryptDns start      (or if you updated letsEncryptDns.js) sudo service letsEncryptDns restart
+#
+# See logs: sudo journalctl -u letsEncryptDns
 #
 
 [Unit]

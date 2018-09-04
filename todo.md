@@ -43,16 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Problem with ns6
-
-how to register wildcard via letsencrypt ?
-using letsEncryptDns.js on the dns server.
-prehook ?
+Output from certbot-manual-cleanup-hook.sh:
+Error: Cannot find start padding for johan in zone file: /etc/bind/zones/db.webide.se
 
 
-So that you don't need to put _socket as prefix in express, socket.io etc
-register wildcard socket.user.webide.se SSL
-proxy *.user. to the socket!
+
 
 ---
 
@@ -299,6 +294,14 @@ Able to create new repositories and manage users piblic read or push access
 * Test existing features and write automatic tests
 * Fix bugs!
 
+---
+See if johan.webide.se is auto renewed before deploying 
+(Your cert will expire on 2018-12-03.)
+
+So that you don't need to put _socket as prefix in express, socket.io etc
+register wildcard socket.user.webide.se SSL
+proxy *.user. to the socket!
+---
 
 
 What I'm thinking

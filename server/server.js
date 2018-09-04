@@ -1748,8 +1748,8 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 				// the cert does not exist. Try to register it
 				var userDomain = url_user + "." + DOMAIN;
 				console.time("Register " + userDomain + " with letsencrypt");
-				
-				module_letsencrypt.register(userDomain, ADMIN_EMAIL, true, function(err) {
+				var wildcard = false; // Check if johan.webide.se auto registers before starting using wildcards (Your cert will expire on 2018-12-03.)
+				module_letsencrypt.register(userDomain, ADMIN_EMAIL, wildcard, function(err) {
 					console.timeEnd("Register " + userDomain + " with letsencrypt");
 					if(err) {
 						

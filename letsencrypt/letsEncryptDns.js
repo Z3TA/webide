@@ -8,12 +8,15 @@
 	LJQIGP1nHSfxPHq8_KfhnWWl9gscmT_7yw4GJv7dwdo
 	---------------------------------------------------------------------------------------------------
 	
+	install: See letsEncryptDns.service
+	
+	
 	Note: Certbot currently don't support hooks with automaitcally renewing, so you need to use crontab!
-	Add the following command to crontab (replace path to jzedit):
+	Add the following command to crontab on the cloudIDE server (replace path to jzedit):
 	certbot renew --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	
-	How to test on the IDE server (replace path to jzedit):
+	How to test on the cloudIDE server (replace path to jzedit):
 	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Delete a cert:
