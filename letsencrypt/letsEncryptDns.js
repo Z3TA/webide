@@ -1,6 +1,6 @@
 /*
 	
-	This service is meant to run on a DNS server to handle letsencrypt DNS challanges such as:
+	This service is meant to run on a DNS master server to handle letsencrypt DNS challanges such as:
 	
 	Please deploy a DNS TXT record under the name
 	_acme-challenge.johan.webide.se with the following value:
@@ -9,14 +9,16 @@
 	---------------------------------------------------------------------------------------------------
 	
 	Note: Certbot currently don't support hooks with automaitcally renewing, so you need to use crontab!
-	Add the following command to crontab:
+	Add the following command to crontab (replace path to jzedit):
 	certbot renew --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	
-	How to test on the IDE server:
+	How to test on the IDE server (replace path to jzedit):
 	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
-	(remove --staging for live production)
+	Delete a cert:
+	certbot delete
+	
 	
 	---------------------------------------------------------------------------------------------------
 	Problem 1: 

@@ -1749,7 +1749,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 				var userDomain = url_user + "." + DOMAIN;
 				console.time("Register " + userDomain + " with letsencrypt");
 				
-				module_letsencrypt.register(userDomain, ADMIN_EMAIL, function(err) {
+				module_letsencrypt.register(userDomain, ADMIN_EMAIL, true, function(err) {
 					console.timeEnd("Register " + userDomain + " with letsencrypt");
 					if(err) {
 						

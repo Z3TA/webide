@@ -16,8 +16,8 @@ server {
   root %HOMEDIR%wwwpub/;
   index index.html index.htm;
 
-  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.webide.se/fullchain.pem;
-  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.webide.se/privkey.pem;
+  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
+  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
 
   access_log %HOMEDIR%log/access.log combined;
 
@@ -51,7 +51,13 @@ server {
 }
 
 server {
-  server_name ~^(.*)\.%USERNAME%.%DOMAIN%$ ;
+  server_name ~^(.*)\.%USERNAME%.%DOMAIN%$;
+
+  #SSL#listen 443 ssl;
+  #SSL#listen [::]:443 ssl;
+  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
+  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
+
   location / {
     charset	utf-8;
     proxy_pass http://unix:%HOMEDIR%sock/_$1;

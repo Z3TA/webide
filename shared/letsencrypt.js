@@ -2,30 +2,51 @@
 	Running certbot (letsencrypt) to install SSL certificate
 */
 
+const module_path = require("path");
+
 var letsencrypt = {};
 
-letsencrypt.register = function register(domain, adminEmail, callback) {
+letsencrypt.register = function register(domain, adminEmail, wildcard, callback) {
 	
 	if(domain == undefined) throw new Error("domain=" + domain + " required!");
 	if(domain == undefined) throw new Error("adminEmail=" + adminEmail + " required!");
 	
+	if(typeof wildcard == "function") {
+		callback = wildcard;
+		wildcard = undefined;
+	}
+	
 	var spawn = require('child_process').spawn;
 	
 	/*
+		without wildcard certificate:
 		certbot certonly --nginx --noninteractive --agree-tos --email zeta@zetafiles.org -d johan.webide.se
+		
+		with wildcard certificate: 
+		certbot certonly --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 		
 		certonly = Don't mess with nginx config files
 		
-		certbot certonly --manual --preferred-challenges dns --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se'
-		
-		note: when updating zone file, you need to add the user subdomain wildards! example:
-		_acme-challenge.johan.webide.se. IN TXT "LJQIGP1nHSfxPHq8_KfhnWWl9gscmT_7yw4GJv7dwdo"
-		*.johan     IN      CNAME        webide.se.
-		johan       IN      CNAME        webide.se.
-		
 	*/
 	
+	if(wildcard) {
+		var path = module_path.resolve("./../letsencrypt/");
+		var args = [
+			"certonly", 
+			"--manual", 
+			"--manual-public-ip-logging-ok", 
+			"--preferred-challenges dns", 
+			"--noninteractive", 
+			"--agree-tos", 
+			"--email " + adminEmail, 
+			"-d '" + domain + ",*." + domain + "'", 
+			'--manual-auth-hook="' + path + '/certbot-manual-auth-hook.sh"', 
+			'--manual-cleanup-hook="' + path + '/certbot-manual-cleanup-hook.sh"'
+		];
+	}
+	else {
 	var args = ["certonly", "--nginx", "--noninteractive", "--agree-tos", "--email", adminEmail, "-d", domain];
+	}
 	
 	//console.log("hg cat args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
 	
