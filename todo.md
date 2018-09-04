@@ -43,11 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Output from certbot-manual-cleanup-hook.sh:
-Error: Cannot find start padding for johan in zone file: /etc/bind/zones/db.webide.se
-
-
-
 
 ---
 

@@ -55,6 +55,8 @@
 	
 */
 
+"use strict";
+
 var IP_OK = ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
 var TLDS = ["webide.se"]; // Domains we handle
 var HTTP_PORT = "8102";
@@ -64,6 +66,8 @@ var SECRET = "changeme"; // Change this to prevent a malicious user to add custo
 var IN_PROGRESS = false; // We can only process one request at a time
 var QUEUE = [];
 var PROGRESS_COUNTER = 0;
+
+var TTL = 20; // Time-to-live for the _acme-challenge TXT record
 
 const module_http = require("http");
 const module_fs = require("fs");
@@ -151,7 +155,8 @@ function processWork(work) {
 	var paddingStart = "; Start Letsencrypt challange for " + subname + "\n";
 	var paddingEnd = "; End Letsencrypt challange for " + subname + "\n\n";
 	
-	var challangeString = "_acme-challenge." + name + '. 20 IN TXT "' + value + '"\n';
+	var txtEntry = "_acme-challenge." + name + '. ' + TTL + ' IN TXT ';
+	var challangeString = txtEntry + '"' + value + '"\n';
 	var specificString = "*." + subname + " IN CNAME " + tld + ".\n";
 	
 	
@@ -207,7 +212,7 @@ function processWork(work) {
 			// Only remove the challange string!
 			zoneData = zoneData.slice(0, zoneData.indexOf(challangeString)) + zoneData.slice(zoneData.indexOf(challangeString) + challangeString.length);
 			
-			if(zoneData.indexOf(name + " IN TXT") == -1) {
+			if(zoneData.indexOf(txtEntry) == -1) {
 				// It no longer contains any challange strings.
 				// We can also remove the padding
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
