@@ -43,6 +43,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+gcsf
+
+https://www.ostechnix.com/how-to-mount-google-drive-locally-as-virtual-file-system-in-linux/
+
 ---
 Investigating using Google Drive on server side using google-drive-ocamlfuse
 Having a very hard time trying to compile it ...
