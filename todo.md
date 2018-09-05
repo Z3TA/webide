@@ -43,6 +43,25 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+---
+Investigating using Google Drive on server side using google-drive-ocamlfuse
+Having a very hard time trying to compile it ...
+Issue with users having to copy/paste the auth. It would be better to use redirect_uri ...
+Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
+
+Then replace the current Google drive integration with google-drive-ocamlfuse
+so that you can run nodejs script etc, that are saved on google drive.
+
+Detect if running from chrome-book, then auto connect to Google drive.
+If not running in Chrome app mode, you must click on Google drive in the menu.
+
+---
+
+Google drive integration is a must have for a Chromebook users, since that's where they store their files.
+Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
+Should Google Drive be mounted on the server side instead !?
+
+---
 
 
 
@@ -125,22 +144,6 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 
 
-
-
-
----
-Investigating using Google Drive on server side using google-drive-ocamlfuse
-Having a very hard time trying to compile it ...
-Issue with users having to copy/paste the auth. It would be better to use redirect_uri ...
-Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
-
-Then replace the current Google drive integration with google-drive-ocamlfuse
-so that you can run nodejs script etc, that are saved on google drive.
-
-Detect if running from chrome-book, then auto connect to Google drive.
-If not running in Chrome app mode, you must click on Google drive in the menu.
-
----
 
 
 
@@ -342,11 +345,6 @@ Most useful command seems to be "change between brackets" or "delete until x"
 
 Workflow for colaborating:
 Something like an internal wiki ... 
-
----
-Google drive integration is a must have for a Chromebook users, since that's where they store their files.
-Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
-Should Google Drive be mounted on the server side instead !?
 
 ---
 
