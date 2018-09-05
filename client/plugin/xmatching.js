@@ -58,6 +58,7 @@
 			}
 			
 			if(col > 0) {
+				if(!buffer[row][col-1]) throw new Error("row=" + row + " col=" + col + " buffer[row][col-1]=" + buffer[row][col-1]);
 				charToTheLeft = buffer[row][col-1].char;
 			}
 			
