@@ -551,7 +551,7 @@ gapi.auth2.getAuthInstance().signOut();
 			var oldPath = el.getAttribute("path");
 			
 			promptBox("Rename file:", false, oldPath, function(newPath) {
-				if(newPath) EDITOR.renameFile(oldPath, newPath, function fileRenamed(err, newPath) {
+				if(newPath) EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 					if(err) alertBox(err.message);
 					else {
 						
@@ -559,22 +559,30 @@ gapi.auth2.getAuthInstance().signOut();
 						
 						fileItemMenuHolder.removeChild(fileItemMenu); // Hide the menu
 						
+						var basePath = UTIL.getDirectoryFromPath(oldPath.replace(/[/\\]$/, ""));
+						if(newPath.indexOf(basePath) != 0) {
+// The file or folder was moved into another directory
+							el.parentElement.removeChild(el);
+						}
+						
 						// Change the name text node!
-						if(el != fileItemMenuHolder) {
+						else if(el != fileItemMenuHolder) {
 							// It's a folder that is open!
 							el.removeChild(el.childNodes[2]); // hopefully the text node
-							var displayName = UTIL.getDirectoryFromPath(newPath);
+							var displayName = UTIL.getFolderName(newPath);
+							
 							if(displayName.length > maxNameLength) {
 								el.setAttribute("title", displayName);
 								displayName = displayName.substr(0, 37) + "...";
 							}
+							console.log("Inserting new folder name=" + displayName);
 							el.insertBefore(document.createTextNode(displayName), el.childNodes[2]);
 						}
 						else {
 							// It's a file or closed folder
 							el.removeChild(el.lastChild); // hopefully the text node
 							
-							var displayName = UTIL.getFilenameFromPath(newPath);
+							var displayName = UTIL.getFilenameFromPath(newPath) || UTIL.getFolderName(newPath);
 							if(displayName.length > maxNameLength) {
 								el.setAttribute("title", displayName);
 								displayName = displayName.substr(0, 37) + "...";
@@ -792,13 +800,11 @@ EDITOR.loadScript("https://apis.google.com/js/api.js", true, function() {
 		var toElement = document.getElementById(toFolder);
 		var toUlEl = document.getElementById(toFolder + "_items");
 		
-		console.log("fromPath=" + fromPath + " toFolder=" + toFolder);
-		
-		
-		CLIENT.cmd("move", {from: fromPath, to: toFolder}, function itemMoved(err, resp) {
+		var oldPath = fromPath;
+		var newPath = UTIL.trailingSlash(toFolder) + (UTIL.getFilenameFromPath(oldPath) || UTIL.getFolderName(oldPath));
+		console.log("fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
+		EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 			if(err) return alertBox(err.message);
-			
-			var newPath = resp.path;
 			
 			updateItemPaths(fromPath, newPath);
 			

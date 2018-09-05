@@ -123,10 +123,11 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
 	btk: [], // Back to keyboard
 	fileClose: [], 
-	fileOpen: [], 
+	fileOpen: [],
 	fileHide: [],
 	fileShow: [],
 	fileParse: [],
+	move: [], // When a file or folder is moved/renamed
 	beforeSave: [],
 	afterSave: [],
 	fileChange: [], 
@@ -2817,6 +2818,7 @@ EDITOR.fireEvent("btk");
 	EDITOR.fireEvent = function(eventName, args, callback) {
 		
 		if(args == undefined) args = [];
+		if(!Array.isArray(args)) throw new Error("args need to be an Array!");
 		
 		console.log("Firing event: " + eventName);
 		
@@ -4665,10 +4667,10 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		return ret;
 	}
 	
-	EDITOR.renameFile = function renameFile(oldPath, newPath, callback) {
-		// Same as moving a file
+	EDITOR.move = function renameFile(oldPath, newPath, callback) {
+		// Also used for renaming files and folders!
 		
-		console.log("Renaming oldPath=" + oldPath + " to newPath=" + newPath);
+		console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
 		
 		if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
 		
@@ -4676,11 +4678,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
 		
-		
-		
 		//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
 		
-		CLIENT.cmd("rename", {oldPath: oldPath, newPath: newPath}, function(err, json) {
+		CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
 			if(err) return callback(err);
 			
 			if(EDITOR.files.hasOwnProperty(oldPath)) {
@@ -4704,6 +4704,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 					if(openFileErr) throw openFileErr;
 					
 					callback(null, newFile.path);
+					
+					EDITOR.fireEvent("move", [oldPath, newPath]);
 					
 				});
 			}

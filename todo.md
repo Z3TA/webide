@@ -50,14 +50,8 @@ WYSIWYG appends an extra new-line padding inside <body>
 
 Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
 
-
-
 ---
 
-When renaming a folder via file explorer it gets a blank name 
-(the rename however succeeds)
-
----
 
 Some nodejs scripts wants to automatically open up a new browser tab,
 detect this and open a new window.
@@ -71,14 +65,6 @@ Permission denied when trying to clone a git repo using git@github.com:user/repo
 works when using https url! (auto convert github git urls to github https urls !?)
 
 automatically open readme or browser files after cloning!
-
----
-
-Not implemented !? CLIENT.event fileMove
-Get error when moving a file using file explorer
-
-Editor also "bugged out" and couln't save "todo.md" after the move,
-also couln't open any files.
 
 ---
 
@@ -107,8 +93,6 @@ Vim tests, continue with vim tutorial and write a test for each feature in the t
 http://vimdoc.sourceforge.net/htmldoc/usr_03.html
 
 
-Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?
-(there are both a move and rename event in the server api!??)
 
 http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 

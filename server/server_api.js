@@ -96,7 +96,7 @@ var exe = "/usr/bin/unzip";
 			
 			if(exe == "/bin/gunzip" && json.destination) {
 				// Move the file after gunzip'ing
-				API.move(user, {}, function fileMoved(err, movedto) {
+				API.move(user, {oldPath: destination, newPath: json.destination}, function fileMoved(err, movedto) {
 					if(err) return callback(new Error("gunzip succeeded, but move failed: " + err.message));
 					else callback(null, {source: source, destination: movedto.path});
 				});
@@ -724,40 +724,13 @@ API.copyFile = function copyFile(user, json, callback) {
 }
 
 API.move = function move(user, json, callback) {
-	
-	// todo: Make it work with remote connections!
-	
-	var lastCharOfDestination = json.to.slice(json.to.length-1);
-	if(lastCharOfDestination != "/" && lastChar != "\\") return callback(new Error("Destination needs to be a directory!"))
-	
-	var from = user.translatePath(json.from);
-	var to = user.translatePath(json.to);
-	
-	var lastCharOfItem = from.slice(from.length-1);
-	
-	var itemIsFolder = (lastCharOfItem == "/" || lastCharOfItem == "\\");
-	
-	var itemName = itemIsFolder ? UTIL.getFolderName(from) : UTIL.getFilenameFromPath(from);
-	
-	var oldPath = from;
-	var newPath = to + itemName;
-	
-	if(itemIsFolder) newPath = UTIL.trailingSlash(newPath);
-	
-	var fs = require("fs");
-	fs.rename(oldPath, newPath, function renamed(err) {
-		if(err) return callback(err);
+	/*
 		
-		callback(null, {path: newPath});
+		Use EDITOR.move ! (don't call this directly)
 		
-		user.send({
-			fileMove: {from: from, to: to}
-		});
-
-	});
-}
-
-API.rename = function rename(user, json, callback) {
+		todo: Make it work with remote connections!
+		
+	*/
 	
 	var oldPath = json.oldPath;
 	var newPath = json.newPath;
@@ -771,13 +744,15 @@ API.rename = function rename(user, json, callback) {
 	fs.rename(oldPath, newPath, function(err) {
 		
 		if(err) {
-			if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not a directory! " + err.message);
+			if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
 		}
 		
 		callback(err, {oldPath: oldPath, newPath: newPath});
+		
+		// EDITOR.move fires move event
+		
 	});
-	
-}
+	}
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	
