@@ -43,6 +43,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When in SSG preview and you click a link, the window closes !!? Only in Firefox
+
+WYSIWYG appends an extra new-line padding inside <body> 
+
+
+Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
+
+
 
 ---
 
@@ -91,12 +99,6 @@ do nothing !?
 
 
 
-When in SSG preview and you click a link, the window closes !!? Only in Firefox
-
-WYSIWYG appends an extra new-line padding inside <body> 
-
-
-Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
 
 ---
 
