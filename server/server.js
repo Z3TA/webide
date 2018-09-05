@@ -327,7 +327,7 @@ function recycleGuestAccounts(callback) {
 	function resetGuest(id) {
 		/*
 			Just delete the user instead of trying to reset.
-			We could use ZFS to restore, but then it might not get all the latest features
+			We could use ZFS to restore, but then the account might not get all the latest features
 			*/
 		
 		var username = "guest" + id;
@@ -433,9 +433,10 @@ function main() {
 else {
 			GUEST_COUNTER = parseInt(data);
 			recycleGuestAccounts(function guestAccountsRecycled(err) {
+					log("GUEST_POOL.length=" + GUEST_POOL.length);
 				if(err) throw err;
 				startServer();
-			}); 
+			});
 		}
 	});
 	}
