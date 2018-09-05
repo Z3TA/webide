@@ -1771,7 +1771,7 @@ var WysiwygEditor;
 			setTimeout(function afterWeirdStuff() {
 				previewWin.window.onbeforeunload = function onbeforeunload() {
 					console.warn("onbeforeunload called!");
-					if(!wysiwygEditor.isReloading) wysiwygEditor.close();
+					if(!wysiwygEditor.isReloading && !wysiwygEditor.onlyPreview) wysiwygEditor.close();
 					//return true; // Shows a "are you sure" message
 				};
 				
