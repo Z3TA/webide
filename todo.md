@@ -59,12 +59,6 @@ When renaming a folder via file explorer it gets a blank name
 
 ---
 
-npm WARN lifecycle npm is using node but there is no node binary in the current PATH
-
-(add node binary to PATH env.)
-
----
-
 Some nodejs scripts wants to automatically open up a new browser tab,
 detect this and open a new window.
 
