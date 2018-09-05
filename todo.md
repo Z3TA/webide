@@ -43,13 +43,13 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
+
+
 WYSIWYG appends an extra new-line padding inside <body> 
 
 
-Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
-
 ---
-
 
 Some nodejs scripts wants to automatically open up a new browser tab,
 detect this and open a new window.
