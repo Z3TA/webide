@@ -44,6 +44,11 @@ What I'm working on
 -------------------
 
 gcsf
+----
+sudo apt-get install -y libfuse-dev pkg-config libssl-dev
+curl https://sh.rustup.rs -sSf | sh
+rustup update stable
+cargo install gcsf
 
 https://www.ostechnix.com/how-to-mount-google-drive-locally-as-virtual-file-system-in-linux/
 
