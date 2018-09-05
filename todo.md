@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Doesn't open welcome.htm when logging in for the first time!??!?!???!?!?!??!?!
+
 
 
 WYSIWYG appends an extra new-line padding inside <body> 
