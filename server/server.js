@@ -131,6 +131,8 @@ var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
 var GUEST_POOL = []; // Because it's a bit slow to create new users
 var CREATE_USER_LOCK = false; // Can only create one user at a time
 
+var GCSF = {}; // username: GCSF session
+
 // Declare modules here as a OPTIMIZATION
 const module_fs = require("fs");
 const module_child_process = require('child_process');
@@ -1122,8 +1124,8 @@ username = guestUser;
 										console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
 										
 										createHttpEndpoint(userConnectionName, folder, function(err, url) {
-											if(err) workerResp(req, null, err.message);
-											else workerResp(req, {url: url});
+											if(err) workerResp(err.message);
+											else workerResp(null, {url: url});
 										});
 									}
 									else if(req.removeHttpEndpoint) {
@@ -1140,9 +1142,21 @@ username = guestUser;
 									else if(req.debugInBrowserVnc) {
 										var url = req.debugInBrowserVnc.url;
 										startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
-											workerResp(req, resp, err);
+											workerResp(err, resp);
 										});
-										
+										}
+									else if(req.googleDrive) {
+										if(req.googleDrive.code) {
+											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF session for " + userConnectionName));
+											GCSF[userConnectionName].enterCode(req.googleDrive.code, function(err, resp) {
+												workerResp(err, resp);
+											});
+										}
+										else {
+											gcsfLogin(userConnectionName, function(err, authUrl) {
+												workerResp(err, authUrl);
+											});
+										}
 									}
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
@@ -1151,7 +1165,7 @@ username = guestUser;
 								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 								
 								
-								function workerResp(req, resp, err) {
+								function workerResp(err, resp) {
 									if(id == undefined) throw new Error("id=" + id);
 									var obj = {id: id, parentResponse: resp};
 									if(err) obj.err = err.message ? err.message : err;
@@ -1180,7 +1194,7 @@ username = guestUser;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-userWorker = createUserWorker(userConnectionName, uid, gid);
+										userWorker = createUserWorker(userConnectionName, uid, gid);
 									userWorker.send({identify: userInfo});
 									
 									userWorker.on("message", messageFromWorker);
@@ -2848,6 +2862,146 @@ function sendMail(from, to, subject, text) {
 			log("Mail sent: " + info.response);
 		}
 	});
+	
+}
+
+function gcsfLogin(username, gcsfLoginCallback) {
+	var enterCodeCallback = undefined; // Call this function when mounted
+	var loginSuccess = false;
+	
+	// Where configDir + .config/gcsf/gcsf.toml should be saved
+	var configDir = UTIL.trailingSlash( module_path.normalize(__dirname + "/..") );
+	
+	var gcsfOptions = {
+		env: {
+			XDG_CONFIG_HOME: configDir,
+			HOME: configDir
+		}
+	}
+	
+	var gcsfArgs = ["login", username];
+	
+	var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
+	
+	
+	log("Starting chromium-browser with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
+	
+	var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
+	
+	GCSF[username] = {
+		gcsfLoginSession: gcsfLoginSession,
+		enterCode: function enterGcsfCode(code, cb) {
+			enterCodeCallback = cb;
+			this.gcsfLoginSession.stdin.write(code + "\n");
+		}
+	}
+	
+	gcsfLoginSession.on("close", function (code, signal) {
+		log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
+		if(gcsfLoginCallback) {
+			gcsfLoginCallback( new Error("gcsf login session closed with code=" + code + " and signal=" + signal) );
+			gcsfLoginCallback = null;
+		}
+		delete GCSF[username];
+	});
+	
+	gcsfLoginSession.on("disconnect", function () {
+		log(username + " gcsfLoginSession disconnect: gcsfLoginSession.connected=" + gcsfLoginSession.connected, DEBUG);
+	});
+	
+	gcsfLoginSession.on("error", function (err) {
+		log(username + " gcsfLoginSession error: err.message=" + err.message, ERROR);
+		console.error(err);
+		if(gcsfLoginCallback) {
+			gcsfLoginCallback(err);
+			gcsfLoginCallback = null;
+		}
+		delete GCSF[username];
+	});
+	
+	gcsfLoginSession.stdout.on("data", function(data) {
+		log(username + " gcsfLoginSession stdout: " + data, INFO);
+		
+		var matchBrowserUrl = data.match(reBrowserUrl);
+		
+		if(matchBrowserUrl) {
+			var authUrl = matchBrowserUrl[1];
+			gcsfLoginCallback(null, authUrl);
+			gcsfLoginCallback = null;
+		}
+		else if(data.match(/Successfully logged in/)) {
+			if(loginSuccess === true) throw new Error(username + " gcsfLoginSession already logged in successfully !?");
+			loginSuccess = true;
+			gcsfMount(username, function(err) {
+				enterCodeCallback(err);
+				enterCodeCallback = null;
+			});
+		}
+	});
+	
+	gcsfLoginSession.stderr.on("data", function (data) {
+		log(username + " gcsfLoginSession stderr: " + data, DEBUG);
+	});
+	
+	function gcsfMount(username, gcsfMountCallback) {
+		
+		var mountDir = HOME_DIR + username + "/googleDrive";
+		var mountSuccessString = "Mounted to " + mountDir;
+		var gcsfMountArgs = ["mount", mountDir, "-s", username];
+		
+		// First create the folder to mount to
+		module_fs.mkdir(mountDir, function(err) {
+			if(err) throw err;
+			
+			log("Starting gcsfMountSession with args=" + JSON.stringify(gcsfMountArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions) + "");
+			
+			var gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
+			
+			gcsfMountSession.on("close", gcsfMountSessionClose);
+			gcsfMountSession.on("disconnect", gcsfMountSessionDisconnect);
+			gcsfMountSession.on("error", gcsfMountSessionError);
+			gcsfMountSession.stdout.on("data", gcsfMountSessionStdout);
+			gcsfMountSession.stderr.on("data", gcsfMountSessionStderr);
+			
+		});
+		
+		function gcsfMountSessionClose(code, signal) {
+			log(username + "gcsfMountSession close: code=" + code + " signal=" + signal, NOTICE);
+			if(gcsfMountCallback) {
+				gcsfMountCallback( new Error("gcsf mount session closed with code=" + code + " and signal=" + signal) );
+				gcsfMountCallback = null;
+			}
+		}
+		
+		function gcsfMountSessionDisconnect() {
+			log(username + " gcsfMountSession disconnect: gcsfMountSession.connected=" + gcsfMountSession.connected, DEBUG);
+		}
+		
+		function gcsfMountSessionError(err) {
+			log(username + " gcsfMountSession error: err.message=" + err.message, ERROR);
+			console.error(err);
+			if(gcsfMountCallback) {
+gcsfMountCallback(err);
+				gcsfMountCallback = null;
+			}
+		}
+		
+		function gcsfMountSessionStdout(data) {
+			log(username + " gcsfMountSession stdout: " + data, INFO);
+			
+			if( data.indexOf(mountSuccessString) ) {
+				gcsfMountCallback(null);
+				gcsfMountCallback = null;
+				// The process will continue to live and output debug info
+			}
+		}
+		
+		function gcsfMountSessionStderr(data) {
+			log(username + " gcsfMountSession stderr: " + data, DEBUG);
+		}
+		
+	}
+	
 	
 }
 

@@ -690,6 +690,23 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 	});
 }
 
+API.googleDrive = function googleDrive(user, json, callback) {
+	/*
+		Mount google drive
+		
+		If a code is supplied it will attempt to mount
+		If not code is supplied it will login and call back with a authUrl
+	*/
+	
+	var code = json.code;
+	
+	//console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	parentRequest({googleDrive: {code: code}}, function(err, authUrl) {
+		if(err) callback(err);
+		else callback(err, authUrl);
+	});
+}
 
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
