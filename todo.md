@@ -45,6 +45,11 @@ What I'm working on
 
 gcsf
 ----
+
+'Could not load configuration file.: ErrorMessage { msg: "Cannot create configuration directory" }', libcore/result.rs:945:5
+
+
+
 sudo apt-get install -y libfuse-dev pkg-config libssl-dev
 curl https://sh.rustup.rs -sSf | sh
 rustup update stable

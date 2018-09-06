@@ -2875,7 +2875,8 @@ function gcsfLogin(username, gcsfLoginCallback) {
 	var gcsfOptions = {
 		env: {
 			XDG_CONFIG_HOME: configDir,
-			HOME: configDir
+			HOME: configDir,
+			PATH: "/usr/bin/:/bin/"
 		}
 	}
 	
@@ -2884,7 +2885,7 @@ function gcsfLogin(username, gcsfLoginCallback) {
 	var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
 	
 	
-	log("Starting chromium-browser with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
+	log("Starting gcsfLoginSession with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
 	
 	var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
 	
