@@ -37,7 +37,7 @@ if(err) return alertBox(err.message);
 				EDITOR.createWindow({url: gd.url}, function(err, win) {
 					// Ignore error because we shouln't be able to access this window
 					
-					promptBox("After authorizing Google Drive you will get a code. Paste the code here:", function(code) {
+					promptBox("After authorizing with Google (new window) you will get a code. Paste the code here:", function(code) {
 						
 						try {
 							win.close();

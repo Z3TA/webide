@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Issues with GCFS and home dir XDG_CONFIG_HOME blow up for some reason (now able to create config dir)
+
 What do we need to install for gcsf to run ?
 
 sudo apt-get install -y libfuse-dev pkg-config libssl-dev
