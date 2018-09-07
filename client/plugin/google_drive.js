@@ -10,6 +10,8 @@
 	
 	
 */
+(function() {
+	"use strict";
 
 var menuItem;
 
@@ -25,40 +27,73 @@ EDITOR.removeMenuItem(menuItem);
 });
 
 function googleDriveInit() {
-CLIENT.cmd("googleDrive", {code: null}, function(err, authUrl) {
+		// Hide the menu right away so the user don't think it's "locked"
+		EDITOR.hideMenu();
+		
+		// Should we show a loading bar !?
+		
+		CLIENT.cmd("googleDrive", {code: null}, function(err, gd) {
 if(err) return alertBox(err.message);
 		
-		if(!authUrl) throw new Error("Unexpected authUrl=" + authUrl);
-		
-		EDITOR.createWindow({url: authUrl}, function(err, win) {
-			// Ignore error because we shouln't be able to access this window
-			
-			promptBox("After authorizing Google Drive you will get a code. Paste the code here:", function(code) {
-				if(code) {
-					CLIENT.cmd("googleDrive", {code: code}, function(err) {
-						if(err) return alertBox(err.message);
+			if(gd.mounted) return mountSuccess();
+			else if(gd.url) {
+				EDITOR.createWindow({url: gd.url}, function(err, win) {
+					// Ignore error because we shouln't be able to access this window
+					
+					promptBox("After authorizing Google Drive you will get a code. Paste the code here:", function(code) {
 						
-						// Assume it was successfully mounted
-						EDITOR.fileExplorer("/googleDrive/");
+						try {
+							win.close();
+						}
+						catch(err) {
+							console.error(err);
+						}
 						
-						EDITOR.updateMenuItem(menuItem, true, "Google Drive", umountGoogleDrive);
+						if(code) {
+							CLIENT.cmd("googleDrive", {code: code}, function(err) {
+								if(err) return alertBox(err.message);
+								else mountSuccess();
+							});
+						}
+						else {
+							CLIENT.cmd("googleDrive", {cancelLogin: true}, function(err) {
+								if(err) console.error(err);
+							});
+						}
 						
 					});
-				}
-			});
-			
-		});
+					
+				});
+			}
+			else throw new Error("Unexpected response:" + JSON.stringify(gd));
 		
 	});
 }
 
+	function mountSuccess() {
+		// Assume it was successfully mounted
+		EDITOR.fileExplorer("/googleDrive/");
+		
+		EDITOR.updateMenuItem(menuItem, true, "Google Drive", umountGoogleDrive);
+		EDITOR.hideMenu();
+	}
+	
 function umountGoogleDrive() {
+		console.log("Logging out and unmounting Google Drive ...");
 	CLIENT.cmd("googleDrive", {umount: true}, function(err) {
-		if(err) return alertBox(err.message);
-		
-		EDITOR.updateMenuItem(menuItem, false, "Google Drive", umountGoogleDrive);
-		
+			if(err) console.warn(err.message);
+			else console.log("Successfully logged out and unmounted from Google Drive !");
+			
+			// Even if we got an error, the folder has likely umount'ed
+			
+			EDITOR.updateMenuItem(menuItem, false, "Google Drive", googleDriveInit);
+			EDITOR.hideMenu();
+			
+			// Tell file explorer to close /googleDrive folder !?
+			EDITOR.fireEvent("move", ["/googleDrive", "/dev/null"]);
+			
 	});
 }
 
 
+})();

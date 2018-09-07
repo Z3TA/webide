@@ -53,6 +53,7 @@
 		EDITOR.bindKey({desc: "File explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
 		
 		EDITOR.on("fileExplorer", openFileExplorerTool);
+		EDITOR.on("move", fileExplorerFileMoved);
 		
 		//EDITOR.on("beforeResize", saveScrollPosition);
 		//EDITOR.on("afterResize", restoreScrollPosition);
@@ -99,6 +100,7 @@
 		EDITOR.unbindKey(toggleFileExplorer);
 		
 		EDITOR.removeEvent("fileExplorer", openFileExplorerTool);
+		EDITOR.removeEvent("move", fileExplorerFileMoved);
 		
 		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
 gapi.auth2.getAuthInstance().signOut();
@@ -107,6 +109,18 @@ gapi.auth2.getAuthInstance().signOut();
 	
 	function updateSigninStatus(isSignedIn) {
 		console.log("gapi isSignedIn=" + isSignedIn);
+	}
+	
+	function fileExplorerFileMoved(from, to) {
+		
+		var item = document.getElementById(from);
+		
+		if(item) {
+			item.parentNode.removeChild(item);
+		}
+		// Just remove the item for now
+		
+		return true;
 	}
 	
 	function openFileExplorerTool(directory) {

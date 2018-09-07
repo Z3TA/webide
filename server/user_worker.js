@@ -619,6 +619,10 @@ process.on('message', function commandMessage(message) {
 					
 				}
 				else {
+					if(!answer) {
+						console.warn("No answer from command=" + command)
+						answer = {};
+					}
 					send({resp: answer});
 				}
 			});
@@ -690,21 +694,14 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 	});
 }
 
-API.googleDrive = function googleDrive(user, json, callback) {
+API.googleDrive = function googleDrive(user, options, callback) {
 	/*
 		Mount google drive
-		
-		If a code is supplied it will attempt to mount
-		If not code is supplied it will login and call back with a authUrl
 	*/
 	
-	var code = json.code;
-	
-	//console.log("user.name=" + user.name + " serving folder=" + folder);
-	
-	parentRequest({googleDrive: {code: code}}, function(err, authUrl) {
+	parentRequest({googleDrive: options}, function(err, resp) {
 		if(err) callback(err);
-		else callback(err, authUrl);
+		else callback(err, resp);
 	});
 }
 
@@ -1161,7 +1158,7 @@ function npm(arg, extraOptions, callback) {
 				var fileName = UTIL.getFilenameFromPath(npmPath);
 				for (var i=0; i<files.length; i++) {
 					if(files[i] == fileName) {
-exist = true;
+						exist = true;
 						break;
 					}
 				}

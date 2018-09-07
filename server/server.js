@@ -778,6 +778,8 @@ function sockJsConnection(connection) {
 		}
 		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 		
+		gcsfCleanup(userConnectionName);
+		
 		/*
 			if(IP == "127.0.0.1" && HTTP_PORT == "8099") {
 			console.log("We are running locally. Close down the server when client exit.");
@@ -1146,15 +1148,36 @@ username = guestUser;
 										});
 										}
 									else if(req.googleDrive) {
+										console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
 										if(req.googleDrive.code) {
-											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF session for " + userConnectionName));
+											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF sessions for " + userConnectionName));
 											GCSF[userConnectionName].enterCode(req.googleDrive.code, function(err, resp) {
 												workerResp(err, resp);
 											});
 										}
+										else if(req.googleDrive.umount) {
+											// Both gcsfUmount and gcsfLogout will call gcsfCleanup() which closes any GCSF login or mount session
+											gcsfUmount(userConnectionName, function(umountError) {
+												gcsfLogout(userConnectionName, function(logoutErr) {
+													var errMsg = "";
+													if(umountError) errMsg += "Failed to umount!"; // Don't give too much info (might be sensitive)
+													if(logoutErr) errMsg += "Failed to logout: " + logoutErr.message;
+													
+													workerResp(errMsg || null);
+												});
+											});
+										}
+										else if(req.googleDrive.cancelLogin) {
+											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF sessions for " + userConnectionName));
+											
+											gcsfCleanup(userConnectionName);
+											
+											return workerResp(null);
+											
+										}
 										else {
-											gcsfLogin(userConnectionName, function(err, authUrl) {
-												workerResp(err, authUrl);
+											gcsfLogin(userConnectionName, function(err, resp) {
+												workerResp(err, resp);
 											});
 										}
 									}
@@ -2866,44 +2889,50 @@ function sendMail(from, to, subject, text) {
 }
 
 function gcsfLogin(username, gcsfLoginCallback) {
-	var enterCodeCallback = undefined; // Call this function when mounted
+	
+if(GCSF.hasOwnProperty(username)) return gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
+
+var enterCodeCallback = undefined; // Call this function when mounted
 	var loginSuccess = false;
 	
 	// Where configDir + .config/gcsf/gcsf.toml should be saved
 	var configDir = UTIL.trailingSlash( module_path.normalize(__dirname + "/..") );
 	
-	var gcsfOptions = {
-		env: {
-			XDG_CONFIG_HOME: configDir,
-			HOME: configDir,
-			PATH: "/usr/bin/:/bin/"
-		}
-	}
+	console.log("configDir=" + configDir);
+	
+	var gcsfOptions = {};
+
+	//gcsfOptions.env = {XDG_CONFIG_HOME: configDir,HOME: configDir};
+
 	
 	var gcsfArgs = ["login", username];
 	
 	var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
-	
+	var reTokenFileExist = /token file (.*) already exists/;
 	
 	log("Starting gcsfLoginSession with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
 	
 	var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
 	
-	GCSF[username] = {
-		gcsfLoginSession: gcsfLoginSession,
-		enterCode: function enterGcsfCode(code, cb) {
+	GCSF[username] = {};
+
+	GCSF[username].loginSession = gcsfLoginSession;
+	GCSF[username].enterCode = function enterGcsfCode(code, cb) {
 			enterCodeCallback = cb;
-			this.gcsfLoginSession.stdin.write(code + "\n");
+		this.loginSession.stdin.write(code + "\n");
 		}
-	}
 	
 	gcsfLoginSession.on("close", function (code, signal) {
 		log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
+		
+		GCSF[username].loginSession = null;
+		GCSF[username].enterCode = null; // So we get an error if it's called
+		
 		if(gcsfLoginCallback) {
 			gcsfLoginCallback( new Error("gcsf login session closed with code=" + code + " and signal=" + signal) );
 			gcsfLoginCallback = null;
 		}
-		delete GCSF[username];
+		
 	});
 	
 	gcsfLoginSession.on("disconnect", function () {
@@ -2917,24 +2946,28 @@ function gcsfLogin(username, gcsfLoginCallback) {
 			gcsfLoginCallback(err);
 			gcsfLoginCallback = null;
 		}
-		delete GCSF[username];
+		gcsfCleanup(username);
 	});
 	
 	gcsfLoginSession.stdout.on("data", function(data) {
 		log(username + " gcsfLoginSession stdout: " + data, INFO);
 		
-		var matchBrowserUrl = data.match(reBrowserUrl);
+		var str = data.toString();
+		
+		var matchBrowserUrl = str.match(reBrowserUrl);
 		
 		if(matchBrowserUrl) {
 			var authUrl = matchBrowserUrl[1];
-			gcsfLoginCallback(null, authUrl);
+			gcsfLoginCallback(null, {url: authUrl});
 			gcsfLoginCallback = null;
 		}
-		else if(data.match(/Successfully logged in/)) {
+		else if( str.match(/Successfully logged in/) ) {
 			if(loginSuccess === true) throw new Error(username + " gcsfLoginSession already logged in successfully !?");
 			loginSuccess = true;
 			gcsfMount(username, function(err) {
-				enterCodeCallback(err);
+				if(err) return enterCodeCallback(err);
+				else enterCodeCallback(null, {mounted: true});
+				
 				enterCodeCallback = null;
 			});
 		}
@@ -2942,6 +2975,27 @@ function gcsfLogin(username, gcsfLoginCallback) {
 	
 	gcsfLoginSession.stderr.on("data", function (data) {
 		log(username + " gcsfLoginSession stderr: " + data, DEBUG);
+		
+		var str = data.toString();
+		
+		if( str.match(reTokenFileExist) ) {
+			/*
+				Already logged in ?
+				
+			*/
+			
+			// Avoid race condition (with close) 
+			enterCodeCallback = gcsfLoginCallback;
+			gcsfLoginCallback = null;
+			
+			gcsfMount(username, function(err) {
+				if(err) return enterCodeCallback(err);
+				else enterCodeCallback(null, {mounted: true});
+				
+				enterCodeCallback = null;
+			});
+			
+		}
 	});
 	
 	function gcsfMount(username, gcsfMountCallback) {
@@ -2949,14 +3003,18 @@ function gcsfLogin(username, gcsfLoginCallback) {
 		var mountDir = HOME_DIR + username + "/googleDrive";
 		var mountSuccessString = "Mounted to " + mountDir;
 		var gcsfMountArgs = ["mount", mountDir, "-s", username];
+		var notImplementString = "Function not implemented (os error 38)";
+		var mountpointNotEmptyString = "fuse: mountpoint is not empty";
 		
 		// First create the folder to mount to
 		module_fs.mkdir(mountDir, function(err) {
-			if(err) throw err;
+			if(err && err.code != "EEXIST") throw err;
 			
 			log("Starting gcsfMountSession with args=" + JSON.stringify(gcsfMountArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions) + "");
 			
-			var gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
+			var gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfMountArgs, gcsfOptions);
+			
+			GCSF[username].mountSession = gcsfMountSession;
 			
 			gcsfMountSession.on("close", gcsfMountSessionClose);
 			gcsfMountSession.on("disconnect", gcsfMountSessionDisconnect);
@@ -2967,7 +3025,14 @@ function gcsfLogin(username, gcsfLoginCallback) {
 		});
 		
 		function gcsfMountSessionClose(code, signal) {
-			log(username + "gcsfMountSession close: code=" + code + " signal=" + signal, NOTICE);
+			log(username + " gcsfMountSession close: code=" + code + " signal=" + signal, NOTICE);
+			
+			// The closing might be due to a cleanup
+			if( GCSF.hasOwnProperty(username) ) GCSF[username].loginSession = null;
+			
+			// Always do a cleanup when mount session closes!
+			gcsfCleanup(username);
+			
 			if(gcsfMountCallback) {
 				gcsfMountCallback( new Error("gcsf mount session closed with code=" + code + " and signal=" + signal) );
 				gcsfMountCallback = null;
@@ -2989,21 +3054,98 @@ gcsfMountCallback(err);
 		
 		function gcsfMountSessionStdout(data) {
 			log(username + " gcsfMountSession stdout: " + data, INFO);
+			parseGcsfOutput(data);
+		}
+		
+		function gcsfMountSessionStderr(data) {
+			// For some reason gcsf mount outputs everything to stderr !? :P
+			log(username + " gcsfMountSession stderr: " + data, DEBUG);
+			parseGcsfOutput(data);
+		}
+		
+		function parseGcsfOutput(data) {
+			var str = data.toString();
 			
-			if( data.indexOf(mountSuccessString) ) {
+			if( str.indexOf(mountSuccessString) != -1 ) {
+				console.log("Mount success string detected!");
 				gcsfMountCallback(null);
 				gcsfMountCallback = null;
 				// The process will continue to live and output debug info
 			}
-		}
-		
-		function gcsfMountSessionStderr(data) {
-			log(username + " gcsfMountSession stderr: " + data, DEBUG);
+			else if( str.indexOf(notImplementString) != -1 ) {
+				/*
+					Most likely the dir is still mounted, but we are logged out
+					This error will close the mount session
+					Try umount and then mount again !?
+				*/
+			}
+			else if( str.indexOf(mountpointNotEmptyString) != -1 ) {
+				/*
+					Probably means the dir is already mounted.
+					Which is unexpected ... There is probably a gcsf mount session still lingering ...
+					*this* mount session will close.
+					I guess this should count as a mount success :P
+				*/
+				console.log("GCSF mountpoint is not empty!");
+				gcsfMountCallback(null);
+				gcsfMountCallback = null;
+			}
 		}
 		
 	}
+}
+
+function gcsfUmount(username, callback) {
+	var exec = module_child_process.exec;
+	var mountDir = HOME_DIR + username + "/googleDrive";
+	var command = "fusermount -u " + mountDir;
 	
+	gcsfCleanup(username);
 	
+	exec(command,function fusermount(error, stdout, stderr) {
+		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+		
+		if(error) callback(error);
+		else if(stderr) callback(new Error(stderr));
+		else callback(null);
+		
+		module_fs.rmdir(mountDir, function(err) {
+			if(err) console.error(err);
+		});
+		
+	});
+}
+
+function gcsfLogout(username, callback) {
+	var exec = module_child_process.exec;
+	var mountDir = HOME_DIR + username + "/googleDrive";
+	var command = "./gcsf logout " + username;
+	var options = {
+		cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+	}
+	
+	gcsfCleanup(username);
+	
+	exec(command, options, function logout(error, stdout, stderr) {
+		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+		
+		var reSuccess = /Successfully removed (.*)/;
+		
+		if(error) callback(error);
+		else if(stderr) callback(new Error(stderr));
+		else callback(null);
+		
+	});
+}
+
+function gcsfCleanup(username) {
+	if( GCSF.hasOwnProperty(username) ) {
+		if( GCSF[username].loginSession ) GCSF[username].loginSession.kill();
+		if( GCSF[username].mountSession ) GCSF[username].mountSession.kill();
+		delete GCSF[username];
+		return true;
+	}
+	return false;
 }
 
 main();

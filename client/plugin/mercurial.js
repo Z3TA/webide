@@ -188,9 +188,11 @@
 				if(err) {
 				console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found !?
-				if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED" && err.code != "ENOENT") alertBox(err.message);
+				// Because this is run every time the menu is opened, ignore any error
+				//if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED" && err.code != "ENOENT" && err.code != "ENOSYS") alertBox(err.message);
+				return;
 			}
-				else {
+			else {
 				
 				console.log("mercurial.status : " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
 				
