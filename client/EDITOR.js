@@ -919,12 +919,6 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			}
 		}
 		}
-		else if(protocol == "googledrive") {
-			var googleDriveFileId = UTIL.urlHost(path);
-			getGoogleDriveFileSize(googleDriveFileId, function(err, size) {
-				callback(err, size);
-			});
-		}
 		else {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
@@ -936,28 +930,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				else callback(null, json.size);
 			});
 			}
-		
-		function getGoogleDriveFileSize(fileId, callback) {
-			
-			var err = makeErrorIfNotGoogleDriveApiAvailable();
-			if(err) return callback(err);
-			
-			var request = gapi.client.drive.files.get({
-				'fileId': fileId,
-				"fields": "size"
-			});
-			request.execute(function(resp) {
-				console.log("resp=", resp);
-				
-				if(resp.error) {
-					var err = makeGoogleDriveError(resp.error);
-					return callback(err);
-				}
-				
-				return callback(null, resp.size);
-				});
 		}
-	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
 		// An easier method then getFileSizeOnDisk to check if a file exist on disk.
@@ -1122,16 +1095,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		console.log("Reading file: " + path);
 		
-		var protocol = UTIL.urlProtocol(path);
+		//var protocol = UTIL.urlProtocol(path);
 		
-		if(protocol == "googledrive") {
-			var fileId = UTIL.urlHost(path);
-			getGoogleDriveFileContent(fileId, function(err, data) {
-				if(err) return callback(err);
-				else return callback(null, path, data, null);
-			});
-		}
-		else {
 			var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
@@ -1139,36 +1104,6 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			else callback(null, json.path, json.data, json.hash);
 		});
 		}
-		
-		function getGoogleDriveFileContent(fileId, callback) {
-			
-			var err = makeErrorIfNotGoogleDriveApiAvailable();
-			if(err) return callback(err);
-			
-			var request = gapi.client.drive.files.get({
-				fileId: fileId,
-				fields: 'name',
-				alt: 'media'
-			});
-			// Must use .then(), request.execute will return result false
-			request.then(function(resp) {
-				if(resp == false) return callback(new Error("Got bad response from Google Drive Api: resp=" + resp));
-				
-				if(resp && resp.error) {
-					var err = makeGoogleDriveError(resp.error);
-					return callback(err);
-				}
-				
-				console.log("resp=", resp); //response.body contains the string value of the file
-				if (typeof callback === "function") callback(null, resp.body);
-				
-			}, function(error) {
-				callback(error)
-			});
-			
-			}
-		
-	}
 	
 	EDITOR.countLines = function countLines(filePath, callback) {
 		// You probably want to use EDITOR.readLines instead! (EDITOR.readLines gives totalLines as well as lines)
@@ -1348,27 +1283,6 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		var protocol = UTIL.urlProtocol(path);
 		
-		if(protocol == "googledrive") {
-			return saveToDiskCallback(new Error("Saving to Google Drive not yet implemented!"));
-			// We need to ask permission to save this file first !
-			var fileId = UTIL.urlHost(path);
-			var fileMetadata = {};
-			var fileData = new Blob([text], {type : 'text/plain'});
-			var fileName = path.substring(path.lastIndexOf("/")+1);
-			updateFileOnGoogleDrive(fileId, fileMetadata, fileData, function(err) {
-				if(err) {
-					err.message = "Unable to save " + fileName + " to Google Drive: " + err.message;
-					if(saveToDiskCallback) return saveToDiskCallback(err);
-					else throw err;
-				}
-				else {
-					if(saveToDiskCallback) return saveToDiskCallback(null, path);
-					else console.log("File saved to Google Drive: " + path);
-				}
-			});
-return false;
-		}
-		else {
 			var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 			CLIENT.cmd("saveToDisk", json, function(err, json) {
 				if(err) {
@@ -1381,55 +1295,6 @@ return false;
 			}
 		});
 		}
-		
-		function updateFileOnGoogleDrive(fileId, fileMetadata, fileData, callback) {
-			
-			var err = makeErrorIfNotGoogleDriveApiAvailable();
-			if(err) return callback(err);
-			
-			var boundary = '-------314159265358979323846';
-			var delimiter = "\r\n--" + boundary + "\r\n";
-			var close_delim = "\r\n--" + boundary + "--";
-			
-			var reader = new FileReader();
-			//reader.readAsBinaryString(fileData);
-			reader.readAsText(fileData);
-			reader.onload = function(e) {
-				var contentType = "text/plain"; // 'application/octet-stream'
-				// Updating the metadata is optional and you can instead use the value from drive.files.get.
-				var base64Data = btoa(reader.result);
-				var multipartRequestBody =
-				delimiter +
-				'Content-Type: application/json\r\n\r\n' +
-				JSON.stringify(fileMetadata) +
-				delimiter +
-				'Content-Type: ' + contentType + '\r\n' +
-				'Content-Transfer-Encoding: base64\r\n' +
-				'\r\n' +
-				base64Data +
-				close_delim;
-				
-				var request = gapi.client.request({
-					'path': '/upload/drive/v2/files/' + fileId,
-					'method': 'PUT',
-					'params': {'uploadType': 'multipart', 'alt': 'json'},
-					'headers': {
-						'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
-					},
-				'body': multipartRequestBody});
-				request.execute(function(resp) {
-					console.log("resp=", resp);
-					
-					if(resp.error) {
-						var err = makeGoogleDriveError(resp.error);
-						return callback(err);
-					}
-					
-					callback(null);
-				});
-			}
-		}
-	}
 	
 	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
@@ -3989,51 +3854,13 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		console.log("EDITOR.listFiles: pathToFolder=" + pathToFolder + " protocol=" + protocol);
 		
-		if(protocol == "googledrive") {
-			/*
-				The the host part is either root or a drive#file id
-				
-				GoogleDrive://root/
-			*/
-			
-			var parentId = UTIL.urlHost(pathToFolder);
-			var query = "'" + parentId + "' in parents"; // and trashed = false and hidden = false
-			
-			retrieveAllGoogleDriveFiles(query, function googleDriveFiles(err, files) {
-				if(err) return listFilesCallback(err);
-				if(!Array.isArray(files)) throw new Error("files=", files, " is not an array!");
-				
-				/*
-					Google drive doesn't have a file structure. Everything is just a file!
-					
-					id:       "asdfasdfasfasfadsf"
-					kind:     "drive#file"
-					mimeType: "application/vnd.google-apps.folder"
-					name:     "Name of file"
-					
-					We do however want to keep the list as compatible as possible to avaid special case code everywhere
-				*/
-				
-				for (var i=0; i<files.length; i++) {
-					if(files[i].mimeType == "application/vnd.google-apps.folder") files[i].type = "d";
-					else files[i].type = "-";
-					
-					files[i].path = "googledrive://" + files[i].id + "/" + files[i].name;
-				}
-				
-				listFilesCallback(null, files);
-			});
-		}
-		else {
-			var json = {pathToFolder: pathToFolder};
+		var json = {pathToFolder: pathToFolder};
 			
 			CLIENT.cmd("listFiles", json, function listFilesResp(err, fileList) {
 				if(err) listFilesCallback(err);
 				else listFilesCallback(null, fileList);
 			});
 		}
-		
-	}
 	
 	EDITOR.createPath = function(directoryPathToCreate, createPathCallback) {
 		/*
@@ -7581,77 +7408,5 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		menuIsFullScreen = false;
 		EDITOR.resizeNeeded();
 		}
-	
-	function makeErrorIfNotGoogleDriveApiAvailable() {
-		
-		var err = new Error();
-		err.code = "ENOENT";
-		
-		if(typeof gapi == "undefined") {
-			err.message = "Google Drive api not loaded!"
-			return err;
-		}
-		//console.log("typeof gapi = " + typeof gapi);
-		
-		if(typeof gapi.client == "undefined") {
-			err.message = "gapi.client is not loaded!"
-			return err;
-		}
-		//console.log("typeof gapi.client = " + typeof gapi.client);
-		
-		if(typeof gapi.client.drive == "undefined") {
-			err.message = "gapi.client.drive is not loaded!"
-			return err;
-		}
-		//console.log("typeof gapi.client.drive = " + typeof gapi.client.drive);
-		
-		return null;
-	}
-	
-	function retrieveAllGoogleDriveFiles(query, callback) {
-		
-		var err = makeErrorIfNotGoogleDriveApiAvailable();
-		if(err) return callback(err);
-
-		var listOptions = {
-			fields: "files(id,name,size,modifiedTime,mimeType)"
-		};
-		
-		// fields=items(id,name,size,modifiedTime,mimeType)
-		
-		if(query) listOptions.q = query;
-		
-		var initialRequest = gapi.client.drive.files.list(listOptions);
-		retrievePageOfFiles(initialRequest, []);
-		
-		function retrievePageOfFiles(request, result) {
-			request.execute(function(resp) {
-				console.log("resp=", resp);
-				
-				if(resp.error) {
-					var err = makeGoogleDriveError(resp.error);
-					return callback(err);
-				}
-				
-				result = result.concat(resp.files);
-				var nextPageToken = resp.nextPageToken;
-				if (nextPageToken) {
-					listOptions.pageToken = nextPageToken;
-					request = gapi.client.drive.files.list(listOptions);
-					retrievePageOfFiles(request, result);
-				} else {
-					callback(null, result);
-				}
-			});
-		}
-	}
-	
-	function makeGoogleDriveError(respError) {
-		var err = new Error(respError.message);
-		if(respError.code == "404") err.code = "ENOENT";
-		else if(respError.code == "403") err.code = "EACCESS";
-		else err.code = respError.code;
-		return err;
-	}
 	
 })();

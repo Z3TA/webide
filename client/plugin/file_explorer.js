@@ -27,16 +27,6 @@
 	var lastMovedTo = "";
 	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
 	
-	// Google API Client ID and API key from the Developer Console
-	var CLIENT_ID = '987730033948-rupie76gqs1f6ir3u45kg06isli8jnmt.apps.googleusercontent.com';
-	var API_KEY = 'AIzaSyC-zAO6nFL16iwBaLy0o5suVKsA-58CsyM';
-	// Array of API discovery doc URLs for APIs used by the quickstart
-	var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-	// Authorization scopes required by the API; multiple scopes can be
-	// included, separated by spaces.
-	//var SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly'; // List files
-	var SCOPES = 'https://www.googleapis.com/auth/drive.readonly'; // Read file content
-	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
 		load: load,
@@ -208,12 +198,6 @@ gapi.auth2.getAuthInstance().signOut();
 			fsSelect.appendChild(option);
 		}
 		
-		var googleDrive = document.createElement("option");
-			googleDrive.appendChild(document.createTextNode("Google Drive"));
-		googleDrive.setAttribute("id", "googledrive");
-			fsSelect.appendChild(googleDrive);
-		
-		
 		
 		// We want to start from the root, then work our way towards fullPath
 		
@@ -366,7 +350,7 @@ gapi.auth2.getAuthInstance().signOut();
 			var li = document.createElement("li");
 			var icon = document.createElement("img");
 			var type = "";
-			var filetype = UTIL.getFileExtension(item.path) || UTIL.getFileExtension(item.name); // googledrive paths is just an id
+			var filetype = UTIL.getFileExtension(item.path) || UTIL.getFileExtension(item.name);
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
@@ -730,37 +714,6 @@ gapi.auth2.getAuthInstance().signOut();
 				}
 			}
 			exploreDir("/"); // root folder (todo: Check if this works on Windows)
-		}
-		else if(host == "googledrive") {
-			if(typeof gapi == "undefined") {
-EDITOR.loadScript("https://apis.google.com/js/api.js", true, function() {
-					if(typeof gapi == "undefined") return alertBox("Failed to load google api library!");
-					
-					gapi.load('client:auth2', function initGoogleApiClient() {
-						gapi.client.init({
-							apiKey: API_KEY,
-							clientId: CLIENT_ID,
-							discoveryDocs: DISCOVERY_DOCS,
-							scope: SCOPES
-						}).then(function () {
-							// Handle the initial sign-in state.
-							var isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-							
-							if(!isSignedIn) {
-								// Listen for sign-in state changes.
-								gapi.auth2.getAuthInstance().isSignedIn.listen(function signedInMaybe(isSignedIn) {
-									if(isSignedIn) exploreDir("googledrive://root/");
-									else alertBox("Problems signing in to Google Drive");
-								});
-								gapi.auth2.getAuthInstance().signIn();
-							}
-							else exploreDir("googledrive://root/");
-						});
-					});
-					// If the user closes the auth dialog you get a Uncaught {error: "popup_closed_by_user"} which I haven't figured out how to catch!
-				});
-			}
-			else exploreDir("googledrive://root/");
 		}
 		else {
 			if(EDITOR.connections.hasOwnProperty(host)) {
