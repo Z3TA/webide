@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Exit if anything fails
+set -e
+
 echo -n "Have you manually tested the happy path ? And does All automatic tests pass (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
