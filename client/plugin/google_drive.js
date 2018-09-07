@@ -89,6 +89,10 @@ function umountGoogleDrive() {
 			// Tell file explorer to close /googleDrive folder !?
 			EDITOR.fireEvent("move", ["/googleDrive/", "/dev/null"]);
 			
+			if(EDITOR.workingDirectory.match(/^[/\\]googleDrive[/\\].*/) {
+				EDITOR.changeWorkingDir("/");
+			}
+			
 	});
 }
 
