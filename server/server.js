@@ -3132,6 +3132,11 @@ function gcsfUmount(username, callback) {
 	exec(command,function fusermount(error, stdout, stderr) {
 		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
 		
+		/*
+			If you get /bin/sh: 1: fusermount: not found
+			try: apt-get install fuse
+		*/
+		
 		if(error) callback(error);
 		else if(stderr) callback(new Error(stderr));
 		else callback(null);

@@ -158,7 +158,7 @@ exec("apt-add-repository multiverse && apt-get update");
 exec("apt-get install unzip unrar -y");
 
 console.log("Installing CGSF dependencies");
-exec("apt-get install libfuse -y");
+exec("apt-get install fuse -y");
 
 
 
