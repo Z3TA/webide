@@ -25,6 +25,7 @@ var CLIENT = {}; // Client object is global
 	var reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 	var reconnectTimeout;
 	var lastUsedserver = null;
+	var properCallStackError = {};
 	
 	CLIENT.connected = false;
 	
@@ -125,12 +126,20 @@ var CLIENT = {}; // Client object is global
 						var err = null;
 						
 						if(json.error) {
-							err = new Error("Server: " + json.error);
+							var errMsg = "Server: " + json.error;
+							err = properCallStackError[json.id] ||  new Error();
+							err.message = errMsg;
+							// Seems it's not possible to overwrite error.message, but can we overwrite error.stack ?
+							if(err.message != errMsg) {
+err = new Error(errMsg);
+								err.stack = properCallStackError[json.id].stack;
+							}
 							if(json.errorCode) err.code = json.errorCode;
 						}
 						
 						callbackWaitList[json.id](err, json.resp);
 						delete callbackWaitList[json.id];
+						delete properCallStackError[json.id];
 					}
 					else if( noCallbackList.hasOwnProperty(json.id)) {
 						throw noCallbackList[json.id];
@@ -223,6 +232,8 @@ var CLIENT = {}; // Client object is global
 				throw new Error("Unable to stringify json=" + json);
 			}
 		}
+		
+		properCallStackError[id] = new Error("Problem with " + req + " ...");
 		
 		if(callback) {
 callbackWaitList[id] = callback;
