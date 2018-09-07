@@ -80,6 +80,7 @@ echo "Make a npm release"
 cp -rf temp/release/linux/. temp/release/npm/
 
 echo "Clean up the local-desktop release"
+rm -rf temp/release/linux/gcsf
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/adduser.js
 rm -rf temp/release/linux/cloudide_install.js
