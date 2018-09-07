@@ -192,7 +192,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 							
 							var alreadyHaveAccount = "Login to Another account";
 							var createAccount = "Create a New account";
-							var loginAsGuest = "Keep me logged in as Guest";
+							var loginAsGuest = "Keep me logged in as " + userValue;
 							
 							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 								if(answer == loginAsGuest) {

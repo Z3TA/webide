@@ -3017,6 +3017,7 @@ var enterCodeCallback = undefined; // Call this function when mounted
 		var gcsfMountArgs = ["mount", mountDir, "-s", username];
 		var notImplementString = "Function not implemented (os error 38)";
 		var mountpointNotEmptyString = "fuse: mountpoint is not empty";
+		var notConnectedString = "Transport endpoint is not connected";
 		
 		// First create the folder to mount to
 		module_fs.mkdir(mountDir, function(err) {
@@ -3101,6 +3102,20 @@ gcsfMountCallback(err);
 				console.log("GCSF mountpoint is not empty!");
 				gcsfMountCallback(null);
 				gcsfMountCallback = null;
+			}
+			else if( str.indexOf(notConnectedString) != -1 ) {
+				/*
+					GCSH has somehow lost connection to Google Drive
+					*this* mount session will close.
+					
+				*/
+				gcsfMountCallback(new Error("We got disconnected from Google Drive. Please try again."));
+				gcsfMountCallback = null;
+				gcsfUmount(username, function(err) {
+					if(err) console.error(err);
+					// Don't automatically try mounting again or we might end up in an endless loop
+				});
+				
 			}
 		}
 		

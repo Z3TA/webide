@@ -1136,9 +1136,10 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 							EPERM = operation not permitted
 							EBUSY = resource busy or locked
 							ENOENT = no such file or directory
+							ENOTCONN = socket is not connected, stat '/googleDrive'
 						*/
 						
-						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT") {
+						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN") {
 							problem = err.code;
 							type = "*"
 						}

@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Lots of new errors and issues due to Google Drive
+
 Error: Server: API error: ENOTCONN: socket is not connected, stat '/googleDrive'
 
 ---

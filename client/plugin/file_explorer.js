@@ -110,6 +110,8 @@ gapi.auth2.getAuthInstance().signOut();
 		}
 		// Just remove the item for now
 		
+		if(openFolders.indexOf(from) != -1) openFolders.splice(openFolders.indexOf(from), 1);
+		
 		return true;
 	}
 	
@@ -329,7 +331,13 @@ gapi.auth2.getAuthInstance().signOut();
 		// List files in working dir, get name of parent folder
 		EDITOR.listFiles(dir, function gotFileList(err, listItems) {
 			
-			if(err) throw err;
+			if(err) {
+				if(openFolders.indexOf(dir) != -1) {
+openFolders.splice(openFolders.indexOf(dir), 1);
+					return;
+				}
+				else throw err;
+			}
 			
 			listItems.sort(sortByNameAndType);
 			
