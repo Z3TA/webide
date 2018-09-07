@@ -2889,6 +2889,15 @@ function sendMail(from, to, subject, text) {
 }
 
 function gcsfLogin(username, gcsfLoginCallback) {
+	/*
+		
+		Need to create a "native" Google OAuth 2.0 client ID from here:
+		https://console.developers.google.com/apis/credentials?pli=1&project=webide-203608&folder&organizationId
+		
+		Then edit gcsf/src/gcsf/drive_facade.rs and update the client_id, project_id and client_secret !
+		(also remove the http port 8081 auto code entry, because Google API can only redirect to localhost!!)
+		
+	*/
 	
 if(GCSF.hasOwnProperty(username)) return gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 

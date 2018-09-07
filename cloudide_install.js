@@ -157,6 +157,9 @@ console.log("Installing archive extractor utilities");
 exec("apt-add-repository multiverse && apt-get update");
 exec("apt-get install unzip unrar -y");
 
+console.log("Installing CGSF dependencies");
+exec("apt-get install libfuse -y");
+
 
 
 console.log("Finish!");

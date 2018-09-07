@@ -43,88 +43,22 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-gcsf
-----
-
-'Could not load configuration file.: ErrorMessage { msg: "Cannot create configuration directory" }', libcore/result.rs:945:5
-
-
+What do we need to install for gcsf to run ?
 
 sudo apt-get install -y libfuse-dev pkg-config libssl-dev
 curl https://sh.rustup.rs -sSf | sh
 rustup update stable
 cargo install gcsf
 
-https://www.ostechnix.com/how-to-mount-google-drive-locally-as-virtual-file-system-in-linux/
-
-
-$ gcsf login test1
-Please direct your browser to 
-https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=http://localhost:8081&response_type=code&client_id=726003905312-e2mq9mesjc5llclmvc04ef1k7qopv9tu.apps.googleusercontent.com 
-and follow the instructions displayed there.
-
-netstat -tulpn
-tcp        0      0 127.0.0.1:8081          0.0.0.0:*               LISTEN      25884/gcsf
-
-What if port 8081 is taken ?
-
-Please direct your browser to 
-https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=726003905312-e2mq9mesjc5llclmvc04ef1k7qopv9tu.apps.googleusercontent.com
-, follow the instructions and enter the code displayed here:
-
-So port 8081 must be free!
-
-Can I change the "GCSF wants to access your Google account" to webide.se instead !?
-
-Need to modify: /src/gcsf/drive_facade.rs
-
-
-
-./target/debug/gcsf login test7
-Please direct your browser to https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com, follow the instructions and enter the code displayed here: 
-4/UgBR3l88-R5Yq6EtGfZ_w5okGJCKFw6xA9uPDRrFHQTuYWqbekaDjtk
-Successfully logged in. Saved credentials to "/home/Z/.config/gcsf/test7"
-
-mkdir ~/mygoogledrive
-sudo gcsf mount ~/mygoogledrive -s test7
-(long living process, will exit if fusermount -u)
-
- INFO  gcsf > Creating and populating file system...
- INFO  gcsf::gcsf::drive_facade > Received page 1 containing 177 files
- INFO  gcsf::gcsf::drive_facade > Received page 1 containing 57 files
- INFO  gcsf                     > File sytem created.
- INFO  gcsf                     > Mounting to /home/Z/mygoogledrive
- INFO  gcsf                     > Mounted to /home/Z/mygoogledrive
- INFO  gcsf::gcsf::file_manager > Checking for changes and possibly applying them.
- INFO  gcsf::gcsf::file_manager > Checking for changes and possibly applying them.
-
-sudo fusermount -u ~/mygoogledrive
-
-
 ---
-Investigating using Google Drive on server side using google-drive-ocamlfuse
-Having a very hard time trying to compile it ...
-Issue with users having to copy/paste the auth. It would be better to use redirect_uri ...
-Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
-
-Then replace the current Google drive integration with google-drive-ocamlfuse
-so that you can run nodejs script etc, that are saved on google drive.
 
 Detect if running from chrome-book, then auto connect to Google drive.
 If not running in Chrome app mode, you must click on Google drive in the menu.
 
----
-
-Google drive integration is a must have for a Chromebook users, since that's where they store their files.
-Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
-Should Google Drive be mounted on the server side instead !?
 
 ---
-
-
 
 WYSIWYG appends an extra new-line padding inside <body> 
-
 
 ---
 

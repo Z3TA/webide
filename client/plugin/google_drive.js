@@ -1,13 +1,7 @@
 /*
-	
-	Native: 
-	
-	987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com
-	webide-203608
-	oz_hNXf2jtwqM3S7enuXST_j
-	
-	https://console.developers.google.com/apis/credentials?pli=1&project=webide-203608&folder&organizationId
-	
+	Google drive integration is a must have for a Chromebook users, since that's where they store their files.
+	Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
+	That's why Google Drive is mounted server side instead of using the client/web API
 	
 */
 (function() {
