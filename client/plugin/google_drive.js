@@ -9,10 +9,13 @@
 
 var menuItem;
 
+	var GD_MENU_NOT_CONNECTED = "Google Drive";
+	var GD_MENU_CONNECTED = "Google Drive (logout)";
+	
 EDITOR.plugin({
 	desc: "Mount Google Drive",
 	load: function() {
-		menuItem = EDITOR.addMenuItem("Google Drive", googleDriveInit);
+			menuItem = EDITOR.addMenuItem(GD_MENU_NOT_CONNECTED, googleDriveInit);
 
 },
 	unload: function() {
@@ -68,7 +71,7 @@ if(err) return alertBox(err.message);
 		// Assume it was successfully mounted
 		EDITOR.fileExplorer("/googleDrive/");
 		
-		EDITOR.updateMenuItem(menuItem, true, "Google Drive", umountGoogleDrive);
+		EDITOR.updateMenuItem(menuItem, true, GD_MENU_CONNECTED, umountGoogleDrive);
 		EDITOR.hideMenu();
 	}
 	
@@ -80,7 +83,7 @@ function umountGoogleDrive() {
 			
 			// Even if we got an error, the folder has likely umount'ed
 			
-			EDITOR.updateMenuItem(menuItem, false, "Google Drive", googleDriveInit);
+			EDITOR.updateMenuItem(menuItem, false, GD_MENU_NOT_CONNECTED, googleDriveInit);
 			EDITOR.hideMenu();
 			
 			// Tell file explorer to close /googleDrive folder !?

@@ -2934,8 +2934,11 @@ var enterCodeCallback = undefined; // Call this function when mounted
 	gcsfLoginSession.on("close", function (code, signal) {
 		log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
 		
-		GCSF[username].loginSession = null;
-		GCSF[username].enterCode = null; // So we get an error if it's called
+		// The GCS sessions might already have been "cleaned"
+		if( GCSF.hasOwnProperty(username) ) {
+			GCSF[username].loginSession = null;
+			GCSF[username].enterCode = null; // So we get an error if it's called
+		}
 		
 		if(gcsfLoginCallback) {
 			gcsfLoginCallback( new Error("gcsf login session closed with code=" + code + " and signal=" + signal) );
