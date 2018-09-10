@@ -220,6 +220,21 @@
 			return;
 		}
 		
+		try {
+			var reName = new RegExp(text, "ig");
+		}
+		catch(err) {
+			var regexpError = true;
+		}
+		
+		if(regexpError) {
+			inputGoto.setAttribute("class", "inputtext error");
+			return;
+		}
+		else {
+			inputGoto.setAttribute("class", "inputtext");
+		}
+		
 		if(text.length > 0) {
 			// If using shift and other combo key, this will be called twice without the text changing
 			if(text == lastTypedText && lastTypedText == lastSearchText) {
@@ -231,6 +246,7 @@
 				console.log("abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
 			}
+			
 			trySearch();
 		}
 		else {
