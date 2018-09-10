@@ -1591,6 +1591,7 @@
 		
 		UTIL.assert(UTIL.joinPaths(["/foo/bar/", "baz"]), "/foo/bar/baz");
 		UTIL.assert(UTIL.joinPaths(["C:\\\\users\\me\\foo", "bar\\baz\\"]), "C:\\users\\me\\foo\\bar\\baz\\");
+		UTIL.assert(UTIL.joinPaths(["C:\\\\users\\me\\foo", "bar/baz/"]), "C:\\users\\me\\foo\\bar\\baz\\");
 		
 		callback(true);
 		

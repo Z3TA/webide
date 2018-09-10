@@ -1151,7 +1151,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		if(Object.prototype.toString.call( paths ) != '[object Array]') throw new Error("Argument needs to be an array: paths=" + paths);
 		
-		var pathDelimiter = UTIL.getPathDelimiter(paths.join(""));
+		var pathDelimiter = UTIL.getPathDelimiter(paths[0]);
 		
 		for (var i=0; i<paths.length-1; i++) {
 			if(!paths[i]) throw new Error("Item " + i + "=" + paths[i] + " is emty or undefined!");
@@ -1164,7 +1164,9 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		var path = paths.join(pathDelimiter);
 		
-		if(pathDelimiter == "/") {
+		if(pathDelimiter == "/" && path.indexOf("\\") == -1) {
+			// Want to be sure path does not contain and backslash
+			// or node would turn /C:/ into C:\C:\
 			path = "/" + path;
 			path = path.replace(/\\/g, "/");
 		}
