@@ -1,10 +1,10 @@
 Contributing
 ============
-If you make changes to this software, feel free to send them to zeta@zetafiles.org
+If you make changes to this software, feel free to a patch to zeta@zetafiles.org
 
 If it's a big update, (for example a new plugin), you also have to include the following note:
 "I give you full irrevocable copy rights for this code, including but not limited to the right to sell, distribute, and make changes."
-Or use a permissive licence such as MIT, Apache, BSD, Mozilla lincenses, with a disclaimer that it only applies to *your* code/plugin.
+Or use a permissive licence such as MIT, Apache, BSD, or Mozilla lincenses, with a disclaimer that it only applies to *your* code/plugin.
 
 
 Mercurial
@@ -70,8 +70,8 @@ Support and maintenance
 -----------------------
 If your code patches are added to the software, they will receive maintenance,
 meaning they will not break in future releases.
-This does not however mean your code will last forever. It might be deleted for the following reasons:
-obsolete'ness, performance issues or replacements.
+This does not however mean your code will last forever. It can for example be deleted, 
+for the following, but not limited to, these reasons: obsolete'ness, performance issues or replacements.
 
 
 Tests
@@ -85,10 +85,19 @@ EDITOR.addTest(function myTest(callback) {
   throw new Error(""); // Test failed
 }
 
+If the test is inlined put the following comment before the test(s):
+// TEST-CODE-START
+
+And the following code after the tests
+// TEST-CODE-END
+
+If the tests are in seperate file(s), place them in the client/tests/ folder and,
+add them to index.htm somwhere between <!-- BEGIN TESTS --> and <!-- END TESTS -->
+
 
 Documentation
 -------------
-If you are a developer, you should look up what methods do by reading the source code.
+If you are a developer, you should look up what methods do by reading the source code. 😄
 Feel free to comment your code with reasons, as to why you choose to implement it that way.
 And why it's useful. And add notes about performance optimizations.
 Do not write what the code does in the comments, the code should be self explainable.
