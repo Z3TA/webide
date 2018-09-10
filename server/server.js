@@ -407,7 +407,7 @@ function main() {
 	
 	log("Server running as user=" + CURRENT_USER);
 	
-	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
+	if(info.uid < 0) log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user!", 4);
 	
 	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);

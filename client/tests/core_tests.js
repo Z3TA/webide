@@ -1587,6 +1587,14 @@
 		
 	});
 	
+	EDITOR.addTest(function suppotWindowsPaths(callback) {
+		
+		UTIL.assert(UTIL.joinPaths(["/foo/bar/", "baz"]), "/foo/bar/baz");
+		UTIL.assert(UTIL.joinPaths(["C:\\\\users\\me\\foo", "bar\\baz\\"]), "C:\\users\\me\\foo\\bar\\baz\\");
+		
+		callback(true);
+		
+	}, 1);
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {

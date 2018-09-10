@@ -1142,14 +1142,6 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 	},
 	
-	reIndexOf: function reIndexOf(reIn, str, startIndex) {
-		var re = new RegExp(reIn.source, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
-		re.lastIndex = startIndex || 0;
-		var res = re.exec(str);
-		if(!res) return -1;
-		return re.lastIndex - res[0].length;
-	},
-
 	joinPaths: function joinPaths(paths) {
 		/*
 			
@@ -1159,18 +1151,40 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		if(Object.prototype.toString.call( paths ) != '[object Array]') throw new Error("Argument needs to be an array: paths=" + paths);
 		
+		var pathDelimiter = UTIL.getPathDelimiter(paths.join(""));
+		
 		for (var i=0; i<paths.length-1; i++) {
 			if(!paths[i]) throw new Error("Item " + i + "=" + paths[i] + " is emty or undefined!");
 			paths[i] = UTIL.trailingSlash(paths[i]);
-			if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
+			//if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
 		}
 		
-		var path = "/" + paths.join("/");
-		while(path.indexOf("//") != -1) path = path.replace("//", "/");
+		//console.log("paths=", paths);
+		//console.log("pathDelimiter=" + pathDelimiter);
+		
+		var path = paths.join(pathDelimiter);
+		
+		if(pathDelimiter == "/") {
+			path = "/" + path;
+			path = path.replace(/\\/g, "/");
+		}
+		else if(pathDelimiter == "\\") {
+			path = path.replace(/\//g, "\\");
+		}
+		
+		while(path.indexOf(pathDelimiter + pathDelimiter) != -1) path = path.replace(pathDelimiter + pathDelimiter, pathDelimiter);
 		
 		return path;
 	},
 	
+	reIndexOf: function reIndexOf(reIn, str, startIndex) {
+		var re = new RegExp(reIn.source, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
+		re.lastIndex = startIndex || 0;
+		var res = re.exec(str);
+		if(!res) return -1;
+		return re.lastIndex - res[0].length;
+	},
+
 	reLastIndexOf: function reLastIndexOf(regex, str, startpos) {
 		
 		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
