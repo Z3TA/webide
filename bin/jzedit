@@ -13,7 +13,10 @@
 	
 */
 
-var path = require("path");
+var module_path = require("path");
+
+var DEFAULT = require("../server/default_settings.js");
+var STDIN_PORT = DEFAULT.stdin-channel_port;
 
 var JZEDIT_LOCATION = path.resolve(__dirname, "../"); // Path to the jzedit folder (where package.json is located)
 console.log("JZEDIT_LOCATION=" + JZEDIT_LOCATION);
@@ -51,6 +54,8 @@ function main() {
 		Check localhost for jzedit com port on tcp
 		if it's alive, tell the editor to open the file path in arg 2
 		*/
+	
+	
 	
 	var env = process.env;
 env.ARGS = JSON.stringify(process.argv);

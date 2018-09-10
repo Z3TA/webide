@@ -13,6 +13,8 @@ var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower 
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
+var STDIN_PORT = DEFAULT.stdin-channel_port;
+
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
 var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
 var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
@@ -150,8 +152,11 @@ const module_ps = require('ps-node');
 const module_nodemailer = require('nodemailer');
 const module_smtpTransport = require('nodemailer-smtp-transport');
 const module_mount = require("../shared/mount.js");
+const module_string_decoder = require('string_decoder');
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
+
+var stdinChannelBuffer = "";
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -477,8 +482,69 @@ else {
 		}
 		else {
 			log("Server running on URL/address: http://" + makeUrl() + "");
+			
+			if(NO_CHROOT && USERNAME ) {
+				openStdinChannel();
+			}
 		}
 	}
+}
+
+function openStdinChannel() {
+	var net = require("net");
+	var env = process.env;
+	var StringDecoder = module_string_decoder.StringDecoder;
+	var decoder = new StringDecoder('utf8');
+	var stdInFileName = "stdin";
+	var connection;
+	
+	var stdinChannel = net.createConnection({port: STDIN_PORT}, function () {
+		log("stdin channel listening on port " + STDIN_PORT);
+	});
+	
+	stdinChannel.on("error", function stdSocketError(err) {
+		console.warn(err.message);
+	});
+	
+	stdinChannel.on("data", stdIn);
+	stdinChannel.on("end", stdEnd);
+	
+	function stdIn(data) {
+		
+		var str = decoder.write(data);
+		
+		connection = USER_CONNECTIONS[USERNAME];
+		
+		if(connection) {
+			connection.write('{"stdin": "' + str + '"}');
+		}
+		else {
+			stdinChannelBuffer += str;
+		}
+		
+		//alertBox("STDIN: data.length=" + data.length + " strBuffer.length=" + strBuffer.length + " str.length=" + str.length + " data: " + data + "");
+	}
+	
+	function stdEnd(endData) {
+		
+		if(stdInFile) {
+			if(strBuffer.length > 0) {
+				// Collected data from before stdInFile was opened
+				//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
+				stdInFile.write(strBuffer);
+				strBuffer = "";
+			}
+		}
+		else {
+			// Wait for stdInFile ...
+			console.log("Waiting for stdInFile ...");
+			setTimeout(stdEnd, 100);
+		}
+		
+		alertBox("STDIN: END: " + endData);
+	}
+	
+	
 }
 
 function createGuestUser(id, callback) {
@@ -735,6 +801,10 @@ function sockJsConnection(connection) {
 	
 	connection.on("close", sockJsClose);
 	
+	if(stdinChannelBuffer) {
+		connection.write('{"stdin": "' + stdinChannelBuffer + '"}');
+		stdinChannelBuffer = "";
+	}
 	
 	function sockJsMessage(message) {
 		

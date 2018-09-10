@@ -95,7 +95,6 @@ EDITOR.settings = {
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	clearColumnOptimization: false, // When deleting a character, clears only the character
 	insert: false,
-	stdInPort: 13379,
 	useCliboardcatcher: false // Some browsers (IE) can only capture clipboard events if a text element is focused
 };
 
@@ -5257,76 +5256,6 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			}
 		}
 		
-		if(RUNTIME == "nw.js") {
-			/*
-				NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
-				We will have to use a wrapper and send the data via a socket
-			*/
-			var net = require("net");
-			var env = process.env;
-			var stdInFile;
-			var strBuffer = "";
-			var StringDecoder = require('string_decoder').StringDecoder;
-			var decoder = new StringDecoder('utf8');
-			var stdInFileName = "stdin";
-			
-			var httpClient = net.createConnection({port: env.STDIN_PORT || EDITOR.settings.stdInPort}, function() {
-				//alertBox("Connected to STDIN ...");
-				
-				if(!stdInFile) {
-					if(EDITOR.files.hasOwnProperty(stdInFileName)) stdInFile = EDITOR.files[stdInFileName];
-					else {
-						EDITOR.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
-							if(err) throw err;
-							stdInFile = file;
-						});
-					}
-				}
-				
-			});
-			
-			httpClient.on("error", function stdSocketError(err) {
-				console.warn(err.message);
-			});
-			
-			httpClient.on("data", stdIn);
-			httpClient.on("end", stdEnd);
-			
-			// Command arguments
-			var gui = require('nw.gui');
-			var commandArguments = gui.App.argv;
-			console.log("Command arguments:" + commandArguments);
-			//alertBox("Command arguments:" + commandArguments);
-			
-			if(commandArguments.indexOf("--disable-lcd-text") != -1) {
-				EDITOR.settings.sub_pixel_antialias = false;
-			}
-			
-			// Menu test:
-			// https://github.com/nwjs/nw.js/wiki/Window-menu
-			// It says menubar should work in Linux ...
-			// confirmed: Meny at the top DOES NOT WORK in nw.js v0.12.3
-			/*
-				var menu = new gui.Menu({ type: 'menubar' });
-				
-				var menuA = new gui.MenuItem({ label: 'Item A' });
-				
-				var submenu = new gui.Menu();
-				submenu.append(new gui.MenuItem({ label: 'Item 1' }));
-				submenu.append(new gui.MenuItem({ label: 'Item 2' }));
-				submenu.append(new gui.MenuItem({ label: 'Item 3' }));
-				
-				menuA.submenu = submenu;
-				
-				menu.append(menuA);
-				menu.append(new gui.MenuItem({ label: 'Item B' }));
-				menu.append(new gui.MenuItem({ type: 'separator' }));
-				menu.append(new gui.MenuItem({ label: 'Item C' }));
-				
-				gui.Window.get().menu = menu;
-			*/
-		}
-		
 		console.log("Setting mainLoopInterval because first load!");
 		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
@@ -5356,44 +5285,6 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		*/
 		
 		windowLoaded = true;
-		
-		function stdIn(data) {
-			
-			var str = decoder.write(data);
-			
-			if(stdInFile) {
-				if(strBuffer.length > 0) {
-					// Collected data from before stdInFile was opened
-					strBuffer += str; 
-					//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
-					stdInFile.write(strBuffer);
-					strBuffer = "";
-				} else stdInFile.write(str);
-				
-			}
-			else strBuffer += str;
-			
-			//alertBox("STDIN: data.length=" + data.length + " strBuffer.length=" + strBuffer.length + " str.length=" + str.length + " data: " + data + "");
-		}
-		
-		function stdEnd(endData) {
-			
-			if(stdInFile) {
-				if(strBuffer.length > 0) {
-					// Collected data from before stdInFile was opened
-					//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
-					stdInFile.write(strBuffer);
-					strBuffer = "";
-				}
-			}
-			else {
-				// Wait for stdInFile ...
-				console.log("Waiting for stdInFile ...");
-				setTimeout(stdEnd, 100);
-			}
-			
-			alertBox("STDIN: END: " + endData);
-		}
 		
 	}
 	
