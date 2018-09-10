@@ -43,23 +43,18 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Test on different platform.
+Distribute a "evaluation" copy on npm!?
+
 
 ---
 
-Detect if running from chrome-book, then auto connect to Google drive.
+Detect if running from chrome-book, then auto connect to Google drive. ?
 If not running in Chrome app mode, you must click on Google drive in the menu.
-
 
 ---
 
 WYSIWYG appends an extra new-line padding inside <body> 
-
----
-
-Some nodejs scripts wants to automatically open up a new browser tab,
-detect this and open a new window.
-
-Example: https://github.com/okwolf/srvs.git
 
 ---
 
@@ -80,11 +75,7 @@ Doesn't do the right thing: if(|abc)
 should insert abcdef but inserts defabc
 do nothing !?
 
-
-
-
 ---
-
 
 Live colaboration with transform
 
@@ -2605,6 +2596,14 @@ Don't store username/password in localStorage!! third party modules/scripts will
 Make EDITOR.storage work like EDITOR.localStorage so they can easiliy replace each other !?
 
 When user drops a .zip file, ask where to extract it, then open it in file explorer, and also open any README.* or index.js 
+
+---
+Some nodejs scripts wants to automatically open up a new browser tab,
+detect this and open a new window.
+
+Example: https://github.com/okwolf/srvs.git
+
+---
 
 
 ### Debugging
