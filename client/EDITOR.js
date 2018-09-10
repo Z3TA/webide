@@ -2865,7 +2865,7 @@ EDITOR.fireEvent("btk");
 		
 	}
 	
-	EDITOR.autoComplete = function(file, combo, character, charCode, keyPushDirection) {
+	EDITOR.autoComplete = function autoComplete(file, combo, character, charCode, keyPushDirection) {
 		/*
 			An abstraction that lets you have many auto-complete functions. 
 			Register using: EDITOR.on("autoComplete", function)
