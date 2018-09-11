@@ -103,7 +103,8 @@ function main() {
 		stdinChannel.on("error", stdinChannelError);
 		stdinChannel.on("connect", stdinChannelConnected);
 		stdinChannel.on("close", stdinChannelClosed);
-		
+		stdinChannel.on("data", stdinChannelData);
+
 		function stdinChannelError(err) {
 			if(err.code == "ECONNREFUSED") {
 				if(!secondTry) {
@@ -134,15 +135,27 @@ function main() {
 				stdinStream.pipe(stdinChannel);
 				// When piping, the socket will automatically end when the piped stream end!
 			}
-			else {
-				console.log("Closing stdin channel because pipeStdin=" + pipeStdin);
+			else if(filePath == undefined) {
+				console.log("Closing stdin channel because pipeStdin=" + pipeStdin + " and filePath=" + filePath);
 				stdinChannel.end();
-				if(!EDITOR_STARTED) process.exit(0);
+				// The script refuse to exist, force exit as long as editor wasn't started, and we are not waiting for a stdout event
+				if(!EDITOR_STARTED && pipeStdin) process.exit(0);
 			}
 		}
 		
 		function stdinChannelClosed(hadError) {
 			console.log("stdin channel closed. hadError=" + hadError);
+		}
+
+		function stdinChannelData(data) {
+			if(typeof data == "object") data = data.toString();
+			if(filePath && data == filePath) {
+				console.log("Done editing " + filePath);
+				process.exit(0);
+			}
+			else {
+				console.log("stdin channel stdout: " + data);
+			}
 		}
 		
 	}

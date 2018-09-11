@@ -5,6 +5,7 @@
 	var stdinFilePath = "stdin";
 	var stdinFile;
 	var stdinBuffer = "";
+	var watchFiles = [];
 	
 	EDITOR.plugin({
 		desc: "Listen for stdin messages",
@@ -13,6 +14,12 @@
 			CLIENT.on("stdin", stdinPrint);
 			CLIENT.on("arguments", editorArguments);
 			
+
+			EDITOR.on("fileClose", stdinChannelFileClose);
+			EDITOR.on("afterSave", stdinChannelAfterSave);
+
+
+
 			console.log("stdin channel module loaded!");
 			
 		},
@@ -20,29 +27,58 @@
 			CLIENT.removeEvent("stdin", stdinPrint);
 			CLIENT.removeEvent("arguments", editorArguments);
 			
+			EDITOR.removeEvent("fileClose", stdinChannelFileClose);
+			EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
+
 			if(stdinFile) EDITOR.closeFile(stdinFilePath);
 			
 		},
 	});
 	
+	function stdinChannelFileClose(file) {
+		if(watchFiles.indexOf(file.path) != -1) notofyEdit(file.path);
+	}
+
+	function stdinChannelAfterSave(file) {
+
+	}
+
+	function notofyEdit(path) {
+		CLIENT.cmd("stdout", {data: path});
+		watchFiles.splice(watchFiles.indexOf(path));
+	}
+
 	function editorArguments(str) {
 		// Usually a file path
 		var filePath = str;
-		EDITOR.openFile(filePath, undefined, function fileOpened(err, file) {
+		EDITOR.openFile(filePath, undefined, function(err, file) {
 			/*
 				We want to tell the stdin channel when this file is closed!
 			*/
 			if(err) {
-				alertBox("Failed to open " + filePath + "\n" + err.message);
+				if(err.code == "ENOENT") {
+					EDITOR.openFile(filePath, "", function(err, file) {
+						if(err) throw err;
+						else fileOpened(file.path);
+					});
+				}
+				else alertBox("Failed to open (code=" + err.code + ") " + filePath + "\n" + err.message);
 			}
-			
-			// Other files might open and take away focus...
-			setTimeout(function() {	EDITOR.showFile(file); }, 500);
-			setTimeout(function() {	EDITOR.showFile(file); }, 1000);
-			setTimeout(function() {	EDITOR.showFile(file); }, 1500);
-			setTimeout(function() {	EDITOR.showFile(file); }, 2000);
-			
+			else {
+				fileOpened(file.path);
+			}
 		});
+	}
+
+	function fileOpened(path) {
+		// Other files might open and take away focus...
+		setTimeout(function() {	EDITOR.showFile(path); }, 500);
+		setTimeout(function() {	EDITOR.showFile(path); }, 1000);
+		setTimeout(function() {	EDITOR.showFile(path); }, 1500);
+		setTimeout(function() {	EDITOR.showFile(path); }, 2000);
+
+		watchFiles.push(path);
+
 	}
 	
 	function stdinPrint(str) {

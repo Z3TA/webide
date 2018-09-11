@@ -159,6 +159,7 @@ var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order t
 
 var stdinChannelBuffer = "";
 var editorProcessArguments = "";
+var STDOUT_SOCKETS = [];
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -503,7 +504,7 @@ function openStdinChannel() {
 	var stdinServer = module_net.createServer();
 	
 	stdinServer.on("listening", function stdinServerListening() {
-		log("stdin channel listening on port " + STDIN_PORT);
+		log("stdin channel listening on port " + STDIN_PORT, DEBUG);
 	});
 	
 	stdinServer.on("connection", function stdinConnection(socket) {
@@ -512,12 +513,14 @@ function openStdinChannel() {
 		// Reset state for each connection
 		gotArguments = false;
 
+		STDOUT_SOCKETS.push(socket);
 		
 		socket.on("data", stdIn);
 		socket.on("end", stdEnd);
 		
 		socket.on("close", function sockClose(hadError) {
 			console.log("stdin channel socket closed. hadError=" + hadError);
+			STDOUT_SOCKETS.splice(STDOUT_SOCKETS.indexOf(socket));
 		});
 		
 	});
@@ -962,6 +965,13 @@ function sockJsConnection(connection) {
 		
 		console.log("The command queue has " + commandQueue.length + " items.");
 		
+		if(command == "stdout") {
+			for (var i=0; i<STDOUT_SOCKETS.length; i++) {
+				STDOUT_SOCKETS[i].write(json.data);
+			}
+			return;
+		}
+
 		if(!userWorker) {
 			
 			//console.log("json=" + JSON.stringify(json));
