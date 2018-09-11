@@ -51,6 +51,8 @@
 	function editorArguments(str) {
 		// Usually a file path
 		var filePath = str;
+		stdinFilePath = filePath; // This file will also serve as stdin file (if we get data from stdin)
+
 		EDITOR.openFile(filePath, undefined, function(err, file) {
 			/*
 				We want to tell the stdin channel when this file is closed!
@@ -59,26 +61,28 @@
 				if(err.code == "ENOENT") {
 					EDITOR.openFile(filePath, "", function(err, file) {
 						if(err) throw err;
-						else fileOpened(file.path);
+						else fileOpened(file);
 					});
 				}
 				else alertBox("Failed to open (code=" + err.code + ") " + filePath + "\n" + err.message);
 			}
 			else {
-				fileOpened(file.path);
+				fileOpened(file);
 			}
 		});
 	}
 
-	function fileOpened(path) {
+	function fileOpened(file) {
+		console.log("File specified in arguments opened: " + file.path)
 		// Other files might open and take away focus...
-		setTimeout(function() {	EDITOR.showFile(path); }, 500);
-		setTimeout(function() {	EDITOR.showFile(path); }, 1000);
-		setTimeout(function() {	EDITOR.showFile(path); }, 1500);
-		setTimeout(function() {	EDITOR.showFile(path); }, 2000);
+		setTimeout(function() {	EDITOR.showFile(file); }, 500);
+		setTimeout(function() {	EDITOR.showFile(file); }, 1000);
+		setTimeout(function() {	EDITOR.showFile(file); }, 1500);
+		setTimeout(function() {	EDITOR.showFile(file); }, 2000);
 
-		watchFiles.push(path);
+		watchFiles.push(file.path);
 
+		if(!stdinFile) stdinFileOpened(null, file); // Also use this for stdin
 	}
 	
 	function stdinPrint(str) {
@@ -89,8 +93,10 @@
 			stdinFile.write(str);
 			return;
 		}
+		else console.log("No stdinFile available")
 		
 		if(EDITOR.openFileQueue.indexOf(stdinFilePath) == -1) {
+			console.log("Opening stdinFile ...");
 			EDITOR.openFile(stdinFilePath, "", stdinFileOpened);
 		}
 		
@@ -99,6 +105,7 @@
 	}
 	
 	function stdinFileOpened(err, file) {
+		console.log("stdinFile opened! file==stdinFile?" + (file == stdinFile));
 		if(err) throw err;
 		stdinFile = file;
 		if(stdinBuffer) stdinFile.write(stdinBuffer);

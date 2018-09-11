@@ -4,17 +4,27 @@
 	This script can be used in place of "editor".
 	
 	jzedit [filepath]
-	(or pipe to it)
+
+	or pipe to it:
+	echo hello | jzedit [filepath]
+
 	
 	Installation (optional, if npm didn't do this for us):
+	------------------------------------------------------
 	* Make sure this file is executable: chmod +x jzedit
 	* Add this folder to PATH
 	   * Or copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
 	   * Or add the jzedit location to .profile or .bashrc :  export PATH=$PATH:/path/to/bin/jzedit
 	
-	todo:
-	Some programs like "crontab -e" assumes we are done when exiting ...
-	Solution: Keep the program running, and don't exit until we get a notice that the file has been closed !?
+
+	Make jzedit the default editor:
+	-------------------------------
+	export EDITOR='jzedit'
+
+	or export EDITOR='/path/tp/jzedit/bin/jzedit')
+
+	permanent: Add it to .bashrc
+
 	
 */
 
@@ -148,6 +158,10 @@ function main() {
 		}
 
 		function stdinChannelData(data) {
+			/*
+				Some programs like "crontab -e" assumes we are done when exiting ...
+				Solution: Keep the program running, and don't exit until we get a notice that the file has been closed
+			*/
 			if(typeof data == "object") data = data.toString();
 			if(filePath && data == filePath) {
 				console.log("Done editing " + filePath);
