@@ -52,6 +52,7 @@
 		// Usually a file path
 		var filePath = str;
 		stdinFilePath = filePath; // This file will also serve as stdin file (if we get data from stdin)
+		stdinFile = null; // This is the *new* stdin-file!
 
 		EDITOR.openFile(filePath, undefined, function(err, file) {
 			/*
@@ -82,7 +83,9 @@
 
 		watchFiles.push(file.path);
 
-		if(!stdinFile) stdinFileOpened(null, file); // Also use this for stdin
+		// ALways make the latest file opened in arguments the stdin-file 
+		if(!stdinFile) stdinFileOpened(null, file);
+
 	}
 	
 	function stdinPrint(str) {

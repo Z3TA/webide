@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+stdin-file
+
 Able to "pipe" data to the editor ...
 echo hi | jzedit [user or file path]
 
