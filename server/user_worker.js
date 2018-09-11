@@ -638,7 +638,7 @@ process.on('message', function commandMessage(message) {
 		
 	}
 	
-})
+});
 
 
 
