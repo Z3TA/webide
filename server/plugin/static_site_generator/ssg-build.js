@@ -91,7 +91,7 @@ var PUBFOLDER; // The bublic/publication folder
 // todo: Allow more flags
 var PUBLISH = process.argv[4];
 
-log("PUBLISH=" + PUBLISH);
+//log("PUBLISH=" + PUBLISH);
 
 var MEDIAFILES = []; // Files mentioned in source code
 

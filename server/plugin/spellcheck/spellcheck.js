@@ -25,7 +25,7 @@ var dictFiles = {};
 
 // Preload all languages before we are chrooted
 // Need to load them sync so we get them before we are chrooted
-	log("Preloading spellcheck dictionaries ...", logModule.INFO);
+	//log("Preloading spellcheck dictionaries ...", logModule.INFO);
 var langFolder = __dirname + "/languages/";
 var folders = fs.readdirSync(langFolder);
 for (var i=0, name=""; i<folders.length; i++) {
