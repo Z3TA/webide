@@ -10,6 +10,9 @@
     "transparent": false,
     "always-on-top": false
   },
+  "bin": {
+    "jzedit": "./bin/jzedit"
+  },
   "private": true,
   "license": "SEE LICENSE IN LICENSE.txt",
   "description": "A text/code editor for JavaScript made in JavaScript",

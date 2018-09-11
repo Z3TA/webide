@@ -38,6 +38,9 @@ var serversToCheck = 0;
 var HTTP_REQUESTS = [];
 //return startClient("127.0.0.1", "8099");
 
+var module_path = require("path");
+
+var serverProcess; // So it can be killed when client exit
 
 if(localOnly) {
 	startClient();
@@ -128,7 +131,8 @@ function startNewServer() {
 	var serverIp = LOCAL_SERVER_IP;
 	var serverPort = LOCAL_SERVER_PORT;
 	
-var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
+	var scriptPath = module_path.resolve(__dirname, "server/server.js");
+	var serverArg = [scriptPath, "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
 
 	var serverOptions = {
 		stdio: "inherit"
@@ -142,11 +146,18 @@ var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--pass
 	});
 	*/
 
-	attemptLaunch("node", serverArg, function(err) {
+	attemptLaunch("node", serverArg, function(err, cp) {
 		if(err) log("Unable to start server!");
 		else {
 			log("Server started!");
+			
+
+			if(!cp) throw new Error("Got no server child process!");
+			serverProcess = cp;
+
 			if(!clientStarting) startClient();
+			
+
 		}
 	}, serverOptions);
 	}
@@ -425,7 +436,7 @@ function startClient(ip, port, proto) {
 		}
 		else program = programOriginal;
 
-		attemptLaunch(program, args, function triedProgram(err) {
+		attemptLaunch(program, args, function triedProgram(err, cp) {
 			if(err) {
 
 				var time = timeStamp();
@@ -443,6 +454,22 @@ function startClient(ip, port, proto) {
 			else {
 				log("Successfully started program=" + programOriginal);
 				programStarted = true;
+
+				if(cp && cp.connected) {
+					cp.on("close", function killServer() {
+						serverProcess.kill();
+						serverProcess.unref();
+					})
+					
+				}
+				//else if(!serverProcess) console.warn("We do not yet have the server process!"); 
+				else {
+					serverProcess.kill(); // Kill the server right away
+					serverProcess.unref();
+				}
+
+				process.exit(); // Exit start script when client closes
+
 			}
 		});
 	}
@@ -452,8 +479,8 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 
 	if(typeof callbackFunction != "function") throw new Error("No callback function!");
 	
-	function callback(err) {
-		if(callbackFunction) callbackFunction(err);
+	function callback(err, cp) {
+		if(callbackFunction) callbackFunction(err, cp);
 		callbackFunction = null; // Only callback once!
 	}
 	
@@ -483,7 +510,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	
 	if(cp.connected) {
 		log("Asuming process=" + process + " was successful because it's connected!", DEBUG);
-		return callback(null);
+		return callback(null, cp);
 	}
 	
 	cp.on("close", function programClose(code, signal) {
@@ -493,7 +520,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		code = parseInt(code);
 		if(code === 0) {
 			log("Asuming process=" + process + " was successful because close code=" + code);
-			callback(null);
+			callback(null); // Don't return child-process after it has closed
 		}
 		else callback(new Error(msg));
 
@@ -523,7 +550,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		if(!gotStdoutData) {
 			gotStdoutData = true;
 			log("Asuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
-			callback(null);
+			callback(null, cp);
 		}
 
 	});
@@ -531,6 +558,14 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	cp.stderr.on("data", function programStderr(data) {
 		var msg = process + " stderr data: " + data;
 		log(msg, DEBUG);
+
+		// Node -v 8 seems to get all data on stderr instead of the correct stdout ... 
+		if(!gotStdoutData) {
+			gotStdoutData = true;
+			log("Asuming process=" + process + " was successful because something was returned from stderr!", DEBUG);
+			callback(null, cp);
+		}
+
 	});
 
 	/*

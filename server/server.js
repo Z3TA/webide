@@ -72,7 +72,7 @@ var log; // Using small caps because it looks and feels better
 	
 	if(lastFolder != "server") {
 		try {
-			process.chdir('./server');
+			process.chdir(__dirname);
 			//console.log('New directory: ' + process.cwd());
 		}
 		catch (err) {
@@ -497,7 +497,7 @@ function openStdinChannel() {
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
 	var stdInFileName = "stdin";
-	var editor_client_connection;
+	var client_connections;
 	var gotArguments = false; // The data will always start with process arguments and then a line-break
 	
 	var stdinServer = module_net.createServer();
@@ -530,13 +530,19 @@ function openStdinChannel() {
 	stdinServer.listen(STDIN_PORT);
 	
 	
+	function sendToAll(user_connections, data) {
+		for (var i=0, conn; i<user_connections.connections.length; i++) {
+			user_connections.connections[i].write(data);
+		}
+	}
+	
 	function sendOrBuffer(str) {
-		editor_client_connection = USER_CONNECTIONS[USERNAME];
+		client_connections = USER_CONNECTIONS[USERNAME];
 		
-		if(editor_client_connection) {
+		if(client_connections) {
 			var data = JSON.stringify({stdin: str}); // Serialize
 			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
-			editor_client_connection.write(data);
+			sendToAll(client_connections, data);
 		}
 		else {
 			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
@@ -554,11 +560,11 @@ function openStdinChannel() {
 				var args = str.slice(0, lbIndex);
 				console.log("args=" + UTIL.lbChars(args));
 				if(args.length > 0) {
-					editor_client_connection = USER_CONNECTIONS[USERNAME];
-					if(editor_client_connection) {
+					client_connections = USER_CONNECTIONS[USERNAME];
+					if(client_connections) {
 						var data = JSON.stringify({arguments: args}); // Serialize
 						console.log("Sending editor arguments to client user " + USERNAME + " (str.length=" + str.length + ")");
-						editor_client_connection.write(data);
+						sendToAll(client_connections, data);
 					}
 					else {
 						console.log("Editor client user " + USERNAME + " not connected! Saving arguments for when the user logs in: args=" + args);
@@ -835,20 +841,6 @@ function sockJsConnection(connection) {
 	connection.on("data", sockJsMessage);
 	
 	connection.on("close", sockJsClose);
-	
-	if(stdinChannelBuffer) {
-		var obj = {stdin: stdinChannelBuffer};
-		var data = JSON.stringify(obj);
-		connection.write(data);
-		stdinChannelBuffer = "";
-	}
-	
-	if(editorProcessArguments) {
-		var obj = {arguments: editorProcessArguments};
-		var data = JSON.stringify(obj);
-		connection.write(data);
-		editorProcessArguments = "";
-	}
 	
 	function sockJsMessage(message) {
 		
@@ -1196,6 +1188,20 @@ username = guestUser;
 									handleUserMessage(commandQueue[i]);
 								}
 								commandQueue.length = 0;
+							}
+							
+							if(userConnectionName == USERNAME) {
+								if(stdinChannelBuffer) {
+									var data = JSON.stringify({stdin: stdinChannelBuffer});
+									connection.write(data);
+									stdinChannelBuffer = "";
+								}
+								
+								if(editorProcessArguments) {
+									var data = JSON.stringify({arguments: editorProcessArguments});
+									connection.write(data);
+									editorProcessArguments = "";
+								}
 							}
 							
 							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
@@ -2363,8 +2369,10 @@ function createUserWorker(name, uid, gid) {
 	
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
 	
+	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
+
 	try {
-		var worker = module_child_process.fork("user_worker.js", args, options);
+		var worker = module_child_process.fork(scriptPath, args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {

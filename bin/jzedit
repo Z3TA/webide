@@ -3,11 +3,18 @@
 /*
 	This script can be used in place of "editor".
 	
+	jzedit [filepath]
+	(or pipe to it)
+	
 	Installation (optional, if npm didn't do this for us):
 	* Make sure this file is executable: chmod +x jzedit
 	* Add this folder to PATH
 	   * Or copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
 	   * Or add the jzedit location to .profile or .bashrc :  export PATH=$PATH:/path/to/bin/jzedit
+	
+	todo:
+	Some programs like "crontab -e" assumes we are done when exiting ...
+	Solution: Keep the program running, and don't exit until we get a notice that the file has been closed !?
 	
 */
 
@@ -21,6 +28,8 @@ var JZEDIT_LOCATION = module_path.resolve(__dirname, "../"); // Path to the jzed
 console.log("JZEDIT_LOCATION=" + JZEDIT_LOCATION);
 
 
+var EDITOR_STARTED = false;
+
 //console.log("process.argv=" + process.argv);
 
 function main() {
@@ -30,6 +39,12 @@ function main() {
 	args.shift(); // Remove the path to this script
 	args = args.join(" ");
 	
+	if(args.length > 0) {
+		// Asume args is a file path. Resolve the path
+		var workingDir = process.cwd();
+		var filePath = module_path.resolve(workingDir, args);
+	}
+
 	var argsSent = false;
 	
 	var stdinData = '';
@@ -69,7 +84,9 @@ function main() {
 		" stdinStreamHasData=" + stdinStreamHasData +
 		" stdinChannel.connecting = " + (stdinChannel && stdinChannel.connecting) );
 		
-		if( (!stdinChannel || stdinChannel.destroyed) && (!argsSent || stdinStreamHasData) && !(stdinChannel && stdinChannel.connecting) ) connectToStdinChannel(stdinStreamHasData);
+		if( (!stdinChannel || stdinChannel.destroyed) && 
+		(!argsSent || stdinStreamHasData) && 
+		!(stdinChannel && stdinChannel.connecting) ) connectToStdinChannel(stdinStreamHasData);
 		
 		
 	});
@@ -80,22 +97,33 @@ function main() {
 	});
 	
 	
-	function connectToStdinChannel(pipeStdin) {
-		console.log("(re)connecting to editor server stdin channel ...");
+	function connectToStdinChannel(pipeStdin, secondTry) {
+		console.log("(re)connecting to editor server stdin channel. secondTry=" + secondTry + " ...");
 		stdinChannel = module_net.createConnection({port: STDIN_PORT});
 		stdinChannel.on("error", stdinChannelError);
 		stdinChannel.on("connect", stdinChannelConnected);
 		stdinChannel.on("close", stdinChannelClosed);
 		
 		function stdinChannelError(err) {
-			console.error(err);
+			if(err.code == "ECONNREFUSED") {
+				if(!secondTry) {
+					console.log("Attempting to start the editor ...");
+					startEditor(function editorStarted(err) {
+						if(err) console.log(err.message);
+						else connectToStdinChannel(pipeStdin, true);
+												
+					});
+				}
+				else console.log("Already tried starting the editor!");
+			}
+			else console.error(err);
 		}
 		
 		function stdinChannelConnected() {
 			console.log("Connected to editor server stdin channel. pipeStdin=" + pipeStdin);
 			
 			// When connecting we Must always send the arguments even if they are empty
-			stdinChannel.write(args + "\n");
+			stdinChannel.write((filePath || args) + "\n");
 			argsSent = true;
 			
 			if(stdinData.length > 0) stdinChannel.write(stdinData);
@@ -109,6 +137,7 @@ function main() {
 			else {
 				console.log("Closing stdin channel because pipeStdin=" + pipeStdin);
 				stdinChannel.end();
+				if(!EDITOR_STARTED) process.exit(0);
 			}
 		}
 		
@@ -124,8 +153,10 @@ function startEditor(callback) {
 	
 	var spawn = require('child_process').spawn;
 	
-	var editor = spawn( JZEDIT_LOCATION + "start.js" , { env: process.env } );
+	var editor = spawn( JZEDIT_LOCATION + "/start.js", ["-no-module-check", "-local"] , { env: process.env } );
 	
+	EDITOR_STARTED = true;
+
 	editor.on("error", function editorError(err) {
 		console.log("Editor error: " + err.message);
 		if(callback) {
@@ -140,10 +171,23 @@ function startEditor(callback) {
 			callback( new Error("Editor closed! code=" + code) );
 			callback = null;
 		}
+		process.exit(); // Always exit (this script) when the editor exit
 	});
 	
-	editor.stdout.on("data", function editorLog(data) {
-		console.log("editor start stdout: " + stdout);
+	editor.stdout.on("data", function editorStdout(data) {
+		//console.log("editor stdout: " + data);
+		editorLog(data);
+	});
+	
+	editor.stderr.on("data", function editorStderr(data) {
+		//console.log("Editor stderr: " + data);
+		editorLog(data);
+	});
+
+	function editorLog(data) {
+
+		if(typeof data == "object") data = data.toString();
+
 		var reStdinChannel = /stdin channel listening on port (\d+)/;
 		var match = data.match(reStdinChannel);
 		if(match) {
@@ -152,16 +196,12 @@ function startEditor(callback) {
 			callback(null);
 			callback = null;
 			
-			// Detatch from editor's start process
-			//subprocess.unref();
+			// Don't exit until the editor exit's
+			//editor.ref();
 			
 			
 		}
-	});
-	
-	editor.stderr.on("data", function editorErr(data) {
-		console.log("Editor stderr: " + data);
-	});
+	}
 }
 
 
