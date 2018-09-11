@@ -14,8 +14,8 @@ module.exports = {
 	smtp_port: 25,
 	smtp_host: "epost.zetafiles.org",
 	http_ip: "127.0.0.1", // use 0.0.0.0 to bind to all IP's'
-	stdin-channel_port: 13379
-	}
+	stdin_channel_port: 13379
+}
 
 /*
 	

@@ -13,7 +13,7 @@ var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower 
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
-var STDIN_PORT = DEFAULT.stdin-channel_port;
+var STDIN_PORT = DEFAULT.stdin_channel_port;
 
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
 var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
