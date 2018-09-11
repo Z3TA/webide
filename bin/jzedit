@@ -1,11 +1,9 @@
 #!/usr/bin/env node
+
 /*
-	This is a wrapper for nw and the jzedit package,
-	to allow passing files to STDIN / pipe
+	This script can be used in place of "editor".
 	
-	You need nodejs to run this! (https://nodejs.org/)
-	
-	Installation:
+	Installation (optional, if npm didn't do this for us):
 	* Make sure this file is executable: chmod +x jzedit
 	* Add this folder to PATH
 	   * Or copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
@@ -14,110 +12,157 @@
 */
 
 var module_path = require("path");
+var module_net = require("net");
 
 var DEFAULT = require("../server/default_settings.js");
-var STDIN_PORT = DEFAULT.stdin-channel_port;
+var STDIN_PORT = DEFAULT.stdin_channel_port;
 
-var JZEDIT_LOCATION = path.resolve(__dirname, "../"); // Path to the jzedit folder (where package.json is located)
+var JZEDIT_LOCATION = module_path.resolve(__dirname, "../"); // Path to the jzedit folder (where package.json is located)
 console.log("JZEDIT_LOCATION=" + JZEDIT_LOCATION);
 
-var RUNTIME;
-if(process.platform == "win32") {
-	RUNTIME = "nwjs-v0.12.3-win-x64/nw.exe"; // Change this to your OS
-}
-else if(process.platform == "linux") {
-	RUNTIME = "nwjs-v0.12.3-linux-x64/nw"; // Change this to your OS
-}
-else if(process.platform == "darwin") {
-	RUNTIME = "nwjs-v0.12.3-osx-x64/nwjs.app"; // Change this to your OS
-}
-else {
-	throw new Error("Unknown platform: " + process.platform);
-}
-console.log("RUNTIME=" + RUNTIME);
-
-
-var NW_ARG = [JZEDIT_LOCATION, "--disable-lcd-text"];
-
-
-
-var PORT = 13379; // TCP port to use
-
-console.log("Starting jzedit wrapper ...");
 
 //console.log("process.argv=" + process.argv);
 
 function main() {
 
-	/*
-		What if jzedit is already running !? 
-		Check localhost for jzedit com port on tcp
-		if it's alive, tell the editor to open the file path in arg 2
-		*/
+	var args = process.argv;
+	args.shift(); // Remove the path to node
+	args.shift(); // Remove the path to this script
+	args = args.join(" ");
 	
+	var argsSent = false;
 	
+	var stdinData = '';
 	
-	var env = process.env;
-env.ARGS = JSON.stringify(process.argv);
-	env.STDIN_PORT = process.env.STDIN_PORT || PORT;
+	var stdinChannel;
 	
-var spawn = require('child_process').spawn;
-
-	var nw = spawn( JZEDIT_LOCATION + "/runtime/" + RUNTIME, NW_ARG , { env: env } );
-
-	
-	nw.on("error", function nwError(err) {
-		throw err;
-	});
-	
-	nw.on("close", function nwClose(code) {
-		console.log("nw closed. code=" + code);
-		if(code==0) console.log("jzedit is probably already running! (suggestion: kill it)");
-		server.close();
-	});
-
-	nw.stdout.on("data", function nwStdout(data) {
-		//console.log("nwStdout: " + data);
-	});
-
-	nw.stderr.on("data", function nwStderr(data) {
-		console.log(data);
-	});
-	
-	
-	var net = require('net');
-	
-	var server = net.createServer(clientConnects);
-	
-	server.on("error", serverError);
-	
-	server.listen(env.STDIN_PORT);
-	
-	function clientConnects(clientConnection) {
+	var stdinStream = process.stdin;
+	stdinStream.on('readable', function() {
+		console.log("stdin stream readable!");
+		/*
+			readable will be called on program start 
+			and after pressing enter while the program is running
+			
+*/
+		var chunk = this.read();
+		// Note: Reading data will remove it from the internal buffer and it will not be piped
 		
-		console.log("Client (jzedit) connected!");
-		
-		clientConnection.on("end", clientClosed);
-		clientConnection.on("data", clientData);
-		
-		// When jzedit connects, pipe stdin
-		process.stdin.pipe(clientConnection);
-		
-		function clientClosed() {
-			console.log("jzedit disconnected!");
+		if (chunk === null) {
+			var stdinStreamHasData = false;
+			console.log("No data in stdin stream.");
+			
+			
+		} else {
+			var stdinStreamHasData = true;
+			console.log("stdin stream has data!");
+			
+			stdinData += chunk;
+			
 		}
 		
-		function clientData(data) {
-			console.log("data: " + data);
+		/*
+			Connect to the editor server's stdin channel
+*/
+		console.log("stdinChannel=" + !!stdinChannel + 
+		" stdinChannel.destroyed=" + (stdinChannel && stdinChannel.destroyed) + 
+		" argsSent=" + argsSent + 
+		" stdinStreamHasData=" + stdinStreamHasData +
+		" stdinChannel.connecting = " + (stdinChannel && stdinChannel.connecting) );
+		
+		if( (!stdinChannel || stdinChannel.destroyed) && (!argsSent || stdinStreamHasData) && !(stdinChannel && stdinChannel.connecting) ) connectToStdinChannel(stdinStreamHasData);
+		
+		
+	});
+	stdinStream.on('end', function() {
+		console.log("stdin stream ended!");
+		//if(stdinChannel) stdinChannel.end();
+		
+	});
+	
+	
+	function connectToStdinChannel(pipeStdin) {
+		console.log("(re)connecting to editor server stdin channel ...");
+		stdinChannel = module_net.createConnection({port: STDIN_PORT});
+		stdinChannel.on("error", stdinChannelError);
+		stdinChannel.on("connect", stdinChannelConnected);
+		stdinChannel.on("close", stdinChannelClosed);
+		
+		function stdinChannelError(err) {
+			console.error(err);
+		}
+		
+		function stdinChannelConnected() {
+			console.log("Connected to editor server stdin channel. pipeStdin=" + pipeStdin);
+			
+			// When connecting we Must always send the arguments even if they are empty
+			stdinChannel.write(args + "\n");
+			argsSent = true;
+			
+			if(stdinData.length > 0) stdinChannel.write(stdinData);
+			else console.log("No stdinData to send");
+			
+			if(pipeStdin) {
+				console.log("Piping stdin to editor ...");
+				stdinStream.pipe(stdinChannel);
+				// When piping, the socket will automatically end when the piped stream end!
+			}
+			else {
+				console.log("Closing stdin channel because pipeStdin=" + pipeStdin);
+				stdinChannel.end();
+			}
+		}
+		
+		function stdinChannelClosed(hadError) {
+			console.log("stdin channel closed. hadError=" + hadError);
 		}
 		
 	}
-	
-	function serverError(err) {
-		throw err;
-	}
-	
 	
 }
+
+function startEditor(callback) {
+	
+	var spawn = require('child_process').spawn;
+	
+	var editor = spawn( JZEDIT_LOCATION + "start.js" , { env: process.env } );
+	
+	editor.on("error", function editorError(err) {
+		console.log("Editor error: " + err.message);
+		if(callback) {
+			callback( err );
+			callback = null;
+		}
+	});
+	
+	editor.on("close", function editorClosed(code) {
+		console.log("editor closed. code=" + code);
+		if(callback) {
+			callback( new Error("Editor closed! code=" + code) );
+			callback = null;
+		}
+	});
+	
+	editor.stdout.on("data", function editorLog(data) {
+		console.log("editor start stdout: " + stdout);
+		var reStdinChannel = /stdin channel listening on port (\d+)/;
+		var match = data.match(reStdinChannel);
+		if(match) {
+			if(match[1] != STDIN_PORT) STDIN_PORT = match[1];
+			
+			callback(null);
+			callback = null;
+			
+			// Detatch from editor's start process
+			//subprocess.unref();
+			
+			
+		}
+	});
+	
+	editor.stderr.on("data", function editorErr(data) {
+		console.log("Editor stderr: " + data);
+	});
+}
+
 
 main();

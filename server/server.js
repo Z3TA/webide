@@ -153,10 +153,12 @@ const module_nodemailer = require('nodemailer');
 const module_smtpTransport = require('nodemailer-smtp-transport');
 const module_mount = require("../shared/mount.js");
 const module_string_decoder = require('string_decoder');
+const module_net = require("net");
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
 
 var stdinChannelBuffer = "";
+var editorProcessArguments = "";
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -491,57 +493,90 @@ else {
 }
 
 function openStdinChannel() {
-	var net = require("net");
 	var env = process.env;
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
 	var stdInFileName = "stdin";
-	var connection;
+	var editor_client_connection;
+	var gotArguments = false; // The data will always start with process arguments and then a line-break
 	
-	var stdinChannel = net.createConnection({port: STDIN_PORT}, function () {
+	var stdinServer = module_net.createServer();
+	
+	stdinServer.on("listening", function stdinServerListening() {
 		log("stdin channel listening on port " + STDIN_PORT);
 	});
 	
-	stdinChannel.on("error", function stdSocketError(err) {
-		console.warn(err.message);
+	stdinServer.on("connection", function stdinConnection(socket) {
+		log("stdin channel connection !");
+		
+		// Reset state for each connection
+		gotArguments = false;
+
+		
+		socket.on("data", stdIn);
+		socket.on("end", stdEnd);
+		
+		socket.on("close", function sockClose(hadError) {
+			console.log("stdin channel socket closed. hadError=" + hadError);
+		});
+		
 	});
 	
-	stdinChannel.on("data", stdIn);
-	stdinChannel.on("end", stdEnd);
+	stdinServer.on("error", function stdSocketError(err) {
+		console.warn("stdin channel error: " + err.message);
+	});
 	
-	function stdIn(data) {
+	
+	stdinServer.listen(STDIN_PORT);
+	
+	
+	function sendOrBuffer(str) {
+		editor_client_connection = USER_CONNECTIONS[USERNAME];
 		
-		var str = decoder.write(data);
-		
-		connection = USER_CONNECTIONS[USERNAME];
-		
-		if(connection) {
-			connection.write('{"stdin": "' + str + '"}');
+		if(editor_client_connection) {
+			var data = JSON.stringify({stdin: str}); // Serialize
+			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
+			editor_client_connection.write(data);
 		}
 		else {
+			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
 			stdinChannelBuffer += str;
 		}
+	}
+	
+	function stdIn(data) {
+		var str = decoder.write(data);
 		
-		//alertBox("STDIN: data.length=" + data.length + " strBuffer.length=" + strBuffer.length + " str.length=" + str.length + " data: " + data + "");
+		if(!gotArguments) {
+			// Look for a linebreak
+			var lbIndex = str.indexOf("\n");
+			if(lbIndex != -1) {
+				var args = str.slice(0, lbIndex);
+				console.log("args=" + UTIL.lbChars(args));
+				if(args.length > 0) {
+					editor_client_connection = USER_CONNECTIONS[USERNAME];
+					if(editor_client_connection) {
+						var data = JSON.stringify({arguments: args}); // Serialize
+						console.log("Sending editor arguments to client user " + USERNAME + " (str.length=" + str.length + ")");
+						editor_client_connection.write(data);
+					}
+					else {
+						console.log("Editor client user " + USERNAME + " not connected! Saving arguments for when the user logs in: args=" + args);
+						editorProcessArguments = args;
+					}
+				}
+				str = str.slice(lbIndex+1);
+				gotArguments = true;
+			}
+		}
+		
+		if(str.length > 0) sendOrBuffer(str);
+		console.log("STDIN: data.length=" + data.length + " stdinChannelBuffer.length=" + stdinChannelBuffer.length + " data=" + data);
 	}
 	
 	function stdEnd(endData) {
-		
-		if(stdInFile) {
-			if(strBuffer.length > 0) {
-				// Collected data from before stdInFile was opened
-				//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
-				stdInFile.write(strBuffer);
-				strBuffer = "";
-			}
-		}
-		else {
-			// Wait for stdInFile ...
-			console.log("Waiting for stdInFile ...");
-			setTimeout(stdEnd, 100);
-		}
-		
-		alertBox("STDIN: END: " + endData);
+		if(endData) sendOrBuffer(decoder.write(endData));
+		console.log("STDIN: END: endData.length=" + (endData && endData.length) );
 	}
 	
 	
@@ -567,27 +602,27 @@ function createGuestUser(id, callback) {
 	CREATE_USER_LOCK = true;
 	
 	if( id ) {
-var guestId = id;
+		var guestId = id;
 		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
 		guestCounterSaved(null);
 	}
 	else {
-var guestId = ++GUEST_COUNTER;
+		var guestId = ++GUEST_COUNTER;
 		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
 		
-// Save guest counter so that we can continue the number serie after server restarts
-	// It's not that bad if there are holes in the number serie. 
-	// We however don't want to give two people the same guest account!
+		// Save guest counter so that we can continue the number serie after server restarts
+		// It's not that bad if there are holes in the number serie. 
+		// We however don't want to give two people the same guest account!
 		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
 	}
 	
 	function guestCounterSaved(err) {
 		if(err) return callback(err);
-
+		
 		if(username == undefined || username == "guestundefined" || username == "[object Object]") {
-throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
+			throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
 		}
 		
 		var password = module_generator.generate({
@@ -802,8 +837,17 @@ function sockJsConnection(connection) {
 	connection.on("close", sockJsClose);
 	
 	if(stdinChannelBuffer) {
-		connection.write('{"stdin": "' + stdinChannelBuffer + '"}');
+		var obj = {stdin: stdinChannelBuffer};
+		var data = JSON.stringify(obj);
+		connection.write(data);
 		stdinChannelBuffer = "";
+	}
+	
+	if(editorProcessArguments) {
+		var obj = {arguments: editorProcessArguments};
+		var data = JSON.stringify(obj);
+		connection.write(data);
+		editorProcessArguments = "";
 	}
 	
 	function sockJsMessage(message) {
