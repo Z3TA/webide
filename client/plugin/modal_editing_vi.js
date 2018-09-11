@@ -178,7 +178,6 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	
 	var option = {
 		showmode: true, // show EDITOR.mode
-		number: true, // Show line numbers
 		ruler: false, /*
 			When enabled, the ruler is displayed on the right side of the status line at the bottom of the window.
 			By default, it displays the line number, the column number, the virtual column number,
