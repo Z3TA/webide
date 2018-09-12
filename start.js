@@ -65,7 +65,7 @@ else {
 	checkServer(LOCAL_SERVER_IP, serverChecked);
 	
 	var adresses = getIpv4Ips();
-for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
+	for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
 }
 
 var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
@@ -78,9 +78,9 @@ if(!no_module_check) {
 		if(err && err.code == "ENOENT") {
 			/*
 				console.log("\nYou need to npm install module dependencies! (node_modules folder is emty)\n"
-			 + "Or use the flag -no-module-check\n"
-			 +	"Type the following in the termial/command-line to install the modules:");
-			console.log("npm install");
+				+ "Or use the flag -no-module-check\n"
+				+	"Type the following in the termial/command-line to install the modules:");
+				console.log("npm install");
 				process.exit(1);
 			*/
 			
@@ -93,7 +93,7 @@ if(!no_module_check) {
 					console.log('exec error: ' + error);
 				}
 			});
-			}
+		}
 	});
 }
 
@@ -132,9 +132,9 @@ function startNewServer() {
 	if(serverFound) return;
 	
 	abortHttpRequests();
-
+	
 	serverFound = true;
-
+	
 	log("Starting new server ...");
 	
 	var serverIp = LOCAL_SERVER_IP;
@@ -142,37 +142,37 @@ function startNewServer() {
 	
 	var scriptPath = module_path.resolve(__dirname, "server/server.js");
 	var serverArg = [scriptPath, "--loglevel=" + LOG_LEVEL, "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
-
+	
 	var serverOptions = {
 		stdio: "inherit"
 	}
-
+	
 	//var child = require('child_process').spawn("node", serverArg, serverOptions); 
-
+	
 	/*
-	child.stdout.on('data', function(data) {
-	    console.log(data.toString()); 
-	});
+		child.stdout.on('data', function(data) {
+		console.log(data.toString()); 
+		});
 	*/
-
+	
 	attemptLaunch("node", serverArg, function(err, cp) {
 		if(err) log("Unable to start server!");
 		else {
 			log("Server started!");
 			
-
+			
 			if(!cp) throw new Error("Got no server child process!");
 			serverProcess = cp;
-
+			
 			if(!clientStarting) startClient();
 			
-
+			
 		}
 	}, serverOptions);
-	}
+}
 
 function broadcast() {
-// Listen to and send broadcast messages asking for jzedit server
+	// Listen to and send broadcast messages asking for jzedit server
 	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 	
 	var broadcastPort = 6024;
@@ -190,20 +190,20 @@ function broadcast() {
 		// We must send at least one broadcast message to be able to receive messages!
 		for(var i=0; i<broadcastAddresses.length; i++) ask(broadcastAddresses[i]);
 	});
-
+	
 	// Client
 	var broadcastClient = dgram.createSocket('udp4');
-
+	
 	broadcastClient.on('listening', function () {
 		var address = broadcastClient.address();
 		console.log('UDP Client listening on ' + address.address + ":" + address.port);
 		broadcastClient.setBroadcast(true);
 	});
-
+	
 	broadcastClient.on('message', function (message, rinfo) {
 		console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
 		
-
+		
 		// jzedit server url: http://127.0.0.1/
 		// jzedit server url: http://127.0.0.1:8099/
 		
@@ -227,9 +227,9 @@ function broadcast() {
 		}
 		
 	});
-
+	
 	broadcastClient.bind(broadcastPort);
-
+	
 	function ask(broadcastAddress) {
 		var lookForServerMessage = "Where can I find a jzedit server?"
 		var message = new Buffer(lookForServerMessage);
@@ -264,10 +264,10 @@ function getIpv4Ips() {
 }
 
 function isPrivatev4IP(ip) {
-   var parts = ip.split('.');
-   return parts[0] === '10' || parts[0] === '127' ||
-	  (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
-	  (parts[0] === '192' && parts[1] === '168');
+	var parts = ip.split('.');
+	return parts[0] === '10' || parts[0] === '127' ||
+	(parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
+	(parts[0] === '192' && parts[1] === '168');
 }
 
 function checkServer(ip, callback) {
@@ -280,49 +280,49 @@ function checkServer(ip, callback) {
 		//log("A server has already been found. Aborting checkServer", DEBUG);
 		return;
 	}
-
+	
 	log("Checking for a jzedit server on ip=" + ip + " ...", DEBUG);
 	
 	var http = require("http");
-
+	
 	var portFound = false;
 	var portsChecked = 0;
-
+	
 	var portsToCheck = [80, 8080, 8099];
 	
 	for(var i=0; i<portsToCheck.length; i++) checkPort(portsToCheck[i], portChecked);
 	
 	function portChecked(itsTheServer, port) {
 		portsChecked++;
-
+		
 		if(itsTheServer) {
 			portFound = true;
 			callback(true, ip, port);
 		}
 		else if(portsChecked == portsToCheck.length && !portFound) callback(false, ip);
 	}
-
+	
 	function checkPort(port, checkPortCallback) {
 		
 		if(serverFound) {
 			//log("A server has already been found. Aborting checkServer checkPort", DEBUG);
 			return;
 		}
-
+		
 		log("Checking port=" + port + " on ip=" + ip, DEBUG);
 		
 		
 		var options = {
-		  host: ip,
-		  port: port,
-		  path: '/jzedit',
-		  method: 'GET'
+			host: ip,
+			port: port,
+			path: '/jzedit',
+			method: 'GET'
 		};
-
+		
 		var req = http.request(options, function(res) {
-
+			
 			if(serverFound) return;
-
+			
 			log("Answer on port=" + port + " on ip=" + ip, INFO);
 			log('STATUS: ' + res.statusCode, DEBUG);
 			log('HEADERS: ' + JSON.stringify(res.headers), DEBUG);
@@ -342,10 +342,10 @@ function checkServer(ip, callback) {
 		HTTP_REQUESTS.push(req);
 		
 		req.on('error', function(e) {
-		  if(!serverFound) log('problem with request: ' + e.message, DEBUG);
-		  checkPortCallback(false, port);
+			if(!serverFound) log('problem with request: ' + e.message, DEBUG);
+			checkPortCallback(false, port);
 		});
-
+		
 		req.end();
 	}
 }
@@ -380,9 +380,9 @@ function startClient(ip, port, proto) {
 	else if(platform == "linux")  nwRuntime = "./runtime/nwjs-v0.12.3-linux-x64/nw";
 	else log("platform=" + platform + " not yet supported by nw.js", INFO);
 	
-
+	
 	var tryPrograms = [];
-		
+	
 	// Always try nw.js first!
 	//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
 	//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
@@ -406,22 +406,22 @@ function startClient(ip, port, proto) {
 		// Only try Safari on Mac
 		// Unfortunately Safari doesn't support chromless
 		// We might be able to remove the chrome after it started though, by using osascript
-
+		
 		//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
-
+		
 		tryPrograms.push(["safari", [url]]);
 	}
 	
-
+	
 	var programIndex = 0;
 	var startTime = timeStamp();
 	var maxTime = 3; // Seconds
 	var programStarted = false;
 	
 	tryProgram(tryPrograms[programIndex]);
-
 	
-
+	
+	
 	function tryProgram(arr) {
 		var programOriginal = arr[0];
 		var args = arr[1] || [];
@@ -442,20 +442,20 @@ function startClient(ip, port, proto) {
 			args.unshift("/K");
 			
 			program = "cmd";
-
+			
 		}
 		else program = programOriginal;
-
+		
 		attemptLaunch(program, args, function triedProgram(err, cp) {
 			if(err) {
-
+				
 				var time = timeStamp();
-
+				
 				if(time - startTime > maxTime && programStarted) {
 					log((time - startTime) + " seconds since start. Assuming exit");
 					return process.exit();
 				}
-
+				
 				log("Failed to start program=" + programOriginal);
 				programIndex++;
 				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
@@ -464,13 +464,13 @@ function startClient(ip, port, proto) {
 			else {
 				log("Successfully started program=" + programOriginal);
 				programStarted = true;
-
+				
 				if(cp) { // Don't check if the cp is connected (it's not)
 					cp.on("close", function killServer(code) {
 						console.log("Killing server process because " + program + " closed! (code=" + code + ")");
 						serverProcess.kill();
 						serverProcess.unref();
-
+						
 						console.log("Exiting because client process closed!");
 						process.exit(0); // Exit start script when client closes
 					});
@@ -478,27 +478,29 @@ function startClient(ip, port, proto) {
 				}
 				//else if(!serverProcess) console.warn("We do not yet have the server process!"); 
 				else {
+					console.log("Did not recive cp after launching " + program);
+					
 					// Kill the server right away
 					if(serverProcess) {
-					console.log("Killing server process because cp=" + !!cp + ""); // and cp.connected=" + (cp && cp.connected) + "
-					serverProcess.kill();
-					serverProcess.unref();
+						console.log("Killing server process because cp=" + !!cp + ""); // and cp.connected=" + (cp && cp.connected) + "
+						serverProcess.kill();
+						serverProcess.unref();
 					}
 					else console.log("serverProcess not running !?");
 					
 					console.log("Exiting because cp=" + !!cp);
 					process.exit(0); // Exit start script when client closes
 				}
-
 				
-
+				
+				
 			}
 		});
 	}
 }
 
 function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
-
+	
 	if(typeof callbackFunction != "function") throw new Error("No callback function!");
 	
 	function callback(err, cp) {
@@ -512,7 +514,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	var options = {};
 	
 	var gotStdoutData = false;
-
+	
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
 	
@@ -531,7 +533,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	}
 	
 	cp.ref(); // Do not uncouple!
-
+	
 	if(cp.connected && callbackFunction) {
 		log("Assuming process=" + process + " was successful because it's connected!", DEBUG);
 		return callback(null, cp);
@@ -547,7 +549,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 			callback(null); // Don't return child-process after it has closed
 		}
 		else callback(new Error(msg));
-
+		
 	});
 	
 	cp.on("disconnect", function programDisconnect() {
@@ -566,38 +568,38 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		var msg = process + " exit: code=" + code + " signal=" + signal;
 		log(msg, DEBUG);
 	});
-
+	
 	cp.stdout.on("data", function programStdout(data) {
 		var msg = process + " stdout data: " + data;
 		log(msg, DEBUG);
-
+		
 		if(!gotStdoutData && callbackFunction) {
 			gotStdoutData = true;
 			log("Assuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
 			callback(null, cp);
 		}
-
+		
 	});
 	
 	cp.stderr.on("data", function programStderr(data) {
 		var msg = process + " stderr data: " + data;
 		log(msg, DEBUG);
-
+		
 		// Node -v 8 seems to get all data on stderr instead of the correct stdout ... 
 		if(!gotStdoutData && callbackFunction) {
 			gotStdoutData = true;
 			log("Assuming process=" + process + " was successful because something was returned from stderr!", DEBUG);
 			callback(null, cp);
 		}
-
+		
 	});
-
+	
 	/*
-	var waitTime = 250;
-	setTimeout(function started() {
+		var waitTime = 250;
+		setTimeout(function started() {
 		log("Assuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
 		callback(null);
-	}, waitTime);
+		}, waitTime);
 	*/
 	
 }
