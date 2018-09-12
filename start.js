@@ -27,6 +27,8 @@ var DEBUG = 7;
 var getArg = require("./shared/getArg.js");
 
 var LOG_LEVEL = getArg(["loglevel", "loglevel"]) || INFO;
+if(!!getArg(["debug", "debug"])) LOG_LEVEL = DEBUG;
+
 module_log.setLogLevel(LOG_LEVEL);
 
 
