@@ -476,10 +476,13 @@ function startClient(ip, port, proto) {
 				//else if(!serverProcess) console.warn("We do not yet have the server process!"); 
 				else {
 					// Kill the server right away
+					if(serverProcess) {
 					console.log("Killing server process because cp=" + !!cp + ""); // and cp.connected=" + (cp && cp.connected) + "
 					serverProcess.kill();
 					serverProcess.unref();
-
+					}
+					else console.log("serverProcess not running !?");
+					
 					console.log("Exiting because cp=" + !!cp);
 					process.exit(0); // Exit start script when client closes
 				}

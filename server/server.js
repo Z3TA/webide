@@ -529,8 +529,7 @@ function openStdinChannel() {
 		console.warn("stdin channel error: " + err.message);
 	});
 	
-	
-	stdinServer.listen(STDIN_PORT);
+	stdinServer.listen(STDIN_PORT, "127.0.0.1");
 	
 	
 	function sendToAll(user_connections, data) {
