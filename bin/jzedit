@@ -35,6 +35,8 @@ var module_log = require("../shared/log.js");
 var log = module_log.log;
 module_log.overrideConsole();
 
+var DEBUG = module_log.DEBUG;
+
 var DEFAULT = require("../server/default_settings.js");
 var STDIN_PORT = DEFAULT.stdin_channel_port;
 
@@ -123,9 +125,11 @@ function main() {
 				if(!secondTry) {
 					console.log("Attempting to start the editor ...");
 					startEditor(function editorStarted(err) {
-						if(err) console.log(err.message);
-						else connectToStdinChannel(pipeStdin, true);
-												
+						if(err) console.log("Failed to start editor: " + err.message);
+						else {
+							console.log("Editor started successfully");
+							connectToStdinChannel(pipeStdin, true);
+						}					
 					});
 				}
 				else console.log("Already tried starting the editor!");
@@ -137,14 +141,16 @@ function main() {
 			console.log("Connected to editor server stdin channel. pipeStdin=" + pipeStdin);
 			
 			// When connecting we Must always send the arguments even if they are empty
-			stdinChannel.write((filePath || args) + "\n");
+			var argsString = filePath || args;
+			console.log("Sending argsString=" + argsString);
+			stdinChannel.write(argsString + "\n");
 			argsSent = true;
 			
 			if(stdinData.length > 0) stdinChannel.write(stdinData);
 			else console.log("No stdinData to send");
 			
 			if(pipeStdin) {
-				console.log("Piping stdin to editor ...");
+				log("Piping stdin to editor ...");
 				stdinStream.pipe(stdinChannel);
 				// When piping, the socket will automatically end when the piped stream end!
 			}
@@ -185,7 +191,7 @@ function startEditor(callback) {
 
 	var spawn = require('child_process').spawn;
 	var editorDebugLog = [];
-	var editor = spawn( JZEDIT_LOCATION + "/start.js", ["-no-module-check", "-local"] , { env: process.env } );
+	var editor = spawn( JZEDIT_LOCATION + "/start.js", ["-no-module-check", "-local", "--loglevel=" + DEBUG] , { env: process.env } );
 	
 	EDITOR_STARTED = true;
 
@@ -205,7 +211,7 @@ function startEditor(callback) {
 		}
 
 		for(var i=0; i<editorDebugLog.length; i++) {
-			console.log(editorDebugLog[i]);
+			log("start.js stderr:" + editorDebugLog[i], DEBUG);
 		}
 		console.log("Exiting because start.js closed.")
 		process.exit(0); // Always exit (this script) when the editor exit
@@ -217,7 +223,7 @@ function startEditor(callback) {
 	});
 	
 	editor.stderr.on("data", function editorStderr(data) {
-		console.log("start.js stderr: " + data);
+		//console.log("start.js stderr: " + data);
 		editorLog(data);
 	});
 
@@ -230,12 +236,18 @@ function startEditor(callback) {
 		if(match) {
 			if(match[1] != STDIN_PORT) STDIN_PORT = match[1];
 			
+			console.log("Editor listening on stdin channel!");
+
 			callback(null);
 			callback = null;
 			
 			// Don't exit until the editor exit's
 			//editor.ref();
 		}
+
+		//Waiting for editor to open stdin channel ...
+
+		log(data, DEBUG);
 
 		// Save log for debugging purpouse
 		editorDebugLog.push(data);

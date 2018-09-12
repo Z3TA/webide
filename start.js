@@ -15,7 +15,8 @@
 
 "use strict";
 
-var log = require("./shared/log.js").log;
+var module_log = require("./shared/log.js")
+var log = module_log.log;
 
 // Log levels
 var WARN = 4;
@@ -25,10 +26,16 @@ var DEBUG = 7;
 
 var getArg = require("./shared/getArg.js");
 
+var LOG_LEVEL = getArg(["loglevel", "loglevel"]) || INFO;
+module_log.setLogLevel(LOG_LEVEL);
+
+
 var LOCAL_SERVER_IP = "127.0.0.1";
 var LOCAL_SERVER_PORT = "8099";
 
 var localOnly = !!getArg(["local", "local"]);
+
+
 
 var serverFound = false;
 var clientStarting = false;
@@ -132,7 +139,7 @@ function startNewServer() {
 	var serverPort = LOCAL_SERVER_PORT;
 	
 	var scriptPath = module_path.resolve(__dirname, "server/server.js");
-	var serverArg = [scriptPath, "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
+	var serverArg = [scriptPath, "--loglevel=" + LOG_LEVEL, "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
 
 	var serverOptions = {
 		stdio: "inherit"
