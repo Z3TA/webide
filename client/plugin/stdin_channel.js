@@ -94,6 +94,7 @@
 		
 		if(stdinFile) {
 			stdinFile.write(str);
+			EDITOR.renderNeeded();
 			return;
 		}
 		else console.log("No stdinFile available")
@@ -111,8 +112,11 @@
 		console.log("stdinFile opened! file==stdinFile?" + (file == stdinFile));
 		if(err) throw err;
 		stdinFile = file;
-		if(stdinBuffer) stdinFile.write(stdinBuffer);
-		stdinBuffer = "";
+		if(stdinBuffer.length > 0) {
+			stdinFile.write(stdinBuffer);
+			stdinBuffer = "";
+			EDITOR.renderNeeded();
+		}
 	}
 	
 	

@@ -442,7 +442,7 @@ function startClient(ip, port, proto) {
 				var time = timeStamp();
 
 				if(time - startTime > maxTime && programStarted) {
-					log((time - startTime) + " seconds since start. Asuming exit");
+					log((time - startTime) + " seconds since start. Assuming exit");
 					return process.exit();
 				}
 
@@ -455,20 +455,29 @@ function startClient(ip, port, proto) {
 				log("Successfully started program=" + programOriginal);
 				programStarted = true;
 
-				if(cp && cp.connected) {
-					cp.on("close", function killServer() {
+				if(cp) { // Don't check if the cp is connected (it's not)
+					cp.on("close", function killServer(code) {
+						console.log("Killing server process because " + program + " closed! (code=" + code + ")");
 						serverProcess.kill();
 						serverProcess.unref();
-					})
+
+						console.log("Exiting because client process closed!");
+						process.exit(0); // Exit start script when client closes
+					});
 					
 				}
 				//else if(!serverProcess) console.warn("We do not yet have the server process!"); 
 				else {
-					serverProcess.kill(); // Kill the server right away
+					// Kill the server right away
+					console.log("Killing server process because cp=" + !!cp + ""); // and cp.connected=" + (cp && cp.connected) + "
+					serverProcess.kill();
 					serverProcess.unref();
+
+					console.log("Exiting because cp=" + !!cp);
+					process.exit(0); // Exit start script when client closes
 				}
 
-				process.exit(); // Exit start script when client closes
+				
 
 			}
 		});
@@ -508,18 +517,20 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		return callback(new Error(msg));
 	}
 	
-	if(cp.connected) {
-		log("Asuming process=" + process + " was successful because it's connected!", DEBUG);
+	cp.ref(); // Do not uncouple!
+
+	if(cp.connected && callbackFunction) {
+		log("Assuming process=" + process + " was successful because it's connected!", DEBUG);
 		return callback(null, cp);
 	}
 	
 	cp.on("close", function programClose(code, signal) {
-		var msg = process + " close: code=" + code + " signal=" + signal
+		var msg = process + " close: code=" + code + " signal=" + signal;
 		log(msg, DEBUG);
 		
 		code = parseInt(code);
-		if(code === 0) {
-			log("Asuming process=" + process + " was successful because close code=" + code);
+		if(code === 0 && callbackFunction) {
+			log("Assuming process=" + process + " was successful because close code=" + code, DEBUG);
 			callback(null); // Don't return child-process after it has closed
 		}
 		else callback(new Error(msg));
@@ -547,9 +558,9 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		var msg = process + " stdout data: " + data;
 		log(msg, DEBUG);
 
-		if(!gotStdoutData) {
+		if(!gotStdoutData && callbackFunction) {
 			gotStdoutData = true;
-			log("Asuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
+			log("Assuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
 			callback(null, cp);
 		}
 
@@ -560,9 +571,9 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		log(msg, DEBUG);
 
 		// Node -v 8 seems to get all data on stderr instead of the correct stdout ... 
-		if(!gotStdoutData) {
+		if(!gotStdoutData && callbackFunction) {
 			gotStdoutData = true;
-			log("Asuming process=" + process + " was successful because something was returned from stderr!", DEBUG);
+			log("Assuming process=" + process + " was successful because something was returned from stderr!", DEBUG);
 			callback(null, cp);
 		}
 
@@ -571,7 +582,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	/*
 	var waitTime = 250;
 	setTimeout(function started() {
-		log("Asuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
+		log("Assuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
 		callback(null);
 	}, waitTime);
 	*/

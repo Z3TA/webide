@@ -30,13 +30,16 @@
 
 var module_path = require("path");
 var module_net = require("net");
+var module_log = require("../shared/log.js");
+
+var log = module_log.log;
+module_log.overrideConsole();
 
 var DEFAULT = require("../server/default_settings.js");
 var STDIN_PORT = DEFAULT.stdin_channel_port;
 
 var JZEDIT_LOCATION = module_path.resolve(__dirname, "../"); // Path to the jzedit folder (where package.json is located)
 console.log("JZEDIT_LOCATION=" + JZEDIT_LOCATION);
-
 
 var EDITOR_STARTED = false;
 
@@ -178,14 +181,16 @@ function main() {
 
 function startEditor(callback) {
 	
+	// Use start.js which will start both the server and the client
+
 	var spawn = require('child_process').spawn;
-	
+	var editorDebugLog = [];
 	var editor = spawn( JZEDIT_LOCATION + "/start.js", ["-no-module-check", "-local"] , { env: process.env } );
 	
 	EDITOR_STARTED = true;
 
 	editor.on("error", function editorError(err) {
-		console.log("Editor error: " + err.message);
+		console.log("start.js error: " + err.message);
 		if(callback) {
 			callback( err );
 			callback = null;
@@ -193,21 +198,26 @@ function startEditor(callback) {
 	});
 	
 	editor.on("close", function editorClosed(code) {
-		console.log("editor closed. code=" + code);
+		console.log("start.js closed. code=" + code);
 		if(callback) {
-			callback( new Error("Editor closed! code=" + code) );
+			callback( new Error("start.js closed! code=" + code) );
 			callback = null;
 		}
-		process.exit(); // Always exit (this script) when the editor exit
+
+		for(var i=0; i<editorDebugLog.length; i++) {
+			console.log(editorDebugLog[i]);
+		}
+		console.log("Exiting because start.js closed.")
+		process.exit(0); // Always exit (this script) when the editor exit
 	});
 	
 	editor.stdout.on("data", function editorStdout(data) {
-		//console.log("editor stdout: " + data);
+		//console.log("start.js stdout: " + data);
 		editorLog(data);
 	});
 	
 	editor.stderr.on("data", function editorStderr(data) {
-		//console.log("Editor stderr: " + data);
+		console.log("start.js stderr: " + data);
 		editorLog(data);
 	});
 
@@ -225,9 +235,12 @@ function startEditor(callback) {
 			
 			// Don't exit until the editor exit's
 			//editor.ref();
-			
-			
 		}
+
+		// Save log for debugging purpouse
+		editorDebugLog.push(data);
+		if(editorDebugLog.length > 30) editorDebugLog.shift();
+
 	}
 }
 
