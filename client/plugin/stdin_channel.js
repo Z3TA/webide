@@ -1,3 +1,12 @@
+/*
+
+
+Test in bash:
+cd path/to/jzedit/bin
+counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done | ./jzedit hi.txt
+
+*/
+
 
 (function() {
 	"use strict";
@@ -6,34 +15,38 @@
 	var stdinFile;
 	var stdinBuffer = "";
 	var watchFiles = [];
-	
+	var wrongStdinFileCount = 0;
+
 	EDITOR.plugin({
 		desc: "Listen for stdin messages",
-		load: function() {
-			
-			CLIENT.on("stdin", stdinPrint);
-			CLIENT.on("arguments", editorArguments);
-			
-
-			EDITOR.on("fileClose", stdinChannelFileClose);
-			EDITOR.on("afterSave", stdinChannelAfterSave);
-
-
-
-			console.log("stdin channel module loaded!");
-			
-		},
-		unload: function() {
-			CLIENT.removeEvent("stdin", stdinPrint);
-			CLIENT.removeEvent("arguments", editorArguments);
-			
-			EDITOR.removeEvent("fileClose", stdinChannelFileClose);
-			EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
-
-			if(stdinFile) EDITOR.closeFile(stdinFilePath);
-			
-		},
+		load: loadStdinChannelPlugin,
+		unload: unloadStdinChannelPlugin,
 	});
+
+
+	function loadStdinChannelPlugin() {
+		CLIENT.on("stdin", stdinPrint);
+		CLIENT.on("arguments", editorArguments);
+		
+
+		EDITOR.on("fileClose", stdinChannelFileClose);
+		EDITOR.on("afterSave", stdinChannelAfterSave);
+
+
+
+		console.log("stdin channel module loaded!");
+	}
+
+	function unloadStdinChannelPlugin() {
+		CLIENT.removeEvent("stdin", stdinPrint);
+		CLIENT.removeEvent("arguments", editorArguments);
+		
+		EDITOR.removeEvent("fileClose", stdinChannelFileClose);
+		EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
+
+		if(stdinFile) EDITOR.closeFile(stdinFilePath);
+	}
+
 	
 	function stdinChannelFileClose(file) {
 		if(watchFiles.indexOf(file.path) != -1) notofyEdit(file.path);
@@ -52,7 +65,8 @@
 		// Usually a file path
 		var filePath = str;
 		stdinFilePath = filePath; // This file will also serve as stdin file (if we get data from stdin)
-		stdinFile = null; // This is the *new* stdin-file!
+		stdinFile = null; // filePath is the *new* stdin-file!
+		console.log("Set stdinFilePath to " + stdinFilePath);
 
 		EDITOR.openFile(filePath, undefined, function(err, file) {
 			/*
@@ -92,26 +106,54 @@
 		
 		console.log("stdinPrint: str=" + str);
 		
-		if(stdinFile) {
+		if(stdinFile && stdinFile.path != stdinFilePath) {
+			console.log("Changing stdinFile from " + stdinFile.path + " to " + stdinFilePath);
+			stdinFile = null;
+			EDITOR.openFile(stdinFilePath, undefined, stdinFileOpened);
+		}
+		else if(stdinFile) {
+			console.log("stdinFile.path=" + stdinFile.path + " stdinFilePath=" + stdinFilePath);
 			stdinFile.write(str);
 			EDITOR.renderNeeded();
 			return;
 		}
 		else console.log("No stdinFile available")
 		
-		if(EDITOR.openFileQueue.indexOf(stdinFilePath) == -1) {
+		stdinBuffer += str;
+
+		if(EDITOR.openFileQueue.indexOf(stdinFilePath) != -1) return;
+
+
+		// Don't open the stdin file right away, we might get "arguments".
+		setTimeout(function() {
+			if(EDITOR.openFileQueue.indexOf(stdinFilePath) != -1) return;
 			console.log("Opening stdinFile ...");
 			EDITOR.openFile(stdinFilePath, "", stdinFileOpened);
-		}
-		
-		stdinBuffer += str;
+		}, 100);
+
 		
 	}
 	
 	function stdinFileOpened(err, file) {
-		console.log("stdinFile opened! file==stdinFile?" + (file == stdinFile));
 		if(err) throw err;
+
+		console.log("stdinFile opened! file==stdinFile?" + (file == stdinFile) + " path=" + file.path);
+		
+		if(file.path != stdinFilePath) {
+			console.warn("Wrong stdinFile opened! file.path=" + file.path + " stdinFilePath=" + stdinFilePath + "\n");
+			wrongStdinFileCount++;
+			if(wrongStdinFileCount > 3) {
+				// Avoid opening too many files
+				unloadStdinChannelPlugin();
+				throw new Error("Wrong stdinFile to many times (" + wrongStdinFileCount + ")! file.path=" + file.path + " stdinFilePath=" + stdinFilePath + "");
+			}
+			return;
+		}
+
 		stdinFile = file;
+		stdinFilePath = file.path; // The path might have changed eg stdin(1)
+
+
 		if(stdinBuffer.length > 0) {
 			stdinFile.write(stdinBuffer);
 			stdinBuffer = "";
