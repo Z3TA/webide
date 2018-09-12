@@ -824,7 +824,8 @@ var File; // File object is global
 			// Then write the rest using writeLine()
 			for(var i=1; i<rows.length; i++) {
 				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
-				file.writeLine(rows[i]);
+				if(rows[i] == "") file.insertLineBreak();
+				else file.writeLine(rows[i]);
 			}
 			return addLineBreakMaybe();
 		}
