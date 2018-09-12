@@ -1,2 +1,3 @@
+@echo off
 REM For running in Windows ...
 node jzedit
