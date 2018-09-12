@@ -965,12 +965,18 @@ function sockJsConnection(connection) {
 		console.log("The command queue has " + commandQueue.length + " items.");
 		
 		if(command == "stdout") {
+			try {
 			for (var i=0; i<STDOUT_SOCKETS.length; i++) {
 				STDOUT_SOCKETS[i].write(json.data);
 			}
+			}
+			catch(err) {
+				send({error: err.message});
+			}
+			
 			return;
 		}
-
+		
 		if(!userWorker) {
 			
 			//console.log("json=" + JSON.stringify(json));

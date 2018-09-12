@@ -28,11 +28,8 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 		CLIENT.on("stdin", stdinPrint);
 		CLIENT.on("arguments", editorArguments);
 		
-
 		EDITOR.on("fileClose", stdinChannelFileClose);
 		EDITOR.on("afterSave", stdinChannelAfterSave);
-
-
 
 		console.log("stdin channel module loaded!");
 	}
