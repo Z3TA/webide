@@ -439,6 +439,7 @@ function startClient(ip, port, proto) {
 			args.unshift('""');
 			args.unshift("start");
 			//args.unshift("/C"); // /C
+			args.unshift("/K");
 			
 			program = "cmd";
 
