@@ -43,16 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-stdin-file
-
-Able to "pipe" data to the editor ...
-echo hi | jzedit [user or file path]
-
-So that wan use jzedit as a general purpuse editor for example for editing git commit messages or crontab.
-
-if there's something in stdin - pass it to the editor.
-If a file path is specified, open that file in the editor
-
 
 Test on different platform.
 Distribute a "evaluation" copy on npm!?
