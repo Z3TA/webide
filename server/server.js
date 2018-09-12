@@ -523,6 +523,11 @@ function openStdinChannel() {
 			STDOUT_SOCKETS.splice(STDOUT_SOCKETS.indexOf(socket));
 		});
 		
+		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
+		socket.on("error", function sockError(err) {
+			console.log("stdin channel socket error: " + err.message);
+		});
+		
 	});
 	
 	stdinServer.on("error", function stdSocketError(err) {
