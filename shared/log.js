@@ -77,9 +77,7 @@ function log(msg, lvl, noTrace) {
 
 		//CONSOLE_LOG_ORIGINAL("where=" + where);
 
-		var dateString = myDate() + " ";
 
-		//CONSOLE_LOG_ORIGINAL("msg=" + msg);
 
 		if(typeof msg != "string") {
 			CONSOLE_LOG_ORIGINAL(where + ":");
@@ -88,6 +86,9 @@ function log(msg, lvl, noTrace) {
 		}
 		else {
 
+			var dateString = myDate() + " ";
+			var dateInMsg = (msg.indexOf(dateString.slice(0, 12)) != -1); // 2018-09-12 (08:58:46) 
+			//CONSOLE_LOG_ORIGINAL("msg=" + msg);
 
 			if(msg.indexOf("\n") != -1) {
 				// Pad each line
@@ -103,19 +104,25 @@ function log(msg, lvl, noTrace) {
 			var msgString = "";
 
 			if(USE_COLORS) {
-				msgString = colorDim + dateString;
+				if(!dateInMsg) {
+					msgString = colorDim + dateString;
 
-				if(lvl <= 6) msgString += colorReset;
+					if(lvl <= 6) msgString += colorReset;
+				}
+				else if(lvl > 6) msgString += colorDim;
 
 				if(lvl == _warning) msgString += colorUnderscore;
 				//else if(lvl == _notice) msgString += colorUnderscore;
 
-				msgString += msg + " " + colorDim + where;
+				msgString += msg;
+
+				if(!dateInMsg) msgString += " " + colorDim + where;
 
 				msgString += colorReset;
 			}
 			else {
-				msgString = dateString + msg + " " + where;
+				if(!dateInMsg) msgString = dateString + msg + " " + where;
+				else msgString = msg;
 			}
 
 			if(LOGFILE) {
@@ -164,10 +171,20 @@ function setLogLevel(logLevel) {
 	LOGLEVEL = logLevel;
 }
 
+function overrideConsole() {
+	// Overload console.log 
+	console.log = function() {
+		var msg = arguments[0];
+		for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+		log(msg, 7);
+	}
+}
+
 module.exports = {
 	log: log,
 	setLogFile: setLogFile,
 	setLogLevel: setLogLevel,
+	overrideConsole: overrideConsole,
 	ERROR: 3,
 	WARN: 4,
 	NOTICE: 5,
