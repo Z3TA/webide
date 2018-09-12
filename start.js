@@ -467,9 +467,12 @@ function startClient(ip, port, proto) {
 				
 				if(cp) { // Don't check if the cp is connected (it's not)
 					cp.on("close", function killServer(code) {
+						if(serverProcess) {
 						console.log("Killing server process because " + program + " closed! (code=" + code + ")");
 						serverProcess.kill();
 						serverProcess.unref();
+						}
+						else console.log("serverProcess not running !? (Got cp)");
 						
 						console.log("Exiting because client process closed!");
 						process.exit(0); // Exit start script when client closes
@@ -486,7 +489,7 @@ function startClient(ip, port, proto) {
 						serverProcess.kill();
 						serverProcess.unref();
 					}
-					else console.log("serverProcess not running !?");
+					else console.log("serverProcess not running !? (Did not get cp)");
 					
 					console.log("Exiting because cp=" + !!cp);
 					process.exit(0); // Exit start script when client closes
@@ -499,11 +502,13 @@ function startClient(ip, port, proto) {
 	}
 }
 
-function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
+function attemptLaunch(program, args, callbackFunction, options, uid, gid) {
 	
+	log("Attemting to start program=" + program + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
+
 	if(typeof callbackFunction != "function") throw new Error("No callback function!");
 	
-	function callback(err, cp) {
+	var callback = function(err, cp) {
 		if(callbackFunction) callbackFunction(err, cp);
 		callbackFunction = null; // Only callback once!
 	}
@@ -518,16 +523,14 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
 	
-	log("Attemting to start process=" + process + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
-	
 	try {
-		var cp = childProcess.spawn(process, args, options);
+		var cp = childProcess.spawn(program, args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
-			if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
+			if(uid != undefined) log("Unable to spawn program=" + program + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
 		}
-		var msg = "Unable to spawn process! (" + err.message + ")";
+		var msg = "Unable to spawn program! (" + err.message + ")";
 		log(msg, DEBUG)
 		return callback(new Error(msg));
 	}
@@ -535,17 +538,17 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	cp.ref(); // Do not uncouple!
 	
 	if(cp.connected && callbackFunction) {
-		log("Assuming process=" + process + " was successful because it's connected!", DEBUG);
+		log("Assuming program=" + program + " was successful because it's connected!", DEBUG);
 		return callback(null, cp);
 	}
 	
 	cp.on("close", function programClose(code, signal) {
-		var msg = process + " close: code=" + code + " signal=" + signal;
+		var msg = program + " close: code=" + code + " signal=" + signal;
 		log(msg, DEBUG);
 		
 		code = parseInt(code);
 		if(code === 0 && callbackFunction) {
-			log("Assuming process=" + process + " was successful because close code=" + code, DEBUG);
+			log("Assuming program=" + program + " was successful because close code=" + code, DEBUG);
 			callback(null); // Don't return child-process after it has closed
 		}
 		else callback(new Error(msg));
@@ -553,42 +556,42 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	});
 	
 	cp.on("disconnect", function programDisconnect() {
-		var msg = process + " disconnect: cp.connected=" + cp.connected;
+		var msg = program + " disconnect: cp.connected=" + cp.connected;
 		log(msg, DEBUG)
 		callback(new Error(msg));
 	});
 	
 	cp.on("error", function programClose(err) {
-		var msg = process + " error: err.message=" + err.message
+		var msg = program + " error: err.message=" + err.message
 		log(msg, DEBUG);
 		callback(new Error(msg));
 	});
 	
 	cp.on("exit", function programExit(code, signal) {
-		var msg = process + " exit: code=" + code + " signal=" + signal;
+		var msg = program + " exit: code=" + code + " signal=" + signal;
 		log(msg, DEBUG);
 	});
 	
 	cp.stdout.on("data", function programStdout(data) {
-		var msg = process + " stdout data: " + data;
+		var msg = program + " stdout data: " + data;
 		log(msg, DEBUG);
 		
 		if(!gotStdoutData && callbackFunction) {
 			gotStdoutData = true;
-			log("Assuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
+			log("Assuming program=" + program + " was successful because something was returned from stdout!", DEBUG);
 			callback(null, cp);
 		}
 		
 	});
 	
 	cp.stderr.on("data", function programStderr(data) {
-		var msg = process + " stderr data: " + data;
+		var msg = program + " stderr data: " + data;
 		log(msg, DEBUG);
 		
 		// Node -v 8 seems to get all data on stderr instead of the correct stdout ... 
-		if(!gotStdoutData && callbackFunction) {
+		if( !gotStdoutData && callbackFunction && (program == "node" || program == "nodejs") ) {
 			gotStdoutData = true;
-			log("Assuming process=" + process + " was successful because something was returned from stderr!", DEBUG);
+			log("Assuming program=" + program + " was successful because something was returned from stderr!", DEBUG);
 			callback(null, cp);
 		}
 		
@@ -597,7 +600,7 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 	/*
 		var waitTime = 250;
 		setTimeout(function started() {
-		log("Assuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
+		log("Assuming program=" + program + " successful because nothing happened within " + waitTime + "ms!");
 		callback(null);
 		}, waitTime);
 	*/
