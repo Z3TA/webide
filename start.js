@@ -30,7 +30,7 @@ var LOG_LEVEL = getArg(["loglevel", "loglevel"]) || INFO;
 if(!!getArg(["debug", "debug"])) LOG_LEVEL = DEBUG;
 
 module_log.setLogLevel(LOG_LEVEL);
-
+module_log.overrideConsole();
 
 var LOCAL_SERVER_IP = "127.0.0.1";
 var LOCAL_SERVER_PORT = "8099";
@@ -166,8 +166,31 @@ function startNewServer() {
 			
 			if(!clientStarting) startClient();
 			
-			
+			serverProcess.stdout.on("data", serverLog);
+			serverProcess.stderr.on("data", serverLog);
 		}
+		
+		var lastServerLogMsg = new Date();
+		
+		function serverLog(data) {
+			lastServerLogMsg = new Date();
+			if(typeof data == "object") data = data.toString();
+			if(data.match(/Closed client connection/)) {
+				console.log("Detected: Closed client connection.");
+				
+				setTimeout(function() {
+					if( ((new Date()) - lastServerLogMsg) > 1000 ) { 
+						console.log("Killing the server because there have been no server log messages for a second ...");
+				serverProcess.kill();
+				console.log("Exiting because the client disconnected from the server and the server was killed.");
+				process.exit(0);
+					}
+					else console.log("The Close client connection was probably a reload");
+				}, 2000);
+				
+			}
+		}
+		
 	}, serverOptions);
 }
 
@@ -430,7 +453,8 @@ function startClient(ip, port, proto) {
 		if(platform == "darwin") {
 			
 			args.unshift(programOriginal);
-			args.unshift("-a");
+			args.unshift("-a"); // Specify application
+			args.unshift("-W"); // Wait until the application exit before exiting
 			program = "open";
 		}
 		else if(platform == "win32") {
