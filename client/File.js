@@ -557,32 +557,32 @@ var File; // File object is global
 			// It is for example used in some tests
 			// We do however want to figure out all the reasons why the file ends up with a tab at the end! (and fix them)
 		if(file.text.charAt(0) == "\t") {
-//throw new Error("File starts with a tab: " + file.path);
-				console.warn("File starts with a tab: " + file.path);
+				//throw new Error("File grid sanity check error: File starts with a tab: " + file.path);
+				console.warn("File grid sanity check error: File starts with a tab: " + file.path);
 				if(EDITOR.settings.devMode && !EDITOR.runningTests) alertBox("File starts with a tab: " + file.path);
 			}
 			if(file.text.charAt(file.text.length-1) == "\t") {
-//throw new Error("File ends with a tab: " + file.path);
-				console.warn("File ends with a tab: " + file.path);
+				//throw new Error("File grid sanity check error: File ends with a tab: " + file.path);
+				console.warn("File grid sanity check error: File ends with a tab: " + file.path);
 				if(EDITOR.settings.devMode && !EDITOR.runningTests) alertBox("File now ends with a tab: " + file.path);
 			}
 		}
 		
-		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
+		if(file.startRow % 1 > 0) throw new Error("File grid sanity check error: file.startRow=" + file.startRow + " Needs to be an integer!");
 		
-		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + "");
+		if(file.startRow < 0) throw new Error("File grid sanity check error: file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + "");
 		
 		if(file.partStartRow > 0) {
-			if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
+			if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("File grid sanity check error: file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
 		}
 		
 		for(var row=0; row<grid.length; row++) {
 			
 			// Make sure the properties exist
-			if(typeof grid[row].startIndex !== "number") throw new Error("startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)");
-			if(typeof grid[row].lineNumber !== "number") throw new Error("lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)");
-			if(typeof grid[row].indentation !== "number") throw new Error("indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)");
-			if(typeof grid[row].indentationCharacters !== "string") throw new Error("indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)");
+			if(typeof grid[row].startIndex !== "number") throw new Error("File grid sanity check error: startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)");
+			if(typeof grid[row].lineNumber !== "number") throw new Error("File grid sanity check error: lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)");
+			if(typeof grid[row].indentation !== "number") throw new Error("File grid sanity check error: indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)");
+			if(typeof grid[row].indentationCharacters !== "string") throw new Error("File grid sanity check error: indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)");
 			
 			
 			// Check Startindex
@@ -591,7 +591,7 @@ var File; // File object is global
 			
 			if(grid[row].startIndex != index) {
 				//file.debugGrid();
-				throw new Error("grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index);
+				throw new Error("File grid sanity check error: grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index);
 			}
 			index += grid[row].length + file.lineBreak.length;
 			
@@ -600,7 +600,7 @@ var File; // File object is global
 				// Startindex should be the same as the index of the first letter box
 				if(grid[row].startIndex != grid[row][0].index) {
 					file.debugGrid();
-					throw new Error("startIndex (" + grid[row].startIndex + ") on row " + row + " doesn't match index (" + grid[row][0].index + ") of first box=" + JSON.stringify(grid[row][0]));
+					throw new Error("File grid sanity check error: startIndex (" + grid[row].startIndex + ") on row " + row + " doesn't match index (" + grid[row][0].index + ") of first box=" + JSON.stringify(grid[row][0]));
 				}
 			}
 			else if(row>0){
@@ -609,7 +609,7 @@ var File; // File object is global
 				expect = lastRow.startIndex + lastRow.length + file.lineBreak.length + grid[row].indentationCharacters.length;
 				if(grid[row].startIndex != expect) {
 					file.debugGrid();
-					throw new Error("Row " + row + " has startIndex=" + grid[row].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[row].indentationCharacters.length + " path=" + file.path);
+					throw new Error("File grid sanity check error: Row " + row + " has startIndex=" + grid[row].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[row].indentationCharacters.length + " path=" + file.path);
 				}
 			}
 			
@@ -617,7 +617,7 @@ var File; // File object is global
 			if(row>0){
 				lastRow = grid[row-1];
 				if((grid[row].lineNumber-1) != lastRow.lineNumber) {
-					throw new Error("Line number of row " + row + " is " + grid[row].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (row-1) + " lineNumber = " + lastRow.lineNumber + "");
+					throw new Error("File grid sanity check error: Line number of row " + row + " is " + grid[row].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (row-1) + " lineNumber = " + lastRow.lineNumber + "");
 				}
 			}
 			
@@ -635,13 +635,13 @@ var File; // File object is global
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) (" + UTIL.lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
+					throw new Error("File grid sanity check error: Expected the last " + file.lineBreak.length + " characters(s) (" + UTIL.lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
 				}
 			}
 			
 			// Check indentation
 			if(grid[row].indentation < 0) {
-				throw new Error("Indentation is " + grid[row].indentation + " or row " + row + "!");
+				throw new Error("File grid sanity check error: Indentation is " + grid[row].indentation + " or row " + row + "!");
 			}
 			
 			
@@ -649,22 +649,22 @@ var File; // File object is global
 				// Check if character on the grid and on file.text is the same
 				if(grid[row][col].char != file.text.charAt(grid[row][col].index)) {
 					file.debugGrid();
-					throw new Error("grid[" + row + "][" + col + "].char=" + UTIL.lbChars(grid[row][col].char) + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + UTIL.lbChars(file.text.charAt(grid[row][col].index)));
+					throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char=" + UTIL.lbChars(grid[row][col].char) + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + UTIL.lbChars(file.text.charAt(grid[row][col].index)));
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
-					throw new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!");
+					throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!");
 				}
 				
 				// Make sure the box has these properties:
 				box = grid[row][col];
-				if(box.char === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a char value!");
-				if(box.index === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a index value!");
-				if(box.color === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a color value!");
-				if(box.selected === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a selected value!");
-				if(box.highlighted === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a highlighted value!");
+				if(box.char === undefined) throw new Error("File grid sanity check error: grid[" + row + "][" + col + "] doesn't have a char value!");
+				if(box.index === undefined) throw new Error("File grid sanity check error: grid[" + row + "][" + col + "] doesn't have a index value!");
+				if(box.color === undefined) throw new Error("File grid sanity check error: grid[" + row + "][" + col + "] doesn't have a color value!");
+				if(box.selected === undefined) throw new Error("File grid sanity check error: grid[" + row + "][" + col + "] doesn't have a selected value!");
+				if(box.highlighted === undefined) throw new Error("File grid sanity check error: grid[" + row + "][" + col + "] doesn't have a highlighted value!");
 				
-				if(box.char === "") throw new Error("grid[" + row + "][" + col + "].char is nothing!"); 
+				if(box.char === "") throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char is nothing!"); 
 			}
 			
 		}
@@ -672,7 +672,7 @@ var File; // File object is global
 		if(EDITOR.currentFile == file) {
 		// Check if the scrolling is OK
 		if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
-				throw new Error("Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + 
+				throw new Error("File grid sanity check error: Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + 
 				" EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + 
 				" EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
 		}
