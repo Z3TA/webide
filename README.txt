@@ -31,8 +31,8 @@ Linux:
 1. Open a terminal ...
 
 2. Install nodejs from nodesource:
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
+$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+$ sudo apt-get install -y nodejs
 
 3. Navigate to the folder where you put jzedit: cd jzedit
 
@@ -139,29 +139,29 @@ Login with your Google account.
 2. If the shell terminal didn't open by itself, click on the icon in the top right 
 that looks like >_ and says "Activate Google Cloud Shell"
 It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
-curl https://www.webtigerteam.com/jzedit/download/
+$ curl https://www.webtigerteam.com/jzedit/download/
 
 3. Take notice of the latest server release for jzedit. Then type:
-wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz
+$ wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz
 (replace the number 3397 with the latest jzedit server relase!)
 This will download the gzipped tar archive.
 
 (tip: Pressing tab in the terminal will autocomplete file paths)
 
 4. Then unpack the tarball:
-tar xf jzedit-v1_alpha-3397-server.tar.gz
+$ tar xf jzedit-v1_alpha-3397-server.tar.gz
 
-6. And go into it's folder:
-cd jzedit-v1_alpha-3397-server
+5. And go into it's folder:
+$ cd jzedit-v1_alpha-3397-server
 
-7. Install dependencies:
-npm install
+6. Install dependencies:
+$ npm install
 
-8. cd into the server directory:
-cd server
+7. cd into the server directory:
+$ cd server
 
-9. Start the nodejs server
-node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot
+8. Start the nodejs server
+$ node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot
 
 The server should now be listening to http port 8080 and ip 127.0.0.1
 
@@ -268,7 +268,7 @@ $ sudo apt-get install python-certbot-nginx
 Automatically set up the server for running jzedit as a cloud ide:
 ------------------------------------------------------------------
 If you have a Linux (Ubuntu) server you can run this install script:
-nodejs cloudide_install.js --domain=yourdomain.com
+$ node cloudide_install.js --domain=yourdomain.com
 
 The editor will be installed as a SystemD daemon.
 
@@ -277,22 +277,22 @@ Start the jzedit server: sudo systemctl start jzedit
 Edit /etc/nginx/sites-available/yourdomain.com.nginx
 
 To check for Nginx config problems:
-nginx -T
+$ nginx -T
 
 
 Installing vnc dependencies
 ---------------------------
-sudo apt update
-sudo apt install xvfb x11vnc chromium-browser
+$ sudo apt update
+$ sudo apt install xvfb x11vnc chromium-browser
 
 
 Adding and removing users
 -------------------------
 Use the following script to add users to the cloud ide:
-./adduser.js name passw
+$ ./adduser.js name passw
 
 To remove a user:
-./removeuser name
+$ ./removeuser name
 
 Error: Command failed: umount "target is busy"
 $ ps -aux | grep nodejs
@@ -385,7 +385,7 @@ The error might be related to the PATH env variable. So make sure PATH env exist
 Moving user to another server using ZFS
 --------------------------------
 Run this command from the server you want to move the user TO:
-ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
+$ ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
 
 (The same method can be used to make backups, see backup.sh)
 
@@ -417,24 +417,24 @@ Regularly run zpool scrub
 -------------------------
 
 You want to check the hard drives from time to time:
-sudo zpool scrub tank
+$ sudo zpool scrub tank
 
 Also install smartctl to monitor hdd errors:
-sudo apt-get install smartmontools 
+$ sudo apt-get install smartmontools 
 
 See disk info:
-ls /dev/disk/by-id/
-sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
+$ ls /dev/disk/by-id/
+$ sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
 
 
 Problems cloning from Github
 ----------------------------
 Make sure the server has hggit installed!
-python -c "import hggit"
+$ python -c "import hggit"
 (should not give an error if it's installed)
 How to install:
-apt-get install python-pip
-easy_install hg-git
+$ apt-get install python-pip
+$ easy_install hg-git
 
 
 Problems running apt 
