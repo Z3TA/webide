@@ -95,7 +95,7 @@ if(!no_module_check) {
 	}
 	
 	if(error) {
-		console.log("Unable to require " + moduleName + " module: " + err.message);
+		console.log("Unable to require " + moduleName + " module: " + error.message);
 		
 var exec = require('child_process').exec;
 		log("Attempting to install node modules ... Try again once node_modules are installed!");
