@@ -1882,7 +1882,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		
 		
-		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
+		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe 
+		// (wrappes should have css: overflow: auto!important;)
 		
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
 		//console.log("leftColumnPadding=" + leftColumnPadding);

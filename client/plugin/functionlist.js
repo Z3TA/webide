@@ -51,6 +51,7 @@
 		
 		leftColumn.appendChild(functionListWrap); // Placing it in right column because it is not always visible (prevents text placement to move)
 		
+		hideFunctionList();
 		
 	}
 	

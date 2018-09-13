@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-function list is 16px wide even if there are no functions (Chrome on Windows)
-
 Test on different platform.
 Distribute a "evaluation" copy on npm!?
 
