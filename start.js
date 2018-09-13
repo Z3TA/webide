@@ -61,6 +61,7 @@ var HTTP_REQUESTS = [];
 var module_path = require("path");
 
 var serverProcess; // So it can be killed when client exit
+var clientProcess; // So we can kill it at will
 
 if(localOnly) {
 	startClient();
@@ -83,29 +84,37 @@ var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
 
 console.log("no_module_check=" + no_module_check);
 if(!no_module_check) {
-	// Check if node modules are installed
-	var fs = require("fs");
-	fs.readdir("./node_modules/", function(err, files) {
-		if(err && err.code == "ENOENT") {
-			/*
-				console.log("\nYou need to npm install module dependencies! (node_modules folder is emty)\n"
-				+ "Or use the flag -no-module-check\n"
-				+	"Type the following in the termial/command-line to install the modules:");
-				console.log("npm install");
-				process.exit(1);
-			*/
-			
-			var exec = require('child_process').exec;
-			log("Attempting to install node modules ... Try again once node_modules are installed!");
-			var child = exec('npm install', function (error, stdout, stderr) {
-				console.log('stdout: ' + stdout);
-				console.log('stderr: ' + stderr);
-				if (error !== null) {
-					console.log('exec error: ' + error);
-				}
-			});
-		}
-	});
+	console.log("Check if node modules are installed ...");
+	var error = undefined;
+	var moduleName = "sockjs";
+	try {
+		require(moduleName);
+	}
+	catch(err) {
+		error = err;
+	}
+	
+	if(error) {
+		console.log("Unable to require " + moduleName + " module: " + err.message);
+		
+var exec = require('child_process').exec;
+		log("Attempting to install node modules ... Try again once node_modules are installed!");
+		var child = exec('npm install', function (error, stdout, stderr) {
+			console.log('stdout: ' + stdout);
+			console.log('stderr: ' + stderr);
+			if (error !== null) {
+				console.log('exec error: ' + error);
+			}
+			log("Finished installing dependencies.\nTry running the program again!", NOTICE);
+			if(serverProcess) serverProcess.kill();
+			if(clientProcess) clientProcess.kill();
+			process.exit();
+		});
+		
+	}
+	else {
+		console.log("Dependenices/modules seem to be installed.");
+	}
 }
 
 
@@ -502,6 +511,7 @@ function startClient(ip, port, proto) {
 				programStarted = true;
 				
 				if(cp) { // Don't check if the cp is connected (it's not)
+					clientProcess = cp;
 					cp.on("close", function killServer(code) {
 						if(serverProcess) {
 						console.log("Killing server process because " + program + " closed! (code=" + code + ")");

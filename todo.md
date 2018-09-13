@@ -43,6 +43,36 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+after npm install jzedit -g on Windows:
+server.js:144 
+Cannot find module 'sockjs'
+
+npm install doesn't install a package's dependencies !?
+
+
+Can we get rid of some of these dependencies ?
+
+    diff
+    dirname
+    fs-extra
+    ftp
+    generate-password
+    http-proxy
+    iconv-lite
+    iroh
+    jschardet
+    mammoth
+    marked
+    ncp
+    nodehun
+    nodemailer
+    nodemailer-smtp-transport
+    posix
+    ps-node
+    pty.js
+    sockjs
+    ssh2
+
 Rename README.txt to README.md !?
 
 Issues opening folder ini files on Windows which contains a bunch of weird characters
