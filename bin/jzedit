@@ -133,7 +133,13 @@ function main() {
 				}
 				else console.log("Already tried starting the editor!");
 			}
-			else console.error(err);
+			else {
+console.error(err);
+				
+				console.log("Exiting because there was an error with the stdin channel (server probably closed)");
+				process.exit(1);
+				
+			}
 		}
 		
 		function stdinChannelConnected() {
@@ -164,7 +170,7 @@ function main() {
 		function stdinChannelClosed(hadError) {
 			console.log("stdin channel closed. hadError=" + hadError);
 		}
-
+		
 		function stdinChannelData(data) {
 			/*
 				Some programs like "crontab -e" assumes we are done when exiting ...
