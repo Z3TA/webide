@@ -56,7 +56,6 @@ rm temp/release/linux/release.sh
 rm temp/release/linux/todo.md
 rm temp/release/linux/testfile.txt
 rm temp/release/linux/.hgignore
-rm temp/release/linux/chromeapp.txt
 rm temp/release/linux/getCommitId.js
 rm temp/release/linux/jz.xcf
 rm temp/release/linux/makebundle.js
@@ -64,7 +63,6 @@ rm temp/release/linux/changeset.js
 rm temp/release/linux/update_version.js
 rm temp/release/linux/semver.js
 rm temp/release/linux/SEMVER
-rm temp/release/linux/server/node_worker.js
 rm temp/release/linux/client/gfx/icon/test.htm
 
 echo "Removing unused fonts"
@@ -97,18 +95,19 @@ rm temp/release/linux/client/bundle.htm
 rm temp/release/linux/client/bundle.htm.gz
 rm temp/release/linux/client/sitemap.txt
 
-echo "Make a npm release" (based on local-desktop)
+echo "Make a npm release (based on local-desktop)"
 cp -rf temp/release/linux/. temp/release/npm/
 
 echo "Clean up the server release"
 # CLient is meant to run in the browser
-rm -rf temp/release/server/linux_start.sh
-rm -rf temp/release/server/windows_start.bat
-rm -rf temp/release/server/windows_create_desktop_shortcut.vbs
-rm -rf temp/release/server/linux_launcher.desktop
-rm -rf temp/release/server/osx_start.sh
-rm -rf temp/release/server/start.js
-rm -rf temp/release/server/bin
+rm -rf temp/release/server/bin/
+
+rm temp/release/server/linux_start.sh
+rm temp/release/server/start.bat
+rm temp/release/server/windows_create_desktop_shortcut.vbs
+rm temp/release/server/linux_launcher.desktop
+rm temp/release/server/osx_start.sh
+rm temp/release/server/start.js
 
 
 #echo "Clean up the npm release"
