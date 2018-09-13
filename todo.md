@@ -43,6 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Test fresh install using npm install jzedit -g on Windows.
+(see if node modules are installed)
+
 after npm install jzedit -g on Windows:
 server.js:144 
 Cannot find module 'sockjs'
