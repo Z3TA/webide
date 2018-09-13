@@ -94,6 +94,7 @@ rm temp/release/linux/user_activity.js
 rm temp/release/linux/client/bundle.htm
 rm temp/release/linux/client/bundle.htm.gz
 rm temp/release/linux/client/sitemap.txt
+rm temp/release/linux/backup.sh
 
 echo "Make a npm release (based on local-desktop)"
 cp -rf temp/release/linux/. temp/release/npm/
