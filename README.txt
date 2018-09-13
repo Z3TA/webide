@@ -247,13 +247,13 @@ Installing/upgrading Nodejs
 Uninstall nodejs if it's already installed, then install it form nodesource.
 See https://github.com/nodesource/distributions
 
-sudo apt remove nodejs && sudo apt remove npm
+$ sudo apt remove nodejs && sudo apt remove npm
 
-# Using Ubuntu
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt update && sudo apt install -y nodejs
+Using Ubuntu:
+$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+$ sudo apt update && sudo apt install -y nodejs
 
-# Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
+Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
 
 
 Installing certbot (letsencrypt)
@@ -277,7 +277,7 @@ Start the jzedit server: sudo systemctl start jzedit
 Edit /etc/nginx/sites-available/yourdomain.com.nginx
 
 To check for Nginx config problems:
-# nginx -T
+nginx -T
 
 
 Installing vnc dependencies
@@ -294,77 +294,75 @@ Use the following script to add users to the cloud ide:
 To remove a user:
 ./removeuser name
 
-# Error: Command failed: umount "target is busy"
-ps -aux | grep nodejs
-kill -s 2 810460 
-sudo -u username kill 810460
+Error: Command failed: umount "target is busy"
+$ ps -aux | grep nodejs
+$ kill -s 2 810460 
+$ sudo -u username kill 810460
 
 You might have to reboot in order to unmount all directories.
 
 
 Apparmor debugging
 ------------------
-apt install apparmor-utils
+$ apt install apparmor-utils
 
-sudo service apparmor reload
+$ sudo service apparmor reload
 
-# Add missing rules in profile:
-sudo aa-genprof /usr/bin/nodejs_test123
+Add missing rules in profile:
+$ sudo aa-genprof /usr/bin/nodejs_test123
 
-# Sometimes aa-genprof doesn't find everyting
-sudo aa-logprof
+Sometimes aa-genprof doesn't find everyting
+$ sudo aa-logprof
 
-# See what's going on:
-tail -f /var/log/kern.log
+See what's going on:
+$ tail -f /var/log/kern.log
 
-# example problem: profile transition not found
+example problem: profile transition not found
 
-# is the profile active ?
-sudo apparmor_status | grep nodejs
+is the profile active ?
+$ sudo apparmor_status | grep nodejs
 
-# does it exist ?
-ls /etc/apparmor.d/ | grep nodejs
+does it exist ?
+$ ls /etc/apparmor.d/ | grep nodejs
 
-# is it disabled ?
-ls /etc/apparmor.d/disable/
+is it disabled ?
+$ ls /etc/apparmor.d/disable/
 
-# Temporary stopping apparmor
-sudo service apparmor stop
-sudo service apparmor teardown
+Temporary stopping apparmor
+$ sudo service apparmor stop
+$ sudo service apparmor teardown
 
-# Complain to allow everything but show logs
-sudo aa-complain /home/demo/usr/bin/hg
+Complain to allow everything but show logs
+$ sudo aa-complain /home/demo/usr/bin/hg
 
-# Put a profile back into enforce
-sudo aa-enforce /home/demo/usr/bin/hg
+Put a profile back into enforce
+$ sudo aa-enforce /home/demo/usr/bin/hg
 
 
 
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
-# Where is the program ?
-which python
+Where is the program ?
+$ which python
 
-# Edit server.js and add the program and dependencies to be mounted when a user logs in
-
-
-# What libs are used ?
-ldd /usr/bin/python
-# Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
-
-# Try to run it in chroot
-chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'
-
-# Find 
-
-# Find all other dependencies and mount or copy them into the chroot (users home dir)
-# See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
-wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
-sudo chmod +x tracefile
-./tracefile python
+Edit server.js and add the program and dependencies to be mounted when a user logs in
 
 
-# Create an apparmor profile !
+What libs are used ?
+$ ldd /usr/bin/python
+Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
+
+Try to run it in chroot
+$ chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'
+
+Find all other dependencies and mount or copy them into the chroot (users home dir)
+See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
+$ wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
+$ sudo chmod +x tracefile
+$ ./tracefile python
+
+
+Create an apparmor profile !
 
 
 Debugging Error: spawn EACCES
@@ -391,28 +389,28 @@ ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fr
 
 (The same method can be used to make backups, see backup.sh)
 
-# Enable the user on the new server by adding a new system account: 
-sudo useradd -r -s /bin/false nameofuser
+Enable the user on the new server by adding a new system account: 
+$ sudo useradd -r -s /bin/false nameofuser
 
 
 Take a snapshot before upgrading the server
 -------------------------------------------
 It's a good idea to take a system snapshot before making system updates, so that you can roll back in case something goes wrong.
 
-sudo zfs list -t snapshot
-sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+$ sudo zfs list -t snapshot
+$ sudo zfs snapshot ben/ROOT/ubuntu@upgrade
 
-# cannot create snapshot 'ben/ROOT/ubuntu@upgrade': dataset already exists
-sudo zfs destroy ben/ROOT/ubuntu@upgrade
-sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+cannot create snapshot 'ben/ROOT/ubuntu@upgrade': dataset already exists
+$ sudo zfs destroy ben/ROOT/ubuntu@upgrade
+$ sudo zfs snapshot ben/ROOT/ubuntu@upgrade
 
-sudo apt update && sudo apt upgrade
+$ sudo apt update && sudo apt upgrade
 
-# optional: To prevent running out of disk space, remove packages no longer needed
-sudo apt autoremove
+optional: To prevent running out of disk space, remove packages no longer needed
+$ sudo apt autoremove
 
-# Always reboot after a system upgrade to check if the system boots with the new upgrades
-# You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
+Always reboot after a system upgrade to check if the system boots with the new upgrades
+You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
 
 
 Regularly run zpool scrub

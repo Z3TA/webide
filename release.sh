@@ -113,6 +113,12 @@ rm temp/release/server/start.js
 
 #echo "Clean up the npm release"
 
+# npm wants the readme to be a .md file
+mv temp/release/npm/README.txt temp/release/npm/readme.md
+
+# Make the package publishable by removing private: true in package.json
+sed -i -e 's/"private": true,/"private": false,/g' temp/release/npm/package.json
+
 
 cd temp/release/
 
