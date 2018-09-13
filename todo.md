@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Issues opening folder ini files on Windows which contains a bunch of weird characters
+
 Test on different platform.
 Distribute a "evaluation" copy on npm!?
 
@@ -51,8 +53,6 @@ Merge help/ and about/ files into one folder !?
 
 Turn README.txt files into .htm files and put them in client/about/ !??
 (search for all readme and txt files)
-
-When downloading .zip we get a warning in Windows every time that the editor has been downloaded from the internet!
 
 ---
 

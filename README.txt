@@ -50,6 +50,10 @@ Or run the editor via ./linux_start.sh
 
 Windows
 -------
+(If you downloaded the .zip package: Right-click on the zip-file, and click "Properties". 
+At the bottom, next to "Security: This file came from another computer" click "Unblock" and then "Apply"
+otherwise you will get a "this file comes from another computer" warning every time you run the editor)
+
 1. Download and install nodejs from https://nodejs.org/
 (It should come with a packet manager called npm.)
 
