@@ -67,7 +67,7 @@ EDITOR.settings = {
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
-	sub_pixel_antialias: true, // For the main text area (canvas) only. If set to false, you want to start the editor with --disable-lcd-text
+	sub_pixel_antialias: true, // For the main text area (canvas) only.
 	style: {
 		// These are the default/fallback styles. Over-ride them in settings_overload.js !
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!

@@ -103,7 +103,7 @@ That will use the hosted version on webide.se
 We tried to make a pure Chrome app, but that turned out to be too much work.
 
 If you root the device you might be able to install nodejs. Then
-npm install jzedit
+npm install -g jzedit
 npm start
 
 
@@ -115,7 +115,7 @@ Android
 We recommend installing the editor on a server. See "Running as a cloud editor" below in this file.
 And then you will get a "add to desktop" request.
 
-But of course you can also run the editor locally on your phone ...
+You might be able to run both the server and client on the phone if you first install Node.JS
 
 
 
@@ -142,17 +142,17 @@ It will bring up a virtual pseudo-terminal at the bottom. Click on it to start t
 curl https://www.webtigerteam.com/jzedit/download/
 
 3. Take notice of the latest server release for jzedit. Then type:
-wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_beta-2580-server.tar.gz
-(replace the number 2580 with the latest jzedit server relase!)
+wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz
+(replace the number 3397 with the latest jzedit server relase!)
 This will download the gzipped tar archive.
 
 (tip: Pressing tab in the terminal will autocomplete file paths)
 
 4. Then unpack the tarball:
-tar xf jzedit-v1_beta-2580-server.tar.gz
+tar xf jzedit-v1_alpha-3397-server.tar.gz
 
 6. And go into it's folder:
-cd jzedit-v1_beta-2580-server
+cd jzedit-v1_alpha-3397-server
 
 7. Install dependencies:
 npm install
@@ -161,19 +161,20 @@ npm install
 cd server
 
 9. Start the nodejs server
-node server.js --username=zetafiles --password=secretqwerty123 --port=8080 -nochroot
+node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot
 
 The server should now be listening to http port 8080 and ip 127.0.0.1
-If this was a normal shell you should have used the public IP instead of 127.0.0.1
-and open http://public-ip:8080/ in a browser. 
+
+If this was a normal shell you should have made it listen on the public IP 
+instead of 127.0.0.1 and open http://public-ip:8080/ in a browser.
 But in Google Cloud shell we have to run it via a proxy ...
 
-10. We want to "preview" the "app" ... Click on any link in the Cloud API menu.
-Clicking on a link will show some new icons to the right on top of the terminal.
+10. We want to "preview" the "app" ... (Click on any link in the Cloud API menu ...
+Clicking on any link will make some new icons pop up to the right top side of the terminal.)
 Click on the icon that looks like <> and say "Web preview". And select "Preview on port 8080"
 This will open a new browser tab, that will hopefully load the editor!
 
-Note that some things will be a bit slow as the proxy does not support websockets.
+Note that some things will be a bit slow as the Google proxy does not support websockets.
 
 
 Font settings and styling
@@ -198,14 +199,15 @@ If you take a screen-shot and zoom in, you will notice the text edges has red, g
 This creates an "anti-alias" effect because each pixel on LCD monitors has a red, green and blue line!
 
 "LCD Text" is the default on most operating systems. But some people might see "rainbows".
-It's also uneccesary with a high-res monitor.
+It's also uneccesary with a high-resolution monitor.
 
 
 Turn off "LCD Text" / sub-pixel-antialas
 -----------------------------------------
-Start the program with the argument --disable-lcd-text. See start.bat (Windows) or /start.sh (Linux)
+Set "EDITOR.settings.sub_pixel_antialias = false" in settings_overload.js
 
-Set "global.settings.sub_pixel_antialias = false" in settings_overload.js
+To turn off LCD text for the whole browser (and not just the editor's text area) you need to edit
+linux_start.sh or start.js and add --disable-lcd-text to the browser arguments.
 
 Or turn it off in your operating system! (It's already turned off if you have a Mac with "Retina" display)
 
@@ -229,22 +231,6 @@ Go into settings... Look for browser bar (General settings: Toolbar).. Select to
 
 
 
-Problems cloning from Github
-----------------------------
-Make sure the server has hggit installed!
-python -c "import hggit"
-(should not give an error if it's installed)
-How to install:
-apt-get install python-pip
-easy_install hg-git
-
-
-Problems running apt 
---------------------
-You might get an error like this:
-unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
-
-This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
 
 
 
@@ -358,7 +344,8 @@ Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 # Where is the program ?
 which python
-# Copy it to the user home dir
+
+# Edit server.js and add the program and dependencies to be mounted when a user logs in
 
 
 # What libs are used ?
@@ -377,7 +364,7 @@ sudo chmod +x tracefile
 ./tracefile python
 
 
-# Create an apparmor profile
+# Create an apparmor profile !
 
 
 Debugging Error: spawn EACCES
@@ -391,13 +378,13 @@ Debugging Error: spawn EACCES
 Debugging Error: spawn ENOENT
 -----------------------------
 
-1. It's possible a Apparmor EACCESS in descuise. So try disabling apparmor
-2. The process starts, but tries to find a file and exits with an ENOENT. Try running in chroot.
-It has possible to do with no PATH env variable. So make sure PATH env exist var opt = {env: {PATH: "/bin/:/usr/bin"}}
-3. It might be because of cwd not being a directory or not found
+1. It's possible that the error is an Apparmor EACCESS in disguise. So try disabling apparmor
+2. If the process starts, but tries to find a file and exits with an ENOENT. Try running in chroot.
+The error might be related to the PATH env variable. So make sure PATH env exist var opt = {env: {PATH: "/bin/:/usr/bin"}}
+3. It might be because of spawn's cwd option not being a directory or not found
 
 
-Moving user to another using ZFS
+Moving user to another server using ZFS
 --------------------------------
 Run this command from the server you want to move the user TO:
 ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
@@ -442,7 +429,22 @@ ls /dev/disk/by-id/
 sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
 
 
+Problems cloning from Github
+----------------------------
+Make sure the server has hggit installed!
+python -c "import hggit"
+(should not give an error if it's installed)
+How to install:
+apt-get install python-pip
+easy_install hg-git
 
+
+Problems running apt 
+--------------------
+You might get an error like this:
+unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
+
+This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
 
 
 

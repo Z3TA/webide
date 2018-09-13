@@ -753,6 +753,8 @@ Make server run under apparmor profile ...
 BUGS (and issues)
 =================
 
+Got an error when cutting text in a text file, then pasting it at the end of the file (but not at EOF)
+(it sais something like xxx can not be over file length)
 
 ---
 
