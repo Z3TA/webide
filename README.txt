@@ -20,7 +20,7 @@ https://www.webtigerteam.com/jzedit/download/
 If you only want the server/cloud version, download it from the link above.
 The easiest way to install the desktop version is via npm:
 
-npm install -g jzedit
+`npm install -g jzedit`
 
 Then type "npm start" to start the editor. Or (if you installed globally) "jzedit [path to file]"
 
@@ -31,21 +31,23 @@ Linux:
 1. Open a terminal ...
 
 2. Install nodejs from nodesource:
-$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-$ sudo apt-get install -y nodejs
+```
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
 
-3. Navigate to the folder where you put jzedit: cd jzedit
+3. Navigate to the folder where you put jzedit: `cd jzedit`
 
-4. Install "node_modules" packages: npm install
+4. Install "node_modules" packages: `npm install`
 
 5. Make jzedit.desktop and start.sh executable:
-Via terminal: chmod +x jzedit.desktop start.sh
+Via terminal: `chmod +x jzedit.desktop start.sh`
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
 6. Add desktop shortcut (Unity/GNOME): Double click on jzedit.desktop to start the editor. 
 Then right click on the JZedit icon on the Launcher (left side menu), and select "Lock to Launcher"
 
-Or run the editor via ./linux_start.sh
+Or run the editor via `./linux_start.sh`
 
 
 Windows
@@ -66,7 +68,7 @@ otherwise you will get a "this file comes from another computer" warning every t
 4.5. If the npm install fails you probably need to install build dependencies for Windows!
 Easiest method is to open a command prompt (Click on start menu => run, then type "cmd.exe")
 but right click on "cmd.exe" and select "Run as administrator". 
-Then type: npm install --global --production windows-build-tools
+Then type: `npm install --global --production windows-build-tools`
 
 After nodejs and all dependencies are installed, double click (run) start.bat
 
@@ -87,7 +89,7 @@ Mac OS X
 4. Install the dependencies by typing "npm install" and hit enter in the terminal.
 
 5. After nodejs and all dependencies are installed, type this in the terminal:
-node server/server.js --port=8080 --user=admin --pw=admin -nochroot
+`node server/server.js --port=8080 --user=admin --pw=admin -nochroot`
 
 6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8080/
 
@@ -103,9 +105,10 @@ That will use the hosted version on webide.se
 We tried to make a pure Chrome app, but that turned out to be too much work.
 
 If you root the device you might be able to install nodejs. Then
+````
 npm install -g jzedit
 npm start
-
+````
 
 
 
@@ -139,29 +142,29 @@ Login with your Google account.
 2. If the shell terminal didn't open by itself, click on the icon in the top right 
 that looks like >_ and says "Activate Google Cloud Shell"
 It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
-$ curl https://www.webtigerteam.com/jzedit/download/
+`curl https://www.webtigerteam.com/jzedit/download/`
 
 3. Take notice of the latest server release for jzedit. Then type:
-$ wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz
+`wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz`
 (replace the number 3397 with the latest jzedit server relase!)
 This will download the gzipped tar archive.
 
 (tip: Pressing tab in the terminal will autocomplete file paths)
 
 4. Then unpack the tarball:
-$ tar xf jzedit-v1_alpha-3397-server.tar.gz
+`tar xf jzedit-v1_alpha-3397-server.tar.gz`
 
 5. And go into it's folder:
-$ cd jzedit-v1_alpha-3397-server
+`cd jzedit-v1_alpha-3397-server`
 
 6. Install dependencies:
-$ npm install
+`npm install`
 
 7. cd into the server directory:
-$ cd server
+`cd server`
 
 8. Start the nodejs server
-$ node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot
+`node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot`
 
 The server should now be listening to http port 8080 and ip 127.0.0.1
 
@@ -215,7 +218,7 @@ Or turn it off in your operating system! (It's already turned off if you have a 
 
 Re-compiling dependencies for other version of Node.JS
 =======================================================
-node-gyp rebuild --target=1.2.3
+`node-gyp rebuild --target=1.2.3`
 
 
 
@@ -247,28 +250,30 @@ Installing/upgrading Nodejs
 Uninstall nodejs if it's already installed, then install it form nodesource.
 See https://github.com/nodesource/distributions
 
-$ sudo apt remove nodejs && sudo apt remove npm
+`sudo apt remove nodejs && sudo apt remove npm`
 
 Using Ubuntu:
-$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-$ sudo apt update && sudo apt install -y nodejs
-
+````
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt update && sudo apt install -y nodejs
+````
 Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
 
 
 Installing certbot (letsencrypt)
 --------------------------------
-$ sudo apt-get update
-$ sudo apt-get install software-properties-common
-$ sudo add-apt-repository ppa:certbot/certbot
-$ sudo apt-get update
-$ sudo apt-get install python-certbot-nginx 
-
+````
+sudo apt-get update
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+sudo apt-get install python-certbot-nginx 
+````
 
 Automatically set up the server for running jzedit as a cloud ide:
 ------------------------------------------------------------------
 If you have a Linux (Ubuntu) server you can run this install script:
-$ node cloudide_install.js --domain=yourdomain.com
+`node cloudide_install.js --domain=yourdomain.com`
 
 The editor will be installed as a SystemD daemon.
 
@@ -277,66 +282,70 @@ Start the jzedit server: sudo systemctl start jzedit
 Edit /etc/nginx/sites-available/yourdomain.com.nginx
 
 To check for Nginx config problems:
-$ nginx -T
+`nginx -T`
 
 
 Installing vnc dependencies
 ---------------------------
-$ sudo apt update
-$ sudo apt install xvfb x11vnc chromium-browser
-
+````
+sudo apt update
+sudo apt install xvfb x11vnc chromium-browser
+````
 
 Adding and removing users
 -------------------------
 Use the following script to add users to the cloud ide:
-$ ./adduser.js name passw
+`./adduser.js name passw`
 
 To remove a user:
-$ ./removeuser name
+`./removeuser name`
 
 Error: Command failed: umount "target is busy"
-$ ps -aux | grep nodejs
-$ kill -s 2 810460 
-$ sudo -u username kill 810460
-
+````
+ps -aux | grep nodejs
+kill -s 2 810460 
+sudo -u username kill 810460
+````
 You might have to reboot in order to unmount all directories.
 
 
 Apparmor debugging
 ------------------
-$ apt install apparmor-utils
-
-$ sudo service apparmor reload
-
+````
+apt install apparmor-utils
+sudo service apparmor reload
+````
 Add missing rules in profile:
-$ sudo aa-genprof /usr/bin/nodejs_test123
+`sudo aa-genprof /usr/bin/nodejs_test123`
 
 Sometimes aa-genprof doesn't find everyting
-$ sudo aa-logprof
+`sudo aa-logprof`
 
 See what's going on:
-$ tail -f /var/log/kern.log
+`tail -f /var/log/kern.log`
 
 example problem: profile transition not found
 
 is the profile active ?
-$ sudo apparmor_status | grep nodejs
+`sudo apparmor_status | grep nodejs`
 
 does it exist ?
-$ ls /etc/apparmor.d/ | grep nodejs
+`ls /etc/apparmor.d/ | grep nodejs`
 
 is it disabled ?
-$ ls /etc/apparmor.d/disable/
+`ls /etc/apparmor.d/disable/`
 
 Temporary stopping apparmor
-$ sudo service apparmor stop
-$ sudo service apparmor teardown
+````
+sudo service apparmor stop
+sudo service apparmor teardown
+````
 
 Complain to allow everything but show logs
-$ sudo aa-complain /home/demo/usr/bin/hg
+`sudo aa-complain /home/demo/usr/bin/hg`
 
 Put a profile back into enforce
-$ sudo aa-enforce /home/demo/usr/bin/hg
+`sudo aa-enforce /home/demo/usr/bin/hg`
 
 
 
