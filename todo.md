@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Make readme smaller. Use html documents instead of markdown!!
+Rename README.txt to README.md !?
 
 Issues opening folder ini files on Windows which contains a bunch of weird characters
 

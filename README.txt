@@ -352,24 +352,25 @@ Put a profile back into enforce
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 Where is the program ?
-$ which python
+`which python`
 
 Edit server.js and add the program and dependencies to be mounted when a user logs in
 
 
 What libs are used ?
-$ ldd /usr/bin/python
+`ldd /usr/bin/python`
 Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
 
 Try to run it in chroot
-$ chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'
+`chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'`
 
 Find all other dependencies and mount or copy them into the chroot (users home dir)
 See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
-$ wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
-$ sudo chmod +x tracefile
-$ ./tracefile python
-
+````
+wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
+sudo chmod +x tracefile
+./tracefile python
+````
 
 Create an apparmor profile !
 
@@ -394,29 +395,31 @@ The error might be related to the PATH env variable. So make sure PATH env exist
 Moving user to another server using ZFS
 --------------------------------
 Run this command from the server you want to move the user TO:
-$ ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
+`ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser`
 
 (The same method can be used to make backups, see backup.sh)
 
 Enable the user on the new server by adding a new system account: 
-$ sudo useradd -r -s /bin/false nameofuser
+`sudo useradd -r -s /bin/false nameofuser`
 
 
 Take a snapshot before upgrading the server
 -------------------------------------------
 It's a good idea to take a system snapshot before making system updates, so that you can roll back in case something goes wrong.
-
-$ sudo zfs list -t snapshot
-$ sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+````
+sudo zfs list -t snapshot
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+sudo apt update && sudo apt upgrade
+````
 
 cannot create snapshot 'ben/ROOT/ubuntu@upgrade': dataset already exists
-$ sudo zfs destroy ben/ROOT/ubuntu@upgrade
-$ sudo zfs snapshot ben/ROOT/ubuntu@upgrade
-
-$ sudo apt update && sudo apt upgrade
+````
+sudo zfs destroy ben/ROOT/ubuntu@upgrade
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+````
 
 optional: To prevent running out of disk space, remove packages no longer needed
-$ sudo apt autoremove
+`sudo apt autoremove`
 
 Always reboot after a system upgrade to check if the system boots with the new upgrades
 You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
@@ -426,25 +429,27 @@ Regularly run zpool scrub
 -------------------------
 
 You want to check the hard drives from time to time:
-$ sudo zpool scrub tank
+`sudo zpool scrub tank`
 
 Also install smartctl to monitor hdd errors:
-$ sudo apt-get install smartmontools 
+`sudo apt-get install smartmontools `
 
 See disk info:
-$ ls /dev/disk/by-id/
-$ sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
-
+````
+ls /dev/disk/by-id/
+sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
+````
 
 Problems cloning from Github
 ----------------------------
 Make sure the server has hggit installed!
-$ python -c "import hggit"
+`python -c "import hggit"`
 (should not give an error if it's installed)
 How to install:
-$ apt-get install python-pip
-$ easy_install hg-git
-
+````
+apt-get install python-pip
+easy_install hg-git
+````
 
 Problems running apt 
 --------------------
