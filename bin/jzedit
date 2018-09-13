@@ -23,9 +23,8 @@
 
 	or export EDITOR='/path/tp/jzedit/bin/jzedit')
 
-	permanent: Add it to .bashrc
+	permanent: Add the export command (above) to .bashrc
 
-	
 */
 
 var module_path = require("path");
