@@ -154,9 +154,9 @@ rm version.inc
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 
-#echo "Make NPM release"
-# cd temp/release/npm
-# npm publish
+echo "Make NPM release"
+cd temp/release/npm
+npm publish
 
 # Update the homepage
 
