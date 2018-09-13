@@ -591,7 +591,7 @@ var File; // File object is global
 			
 			if(grid[row].startIndex != index) {
 				file.debugGrid();
-				throw new Error("File grid sanity check error: grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index + " grid[" + row + "].indentationCharacters=" + UTIL.lbChars(grid[row].indentationCharacters) + " (" + grid[row].indentationCharacters + " characters)");
+				throw new Error("File grid sanity check error: grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index + " grid[" + row + "].indentationCharacters=" + UTIL.lbChars(grid[row].indentationCharacters) + " (" + grid[row].indentationCharacters.length + " characters)");
 			}
 			index += grid[row].length + file.lineBreak.length;
 			
