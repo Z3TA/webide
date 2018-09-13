@@ -45,13 +45,13 @@
 		
 		functionListWrap.setAttribute("id", "functionListWrap");
 		functionListWrap.setAttribute("class", "wrap functionListWrap");
+		functionListWrap.setAttribute("style", "display: none"); // Start hidden
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
 		
 		leftColumn.appendChild(functionListWrap); // Placing it in right column because it is not always visible (prevents text placement to move)
 		
-		hideFunctionList();
 		
 	}
 	
@@ -387,16 +387,15 @@ for(var func, element, i=0; i<functions.length; i++) {
 	
 	function hideFunctionList(file) {
 		
-		if(file == undefined) throw new Error("File is undefined!");
-		
-		console.log("Hiding the functionlist for file.path=" + file.path);
+		if(file) console.log("Hiding the functionlist for file.path=" + file.path);
+		else console.log("Hiding the functionlist! file=" + file);
 		
 		if(functionListWrap) {
 			if(functionListWrap.style.display != "none") {
 				functionListWrap.style.display="none";
 				EDITOR.resizeNeeded();
 				console.log("Functionlist is now hidden");
-				console.log(UTIL.getStack("why hide?"));
+				console.log(UTIL.getStack("why hide function list?"));
 			}
 		}
 	}
