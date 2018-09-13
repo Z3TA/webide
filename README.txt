@@ -1,23 +1,30 @@
 
-Welcome to the web tiger team!
-
-
-JZedit/webIDE
-=============
-
-JZedit is a text/code editor/IDE geared for JavaScript, CSS, HTML and Node.JS development.
+JZedit is a text/code editor/IDE for JavaScript, CSS, HTML and Node.JS development.
 
 Also see LICENCE.txt and contribute.txt.
 
 
 webide.se
 ---------
-webide.se is the jzedit editor as a hosted service.
-In this readme you will find instructions on how to run the editor locally on your computer, or host it on your own server.
+webide.se is jzedit running as a cloud editor.
+In this readme you will find instructions on how to run the editor locally on your computer, 
+and how to host it on your own server.
 
 
 Install instructions
 ====================
+
+The editor can be download from here:
+https://www.webtigerteam.com/jzedit/download/
+
+If you only want the server/cloud version, download it from the link above.
+The easiest way to install the desktop version is via npm:
+
+npm install -g jzedit
+
+Then type "npm start" to start the editor. Or (if you installed globally) "jzedit [path to file]"
+
+Se instruction for making a desktop icon and manually installing below:
 
 Linux:
 ------
@@ -35,15 +42,14 @@ sudo apt-get install -y nodejs
 Via terminal: chmod +x jzedit.desktop start.sh
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
-6. "install": Double click on jzedit.desktop to start the editor. 
-Then right click on the JZedit icon on the Launcher (left side), and select "Lock to Launcher"
+6. Add desktop shortcut (Unity/GNOME): Double click on jzedit.desktop to start the editor. 
+Then right click on the JZedit icon on the Launcher (left side menu), and select "Lock to Launcher"
 
-Or run the editor via ./start.sh
+Or run the editor via ./linux_start.sh
 
 
 Windows
 -------
-
 1. Download and install nodejs from https://nodejs.org/
 (It should come with a packet manager called npm.)
 
@@ -60,7 +66,7 @@ Then type: npm install --global --production windows-build-tools
 
 After nodejs and all dependencies are installed, double click (run) start.bat
 
-Add a desktop shorcut:
+Add a desktop shortcut:
 Double click (run) windows_create_desktop_shortcut.vbs
 
 

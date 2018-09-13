@@ -36,13 +36,24 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 
 Happy path: (manually check on prod after each release)
 1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
-2. WYSIWYG edit said fail
+2. WYSIWYG edit said page
 3. Publish changes
 
 
 What I'm working on
 -------------------
 
+Merge help/ and about/ files into one folder !?
+
+Turn README.txt files into .htm files and put them in client/about/ !??
+(search for all readme and txt files)
+
+When downloading .zip we get a warning in Windows every time that the editor has been downloaded from the internet!
+
+jzedit bin wont exit on Windows after socket error
+
+
+function list is 16px wide even if there are no functions (Chrome on Windows)
 
 Test on different platform.
 Distribute a "evaluation" copy on npm!?

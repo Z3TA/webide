@@ -1,8 +1,10 @@
+#!/bin/sh
+':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
 /*
 	
-	Find out which users are inactive
-	
+	Find out which users are inactive:
+	sudo ./user_activity.js
 	
 */
 
@@ -18,6 +20,8 @@ var now = Math.floor(Date.now() / 1000);
 var inactive = 10*24*60*60; // Ten days in seconds
 var times = [];
 var filesToRead = 0;
+
+console.log("Days since last activity:");
 
 eachUser(HOME, function(user) {
 	//console.log(user);
@@ -54,7 +58,7 @@ function done() {
 	});
 	
 	times.forEach(function(user) {
-		console.log(user.name, Math.round(user.hours/24 *10)/10 + " D");
+		console.log(user.name, Math.round(user.hours/24 *10)/10 + " days");
 	});
 }
 

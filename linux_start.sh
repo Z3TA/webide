@@ -3,13 +3,14 @@
 #
 # Start script for running the server locally
 # 
-# If you want a always up server maybe shared by several users,
+# If you want a always up server (shared by several users),
 # see README.txt, jzedit.service, and jzedit.apparmor
 #
-
-# Update the path to the icon
+# We are using this bash script (instead of start.js) to fix the desktop icon ....
+#
 # The linux_launcher.desktop will make the editor appear in the launcher
 # Users can then right click on the icon and select "Lock to launcher"
+# We must make sure it has the correct path
 mv linux_launcher.desktop linux_launcher.desktop-bak
 sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux_launcher.desktop-bak > linux_launcher.desktop
 rm linux_launcher.desktop-bak
@@ -29,7 +30,7 @@ function startClient {
 	chromium-browser --app=$url ||
 	chrome --app=$url > /dev/null 2>&1 ||
 	unity-webapps-runner -i JZedit -h http://127.0.0.1:8099/index.htm 2>&1 ||
-	firefox- new-tab $url > /dev/null 2>&1 ||
+	firefox -new-tab $url > /dev/null 2>&1 ||
  open "$url" 2>&1 ||
 	echo "Failed to start the client!"
 }
@@ -63,8 +64,8 @@ else
 	CMD="$NODE server.js $serverArg"
 
 	# Start server in background
-	# Ignore stdout and send stderr to server.err
-	$CMD &
+
+	$CMD &> server.log &
 
 	PID=$!
 	# The pid is only correct if the server started successfully!

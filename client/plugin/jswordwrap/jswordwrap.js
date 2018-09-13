@@ -1,3 +1,11 @@
+/*
+	
+	Currently not used/deprecated.
+	
+	This is however a planned feature!
+	
+*/
+
 (function() {
 	"use strict";
 	

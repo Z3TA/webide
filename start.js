@@ -473,6 +473,8 @@ function startClient(ip, port, proto) {
 		attemptLaunch(program, args, function triedProgram(err, cp) {
 			if(err) {
 				
+				log("Failed to start program=" + programOriginal);
+				
 				var time = timeStamp();
 				
 				if(time - startTime > maxTime && programStarted) {
@@ -480,7 +482,6 @@ function startClient(ip, port, proto) {
 					return process.exit();
 				}
 				
-				log("Failed to start program=" + programOriginal);
 				programIndex++;
 				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
 				else tryProgram(tryPrograms[programIndex]);

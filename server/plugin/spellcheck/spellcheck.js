@@ -1,3 +1,8 @@
+/*
+	New languages can be downloaded from here:
+	https://cgit.freedesktop.org/libreoffice/dictionaries/tree/
+	(make sure the files are in utf-8 format!)
+*/
 
 var logModule = require("../../../shared/log.js");
 var log = logModule.log;

@@ -46,22 +46,26 @@ cd ../../../
 
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
-rm -rf temp/release/linux/webide_release.sh
-rm -rf temp/release/linux/release.sh
-rm -rf temp/release/linux/todo.md
-rm -rf temp/release/linux/testfile.txt
-rm -rf temp/release/linux/.hgignore
-rm -rf temp/release/linux/webextension
-rm -rf temp/release/linux/hosted_chrome_app
-rm -rf temp/release/linux/chromeapp.txt
-rm -rf temp/release/linux/getCommitId.js
-rm -rf temp/release/linux/jz.xcf
-rm -rf temp/release/linux/makebundle.js
-rm -rf temp/release/linux/changeset.js
-rm -rf temp/release/linux/update_version.js
+rm -rf temp/release/linux/webextension/
+rm -rf temp/release/linux/hosted_chrome_app/
 rm -rf temp/release/linux/runtime/
-rm -rf temp/release/linux/semver.js
-rm -rf temp/release/linux/SEMVER
+rm -rf temp/release/linux/client/plugin/jswordwrap/
+
+rm temp/release/linux/webide_release.sh
+rm temp/release/linux/release.sh
+rm temp/release/linux/todo.md
+rm temp/release/linux/testfile.txt
+rm temp/release/linux/.hgignore
+rm temp/release/linux/chromeapp.txt
+rm temp/release/linux/getCommitId.js
+rm temp/release/linux/jz.xcf
+rm temp/release/linux/makebundle.js
+rm temp/release/linux/changeset.js
+rm temp/release/linux/update_version.js
+rm temp/release/linux/semver.js
+rm temp/release/linux/SEMVER
+rm temp/release/linux/server/node_worker.js
+rm temp/release/linux/client/gfx/icon/test.htm
 
 echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
@@ -76,20 +80,25 @@ sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
-echo "Make a npm release"
-cp -rf temp/release/linux/. temp/release/npm/
-
 echo "Clean up the local-desktop release"
-rm -rf temp/release/linux/gcsf
 rm -rf temp/release/linux/etc/
-rm -rf temp/release/linux/adduser.js
-rm -rf temp/release/linux/cloudide_install.js
-rm -rf temp/release/linux/hashPw.js
-rm -rf temp/release/linux/nodejs_init.js
-rm -rf temp/release/linux/nodejs_init_worker.js
-rm -rf temp/release/linux/removeuser.js
-rm -rf temp/release/linux/signup_service.js
-rm -rf temp/release/linux/update.js
+rm -rf temp/release/linux/letsencrypt/
+rm temp/release/linux/gcsf
+rm temp/release/linux/adduser.js
+rm temp/release/linux/cloudide_install.js
+rm temp/release/linux/hashPw.js
+rm temp/release/linux/nodejs_init.js
+rm temp/release/linux/nodejs_init_worker.js
+rm temp/release/linux/removeuser.js
+rm temp/release/linux/signup_service.js
+rm temp/release/linux/update.js
+rm temp/release/linux/user_activity.js
+rm temp/release/linux/client/bundle.htm
+rm temp/release/linux/client/bundle.htm.gz
+rm temp/release/linux/client/sitemap.txt
+
+echo "Make a npm release" (based on local-desktop)
+cp -rf temp/release/linux/. temp/release/npm/
 
 echo "Clean up the server release"
 # CLient is meant to run in the browser
@@ -100,6 +109,7 @@ rm -rf temp/release/server/linux_launcher.desktop
 rm -rf temp/release/server/osx_start.sh
 rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
+
 
 #echo "Clean up the npm release"
 
