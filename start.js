@@ -2,10 +2,21 @@
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
 /*
-	Universal editor start script
+	Universal editor start script for running locally (desktop)
+	
+	Usage:
+	node start.js [options]
+	
+	options:
+	--loglevel={1-7}  Set the log level
+	-local            Don't search for servers
+	-debug            Same as --loglevel=7)
+	-no-module-check  Don't check if "npm install" have been run
+	
+	--------------------------------------------------------------------------------
 	
 	First try to find a server on localhost
-	Then listen to editor broadcasts on the lan.
+	Then listen to editor broadcasts on the LAN.
 	But if no server is found, start one on localhost
 	
 	Then try to run the client in nw.js
