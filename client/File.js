@@ -590,8 +590,8 @@ var File; // File object is global
 			index += grid[row].indentationCharacters.length;
 			
 			if(grid[row].startIndex != index) {
-				//file.debugGrid();
-				throw new Error("File grid sanity check error: grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index + " grid[" + row + "].indentationCharacters=" + UTIL.lbChars(grid[row].indentationCharacters));
+				file.debugGrid();
+				throw new Error("File grid sanity check error: grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index + " grid[" + row + "].indentationCharacters=" + UTIL.lbChars(grid[row].indentationCharacters) + " (" + grid[row].indentationCharacters + " characters)");
 			}
 			index += grid[row].length + file.lineBreak.length;
 			
