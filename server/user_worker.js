@@ -70,7 +70,10 @@ if(parseInt(process.env.uid)) {
 		But when running with chroot we are not able to spawn any processes!!
 		
 	*/
-	var posix = require("posix");
+	var posix = require("posix"); // Very much needed for chroot to work. 
+	// The posix module is not optional if you want to chroot.
+	// Use the -nochroot flag to run the server without chroot!
+	
 	var username = process.env.username; // getArg(["u", "user", "username"]);
 	var uid = parseInt(process.env.uid); // getArg(["uid", "uid"])
 	var gid = parseInt(process.env.gid); // getArg(["gid", "gid"])

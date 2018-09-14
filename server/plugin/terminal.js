@@ -5,7 +5,14 @@
 	
 */
 
+var ptyMissing = false;
+
+try {
 var pty = require('pty.js');
+}
+catch(err) {
+	ptyMissing = true;
+}
 
 var TERMINAL_COUNTER = 0;
 
@@ -13,7 +20,20 @@ var TERMINAL = {};
 
 var TERMINALS = {};
 
-TERMINAL.open = function newTerminal(user, json, callback) {
+if(ptyMissing) {
+	TERMINAL.open = ptyModuleNotLoaded;
+	TERMINAL.write = ptyModuleNotLoaded
+	TERMINAL.resize = ptyModuleNotLoaded
+	TERMINAL.close = ptyModuleNotLoaded
+}
+else {
+	TERMINAL.open = newTerminal;
+	TERMINAL.write = terminalWrite;
+	TERMINAL.resize = terminalResize;
+	TERMINAL.close = terminalClose
+}
+
+function newTerminal(user, json, callback) {
 	
 	var cols = json.cols || 80;
 	var rows = json.rows || 30;
@@ -49,7 +69,7 @@ TERMINAL.open = function newTerminal(user, json, callback) {
 	callback(null, {id: termId, exec: TERMINALS[termId].process});
 	}
 
-TERMINAL.write = function terminalWrite(user, json, callback) {
+function terminalWrite(user, json, callback) {
 	
 	var termId = json.id;
 	var data = json.data;
@@ -62,7 +82,7 @@ TERMINAL.write = function terminalWrite(user, json, callback) {
 	callback(null, {});
 }
 
-TERMINAL.resize = function terminalResize(user, json, callback) {
+function terminalResize(user, json, callback) {
 	
 	var termId = json.id;
 	var cols = json.cols;
@@ -77,7 +97,7 @@ TERMINAL.resize = function terminalResize(user, json, callback) {
 	callback(null, {});
 }
 
-TERMINAL.close = function terminalClose(user, json, callback) {
+function terminalClose(user, json, callback) {
 	
 	var termId = json.id;
 	var term = TERMINALS[termId];
@@ -90,5 +110,10 @@ TERMINAL.close = function terminalClose(user, json, callback) {
 	callback(null, {});
 }
 
+function ptyModuleNotLoaded(user, json, callback) {
+	var error = new Error("pty module is not installed on the server!");
+	error.code = "MODULE_MISSING";
+	callback(error);
+};
 
 module.exports = TERMINAL;

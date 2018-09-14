@@ -109,7 +109,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 function nodehunNotInstalled(user, json, callback) {
 	var error = new Error("nodehun module is not installed on the server!");
 	error.code = "MODULE_MISSING";
-	callback(error, 0);
+	callback(error);
 };
 
 module.exports = SPELLCHECK;

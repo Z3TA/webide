@@ -136,24 +136,31 @@ var CREATE_USER_LOCK = false; // Can only create one user at a time
 var GCSF = {}; // username: GCSF session
 
 // Declare modules here as a OPTIMIZATION
-const module_fs = require("fs");
-const module_child_process = require('child_process');
-const module_path = require("path");
-const module_letsencrypt = require("../shared/letsencrypt.js");
-const module_os = require("os");
-const module_sockJs = require("sockjs");
-const module_http = require("http");
-const module_generator = require('generate-password');
-const module_dgram = require('dgram');
-const module_pwHash = require("./pwHash.js");
-const module_mimeMap = require("./mimeMap.js");
-const module_httpProxy = require('http-proxy');
-const module_ps = require('ps-node');
-const module_nodemailer = require('nodemailer');
-const module_smtpTransport = require('nodemailer-smtp-transport');
-const module_mount = require("../shared/mount.js");
-const module_string_decoder = require('string_decoder');
-const module_net = require("net");
+var module_fs = require("fs");
+var module_child_process = require('child_process');
+var module_path = require("path");
+var module_letsencrypt = require("../shared/letsencrypt.js");
+var module_os = require("os");
+var module_sockJs = require("sockjs");
+var module_http = require("http");
+var module_generator = require('generate-password');
+var module_dgram = require('dgram');
+var module_pwHash = require("./pwHash.js");
+var module_mimeMap = require("./mimeMap.js");
+var module_httpProxy = require('http-proxy');
+var module_mount = require("../shared/mount.js");
+var module_string_decoder = require('string_decoder');
+var module_net = require("net");
+
+// Optional modules:
+try {
+	var module_nodemailer = require('nodemailer');
+	var module_smtpTransport = require('nodemailer-smtp-transport');
+	var module_ps = require('ps-node');
+}
+catch(err) {
+	log("Unable to load optional module(s): " + err.message);
+}
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
 
@@ -2431,6 +2438,8 @@ function createUserWorker(name, uid, gid) {
 
 function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	
+	if(!module_ps) return callback(new Error("Module ps not loaded."));
+	
 	if(username == undefined && !CRAZY) throw new Error("username needed to start chromium browser!");
 	if(uid == undefined && !CRAZY) throw new Error("uid needed to start chromium browser!");
 	if(gid == undefined && !CRAZY) throw new Error("gid eeded to start chromium browser!");
@@ -3007,6 +3016,9 @@ function sendMail(from, to, subject, text) {
 	};
 	
 	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
+	
+	if(!module_nodemailer) return log("Module nodemailer not loaded!");
+	if(!module_smtpTransport) return log("Module smtpTransport not loaded!");
 	
 	var transporter = module_nodemailer.createTransport(module_smtpTransport(mailSettings));
 	
