@@ -22,6 +22,13 @@
 	Then try to run the client in nw.js
 	But if that fails launch the client in a browser: Chrome, Firefox, IE or Safari
 	
+	Debug:
+	node start.js -debug > debug.log 2>&1
+	
+	Optimization nodes:
+	start client: ca 450ms
+	start server: ca 240ms
+	
 */
 
 "use strict";
@@ -65,14 +72,29 @@ var module_path = require("path");
 var serverProcess; // So it can be killed when client exit
 var clientProcess; // So we can kill it at will
 
-if(localOnly) {
-	startClient();
-	startNewServer();
-	
+var clientConnected = false; // Will be set to true when the server detects a HTTP request
+
+var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
+console.log("no_module_check=" + no_module_check);
+
+if(no_module_check) {
+	console.log("Skiping module check");
+	modulesChecked();
 }
+else checkModules();
+
+function modulesChecked() {
+	if(localOnly) {
+		startClient();
+		startNewServer();
+	}
 else {
+		// We would like to start the client before starting the server because it will take longer to start
+		// But the client needs to know which server and port to connect to, we don't know that until we have found a server.
+		// Use the -local flag for faster startup!
+		
 	// Check the network for servers (but first check localhost)
-	// And if no server is found withing 1? seconds we'll start our own
+	// And if no server is found withing 1? seconds we'll start our own server
 	setTimeout(startNewServer, 1000); // 3000ms
 	
 	log("Check if server is running on localhost ...", INFO);
@@ -81,12 +103,14 @@ else {
 	var adresses = getIpv4Ips();
 	for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
 }
+}
 
-var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
-
-console.log("no_module_check=" + no_module_check);
-if(!no_module_check) {
+function checkModules() {
+	// Checking if the modules/dependencies exist is neccesary because npm *sometimes* doesn't install them ...
+	// The following require takes ca 70ms to run
+	
 	console.log("Check if node modules are installed ...");
+	console.time("checkModules");
 	var error = undefined;
 	var moduleName = "sockjs";
 	try {
@@ -97,13 +121,14 @@ if(!no_module_check) {
 	}
 	
 	if(error) {
+		console.timeEnd("checkModules");
 		console.log("Unable to require " + moduleName + " module: " + error.message);
 		
 		// Use spawn instead of exec so we can see the progress bar
 		var spawn = module_child_process.spawn;
 		var arg = ["install"];
 		var options = {
-			cwd: __dirname, 
+			cwd: __dirname,
 			stdio: ['inherit', 'inherit', 'inherit'],
 			shell: true
 		};
@@ -117,18 +142,22 @@ if(!no_module_check) {
 		npm.on('close', function npmClose(exitCode) {
 			console.log("npm " + arg[0] + " exitCode=" + exitCode + " ");
 			
-			log("Finished installing dependencies.\nTry running the program again!", NOTICE);
-			if(serverProcess) serverProcess.kill();
-			if(clientProcess) clientProcess.kill();
-			process.exit();
+			log("Finished installing dependencies.");
+			
+			// Exit here so that the use can see possible npm errors ??
+			modulesChecked();
+			
+			//log("Try running the program again!", NOTICE); // it might work even if there where npm errors!
+			//process.exit();
 		});
 		
 	}
 	else {
+		console.timeEnd("checkModules");
 		console.log("Dependenices/modules seem to be installed.");
+		modulesChecked();
 	}
 }
-
 
 function serverChecked(online, ip, port) {
 	//log("server ip:" + ip + " is", online ? "ON" : "offline");
@@ -163,6 +192,8 @@ function abortHttpRequests() {
 function startNewServer() {
 	if(serverFound) return;
 	
+	console.time("startNewServer");
+	
 	abortHttpRequests();
 	
 	serverFound = true;
@@ -179,11 +210,12 @@ function startNewServer() {
 		stdio: "inherit"
 	}
 	
-	attemptLaunch("node", serverArg, function(err, cp) {
+	attemptLaunch("node", serverArg, serverOptions, function(err, cp) {
+		console.timeEnd("startNewServer");
 		if(err) log("Unable to start server!");
 		else {
-			log("Server started!");
 			
+			log("Server started!");
 			
 			if(!cp) throw new Error("Got no server child process!");
 			serverProcess = cp;
@@ -213,9 +245,12 @@ function startNewServer() {
 				}, 2000);
 				
 			}
+			else if(!clientConnected && data.match(/HTTP-req/)) {
+clientConnected = true;
+				console.timeEnd("startClient");
+			}
 		}
-		
-	}, serverOptions);
+	});
 }
 
 function broadcast() {
@@ -409,7 +444,9 @@ function startClient(ip, port, proto) {
 	}
 	clientStarting = true;
 	log("Starting client ...");
-	
+	console.time("startClient");
+		
+		
 	if(port == undefined) port = LOCAL_SERVER_PORT;
 	if(ip === undefined) ip = LOCAL_SERVER_IP;
 	
@@ -511,6 +548,7 @@ function startClient(ip, port, proto) {
 				else tryProgram(tryPrograms[programIndex]);
 			}
 			else {
+					// Depending on the program we wont get a callback until the browser/runtime has already exited!
 				log("Successfully started program=" + programOriginal);
 				programStarted = true;
 				
@@ -532,7 +570,7 @@ function startClient(ip, port, proto) {
 				//else if(!serverProcess) console.warn("We do not yet have the server process!"); 
 				else {
 					console.log("Did not recive cp after launching " + program);
-					
+					// No child-process in callback means we got the callback on the close event
 					// Kill the server right away
 					if(serverProcess) {
 						console.log("Killing server process because cp=" + !!cp + ""); // and cp.connected=" + (cp && cp.connected) + "
@@ -545,23 +583,39 @@ function startClient(ip, port, proto) {
 					process.exit(0); // Exit start script when client closes
 				}
 				
-				
-				
 			}
 		});
 	}
 }
 
-function attemptLaunch(program, args, callbackFunction, options, uid, gid) {
+function attemptLaunch(program, args, options, uid, gid, callbackFunction) {
 	
-	log("Attemting to start program=" + program + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
-
+	if(program == undefined) throw new Error("No program specified");
+	if(!Array.isArray(args)) throw new Error("No program argiments specified");
+	if(typeof options == "function") {
+		callbackFunction = options;
+		options = undefined;
+	}
+	if(typeof options == "function") {
+		callbackFunction = options;
+		options = undefined;
+	}
+	if(typeof uid == "function") {
+		callbackFunction = uid;
+		uid = undefined;
+	}
+	
+	if(options && typeof options != "object") throw new Error("options need to be an key:value object");
+	if(uid != undefined && typeof uid != "number") throw new Error("uid needs to be a numeric value");
+	if(gid != undefined && typeof gid != "number") throw new Error("gid needs to be a numeric value");
 	if(typeof callbackFunction != "function") throw new Error("No callback function!");
 	
 	var callback = function(err, cp) {
 		if(callbackFunction) callbackFunction(err, cp);
 		callbackFunction = null; // Only callback once!
 	}
+	
+	log("Attemting to start program=" + program + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
