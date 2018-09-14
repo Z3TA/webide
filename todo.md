@@ -267,6 +267,10 @@ register wildcard socket.user.webide.se SSL
 proxy *.user. to the socket!
 ---
 
+Piping curl to sudo bash is not OK (remove any such instructions). 
+Forgot why we are using Nodesource ...
+---
+
 
 What I'm thinking
 -----------------
