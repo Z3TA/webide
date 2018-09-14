@@ -77,7 +77,7 @@ if(require.main === module) {
 */
 
 // Require modules before we are put into chroot!
-var FS = require("fs-extra");
+var FS = require("fs");
 var PATH = require('path');
 var MAMMOTH = require("mammoth");
 var MARKED = require('marked');
