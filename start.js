@@ -102,7 +102,11 @@ if(!no_module_check) {
 		// Use spawn instead of exec so we can see the progress bar
 		var spawn = module_child_process.spawn;
 		var arg = ["install"];
-		var options = {cwd: __dirname, stdio: ['inherit', 'inherit', 'inherit']};
+		var options = {
+			cwd: __dirname, 
+			stdio: ['inherit', 'inherit', 'inherit'],
+			shell: true
+		};
 		console.log("Running npm " + arg[0] + " ...");
 		var npm = spawn("npm", arg , options);
 		
