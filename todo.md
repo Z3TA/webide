@@ -43,8 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Make sure optional modules are optional
-
+test:
 npm install -g jzedit on Windows
 
 Issues opening folder ini files on Windows which contains a bunch of weird characters
