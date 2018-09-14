@@ -43,32 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
-Can we get rid of some of these dependencies ?
-
-    diff
-    dirname
-    fs-extra
-    ftp
-    generate-password
-    http-proxy
-    iconv-lite
-    iroh
-    jschardet
-    mammoth
-    marked
-    ncp
-    nodehun
-    nodemailer
-    nodemailer-smtp-transport
-    posix
-    ps-node
-    pty.js
-    sockjs
-    ssh2
-
-Rename README.txt to README.md !?
-
 Issues opening folder ini files on Windows which contains a bunch of weird characters
 
 Test on different platform.

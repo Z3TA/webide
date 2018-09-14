@@ -365,7 +365,7 @@
 			
 			setTimeout(function checkEditorInfo() {
 				console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
-				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+				if(EDITOR.info.length == 0) throw new Error("Expected something in EDITOR.info! Not EDITOR.info.length=" + EDITOR.info.length);
 				
 				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();
@@ -374,7 +374,7 @@
 			}, 100);
 			
 		});
-	});
+	}, 1);
 	
 	
 	EDITOR.addTest(function inlineErrorMessages(callback) {

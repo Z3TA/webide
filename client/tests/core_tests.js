@@ -1595,7 +1595,7 @@
 		
 		callback(true);
 		
-	}, 1);
+	});
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {
