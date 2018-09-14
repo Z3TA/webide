@@ -185,7 +185,7 @@ console.error(err);
 				if(editorStartProcess) {
 					// Try to decouple so that the editor doesn't close when we close
 					// 
-					editorStartProcess.disconnect();
+					//editorStartProcess.disconnect();
 					editorStartProcess.unref();
 				}
 				
@@ -204,19 +204,29 @@ function startEditor(callback) {
 	
 	// Use start.js which will start both the server and the client
 
-	// We need to fork or spawn node, spawning a script directly doesn't work on windows!
-	var fork = require('child_process').fork;
+	
+	
 	var editorDebugLog = [];
-	var editor = fork( JZEDIT_LOCATION + "/start.js", ["-local", "--loglevel=" + DEBUG] , {
+	// We need to fork or spawn node, spawning a script directly doesn't work on windows!
+	// fork makes the start.js script close when we close on Windows. So try again with spawn
+	/*
+	var editor = require('child_process').fork( JZEDIT_LOCATION + "/start.js", ["-local", "--loglevel=" + DEBUG] , {
 		 env: process.env, 
 		cwd: JZEDIT_LOCATION,
 		stdio: ['pipe', 'pipe', 'pipe', 'ipc'] // Windows needs explicit pipe or editor.stdout will be null (it works with spawn, but not with fork)
+	});
+	*/
+	
+	var editor = require('child_process').spawn("node", [JZEDIT_LOCATION + "/start.js", "-local", "--loglevel=" + DEBUG] , {
+		env: process.env,
+		cwd: JZEDIT_LOCATION
+		//shell: true
 	});
 	
 	editorStartProcess = editor;
 	
 	// Disconnect from the communications channel to allow start.js to exit
-	editor.disconnect();
+	//editor.disconnect();
 	
 	EDITOR_STARTED = true;
 
