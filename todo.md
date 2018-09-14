@@ -57,6 +57,9 @@ Uncaught TypeError: Cannot read property 'removeAllRanges' of null
 test:
 npm install -g jzedit on Windows
 
+test:
+npm install -g jzedit on Mac
+
 Issues opening folder ini files on Windows which contains a bunch of weird characters
 
 Test on different platform.
