@@ -25,7 +25,6 @@
     "generate-password": "^1.4.0",
     "http-proxy": "^1.17.0",
     "iconv-lite": "https://github.com/Z3TA/iconv-lite/tarball/master",
-    "iroh": "https://github.com/Z3TA/Iroh/tarball/a45218b13ce9754a2429817923ad749d7c49658d",
     "jschardet": "^1.6.0",
     "mammoth": "^1.4.6",
     "marked": "^0.4.0",
