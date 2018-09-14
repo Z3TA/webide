@@ -472,8 +472,8 @@ function startClient(ip, port, proto) {
 	//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
 	
 	// We prefer the chromium/chrome browser!
-	tryPrograms.push(["chrome", ["--app=" + url]]);
-	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
+	tryPrograms.push(["chrome", ["--app=" + url, "--disable-gpu-vsync "]]);
+	tryPrograms.push(["chromium-browser", ["--app=" + url, "--disable-gpu-vsync "]]); 
 	
 	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
 	// We want to open files via http/https though! Using file:// protocol will cause issues.
