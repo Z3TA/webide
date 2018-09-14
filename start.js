@@ -29,6 +29,8 @@
 var module_log = require("./shared/log.js")
 var log = module_log.log;
 
+var module_child_process = require('child_process');
+
 // Log levels
 var WARN = 4;
 var NOTICE = 5;
@@ -97,14 +99,20 @@ if(!no_module_check) {
 	if(error) {
 		console.log("Unable to require " + moduleName + " module: " + error.message);
 		
-var exec = require('child_process').exec;
-		log("Attempting to install node modules ... Try again once node_modules are installed!");
-		var child = exec('npm install', {cwd: __dirname}, function (error, stdout, stderr) {
-			console.log('stdout: ' + stdout);
-			console.log('stderr: ' + stderr);
-			if (error !== null) {
-				console.log('exec error: ' + error);
-			}
+		// Use spawn instead of exec so we can see the progress bar
+		var spawn = module_child_process.spawn;
+		var arg = ["install"];
+		var options = {cwd: __dirname, stdio: ['inherit', 'inherit', 'inherit']};
+		console.log("Running npm " + arg[0] + " ...");
+		var npm = exec("npm", arg , options);
+		
+		npm.on('error', function npmError(err) {
+			log("npm " + arg[0] + " Error: " + err.message);
+		});
+		
+		npm.on('close', function npmClose(exitCode) {
+			console.log("npm " + arg[0] + " exitCode=" + exitCode + " ");
+			
 			log("Finished installing dependencies.\nTry running the program again!", NOTICE);
 			if(serverProcess) serverProcess.kill();
 			if(clientProcess) clientProcess.kill();
@@ -166,14 +174,6 @@ function startNewServer() {
 	var serverOptions = {
 		stdio: "inherit"
 	}
-	
-	//var child = require('child_process').spawn("node", serverArg, serverOptions); 
-	
-	/*
-		child.stdout.on('data', function(data) {
-		console.log(data.toString()); 
-		});
-	*/
 	
 	attemptLaunch("node", serverArg, function(err, cp) {
 		if(err) log("Unable to start server!");
@@ -559,8 +559,6 @@ function attemptLaunch(program, args, callbackFunction, options, uid, gid) {
 		callbackFunction = null; // Only callback once!
 	}
 	
-	var childProcess = require("child_process");
-	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
 	
@@ -570,7 +568,7 @@ function attemptLaunch(program, args, callbackFunction, options, uid, gid) {
 	if(gid != undefined) options.gid = parseInt(gid);
 	
 	try {
-		var cp = childProcess.spawn(program, args, options);
+		var cp = module_child_process.spawn(program, args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
