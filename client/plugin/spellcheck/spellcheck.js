@@ -6,9 +6,10 @@
 	*/
 	"use strict";
 	
-	// Add plugin to editor
+	var pluginDescription = "Spellcheck using Nodehun";
+	
 	EDITOR.plugin({
-		desc: "Spellcheck using Nodehun",
+		desc: pluginDescription,
 		load: loadSpellchecker,
 		unload: unloadSpellchecker,
 	});
@@ -50,14 +51,16 @@
 	
 	function loadDictionaries(login) {
 		CLIENT.cmd("spellcheck.languages", useLanguages, function(err, dictsLoaded) {
-			if(err && dictsLoaded == 0) {
-alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
-				
-				if(err.code == "MODULE_MISSING") unloadSpellchecker();
-				
-				return;
+			// Can populate err even if some dictionaries succeeded!
+			
+			if( (typeof dictsLoaded == "number" && dictsLoaded == 0) || (err && err.code == "MODULE_MISSING")) {
+				console.warn("All dictionaries failed to load. Unloading the spellcheker plugin");
+				EDITOR.disablePlugin(pluginDescription);
 			}
-			else if(dictsLoaded != useLanguages.length) alertBox("Failed to load all spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+			else if(err) {
+				// Other (unexpected) error
+				alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+			}
 			
 		});
 	}

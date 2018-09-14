@@ -48,10 +48,11 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 	
 	if(!Array.isArray(languages)) return callback(new Error("options need to be an array of lanugaes formatted like en_US"));
 	
+		var notAvailable = [];
 	for (var i=0; i<languages.length; i++) {
 		if(!dictFiles.hasOwnProperty(languages[i])) {
-			return callback(new Error("Language dictionary " + languages[i] + " not available! Try " + Object.keys(dictFiles) + ""), dict.length);
-		}
+				notAvailable.push(languages[i]);
+			}
 	}
 	
 	dict.length = 0;
@@ -60,7 +61,11 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 		dict.push(new Nodehun(dictFiles[languages[i]].aff, dictFiles[languages[i]].dic));
 	}
 	
-	callback(null, dict.length);
+		if(notAvailable.length > 0) {
+			error = new Error("Language dictionary(ies) " + notAvailable.join(",") + " not available! Try " + Object.keys(dictFiles) + "");
+		}
+		
+		callback(error, dict.length);
 }
 
 SPELLCHECK.check = function check(user, json, callback) {
@@ -101,81 +106,10 @@ SPELLCHECK.check = function check(user, json, callback) {
 }
 }
 
-function loadDictionary(lang, callback) {
-	log("Loading dictionary " + lang, logModule.DEBUG);
-	
-	// Async load the .aff and .dic files. Then create a dictionary
-	
-	var affBuffer;
-	var dictBuffer;
-	var gotAff = false;
-	var gotDict = false;
-	var failed = false;
-	
-	readFromDisk(__dirname + "/languages/" + lang + "/" + lang + ".aff", readAff);
-	readFromDisk(__dirname + "/languages/" + lang + "/" + lang + ".dic", readDict);
-	
-	function readAff(err, buffer) {
-		if(failed) return;
-		if(err) {
-			failed = true;
-if(err.code == "ENOENT") {
-				callback(new Error("Language not found: " + lang));
-			}
-			else callback(err);
-		}
-		
-		affBuffer = buffer;
-		gotAff = true;
-		
-		if(gotAff && gotDict) gotAll();
-	}
-	
-	function readDict(err, buffer) {
-		if(failed) return;
-		if(err) {
-			failed = true;
-			if(err.code == "ENOENT") {
-				callback(new Error("Language not found: " + lang));
-			}
-			else callback(err);
-		}
-		
-		dictBuffer = buffer;
-		gotDict = true;
-		
-		if(gotAff && gotDict) gotAll();
-	}
-	
-	function gotAll() {
-		/*
-			We have both the aff and dict content!
-			Create the dictionary:
-		*/
-		
-		if(failed) return;
-		
-		dict.push(new Nodehun(affBuffer,dictBuffer));
-		
-		log("Dictionary " + lang + " loaded", logModule.DEBUG);
-		
-		callback(null);
-	}
-}
-
-function readFromDisk(path, callback) {
-	// Return raw buffer
-	
-	fs.readFile(path, function(err, buffer) {
-		if (err) return callback(err);
-		else callback(null, buffer);
-	});
-}
-
 function nodehunNotInstalled(user, json, callback) {
 	var error = new Error("nodehun module is not installed on the server!");
 	error.code = "MODULE_MISSING";
-	callback(error);
+	callback(error, 0);
 };
 
 module.exports = SPELLCHECK;
