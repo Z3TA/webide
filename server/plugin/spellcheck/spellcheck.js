@@ -173,7 +173,9 @@ function readFromDisk(path, callback) {
 }
 
 function nodehunNotInstalled(user, json, callback) {
-	callback(new Error("nodehun module is not installed on the server!"));
+	var error = new Error("nodehun module is not installed on the server!");
+	error.code = "MODULE_MISSING";
+	callback(error);
 };
 
 module.exports = SPELLCHECK;

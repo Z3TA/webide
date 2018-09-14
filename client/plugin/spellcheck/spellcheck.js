@@ -50,7 +50,13 @@
 	
 	function loadDictionaries(login) {
 		CLIENT.cmd("spellcheck.languages", useLanguages, function(err, dictsLoaded) {
-			if(err && dictsLoaded == 0) return alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+			if(err && dictsLoaded == 0) {
+alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+				
+				if(err.code == "MODULE_MISSING") unloadSpellchecker();
+				
+				return;
+			}
 			else if(dictsLoaded != useLanguages.length) alertBox("Failed to load all spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
 			
 		});
