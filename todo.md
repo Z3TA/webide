@@ -43,15 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Test fresh install using npm install jzedit -g on Windows.
-(see if node modules are installed)
-
-after npm install jzedit -g on Windows:
-server.js:144 
-Cannot find module 'sockjs'
-
-npm install doesn't install a package's dependencies !?
-
 
 Can we get rid of some of these dependencies ?
 
@@ -725,6 +716,8 @@ Make sure everything works in Chrome/Chromium browser, then also Firefox (with -
 and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to make it work in
 new versions of nw.js though.
 ubuntu: webapp-container / unity-webapps-runner ?
+
+
 
 
 Things I've learned
