@@ -644,6 +644,14 @@ process.on('message', function commandMessage(message) {
 
 // ## Special API's (that has to use parentRequest)...
 
+API.identify = function identify(user, json, callback) {
+	// Handle weird edge case when the user manages to login twice
+	
+	if(!user.name) throw new Error("Unexpected: user.name=" + user.name);
+	
+	callback(new Error("Already identified as " + user.name));
+}
+
 API.serve = function serve(user, json, callback) {
 	
 	// Serve a folder via HTTP
