@@ -104,7 +104,7 @@ if(!no_module_check) {
 		var arg = ["install"];
 		var options = {cwd: __dirname, stdio: ['inherit', 'inherit', 'inherit']};
 		console.log("Running npm " + arg[0] + " ...");
-		var npm = exec("npm", arg , options);
+		var npm = spawn("npm", arg , options);
 		
 		npm.on('error', function npmError(err) {
 			log("npm " + arg[0] + " Error: " + err.message);
