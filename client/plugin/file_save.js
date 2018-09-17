@@ -281,7 +281,7 @@
 		if(file.savedAs) path = file.path;
 		// Why use the lastFile.path !?
 		// else if(EDITOR.lastFile) path = UTIL.getDirectoryFromPath(EDITOR.lastFile.path);
-		else if(file.path.charAt(0) == "/") path = file.path;
+		else if(file.path.charAt(0) == "/" || file.path.indexOf("\\") != -1) path = file.path;
 		else path = EDITOR.workingDirectory + file.path;
 		
 		inputPath.value = path;

@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-jzedit foo.htm and then saving on Windows gives the path twice eg: C:\foo\barC:\foo\bar\foo.htm
-
 Web preview issues on Windows:
 WysiwygEditor.js:594
 Uncaught TypeError: Cannot read property 'removeAllRanges' of null
