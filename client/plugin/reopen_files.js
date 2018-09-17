@@ -756,7 +756,7 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		//console.log("Saving state for: " + path);
+		console.log("Saving state for: " + path);
 		
 		if(path.length == 0) {
 			fundBugs(false, function(err, openedFilesString) {

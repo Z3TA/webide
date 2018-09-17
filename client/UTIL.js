@@ -41,8 +41,8 @@ var UTIL = {
 		//console.log("delimiter=" + delimiter);
 		//console.log("path=" + path);
 				
-		path = path.replace(/\//g, delimiter);
-		path = path.replace(/\\/g, delimiter);
+		path = path.replace(/\/+/g, delimiter);
+		path = path.replace(/\[^:]\+/g, delimiter);
 		
 		//console.log("path=" + path);
 		

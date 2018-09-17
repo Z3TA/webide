@@ -114,7 +114,6 @@
 		
 		console.log("EDITOR.platform=" + EDITOR.platform);
 		
-
 		if(source.indexOf("file:") == 0) {
 			// If Windows detects / it will add C:/
 			// If Linux does Not detect / it will will add the working dir
@@ -139,6 +138,7 @@
 			source = EDITOR.installDirectory + 'client/' + url.pathname;
 		}
 		
+		source = UTIL.toSystemPathDelimiters(source);
 		
 		if(EDITOR.settings.devMode) {
 			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {\

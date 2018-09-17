@@ -1587,15 +1587,21 @@
 		
 	});
 	
-	EDITOR.addTest(function suppotWindowsPaths(callback) {
+	EDITOR.addTest(function supportWindowsPaths(callback) {
+		
+		EDITOR.changeWorkingDir("C:\\Users\\Jon Doe\\");
+		// System's path delimiter is taken from the working dir
 		
 		UTIL.assert(UTIL.joinPaths(["/foo/bar/", "baz"]), "/foo/bar/baz");
 		UTIL.assert(UTIL.joinPaths(["C:\\\\users\\me\\foo", "bar\\baz\\"]), "C:\\users\\me\\foo\\bar\\baz\\");
 		UTIL.assert(UTIL.joinPaths(["C:\\\\users\\me\\foo", "bar/baz/"]), "C:\\users\\me\\foo\\bar\\baz\\");
 		
+		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
+		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo//bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
+		
 		callback(true);
 		
-	});
+	}, 1);
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {

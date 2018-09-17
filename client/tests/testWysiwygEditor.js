@@ -374,7 +374,7 @@
 			}, 100);
 			
 		});
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function inlineErrorMessages(callback) {

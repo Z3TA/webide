@@ -89,6 +89,8 @@
 		
 		console.log("Disabling dev mode ...");
 		
+		EDITOR.unbindKey(runOneTest);
+		
 		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode);
 		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Editor debugmode");
 		
@@ -119,6 +121,9 @@
 	}
 	
 	function enableDevMode() {
+		
+		var keyT = 84;
+		EDITOR.bindKey({desc: "Run latest test", charCode: keyT, fun: runOneTest, combo: CTRL});
 		
 		showDevTools();
 		
@@ -235,11 +240,14 @@
 	}
 	
 	function runTests() {
-		
 		EDITOR.hideMenu();
 		
-		EDITOR.runTests();
-		
+		EDITOR.runTests(); // Runs all tests
+		}
+	
+	function runOneTest() {
+		EDITOR.runTests(true); // Only runs one test (the one with highest prio)
+		return false; // Prevent browser default
 	}
 	
 })();

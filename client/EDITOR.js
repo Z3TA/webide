@@ -4368,14 +4368,16 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		}
 	}
 	
-	EDITOR.runTests = function runTests() {
+	EDITOR.runTests = function runTests(onlyOne) {
 		
-		if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/") return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
+		if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/" && !onlyOne) {
+ return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
 		(Working directory (" + EDITOR.workingDirectory + ") needs to be / (root))");
+		}
 		
-		EDITOR.changeWorkingDir("/");
+		if(!onlyOne) EDITOR.changeWorkingDir("/");
 		
-		runTests_5616458984153156();
+		runTests_5616458984153156(onlyOne);
 		return true;
 	}
 	
@@ -5307,7 +5309,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
 	}
 	
-	function runTests_5616458984153156() { // Random numbers to make sure it's unique
+	function runTests_5616458984153156(onlyOne) { // Random numbers to make sure it's unique
+		
+		if(onlyOne) testFirstTest = true;
 		
 		/*
 			Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
@@ -5317,6 +5321,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		// Prepare for tests ...
 		
+		if(!onlyOne) {
 		// Close all files
 		for(var path in EDITOR.files) {
 			if(EDITOR.files[path].saved) EDITOR.closeFile(path)
@@ -5324,6 +5329,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				alertBox("Please save or close file before running tests: " + path);
 				return;
 			}
+		}
 		}
 		
 		// Create some test files ...
