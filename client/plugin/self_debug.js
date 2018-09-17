@@ -1,4 +1,4 @@
-(function() {
+(function self_debug() {
 	"use strict";
 	
 	/*
@@ -108,7 +108,7 @@
 }
 	}
 	
-	window.onerror = function(message, source, lineno, colno, error) {
+	window.onerror = function windowError(message, source, lineno, colno, error) {
 		
 		console.warn("Error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		

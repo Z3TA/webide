@@ -586,14 +586,11 @@ var WysiwygEditor;
 		var wysiwygEditor = this;
 		var previewWin = wysiwygEditor.previewWin;
 		
-		console.log("placing caret on index " + charPos + " on (node ? " + !!node + "):");
+		console.warn("placing caret on index " + charPos + " on (node ? " + !!node + "):");
 		console.log(node);
 		
 		var doc = previewWin.window.document;
-		var win = previewWin.window;
-		
 		var range = doc.createRange();
-		var sel = win.getSelection();
 		
 		if(browser=="Firefox" && node.tagName == "BR") {
 			// Firefox can set the caret position, but it's not possible to input/write after the caret has been set in a br element
@@ -609,8 +606,15 @@ var WysiwygEditor;
 		}
 		
 		range.collapse(true);
+		
+		var win = previewWin.window;
+		var sel = win.getSelection();
+		
+		if(sel) {
 		sel.removeAllRanges();
 		sel.addRange(range);
+		}
+		else console.warn("sel=" + sel);
 		
 		return true;
 		
