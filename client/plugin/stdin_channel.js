@@ -29,7 +29,7 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 		CLIENT.on("arguments", editorArguments);
 		
 		EDITOR.on("fileClose", stdinChannelFileClose);
-		EDITOR.on("afterSave", stdinChannelAfterSave);
+		//EDITOR.on("afterSave", stdinChannelAfterSave);
 
 		console.log("stdin channel module loaded!");
 	}
@@ -41,7 +41,7 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 		CLIENT.removeEvent("arguments", editorArguments);
 		
 		EDITOR.removeEvent("fileClose", stdinChannelFileClose);
-		EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
+		//EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
 
 		if(stdinFile) {
 			notofyEdit(stdinFile.path);
@@ -55,7 +55,7 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 	}
 
 	function stdinChannelAfterSave(file) {
-
+		return true;
 	}
 
 	function notofyEdit(path) {
