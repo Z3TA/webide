@@ -1598,6 +1598,7 @@
 		
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo//bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
+		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\\\bar\\\\baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		
 		callback(true);
 		

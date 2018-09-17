@@ -137,7 +137,7 @@
 			
 			source = EDITOR.installDirectory + 'client/' + url.pathname;
 		}
-		
+		console.log("source=" + source);
 		source = UTIL.toSystemPathDelimiters(source);
 		
 		if(EDITOR.settings.devMode) {
