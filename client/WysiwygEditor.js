@@ -1621,7 +1621,13 @@ var WysiwygEditor;
 			if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 			
 			console.log("Waiting for new window with url=" + wysiwygEditor.url + " to be created ...");
-			EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
+			EDITOR.createWindow({
+				url: wysiwygEditor.url, 
+				width: oldPreviewWindowSize.x,
+				height: oldPreviewWindowSize.y,
+				left: oldPreviewWindowPosition.x,
+				top: oldPreviewWindowPosition.y
+			}, windowCreated);
 			
 			function windowCreated(err, newWindow) {
 				console.log("WysiwygEditor reload windowCreated!");

@@ -4221,7 +4221,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		var posY = top || windowPadding;
 		
 		// Self resize so that the created Window will be visible even if the main window is focused
-		window.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+		//window.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
 		// You can't resize a window or tab that wasn’t created by window.open.
 		// You can't resize a window or tab when it’s in a window with more than one tab.
 		
