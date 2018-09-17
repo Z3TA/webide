@@ -43,18 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Web preview issues on Windows:
-WysiwygEditor.js:594
-Uncaught TypeError: Cannot read property 'removeAllRanges' of null
-(because there are no line breaks between body tag and content !?!?)
-<body>
-<p>hello</p>
-</body>
-
-When in web preview and typing outside of body, you get "It's not safe to reload becasue the wysiwygEditor source file has not been saved!"
-If you close the web privew it pops up again when you type. (should exity web preview when the preview windows is closed!)
-
-
 test:
 npm install -g jzedit on Windows
 

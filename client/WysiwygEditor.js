@@ -1355,7 +1355,7 @@ var WysiwygEditor;
 	}
 	
 	
-	WysiwygEditor.prototype.close = function close() {
+	WysiwygEditor.prototype.close = function close(closeWindow) {
 		// Clean up and close the window ...
 		
 		var wysiwygEditor = this;
@@ -1380,7 +1380,7 @@ var WysiwygEditor;
 		
 		wysiwygEditor.closed = true;
 		// Closing the window will also call wysiwygEditor.close()
-		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
+		if(closeWindow !== false && wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 		
 		if(wysiwygEditor.onClose) {
 			wysiwygEditor.onClose();
@@ -1828,7 +1828,10 @@ var WysiwygEditor;
 			setTimeout(function afterWeirdStuff() {
 				previewWin.window.onbeforeunload = function onbeforeunload() {
 					console.warn("onbeforeunload called!");
-					if(!wysiwygEditor.isReloading && !wysiwygEditor.onlyPreview) wysiwygEditor.close();
+					// We don't want the preview window to close when clicking on a link (in the preview window)
+					// We however want the "preview" to unload so that it doesn't pop open again
+					if(!wysiwygEditor.isReloading) wysiwygEditor.close(false);
+					else console.log("wysiwygEditor.isReloading=" + wysiwygEditor.isReloading + " wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 					//return true; // Shows a "are you sure" message
 				};
 				
