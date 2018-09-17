@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Trying to figure out why jzedit foo.txt and foo.txt is not re-opening when re-loading the editor (in Windows)
-
 Web preview issues on Windows:
 WysiwygEditor.js:594
 Uncaught TypeError: Cannot read property 'removeAllRanges' of null
@@ -2672,6 +2670,10 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Goto file (CTRL + O) sometimes freeze the editor. 
+It also takes several seconds to open a file From "goto file" in Windows. 
+But it's fast when for example opening from file explorer. So it's probably "goto file" cleanup that is blocking.
 
 Spellchecking while having many files open takes a shit-load of resources! And keeps the server busy so you can not save!
 

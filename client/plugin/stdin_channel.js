@@ -35,15 +35,20 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 	}
 
 	function unloadStdinChannelPlugin() {
+		// When the editor is reloaded or closed
+		
 		CLIENT.removeEvent("stdin", stdinPrint);
 		CLIENT.removeEvent("arguments", editorArguments);
 		
 		EDITOR.removeEvent("fileClose", stdinChannelFileClose);
 		EDITOR.removeEvent("afterSave", stdinChannelAfterSave);
 
-		if(stdinFile) EDITOR.closeFile(stdinFilePath);
+		if(stdinFile) {
+			notofyEdit(stdinFile.path);
+			stdinFile = null;
+		}
 	}
-
+	
 	
 	function stdinChannelFileClose(file) {
 		if(watchFiles.indexOf(file.path) != -1) notofyEdit(file.path);

@@ -184,7 +184,7 @@
 				//EDITOR.closeFile(testfile);
 				
 				// Call exit listeners before reloading
-				EDITOR.fireEvent("exit", [], function(err, returns) {
+				EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
 					if(err) throw err;
 					
 					var gotError = false;
