@@ -42,7 +42,7 @@ var UTIL = {
 		//console.log("path=" + path);
 				
 		path = path.replace(/\/+/g, delimiter);
-		path = path.replace(/\[^:]\+/g, delimiter);
+		path = path.replace(/(:\\)?\\+/g, "$1" + delimiter);
 		
 		//console.log("path=" + path);
 		

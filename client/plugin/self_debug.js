@@ -137,11 +137,11 @@
 			
 			source = EDITOR.installDirectory + 'client/' + url.pathname;
 		}
-		
+		console.log("source=" + source);
 		source = UTIL.toSystemPathDelimiters(source);
 		
 		if(EDITOR.settings.devMode) {
-			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {\
+			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source.replace(/\\/g, "\\\\") + '\', undefined, function(err, file) {\
 		if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
 		EDITOR.renderNeeded();})">' + source + "</a>";
 		}

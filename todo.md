@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Trying to figure out why jzedit foo.txt and foo.txt is not re-opening when re-loading the editor (in Windows)
+
 Web preview issues on Windows:
 WysiwygEditor.js:594
 Uncaught TypeError: Cannot read property 'removeAllRanges' of null

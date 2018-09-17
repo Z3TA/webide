@@ -1204,7 +1204,7 @@ username = guestUser;
 							
 							var installDirectory = "/";
 							
-							if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
+							if(NO_CHROOT) installDirectory = __dirname.replace(/server$/, "");
 							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
 							
 							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
