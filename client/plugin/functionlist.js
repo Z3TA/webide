@@ -426,6 +426,8 @@ for(var func, element, i=0; i<functions.length; i++) {
 		
 		functionListWrap = document.getElementById("functionListWrap");
 		
+		if(!functionListWrap) return console.warn("functionListWrap not available!");
+		
 		functionListSelect = document.getElementById("functionList");
 
 		showFunctionList();
