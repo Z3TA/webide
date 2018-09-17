@@ -53,6 +53,9 @@ Uncaught TypeError: Cannot read property 'removeAllRanges' of null
 <p>hello</p>
 </body>
 
+When in web preview and typing outside of body, you get "It's not safe to reload becasue the wysiwygEditor source file has not been saved!"
+If you close the web privew it pops up again when you type. (should exity web preview when the preview windows is closed!)
+
 
 test:
 npm install -g jzedit on Windows
@@ -151,6 +154,9 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+
+work flow: Creating a new html form quiz, with radio-boxes and some JavaScript to show the correct answer.
 
 prio: Fix indentation characters so the source code gets clean.
 
