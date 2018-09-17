@@ -4837,7 +4837,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 	
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function(resizeEvent) {
-		console.log("EVENT RESIZE!");
+		console.warn("EVENT RESIZE!");
 		EDITOR.resizeNeeded();
 		EDITOR.renderNeeded();
 		

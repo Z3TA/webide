@@ -65,6 +65,11 @@ var WysiwygEditor;
 	
 	var browser = UTIL.checkBrowser();
 	
+	var oldPreviewWindowPosition;
+	var oldPreviewWindowSize;
+	var oldCodeWindowPosition;
+	var oldCodeWindowSize;
+	
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
 		
@@ -101,6 +106,8 @@ var WysiwygEditor;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
 		if(sourceFile.text.indexOf("<?JS") != -1) throw new Error("Source file contains dynamic script tags. Ignore/transform filter not yet implemented.");
+		
+		wysiwygEditor.reloadAfterSave = false;
 		
 		wysiwygEditor.url = url;
 		wysiwygEditor.bodyTagSource = bodyTagSource || "body";
@@ -341,6 +348,8 @@ var WysiwygEditor;
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
 		var wysiwygEditor = this;
 		
+		console.log("WysiwygEditor.positionate: top=" + top + " left=" + left + " width=" + width + " height=" + height);
+		
 		// Decide window width, height and placement ...
 		var windowPadding = 0;
 		var unityLeftThingy = 10;
@@ -362,8 +371,11 @@ var WysiwygEditor;
 		
 		if(previewWin) {
 			
-			previewWin.moveTo(posX, posY);
-			previewWin.resizeTo(previeWidth, previewHeight);
+			if(oldPreviewWindowPosition) previewWin.moveTo(oldPreviewWindowPosition.x, oldPreviewWindowPosition.y);
+			else previewWin.moveTo(posX, posY);
+			
+			if(oldPreviewWindowSize) previewWin.resizeTo(oldPreviewWindowSize.x, oldPreviewWindowSize.y);
+			else previewWin.resizeTo(previeWidth, previewHeight);
 			
 			/*
 				wysiwygEditor.screenX = previewWin.screenX || previewWin.screenLeft;
@@ -375,8 +387,14 @@ var WysiwygEditor;
 			// Resize the editor
 			var editorCodeWindow = window; // gui.Window.get();
 			
-			editorCodeWindow.moveTo(0, 0);
-			editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+			console.log("oldCodeWindowPosition=", oldCodeWindowPosition);
+			if(oldCodeWindowPosition) editorCodeWindow.moveTo(oldCodeWindowPosition.x, oldCodeWindowPosition.y);
+			else editorCodeWindow.moveTo(0, 0);
+			
+			console.log("oldCodeWindowSize=", oldCodeWindowSize);
+			if(oldCodeWindowSize) editorCodeWindow.resizeTo(oldCodeWindowSize.x, oldCodeWindowSize.y);
+			else editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+		
 		}
 		else console.warn("previewWin not available when positionateing!")
 	}
@@ -646,7 +664,10 @@ var WysiwygEditor;
 			
 			if(wysiwygEditor.isCompiled) return wysiwygEditor.close();
 			
-			wysiwygEditor.reload();
+			//wysiwygEditor.reload();
+			wysiwygEditor.reloadAfterSave = true;
+			console.log("Will reload after next save ...");
+			
 			return;
 		}
 		
@@ -745,6 +766,11 @@ var WysiwygEditor;
 		console.log("WysiwygEditor.anyFileSaved: " + file.path);
 		
 		if(file == wysiwygEditor.sourceFile) wysiwygEditor.sourceFileIsSaved = true;
+		
+		if(wysiwygEditor.reloadAfterSave && wysiwygEditor.sourceFile == file) {
+			wysiwygEditor.reloadAfterSave = false;
+			return wysiwygEditor.reload() ;
+		}
 		
 		var previewWin = wysiwygEditor.previewWin;
 		
@@ -1524,6 +1550,27 @@ var WysiwygEditor;
 		
 		console.warn("(re)loading preview window ...");
 		
+		oldPreviewWindowPosition = {
+			x: wysiwygEditor.previewWin.screenX || wysiwygEditor.previewWin.screenLeft, 
+			y: wysiwygEditor.previewWin.screenY || wysiwygEditor.previewWin.screenTop
+		};
+		oldPreviewWindowSize = {
+			x: wysiwygEditor.previewWin.innerWidth,
+			y: wysiwygEditor.previewWin.innerHeight
+		};
+		
+		var editorCodeWindow = window; // gui.Window.get();
+		oldCodeWindowPosition = {
+			x: editorCodeWindow.screenX || editorCodeWindow.screenLeft, 
+			y: editorCodeWindow.screenY || editorCodeWindow.screenTop
+		};
+		oldCodeWindowSize = {
+			x: editorCodeWindow.innerWidth,
+			y: editorCodeWindow.innerHeight
+		};
+		
+		console.log("Set oldCodeWindowPosition=", oldCodeWindowPosition);
+		console.log("Set oldCodeWindowSize=", oldCodeWindowSize);
 		
 		if(wysiwygEditor.hasLoaded) {
 			
