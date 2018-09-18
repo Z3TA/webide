@@ -1589,6 +1589,8 @@
 	
 	EDITOR.addTest(function supportWindowsPaths(callback) {
 		
+		var oldWorkingDir = EDITOR.workingDirectory;
+		
 		EDITOR.changeWorkingDir("C:\\Users\\Jon Doe\\");
 		// System's path delimiter is taken from the working dir
 		
@@ -1599,6 +1601,8 @@
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo//bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\\\bar\\\\baz.txt"), "C:\\\\foo\\bar\\baz.txt");
+		
+		EDITOR.changeWorkingDir(oldWorkingDir);
 		
 		callback(true);
 		
