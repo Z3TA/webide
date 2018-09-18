@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Issue with dragging big file to the editor.
+(save to disk before opening)
 
 test:
 npm install -g jzedit on Windows
