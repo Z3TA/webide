@@ -5623,7 +5623,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				
 			}
 			else {
-				// Create a new file with the dropped text
+				// todo: Create a new file with the dropped text
+				alertBox("Not yet implemented!");
 			}
 			return;
 		}
@@ -5680,7 +5681,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				if(h) handled = true;
 			}
 			
-			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
+			if(!handled) promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
 				if(path) {
 					EDITOR.checkPath(path, function(err, path) {
 						if(err && err.code != "CANCEL") return alertBox(err.message);
@@ -5759,7 +5760,19 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
 			else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
 			
-			if(fileToOpen) EDITOR.openFile(fileToOpen);
+			if(fileToOpen) {
+				var fileExtension = UTIL.getFileExtension(fileToOpen);
+				
+				// Open right away if it's a supported file
+				if(EDITOR.supportedFiles.indexOf(fileExtension) != -1) EDITOR.openFile(fileToOpen);
+				else {
+					var yes = "Yes";
+					var no = "No";
+					confrimBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
+						if(answer == yes) EDITOR.openFile(fileToOpen);
+					});
+				}
+			}
 			
 			EDITOR.resizeNeeded(); // To get rid of progress bar
 			
