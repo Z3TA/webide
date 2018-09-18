@@ -1246,6 +1246,8 @@ var File; // File object is global
 		var newCaret = file.createCaret(index + text.length); //  + 
 		file.mutateCaret(caret, newCaret);
 		
+		if(caret != file.caret) file.fixCaret(file.caret);
+		
 		console.timeEnd("insertText");
 		
 		

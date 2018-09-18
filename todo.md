@@ -44,9 +44,6 @@ What I'm working on
 -------------------
 
 
-
-Test dragging text to the editor, and test dragging text to the editor when there is no file open
-
 test:
 npm install -g jzedit on Windows
 

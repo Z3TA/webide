@@ -594,6 +594,7 @@ callback = value;
 		
 		var file = null;
 		
+		if(path == undefined) path = "new file";
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
@@ -5612,6 +5613,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		if(text) {
 			// Drop the text into the current file
+			console.log("Dragged text.length=" + text.length + " to the editor.");
 			if(EDITOR.currentFile) {
 				
 				// Get row and col
@@ -5623,8 +5625,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				
 			}
 			else {
-				// todo: Create a new file with the dropped text
-				alertBox("Not yet implemented!");
+				// Create a new file with the dropped text
+				EDITOR.openFile(undefined, text); 
+				
 			}
 			return;
 		}
