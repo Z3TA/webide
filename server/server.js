@@ -1911,14 +1911,16 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 		// Check ssl certificate
 		console.time("Check " + username + " SSL Cert");
 		var url_user = UTIL.urlFriendly(username);
+		var userDomain = url_user + "." + DOMAIN;
 		
 		var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
 		module_fs.stat(certPath, function(err, stat) {
 			if(err == null) {
 				console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
-				sslCertChecked = true;
-				console.timeEnd("Check " + username + " SSL Cert");
-				//return checkMountsReadyMaybe();
+				
+				enableSSL(userDomain); // Check if Nginx needs to be updated
+				
+				return;
 			}
 			else if(err.code == 'ENOENT') {
 				console.log("ENOENT: certPath=" + certPath);
@@ -1927,17 +1929,17 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 					log("Skipping SSL registration because of too many failed attempts!");
 					sslCertChecked = true;
 					console.timeEnd("Check " + username + " SSL Cert");
-					//return checkMountsReadyMaybe();
+					
+					return;
 				}
 				
 				// the cert does not exist. Try to register it
-				var userDomain = url_user + "." + DOMAIN;
+				
 				console.time("Register " + userDomain + " with letsencrypt");
 				var wildcard = false; // Check if johan.webide.se auto registers before starting using wildcards (Your cert will expire on 2018-12-03.)
 				module_letsencrypt.register(userDomain, ADMIN_EMAIL, wildcard, function(err) {
 					console.timeEnd("Register " + userDomain + " with letsencrypt");
 					if(err) {
-						
 						if(FAILED_SSL_REG.hasOwnProperty(userDomain)) FAILED_SSL_REG[userDomain]++;
 						else FAILED_SSL_REG[userDomain] = 1;
 						
@@ -1949,44 +1951,11 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 						
 						sslCertChecked = true;
 						console.timeEnd("Check " + username + " SSL Cert");
-						//return checkMountsReadyMaybe();
 					}
 					else {
 						console.log("SSL certificate for " + userDomain + " installed!");
 						
-						// Enable SSL on the site
-						var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
-						module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
-							if(err) throw err;
-							data = data.replace(/#SSL#/g, "");
-							data = data.replace(/listen 80;#NOSSL#/g, "");
-							data = data.replace(/listen [::]:80;#NOSSL#/g, "");
-							
-							module_fs.writeFile(nginxProfilePath, data, function(err) {
-								if(err) throw err;
-								
-								console.log("SSL enabled: " + nginxProfilePath);
-								
-								
-								// Don't make the user wait for nginx config to reload (ca 70ms)
-								console.time(username + " nginx reload");
-								var exec = module_child_process.exec;
-								exec("service nginx reload", function(error, stdout, stderr) {
-									console.timeEnd(username + " nginx reload");
-									
-									if(error) throw(error);
-									if(stderr) throw new Error(stderr);
-									if(stdout) throw new Error(stdout);
-									
-									sslCertChecked = true;
-									console.timeEnd("Check " + username + " SSL Cert");
-									//return checkMountsReadyMaybe();
-									
-									//log("nginx reloaded!");
-									
-								});
-							});
-						});
+						enableSSL(userDomain);
 					}
 				}); // letsencrypt.register
 			}
@@ -1995,6 +1964,49 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 				throw err;
 			}
 		});
+		
+		function enableSSL(userDomain) {
+			// Enable SSL on the site
+			var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
+			module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
+				if(err) throw err;
+				
+				if(data.indexOf("#SSL#") == -1 || data.indexOf("#NOSSL#") == -1) {
+					log("SSL already configured on " + userDomain);
+					sslCertChecked = true;
+					console.timeEnd("Check " + username + " SSL Cert");
+					
+					return;
+				}
+				
+				data = data.replace(/#SSL#/g, "");
+				data = data.replace(/listen 80;#NOSSL#/g, "");
+				data = data.replace(/listen [::]:80;#NOSSL#/g, "");
+				
+				module_fs.writeFile(nginxProfilePath, data, function(err) {
+					if(err) throw err;
+					
+					console.log("SSL enabled: " + nginxProfilePath);
+					
+					// Don't make the user wait for nginx config to reload (ca 70ms)
+					console.time(username + " nginx reload");
+					var exec = module_child_process.exec;
+					exec("service nginx reload", function(error, stdout, stderr) {
+						console.timeEnd(username + " nginx reload");
+						
+						if(error) throw(error);
+						if(stderr) throw new Error(stderr);
+						if(stdout) throw new Error(stdout);
+						
+						sslCertChecked = true;
+						console.timeEnd("Check " + username + " SSL Cert");
+						
+					});
+				});
+			});
+		}
+		
+		
 	} // checkSslCert
 	
 } // checkMounts

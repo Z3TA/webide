@@ -118,4 +118,20 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 	});
 }
 
+letsencrypt.remove = function remove(domain, adminEmail, wildcard, callback) {
+
+	throw new Error("Not yet implemented");
+	
+	/*
+		
+		certbot delete --cert-name domain.com
+		
+		Can only delete one domain at a time
+		
+	*/
+	
+	
+	
+}
+
 module.exports = letsencrypt;
