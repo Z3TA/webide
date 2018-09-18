@@ -22,7 +22,7 @@ The easiest way to install the desktop version is via npm:
 
 `npm install -g jzedit`
 
-Then type "npm start" to start the editor. Or (if you installed globally) "jzedit [path to file]"
+Then type "npm start" to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
 Se instruction for making a desktop icon and manually installing below:
 

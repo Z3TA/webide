@@ -4583,7 +4583,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			var ret = fun(file, evCallback);
 			eventFunsCalled++;
 			console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
-			if(ret || ref === false || ret === null) evCallback(null);// The function did not return void, asume it's done!
+			if(ret || ret === false || ret === null) evCallback(null);// The function did not return void, asume it's done!
 			
 			function evCallback(err) {
 				console.log("Got " + ev + " event callback from " + fName + " err=" + err);
