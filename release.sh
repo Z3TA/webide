@@ -62,7 +62,7 @@ rm temp/release/linux/makebundle.js
 rm temp/release/linux/changeset.js
 rm temp/release/linux/update_version.js
 rm temp/release/linux/semver.js
-rm temp/release/linux/SEMVER
+#rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm
 
 echo "Removing unused fonts"
