@@ -1633,7 +1633,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 						if(err.code != "ENOENT") throw err;
 						
 						module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
-							if(err) throw err;
+							if(err && err.code != "EEXIST") throw err;
 							
 							var exec = module_child_process.exec;
 							exec("service nginx reload", function(error, stdout, stderr) {
