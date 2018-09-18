@@ -1323,7 +1323,7 @@ username = guestUser;
 											
 										}
 										else {
-											gcsfLogin(userConnectionName, function(err, resp) {
+											gcsfLogin(userConnectionName, 0, function(err, resp) {
 												workerResp(err, resp);
 											});
 										}
@@ -3054,7 +3054,7 @@ function sendMail(from, to, subject, text) {
 	
 }
 
-function gcsfLogin(username, gcsfLoginCallback) {
+function gcsfLogin(username, loginRetries, gcsfLoginCallback) {
 	/*
 		
 		Need to create a "native" Google OAuth 2.0 client ID from here:
@@ -3065,9 +3065,19 @@ function gcsfLogin(username, gcsfLoginCallback) {
 		
 	*/
 	
-if(GCSF.hasOwnProperty(username)) return gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
+	if(typeof username != "string") throw new Error("typeof username=" + typeof username);
+	if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
+	if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
 
-var enterCodeCallback = undefined; // Call this function when mounted
+	var maxLoginRetries = 1;
+	
+	if(GCSF.hasOwnProperty(username)) {
+gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
+		gcsfLoginCallback = null;
+		return;
+	}
+	
+	var enterCodeCallback = undefined; // Call this function when mounted
 	var loginSuccess = false;
 	
 	// Where configDir + .config/gcsf/gcsf.toml should be saved
@@ -3093,6 +3103,7 @@ var enterCodeCallback = undefined; // Call this function when mounted
 
 	GCSF[username].loginSession = gcsfLoginSession;
 	GCSF[username].enterCode = function enterGcsfCode(code, cb) {
+		log("enter gcsf code called for " + username, DEBUG);
 			enterCodeCallback = cb;
 		this.loginSession.stdin.write(code + "\n");
 		}
@@ -3135,6 +3146,7 @@ var enterCodeCallback = undefined; // Call this function when mounted
 		var matchBrowserUrl = str.match(reBrowserUrl);
 		
 		if(matchBrowserUrl) {
+			log("Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
 			var authUrl = matchBrowserUrl[1];
 			gcsfLoginCallback(null, {url: authUrl});
 			gcsfLoginCallback = null;
@@ -3142,9 +3154,16 @@ var enterCodeCallback = undefined; // Call this function when mounted
 		else if( str.match(/Successfully logged in/) ) {
 			if(loginSuccess === true) throw new Error(username + " gcsfLoginSession already logged in successfully !?");
 			loginSuccess = true;
+			log("Running gcsf mount for " + username + " because gcsf login successfully ....", DEBUG);
 			gcsfMount(username, function(err) {
-				if(err) return enterCodeCallback(err);
-				else enterCodeCallback(null, {mounted: true});
+				if(err) {
+					log("Error when running gcsf mount for " + username + " after gcsf login success: " + err.message, INFO);
+					enterCodeCallback(err);
+				}
+				else {
+					log("gcsf mount successful for " + username + " after gcsf login success!", DEBUG);
+enterCodeCallback(null, {mounted: true});
+				}
 				
 				enterCodeCallback = null;
 			});
@@ -3158,21 +3177,48 @@ var enterCodeCallback = undefined; // Call this function when mounted
 		
 		if( str.match(reTokenFileExist) ) {
 			/*
-				Already logged in ?
+				Already logged in !?
+				
+				gcsf login session will close!
 				
 			*/
 			
-			// Avoid race condition (with close) 
-			enterCodeCallback = gcsfLoginCallback;
+			// We don't want to call the gcsfLoginCallback just yet (close event will call it)
+			var alreadyLoggedInCallback = gcsfLoginCallback;
 			gcsfLoginCallback = null;
 			
-			gcsfMount(username, function(err) {
-				if(err) return enterCodeCallback(err);
-				else enterCodeCallback(null, {mounted: true});
-				
-				enterCodeCallback = null;
-			});
+			// Sanity check: We should not have a enterCodeCallback
+			if(enterCodeCallback) throw new Error("Unexpected enterCodeCallback " + !!enterCodeCallback);
 			
+			log("Running gcsf mount for " + username + " because most likely already logged in ...", DEBUG);
+			gcsfMount(username, function(err) {
+				if(err) {
+					log("gcsf mount error for " + username + ": " + err.message, INFO);
+					if(err.code=="UMOUNT_THEN_TRY_AGAIN" && loginRetries < maxLoginRetries) {
+						loginRetries++;
+						
+						log("fusermount for " + username + " before retrying gcsf login ...", DEBUG);
+						gcsfUmount(username, function(err) {
+							if(err) console.error(err);
+							
+							log("Retrying (" + loginRetries + ") gcsf login for " + username + " ...", INFO);
+							gcsfLogin(username, loginRetries, alreadyLoggedInCallback);
+							alreadyLoggedInCallback = null;
+							
+						});
+					}
+					else {
+						log("gcsf mount error code=" + err.code + " loginRetries=" + loginRetries + " Not trying again!", INFO);
+						alreadyLoggedInCallback(err);
+						alreadyLoggedInCallback = null;
+					}
+				}
+				else {
+					log("gcsf mount success for " + username + "", DEBUG);
+					alreadyLoggedInCallback(null, {mounted: true});
+					alreadyLoggedInCallback = null;
+				}
+			});
 		}
 	});
 	
@@ -3184,6 +3230,7 @@ var enterCodeCallback = undefined; // Call this function when mounted
 		var notImplementString = "Function not implemented (os error 38)";
 		var mountpointNotEmptyString = "fuse: mountpoint is not empty";
 		var notConnectedString = "Transport endpoint is not connected";
+		var driveBuzy = "Device or resource busy";
 		
 		// First create the folder to mount to
 		module_fs.mkdir(mountDir, function(err) {
@@ -3226,7 +3273,7 @@ var enterCodeCallback = undefined; // Call this function when mounted
 			log(username + " gcsfMountSession error: err.message=" + err.message, ERROR);
 			console.error(err);
 			if(gcsfMountCallback) {
-gcsfMountCallback(err);
+				gcsfMountCallback(err);
 				gcsfMountCallback = null;
 			}
 		}
@@ -3257,6 +3304,11 @@ gcsfMountCallback(err);
 					This error will close the mount session
 					Try umount and then mount again !?
 				*/
+				var error = new Error("Unable to mount Google Drive. Please try again.");
+				error.code = "UMOUNT_THEN_TRY_AGAIN";
+				gcsfMountCallback(error);
+				gcsfMountCallback = null;
+				
 			}
 			else if( str.indexOf(mountpointNotEmptyString) != -1 ) {
 				/*
@@ -3265,7 +3317,7 @@ gcsfMountCallback(err);
 					*this* mount session will close.
 					I guess this should count as a mount success :P
 				*/
-				console.log("GCSF mountpoint is not empty!");
+				log("GCSF mountpoint is not empty! Assuming mount sucess", INFO);
 				gcsfMountCallback(null);
 				gcsfMountCallback = null;
 			}
@@ -3274,15 +3326,30 @@ gcsfMountCallback(err);
 					GCSH has somehow lost connection to Google Drive
 					*this* mount session will close.
 					
+					It usually happens when the user forgot to logout/umount google drive from an earlier session
 				*/
-				gcsfMountCallback(new Error("We got disconnected from Google Drive. Please try again."));
+				
+				var error = new Error("We got disconnected from Google Drive. Please try again.")
+				error.code = "UMOUNT_THEN_TRY_AGAIN";
+				gcsfMountCallback(error);
 				gcsfMountCallback = null;
-				gcsfUmount(username, function(err) {
-					if(err) console.error(err);
-					// Don't automatically try mounting again or we might end up in an endless loop
-				});
 				
 			}
+			else if( str.indexOf(driveBuzy) != -1 ) {
+				/*
+					Probably some reference still lingering to the old mount
+					
+					
+					This error will *NOT* close the mount session
+				*/
+				
+				gcsfMountCallback( new Error("Unable to mount Google Drive: Device or resource busy. Please try again later.") );
+				gcsfMountCallback = null;
+				
+				gcsfMountSession.kill();
+				
+			}
+			
 		}
 		
 	}

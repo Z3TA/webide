@@ -623,7 +623,7 @@ process.on('message', function commandMessage(message) {
 				}
 				else {
 					if(!answer) {
-						console.warn("No answer from command=" + command)
+						console.warn("No data in answer from command=" + command)
 						answer = {};
 					}
 					send({resp: answer});
