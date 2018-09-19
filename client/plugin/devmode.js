@@ -45,7 +45,8 @@
 			}
 			else if(EDITOR.settings.devMode == true) {
 				enableDevMode();
-				enableDebugMode();
+				//enableDebugMode();
+				// Uncomment line above to send all console.log's to the server
 			}
 			
 			/*
