@@ -33,6 +33,8 @@ var DEBUG_CHROOT = false;
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
+var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);
+
 // Log levels
 var ERROR = 3;
 var WARN = 4;
@@ -487,16 +489,19 @@ else {
 		wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
 		
 		
-		if(HTTP_IP != "127.0.0.1") {
-			broadcast(HTTP_IP);
-		}
-		else {
-			log("Server running on URL/address: http://" + makeUrl() + "");
-			
+		if(HTTP_IP == "127.0.0.1") {
 			if(NO_CHROOT && USERNAME ) {
 				openStdinChannel();
 			}
+			
+			log("Server running on URL/address: http://" + makeUrl() + "");
+			
 		}
+		
+		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {
+			broadcast(HTTP_IP);
+		}
+		
 	}
 }
 
@@ -974,8 +979,6 @@ function sockJsConnection(connection) {
 			}
 		}
 		
-		console.log("The command queue has " + commandQueue.length + " items.");
-		
 		if(command == "stdout") {
 			try {
 			for (var i=0; i<STDOUT_SOCKETS.length; i++) {
@@ -988,6 +991,13 @@ function sockJsConnection(connection) {
 			
 			return;
 		}
+		else if(command == "log") {
+			log((userConnectionName ? userConnectionName : IP) + ": " + json.data, DEBUG);
+			
+			return false;
+		}
+		
+		console.log("The command queue has " + commandQueue.length + " items.");
 		
 		if(!userWorker) {
 			

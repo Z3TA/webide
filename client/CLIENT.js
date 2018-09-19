@@ -221,14 +221,14 @@ err = new Error(errMsg);
 		var string = id + GS + req;
 		
 		// console.warn so we get a stack trace and can find out where the request was made while debugging
-		console.warn("CLIENT.cmd id=" + id + " req=" + req);
+		if(req != "log") console.warn("CLIENT.cmd id=" + id + " req=" + req);
 		
 		if(json) {
 			try {
 				string += GS + JSON.stringify(json);
 			}
 			catch(err) {
-				console.log(json);
+				if(req != "log") console.log(json);
 				throw new Error("Unable to stringify json=" + json);
 			}
 		}
@@ -238,7 +238,7 @@ err = new Error(errMsg);
 		if(callback) {
 callbackWaitList[id] = callback;
 		}
-		else {
+		else if(req != "stdout" && req != "log") { // Known commands that doesn't call back
 			// This error will be thrown if the server callbacks with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
 			console.warn("No callback defined in req=" + req);
@@ -246,7 +246,7 @@ callbackWaitList[id] = callback;
 		
 		connSend(string, function sendMessageToServer(err) {
 			if(err) {
-				console.log("connSend error: "+ err);
+				if(req != "log") console.log("connSend error: "+ err);
 				if(callbackWaitList.hasOwnProperty(id)) {
 					callbackWaitList[id](err);
 					delete callbackWaitList[id];

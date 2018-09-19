@@ -45,6 +45,7 @@
 			}
 			else if(EDITOR.settings.devMode == true) {
 				enableDevMode();
+				enableDebugMode();
 			}
 			
 			/*
@@ -146,6 +147,43 @@
 		
 	}
 	
+	function enableDebugMode() {
+		/*
+			Send all clinet console.log's to the server.
+			Useful for when testing the editor in a browser that doesn't have developer tools
+		*/ 
+		
+		console.log = console.warn = log;
+		
+		//CLIENT.cmd("log", {data: "Debug mode enabled"});
+		
+		function log() {
+			// Avoid recursion
+			console.log = consoleLogOriginal;
+			console.warn = consoleWarnOriginal;
+			
+			// Get the parameters
+			var str = "";
+			for (var i=0; i<arguments.length; i++) {
+				if(arguments[i].toString) str += arguments[i].toString() + "\n";
+				else str += arguments[i] + "\n";
+			}
+			
+			CLIENT.cmd("log", {data: str});
+			
+			console.log = console.warn = log;
+		}
+		
+		function nothing() {};
+		
+	}
+	
+	function disableDebugMode() {
+		console.log = consoleLogOriginal;
+		console.warn = consoleWarnOriginal;
+		CLIENT.cmd("log", {data: "Debug mode disabled"});
+	}
+	
 	function toggleDevMode() {
 		
 		EDITOR.settings.devMode = EDITOR.settings.devMode ? false : true;
@@ -157,6 +195,7 @@
 		}
 		else {
 			disableDevMode();
+			disableDebugMode();
 			console.log("devMode disabled");
 		}
 		EDITOR.hideMenu();

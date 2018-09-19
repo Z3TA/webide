@@ -2774,14 +2774,14 @@ EDITOR.fireEvent("btk");
 	
 	EDITOR.addAnimation = function(fun) {
 		if(typeof fun != "function") throw new Error("The animation to be added needs to be a function!");
-		console.log("Adding animation: " + UTIL.getFunctionName(fun));
+		//console.log("Adding animation: " + UTIL.getFunctionName(fun));
 		if(EDITOR.animationFunctions.indexOf(fun) != -1) console.warn("Animation " + UTIL.getFunctionName(fun) + " is already running!");
 		if(!isAnimating && window.requestAnimationFrame) window.requestAnimationFrame(animate);
 		return EDITOR.animationFunctions.push(fun) - 1;
 	}
 	EDITOR.removeAnimation = function(fun) {
 		if(typeof fun != "function") throw new Error("The animation to be removed needs to be a function!");
-		console.log("Removing animation: " + UTIL.getFunctionName(fun));
+		//console.log("Removing animation: " + UTIL.getFunctionName(fun));
 		return removeFrom(EDITOR.animationFunctions, fun);
 	}
 	
@@ -6605,7 +6605,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				recognition.stop();
 			}
 		}
-		else console.log("recognition: Not ctrl! charCode=" + charCode);
+		//else console.log("recognition: Not ctrl! charCode=" + charCode);
 		
 		EDITOR.interact("keyUp", keyUpEvent);
 		
