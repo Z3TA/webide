@@ -43,6 +43,15 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When saving as on ftp it sais "path does not exist"
+
+/home/Z/Projects/jzedit/client/EDITOR.js:926
+Uncaught Error: Unable to get file size for: ftp://192.168.0.1/hemsida/startsida_bilder.html
+Server: API error: Could not get file size.
+
+When viewing a ftp site in file explorer it bugs out and starts with previous folder as root.
+
+
 Issue with dragging big file to the editor.
 (save to disk before opening)
 
