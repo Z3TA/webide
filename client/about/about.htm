@@ -15,7 +15,7 @@
 	<abstract>
 	<p>Want to make a web-site or app ?<br>
 	And have it running <i>live</i> on the web/cloud five minutes from now ?<br>
-	<i>With</i> dev-tools integration. <i>Without</i> any config or setups.</p>
+	<i>With</i> dev-tools integration. <i>Without</i> any configuration or setup.</p>
 	
 	<p>Deploy your web apps and micro-services in one click ...</p>
 	
@@ -38,7 +38,7 @@
 	With integrated dev-tools, cloud hosting service, source control and content management system.
 	Making it easy to both develop and deploy (run, in production) full stack JavaScript web applications 
 	<i>from anywhere</i> in any device or platform that comes with a web browser. 
-	And Without installing anything, config, setup, or touching a terminal or command line!</p>
+	And Without installing anything, configuration, setup, or touching a terminal or command line!</p>
 	
 	
 	<h2>Why should I use webide.se to edit my web site !?</h2>
@@ -58,22 +58,6 @@
 	with IDE-like features such as auto-complete and built in version
 	control (Mercurial with hggit).</p>
 	
-	<p>While being a "cloud editor" it can also run locally on a PC, 
-	or any device that can run <a href="https://www.nodejs.org/">Node.JS</a>.</p>
-	
-	<h3>Install jzeidt locally</h3>
-	
-	<p>First install nodejs, (apt install nodejs) or download from <a href="https://nodejs.org/">Node.js website</a>.<br>
-	With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install jzedit</b>. To run the editor type <b>npm start</b>. 
-	Or if you only want to run the server and open the editor in a browser, type <b>npm run server</b>.<br>
-	
-	<!--
-	<h3>Using as a cloud ide</h3>
-	
-	<p>You can have your team all share the same customzed enviroment and be able to use it from anywhere.</p>
-	
-	<p>You can find detailed instructions on how to run jzedit as a cloud server like webide.se in the readme.</p>
-	-->
 	
 	
 	<h2>Some features</h2>
@@ -93,12 +77,12 @@
 	</ul>
 	
 	
-	<h2>For non-techical users</h2>
+	<h2>For non-technical users</h2>
 	
 	<p>The editor is not only for developers, it can also be setup so that a non-technical user can use it,
 	for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. with automated source control management.<br>
 	For example when using the built in static site generator together with a software repository, it will automatically pull new updates from the repo,
-	merge if neccesary, and ask the user to write a commit message before publishing.</p>
+	merge if necessary, and ask the user to write a commit message before publishing.</p>
 	
 	
 	<h2>Architecture</h2>
@@ -135,7 +119,7 @@
 	JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
 	
 	
-	<h2>But does it have Vim keybindings?</h2>
+	<h2>But does it have Vim key-bindings?</h2>
 	
 	<p>Yes, there is a editor, inside the editor, called Vim mode (vim normal), hit <keyb>CTRL+SPACE</keyb> to activate it.</p>
 	
@@ -148,7 +132,7 @@
 	<p>Writing a text editor turned out to be much more fun then anticipated.<br>
 	And we also think there are room for improvements to make writing code more easier and fun, especially for beginners.</p>
 	
-	<p>We want to bring professional tools like source control, and static-site-generation to organisations to help them more effeciently 
+	<p>We want to bring professional tools like source control, and static-site-generation to organisations to help them more efficiently 
 	manage, share and collaborate with documents and public or intranet web sites.</p> 
 	
 	<p>In 1975 an text editor was developed that made use of a video monitor so you could see what you where typing.
@@ -156,11 +140,20 @@
 	So the author ended up calling it the "editor for mortals".<br>
 	When <i>normal</i> people see "code" they get scared. We want to make "coding" natural for normal people.</p>
 	
-	<p>The web enviroment and JavaScript allows rapid development and we hope to experiment with stuff like speech-to-text,
+	<p>The web environment and JavaScript allows rapid development and we hope to experiment with stuff like speech-to-text,
 	and visual aids to show which parts of the code does what, what parts are hot, the scope of variables etc.</p>
 	
 	
 	
+	
+	<h3>Run JZedit locally</h3>
+	
+	<p>Don't want to use the hosted service ? You can install the editor on your own workstation or server!</p>
+	
+	<p>First install nodejs, (sudo apt install nodejs) or download from <a href="https://nodejs.org/">Node.js website</a>.<br>
+	With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install -g jzedit</b>.<br>
+	To run the editor type <b>npm start</b>, or if you installed globally (-g flag) jzedit file-path.<br>
+	Or if you only want to run the server and open the editor in a browser, type <b>npm run server</b>.</p>
 	
 	
 	<hr>
