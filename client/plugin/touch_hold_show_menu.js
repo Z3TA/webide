@@ -34,6 +34,8 @@
 	
 	function ltTouchDown(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
+		console.log("ltTouchDown! mouseDownEvent.type=" + mouseDownEvent.type + " mouseDownEvent.which=" + mouseDownEvent.which + " direction=" + direction);
+		
 		if(mouseDownEvent.which > 1) {
 			// The user is using a regular mouse, so this plugin is not necessary
 			// Unload the module to free up resources
@@ -46,27 +48,27 @@
 		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return true;
 		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return true;
 		
-		console.log(mouseDownEvent);
+		//console.log(mouseDownEvent);
 		
 		touchDownTimer = setTimeout(function showMenu() {
-			
 			showTheMenu = true;
-			
+			console.log("ltTouchDown touchDownTimer!");
 		}, 300);
 		
 		touchTooLongTimer = setTimeout(function showMenu() {
-			
 			showTheMenu = false;
-			
+			console.log("ltTouchDown touchTooLongTimer!");
 		}, 1500);
 		
 	}
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
+		console.log("ltTouchUp showTheMenu=" + showTheMenu);
+		
 		if(mouseDownEvent.type != "touchend") return;
 		
-		console.log(mouseDownEvent);
+		//console.log(mouseDownEvent);
 		
 		clearTimeout(touchDownTimer);
 		clearTimeout(touchTooLongTimer);

@@ -6464,6 +6464,14 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		lastKeyDown = charCode;
 		
+		// In case the user has no mouse, pressing Enter should hide the "Right click to show the menu" message
+		if(!menuVisibleOnce && charCode == 13) {
+			menuVisibleOnce = true;
+			EDITOR.input = true;
+			preventDefault = true;
+			EDITOR.renderNeeded();
+		}
+		
 		if(preventDefault) {
 			//alert("Preventing default browser action!");
 			//console.log("Preventing default browser action!");
