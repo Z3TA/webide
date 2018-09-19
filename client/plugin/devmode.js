@@ -195,8 +195,8 @@
 			console.log("devMode enabled");
 		}
 		else {
-			disableDevMode();
 			disableDebugMode();
+			disableDevMode();
 			console.log("devMode disabled");
 		}
 		EDITOR.hideMenu();
