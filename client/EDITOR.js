@@ -922,15 +922,11 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		else {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
-				if(err) {
-					var error = new Error("Unable to get file size for: " + path + "\n" + err.message);
-					error.code = err.code;
-					callback(error);
-				}
+				if(err) return callback(err);
 				else callback(null, json.size);
 			});
-			}
 		}
+	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
 		// An easier method then getFileSizeOnDisk to check if a file exist on disk.
@@ -939,14 +935,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		EDITOR.getFileSizeOnDisk(path, gotSize);
 		
 		function gotSize(err, size) {
-			
 			if(err) {
-				if(err.code === 'ENOENT' || err.message.indexOf("No such file") != -1) {
+				if(err.code === 'ENOENT' || err.code == "550" || err.message.indexOf("No such file") != -1) {
 					callback(false);
 				}
 				else {
-					console.warn("Unexpected error when checking if file exist:")
-					throw err;
+					throw new Error("Unexpected error when checking if file exist (using EDITOR.getFileSizeOnDisk): err.code=" + err.code + " err.message=" + err.message);
 				}
 			}
 			else {

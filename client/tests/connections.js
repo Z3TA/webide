@@ -108,6 +108,47 @@
 	});
 	
 	
+	EDITOR.addTest(function testFtpConnection(callback) {
+		var testFolder = "ftp://100m.se/demo/jzedit-test/";
+var protocol = "ftp";
+		var serverAddress = "100m.se";
+
+		CLIENT.cmd("connect", {
+			protocol: protocol, 
+			serverAddress: serverAddress,
+			user: "test", 
+			passw: "ftptest123"
+}, function(err, json) {
+			if(err) throw err
+			else {
+				EDITOR.createPath(testFolder, function folderCreated(err, path) {
+					if(err) throw err;
+					EDITOR.saveToDisk(testFolder + "foo.txt", "foo bar", function fileCreated(err) {
+if(err) throw err;
+
+						// Cleanup
+						CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
+							if(err) throw err
+							else {
+								// Don't disconnect right away because other tests might depend on the connection
+								callback(true);
+								
+								// Cleanup
+								setTimeout(function disconnectFromSftp() {
+									CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}, function(err, json) {
+										
+									});
+								}, 10000);
+							}
+						});
+});
+				});
+			}
+		});
+		
+	}, 1);
+	
+	
 	EDITOR.addTest(function ftpFindInFiles(callback) {
 		// todo!
 		

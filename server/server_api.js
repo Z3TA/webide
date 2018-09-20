@@ -1867,7 +1867,6 @@ API.deleteFile = function deleteFile(user, json, callback) {
 			
 			console.log("Deleting file from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 			
-			// Asume the FTP server has support for RFC 3659 "size"
 			c.delete(parse.pathname, function ftpFileDeleted(err) {
 				if(err) {
 					console.warn(err.message);
@@ -1942,7 +1941,6 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			
 			console.log("Deleting directory from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 			
-			// Asume the FTP server has support for RFC 3659 "size" ?? HUH !?
 			c.rmdir(parse.pathname, recursive, function ftpDirDeleted(err) {
 				if(err) {
 					console.warn(err.message);
