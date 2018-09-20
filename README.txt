@@ -22,7 +22,7 @@ The easiest way to install the desktop version is via npm:
 
 `npm install -g jzedit`
 
-Then type "npm start" to start the editor. Or (if you installed globally) `jzedit [path to file]`
+Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
 Se instruction for making a desktop icon and manually installing below:
 
@@ -63,7 +63,7 @@ otherwise you will get a "this file comes from another computer" warning every t
 
 3. Navigate to the folder this file is located in via the command prompt: cd path\to\jzedit
 
-4. Install the dependencies by typing "npm install" and hit enter in the command prompt.
+4. Install the dependencies by typing `npm install` and hit enter in the command prompt.
 
 4.5. If the npm install fails you probably need to install build dependencies for Windows!
 Easiest method is to open a command prompt (Click on start menu => run, then type "cmd.exe")
@@ -82,11 +82,11 @@ Mac OS X
 1. Download and install nodejs from https://nodejs.org/
 (It should come with a packet manager called npm.)
 
-2. Open a terminal: Function-key + Space, and type "terminal"
+2. Open a terminal: Function-key + Space, and type `terminal`
 
-3. Navigate to the folder this file is located in via the terminal: cd path\to\jzedit
+3. Navigate to the folder this file is located in via the terminal: `cd path/to/jzedit`
 
-4. Install the dependencies by typing "npm install" and hit enter in the terminal.
+4. Install the dependencies by typing `npm install` and hit enter in the terminal.
 
 5. After nodejs and all dependencies are installed, type this in the terminal:
 `node server/server.js --port=8080 --user=admin --pw=admin -nochroot`
@@ -104,7 +104,7 @@ That will use the hosted version on webide.se
 
 We tried to make a pure Chrome app, but that turned out to be too much work.
 
-If you root the device you might be able to install nodejs. Then
+If you root the device you might be able to install nodejs. And then:
 ````
 npm install -g jzedit
 npm start
@@ -115,10 +115,13 @@ npm start
 Android
 --------
 
-We recommend installing the editor on a server. See "Running as a cloud editor" below in this file.
-And then you will get a "add to desktop" request.
-
 You might be able to run both the server and client on the phone if you first install Node.JS
+
+We however recommend installing the editor on a server. A small VPS will do.
+Then open the app in a web browser and you will get a "add to desktop" request.
+
+Also see "Running as a cloud editor" below in this file.
+
 
 
 
@@ -149,7 +152,7 @@ It will bring up a virtual pseudo-terminal at the bottom. Click on it to start t
 (replace the number 3397 with the latest jzedit server relase!)
 This will download the gzipped tar archive.
 
-(tip: Pressing tab in the terminal will autocomplete file paths)
+(tip: Pressing tab in the terminal will auto-complete file paths)
 
 4. Then unpack the tarball:
 `tar xf jzedit-v1_alpha-3397-server.tar.gz`
@@ -202,7 +205,7 @@ If you take a screen-shot and zoom in, you will notice the text edges has red, g
 This creates an "anti-alias" effect because each pixel on LCD monitors has a red, green and blue line!
 
 "LCD Text" is the default on most operating systems. But some people might see "rainbows".
-It's also uneccesary with a high-resolution monitor.
+"LCD Text" is unnecessary with a high-resolution monitor.
 
 
 Turn off "LCD Text" / sub-pixel-antialas
@@ -243,7 +246,8 @@ Running as a cloud editor
 You can use the editor "natively" running on your desktop via nw.js or in the browser. 
 But it's also possible to use the editor as a "cloud" editor, running on a server, and access it via a web browser.
 
-It's recommended to use ZFS on the server, so each user can have their own file-system and be able to take snapshots etc.
+It's recommended to use ZFS (file system) on the server,
+so each user can have their own file-system and be able to take snapshots etc.
 
 Installing/upgrading Nodejs
 ---------------------------
@@ -270,7 +274,7 @@ sudo apt-get update
 sudo apt-get install python-certbot-nginx 
 ````
 
-Automatically set up the server for running jzedit as a cloud ide:
+Automatically set up the server for running jzedit as a cloud-IDE:
 ------------------------------------------------------------------
 If you have a Linux (Ubuntu) server you can run this install script:
 `node cloudide_install.js --domain=yourdomain.com`
@@ -295,14 +299,14 @@ sudo apt install xvfb x11vnc chromium-browser
 Adding and removing users
 -------------------------
 Use the following script to add users to the cloud ide:
-`./adduser.js name passw`
+`./adduser.js username password`
 
 To remove a user:
-`./removeuser name`
+`./removeuser username`
 
 Error: Command failed: umount "target is busy"
 ````
-ps -aux | grep nodejs
+ps -aux | grep node
 kill -s 2 810460 
 sudo -u username kill 810460
 ````
@@ -388,7 +392,7 @@ Debugging Error: spawn ENOENT
 
 1. It's possible that the error is an Apparmor EACCESS in disguise. So try disabling apparmor
 2. If the process starts, but tries to find a file and exits with an ENOENT. Try running in chroot.
-The error might be related to the PATH env variable. So make sure PATH env exist var opt = {env: {PATH: "/bin/:/usr/bin"}}
+The error might be related to the PATH env variable. So make sure PATH env exist `var opt = {env: {PATH: "/bin/:/usr/bin"}}`
 3. It might be because of spawn's cwd option not being a directory or not found
 
 
