@@ -2094,7 +2094,8 @@ var WysiwygEditor;
 			}
 			var rowText = file.rowText(row);
 			var matchText = rowText.match(/console.log ?\( ?(['"`]?)(.*)\1\)/);
-			if(!matchText) throw new Error("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
+			// The user might have removed the console.log !
+			if(!matchText) return console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
 			var quote = matchText[1];
 			var logText = matchText[2];
 			
