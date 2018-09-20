@@ -43,9 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When scrolling up in a big file: Uncaught Error: y=-3 < 0
 
-Issue with dragging big file to the editor.
-(save to disk before opening)
+
 
 test:
 npm install -g jzedit on Windows

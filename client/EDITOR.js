@@ -5626,7 +5626,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			return;
 		}
 		
-		if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
+		if(fileDropEvent.dataTransfer.files.length == 0) {
+return alertBox("The dropped object doesn't seem to be a file!");
+		}
 		
 		console.log( fileDropEvent.dataTransfer);
 		
@@ -5825,13 +5827,19 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			var reader = new FileReader();
 			
 			reader.onload = function (readerEvent) {
-				
-				var content = readerEvent.target.result;
-				
-				
 				console.log("Drop op: " + readerEvent.target);
-				
-				EDITOR.openFile(filePath, content);
+				var content = readerEvent.target.result;
+				if(content.length > EDITOR.settings.bigFileSize) {
+					var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
+					console.log("Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
+					
+					EDITOR.saveToDisk(tmpPath, content, function fileSavedMaybe(err) {
+						if(err) throw err;
+						
+						EDITOR.openFile(tmpPath);
+					});
+				}
+				else EDITOR.openFile(filePath, content);
 				
 			};
 			console.log(file);
