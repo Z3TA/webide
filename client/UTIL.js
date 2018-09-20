@@ -1510,7 +1510,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	
 	shortString: function shortString(stringOrObject, limit) {
 		// Returns a string with max limit characters. Useful for debugging
-		if(limit == undefined) limit = 142;
+		if(limit == undefined) limit = 512;
 		
 		var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject;
 		

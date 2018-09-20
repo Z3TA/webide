@@ -1416,7 +1416,7 @@ username = guestUser;
 			
 			var str = JSON.stringify(answer);
 			
-			log(IP + " <= " + UTIL.shortString(str));
+			log(IP + " <= " + (answer.id ? answer.id : "") + UTIL.shortString(str));
 			
 			conn.write(str);
 		}

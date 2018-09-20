@@ -1194,24 +1194,8 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 			
 			var ftpClient = user.remoteConnections[hostname].client;
 			
-			if(pathToFolder != user.workingDirectory) {
-				// First change folder
-				console.log("Sending cwd '" + pathname + "' to " + protocol + hostname);
-				ftpClient.cwd(pathname, function changedDir(err) {
-					
-					if(err) {
-						listFilesCallback(err);
-						runFtpQueue();
-					}
-					else {
-						ftpListFiles(ftpClient);
-					}
-					
-				});
-			}
-			else {
-				ftpListFiles(ftpClient);
-			}
+			ftpListFiles(ftpClient);
+			
 		}
 		else {
 			listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to FTP on " + hostname + " !"));
@@ -1222,7 +1206,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 			
 			console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
 			
-			ftpClient.list(function readdirFtp(err, folderItems) {
+			ftpClient.list(parse.pathname, function readdirFtp(err, folderItems) {
 				if (err) {
 					console.warn(err.message);
 					listFilesCallback(err);

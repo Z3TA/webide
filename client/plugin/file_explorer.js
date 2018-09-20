@@ -330,13 +330,13 @@ gapi.auth2.getAuthInstance().signOut();
 		
 		// List files in working dir, get name of parent folder
 		EDITOR.listFiles(dir, function gotFileList(err, listItems) {
-			
 			if(err) {
-				if(openFolders.indexOf(dir) != -1) {
-openFolders.splice(openFolders.indexOf(dir), 1);
-					return;
+				// The Google Drive folder can give a bunch of wierd errors when it's not connected
+				if(dir.indexOf("/googleDrive") == 0 && openFolders.indexOf(dir) != -1) {
+					openFolders.splice(openFolders.indexOf(dir), 1);
+					return alertBox("Google Drive error: " + err.message);
 				}
-				else throw err;
+else throw err;
 			}
 			
 			listItems.sort(sortByNameAndType);
