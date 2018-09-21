@@ -510,15 +510,33 @@ else throw err;
 		optCancel.onclick = hideMenu;
 		fileItemMenu.appendChild(optCancel);
 		
+		if(isFolder) {
+			var optCreateFolder = document.createElement("li");
+			optCreateFolder.innerText = "new Folder";
+			fileItemMenu.appendChild(optCreateFolder);
+			optCreateFolder.onclick = function createFolder(clickEvent) {
+				clickEvent.preventDefault();
+				clickEvent.stopPropagation();
+
+				promptBox("Create new folder (path):", false, path, function(newFolderPath) {
+					if(newFolderPath == path) return;
+					newFolderPath = UTIL.trailingSlash(newFolderPath);
+					if(newFolderPath) CLIENT.cmd("createPath", {pathToCreate: newFolderPath}, function folderCreatedMaybe(err, json) {
+						if(err) alertBox(err.message);
+						else exploreDir(json.path);
+					});
+				});
+				
+				return false;
+			}
+		}
+		
 		var optDelete = document.createElement("li");
 		optDelete.innerText = "Delete";
 		fileItemMenu.appendChild(optDelete);
 		optDelete.onclick = function deleteFile(clickEvent) {
 			clickEvent.preventDefault();
 			clickEvent.stopPropagation();
-			
-			var path = el.getAttribute("path");
-			var isFolder = (path.charAt(path.length-1) == "/" || path.charAt(path.length-1) == "\\");
 			
 			if(!clickEvent.ctrlKey && isFolder) {
 				
