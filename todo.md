@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Allow the SSG repository to be a parent folder
-
 
 When scrolling up in a big file: Uncaught Error: y=-3 < 0
 

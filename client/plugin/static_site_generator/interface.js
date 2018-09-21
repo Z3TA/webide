@@ -1684,92 +1684,26 @@
 			return;
 		}
 		
+		var folders = UTIL.getFolders(site.projectFolder);
 		
-		EDITOR.folderExistIn(site.projectFolder, ".hg", function(exist) {
-			if(exist) {
-				// Check if remote is the same as repository
-				var hgrcFile = exist + "hgrc";
-				console.log("hgrcFile=" + hgrcFile);
-				EDITOR.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
-					if(err) throw err; // All mercurial repos should have a hgrc!
-					
-					var pathPartStart = hgrcContent.indexOf("[paths]");
-					
-					if(pathPartStart == -1) {
-						// hgrc has no paths part, add [paths] and default repository
-						hgrcContent = "[paths]\ndefault = " + site.repository + "\n" + hgrcContent;
-						EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
-							if(err) throw err; // Unexpected
-							doHgSync();
-						});
-					}
-					else {
-						var pathPartEnd = hgrcContent.indexOf("[", pathPartStart + 1);
-						var pathPart;
-						
-						if(pathPartEnd != -1) pathPart = hgrcContent.substring(pathPartStart + 7, pathPartEnd);
-						else pathPart = hgrcContent.substring(pathPartStart + 7);
-						
-						// Check if our repo is the default repo
-						var regex = new RegExp("default\\s?=\\s?(.*)");
-						var repos = pathPart.match(regex);
-						
-						if(repos == null) {
-							// No default repo exist, add our repo as default
-							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "\ndefault = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
-							console.log("pathPart=" + pathPart);
-							console.log("reg: " + pathPart.match(regex) + " (" + regex + ")");
-							console.log("Saving hgrcContent:\n" + hgrcContent);
-							EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
-								if(err) throw err; // Unexpected
-								doHgSync();
-							});
-						}
-						else {
-							var defaultRepo = repos[1].trim();
-							var siteRepo = site.repository.trim();
-							if(defaultRepo != siteRepo) {
-								
-								if(siteRepo == "" && defaultRepo != "") {
-									// Update settings
-									site.repository = defaultRepo;
-									EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
-									doHgSync();
-								}
-								else {
-									// Ask
-									var useDefault = "Use hgrc default repo";
-									var useSettings = "Use settings repo";
-									var cancelSync = "Cancel Sync";
-									
-									confirmBox("Repository in SSG settings do not match with the default repository in hgrc!\nhsettings repo: " + site.repository + "\nhgrc default repo: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
-										
-										if(answer == useSettings) {
-											var fullString = repos[0];
-											hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
-											EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
-												if(err) throw err; // Unexpected
-												doHgSync();
-											});
-										}
-										else if(answer == useDefault) {
-											site.repository = defaultRepo;
-											EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
-											doHgSync();
-										}
-										//else if(answer == cancelSync) do nothing
-									});
-								}
-							}
-							else {
-								// All good, our repo is the default repo!
-								doHgSync();
-							}
-						}
-					}
-				});
+		lookInFolder(folders.pop());
+		
+		function lookInFolder(folder) {
+			EDITOR.folderExistIn(folder, ".hg", function(existingFolder) {
+				if(existingFolder) {
+					hgFolderFound(existingFolder);
 			}
-			else if(site.repository != undefined && site.repository != "undefined") {
+				else if(folders.length > 1) {
+					lookInFolder(folders.pop());
+				}
+				else {
+					noHgFolderFound();
+				}
+			});
+		}
+		
+		function noHgFolderFound() {
+			if(site.repository != undefined && site.repository != "undefined") {
 				// .hg folder don't exist. Ask if user wants to init (using clone)
 				
 				console.log("site.repository=" + site.repository);
@@ -1784,8 +1718,91 @@
 			else {
 				alertBox("No repository configured for site: " + site.name + "!");
 			}
-		});
+		}
 		
+		function hgFolderFound(existingFolder) {
+			// Check if remote is the same as repository
+			var hgrcFile = existingFolder + "hgrc";
+			console.log("hgrcFile=" + hgrcFile);
+			EDITOR.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
+				if(err) throw err; // All mercurial repos should have a hgrc!
+				
+				var pathPartStart = hgrcContent.indexOf("[paths]");
+				
+				if(pathPartStart == -1) {
+					// hgrc has no paths part, add [paths] and default repository
+					hgrcContent = "[paths]\ndefault = " + site.repository + "\n" + hgrcContent;
+					EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+						if(err) throw err; // Unexpected
+						doHgSync();
+					});
+				}
+				else {
+					var pathPartEnd = hgrcContent.indexOf("[", pathPartStart + 1);
+					var pathPart;
+					
+					if(pathPartEnd != -1) pathPart = hgrcContent.substring(pathPartStart + 7, pathPartEnd);
+					else pathPart = hgrcContent.substring(pathPartStart + 7);
+					
+					// Check if our repo is the default repo
+					var regex = new RegExp("default\\s?=\\s?(.*)");
+					var repos = pathPart.match(regex);
+					
+					if(repos == null) {
+						// No default repo exist, add our repo as default
+						hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "\ndefault = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
+						console.log("pathPart=" + pathPart);
+						console.log("reg: " + pathPart.match(regex) + " (" + regex + ")");
+						console.log("Saving hgrcContent:\n" + hgrcContent);
+						EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+							if(err) throw err; // Unexpected
+							doHgSync();
+						});
+					}
+					else {
+						var defaultRepo = repos[1].trim();
+						var siteRepo = site.repository.trim();
+						if(defaultRepo != siteRepo) {
+							
+							if(siteRepo == "" && defaultRepo != "") {
+								// Update settings
+								site.repository = defaultRepo;
+								EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
+								doHgSync();
+							}
+							else {
+								// Ask
+								var useDefault = "Use hgrc default repo";
+								var useSettings = "Use settings repo";
+								var cancelSync = "Cancel Sync";
+								
+								confirmBox("Repository in SSG settings do not match with the default repository in hgrc!\nhsettings repo: " + site.repository + "\nhgrc default repo: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
+									
+									if(answer == useSettings) {
+										var fullString = repos[0];
+										hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
+										EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+											if(err) throw err; // Unexpected
+											doHgSync();
+										});
+									}
+									else if(answer == useDefault) {
+										site.repository = defaultRepo;
+										EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
+										doHgSync();
+									}
+									//else if(answer == cancelSync) do nothing
+								});
+							}
+						}
+						else {
+							// All good, our repo is the default repo!
+							doHgSync();
+						}
+					}
+				}
+			});
+		}
 		
 		function doHgCloneInit() {
 			var command = "mercurial.clone";
