@@ -43,6 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Annoying that when you click inside the preview/WYSIWYG it scrolls down
 
 When scrolling up in a big file: Uncaught Error: y=-3 < 0
 
