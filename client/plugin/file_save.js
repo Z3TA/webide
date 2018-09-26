@@ -87,7 +87,7 @@
 		var buttonSaveAs = document.createElement("input");
 		buttonSaveAs.setAttribute("type", "submit");
 		buttonSaveAs.setAttribute("class", "button");
-		buttonSaveAs.setAttribute("value", "Save as");
+		buttonSaveAs.setAttribute("value", "Save current file as");
 		saveDialog.appendChild(buttonSaveAs);
 		//buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
