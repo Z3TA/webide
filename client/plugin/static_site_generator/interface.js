@@ -39,8 +39,7 @@
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
 		load: load,
-		unload: unload,
-		order: 2100 // So that "quickedit" don't open the file before reopen_files.js plugin does
+		unload: unload
 	});
 	
 	function getSites() {
@@ -104,7 +103,7 @@
 					
 					if(filePath.slice(filePath.length-1) == "/") filePath = filePath + "index.htm";
 					
-					EDITOR.openFile(filePath, undefined, quickeditFileOpened);
+					EDITOR.openFile(filePath, undefined, {show: true}, quickeditFileOpened);
 					
 					
 				}
@@ -180,16 +179,31 @@
 		
 		function isSite(url) {
 			// Figure out if the url belongs to any of our sites ...
+			console.log("sites.length=" + sites.length);
 			for(var i=0, site; i<sites.length; i++) {
 				site = sites[i];
 				
 				console.log(url + " == " + site.url + " ??");
 				
-				if(url.indexOf(site.url) != -1 || site.url.indexOf(url) != -1) return site;
-				else if(url.indexOf(site.publish) != 0) return site;
-				else if(url.indexOf(site.preview) != 0) return site;
-				else return null;
+				if(url.indexOf(site.url) != -1) {
+					console.log("A site.url=" + site.url + " is in url=" + url);
+					return site;
+				}
+				else if(site.url.indexOf(url) != -1) {
+					console.log("B url=" + url + " is in site.url=" + site.url + "");
+					return site;
+				}
+				else if(url.indexOf(site.publish) == 0) {
+					console.log("C site.publish=" + site.publish + " is in url=" + url + "");
+					return site;
+				}
+				else if(url.indexOf(site.preview) == 0) {
+					console.log("D site.preview=" + site.preview + " is in url=" + url + "");
+					return site;
+				}
 			}
+			console.log("E Unable to determine which or if the url belongs to any SSG-site: url=" + url);
+			return null;
 		}
 	}
 	

@@ -76,7 +76,7 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 			*/
 			if(err) {
 				if(err.code == "ENOENT") {
-					EDITOR.openFile(filePath, "", function(err, file) {
+					EDITOR.openFile(filePath, "", {show: true}, function(err, file) {
 						if(err) throw err;
 						else fileOpened(file);
 					});
@@ -91,11 +91,6 @@ counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done
 
 	function fileOpened(file) {
 		console.log("File specified in arguments opened: " + file.path)
-		// Other files might open and take away focus...
-		setTimeout(function() {	EDITOR.showFile(file); }, 500);
-		setTimeout(function() {	EDITOR.showFile(file); }, 1000);
-		setTimeout(function() {	EDITOR.showFile(file); }, 1500);
-		setTimeout(function() {	EDITOR.showFile(file); }, 2000);
 
 		watchFiles.push(file.path);
 

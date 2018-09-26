@@ -580,6 +580,7 @@ callback = value;
 		}
 	}
 	
+	var showFile; // Don't open switch to any other file when opening a file
 	
 	EDITOR.openFile = function(path, text, state, callback) {
 		/*
@@ -613,6 +614,13 @@ callback = value;
 			state = undefined;
 		}
 		
+		if(state && state.show) {
+showFile = path;
+			setTimeout(function() {
+				showFile = undefined;
+			}, 5000);
+		}
+		
 		// Check if the file is already opened
 		if(EDITOR.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
@@ -635,7 +643,7 @@ callback = value;
 					return fileOpenError(new Error("There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files)));
 				}
 				
-				if(EDITOR.currentFile != file) {
+				if(EDITOR.currentFile != file && (showFile == undefined || showFile == path)) {
 					// Switch to it ...
 					
 					if(text != undefined && text != file.text) throw new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path);
@@ -823,7 +831,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 					EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
 				}
 				
-				if(!state || state.show !== false) {
+				console.log("state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
+				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
 					EDITOR.showFile(file);
 					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
@@ -3099,7 +3108,9 @@ var word = "";
 		
 		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
 		
-		console.log("Showing " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
+		if(showFile != undefined && showFile != file.path) return console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
+		
+		console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		
 		if(file == EDITOR.currentFile) {
 			console.warn("File already in view: " + file.path);

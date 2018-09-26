@@ -43,17 +43,16 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Source control: Pull: Said I should Update, but Update said I should merge, but then get an error:
+When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
+/home/Z/Projects/jzedit/client/plugin/goto_file.js:586
+Uncaught Error: path=null
+
+Source control: Pull: Said I should Update, but Update said I should merge, but then Merge give an error:
 Command failed: hg merge
 abort: outstanding uncommitted merge
 
-
-
-When having two SSG sites quickedit fails to choose the right one.
-
 How to prevent preview files coming up when opening a file ?
-Switch working dir to the SSG folder when detecting opening a file beloning to the SSG project ? 
-
+Switch working dir to the SSG folder when detecting opening a file beloning to the SSG project !? 
 
 bug: Cant see diff/file content in hg log
 
@@ -63,6 +62,9 @@ Annoying that when you click inside the preview/WYSIWYG it scrolls down
 
 When scrolling up in a big file: Uncaught Error: y=-3 < 0
 
+
+Single equal sign in if() statement false posetive:
+					console.log("Unable to determine which or if the url belongs to any SSG-site: url=" + url); 
 
 
 test:
