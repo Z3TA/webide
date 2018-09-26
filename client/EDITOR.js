@@ -27,7 +27,7 @@ EDITOR.supportedFiles = [
 	"xml", 
 	"json", 
 	"css", 
-]; 
+];
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {

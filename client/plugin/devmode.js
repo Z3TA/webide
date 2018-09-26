@@ -40,7 +40,12 @@
 			
 			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 			
-			if(EDITOR.settings.devMode == false) {
+			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
+			
+			if(QUERY_STRING.debug) {
+				enableDevMode();
+			}
+			else if(EDITOR.settings.devMode == false) {
 				disableDevMode(true);
 			}
 			else if(EDITOR.settings.devMode == true) {

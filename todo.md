@@ -43,6 +43,22 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Source control: Pull: Said I should Update, but Update said I should merge, but then get an error:
+Command failed: hg merge
+abort: outstanding uncommitted merge
+
+
+
+When having two SSG sites quickedit fails to choose the right one.
+
+How to prevent preview files coming up when opening a file ?
+Switch working dir to the SSG folder when detecting opening a file beloning to the SSG project ? 
+
+
+bug: Cant see diff/file content in hg log
+
+Able to amend while making a commit (add the change to last commit)
+
 Annoying that when you click inside the preview/WYSIWYG it scrolls down
 
 When scrolling up in a big file: Uncaught Error: y=-3 < 0
@@ -147,6 +163,8 @@ I made some mental notes today while I was doing some work, so I could compile a
 todo
 ----
 
+Many npm modules want to put stuff in /lib/ when installing globally,
+investigate where, and if we can somehow allow it.
 
 work flow: Creating a new html form quiz, with radio-boxes and some JavaScript to show the correct answer.
 
