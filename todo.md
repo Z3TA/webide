@@ -43,6 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+server_login.js doesn't give a login dialog after trying to login with user specified in query-string and password from localStorage
+
+Quickedit: Doesn't give login-box !? (when not logged in) it just sais bad password, and doesn't show the login box.
+
+
 hg pull error:
 Error: fileCount=1 pulledFiles (2) = 
 ["/home/Z/Projects/kivo2/app/dokument/index_src.htm",

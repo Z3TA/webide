@@ -109,7 +109,7 @@
 			var userValue = QUERY_STRING["user"];
 			var pwValue = QUERY_STRING["pw"];
 
-			if(EDITOR.localStorage) {
+			if(EDITOR.localStorage) { // && !userValue
 				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
 					if(err) console.error(err);
 					console.log("credentials: ", obj);
@@ -165,7 +165,7 @@
 			}
 			
 			if(userValue && pwValue) {
-				console.log("Attempting to login to server with user=" + userValue + " ...");
+				console.log("Attempting to login to server with user=" + userValue + " pwValue.length=" + pwValue + "...");
 				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
 					
 					if(err) {
@@ -226,9 +226,17 @@ alertBox("Failed to automatically login as " + userValue + "." +
 	}
 	
 	function showLoginDialog(options) {
-		if(QUERY_STRING["skiplogin"]) return true;
-		if(serverLoginDialog.visible) return true;
+		
+		if(QUERY_STRING["skiplogin"]) {
+			console.log("Not showing login dialog because QUERY_STRING["skiplogin"]=" + QUERY_STRING["skiplogin"]);
+			return true;
+		}
+		if(serverLoginDialog.visible) {
+			console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
+			return true;
+		}
 		EDITOR.hideMenu();
+		console.log("Showing login dialog!")
 		return serverLoginDialog.show(options);
 	}
 	
