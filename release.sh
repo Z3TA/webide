@@ -29,7 +29,7 @@ hg clone . temp/release/linux/
 
 echo "Update version"
 node update_version.js ./temp/release/linux/
-# Note: Updates the version in the release files, not the source code (or we would have a commit/version update loop)
+# Note: Update the version in the release files, not the source code (or we would have a commit/version update loop)
 
 sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/package.json
 
@@ -38,11 +38,20 @@ sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 
+echo "Copy over version.inc"
+cp version.inc temp/release/linux/
+
+# Update version (Use double quotes to make the shell expand variables while preserving whitespace)
+sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
+
+
 # Generate bundle
+# Make sure the bundle is generater After any scripts has been modified
 cd temp/release/linux/
 nodejs makebundle.js
 gzip client/bundle.htm --best --keep
 cd ../../../
+
 
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
@@ -69,11 +78,7 @@ echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
 find temp/release/linux/client/gfx/font/ -type d -empty -delete
 
-echo "Copy over version.inc"
-cp version.inc temp/release/linux/
 
-# Update version (Use double quotes to make the shell expand variables while preserving whitespace)
-sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
