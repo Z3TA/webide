@@ -45,8 +45,6 @@ What I'm working on
 
 Able to resize the bottom area. for example when using hg Log.
 
-bug: Cant see diff/file content in hg log
-
 When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
 /home/Z/Projects/jzedit/client/plugin/goto_file.js:586
 Uncaught Error: path=null

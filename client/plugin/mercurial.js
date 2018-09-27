@@ -1913,19 +1913,29 @@ updateCommitFileSelect();
 			var directory = EDITOR.workingDirectory;
 		}
 		
+		// todo: The log can be very long, have it paged (many pages, only show 100? at a time) Most of the time you are only interested in the latest's
 		CLIENT.cmd("mercurial.log", {directory: directory}, function resolveList(err, changes) {
 			if(err) throw err;
 			
 			//console.log("mercurial.log changes:");
 			//console.log(changes);
 			
+			// They should already be in order. But just in case:
 			changes.sort(function sortChanges(a, b) {
-				return b.rev - a.rev;
+				return a.rev - b.rev; // Lowest rev first
 			});
+			
+			// sanity: Check for gaps, there should be no gaps
+			for (var i=0; i<changes.length; i++) {
+				if(changes[i].rev != i) throw new Error("changes[" + i + "].rev=" + changes[i].rev);
+			}
 			
 			var reEmail = /<(.*)>/;
 			
-			for (var i=0, tr, td, sel, opt, span, d, a, msg, matchEmail, email; i<changes.length; i++) {
+			// Show the changes backwards so that latest gets on top
+			for (var i=changes.length-1, tr, td, sel, opt, span, d, a, msg, matchEmail, email; i>-1; i--) {
+				//if(changes[i] == undefined) throw new Error("changes[" + i + "]=" + changes[i]); // Give early error to ease debug
+				
 				tr = document.createElement("tr");
 				tr.setAttribute("id", "rev" + changes[i].rev);
 				
