@@ -43,6 +43,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Annoying with the "splash screen" (right click to show the menu) when using quick-edit
+Don't show the message if QUERY_STRING is populated !?
+
 server_login.js doesn't give a login dialog after trying to login with user specified in query-string and password from localStorage
 
 Quickedit: Doesn't give login-box !? (when not logged in) it just sais bad password, and doesn't show the login box.

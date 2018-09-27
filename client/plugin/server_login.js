@@ -228,7 +228,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 	function showLoginDialog(options) {
 		
 		if(QUERY_STRING["skiplogin"]) {
-			console.log("Not showing login dialog because QUERY_STRING["skiplogin"]=" + QUERY_STRING["skiplogin"]);
+			console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
 			return true;
 		}
 		if(serverLoginDialog.visible) {
