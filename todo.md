@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-unable to hotload
-
 Able to resize the bottom area. for example when using hg Log.
 
 bug: Cant see diff/file content in hg log

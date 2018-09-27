@@ -44,52 +44,68 @@
 		// Fun fact: In Windows there are three slashes in file:/// but in Linux it's only two!
 		var currentScript = EDITOR.currentFile.path.replace(/\\/g, "/");
 		
-		var reloaded = false;
+		var index = currentScript.indexOf("/plugin/");
+		if(index == -1) return alertBox("Script is not in the plugin folder: " + currentScript);
+		currentScript = currentScript.slice(index);
 		
+		console.log("currentScript=" + currentScript);
+		
+		var pluginDescription = "";
+		for(var i=0; i<EDITOR.plugins.length; i++) {
+			if(currentFile.text.indexOf(EDITOR.plugins[i].desc) != -1) {
+				if(pluginDescription) throw new Error("There are more then one plugin with the same description: " + pluginDescription);
+pluginDescription = EDITOR.plugins[i].desc;
+				// Continue so we can detect dublicate descriptions
+			}
+		}
+		
+		if(!pluginDescription) return alertBox("Did not find a plugin description for " + currentFile.path);
+		
+		// Find the script ...
+		var reloaded = false;
 		for(var i=0; i < scripts.length; i++) {
-			
-			console.log(scripts[i].src + " == " + currentScript + " (" + (scripts[i].src == currentScript) + ")");
-			
+			index = scripts[i].src.indexOf("/plugin/");
+			if(index == -1) {
+				console.log("Not a plugin: " + scripts[i].src);
+				continue;
+			}
 			var parent = scripts[i].parentNode;
 			
+			console.log("parent==head?" + (parent==head) + " " + currentScript + " in " + scripts[i].src + " ? " + (scripts[i].src.indexOf(currentScript) != -1));
+			
 			if(parent == head && scripts[i].src.indexOf(currentScript) != -1) {
-				append(scripts[i]);
-				reloaded = true;
+				reloaded = append(scripts[i]);
+				break;
 			}
 			}
 		
-		if(!reloaded) alertBox("Failed to reload: " + currentScript);
+		if(reloaded instanceof Error) alertBox("Problems reloading " + currentScript + ": " + reloaded.message);
+		else if(reloaded === false) alertBox("Unable to find " + currentScript + " in header!");
+		else if(reloaded === true) alertBox("Successfully reloaded " + currentScript);
+		else throw new Error("reloaded=" + reloaded);
 		
 		return false;
 		
-		
 		function append(script) {
-			
 			console.log("Reloading script: " + currentScript);
 			
-			// We want to unload all plugins (asume keybindings are unloaded by the plugins unload function)
-			//var code = currentFile.text;
-			
-			//var loadFunctionName = code.match(/editor\.plugin\s*\(\s*{[^}]*[^un]load\s*:\s*([\S]*)[,]?/);
-		
-			//if(!loadFunctionName) alertBox("Unable to fund plugin load function. The code will Not be hot reloaded");
-			//else {
-			
-			//loadFunctionName = loadFunctionName[0]; // First group match in the regexp
-				
 			//EDITOR.disablePlugin(loadFunctionName);
 					
 					head.removeChild(script);
 					
 					script = document.createElement("script");
-			script.src = "file://" + currentScript;
+			script.src = currentScript; // Relative path
 					script.type = "text/javascript";
 					
-					head.appendChild(script);
+			var success = true;
+			try {
+				head.appendChild(script);
+			}
+			catch(err) {
+				return err;
+			}
 			
-			alertBox("Refreshed: " + currentScript);
-			
-			//}
+			return true;
 		}
 		
 	}
