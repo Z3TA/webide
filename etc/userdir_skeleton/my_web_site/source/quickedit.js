@@ -26,7 +26,7 @@
 		var leftButton = 1;
 		
 		// Secret combo ...
-		if(e.which == leftButton && e.ctrlKey && e.altKey) {
+		if(e.which == leftButton && (e.ctrlKey || e.metaKey) && e.altKey) {
 			
 			// What word did we click on ?
 			var sel = window.getSelection();

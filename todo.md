@@ -43,6 +43,25 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+hg pull error:
+Error: fileCount=1 pulledFiles (2) = 
+["/home/Z/Projects/kivo2/app/dokument/index_src.htm",
+"/home/Z/Projects/kivo2/hemsida/src/quickedit.js"] 
+affectedFilesString=
+M app/dokument/index_src.htm
+M hemsida/src/quickedit.js
+
+at /home/Z/Projects/jzedit/server/plugin/mercurial.js:788:50
+
+
+Test to see what happens if a user delete all his files and folders.
+
+After deleting a SSG from the SSG interface:
+TypeError: Cannot read property 'name' of undefined
+    at changeSelectSite 
+    at HTMLInputElement.deleteSite
+
+
 Able to resize the bottom area. for example when using hg Log.
 
 When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
