@@ -4451,13 +4451,13 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		isVisible: false
 	}
 	
-	EDITOR.openFileTool = function fileOpenTool(directory) {
+	EDITOR.openFileTool = function fileOpenTool(directory, filePath) {
 		console.log("Calling openFileTool listeners (" + EDITOR.eventListeners.openFileTool.length + ")");
 		
 		var ret = false;
 		
 		for(var i=0, f; i<EDITOR.eventListeners.openFileTool.length; i++) {
-			ret = EDITOR.eventListeners.openFileTool[i].fun(directory);
+			ret = EDITOR.eventListeners.openFileTool[i].fun(directory, filePath);
 			if(ret === true) break; // Only open one tool
 		}
 		
@@ -5149,6 +5149,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		// Attatch CLIENT listeners before plugins and start events load
 		CLIENT.on("loginSuccess", function loggedInToServer(login) {
 			EDITOR.user = login.user;
+			
+			if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
 			
 			EDITOR.installDirectory = login.installDirectory || "/";
 			//alertBox(JSON.stringify(login));

@@ -95,13 +95,20 @@
 		hide_gotoFileInput();
 	}
 	
-	function openAnyFileTool(directory) {
+	function openAnyFileTool(directory, filePath) {
 		
 		if(directory) {
 			if(inputFolder) inputFolder.value = directory;
 			else EDITOR.changeWorkingDir(directory);
 		}
+		
 		show_gotoFileInput();
+		
+		if(filePath) {
+			if(inputGoto) inputGoto.value = filePath;
+			trySearch();
+			inputGoto.focus();
+		}
 		
 		return true; // true means we handled it
 		

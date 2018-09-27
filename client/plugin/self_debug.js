@@ -114,6 +114,14 @@
 		
 		console.log("EDITOR.platform=" + EDITOR.platform);
 		
+		findSourcePath(source, function(err, source) {
+			if(err) alertBox(err);
+			showErrorMessage(message, source, lineno, colno, error)
+		});
+		
+	}
+	
+	function findSourcePath(source, callback) {
 		if(source.indexOf("file:") == 0) {
 			// If Windows detects / it will add C:/
 			// If Linux does Not detect / it will will add the working dir
@@ -123,27 +131,46 @@
 			else {
 				source = source.replace("file://", ""); // Two slashes in linux (and other?)
 			}
+			return callback(null, source);
 		}
 		else {
-
+			
 			// The source is always in client folder
 			var url = UTIL.getLocation(source);
 			console.log(url);
 			console.log("document.location.href=" + document.location.href);
 			console.log("url.pathname=" + url.pathname);
-
+			
 			var source = source.replace(url.pathname, "/client" + url.pathname);
 			console.log("source=" + source);
 			
-			source = EDITOR.installDirectory + 'client/' + url.pathname;
+			if(EDITOR.installDirectory != "/") {
+				source = EDITOR.installDirectory + 'client/' + url.pathname;
+				return callback(null, source);
+			}
+			else {
+				// We might not be logged in. Wait to see if EDITOR.installDirectory is populated
+				setTimeout(function() {
+					source = EDITOR.installDirectory + 'client/' + url.pathname;
+					return callback(null, source);
+				}, 3000);
+			}
 		}
+	}
+	
+	
+	function showErrorMessage(message, source, lineno, colno, error) {
 		console.log("source=" + source);
 		source = UTIL.toSystemPathDelimiters(source);
 		
 		if(EDITOR.settings.devMode) {
+			if(source.indexOf("file:") != 0 && EDITOR.installDirectory == "/") {
+				// EDITOR.openFileTool
+			}
+			
 			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source.replace(/\\/g, "\\\\") + '\', undefined, function(err, file) {\
-		if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
-		EDITOR.renderNeeded();})">' + source + "</a>";
+			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
+			EDITOR.renderNeeded();})">' + source + "</a>";
 		}
 		else {
 			var sourceLink = '' + source + "";
@@ -228,9 +255,7 @@
 			}
 			
 		});
-		
 	}
-	
 	
 	
 	function reportTemplate(errMessage, source, lineno, colno, error) {
