@@ -28,21 +28,27 @@ echo "Copy the files"
 hg clone . temp/release/linux/
 
 echo "Update version"
-node update_version.js ./temp/release/linux/
 # Note: Update the version in the release files, not the source code (or we would have a commit/version update loop)
+# (Use double quotes to make the shell expand variables while preserving whitespace)
 
+sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
+sed -i -e "s/var EDITOR_VERSION = 0;/var EDITOR_VERSION = $commit;/g" temp/release/linux/server/server.js
+sed -i -e "s/var version = 0;/var version = $commit;/g" temp/release/linux/client/serviceWorker.js
+
+# The package.json want a semver version, not to be confused with latest commit id
 sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/package.json
+
+# The manifest.webapp version probably doesn't matter, but update it just in case, it seems it assume semver
+sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/client/manifest.webapp
+
+echo "Copy over version.inc"
+# version.inc can for example be used by other programs to get the jzedit commmit id (version)
+cp version.inc temp/release/linux/
+
 
 echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
-
-
-echo "Copy over version.inc"
-cp version.inc temp/release/linux/
-
-# Update version (Use double quotes to make the shell expand variables while preserving whitespace)
-sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
 
 # Generate bundle
@@ -69,7 +75,6 @@ rm temp/release/linux/getCommitId.js
 rm temp/release/linux/jz.xcf
 rm temp/release/linux/makebundle.js
 rm temp/release/linux/changeset.js
-rm temp/release/linux/update_version.js
 rm temp/release/linux/semver.js
 #rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm

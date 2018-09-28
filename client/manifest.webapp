@@ -4,7 +4,9 @@
 	"description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
 	"launch_path": "/index.htm",
 	"icons": {
-		"64": "/gfx/jz64.png"
+		"64": "/gfx/jz64.png",
+		"192": "/gfx/jz192.png",
+  "512": "/gfx/jz512.png"
 	},
  "permissions": {
    "audio-capture" : {
@@ -16,6 +18,6 @@
  }
 	"developer": {
 		"name": "Johan Zetterberg",
-		"url": "http://www.webtigerteam.com/johan/"
+		"url": "https://zäta.com/"
 	}
 }

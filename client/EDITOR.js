@@ -5,6 +5,10 @@
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
 var EDITOR = {};
 
+EDITOR.version = 0; // Populated by release.sh, or from the server when logging in
+
+if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
+else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + login.serverVersion);
 
 var tempTest = 0;
 var benchmarkCharacter = ".";
@@ -106,7 +110,6 @@ EDITOR.files = {};       // List of all opened files with the path as key
 EDITOR.mouseX = 0;       // Current mouse position
 EDITOR.mouseY = 0;
 EDITOR.info = [];        // Talk bubbles. See EDITOR.addInfo()
-EDITOR.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 EDITOR.connections = {}  // Store connections to remote servers (FTP, SSH)
 EDITOR.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
@@ -4989,10 +4992,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 		});
 		
-		getVersion(function(version) {
-			console.log("Editor version: " + version);
-			bootstrap();
-		});
+		bootstrap();
 		
 		canvas = document.getElementById("canvas");
 		
@@ -5154,6 +5154,10 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			EDITOR.installDirectory = login.installDirectory || "/";
 			//alertBox(JSON.stringify(login));
+			
+			if(!EDITOR.version) EDITOR.version = parseInt(login.editorVersion);
+			
+			if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
 			
 			console.log("Logged in as user: " + EDITOR.user);
 			
@@ -7188,7 +7192,7 @@ return alertBox("The dropped object doesn't seem to be a file!");
 	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
-		
+		console.log("Editor version: " + EDITOR.version);
 		EDITOR.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
 			if(err) {
 				console.warn("bootstrap.url: " + err.message);
@@ -7222,51 +7226,6 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			
 		});
 	}
-	
-	function getVersion(callback) {
-		
-		EDITOR.readFromDisk("version.inc", function(err, path, string) {
-			if(err) {
-				// Failed to read file 
-				
-				if(RUNTIME == "nw.js") {
-					
-					// Try Mercurial
-					var exec = require('child_process').exec;
-					var child = exec('hg log -l 1', function(error, stdout, stderr) {
-						if(!error) {
-							
-							var myRegexp = /changeset:\s*(\d*):/g;
-							var match = myRegexp.exec(stdout);
-							
-							if(!match) {
-								console.warn("Unable to find latest HG commit id! stdout=" + stdout);
-								callback(EDITOR.version);
-							}
-							else {
-								EDITOR.version = parseInt(match[1]);
-								callback(EDITOR.version);
-							}
-						}
-						else {
-							console.warn("Failed to run hg log in order to get editor version.");
-							callback(EDITOR.version);
-						}
-					});
-				}
-				else {
-					console.warn("Failed to read version.inc");
-					callback(EDITOR.version);
-				}
-			}
-			else {
-				EDITOR.version = parseInt(string);
-				callback(EDITOR.version);
-			}
-		});
-		
-	}
-	
 	
 	function fullScreen() {
 		alertBox("Attempting to go into full-screen ...")

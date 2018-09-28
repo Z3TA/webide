@@ -5,6 +5,8 @@
 
 if(process.version.indexOf("v8.") != 0) console.warn("The editor has only been tested with node.js version 8!");
 
+var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
+
 var DEFAULT = require("./default_settings.js");
 
 var getArg = require("../shared/getArg.js");
@@ -432,7 +434,32 @@ function main() {
 		process.exit();
 	}
 	
-	if(!USERNAME && !NO_CHROOT) {
+	if(EDITOR_VERSION == 0) {
+		var exec = module_child_process.exec;
+		var getLatestCommitId = "hg log -l 1"
+		exec(getLatestCommitId, function(error, stdout, stderr) {
+			//console.log("stdout: " + stdout);
+			//console.log("stderr: " + stderr);
+			if (error !== null) {
+				log("exec '" + getLatestCommitId + "' error: " + error, WARN);
+			}
+			
+			//changeset:\s*(\d*):
+			var findChangeset = /changeset:\s*(\d*):/g;
+			
+			var matchChangeset = findChangeset.exec(stdout);
+			
+			if(!matchChangeset) log("Unable to find changeset in '" + stdout + "'", WARN);
+			else EDITOR_VERSION = parseInt(matchChangeset[1].toString());
+			
+			getGuestCount();
+			
+		});
+	}
+	else getGuestCount();
+	
+	function getGuestCount() {
+		if(!USERNAME && !NO_CHROOT) {
 		module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
@@ -460,6 +487,7 @@ else {
 	});
 	}
 	else startServer();
+	}
 	
 	function startServer() {
 		
@@ -1192,7 +1220,7 @@ username = guestUser;
 							}
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid);
-							
+							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
 							
 							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
@@ -1217,7 +1245,8 @@ username = guestUser;
 							if(NO_CHROOT) installDirectory = __dirname.replace(/server$/, "");
 							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
 							
-							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
+							// Respond to the client that the login was successful
+							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory, editorVersion: EDITOR_VERSION}}});
 							
 							if(commandQueue.length > 0) {
 								console.log("Running " + commandQueue.length + " commands from the command queue ...");
