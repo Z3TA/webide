@@ -49,6 +49,7 @@
 	
 	function hideIndentationManager() {
 		if(indentationManager) indentationManager.style.display = "none";
+		EDITOR.resizeNeeded();
 		return true;
 	}
 	
