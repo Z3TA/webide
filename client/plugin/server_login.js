@@ -247,7 +247,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 	
 	function hideLoginDialog() {
 		console.log("hideLoginDialog!");
-		console.log(getStack("hideLoginDialog"));
+		console.log(UTIL.getStack("hideLoginDialog"));
 		return serverLoginDialog.hide();
 	}
 	
