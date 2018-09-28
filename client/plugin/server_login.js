@@ -109,12 +109,16 @@
 			var userValue = QUERY_STRING["user"];
 			var pwValue = QUERY_STRING["pw"];
 
+			console.log("userValue=" + userValue + " pwValue=" + pwValue);
+			
 			if(EDITOR.localStorage) { // && !userValue
-				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
+				console.log("Checking for editorServerUser and editorServerPw in local storage ...");
+				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function gotLoginFromLocalStorage(err, obj) {
 					if(err) console.error(err);
+					
 					console.log("credentials: ", obj);
 					if(obj && obj.editorServerUser) {
-						console.log("Using saved credentials to login");
+						console.log("Using saved credentials to login ...");
 						userValue = userValue || obj["editorServerUser"];
 						pwValue = pwValue || obj["editorServerPw"];
 					}
@@ -160,16 +164,17 @@
 		
 		function attemptLogin() {
 			if(!userValue) {
+				console.log("Using default login because userValue=" + userValue);
 				userValue = DEFAULT_USERNAME;
 				pwValue = DEFAULT_PASSWORD;
 			}
 			
 			if(userValue && pwValue) {
-				console.log("Attempting to login to server with user=" + userValue + " pwValue.length=" + pwValue + "...");
+				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
 				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
-					
 					if(err) {
 						console.error(err);
+						
 						if(userValue == DEFAULT_USERNAME) {
 alertBox("Failed to automatically login as " + userValue + "." +
 							" Fill in your username and password below, or <a href='/signup/signup.htm'>Create a New account</a> !\n" +
@@ -208,24 +213,24 @@ alertBox("Failed to automatically login as " + userValue + "." +
 									showLoginDialog();
 								}
 								else throw new Error("Unknown answer: " + answer);
-								
-							});
+								});
 						}
-						
-					}
-					
-				});
+						}
+					});
 			}
 			else {
 				showLoginDialog();
+				
+				if(userValue && !pwValue) {
 				var serverLoginPw = document.getElementById("serverLoginPw");
 				if(serverLoginPw) serverLoginPw.focus();
+				}
 			}
 		}
-		
 	}
 	
 	function showLoginDialog(options) {
+		console.log("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
 		
 		if(QUERY_STRING["skiplogin"]) {
 			console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
@@ -236,11 +241,13 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			return true;
 		}
 		EDITOR.hideMenu();
-		console.log("Showing login dialog!")
+		console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
 	}
 	
 	function hideLoginDialog() {
+		console.log("hideLoginDialog!");
+		console.log(getStack("hideLoginDialog"));
 		return serverLoginDialog.hide();
 	}
 	
