@@ -70,6 +70,12 @@ TypeError: Cannot read property 'name' of undefined
     at HTMLInputElement.deleteSite
 
 
+Widget for the WYSIWYG
+When double clicking on a word: Bring up options: B,I,Link,TT,quote,comment (T=h1 or h2)
+When making a new line, show a plus sign, when clicking on the plus sign; bring up options: Add image,img-search,video,embed/snippet,hr 
+
+
+
 Able to resize the bottom area. for example when using hg Log.
 
 When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
