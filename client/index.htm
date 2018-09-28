@@ -16,21 +16,21 @@
 	<link rel="icon" href="gfx/jz192.png" sizes="192x192"/>
 	<link rel="icon" href="gfx/jz512.png" sizes="512x512"/>
 	
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1.0, minimum-scale=1.0" />
-		<!-- The maximum-scale=1, minimum-scale=1 is needed so that mobile browsers don't butcher the text by zooming out -->
-		
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1.0, minimum-scale=1.0" />
+	<!-- The maximum-scale=1, minimum-scale=1 is needed so that mobile browsers don't butcher the text by zooming out -->
+	
 	<meta name="theme-color" content="#4c4944">
 	
 	<link rel="manifest" href="/manifest.webmanifest">
 	
-		<link rel="stylesheet" type="text/css" href="gfx/style.css">
-		
+	<link rel="stylesheet" type="text/css" href="gfx/style.css">
+	
 	<link rel="alternate" type="application/json+oembed" href="/oembed?embed=true" title="The editor embedded in an iframe" />
 	
 	
-		<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
+	<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
 	
 	<script src="register_service_worker.js"></script>
 	<script src="polyfill.js"></script>
@@ -223,7 +223,7 @@
 	<script src="tests/connections.js"></script>
 	<script src="tests/readLines.js"></script>
 	<script src="tests/testEditor.js"></script>
-<script src="plugin/test_dialog.js"></script>
+	<script src="plugin/test_dialog.js"></script>
 	
 	<!-- END TESTS -->
 	
@@ -253,36 +253,36 @@
 
 <div id="dashboard" class="dashboard"></div>
 <div id="wireframe" class="wireframe rows">
-		
-		<div id="header" class="header" draggable="false"></div>
-		
-		<div id="columns" class="columns">
-			<div id="leftColumn" class="leftColumn"></div>
-			<div id="content" class="content centerColumn">
-				<canvas id="canvas" class="fileCanvas"></canvas>
-			</div>
-			<div id="rightColumn" class="rightColumn"></div>
-			
+	
+	<div id="header" class="header" draggable="false"></div>
+	
+	<div id="columns" class="columns">
+		<div id="leftColumn" class="leftColumn"></div>
+		<div id="content" class="content centerColumn">
+			<canvas id="canvas" class="fileCanvas"></canvas>
 		</div>
-		
-		<div id="footer" class="footer"></div>
+		<div id="rightColumn" class="rightColumn"></div>
 		
 	</div>
 	
-	<textarea style="width: 100px; position: absolute; left: -200px; top: -200px;" id="clipboardcatcher"></textarea>
-	
-	<input style="display:none;" id="fileInput" type="file" />
-	
-	<input style="display:none;" id="fileSaveAs" type="file" nwsaveas /> <!-- Used for both save and saveAs -->
-	
-	<input style="display:none;" id="directoryInput" type="file" nwdirectory /> <!--- Used for selecting a directory -->
-	
-	<ul id="canvasContextmenu" class="menu" style="display: block; position: absolute;">
-		<div id="canvasContextmenuTemp"></div>
-		<!--<li>First item</li>
-		<li class="sep">Separator</li>
-		<li>Second item</li>-->
-	</ul>
-	
-	</body>
-	</html>
+	<div id="footer" class="footer"></div>
+	<!-- Safari's web inspector causes the footer to get zero height! -->
+</div>
+
+<textarea style="width: 100px; position: absolute; left: -200px; top: -200px;" id="clipboardcatcher"></textarea>
+
+<input style="display:none;" id="fileInput" type="file" />
+
+<input style="display:none;" id="fileSaveAs" type="file" nwsaveas /> <!-- Used for both save and saveAs -->
+
+<input style="display:none;" id="directoryInput" type="file" nwdirectory /> <!--- Used for selecting a directory -->
+
+<ul id="canvasContextmenu" class="menu" style="display: block; position: absolute;">
+	<div id="canvasContextmenuTemp"></div>
+	<!--<li>First item</li>
+	<li class="sep">Separator</li>
+	<li>Second item</li>-->
+</ul>
+
+</body>
+</html>

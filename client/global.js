@@ -74,9 +74,8 @@ else if(RUNTIME == "nw.js") {
 
 
 var QUERY_STRING = function () {
-  // This function is anonymous, is executed immediately and 
-	// the return value is assigned to global object QUERY_STRING
-  var query_string = {};
+	// Self calling function to not clutter global scope
+	var query_string = {};
   var query = window.location.search.substring(1);
   var vars = query.split("&");
   for (var i=0;i<vars.length;i++) {
