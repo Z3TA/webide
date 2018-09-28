@@ -1234,12 +1234,20 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		else if(file.hash)  {
 				// Check the hash before saving to prevent over-writing something
 				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
-					if(err) throw err;
-					if(file.hash != hash) {
+					if(err) {
+						if(err.code == "ENOENT") console.warn("File did not exist on disk: " + file.path);
+						else {
+							console.log("err.code=" + err.code);
+							throw err;
+						}
+					}
+					else if(file.hash != hash) {
 						console.log("file.hash=" + file.hash + " hash=" + hash);
 						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "warning");
+						return;
 					}
-					else EDITOR.saveToDisk(file.path, file.text, doneSaving);
+					
+					EDITOR.saveToDisk(file.path, file.text, doneSaving);
 				});
 			}
 			else {

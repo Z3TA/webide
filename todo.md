@@ -43,6 +43,15 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Quick-edit doesn't work in IE11:
+IndexSizeError: range.setEnd(node, range.endOffset + 1);
+
+Test in IE11 !!!
+
+Run tests in Safari and IE!
+
+Test in other browsers besides Chrome and Firefox
+
 Annoying with the "splash screen" (right click to show the menu) when using quick-edit
 Don't show the message if QUERY_STRING is populated !?
 

@@ -179,7 +179,9 @@ else if(parse.protocol == "sftp:") {
 	
 	function streamError(err){ 
 		//console.log("Stream error! path=" + path);
-		callback(new Error("Unable to hash file: " + path + "\n " + err.message));
+		var error = new Error("Unable to hash file: " + path + "\n " + err.message);
+		error.code = err.code;
+		callback(error);
 		callback = null;
 	}
 }

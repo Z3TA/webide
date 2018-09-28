@@ -46,15 +46,18 @@ if(!file) return true;
 		
 		function reload() {
 			EDITOR.readFromDisk(file.path, function(err, path, text, hash) {
-				
-				if(err) throw err;
-				else {
-				file.reload(text);
-					file.hash = hash;
-				file.saved(); // Because we reloaded from disk
+				if(err) {
+					if(err.code == "ENOENT") {
+						alertBox("The file no longer exist on disk: " + file.path);
+					}
+					else throw err;
 				}
-				
-			});
+				else {
+					file.reload(text);
+					file.hash = hash;
+					file.saved(); // Because we reloaded from disk
+				}
+				});
 		}
 		
 	}
