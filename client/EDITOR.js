@@ -8,7 +8,7 @@ var EDITOR = {};
 EDITOR.version = 0; // Populated by release.sh, or from the server when logging in
 
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
-else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + login.serverVersion);
+else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
 
 var tempTest = 0;
 var benchmarkCharacter = ".";
