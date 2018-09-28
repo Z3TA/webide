@@ -93,7 +93,6 @@
 	}
 	
 	function disableDevMode(noAlert) {
-		
 		console.log("Disabling dev mode ...");
 		
 		EDITOR.unbindKey(runOneTest);
@@ -123,8 +122,14 @@
 		
 		if(!noAlert) alertBox("devMode OFF!");
 		
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("devModeOff");
-		
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+			try {
+				navigator.serviceWorker.controller.postMessage("devModeOff");
+			}
+			catch(err) {
+				console.warn("Failed to post message to server worker: " + err.message);
+			}
+		}
 	}
 	
 	function enableDevMode() {

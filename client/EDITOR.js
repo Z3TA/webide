@@ -8,7 +8,14 @@ var EDITOR = {};
 EDITOR.version = 0; // Populated by release.sh, or from the server when logging in
 
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
-else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
+else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+	try {
+		navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
+	}
+	catch(err) {
+		console.warn("Failed to post message to server worker: " + err.message);
+	}
+}
 
 var tempTest = 0;
 var benchmarkCharacter = ".";
@@ -5157,7 +5164,14 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			if(!EDITOR.version) EDITOR.version = parseInt(login.editorVersion);
 			
-			if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
+			if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+				try {
+					navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
+				}
+				catch(err) {
+					console.warn("Failed to post message to server worker: " + err.message);
+				}
+			}
 			
 			console.log("Logged in as user: " + EDITOR.user);
 			
