@@ -6,7 +6,7 @@
 var EDITOR = {};
 
 EDITOR.version = 0; // Populated by release.sh, or from the server when logging in
-
+console.log("EDITOR.version=" + EDITOR.version);
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
 else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
 	try {
@@ -1845,7 +1845,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
 		}
 		
-		/*
+		if(QUERY_STRING["debug"]) {
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
 			console.log("leftColumnWidth=" + leftColumnWidth);
@@ -1863,7 +1863,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			console.log("outherWidth=" + content.outherWidth)
 			console.log("width=" + contentComputedStyle.width);
 			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
-		*/
+		}
 		
 		EDITOR.height = windowHeight;
 		EDITOR.width = windowWidth;
@@ -4010,6 +4010,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		widget.build = function buildWidget() {
 			
 			// But when this function is called, the DOM *will* exist!
+			
+			console.log("Building widget " + UTIL.getFunctionName(buildFunction));
 			
 			var build;
 			

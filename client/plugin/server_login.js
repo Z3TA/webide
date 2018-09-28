@@ -171,7 +171,7 @@
 			
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
-				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
+				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
 					if(err) {
 						console.error(err);
 						

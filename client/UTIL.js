@@ -553,6 +553,10 @@ originalRow.push("");
 
 
 	getFunctionName: function getFunctionName(fun) {
+		if(!fun) {
+console.warn("fun=" + fun);
+			return fun;
+		}
 		if(fun.name) return fun.name;
 		
 		var ret = fun.toString();

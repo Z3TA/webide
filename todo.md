@@ -43,6 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+Safari is not showing the footer!! But only on prod!!
+
+
+
 Annoying with the "splash screen" (right click to show the menu) when using quick-edit
 Don't show the message if QUERY_STRING is populated !?
 
