@@ -1425,13 +1425,34 @@ updateCommitFileSelect();
 			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 			
 			if(!annotationWidget) {
+				console.log("Creating annotationWidget!");
 				annotationWidget = document.createElement("div");
 				annotationWidget.setAttribute("id", "mercurialAnnotationWidget");
 				annotationWidget.setAttribute("class", "mercurialAnnotationWidget");
+				
+				var annotationRev = document.createElement("a");
+				annotationRev.setAttribute("class", "annotationRev");
+				annotationRev.setAttribute("href", "JavaScript: ;");
+				annotationWidget.appendChild(annotationRev);
+				
+				var annotationText = document.createElement("div");
+				annotationText.setAttribute("class", "annotationText");
+				annotationWidget.appendChild(annotationText);
+				
 				footer.appendChild(annotationWidget);
 			}
 			else {
+				console.log("annotationWidget already exist!");
+				console.log(annotationWidget);
 				annotationWidget.style.display="block";
+				console.log(annotationWidget.childNodes);
+				
+				if(annotationWidget.childNodes.length == 0) throw new Error("annotationWidget.childNodes.length=" + annotationWidget.childNodes.length);
+				
+				var annotationRev = annotationWidget.childNodes[0];
+				var annotationText = annotationWidget.childNodes[1];
+				
+				console.log(annotationRev.childNodes);
 			}
 			
 			var line = caret.row + 1;
@@ -1485,18 +1506,38 @@ updateCommitFileSelect();
 					" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				}
 				console.log("change=" + change);
-				annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
+				annotationText.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
+				
+				annotationRev.innerText = "rev " + changeId;
+				
+				annotationRev.onclick = diff; 
+				
 				console.log("changesets=" + JSON.stringify(changesets, null, 2));
 				console.log("showing changeset changeId=" + changeId);
 			}
 			else {
 				console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
-				annotationWidget.innerText = "No annotations for line " + line + " in " + file.path;
+				annotationText.innerText = "No annotations for line " + line + " in " + file.path;
 			}
 			
 			EDITOR.resizeNeeded();
 			
 			annotation.lastLine = line;
+			
+			function diff(ev) {
+				if(!changeId) throw new Error("changeId=" + changeId);
+				var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+				CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: changeId}, function hgDiff(err, resp) {
+					
+					if(err) return alertBox(err.message);
+					
+					var text = resp.text;
+					var fileName = UTIL.getFileNameWithoutExtension(EDITOR.currentFile.path) + "-rev" + changeId + ".diff";
+					EDITOR.openFile(fileName, text, function(err, file) {
+						if(err) alertBox(err.message);
+					});
+				});
+			}
 		}
 		
 		function hide(line) {
@@ -1506,9 +1547,10 @@ updateCommitFileSelect();
 			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 			
 			if(annotationWidget) {
-				
-				annotationWidget.innerText = "";
 				annotationWidget.style.display="none";
+				
+				var annotationText = annotationWidget.childNodes[0];
+				annotationText.innerText = "";
 				
 				EDITOR.resizeNeeded();
 			}
@@ -1564,7 +1606,17 @@ updateCommitFileSelect();
 	
 	function hideMercurialWidgets() {
 		// Returning false prevents browser's default action. Only return false if we did something.
-		return !!( repoCommitDialog.hide() + hideCloneDialog() + hideAuthDialog() + hideVersionHistory() + versionControlWidget.hide() );
+		return !!( hideAnnotationWidget() + repoCommitDialog.hide() + hideCloneDialog() + hideAuthDialog() + hideVersionHistory() + versionControlWidget.hide() );
+	}
+	
+	function hideAnnotationWidget() {
+		var annotationWidget = document.getElementById("mercurialAnnotationWidget");
+		if(annotationWidget) {
+			var footer = document.getElementById("footer");
+			footer.removeChild(annotationWidget);
+			return false;
+		}
+		else return true;
 	}
 	
 	function hideAuthDialog() {
@@ -2037,6 +2089,9 @@ updateCommitFileSelect();
 	}
 	
 	function mercurialDiff(directory, filePaths) {
+		
+		//console.log("directory=", directory + " typeof " + (typeof directory));
+		//if(typeof directory == "object") directory = undefined; // Mouse event
 		
 		if(filePaths == undefined) filePaths = EDITOR.currentFile && [EDITOR.currentFile.path];
 		if(directory == undefined) directory = EDITOR.workingDirectory;
@@ -2686,6 +2741,5 @@ if(err) return alertBox(err.message);
 			}
 		return arr;
 		}
-	
 	
 })();

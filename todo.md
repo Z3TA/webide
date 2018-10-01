@@ -1739,8 +1739,6 @@ Then mark the "hunks" in the margin.
 
 ---
 
-When annotations are on, show a "see diff" link that shows the diff if you click on it
-
 Test more scripts to see if the editor can inline all console.log's
 
 More formatting ? Inline breaks after ) and conditionals ? foo : bar !?

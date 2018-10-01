@@ -712,6 +712,7 @@ console.warn("fun=" + fun);
 
 	getFilenameFromPath: function getFilenameFromPath(path) {
 		// Returns the file name, including the file extension part
+		if(typeof path != "string") throw new Error("Not a string: path=" + path);
 		if(path.indexOf("/") > -1) {
 			return path.substr(path.lastIndexOf('/')+1);
 		}
@@ -789,6 +790,7 @@ console.warn("fun=" + fun);
 
 	getFileNameWithoutExtension: function getFileNameWithoutExtension(filePath) {
 		// Returns the file name, but WITHOUT the extension part: /foo/bar.baz => bar
+		if(typeof filePath != "string") throw new Error("Not a string: filePath=" + filePath);
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var fileExtension = UTIL.getFileExtension(fileName);
 		

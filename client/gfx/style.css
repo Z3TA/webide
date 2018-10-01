@@ -1135,6 +1135,12 @@ ul.resolveList li {
 
 /* ############### File explorer ############### */
 
+.annotationRev {
+	float: right;
+}
+
+/* ############### File explorer ############### */
+
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 13px;
