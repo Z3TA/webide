@@ -12,6 +12,10 @@
 	
 	"use strict";
 	
+	if(typeof console == "undefined") console = {};
+	if(typeof console.log == "undefined") console.log = function() {};
+	if(typeof console.error == "undefined") console.error = function() {};
+	
 	function editPage(nodes, url) {
 		var editorUrl = "https://webide.se/"; // Change this to the editor URL
 		var editorUser = "demo"; // Change this to the real user (optional)
