@@ -43,8 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Replacing text: lastFile => lastFileShowed (replace all) goes into endless loop
-
 When using show: true with open and then closing that file, the editor doesn't switch to another file!
 
 Quick-edit doesn't work in IE11:

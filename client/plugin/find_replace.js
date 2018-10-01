@@ -592,10 +592,10 @@
 		lastSearchEnd = -1; // Begin from the start
 		
 		while(start > -1) {
+			if(start < lastStart) throw new Error("Find loop detected!");
 			lastStart = start;
 			start = find(str, file, useRegex, true, true, "right", ignoreCase);
 			console.log("start=" + start);
-			if(start < lastStart) throw new Error("Find loop detected!");
 		}
 		
 		EDITOR.renderNeeded();
@@ -664,17 +664,17 @@
 	function replaceAll(newString, searchString, file, useRegex, ignoreCase) {
 		var start = 0;
 		var lastStart = -1;
-		var dontLoop = false;
+		var dontLoop = true;
 		
 		lastSearchEnd = -1; // Begin from the start
 		
 		console.log("Replace all " + searchString + " width " + newString);
 		
 		while(start > -1) {
+			if(start < lastStart) throw new Error("Replace loop detected!");
 			lastStart = start;
 			start = replace(newString, searchString, file, useRegex, dontLoop, ignoreCase);
 			console.log("start=" + start);
-			if(start < lastStart) throw new Error("Replace loop detected!");
 		}
 		
 		EDITOR.renderNeeded();
@@ -723,5 +723,23 @@
 	});
 	*/
 	
+	
+	// TEST-CODE-START
+	EDITOR.addTest(testReplaceAll, 1);
+	function testReplaceAll(callback) {
+		EDITOR.openFile("replaceAll.txt", "fooBar\nfooBar\nfooBar\nfooBar\n", function(err, file) {
+			var newString = "fooBarBaz";
+			var searchString = "fooBar";
+			replaceAll(newString, searchString, file);
+			
+			if(file.text != "fooBarBaz\nfooBarBaz\nfooBarBaz\nfooBarBaz\n") throw new Error("file.text=" + file.text);
+			
+			EDITOR.closeFile(file);
+			
+			callback(true);
+			
+		});
+	}
+	// TEST-CODE-END
 	
 })();
