@@ -165,9 +165,9 @@ for(var i=0; i<list.length; i++) {
 	function switchTab() {
 		// Open last file
 		
-		if(EDITOR.lastFile == EDITOR.currentFile) throw new Error("EDITOR.lastFile = EDITOR.currentFile = " + EDITOR.currentFile.path);
+		if(EDITOR.lastFileShowed == EDITOR.currentFile) throw new Error("EDITOR.lastFileShowed = EDITOR.currentFile = " + EDITOR.currentFile.path);
 		
-		if(EDITOR.lastFile) EDITOR.showFile(EDITOR.lastFile);
+		if(EDITOR.lastFileShowed) EDITOR.showFile(EDITOR.lastFileShowed);
 		else console.warn("No file to switch to!");
 		
 		return false;

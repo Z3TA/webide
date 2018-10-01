@@ -1027,15 +1027,15 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			}
 			
 			// Make sure lastFile is not currentFile
-			if(EDITOR.lastFile == EDITOR.currentFile && EDITOR.lastFile != undefined) {
+			if(EDITOR.lastFileShowed == EDITOR.currentFile && EDITOR.lastFileShowed != undefined) {
 				console.warn("lastFile is the currentFile:" + EDITOR.currentFile.path);
-				EDITOR.lastFile = EDITOR.lastChangedFile([EDITOR.currentFile, file]);
+				EDITOR.lastFileShowed = EDITOR.lastChangedFile([EDITOR.currentFile, file]);
 			}
 			
 			// Sanity check
-			if(EDITOR.lastFile) {
-				if(!EDITOR.files.hasOwnProperty(EDITOR.lastFile.path)) {
-					throw new Error("EDITOR.lastFile does not exist in EDITOR.files! path=" + EDITOR.lastFile.path + "\nWhen closing file.path=" + file.path);
+			if(EDITOR.lastFileShowed) {
+				if(!EDITOR.files.hasOwnProperty(EDITOR.lastFileShowed.path)) {
+					throw new Error("EDITOR.lastFileShowed does not exist in EDITOR.files! path=" + EDITOR.lastFileShowed.path + "\nWhen closing file.path=" + file.path);
 					return;
 				}
 			}
@@ -1048,7 +1048,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				if(!doNotSwitchFile) { // double negative => true
 					
 					// The file we are closing is the current file, and we are "allowed" to swith 
-					if(EDITOR.lastFile) switchTo = EDITOR.lastFile;
+					if(EDITOR.lastFileShowed) switchTo = EDITOR.lastFileShowed;
 				}
 			}
 			
@@ -3145,15 +3145,15 @@ var word = "";
 				EDITOR.eventListeners.fileHide[i].fun(EDITOR.currentFile); // Call function
 			}
 			
-			if(EDITOR.currentFile) EDITOR.lastFile = EDITOR.currentFile
-			else EDITOR.lastFile = EDITOR.lastChangedFile([file]);
+			if(EDITOR.currentFile) EDITOR.lastFileShowed = EDITOR.currentFile
+			else EDITOR.lastFileShowed = EDITOR.lastChangedFile([file]);
 			
 		}
 		
 		EDITOR.currentFile = file;
 		
-		if(EDITOR.currentFile == EDITOR.lastFile) {
-			EDITOR.lastFile = EDITOR.lastChangedFile([EDITOR.currentFile]);
+		if(EDITOR.currentFile == EDITOR.lastFileShowed) {
+			EDITOR.lastFileShowed = EDITOR.lastChangedFile([EDITOR.currentFile]);
 		}
 		
 		if(focus == undefined) focus = true;
