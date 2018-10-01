@@ -1042,18 +1042,27 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			
 			var switchTo; // Have to check this before removing the file reference
 			if(EDITOR.currentFile == file) {
-				
 				EDITOR.currentFile = undefined; // Closed, kinda
 				
 				if(!doNotSwitchFile) { // double negative => true
-					
 					// The file we are closing is the current file, and we are "allowed" to swith 
 					if(EDITOR.lastFileShowed) switchTo = EDITOR.lastFileShowed;
+					else {
+						// No other file has been shown before
+						console.log("Heybaboriba");
+						for (var i=0; i<EDITOR.files.length; i++) {
+							if(EDITOR.files[i].path != path) {
+switchTo = EDITOR.files[i];
+								break;
+							}
+						}
+					}
 				}
 			}
 			
-			delete EDITOR.files[path]; // Remove all references to the file BEFORE switching to another file
 			
+			
+			delete EDITOR.files[path]; // Remove all references to the file BEFORE switching to another file
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
 				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path + 
@@ -1064,6 +1073,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				EDITOR.showFile(switchTo);
 				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
 			}
+			
 			
 			// Sanity check again. Make shure we didn't switch to the file being closed
 			if(EDITOR.currentFile) {
@@ -1080,7 +1090,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			Returns a readable stream ...
 			
 			We should probably use streams everywhere! So that opening small and large files use the same method.
-			*/
+		*/
 	}
 	
 	EDITOR.copyFolder = function(source, destination) {
@@ -1110,13 +1120,13 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		//var protocol = UTIL.urlProtocol(path);
 		
-			var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
+		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
 			if(err) callback(err);
 			else callback(null, json.path, json.data, json.hash);
 		});
-		}
+	}
 	
 	EDITOR.countLines = function countLines(filePath, callback) {
 		// You probably want to use EDITOR.readLines instead! (EDITOR.readLines gives totalLines as well as lines)
@@ -1206,21 +1216,21 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		function beginSaving() {
 			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash);
-		if(file.path != path) {
-			if(EDITOR.files.hasOwnProperty(path)) {
-				var err = new Error("There is already a file open with path=" + path);
-				if(callback) callback(err, path);
-				else throw err;
-			}
-			console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
-			
-			// Check if the file exist on disk so we don't accidently overwrite it!
-			EDITOR.doesFileExist(path, function fileExist(exist) {
-				if(exist) {
-					var overwrite = "Overwrite";
-					var cancel = "Cancel";
-					confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
-						if(answer == overwrite) reOpen(file.path, path);
+			if(file.path != path) {
+				if(EDITOR.files.hasOwnProperty(path)) {
+					var err = new Error("There is already a file open with path=" + path);
+					if(callback) callback(err, path);
+					else throw err;
+				}
+				console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
+				
+				// Check if the file exist on disk so we don't accidently overwrite it!
+				EDITOR.doesFileExist(path, function fileExist(exist) {
+					if(exist) {
+						var overwrite = "Overwrite";
+						var cancel = "Cancel";
+						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
+							if(answer == overwrite) reOpen(file.path, path);
 						else {
 								var err = new Error("You canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
