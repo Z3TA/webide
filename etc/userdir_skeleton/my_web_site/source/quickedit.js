@@ -3,7 +3,7 @@
 	Inlcuding this file on your web page makes it possible to tell
 	jzedit to edit the page you are looking at ...
 	
-	The "secret" combo is left Mouse click while holding Ctrl and Alt key
+	The "secret" combo is left Mouse click while holding Alt key and either Ctrl, Shift or Cmd.
 	It will take you to the editor, where you can change the source code.
 	
 */
@@ -26,20 +26,40 @@
 		var leftButton = 1;
 		
 		// Secret combo ...
-		if(e.which == leftButton && (e.ctrlKey || e.metaKey) && e.altKey) {
+		if(e.which == leftButton && (e.ctrlKey || e.metaKey || e.shiftKey) && e.altKey) {
 			
 			// What word did we click on ?
 			var sel = window.getSelection();
 			var range = sel.getRangeAt(0);
 			var node = sel.anchorNode;
+			var start = 0;
+			var end = 0;
 			while (range.toString().indexOf(' ') != 0 && range.startOffset > 0) {
-				range.setStart(node, (range.startOffset - 1));
+				start = range.startOffset - 1;
+				console.log("start=" + start);
+				try {
+					range.setStart(node, start);
+				}
+				catch(err) {
+					console.error(err);
+					break;
+				}
 			}
+			
 			range.setStart(node, range.startOffset + 1);
+			
 			do {
-				range.setEnd(node, range.endOffset + 1);
-				
+				end = range.endOffset + 1
+				console.log("end=" + end);
+				try {
+					range.setEnd(node, end);
+				}
+				catch(err) {
+					console.error(err);
+					break;
+				}
 			} while (range.toString().indexOf(' ') == -1 && range.toString().trim() != '' && range.endOffset < node.length);
+			
 			var word = range.toString().trim();
 			
 			// Get the "path" to the node we clicked on
@@ -59,11 +79,9 @@
 			
 			var url = window.location.href;
 			
-			/*
-				console.log("url=" + url);
-				console.log("clickPath=" + JSON.stringify(clickPath, null, 2));
-				console.log("nodes=" + JSON.stringify(nodes, null, 2));
-			*/
+			console.log("url=" + url);
+			console.log("clickPath=" + JSON.stringify(clickPath, null, 2));
+			console.log("nodes=" + JSON.stringify(nodes, null, 2));
 			
 			editPage(nodes, url);
 		}
