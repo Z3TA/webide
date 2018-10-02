@@ -6,6 +6,7 @@
 	var consoleTimeEndOriginal = console.timeEnd;
 	var consoleWarnOriginal = console.warn;
 	var consoleErrorOriginal = console.error;
+	var devModeManuallOffOnce = false;
 	
 	var toggleDevmodeMenuItem, showDevToolsMenuItem;
 	var toggleDevmodeMenuItemPosition = 0;
@@ -72,6 +73,8 @@
 			EDITOR.unbindKey(toggleDevMode);
 			EDITOR.unbindKey(testErrorHandler);
 			
+			EDITOR.unbindKey(runOneTest);
+			
 			console.log = consoleLogOriginal;
 			console.time = consoleTimeOriginal;
 			console.timeEnd = consoleTimeEndOriginal;
@@ -94,6 +97,8 @@
 	
 	function disableDevMode(noAlert) {
 		console.log("Disabling dev mode ...");
+		
+		devModeManuallOffOnce = true;
 		
 		EDITOR.unbindKey(runOneTest);
 		
@@ -120,8 +125,6 @@
 			Only use the Chrome dev tools when you are actually debugging! Turn devMode OFF when you are not debugging (watching the console)
 		*/
 		
-		if(!noAlert) alertBox("devMode OFF!");
-		
 		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
 			try {
 				navigator.serviceWorker.controller.postMessage("devModeOff");
@@ -130,6 +133,8 @@
 				console.warn("Failed to post message to server worker: " + err.message);
 			}
 		}
+		
+		if(!noAlert) alertBox("devMode OFF!");
 	}
 	
 	function enableDevMode() {
@@ -154,9 +159,8 @@
 		
 		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("devModeOn");
 		
-		//alertBox("devMode now active!");
-		
-	}
+		if(EDITOR.settings.devMode == false || devModeManuallOffOnce) alertBox("Editor devMode active! EDITOR.version=" + EDITOR.version);
+		}
 	
 	function enableDebugMode() {
 		/*

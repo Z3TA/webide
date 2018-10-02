@@ -1,7 +1,6 @@
 Prio:
 
 1) Demoable. Make sure things work when demoing the editor: use happy path, stay on happy path! (make tests that covers the demo happy path)
-- SCM integration
 
 2) Beta release?, get USER FEEDBACK!
 find beta testers!
@@ -46,8 +45,6 @@ What I'm working on
 Regexp search using ^ should match start of line, not just start of file!
 
 Endless loop when searching left using regexp.
-
-Able to see which version of the editor you are running. About link in menu !?
 
 Saving a file ending with a space causes problems ...
 
@@ -212,6 +209,8 @@ todo
 ----
 
 Swedish translation
+
+Demo happy path for SCM integration
 
 Many npm modules want to put stuff in /lib/ when installing globally,
 investigate where, and if we can somehow allow it.
