@@ -42,11 +42,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+When saving a file in Windows IE11 it wants to save with double paths ...
+
 Regexp search using ^ should match start of line, not just start of file!
 
 Endless loop when searching left using regexp.
-
-Saving a file ending with a space causes problems ...
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
 https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu

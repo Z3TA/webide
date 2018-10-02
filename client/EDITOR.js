@@ -1197,6 +1197,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			path = file.path;
 		}
 		
+		var trimmedPath = path.trim();
+		if(path != trimmedPath) {
+			console.warn("Path trimmed: " + UTIL.lbChars(path) + " => " + trimmedPath);
+			path = trimmedPath;
+		}
+		
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
 		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors) {
@@ -1228,17 +1234,17 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 						var cancel = "Cancel";
 						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
 							if(answer == overwrite) reOpen(file.path, path);
-						else {
+							else {
 								var err = new Error("You canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
-							callback(err);
-						}
-					});
-				}
-				else reOpen(file.path, path);
-			});
-		}
-		else if(file.hash)  {
+								callback(err);
+							}
+						});
+					}
+					else reOpen(file.path, path);
+				});
+			}
+			else if(file.hash)  {
 				// Check the hash before saving to prevent over-writing something
 				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
 					if(err) {
@@ -1307,7 +1313,16 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		// Only works with text files !
 		
+		if(!path) throw new Error("path=" + path);
+		if(!text) throw new Error("text=" + text);
+		
 		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
+		
+		var trimmedPath = path.trim();
+		if(path != trimmedPath) {
+			console.warn("Path trimmed: " + UTIL.lbChars(path) + " => " + trimmedPath);
+			path = trimmedPath;
+		}
 		
 		var protocol = UTIL.urlProtocol(path);
 		
