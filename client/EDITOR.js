@@ -1049,18 +1049,15 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 					if(EDITOR.lastFileShowed) switchTo = EDITOR.lastFileShowed;
 					else {
 						// No other file has been shown before
-						console.log("Heybaboriba");
-						for (var i=0; i<EDITOR.files.length; i++) {
-							if(EDITOR.files[i].path != path) {
-switchTo = EDITOR.files[i];
+						for (var filePath in EDITOR.files) {
+							if(filePath != path) {
+								switchTo = EDITOR.files[filePath];
 								break;
 							}
 						}
 					}
 				}
 			}
-			
-			
 			
 			delete EDITOR.files[path]; // Remove all references to the file BEFORE switching to another file
 			
@@ -1070,8 +1067,8 @@ switchTo = EDITOR.files[i];
 			}, 30);
 			
 			if(switchTo) {
-				EDITOR.showFile(switchTo);
 				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
+				EDITOR.showFile(switchTo, true, true);
 			}
 			
 			
@@ -3128,7 +3125,7 @@ var word = "";
 		
 	}
 	
-	EDITOR.showFile = function(file, focus) {
+	EDITOR.showFile = function(file, focus, overrideShowFile) {
 		
 		if(!(file instanceof File)) {
 			file = EDITOR.files[file];
@@ -3136,7 +3133,7 @@ var word = "";
 		
 		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
 		
-		if(showFile != undefined && showFile != file.path) return console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
+		if(!overrideShowFile && showFile != undefined && showFile != file.path) return console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
 		
 		console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		

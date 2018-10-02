@@ -43,10 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Trying to get another file to show when closing a file, when that file is the only file that has been in view.
-
-When using show: true with open and then closing that file, the editor doesn't switch to another file!
-
 Quick-edit doesn't work in IE11:
 IndexSizeError: range.setEnd(node, range.endOffset + 1);
 
