@@ -59,7 +59,10 @@ pluginDescription = EDITOR.plugins[i].desc;
 			}
 		}
 		
-		if(!pluginDescription) return alertBox("Did not find a plugin description for " + currentFile.path);
+		if(!pluginDescription) {
+alertBox("Did not find a plugin description for " + currentFile.path);
+			return true;
+		}
 		
 		// Find the script ...
 		var reloaded = false;

@@ -43,8 +43,16 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Quick-edit doesn't work in IE11:
-IndexSizeError: range.setEnd(node, range.endOffset + 1);
+Regexp search using ^ should match start of line, not just start of file!
+
+Endless loop when searching left using regexp.
+
+Able to see which version of the editor you are running. About link in menu !?
+
+Saving a file ending with a space causes problems ...
+
+Add "edit page" to context menu in quickedit.js (only works in Firefox)
+https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
 
 Test in IE11 !!!
 
@@ -202,6 +210,8 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+Swedish translation
 
 Many npm modules want to put stuff in /lib/ when installing globally,
 investigate where, and if we can somehow allow it.
@@ -2048,9 +2058,6 @@ When saving a .css file belonging to the SSG, reload it in the preview!
 Double clicking the file in commit file selection should open it.
 
 Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
-
-Add "edit page" to context menu in quickedit.js (only works in Firefox)
-https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
 
 refactor voice, EDITOR.say, so all plugins can use it.
 

@@ -3,7 +3,7 @@
 	
 	"use strict";
 	
-	var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
+	var findReplaceDiv, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
 		replaceAllButton, ignoreCaseOption;
 	
 	var inputFindGotFocus = false;
@@ -13,12 +13,13 @@
 	var lastSearchStrLength = 0;
 	var lastSearchDirection = "right"; // right|left
 	
-	EDITOR.on("start", find_replace_main, 10);
+	EDITOR.plugin({
+		desc: "Find and Replace",
+		load: loadFindAndReplace,
+		unload: unloadFindAndReplace,
+	});
 	
-	function find_replace_main() {
-		
-		console.log("find_replace.js loaded!");
-		
+	function loadFindAndReplace() {
 		// Bind to ctrl + F
 		
 		var char_F = 70;
@@ -28,19 +29,16 @@
 		
 		EDITOR.bindKey({desc: "Hide the find/replace GUI", charCode: char_Esc, fun: hideFindReplaceGui});
 		
-		EDITOR.on("moveCaret", function resetLastSearchStrLength(file, caret) {
-			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
-			return true;
-		});
+		EDITOR.on("moveCaret", resetLastSearchStrLength);
 		
 		EDITOR.addEvent("voiceCommand", {
 			re: /(find|search) (.*)/i,
-			grammar: ["find", "search"], fun: findInFile
+			grammar: ["find", "search"], 
+			fun: findInFile
 		});
 		
 		// Point variables to the document object model
-		footer = document.getElementById("footer");
-		div = document.getElementById("findReplace");
+		findReplaceDiv = document.getElementById("findReplace");
 		inputFind = document.getElementById("inputFind");
 		inputReplace = document.getElementById("inputReplace");
 		inputInDir = document.getElementById("inputInDir");
@@ -55,6 +53,25 @@
 		
 	}
 	
+	function unloadFindAndReplace() {
+		
+		EDITOR.unbindKey(findReplace);
+		EDITOR.unbindKey(hideFindReplaceGui);
+		
+		CLIENT.removeEvent("moveCaret", resetLastSearchStrLength);
+		CLIENT.removeEvent("voiceCommand", findInFile);
+		
+		// Cleanup
+		hide_search();
+		
+	}
+	
+	// Unable to hot reload this plugin because the edtior complains about this function already being registered .. WHY!?
+	function resetLastSearchStrLength(file, caret) {
+		lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
+		return true;
+	}
+	
 	function findInFile(text, file, match) {
 		
 		var str = match[2];
@@ -66,6 +83,7 @@
 	
 	function buildDiv() {
 		
+		var footer = document.getElementById("footer");
 		if(!footer) {
 			throw new Error("Can not find the footer!");
 		}
@@ -73,10 +91,10 @@
 		//if(!div) { // This will still return true after it has been removed!!!
 		
 		
-		div = document.createElement("div");
+		findReplaceDiv = document.createElement("div");
 		
-		div.setAttribute("id", "findReplace");
-		div.setAttribute("class", "findReplace");
+		findReplaceDiv.setAttribute("id", "findReplace");
+		findReplaceDiv.setAttribute("class", "findReplace");
 		
 		// Build the input stuff ...
 		
@@ -219,9 +237,9 @@
 		table.appendChild(tr);
 		
 		
-		div.appendChild(table);
+		findReplaceDiv.appendChild(table);
 		
-		footer.appendChild(div);
+		footer.appendChild(findReplaceDiv);
 		
 
 		// Add event listeners
@@ -257,6 +275,7 @@
 		inputFind.addEventListener("keyup", function(keyUpEvent) {
 			var keyEnter = 13;
 			var keyEscape = 27;
+			var backSlash = 
 			
 			keyUpEvent.preventDefault();
 			
@@ -264,9 +283,30 @@
 				findButtonRight.click();
 			}
 			
-			// Find while typing
-			lastSearchStrLength = 0; // So we keep searching the same word until it no longer match
-			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			var text = inputFind.value;
+			var regexpError = false;
+			if(regexOption.checked && text.length > 0) {
+				try {
+					var reTest = new RegExp(text, "ig");
+				}
+				catch(err) {
+					regexpError = true;
+				}
+			}
+			
+			if(regexpError) {
+				inputFind.setAttribute("class", "inputtext error");
+				return;
+			}
+			else {
+				inputFind.setAttribute("class", "inputtext");
+			}
+			
+			if(!regexpError) {
+				// Find while typing
+				lastSearchStrLength = 0; // So we keep searching the same word until it no longer match
+				find(text, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			}
 			
 		}, false);
 		
@@ -300,16 +340,9 @@
 	function hide_search() {
 		// Clear the search box?
 		if(searchVisible) {
-			
 			// Hide the search window
-			//div.style.display="none"; // Need to hide this, or the footer will not scrimp
+			findReplaceDiv.parentNode.removeChild(findReplaceDiv);
 			
-			div.parentNode.removeChild(div);
-			
-			//footer.style.height = "0px"; // Hmm, can't be less then one px
-			//footer.style.display = "none"; // But we can hide the table cell! nope :/
-			
-			//footer.style.border = ""
 			
 			// Bring back focus to the current file
 			var file = EDITOR.currentFile;
@@ -327,16 +360,15 @@
 	
 	function show_search() {
 		if(!searchVisible) {
+			var footer = document.getElementById("footer");
 			var footerHeight = parseInt(footer.style.height);
 			var heightNeeded = 120;
 			
-			//if(!div) buildDiv();
 			buildDiv(); // Always build!
 			
 			searchVisible = true;
 			
-			div.style.display="block";
-			//footer.style.display = "table-cell";
+			findReplaceDiv.style.display="block";
 			
 			if(footerHeight < heightNeeded) {
 				footer.style.height = footerHeight + heightNeeded + "px";
