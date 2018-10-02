@@ -3,7 +3,12 @@
 	Inlcuding this file on your web page makes it possible to tell
 	jzedit to edit the page you are looking at ...
 	
-	The "secret" combo is left Mouse click while holding Alt key and either Ctrl, Shift or Cmd.
+	The "secret" combo depends on the browser! It's left Mouse click while holding 
+	Chrome: Ctrl + Alt
+	Firefox: Ctrl + Alt
+	Internet Explorer: Window + Alt
+	Safari: Alt
+	
 	It will take you to the editor, where you can change the source code.
 	
 */
@@ -29,8 +34,7 @@
 		
 		var leftButton = 1;
 		
-		// Secret combo ...
-		if(e.which == leftButton && (e.ctrlKey || e.metaKey || e.shiftKey) && e.altKey) {
+		if(e.which == leftButton && e.altKey) {
 			
 			// What word did we click on ?
 			var sel = window.getSelection();
