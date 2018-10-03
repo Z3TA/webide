@@ -110,14 +110,19 @@ var exe = "/usr/bin/unzip";
 API.hash = function hash(user, json, callback) {
 	// Useful for example comparing files, so that files don't need to be uploaded to the client for comparison.
 	
-	var path = user.translatePath(json.path);
-	if(path instanceof Error) return callback(path);
-	
 	var crypto = require('crypto');
-	
-	
 	var hash = crypto.createHash('sha256');
 	
+	if(!json.path && json.text) {
+		// Hash the text (not the file)
+		hash.update(json.text);
+		callback(null, hash.digest('hex'));
+		callback = null;
+		return;
+}
+	
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
 	
 	// Check path for protocol
 	var url = require("url");
