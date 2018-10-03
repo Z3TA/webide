@@ -42,23 +42,34 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-When goto file searching and typing, restart the search in the original folder.
+Build a bug/issue tracker plugin !?
+Users can submit bugs and issues !? No, not via the editor
+Sent to and stored where ? project_issues.json !?
+
+Search field:   Summary how many of each type, manual edit (open the json file in the editor)
+Issue list, top-10
+(plus-minus button) on each to change prio
+
+source:
+
+[
+{id: hash of create-date and user name, increment, type: "bug", "text", prio: 0, addedBy: "name", assignedTo: "name", addedDate: date, updatedDate: date}
+]
+source can also be edited manually, have a watcher that detects changes
+(no id, inly temorary id. issue-tempid.txt
+issue are either updated or added when saving
+
+
+Annoying with the "splash screen" (right click to show the menu) when using quick-edit
+Don't show the message if QUERY_STRING is populated !?
 
 When saving a file in Windows IE11 it wants to save with double paths ...
-
-Regexp search using ^ should match start of line, not just start of file!
-
-Endless loop when searching left using regexp.
 
 Test in IE11 !!!
 
 Run tests in Safari and IE!
 
 Test in other browsers besides Chrome and Firefox
-
-Annoying with the "splash screen" (right click to show the menu) when using quick-edit
-Don't show the message if QUERY_STRING is populated !?
-
 
 hg pull error:
 Error: fileCount=1 pulledFiles (2) = 
@@ -70,8 +81,10 @@ M hemsida/src/quickedit.js
 
 at /home/Z/Projects/jzedit/server/plugin/mercurial.js:788:50
 
+Source control: Pull: Said I should Update, but Update said I should merge, but then Merge give an error:
+Command failed: hg merge
+abort: outstanding uncommitted merge
 
-Test to see what happens if a user delete all his files and folders.
 
 After deleting a SSG from the SSG interface:
 TypeError: Cannot read property 'name' of undefined
@@ -79,34 +92,16 @@ TypeError: Cannot read property 'name' of undefined
     at HTMLInputElement.deleteSite
 
 
-Widget for the WYSIWYG
-When double clicking on a word: Bring up options: B,I,Link,TT,quote,comment (T=h1 or h2)
-When making a new line, show a plus sign, when clicking on the plus sign; bring up options: Add image,img-search,video,embed/snippet,hr 
+When editing in WYSIWYG mode and clicking somewhere it scrolls down! (very annying)
 
 
 
-Able to resize the bottom area. for example when using hg Log.
-
-When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
-/home/Z/Projects/jzedit/client/plugin/goto_file.js:586
-Uncaught Error: path=null
-
-Source control: Pull: Said I should Update, but Update said I should merge, but then Merge give an error:
-Command failed: hg merge
-abort: outstanding uncommitted merge
-
-How to prevent preview files coming up when opening a file ?
-Switch working dir to the SSG folder when detecting opening a file beloning to the SSG project !? 
-
-Able to amend while making a commit (add the change to last commit)
-
-Annoying that when you click inside the preview/WYSIWYG it scrolls down
-
-When scrolling up in a big file: Uncaught Error: y=-3 < 0
+How to prevent compiled-preview files coming up when opening (search) a file !?
 
 
-Single equal sign in if() statement false posetive:
-					console.log("Unable to determine which or if the url belongs to any SSG-site: url=" + url); 
+
+See what people are using the editor for, make that work (the things new users tries to do) ...
+
 
 
 test:
@@ -115,7 +110,7 @@ npm install -g jzedit on Windows
 test:
 npm install -g jzedit on Mac
 
-Issues opening folder ini files on Windows which contains a bunch of weird characters
+
 
 Test on different platform.
 Distribute a "evaluation" copy on npm!?
@@ -839,6 +834,29 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Issues opening folder ini files on Windows which contains a bunch of weird characters
+
+When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
+/home/Z/Projects/jzedit/client/plugin/goto_file.js:586
+Uncaught Error: path=null
+
+When scrolling up in a big file: Uncaught Error: y=-3 < 0
+
+Single equal sign in if() statement false posetive:
+					console.log("Unable to determine which or if the url belongs to any SSG-site: url=" + url); 
+
+
+Annoying that when you click inside the preview/WYSIWYG it scrolls down
+
+Test to see what happens if a user delete all his files and folders ...
+
+goto file doesn't really abort ... it globs the search folder ...
+When goto file searching and typing, restart the search in the original folder.
+
+Regexp search using ^ should match start of line, not just start of file!
+
+Endless loop when searching left using regexp.
 
 Got an error when cutting text in a text file, then pasting it at the end of the file (but not at EOF)
 (it sais something like xxx can not be over file length)
@@ -1732,6 +1750,16 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Able to amend while making a commit (add the change to last commit)
+
+----
+Widget for the WYSIWYG
+When double clicking on a word: Bring up options: B,I,Link,TT,quote,comment (T=h1 or h2)
+When making a new line, show a plus sign, when clicking on the plus sign; bring up options: Add image,img-search,video,embed/snippet,hr 
+---
+
+Able to resize the bottom area. for example when using hg Log.
 
 ---
 
