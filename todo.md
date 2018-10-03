@@ -42,27 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Build a bug/issue tracker plugin !?
-Users can submit bugs and issues !? No, not via the editor
-Sent to and stored where ? project_issues.json !?
-
-Search field:   Summary how many of each type, manual edit (open the json file in the editor)
-Issue list, top-10
-(plus-minus button) on each to change prio
-
-source:
-
-[
-{id: hash of create-date and user name, increment, type: "bug", "text", prio: 0, addedBy: "name", assignedTo: "name", addedDate: date, updatedDate: date}
-]
-source can also be edited manually, have a watcher that detects changes
-(no id, inly temorary id. issue-tempid.txt
-issue are either updated or added when saving
-
-
-Annoying with the "splash screen" (right click to show the menu) when using quick-edit
-Don't show the message if QUERY_STRING is populated !?
-
 When saving a file in Windows IE11 it wants to save with double paths ...
 
 Test in IE11 !!!
@@ -2925,6 +2904,31 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+----
+Build a bug/issue tracker plugin !?
+Users can submit bugs and issues !? No, not via the editor
+Sent to and stored where ? project_issues.json !?
+
+Search field:   Summary how many of each type, manual edit (open the json file in the editor)
+Issue list, top-10
+(+1 +10 -1 -7 button) on each to change prio
+short description from text
+tag: list of buttons, other: type in other
+assigned to: select box which lets you reassign
+
+source:
+
+[
+{id: hash of create-date and user name, tags: ["bug", "polish", "unrepeatable"], "text", prio: 0, addedBy: "name", assignedTo: "name", addedDate: date, updatedDate: date}
+]
+source can also be edited manually, have a watcher that detects changes
+issue-hashid.txt
+issue are either updated or added when saving
+if added, ask for category: "What kind of issue is this ?" [... known issues, other] other: input box
+----
+
 
 Built in functionality for folding and adding extra rows that are not part of the file buffer.
 So that you can have nicer diffs
