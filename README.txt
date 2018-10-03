@@ -8,7 +8,7 @@ webide.se
 ---------
 webide.se is jzedit running as a cloud editor.
 In this readme you will find instructions on how to run the editor locally on your computer, 
-and how to host it on your own server.
+or host it on your own server.
 
 
 Install instructions
