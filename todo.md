@@ -79,6 +79,15 @@ How to prevent compiled-preview files coming up when opening (search) a file !?
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
+I'm lucky if someone actually reads the welcome message or open the menu ...
+Most people seems to decided within 2 seconds that this is not for them. But why did they install it in the first place ?
+Maybe they where locking for a chrome app and didn't want a hosted app !?
+
+Change description that this is a hosted app.
+That it needs internet connection but we are working on offline mode.
+Also write that the editor can be installed locallu using npm install -g jzedit
+
+
 
 
 test:
