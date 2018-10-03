@@ -785,7 +785,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 						
 						if(!matchHgGit && !noChanges) {
 							// Sanity check
-							if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
+						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString + " stdout=" + stdout);
 						}
 						
 						resp["files"] = pulledFiles;

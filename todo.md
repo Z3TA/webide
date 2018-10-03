@@ -42,14 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-When saving a file in Windows IE11 it wants to save with double paths ...
-
-Test in IE11 !!!
-
-Run tests in Safari and IE!
-
-Test in other browsers besides Chrome and Firefox
-
 hg pull error:
 Error: fileCount=1 pulledFiles (2) = 
 ["/home/Z/Projects/kivo2/app/dokument/index_src.htm",
@@ -70,6 +62,12 @@ TypeError: Cannot read property 'name' of undefined
     at changeSelectSite 
     at HTMLInputElement.deleteSite
 
+
+When saving a file in Windows IE11 it wants to save with double paths ...
+
+Test in IE11 !!!
+
+Run tests in Safari and IE!
 
 When editing in WYSIWYG mode and clicking somewhere it scrolls down! (very annying)
 
