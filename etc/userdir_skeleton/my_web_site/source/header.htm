@@ -15,6 +15,20 @@
 	
 	<script type="JavaScript" src="/quickedit.js"></script>
 		
+	<script>
+		function editPage(nodes, url) {
+			if(nodes == undefined) nodes = [];
+			if(url == undefined) url = window.location.href;
+			var editorUrl = "https://webide.se/"; // Change this to the editor URL
+			var editorUser = "demo"; // Change this to the real user (optional)
+			document.location = editorUrl + "?user=" + editorUser + "&editPage=" + encodeURIComponent(url) + "&nodes=" + encodeURIComponent(nodes.join(",")) + "";
+		}
+	</script>
+	
+	<menu type="context" id="edit">
+	<menuitem label="Edit on webide.se" onclick="editPage()" icon="https://webide.se/gfx/jz64.png"></menuitem>
+	</menu>
+	
 		</head>
 		
 		<body>
@@ -31,6 +45,6 @@
 		</center>
 		</div>
 		
-		<div class="wrap">
+<div class="wrap" contextmenu="edit">
 		
 		</body>

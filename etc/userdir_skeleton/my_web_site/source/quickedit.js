@@ -3,7 +3,7 @@
 	Inlcuding this file on your web page makes it possible to tell
 	jzedit to edit the page you are looking at ...
 	
-	The "secret" combo depends on the browser! It's left Mouse click while holding 
+	The "secret" combo depends on the browser! It's left Mouse click while holding
 	Chrome: Ctrl + Alt
 	Firefox: Ctrl + Alt
 	Internet Explorer: Window + Alt
@@ -11,30 +11,42 @@
 	
 	It will take you to the editor, where you can change the source code.
 	
+	Optionally also paste the following code to the header:
+	
+	<menu type="context" id="edit">
+	<menuitem label="Edit on webide.se" onclick="editPage()" icon="https://webide.se/gfx/jz64.png"></menuitem>
+	</menu>
+	
+	And contextmenu="edit" to the wrap elelement (also in header.htm)
 */
 
 (function() {
-	
 	"use strict";
 	
+	// Polyfill for browsers that don't have console.log etc
 	if(typeof console == "undefined") console = {};
 	if(typeof console.log == "undefined") console.log = function() {};
 	if(typeof console.error == "undefined") console.error = function() {};
 	
-	function editPage(nodes, url) {
+	if(typeof editPage == undefined) editPage = function editPage(nodes, url) {
+		if(nodes == undefined) nodes = [];
+		if(url == undefined) url = window.location.href;
+		
 		var editorUrl = "https://webide.se/"; // Change this to the editor URL
-		var editorUser = "demo"; // Change this to the real user (optional)
+		var editorUser = "demo";              // Change this to the real user (optional)
 		
 		document.location = editorUrl + "?user=" + editorUser + "&editPage=" + encodeURIComponent(url) + "&nodes=" + encodeURIComponent(nodes.join(",")) + "";
 	}
 	
 	document.addEventListener( "click", function(e) {
-		
 		if(!e && typeof event != "undefined") e = event;
 		
 		var leftButton = 1;
 		
+		// Secret combo ...
 		if(e.which == leftButton && e.altKey) {
+			
+			console.log("Correct combo !");
 			
 			// What word did we click on ?
 			var sel = window.getSelection();
@@ -92,14 +104,18 @@
 			console.log("nodes=" + JSON.stringify(nodes, null, 2));
 			
 			editPage(nodes, url);
+			
 		}
-		else {
-			/*
-				console.log("e.which=" + e.which);
-				console.log("e.ctrlKey=" + e.ctrlKey);
-				console.log("e.altKey=" + e.altKey);
-				console.log("e.shiftKey=" + e.shiftKey);
-			*/
-		}
+		/*
+			
+			else {
+			
+			console.log("e.which=" + e.which);
+			console.log("e.ctrlKey=" + e.ctrlKey);
+			console.log("e.altKey=" + e.altKey);
+			console.log("e.shiftKey=" + e.shiftKey);
+			
+			}
+		*/
 	});
 })();
