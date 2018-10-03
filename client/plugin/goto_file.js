@@ -49,7 +49,7 @@
 		}
 		
 		// Insert text into translation dictionary if they dont exist
-		//dictionary.default("gotoline", "Goto line")
+		//dictionary.default("gotofile", "Goto file")
 		
 		// Create the hypertext markup if it doesn't existpppp
 		
@@ -84,11 +84,16 @@
 		
 		EDITOR.unbindKey(hide_gotoFileInput);
 		
+		EDITOR.unbindKey(gotoFile_moveUp);
+		EDITOR.unbindKey(gotoFile_moveDown);
+		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
 		
 		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
 		CLIENT.removeEvent("fileFound", gotoFileFileFound);
 		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
+		
+		 
 		
 		EDITOR.removeMenuItem(menuItem);
 		
@@ -138,6 +143,8 @@
 		inputFolder.setAttribute("class", "inputtext");
 		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
 		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
+		inputFolder.setAttribute("default", folderToSearchIn || EDITOR.workingDirectory);
+		
 		
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
@@ -252,6 +259,7 @@
 			if(isSearching) {
 				console.log("abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
+				inputFolder.value = inputFolder.getAttribute("default");
 			}
 			
 			trySearch();
