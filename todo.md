@@ -42,8 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Run tests in Safari and IE!
-
 When editing in WYSIWYG mode and clicking somewhere it scrolls down! (very annying)
 
 
@@ -67,7 +65,8 @@ Fix issues with the terminal:
 When reloading the editor - the terminal-session is just a plain text file. Reconnect to the terminal !?
 After reloading and starting terminal again, it starts in old session, but nothing happens!
 
-
+Weird terminal prompt: 
+ello_worldguest80@webide:/nodejs/hello_world$
 
 
 Install MongoDB on webide.se
