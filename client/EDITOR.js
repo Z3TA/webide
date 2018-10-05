@@ -1019,11 +1019,11 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			
 			EDITOR.removeAllInfo(file);
 			
-			// Make sure lastFile is not the file being closed
-			if(EDITOR.lastFile == file) {
-				console.warn("lastFile is the file being closed!");
-				EDITOR.lastFile = EDITOR.lastChangedFile([file]);
-				console.log("Changed lastfile to: " + EDITOR.lastFile.path);
+			// Make sure lastFileShowed is not the file being closed
+			if(EDITOR.lastFileShowed == file) {
+				console.warn("lastFileShowed is the file being closed!");
+				EDITOR.lastFileShowed = EDITOR.lastChangedFile([file]);
+				console.log("Changed lastFileShowed to: " + EDITOR.lastFileShowed.path);
 			}
 			
 			// Make sure lastFile is not currentFile
