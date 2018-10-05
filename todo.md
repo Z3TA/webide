@@ -42,12 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-After deleting a SSG from the SSG interface:
-TypeError: Cannot read property 'name' of undefined
-    at changeSelectSite 
-    at HTMLInputElement.deleteSite
-
-
 When saving a file in Windows IE11 it wants to save with double paths ...
 
 Test in IE11 !!!

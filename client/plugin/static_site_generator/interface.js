@@ -696,8 +696,11 @@
 		
 		//alertBox("Fired changeSelectSite");
 		
+		console.log("changeSelectSite: selectSite.selectedIndex=" + selectSite.selectedIndex + " selectSite.options=", selectSite.options);
+		
 		var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 		selectedSite = sites[selectedSiteIndex];
+		if(selectedSite) {
 		EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
 		
 		inputSiteName.value = selectedSite.name;
@@ -713,6 +716,8 @@
 		inputRepoAuthPw.value = selectedSite.repoPw;
 		inputRepository.value = selectedSite.repository;
 		inputUrl.value = selectedSite.url;
+		}
+		else console.warn("selectedSite=" + selectedSite);
 	}
 	
 	function editSiteSettings() {
@@ -1154,9 +1159,8 @@
 		
 		function cancelEdit() {
 			
-			if(!selectedSite) throw new Error("No site selected!");
-			
-			// Reset the values
+			if(selectedSite) {
+				// Reset the values
 			inputSiteName.value = selectedSite.name;
 			inputProjectFolder.value = selectedSite.projectFolder;
 			inputSourceFolder.value = selectedSite.source;
@@ -1170,7 +1174,8 @@
 			inputRepoAuthUser.value = selectedSite.repoUser;
 			inputRepoAuthPw.value = selectedSite.repoPw;
 			inputUrl.value = selectedSite.url;
-			
+			}
+			else console.warn("No site selected!");
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
