@@ -104,12 +104,12 @@ var stderr = "";
 var progressCounter = 0;
 var progressMax = 30;
 
-user.send({mercurialProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+		user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 
 var progressInterval = setInterval(function() {
 progressCounter++;
 progressMax++;
-			user.send({mercurialProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 }, 500); // Fake progress
 
 clone.stdout.on('data', function cloneStdout(data) {
@@ -135,7 +135,7 @@ committing changelog
 */
 progressCounter++;
 
-			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 });
 
 clone.stderr.on('data', function cloneStderr(data) {
@@ -441,7 +441,6 @@ MERCURIAL.init = function hginit(user, json, callback) {
 	});
 }
 
-
 MERCURIAL.commit = function hgcommit(user, json, callback) {
 	// commit the specified files or all outstanding changes
 	
@@ -465,8 +464,41 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		var execFile = require('child_process').execFile;
 		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
-			console.log("hg commit uid=" + ((typeof process.getuid == "function") && process.getuid() ) + 
+			console.log("hg commit uid=" + ((typeof process.getuid == "function") && process.getuid() ) +
 			" gid=" + ((typeof process.getgid == "function") && process.getgid()) + " files=" + JSON.stringify(files) + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
+			
+			if(stdout.match(/nothing changed/) != null) return callback("Nothing has changed! Did you forget to add files ?");
+			
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				if(stdout != "") callback(stdout);
+				else callback(null, {directory: directory});
+				
+			}
+		});
+	});
+}
+
+MERCURIAL.commitAll = function hgcommit(user, json, callback) {
+	// commit All outstanding changes
+	
+	var directory = UTIL.trailingSlash(json.directory);
+	var message = json.message;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(directory.charAt(directory.length-1) != "/" && directory.charAt(directory.length-1) != "\\") return callback(new Error("directory=" + directory + " needs to end with a path delimter!"));
+	if(message == undefined) return callback(new Error("No message defined"));
+	
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
+		
+		var execFile = require('child_process').execFile;
+		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+			
+			console.log("hg commit uid=" + ((typeof process.getuid == "function") && process.getuid() ) + 
+			" gid=" + ((typeof process.getgid == "function") && process.getgid()) + " files=ALL localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
 			if(stdout.match(/nothing changed/) != null) return callback("Nothing has changed! Did you forget to add files ?");
 			
@@ -773,13 +805,29 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							
 							var affectedFiles = affectedFilesString.split(/\n|\r\n/);
 							
+						/*
+							M = modified
+							A = added
+							R = removed
+							C = clean
+							! = missing (deleted by non-hg command, but still tracked)
+							? = not tracked
+							I = ignored
+							
+							We only want to know the updated/pulled files! From the following message:
+							added X changesets with Y changes to Z files
+							We are only interested in the files marked with M !?
+							
+						*/
+						
 							for(var i=0, prefix; i<affectedFiles.length; i++) {
 								prefix = affectedFiles[i].substr(0, affectedFiles[i].indexOf(" ")).trim();
 								
 								// Remove prefix (?, M, A, R, etc) and add directory
+							
 								affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim();
 								
-								if(prefix != "?") pulledFiles.push(affectedFiles[i]); 
+							if(prefix == "M") pulledFiles.push(affectedFiles[i]); 
 							}
 						}
 						
@@ -952,11 +1000,11 @@ var stderr = "";
 var progressCounter = 0;
 		var progressMax = 100;
 
-		user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+		user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 		
 		var progressInterval = setInterval(function() {
 progressCounter++;
-			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 }, 500); // Fake progress
 		
 		push.stdout.on('data', function pushStdout(data) {
@@ -966,7 +1014,7 @@ stdout += data;
 			
 // todo: Better estimation on progress!
 progressCounter++;
-			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
 });
 
 		push.stderr.on('data', function pushStderr(data) {

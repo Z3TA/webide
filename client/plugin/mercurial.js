@@ -382,6 +382,7 @@
 		fileSelect.setAttribute("size", "6");
 		fileSelect.setAttribute("title", "Select files");
 		fileSelect.setAttribute("multiple", "multiple");
+		fileSelect.onkeydown = selectFileKeyDown;
 		
 		group.appendChild(fileSelect);
 		div.appendChild(group);
@@ -498,6 +499,17 @@ updateCommitFileSelect();
 		
 		return div;
 		
+		function selectFileKeyDown(keyDownEvent) {
+			keyDownEvent = keyDownEvent || window.event;
+			var delKey = 46;
+			if(keyDownEvent.keyCode == delKey) {
+				mercurialDelete(keyDownEvent);
+				return false;
+			}
+			
+			return true;
+		}
+		
 		function mercurialRevert(buttonClickEvent) {
 			
 			var revertFiles = [];
@@ -556,7 +568,7 @@ updateCommitFileSelect();
 			}
 		}
 		
-		function mercurialDelete(buttonClickEvent) {
+		function mercurialDelete(buttonOrKeyEvent) {
 			
 			var removeFiles = [];
 			var deleteUntracked = []; // Remove untracked files from disk
@@ -573,7 +585,7 @@ updateCommitFileSelect();
 			
 			if(removeFiles.length == 0 && deleteUntracked.length == 0) return alertBox("No files selected!");
 			
-			if(!buttonClickEvent.ctrlKey) {
+			if(!buttonOrKeyEvent.ctrlKey) {
 				var msg = "Are you sure you want to delete the following files ?\n" + removeFiles.concat(deleteUntracked).join("\n");
 				var yes = "Yes, Delete them";
 				var no = "No!";
@@ -780,7 +792,7 @@ updateCommitFileSelect();
 							nonTracked.splice(nonTracked.indexOf(nonTracked[0]), 1);
 						}
 						
-						return readyToCommit(false);
+						return readyToCommit();
 					}
 					
 					CLIENT.cmd("mercurial.add", {directory: rootDir, files: nonTracked}, function commited(err, resp) {
@@ -788,19 +800,32 @@ updateCommitFileSelect();
 						if(err) alertBox(err.message);
 						else {
 							
-							readyToCommit(true);
+							readyToCommit();
 							
 						};
 						
 					});
 				})
 			}
-			else readyToCommit(false);
+			else readyToCommit();
 			
 			
-			function readyToCommit(filesWhereAdded) {
-				CLIENT.cmd("mercurial.commit", opt, function commited(err, resp) {
-					
+			function readyToCommit(commitAll) {
+				
+				var selectedFileCount = 0;
+				for (var i = 0; i < fileSelect.options.length; i++) {
+					if (fileSelect.options[i].selected) {
+						selectedFileCount++;
+					}
+				}
+				
+				if(commitAll && selectedFileCount < fileSelect.options.length) {
+					throw new Error("Not all files selected while commitAll=" + commitAll);
+				}
+				
+				var cmd = "mercurial.commit";
+				if(commitAll) cmd = "mercurial.commitAll";
+				CLIENT.cmd(cmd, opt, function commited(err, resp) {
 					if(err) {
 						
 						if(err.message.match(/created new head/)) {
@@ -808,7 +833,17 @@ updateCommitFileSelect();
 							alertBox("We need to pull and merge before pushing!");
 						}
 						else if(err.message.match(/cannot partially commit a merge/)) {
-							// todo:  'hg resolve -m [FILE]' !?!?
+							/*
+								This can happen if Mercurial expects a commit without files specified.
+								
+								todo:  'hg resolve -m [FILE]' !?!?
+							*/
+							
+							if(selectedFileCount == fileSelect.options.length && selectedFileCount == opt.files.length && !commitAll) {
+								return readyToCommit(true);
+							}
+							else console.log("selectedFileCount=" + selectedFileCount + " fileSelect.options.length=" + fileSelect.options.length + " opt.files.length=" + opt.files.length + " commitAll=" + commitAll + " ");
+							
 							alertBox("We need to reslove the merge conflict manually.");
 						}
 						else if(err.message.match(/unresolved merge conflicts/)) {

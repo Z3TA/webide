@@ -42,21 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-hg pull error:
-Error: fileCount=1 pulledFiles (2) = 
-["/home/Z/Projects/kivo2/app/dokument/index_src.htm",
-"/home/Z/Projects/kivo2/hemsida/src/quickedit.js"] 
-affectedFilesString=
-M app/dokument/index_src.htm
-M hemsida/src/quickedit.js
-
-at /home/Z/Projects/jzedit/server/plugin/mercurial.js:788:50
-
-Source control: Pull: Said I should Update, but Update said I should merge, but then Merge give an error:
-Command failed: hg merge
-abort: outstanding uncommitted merge
-
-
 After deleting a SSG from the SSG interface:
 TypeError: Cannot read property 'name' of undefined
     at changeSelectSite 
@@ -88,6 +73,15 @@ That it needs internet connection but we are working on offline mode.
 Also write that the editor can be installed locallu using npm install -g jzedit
 
 
+Fix issues with the terminal:
+When reloading the editor - the terminal-session is just a plain text file. Reconnect to the terminal !?
+After reloading and starting terminal again, it starts in old session, but nothing happens!
+
+
+
+
+Install MongoDB on webide.se
+Try running wiki js
 
 
 test:
