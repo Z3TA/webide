@@ -49,6 +49,8 @@ When editing in WYSIWYG mode and clicking somewhere it scrolls down! (very annyi
 How to prevent compiled-preview files coming up when opening (search) a file !?
 
 
+todo: more instruction in "Deploying to production" in
+/home/Z/Projects/jzedit/etc/userdir_skeleton/wwwpub/nodejs.htm
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
