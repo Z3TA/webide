@@ -123,6 +123,12 @@ Then open the app in a web browser and you will get a "add to desktop" request.
 Also see "Running as a cloud editor" below in this file.
 
 
+How to update
+=============
+
+If you installed using npm: 
+`npm update -g jzedit`
+
 
 
 
