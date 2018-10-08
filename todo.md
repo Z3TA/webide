@@ -44,10 +44,7 @@ What I'm working on
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
-I'm lucky if someone actually reads the welcome message or open the menu ...
-Most people seems to decided within 2 seconds that this is not for them. But why did they install it in the first place ?
-Maybe they where locking for a chrome app and didn't want a hosted app !?
-
+It seems like people are actually reading though the welcome notes!!
 
 Fix issues with the terminal:
 When reloading the editor - the terminal-session is just a plain text file. Reconnect to the terminal !?
