@@ -42,9 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-todo: more instruction in "Deploying to production" in
-/home/Z/Projects/jzedit/etc/userdir_skeleton/wwwpub/nodejs.htm
-
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
 I'm lucky if someone actually reads the welcome message or open the menu ...
