@@ -3846,10 +3846,9 @@ var File; // File object is global
 			//if(diff < 0) {console.log("We scrolled up y--");y--;}
 			
 			
-			console.log("y=" + y);
+			console.log("y=" + y + " low=" + low + " diff=" + diff);
 			
-			if(y < low) throw new Error("Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + 
-			" to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
+			if(y < low) console.warn("You are scrolling too fast ... Or Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
