@@ -42,10 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-When editing in WYSIWYG mode and clicking somewhere it scrolls down! (very annying)
-
-
-
 How to prevent compiled-preview files coming up when opening (search) a file !?
 
 

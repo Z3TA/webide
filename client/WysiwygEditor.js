@@ -437,28 +437,11 @@ var WysiwygEditor;
 			//else throw error; 
 		}
 		
-		// Make it visible (scrollIntoView), or elementFromPoint(x, y) will fail !
-		
 		if(baseNode.nodeType == Node.TEXT_NODE) {
-			// Measure the parent node (can't measure text nodes)
-			var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
-			parentNode.scrollIntoView();
-			var pos = parentNode.getBoundingClientRect();
-			console.log("parentNode:");
-			console.log(parentNode);
-			console.log("parentNode nodeType=" + parentNode.nodeType);
+			var text = baseNode.parentNode.innerText
 		}
-		else if(baseNode.nodeType == Node.ELEMENT_NODE) {
-			// The node probably don't have any text yet
-			baseNode.scrollIntoView();
-			var pos = baseNode.getBoundingClientRect();
-			console.log("baseNode:");
-			console.log(baseNode);
-		}
-		else {
-			console.log(baseNode);
-			throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
-		}
+		
+		var pos = getPos(baseNode, false);
 		
 		if (selection.rangeCount) {
 			var selRange = selection.getRangeAt(0);
@@ -470,10 +453,46 @@ var WysiwygEditor;
 			
 		} else throw new Error("no selection.rangeCount");
 		
+		var x = Math.round(pos.left + 1);
+		var y = Math.round(pos.top + 1);
+		
+		var element = doc.elementFromPoint(x, y);
+		
+		if(element == null) {
+			pos = getPos(baseNode, true);
+			x = Math.round(pos.left + 1);
+			y = Math.round(pos.top + 1);
+		}
+		
 		// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
-		return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos, text: parentNode ? parentNode.innerText : baseNode.innerText };
+		return {x: x, y: y, char: caretPos, text: text || baseNode.innerText };
 		
-		
+		function getPos(baseNode, scrollIntoView) {
+			// Make it visible (scrollIntoView), or elementFromPoint(x, y) will fail !
+			// The scrolling is however *very* annoying. So only scroll if elementFromPoint would fail
+			if(baseNode.nodeType == Node.TEXT_NODE) {
+				// Measure the parent node (can't measure text nodes)
+				var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
+				if(scrollIntoView) parentNode.scrollIntoView();
+				var pos = parentNode.getBoundingClientRect();
+				console.log("parentNode:");
+				console.log(parentNode);
+				console.log("parentNode nodeType=" + parentNode.nodeType);
+			}
+			else if(baseNode.nodeType == Node.ELEMENT_NODE) {
+				// The node probably don't have any text yet
+				if(scrollIntoView) baseNode.scrollIntoView();
+				var pos = baseNode.getBoundingClientRect();
+				console.log("baseNode:");
+				console.log(baseNode);
+			}
+			else {
+				console.log(baseNode);
+				throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
+			}
+			
+			return pos;
+		}
 		
 		
 	}
