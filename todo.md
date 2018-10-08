@@ -42,9 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-How to prevent compiled-preview files coming up when opening (search) a file !?
-
-
 todo: more instruction in "Deploying to production" in
 /home/Z/Projects/jzedit/etc/userdir_skeleton/wwwpub/nodejs.htm
 

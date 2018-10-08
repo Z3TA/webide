@@ -35,6 +35,8 @@
 	
 	var progressBar;
 	
+	var askToOpenSourceFileIfOpenedPreviewFile = true;
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -365,7 +367,28 @@
 			for(var i=0; i<sites.length; i++) {
 				if(filePath.indexOf(sites[i].source) != -1) {
 					showSSG();
-					switchSite(i)
+					switchSite(i);
+					break;
+				}
+				if(filePath.indexOf(sites[i].preview) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
+					showSSG();
+					switchSite(i);
+					
+					var fileName = UTIL.getFilenameFromPath(file.path);
+					var yes = "Yes, open the source file instead";
+					var no = "No, not this time";
+					var stop = "No, don't ask again!";
+					confirmBox('You have opened the "compiled" version of ' + fileName + '. Do you want to open the source file instead ?', [yes, no, stop], function(answer) {
+						if(answer == yes) {
+							var openInstead = file.path.replace(sites[i].preview, sites[i].source);
+							EDITOR.closeFile(file);
+							EDITOR.openFile(openInstead);
+						}
+						else if(answer == stop) {
+							askToOpenSourceFileIfOpenedPreviewFile = false;
+						}
+					});
+					
 					break;
 				}
 			}
