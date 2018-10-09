@@ -3275,6 +3275,7 @@ enterCodeCallback(null, {mounted: true});
 		var mountpointNotEmptyString = "fuse: mountpoint is not empty";
 		var notConnectedString = "Transport endpoint is not connected";
 		var driveBuzy = "Device or resource busy";
+		var gcsfMountSession;
 		
 		// First create the folder to mount to
 		module_fs.mkdir(mountDir, function(err) {
@@ -3282,7 +3283,7 @@ enterCodeCallback(null, {mounted: true});
 			
 			log("Starting gcsfMountSession with args=" + JSON.stringify(gcsfMountArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions) + "");
 			
-			var gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfMountArgs, gcsfOptions);
+			gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfMountArgs, gcsfOptions);
 			
 			GCSF[username].mountSession = gcsfMountSession;
 			
