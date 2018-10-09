@@ -42,42 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-gcsf did not call back:
-
-2018-10-08 (16:52:52) req.googleDrive={"code":null} (server.js:1337:19))
-2018-10-08 (16:52:52) configDir=/home/Z/Projects/jzedit/ (server.js:3125:10))
-2018-10-08 (16:52:52) Starting gcsfLoginSession with args=["login","ltest1"] gcsfOptions={} (server.js:3137:2))
-2018-10-08 (16:52:52) ltest1 gcsfLoginSession stderr:  ERROR gcsf > Could not log in: token file "/home/Z/.config/gcsf/ltest1" already exists.
-                       (server.js:3213:3))
-2018-10-08 (16:52:52) Running gcsf mount for ltest1 because most likely already logged in ... (server.js:3232:4))
-2018-10-08 (16:52:52) ltest1 gcsfLoginSession close: code=0 signal=null (server.js:3151:3))
-2018-10-08 (16:52:52) Starting gcsfMountSession with args=["mount","/home/ltest1/googleDrive","-s","ltest1"] gcsfOptions={} (server.js:3278:4)
-2018-10-08 (16:52:52) ltest1 gcsfMountSession stderr:  INFO  gcsf > Creating and populating file system...
-                       (server.js:3327:4))
-2018-10-08 (16:52:52) ltest1 gcsfMountSession stdout: Please direct your browser to https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com, follow the instructions and enter the code displayed here: 
-                       (server.js:3321:4))
-
-
-
-2018-10-08 (16:56:02) req.googleDrive={"code":null} (server.js:1337:19))
-2018-10-08 (16:56:02) configDir=/home/Z/Projects/jzedit/ (server.js:3125:10))
-2018-10-08 (16:56:02) Starting gcsfLoginSession with args=["login","ltest1"] gcsfOptions={} (server.js:3137:2))
-2018-10-08 (16:56:02) ltest1 gcsfLoginSession stderr:  ERROR gcsf > Could not log in: token file "/home/Z/.config/gcsf/ltest1" already exists.
-                       (server.js:3213:3))
-2018-10-08 (16:56:02) Running gcsf mount for ltest1 because most likely already logged in ... (server.js:3232:4))
-2018-10-08 (16:56:02) Starting gcsfMountSession with args=["mount","/home/ltest1/googleDrive","-s","ltest1"] gcsfOptions={} (server.js:3278:4)
-2018-10-08 (16:56:02) ltest1 gcsfLoginSession close: code=0 signal=null (server.js:3151:3))
-2018-10-08 (16:56:02) ltest1 gcsfMountSession stderr:  INFO  gcsf > Creating and populating file system...
-                       (server.js:3327:4))
-2018-10-08 (16:56:02) ltest1 gcsfMountSession stdout: Please direct your browser to https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com, follow the instructions and enter the code displayed here: 
-                       (server.js:3321:4))
-
-
-
----
-
 Issue moving a file from Google Drive to another folder.
 
+Auto update preview when source="something" is saved.
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 

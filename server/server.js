@@ -3141,8 +3141,8 @@ gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 	GCSF[username] = {};
 
 	GCSF[username].loginSession = gcsfLoginSession;
-	GCSF[username].enterCode = function enterGcsfCode(code, cb) {
-		log("enter gcsf code called for " + username, DEBUG);
+	GCSF[username].enterCode = function enterGcsfCodeForLoginSession(code, cb) {
+		log("enter gcsf code called for " + username + " from login session", DEBUG);
 			enterCodeCallback = cb;
 		this.loginSession.stdin.write(code + "\n");
 		}
@@ -3185,7 +3185,7 @@ gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 		var matchBrowserUrl = str.match(reBrowserUrl);
 		
 		if(matchBrowserUrl) {
-			log("Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
+			log("gcsfLoginSession Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
 			var authUrl = matchBrowserUrl[1];
 			gcsfLoginCallback(null, {url: authUrl});
 			gcsfLoginCallback = null;
@@ -3230,10 +3230,16 @@ enterCodeCallback(null, {mounted: true});
 			if(enterCodeCallback) throw new Error("Unexpected enterCodeCallback " + !!enterCodeCallback);
 			
 			log("Running gcsf mount for " + username + " because most likely already logged in ...", DEBUG);
-			gcsfMount(username, function(err) {
+			gcsfMount(username, function(err, mntInfo) {
 				if(err) {
 					log("gcsf mount error for " + username + ": " + err.message, INFO);
-					if(err.code=="UMOUNT_THEN_TRY_AGAIN" && loginRetries < maxLoginRetries) {
+					
+					if(err.code=="ENTER_CODE") {
+						log(err.message, DEBUG);
+						alreadyLoggedInCallback(null, {url: mntInfo.url});
+						alreadyLoggedInCallback = null;
+					}
+					else if(err.code=="UMOUNT_THEN_TRY_AGAIN" && loginRetries < maxLoginRetries) {
 						loginRetries++;
 						
 						log("fusermount for " + username + " before retrying gcsf login ...", DEBUG);
@@ -3262,7 +3268,6 @@ enterCodeCallback(null, {mounted: true});
 	});
 	
 	function gcsfMount(username, gcsfMountCallback) {
-		
 		var mountDir = HOME_DIR + username + "/googleDrive";
 		var mountSuccessString = "Mounted to " + mountDir;
 		var gcsfMountArgs = ["mount", mountDir, "-s", username];
@@ -3331,7 +3336,25 @@ enterCodeCallback(null, {mounted: true});
 		function parseGcsfOutput(data) {
 			var str = data.toString();
 			
-			if( str.indexOf(mountSuccessString) != -1 ) {
+			var matchBrowserUrl = str.match(reBrowserUrl);
+			
+			if(matchBrowserUrl) {
+				log("gcsfMount session Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
+				var authUrl = matchBrowserUrl[1];
+				
+				var error = new Error("gcsf mount session waiting for Google auth code on stdin ...");
+				error.code = "ENTER_CODE";
+				gcsfMountCallback(error, {url: authUrl});
+				gcsfMountCallback = null;
+				
+				GCSF[username].enterCode = function enterGcsfCodeToMountSession(code, cb) {
+					log("enter gcsf code called for " + username + " from mount session", DEBUG);
+					gcsfMountCallback = cb;
+					this.mountSession.stdin.write(code + "\n");
+				}
+				
+			}
+			else if( str.indexOf(mountSuccessString) != -1 ) {
 				console.log("Mount success string detected!");
 				gcsfMountCallback(null);
 				gcsfMountCallback = null;
@@ -3388,10 +3411,8 @@ enterCodeCallback(null, {mounted: true});
 				gcsfMountSession.kill();
 				
 			}
-			
 		}
-		
-	}
+		}
 }
 
 function gcsfUmount(username, callback) {
