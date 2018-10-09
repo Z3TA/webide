@@ -133,12 +133,7 @@
 	function startTerminalOnLogin() {
 		startTerminal(function (err, file) {
 			if(err) return alertBox(err.message);
-			
-			// Wait for other plugins like reopenFiles to do it's thing
-			setTimeout(function() {
-				EDITOR.showFile(file);
-			}, 1000);
-		});
+			});
 	}
 	
 	function startTerminal(startTerminalCallback) {
@@ -199,7 +194,7 @@
 			return;
 		}
 		
-		EDITOR.openFile(name, "", function fileOpened(err, file) {
+		EDITOR.openFile(name, "", {show: true}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
 				else return alertBox(err.message);
