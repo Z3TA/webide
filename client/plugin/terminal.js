@@ -7,12 +7,12 @@
 (function() {
 	"use strict";
 	
-	var TP = "terminal"; // Terminal name prefix
+	var termPrefix = "terminal"; // Terminal name prefix
 	var ESC = String.fromCharCode(27);
 	
 	var menuItem;
 	var terminalFiles = [];
-	var reTerm = new RegExp(TP + "(\\d+)");
+	var reTerm = new RegExp(termPrefix + "(\\d+)");
 	var oldCols = 0;
 	var oldRows = 0;
 	
@@ -156,23 +156,22 @@
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
 		var terminalId = 1;
-		var terminalName = TP + terminalId;
+		var terminalName = termPrefix + terminalId;
 		
 		var openFiles = Object.keys(EDITOR.files);
 		while(openFiles.indexOf(terminalName) != -1 && terminalId < 100) {
 			terminalId++;
-			terminalName = TP + terminalId;
+			terminalName = termPrefix + terminalId;
 		}
 		
 		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, function terminalOpened(err, term) {
 			if(err) {
-				// How do I repeat this ?
-				alertBox(err.message);
+				// How do I repeat: Open two terminals, then close them, and open a new terminal
 				var reHigher = /Terminal id needs to be (\d+) or higher/;
 				var matchHigher = err.message.match(reHigher);
 				if(matchHigher) {
 					terminalId = parseInt(matchHigher[1]);
-					terminalName = TP + terminalId;
+					terminalName = termPrefix + terminalId;
 					return CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, terminalOpened);
 				}
 				else if(startTerminalCallback) startTerminalCallback(err);
@@ -249,20 +248,20 @@
 	
 	function terminalMessage(term) {
 		
-		var file = EDITOR.files[TP + term.id];
+		var file = EDITOR.files[termPrefix + term.id];
 		
 		if(term.exit) {
 			
 			if(file) file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			
-			if(term.exit.code != 0) alertBox(TP + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
+			if(term.exit.code != 0) alertBox(termPrefix + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
 			
 			while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 			return;
 		}
 		
 		if(!file && term.data) {
-			var name = TP + term.id;
+			var name = termPrefix + term.id;
 			openTerminalFile(name, function(err, f) {
 				if(err) return alertBox(err.message);
 				

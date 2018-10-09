@@ -44,7 +44,7 @@ What I'm working on
 
 Replace all doesn't replace the first!
 
-Terminal says id needs to be 3 or higher
+When hitting Replace when there is nothing selected does a case insensitive search and replace!
 
 JSX support ?
 
