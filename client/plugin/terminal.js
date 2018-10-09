@@ -239,7 +239,7 @@
 		
 		if(term.exit) {
 			
-			file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
+			if(file) file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			
 			if(term.exit.code != 0) alertBox("terminal" + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
 			
