@@ -7,10 +7,14 @@
 (function() {
 	"use strict";
 	
+	var TP = "terminal"; // Terminal name prefix
+	var ESC = String.fromCharCode(27);
+	
 	var menuItem;
 	var terminalFiles = [];
-	var reTerm = /terminal(\d+)/;
-	var ESC = String.fromCharCode(27);
+	var reTerm = new RegExp(TP + "(\\d+)");
+	var oldCols = 0;
+	var oldRows = 0;
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -152,17 +156,26 @@
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
 		var terminalId = 1;
-		var terminalName = "terminal" + terminalId;
+		var terminalName = TP + terminalId;
 		
 		var openFiles = Object.keys(EDITOR.files);
 		while(openFiles.indexOf(terminalName) != -1 && terminalId < 100) {
 			terminalId++;
-			terminalName = "terminal" + terminalId;
+			terminalName = TP + terminalId;
 		}
 		
 		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, function terminalOpened(err, term) {
 			if(err) {
-				if(startTerminalCallback) startTerminalCallback(err);
+				// How do I repeat this ?
+				alertBox(err.message);
+				var reHigher = /Terminal id needs to be (\d+) or higher/;
+				var matchHigher = err.message.match(reHigher);
+				if(matchHigher) {
+					terminalId = parseInt(matchHigher[1]);
+					terminalName = TP + terminalId;
+					return CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, terminalOpened);
+				}
+				else if(startTerminalCallback) startTerminalCallback(err);
 				else return alertBox(err.message);
 			}
 			// We might get terminal data before we get the open callback!
@@ -173,13 +186,14 @@
 	function resizeTerminals(file) {
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
-		var id = 0;
-		var match = null;
 		
-		for(var path in EDITOR.files) {
-			match = path.match(reTerm);
-			if(match) {
-				id = match[1];
+		if(oldCols != cols || oldRows != rows) {
+			oldCols = cols;
+			oldRows = rows;
+			
+			for (var i=0, match, id=0; i<terminalFiles.length; i++) {
+				match = terminalFiles[i].path.match(reTerm);
+				id = parseInt(match[1]);
 				resizeTerminal(id);
 			}
 		}
@@ -187,8 +201,8 @@
 		function resizeTerminal(id) {
 			if(CLIENT.connected) {
 				CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
-					if(err) console.warn(err.message);
-			});
+					if(err) throw err;
+				});
 		}
 			else console.warn("Not connected to server!");
 		}
@@ -235,20 +249,20 @@
 	
 	function terminalMessage(term) {
 		
-		var file = EDITOR.files["terminal" + term.id];
+		var file = EDITOR.files[TP + term.id];
 		
 		if(term.exit) {
 			
 			if(file) file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			
-			if(term.exit.code != 0) alertBox("terminal" + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
+			if(term.exit.code != 0) alertBox(TP + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
 			
 			while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 			return;
 		}
 		
 		if(!file && term.data) {
-			var name = "terminal" + term.id;
+			var name = TP + term.id;
 			openTerminalFile(name, function(err, f) {
 				if(err) return alertBox(err.message);
 				
@@ -1185,6 +1199,10 @@ file.insertLineBreak();
 	}
 	
 	function terminalCloseFile(file) {
+		if(typeof file == "string") {
+			file = EDITOR.files[file];
+		}
+		
 		if(terminalFiles.indexOf(file) == -1) return true;
 		
 		var id = file.path.match(reTerm)[1];

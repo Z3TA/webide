@@ -42,6 +42,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Replace all doesn't replace the first!
+
+Terminal says id needs to be 3 or higher
+
 JSX support ?
 
 Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?

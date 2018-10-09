@@ -22,15 +22,15 @@ var TERMINALS = {};
 
 if(ptyMissing) {
 	TERMINAL.open = ptyModuleNotLoaded;
-	TERMINAL.write = ptyModuleNotLoaded
-	TERMINAL.resize = ptyModuleNotLoaded
-	TERMINAL.close = ptyModuleNotLoaded
+	TERMINAL.write = ptyModuleNotLoaded;
+	TERMINAL.resize = ptyModuleNotLoaded;
+	TERMINAL.close = ptyModuleNotLoaded;
 }
 else {
 	TERMINAL.open = newTerminal;
 	TERMINAL.write = terminalWrite;
 	TERMINAL.resize = terminalResize;
-	TERMINAL.close = terminalClose
+	TERMINAL.close = terminalClose;
 }
 
 function newTerminal(user, json, callback) {
@@ -42,7 +42,11 @@ function newTerminal(user, json, callback) {
 	var exec = json.exec || "/bin/bash";
 	var termId = json.id || ++TERMINAL_COUNTER;
 	
-	if(termId < TERMINAL_COUNTER) return callback(new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher"));
+	if(termId < TERMINAL_COUNTER) {
+		var error = new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher");
+		error.code = "TERMINAL_ID_COUNTER";
+		return callback(error);
+	}
 	
 	if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;
 	
@@ -79,7 +83,11 @@ function terminalWrite(user, json, callback) {
 	var data = json.data;
 	var term = TERMINALS[termId];
 	if(data == undefined) return callback(new Error("data=" + data));
-	if(!term) return callback(new Error("Unknown terminal id=" + termId));
+	if(!term) {
+		var error = new Error("Unknown terminal id=" + termId);
+		error.code = "UNKNOWN_TERMINAL_ID";
+		return callback(error);
+	}
 	
 	term.write(data);
 	
@@ -94,8 +102,11 @@ function terminalResize(user, json, callback) {
 	var term = TERMINALS[termId];
 	if(cols == undefined) return callback(new Error("cols=" + cols));
 	if(rows == undefined) return callback(new Error("rows=" + rows));
-	if(!term) return callback(new Error("Unknown terminal id=" + termId));
-	
+	if(!term) {
+		var error = new Error("Unknown terminal id=" + termId);
+		error.code = "UNKNOWN_TERMINAL_ID";
+		return callback(error);
+	}
 	term.resize(cols, rows);
 	
 	callback(null, {});
@@ -105,7 +116,11 @@ function terminalClose(user, json, callback) {
 	
 	var termId = json.id;
 	var term = TERMINALS[termId];
-	if(!term) return callback(new Error("Unknown terminal id=" + termId));
+	if(!term) {
+		var error = new Error("Unknown terminal id=" + termId);
+		error.code = "UNKNOWN_TERMINAL_ID";
+		return callback(error);
+	}
 	
 	term.destroy();
 	
