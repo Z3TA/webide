@@ -1,4 +1,9 @@
-
+/*
+	
+	Question: Should terminals be reopened when the file re-opens !?
+	Answer: No! Because we wouln't be able to get back to the old state (bash session)
+	
+*/
 (function() {
 	"use strict";
 	
@@ -21,6 +26,7 @@
 			EDITOR.on("fileClose", terminalCloseFile);
 			EDITOR.on("paste", terminalPaste);
 			EDITOR.on("mouseClick", terminalMouseClick);
+			EDITOR.on("exit", exitAllTerminals);
 			
 			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
 				CLIENT.on("loginSuccess", startTerminalOnLogin);
@@ -40,6 +46,8 @@
 			
 			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 			CLIENT.removeEvent("terminal", terminalMessage);
+			EDITOR.removeEvent("exit", exitAllTerminals);
+			
 		}
 	});
 	
@@ -212,8 +220,8 @@
 			file.parsed = null;
 			
 			terminalFiles.push(file);
-			
-			file.writeLine("Use Alt key instead of Ctrl to send control characters!\n\n");
+			file.write(file.path + " session started " + (new Date()) + "\n");
+			file.writeLine("Use Alt key instead of Ctrl to send control characters!");
 			file.writeLineBreak();
 			file.writeLineBreak();
 			
@@ -230,7 +238,11 @@
 		var file = EDITOR.files["terminal" + term.id];
 		
 		if(term.exit) {
-			alertBox("terminal" + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
+			
+			file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
+			
+			if(term.exit.code != 0) alertBox("terminal" + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
+			
 			while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 			return;
 		}
@@ -1177,12 +1189,20 @@ file.insertLineBreak();
 		
 		var id = file.path.match(reTerm)[1];
 		
+		file.write("\n\nClosing " + file.path + " session " + new Date());
+		
 		CLIENT.cmd("terminal.close", {id: id}, function terminalClose(err) {
 			if(err) alertBox(err.message);
 		});
 		
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		
+	}
+	
+	function exitAllTerminals() {
+		console.log("exitAllTerminals: " + terminalFiles.length);
+		for (var i=0; i<terminalFiles.length; i++) terminalCloseFile(terminalFiles[i]);
+		return true;
 	}
 	
 	function TerminalState() {

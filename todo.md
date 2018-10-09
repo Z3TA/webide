@@ -42,12 +42,13 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+JSX support ?
+
+Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?
+
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
 It seems like people are actually reading through the welcome notes!!
-
-Fix issues with the terminal:
-When reloading the editor - the terminal-session is just a plain text file. Reconnect to the terminal !?
 
 Weird terminal prompt: 
 ello_worldguest80@webide:/nodejs/hello_world$
