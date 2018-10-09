@@ -82,7 +82,7 @@
 					
 					wEditor.onClose = function() {
 					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
-					if(err) throw err;
+					if(err) console.warn(err.message);
 					});
 					}
 				

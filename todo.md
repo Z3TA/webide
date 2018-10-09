@@ -42,8 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Auto update preview when source="something" is saved.
-
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
 It seems like people are actually reading though the welcome notes!!

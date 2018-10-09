@@ -135,6 +135,8 @@ var WysiwygEditor;
 		
 		wysiwygEditor.reCompile = options.reCompile;
 		
+		wysiwygEditor.sources = [];
+		
 		if(compiledSource) {
 			/*
 				If the source code has been "compiled". For example in case of the built in Static Site Generator (SSG) the 
@@ -285,6 +287,24 @@ var WysiwygEditor;
 			wysiwygEditor.positionate(top, left, width, height);
 			
 			if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
+			
+			// Find "sources"
+			console.log("Finding sources ...");
+			var html = wysiwygEditor.getPreviewWindowHtml();
+			var reSource = /(src|sources?)\s*=\s*(['"])([^'"]+)\2/ig // Very important with the g flag or there will be an endless loop
+			var match;
+			var sourcesFound = 0;
+			var fileName = "";
+			while ((match = reSource.exec(html)) != null) {
+				fileName = UTIL.getFilenameFromPath(match[3]);
+				console.log("Found source: ", match);
+				wysiwygEditor.sources.push( fileName );
+				if(sourcesFound > 100) { // Prevent endless loop
+					console.warn("Found " + sourcesFound + " sources: ", wysiwygEditor.sources);
+					break;
+				}
+			}
+			console.log("wysiwygEditor.sources=" + JSON.stringify(wysiwygEditor.sources));
 			
 			if(wysiwygEditor.whenLoaded) {
 				/*
@@ -880,6 +900,15 @@ var WysiwygEditor;
 			
 			return saveEventCallback(null)
 		}
+		else if( wysiwygEditor.sources.indexOf(fileName) != -1 ) {
+			console.log("Found fileName=" + fileName + " in wysiwygEditor.sources");
+			// Some source file was saved, so reload the preview page
+			wysiwygEditor.reload(function(err) {
+				if(err) alertBox(err.message);
+				saveEventCallback(null);
+			});
+		}
+		
 		else return saveEventCallback(null);
 	}
 	
