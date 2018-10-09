@@ -751,7 +751,24 @@ API.move = function move(user, json, callback) {
 	fs.rename(oldPath, newPath, function(err) {
 		
 		if(err) {
-			if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
+			if(err.code == "EISDIR") {
+err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
+				err.code = "EISDIR";
+			}
+			else if(err.code == "EXDEV") {
+				console.log(err.message + " ... Trying copy ...");
+				/*
+					Most likely a gcsf error: EXDEV: cross-device link not permitted, rename '/googleDrive/hello.js' -> '/wwwpub/hello.js'
+				*/ 
+				return API.copyFile(user, {from: oldPath, to: newPath}, function afterCopy(err, copy) {
+					if(err) {
+						var error = new Error("Failed to move (EXDEV), and also failed to copy (" + err.code + "): " + err.message);
+						error.code = err.code;
+						return callback(error);
+					}
+					else callback(null, {oldPath: oldPath, newPath: copy.to});
+				});
+			}
 		}
 		
 		callback(err, {oldPath: oldPath, newPath: newPath});
@@ -759,7 +776,7 @@ API.move = function move(user, json, callback) {
 		// EDITOR.move fires move event
 		
 	});
-	}
+}
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	

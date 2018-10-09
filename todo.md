@@ -42,8 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Issue moving a file from Google Drive to another folder.
-
 Auto update preview when source="something" is saved.
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
