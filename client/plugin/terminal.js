@@ -143,16 +143,23 @@
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
+		var terminalId = 1;
+		var terminalName = "terminal" + terminalId;
 		
-		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows}, function terminalOpened(err, term) {
+		var openFiles = Object.keys(EDITOR.files);
+		while(openFiles.indexOf(terminalName) != -1 && terminalId < 100) {
+			terminalId++;
+			terminalName = "terminal" + terminalId;
+		}
+		
+		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, function terminalOpened(err, term) {
 			if(err) {
 				if(startTerminalCallback) startTerminalCallback(err);
 				else return alertBox(err.message);
 			}
 			// We might get terminal data before we get the open callback!
-			openTerminalFile("terminal" + term.id, startTerminalCallback);
-			
-		});
+			openTerminalFile(terminalName, startTerminalCallback);
+			});
 	}
 	
 	function resizeTerminals(file) {

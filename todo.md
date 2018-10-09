@@ -44,11 +44,10 @@ What I'm working on
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
-It seems like people are actually reading though the welcome notes!!
+It seems like people are actually reading through the welcome notes!!
 
 Fix issues with the terminal:
 When reloading the editor - the terminal-session is just a plain text file. Reconnect to the terminal !?
-After reloading and starting terminal again, it starts in old session, but nothing happens!
 
 Weird terminal prompt: 
 ello_worldguest80@webide:/nodejs/hello_world$

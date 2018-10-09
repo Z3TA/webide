@@ -40,7 +40,11 @@ function newTerminal(user, json, callback) {
 	var cwd = json.cwd || process.env.HOME;
 	var env = json.env || process.env;
 	var exec = json.exec || "/bin/bash";
-	var termId = ++TERMINAL_COUNTER;
+	var termId = json.id || ++TERMINAL_COUNTER;
+	
+	if(termId < TERMINAL_COUNTER) return callback(new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher"));
+	
+	if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;
 	
 	TERMINALS[termId] = pty.spawn(exec, [], {
 		name: 'xterm-color',
