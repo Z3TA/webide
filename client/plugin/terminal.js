@@ -200,9 +200,16 @@
 		function resizeTerminal(id) {
 			if(CLIENT.connected) {
 				CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
-					if(err) throw err;
+					if(err && err.code == "UNKNOWN_TERMINAL_ID") {
+						// The server might have restarted
+						terminalCloseFile(termPrefix + id);
+					}
+					else if(err) {
+						console.log("err.code=" + err.code);
+						throw err;
+					}
 				});
-		}
+			}
 			else console.warn("Not connected to server!");
 		}
 	}
@@ -237,6 +244,7 @@
 			file.writeLine("Use Alt key instead of Ctrl to send control characters!");
 			file.writeLineBreak();
 			file.writeLineBreak();
+			EDITOR.renderNeeded();
 			
 			console.log(typeof callback)
 			console.log(callback);
@@ -252,7 +260,10 @@
 		
 		if(term.exit) {
 			
-			if(file) file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
+			if(file) {
+file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
+				EDITOR.renderNeeded();
+			}
 			
 			if(term.exit.code != 0) alertBox(termPrefix + term.id + " exit: code=" + term.exit.code + " signal=" + term.exit.signal);
 			
@@ -1211,9 +1222,10 @@ file.insertLineBreak();
 		var id = file.path.match(reTerm)[1];
 		
 		file.write("\n\nClosing " + file.path + " session " + new Date());
+		EDITOR.renderNeeded();
 		
 		CLIENT.cmd("terminal.close", {id: id}, function terminalClose(err) {
-			if(err) alertBox(err.message);
+			if(err && err.code != "UNKNOWN_TERMINAL_ID") alertBox(err.message);
 		});
 		
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
