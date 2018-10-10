@@ -803,6 +803,15 @@ Make server run under apparmor profile ...
 BUGS (and issues)
 =================
 
+---
+Function get the name bar while it should be an anonymous function:
+
+foo({bar: 1}).then(() => {
+	// This should be an anonymous function
+});
+
+---
+
 Issues opening folder ini files on Windows which contains a bunch of weird characters
 
 When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:

@@ -2119,8 +2119,12 @@ var WysiwygEditor;
 			console.log(stackLineWithFile);
 			var matchFile = stackLineWithFile.match(reFile);
 			if(!matchFile) {
-				console.warn("Could not get file path from stackLineWithFile=" + stackLineWithFile + ". Most likely it's from another domain.");
-				return;
+				console.log("Could not get file path from stackLineWithFile=" + stackLineWithFile + ". Searching the whole stack ...");
+				matchFile = stack.match(reFile);
+				if(!matchFile) {
+					console.warn("Could not get file path from stackLineWithFile=" + stackLineWithFile + " or stack=" + stack + ". Most likely it's from another domain.");
+					return;
+				}
 			}
 			console.log(matchFile);
 			var filePath = folder + matchFile[1];
@@ -2147,27 +2151,10 @@ var WysiwygEditor;
 			var rowText = file.rowText(row);
 			var matchText = rowText.match(/console.log ?\( ?(['"`]?)(.*)\1\)/);
 			// The user might have removed the console.log !
-			if(!matchText) return console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
-			var quote = matchText[1];
-			var logText = matchText[2];
-			
-			/*
-				// Trying to do something fancy like displaying the values ontop of the variables
-				
-				var jsdiff = JsDiff ? JsDiff : require('diff');
-				var diff = jsdiff.diffChars(logText, msg);
-				console.log(diff);
-				var tot = 0;
-				var removedLength = 0;
-				var addedLength = 0;
-				for (var i=0; i<.diff.length; i++) {
-				if(diff[i].added) addedLength += diff[i].count;
-				else if(diff[i].removed) removedLength++;
-				else {
-				
-				}
-				}
-			*/
+			// We might also be higher up in the stack, for example a function that calls console.log
+			if(!matchText) {
+console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
+			}
 			
 			EDITOR.addInfo(row, col, msg, file);
 			
