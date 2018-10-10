@@ -812,7 +812,11 @@ var WysiwygEditor;
 		
 		if(wysiwygEditor.reloadAfterSave && wysiwygEditor.sourceFile == file) {
 			wysiwygEditor.reloadAfterSave = false;
-			return wysiwygEditor.reload() ;
+			
+			wysiwygEditor.reload(function(err) {
+				return saveEventCallback(err);
+});
+			
 		}
 		
 		var previewWin = wysiwygEditor.previewWin;
