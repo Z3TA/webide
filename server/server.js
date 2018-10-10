@@ -1219,7 +1219,7 @@ username = guestUser;
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
 							}
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
 							
@@ -1403,7 +1403,7 @@ username = guestUser;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid);
+										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 									userWorker.send({identify: userInfo});
 									
 									userWorker.on("message", messageFromWorker);
@@ -2409,7 +2409,7 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(name, uid, gid) {
+function createUserWorker(name, uid, gid, homeDir) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
@@ -2418,7 +2418,7 @@ function createUserWorker(name, uid, gid) {
 	options.env = {
 		username: name,
 		loglevel: LOGLEVEL,
-		HOME: "/",
+		HOME: NO_CHROOT ? homeDir : "/",
 		USER: name,
 		LOGNAME: name,
 		USER_NAME: name
