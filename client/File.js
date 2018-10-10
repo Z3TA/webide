@@ -3277,7 +3277,12 @@ var File; // File object is global
 	}
 	
 	
-	File.prototype.cloneRow = function(row) {
+	File.prototype.cloneRow = function(row, maxColumns) {
+		/*
+			This might have performance issues for very long lines ...
+			It also use up a lot of extra memory.
+			
+		*/
 		var file = this;
 		var grid = file.grid;
 		
@@ -3292,6 +3297,7 @@ var File; // File object is global
 		
 		var clone = grid[row].slice(0);
 		
+		if(clone.length > maxColumns) clone.length = maxColumns; // Optimization for files without line breaks
 		
 		for (var i=0; i<clone.length; i++) {
 			clone[i] = clone[i].clone();

@@ -1489,8 +1489,9 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			//console.time("createBuffer");
 			var bufferStartRow = Math.max(0, file.startRow);
 			var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
+			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see
 			for(var row = bufferStartRow; row < bufferEndRow; row++) {
-				buffer.push(file.cloneRow(row)); // Clone the row
+				buffer.push(file.cloneRow(row, maxColumns)); // Clone the row
 			}
 			//console.timeEnd("createBuffer");
 			
@@ -6054,6 +6055,8 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			alertBox("Unable to get platform/OS clipboard data!");
 		}
 		
+		if(text && text.length > EDITOR.settings.bigFileSize) return alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
+		
 		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 			// Give focus back to the editor/canvas
 			EDITOR.input = true;
@@ -6061,7 +6064,7 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			giveBackFocusAfterClipboardEvent = false;
 		}
 		
-		console.log("PASTE: " + UTIL.lbChars(text));
+		//console.log("PASTE: " + UTIL.lbChars(text));
 		
 		if(EDITOR.input && EDITOR.currentFile) {
 			
