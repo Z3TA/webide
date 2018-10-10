@@ -804,6 +804,8 @@ var WysiwygEditor;
 	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, saveEventCallback) {
 		var wysiwygEditor = this;
 		
+		// note: This function MUST call back because it's a saveFile event listener
+		
 		if(!file) return saveEventCallback(new Error("file=" + file));
 		
 		console.log("WysiwygEditor.anyFileSaved: " + file.path);
@@ -816,7 +818,7 @@ var WysiwygEditor;
 			wysiwygEditor.reload(function(err) {
 				return saveEventCallback(err);
 });
-			
+			return;
 		}
 		
 		var previewWin = wysiwygEditor.previewWin;
@@ -2409,7 +2411,7 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
 		console.log("Unique function name for afterSave event: " + name);
 		var customAction = function(file, saveCallback) {
-			return wysiwygEditor.anyFileSaved(file, saveCallback);
+			wysiwygEditor.anyFileSaved(file, saveCallback);
 		}
 		var func = new Function("action" + name, "return function " + name + "(file, saveCallback){ return action" + name + "(file, saveCallback) };")(customAction);
 		

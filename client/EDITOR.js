@@ -1329,7 +1329,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		var protocol = UTIL.urlProtocol(path);
 		
 			var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
-			CLIENT.cmd("saveToDisk", json, function(err, json) {
+			CLIENT.cmd("saveToDisk", json, function saveToDiskCmd(err, json) {
 				if(err) {
 				if(saveToDiskCallback) saveToDiskCallback(err);
 				else throw err;
@@ -4610,6 +4610,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		var eventListeners = EDITOR.eventListeners[ev];
 		var uniqueFunctionNames = [];
 		var returnedOrCalledBack = [];
+		var stackTrace = {};
 		
 		for(var i=0; i<eventListeners.length; i++) {
 			callListener(eventListeners[i].fun);
@@ -4637,8 +4638,10 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			function evCallback(err) {
 				console.log("Got " + ev + " event callback from " + fName + " err=" + err);
-				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back!");
+				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
 				returnedOrCalledBack.push(fName);
+				
+				stackTrace[fName] = UTIL.getStack("callback");
 				
 				if(err) errors.push(err);
 				var index = waitingFor.indexOf(fName);
