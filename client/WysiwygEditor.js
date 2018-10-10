@@ -2174,19 +2174,19 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 		var colno = errorEvent.colno;
 		var error = errorEvent.error;
 		
-		console.log("Captured error: message=" + message + " line=" + lineno);
+		console.log("Captured error: message=" + message + " line=" + lineno + "");
+		
+		console.log(errorEvent);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
 		}
 		
-		console.log(errorEvent);
-		
 		var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
 		var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 		
 		console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
-		" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.stack);
+		" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.error.stack);
 		
 		var filePath = folder + source.replace(urlPath, "");
 		
@@ -2194,6 +2194,8 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 			// Source file path has no slash in it! (some tests doesn't add the root slash)
 			if(filePath.charAt(0) == "/" || filePath.charAt(0) == "\\") filePath = filePath.slice(1);
 		}
+		
+		console.log("Error in filePath?=" + filePath);
 		
 		var file = EDITOR.files[filePath];
 		
@@ -2210,6 +2212,40 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 			EDITOR.addInfo(row, col, message, file, 1);
 		}
 		else { // The file is not opened
+			console.log("File is not opened: " + filePath);
+			
+			// Try higher up the stack
+			var errorStack = errorEvent.error.stack;
+			if(errorStack) {
+				var reFileFromStackTrace = new RegExp("\\(?(.*):(\\d*):(\\d*)\\)?", "g");
+				var match;
+				var fileStackLength = 0;
+				var stackPath;
+				whileLoop: while ((match = reFileFromStackTrace.exec(errorStack)) !== null && fileStackLength < 100) {
+					console.log("match: ", match);
+					fileStackLength++;
+					// Is it opened ?
+					stackPath = match[1];
+					for(var filePath in EDITOR.files) {
+						console.log("stackPath=" + stackPath + " in filePath=" + filePath + " ?");
+						if(filePath.indexOf(stackPath) != -1) {
+							console.log("yes!");
+							var file = EDITOR.files[filePath];
+							var row = match[2];
+							var col = match[3];
+							break whileLoop;
+						}
+						else console.log("nope");
+					}
+				}
+				
+				if(file && row) {
+					EDITOR.addInfo(row, col, message, file, 1);
+					return;
+				}
+				
+			}
+			
 			var sourceLink = 'Detected error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
 			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
 			EDITOR.renderNeeded();})">' + filePath + ":" + lineno + "</a>";
