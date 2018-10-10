@@ -340,7 +340,11 @@
 					inNumber = "";
 					numberSerie.length = 0;
 				}
-				else if(inEsc && (code == 91 || code == 93)) { // 91=[  93=]  
+				else if(inEsc && code == 93) { // 93=]  
+					// Undocumented
+					inEsc = false;
+				}
+				else if(inEsc && code == 91) { // 91=[
 					inBracket = true;
 					inEsc = false;
 				}

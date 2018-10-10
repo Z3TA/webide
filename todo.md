@@ -42,6 +42,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+
+Path-picker widget with auto-complete for folder names
+
 Replace all doesn't replace the first!
 
 When hitting Replace when there is nothing selected does a case insensitive search and replace!
@@ -60,6 +64,12 @@ ello_worldguest80@webide:/nodejs/hello_world$
 
 Install MongoDB and Postgres on webide.se
 Try running wiki js
+
+Example on how to make a form and save the data to a db/file
+
+tensorflow (JS) example
+
+
 
 
 test:
