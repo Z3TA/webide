@@ -124,9 +124,11 @@
 		});
 	}
 	
-	function openLocalFileTool(directory) {
+	function openLocalFileTool(options) {
 		// Only answer on openFileTool events if we are running locally/"native"
 		if(EDITOR.user != "admin") return false;
+		
+		var directory = options.directory;
 		
 		openLocalFile(directory);
 		

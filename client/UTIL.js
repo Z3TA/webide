@@ -144,6 +144,14 @@ var UTIL = {
 		else return false;
 	},
 	
+	root: function rootPath(path) {
+		if(path == undefined && typeof EDITOR == "object") path = EDITOR.workingDirectory;
+		
+		var folders = UTIL.getFolders(path);
+		
+		return folders[0];
+	},
+	
 	getFolders: function getFolders(fullPath, includeHostInfo) {
 		/* 
 			Returns each folder in the path. Can take an url or a local filesystem path

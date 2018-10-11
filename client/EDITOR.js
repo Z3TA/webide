@@ -167,7 +167,7 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		voiceCommand: [],
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 		previewTool: [],
-	pathPicker: [] // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPicker
+	pathPickerTool: [] // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
 	};
 
 EDITOR.renderFunctions = [];
@@ -3122,19 +3122,6 @@ var word = "";
 		
 		return false; // disable default action
 		
-		function sharedStart(array) {
-			// Return the text that all words in an array share
-			var A= array.concat().sort(), // Create new array with the words sorted
-			a1= A[0],
-			a2= A[A.length-1],
-			L= a1.length,
-			i= 0;
-			
-			while(i<L && a1.charAt(i) === a2.charAt(i)) i++;
-			
-			return a1.substring(0, i);
-		}
-		
 		function completeWord(word, wholeWord, moveCaret) {
 			
 			if(wholeWord.substring(0, word.length) != word) {
@@ -3183,6 +3170,77 @@ var word = "";
 			
 			EDITOR.renderNeeded();
 			
+		}
+		
+	}
+	
+	function sharedStart(array) {
+		// Return the text that all words in an array share
+		var A= array.concat().sort(), // Create new array with the words sorted
+		a1= A[0],
+		a2= A[A.length-1],
+		L= a1.length,
+		i= 0;
+		
+		while(i<L && a1.charAt(i) === a2.charAt(i)) i++;
+		
+		return a1.substring(0, i);
+	}
+	
+	EDITOR.autoCompletePath = function autoCompletePath(options, callback) {
+		// Returns an array of possible autocomplete values
+		
+		console.log("EDITOR.autoCompletePath: options=" + JSON.stringify(options));
+		
+		if(typeof options == "function" && callback == undefined) {
+			callback = options;
+			options = undefined;
+		}
+		
+		if(typeof options == "string") {
+			options = {path: options};
+		}
+		
+		if(options.path) {
+			var name = UTIL.getFilenameFromPath(options.path);
+			var folder = UTIL.getDirectoryFromPath(options.path);
+		}
+		else {
+			throw new Error("No path specified in options=" + JSON.stringify(options));
+		}
+		
+		EDITOR.listFiles(folder, function(err, files) {
+			
+			if(err) return callback(err);
+			
+			if(name) files = files.filter(nameFilter);
+			if(options.onlyDirectories) files = files.filter(onlyDirectories);
+			
+			var filesNames = files.map(fileName);
+			
+			console.log("filesNames=" + filesNames);
+			
+			var path = folder + sharedStart(filesNames);
+			
+			console.log("EDITOR.autoCompletePath: " + options.path + " => " + path);
+			
+			callback(err, path);
+		});
+		
+		function fileName(file) {
+			return file.name;
+		}
+		
+		function nameFilter(file) {
+			return file.name.slice(0, name.length) == name;
+		}
+		
+		function onlyDirectories(file) {
+			return file.type == "d";
+		}
+		
+		function fullPath(file) {
+			return folder + file.name;
 		}
 		
 	}
@@ -3878,7 +3936,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 							return callback(error);
 						}
 						else if(answer == another) {
-							EDITOR.pathPicker(fullPath, function changedPath(err, newPath) {
+							EDITOR.pathPickerTool({default: fullPath}, function changedPath(err, newPath) {
 								if(err) {
 									return callback(err);
 								}
@@ -3902,38 +3960,6 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			// it's in the root
 			return callback(null, fullPath);
 		}
-	}
-	
-	EDITOR.pathPicker = function pathPicker(defaultPath, callback) {
-		// Fill show a tool for picking a file path, which will callback with the chosen path
-		
-		if(typeof defaultPath == "function") {
-			callback = defaultPath;
-			defaultPath = undefined;
-		}
-		
-		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
-		
-		console.log("Calling pathPicker listeners (" + EDITOR.eventListeners.pathPicker.length + ") ");
-		
-		var ret = false;
-		
-		for(var i=0, f; i<EDITOR.eventListeners.pathPicker.length; i++) {
-			ret = EDITOR.eventListeners.pathPicker[i].fun(defaultPath, callback);
-			if(ret === true) return true; // Only open one tool, hope it will call back!
-		}
-		
-		// If no path picker wanted to handle it: Use the stone-age path picker
-		promptBox("Choose a file path:", false, defaultPath, function(path) {
-			if(!path) {
-				var error = new Error("Aborted when picking path");
-				error.code = "CANCEL";
-				return callback(error);
-			}
-			else return callback(null, path);
-		});
-		
-		return true; // True as in "we found a path picker"
 	}
 	
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
@@ -4551,17 +4577,50 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		isVisible: false
 	}
 	
-	EDITOR.openFileTool = function fileOpenTool(directory, filePath) {
+	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
 		console.log("Calling openFileTool listeners (" + EDITOR.eventListeners.openFileTool.length + ")");
 		
 		var ret = false;
 		
 		for(var i=0, f; i<EDITOR.eventListeners.openFileTool.length; i++) {
-			ret = EDITOR.eventListeners.openFileTool[i].fun(directory, filePath);
+			ret = EDITOR.eventListeners.openFileTool[i].fun(options, filePath);
 			if(ret === true) break; // Only open one tool
 		}
 		
 		return ret;
+	}
+	
+	EDITOR.pathPickerTool = function pathPicker(options, callback) {
+		// Show a tool for picking a file path, which will callback with the chosen path
+		
+		if(typeof options == "function") {
+			callback = options;
+			options = undefined;
+		}
+		
+		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
+		
+		console.log("Calling pathPicker listeners (" + EDITOR.eventListeners.pathPicker.length + ") ");
+		
+		var ret = false;
+		
+		for(var i=0, f; i<EDITOR.eventListeners.pathPicker.length; i++) {
+			ret = EDITOR.eventListeners.pathPicker[i].fun(options, callback);
+			if(ret === true) return true; // Only open one tool, hope it will call back!
+		}
+		
+		// If no path picker wanted to handle it: Use the stone-age path picker
+		var defaultPath = options && options.default;
+		promptBox("Choose a file path:", false, defaultPath, function(path) {
+			if(!path) {
+				var error = new Error("Aborted when picking path");
+				error.code = "CANCEL";
+				return callback(error);
+			}
+			else return callback(null, path);
+		});
+		
+		return true; // True as in "we found a path picker"
 	}
 	
 	EDITOR.previewTool = function previewTool(file, ev) {

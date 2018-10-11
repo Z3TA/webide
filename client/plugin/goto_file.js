@@ -19,6 +19,7 @@
 	var keyDown = 40;
 	var charEscape = 27;
 	var charEnter = 13;
+	var keyTab = 9;
 	var workingDir;
 	var progressBar;
 	var fileCache = [];
@@ -100,7 +101,9 @@
 		hide_gotoFileInput();
 	}
 	
-	function openAnyFileTool(directory, filePath) {
+	function openAnyFileTool(options, filePath) {
+		
+		var directory = options.directory;
 		
 		if(directory) {
 			if(inputFolder) inputFolder.value = directory;
@@ -196,6 +199,7 @@
 		cancelButton.addEventListener("click", hide_gotoFileInput, false);
 		
 		inputGoto.addEventListener("keyup", typing, false);
+		inputGoto.addEventListener("keydown", keydown, false);
 		
 		//inputFolder.addEventListener("keyup", chandingDir, false);
 		
@@ -205,14 +209,30 @@
 		
 	}
 	
+	function keydown(keyDownEvent) {
+		if(keyDownEvent.keyCode == keyTab) {
+			var text = inputGoto.value;
+			if(text.length == 0) return ALLOW_DEFAULT;
+			
+			EDITOR.autoCompletePath({path: text}, function(err, path) {
+				if(err) return alertBox(err.message);
+				inputGoto.value = path;
+				typing();
+			});
+			keyDownEvent.preventDefault();
+			return PREVENT_DEFAULT;
+		}
+		else return ALLOW_DEFAULT;
+	}
+	
 	function typing(keyUpEvent) {
 		
 		var text = inputGoto.value
 		
-		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+		if(typeof keyUpEvent == "object") {
+console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 		
-		keyUpEvent.preventDefault();
-		
+			keyUpEvent.preventDefault();
 		
 		if (keyUpEvent.keyCode == charEnter) {
 			gotoFile();
@@ -232,6 +252,7 @@
 			//gotoFile_moveDown();
 			inputGoto.focus();
 			return;
+		}
 		}
 		
 		try {

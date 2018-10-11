@@ -621,7 +621,7 @@
 			
 			EDITOR.changeWorkingDir(selectedSite.source);
 			
-			EDITOR.openFileTool(selectedSite.source); // Sets EDITOR.input to false
+			EDITOR.openFileTool({directory: selectedSite.source}); // Sets EDITOR.input to false
 			
 			
 		}, false);

@@ -42,7 +42,16 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Path-picker widget with auto-complete for folder names
+Path-picker widget with auto-complete for folder names.
+It should be able to replace a input box !?
+used both in open file and save file !?
+Or just use EDITOR.autoComplete and add a autocomplete tool that will autocomplete paths!?
+Should it show the autocompleted text while typing !?
+Should also have a glob button/functionality to erase to last folder
+
+EDITOR.createPathInput
+
+---
 
 Replace all doesn't replace the first!
 
