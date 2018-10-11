@@ -2222,7 +2222,7 @@ function handleHttpRequest(request, response) {
 	}
 	else {
 		
-		//console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
+		console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
 		
 		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
