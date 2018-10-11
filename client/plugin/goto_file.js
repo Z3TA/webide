@@ -621,7 +621,7 @@
 				if(!path) {
 					console.log("selectedItem::");
 					console.log(selectedItem);
-					throw new Error("path=" + path)
+					throw new Error("path=" + path + " selectedItem=" + selectedItem);
 				}
 				
 				console.log("Opening " + path);
