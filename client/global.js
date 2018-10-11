@@ -106,5 +106,9 @@ var SHIFT = 1;
 var CTRL = 2;
 var ALT = 4;
 
-
+// So we can be more explicit and avoid "type" errors
+var SUCCESS = true;
+var FAIL = false;
+var PREVENT_DEFAULT = false;
+var ALLOW_DEFAULT = true;
 

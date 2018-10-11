@@ -2081,170 +2081,43 @@ var WysiwygEditor;
 		if(RUNTIME != "nw.js") consoleLogOriginal.apply(undefined, arg);
 		
 		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
-		// Figure out what script made the log
-		/*
-			
-			Error
-			at WysiwygEditor.consoleLog (http://192.168.0.3:8080/WysiwygEditor.js:1820:16)
-			at consoleLogCapturer (http://192.168.0.3:8080/WysiwygEditor.js:1532:18)
-			at http://192.168.0.3:8080/kvkvx3pet0/inlineConsoleLog.htm:4:9
-			
-		*/
-		var stack = (new Error("")).stack;
-		var arrStack = stack.split("\n");
 		
-		for(var i=0; i<arrStack.length; i++) console.log(i + " " + arrStack[i]);
+		var inlinedMessage = EDITOR.showMessageFromStackTrace({message: msg, url: wysiwygEditor.url, path: wysiwygEditor.sourceFile.path});
 		
-		var stackLineWithFile;
-		for (var i=0, index = 0; i<arrStack.length; i++) {
-			
-			index = arrStack[i].trim().indexOf("at consoleLogCapturer"); // Chrome
-			if(index == -1) index = arrStack[i].indexOf("consoleLogCapturer@"); // Firefox
-			
-			console.log("index=" + index);
-			if(index != -1) {
-				stackLineWithFile = arrStack[i+1];
-				break;
-			}
+		if(!inlinedMessage) {
+			console.warn("Unable to inline msg=" + msg);
+			alertBox(msg);
 		}
-		
-		if(stackLineWithFile) {
-			
-			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
-			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
-			
-			console.log("urlPath=" + urlPath);
-			console.log("folder=" + folder);
-			
-			var reFile = new RegExp("\\(?" + urlPath + "(.*):(\\d*):(\\d*)\\)?");
-			console.log(reFile);
-			console.log(stackLineWithFile);
-			var matchFile = stackLineWithFile.match(reFile);
-			if(!matchFile) {
-				console.log("Could not get file path from stackLineWithFile=" + stackLineWithFile + ". Searching the whole stack ...");
-				matchFile = stack.match(reFile);
-				if(!matchFile) {
-					console.warn("Could not get file path from stackLineWithFile=" + stackLineWithFile + " or stack=" + stack + ". Most likely it's from another domain.");
-					return;
-				}
-			}
-			console.log(matchFile);
-			var filePath = folder + matchFile[1];
-			var row = parseInt(matchFile[2])-1;
-			var col = parseInt(matchFile[3]);
-			console.log("filePath=" + filePath);
-			
-			if(!wysiwygEditor.sourceFile.path.match(/\/|\\/)) {
-				// Source file path has no slash in it! (some tests doesn't add the root slash)
-				if(filePath.charAt(0) == "/" || filePath.charAt(0) == "\\") filePath = filePath.slice(1);
-			}
-			if(!EDITOR.files.hasOwnProperty(filePath)) return console.log("File not opened in the editor: " + filePath);
-			
-			var file = EDITOR.files[filePath];
-			//if(file != EDITOR.currentFile) return console.log("File is not in view: " + filePath);
-			
-			//if(!(row >= file.startRow && row <= (file.startRow+EDITOR.view.visibleRows))) return console.log("The row is not in veiw: row=" + row + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
-			
-			col = col - file.grid[row].indentationCharacters.length;
-			if(col < 0) { // Sanity check
-				throw new Error("col=" + col + " file.grid[" + row + "].indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) +
-				" (" + file.grid[row].indentationCharacters.length + ")");
-			}
-			var rowText = file.rowText(row);
-			var matchText = rowText.match(/console.log ?\( ?(['"`]?)(.*)\1\)/);
-			// The user might have removed the console.log !
-			// We might also be higher up in the stack, for example a function that calls console.log
-			if(!matchText) {
-console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
-			}
-			
-			EDITOR.addInfo(row, col, msg, file);
-			
-		}
-		else throw new Error("Did not find the file location in stack=" + stack);
-		
 	}
 	
 	WysiwygEditor.prototype.error = function error(errorEvent) {
+		/*
+			This script runs in the context of the preview window
+			Throwing an error here will not register in the editor!
+		*/
 		var wysiwygEditor = this;
-		
-		var message = errorEvent.message;
-		var source = errorEvent.filename;
-		var lineno = errorEvent.lineno;
-		var colno = errorEvent.colno;
-		var error = errorEvent.error;
 		
 		console.log("Captured error: message=" + message + " line=" + lineno + "");
 		
-		console.log(errorEvent);
+		var inlinedMessage = EDITOR.showMessageFromStackTrace({
+			errorEvent: errorEvent, 
+			level: 1, // 1=Error
+			url: wysiwygEditor.url, 
+			path: wysiwygEditor.sourceFile.path
+		});
 		
-		if(!lineno) {
-			return console.warn("No linenno!");
-		}
-		
-		var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
-		var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
-		
-		console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
-		" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.error.stack);
-		
-		var filePath = folder + source.replace(urlPath, "");
-		
-		if(!wysiwygEditor.sourceFile.path.match(/\/|\\/)) {
-			// Source file path has no slash in it! (some tests doesn't add the root slash)
-			if(filePath.charAt(0) == "/" || filePath.charAt(0) == "\\") filePath = filePath.slice(1);
-		}
-		
-		console.log("Error in filePath?=" + filePath);
-		
-		var file = EDITOR.files[filePath];
-		
-		if(file) {
-			var row = lineno-1;
-			if(file.grid.length <= row) throw new Error("row=" + row + " outside the file.grid.length=" + file.grid.length + " for file.path=" + file.path + " source=" + source);
-			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
-			if(EDITOR.currentFile != file) {
-				EDITOR.showFile(file);
-			}
+		if(!inlinedMessage) {
 			
-			file.scrollToLine(lineno);
+			var message = errorEvent.message;
+			var source = errorEvent.filename;
+			var lineno = errorEvent.lineno;
+			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
+			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 			
-			EDITOR.addInfo(row, col, message, file, 1);
-		}
-		else { // The file is not opened
-			console.log("File is not opened: " + filePath);
+			console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
+			" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.error.stack);
 			
-			// Try higher up the stack
-			var errorStack = errorEvent.error.stack;
-			if(errorStack) {
-				var reFileFromStackTrace = new RegExp("\\(?(.*):(\\d*):(\\d*)\\)?", "g");
-				var match;
-				var fileStackLength = 0;
-				var stackPath;
-				whileLoop: while ((match = reFileFromStackTrace.exec(errorStack)) !== null && fileStackLength < 100) {
-					console.log("match: ", match);
-					fileStackLength++;
-					// Is it opened ?
-					stackPath = match[1];
-					for(var filePath in EDITOR.files) {
-						console.log("stackPath=" + stackPath + " in filePath=" + filePath + " ?");
-						if(filePath.indexOf(stackPath) != -1) {
-							console.log("yes!");
-							var file = EDITOR.files[filePath];
-							var row = match[2];
-							var col = match[3];
-							break whileLoop;
-						}
-						else console.log("nope");
-					}
-				}
-				
-				if(file && row) {
-					EDITOR.addInfo(row, col, message, file, 1);
-					return;
-				}
-				
-			}
+			var filePath = folder + source.replace(urlPath, "");
 			
 			var sourceLink = 'Detected error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
 			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
@@ -2252,6 +2125,7 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 			alertBox(sourceLink + "\n\n" + message + "");
 		}
 	}
+	
 	
 	WysiwygEditor.prototype.autoComplete = function autoComplete(file, word, wordLength, gotOptions) {
 		/*
@@ -2807,9 +2681,6 @@ console.warn("Unabled to find console.log on line=" + (row+1) + " in " + file.pa
 		*/
 		
 	}
-	
-	
-	
 	
 	
 	// ### Test(s)

@@ -42,10 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Capture tensorflow errors
-
-Tensforflow.js support
-
 Path-picker widget with auto-complete for folder names
 
 Replace all doesn't replace the first!

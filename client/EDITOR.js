@@ -131,6 +131,7 @@ EDITOR.collaborationMode = false;
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
 	btk: [], // Back to keyboard
+	error: [],
 	fileClose: [], 
 	fileOpen: [],
 	fileHide: [],
@@ -2551,6 +2552,9 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 	EDITOR.addInfo = function(row, col, textString, file, lvl) {
 		// Will display a talk bubble (plugin/render_info.js)
 		
+		row = parseInt(row);
+		col = parseInt(col);
+		
 		if(file == undefined) file = EDITOR.currentFile;
 		if(! file instanceof File) throw new Error("Third argument file is supposed to be a File object");
 		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
@@ -2660,6 +2664,57 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			});
 		}
 		
+	}
+	
+	EDITOR.error = function editorError(error) {
+		/*
+			Some functions will throw errors in other windows, and not be captured by window.onerror (this window)
+			Use this function to make sure the editor registers the error.
+			
+			Note: We don't want to use this function everywhere instead of throw. Because this function will not work for early errors.
+		*/
+		
+		var message = error.message || error;
+		var source = error.fileName;
+		var lineno = error.lineNumber;
+		var colno = error.columnNumber;
+		
+		UTIL.objInfo(error);
+		
+		if(!source && !lineno) {
+			// Try to get source and lineno from the stack trace
+			
+			if(typeof error == "string") {
+				var errorStack = UTIL.getStack(error);
+			}
+			else if(error.stack) {
+				var errorStack = error.stack;
+			}
+			else {
+				console.warn("error=" + error + " (" + typeof error + ")");
+				throw error;
+			}
+			
+			var stackTrace = UTIL.parseStackTrace(errorStack);
+			var firstLine = stackTrace[0];
+			if(firstLine) {
+				source = firstLine.source;
+				lineno = firstLine.lineno;
+				colno = firstLine.colno;
+			}
+			else console.warn("Unable to get error info from errorStack=" + errorStack);
+		}
+		
+		console.log("EDITOR.error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
+		
+		if(EDITOR.eventListeners.error.length > 0) {
+			console.log("Calling error listeners (" + EDITOR.eventListeners.error.length + ") ...");
+			for(var i=0; i<EDITOR.eventListeners.error.length; i++) {
+				EDITOR.eventListeners.error[i].fun(message, source, lineno, colno, error); // Call function
+			}
+		}
+		
+		return FAIL;
 	}
 	
 	EDITOR.removeAllInfo = function(file, row, col) {
@@ -4762,6 +4817,98 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		},
 		isVisible: true
 		
+	}
+	
+	EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
+		// Finds a currently opened file from the stack trace, and show the message on the line from the stack trace
+		
+		console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(options));
+		
+		if(options.message) {
+			var message = options.message;
+		}
+		else if(options.error) {
+			var message = options.error.message;
+		}
+		else if(options.errorEvent) {
+			var message = options.errorEvent.error.message;
+		}
+		
+		if(options.stackTrace) {
+			var errorStack = options.stackTrace;
+		}
+		else if(options.error) {
+			var errorStack = options.error.stack;
+		}
+		else if(options.errorEvent) {
+			var errorStack = options.errorEvent.error.stack;
+		}
+		else {
+			var errorStack = UTIL.getStack(message);
+		}
+		
+		if(!errorStack) return EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
+		
+		var stackLines = UTIL.parseStackTrace(errorStack);
+		
+		if(options.url) {
+			var urlPath = UTIL.getDirectoryFromPath(options.url);
+		}
+		
+		if(options.path) {
+			var folder = UTIL.getDirectoryFromPath(options.path);
+		}
+		
+		if(options.level) {
+			var level = options.level;
+		}
+		else {
+			var level = 3; // 1=Err 2=Warn 3=Info
+		}
+		
+		var sourcePath = "";
+		stackLoop: for (var i=0; i<stackLines.length; i++) {
+			for(var filePath in EDITOR.files) {
+				
+				if(urlPath && folder) sourcePath = stackLines[i].source.replace(urlPath, folder);
+				else if(urlPath) sourcePath = stackLines[i].source.replace(urlPath, "");
+				else sourcePath = UTIL.getPathFromUrl(stackLines[i].source);
+				
+				if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
+				
+				console.log("sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
+				if(filePath.indexOf(sourcePath) != -1) {
+					console.log("yes!");
+					var file = EDITOR.files[filePath];
+					var lineno = stackLines[i].lineno;
+					var colno = stackLines[i].colno;
+					break stackLoop;
+				}
+				else console.log("nope");
+			}
+		}
+		
+		if(file && lineno) {
+			var row = lineno - 1;
+			var gridRow = file.grid[row];
+			if(!gridRow) { // Sanity check
+				return EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
+			}
+			var indentationCharacters = file.grid[row].indentationCharacters.length;
+			var col = colno - indentationCharacters;
+			
+			file.scrollToLine(lineno);
+			
+			EDITOR.addInfo(row, col, message, file, level);
+			
+			if(EDITOR.currentFile != file) EDITOR.showFile(file);
+			
+			return SUCCESS;
+			
+		}
+		else console.warn("Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+		
+		return FAIL;
 	}
 	
 	

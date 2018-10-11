@@ -3692,7 +3692,7 @@ var File; // File object is global
 		
 		if(file.isStreaming) throw new Error("Can't scroll to line in a file that is streaming!");
 		
-		if(undefined == line) {
+		if(line == undefined) {
 			throw new Error("line=" + line + " is undefined!");
 		}
 		else if(isNaN(line)) {

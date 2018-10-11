@@ -671,6 +671,9 @@ console.warn("fun=" + fun);
 			Useful for events like click etc.
 		*/
 		console.log("######################## OBJ INFO #########################");
+		
+		if(console.dir) return console.dir(o);
+		
 		var val;
 		for(var p in o) {
 			try {
@@ -687,6 +690,56 @@ console.warn("fun=" + fun);
 		}
 	},
 
+	parseStackTrace: function parseStackTrace(stackTrace) {
+		/*
+			
+			creating caret: at File.createCaret (http://127.0.0.1:8080/File.js:434:20)
+			at new File (http://127.0.0.1:8080/File.js:90:21)
+			at load (http://127.0.0.1:8080/EDITOR.js:798:18)
+			at Object.EDITOR.openFile (http://127.0.0.1:8080/EDITOR.js:783:5)
+			
+		*/
+		
+		var reStack = /at ([^ ]*) ?\(?(.*):(\d*):(\d*)/g;
+		var stackLength = 0;
+		var lines = [];
+		var fName="";
+		var source="";
+		var lineno=0;
+		var colno=0;
+		var obj = {};
+		var match;
+		
+		while ((match = reStack.exec(stackTrace)) !== null && stackLength < 100) {
+			stackLength++;
+			
+			fName = match[1];
+			source = match[2];
+			lineno = match[3];
+			colno = match[4];
+			
+			if(fName && !source) {
+source = fName;
+				fName = "";
+			}
+			
+			obj = {};
+			if(fName) obj.fName = fName;
+			if(source) obj.source = source;
+			if(lineno) obj.lineno = lineno;
+			if(colno) obj.colno = colno;
+			
+			lines.push(obj);
+			
+		}
+		
+		if(lines.length == 0) {
+			throw new Error(reStack + " does not match stackTrace=" + stackTrace);
+		}
+		
+		return lines;
+	},
+	
 	isString: function isString(text) {
 		// When a string is created with new String, it will be typeof object!
 		

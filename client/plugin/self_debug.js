@@ -23,6 +23,7 @@
 	//EDITOR.on("interaction", selfDebugInteraction);
 	//EDITOR.on("fileChange", selfDebugFileChange);
 	
+	window.onerror = windowError;
 	
 	EDITOR.plugin({
 		desc: "Send bug reports",
@@ -34,10 +35,14 @@
 	function bugReportLoad() {
 		var key_S = 83;
 		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		
+		EDITOR.on("error", windowError);
 	}
 	
 	function bugReportUnload() {
 		EDITOR.unbindKey(sendBugReport);
+		
+		EDITOR.removeEvent("error", windowError);
 	}
 	
 	function sendBugReport() {
@@ -108,7 +113,7 @@
 }
 	}
 	
-	window.onerror = function windowError(message, source, lineno, colno, error) {
+	function windowError(message, source, lineno, colno, error) {
 		
 		console.warn("Error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		

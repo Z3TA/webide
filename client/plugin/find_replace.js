@@ -757,7 +757,7 @@
 	
 	
 	// TEST-CODE-START
-	EDITOR.addTest(testReplaceAll, 1);
+	EDITOR.addTest(testReplaceAll);
 	function testReplaceAll(callback) {
 		EDITOR.openFile("replaceAll.txt", "fooBar\nfooBar\nfooBar\nfooBar\n", function(err, file) {
 			var newString = "fooBarBaz";
