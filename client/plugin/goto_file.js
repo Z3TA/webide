@@ -215,9 +215,11 @@
 			if(text.length == 0) return ALLOW_DEFAULT;
 			
 			EDITOR.autoCompletePath({path: text}, function(err, path) {
-				if(err) return alertBox(err.message);
-				inputGoto.value = path;
+				if(err && err.code != "ENOENT") return alertBox(err.message);
+				else if(!err && path != inputGoto.value) {
+					inputGoto.value = path;
 				typing();
+				}
 			});
 			keyDownEvent.preventDefault();
 			return PREVENT_DEFAULT;
@@ -230,12 +232,12 @@
 		var text = inputGoto.value
 		
 		if(typeof keyUpEvent == "object") {
-console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
-		
+			console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+			
 			keyUpEvent.preventDefault();
-		
-		if (keyUpEvent.keyCode == charEnter) {
-			gotoFile();
+			
+			if (keyUpEvent.keyCode == charEnter) {
+				gotoFile();
 			return;
 		}
 		else if(keyUpEvent.keyCode == charEscape) {

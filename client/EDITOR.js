@@ -3175,6 +3175,8 @@ var word = "";
 	}
 	
 	function sharedStart(array) {
+		if(!Array.isArray(array)) throw new Error("array=" + array + " needs to be an Array typeof array=" + typeof array);
+		if(array.length == 0) throw new Error("Array is empty: array=" + JSON.stringify(array));
 		// Return the text that all words in an array share
 		var A= array.concat().sort(), // Create new array with the words sorted
 		a1= A[0],
@@ -3209,7 +3211,7 @@ var word = "";
 			throw new Error("No path specified in options=" + JSON.stringify(options));
 		}
 		
-		EDITOR.listFiles(folder, function(err, files) {
+		EDITOR.listFiles(folder, function fileList(err, files) {
 			
 			if(err) return callback(err);
 			
@@ -3217,6 +3219,12 @@ var word = "";
 			if(options.onlyDirectories) files = files.filter(onlyDirectories);
 			
 			var filesNames = files.map(fileName);
+			
+			if(files.length == 0) {
+				var error = new Error("No path matches found for options=" + JSON.stringify(options));
+				error.code ="ENOENT";
+				return callback(error);
+			}
 			
 			console.log("filesNames=" + filesNames);
 			
