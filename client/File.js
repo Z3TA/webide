@@ -2612,7 +2612,7 @@ var File; // File object is global
 		console.log("File:moveCaretToIndex");
 		
 		if(index == undefined) {
-			throw new Error("index is undefined!");
+			throw new Error("moveCaretToIndex: index=" + index + " caret=" + JSON.stringify(caret));
 		}
 		else if(index < 0) {
 			throw new Error("index=" + index + " can not be less then zero!");
