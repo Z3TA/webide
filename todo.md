@@ -42,11 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-lots of:
-nginx: [warn] conflicting server name "guest75.webide.se" on [::]:80, ignored
-nginx: [warn] conflicting server name "guest76.webide.se" on [::]:80, ignored
-nginx: [warn] conflicting server name "guest77.webide.se" on [::]:80, ignored
-
 nginx: [warn] duplicate MIME type "text/html" in /etc/nginx/sites-enabled/webide.se:34
 
 nginx: [warn] could not build optimal server_names_hash, you should increase either server_names_hash_max_size: 512 or server_names_hash_buc ...

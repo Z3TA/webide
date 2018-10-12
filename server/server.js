@@ -2018,7 +2018,7 @@ function checkMounts(options, checkMountsCallback) {
 			module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
 				if(err) throw err;
 				
-				if(data.indexOf("#SSL#") == -1 || data.indexOf("#NOSSL#") == -1) {
+				if(data.indexOf("#SSL#") == -1 && data.indexOf("#NOSSL#") == -1) {
 					log("SSL already configured on " + userDomain);
 					sslCertChecked = true;
 					console.timeEnd("Check " + username + " SSL Cert");
@@ -2028,14 +2028,13 @@ function checkMounts(options, checkMountsCallback) {
 				
 				data = data.replace(/#SSL#/g, "");
 				data = data.replace(/listen 80;#NOSSL#/g, "");
-				data = data.replace(/listen [::]:80;#NOSSL#/g, "");
+				data = data.replace(/listen \[::\]:80;#NOSSL#/g, "");
 				
 				module_fs.writeFile(nginxProfilePath, data, function(err) {
 					if(err) throw err;
 					
 					console.log("SSL enabled: " + nginxProfilePath);
 					
-					// Don't make the user wait for nginx config to reload (ca 70ms)
 					console.time(username + " nginx reload");
 					var exec = module_child_process.exec;
 					exec("service nginx reload", function(error, stdout, stderr) {
