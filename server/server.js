@@ -410,7 +410,10 @@ function recycleGuestAccounts(callback) {
 		
 		console.log("Done recycling id=" + id + " countLeft=" + countLeft);
 		
-		if(countLeft == 0) callback(null);
+		if(countLeft == 0) {
+callback(null);
+			callback = null;
+		}
 	}
 	
 }
@@ -1973,7 +1976,7 @@ function checkMounts(options, checkMountsCallback) {
 					log("Skipping SSL registration because of too many failed attempts!");
 					sslCertChecked = true;
 					console.timeEnd("Check " + username + " SSL Cert");
-					
+					if(options.waitForSSL) checkMountsReadyMaybe();
 					return;
 				}
 				
@@ -1992,9 +1995,9 @@ function checkMounts(options, checkMountsCallback) {
 						else {
 							console.warn(err.message);
 						}
-						
 						sslCertChecked = true;
 						console.timeEnd("Check " + username + " SSL Cert");
+						if(options.waitForSSL) checkMountsReadyMaybe();
 					}
 					else {
 						console.log("SSL certificate for " + userDomain + " installed!");
@@ -2019,7 +2022,7 @@ function checkMounts(options, checkMountsCallback) {
 					log("SSL already configured on " + userDomain);
 					sslCertChecked = true;
 					console.timeEnd("Check " + username + " SSL Cert");
-					
+					if(options.waitForSSL) checkMountsReadyMaybe();
 					return;
 				}
 				
@@ -2044,7 +2047,7 @@ function checkMounts(options, checkMountsCallback) {
 						
 						sslCertChecked = true;
 						console.timeEnd("Check " + username + " SSL Cert");
-						
+						if(options.waitForSSL) checkMountsReadyMaybe();
 					});
 				});
 			});
