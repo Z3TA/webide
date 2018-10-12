@@ -68,9 +68,6 @@ See what people are using the editor for, make that work (the things new users t
 
 It seems like people are actually reading through the welcome notes!!
 
-Weird terminal prompt: 
-ello_worldguest80@webide:/nodejs/hello_world$
-
 
 Install MongoDB and Postgres on webide.se
 Try running wiki js
