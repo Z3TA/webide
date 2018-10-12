@@ -2421,7 +2421,8 @@ function createUserWorker(name, uid, gid, homeDir) {
 		HOME: NO_CHROOT ? homeDir : "/",
 		USER: name,
 		LOGNAME: name,
-		USER_NAME: name
+		USER_NAME: name,
+		PATH: "/usr/bin:/bin"
 	}
 	
 	if(NO_CHROOT) {

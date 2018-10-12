@@ -42,6 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Make a non-minified version of tensorflow.js so function argument hinting become more useful.
+
+
 Path-picker widget with auto-complete for folder names.
 It should be able to replace a input box !?
 used both in open file and save file !?
@@ -321,6 +324,12 @@ Forgot why we are using Nodesource ...
 
 What I'm thinking
 -----------------
+
+The reason for type annotation is to help tooling, to allow go do definition, rename all instances of foo.bar, 
+to see which methods/properties are available on an object. Can we accompish that in this editor without type annotatioins !?
+
+The reason to use a compiler is so that you can use the latest or non-standard language features ...
+
 
 If you start new files while offline, then close the editor, 
 and next time you open the editor up the files you created while offline are gone !!!

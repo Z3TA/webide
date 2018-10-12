@@ -42,6 +42,8 @@ function newTerminal(user, json, callback) {
 	var exec = json.exec || "/bin/bash";
 	var termId = json.id || ++TERMINAL_COUNTER;
 	
+	console.log("env=" + JSON.stringify(env));
+	
 	if(termId < TERMINAL_COUNTER) {
 		var error = new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher");
 		error.code = "TERMINAL_ID_COUNTER";

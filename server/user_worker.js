@@ -53,7 +53,7 @@ log("process.env.uid=" + process.env.uid, 7);
 var npmOptions = {
 	env: {
 		HOME: "/",
-		PATH: "/usr/bin/:/bin/", // npm want node to be inside PATH
+		PATH: "/usr/bin:/bin", // npm want node to be inside PATH
 		dev: true
 	},
 };
@@ -1386,7 +1386,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			cwd: directory,
 			env: {
 				myName: user.name,
-				dev: true
+				dev: true,
+				PATH: "/usr/bin:/bin"
 			},
 			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 		};

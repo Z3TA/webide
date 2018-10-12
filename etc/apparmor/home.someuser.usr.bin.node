@@ -42,6 +42,10 @@
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
   %HOME%%USERNAME%/bin/bash Px,
 
+  # Some install scripts need these !?
+  #%HOME%%USERNAME%/usr/bin/env ix,
+  #%HOME%%USERNAME%/bin/sh ix,
+
   #/dev/tty rw,
 
 }
