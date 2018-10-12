@@ -639,8 +639,8 @@ var WysiwygEditor;
 		try {
 			range.setStart(node, charPos);
 		}
-		catch(e) {
-			console.warn(e.message);
+		catch(err) {
+			console.warn(err.message);
 			return false;
 		}
 		
@@ -961,18 +961,18 @@ var WysiwygEditor;
 		return true;
 	}
 	
-	WysiwygEditor.prototype.previewMouseup = function previewMouseup(e) {
+	WysiwygEditor.prototype.previewMouseup = function previewMouseup(mouseUpEvent) {
 		var wysiwygEditor = this;
 		
 		console.log("previewMouseup!");
 		
-		//UTIL.objInfo(e.target);
+		//UTIL.objInfo(mouseUpEvent.target);
 		
 		var file = EDITOR.currentFile;
 		
 		// Safari blurs the editor before the mouseup is triggered, while other browsers does not
 		// Should we always place the caret !?
-		if(file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(e.target);
+		if(file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(mouseUpEvent.target);
 		//else console.log("EDITOR.input=" + EDITOR.input + " file==wysiwygEditor.sourceFile?" + (file==wysiwygEditor.sourceFile) + "");
 		
 		if(file.path.slice(-3) == "css") {
@@ -1013,7 +1013,7 @@ var WysiwygEditor;
 			
 			console.log("Current file is a stylesheet to the file in preview!");
 			
-			var cssRules = css(e.target);
+			var cssRules = css(mouseUpEvent.target);
 			
 			console.log("cssRules: " + cssRules);
 			
@@ -1081,10 +1081,10 @@ var WysiwygEditor;
 		}
 	}
 	
-	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(e) {
+	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(selectionchangeEvent) {
 		var wysiwygEditor = this;
 		console.log("previewSelectionchange!");
-		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(selectionchangeEvent.target);
 	}
 	
 	WysiwygEditor.prototype.previewPaste = function previewPaste(e, doc) {

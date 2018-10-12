@@ -42,6 +42,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Also autocomplete when saving as, and only autocomplete left of the caret
+
 Make a non-minified version of tensorflow.js so function argument hinting become more useful.
 
 

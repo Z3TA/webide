@@ -310,18 +310,18 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 	cancel.addEventListener("click", function(clickEvent) {callback(null); dialog.close(clickEvent)}, false);
 	
 	
-	input.addEventListener("keydown", function(e) {
+	input.addEventListener("keydown", function(keyDownEvent) {
 		var enterKey = 13;
 		var escapeKey = 27;
 		// Clicking enter in the input area should "submit"
-		if (e.keyCode == enterKey && !e.shiftKey) {
-			e.preventDefault();
-			e.stopPropagation();
+		if (keyDownEvent.keyCode == enterKey && !keyDownEvent.shiftKey) {
+			keyDownEvent.preventDefault();
+			keyDownEvent.stopPropagation();
 			ok.click();
 		return false;
 		}
 		// Clicking escape should be same as cancel
-		else if(e.keyCode == escapeKey) cancel.click();
+		else if(keyDownEvent.keyCode == escapeKey) cancel.click();
 	});
 	
 	

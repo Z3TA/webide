@@ -85,9 +85,9 @@ var CLIENT = {}; // Client object is global
 			
 		}
 		
-		connection.onmessage = function serverMessage(e) {
+		connection.onmessage = function serverMessage(sockJsEvent) {
 			
-			var msg = e.data;
+			var msg = sockJsEvent.data;
 			
 			console.log("Server: " + UTIL.shortString(msg));
 			//console.log( "Server: " + msg );

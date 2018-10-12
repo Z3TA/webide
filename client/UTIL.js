@@ -796,7 +796,7 @@ source = fName;
 				var stat = fs.lstatSync(filePath);
 				return stat.isFile();
 			}
-			catch(e) {
+			catch(err) {
 				return false;
 			}
 		}
@@ -911,7 +911,7 @@ else {
 			var stat = fs.lstatSync(path);
 			return stat.isDirectory();
 		}
-		catch(e) {
+		catch(err) {
 			return false;
 		}
 	},
