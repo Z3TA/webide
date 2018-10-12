@@ -42,6 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+prod server keeps restarting, why !?!?!?
+
+
 Also autocomplete when saving as, and only autocomplete left of the caret
 
 

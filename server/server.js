@@ -467,8 +467,7 @@ function main() {
 			// Creating a guest account will create the GUEST_COUNTER file!
 			fillGuestPool(function guestPoolFilledMaybe(err) {
 				if(err && err.code != "LOCK") throw err;
-				else startServer();
-			});
+					});
 			/*
 					module_fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
 				if (err) throw err;
@@ -481,9 +480,10 @@ else {
 			recycleGuestAccounts(function guestAccountsRecycled(err) {
 					log("GUEST_POOL.length=" + GUEST_POOL.length);
 				if(err) throw err;
-				startServer();
-			});
+					});
 		}
+				
+				startServer();
 	});
 	}
 	else startServer();
