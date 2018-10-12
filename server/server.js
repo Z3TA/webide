@@ -1085,7 +1085,7 @@ if(GUEST_POOL.length == 0) {
 						}
 						else {
 							var guestUser = GUEST_POOL.shift();
-							console.log("Using guest account " + guestUser + " from GUEST_POOL");
+							console.log("Using guest account " + guestUser + " from GUEST_POOL (new length=" + GUEST_POOL.length + ")");
 							var guestPw = module_generator.generate({
 								length: 10,
 								numbers: true
