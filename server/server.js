@@ -231,7 +231,7 @@ function fillGuestPool(id, callback) {
 		else {
 			if(!userInfo.username) throw new Error("No username in userInfo=" + JSON.stringify(userInfo));
 			// Check mounts etc when filling the guest pool, instead of when logging in
-			checkMounts(userInfo.username, userInfo.homeDir, userInfo.uid, userInfo.gid, function checkedMounts(err) {
+			checkMounts({username: userInfo.username, homeDir: userInfo.homeDir, uid: userInfo.uid, gid: userInfo.gid, waitForSSL: true}, function checkedMounts(err) {
 				
 				GUEST_POOL.push(userInfo.username);
 				console.log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length);
@@ -1193,7 +1193,7 @@ username = guestUser;
 								rootPath = passwd.homeDir;
 								
 								if(alreadyCheckedMounts) acceptUser();
-								else checkMounts(username, homeDir, uid, gid, checkedMounts);
+								else checkMounts({username: username, homeDir: homeDir, uid: uid, gid: gid}, checkedMounts);
 								
 							});
 						}
@@ -1454,8 +1454,13 @@ username = guestUser;
 }
 
 
-function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
+function checkMounts(options, checkMountsCallback) {
 	"use strict";
+	
+	var username = options.username;
+	var homeDir = options.homeDir;
+	var uid = options.uid;
+	var gid = options.gid;
 	
 	if(username == "guestundefined") throw new Error("username=" + username);
 	
@@ -1872,7 +1877,7 @@ function checkMounts(username, homeDir, uid, gid, checkMountsCallback) {
 			+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
 		*/
 		
-		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated) {
+		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL)) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
