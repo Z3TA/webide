@@ -164,6 +164,8 @@ umount("/home/" + username + "/usr/lib");
 umount("/home/" + username + "/usr/local/lib");
 umount("/home/" + username + "/usr/share");
 
+fuseUmount("/home/" + username + "/googleDrive");
+
 // It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
 umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
 unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
@@ -303,7 +305,7 @@ function userdel() {
 					// We want to sleep to make it sync
 					// can't use setTimeout because it would made the script continue
 					try {
-						child_process.execSync("umount -f " + path + ""); // we want to throw if this fails
+						child_process.execSync("umount -f " + path + "");
 					}
 					catch(err) {
 if( err.message.indexOf("umount: " + path + ": not mounted") == -1
@@ -311,7 +313,7 @@ if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 						&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
 							throw new Error("Lazy umount failed: " + err.message);
 						}
-						else console.log("hmm? Lazy umouny gave: " + err.message);
+						else console.log("hmm? Lazy umount gave: " + err.message);
 					}
 					
 					
@@ -331,6 +333,53 @@ if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 	// But then we got issues after re-installing server
 	// So we ended up with server.js being responsible for mounting the mount-points.
 }
+
+function fuseUmount(path, ignoreErrors) {
+	// The fuse file system is used for mounting Google Drive ...
+	var child_process = require("child_process");
+	try {
+		child_process.execSync("fusermount -u " + path + ""); // .toString(ENCODING)
+	}
+	catch(err) {
+		if(!ignoreErrors) {
+			
+			if( err.message.indexOf("fusermount: failed to unmount " + path + ": not mounted") == -1
+			&& err.message.indexOf("fusermount: failed to unmount " + path + ": mountpoint not found") == -1
+			&& err.message.indexOf("fusermount: failed to unmount " + path + ": No such file or directory") == -1 ) {
+				
+				if(err.message.indexOf("failed to unmount " + path + ": Device or resource busy") != -1) {
+					
+					// Sometimes you can not umount because there are other mounts to the target!
+					// A lazy umount might be able to get rid of those mounts!
+					console.log("fusermount -u " + path + ". Target is busy! Doing lazy umount -uz");
+					child_process.execSync("fusermount -uz " + path + " && sleep 1"); // we want to throw if this fails
+					// We want to sleep to make it sync
+					// can't use setTimeout because it would made the script continue
+					try {
+						child_process.execSync("fusermount -u " + path + "");
+					}
+					catch(err) {
+						if( err.message.indexOf("fusermount: failed to unmount " + path + ": not mounted") == -1
+						&& err.message.indexOf("fusermount: failed to unmount " + path + ": mountpoint not found") == -1
+						&& err.message.indexOf("fusermount: failed to unmount " + path + ": No such file or directory") == -1 ) {
+							throw new Error("Lazy umount failed: " + err.message);
+						}
+						else console.log("Running fusermount -u after fusermount -uz gave the following error: " + err.message);
+					}
+					
+				}
+				else {
+					throw err;
+					// stderr message are already shown in the shell, no need to repeat them
+				}
+			}
+			
+		}
+	}
+	
+	return;
+}
+
 
 function regExpEsc(str) {
 	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");

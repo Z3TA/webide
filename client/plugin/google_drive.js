@@ -12,7 +12,7 @@ var menuItem;
 	var GD_MENU_NOT_CONNECTED = "Google Drive";
 	var GD_MENU_CONNECTED = "Google Drive (logout)";
 	
-	if(window.location.hostname == "127.0.0.1") return console.warn("Disabling Google Drive integration when running locally");
+	if( window.location.hostname == "127.0.0.1" && !QUERY_STRING["googleDrive"] ) return console.warn("Disabling Google Drive integration when running locally");
 	// Don't bother compiling gcsf for every platform (we might make it into a node module if Google Drive becomes a wanted feature)
 	
 EDITOR.plugin({
