@@ -1050,31 +1050,31 @@ file.insertLineBreak();
 	}
 	
 	function terminalKeyPressed(file, character, combo) {
-		if(terminalFiles.indexOf(file) == -1) return true;
+		if(terminalFiles.indexOf(file) == -1) return ALLOW_DEFAULT;
 		
 		var id = file.path.match(reTerm)[1];
 		
 		console.log("key pressed: " + character);
 		
-		if(!EDITOR.input) return true;
+		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
-		if(EDITOR.mode != "default") return true;
+		if(EDITOR.mode != "default") return ALLOW_DEFAULT;
 			
 		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});
 		
-		return false;
+		return PREVENT_DEFAULT;
 	}
 	
 	function terminalKeyDown(file, character, combo, keyDownEvent) {
-		if(terminalFiles.indexOf(file) == -1) return true;
+		if(terminalFiles.indexOf(file) == -1) return ALLOW_DEFAULT;
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
 		console.log("key down: " + character + " (" + code + ")");
 		
-		if(!EDITOR.input) return true;
+		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
 		var id = file.path.match(reTerm)[1];
 		var data;
@@ -1090,8 +1090,30 @@ file.insertLineBreak();
 			data = character;
 			
 			// We don't want the text right of the caret to cary over to the next line!
-			//file.writeLineBreak();
-			//file.moveCaretToEndOfFile();
+			
+			// Check for open or edit command
+			
+			var rowText = file.rowText(file.caret.row);
+			// ltest1@zpc:/repo/tensorflow$ open README.md
+			var reCmd = /^(.*)?:(.*)\$ ([^ ]*) (.*)$/
+			var match = rowText.match(reCmd);
+			if(match && match.length == 5) {
+				var folder = match[2];
+				var command = match[3];
+				if(command == "open" || command == "edit") {
+					var path = UTIL.trailingSlash(folder) + match[4];
+					
+					//data = String.fromCharCode(1); // Go to start of command
+					//data += "echo ";
+					//data += character; // Enter
+					
+					path = path.trim(); // Remove trailing space
+					
+					EDITOR.openFile(path, undefined, {show: true});
+				}
+			} 
+			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
+			
 		}
 		else if(code == 37 && combo.sum == 0) { // arrow left
 			data = ESC + "[D";
@@ -1190,26 +1212,13 @@ file.insertLineBreak();
 			data = String.fromCharCode(26);
 		}
 		
-		else return true;
+		else return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});
 		
-		return false;
-	}
-	
-	function terminalEndOfText(file, combo, character, charCode, keyPushDirection, targetElementClass) {
-		if(terminalFiles.indexOf(file) == -1) return true;
-		
-		var id = file.path.match(reTerm)[1];
-		var data = String.fromCharCode(3); // ETX (end of text) 
-		
-		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
-			if(err) alertBox(err.message);
-		});
-		
-		return false;
+		return PREVENT_DEFAULT;
 	}
 	
 	function terminalCloseFile(file) {
