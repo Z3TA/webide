@@ -42,23 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-nginx: [warn] duplicate MIME type "text/html" in /etc/nginx/sites-enabled/webide.se:34
-
-nginx: [warn] could not build optimal server_names_hash, you should increase either server_names_hash_max_size: 512 or server_names_hash_buc ...
-
-
-
-Also autocomplete when saving as, and only autocomplete left of the caret
-
-
-Path-picker widget with auto-complete for folder names.
-It should be able to replace a input box !?
-used both in open file and save file !?
-Or just use EDITOR.autoComplete and add a autocomplete tool that will autocomplete paths!?
-Should it show the autocompleted text while typing !?
-Should also have a glob button/functionality to erase to last folder
-
-EDITOR.createPathInput
 
 ---
 

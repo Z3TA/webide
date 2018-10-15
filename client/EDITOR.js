@@ -3236,7 +3236,8 @@ var word = "";
 		});
 		
 		function fileName(file) {
-			return file.name;
+			if(file.type=="d") return UTIL.trailingSlash(file.name);
+			else return file.name;
 		}
 		
 		function nameFilter(file) {

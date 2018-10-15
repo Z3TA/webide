@@ -10,6 +10,7 @@
 	var inputPath;
 	var inputPathMinSize = 50;
 	var menu;
+	var folderPicker;
 	
 	var mimeMap = {
 		css: "text/css",
@@ -64,6 +65,118 @@
 		hideSaveDialog();
 	}
 	
+	function setCaretPosition(elemId, caretPos) {
+		var el = document.getElementById(elemId);
+		
+		el.value = el.value;
+		// ^ this is used to not only get "focus", but
+		// to make sure we don't have it everything -selected-
+		// (it causes an issue in chrome, and having it doesn't hurt any other browser)
+		
+		if (el !== null) {
+			
+			if (el.createTextRange) {
+				var range = el.createTextRange();
+				range.move('character', caretPos);
+				range.select();
+				return true;
+			}
+			
+			else {
+				// (el.selectionStart === 0 added for Firefox bug)
+				if (el.selectionStart || el.selectionStart === 0) {
+					el.focus();
+					el.setSelectionRange(caretPos, caretPos);
+					return true;
+				}
+				
+				else  { // fail city, fortunately this never happens (as far as I've tested) :)
+					el.focus();
+					return false;
+				}
+			}
+		}
+	}
+	
+	function pathKeyDown(keyDownEvent) {
+		var keyTab = 9;
+		if(keyDownEvent.keyCode == keyTab) {
+			var text = inputPath.value;
+			if(text.length == 0) return ALLOW_DEFAULT;
+			
+			var caretPos = inputPath.selectionStart;
+			
+			if(caretPos != text.length) {
+				var afterCaret = text.slice(caretPos);
+				text = text.slice(0, caretPos);
+				console.log("afterCaret=" + afterCaret);
+				console.log("text=" + text);
+			}
+			
+			EDITOR.autoCompletePath({path: text}, function(err, path) {
+				if(err && err.code != "ENOENT") return alertBox(err.message);
+				else if(!err && path != inputPath.value) {
+					
+					if(afterCaret) {
+						inputPath.value = path + afterCaret;
+						setCaretPosition("inputPath", path.length);
+					}
+					else inputPath.value = path;
+					
+					if(UTIL.isDirectory(path)) updateFolderPicker(path);
+				}
+			});
+			keyDownEvent.preventDefault();
+			return PREVENT_DEFAULT;
+		}
+		else return ALLOW_DEFAULT;
+	}
+	
+	function pathKeyPress(keyPressEvent) {
+		console.log(keyPressEvent);
+		var character = keyPressEvent.char || keyPressEvent.key;
+		if(character == "/" || character == "\\") {
+			updateFolderPicker(inputPath.value);
+		}
+	}
+	
+	function updateFolderPicker(pathToFolder) {
+		while(folderPicker.firstChild)folderPicker.removeChild(folderPicker.firstChild);
+		
+		addFolder("../");
+		
+		EDITOR.listFiles(pathToFolder, function fileList(err, files) {
+			
+			if(files) {
+				for (var i=0; i<files.length; i++) {
+				if(files[i].type=="d") addFolder(files[i].name);
+			}
+			}
+			
+			EDITOR.resizeNeeded();
+			
+			if(err) console.warn(err.message);
+		});
+		
+		return ALLOW_DEFAULT;
+	
+		function addFolder(name) {
+			console.log("Adding folder button name=" + name);
+			var button = document.createElement("button");
+			button.innerText = name;
+			button.onclick = function clickButton() {
+				var fullPath = UTIL.resolvePath(pathToFolder, name);
+				fullPath = UTIL.trailingSlash(fullPath);
+				inputPath.value = fullPath;
+				updateFolderPicker(fullPath);
+				inputPath.focus();
+			}
+			
+			folderPicker.appendChild(button);
+		}
+		
+	}
+	
 	function buildSaveDialog() {
 		
 		console.log("Building save dialog");
@@ -75,8 +188,11 @@
 		
 		inputPath = document.createElement("input");
 		inputPath.setAttribute("type", "text");
+		inputPath.setAttribute("id", "inputPath");
 		inputPath.setAttribute("class", "input text path");
 		inputPath.setAttribute("size", Math.max(inputPathMinSize, EDITOR.workingDirectory.length)); // Update in show()
+		inputPath.addEventListener("keydown", pathKeyDown);
+		inputPath.addEventListener("keypress", pathKeyPress);
 		
 		var labelPath = document.createElement("label");
 		labelPath.setAttribute("for", "inputPath");
@@ -84,7 +200,7 @@
 		labelPath.appendChild(inputPath);
 		saveDialog.appendChild(labelPath);
 		
-		var buttonSaveAs = document.createElement("input");
+var buttonSaveAs = document.createElement("input");
 		buttonSaveAs.setAttribute("type", "submit");
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save current file as");
@@ -122,6 +238,9 @@
 		}, false);
 		saveDialog.appendChild(cancel);
 		
+		folderPicker = document.createElement("div");
+		folderPicker.setAttribute("class", "folderPicker");
+		saveDialog.appendChild(folderPicker);
 		
 		footer.appendChild(saveDialog);
 		
@@ -265,7 +384,6 @@
 	
 	
 	function saveAs(e) {
-		
 		var file = EDITOR.currentFile;
 		var defaultPath;
 		
@@ -274,7 +392,6 @@
 		EDITOR.hideMenu(); // This will bring focus to the editor input
 		
 		showSaveDialog();
-		
 		
 		var path = "";
 		
@@ -294,6 +411,9 @@
 		
 		inputPath.setAttribute("size", size);
 		
+		var folder = UTIL.getDirectoryFromPath(path);
+		
+		updateFolderPicker(folder);
 	}
 	
 	
