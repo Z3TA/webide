@@ -42,6 +42,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Bug in logic in File.createCaret (line 482) error check:
+
+Error: caret.eof=true should be false when caret.col=21 == grid[11].length=21
+
+
+---
+
+When working in preview mode and editing html with style's the CSS-file gets ignored.
 
 ---
 
@@ -804,6 +812,12 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Issue when editing a SVG file. Colors where off. After reloading from disk, there where spaces inserted in the middle of tags.
+Then when switching to a txt the txt file got a huge left margin.
+It happens when you make a comment <!-- --> in the svg file.
+Alls happens when just doing normal edting.
+Indentation characters get screwed up.
 
 ---
 Function get the name bar while it should be an anonymous function:
@@ -1729,6 +1743,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Should be able to see changes to svg live while editing!
 
 Able to amend while making a commit (add the change to last commit)
 
