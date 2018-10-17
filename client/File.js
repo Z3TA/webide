@@ -366,16 +366,17 @@ var File; // File object is global
 				throw new Error("row=" + row + " >= grid.length=" + grid.length);
 			}
 			else {
-				// Plate the caret on that row
+				// Place the caret on that row
 				caret.index = grid[row].startIndex;
 				caret.row = row;
 				caret.col = 0;
 				
 				if(grid[row].length == 0) caret.eol = true;
-				if(row == (grid.length-1)) caret.eof = true;
+				
+				if(grid[row].length == 0 && row == (grid.length-1)) caret.eof = true;
+				
 			}
-			
-		}
+			}
 		else if(index == undefined && col != undefined) {
 			// We have only the col
 			if(isNaN(col)) {
@@ -390,26 +391,26 @@ var File; // File object is global
 				}
 				else {
 					// Find a row with at least col characters
-					row = 0;
-					while(row < grid.length) {
-						if(grid[row].length >= col) break;
-						row++;
+					var r = 0;
+					while(r < grid.length) {
+						if(grid[r].length >= col) break;
+						r++;
 					}
-					if(row == grid.length) {
+					if(r == grid.length) {
 						// Place caret at EOF
-						row--;
+						r--;
 						caret.index = file.text.length;
-						caret.row = row;
-						caret.col = grid[row].length;
+						caret.row = r;
+						caret.col = grid[r].length;
 						caret.eol = true;
 						caret.eof = true;
 					}
 					else {
-						caret.index = file.getIndexFromRowCol(row, col);
-						caret.row = row;
+						caret.index = file.getIndexFromRowCol(r, col);
+						caret.row = r;
 						caret.col = col;
 						
-						if(col == grid[row].length) caret.eol = true;
+						if(col == grid[r].length) caret.eol = true;
 						
 					}
 					
@@ -428,7 +429,6 @@ var File; // File object is global
 				caret = file.moveCaretToIndex(index, caret);
 			}
 		}
-		
 		
 		console.warn("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
 		console.log(UTIL.getStack("creating caret"));
@@ -465,29 +465,27 @@ var File; // File object is global
 		//console.log("grid[" + caret.row + "].length=" + grid[caret.row].length);
 		//console.log("grid[" + caret.row + "].startIndex=" + grid[caret.row].startIndex);
 		
-		
 		// Check if we got eol & eof right ...
 		if(caret.col == grid[caret.row].length) {
-			
 			if(caret.eol != true) throw new Error("caret.eol=" + caret.eol + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length);
-			caret.eol = true;
+			//caret.eol = true;
 			
 			if(caret.index == file.text.length) {
-				if(caret.eof != true) throw new Error("caret.eof=" + caret.eof + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and caret.index=" + caret.index + " == file.text.length=" + file.text.length);
-				caret.eof = true;
+				if(caret.eof != true) throw new Error("caret.eof=" + caret.eof + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + ", grid.length=" + grid.length + " and caret.index=" + caret.index + " == file.text.length=" + file.text.length);
+				//caret.eof = true;
 			}
 			else {
 				if(caret.eof != false) {
 					//file.debugGrid();
-					throw new Error("caret.eof=" + caret.eof + " should be false when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and NOT caret.index=" + caret.index + " == file.text.length=" + file.text.length);
+					throw new Error("caret.eof=" + caret.eof + " should be false when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + ", grid.length=" + grid.length + " and NOT caret.index=" + caret.index + " == file.text.length=" + file.text.length + " (index=" + index + " row=" + row + " col=" + col + ") ");
 				}
-				caret.eof = false;
+				//caret.eof = false;
 			}
 		}
 		else {
-			if(caret.eol != false && caret.eof != false) throw new Error("Both caret.eol=" + caret.eol + " and  caret.eof=" + caret.eof + " should be false when NOT caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length);
-			caret.eol = false;
-			caret.eof = false;
+			if(caret.eol != false || caret.eof != false) throw new Error("Both caret.eol=" + caret.eol + " and  caret.eof=" + caret.eof + " should be false when NOT caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length);
+			//caret.eol = false;
+			//caret.eof = false;
 		}
 		
 		if(!caret.eol) {
