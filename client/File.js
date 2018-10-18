@@ -341,8 +341,7 @@ var File; // File object is global
 				throw new Error("col=" + col + " > grid[" + row + "].length=" + grid[row].length);
 			}
 			else {
-				index = file.getIndexFromRowCol(row, col);
-				caret.index = index;
+				caret.index = file.getIndexFromRowCol(row, col);
 				caret.row = row;
 				caret.col = col;
 				
@@ -500,7 +499,7 @@ var File; // File object is global
 		return caret;
 		
 		function placeCaretAtFirstRowWithTextOrEof() {
-			row = 0;
+			var row = 0;
 			while(row < grid.length) {
 				if(grid[row].length > 0) break;
 				row++;
@@ -523,8 +522,7 @@ var File; // File object is global
 				caret.eof = false;
 			}
 		}
-		
-	}
+		}
 	
 	
 	File.prototype.checkGrid = function() {
