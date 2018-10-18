@@ -42,9 +42,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Bug in logic in File.createCaret (line 482) error check:
+after exiting Python in the terminal, the prompt gets placed below the view.
 
-Error: caret.eof=true should be false when caret.col=21 == grid[11].length=21
 
 
 ---
@@ -73,7 +72,14 @@ Example on how to make a form and save the data to a db/file
 
 tensorflow (JS) example
 
-
+Some people actually do read the welcome and example files.
+I should have good welcome and example files! Showing off the editor's cool features.
+And maybe even some tutorials
+Put tutorials on Githb. Auto clone when double clicking? on a git url !?
+Examples: 
+HTML forms. Save results in a database.
+HTML form, personality test. (worth 145.000 SEK)
+HTML form + school enrollment system (worth 2,000,000 SEK)
 
 
 test:
@@ -173,6 +179,9 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+Support for the node REPL in the terminal.
+Some users just opens up terminal, type node, then work from there.
 
 Swedish translation
 
