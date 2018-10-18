@@ -2611,12 +2611,12 @@ var File; // File object is global
 			throw new Error("moveCaretToIndex: index=" + index + " caret=" + JSON.stringify(caret));
 		}
 		else if(index < 0) {
-			throw new Error("index=" + index + " can not be less then zero!");
+			throw new Error("moveCaretToIndex: index=" + index + " can not be less then zero!");
 		}
 		else if(index > file.text.length) {
-			throw new Error("index=" + index + " can not be over file length=" + file.text.length + "");
+			throw new Error("moveCaretToIndex: index=" + index + " can not be over file length=" + file.text.length + "");
 		}
-		else if(isNaN(index)) throw new Error("index=" + index + " is not a number!");
+		else if(isNaN(index)) throw new Error("moveCaretToIndex: index=" + index + " is not a number!");
 		
 		if(caret == undefined || caret == file.caret) {
 			file.checkCaret(file.caret);
