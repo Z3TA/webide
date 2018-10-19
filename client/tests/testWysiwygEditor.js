@@ -397,7 +397,7 @@
 			}, 100);
 			
 		});
-	}, 1);
+	}, 2);
 	
 	EDITOR.addTest(function previewAutocomplete(callback) {
 		

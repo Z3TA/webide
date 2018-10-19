@@ -708,7 +708,9 @@ console.warn("fun=" + fun);
 			
 		*/
 		
-		var reStack = /at ([^ ]*) ?\(?(.*):(\d*):(\d*)/g;
+		console.log("parseStackTrace: stackTrace=" + stackTrace);
+		
+		var reStack = /at ([^ ]*) ?\(?(.*):(\d*):(\d*)/g; // Chromium
 		var stackLength = 0;
 		var lines = [];
 		var fName="";
@@ -718,13 +720,44 @@ console.warn("fun=" + fun);
 		var obj = {};
 		var match;
 		
+
+		if(stackTrace.match(reStack)) {
+			console.log("Using reStack=" + reStack);
+		}
+		else {
+			/*
+				Firefox variant B:
+				hi 1539955769156: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2085:24
+			*/
+			var reStack = /([^ ]*)@(.*):(\d*):(\d*)/g; // Firefox
+		}
+		
+		if(stackTrace.match(reStack)) {
+			console.log("Using reStack=" + reStack);
+		}
+		else {
+			/*
+				Firefox variant C:
+				@http://127.0.0.1:8080/rs9snkpfpe/inlineErrorMessages.htm:4:7
+			*/
+			var reStack = /@?(.*):(\d*):(\d*)/g; // Firefox
+		}
+		
 		while ((match = reStack.exec(stackTrace)) !== null && stackLength < 100) {
 			stackLength++;
 			
+			if(match.length == 5) {
 			fName = match[1];
 			source = match[2];
 			lineno = match[3];
 			colno = match[4];
+			}
+			else if(match.length == 4) {
+				fName ="";
+				source = match[1];
+				lineno = match[2];
+				colno = match[3];
+			}
 			
 			if(fName && !source) {
 source = fName;

@@ -1608,6 +1608,23 @@
 		
 	});
 	
+	EDITOR.addTest(function testParseStackTrace(callback) {
+
+		var s = UTIL.parseStackTrace("creating caret: at File.createCaret (http://127.0.0.1:8080/File.js:434:20)");
+		if(s[0].fName != "File.createCaret" || s[0].lineno != "434") throw new Error("Unexpected: " + JSON.stringify(s, null, 2) );
+		
+		var s = UTIL.parseStackTrace("@http://127.0.0.1:8080/rs9snkpfpe/inlineErrorMessages.htm:4:7");
+		if(s[0].lineno != "4") throw new Error("Unexpected: " + JSON.stringify(s, null, 2));
+		
+		var s = UTIL.parseStackTrace("hi 1539955769156: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2085:24");
+		if(s[0].fName != "oleLog" || s[0].lineno != "2085") throw new Error("Unexpected: " + JSON.stringify(s, null, 2));
+		
+		
+		
+		callback(true);
+	}, 1);
+	
+	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {
 			if(functions[i].name == name) return true;
@@ -1628,8 +1645,4 @@
 		}
 	}
 	
-	
-	
-	
 })();
-
