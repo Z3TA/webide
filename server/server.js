@@ -1028,7 +1028,7 @@ function sockJsConnection(connection) {
 			return false;
 		}
 		
-		console.log("The command queue has " + commandQueue.length + " items.");
+		//console.log("The command queue has " + commandQueue.length + " items.");
 		
 		if(!userWorker) {
 			
@@ -1283,7 +1283,7 @@ username = guestUser;
 							return true;
 							
 							function messageFromWorker(workerMessage, handle) {
-								console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+								//console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 								
 								if(workerMessage.resp || workerMessage.error) send(workerMessage);
 								else if(workerMessage.message) {
@@ -1448,7 +1448,7 @@ username = guestUser;
 			
 			var str = JSON.stringify(answer);
 			
-			log(IP + " <= " + (answer.id ? answer.id : "") + UTIL.shortString(str));
+			log(IP + " <= " + (answer.id ? answer.id : "") + UTIL.shortString(str, 256));
 			
 			conn.write(str);
 		}

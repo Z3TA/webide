@@ -6,7 +6,7 @@
 	*/
 	"use strict";
 	
-	var pluginDescription = "Spellcheck using Nodehun";
+	var pluginDescription = "Spellcheck";
 	
 	EDITOR.plugin({
 		desc: pluginDescription,
@@ -29,6 +29,7 @@
 		Can be downloaded from: http://cgit.freedesktop.org/libreoffice/dictionaries/tree/
 	*/
 	
+	
 	var useLanguages = ["en_US", "sv_SE"]; // Add more languages by including the language prefix
 	
 	var cache = {}; // true for OK, false for misspelled
@@ -40,6 +41,13 @@
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
 	var menuItem;
 	var enabled = false;
+	
+	// Don't spell-check these:
+	var htmlTags = ["tspan", "rect", "svg", "defs", "a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
+	var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
+	var fileExtensions = ["js", "htm", "css", "txt", "json"];
+	var programmersAbbr = ["onerror", "png", "gfx", "onclick", "onload", "src", "@media", "nowrap", "charset", "lang", "rx", "ry", "cx", "cy", "rgba", "url", "xmlns", "xlink", "&raquo", "&laquo", "&nbsp", "stringify", "str", "num", "refactor", "refactoring", "substr", "substring", "undefined", "href", "async", "chroot"];
+	var regexIgnore = [/^\d+(em|px)$/, /^#?([A-Fa-f0-9]{1,6})$/, /^\d+.{1,6}/];
 	
 	function loadSpellchecker() {
 		
@@ -84,8 +92,8 @@
 		else disable();
 		
 		EDITOR.hideMenu();
-		}
-
+	}
+	
 	function enable() {
 		// Begin spell-checking all opened files
 		
@@ -129,8 +137,8 @@
 	}
 	
 	function showSpellSuggestion(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo) {
-if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
-
+		if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
+		
 		var file = EDITOR.currentFile;
 		
 		if(file) {
@@ -151,9 +159,9 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 				EDITOR.addTempMenuItem(suggestion, replaceWord);
 			}
 			/*
-			else {
+				else {
 				EDITOR.contextMenuAddTemp("No spelling suggestion for <i>" + word + "</i>");
-			}
+				}
 			*/
 			
 			function replaceWord() {
@@ -178,9 +186,9 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 				*/
 				
 				EDITOR.renderNeeded();
-				}
 			}
-}
+		}
+	}
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
@@ -188,7 +196,7 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
-
+		
 		// possible change: text (insertText), insert (putCharacter), deleteCharacter, line break, delete, undo-redo
 		
 		//console.log("change=" + change);
@@ -197,7 +205,7 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 			
 			/*
 				problem: 
-					user makes a spelling mistake, then corrects it. And the correction is wrong.
+				user makes a spelling mistake, then corrects it. And the correction is wrong.
 				
 			*/
 			
@@ -231,7 +239,7 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 				// Only spellcheck the current line
 				checkRow(grid[row]);
 				return;
-
+				
 			}
 			
 		}
@@ -243,14 +251,14 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+EDITOR.view.visibleRows); row++) {
 		
 		console.time("runSpellCheckTimer");
-
+		
 		for(var row = 0; row < grid.length; row++) {
 			checkRow(grid[row]);
 		}
 		console.timeEnd("runSpellCheckTimer");
 		
 		function checkRow(gridRow) {
-
+			
 			var word = "";
 			var char = "";
 			
@@ -305,7 +313,7 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 					}
 					
 					if(word.length > 1) spellCheck(file, word, row, col + cp);
-				
+					
 				}
 				else {
 					//console.log("spellchecker ignoring:" + word);
@@ -339,29 +347,29 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 			// ### Color the grid
 			var origWordLength = origWord.length;
 			// col is the end-column. The range is col-origWordLength to col
-				
-				if(grid[row].length < col) {
+			
+			if(grid[row].length < col) {
 				//console.log("spellcheck: The grid has changed! grid[" + row + "].length=" + grid[row].length + " col=" + col + " origWordLength=" + origWordLength + "");
-					return; //
-				}
-				
+				return; //
+			}
+			
 			for(var c=col-1; c>col-origWordLength-1; c--) {
-					
-					grid[row][c].wave = true;
-					//grid[row][c].color="red";
-					//console.log("coloring row=" + row + " col=" + c);
-					
-				}
 				
+				grid[row][c].wave = true;
+				//grid[row][c].color="red";
+				//console.log("coloring row=" + row + " col=" + c);
+				
+			}
+			
 			if(file == EDITOR.currentFile) {
 				// We only need to render if the row is visible on the screen
 				if(file.rowVisible(row)) { 
 					EDITOR.renderNeeded();
-				//EDITOR.renderRow(row);
-					}
+					//EDITOR.renderRow(row);
 				}
-				}
-}
+			}
+		}
+	}
 	
 	function spellCheck(file, word, row, col) {
 		/*
@@ -371,15 +379,10 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 			
 			The callback function has to take into consideration that the state of the document
 			might have changed when the answer is returned.
-		
+			
 		*/
 		
 		//console.log("spell-checking:" + word);
-		
-		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
-		var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
-		var fileExtensions = ["js", "htm", "css", "txt", "json"];
-		var programmersAbbr = ["str", "num", "refactor", "refactoring", "substr", "substring", "undefined", "href", "async", "chroot"];
 		
 		var checkedDictionaries = 0;
 		var voteCorrect = 0;
@@ -388,10 +391,14 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 		//console.time("spell-check " + word);
 		
 		//console.log("spell-checking:" + word);
-		 
+		
+		for (var i=0; i<regexIgnore.length; i++) {
+			if(word.match(regexIgnore[i])) return;
+		}
+		
 		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || UTIL.isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
 			//doSomething(file.path, true, word, row, col); // It's spelled correct
-			}
+		}
 		else if(cache.hasOwnProperty(word)) {
 			if(cache[word] == false) spellingError(file.path, word, row, col);
 		}
@@ -427,6 +434,6 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 			});
 		}
 		//console.timeEnd("spell-check " + word);
-}
+	}
 	
 })();

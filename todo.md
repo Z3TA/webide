@@ -42,6 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+The server becomes queued up, and waits when for example the spell-checker is running.
+
+
 after exiting Python in the terminal, the prompt gets placed below the view.
 
 

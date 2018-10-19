@@ -75,7 +75,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 	var checkedDictionaries = 0;
 	var voteCorrect = 0;
 	
-		log("Spellchecking word=" + word, logModule.DEBUG);
+		//log("Spellchecking word=" + word, logModule.DEBUG);
 	
 	for(var i=0; i<dict.length; i++) {
 		dict[i].spellSuggest(word, spellAnswer);
@@ -85,8 +85,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 	function spellAnswer(err, correct, sugg, origWord){
 		checkedDictionaries++;
 		
-			log("Got answer from Nodehun err=" + (err && err.message) + 
-			" currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "", logModule.DEBUG);
+			//log("Got answer from Nodehun err=" + (err && err.message) + " currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "", logModule.DEBUG);
 		
 		if(err) return callback(err);
 		

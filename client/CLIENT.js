@@ -212,7 +212,7 @@ err = new Error(errMsg);
 			callback = json;
 			json = null;
 		}
-		else if(typeof json != "object") throw new Error("Second argument json (if specified) must be an object!");
+		else if(typeof json != "object") throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
 		
 		var GS = String.fromCharCode(29);
 		
