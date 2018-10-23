@@ -115,7 +115,7 @@
 	
 	function windowError(message, source, lineno, colno, error) {
 		
-		console.warn("Error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
+		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		
 		console.log("EDITOR.platform=" + EDITOR.platform);
 		
@@ -149,7 +149,7 @@
 			var source = source.replace(url.pathname, "/client" + url.pathname);
 			console.log("source=" + source);
 			
-			if(EDITOR.installDirectory != "/") {
+			if(EDITOR.user) {
 				source = EDITOR.installDirectory + 'client/' + url.pathname;
 				return callback(null, source);
 			}
