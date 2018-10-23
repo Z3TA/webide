@@ -35,7 +35,7 @@
 		
 		var yes = "OK, I will click on the JZ icon";
 		var no = "No, I'll keep using this"
-		confrimBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
+		confirmBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
 			if(answer == yes) {
 				window.onbeforeunload = null;
 				window.close();

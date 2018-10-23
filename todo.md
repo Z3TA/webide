@@ -42,6 +42,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Test: add 2 desktop in Chrome
+
+Test: Uploading an unsupported file to trigger confirmBox("Do you want to open in EDITOR.js
+
+
 /repo
 bash-4.3$ npm install --global snake-cli
 npm WARN checkPermissions Missing write access to /usr/lib/node_modules

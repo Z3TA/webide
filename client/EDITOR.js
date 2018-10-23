@@ -6053,7 +6053,7 @@ return alertBox("The dropped object doesn't seem to be a file!");
 				else {
 					var yes = "Yes";
 					var no = "No";
-					confrimBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
+					confirmBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
 						if(answer == yes) EDITOR.openFile(fileToOpen);
 					});
 				}
