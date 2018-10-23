@@ -3416,7 +3416,7 @@ var File; // File object is global
 		
 	}
 	
-	File.prototype.scrollToCaret = function(caret, callback) {
+	File.prototype.scrollToCaret = function(caret) {
 		var file = this;
 		/*
 			note: Caret is bound to the grid! And caret.index is the index in file.text
@@ -3441,7 +3441,14 @@ var File; // File object is global
 			startRow = caret.row;
 			
 		}
-		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows)) {
+		
+		/*
+			rev 2529 - annoying that the editor scrolls down one step when scrolling to the last visible row => Removed - 1
+			That resultet in the the text sometimes getting half visible, eg outside the screen. (unable to repeat the issue in 2529)
+			So added back - 1 again.
+		*/
+		
+		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows - 1)) {
 			console.log("Caret is below the visible space");
 			
 			startRow = caret.row - EDITOR.view.visibleRows + 2;

@@ -1622,7 +1622,34 @@
 		
 		
 		callback(true);
-	}, 1);
+	});
+	
+	EDITOR.addTest(function noTextOusideScreen(callback) {
+		
+		EDITOR.openFile("textOutsideScreen.txt", 'Row 0', function(err, file) {
+			
+			if(err) throw err;
+			
+			var canvasHeight = EDITOR.canvas.height;
+			var gridBoxHeight = EDITOR.settings.gridHeight;
+			var topMargin = EDITOR.settings.topMargin;
+			var bottomMargin = EDITOR.settings.bottomMargin;
+			var visibleRows = Math.ceil( (canvasHeight - topMargin - bottomMargin) / gridBoxHeight );
+			
+			for (var row=1; row<visibleRows; row++) {
+				file.writeLine("Row " + row);
+			}
+			
+			file.moveCaretToEndOfFile();
+			file.scrollToCaret();
+			
+			if(file.startRow != 1) throw new Error("Text is outside the screen! file.startRow=" + file.startRow + " visibleRows=" + visibleRows);
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
 	
 	
 	function existFunctionWithName(functions, name) {

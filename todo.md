@@ -42,10 +42,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+/repo
+bash-4.3$ npm install --global snake-cli
+npm WARN checkPermissions Missing write access to /usr/lib/node_modules
+npm ERR! path /usr/lib/node_modules
 
-after exiting Python in the terminal, the prompt gets placed below the view.
 
-
+When auto-completing file names, and there are more then one options, show avaible options somwhere ... (annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)
+When typing in goto_file, highlight the folder-buttons who's name starts with what you have typed !?
 
 ---
 
@@ -2758,6 +2762,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+The terminal have issues when it gets a lot of data. Try for example playing snake in the terminal: snake-cli
 
 Goto file (CTRL + O) sometimes freeze the editor. 
 It also takes several seconds to open a file From "goto file" in Windows. 
