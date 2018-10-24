@@ -7,8 +7,7 @@
 	
 	Dilemma:
 	When should we show the A2HS message ?
-	Show we wait until the user has logged in or signed up !?
-	
+	Should we wait until the user has logged in or signed up !?
 	
 */
 
