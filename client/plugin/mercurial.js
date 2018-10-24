@@ -2414,10 +2414,10 @@ updateCommitFileSelect();
 						var msg = "Finished downloading " + resp.changesets + " changesets with " + resp.changes + 
 						" changes to " + resp.fileCount + " files from " + repoUrl;
 					}
-					else if(updatedFiles.length > 0) {
+					else if(resp.fileCount > 0) {
 						var msg = updatedFiles.length + " files are ready to be updated (click update)";
 					}
-					else if(updatedFiles.length == 0) {
+					else {
 						var msg = "No new changes on " + repoUrl;
 					}
 					

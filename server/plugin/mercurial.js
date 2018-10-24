@@ -769,7 +769,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				
 				var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
 				var resp = {repo: repoUrl, directory: user.toVirtualPath(rootDir)};
-				var fileCount = -1;
+				var fileCount = -1; // Inlcudes both added and updated
 				var matchHgGit = stdout.match(/importing git objects into hg/);
 				
 				if(matchPull) {
@@ -798,7 +798,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 					else {
 						
 						var affectedFilesString = status_stdout.trim();
-						var pulledFiles = [];
+					var updatedFiles = [];
 						
 						if(affectedFilesString != "") {
 							console.log("affectedFilesString=" + affectedFilesString);
@@ -816,7 +816,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							
 							We only want to know the updated/pulled files! From the following message:
 							added X changesets with Y changes to Z files
-							We are only interested in the files marked with M !?
+							We are currently only interested in the modfied files (marked with M), so that the editor can reload them.
 							
 						*/
 						
@@ -827,16 +827,16 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							
 								affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim();
 								
-							if(prefix == "M") pulledFiles.push(affectedFiles[i]); 
+							if(prefix == "M") updatedFiles.push(affectedFiles[i]); 
 							}
 						}
 						
 						if(!matchHgGit && !noChanges) {
-							// Sanity check
-						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString + " stdout=" + stdout);
+						// Debug info: (anyone know which files are included in "with X changes to Y files" ?)
+						console.log("fileCount=" + fileCount + " updatedFiles (" + updatedFiles.length + ") = " + JSON.stringify(updatedFiles) + " affectedFilesString=" + affectedFilesString + " stdout=" + stdout);
 						}
 						
-						resp["files"] = pulledFiles;
+					resp["files"] = updatedFiles;
 						
 					pullDone(null, resp);
 					

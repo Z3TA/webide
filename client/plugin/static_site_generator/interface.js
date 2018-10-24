@@ -2066,7 +2066,7 @@
 					}
 					else {
 						
-						var changes = resp.changes;
+						var changes = resp.changes; // Number
 						var repoUrl = resp.repo;
 						var ask = false;
 						var filesOpenedInEditorAndNotSaved = [];
