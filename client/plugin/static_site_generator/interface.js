@@ -365,28 +365,42 @@
 			// Check all sites to see if the file belongs to any source
 			
 			for(var i=0; i<sites.length; i++) {
+				console.log("askToOpenSourceFileIfOpenedPreviewFile=" + askToOpenSourceFileIfOpenedPreviewFile);
+				console.log("filePath=" + filePath + " sites[" + i + "].preview=" + sites[i].preview);
+				
 				if(filePath.indexOf(sites[i].source) != -1) {
 					showSSG();
 					switchSite(i);
 					break;
 				}
-				if(filePath.indexOf(sites[i].preview) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
-					showSSG();
-					switchSite(i);
+				
+				/*
+					Warn user when opening a file from the preview folder
+				*/
+				else if(filePath.indexOf(sites[i].preview) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
+					var openInstead = file.path.replace(sites[i].preview, sites[i].source);
 					
-					var fileName = UTIL.getFilenameFromPath(file.path);
-					var yes = "Yes, open the source file instead";
-					var no = "No, not this time";
-					var stop = "No, don't ask again!";
-					confirmBox('You have opened the "compiled" version of ' + fileName + '. Do you want to open the source file instead ?', [yes, no, stop], function(answer) {
-						if(answer == yes) {
-							var openInstead = file.path.replace(sites[i].preview, sites[i].source);
-							EDITOR.closeFile(file);
-							EDITOR.openFile(openInstead);
-						}
-						else if(answer == stop) {
-							askToOpenSourceFileIfOpenedPreviewFile = false;
-						}
+					EDITOR.doesFileExist(openInstead, function fileExistMaybe(fileExists) {
+						
+						if(!fileExists) return; // It's a false-posetive (the preview is probably set to /wwwpub which also has other files)
+						
+						showSSG();
+						switchSite(i);
+						
+						var fileName = UTIL.getFilenameFromPath(file.path);
+						var yes = "Yes, open the source file instead";
+						var no = "No, not this time";
+						var stop = "No, don't ask again!";
+						confirmBox('You have opened the "compiled" version of ' + fileName + '. Do you want to open the source file instead ?', [yes, no, stop], function(answer) {
+							if(answer == yes) {
+								
+								EDITOR.closeFile(file);
+								EDITOR.openFile(openInstead);
+							}
+							else if(answer == stop) {
+								askToOpenSourceFileIfOpenedPreviewFile = false;
+							}
+						});
 					});
 					
 					break;
