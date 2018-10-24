@@ -44,8 +44,6 @@ What I'm working on
 
 Test: add 2 desktop in Chrome
 
-Test: Uploading an unsupported file to trigger confirmBox("Do you want to open in EDITOR.js
-
 
 /repo
 bash-4.3$ npm install --global snake-cli
@@ -189,6 +187,8 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+Code debt cleanup: Upload functionality, currently have different paths for single file and multiple files, refactor so there's one path.
 
 Support for the node REPL in the terminal.
 Some users just opens up terminal, type node, then work from there.

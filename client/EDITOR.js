@@ -24,9 +24,9 @@ var inputCount = 0;
 var menuVisibleOnce = false;
 var menuIsFullScreen = false;
 
-// List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
-// important: Add file format that are supported by the parsers here:
-EDITOR.supportedFiles = [
+// List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
+// Note: The file parsers should fill this list!
+EDITOR.parseFileExtensionAsCode = [
 	"js",
 	"java", 
 	"htm", 
@@ -39,6 +39,11 @@ EDITOR.supportedFiles = [
 	"json", 
 	"css", 
 ];
+
+// These file extensions will be treated as plain text
+EDITOR.plainTextFileExtensions = [
+	"txt"
+]
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
@@ -5883,8 +5888,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 	function fileDrop(fileDropEvent) {
 		fileDropEvent.preventDefault();
 		
-		console.log("fileDrop");
-		
+		console.log("fileDrop: fileDropEvent:");
 		console.log(fileDropEvent);
 		
 		menuVisibleOnce = true; // Show the dropped content
@@ -5893,7 +5897,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		if(text) {
 			// Drop the text into the current file
-			console.log("Dragged text.length=" + text.length + " to the editor.");
+			console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
 			if(EDITOR.currentFile) {
 				
 				// Get row and col
@@ -5916,7 +5920,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 return alertBox("The dropped object doesn't seem to be a file!");
 		}
 		
-		console.log( fileDropEvent.dataTransfer);
+		console.log("fileDrop: fileDropEvent.dataTransfer:");
+		console.log( fileDropEvent.dataTransfer );
 		
 		var items = fileDropEvent.dataTransfer.items;
 		var files = fileDropEvent.dataTransfer.files;
@@ -5932,7 +5937,8 @@ return alertBox("The dropped object doesn't seem to be a file!");
 		var foldersRead = 0;
 		var done = false;
 		
-		if(items.length > 1) {
+		if(items && items.length > 1) {
+			console.log("fileDrop: Dropped " + items.length + " items ...");
 			var progressBar = document.createElement("progress");
 			progressBar.max = items.length;
 			progressBar.value = 0;
@@ -5949,24 +5955,32 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			}
 			return;
 		}
-		
+		else {
+			// ### Handle single file
+			console.log("fileDrop: Dropped Single file !?");
+			
+			// todo: What if you drop a single folder ?
+			
 		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
+			if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = "/upload/" + filePath;
+			
 		var fileType = file.type;
 		
 		// The default action is to open the file in the editor.
 		// But if the editor don't support the file, ask plugins what to do with it ...
 		var handled = false;
-		if(notSupported(fileType)) {
+			if(!supported(fileType)) {
 			
-			console.log("Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
+				console.log("fileDrop: File is not supported. Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
 			for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
 				h = EDITOR.eventListeners.fileDrop[i].fun(file);
 				if(h) handled = true;
 			}
 			
-			if(!handled) promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
+			if(!handled) {
+promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
 				if(path) {
 					EDITOR.checkPath(path, function(err, path) {
 						if(err && err.code != "CANCEL") return alertBox(err.message);
@@ -5977,16 +5991,20 @@ return alertBox("The dropped object doesn't seem to be a file!");
 					});
 				}
 			});
-			
+				}
+			}
+			else {
+				console.log("fileDrop: File is supported! fileType=" + fileType);
+				readFile();
+			}
+			EDITOR.interact("fileDrop", fileDropEvent);
 		}
-		else readFile();
-		
-		EDITOR.interact("fileDrop", fileDropEvent);
 		
 		return false;
 		
 		
 		function traverseFileTree(item, path) {
+			console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
 			path = path || "/upload/";
 			if (item.isFile) {
 				// Get file
@@ -5994,7 +6012,7 @@ return alertBox("The dropped object doesn't seem to be a file!");
 				
 				item.file(function(file) {
 					var filePath = path + file.name;
-					console.log("File:", filePath);
+					console.log("fileDrop:item.file: filePath=", filePath);
 					if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
 					saveFile(file, path + file.name, true, fileSaved);
 				});
@@ -6008,59 +6026,65 @@ return alertBox("The dropped object doesn't seem to be a file!");
 					for (var i=0; i<entries.length; i++) {
 						traverseFileTree(entries[i], path + item.name + "/");
 					}
+					console.log("fileDrop: dirReader.readEntries: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
 					if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
 				});
 			}
 			progressBar.max = Math.max(progressBar.max, filesToSave+foldersToRead);
-		}
-		
-		function fileSaved(err, path) {
-			if(err) {
-				console.error(err);
-				uploadErrors.push(err);
-			}
-			filesSaved++;
-			progressBar.value = filesSaved+foldersRead;
-			if(path) lastPath = path;
-			if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
-		}
-		
-		function uploadComplete() {
-			console.log("Upload complete! filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 			
-			if(done) return console.warn("Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
-			done = true;
-			
-			if(lastPath == undefined) {
-				var failMsg = "Upload failed!";
-				for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
-				return alertBox(failMsg);
-			}
-			var folder = UTIL.getDirectoryFromPath(lastPath);
-			var folders = UTIL.getFolders(folder);
-			var baseFolder = folders[2];
-			
-			footer.removeChild(progressBar);
-			
-			if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
-			else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
-			
-			if(fileToOpen) {
-				var fileExtension = UTIL.getFileExtension(fileToOpen);
-				
-				// Open right away if it's a supported file
-				if(EDITOR.supportedFiles.indexOf(fileExtension) != -1) EDITOR.openFile(fileToOpen);
-				else {
-					var yes = "Yes";
-					var no = "No";
-					confirmBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
-						if(answer == yes) EDITOR.openFile(fileToOpen);
-					});
+			function fileSaved(err, path) {
+				if(err) {
+					console.error(err);
+					uploadErrors.push(err);
 				}
+				filesSaved++;
+				progressBar.value = filesSaved+foldersRead;
+				if(path) lastPath = path;
+				console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
+				if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
 			}
 			
-			EDITOR.resizeNeeded(); // To get rid of progress bar
-			
+			function uploadComplete() {
+				console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
+				
+				if(done) return console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+				done = true;
+				
+				if(lastPath == undefined) {
+					var failMsg = "Upload failed!";
+					for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
+					return alertBox(failMsg);
+				}
+				var folder = UTIL.getDirectoryFromPath(lastPath);
+				var folders = UTIL.getFolders(folder);
+				var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
+				
+				console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
+				
+				footer.removeChild(progressBar);
+				
+				if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
+				else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
+				
+				if(fileToOpen) {
+					var fileExtension = UTIL.getFileExtension(fileToOpen);
+					console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
+					// Open right away if it's a supported file
+					if(EDITOR.parseFileExtensionAsCode.indexOf(fileExtension) != -1 || EDITOR.plainTextFileExtensions.indexOf(fileExtension) != -1) {
+						EDITOR.openFile(fileToOpen);
+					}
+					else {
+						var yes = "Yes";
+						var no = "No";
+						confirmBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
+							if(answer == yes) EDITOR.openFile(fileToOpen);
+						});
+					}
+				}
+				
+				EDITOR.resizeNeeded(); // To get rid of progress bar
+				
+			}
 		}
 		
 		function saveFile(file, filePath, createPath, callback) {
@@ -6108,16 +6132,27 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			fileType.indexOf("json") == -1;
 		}
 		
+		function supported(fileType) {
+			// Return true if the file is supported by the editor. Or false if it's not supported.
+			// Example: fileType=text/plain
+			if(fileType == "") return true;
+			if(fileType.indexOf("text") == 0) return true;
+			if( fileType.match(/application\/(javascript|ecmascript|xml|json|text)/) ) return true;
+			
+			console.log("Not supported: fileType=" + fileType);
+			return false;
+		}
+		
 		function readFile() {
 			
 			var reader = new FileReader();
 			
 			reader.onload = function (readerEvent) {
-				console.log("Drop op: " + readerEvent.target);
+				console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
 				var content = readerEvent.target.result;
 				if(content.length > EDITOR.settings.bigFileSize) {
 					var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
-					console.log("Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
+					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
 					
 					EDITOR.saveToDisk(tmpPath, content, function fileSavedMaybe(err) {
 						if(err) throw err;
@@ -6128,9 +6163,12 @@ return alertBox("The dropped object doesn't seem to be a file!");
 				else EDITOR.openFile(filePath, content);
 				
 			};
+			console.log("fileDrop: readFile: file:");
 			console.log(file);
+			
 			//reader.readAsDataURL(file); // For binary files (will be base64 encoded)
-			reader.readAsText(file);
+			var readText = reader.readAsText(file);
+			console.log("fileDrop: readText=" + readText); // Does it give a success indication (so I know if I should use readAsText or readAsDataURL)
 			
 			/*
 				for (var i = 0; i < e.dataTransfer.files.length; ++i) {
@@ -6140,7 +6178,7 @@ return alertBox("The dropped object doesn't seem to be a file!");
 			*/
 		}
 		
-	};
+	}
 	
 	
 	

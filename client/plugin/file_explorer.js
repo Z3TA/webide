@@ -416,7 +416,7 @@ else throw err;
 				
 				icon.setAttribute("src", "gfx/icon/" + iconName + ".svg");
 				
-				if(EDITOR.supportedFiles.indexOf(filetype.toLowerCase()) == -1) {
+				if(EDITOR.parseFileExtensionAsCode.indexOf(filetype.toLowerCase()) == -1) {
 					icon.setAttribute("style", "opacity: 0.5;");
 				}
 				

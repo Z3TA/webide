@@ -414,13 +414,13 @@
 	function fileDrop(dataFile) {
 		// When a file is dropped into the editor
 		
-		var file = EDITOR.currentFile;
+		var currentFile = EDITOR.currentFile;
 		
-		if(!file) return false; // No file is open so the image is probably not supposed to go into a SSG site
+		if(!currentFile) return false; // No file is open so the image is probably not supposed to go into a SSG site
 		
-		// Check if the current file belongs to a SSG project:
+		// Check if the currently opened file belongs to a SSG project:
 		for(var i=0; i<sites.length; i++) {
-			if(EDITOR.currentFile.path.indexOf(sites[i].source) != -1) {
+			if(currentFile.path.indexOf(sites[i].source) != -1) {
 				handleFile(sites[i], dataFile);
 				return true;
 			}
@@ -457,24 +457,24 @@
 							
 							console.log("Saved file: " + path);
 							
-							var currentFileName = UTIL.getFilenameFromPath(file.path);
+							var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
 							
 							if(currentFileName.match(/^(header|footer).html?/)) {
 								var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
 							}
 							else {
 								// File paths needs to be relative!
-								var relativePath = getRelativePath(file.path, site.source);
+								var relativePath = getRelativePath(currentFile.path, site.source);
 								var fileSrc = relativePath + path.replace(site.source, ""); 
 							}
 							
 							if(isImage) {
 								// todo: Some sort of crop and resize tool
-								file.insertText('<img src="' + fileSrc + '">');
+								currentFile.insertText('<img src="' + fileSrc + '">');
 							}
 							else {
 								var fileName = UTIL.getFilenameFromPath(filePath);
-								file.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
+								currentFile.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
 							}
 							
 						});
