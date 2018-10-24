@@ -1573,11 +1573,6 @@ function checkMounts(options, checkMountsCallback) {
 			module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
 			module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
 			
-			// Be able to type npm in terminal:
-			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-				npmSymLinkCreated = true;
-			});
 		}
 		else {
 			foldersToMount += 2;
@@ -1614,6 +1609,12 @@ function checkMounts(options, checkMountsCallback) {
 		module_mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
 		module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
 		module_mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+		
+		// Be able to type npm in terminal:
+		module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+			if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+			npmSymLinkCreated = true;
+		});
 		
 		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);

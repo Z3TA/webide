@@ -42,13 +42,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Server exists because there's nothing to do ...
+
+
+
+
 Test: add 2 desktop in Chrome
-
-
-/repo
-bash-4.3$ npm install --global snake-cli
-npm WARN checkPermissions Missing write access to /usr/lib/node_modules
-npm ERR! path /usr/lib/node_modules
 
 
 When auto-completing file names, and there are more then one options, show avaible options somwhere ... (annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)
@@ -337,6 +336,8 @@ Forgot why we are using Nodesource ...
 
 What I'm thinking
 -----------------
+
+Should users have their own /usr/lib/node_modules folder so they can install nodejs modules globally!?
 
 The reason for type annotation is to help tooling, to allow go do definition, rename all instances of foo.bar, 
 to see which methods/properties are available on an object. Can we accompish that in this editor without type annotatioins !?
