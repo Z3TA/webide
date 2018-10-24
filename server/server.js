@@ -494,6 +494,8 @@ else {
 	
 	function startServer() {
 		
+		log("Starting server ...");
+		
 		var wsServer = module_sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
 		
@@ -1610,12 +1612,6 @@ function checkMounts(options, checkMountsCallback) {
 		module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
 		module_mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
 		
-		// Be able to type npm in terminal:
-		module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-			if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-			npmSymLinkCreated = true;
-		});
-		
 		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
 		
@@ -1627,7 +1623,6 @@ function checkMounts(options, checkMountsCallback) {
 			apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
 		}
 		
-		
 		// Create a fake /etc/passwd that some programs use to lookup home dir and username
 		// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
 		if(!DEBUG_CHROOT) {
@@ -1637,6 +1632,7 @@ function checkMounts(options, checkMountsCallback) {
 			});
 		}
 		else passwdCreated = true;
+		
 		
 		// Make sure nginx profile exist
 		console.time("Check " + username + " nginx profile");
@@ -1880,6 +1876,15 @@ function checkMounts(options, checkMountsCallback) {
 			+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
 			+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
 		*/
+		
+		if(foldersToMount === 0) {
+			// Be able to type npm in terminal:
+			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+				npmSymLinkCreated = true;
+				if(!checkMountsReady) checkMountsReadyMaybe();
+			});
+		}
 		
 		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL)) {
 			
