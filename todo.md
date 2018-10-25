@@ -42,6 +42,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Working on implementing collaboraction support
 
 
 When auto-completing file names, and there are more then one options, show avaible options somwhere ... (annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)

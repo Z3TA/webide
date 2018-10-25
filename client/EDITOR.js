@@ -130,8 +130,6 @@ EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/
 
 EDITOR.installDirectory = "/";
 
-EDITOR.collaborationMode = false;
-
 
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
@@ -5211,51 +5209,12 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 		
-		CLIENT.on("mirror", function clientMirror(json) {
-			
-			var clientConnectionId = json.cId;
-			
-			if(clientConnectionId == undefined) throw new Error("Did not get clientConnectionId from mirror event!");
-			if(CLIENT.connectionId == undefined) throw new Error("We do not have CLIENT.connectionId!");
-			
-			console.log("MIRROR: clientConnectionId=" + clientConnectionId + " CLIENT.connectionId=" + CLIENT.connectionId + " json=" + JSON.stringify(json, null, 2));
-			
-			if(clientConnectionId == CLIENT.connectionId) {
-				console.log("Ignoring mirror event from ourself: " + json.object + "." + json.method);
-				return;
-			}
-			
-			if(json.object == "FILE") {
-				if(!EDITOR.files.hasOwnProperty(json.path)) {
-					throw new Error("Receved mirror event for file that is not opened! path=" + json.path);
-				}
-				else {
-					var thisArg = EDITOR.files[json.path];
-					var argsArray = json.args;
-					console.log("Calling File." + json.method + "(" + argsArray.join(", ") + ")");
-					EDITOR.files[json.path][json.method].apply(thisArg, argsArray);
-					
-				}
-			}
-		});
-		
-		EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
-			
+		EDITOR.on("moveCaret", function clearInfoBubblesWhenCaretIsMoved(file, caret) {
 			// Clear info messages in this file
 			EDITOR.removeAllInfo(file);
 			
-			if(caret == file.caret && EDITOR.collaborationMode) {
-				CLIENT.cmd("mirror", {
-					object: "FILE", 
-					path: file.path, 
-					method: "moveCaret", 
-					args: [file.caret.index, file.caret.row, file.caret.col],
-				});
-			}
-			
 			return true;
-			
-		});
+			});
 		
 		bootstrap();
 		

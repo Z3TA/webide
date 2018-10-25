@@ -864,6 +864,7 @@ function sockJsConnection(connection) {
 	var userWorker = null;
 	var userConnectionName = null;
 	var userConnectionId = -1;
+	var userAlias;
 	var IP = connection.remoteAddress;
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
@@ -928,6 +929,16 @@ function sockJsConnection(connection) {
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
 			}
+			else {
+				// Tell all remaining clients that this client disconnected
+				var connectionCount = USER_CONNECTIONS[userConnectionName].connections.length;
+				var disconnectMsg = {clientLeave: {ip: IP, cId: userConnectionId, connectionCount: connectionCount, alias: userAlias}};
+				var data = JSON.stringify(disconnectMsg);
+				
+				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+					USER_CONNECTIONS[userConnectionName].connections[i].write(data);
+				}
+			}
 			
 			for(var displayId in VNC_CHANNEL) {
 				if(VNC_CHANNEL[displayId].startedBy == userConnectionName) stopVncChannel(displayId);
@@ -942,7 +953,7 @@ function sockJsConnection(connection) {
 			if(IP == "127.0.0.1" && HTTP_PORT == "8099") {
 			console.log("We are running locally. Close down the server when client exit.");
 			process.exit(0);
-		}
+			}
 		*/
 		
 		// The user might reconnect, so we don't want to unmount stuff!
@@ -1014,8 +1025,8 @@ function sockJsConnection(connection) {
 		
 		if(command == "stdout") {
 			try {
-			for (var i=0; i<STDOUT_SOCKETS.length; i++) {
-				STDOUT_SOCKETS[i].write(json.data);
+				for (var i=0; i<STDOUT_SOCKETS.length; i++) {
+					STDOUT_SOCKETS[i].write(json.data);
 			}
 			}
 			catch(err) {
@@ -1048,7 +1059,14 @@ function sockJsConnection(connection) {
 				// # Identify
 				var createUserRetries = 0;
 				
+				if(json.alias) userAlias = json.alias;
+				
 				(function checkUser(username, password) {
+					/*
+						DO NOT ATTEMPT TO REFACTOR THIS FUNCTION!
+						Better have the closure chain be obvious,
+						as the socket connection need to have user worker etc
+					*/
 					
 					//console.log(IP + " loggingin as " + username + ": " + (new Date()).getTime());
 					console.time("Login " + IP); // user=guest can change to user###
@@ -1224,6 +1242,8 @@ username = guestUser;
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
 							}
 							
+							var connectionCount = USER_CONNECTIONS[userConnectionName].connections.length;
+							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
@@ -1251,7 +1271,13 @@ username = guestUser;
 							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
 							
 							// Respond to the client that the login was successful
-							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory, editorVersion: EDITOR_VERSION}}});
+							send({resp: {loginSuccess: {user: userConnectionName, alias: userAlias, ip: IP, cId: userConnectionId, connectionCount: connectionCount, installDirectory: installDirectory, editorVersion: EDITOR_VERSION}}});
+							
+							// Tell all client that a new client has connected
+							var connectMsg = {id: 0, clientJoin: {ip: IP, cId: userConnectionId, connectionCount: connectionCount, alias: userAlias}};
+							for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+								send(connectMsg, USER_CONNECTIONS[userConnectionName].connections[i]);
+							}
 							
 							if(commandQueue.length > 0) {
 								console.log("Running " + commandQueue.length + " commands from the command queue ...");
@@ -1430,19 +1456,30 @@ username = guestUser;
 		}
 		else {
 			
-			userWorker.send({commands: {command: command, json: json, id: id}});
-			
+			if(command == "echo") {
+				// Send the data to all other connected client, except the client that sent the echo msg
+				json.echoCounter = ++USER_CONNECTIONS[userConnectionName].echoCounter;
+				var echo = {echo: json, id: 0};
+				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+					if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {
+						send(echo, USER_CONNECTIONS[userConnectionName].connections[i]);
+					}
+				}
+			}
+			else {
+				userWorker.send({commands: {command: command, json: json, id: id}});
+			}
 		}
 		
 		function send(answer, conn) {
 			
 			if(conn == undefined) conn = connection;
 			
-			if(answer.id == undefined && id) answer.id = id;
+			if(answer.id == undefined && id) answer.id = id; 
 			
 			if(answer.id == id) id = null; // Do not reuse the same id
 			
-			if(answer.id === 0) delete answer["id"];
+			if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
 			
 			if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
 			if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));
@@ -1483,7 +1520,7 @@ function checkMounts(options, checkMountsCallback) {
 	
 	if(NO_CHROOT) {
 		console.log("Not checking mounts because -nochroot option in server parameters");
-		return acceptUser();
+		return checkMountsCallback(null);
 	}
 	
 	console.log("Checking mounts for username=" + username + " ...");

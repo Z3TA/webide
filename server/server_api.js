@@ -1836,28 +1836,6 @@ API.storageRemove = function storageRemove(user, json, callback) {
 	
 }
 
-
-API.mirror = function mirror(user, json, callback) {
-	
-	if(json.object == undefined) return callback(new Error("object=" + object + " can not be null or undefined!"));
-	if(json.method == undefined) return callback(new Error("method=" + method + " can not be null or undefined!"));
-	if(json.cId == undefined) return callback(new Error("cId=" + cId + " can not be null or undefined!"));
-	
-	user.send({mirror: json});
-	
-	//callback(null, json);
-	
-}
-
-API.echo = function echo(user, json, callback) {
-	
-	json.ECHO_COUNTER = ECHO_COUNTER++;
-	
-	user.send({echo: json});
-	
-}
-
-
 API.deleteFile = function deleteFile(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);
