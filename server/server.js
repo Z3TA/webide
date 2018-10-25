@@ -872,6 +872,7 @@ function sockJsConnection(connection) {
 	var awaitingMessagesFromWorker = {};
 	var recreateUserProcessSleepTime = 0;
 	var lastUserProcessCrash = new Date();
+	var userBrowser = UTIL.checkBrowser(agent);
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
@@ -922,8 +923,9 @@ function sockJsConnection(connection) {
 				};
 			*/
 			
-			// Users logged in with the same name can however send messages to each others ...
+			// Users logged in with the same username can send messages to each other
 			
+			USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
 			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
 			
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
@@ -931,8 +933,15 @@ function sockJsConnection(connection) {
 			}
 			else {
 				// Tell all remaining clients that this client disconnected
-				var connectionCount = USER_CONNECTIONS[userConnectionName].connections.length;
-				var disconnectMsg = {clientLeave: {ip: IP, cId: userConnectionId, connectionCount: connectionCount, alias: userAlias}};
+				var disconnectMsg = {
+					clientLeave: {
+						ip: IP, 
+						cId: userConnectionId, 
+						connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
+						alias: userAlias || userBrowser + "(" + IP + ")" 
+					}
+				};
+				
 				var data = JSON.stringify(disconnectMsg);
 				
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
@@ -1233,16 +1242,17 @@ username = guestUser;
 							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 								USER_CONNECTIONS[userConnectionName] = {
 									connections: [connection],
-									counter: 0
+									connectionCounter: 1, // Start with 1 so it's true:ish. Keep incrementing so we get a unique id
+									echoCounter: 1, // Start with 1 so it's true:ish
+									connectedClientIds: [1]
 								}
-								userConnectionId = 0;
+								userConnectionId = 1;
 							}
 							else {
 								USER_CONNECTIONS[userConnectionName].connections.push(connection);
-								userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
+								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
+								USER_CONNECTIONS[userConnectionName].connectedClientIds.push(userConnectionId);
 							}
-							
-							var connectionCount = USER_CONNECTIONS[userConnectionName].connections.length;
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
@@ -1271,10 +1281,30 @@ username = guestUser;
 							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
 							
 							// Respond to the client that the login was successful
-							send({resp: {loginSuccess: {user: userConnectionName, alias: userAlias, ip: IP, cId: userConnectionId, connectionCount: connectionCount, installDirectory: installDirectory, editorVersion: EDITOR_VERSION}}});
+							send({
+								resp: {
+									loginSuccess: {
+										user: userConnectionName, 
+										alias: userAlias || userBrowser + "(" + IP + ")", 
+										ip: IP, 
+										cId: userConnectionId, 
+										connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
+										installDirectory: installDirectory, 
+										editorVersion: EDITOR_VERSION
+									}
+								}
+							});
 							
 							// Tell all client that a new client has connected
-							var connectMsg = {id: 0, clientJoin: {ip: IP, cId: userConnectionId, connectionCount: connectionCount, alias: userAlias}};
+							var connectMsg = {
+								id: 0, 
+								clientJoin: {
+									ip: IP, 
+									cId: userConnectionId, 
+									connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
+									alias: userAlias || userBrowser + "(" + IP + ")"
+								}
+							};
 							for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
 								send(connectMsg, USER_CONNECTIONS[userConnectionName].connections[i]);
 							}
@@ -1459,6 +1489,12 @@ username = guestUser;
 			if(command == "echo") {
 				// Send the data to all other connected client, except the client that sent the echo msg
 				json.echoCounter = ++USER_CONNECTIONS[userConnectionName].echoCounter;
+				
+				if(json.echoCounter != json.order) log( "Out of sync: echo: echoCounter=" + json.echoCounter + " json=" + UTIL.shortString(JSON.stringify(json)) , NOTICE);
+				
+				json.cId = userConnectionId;
+				json.alias = userAlias || userBrowser + "(" + IP + ")";
+				
 				var echo = {echo: json, id: 0};
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
 					if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {

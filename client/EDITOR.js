@@ -210,12 +210,10 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	// These variables and functions are private ...
 	// We only expose methods that are in the EDITOR object.
 	
-	var browser = UTIL.checkBrowser();
+	if(BROWSER.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
+	//if(BROWSER.indexOf("Firefox") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
-	if(browser.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
-	//if(browser.indexOf("Firefox") == 0) EDITOR.settings.useCliboardcatcher = true;
-	
-	//if(browser != "Chrome") alertBox("The editor might be slow in your browser (" + browser + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
+	//if(BROWSER != "Chrome") alertBox("The editor might be slow in your BROWSER (" + BROWSER + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
@@ -4182,8 +4180,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			widget.visible = true;
 			
-			var browser = UTIL.checkBrowser();
-			if(browser == "Firefox") {
+			if(BROWSER == "Firefox") {
 				// Firefox waits some time before moving the elements if they don't fit ...
 				setTimeout(function firefoxLag() {
 					EDITOR.resizeNeeded();
@@ -6192,7 +6189,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
-			if (browser.indexOf("MSIE") == 0) {
+			if (BROWSER.indexOf("MSIE") == 0) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
 				copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
@@ -6234,7 +6231,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
-			if (browser.indexOf("MSIE") == 0) {
+			if (BROWSER.indexOf("MSIE") == 0) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
 				cutEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
@@ -6664,13 +6661,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if((combo.sum > 0 || windowKey) && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
-			var browser = UTIL.checkBrowser();
-			
 			// Enable native commands
 			if( (combo.ctrl || windowKey)  && character == "C") {
 				console.log("Native command: copy !?");
 				
-				if(browser == "Firefox" || browser == "Safari") nativeCopy = true;
+				if(BROWSER == "Firefox" || BROWSER == "Safari") nativeCopy = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -6693,7 +6688,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "V") {
 				console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
-				if(browser == "Firefox" || browser == "Safari") nativePaste = true;
+				if(BROWSER == "Firefox" || BROWSER == "Safari") nativePaste = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -6710,7 +6705,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "X") {
 				console.log("Native command: cut !?");
 				
-				if(browser == "Firefox" || browser == "Safari") nativeCut = true;
+				if(BROWSER == "Firefox" || BROWSER == "Safari") nativeCut = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7436,19 +7431,17 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		var img = new Image();
 		
+		var domurl = window.URL || window.webkitURL || window;
 		
 		img.onload = function () {
 			console.log("SVG image created!");
 			callback(img);
-			if(url) DOMURL.revokeObjectURL(url);
+			if(url) domurl.revokeObjectURL(url);
 		}
 		
-		var browser = UTIL.checkBrowser();
-		
-		var DOMURL = window.URL || window.webkitURL || window;
-		if( DOMURL.createObjectUR ) {
+		if( domurl.createObjectUR ) {
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-			var url = DOMURL.createObjectURL(svg);
+			var url = domurl.createObjectURL(svg);
 			img.src = url;
 		}
 		else {

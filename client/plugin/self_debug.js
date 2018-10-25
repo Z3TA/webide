@@ -274,7 +274,7 @@
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +
 		'Platform: ' + process.platform + '\n' +
-		'Browser: ' + UTIL.checkBrowser() + '\n' +
+		'Browser: ' + BROWSER + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
 		errMessage + '\n\n' +

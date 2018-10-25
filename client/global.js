@@ -95,6 +95,7 @@ var QUERY_STRING = function () {
   return query_string;
 }();
 
+var BROWSER = UTIL.checkBrowser();
 
 
 Error.stackTraceLimit = Infinity;

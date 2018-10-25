@@ -59,12 +59,8 @@ var WysiwygEditor;
 	"use strict";
 	
 	var wysiwygEditorCounter = 0; // WysiwygEditor instances
-	
 	var previewInputFired = false;
 	var consoleLogOriginal;
-	
-	var browser = UTIL.checkBrowser();
-	
 	var oldPreviewWindowPosition;
 	var oldPreviewWindowSize;
 	var oldCodeWindowPosition;
@@ -450,7 +446,6 @@ var WysiwygEditor;
 			console.log(selection.baseNode);
 			console.log(selection.anchorNode);
 			//We get no baseNode in Safari when clicking on buttons!!
-			//var browser = UTIL.checkBrowser();
 			//Chromium also gets no baseNode the first time you click on a button. (it works afterwards)
 			var error = new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
 			return console.warn(error.message);
@@ -631,7 +626,7 @@ var WysiwygEditor;
 		var doc = previewWin.window.document;
 		var range = doc.createRange();
 		
-		if(browser=="Firefox" && node.tagName == "BR") {
+		if(BROWSER=="Firefox" && node.tagName == "BR") {
 			// Firefox can set the caret position, but it's not possible to input/write after the caret has been set in a br element
 			node = node.parentNode; // Most likely a p element
 		}

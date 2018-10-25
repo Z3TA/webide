@@ -1350,15 +1350,20 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		head.appendChild(link);
 	},
 
-	checkBrowser: function checkBrowser() {
-		var c = navigator.userAgent.search("Chrome");
-		var f = navigator.userAgent.search("Firefox");
-		var m8 = navigator.userAgent.search("MSIE 8.0");
-		var m9 = navigator.userAgent.search("MSIE 9.0");
-		var browser = "Unknown";
+	checkBrowser: function checkBrowser(userAgent) {
+		var browser = "Unknown browser";
 		
-		var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-		var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
+		if(!userAgent && typeof navigator != "object") return browser;
+		
+		if(userAgent == undefined) userAgent = navigator.userAgent;
+		
+		var c = userAgent.search("Chrome");
+		var f = userAgent.search("Firefox");
+		var m8 = userAgent.search("MSIE 8.0");
+		var m9 = userAgent.search("MSIE 9.0");
+		
+		var isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+		var isIe = (userAgent.toLowerCase().indexOf("msie") != -1 || userAgent.toLowerCase().indexOf("trident") != -1);
 		
 		if(isSafari) browser = "Safari";
 		else if (c > -1) browser = "Chrome";

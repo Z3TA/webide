@@ -16,12 +16,14 @@
 		
 	*/
 	
-	var eventOrder = 0;
+	var eventOrder = -1;
+	var eventOrderSynced = false;
 	var userConnectionId = 0;
-	var events = {}; // filePath: ev: Store latest events for use in transformation
+	var fileChangeEvents = {}; // filePath: ev: Store latest events for use in transformation
 	var collabMode = false;
 	var ignoreNextFileChangeEvent = false;
-	var collabClients = []; // client id, only the one who first connected has the full list
+	var fileChangeEventOrders = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
+	var meMaster = false;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices",
@@ -46,6 +48,7 @@
 			EDITOR.removeEvent("fileClose", collabFileClose);
 			EDITOR.removeEvent("fileChange", collabFileChange);
 			EDITOR.removeEvent("moveCaret", collabMoveCaret);
+			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			
 			CLIENT.removeEvent("echo", collabHandleEcho);
 			CLIENT.removeEvent("loginSuccess", collabLoginSuccess);
@@ -64,7 +67,7 @@
 		userConnectionId = json.cId;
 		
 		// Get the eventOrder, (currently echoCounter)
-		CLIENT.cmd("echo", {ping: new Date().getTime()});
+		CLIENT.cmd("echo", {eventOrder: -1, ping: new Date().getTime()});
 		
 	}
 	
@@ -74,7 +77,13 @@
 		
 		console.log("collabJoin: " + JSON.stringify(json));
 		
-		if(json.connectionCount > 1) {
+		var connectedClientIds = json.connectedClientIds;
+		
+		connectedClientIds.sort(function sortNumber(a,b) {
+			return a - b;
+		});
+		
+		if(connectedClientIds.length > 1) {
 			// More then one user logged in to the same account
 			
 			collabMode = true;
@@ -87,46 +96,40 @@
 				Answer: 
 			*/
 			
-			if(json.cId == undefined) throw new Error("json.cId=" + json.cId);
-			if(collabClients.indexOf(json.cId) != -1) throw new Error("json.cId=" + json.cId + " already in collabClients=" + JSON.stringify(collabClients));
-			collabClients.push(json.cId);
-			collabClients.sort(function sortNumber(a,b) {
-				return a - b;
-			});
-			//if(collabClients.length != json.connectionCount) throw new Error("json.connectionCount=" + json.connectionCount + " collabClients.length=" + collabClients.length + " collabClients=" + JSON.stringify(collabClients));
-			//if(collabClients[0] > collabClients[0]) throw new Error("Wrong sort order: collabClients=" + JSON.stringify(collabClients));
+			var master = connectedClientIds[0]; // The one with the lowest connection-id
 			
-			var master = collabClients[0];
+			console.log("master=" + master + " userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds));
+			
 			if(userConnectionId == master) {
-				var file;
 				for(var path in EDITOR.files) {
-					file = EDITOR.files[path];
+					if(!fileChangeEventOrders.hasOwnProperty(path)) fileChangeEventOrders[path] = 0;
+				}
+				CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChangeEventOrders: fileChangeEventOrders});
+			}
+			
+			var file;
+			for(var path in EDITOR.files) {
+				file = EDITOR.files[path];
 					if(!file.isSaved && file.savedAs) syncFile(file);
 				}
-			}
 			
 			if(json.cId != userConnectionId) {
-				alertBox(json.alias || json.ip + " client joined your session.\nYou are now in collaboration mode!");
+				alertBox(json.alias + " client joined your session.\nYou are now in collaboration mode!");
 			}
 			
 		}
-		
-		function syncFile(file) {
-			
-			eventOrder++;
-			var ev = {
-				path: file.path,
-				text: file.text,
-				hash: file.hash,
-				caret: file.caret,
-				order: eventOrder,
-				cId: userConnectionId,
-				collabClients: collabClients
-			};
-			
-			CLIENT.cmd("echo", {sync: ev});
 		}
+	
+	function syncFile(file) {
 		
+		var fileSyncEv = {
+			path: file.path,
+			text: file.text,
+			hash: file.hash,
+			caret: file.caret,
+		};
+		
+		CLIENT.cmd("echo", {eventOrder: ++eventOrder, sync: fileSyncEv});
 	}
 	
 	function collabLeave(json) {
@@ -134,20 +137,18 @@
 		
 		console.log("collabLeave: " + JSON.stringify(json));
 		
-		if(json.connectionCount == 1) {
+		var connectedClientIds = json.connectedClientIds;
+		
+		if(connectedClientIds.length == 1) {
 			// We are the only connected client
+			if(connectedClientIds[0] != userConnectionId) throw new Error("Unexpected: userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds))
 			collabMode = false;
-			alertBox(json.alias || json.id + " client disconnected.\nWe are no longer in collaboration mode !");
+			alertBox(json.alias + " client disconnected.\nWe are no longer in collaboration mode !");
 		}
-		else if(json.connectionCount > 1) {
+		else if(connectedClientIds.length > 1) {
 			alertBox(json.alias || json.id + " client disconnected");
 		}
-		else throw new Error("json.connectionCount=" + json.connectionCount + " json:" + JSON.stringify(json, null, 2));
-		
-		if(json.cId == undefined) throw new Error("json.cId=" + json.cId);
-		var collabClientsIndex = collabClients.indexOf(json.cId);
-		if(collabClientsIndex == -1) console.warn("json.cId=" + json.cId + " not in collabClients=" + JSON.stringify(collabClients));
-		collabClients.splice(collabClientsIndex, 1);
+		else throw new Error("connectedClientIds.length=" + jconnectedClientIds.length + " json:" + JSON.stringify(json, null, 2));
 		
 		return true;
 	}
@@ -160,8 +161,6 @@
 		alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
 		collabMode = false;
 		
-		collabClients.length = 0;
-		
 	}
 	
 	
@@ -170,6 +169,20 @@
 	}
 	
 	function collabFileOpen(file) {
+		
+		if(!fileChangeEventOrders.hasOwnProperty(file.path)) fileChangeEventOrders[file.path] = 0;
+		
+		if(!file.isSaved) syncFile(file);
+		else {
+			// Ask other clients if they have a newer version of the file
+			
+			var fileOpenEv = {
+				path: file.path,
+				hash: file.hash,
+			};
+			
+			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileOpen: fileOpenEv});
+		}
 		
 		return true;
 	}
@@ -192,7 +205,8 @@
 		if(row == undefined) throw new Error("row=" + row);
 		if(col == undefined) throw new Error("col=" + col);
 		
-		eventOrder++;
+		if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
+		
 		var fileChangeEvent = {
 			filePath: file.path, 
 			type: change, 
@@ -200,24 +214,58 @@
 			index: index, 
 			row: row || file.caret.row,
 			col: col || file.caret.col,
-			order: eventOrder, 
-			cId: userConnectionId
+			order: ++fileChangeEventOrders[file.path], 
+			cId: userConnectionId // The server adds cId, but we also want it in the file change object
 		};
 		
-		if(!events.hasOwnProperty(file.path)) events[file.path] = [];
+		if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
 		
-		events[file.path][eventOrder] = fileChangeEvent;
+		fileChangeEvents[file.path][fileChangeEvent.order] = fileChangeEvent;
 		
-		CLIENT.cmd("echo", {fileChange: fileChangeEvent});
+		CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
 		
 		return true;
 	}
 	
 	function collabHandleEcho(json) {
 		
+		if(!json.eventOrder == undefined) throw new Error("Echo without eventOrder: " + JSON.stringify(json));
+		if(!json.echoCounter == undefined) throw new Error("Echo without echoCounter: " + JSON.stringify(json));
+		if(!json.alias) throw new Error("Echo without alias: " + JSON.stringify(json));
+		if(!json.cId == undefined) throw new Error("Echo without cId: " + JSON.stringify(json));
+		
+		if(json.cId == userConnectionId) throw new Error("It should not be possible to get echo's from myself! json.cId=" + json.cId + " userConnectionId=" + userConnectionId);
+		
+		if(eventOrderSynced) eventOrder++;
+		
 		if(json.ping) {
 			console.log("Server latency: " + ( (new Date()).getTime() - json.ping ) + "ms");
 			eventOrder = json.echoCounter;
+			console.log("Set eventOrder=" + eventOrder);
+		}
+		else if(eventOrderSynced && json.eventOrder > eventOrder) {
+			throw new Error("Events are out of order, we have missed " + (json.eventOrder-eventOrder) + " events! json.eventOrder=" + json.eventOrder + " eventOrder=" + eventOrder);
+		}
+		else if(json.fileChangeEventOrders) {
+			fileChangeEventOrders = json.fileChangeEventOrders;
+		}
+		else if(json.fileOpen) {
+			var file = EDITOR.files[json.fileOpen.path];
+			if(!file) console.log("File not opened: " + json.fileOpen.path);
+			else {
+				if(file.hash != json.fileOpen.hash) {
+					console.log("Syncing file because hash missmatch: " + file.path);
+					syncFile(file);
+				}
+				else if(file.changed) {
+					console.log("Syncing file because it has changed: " + file.path);
+					syncFile(file);
+				}
+				else {
+					console.log("No need to sync file because it's has the same hash and has not changed. (file.hash=" + file.hash + ", json.fileOpen.hash=" + json.fileOpen.hash + ", file.isSaved=" + file.isSaved + ")");
+				}
+			}
+			
 		}
 		else if(json.sync) {
 			
@@ -227,11 +275,12 @@
 			if(!file) console.log("File not opened, no need to sync: path=" + sync.path);
 			else {
 				
-				if((file.isSaved || file.text == sync.text) && file.hash == sync.hash) updateFileConent(file, sync.text);
+				if(file.isSaved && file.hash == sync.hash) updateFileConent(file, sync.text);
+				else if(file.text == sync.text) console.log("No update needed, sync and file is the same!");
 				else {
 					var update = "Just update";
 					var backup = "Save a backup"
-					confirmBox( (sync.alias || sync.ip) + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, backup], function(answer) {
+					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, backup], function(answer) {
 						if(answer == update) updateFileConent(file, sync.text);
 						else if(answer == backup) {
 							var backupPath = file.path + ".bak";
@@ -253,31 +302,38 @@
 			
 		}
 		else if(json.fileChange) {
+			// ### File change event
 			
 			var ev = json.fileChange;
+			ev.cId = json.cId;
+			
 			var file = EDITOR.files[ev.filePath];
 			
-			if(ev.cId == userConnectionId) {
-				// Event from myself, can be ignored
-				return;
+			if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
+			
+			var currentOrder = fileChangeEventOrders[file.path];
+			fileChangeEventOrders[file.path]++;
+			
+			if(ev.order > currentOrder+1) {
+				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrders[file.path]) + " events!");
 			}
 			
-			// Apply change
+			
+			
+			
 			if(file == undefined) {
 				console.warn("Got change to a file that we do not have open: " + ev.filePath);
 				return;
 			}
 			
 			
-			if(ev.order > (eventOrder+1)) {
-				throw new Error("Events are out of order, we have missed " + (ev.order-eventOrder) + " events!");
-			}
-			else if(ev.order == (eventOrder+1)) {
+			
+			else if(ev.order == currentOrder+1) {
 				// This is "latest". No need to transform
 			}
-			else if(ev.order == eventOrder) {
+			else if(ev.order == currentOrder ) {
 				// Two events at the same time. We need to transform
-				if(events[file.path][ev.order].cId == userConnectionId) {
+				if(fileChangeEvents[file.path][ev.order].cId == userConnectionId) {
 					// I just sent an event with this order
 					// In my point of view I was first
 				}
@@ -288,30 +344,26 @@
 					// Two different users who are not me, sent an event at the same time
 					// In my point of view, the event we have already recived came first!
 					// We have to transform from the previous event
-					var previousEvent = events[file.path][ev.order];
+					var previousEvent = fileChangeEvents[file.path][ev.order];
 					transformBackwards(ev, previousEvent);
 				}
 			}
 			else if(ev.order < eventOrder) {
 				// Someone is lagging behind
 				var order = ev.order;
-				while(order++ < eventOrder) transformBackwards(ev, events[file.path][order]);
+				while(order++ < eventOrder) transformBackwards(ev, fileChangeEvents[file.path][order]);
 				
 			}
 			else {
 				throw new Error("ev.order=" + ev.order + " eventOrder=" + eventOrder);
 			}
 			
+			if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
 			
-			// Need to do some transformation so that inserts/deletions are done in the right places
+			fileChangeEvents[file.path][eventOrder] = ev;
 			
-			eventOrder++;
 			
-			if(!events.hasOwnProperty(file.path)) events[file.path] = [];
-			
-			events[file.path][eventOrder] = ev;
-			
-			// ### Apply change
+			// ### Apply file change
 			
 			ignoreNextFileChangeEvent = true;
 			
@@ -338,7 +390,7 @@
 				file.deleteCharacter(caret);
 			}
 			else if(ev.type == "reload") { // The file was reloaded with new text
-				file
+				file.reload(ev.text);
 			}
 			
 			ignoreNextFileChangeEvent = false;
