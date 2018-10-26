@@ -170,8 +170,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		voiceCommand: [],
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 		previewTool: [],
-	pathPickerTool: [] // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
-	};
+	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
+	select: [] // Selecting text
+};
 
 EDITOR.renderFunctions = [];
 EDITOR.preRenderFunctions = [];

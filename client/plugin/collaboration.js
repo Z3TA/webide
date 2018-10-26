@@ -35,6 +35,7 @@
 			EDITOR.on("fileClose", collabFileClose);
 			EDITOR.on("fileChange", collabFileChange);
 			EDITOR.on("moveCaret", collabMoveCaret);
+			EDITOR.on("select", collabSelectText);
 			
 			/*
 				EDITOR.on("interaction", function(file, action, ev) {
@@ -61,12 +62,15 @@
 			EDITOR.removeEvent("fileChange", collabFileChange);
 			EDITOR.removeEvent("moveCaret", collabMoveCaret);
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
+			EDITOR.removeEvent("select", collabSelectText);
 			
 			CLIENT.removeEvent("echo", collabHandleEcho);
 			CLIENT.removeEvent("loginSuccess", collabLoginSuccess);
 			CLIENT.removeEvent("clientJoin", collabJoin);
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
+			
+			EDITOR.unbindKey(testCollaboration);
 			
 		},
 		order: 100
@@ -207,6 +211,24 @@
 	}
 	
 	function collabFileClose(file) {
+		
+		return true;
+	}
+	
+	function collabSelectText(file, selection) {
+		console.log(selection);
+		
+		selection.sort(function sortByIndex(a, b) {
+			return a.index - b.index;
+		});
+		
+		var selectEvent = {
+			filePath: file.path,
+			start: selection[0].index,
+			end: selection[selection.length-1].index,
+		}
+		
+		CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
 		
 		return true;
 	}
@@ -394,6 +416,8 @@
 			
 			ignoreNextFileChangeEvent = true;
 			
+			console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index);
+			
 			if(ev.type == "removeRow") {
 				console.log("Removing row on row=" + row);
 				file.removeRow(ev.row);
@@ -433,6 +457,23 @@
 			if(file == EDITOR.currentFile) EDITOR.renderNeeded();
 			
 		}
+		else if(json.select) {
+			// ### Selected text
+			
+			var selectEvent = json.select;
+			
+			console.log("selectEvent: " + JSON.stringify(selectEvent));
+			
+			var file = EDITOR.files[selectEvent.filePath];
+			
+			if(file == undefined) {
+				console.warn("Text was selected in a file that is not open: " + selectEvent.filePath);
+				return;
+			}
+			
+			file.highLightTextRange(selectEvent.start, selectEvent.end);
+			EDITOR.renderNeeded();
+		}
 		
 		return true;
 		
@@ -442,18 +483,16 @@
 			
 			var textLength = prev.text.length;
 			
-			console.log("Transforming backwards from prev.type=" + prev.type + " ");
+			console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index);
 			
 			if(prev.type == "removeRow") {
 				if(ev.index > prev.index) ev.index -= textLength;
 			}
 			else if(prev.type == "text") { // Text was inserted
-				if(ev.index >= prev.index) {
-ev.index += textLength;
-				}
+				if(ev.index >= prev.index) ev.index += textLength;
 			}
 			else if(prev.type == "insert") { // One character was inserted
-				if(ev.index > prev.index) ev.index -= 1;
+				if(ev.index >= prev.index) ev.index += 1;
 			}
 			else if(prev.type == "deleteTextRange") { // Delete a bunch of text
 				if(ev.index > prev.index) ev.index -= textLength;
@@ -551,7 +590,8 @@ ev.index += textLength;
 			file.moveCaret(6);
 			EDITOR.mock("typing", "f");
 			f({change: "insert", index: 6, text: "z"});
-			if(file.text != "0abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			if(file.text != "abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
 			
 			
 			

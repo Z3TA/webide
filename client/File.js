@@ -1458,6 +1458,8 @@ file.mode = "text";
 			}
 		}
 		
+		//EDITOR.fireEvent("deselect", [deselect]);
+		
 		// Remove all deselected boxes
 		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
 		var remove;
@@ -1486,8 +1488,9 @@ file.mode = "text";
 		
 		// Sort selection by index !?
 		
-		
 		file.checkSelection();
+		
+		EDITOR.fireEvent("select", [file, selection]);
 		
 		EDITOR.renderNeeded();
 		
@@ -3557,6 +3560,7 @@ file.mode = "text";
 	});
 	
 	File.prototype.highlightText = function(text, startAt, stopAt) {
+		// Searches for all instances of text and highlights it
 		var file = this;
 		
 		if(text.length == 0) {
@@ -3599,6 +3603,21 @@ file.mode = "text";
 			start = end+1; // Continue search at the end of the word to prevent loop
 			
 		}
+		
+		function highLightBox(box) {
+			// box is a gridBox
+			box.highlighted = true;
+			file.highlighted.push(box);
+		}
+		
+	}
+	
+	File.prototype.highLightTextRange = function highLightTextRange(start, end) {
+		// Highlights text from start to end
+		var file = this;
+		
+		var textRange = file.createTextRange(start, end);
+		textRange.forEach(highLightBox);
 		
 		function highLightBox(box) {
 			// box is a gridBox
