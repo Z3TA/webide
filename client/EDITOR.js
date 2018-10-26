@@ -1552,11 +1552,13 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			clearTimeout(renderCaretTimer);
 			EDITOR.removeAnimation(fadeInCaretAnimation);
 			
-			console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
+			/*
+				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
 				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) + 
 				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
+			*/
 			
-			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20) {
+			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
 				//console.log("Rendering caret");
 				EDITOR.renderCaret(file.caret);
 				document.getElementById('canvas').style.cursor = 'text';
