@@ -24,6 +24,8 @@
 	var ignoreNextFileChangeEvent = false;
 	var fileChangeEventOrders = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
 	var meMaster = false;
+	var connectionClosedDialog;
+	var clientLeaveDialog = {}; 
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices",
@@ -73,6 +75,8 @@
 		// Get the eventOrder, (currently echoCounter)
 		CLIENT.cmd("echo", {eventOrder: -1, ping: new Date().getTime()});
 		
+		if(connectionClosedDialog) connectionClosedDialog.close();
+		
 	}
 	
 	
@@ -118,7 +122,11 @@
 				}
 			
 			if(json.cId != userConnectionId) {
-				alertBox(json.alias + " client joined your session.\nYou are now in collaboration mode!");
+				if(clientLeaveDialog.hasOwnProperty(json.alias)) {
+clientLeaveDialog[json.alias].close();
+					delete clientLeaveDialog[json.alias];
+				}
+				else alertBox(json.alias + " client joined your session.\nYou are now in collaboration mode!");
 			}
 			
 		}
@@ -147,10 +155,10 @@
 			// We are the only connected client
 			if(connectedClientIds[0] != userConnectionId) throw new Error("Unexpected: userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds))
 			collabMode = false;
-			alertBox(json.alias + " client disconnected.\nWe are no longer in collaboration mode !");
+			if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(json.alias + " client disconnected.\nWe are no longer in collaboration mode !");
 		}
 		else if(connectedClientIds.length > 1) {
-			alertBox(json.alias || json.id + " client disconnected");
+			if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(json.alias || json.id + " client disconnected");
 		}
 		else throw new Error("connectedClientIds.length=" + jconnectedClientIds.length + " json:" + JSON.stringify(json, null, 2));
 		
@@ -162,7 +170,8 @@
 		
 		userConnectionId = null;
 		
-		alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
+		if(!connectionClosedDialog) connectionClosedDialog = alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
+		
 		collabMode = false;
 		
 	}
