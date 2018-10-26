@@ -34,6 +34,10 @@
 			EDITOR.on("fileChange", collabFileChange);
 			EDITOR.on("moveCaret", collabMoveCaret);
 			
+			EDITOR.on("interaction", function(file, action, ev) {
+				console.log("Interaction: " + action);
+			});
+			
 			CLIENT.on("echo", collabHandleEcho);
 			CLIENT.on("loginSuccess", collabLoginSuccess);
 			CLIENT.on("clientJoin", collabJoin);

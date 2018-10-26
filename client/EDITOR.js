@@ -1551,11 +1551,11 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			// First remove any old ones so they do not stop before the caret is fully filled
 			clearTimeout(renderCaretTimer);
 			EDITOR.removeAnimation(fadeInCaretAnimation);
-			/*
-				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
+			
+			console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
 				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) + 
 				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
-			*/
+			
 			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20) {
 				//console.log("Rendering caret");
 				EDITOR.renderCaret(file.caret);
@@ -2764,7 +2764,7 @@ EDITOR.fireEvent("btk");
 		if(EDITOR.eventListeners.interaction.length > 0) {
 			console.log("Calling interaction listeners (" + EDITOR.eventListeners.interaction.length + ") ...");
 			for(var i=0; i<EDITOR.eventListeners.interaction.length; i++) {
-				EDITOR.eventListeners.interaction[i].fun(EDITOR.currentFile); // Call function
+				EDITOR.eventListeners.interaction[i].fun(EDITOR.currentFile, interaction, options); // Call function
 			}
 		}
 		
