@@ -1,6 +1,6 @@
 (function() {
 	"use strict";
-
+	
 	/*
 		
 		Work in progres ...
@@ -30,7 +30,7 @@
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices",
 		load: function loadCollaboration() {
-
+			
 			EDITOR.on("fileOpen", collabFileOpen);
 			EDITOR.on("fileClose", collabFileClose);
 			EDITOR.on("fileChange", collabFileChange);
@@ -48,6 +48,10 @@
 			CLIENT.on("clientLeave", collabLeave);
 			CLIENT.on("connectionLost", collabConnectionLost);
 			
+			if(EDITOR.settings.devMode) {
+				var charC = 67;
+				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: charC, combo: CTRL+SHIFT});
+			}
 			
 		},
 		unload: function unloadCollaboration() {
@@ -64,7 +68,7 @@
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
 			
-},
+		},
 		order: 100
 	});
 	
@@ -120,19 +124,19 @@
 			var file;
 			for(var path in EDITOR.files) {
 				file = EDITOR.files[path];
-					if(!file.isSaved && file.savedAs) syncFile(file);
-				}
+				if(!file.isSaved && file.savedAs) syncFile(file);
+			}
 			
 			if(json.cId != userConnectionId) {
 				if(clientLeaveDialog.hasOwnProperty(json.alias)) {
-clientLeaveDialog[json.alias].close();
+					clientLeaveDialog[json.alias].close();
 					delete clientLeaveDialog[json.alias];
 				}
 				else alertBox(json.alias + " client joined your session.\nYou are now in collaboration mode!");
 			}
 			
 		}
-		}
+	}
 	
 	function syncFile(file) {
 		
@@ -237,12 +241,16 @@ clientLeaveDialog[json.alias].close();
 		
 		fileChangeEvents[file.path][fileChangeEvent.order] = fileChangeEvent;
 		
+		console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
+		
 		CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
 		
 		return true;
 	}
 	
 	function collabHandleEcho(json) {
+		
+		console.log("collabHandleEcho: json=" + JSON.stringify(json, null, 2));
 		
 		if(!json.eventOrder == undefined) throw new Error("Echo without eventOrder: " + JSON.stringify(json));
 		if(!json.echoCounter == undefined) throw new Error("Echo without echoCounter: " + JSON.stringify(json));
@@ -322,35 +330,38 @@ clientLeaveDialog[json.alias].close();
 			var ev = json.fileChange;
 			ev.cId = json.cId;
 			
+			if(ev.filePath == undefined) throw new Error("ev.filePath=" + ev.filePath + " ev=" + JSON.stringify(ev));
+			
 			var file = EDITOR.files[ev.filePath];
-			
-			if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
-			
-			var currentOrder = fileChangeEventOrders[file.path];
-			fileChangeEventOrders[file.path]++;
-			
-			if(ev.order > currentOrder+1) {
-				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrders[file.path]) + " events!");
-			}
-			
-			
-			
 			
 			if(file == undefined) {
 				console.warn("Got change to a file that we do not have open: " + ev.filePath);
 				return;
 			}
 			
+			if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
 			
+			var currentOrder = fileChangeEventOrders[file.path];
+			fileChangeEventOrders[file.path]++;
+			
+			console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
+			
+			if(ev.order > currentOrder+1) {
+				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrders[file.path]) + " events!");
+			}
 			
 			else if(ev.order == currentOrder+1) {
-				// This is "latest". No need to transform
+				console.log("ev.order=" + ev.order + " is the latest order! currentOder=" + currentOrder + ". No need to transform");
 			}
 			else if(ev.order == currentOrder ) {
-				// Two events at the same time. We need to transform
+				console.log("Two file change events with the same ev.order=" + ev.order + " currentOrder=" + currentOrder + ". We need to transform!");
 				if(fileChangeEvents[file.path][ev.order].cId == userConnectionId) {
 					// I just sent an event with this order
 					// In my point of view I was first
+					console.log("Change ev.order=" + ev.order + " was made by this client.");
+					// We need to transform the event with the other event in mind
+					var previousEvent = fileChangeEvents[file.path][ev.order];
+					transformBackwards(ev, previousEvent);
 				}
 				else if(ev[ev.order].cId == ev.cId) {
 					throw new Error("User with cId=" + ev.cId + " sent two change events with the same order!");
@@ -360,22 +371,23 @@ clientLeaveDialog[json.alias].close();
 					// In my point of view, the event we have already recived came first!
 					// We have to transform from the previous event
 					var previousEvent = fileChangeEvents[file.path][ev.order];
+					console.log("Transforming with previous event: " + JSON.stringify(previousEvent));
 					transformBackwards(ev, previousEvent);
 				}
 			}
-			else if(ev.order < eventOrder) {
-				// Someone is lagging behind
+			else if(ev.order < currentOrder) {
+				console.log(json.alias +  " is behind! ev.order=" + ev.order + " currentOrder=" + currentOrder);
 				var order = ev.order;
-				while(order++ < eventOrder) transformBackwards(ev, fileChangeEvents[file.path][order]);
+				while(order++ < currentOrder) transformBackwards(ev, fileChangeEvents[file.path][order]);
 				
 			}
 			else {
-				throw new Error("ev.order=" + ev.order + " eventOrder=" + eventOrder);
+				throw new Error("ev.order=" + ev.order + " currentOrder=" + currentOrder);
 			}
 			
 			if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
 			
-			fileChangeEvents[file.path][eventOrder] = ev;
+			fileChangeEvents[file.path][currentOrder] = ev;
 			
 			
 			// ### Apply file change
@@ -383,30 +395,38 @@ clientLeaveDialog[json.alias].close();
 			ignoreNextFileChangeEvent = true;
 			
 			if(ev.type == "removeRow") {
+				console.log("Removing row on row=" + row);
 				file.removeRow(ev.row);
 			}
 			else if(ev.type == "text") { // Text was inserted
 				var caret = file.createCaret(ev.index, ev.row, ev.col);
+				console.log("Inserting text at caret=" + JSON.stringify(caret));
 				file.insertText(ev.text, caret);
 			}
 			else if(ev.type == "insert") { // One character was inserted
 				var caret = file.createCaret(ev.index, ev.row, ev.col);
+				console.log("Putting character=" + ev.text + " at caret=" + JSON.stringify(caret));
 				file.putCharacter(ev.text, caret);
 			}
 			else if(ev.type == "deleteTextRange") { // Delete a bunch of text
+				console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
 				file.deleteTextRange(ev.index, ev.index + ev.text.length);
 			}
 			else if(ev.type == "linebreak") { // A line break was inserted
 				var caret = file.createCaret(ev.index, ev.row, ev.col);
+				console.log("Inserting a line break at caret=" + JSON.stringify(caret));
 				file.insertLineBreak(caret);
 			}
 			else if(ev.type == "delete") { // One character was deleted
 				var caret = file.createCaret(ev.index, ev.row, ev.col);
+				console.log("Deleting character=" + ev.text + " at caret=" + JSON.stringify(caret));
 				file.deleteCharacter(caret);
 			}
 			else if(ev.type == "reload") { // The file was reloaded with new text
+				console.log("Reloading text! ev.text.length=" + ev.text.length);
 				file.reload(ev.text);
 			}
+			else throw new Error("Unknown ev.type=" + ev.type);
 			
 			ignoreNextFileChangeEvent = false;
 			
@@ -418,6 +438,8 @@ clientLeaveDialog[json.alias].close();
 		
 		function transformBackwards(ev, prev) {
 			
+			if(prev == undefined || ev == undefined) throw new Error("ev=" + JSON.stringify(ev) + " prev=" + JSON.stringify(prev));
+			
 			var textLength = prev.text.length;
 			
 			console.log("Transforming backwards from prev.type=" + prev.type + " ");
@@ -426,7 +448,9 @@ clientLeaveDialog[json.alias].close();
 				if(ev.index > prev.index) ev.index -= textLength;
 			}
 			else if(prev.type == "text") { // Text was inserted
-				if(ev.index > prev.index) ev.index += textLength;
+				if(ev.index >= prev.index) {
+ev.index += textLength;
+				}
 			}
 			else if(prev.type == "insert") { // One character was inserted
 				if(ev.index > prev.index) ev.index -= 1;
@@ -451,5 +475,101 @@ clientLeaveDialog[json.alias].close();
 			ignoreNextFileChangeEvent = false;
 		}
 	}
+	
+	
+	
+	// TEST-CODE-START
+	
+	function testCollaboration(callback) {
+		
+		var ENTER = 13;
+		
+		collabMode = true;
+		
+		var testUserConnectionId = userConnectionId + 1;
+		var testUserAlias = "Test";
+		var testEventOrder = 1;
+		var fakeEchoCounter = 1;
+		var testFile;
+		var fileChangeOrder = 1;
+		
+		function f(o) {
+			
+			if(o.index == undefined) throw new Error("Must specify index!");
+			if(o.change == undefined) throw new Error("Must specify change!");
+			
+			var caret = testFile.createCaret(o.index);
+			
+			var json = {
+				cId: testUserConnectionId,
+				alias: testUserAlias,
+				eventOrder: ++testEventOrder,
+				echoCounter: ++fakeEchoCounter,
+				fileChange: {
+					filePath: testFile.path,
+					order: o.order || ++fileChangeOrder,
+					index: o.index || caret.index,
+					row: o.row || caret.row,
+					col: o.col || caret.col,
+					text: o.text || "",
+					type: o.change
+				}
+			}
+			
+			collabHandleEcho(json);
+		}
+		
+		EDITOR.openFile("collabtest.txt", "\n", function(err, file) {
+			if(err) throw err;
+			
+			testFile = file;
+			
+			eventOrder = 1;
+			
+			EDITOR.mock("typing", "abc");
+			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			fileChangeOrder = 3; // 3 characters type (abc)
+			if(fileChangeEventOrders[file.path] != fileChangeOrder) throw new Error("Unexpected: fileChangeOrder=" + fileChangeOrder + " fileChangeEventOrders[" + file.path + "]=" + fileChangeEventOrders[file.path]);
+			
+			f({change: "linebreak", index: 3, text: "\n"});
+			if(file.text != "abc\n\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			f({change: "insert", index: 4, text: "d"});
+			if(file.text != "abc\nd\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			f({change: "insert", index: 5, text: "e"});
+			if(file.text != "abc\nde\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			f({change: "insert", index: 0, text: "0"});
+			if(file.text != "0abc\nde\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			f({change: "delete", index: 0, text: "0"});
+			if(file.text != "abc\nde\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			// Edit at the same time
+			file.moveCaret(6);
+			EDITOR.mock("typing", "f");
+			f({change: "insert", index: 6, text: "z"});
+			if(file.text != "0abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			
+			
+			if(typeof callback == "function") callback(true);
+			else {
+				file.write("\n\nCollaboration test suite passed!"); // Write at EOF
+			}
+			collabMode = false;
+			
+		});
+		
+		if(typeof callback != "function") return false;
+	}
+	
+	EDITOR.addTest(testCollaboration);
+	
+	// TEST-CODE-END
+	
 	
 })();

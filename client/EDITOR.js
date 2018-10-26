@@ -4033,6 +4033,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		// Simulate ... 
 		
+		console.log("EDITOR.mock: mock=" + mock + " options=" + JSON.stringify(options));
+		
 		if(mock == "keydown") {
 			if(typeof options == "string") {
 				var letter = options;

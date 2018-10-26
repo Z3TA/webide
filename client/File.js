@@ -300,6 +300,7 @@ file.mode = "text";
 		}
 		
 		if(grid.length == 0) {
+			console.lo("File:createCaret: The file has no rows! grid.length=" + grid.length);
 			// The file has no rows! But it can still have text, like white space
 			// Caret can only be at index=file.text.length, row=0, col=0
 			
@@ -326,11 +327,11 @@ file.mode = "text";
 			//return caret;
 		}
 		else if(index == undefined && row == undefined && col == undefined) {
-			// We got nothing 
+			console.log("File:createCaret: We got nothing: index=" + index + " row=" + row + " col=" + col + " ");
 			placeCaretAtFirstRowWithTextOrEof();
 		}
 		else if(index == undefined && row != undefined && col != undefined) {
-			// We have row and col, but not index
+			console.log("File:createCaret: We have row=" + row + " and col=" + col + ", but not index=" + index);
 			if(isNaN(row)) {
 				throw new Error("row=" + row + " is not a number!");
 			}
@@ -363,7 +364,7 @@ file.mode = "text";
 			}
 		}
 		else if(index == undefined && row != undefined) {
-			// We have only the row
+			console.log("File:createCaret: We have only the row=" + row + " ! index=" + index + " col=" + col);
 			if(isNaN(row)) {
 				throw new Error("row=" + row + " is not a number!");
 			}
@@ -386,7 +387,7 @@ file.mode = "text";
 			}
 			}
 		else if(index == undefined && col != undefined) {
-			// We have only the col
+			console.log("File:createCaret: We have only the col=" + col + " ! index=" + index + " row=" + row);
 			if(isNaN(col)) {
 				throw new Error("col=" + col + " is not a number!");
 			}
@@ -427,7 +428,7 @@ file.mode = "text";
 			
 		}
 		else {
-			// We have only index
+			console.log("File:createCaret: We have only index=" + index + " ! row=" + row + " col=" + col + "");
 			if(isNaN(index)) {
 				throw new Error("Index is not a number!");
 			}
@@ -438,7 +439,7 @@ file.mode = "text";
 			}
 		}
 		
-		console.warn("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
+		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
 		console.log(UTIL.getStack("creating caret"));
 		
 		// Sanity check if we got it right
@@ -503,7 +504,7 @@ file.mode = "text";
 			}
 		}
 		
-		file.checkCaret(caret); // Another sanity check
+		file.checkCaret(caret); // Another sanity check (we have already checked once, but it doesn't hurt to check twice)
 		
 		return caret;
 		
@@ -1367,11 +1368,17 @@ file.mode = "text";
 			
 			//console.log("Done fixing grid indexes");
 			
-			file.scrollToCaret(caret);
+			if(caret == file.caret) file.scrollToCaret(caret);
 			
 		}
 		
 		//console.timeEnd("putCharacterCore");
+		
+		// The other caret's might now be off
+		if(caret != file.caret) {
+			if(file.caret.index >= index) file.caret.index++
+			if(file.caret.row == row && file.caret.col >= col) file.caret.col++;
+		}
 		
 		// Call file edit listeners
 		file.change("insert", character, index, row, col) // change, text, index, row, col
@@ -2592,9 +2599,13 @@ file.mode = "text";
 			}
 		}
 		
+		// The other caret's might now be off
+		if(caret != file.caret) {
+			file.fixCaret(file.caret);
+		}
+		
 		// Call file edit listeners
 		file.change("delete", character, index, row, col) // change, text, index, row, col
-		
 		
 		
 		console.timeEnd("deleteCharacter");
