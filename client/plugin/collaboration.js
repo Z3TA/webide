@@ -180,7 +180,7 @@
 		
 		userConnectionId = null;
 		
-		if(!connectionClosedDialog) connectionClosedDialog = alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
+		if(!connectionClosedDialog && collabMode) connectionClosedDialog = alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
 		
 		collabMode = false;
 		
@@ -217,6 +217,8 @@
 	
 	function collabSelectText(file, selection) {
 		console.log(selection);
+		
+		if(selection.length == 0) return true;
 		
 		selection.sort(function sortByIndex(a, b) {
 			return a.index - b.index;
