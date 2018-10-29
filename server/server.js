@@ -864,7 +864,6 @@ function sockJsConnection(connection) {
 	var userWorker = null;
 	var userConnectionName = null;
 	var userConnectionId = -1;
-	var userAlias;
 	var IP = connection.remoteAddress;
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
@@ -873,6 +872,7 @@ function sockJsConnection(connection) {
 	var recreateUserProcessSleepTime = 0;
 	var lastUserProcessCrash = new Date();
 	var userBrowser = UTIL.checkBrowser(agent);
+	var userAlias = userBrowser + "(" + IP + ")";
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
@@ -927,6 +927,7 @@ function sockJsConnection(connection) {
 			
 			USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
 			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
+			delete USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId];
 			
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
@@ -938,7 +939,8 @@ function sockJsConnection(connection) {
 						ip: IP, 
 						cId: userConnectionId, 
 						connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
-						alias: userAlias || userBrowser + "(" + IP + ")" 
+						alias: userAlias,
+						connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
 					}
 				};
 				
@@ -1244,7 +1246,8 @@ username = guestUser;
 									connections: [connection],
 									connectionCounter: 1, // Start with 1 so it's true:ish. Keep incrementing so we get a unique id
 									echoCounter: 1, // Start with 1 so it's true:ish
-									connectedClientIds: [1]
+									connectedClientIds: [1],
+									connectionCLientAliases: {1: userAlias}
 								}
 								userConnectionId = 1;
 							}
@@ -1252,6 +1255,7 @@ username = guestUser;
 								USER_CONNECTIONS[userConnectionName].connections.push(connection);
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
 								USER_CONNECTIONS[userConnectionName].connectedClientIds.push(userConnectionId);
+								USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId] = userAlias;
 							}
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
@@ -1285,7 +1289,7 @@ username = guestUser;
 								resp: {
 									loginSuccess: {
 										user: userConnectionName, 
-										alias: userAlias || userBrowser + "(" + IP + ")", 
+										alias: userAlias, 
 										ip: IP, 
 										cId: userConnectionId, 
 										connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
@@ -1301,8 +1305,9 @@ username = guestUser;
 								clientJoin: {
 									ip: IP, 
 									cId: userConnectionId, 
-									connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
-									alias: userAlias || userBrowser + "(" + IP + ")"
+									connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
+									alias: userAlias,
+									connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
 								}
 							};
 							for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
@@ -1493,7 +1498,7 @@ username = guestUser;
 				if(json.echoCounter != json.order) log( "Out of sync: echo: echoCounter=" + json.echoCounter + " json=" + UTIL.shortString(JSON.stringify(json)) , NOTICE);
 				
 				json.cId = userConnectionId;
-				json.alias = userAlias || userBrowser + "(" + IP + ")";
+				json.alias = userAlias;
 				
 				var echo = {echo: json, id: 0};
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {

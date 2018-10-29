@@ -104,6 +104,8 @@
 		if(connectedClientIds.length > 1) {
 			// More then one user logged in to the same account
 			
+			var wasInCollabMode = collabMode;
+			
 			collabMode = true;
 			
 			/*
@@ -131,12 +133,28 @@
 				if(!file.isSaved && file.savedAs) syncFile(file);
 			}
 			
-			if(json.cId != userConnectionId) {
+			
+			if(json.cId == userConnectionId) {
+				var msg = "You are in collaboration mode with ";
+				for (var i=0; i < connectedClientIds.length-1; i++) {
+					msg += json.connectionCLientAliases[ connectedClientIds[i] ] + ", ";
+				}
+				msg += "and " + json.connectionCLientAliases[connectedClientIds[connectedClientIds.length-1]];
+				
+				alertBox(msg);
+			}
+			else {
 				if(clientLeaveDialog.hasOwnProperty(json.alias)) {
 					clientLeaveDialog[json.alias].close();
 					delete clientLeaveDialog[json.alias];
 				}
-				else alertBox(json.alias + " client joined your session.\nYou are now in collaboration mode!");
+				else {
+					var msg = json.alias + " joined your session.";
+					
+					if(!wasInCollabMode) msg += "\nYou are now in collaboration mode!";
+					
+					alertBox(msg);
+				}
 			}
 			
 		}
@@ -161,16 +179,16 @@
 		
 		var connectedClientIds = json.connectedClientIds;
 		
+		var msg = json.alias + " client disconnected.";
+		
 		if(connectedClientIds.length == 1) {
 			// We are the only connected client
 			if(connectedClientIds[0] != userConnectionId) throw new Error("Unexpected: userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds))
 			collabMode = false;
-			if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(json.alias + " client disconnected.\nWe are no longer in collaboration mode !");
+			msg += "\nWe are no longer in collaboration mode !";
 		}
-		else if(connectedClientIds.length > 1) {
-			if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(json.alias || json.id + " client disconnected");
-		}
-		else throw new Error("connectedClientIds.length=" + jconnectedClientIds.length + " json:" + JSON.stringify(json, null, 2));
+		
+		if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(msg);
 		
 		return true;
 	}

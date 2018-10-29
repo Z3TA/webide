@@ -119,7 +119,8 @@ function Dialog(msg, icon, dialogDelay) {
 	}
 }
 Dialog.prototype.close = function(someEvent) {
-	this.div.parentElement.removeChild(this.div);
+	if(this.div.parentElement) this.div.parentElement.removeChild(this.div);
+	else console.warn("Parent element does not exist for div=", this.div);
 	
 	if(this.editorHadInputFocus) {
 		// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
