@@ -22,7 +22,7 @@
 	var fileChangeEvents = {}; // filePath: [order][n]ev: Store latest events for use in transformation
 	var collabMode = false;
 	var ignoreNextFileChangeEvent = false;
-	var fileChangeEventOrders = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
+	var fileChangeEventOrderCounters = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
 	var meMaster = false;
 	var connectionClosedDialog;
 	var clientLeaveDialog = {}; 
@@ -122,9 +122,9 @@
 			
 			if(userConnectionId == master) {
 				for(var path in EDITOR.files) {
-					if(!fileChangeEventOrders.hasOwnProperty(path)) fileChangeEventOrders[path] = 0;
+					if(!fileChangeEventOrderCounters.hasOwnProperty(path)) fileChangeEventOrderCounters[path] = 0;
 				}
-				CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChangeEventOrders: fileChangeEventOrders});
+				CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChangeEventOrderCounters: fileChangeEventOrderCounters});
 			}
 			
 			var file;
@@ -211,7 +211,7 @@
 	
 	function collabFileOpen(file) {
 		
-		if(!fileChangeEventOrders.hasOwnProperty(file.path)) fileChangeEventOrders[file.path] = 0;
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) fileChangeEventOrderCounters[file.path] = 0;
 		
 		if(!file.isSaved) syncFile(file);
 		else {
@@ -266,7 +266,7 @@
 		if(row == undefined) throw new Error("row=" + row);
 		if(col == undefined) throw new Error("col=" + col);
 		
-		if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 		
 		var fileChangeEvent = {
 			filePath: file.path, 
@@ -275,7 +275,7 @@
 			index: index, 
 			row: row || file.caret.row,
 			col: col || file.caret.col,
-			order: ++fileChangeEventOrders[file.path], 
+			order: ++fileChangeEventOrderCounters[file.path], 
 			cId: userConnectionId // The server adds cId, but we also want it in the file change object
 		};
 		
@@ -314,8 +314,8 @@
 		else if(eventOrderSynced && json.eventOrder > eventOrder) {
 			throw new Error("Events are out of order, we have missed " + (json.eventOrder-eventOrder) + " events! json.eventOrder=" + json.eventOrder + " eventOrder=" + eventOrder);
 		}
-		else if(json.fileChangeEventOrders) {
-			fileChangeEventOrders = json.fileChangeEventOrders;
+		else if(json.fileChangeEventOrderCounters) {
+			fileChangeEventOrderCounters = json.fileChangeEventOrderCounters;
 		}
 		else if(json.fileOpen) {
 			var file = EDITOR.files[json.fileOpen.path];
@@ -384,17 +384,17 @@
 				return;
 			}
 			
-			if(!fileChangeEventOrders.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrders: " + JSON.stringify(fileChangeEventOrders, null, 2));
+			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 			
-			var currentOrder = fileChangeEventOrders[file.path];
-			fileChangeEventOrders[file.path]++;
+			var currentOrder = fileChangeEventOrderCounters[file.path];
+			fileChangeEventOrderCounters[file.path]++;
 			
 			console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
 			
-			var arr = fileChangeEvents[file.path][ev.order];
+			var arr = fileChangeEvents[file.path] && fileChangeEvents[file.path][ev.order];
 			
 			if(ev.order > currentOrder+1) {
-				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrders[file.path]) + " events!");
+				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrderCounters[file.path]) + " events!");
 			}
 			
 			else if(ev.order == currentOrder+1) {
@@ -617,7 +617,7 @@
 			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			fileChangeOrder = 3; // 3 characters type (abc)
-			if(fileChangeEventOrders[file.path] != fileChangeOrder) throw new Error("Unexpected: fileChangeOrder=" + fileChangeOrder + " fileChangeEventOrders[" + file.path + "]=" + fileChangeEventOrders[file.path]);
+			if(fileChangeEventOrderCounters[file.path] != fileChangeOrder) throw new Error("Unexpected: fileChangeOrder=" + fileChangeOrder + " fileChangeEventOrderCounters[" + file.path + "]=" + fileChangeEventOrderCounters[file.path]);
 			
 			f({change: "linebreak", index: 3, text: "\n"});
 			if(file.text != "abc\n\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
