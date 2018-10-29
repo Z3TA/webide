@@ -45,6 +45,7 @@ What I'm working on
 Rewrite the undo-redo plugin so there's no undo-redo event, just reversable file change events.
 hmm ... undo/redo in collaboration mode can be problematic!
 We could save everyones history, but it would be weird if Ctrl+Z undid someone else change and not yours.
+Undo events would have to transform via all other events in between to get the right index.
 
 
 Working on implementing collaboraction support
