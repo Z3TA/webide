@@ -471,7 +471,7 @@
 			}
 			else if(ev.type == "deleteTextRange") { // Delete a bunch of text
 				console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
-				file.deleteTextRange(ev.index, ev.index + ev.text.length);
+				file.deleteTextRange(ev.index, ev.index + ev.text.length-1);
 			}
 			else if(ev.type == "linebreak") { // A line break was inserted
 				var caret = file.createCaret(ev.index, ev.row, ev.col);

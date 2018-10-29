@@ -42,6 +42,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Rewrite the undo-redo plugin so there's no undo-redo event, just reversable file change events.
+hmm ... undo/redo in collaboration mode can be problematic!
+We could save everyones history, but it would be weird if Ctrl+Z undid someone else change and not yours.
+
+
 Working on implementing collaboraction support
 
 
