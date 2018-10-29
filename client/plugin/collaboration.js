@@ -437,7 +437,8 @@
 			console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index);
 			
 			if(ev.type == "removeRow") {
-				console.log("Removing row on row=" + row);
+				var caret = file.createCaret(ev.index);
+				console.log("Removing row on row=" + caret.row);
 				file.removeRow(ev.row);
 			}
 			else if(ev.type == "text") { // Text was inserted
@@ -503,24 +504,35 @@
 			
 			console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index);
 			
-			if(prev.type == "removeRow") {
-				if(ev.index > prev.index) ev.index -= textLength;
+			/*
+				We only need to know index and row
+			*/
+			
+			if(prev.type == "removeRow" && ev.index > prev.index) {
+				ev.index -= textLength;
+				ev.row--;
 			}
-			else if(prev.type == "text") { // Text was inserted
-				if(ev.index >= prev.index) ev.index += textLength;
+			else if(prev.type == "text" && ev.index >= prev.index) { // Text was inserted
+				ev.index += textLength;
+				ev.row += UTIL.occurrences(prev.string, "\n");
 			}
-			else if(prev.type == "insert") { // One character was inserted
-				if(ev.index >= prev.index) ev.index += 1;
+			else if(prev.type == "insert" && ev.index >= prev.index) { // One character was inserted
+				ev.index += 1;
 			}
-			else if(prev.type == "deleteTextRange") { // Delete a bunch of text
-				if(ev.index > prev.index) ev.index -= textLength;
+			else if(prev.type == "deleteTextRange" && ev.index > prev.index) { // Delete a bunch of text
+				ev.index -= textLength;
+				ev.row -= UTIL.occurrences(prev.string, "\n");
 			}
-			else if(prev.type == "linebreak") { // A line break was inserted
-				
+			else if(prev.type == "linebreak" && ev.index > prev.index) { // A line break was inserted
+				ev.index += textLength; // Lf or CrLf
+				ev.row++;
 			}
-			else if(prev.type == "delete") { // One character was deleted
+			else if(prev.type == "delete" && ev.index >= prev.index) { // One or more characters was deleted (can include line breaks)
+				ev.index -= textLength;
+				if(prev.text.indexOf("\n") != -1) ev.row--;
 			}
 			else if(prev.type == "reload") { // The file was reloaded with new text
+				// No need to transform, the chnage was over-written
 			}
 			
 		}
