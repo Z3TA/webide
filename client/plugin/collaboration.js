@@ -19,7 +19,7 @@
 	var eventOrder = -1;
 	var eventOrderSynced = false;
 	var userConnectionId = 0;
-	var fileChangeEvents = {}; // filePath: ev: Store latest events for use in transformation
+	var fileChangeEvents = {}; // filePath: [order][n]ev: Store latest events for use in transformation
 	var collabMode = false;
 	var ignoreNextFileChangeEvent = false;
 	var fileChangeEventOrders = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
@@ -263,7 +263,10 @@
 		
 		if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
 		
-		fileChangeEvents[file.path][fileChangeEvent.order] = fileChangeEvent;
+		if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+		
+		fileChangeEvents[file.path][fileChangeEvent.order] = [];
+		fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
 		
 		console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
 		
@@ -370,6 +373,8 @@
 			
 			console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
 			
+			var arr = fileChangeEvents[file.path][ev.order];
+			
 			if(ev.order > currentOrder+1) {
 				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrders[file.path]) + " events!");
 			}
@@ -378,32 +383,41 @@
 				console.log("ev.order=" + ev.order + " is the latest order! currentOder=" + currentOrder + ". No need to transform");
 			}
 			else if(ev.order == currentOrder ) {
-				console.log("Two file change events with the same ev.order=" + ev.order + " currentOrder=" + currentOrder + ". We need to transform!");
-				if(fileChangeEvents[file.path][ev.order].cId == userConnectionId) {
-					// I just sent an event with this order
-					// In my point of view I was first
-					console.log("Change ev.order=" + ev.order + " was made by this client.");
-					// We need to transform the event with the other event in mind
-					var previousEvent = fileChangeEvents[file.path][ev.order];
-					transformBackwards(ev, previousEvent);
+				
+				for (var previousEvent, i=arr.length-1; i>-1; i--) {
+					previousEvent = arr[i];
+					
+					if(arr[i].cId == userConnectionId) {
+						// I just sent an event with this order
+						// In my point of view I was first
+						console.log("Change " + i + "/" + arr.length + " of ev.order=" + ev.order + " was made by this client.");
+						// We need to transform the event with the other event in mind
+						transformBackwards(ev, previousEvent);
+					}
+					else if(arr[i].cId == ev.cId) {
+						throw new Error("User with cId=" + ev.cId + " sent two change events with the same order! " + JSON.stringify(arr[i]) + " vs " + JSON.stringify(ev));
+					}
+					else {
+						// Two different users who are not me, sent an event at the same time
+						// In my point of view, the event we have already recived came first!
+						// We have to transform from the previous event
+						console.log("Transforming with previous event: " + JSON.stringify(previousEvent));
+						transformBackwards(ev, previousEvent);
+					}
+					
 				}
-				else if(ev[ev.order].cId == ev.cId) {
-					throw new Error("User with cId=" + ev.cId + " sent two change events with the same order!");
-				}
-				else {
-					// Two different users who are not me, sent an event at the same time
-					// In my point of view, the event we have already recived came first!
-					// We have to transform from the previous event
-					var previousEvent = fileChangeEvents[file.path][ev.order];
-					console.log("Transforming with previous event: " + JSON.stringify(previousEvent));
-					transformBackwards(ev, previousEvent);
-				}
+				
 			}
 			else if(ev.order < currentOrder) {
 				console.log(json.alias +  " is behind! ev.order=" + ev.order + " currentOrder=" + currentOrder);
 				var order = ev.order;
-				while(order++ < currentOrder) transformBackwards(ev, fileChangeEvents[file.path][order]);
 				
+				while(order++ < currentOrder) {
+					arr = fileChangeEvents[file.path][order];
+					for (var i=arr.length-1; i>-1; i--) {
+						transformBackwards(ev, arr[i]);
+					}
+				}
 			}
 			else {
 				throw new Error("ev.order=" + ev.order + " currentOrder=" + currentOrder);
@@ -411,7 +425,9 @@
 			
 			if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
 			
-			fileChangeEvents[file.path][currentOrder] = ev;
+			if( !fileChangeEvents[file.path][ev.order] ) fileChangeEvents[file.path][ev.order] = [];
+			
+			fileChangeEvents[file.path][ev.order].push(ev);
 			
 			
 			// ### Apply file change
@@ -548,12 +564,12 @@
 				echoCounter: ++fakeEchoCounter,
 				fileChange: {
 					filePath: testFile.path,
-					order: o.order || ++fileChangeOrder,
+					type: o.change,
+					text: o.text || "",
 					index: o.index || caret.index,
 					row: o.row || caret.row,
 					col: o.col || caret.col,
-					text: o.text || "",
-					type: o.change
+					order: o.order || ++fileChangeOrder,
 				}
 			}
 			
@@ -595,7 +611,7 @@
 			if(file.text != "abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
-			
+			console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
 			
 			if(typeof callback == "function") callback(true);
