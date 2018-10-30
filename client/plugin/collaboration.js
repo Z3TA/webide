@@ -28,7 +28,7 @@
 	
 	var eventOrder = -1;
 	var eventOrderSynced = false;
-	var userConnectionId = 0;
+	var userConnectionId = -1;
 	var fileChangeEvents = {}; // filePath: [order][n]ev: Store latest events for use in transformation
 	var collabMode = false;
 	var ignoreFileChange = false;
@@ -69,6 +69,7 @@
 			if(EDITOR.settings.devMode) {
 				var charC = 67;
 				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: charC, combo: CTRL+SHIFT});
+				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: 90, combo: CTRL+SHIFT});
 			}
 			
 		},
@@ -99,6 +100,11 @@
 		// Login success comes before collabConnect!
 		// json: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}
 		
+		for(var filePath in undoRedoHistory) {
+			for (var i=0; i<undoRedoHistory[filePath].length; i++) {
+				if(undoRedoHistory[filePath][i].cId == userConnectionId) undoRedoHistory[filePath][i].cId = json.cId;
+			}
+		}
 		userConnectionId = json.cId;
 		
 		// Get the eventOrder, (currently echoCounter)
@@ -213,7 +219,13 @@
 	function collabConnectionLost() {
 		// We have lost the connection from the server
 		
-		userConnectionId = null;
+		for(var filePath in undoRedoHistory) {
+			for (var i=0; i<undoRedoHistory[filePath].length; i++) {
+				if(undoRedoHistory[filePath][i].cId == userConnectionId) undoRedoHistory[filePath][i].cId = -1;
+			}
+		}
+		
+		userConnectionId = -1;
 		
 		if(!connectionClosedDialog && collabMode) connectionClosedDialog = alertBox("We have lost the connection to the server. Exiting collaboraction mode!");
 		
@@ -621,10 +633,18 @@ console.warn("Unable to redo: undo/redo history index=" + history.index + " has 
 		
 		if(collabMode) {
 			// We are only interested in redo-ing our own changes
+			var startChangeIndex = history.index;
 			for (var i=history.index; i<history.length; i++) {
 				if(history[i].cId == userConnectionId) break;
 history.index++;
 			}
+			
+			console.log("Transforming change=" + JSON.stringify(change));
+			for (var i=startChangeIndex; i<history.index; i++) {
+				transformBackwards(change, history[i]);
+			}
+			console.log("Transformed change=" + JSON.stringify(change));
+			
 }
 		
 		var historyItem = history[history.index];
@@ -633,9 +653,6 @@ history.index++;
 		
 		var change = copyObjProp(historyItem);
 		
-		for (var i=history.index; i<history.length; i++) {
-			transformBackwards(change, history[i]);
-		}
 		
 		saveUndoRedoHistory = false;
 		redo(file, change, true);
@@ -666,17 +683,26 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 		
 		if(collabMode) {
 			// We only want to undo the changes we made
-			for (var i=history.length-1; i>-1; i--) {
-				if(history[i].cId == userConnectionId) break;
-				history.index--;
+			var startChangeIndex = history.index;
+			for (var i=history.index; i>-1; i--) {
+				if(history[i].cId == userConnectionId) {
+					console.log("made by me: " + JSON.stringify(history[i]));
+					break;
+				}
+				else {
+					console.log("made by someone else: " + JSON.stringify(history[i]));
+					history.index--;
+				}
 			}
 			
 			var change = copyObjProp(history[history.index]);
 			
 			// We have to tranform the change to the correct position
-			for (var i=history.length-1; i>history.index; i--) {
+			console.log("Transforming change=" + JSON.stringify(change));
+			for (var i=startChangeIndex; i>history.index; i--) {
 				transformBackwards(change, history[i]);
 			}
+			console.log("Transformed change=" + JSON.stringify(change));
 		}
 		else {
 			var change = history[history.index];
@@ -880,12 +906,23 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 			if(file.text != "abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
+			// Undo/redo in colaboration mode
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "abc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "ab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			
+			
 			console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
 			
 			if(typeof callback == "function") callback(true);
 			else {
 				file.write("\n\nCollaboration test suite passed!"); // Write at EOF
+				EDITOR.renderNeeded();
 			}
 			collabMode = false;
 			
@@ -895,6 +932,40 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 	}
 	
 	EDITOR.addTest(testCollaboration);
+	
+	function testUndoRedo(callback) {
+		var Z = 90;
+		
+		EDITOR.openFile("undoredo.txt", "\n", function colaborationTestFileOpened(err, file) {
+			if(err) throw err;
+
+			EDITOR.mock("typing", "abc");
+			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			if(typeof callback == "function") callback(true);
+			else {
+				file.write("\n\nundo/redo test suite passed!"); // Write at EOF
+				EDITOR.renderNeeded();
+			}
+		});
+		
+		if(typeof callback != "function") return false;
+	}
+	
+	EDITOR.addTest(testUndoRedo);
 	
 	// TEST-CODE-END
 	
