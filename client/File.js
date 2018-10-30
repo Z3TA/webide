@@ -3387,6 +3387,7 @@ file.mode = "text";
 		*/
 		
 		console.log("File:fixCaret");
+		console.log("before: " + JSON.stringify(caret));
 		
 		if(caret == undefined) caret = file.caret
 		else {
@@ -3431,13 +3432,14 @@ file.mode = "text";
 		}
 		caret.index = file.getIndexFromRowCol(caret.row, caret.col);
 		
+		console.log("after: " + JSON.stringify(caret));
+		
 		file.checkCaret(caret);
 		
 		if(caret == file.caret) EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		return caret;
-		
-	}
+		}
 	
 	File.prototype.scrollToCaret = function(caret) {
 		var file = this;

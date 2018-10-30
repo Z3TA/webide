@@ -12,7 +12,17 @@
 		Problem: We don't just want to have collaboration when logging in to the same account
 		Solution: Make it possible to share the session, by giving a temorary login token/password
 		
+		Dilemma: Should we make this into a separate mode, so we can have different functionality
+		to for example Ctrl+Z (undo/redo) !?
+		Or should we let this module handle all undo/redo !?
+		Decision: Let this module handle all undo/redo
+		
+		Dilemma: Should we keep track of undo/redo history branches
+		Answer: No, keep it simple!
+		
 		Hmm, how will this work with the terminal !? Make the terminal only send to the client with the terminal !?
+		
+		todo: Handle file renaming (keep history)
 		
 	*/
 	
@@ -21,15 +31,19 @@
 	var userConnectionId = 0;
 	var fileChangeEvents = {}; // filePath: [order][n]ev: Store latest events for use in transformation
 	var collabMode = false;
-	var ignoreNextFileChangeEvent = false;
+	var ignoreFileChange = false;
 	var fileChangeEventOrderCounters = {}; // Separate order counters for each file(path): filePath: order (Number: counter)
 	var meMaster = false;
 	var connectionClosedDialog;
 	var clientLeaveDialog = {}; 
+	var undoRedoHistory = {}; // filePath:changeEvent
+	var saveUndoRedoHistory = true;
 	
 	EDITOR.plugin({
-		desc: "Let you see changes live while logged in from different devices",
+		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
 		load: function loadCollaboration() {
+			
+			//EDITOR.addMode("collaboration", "default");
 			
 			EDITOR.on("fileOpen", collabFileOpen);
 			EDITOR.on("fileClose", collabFileClose);
@@ -48,6 +62,9 @@
 			CLIENT.on("clientJoin", collabJoin);
 			CLIENT.on("clientLeave", collabLeave);
 			CLIENT.on("connectionLost", collabConnectionLost);
+			
+			EDITOR.bindKey({desc: "Redo change", charCode: 89, fun: collabRedo, combo: CTRL});
+			EDITOR.bindKey({desc: "Undo change", charCode: 90, fun: collabUndo, combo: CTRL});
 			
 			if(EDITOR.settings.devMode) {
 				var charC = 67;
@@ -71,6 +88,8 @@
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
 			
 			EDITOR.unbindKey(testCollaboration);
+			EDITOR.unbindKey(collabRedo);
+			EDITOR.unbindKey(collabUndo);
 			
 		},
 		order: 100
@@ -89,7 +108,6 @@
 		
 	}
 	
-	
 	function collabJoin(json) {
 		// A new client has connected
 		
@@ -107,7 +125,6 @@
 			var wasInCollabMode = collabMode;
 			
 			collabMode = true;
-			
 			/*
 				Need to sync unsaved savedAs files
 				Problem: Who is going to send the state to the new client !?
@@ -122,7 +139,7 @@
 			
 			if(userConnectionId == master) {
 				for(var path in EDITOR.files) {
-					if(!fileChangeEventOrderCounters.hasOwnProperty(path)) fileChangeEventOrderCounters[path] = 0;
+					if(!fileChangeEventOrderCounters.hasOwnProperty(path)) fileChangeEventOrderCounters[path] = -1;
 				}
 				CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChangeEventOrderCounters: fileChangeEventOrderCounters});
 			}
@@ -210,8 +227,9 @@
 	}
 	
 	function collabFileOpen(file) {
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
 		
-		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) fileChangeEventOrderCounters[file.path] = 0;
+		if(!collabMode) return true;
 		
 		if(!file.isSaved) syncFile(file);
 		else {
@@ -234,6 +252,8 @@
 	}
 	
 	function collabSelectText(file, selection) {
+		if(!collabMode) return true;
+		
 		console.log(selection);
 		
 		if(selection.length == 0) return true;
@@ -254,43 +274,86 @@
 	}
 	
 	function collabFileChange(file, change, text, index, row, col) {
-		//if(change != "undo-redo") throw new Error("We really need to make a new undo-redo!"
+		if(ignoreFileChange) return true;
 		
-		if(!collabMode) return;
-		if(ignoreNextFileChangeEvent) return;
+		console.log("fileChangeEvents: " + JSON.stringify(fileChangeEvents, null, 2));
 		
-		if(file == undefined) throw new Error("file=" + file);
-		if(change == undefined) throw new Error("change=" + file);
-		if(text == undefined) throw new Error("text=" + file);
-		if(index == undefined) throw new Error("index=" + index);
-		if(row == undefined) throw new Error("row=" + row);
-		if(col == undefined) throw new Error("col=" + col);
+if(file == undefined) throw new Error("file=" + file);
+			if(change == undefined) throw new Error("change=" + file);
+			if(text == undefined) throw new Error("text=" + file);
+			if(index == undefined) throw new Error("index=" + index);
+			if(row == undefined) throw new Error("row=" + row);
+			if(col == undefined) throw new Error("col=" + col);
+			
+			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+			
+			var fileChangeEvent = {
+				filePath: file.path, 
+				type: change, 
+				text: text, 
+				index: index, 
+				row: row || file.caret.row,
+				col: col || file.caret.col,
+				order: ++fileChangeEventOrderCounters[file.path], 
+				cId: userConnectionId // The server adds cId, but we also want it in the file change object
+			};
 		
-		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+		console.log("fileChangeEvent.order=" + fileChangeEvent.order);
 		
-		var fileChangeEvent = {
-			filePath: file.path, 
-			type: change, 
-			text: text, 
-			index: index, 
-			row: row || file.caret.row,
-			col: col || file.caret.col,
-			order: ++fileChangeEventOrderCounters[file.path], 
-			cId: userConnectionId // The server adds cId, but we also want it in the file change object
-		};
+		if(collabMode) {
+			if(!fileChangeEvents.hasOwnProperty(file.path)) {
+				console.log("before: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
+				fileChangeEvents[file.path] = [];
+				console.log("after: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
+			}
+			
+			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			
+			fileChangeEvents[file.path][fileChangeEvent.order] = [];
+			
+			console.log("A fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			
+			if(fileChangeEvent == undefined) throw new Error("fileChangeEvent=" + fileChangeEvent);
+			fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
+			
+			console.log("B fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			
+			console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
+			
+			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
+		}
 		
-		if(!fileChangeEvents.hasOwnProperty(file.path)) fileChangeEvents[file.path] = [];
-		
-		if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
-		
-		fileChangeEvents[file.path][fileChangeEvent.order] = [];
-		fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
-		
-		console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
-		
-		CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
+		if(saveUndoRedoHistory) {
+			saveUndoRedoHistoryEvent(fileChangeEvent)
+		}
 		
 		return true;
+	}
+	
+	function saveUndoRedoHistoryEvent(fileChangeEvent) {
+		
+		console.warn("Adding event to undo/redo history: " + JSON.stringify(fileChangeEvent, null, 2));
+		
+		var path = fileChangeEvent.filePath;
+		
+		if(path == undefined) throw new Error("path=" + path + " fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
+		
+		if(!undoRedoHistory.hasOwnProperty(path)) {
+			undoRedoHistory[path] = [];
+			undoRedoHistory[path].index = -1;
+		}
+		
+		if(undoRedoHistory[path].index < undoRedoHistory[path].length-1) {
+			// We made a change in the middle of history
+			// As we have not chosen to support history branches, we will reset history
+			console.log("Resetting undoRedoHistory.length=" + undoRedoHistory.length + " to " + (undoRedoHistory[file.path].index+1));
+			undoRedoHistory[path].length = undoRedoHistory[path].index+1;
+		}
+		
+		undoRedoHistory[path].push(fileChangeEvent);
+		undoRedoHistory[path].index++;
+		
+		console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
 	}
 	
 	function collabHandleEcho(json) {
@@ -402,6 +465,9 @@
 			}
 			else if(ev.order == currentOrder ) {
 				
+				if(arr == undefined) throw new Error("History not recorded: ev.order=" + ev.order + " ignoreFileChange=" + ignoreFileChange + " file.path=" + file.path + " in fileChangeEvents ? " + 
+				(fileChangeEvents.hasOwnProperty(file.path)) + " fileChangeEvents[" + file.path + "]=" + JSON.stringify(fileChangeEvents[file.path], null, 2) + " typeof " + (typeof fileChangeEvents[file.path]) );
+				
 				for (var previousEvent, i=arr.length-1; i>-1; i--) {
 					previousEvent = arr[i];
 					
@@ -445,53 +511,22 @@
 			
 			if( !fileChangeEvents[file.path][ev.order] ) fileChangeEvents[file.path][ev.order] = [];
 			
+			if(ev == undefined) throw new Error("ev=" + ev);
+			if(ev.order == undefined) throw new Error("ev.order=" + ev.order + " ev=" + JSON.stringify(ev, null, 2));
+			
 			fileChangeEvents[file.path][ev.order].push(ev);
 			
 			
 			// ### Apply file change
 			
-			ignoreNextFileChangeEvent = true;
-			
-			console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index);
-			
-			if(ev.type == "removeRow") {
-				var caret = file.createCaret(ev.index);
-				console.log("Removing row on row=" + caret.row);
-				file.removeRow(ev.row);
-			}
-			else if(ev.type == "text") { // Text was inserted
-				var caret = file.createCaret(ev.index, ev.row, ev.col);
-				console.log("Inserting text at caret=" + JSON.stringify(caret));
-				file.insertText(ev.text, caret);
-			}
-			else if(ev.type == "insert") { // One character was inserted
-				var caret = file.createCaret(ev.index, ev.row, ev.col);
-				console.log("Putting character=" + ev.text + " at caret=" + JSON.stringify(caret));
-				file.putCharacter(ev.text, caret);
-			}
-			else if(ev.type == "deleteTextRange") { // Delete a bunch of text
-				console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
-				file.deleteTextRange(ev.index, ev.index + ev.text.length-1);
-			}
-			else if(ev.type == "linebreak") { // A line break was inserted
-				var caret = file.createCaret(ev.index, ev.row, ev.col);
-				console.log("Inserting a line break at caret=" + JSON.stringify(caret));
-				file.insertLineBreak(caret);
-			}
-			else if(ev.type == "delete") { // One character was deleted
-				var caret = file.createCaret(ev.index, ev.row, ev.col);
-				console.log("Deleting character=" + ev.text + " at caret=" + JSON.stringify(caret));
-				file.deleteCharacter(caret);
-			}
-			else if(ev.type == "reload") { // The file was reloaded with new text
-				console.log("Reloading text! ev.text.length=" + ev.text.length);
-				file.reload(ev.text);
-			}
-			else throw new Error("Unknown ev.type=" + ev.type);
-			
-			ignoreNextFileChangeEvent = false;
+			ignoreFileChange = true;
+			redo(file, ev, false);
+			ignoreFileChange = false;
 			
 			if(file == EDITOR.currentFile) EDITOR.renderNeeded();
+			
+			// Undo-redo
+			saveUndoRedoHistoryEvent(ev);
 			
 		}
 		else if(json.select) {
@@ -514,55 +549,259 @@
 		
 		return true;
 		
-		function transformBackwards(ev, prev) {
-			
-			if(prev == undefined || ev == undefined) throw new Error("ev=" + JSON.stringify(ev) + " prev=" + JSON.stringify(prev));
-			
-			var textLength = prev.text.length;
-			
-			console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index);
-			
-			/*
-				We only need to know index and row
-			*/
-			
-			if(prev.type == "removeRow" && ev.index > prev.index) {
-				ev.index -= textLength;
-				ev.row--;
-			}
-			else if(prev.type == "text" && ev.index >= prev.index) { // Text was inserted
-				ev.index += textLength;
-				ev.row += UTIL.occurrences(prev.string, "\n");
-			}
-			else if(prev.type == "insert" && ev.index >= prev.index) { // One character was inserted
-				ev.index += 1;
-			}
-			else if(prev.type == "deleteTextRange" && ev.index > prev.index) { // Delete a bunch of text
-				ev.index -= textLength;
-				ev.row -= UTIL.occurrences(prev.string, "\n");
-			}
-			else if(prev.type == "linebreak" && ev.index > prev.index) { // A line break was inserted
-				ev.index += textLength; // Lf or CrLf
-				ev.row++;
-			}
-			else if(prev.type == "delete" && ev.index >= prev.index) { // One or more characters was deleted (can include line breaks)
-				ev.index -= textLength;
-				if(prev.text.indexOf("\n") != -1) ev.row--;
-			}
-			else if(prev.type == "reload") { // The file was reloaded with new text
-				// No need to transform, the chnage was over-written
-			}
-			
-		}
 		
 		
 		function updateFileConent(file, text) {
-			ignoreNextFileChangeEvent = true;
+			ignoreFileChange = true;
 			file.reload(text);
-			ignoreNextFileChangeEvent = false;
+			ignoreFileChange = false;
 		}
 	}
 	
+	function transformBackwards(ev, prev) {
+		
+		if(prev == undefined || ev == undefined) throw new Error("ev=" + JSON.stringify(ev) + " prev=" + JSON.stringify(prev));
+		
+		var textLength = prev.text.length;
+		
+		console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index);
+		
+		/*
+			We only need to know index and row
+		*/
+		
+		if(prev.type == "removeRow" && ev.index > prev.index) {
+			ev.index -= textLength;
+			ev.row--;
+		}
+		else if(prev.type == "text" && ev.index >= prev.index) { // Text was inserted
+			ev.index += textLength;
+			ev.row += UTIL.occurrences(prev.string, "\n");
+		}
+		else if(prev.type == "insert" && ev.index >= prev.index) { // One character was inserted
+			ev.index += 1;
+		}
+		else if(prev.type == "deleteTextRange" && ev.index > prev.index) { // Delete a bunch of text
+			ev.index -= textLength;
+			ev.row -= UTIL.occurrences(prev.string, "\n");
+		}
+		else if(prev.type == "linebreak" && ev.index > prev.index) { // A line break was inserted
+			ev.index += textLength; // Lf or CrLf
+			ev.row++;
+		}
+		else if(prev.type == "delete" && ev.index >= prev.index) { // One or more characters was deleted (can include line breaks)
+			ev.index -= textLength;
+			if(prev.text.indexOf("\n") != -1) ev.row--;
+		}
+		else if(prev.type == "reload") { // The file was reloaded with new text
+			// No need to transform, the chnage was over-written
+		}
+		
+	}
+	
+	function collabRedo(file) {
+		if(!undoRedoHistory.hasOwnProperty(file.path)) {
+console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
+			return PREVENT_DEFAULT;
+		}
+		
+		var history = undoRedoHistory[file.path];
+		
+		if(history.length == 0) {
+console.warn("Unable to redo: No undo/redo history to undo! history.length=" + history.length + "");
+			return PREVENT_DEFAULT;
+		}
+		
+		if(history.index >= history.lebgth) {
+console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
+			return PREVENT_DEFAULT;
+		}
+		
+		history.index++;
+		
+		if(collabMode) {
+			// We are only interested in redo-ing our own changes
+			for (var i=history.index; i<history.length; i++) {
+				if(history[i].cId == userConnectionId) break;
+history.index++;
+			}
+}
+		
+		var historyItem = history[history.index];
+		
+		if(!historyItem) throw new Error("historyItem: " + historyItem + " history.index=" + history.index + " history=", history);
+		
+		var change = copyObjProp(historyItem);
+		
+		for (var i=history.index; i<history.length; i++) {
+			transformBackwards(change, history[i]);
+		}
+		
+		saveUndoRedoHistory = false;
+		redo(file, change, true);
+		saveUndoRedoHistory = true;
+		
+		return PREVENT_DEFAULT;
+	}
+	
+	function collabUndo(file) {
+		if(!undoRedoHistory.hasOwnProperty(file.path)) {
+console.warn(file.path + " has no undo/redo history!");
+			return PREVENT_DEFAULT;
+		}
+		
+		var history = undoRedoHistory[file.path];
+		
+		console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index);
+		
+		if(history.length == 0) {
+console.warn("No undo/redo history to undo! history.length=" + history.length + "");
+			return PREVENT_DEFAULT;
+		}
+		
+		if(history.index < 0) {
+console.warn("undo/redo history index=" + history.index + " has reached the bottom");
+			return PREVENT_DEFAULT;
+		}
+		
+		if(collabMode) {
+			// We only want to undo the changes we made
+			for (var i=history.length-1; i>-1; i--) {
+				if(history[i].cId == userConnectionId) break;
+				history.index--;
+			}
+			
+			var change = copyObjProp(history[history.index]);
+			
+			// We have to tranform the change to the correct position
+			for (var i=history.length-1; i>history.index; i--) {
+				transformBackwards(change, history[i]);
+			}
+		}
+		else {
+			var change = history[history.index];
+		}
+		
+		if(change == undefined) throw new Error("change=" + change + " history.index=" + history.index + " history:" + JSON.stringify(history, null, 2));
+		
+		history.index--;
+		
+		/*
+			Question: Should we ignore the file change event !?
+			Answer: We want to send the change to other clients, but not add it to our own undo/redo history
+		*/ 
+		
+		saveUndoRedoHistory = false;
+		
+		undo(file, change, true);
+		
+		saveUndoRedoHistory = true;
+		
+		return PREVENT_DEFAULT;
+	}
+	
+	function undo(file, ev, moveCaret) {
+		if(!ev.type) throw new Error("File change event without type: " + JSON.stringify(ev));
+		
+		console.log("Undoing file change: ev.type=" + ev.type + " ev.index=" + ev.index);
+		
+		if(ev.type == "removeRow") {
+			var caret = file.createCaret(ev.index);
+			console.log("Re-adding row on row=" + caret.row);
+			if(caret.row != ev.row) throw new Error("caret.row=" + caret.row + " does not match ev.row=" + ev.row + "\nev:" + JSON.stringify(ev, null, 2) + "\ncaret=" + JSON.stringify(caret));
+			file.insertTextRow(ev.row);
+		}
+		else if(ev.type == "text") { // Text was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Undoing insert text (" + ev.text.length + " chars) at caret=" + JSON.stringify(caret));
+			file.deleteTextRange(caret.index, caret.index + ev.text.length);
+		}
+		else if(ev.type == "insert") { // One character was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Undoing insert character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			file.deleteCharacter(caret);
+		}
+		else if(ev.type == "deleteTextRange") { // Delete a bunch of text
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Undoing deleting of " + ev.text.length + " characters at index=" + ev.index);
+			file.insertText(ev.text, caret);
+		}
+		else if(ev.type == "linebreak") { // A line break was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Undoing inserting a line break at caret=" + JSON.stringify(caret));
+			file.deleteCharacter(caret);
+		}
+		else if(ev.type == "delete") { // One character was deleted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Undoing deleting character=" + UTIL.lbChars(ev.text) + " at caret=" + JSON.stringify(caret));
+			
+			if(ev.text.indexOf("\n") != -1) file.insertLineBreak(caret);
+			else file.putCharacter(ev.text, caret);
+			
+		}
+		else if(ev.type == "reload") { // The file was reloaded with new text
+			console.log("Reloading text! ev.text.length=" + ev.text.length);
+			file.reload(ev.text);
+		}
+		else throw new Error("Unknown ev.type=" + ev.type);
+		
+		if(moveCaret && caret) file.caret = caret;
+		
+		EDITOR.renderNeeded();
+	}
+	
+	function redo(file, ev, moveCaret) {
+		console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " moveCaret=" + moveCaret);
+		
+		if(ev.type == "removeRow") {
+			var caret = file.createCaret(ev.index);
+			console.log("Removing row on row=" + caret.row);
+			file.removeRow(ev.row);
+		}
+		else if(ev.type == "text") { // Text was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Inserting text at caret=" + JSON.stringify(caret));
+			file.insertText(ev.text, caret);
+		}
+		else if(ev.type == "insert") { // One character was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Putting character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			file.putCharacter(ev.text, caret);
+		}
+		else if(ev.type == "deleteTextRange") { // Delete a bunch of text
+			console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
+			file.deleteTextRange(ev.index, ev.index + ev.text.length-1);
+		}
+		else if(ev.type == "linebreak") { // A line break was inserted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Inserting a line break at caret=" + JSON.stringify(caret));
+			file.insertLineBreak(caret);
+		}
+		else if(ev.type == "delete") { // One character was deleted
+			var caret = file.createCaret(ev.index, ev.row, ev.col);
+			console.log("Deleting character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			file.deleteCharacter(caret);
+		}
+		else if(ev.type == "reload") { // The file was reloaded with new text
+			console.log("Reloading text! ev.text.length=" + ev.text.length);
+			file.reload(ev.text);
+		}
+		else throw new Error("Unknown ev.type=" + ev.type);
+		
+		if(moveCaret && caret) {
+			file.caret = caret;
+		}
+		
+		EDITOR.renderNeeded();
+	}
+	
+	function copyObjProp(fromObj) {
+		var obj = {};
+		for(var prop in fromObj) {
+			obj[prop] = fromObj[prop];
+		}
+		return obj;
+	}
 	
 	
 	// TEST-CODE-START
@@ -578,7 +817,7 @@
 		var testEventOrder = 1;
 		var fakeEchoCounter = 1;
 		var testFile;
-		var fileChangeOrder = 1;
+		var fileChangeOrder = 0;
 		
 		function f(o) {
 			
@@ -606,7 +845,7 @@
 			collabHandleEcho(json);
 		}
 		
-		EDITOR.openFile("collabtest.txt", "\n", function(err, file) {
+		EDITOR.openFile("collabtest.txt", "\n", function colaborationTestFileOpened(err, file) {
 			if(err) throw err;
 			
 			testFile = file;
@@ -616,7 +855,7 @@
 			EDITOR.mock("typing", "abc");
 			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
-			fileChangeOrder = 3; // 3 characters type (abc)
+			fileChangeOrder = 2; // 3 characters typed (abc) fileChangeOrder:0-1-2
 			if(fileChangeEventOrderCounters[file.path] != fileChangeOrder) throw new Error("Unexpected: fileChangeOrder=" + fileChangeOrder + " fileChangeEventOrderCounters[" + file.path + "]=" + fileChangeEventOrderCounters[file.path]);
 			
 			f({change: "linebreak", index: 3, text: "\n"});

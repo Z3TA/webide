@@ -527,14 +527,52 @@ callback = value;
 		console.warn("window.localStorage not available!");
 	}
 	
-	EDITOR.addMode = function addMode(name) {
-		if(EDITOR.modes.indexOf(name) != -1) throw new Error(name + " mode is already registered!");
-		EDITOR.modes.push(name);
-	}
+	EDITOR.addMode = function addMode(modeName, inheritKeyBindingsFrom) {
+		if(EDITOR.modes.indexOf(modeName) != -1) throw new Error(modeName + " mode is already registered!");
+		EDITOR.modes.push(modeName);
+		
+		if(inheritKeyBindingsFrom) {
+			for(var i=0, b; i<keyBindings.length; i++) {
+				if(keyBindings[i].mode == inheritKeyBindingsFrom) {
+b = {};
+for(var prop in keyBindings[i]) {
+b[prop] = keyBindings[i][prop];
+}
+b.mode = modeName;
+EDITOR.bindKey(b);
+}
+			}
+}
+}
+	
 	EDITOR.setMode = function setMode(name) {
 		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
 		EDITOR.mode = name;
 		console.warn("Set EDITOR.mode=" + EDITOR.mode);
+	}
+	
+	EDITOR.beep = function beep(volume, frequency, type, duration) {
+		// Makes a beep sound
+		
+		if(volume == undefined) volume = 0.15;
+		if(frequency == undefined) frequency = 100;
+		if(type == undefined) type = "square";
+		if(duration == undefined) duration = 120;
+		
+		var audio = window.AudioContext || window.webkitAudioContext
+		var audioCtx = new audio;
+		var oscillator = audioCtx.createOscillator();
+		var gainNode = audioCtx.createGain();
+		
+		oscillator.connect(gainNode);
+		gainNode.connect(audioCtx.destination);
+		
+		gainNode.gain.value = volume;
+		oscillator.frequency.value = frequency;
+		oscillator.type = type;
+		
+		oscillator.start();
+		oscillator.stop(audioCtx.currentTime + duration/1000)
 	}
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
@@ -3681,7 +3719,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
 				if(b.disableOthers) disable.push(keyBindings[i]);
 				else {
-					// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
+					// It's OK to bind the same key combo to do many things, eg Esc key, but we should give a warning:
 					UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
 				}
 			}
