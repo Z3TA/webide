@@ -384,7 +384,7 @@ if(file == undefined) throw new Error("file=" + file);
 				// But only the changes we made
 				
 				var oldHistoryLength = history.length;
-				for (var i=history.index, removed; i<history.length; i++) {
+				for (var i=history.index+1, removed; i<history.length; i++) {
 					if(history[i].cId == userConnectionId) {
 						removed = history.splice(i, 1);
 						i--;
@@ -812,7 +812,7 @@ transformBackwards(change, history[i]);
 		else if(ev.type == "text") { // Text was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
 			console.log("Undoing insert text (" + ev.text.length + " chars) at caret=" + JSON.stringify(caret));
-			file.deleteTextRange(caret.index, caret.index + ev.text.length);
+			file.deleteTextRange(caret.index, caret.index + ev.text.length - 1);
 		}
 		else if(ev.type == "insert") { // One character was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
@@ -1026,6 +1026,29 @@ transformBackwards(change, history[i]);
 		EDITOR.openFile("undoredo.txt", "\n", function colaborationTestFileOpened(err, file) {
 			if(err) throw err;
 
+			EDITOR.mock("typing", "ab");
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("typing", "12");
+			if(file.text != "12\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "1\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Should do nothing
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			
 			EDITOR.mock("typing", "abc");
 			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
@@ -1061,6 +1084,8 @@ transformBackwards(change, history[i]);
 			EDITOR.mock("typing", "åä");
 			if(file.text != "abåä\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			console.log("Did history reset ? " + JSON.stringify(undoRedoHistory[file.path], null, 2));
+			
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
 			if(file.text != "abå\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
@@ -1072,6 +1097,39 @@ transformBackwards(change, history[i]);
 			
 			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
 			if(file.text != "abåä\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "abå\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			// Inserting and removing many characters
+			file.insertText("xyz");
+			if(file.text != "xyz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "xyz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			file.deleteTextRange(0, 2);
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "xyz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo delete
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
 			
 			
 			if(typeof callback == "function") callback(true);
