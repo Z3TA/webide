@@ -384,8 +384,15 @@ if(file == undefined) throw new Error("file=" + file);
 				// But only the changes we made
 				
 				var oldHistoryLength = history.length;
-				cutHead();
-				console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! path=" + path);
+				for (var i=history.index, removed; i<history.length; i++) {
+					if(history[i].cId == userConnectionId) {
+						removed = history.splice(i, 1);
+						i--;
+						history.index = i;
+						console.log("Removed history item: " + JSON.stringify(removed, null, 2));
+					}
+				}
+				console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! history.index=" + history.index + " history.length=" + history.length + " path=" + path);
 			}
 		}
 		
@@ -403,15 +410,6 @@ if(file == undefined) throw new Error("file=" + file);
 			if(history[i] == null) throw new Error("history i=" + i + " is " + history[i]);
 		}
 		
-		function cutHead() {
-			for (var i=history.index, removed; i<history.length; i++) {
-				if(history[i].cId == userConnectionId) {
-					removed = history.splice(i, 1);
-					i--;
-					console.log("Removed history item: " + JSON.stringify(removed, null, 2));
-				}
-			}
-		}
 		
 	}
 	
@@ -678,21 +676,37 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 			return PREVENT_DEFAULT;
 		}
 		
-		if(history.index >= history.lebgth) {
-console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
+		if(history.index == history.length-1) {
+			console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
 			return PREVENT_DEFAULT;
 		}
 		
+		if(history.index >= history.length) throw new Error("history.index=" + history.index + " history.length=" + history.length);
+		
+		// Move the history index forward before!
+		
 		// Move history index forward to a change we made
+		var oldIndex = history.index;
 		history.index++;
 		for (var i=history.index; i<history.length; i++) {
 			if(history[i].cId == userConnectionId) break;
 			history.index++;
 		}
+		console.log("Redo: Moved history index from " + oldIndex + " to " + history.index + " history.length=" + length);
+		
+		if(history.index > history.length) throw new Error("history.index=" + history.index + " history.length=" + history.length);
+		
+		if(history.index >= history.length) {
+			console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
+			
+			return PREVENT_DEFAULT;
+		}
 		
 		var historyItem = history[history.index];
 		
-		if(!historyItem) throw new Error("historyItem=" + historyItem + " history.index=" + history.index + " history=" + JSON.stringify(history,  null, 2));
+		if(!historyItem) throw new Error("historyItem=" + historyItem + " history.index=" + history.index + " history.length=" + history.length + " history=" + JSON.stringify(history,  null, 2));
+		
+		if(historyItem.cId != userConnectionId) throw new Error("history index should always point to a change we made! history.index=" + history.index + " historyItem=" + JSON.stringify(historyItem, null, 2));
 		
 		var change = copyObjProp(historyItem);
 		
@@ -732,7 +746,17 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 			return PREVENT_DEFAULT;
 		}
 		
-		var change = copyObjProp(history[history.index]);
+		// Change the history.index afterwards!
+		
+		if(history.index >= history.length) throw new Error("Should not be able to reach the cealing: history.index=" + history.index + " history.length=" + history.length);
+		
+		var historyItem = history[history.index];
+		
+		if(historyItem == undefined) throw new Error("historyItem=" + historyItem + " history.index=" + history.index + " history.length=" + history.length);
+		
+		if(historyItem.cId != userConnectionId) throw new Error("history index should always point to a change we made! history.index=" + history.index + " historyItem=" + JSON.stringify(historyItem, null, 2));
+		
+		var change = copyObjProp(historyItem);
 		
 		if(collabMode) {
 			if(change.cId != userConnectionId) throw new Error("Change was made by someone else: history.index=" + history.index + " change=" + JSON.stringify(change, null, 2) + " history=" + JSON.stringify(history, null, 2));
@@ -761,17 +785,14 @@ transformBackwards(change, history[i]);
 			history.index--;
 		}
 		// If no change was found: history.index=-1
-		console.log("Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
+		console.log("Undo: Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
 		
 		/*
 			Question: Should we ignore the file change event !?
 			Answer: We want to send the change to other clients, but not add it to our own undo/redo history
 		*/ 
-		
 		saveUndoRedoHistory = false;
-		
 		undo(file, change, true);
-		
 		saveUndoRedoHistory = true;
 		
 		return PREVENT_DEFAULT;
@@ -1014,11 +1035,43 @@ transformBackwards(change, history[i]);
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
 			if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Should do nothing
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
 			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
 			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
 			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Should do nothing
+			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			// Typing in the middle of the history should reset it
+			EDITOR.mock("typing", "åä");
+			if(file.text != "abåä\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "abå\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "abå\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true});
+			if(file.text != "abåä\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
 			if(typeof callback == "function") callback(true);
