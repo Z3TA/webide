@@ -333,7 +333,17 @@ if(file == undefined) throw new Error("file=" + file);
 			console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
 			
 			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
+			
+			if(EDITOR.settings.devMode) { // Sanity check
+				for (var i=0; i<fileChangeEvents[file.path].length; i++) {
+					if(fileChangeEvents[file.path][i] == null) {
+						throw new Error("Hole detected: fileChangeEvents['" + file.path + "'] i=" + i + " is " + fileChangeEvents[file.path][i] + "\n" + JSON.stringify(fileChangeEvents[file.path], null, 2));
+					}
+				}
+			}
+			
 		}
+		
 		
 		if(saveUndoRedoHistory) {
 			saveUndoRedoHistoryEvent(fileChangeEvent)
@@ -342,30 +352,67 @@ if(file == undefined) throw new Error("file=" + file);
 		return true;
 	}
 	
-	function saveUndoRedoHistoryEvent(fileChangeEvent) {
+	function saveUndoRedoHistoryEvent(ev) {
 		
-		console.warn("Adding event to undo/redo history: " + JSON.stringify(fileChangeEvent, null, 2));
+		console.warn("Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
 		
-		var path = fileChangeEvent.filePath;
+		var path = ev.filePath;
 		
-		if(path == undefined) throw new Error("path=" + path + " fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
+		if(path == undefined) throw new Error("path=" + path + " ev=" + JSON.stringify(ev, null, 2));
 		
 		if(!undoRedoHistory.hasOwnProperty(path)) {
 			undoRedoHistory[path] = [];
 			undoRedoHistory[path].index = -1;
 		}
 		
-		if(undoRedoHistory[path].index < undoRedoHistory[path].length-1) {
-			// We made a change in the middle of history
-			// As we have not chosen to support history branches, we will reset history
-			console.log("Resetting undoRedoHistory.length=" + undoRedoHistory.length + " to " + (undoRedoHistory[file.path].index+1));
-			undoRedoHistory[path].length = undoRedoHistory[path].index+1;
+		var history = undoRedoHistory[path];
+		
+		if(ev.cId == userConnectionId && history.index > -1) {
+			// Change made by me
+			// Am I in the middle or at the end of *my* history ?
+			var middle = false;
+			for (var i=history.index+1; i<history.length; i++) {
+				if(history[i].cId == userConnectionId) {
+					middle = true;
+					break;
+				}
+			}
+			
+			if(middle) {
+				// We made a change in the middle of history
+				// As we have not chosen to support history branches, we will reset history
+				// But only the changes we made
+				
+				var oldHistoryLength = history.length;
+				cutHead();
+				console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! path=" + path);
+			}
 		}
 		
-		undoRedoHistory[path].push(fileChangeEvent);
-		undoRedoHistory[path].index++;
+		var index = history.push(ev) -1;
+		
+		if(ev.cId == userConnectionId) {
+			// Move the history index forward to this edit
+			history.index = index;
+		}
 		
 		console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
+		
+		// Sanity check
+		for (var i=0; i<history.length.length; i++) {
+			if(history[i] == null) throw new Error("history i=" + i + " is " + history[i]);
+		}
+		
+		function cutHead() {
+			for (var i=history.index, removed; i<history.length; i++) {
+				if(history[i].cId == userConnectionId) {
+					removed = history.splice(i, 1);
+					i--;
+					console.log("Removed history item: " + JSON.stringify(removed, null, 2));
+				}
+			}
+		}
+		
 	}
 	
 	function collabHandleEcho(json) {
@@ -462,7 +509,7 @@ if(file == undefined) throw new Error("file=" + file);
 			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 			
 			var currentOrder = fileChangeEventOrderCounters[file.path];
-			fileChangeEventOrderCounters[file.path]++;
+			if(ev.order > currentOrder) fileChangeEventOrderCounters[file.path]++;
 			
 			console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
 			
@@ -528,6 +575,13 @@ if(file == undefined) throw new Error("file=" + file);
 			
 			fileChangeEvents[file.path][ev.order].push(ev);
 			
+			if(EDITOR.settings.devMode) { // Sanity check
+				for (var i=0; i<fileChangeEvents[file.path].length; i++) {
+					if(fileChangeEvents[file.path][i] == null) {
+						throw new Error("Hole detected: fileChangeEvents['" + file.path + "'] i=" + i + " is " + fileChangeEvents[file.path][i] + "\n" + JSON.stringify(fileChangeEvents[file.path], null, 2));
+					}
+				}
+			}
 			
 			// ### Apply file change
 			
@@ -576,7 +630,7 @@ if(file == undefined) throw new Error("file=" + file);
 		
 		var textLength = prev.text.length;
 		
-		console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index);
+		console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index + " prev.text=" + prev.text);
 		
 		/*
 			We only need to know index and row
@@ -629,30 +683,27 @@ console.warn("Unable to redo: undo/redo history index=" + history.index + " has 
 			return PREVENT_DEFAULT;
 		}
 		
+		// Move history index forward to a change we made
 		history.index++;
-		
-		if(collabMode) {
-			// We are only interested in redo-ing our own changes
-			var startChangeIndex = history.index;
-			for (var i=history.index; i<history.length; i++) {
-				if(history[i].cId == userConnectionId) break;
-history.index++;
-			}
-			
-			console.log("Transforming change=" + JSON.stringify(change));
-			for (var i=startChangeIndex; i<history.index; i++) {
-				transformBackwards(change, history[i]);
-			}
-			console.log("Transformed change=" + JSON.stringify(change));
-			
-}
+		for (var i=history.index; i<history.length; i++) {
+			if(history[i].cId == userConnectionId) break;
+			history.index++;
+		}
 		
 		var historyItem = history[history.index];
 		
-		if(!historyItem) throw new Error("historyItem: " + historyItem + " history.index=" + history.index + " history=", history);
+		if(!historyItem) throw new Error("historyItem=" + historyItem + " history.index=" + history.index + " history=" + JSON.stringify(history,  null, 2));
 		
 		var change = copyObjProp(historyItem);
 		
+		if(collabMode) {
+			
+			console.log("Transforming change=" + JSON.stringify(change));
+			for (var i=history.index+1; i<history.length; i++) {
+				if(history[i].cId != userConnectionId) transformBackwards(change, history[i]);
+			}
+			console.log("Transformed change=" + JSON.stringify(change));
+			}
 		
 		saveUndoRedoHistory = false;
 		redo(file, change, true);
@@ -681,36 +732,36 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 			return PREVENT_DEFAULT;
 		}
 		
+		var change = copyObjProp(history[history.index]);
+		
 		if(collabMode) {
-			// We only want to undo the changes we made
-			var startChangeIndex = history.index;
-			for (var i=history.index; i>-1; i--) {
-				if(history[i].cId == userConnectionId) {
-					console.log("made by me: " + JSON.stringify(history[i]));
-					break;
-				}
-				else {
-					console.log("made by someone else: " + JSON.stringify(history[i]));
-					history.index--;
-				}
-			}
-			
-			var change = copyObjProp(history[history.index]);
+			if(change.cId != userConnectionId) throw new Error("Change was made by someone else: history.index=" + history.index + " change=" + JSON.stringify(change, null, 2) + " history=" + JSON.stringify(history, null, 2));
 			
 			// We have to tranform the change to the correct position
-			console.log("Transforming change=" + JSON.stringify(change));
-			for (var i=startChangeIndex; i>history.index; i--) {
-				transformBackwards(change, history[i]);
+			// Always transform with change events that came after (both for undo and redo)
+			console.log("Transforming change=" + JSON.stringify(change) + " from history.index=" + history.index);
+			//for (var i=history.length-1; i>=history.index; i--) {
+			for (var i=history.index+1; i<history.length; i++) {
+				//console.log("i=" + i + " history.length=" + history.length);
+				if(history[i].cId != userConnectionId) {
+transformBackwards(change, history[i]);
+					console.log("Ended up with index=" + change.index + " and row=" + change.row);
+				}
 			}
 			console.log("Transformed change=" + JSON.stringify(change));
-		}
-		else {
-			var change = history[history.index];
 		}
 		
 		if(change == undefined) throw new Error("change=" + change + " history.index=" + history.index + " history:" + JSON.stringify(history, null, 2));
 		
+		// Move the history index back to a change that was made by me
+		var oldIndex = history.index;
 		history.index--;
+		for (var i=history.index; i>-1; i--) {
+			if(history[i].cId == userConnectionId) break;
+			history.index--;
+		}
+		// If no change was found: history.index=-1
+		console.log("Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
 		
 		/*
 			Question: Should we ignore the file change event !?
@@ -729,7 +780,7 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 	function undo(file, ev, moveCaret) {
 		if(!ev.type) throw new Error("File change event without type: " + JSON.stringify(ev));
 		
-		console.log("Undoing file change: ev.type=" + ev.type + " ev.index=" + ev.index);
+		console.log("Undoing file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text);
 		
 		if(ev.type == "removeRow") {
 			var caret = file.createCaret(ev.index);
@@ -744,7 +795,7 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 		}
 		else if(ev.type == "insert") { // One character was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing insert character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			console.log("Undoing " + JSON.stringify(ev) + " at caret=" + JSON.stringify(caret));
 			file.deleteCharacter(caret);
 		}
 		else if(ev.type == "deleteTextRange") { // Delete a bunch of text
@@ -777,7 +828,7 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 	}
 	
 	function redo(file, ev, moveCaret) {
-		console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " moveCaret=" + moveCaret);
+		console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text + " moveCaret=" + moveCaret);
 		
 		if(ev.type == "removeRow") {
 			var caret = file.createCaret(ev.index);
@@ -902,18 +953,33 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 			// Edit at the same time
 			file.moveCaret(6);
 			EDITOR.mock("typing", "f");
+			fileChangeOrder = 7; // The next order will be 8 which is same as insert f above.
 			f({change: "insert", index: 6, text: "z"});
 			if(file.text != "abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
 			// Undo/redo in colaboration mode
-			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert f
 			if(file.text != "abc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
-			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
 			if(file.text != "ab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			fileChangeOrder = 10;
 			
+			f({change: "insert", index: 0, text: "å"});
+			if(file.text != "åab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert c
+			if(file.text != "åabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			fileChangeOrder = 12;
+			
+			f({change: "insert", index: 1, text: "ä"});
+			if(file.text != "åäabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
+			if(file.text != "åäab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
 			console.log(JSON.stringify(fileChangeEvents, null, 2));
