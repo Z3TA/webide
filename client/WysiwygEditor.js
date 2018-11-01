@@ -520,6 +520,9 @@ var WysiwygEditor;
 		var sourceFile = wysiwygEditor.sourceFile;
 		
 		var innerText = elementFromContentEditable.innerText;
+		
+		if(!innerText) return console.warn("Unable to get innerText property from elementFromContentEditable=" + elementFromContentEditable);
+		
 		if(innerText.length == 0) console.log("Element in content-editable does not contain text.");
 		else {
 			
