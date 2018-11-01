@@ -367,7 +367,7 @@ if(file == undefined) throw new Error("file=" + file);
 		
 		var history = undoRedoHistory[path];
 		
-		if(ev.cId == userConnectionId && history.index > -1) {
+		if(ev.cId == userConnectionId) {
 			// Change made by me
 			// Am I in the middle or at the end of *my* history ?
 			var middle = false;
@@ -395,6 +395,7 @@ if(file == undefined) throw new Error("file=" + file);
 				console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! history.index=" + history.index + " history.length=" + history.length + " path=" + path);
 			}
 		}
+		else console.log("Not resetting! ev.cId=" + ev.cId + " userConnectionId=" + userConnectionId + " history.index=" + history.index + " history.length=" + history.length);
 		
 		var index = history.push(ev) -1;
 		
@@ -402,6 +403,8 @@ if(file == undefined) throw new Error("file=" + file);
 			// Move the history index forward to this edit
 			history.index = index;
 		}
+		
+		console.log("history.index=" + history.index + " history.length=" + history.length);
 		
 		console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
 		
@@ -734,7 +737,7 @@ console.warn(file.path + " has no undo/redo history!");
 		
 		var history = undoRedoHistory[file.path];
 		
-		console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index);
+		console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index + " history=" + JSON.stringify(history, null, 2));
 		
 		if(history.length == 0) {
 console.warn("No undo/redo history to undo! history.length=" + history.length + "");
@@ -1038,10 +1041,18 @@ transformBackwards(change, history[i]);
 			EDITOR.mock("typing", "12");
 			if(file.text != "12\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			if(undoRedoHistory[file.path].length != 2) throw new Error("undoRedoHistory did not reset! index=" + undoRedoHistory[file.path].index + "  undoRedoHistory=" + JSON.stringify(undoRedoHistory, null, 2));
+			
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
 			if(file.text != "1\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Should do nothing
+			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Should do nothing
 			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Should do nothing
