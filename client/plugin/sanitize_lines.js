@@ -1,17 +1,9 @@
 
 (function() {
 
-	EDITOR.on("paste", pasteFormat);
+	EDITOR.on("sanitize", fixLineBreaksAndTrim);
 	
-	function pasteFormat(file, text, pasteEvent) {
-		
-		/*
-		if (window.clipboardData && window.clipboardData.getData) { // IE
-			var text = window.clipboardData.getData('Text');
-		} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
-			var text = pasteEvent.clipboardData.getData('text/plain');
-		}
-		*/
+	function fixLineBreaksAndTrim(file, text) {
 		
 		// Fix lonely carrige-returns (without a line-feed)
 		//console.log("lineBreak=" + EDITOR.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));

@@ -129,8 +129,6 @@
 		
 		if(!EDITOR.input) return true;
 		
-		
-		
 		CLIENT.cmd("terminal.write", {id: id, data: text}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});

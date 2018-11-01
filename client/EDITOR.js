@@ -171,7 +171,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 		previewTool: [],
 	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
-	select: [] // Selecting text
+	select: [], // Selecting text
+	sanitize: [] // For example foramtting and santizing text pasted or dropped into the editor
 };
 
 EDITOR.renderFunctions = [];
@@ -1414,6 +1415,30 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		// path needs to be a directory
 		var fileOpen = document.getElementById("fileInput");
 		fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
+	}
+	
+	EDITOR.sanitizeText = function sanitizeText(file, text) {
+		// For example when pasting or dragging text to the editor
+		
+		if(typeof file == "string" && text == undefined) {
+text = file;
+			file = EDITOR.currentFile;
+		}
+		
+		if(! file instanceof File) throw new Error("file should be a File object: filke=" + file);
+		
+		if(file == undefined) throw new Error("How can file be " + file + " ???");
+		
+		if(text == undefined) throw new Error("text=" + text);
+		
+		console.log("Calling sanitize listeners (" + EDITOR.eventListeners.sanitize.length + ") ...");
+		for(var i=0, fun; i<EDITOR.eventListeners.sanitize.length; i++) {
+			fun = EDITOR.eventListeners.sanitize[i].fun;
+			text = fun(file, text);
+			if(typeof text != "string") throw new Error("sanitize listener: " + UTIL.getFunctionName(fun) + " returned: (" + (typeof text) + ") \n" + text);
+		}
+		
+		return text;
 	}
 	
 	EDITOR.localFileDialog = function(defaultPath, callback) {
@@ -5904,6 +5929,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				var mouseY = fileDropEvent.offsetY;
 				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 				
+				text = EDITOR.sanitizeText(EDITOR.currentFile, text);
+				
 				EDITOR.currentFile.insertText(text, caret);
 				
 			}
@@ -6346,6 +6373,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			// Insert text at caret position
 			if(EDITOR.currentFile) {
 				var file = EDITOR.currentFile;
+				
+				text = EDITOR.sanitizeText(file, text);
 				
 				// If there is a text selection. Delete the selection first!
 				file.deleteSelection();
