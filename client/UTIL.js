@@ -937,18 +937,6 @@ else {
 		return filePath;
 	},
 	
-	isFolderPath: function isFolderPath(path) {
-		throw new Error("Depricated! Use EDITOR.folderExistIn(pathToParentFolder, folderName, folderExistInCallback) instead!");
-		var fs = require("fs");
-		try {
-			var stat = fs.lstatSync(path);
-			return stat.isDirectory();
-		}
-		catch(err) {
-			return false;
-		}
-	},
-	
 	isDirectory: function isDirectory(path) {
 		// It's a directory if the path ends with a slash
 		var lastChar = path.slice(path.length-1);

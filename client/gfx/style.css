@@ -495,7 +495,7 @@ input[type=button], button.button, input[type=submit] {
 	vertical-align: middle;
 }
 
-input[type=button].half, button.half {
+input[type=button].half, input[type=submit].half, button.half {
 	min-width: 55px;
 }
 
@@ -1310,9 +1310,7 @@ div.group {
 	margin-bottom: 4px;
 	border-radius: 5px;
 	min-width: 2em;
-	
-}
-
+	}
 
 
 @keyframes flash

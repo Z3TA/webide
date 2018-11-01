@@ -11,6 +11,7 @@
 	var inputPathMinSize = 50;
 	var menu;
 	var folderPicker;
+	var suggestedFolderButtons = {};
 	
 	var mimeMap = {
 		css: "text/css",
@@ -99,7 +100,9 @@
 	}
 	
 	function pathKeyDown(keyDownEvent) {
+		console.log("pathKeyDown: inputPath.value=" + inputPath.value);
 		var keyTab = 9;
+		// Autocomplete the path when pressing tab
 		if(keyDownEvent.keyCode == keyTab) {
 			var text = inputPath.value;
 			if(text.length == 0) return ALLOW_DEFAULT;
@@ -113,7 +116,7 @@
 				console.log("text=" + text);
 			}
 			
-			EDITOR.autoCompletePath({path: text}, function(err, path) {
+			EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path) {
 				if(err && err.code != "ENOENT") return alertBox(err.message);
 				else if(!err && path != inputPath.value) {
 					
@@ -123,7 +126,7 @@
 					}
 					else inputPath.value = path;
 					
-					if(UTIL.isDirectory(path)) updateFolderPicker(path);
+					if(UTIL.isDirectory(path)) suggestFolders(path);
 				}
 			});
 			keyDownEvent.preventDefault();
@@ -132,20 +135,78 @@
 		else return ALLOW_DEFAULT;
 	}
 	
-	function pathKeyPress(keyPressEvent) {
-		console.log(keyPressEvent);
-		var character = keyPressEvent.char || keyPressEvent.key;
-		if(character == "/" || character == "\\") {
-			updateFolderPicker(inputPath.value);
+	function pathKeyInput(inputEvent) {
+		console.log("pathKeyInput: inputPath.value=" + inputPath.value);
+		
+		suggestFolders(inputPath.value);
+		return ALLOW_DEFAULT;
+	}
+	
+	var oldPath = "", currentPath = "", oldFolder = "", currentFolder = "";
+	function suggestFolders(pathValue) {
+		// Does the path match any of the path-pickers ?
+		
+		console.log("pathValue=" + pathValue);
+		if(!pathValue) {
+			console.warn("pathValue=" + pathValue);
+			return;
+		}
+		
+		oldPath = currentPath;
+		currentPath = pathValue;
+		
+		if(oldPath == currentPath) return; // Path didn't change
+		
+		oldFolder = currentFolder;
+		currentFolder = UTIL.getDirectoryFromPath(currentPath);
+		
+		var pathIsFolder = UTIL.isDirectory(pathValue);
+		
+		if(oldFolder != currentFolder) {
+			// Folder did change!?
+			var pathToFolder = currentFolder;
+			if(pathIsFolder) {
+				// We want to show folders in the parent path !?
+			}
+			updateFolderPicker(pathToFolder, highLight);
+		}
+		else highLight(null);
+		
+		function highLight(err) {
+			
+			if(err) return console.error(err);
+			
+			if(pathIsFolder) return;
+			
+			var suggestedFolders = Object.keys(suggestedFolderButtons);
+			
+			for (var i=0, part; i<suggestedFolders.length; i++) {
+				part = suggestedFolders[i].slice(0, pathValue.length)
+				console.log("(" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
+				if(part == pathValue) {
+					console.log("Highlight: " + suggestedFolders[i]);
+					suggestedFolderButtons[suggestedFolders[i]].setAttribute("class", "highlighted");
+				}
+				else {
+					suggestedFolderButtons[suggestedFolders[i]].setAttribute("class", "");
+				}
+			}
 		}
 	}
 	
-	function updateFolderPicker(pathToFolder) {
+	function updateFolderPicker(pathToFolder, callback) {
 		while(folderPicker.firstChild)folderPicker.removeChild(folderPicker.firstChild);
 		
 		addFolder("../");
 		
+		for(var path in suggestedFolderButtons) delete suggestedFolderButtons[path];
+		
 		EDITOR.listFiles(pathToFolder, function fileList(err, files) {
+			
+			if(err) {
+				if(callback) return callback(err);
+				else throw err;
+			}
 			
 			if(files) {
 				for (var i=0; i<files.length; i++) {
@@ -153,24 +214,29 @@
 			}
 			}
 			
+			if(callback) callback(null);
+			
 			EDITOR.resizeNeeded();
 			
-			if(err) console.warn(err.message);
 		});
 		
 		return ALLOW_DEFAULT;
 	
 		function addFolder(name) {
 			console.log("Adding folder button name=" + name);
+			
+			var fullPath = UTIL.resolvePath(pathToFolder, name);
+			fullPath = UTIL.trailingSlash(fullPath);
+			
 			var button = document.createElement("button");
 			button.innerText = name;
 			button.onclick = function clickButton() {
-				var fullPath = UTIL.resolvePath(pathToFolder, name);
-				fullPath = UTIL.trailingSlash(fullPath);
 				inputPath.value = fullPath;
-				updateFolderPicker(fullPath);
+				suggestFolders(fullPath);
 				inputPath.focus();
 			}
+			
+			suggestedFolderButtons[fullPath] = button;
 			
 			folderPicker.appendChild(button);
 		}
@@ -191,8 +257,8 @@
 		inputPath.setAttribute("id", "inputPath");
 		inputPath.setAttribute("class", "input text path");
 		inputPath.setAttribute("size", Math.max(inputPathMinSize, EDITOR.workingDirectory.length)); // Update in show()
-		inputPath.addEventListener("keydown", pathKeyDown);
-		inputPath.addEventListener("keypress", pathKeyPress);
+		inputPath.addEventListener("keydown", pathKeyDown); // input value has not been updated
+		inputPath.addEventListener("input", pathKeyInput); // input value HAS been updated! Also captures most changes.
 		
 		var labelPath = document.createElement("label");
 		labelPath.setAttribute("for", "inputPath");
@@ -413,7 +479,7 @@ var buttonSaveAs = document.createElement("input");
 		
 		var folder = UTIL.getDirectoryFromPath(path);
 		
-		updateFolderPicker(folder);
+		suggestFolders(folder);
 	}
 	
 	

@@ -45,7 +45,10 @@
 		var currentScript = EDITOR.currentFile.path.replace(/\\/g, "/");
 		
 		var index = currentScript.indexOf("/plugin/");
-		if(index == -1) return alertBox("Script is not in the plugin folder: " + currentScript);
+		if(index == -1) {
+alertBox("Script is not in the plugin folder: " + currentScript);
+			return true;
+		}
 		currentScript = currentScript.slice(index);
 		
 		console.log("currentScript=" + currentScript);

@@ -2944,6 +2944,10 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Auto parenthese spacing:
+(when adding a space next to a parenthese - also make sure the matching parenthese have the same amount of space)!
+example: ( (  (   |   )  ) )
+removing a space should also remove the space on the matching parenthese's side and vice versa.
 
 ----
 Build a bug/issue tracker plugin !?
