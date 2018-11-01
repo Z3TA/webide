@@ -816,6 +816,7 @@ transformBackwards(change, history[i]);
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
 			console.log("Undoing insert text (" + ev.text.length + " chars) at caret=" + JSON.stringify(caret));
 			file.deleteTextRange(caret.index, caret.index + ev.text.length - 1);
+			if(file.grid[caret.row].length == caret.col) caret.eol = true; 
 		}
 		else if(ev.type == "insert") { // One character was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
@@ -846,7 +847,10 @@ transformBackwards(change, history[i]);
 		}
 		else throw new Error("Unknown ev.type=" + ev.type);
 		
-		if(moveCaret && caret) file.caret = caret;
+		if(moveCaret && caret) {
+			file.caret = caret;
+file.fixCaret();
+		}
 		
 		EDITOR.renderNeeded();
 	}

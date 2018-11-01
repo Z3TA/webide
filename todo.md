@@ -42,6 +42,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Refactor File.caret !??
+Make it not reasignable, so we can more easily track all changes and debug issues.
+Make it possible to have many carets, and make all file methods take an array of carets instead of just one caret !?
+
+
+
 Rewrite the undo-redo plugin so there's no undo-redo event, just reversable file change events.
 hmm ... undo/redo in collaboration mode can be problematic!
 We could save everyones history, but it would be weird if Ctrl+Z undid someone else change and not yours.
