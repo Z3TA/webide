@@ -850,6 +850,7 @@ transformBackwards(change, history[i]);
 		if(moveCaret && caret) {
 			file.caret = caret;
 file.fixCaret();
+			file.scrollToCaret();
 		}
 		
 		EDITOR.renderNeeded();
