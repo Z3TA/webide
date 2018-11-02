@@ -171,7 +171,7 @@
 			
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
-				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
+				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId}, function loggedInMaybe(err, resp) {
 					if(err) {
 						console.error(err);
 						
@@ -470,7 +470,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			
 			function identify() {
 				
-				CLIENT.cmd("identify", {username: user.value, password: pw.value}, function loggedIn(err, resp) {
+				CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId}, function loggedIn(err, resp) {
 					if(err) {
 						console.error(err);
 						alertBox("Unable to login: " + err.message + "\nURL: " + server.url);

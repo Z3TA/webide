@@ -1070,6 +1070,8 @@ function sockJsConnection(connection) {
 				// # Identify
 				var createUserRetries = 0;
 				
+				if(!json.sessionId) return send({error: "sessionId required", errorCode: "SESSIONID_REQUIRED"});
+				
 				if(json.alias) userAlias = json.alias;
 				
 				(function checkUser(username, password) {
@@ -1262,7 +1264,7 @@ username = guestUser;
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
 							
-							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
+							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
 							
 							userWorker.send({identify: userInfo});
 							userWorker.on("message", messageFromWorker);
@@ -1290,6 +1292,7 @@ username = guestUser;
 									loginSuccess: {
 										user: userConnectionName, 
 										alias: userAlias, 
+										sessionId: json.sessionId,
 										ip: IP, 
 										cId: userConnectionId, 
 										connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 

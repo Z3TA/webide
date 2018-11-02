@@ -1651,6 +1651,76 @@
 		});
 	});
 	
+	EDITOR.addTest(function noDoubleLogin(callback) {
+		// It should not be possible to be logged in twice
+		
+		var userValue = "";
+		var pwValue = "";
+		var loginSuccessCounter = 0;
+		var loginAttempts = 0;
+		
+		CLIENT.on("clientJoin", testDoubleLoginClientJoin);
+		CLIENT.on("connectionConnected", testDoubleLoginConnectionConnected);
+		CLIENT.on("loginSuccess", testDoubleLoginLoginSuccess);
+		
+		EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function gotLoginFromLocalStorage(err, obj) {
+			if(err) throw new Error("Failed to get login credentials! Error: " + err);
+			else {
+				
+				userValue = obj.editorServerUser;
+				pwValue = obj.editorServerPw;
+				
+				CLIENT.disconnect();
+				CLIENT.connect();
+				
+			}
+			
+		});
+		
+		function testDoubleLoginLoginSuccess(json) {
+			loginSuccessCounter++;
+			
+			if(loginSuccessCounter>1) throw new Error("Logged in " + loginSuccessCounter + " times!");
+			
+			if(loginAttempts == 2) {
+				CLIENT.removeEvent("clientJoin", testDoubleLoginClientJoin);
+				CLIENT.removeEvent("connectionConnected", testDoubleLoginConnectionConnected);
+				CLIENT.removeEvent("loginSuccess", testDoubleLoginLoginSuccess);
+				callback(true);
+				userValue = null;
+				pwValue = null;
+			}
+		}
+		
+		function testDoubleLoginClientJoin(json) {
+			var connectedClientIds = json.connectedClientIds;
+			if(connectedClientIds.length > 1) throw new Error("Logged in more then once !");
+		}
+		
+		function testDoubleLoginConnectionConnected(err) {
+			// Try to login twice
+			CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
+				loginAttempts++;
+				if(err) {
+					console.log("First login attempt failed! Error: " + err.message);
+}
+				else {
+					console.log("First login attempt succeeded!");
+				}
+			});
+			
+			CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
+				loginAttempts++;
+				if(err) {
+					console.log("Second login attempt failed! Error: " + err.message);
+				}
+				else {
+					console.log("Second login attempt succeeded!");
+				}
+			});
+		}
+		
+	}, 1);
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {

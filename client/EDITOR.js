@@ -17,6 +17,8 @@ else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.se
 	}
 }
 
+EDITOR.sessionId = Math.random().toString(36).substring(7); // A hopefully unique ID for this session 
+
 var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
