@@ -42,23 +42,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
-Refactor File.caret !??
-Make it not reasignable, so we can more easily track all changes and debug issues.
-Make it possible to have many carets, and make all file methods take an array of carets instead of just one caret !?
+Test undo/redo and collaboration
 
 
 
-Rewrite the undo-redo plugin so there's no undo-redo event, just reversable file change events.
-hmm ... undo/redo in collaboration mode can be problematic!
-We could save everyones history, but it would be weird if Ctrl+Z undid someone else change and not yours.
-Undo events would have to transform via all other events in between to get the right index.
-
-
-Working on implementing collaboraction support
-
-
-When auto-completing file names, and there are more then one options, show avaible options somwhere ... (annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)
+When auto-completing file names, and there are more then one options, show avaible options somwhere ... 
+(annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)
 When typing in goto_file, highlight the folder-buttons who's name starts with what you have typed !?
 
 ---

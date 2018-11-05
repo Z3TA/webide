@@ -3280,6 +3280,8 @@ var word = "";
 			throw new Error("No path specified in options=" + JSON.stringify(options));
 		}
 		
+		console.log("autoCompletePath: path=" + options.path);
+		
 		EDITOR.listFiles(folder, function fileList(err, files) {
 			
 			if(err) return callback(err);
@@ -3288,6 +3290,7 @@ var word = "";
 			if(options.onlyDirectories) files = files.filter(onlyDirectories);
 			
 			var filesNames = files.map(fileName);
+			var filePaths = files.map(filePath);
 			
 			if(files.length == 0) {
 				var error = new Error("No path matches found for options=" + JSON.stringify(options));
@@ -3301,12 +3304,16 @@ var word = "";
 			
 			console.log("EDITOR.autoCompletePath: " + options.path + " => " + path);
 			
-			callback(err, path);
+			callback(err, path, filePaths);
 		});
+		
+		function filePath(file) {
+			return file.path;
+		}
 		
 		function fileName(file) {
 			if(file.type=="d") return UTIL.trailingSlash(file.name);
-			else return file.name;
+			return file.name;
 		}
 		
 		function nameFilter(file) {

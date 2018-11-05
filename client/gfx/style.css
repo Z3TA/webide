@@ -1302,7 +1302,7 @@ div.group {
 	max-width: 260px; /* many rows */
 }
 
-.folderPicker button {
+.folderPicker button, .filePicker button {
 	font-size: 1em;
 	padding: 2px;
 	margin: 2px;

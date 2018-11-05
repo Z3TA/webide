@@ -28,6 +28,7 @@
 	var lastSearchText = "";
 	var lastTypedText = "";
 	var menuItem;
+	var folderPicker;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -191,6 +192,9 @@
 		gotoDiv.appendChild(gotoButton);
 		gotoDiv.appendChild(cancelButton);
 		
+		folderPicker = document.createElement("div");
+		folderPicker.setAttribute("class", "folderPicker");
+		gotoDiv.appendChild(folderPicker);
 		
 		footer.appendChild(gotoDiv);
 		
@@ -210,21 +214,40 @@
 	}
 	
 	function keydown(keyDownEvent) {
+		while(folderPicker.firstChild) folderPicker.removeChild(folderPicker.firstChild); // Clear options
 		if(keyDownEvent.keyCode == keyTab) {
 			var text = inputGoto.value;
 			if(text.length == 0) return ALLOW_DEFAULT;
 			
-			EDITOR.autoCompletePath({path: text}, function(err, path) {
+			EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path, options) {
+				console.log("autoCompletePath text=" + text + " path=" + path + " err=" + err + " options=" + JSON.stringify(options));
 				if(err && err.code != "ENOENT") return alertBox(err.message);
 				else if(!err && path != inputGoto.value) {
 					inputGoto.value = path;
 				typing();
+				}
+				console.log("autoCompletePath path=" + text + " options.length=" + (options && options.length) + " options=" + JSON.stringify(options));
+				if(options && options.length > 1) {
+					options.forEach(addFolderOption);
+					EDITOR.resizeNeeded();
 				}
 			});
 			keyDownEvent.preventDefault();
 			return PREVENT_DEFAULT;
 		}
 		else return ALLOW_DEFAULT;
+	}
+	
+	function addFolderOption(path) {
+		var button = document.createElement("button");
+		var name = UTIL.getFolderName(path);
+		button.innerText = name;
+		button.onclick = function clickButton() {
+			inputGoto.value = path;
+			inputGoto.focus();
+			typing();
+		}
+		folderPicker.appendChild(button);
 	}
 	
 	function typing(keyUpEvent) {
@@ -713,6 +736,7 @@
 	}
 	
 	function gotoFilePathGlob(folder) {
+		console.log("gotoFilePathGlob: folder=" + folder);
 		if(inputFolder) inputFolder.value = folder;
 	}
 	
