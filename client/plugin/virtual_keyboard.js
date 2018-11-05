@@ -251,9 +251,11 @@
 		var kb = document.getElementById("virtualKeyboard");
 		var b = kb.getElementsByTagName("button");
 		
-		for(var i=0; i<b.length; i++) {
-			//console.log(b[i]);
-			if(b[i]) b[i].style.width= parseInt(b[0].offsetWidth) * percentage + "px";
+		for(var i=0, ow, oh; i<b.length; i++) {
+			
+			//console.log("Resizing button " + i + " (" + b[i].innerText + ") from " + b[i].offsetWidth + " to " + (parseInt(b[i].offsetWidth) * percentage) );
+			if(b[i]) b[i].style.width= parseInt(b[i].offsetWidth) * percentage + "px";
+			if(b[i]) b[i].style.height= parseInt(b[i].offsetHeight) * percentage + "px";
 			}
 			EDITOR.resizeNeeded();
 		}
