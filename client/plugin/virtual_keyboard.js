@@ -86,6 +86,8 @@
 		
 		// ### First row
 		
+		makeButton("@", 0);
+		
 		makeButton("1", 0);
 		makeButton("2", 0);
 		makeButton("3", 0);
@@ -182,7 +184,7 @@
 		
 		makeButton("{", 2);
 		
-		makeButton("Enter ", 2, function space(click) {
+		makeButton(" Enter ", 2, function space(click) {
 			click.target.blur();
 			clearSelection();
 			EDITOR.input = true;
@@ -193,7 +195,7 @@
 		
 		
 		
-		
+		// ### Third row
 		
 		makeButton("  space  ", 3, function space(click) {
 			click.target.blur();
@@ -229,7 +231,7 @@
 		
 		makeButton("|", 3);
 		makeButton("&", 3);
-		makeButton("@", 3);
+		
 		
 		
 		makeButton("Big", 2, biggerButtons, "misc");
