@@ -44,12 +44,6 @@ What I'm working on
 
 Test undo/redo and collaboration
 
-
-
-When auto-completing file names, and there are more then one options, show avaible options somwhere ... 
-(annoying when you hit tab, you know there are existing folders, but it doesn't auto-complete)
-When typing in goto_file, highlight the folder-buttons who's name starts with what you have typed !?
-
 ---
 
 When working in preview mode and editing html with style's the CSS-file gets ignored.
@@ -60,21 +54,11 @@ Replace all doesn't replace the first!
 
 When hitting Replace when there is nothing selected does a case insensitive search and replace!
 
-JSX support ?
-
 Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?
 
 See what people are using the editor for, make that work (the things new users tries to do) ...
 
 It seems like people are actually reading through the welcome notes!!
-
-
-Install MongoDB and Postgres on webide.se
-Try running wiki js
-
-Example on how to make a form and save the data to a db/file
-
-tensorflow (JS) example
 
 Some people actually do read the welcome and example files.
 I should have good welcome and example files! Showing off the editor's cool features.
@@ -84,6 +68,14 @@ Examples:
 HTML forms. Save results in a database.
 HTML form, personality test. (worth 145.000 SEK)
 HTML form + school enrollment system (worth 2,000,000 SEK)
+
+
+Install MongoDB and Postgres on webide.se
+Try running wiki js
+
+Example on how to make a form and save the data to a db/file
+
+tensorflow (JS) example
 
 
 test:
@@ -130,10 +122,6 @@ Doesn't do the right thing: if(|abc)
 (hitting autocomplete when caret is at a)
 should insert abcdef but inserts defabc
 do nothing !?
-
----
-
-Live colaboration with transform
 
 ---
 
