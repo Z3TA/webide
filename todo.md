@@ -42,10 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-How to prevent a client from logginc in many time and creating ghost worker processes !?
-
-When reconnecting after connection lost, and you manually click login, you get double connected, and get into collaboration mode with yourself!
-It's then impossible to exit collaboration mode by logging out/disconnecting, there will still be a "ghost" session!
 
 Refactor File.caret !??
 Make it not reasignable, so we can more easily track all changes and debug issues.

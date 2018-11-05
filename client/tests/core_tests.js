@@ -1651,12 +1651,12 @@
 		});
 	});
 	
-	EDITOR.addTest(function noDoubleLogin(callback) {
+	EDITOR.addTest(function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		
 		var userValue = "";
 		var pwValue = "";
-		var loginSuccessCounter = 0;
+		var loginSuccessCounter = -1; // We will get one loginSuccess when we call CLIENT.on("loginSuccess") then another after the re-connection
 		var loginAttempts = 0;
 		
 		CLIENT.on("clientJoin", testDoubleLoginClientJoin);
@@ -1678,6 +1678,8 @@
 		});
 		
 		function testDoubleLoginLoginSuccess(json) {
+			console.warn("testDoubleLogin: loginSuccess! json=" + JSON.stringify(json, null, 2));
+			
 			loginSuccessCounter++;
 			
 			if(loginSuccessCounter>1) throw new Error("Logged in " + loginSuccessCounter + " times!");
@@ -1699,23 +1701,23 @@
 		
 		function testDoubleLoginConnectionConnected(err) {
 			// Try to login twice
-			CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
+			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "abc"}, function loggedInMaybe(err, resp) {
 				loginAttempts++;
 				if(err) {
-					console.log("First login attempt failed! Error: " + err.message);
+					console.log("testDoubleLogin: First login attempt failed! Error: " + err.message);
 }
 				else {
-					console.log("First login attempt succeeded!");
+					console.log("testDoubleLogin: First login attempt succeeded!");
 				}
 			});
 			
-			CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedInMaybe(err, resp) {
+			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "def"}, function loggedInMaybe(err, resp) {
 				loginAttempts++;
 				if(err) {
-					console.log("Second login attempt failed! Error: " + err.message);
+					console.log("testDoubleLogin: Second login attempt failed! Error: " + err.message);
 				}
 				else {
-					console.log("Second login attempt succeeded!");
+					console.log("testDoubleLogin: Second login attempt succeeded!");
 				}
 			});
 		}

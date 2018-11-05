@@ -873,6 +873,8 @@ function sockJsConnection(connection) {
 	var lastUserProcessCrash = new Date();
 	var userBrowser = UTIL.checkBrowser(agent);
 	var userAlias = userBrowser + "(" + IP + ")";
+	var clientSessionId = "";
+	var checkingUser = false;
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
@@ -927,6 +929,8 @@ function sockJsConnection(connection) {
 			
 			USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
 			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
+			USER_CONNECTIONS[userConnectionName].sessionId.splice(USER_CONNECTIONS[userConnectionName].sessionId.indexOf(clientSessionId), 1);
+			
 			delete USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId];
 			
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
@@ -1072,7 +1076,17 @@ function sockJsConnection(connection) {
 				
 				if(!json.sessionId) return send({error: "sessionId required", errorCode: "SESSIONID_REQUIRED"});
 				
+				if(USER_CONNECTIONS[userConnectionName] && USER_CONNECTIONS[userConnectionName].sessionId.indexOf(json.sessionId) != -1) {
+					return send({error: "A connection with the session id " + json.sessionId + " already exist!", errorCode: "SESSIONID_ALREADY_CONNECTED"});
+				}
+				
 				if(json.alias) userAlias = json.alias;
+				
+				if(checkingUser) {
+					return send({error: "Authorizing in progress ... Please wait for a login success/error before trying agian !", errorCode: "AUTH_IN_PROGRESS"});
+				}
+				
+				checkingUser = true;
 				
 				(function checkUser(username, password) {
 					/*
@@ -1200,6 +1214,7 @@ username = guestUser;
 					
 						console.timeEnd("Login " + IP);
 						
+						checkingUser = false;
 					}
 					
 					function idSuccess(alreadyCheckedMounts) {
@@ -1241,24 +1256,31 @@ username = guestUser;
 						
 						function acceptUser() {
 							
-							if(gid == undefined) gid = uid;
+							clientSessionId = json.sessionId;
 							
 							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+								userConnectionId = 1;
+								
 								USER_CONNECTIONS[userConnectionName] = {
 									connections: [connection],
 									connectionCounter: 1, // Start with 1 so it's true:ish. Keep incrementing so we get a unique id
 									echoCounter: 1, // Start with 1 so it's true:ish
-									connectedClientIds: [1],
-									connectionCLientAliases: {1: userAlias}
+									connectedClientIds: [userConnectionId],
+									connectionCLientAliases: {1: userAlias},
+									sessionId: [clientSessionId]
 								}
-								userConnectionId = 1;
+								
 							}
 							else {
-								USER_CONNECTIONS[userConnectionName].connections.push(connection);
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
+								
+								USER_CONNECTIONS[userConnectionName].connections.push(connection);
 								USER_CONNECTIONS[userConnectionName].connectedClientIds.push(userConnectionId);
 								USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId] = userAlias;
+								USER_CONNECTIONS[userConnectionName].sessionId.push(clientSessionId);
 							}
+							
+							if(gid == undefined) gid = uid;
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
@@ -1344,6 +1366,8 @@ username = guestUser;
 								
 								console.timeEnd("Login " + IP);
 								console.log(IP + " logged in as " + username + "");
+								
+								checkingUser = false;
 							});
 							
 							return true;

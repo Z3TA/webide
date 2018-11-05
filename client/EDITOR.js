@@ -5678,7 +5678,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			}
 			
 			function asyncInitTest(test) {
-				setTimeout(function() { // Make all tests async
+				setTimeout(function runTestAsync() { // Make all tests async
 					runTest(test);
 				}, 0);
 			}
