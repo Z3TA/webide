@@ -159,10 +159,20 @@
 			
 			if(json.cId == userConnectionId) {
 				var msg = "You are in collaboration mode with ";
-				for (var i=0; i < connectedClientIds.length-1; i++) {
-					msg += json.connectionCLientAliases[ connectedClientIds[i] ] + ", ";
+				var others = connectedClientIds.filter(notMe);
+				if(others.length > 2) {
+					for (var i=0; i < others.length-1; i++) {
+						msg += json.connectionCLientAliases[ others[i] ] + ", ";
 				}
-				msg += "and " + json.connectionCLientAliases[connectedClientIds[connectedClientIds.length-1]];
+					msg += "and " + json.connectionCLientAliases[others[others.length-1]];
+				}
+				else if(others.length == 2) {
+					msg += json.connectionCLientAliases[ others[0] ] + " and " + json.connectionCLientAliases[ others[1] ]
+				}
+				else if(others.length == 1) {
+					msg += json.connectionCLientAliases[ others[0] ]
+				}
+				else throw new Error("others.length=" + others.length);
 				
 				alertBox(msg);
 			}
@@ -180,6 +190,10 @@
 				}
 			}
 			
+		}
+		
+		function notMe(id) {
+			return id != userConnectionId;
 		}
 	}
 	
