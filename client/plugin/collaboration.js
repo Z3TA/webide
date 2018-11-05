@@ -24,6 +24,12 @@
 		
 		todo: Handle file renaming (keep history)
 		
+		
+		Problem: When you join (late) the order is > 0 and you get a hole in the change event array
+		Sulution: Allow hole in the beginning, but not in the middle
+		Problem: What if the user leaves, then joins again ?
+		Solutions: Allow holes. Just show a warning instead of throwing.
+		
 	*/
 	
 	var eventOrder = -1;
@@ -348,13 +354,7 @@ if(file == undefined) throw new Error("file=" + file);
 			
 			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
 			
-			if(EDITOR.settings.devMode) { // Sanity check
-				for (var i=0; i<fileChangeEvents[file.path].length; i++) {
-					if(fileChangeEvents[file.path][i] == null) {
-						throw new Error("Hole detected: fileChangeEvents['" + file.path + "'] i=" + i + " is " + fileChangeEvents[file.path][i] + "\n" + JSON.stringify(fileChangeEvents[file.path], null, 2));
-					}
-				}
-			}
+			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
 			
 		}
 		
@@ -364,6 +364,16 @@ if(file == undefined) throw new Error("file=" + file);
 		}
 		
 		return true;
+	}
+	
+	function detectHoles(arr) {
+		var hole = (arr[0] == null); // Only throw an error if there is an hole in the middle
+		for (var i=0; i<arr.length; i++) {
+			if(arr[i] == null) {
+				if(hole) console.warn("Hole detected: i=" + i + " is " + arr[i] + "\n" + JSON.stringify(arr, null, 2));
+			}
+			else hole = false;
+		}
 	}
 	
 	function saveUndoRedoHistoryEvent(ev) {
@@ -590,13 +600,8 @@ if(file == undefined) throw new Error("file=" + file);
 			
 			fileChangeEvents[file.path][ev.order].push(ev);
 			
-			if(EDITOR.settings.devMode) { // Sanity check
-				for (var i=0; i<fileChangeEvents[file.path].length; i++) {
-					if(fileChangeEvents[file.path][i] == null) {
-						throw new Error("Hole detected: fileChangeEvents['" + file.path + "'] i=" + i + " is " + fileChangeEvents[file.path][i] + "\n" + JSON.stringify(fileChangeEvents[file.path], null, 2));
-					}
-				}
-			}
+			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
+			
 			
 			// ### Apply file change
 			
