@@ -570,6 +570,8 @@ for(var func, element, i=0; i<functions.length; i++) {
 		return domModel;
 	}
 	
+	// TEST-CODE-START
+	
 	EDITOR.addTest(function test_removeAddSubfunctionIndentation(callback) {
 			EDITOR.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
 			
@@ -593,5 +595,6 @@ for(var func, element, i=0; i<functions.length; i++) {
 		});
 	});
 	
+	// TEST-CODE-END
 	
 })();

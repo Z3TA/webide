@@ -736,7 +736,7 @@
 		return lastIndexOf;
 	}
 	
-	
+	// TEST-CODE-START
 	
 	// ## Todo: Write tests
 	/*
@@ -755,8 +755,6 @@
 	});
 	*/
 	
-	
-	// TEST-CODE-START
 	EDITOR.addTest(testReplaceAll);
 	function testReplaceAll(callback) {
 		EDITOR.openFile("replaceAll.txt", "fooBar\nfooBar\nfooBar\nfooBar\n", function(err, file) {
@@ -772,6 +770,7 @@
 			
 		});
 	}
+	
 	// TEST-CODE-END
 	
 })();

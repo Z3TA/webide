@@ -380,10 +380,7 @@
 	
 	
 	
-	/*
-		# Tests
-	*/
-	
+	// TEST-CODE-START
 	
 	EDITOR.addTest(function test_xml_CDATA(callback) {
 		EDITOR.openFile("cdata.svg", '<svg>\n<defs>\n<style type="text/css"><![CDATA[\ntext {\nfont-size: 12px;\n}\n</style>\n</defs>\n</svg>\n', function(err, file) {
@@ -395,5 +392,7 @@
 				
 			});
 	});
+	
+	// TEST-CODE-END
 	
 })();

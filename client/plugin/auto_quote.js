@@ -298,6 +298,7 @@
 	 * 
 	 */
 	
+	// TEST-CODE-START
 	
 	EDITOR.addTest(function classic_asp_concat(callback) {
 		EDITOR.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
@@ -316,6 +317,6 @@
 		});
 	});
 	
-	
+	// TEST-CODE-END
 	
 })();

@@ -477,6 +477,8 @@ for(var i=0; i<list.length; i++) {
 		
 	}
 	
+	// TEST-CODE-START
+	
 	// ## Tests
 	
 	EDITOR.addTest(function changeFileTabOrder(callback) {
@@ -553,5 +555,6 @@ for(var i=0; i<list.length; i++) {
 		
 	},100); // Run this early, so it doesn't also fail if another test fails
 	
+	// TEST-CODE-END
 	
 })();

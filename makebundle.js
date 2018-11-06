@@ -70,6 +70,7 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		content = content.replace(/(["'"])(.*)<style/g, "$1$2<st$1 + $1yle");
 		content = content.replace(/(["'"])(.*)<\/style/g, "$1$2</st$1 + $1yle");
 		
+		content = content.replace(/\/\/ TEST-CODE-START.*\/\/ TEST-CODE-END/gm, "");
 		
 			var result = UglifyJS.minify(content, {keep_fnames: true});
 			if (result.error) {

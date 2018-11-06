@@ -2681,6 +2681,8 @@ var WysiwygEditor;
 	}
 	
 	
+	// TEST-CODE-START
+	
 	// ### Test(s)
 	
 	EDITOR.addTest(function testInsertLineBreaks(callback) {
@@ -2802,6 +2804,6 @@ var WysiwygEditor;
 		
 	});
 	
-	
+	// TEST-CODE-END
 	
 })();

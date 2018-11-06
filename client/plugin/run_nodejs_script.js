@@ -729,6 +729,9 @@
 		return false;
 	}
 	
+	
+	// TEST-CODE-START
+	
 	EDITOR.addTest(function testNodeErroMessage2(callback) {
 		
 		var errMsg = "ErrorExample: This is the error description";
@@ -782,5 +785,7 @@
 			
 		});
 	});
+	
+	// TEST-CODE-END
 	
 })();
