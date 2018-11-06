@@ -1325,18 +1325,16 @@ username = guestUser;
 							});
 							
 							// Tell all client that a new client has connected
-							var connectMsg = {
-								id: 0, 
-								clientJoin: {
-									ip: IP, 
-									cId: userConnectionId, 
-									connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
-									alias: userAlias,
-									connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
-								}
+							var clientJoin = {
+								ip: IP,
+								cId: userConnectionId,
+								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
+								alias: userAlias,
+								connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
 							};
+							
 							for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-								send(connectMsg, USER_CONNECTIONS[userConnectionName].connections[i]);
+								send({clientJoin: clientJoin, id: 0}, USER_CONNECTIONS[userConnectionName].connections[i]);
 							}
 							
 							if(commandQueue.length > 0) {
@@ -1379,7 +1377,7 @@ username = guestUser;
 								else if(workerMessage.message) {
 									if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 										for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-											send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
+											send({msg: workerMessage.message.msg, id:0}, USER_CONNECTIONS[userConnectionName].connections[i]);
 										}
 									}
 								}
@@ -1527,10 +1525,9 @@ username = guestUser;
 				json.cId = userConnectionId;
 				json.alias = userAlias;
 				
-				var echo = {echo: json, id: 0};
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
 					if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {
-						send(echo, USER_CONNECTIONS[userConnectionName].connections[i]);
+						send({echo: json, id: 0}, USER_CONNECTIONS[userConnectionName].connections[i]);
 					}
 				}
 			}
@@ -1543,11 +1540,20 @@ username = guestUser;
 			
 			if(conn == undefined) conn = connection;
 			
-			if(answer.id == undefined && id) answer.id = id; 
+			//console.log("answer.id=" + answer.id);
+			
+			if(answer.id == undefined && id) {
+				//console.log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2));
+				answer.id = id;
+			}
 			
 			if(answer.id == id) id = null; // Do not reuse the same id
 			
 			if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
+			
+			// Sanity check
+			// Note: This function mutates the answer object, so if it's called in a loop, next iteration will have id==undefined
+			if( answer.hasOwnProperty("echo") && answer.hasOwnProperty("id") ) throw new Error("echo with id=" + answer.id + ": " + JSON.stringify(echo, null, 2));
 			
 			if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
 			if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));

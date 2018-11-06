@@ -238,7 +238,7 @@ err = new Error(errMsg);
 		if(callback) {
 callbackWaitList[id] = callback;
 		}
-		else if(req != "stdout" && req != "log") { // Known commands that doesn't call back
+		else if(req != "stdout" && req != "log" && req != "echo") { // Known commands that doesn't call back
 			// This error will be thrown if the server callbacks with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
 			console.warn("No callback defined in req=" + req);
