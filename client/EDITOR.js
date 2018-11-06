@@ -1578,15 +1578,14 @@ text = file;
 				//console.timeEnd("prerender: " + funName);
 			}
 			//console.timeEnd("preRenders");
-			
+			// preRenderFunctions could be optimized using web workers!
 			
 			// Find out if the buffer contains zero with characters ( might need optimization )
 			if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
-				
-			}
+				}
 			else var containZeroWidthCharacters = false;
 			
 			//ctx.imageSmoothingEnabled = true;
@@ -1604,6 +1603,7 @@ text = file;
 				ctx.lineWidth = 1;
 			*/
 			
+			// Render functions need to be ordered, so we can't optimize them with web workers
 			//console.time("renders");
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
