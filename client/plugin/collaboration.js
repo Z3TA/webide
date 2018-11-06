@@ -44,6 +44,7 @@
 	var clientLeaveDialog = {}; 
 	var undoRedoHistory = {}; // filePath:changeEvent
 	var saveUndoRedoHistory = true;
+	var carets = {}; // filePath: {cId, caret}
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -51,10 +52,12 @@
 			
 			//EDITOR.addMode("collaboration", "default");
 			
+			//EDITOR.addRender(renderCollaborationCarets);
+			//EDITOR.on("moveCaret", collabMoveCaret);
+			
 			EDITOR.on("fileOpen", collabFileOpen);
 			EDITOR.on("fileClose", collabFileClose);
 			EDITOR.on("fileChange", collabFileChange);
-			EDITOR.on("moveCaret", collabMoveCaret);
 			EDITOR.on("select", collabSelectText);
 			
 			/*
@@ -81,10 +84,12 @@
 		},
 		unload: function unloadCollaboration() {
 			
+			//EDITOR.removeRender(renderCollaborationCarets);
+			//EDITOR.removeEvent("moveCaret", collabMoveCaret);
+			
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			EDITOR.removeEvent("fileClose", collabFileClose);
 			EDITOR.removeEvent("fileChange", collabFileChange);
-			EDITOR.removeEvent("moveCaret", collabMoveCaret);
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			EDITOR.removeEvent("select", collabSelectText);
 			
@@ -255,6 +260,14 @@
 	
 	
 	function collabMoveCaret(file, caret) {
+		
+		var caretEvent = {
+			filePath: file.path,
+			caret: caret,
+		}
+		
+		CLIENT.cmd("echo", {eventOrder: ++eventOrder, moveCaret: caretEvent});
+		
 		return true;
 	}
 	
@@ -579,9 +592,16 @@ if(file == undefined) throw new Error("file=" + file);
 			else if(ev.order < currentOrder) {
 				console.log(json.alias +  " is behind! ev.order=" + ev.order + " currentOrder=" + currentOrder);
 				var order = ev.order;
-				
+				var changeEvents = fileChangeEvents[file.path];
+				if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+				if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
 				while(order++ < currentOrder) {
-					arr = fileChangeEvents[file.path][order];
+					arr = changeEvents[order];
+					
+					if(!arr) {
+						throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
+					}
+					
 					for (var i=arr.length-1; i>-1; i--) {
 						transformBackwards(ev, arr[i]);
 					}
@@ -630,6 +650,14 @@ if(file == undefined) throw new Error("file=" + file);
 			}
 			
 			file.highLightTextRange(selectEvent.start, selectEvent.end);
+			EDITOR.renderNeeded();
+		}
+		else if(json.moveCaret) {
+			// ### Someone moved their caret
+			if( !carets.hasOwnProperty(json.moveCaret.filePath) ) carets[json.moveCaret.filePath] = {};
+			
+			carets[json.moveCaret.filePath][json.cId] = json.moveCaret.caret;
+			
 			EDITOR.renderNeeded();
 		}
 		
@@ -926,6 +954,30 @@ file.fixCaret();
 			obj[prop] = fromObj[prop];
 		}
 		return obj;
+	}
+	
+	function renderCollaborationCarets(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		// Math.floor to prevent sub pixels
+		
+		var fileCarets = carets[file.path];
+		
+		if(!fileCarets) return;
+		
+		var top, left, row, col, color, mod;
+		
+		for (var cId in fileCarets) {
+			row = fileCarets[cId].row;
+			col = fileCarets[cId].col;
+			top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+			left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+			mod = cId % (EDITOR.settings.style.altColors.length-1);
+			color = EDITOR.settings.style.altColors[ mod ];
+			
+			ctx.fillStyle = color;
+			
+			ctx.fillRect(left-cId%3, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight/2);
+		}
+		
 	}
 	
 	
