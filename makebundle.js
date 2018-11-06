@@ -72,9 +72,16 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		
 		content = content.replace(/\/\/ TEST-CODE-START.*\/\/ TEST-CODE-END/gm, "");
 		
-			var result = UglifyJS.minify(content, {keep_fnames: true});
+			var result = UglifyJS.minify(content, {
+			keep_fnames: true,
+			compress:{
+				pure_funcs: [ 'console.log', 'console.warn' ]
+			}
+		});
 			if (result.error) {
-				throw new Error("Problem minifying " + script.src + ": " + result.error);
+			console.log(content);
+			throw new Error("Problem minifying " + script.src + ": " + result.error);
+			
 				//throw result.error;
 			}
 			var minifiedJs = result.code;
