@@ -141,7 +141,7 @@ else {
 // Make sure the file is emty
 if(targetStats.size !== 0) {
 mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePath + " to targetPath=" + targetPath +
-" targetStats=" + targetStats + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + ""));
+" targetStats=" + JSON.stringify(targetStats) + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + ""));
 }
 else targetCreated();
 

@@ -42,6 +42,49 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Server: Problem creating mounts: Target file not emty! Can not mount sourcePath=/usr/bin/ssh to targetPath=/home/johan/usr/bin/ssh targetStats=[object Object] sourceStats.ino=141798 targetStats.ino=98734
+Server: Problem creating mounts: Target file not emty! Can not mount sourcePath=/usr/bin/ssh to targetPath=/home/ltest1/usr/bin/ssh targetStats=[object Object] sourceStats.ino=294089 targetStats.ino=188142
+It means that file has changed ... What should we do !? 
+Umount it and mount the new one !?
+
+
+Goto file no longer works! (it searches the wrong dir)
+
+Can not see when selecting text!!
+
+Double clicking no longer highlights the word you clicked on! (only others)
+
+Terminal stopped working !?!?!?
+
+
+
+---
+
+*.johan.webide.se magically renewed, I did not see anything in cron log, so I don't know how it managed to be renewed ....
+
+This however allow us to use wildcard domains for all users!
+and /sock/foo will be redirected from foo.username.webide.se
+
+Make a custom 502 Bad Gateway error message:
+"Can not connect to port: /sock/foo
+Replace port number with /sock/foo in your app!
+
+----
+
+Testing webdav
+
+davs://webdav.johan.webide.se
+
+davs://<username>@<webdav_address>
+
+----
+
+Implement syntax highliting pre-renderer, using standard JS lib:
+Maybe we can make use of https://github.com/highlightjs/highlight.js !?
+
+
+----
+
 Test undo/redo and collaboration
 
 ---
