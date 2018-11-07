@@ -50,7 +50,7 @@ function makeDirP(path, callback) {
 function mount(sourcePath, targetPath, callback) {
 //console.time("mounting " + targetPath);
 var abort = false;
-
+	var retryCounter = 0;
 // Are we mounting a file or a folder !?
 
 module_fs.stat(sourcePath, function(err, sourceStats) {
@@ -60,110 +60,129 @@ if(err) return mountDone(err);
 //console.log("Folder exist: " + sourcePath);
 
 // Does the target exist ?
-module_fs.stat(targetPath, function(err, targetStats) {
-
-if(err) {
-if(err.code != "ENOENT") return mountDone(err);
-
-//console.log("Target doesn't exist: " + targetPath);
-
-if(sourceStats.isDirectory()) {
-//console.log("Source is a directory: " + targetPath);
-makeDirP(targetPath, function(err) {
-if(err) return mountDone(err);
-//console.log("Target directory created: " + targetPath);
-targetCreated();
-});
-}
-else {
-//console.log("Source is a file: " + targetPath);
-var parentFolder = UTIL.parentFolder(targetPath);
-makeDirP(parentFolder, function(err) {
-if(err) {
-if(err.code == "EEXIST" && err.message.indexOf(parentFolder) != -1) {
-// If mount is called several time with the same root folders there can be racing
-console.log("Racing to create parentFolder=" + parentFolder + ": " + err.message);
-}
-else {
-console.log("makeDirP failed!");
-console.log("err.code=" + err.code + " ==EEXIST ? " + (err.code == "EEXIST") + "");
-console.log("parentFolder=" + parentFolder);
-console.log("err.message=" + err.message + " (err.message.indexOf(parentFolder)=" + err.message.indexOf(parentFolder) + ")");
-return mountDone(err);
-}
-}
-
-// Create emty file
-//console.log("Creating emty file: " + targetPath);
-module_fs.open(targetPath, 'w', function (err, fileDescriptor) {
-if(err) {
-console.log("module_fs.open targetPath=" + targetPath + " error: " + err.message);
-return mountDone(err);
-}
-//console.log("File opened for write: " + targetPath);
-
-module_fs.close(fileDescriptor, function(err) {
-if(err) {
-console.log("module_fs.close targetPath=" + targetPath + " error: " + err.message);
-return mountDone(err);
-}
-//console.log("Emty file created: " + targetPath);
-targetCreated();
-});
-});
-});
-}
-}
-else {
-
-//console.log("Target exist: " + targetPath);
-
-if(sourceStats.ino == targetStats.ino) {
-//console.timeEnd("mounting " + targetPath);
-return mountDone(null); // Already mounted!
-}
-
-if(sourceStats.isDirectory()) {
-
-if(!targetStats.isDirectory()) return mountDone(new Error("Source is a directory, but target is not! sourcePath=" + sourcePath +
-" targetPath=" + targetPath + " sourceStats=" + sourceStats + " targetStats=" + targetStats + " "));
-
-// Check if the target folder is emty
-module_fs.readdir(targetPath, function readDir(err, files) {
-if(err) return mountDone(err);
-
-if(files.length > 0) return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
-else targetCreated();
-
-});
-}
-else {
-// Make sure the file is emty
-if(targetStats.size !== 0) {
-mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePath + " to targetPath=" + targetPath +
-" targetStats=" + JSON.stringify(targetStats) + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + ""));
-}
-else targetCreated();
-
-}
-}
-
-function targetCreated() {
-
+		module_fs.stat(targetPath, function targetStat(err, targetStats) {
+			
+			if(err) {
+				if(err.code != "ENOENT") return mountDone(err);
+				
+				//console.log("Target doesn't exist: " + targetPath);
+				
+				if(sourceStats.isDirectory()) {
+					//console.log("Source is a directory: " + targetPath);
+					makeDirP(targetPath, function(err) {
+						if(err) return mountDone(err);
+						//console.log("Target directory created: " + targetPath);
+						targetCreated();
+					});
+				}
+				else {
+					//console.log("Source is a file: " + targetPath);
+					var parentFolder = UTIL.parentFolder(targetPath);
+					makeDirP(parentFolder, function(err) {
+						if(err) {
+							if(err.code == "EEXIST" && err.message.indexOf(parentFolder) != -1) {
+								// If mount is called several time with the same root folders there can be racing
+								console.log("Racing to create parentFolder=" + parentFolder + ": " + err.message);
+							}
+							else {
+								console.log("makeDirP failed!");
+								console.log("err.code=" + err.code + " ==EEXIST ? " + (err.code == "EEXIST") + "");
+								console.log("parentFolder=" + parentFolder);
+								console.log("err.message=" + err.message + " (err.message.indexOf(parentFolder)=" + err.message.indexOf(parentFolder) + ")");
+								return mountDone(err);
+							}
+						}
+						
+						// Create emty file
+						//console.log("Creating emty file: " + targetPath);
+						module_fs.open(targetPath, 'w', function (err, fileDescriptor) {
+							if(err) {
+								console.log("module_fs.open targetPath=" + targetPath + " error: " + err.message);
+								return mountDone(err);
+							}
+							//console.log("File opened for write: " + targetPath);
+							
+							module_fs.close(fileDescriptor, function(err) {
+								if(err) {
+									console.log("module_fs.close targetPath=" + targetPath + " error: " + err.message);
+									return mountDone(err);
+								}
+								//console.log("Emty file created: " + targetPath);
+								targetCreated();
+							});
+						});
+					});
+				}
+			}
+			else {
+				
+				//console.log("Target exist: " + targetPath);
+				
+				if(sourceStats.ino == targetStats.ino) {
+					//console.timeEnd("mounting " + targetPath);
+					return mountDone(null); // Already mounted!
+				}
+				
+				if(sourceStats.isDirectory()) {
+					
+					if(!targetStats.isDirectory()) return mountDone(new Error("Source is a directory, but target is not! sourcePath=" + sourcePath +
+					" targetPath=" + targetPath + " sourceStats=" + sourceStats + " targetStats=" + targetStats + " "));
+					
+					// Check if the target folder is emty
+					module_fs.readdir(targetPath, function readDir(err, files) {
+						if(err) return mountDone(err);
+						
+						if(files.length > 0) {
+							return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
+						}
+						else targetCreated();
+						
+					});
+				}
+				else {
+					// Make sure the file is emty
+					if(targetStats.size !== 0) {
+						
+						// It's not empty (and it's not the same as source)
+						// The source file has probably been replaced with a newever version
+						// Umount the old version and mount the new version ...
+						
+						console.log("Target file not emty: " + targetPath + " ... Attempting umount before mounting ...");
+						umount(targetPath, function unmountedMaybe(err) {
+							if(err) {
+								
+								var errorMsg = "Target file not emty! Can not mount sourcePath=" + sourcePath + " to targetPath=" + targetPath +
+								" targetStats=" + JSON.stringify(targetStats) + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "" +
+								"And not possible to umount: " + err.message;
+								
+								return mountDone(new Error(errorMsg));
+								
+							}
+							else {
+								targetCreated();
+							}
+						});
+					}
+					else targetCreated();
+				}
+			}
+			
+			function targetCreated() {
+				
 				var exec = module_child_process.exec;
-
-exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
-if(error) return mountDone(error);
-if(stderr) return mountDone(new Error(stderr));
-if(stdout) return mountDone(new Error(stdout));
-
-//console.timeEnd("mounting " + targetPath);
-return mountDone(null);
-});
-
-}
-
-});
+				
+				exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
+					if(error) return mountDone(error);
+					if(stderr) return mountDone(new Error(stderr));
+					if(stdout) return mountDone(new Error(stdout));
+					
+					//console.timeEnd("mounting " + targetPath);
+					return mountDone(null);
+				});
+				
+			}
+			
+		});
 
 });
 
@@ -195,6 +214,87 @@ if(mountResult != "") throw mountResult;
 //module_fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
 // Server was unable to boot after adding stuff to fstab!!
 */
+}
+
+function umount(path, callback) {
+	var child_process = require("child_process");
+	var command1 = "umount " + path + " --force";
+	child_process.exec(command1, function(error, stdout, stderr) {
+		
+		console.log(command1 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
+		
+		var str1 = "";
+		if(stdout) str1 += stdout;
+		if(stderr) str1 += stderr;
+		if(error) str1 += error.message;
+		
+		if(umountSuccess(str1)) {
+			return callback(null);
+		}
+		else if(str1.indexOf("umount: " + path + ": target is busy") != -1) {
+			// Sometimes you can not umount because there are other mounts to the target!
+			// A lazy umount might be able to get rid of those mounts!
+			var command2 = "umount -lf " + path + " && sleep 1"
+			console.log("umount " + path + ". Target is busy! Doing lazy umount -lf");
+			// we want to throw if this fails ...
+			child_process.exec(command, function(error, stdout, stderr) {
+				console.log(command2 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
+
+				var str2 = "";
+				if(stdout) str2 += stdout;
+				if(stderr) str2 += stderr;
+				if(error) str2 += error.message;
+				
+				if(error || stderr) return callback(error ? error : new Error(stderr));
+				
+				var command3 = "umount -f " + path + "";
+				child_process.exec(command3, function(error, stdout, stderr) {
+
+					console.log(command3 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
+					
+					var str3 = "";
+					if(stdout) str3 += stdout;
+					if(stderr) str3 += stderr;
+					if(error) str3 += error.message;
+					
+					if(umountSuccess(str3)) {
+						console.log("Lazy umount and mount succeeded! path=" + path);
+						return callback(null);
+					}
+					else {
+						var msg = "Lazy umount failed: " + str3;
+						console.log(msg);
+						return callback(new Error(msg));
+					}
+					
+				}); // command3
+}); // command2
+		}
+		else {
+			var msg = "umount failed for unknown reasons: " + str;
+			console.log(msg);
+			return callback(new Error(msg));
+		}
+	}); // command1
+	
+	function umountSuccess(str) {
+		if( str.indexOf("umount: " + path + ": not mounted") ) {
+			return true;
+		}
+		else if( str.indexOf("umount: " + path + ": mountpoint not found") ) {
+			return true;
+		}
+		else if( str.indexOf("umount: " + path + ": No such file or directory") ) {
+			return true;
+		}
+		else if( str == "" ) {
+			return true;
+		}
+		else {
+return false;
+		}
+	}
+	
 }
 
 module.exports = mount;

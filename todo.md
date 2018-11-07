@@ -42,11 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Server: Problem creating mounts: Target file not emty! Can not mount sourcePath=/usr/bin/ssh to targetPath=/home/johan/usr/bin/ssh targetStats=[object Object] sourceStats.ino=141798 targetStats.ino=98734
-Server: Problem creating mounts: Target file not emty! Can not mount sourcePath=/usr/bin/ssh to targetPath=/home/ltest1/usr/bin/ssh targetStats=[object Object] sourceStats.ino=294089 targetStats.ino=188142
-It means that file has changed ... What should we do !? 
-Umount it and mount the new one !?
-
 
 
 ---
