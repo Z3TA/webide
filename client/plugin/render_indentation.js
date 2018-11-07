@@ -14,8 +14,8 @@
 	
 	function indention_helper() {
 		
-		EDITOR.renderFunctions.push(indention_render);
-		
+		EDITOR.addRender(indention_render, 2400);
+
 		EDITOR.on("fileChange", renderIndentationOnChange);
 		
 		var charCode = 73; // I

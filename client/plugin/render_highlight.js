@@ -13,7 +13,7 @@
 	}
 
 
-	EDITOR.renderFunctions.push(highlightRender);
+	EDITOR.addRender(highlightRender, 101);
 	
 	console.log("Loaded highlightRender");
 	

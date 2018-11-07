@@ -50,9 +50,8 @@ Umount it and mount the new one !?
 
 Goto file no longer works! (it searches the wrong dir)
 
-Can not see when selecting text!!
+Find in files no longer works! (doesn't show the results)
 
-Double clicking no longer highlights the word you clicked on! (only others)
 
 Terminal stopped working !?!?!?
 

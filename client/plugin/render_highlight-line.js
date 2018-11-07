@@ -1,7 +1,7 @@
 
 (function() {
 	
-	EDITOR.renderFunctions.push(highLightLine); // function will be called on every frame render
+	EDITOR.addRender(highLightLine, 100);
 
 	var color = EDITOR.settings.style.currentLineColor;
 	

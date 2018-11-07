@@ -31,8 +31,8 @@
 		
 		EDITOR.bindKey({desc: "Scroll And move the caret down", charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
 		
-		EDITOR.renderFunctions.push(showMarkdownHeadings);
-		
+		EDITOR.addRender(showMarkdownHeadings, 3000);
+
 		var strZoomIn = "zoom in "; // special " " space so the with of the button will be the same when chaning text
 		var strZoomOut = "zoom out";
 		

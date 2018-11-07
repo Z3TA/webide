@@ -22,12 +22,8 @@
 	
 	
 	function infoBubbles() {
-		
-		// Extend editor (moved to core, because many plugins depend on this)
-		
-		// Add renderer
-		EDITOR.renderFunctions.push(infoRender);
-}
+		EDITOR.addRender(infoRender, 5000);
+	}
 	
 
 	function infoRender(ctx, buffer, file) {

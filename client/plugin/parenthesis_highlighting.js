@@ -5,8 +5,8 @@
 
 (function() {
 	
-	EDITOR.renderFunctions.push(parenthesis_highlight);
-	
+	EDITOR.addRender(parenthesis_highlight, 3000)
+
 	function parenthesis_highlight(ctx, buffer, file) {
 		
 		console.log("Rendering parenthesis_highlight...");

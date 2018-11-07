@@ -19,7 +19,7 @@
 		debug.warn("No font defined!");
 	}
 
-	EDITOR.renderFunctions.push(textRender);
+	EDITOR.addRender(textRender, 2100);
 	
 	console.log("Loaded textRenderer");
 	

@@ -13,8 +13,8 @@
 	}
 
 
-	EDITOR.renderFunctions.push(selectionRender);
-	
+	EDITOR.addRender(selectionRender, 200);
+
 	console.log("Loaded selectionRender");
 	
 	function selectionRender(ctx, buffer, file, startRow) {

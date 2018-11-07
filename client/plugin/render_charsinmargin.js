@@ -25,7 +25,7 @@
 	}
 	
 	
-	EDITOR.renderFunctions.push(transparentMarginCharacters);
+	EDITOR.addRender(transparentMarginCharacters, 2300);
 	
 	console.log("Loaded textRenderer");
 	

@@ -2956,11 +2956,44 @@ EDITOR.fireEvent("btk");
 		return removeFrom(EDITOR.animationFunctions, fun);
 	}
 	
-	EDITOR.addRender = function(fun) {
+	var renderOrder = {};
+	EDITOR.addRender = function(fun, order) {
+		
+		var fName = UTIL.getFunctionName(fun);
+		
+		if(renderOrder.hasOwnProperty(fName)) {
+			throw new Error("There is already a render function with the name " + fName + ". Render function names need to be unique!");
+		}
+		if(order == undefined) throw new Error("Render order (second argument) need to be defined for " + fName + " Use number 1-1999 for backgrounds and 2000+ for foreground");
+		
+		for(var fn in renderOrder) {
+			if(renderOrder[fn] == order) throw new Error(fName + " has the same order=" + order + " as " + fn + ". Increase the order to make it run after " + fn + " or decrease the order to make it run before.");
+		}
+
+		renderOrder[fName] = order;
+		
 		console.log("Adding render: " + UTIL.getFunctionName(fun));
-		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + UTIL.getFunctionName(fun));
-		return EDITOR.renderFunctions.push(fun) - 1;
+		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + fName);
+		
+		EDITOR.renderFunctions.push(fun);
+		
+		EDITOR.renderFunctions.sort(sortByRenderOrder);
+		
+		// Do not return index as it's not safe to remove the function based on index
+		
+		function sortByRenderOrder(fA, fB) {
+			var fNameA = UTIL.getFunctionName(fA);
+			var fNameB = UTIL.getFunctionName(fB);
+			var a = renderOrder[fNameA];
+			var b = renderOrder[fNameB];
+			
+			if(a > b) return 1;
+			else if(b > 1) return -1;
+			else return 0;
+		}
+		
 	}
+	
 	EDITOR.removeRender = function(fun) {
 		console.log("Removing render: " + UTIL.getFunctionName(fun));
 		return removeFrom(EDITOR.renderFunctions, fun);

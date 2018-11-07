@@ -38,7 +38,8 @@
 		EDITOR.on("fileHide", hideDocumentPreviewDiv);
 		EDITOR.on("fileShow", showDocumentPreviewDiv);
 
-		EDITOR.renderFunctions.push(renderPreview);
+		EDITOR.addRender(renderPreview, 3000);
+
 		EDITOR.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});
 		EDITOR.addEvent("mouseClick", {fun: mouseClick, targetClass:"documentPreviewCanvas", button: 0});
 		

@@ -18,7 +18,7 @@
 		desc: "Render line numbers",
 		load: function() {
 			// lineNumbers function will be called on every frame render
-			EDITOR.addRender(paintLineNumbers);
+			EDITOR.addRender(paintLineNumbers, 900);
 			
 			// Add new item for lineNumberColor to EDITOR.settings if it's not already added
 			EDITOR.settings.style.lineNumberColor = EDITOR.settings.style.lineNumberColor ? EDITOR.settings.style.lineNumberColor : "rgb(200,200,200)";

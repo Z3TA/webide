@@ -22,14 +22,23 @@
 	}
 	
 	function unloadXmatch() {
-		EDITOR.renderFunctions.splice(xMatcher[1], 1);
-		EDITOR.renderFunctions.splice(xMatcher[0], 1);
+		xMatcher.forEach(EDITOR.removeRender);
+		xMatcher.length = 0;
 	}
 	
 	function highLightX(a, b) {
-		xMatcher.push(EDITOR.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
+
+
+		var name = "xMatcher" + xMatcher.length;
+		var customRender = function(ctx, buffer, file, startRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow);
-		}) - 1);
+		}
+		var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow){ render" + name + "(ctx, buffer, file, startRow) };")(customRender);
+
+		xMatcher.push(func);
+
+		EDITOR.addRender(func, 2200 + xMatcher.length - 1);
+
 	}
 	
 	function highlightMatch(ctx, buffer, file, lP, rP, startRow) {

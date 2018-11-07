@@ -7,16 +7,12 @@
 			
 			// We want this render function to run before text rendering
 			// But after renders that clears the background!
-			EDITOR.renderFunctions.unshift(textBgRender); 
+			EDITOR.addRender(textBgRender, 1900);
 			
 			console.log("Loaded textbg renderer");
 			},
 		unload: function unloadTextBgRenderl() {
-			var index = EDITOR.renderFunctions.indexOf(textBgRender);
-			while(index > -1) {
-			EDITOR.renderFunctions.splice(index, 1);
-				index = EDITOR.renderFunctions.indexOf(textBgRender);
-			}
+			EDITOR.removeRender(textBgRender);
 			console.log("Unloaded textbg renderer");
 		},
 		order: 1 // Make sure it runs before text render so that the text is rendered above (and not under) the background
@@ -24,7 +20,7 @@
 	
 	*/
 	
-	EDITOR.renderFunctions.push(textBgRender); 
+	EDITOR.addRender(textBgRender, 1900);
 	
 	function textBgRender(ctx, buffer, file, startRow) {
 		
