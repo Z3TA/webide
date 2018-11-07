@@ -1373,11 +1373,22 @@ username = guestUser;
 							function messageFromWorker(workerMessage, handle) {
 								//console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 								
-								if(workerMessage.resp || workerMessage.error) send(workerMessage);
+								if(workerMessage.resp || workerMessage.error) {
+									send(workerMessage);
+								}
 								else if(workerMessage.message) {
+									var obj;
 									if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 										for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-											send({msg: workerMessage.message.msg, id:0}, USER_CONNECTIONS[userConnectionName].connections[i]);
+											
+											// Need to copy the props into another object so the object passed to send will be unique (and have id=0)
+											obj = {};
+											for(var name in workerMessage.message) {
+												obj[name] = workerMessage.message[name];
+											}
+											obj.id = 0;
+
+											send(obj, USER_CONNECTIONS[userConnectionName].connections[i]);
 										}
 									}
 								}

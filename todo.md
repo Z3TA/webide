@@ -48,14 +48,6 @@ It means that file has changed ... What should we do !?
 Umount it and mount the new one !?
 
 
-Goto file no longer works! (it searches the wrong dir)
-
-Find in files no longer works! (doesn't show the results)
-
-
-Terminal stopped working !?!?!?
-
-
 
 ---
 
