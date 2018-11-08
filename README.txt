@@ -40,8 +40,8 @@ sudo apt-get install -y nodejs
 
 4. Install "node_modules" packages: `npm install`
 
-5. Make jzedit.desktop and start.sh executable:
-Via terminal: `chmod +x jzedit.desktop start.sh`
+5. Make jzedit.desktop and linux_start.sh executable:
+Via terminal: `chmod +x jzedit.desktop linux_start.sh`
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
 6. Add desktop shortcut (Unity/GNOME): Double click on jzedit.desktop to start the editor. 
