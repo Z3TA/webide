@@ -16,35 +16,18 @@
 Try any of the example files in the /nodejs/ folder.</p>
 
 
-<h2>Unix sockets / named pipes</h2>
+<h2>Use Unix sockets (named pipes) instead of ports!</h2>
 
-<p>Use /sock/_somename instead of a <b>port</b>-number.
-Eg. replace server.listen(80) with server.listen("/sock/_nameOfSocket") </p>
+<p>Use for example /sock/nameofsocket instead of a port 80.
+Eg. replace server.listen(80) with server.listen("/sock/nameofsocket") </p>
 
-<p>All HTTP (and websocket) request starting with
-http://%USERNAME%.%DOMAIN%/_underscore
-will be proxied to your /sock/_underscore unix socket.</p>
+<p>All HTTP (and websocket) request going to
+https://nameofsocket.%USERNAME%.%DOMAIN% 
+will be proxied to your /sock/nameofsocket unix socket!</p>
 
-<p>You might have to add the unix socket as a prefix/path when
-using modules such as express and socket.io:
-Example: <i>express().use("/_unixSocket", express.static('public'));</i> or
-<i>socketio(server, {path: "/_unixSocket/something"});</i></p>
+<p>If you get <i>Error: EADDRINUSE /sock/nameofsocket</i> simply delete the file.<br>
+The editor will automatically be delete sockets when the script exit.</p>
 
-<p>If you get <i>Error: EADDRINUSE /sock/_yoursock</i> simply delete the file.<br>
-(unix sockets created while running a node.js script are
-normally deleted by the editor when a node.js script stops)</p>
-
-<h3>Relative paths</h3>
-
-<p>For example when using the express module to serve static content,
-the url will be http://%USERNAME%.%DOMAIN%/_sockName<br>
-So make sure all paths are relative (not hardcoded with / infront).
-If you use relative paths you can later change the socket name, 
-for example when putting the app in production.<br>
-Example: Linking to /assets/sound/bird.wav from /game/index.htm the 
-url should be ../assets/sound/bird.wav.<br>
-Or if index.htm was in the root, the 
-url would be assets/sound/bird.wav (no slash infront)</p>
 
 
 <h2>Deploying to production</h2>
