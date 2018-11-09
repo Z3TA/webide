@@ -42,13 +42,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Got permission denied when cloning from Github ... 
-Should be able to get my shh key !?
-git@github.com:Z3TA/letsencrypt-nodejs-nginx.git
-
-CLIENT.cmd id=113 req=mercurial.clone
-Server: {"error":"API error: Warning: Permanently added 'github.com,140.82.118.3' (RSA) to the list of known hosts.\r\n","id":"113"}
-
+Annoying when the editor ask's to convert the file because of the utf8 BOM.
 
 
 ---
