@@ -387,12 +387,7 @@ function adduser() {
 	welcome_file = welcome_file.replace(/%DOMAIN%/g, DOMAIN);
 	fs.writeFileSync(homeDir + "wwwpub/welcome.htm", welcome_file);
 		
-		var nodeinfo_file = fs.readFileSync(homeDir + "wwwpub/nodejs.htm", ENCODING);
-		nodeinfo_file = nodeinfo_file.replace(/%USERNAME%/g, username);
-		nodeinfo_file = nodeinfo_file.replace(/%DOMAIN%/g, DOMAIN);
-		fs.writeFileSync(homeDir + "wwwpub/nodejs.htm", nodeinfo_file);
 		
-	
 	// add wwwpub
 		var wwwgid = getGroupId("www-data");
 	//fs.mkdirSync(homeDir + "wwwpub");

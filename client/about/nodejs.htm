@@ -32,7 +32,7 @@
 	Eg. replace server.listen(80) with server.listen("/sock/nameofsocket") </p>
 	
 	<p>All HTTP (and websocket) request going to
-	https://nameofsocket.%USERNAME%.%DOMAIN%
+	https://nameofsocket.username.webide.se
 	will be proxied to your /sock/nameofsocket unix socket!</p>
 	
 	<p>If you get <i>Error: EADDRINUSE /sock/nameofsocket</i> simply delete the file.<br>
@@ -62,7 +62,7 @@
 	<h3>Production vs Development enviroment</h3>
 	
 	<p>The "production" enviroment will append prod: true,
-	and myName: %USERNAME% to the process.env (enviroment variables).<br>
+	and myName: username to the process.env (enviroment variables).<br>
 	While normal (development) will have dev: true (no prod variable).</p>
 	
 	<p>This can be useful if you for example want to use a different
