@@ -72,7 +72,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			}
 			clone();
 		}
-	}); 
+	});
 	
 	function clone() {
 		var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
@@ -149,10 +149,15 @@ console.log("clone error stderr=" + stderr);
 			var destinationNotEmpty = stderr.match(/abort: destination '(.*)' is not empty/);
 				
 				if(destinationNotEmpty) {
-				cloneDone(new Error("The destination folder is not empty: " + local + destinationNotEmpty[1]));
+				cloneDone("The destination folder is not empty: " + local + destinationNotEmpty[1]);
 				}
-			else if(stderr) cloneDone(err);
-				
+			else if(stderr) {
+				cloneDone(err.message + "\n" + stderr);
+			}
+			else {
+				cloneDone(err.message);
+			}
+			
 			user.send({mercurialProgress: {max: 1, value: 1}});
 
 });
@@ -177,7 +182,17 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 			
 			if(stderr) {
 				
-				if(stderr.match(/: No such file or directory$/)) {
+				var reAddedHost = /Warning: Permanently added (.*) (RSA) to the list of known hosts./;
+				var reNoSuchFileOrDirectory = /: No such file or directory$/;
+				
+				stderr.replace(reAddedHost, "");
+				
+				stderr = stderr.trim();
+				
+				if(!stderr) return cloneSuccess();
+				
+				// What error message to show ?
+				if(stderr.match(reNoSuchFileOrDirectory)) {
 					cloneDone("Directory does not exist: " + local);
 				}			
 				else cloneDone(stderr);
@@ -200,19 +215,21 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 					
 					var path = user.toVirtualPath(dir);
 				*/
-				
-				if(save) {
-					
-					saveCredentialsInHgrc(user, localPath, remote, hguser, pw, function hgrcSaved(err) {
-						if (err) throw err;
-						else cloneDone();
-					});
-					
-				} else cloneDone();
-				
+				cloneSuccess();
 				
 			}
 		});
+		
+		function cloneSuccess() {
+			if(save) {
+				
+				saveCredentialsInHgrc(user, localPath, remote, hguser, pw, function hgrcSaved(err) {
+					if (err) throw err;
+					else cloneDone();
+				});
+				
+			} else cloneDone(null);
+		}
 		
 		function cloneDone(errorMessage) {
 			if(callback === null) throw new Error("clone callback already called!");
