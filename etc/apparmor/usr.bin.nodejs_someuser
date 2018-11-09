@@ -99,8 +99,8 @@
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** rwl,
 
-    /home/ltest1/bin/gzip rix,
-    /home/ltest1/usr/bin/ssh-keygen rix,
+    %HOME%%USERNAME%/bin/gzip rix,
+    %HOME%%USERNAME%/usr/bin/ssh-keygen rix,
 
   }
 

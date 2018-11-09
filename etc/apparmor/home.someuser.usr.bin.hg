@@ -31,8 +31,9 @@
   /lib/** r,
   /usr/lib/** r,
   /usr/local/lib/** r,
-  /usr/bin/python2.7 ix,
-  /usr/bin/ssh px,
+
+  %HOME%%USERNAME%/usr/bin/python2.7 ix,
+  %HOME%%USERNAME%/usr/bin/ssh ix,
 
   #/run/resolvconf/resolv.conf r, # copied from userdir_skeleton
   #/etc/mercurial/hgrc.d/cacerts.rc # copied from userdir_skeleton
