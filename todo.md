@@ -42,6 +42,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Got permission denied when cloning from Github ... 
+Should be able to get my shh key !?
+git@github.com:Z3TA/letsencrypt-nodejs-nginx.git
+
+
 
 
 ---

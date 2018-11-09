@@ -2662,11 +2662,60 @@ API.abortFindFiles = function abortFindFiles(user, json, abortFindFilesCallback)
 abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 	}
 
-/*
-	// Deprecated! Use virtual terminal instead!
-
-	API.shell = function shellCommand(user, json, shellCommandCallback) {
+API.run = function run(user, json, callback) {
+	// Runs a shell command
 	
+	// Use exec instead of execFile because it's too hard to know how the arguments should be passed.
+	var exec = require('child_process').exec;
+	
+	var options = {
+		encoding: 'utf8',
+		maxBuffer: 200*1024,
+		env: process.env
+	};
+	
+	/*
+		env: {
+		HOME: "/",
+		PATH:"/bin/:/usr/bin/",
+		USER: user.name,
+		LOGNAME: user.name,
+		uid:
+		gid:
+		}
+	*/
+	
+	if(json.cwd) options.cwd = json.cwd;
+	if(json.env) {
+		for(var prop in json.env) {
+			options.env[prop] = json.env[prop];
+		}
+	}
+	
+	var command = json.command;
+	
+	console.log("Running command=" + command + " ...");
+	console.log("env=" + JSON.stringify(options.env, null, 2));
+	exec(command, options, function (err, stdout, stderr) {
+		
+		console.log(command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
+		
+		
+		
+		if(err) {
+			console.log("err.code=" + err.code);
+			return callback(err);
+		}
+		else return callback(null, {stdout: stdout, stderr: stderr});
+		
+	});
+}
+
+
+/*
+	
+	API.shell = function shellCommand(user, json, shellCommandCallback) {
+	// Deprecated! Use virtual terminal instead!
 	var exec = require('child_process').exec;
 	
 	var commandToRun = json.command;

@@ -1215,6 +1215,15 @@ updateCommitFileSelect();
 		labelSavePassword.appendChild(document.createTextNode("Save credentials"));
 		form.appendChild(labelSavePassword);
 		
+		// ### SSH key button
+		var sshButton = document.createElement("input");
+		sshButton.setAttribute("type", "button");
+		sshButton.setAttribute("class", "button");
+		sshButton.setAttribute("value", "Copy SSH Public key");
+		sshButton.setAttribute("title", "Copy public SSH key to clipboard");
+		sshButton.addEventListener("click", getSSHPublicKey, false);
+		form.appendChild(sshButton);
+		
 		var cancel = document.createElement("button");
 		cancel.setAttribute("type", "button");
 		cancel.setAttribute("class", "button");
@@ -2762,15 +2771,56 @@ if(err) return alertBox(err.message);
 		});
 	}
 	
+	function getSSHPublicKey() {
+		var pubKeyPath = "/.ssh/id_rsa.pub";
+		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+		
+		function gotPubKeyMaybe(err, path, pubkey, hash) {
+			if(err) {
+				var yes = "Yes";
+				var no = "No";
+				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
+					
+					if(answer == yes) {
+						
+						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
+							
+							if(err) {
+								alertBox("ssh-keygen failed! " + err.message);
+							}
+							else {
+								
+								console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
+								
+								EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+							}
+							
+						});
+						
+					}
+					
+				});
+			}
+			else {
+				EDITOR.copyToClipboard(pubkey, function(err) {
+					if(err) throw err;
+					console.log("Public key copied to clipboard!");
+});
+			}
+		}
+		
+		return false;
+		
+	}
 	
 	function getSelects(selEl) {
 		// Returns an array of selected values from select element
 		if(!selEl) throw new Error("selEl=" + selEl);
 		var arr = [];
 		var opt = selEl.options;
-			for(var i=0, val; i<opt.length; i++) {
-				if(opt[i].selected) {
-					val = opt[i].value;
+		for(var i=0, val; i<opt.length; i++) {
+			if(opt[i].selected) {
+				val = opt[i].value;
 				if(arr.indexOf(val) == -1) arr.push(val);
 					}
 			}
