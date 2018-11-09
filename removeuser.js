@@ -209,7 +209,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 					if(zfsDestroyErr.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
 						console.log("zfsDestroyErr: " + zfsDestroyErr.message);
 					}
-					if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
+					else if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
 						// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
 						// Try to restart jzedit server to see if it helps
 					// Last resort is to reboot to get rid of all the mounts
@@ -222,20 +222,23 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 					return zfsDestroy(zfsPool, userHomeDir); // Try again
 						
 					}
-					else throw zfsDestroyErr;
+					else {
+					console.log("zfsPool=" + zfsPool + " HOME=" + HOME + " username=" + username);
+					throw zfsDestroyErr;
 				}
-				
-				if(zfsDestroyStdout) console.log(zfsDestroyStdout);
-				
-			//console.log("Successfully destroyed: " + zfsPool + userHomeDir);
-				
-				userdel();
 			}
 			
-		});
-	}
-	else userdel();
-	
+			if(zfsDestroyStdout) console.log(zfsDestroyStdout);
+			
+			//console.log("Successfully destroyed: " + zfsPool + userHomeDir);
+			
+			userdel();
+		}
+		
+	});
+}
+else userdel();
+
 
 function restartEditorService() {
 	console.log("Restarting jzedit service ...");
@@ -250,52 +253,56 @@ function restartEditorService() {
 	if(restartJzeditStdout) console.log(restartJzeditStdout);
 }
 
-	
+
 function userdel() {
-		
-		var userDelCmd = 'userdel -f ';
-		
-		if(NOZFS) userDelCmd += " -r"; // Also remove home dir
-		
-		userDelCmd += username;
-		
-		child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
-			if (err) throw err;
-			
-			var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
-			
-			if(stderr) {
-				if(stderr.trim() != mailspool) throw new Error(stderr);
-			}
-			
-			console.log("User " + username + " deleted!");
-			
-		});
-	}
 	
-	function unlink(path) {
+	var userDelCmd = 'userdel -f ';
+	
+	if(NOZFS) userDelCmd += " -r"; // Also remove home dir
+	
+	userDelCmd += username;
+	
+	child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
+		
+		var error = err.message || stderr;
+		
+		var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
+		
+		if (error) {
+			if(error.indexOf("userdel: user '" + username + "' does not exist") == -1
+			&& stderr.trim() != mailspool) {
+				throw err || new Error(stderr);
+			}
+		}
+		
+		console.log("User " + username + " deleted!");
+		
+	});
+}
+
+function unlink(path) {
 	// Only use this function if you want to ignore ENOENT's, otherwise use fs.unlinkSync directly.
 	// note: unlinking is the same as Removing a file!! So be careful
-		var fs = require("fs");
-		try {
-			fs.unlinkSync(path);
-		}
-		catch(err) {
-			if(err.code == "ENOENT") console.warn("Did not find path=" + path);
-			else throw err;
-		}
+	var fs = require("fs");
+	try {
+		fs.unlinkSync(path);
 	}
-	
-	function umount(path, ignoreErrors) {
+	catch(err) {
+		if(err.code == "ENOENT") console.warn("Did not find path=" + path);
+		else throw err;
+	}
+}
+
+function umount(path, ignoreErrors) {
 	var child_process = require("child_process");
-		try {
+	try {
 		child_process.execSync("umount " + path + " --force"); // .toString(ENCODING)
-		}
-		catch(err) {
-			if(!ignoreErrors) {
-				if( err.message.indexOf("umount: " + path + ": not mounted") == -1
-				&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
-				&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
+	}
+	catch(err) {
+		if(!ignoreErrors) {
+			if( err.message.indexOf("umount: " + path + ": not mounted") == -1
+			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
+			&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
 				
 				if(err.message.indexOf("umount: " + path + ": target is busy") != -1) {
 					// Sometimes you can not umount because there are other mounts to the target!
@@ -345,6 +352,7 @@ function fuseUmount(path, ignoreErrors) {
 			
 			if( err.message.indexOf("fusermount: failed to unmount " + path + ": not mounted") == -1
 			&& err.message.indexOf("fusermount: failed to unmount " + path + ": mountpoint not found") == -1
+			&& err.message.indexOf("fusermount: bad mount point " + path + ": No such file or directory") == -1
 			&& err.message.indexOf("fusermount: failed to unmount " + path + ": No such file or directory") == -1 ) {
 				
 				if(err.message.indexOf("failed to unmount " + path + ": Device or resource busy") != -1) {
