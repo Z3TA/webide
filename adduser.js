@@ -451,7 +451,7 @@ function adduser() {
 		// Register SSL certificate for user web page
 			console.time("Letsencrypt");
 		var letsencrypt = require("./shared/letsencrypt.js");
-			letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL);
+			letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, true);
 			console.timeEnd("Letsencrypt");
 		}
 		
