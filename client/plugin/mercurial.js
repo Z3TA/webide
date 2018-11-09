@@ -1182,7 +1182,7 @@ updateCommitFileSelect();
 		// ### password
 		var labelPw = document.createElement("label");
 		labelPw.setAttribute("for", "repoLoginPw");
-		labelPw.appendChild(document.createTextNode("Username: "));
+		labelPw.appendChild(document.createTextNode("Password: "));
 		form.appendChild(labelPw);
 		
 		var pw = document.createElement("input");
@@ -1317,16 +1317,34 @@ updateCommitFileSelect();
 				}
 				
 				CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
-					
-					if(err) alertBox(err.message);
+					if(err) {
+var error = err.message;
+						
+						// For git+ssh to work you need both a username/password and a known public ssh key 
+						if( error.match(/Permission denied \(publickey\)/) && repo.value.match(/github\.com/) ) {
+							error += "\n\nTip: Try using HTTPS instead"
+						}
+						
+						alertBox(error);
+					}
 					else {
+						// Show readme if one exist ...
+						EDITOR.listFiles(resp.path, function(err, files) {
+							if(err) throw err;
+							
+							for(var i=0; i<files.length; i++) {
+								if( files[i].type == "-" && files[i].name.match(/readme/i) ) {
+									EDITOR.openFile(files[i].path);
+									return;
+								}
+}
+							// No readme found
+							alertBox("Successfully cloned to:\n" + resp.path);
+						});
 						
-						alertBox("Successfully cloned to:\n" + resp.path);
 						hideCloneDialog();
-						
-					};
-					
-				});
+						};
+					});
 			}
 		}
 	}

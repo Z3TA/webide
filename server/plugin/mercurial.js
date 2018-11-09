@@ -182,10 +182,12 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 			
 			if(stderr) {
 				
-				var reAddedHost = /Warning: Permanently added (.*) (RSA) to the list of known hosts./;
+				var reAddedHost1 = /Warning: Permanently added (.*) (RSA) to the list of known hosts\./;
+				var reAddedHost2 = /Warning: Permanently added the RSA host key for IP address (.*) to the list of known hosts\./;
 				var reNoSuchFileOrDirectory = /: No such file or directory$/;
 				
-				stderr.replace(reAddedHost, "");
+				stderr.replace(reAddedHost1, "");
+				stderr.replace(reAddedHost2, "");
 				
 				stderr = stderr.trim();
 				
