@@ -204,6 +204,7 @@
 		
 		inputGoto.addEventListener("keyup", typing, false);
 		inputGoto.addEventListener("keydown", keydown, false);
+		inputGoto.addEventListener('paste', paste, false);
 		
 		//inputFolder.addEventListener("keyup", chandingDir, false);
 		
@@ -250,9 +251,42 @@
 		folderPicker.appendChild(button);
 	}
 	
+	function paste(pasteEvent) {
+		// Pasting into inputGoto
+		
+		if(inputGoto.value) return true; // There's already text, don't mess it up
+		
+		if (window.clipboardData && window.clipboardData.getData) { // IE
+			var text = window.clipboardData.getData('Text');
+		} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
+			var text = pasteEvent.clipboardData.getData('text/plain');
+		}
+		
+		text = text.trim();
+		
+		if(text.indexOf("/") != -1 || text.indexOf("\\") != -1) {
+			// It's probably a path.
+			
+			//  We want to move the folder part into inputFolder
+			
+			var dir = UTIL.getDirectoryFromPath(text);
+			var file = UTIL.getFilenameFromPath(text);
+			
+			inputGoto.value = file;
+			inputFolder.value = dir;
+			
+			pasteEvent.preventDefault();
+			typing();
+			return false;
+			
+		}
+		
+		return true;
+	}
+	
 	function typing(keyUpEvent) {
 		
-		var text = inputGoto.value
+		var text = inputGoto.value;
 		
 		if(typeof keyUpEvent == "object") {
 			console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
@@ -455,8 +489,12 @@
 		
 		EDITOR.hideMenu();
 		
+		
+		
 		if(file) {
 			currentDir = UTIL.getDirectoryFromPath(file.path);
+			
+			var selectedText = file.getSelectedText();
 			
 			var folderToSearchIn = currentDir;
 			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
@@ -467,6 +505,8 @@
 				console.log("folderToSearchIn=" + folderToSearchIn);
 			}
 		}
+		
+		var clipboard = 
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 		
