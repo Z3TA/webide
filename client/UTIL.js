@@ -1468,7 +1468,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
             hash: ""
         };
 		
-		var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps", "chrome-extension"];
+		var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps", "chrome-extension", "smb"];
 		
         function firstSplit (str, splitter) {
             var array;

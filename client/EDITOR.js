@@ -5963,9 +5963,32 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		var text = fileDropEvent.dataTransfer.getData('Text');
 		
 		if(text) {
-			// Drop the text into the current file
 			console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
+			
+			if(text.length < 512) {
+				var url = UTIL.getLocation(text);
+				if(url.protocol == "smb" && url.host && url.pathname) {
+					/*
+						User tried to drag a file from a samba share into the editor ...
+						smb://z-mainframe/www/z%C3%A4ta.com/index.htm
+						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
+						
+						currect: 
+						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
+						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com/sv/blog/byta_disk_zfs.htm 
+						
+						
+						
+					*/
+					var path = "/run/user/1000/gvfs/smb-share:server=" + url.host + ",share=" + decodeURI(url.pathname.slice(1));
+					path = path.trim(); // Remove CRLF
+					EDITOR.openFile(path);
+					return;
+				}
+			}
+			
 			if(EDITOR.currentFile) {
+				// Drop the text into the current file
 				
 				// Get row and col
 				var mouseX = fileDropEvent.offsetX;
@@ -6392,7 +6415,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 			pasteEvent.preventDefault();
 			
-			console.log("Calling paste listeners (" + EDITOR.eventListeners.paste.length + ") ...");
+			console.log("Calling paste listeners on paste event (" + EDITOR.eventListeners.paste.length + ") ...");
 			for(var i=0, fun; i<EDITOR.eventListeners.paste.length; i++) {
 				
 				fun = EDITOR.eventListeners.paste[i].fun;
