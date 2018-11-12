@@ -45,6 +45,14 @@ What I'm working on
 Annoying when the editor ask's to convert the file because of the utf8 BOM.
 
 
+idea: When using the scroll wheel on a hex color, you make the color darker och lighter, and see the changes live in the preview.
+When holding down shift and scrolling on a color you change the color hue.
+It changes faster if you scroll faster, or slower if you scroll slow.
+With touch (two fingers) you can scroll sideways to change hue and up/down to change lightness.
+Or use HTML5 color picker !!!? (can you see changes live ? It seems to)
+When you double click #ababab on a hex color you get the html5 color picker.
+The undo/redo should not save until you click OK
+
 ---
 
 *.johan.webide.se magically renewed, I did not see anything in cron log, so I don't know how it managed to be renewed ....
@@ -2783,6 +2791,10 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Test server response time:
+
+CLIENT.cmd("ping", {time: new Date().getTime()}, (err, json) => console.log( ((new Date()).getTime() - json.ping ) + "ms") );
 
 The terminal have issues when it gets a lot of data. Try for example playing snake in the terminal: snake-cli
 

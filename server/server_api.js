@@ -2740,6 +2740,11 @@ API.run = function run(user, json, callback) {
 	}
 */
 
+API.ping = function ping(user, json, callback) {
+	callback(null, json);
+}
+
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");
