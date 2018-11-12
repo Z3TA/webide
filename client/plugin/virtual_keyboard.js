@@ -187,8 +187,7 @@
 		makeButton(" Enter ", 2, function space(click) {
 			click.target.blur();
 			clearSelection();
-			EDITOR.input = true;
-			EDITOR.mock( "keydown", { charCode:13 } );
+			fireKey(13, "keydown");
 		});
 		
 		makeButton("}", 2);
@@ -200,8 +199,7 @@
 		makeButton("  space  ", 3, function space(click) {
 			click.target.blur();
 			clearSelection();
-			EDITOR.input = true;
-			EDITOR.mock( "keypress", { charCode: " ".charCodeAt(0) } );
+			fireKey(32, "keypress")
 		});
 		
 		
@@ -216,8 +214,7 @@
 		makeButton("compl", 3, function space(click) {
 			click.target.blur();
 			clearSelection();
-			EDITOR.input = true;
-			EDITOR.mock( "keydown", { charCode: EDITOR.settings.autoCompleteKey } );
+			fireKey(EDITOR.settings.autoCompleteKey, "keydown")
 		});
 		
 		makeButton("<", 3);
@@ -312,7 +309,8 @@
 		buttons[char] = {
 			el: b,
 			row: row,
-			group: group
+			group: group,
+			click: click // For testing
 		};
 		
 		if(alt) buttons[char].alt = alt;
@@ -320,25 +318,76 @@
 		return b;
 	}
 	
-	function insertAtCaret(txtarea, text) {
-		// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
-		//var txtarea = document.getElementById(areaId);
-		var scrollPos = txtarea.scrollTop;
-		var caretPos = txtarea.selectionStart;
+	function insertAtCaret(t, text) {
+		/*
+			The caret is lost when the element is blurred, eg when you push a button on the virtual keyboard.
+			Solution: Save the caret posited every time the element blurs
+		*/
 		
-		var front = (txtarea.value).substring(0, caretPos);
-		var back = (txtarea.value).substring(txtarea.selectionEnd, txtarea.value.length);
-		txtarea.value = front + text + back;
-		caretPos = caretPos + text.length;
-		txtarea.selectionStart = caretPos;
-		txtarea.selectionEnd = caretPos;
-		txtarea.focus();
-		txtarea.scrollTop = scrollPos;
+		console.log("insertAtCaret: text=" + text);
+		
+		if(!t.onblur) {
+			t.setAttribute("sTop", t.scrollTop);
+			t.setAttribute("selStart", t.selectionStart);
+			t.setAttribute("selEnd", t.selectionEnd);
+t.onblur = function() {
+				//console.log("Blur: update from " + this.getAttribute("selStart") + " to selStart=" + this.selectionStart + " ", this);
+				this.setAttribute("sTop", this.scrollTop);
+				this.setAttribute("selStart", this.selectionStart);
+				this.setAttribute("selEnd", this.selectionEnd);
+			}
+			t.onclick = function() {
+				//console.log("Click: update from " + this.getAttribute("selStart") + " to selStart=" + this.selectionStart + " ", this);
+				this.setAttribute("sTop", this.scrollTop);
+				this.setAttribute("selStart", this.selectionStart);
+				this.setAttribute("selEnd", this.selectionEnd);
+			}
+		}
+		
+		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
+		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
+		var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
+		
+		if( typeof sTop != "number" || isNaN(sTop) ) {
+			throw new Error("Unable to get scroll position! scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
+		}
+		if( typeof selStart != "number" || isNaN(selStart) ){
+			throw new Error("Unable to get caret position! selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
+		}
+		if( typeof selEnd != "number" || isNaN(selEnd) ){
+			throw new Error("Unable to get selection end! selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+		}
+		
+		//console.log("selStart=" + selStart + " (" + t.getAttribute("sTop") + ")");
+		
+		var front = (t.value).substring(0, selStart);
+		var back = (t.value).substring(selEnd, t.value.length);
+		
+		if(text == "\b") {
+			t.value = front.slice(0, -1) + back;
+			selStart = selStart - 1;
+		}
+		else {
+			t.value = front + text + back;
+			selStart = selStart + text.length;
+		}
+		
+		t.selectionStart = selStart;
+		t.selectionEnd = selStart;
+		t.focus();
+		t.scrollTop = sTop;
+		
+		t.setAttribute("sTop", sTop);
+		t.setAttribute("selStart", selStart);
+		t.setAttribute("selEnd", selStart);
+		
 	}
 	
 	function fireKey(charCode, eventType) {
 		
 		//event.preventDefault();
+		
+		console.log("fireKey: charCode=" + charCode + " eventType=" + eventType);
 		
 		if(eventType == undefined) eventType = "keypress";
 		
@@ -375,5 +424,77 @@
 			window.getSelection().removeAllRanges();
 		}
 	}
+	
+	
+	// TEST-CODE-START
+	// ### Test(s)
+	
+	EDITOR.addTest(function testInsertAtCaret(callback) {
+		// Make sure the characters are inserted in the right order.
+		
+		var input = document.createElement("input");
+		
+		var footer = document.getElementById("footer");
+		
+		footer.appendChild(input);
+		EDITOR.resizeNeeded();
+		
+		//input.blur();
+		
+		EDITOR.virtualKeyboard.show();
+		
+		
+		// Seems we need an event to trigger the click event
+		
+		input.focus(); // Element needs to have focus *before* clicking on it for the click() event to trigger.
+		
+		input.setAttribute("placeholder", "Double Click here to trigger the test!");
+		
+		input.ondblclick = function() {
+			
+			buttons["a"].el.click();
+			buttons["b"].el.click();
+			buttons["c"].el.click();
+			
+			setTimeout(function() {
+				
+				if(input.value != "abc") throw new Error("Unexpected input.value=" + input.value);
+				
+				footer.removeChild(input);
+				
+				EDITOR.virtualKeyboard.hide();
+				
+				return callback(true);
+				
+			}, 0);
+			
+		}
+		
+		return;
+		
+		insertAtCaret(input, "a");
+		
+		setTimeout(function() {
+			input.blur();
+			insertAtCaret(input, "b");
+			setTimeout(function() {
+				input.blur();
+				insertAtCaret(input, "c");
+				setTimeout(function() {
+					
+					if(input.value != "abc") throw new Error("Unexpected input.value=" + input.value);
+					
+					footer.removeChild(input);
+					
+					return callback(true);
+					
+				}, 500);
+			}, 500);
+		}, 4500);
+		
+	}, 1);
+	
+	
+	// TEST-CODE-END
 	
 })();
