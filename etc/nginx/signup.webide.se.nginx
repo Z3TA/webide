@@ -12,8 +12,8 @@
 
 # Redirect to https:
 server {
-  listen 80;
-  listen [::]:80;
+  listen 80 http2;
+  listen [::]:80 http2;
   server_name signup.webide.se;
   return 301 https://signup.webide.se$request_uri;
 }
@@ -23,12 +23,12 @@ server {
   charset utf-8;
   
   # Ucomment to enable SSL
-  listen 443 ssl;
+  listen 443 ssl http2;
   ssl_certificate      /etc/ssl/certs/letsencrypt/signup.webide.se.crt;
   ssl_certificate_key  /etc/ssl/private/signup.webide.se.key;
 
   # Uncomment the line below to Enable IPv6
-  listen [::]:443 ssl;
+  listen [::]:443 ssl http2;
   # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   location / {

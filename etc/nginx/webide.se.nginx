@@ -11,18 +11,18 @@
 
 # Redirect to https:
 server {
-  listen 80;
-  listen [::]:80;
+  listen 80 http2;
+  listen [::]:80 http2;
   server_name webide.se www.webide.se webeditor.se www.webeditor.se;
   return 301 https://webide.se$request_uri;
 }
 
 server {
 
-  listen 443 ssl;
+  listen 443 ssl http2;
 
-  #listen [::]:443 ipv6only=on ssl;
-  listen [::]:443 ssl;
+  #listen [::]:443 http2 ipv6only=on ssl;
+  listen [::]:443 http2 ssl;
   # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   server_name webide.se;
