@@ -900,7 +900,7 @@ function sockJsConnection(connection) {
 	
 	function sockJsMessage(message) {
 		
-		if(message.length > 100) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
+		if(message.length > 300) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
 		else log(IP + " => " + message);
 		
 		handleUserMessage(message);

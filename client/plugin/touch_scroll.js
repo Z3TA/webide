@@ -22,6 +22,7 @@
 	var lastMoveDirectionX = 0;
 	var lastMoveDirectionY = 0;
 	var virtualKeyboardWasVisible = false;
+	var renderOrder = 25;
 	
 	EDITOR.plugin({
 		desc: "Allow touch scrolling in right and bottom screen area",
@@ -111,19 +112,19 @@
 						horizontalScrolling = true;
 					}
 					else if(Math.abs(x - lastPosX) < Math.abs(y - lastPosY)) {
-				if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender);
+				if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 						verticalScrolling = true;
 					}
 					// else: Unable to determine if the user is scrolling horizontally or vertical
 				}
 				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
 					// Inside vertical (row) scroll area
-			if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender);
+			if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 					verticalScrolling = true;
 				}
 				else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
 					// Inside horizontal (column) scroll area
-			if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender);
+			if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender, renderOrder+1);
 					horizontalScrolling = true;
 				}
 		else {

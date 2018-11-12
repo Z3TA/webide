@@ -1,5 +1,10 @@
 (function() {
-	
+	/*
+		
+		todo: Fix the position of keys for when the font size and margins change for different window sizes.
+		
+		
+	*/
 	var buttons = {};
 	var GROUP = "main";
 	
@@ -99,11 +104,11 @@
 		makeButton("9", 0);
 		makeButton("0", 0);
 		
+		makeButton("(", 0);
+		makeButton(")", 0);
+		
 		makeButton("[", 0);
 		makeButton("]", 0);
-		
-		makeButton("-", 0);
-		makeButton("+", 0);
 		
 		makeButton("back", 0, function space(click) {
 			click.target.blur();
@@ -112,13 +117,13 @@
 			return false;
 		});
 		
+		makeButton("-", 0);
+		makeButton("+", 0);
+		
 		makeButton("#", 0);
-		makeButton("\\", 0);
-		
-		makeButton("^", 0);
-		
 		
 		// ### Second row
+		
 		makeButton("q", 1);
 		makeButton("w", 1);
 		makeButton("e", 1);
@@ -141,6 +146,8 @@
 		makeButton("%", 1);
 		makeButton("~", 1);
 		
+		
+		// ### Third row
 		
 		
 		
@@ -184,7 +191,7 @@
 		
 		makeButton("{", 2);
 		
-		makeButton(" Enter ", 2, function space(click) {
+		makeButton("Enter", 2, function space(click) {
 			click.target.blur();
 			clearSelection();
 			fireKey(13, "keydown");
@@ -192,15 +199,13 @@
 		
 		makeButton("}", 2);
 		
+		makeButton("\\", 2);
 		
+		// ### Fourth row
 		
-		// ### Third row
+		makeButton("^", 3);
 		
-		makeButton("  space  ", 3, function space(click) {
-			click.target.blur();
-			clearSelection();
-			fireKey(32, "keypress")
-		});
+		makeButton("&", 3);
 		
 		
 		makeButton("z", 3);
@@ -210,6 +215,12 @@
 		makeButton("b", 3);
 		makeButton("n", 3);
 		makeButton("m", 3);
+		
+		makeButton("space", 3, function space(click) {
+			click.target.blur();
+			clearSelection();
+			fireKey(32, "keypress")
+		});
 		
 		makeButton("compl", 3, function space(click) {
 			click.target.blur();
@@ -227,9 +238,6 @@
 		
 		
 		makeButton("|", 3);
-		makeButton("&", 3);
-		
-		
 		
 		makeButton("Big", 2, biggerButtons, "misc");
 		makeButton("Sml", 2, smallerButtons, "misc");
