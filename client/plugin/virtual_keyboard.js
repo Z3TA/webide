@@ -365,6 +365,23 @@
 		t.setAttribute("selStart", selStart);
 		t.setAttribute("selEnd", selStart);
 		
+		if(EDITOR.settings.devMode) {
+			// Sanity check
+			var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
+			var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
+			var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
+			
+			if( typeof selStart != "number" || isNaN(selStart) ){
+				throw new Error("Nuked selectionStart for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
+			}
+			if( typeof selEnd != "number" || isNaN(selEnd) ){
+				throw new Error("Nuked selection end for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+			}
+			if( typeof sTop != "number" || isNaN(sTop) ) {
+				throw new Error("Nuked scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
+			}
+		}
+		
 	}
 	
 	function fireKey(charCode, eventType, ev) {

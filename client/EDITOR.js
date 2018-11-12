@@ -7218,6 +7218,13 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		lastMouseDownEventType = mouseDownEvent.type;
 		
+		var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
+		// selectionStart etc seem to get lost when the element lose focus, so save it!
+		// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
+		if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
+		if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
+		if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
+		
 		EDITOR.interact("mouseDown", mouseDownEvent);
 		
 		if(preventDefault) {
