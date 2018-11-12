@@ -236,12 +236,12 @@
 		
 	}
 	
-	function biggerButtons() {
-		resizeButtons(1.1)
+	function biggerButtons(ev) {
+		resizeButtons(1.1);
 	}
 	
 	function smallerButtons() {
-		resizeButtons(.91)
+		resizeButtons(.91);
 	}
 	
 	function resizeButtons(percentage) {
@@ -299,8 +299,8 @@
 		b.innerText = char;
 		//b.onclick = ev;
 		
-		b.addEventListener("click", click, true); // Prevent bubbling
-		b.addEventListener("touchstart", click, true); // Prevent bubbling
+		b.addEventListener("click", click, true); // true=Prevent bubbling
+		b.addEventListener("touchend", click, true); // true=Prevent bubbling
 		
 		var pos = undefined;
 		
