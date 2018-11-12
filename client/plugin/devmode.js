@@ -43,7 +43,11 @@
 			
 			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			
-			if(QUERY_STRING.debug) {
+			if(QUERY_STRING.debug && EDITOR.settings.devMode == true) {
+				enableDevMode();
+				enableDebugMode();
+			}
+			else if(QUERY_STRING.debug) {
 				enableDevMode();
 			}
 			else if(EDITOR.settings.devMode == false) {
@@ -51,9 +55,8 @@
 			}
 			else if(EDITOR.settings.devMode == true) {
 				enableDevMode();
-				//enableDebugMode();
-				// Uncomment line above to send all console.log's to the server
 			}
+			else throw new Error("hmm: QUERY_STRING.debug=" + QUERY_STRING.debug + " EDITOR.settings.devMode=" + EDITOR.settings.devMode);
 			
 			/*
 				setInterval(function() {

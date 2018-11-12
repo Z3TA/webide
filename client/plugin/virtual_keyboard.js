@@ -324,38 +324,20 @@
 			Solution: Save the caret posited every time the element blurs
 		*/
 		
-		console.log("insertAtCaret: text=" + text);
-		
-		if(!t.onblur) {
-			t.setAttribute("sTop", t.scrollTop);
-			t.setAttribute("selStart", t.selectionStart);
-			t.setAttribute("selEnd", t.selectionEnd);
-t.onblur = function() {
-				//console.log("Blur: update from " + this.getAttribute("selStart") + " to selStart=" + this.selectionStart + " ", this);
-				this.setAttribute("sTop", this.scrollTop);
-				this.setAttribute("selStart", this.selectionStart);
-				this.setAttribute("selEnd", this.selectionEnd);
-			}
-			t.onclick = function() {
-				//console.log("Click: update from " + this.getAttribute("selStart") + " to selStart=" + this.selectionStart + " ", this);
-				this.setAttribute("sTop", this.scrollTop);
-				this.setAttribute("selStart", this.selectionStart);
-				this.setAttribute("selEnd", this.selectionEnd);
-			}
-		}
+		console.log("insertAtCaret: text=" + text + " Element: id=" + t.id);
 		
 		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
 		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
 		var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
 		
-		if( typeof sTop != "number" || isNaN(sTop) ) {
-			throw new Error("Unable to get scroll position! scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
-		}
 		if( typeof selStart != "number" || isNaN(selStart) ){
-			throw new Error("Unable to get caret position! selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
+			throw new Error("Unable to get caret position for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
 		}
 		if( typeof selEnd != "number" || isNaN(selEnd) ){
-			throw new Error("Unable to get selection end! selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+			throw new Error("Unable to get selection end for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+		}
+		if( typeof sTop != "number" || isNaN(sTop) ) {
+			throw new Error("Unable to get scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
 		}
 		
 		//console.log("selStart=" + selStart + " (" + t.getAttribute("sTop") + ")");
@@ -364,10 +346,12 @@ t.onblur = function() {
 		var back = (t.value).substring(selEnd, t.value.length);
 		
 		if(text == "\b") {
+			console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
 			t.value = front.slice(0, -1) + back;
 			selStart = selStart - 1;
 		}
 		else {
+			console.log("Adding character(s): " + text + " at selStart=" + selStart);
 			t.value = front + text + back;
 			selStart = selStart + text.length;
 		}
@@ -383,23 +367,28 @@ t.onblur = function() {
 		
 	}
 	
-	function fireKey(charCode, eventType) {
+	function fireKey(charCode, eventType, ev) {
 		
 		//event.preventDefault();
 		
-		console.log("fireKey: charCode=" + charCode + " eventType=" + eventType);
+		console.log("fireKey: charCode=" + charCode + " eventType=" + eventType + 
+		" document.activeElement: id=" + document.activeElement.id + " node=" + document.activeElement.nodeName +
+		" EDITOR.lastElementWithFocus: id=" + EDITOR.lastElementWithFocus.id + " node=" + EDITOR.lastElementWithFocus.nodeName);
 		
 		if(eventType == undefined) eventType = "keypress";
 		
+		var el = document.activeElement;
+		
+		//if(document.activeElement != EDITOR.lastElementWithFocus) el = EDITOR.lastElementWithFocus;
+		
+		console.log("el: id=" + el.id + " node=" + el.nodeName + " type=" + el.type);
+		
 		// If a input or textarea element had focus, send it the character!
-		if(EDITOR.lastElementWithFocus && (
-		( EDITOR.lastElementWithFocus.nodeName == "INPUT" && 
-		(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
-		) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
+		if(el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")) {
 			
-			insertAtCaret(EDITOR.lastElementWithFocus, String.fromCharCode(charCode));
+			insertAtCaret(el, String.fromCharCode(charCode));
 			
-			EDITOR.lastElementWithFocus.focus();
+			el.focus();
 		}
 		else {
 			
@@ -449,8 +438,8 @@ t.onblur = function() {
 		input.focus(); // Element needs to have focus *before* clicking on it for the click() event to trigger.
 		
 		input.setAttribute("placeholder", "Double Click here to trigger the test!");
-		
-		input.ondblclick = function() {
+		input.setAttribute("id", "testVirtualKeyboardInput");
+		input.addEventListener("dblclick", function enterText() {
 			
 			buttons["a"].el.click();
 			buttons["b"].el.click();
@@ -468,7 +457,7 @@ t.onblur = function() {
 				
 			}, 0);
 			
-		}
+		});
 		
 		return;
 		

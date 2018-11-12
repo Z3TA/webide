@@ -7088,8 +7088,10 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		mouseDownEvent = mouseDownEvent || windows.event;
 		
-		EDITOR.lastElementWithFocus = document.activeElement;
+		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 		EDITOR.touchDown = true;
+		
+		console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
 		
 		window.focus(); // Enable capturing key events if we are in an iframe
 		
@@ -7288,6 +7290,12 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if(mouseUpEvent.type == "touchstart" && recognition) {
 			recognition.stop();
 		}
+		
+		var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
+		// selectionStart etc seem to get lost when the element lose focus, so save it!
+		if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
+		if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
+		if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
 		
 		EDITOR.interact("mouseUp", mouseUpEvent);
 		
