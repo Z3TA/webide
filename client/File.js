@@ -212,6 +212,13 @@ file.mode = "text";
 		return txt;
 	}
 	
+	File.prototype.copyCaret = function copyCaret(caret) {
+		var file = this;
+		
+		if(caret == undefined) caret = file.caret;
+		
+		return file.mutateCaret({}, caret);
+	}
 	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
 		var file = this;
