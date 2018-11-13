@@ -13,6 +13,7 @@
 	var touchCounter = 0;
 	var keyDownCounter = 0;
 	
+	//var afterClick = false, background, oldTop = 0, oldLeft = 0;
 	
 	EDITOR.plugin({
 		desc: "Add a default set of buttons to the virtual keyboard",
@@ -29,6 +30,10 @@
 			// Listen for keyboard events to make sure the user has a keyboard before hiding the virtual keyboard
 			EDITOR.on("keyDown", maybeHasKeyboard);
 			
+			//EDITOR.on("mouseMove", touchHooverEffect);
+			//EDITOR.on("mouseClick", resetAfterClick);
+			
+			
 			
 		},
 		unload: function unloadVirtualKeyboard() {
@@ -38,16 +43,82 @@
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
 			
+			//EDITOR.removeEvent("mouseMove", touchHooverEffect);
+			//EDITOR.removeEvent("mouseClick", resetAfterClick);
+			
 			EDITOR.virtualKeyboard.hide();
 			
 		}
 	});
 	
+	
+	
+	function touchHooverEffect(mouseX, mouseY, target, mouseMoveEvent) {
+		
+		//EDITOR.renderNeeded();
+		touchHoover(EDITOR.canvasContext, undefined, EDITOR.currentFile);
+		
+		
+		
+		
+	}
+	
+	
+	function touchHoover(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		//if(!touchCounter) return;
+		
+		if(!file) return;
+		if(afterClick) return;
+		
+		if(background) ctx.putImageData(background, oldLeft-2, oldTop-2);
+		
+		var clickFeel = EDITOR.settings.gridWidth / 2;
+		var mouseRow = Math.floor((EDITOR.canvasMouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
+		var gridRow = file.grid[mouseRow];
+		
+		if(!gridRow) return;
+		
+		var mouseCol = Math.floor((EDITOR.canvasMouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+		
+		var top = Math.floor(EDITOR.settings.topMargin + (mouseRow - file.startRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (mouseCol + (file.grid[mouseRow].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		
+		ctx.fillStyle = "rgba(0,0,0, .5)";
+		
+		
+		var width = EDITOR.settings.caret.width;
+		var height = EDITOR.settings.gridHeight;
+		
+		try {
+			background = ctx.getImageData(left-2, top-2, width+2, height+2);
+		}
+		catch(err) {
+			console.log("left=" + left + " top=" + top + " width=" + width + " height=" + height);
+			console.error(err);
+		}
+		
+		oldTop = top;
+		oldLeft = left;
+		
+		ctx.fillRect(left, top, width, height);
+		
+	}
+	
+	function resetAfterClick() {
+		afterClick = true;
+		background = undefined;
+		setTimeout(function() { afterClick=false; }, 120);
+		
+		//EDITOR.beep(0.1, 120, "sine", 20);
+		
+	}
+	
 	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
-		console.log(mouseDownEvent);
+		//console.log(mouseDownEvent);
 		// Some devices only send mousedown on touch!
 		// And some send both!
-		console.log("touchMaybeOnMouseDown: mouseDownEvent.type=" + mouseDownEvent.type + " touchCounter=" + touchCounter + " mouseCounter=" + mouseCounter + " keyDownCounter=" + keyDownCounter + "");
+		//console.log("touchMaybeOnMouseDown: mouseDownEvent.type=" + mouseDownEvent.type + " touchCounter=" + touchCounter + " mouseCounter=" + mouseCounter + " keyDownCounter=" + keyDownCounter + "");
+		
 		if(mouseDownEvent.type == "touchstart") {
 			touchCounter++;
 			EDITOR.virtualKeyboard.show();
