@@ -22,7 +22,6 @@
 	var lastMoveDirectionX = 0;
 	var lastMoveDirectionY = 0;
 	var virtualKeyboardWasVisible = false;
-	var renderOrder = 25;
 	
 	EDITOR.plugin({
 		desc: "Allow touch scrolling in right and bottom screen area",
@@ -30,6 +29,9 @@
 			
 			// Wait for touch events before activating touch scrolling
 			//EDITOR.on("mouseClick", touchMaybeOnMouseDown);
+			
+			EDITOR.addRender(verticalScrollingRender, 25);
+			EDITOR.addRender(horizontalScrollingRender, 26);
 			
 			EDITOR.addEvent("mouseClick", {fun: tsTouchDown, dir: "down", targetClass:"fileCanvas", button: 0});
 			EDITOR.addEvent("mouseClick", {fun: tsTouchUp, dir: "up", targetClass:"fileCanvas", button: 0});
@@ -59,8 +61,8 @@
 		touching = true;
 		touchDownX = x;
 		touchDownY = y;
-		EDITOR.removeRender(verticalScrollingRender);
-		EDITOR.removeRender(horizontalScrollingRender);
+		//EDITOR.removeRender(verticalScrollingRender);
+		//EDITOR.removeRender(horizontalScrollingRender);
 		}
 	
 	function tsTouchUp() {
@@ -69,8 +71,8 @@
 		verticalScrolling = false;
 		maybeScroll = false;
 		touching = false;
-		EDITOR.removeRender(verticalScrollingRender);
-		EDITOR.removeRender(horizontalScrollingRender);
+		//EDITOR.removeRender(verticalScrollingRender);
+		//EDITOR.removeRender(horizontalScrollingRender);
 		
 		if(virtualKeyboardWasVisible && !EDITOR.virtualKeyboard.isVisible) EDITOR.virtualKeyboard.show();
 		
@@ -108,23 +110,23 @@
 				if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone) && y > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) {
 					// In the bottom right corner
 					if(Math.abs(x - lastPosX) > Math.abs(y - lastPosY)) {
-				if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender);
+				//if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender);
 						horizontalScrolling = true;
 					}
 					else if(Math.abs(x - lastPosX) < Math.abs(y - lastPosY)) {
-				if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
+				//if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 						verticalScrolling = true;
 					}
 					// else: Unable to determine if the user is scrolling horizontally or vertical
 				}
 				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
 					// Inside vertical (row) scroll area
-			if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
+			//if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 					verticalScrolling = true;
 				}
 				else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
 					// Inside horizontal (column) scroll area
-			if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender, renderOrder+1);
+			//if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender, renderOrder+1);
 					horizontalScrolling = true;
 				}
 		else {
@@ -298,6 +300,7 @@
 	}
 	
 	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		if(!verticalScrolling) return;
 		
 		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
 		ctx.fillStyle="rgba(210, 210, 210, 0.1)";
@@ -314,6 +317,8 @@
 	}
 	
 	function horizontalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		
+		if(!horizontalScrolling) return;
 		
 		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
 		ctx.fillStyle="rgba(210, 210, 210, 0.3)";
