@@ -42,16 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Invite collaborator
-
-
 When pressing shift-up the text on the row (left side) gets selected, but the caret moves to the line above.
 When you then do anything, like enter text, the caret moves down to the selection.
 When selecting text, always move the caret to the beginning of or end of the selection!
-
-
-Annoying when the editor ask's to convert the file because of the utf8 BOM.
-
 
 idea: When using the scroll wheel on a hex color, you make the color darker och lighter, and see the changes live in the preview.
 When holding down shift and scrolling on a color you change the color hue.

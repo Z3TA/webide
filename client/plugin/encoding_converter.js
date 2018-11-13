@@ -19,8 +19,12 @@
 		
 		var maxCharacters = 500; // Limit on how many characters to check for problems
 		var problem = false;
-		for(var i=0; i<Math.min(maxCharacters, file.text.length); i++) {
+		for(var i=0, charCode; i<Math.min(maxCharacters, file.text.length); i++) {
 			if(file.text.charCodeAt(i) > 60000) {
+				charCode = file.text.charCodeAt(i);
+				
+				if(charCode == 65279) continue; // Ignore UTF8 BOM
+				
 				problemFound(i);
 				problem = true;
 				break;
