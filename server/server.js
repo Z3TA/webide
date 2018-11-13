@@ -50,6 +50,7 @@ var DISPLAY_ID = 0; // Counter of visual displays
 
 var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 
+var INVITATIONS = {}; // Users can invite other users, which allows them to login as the same user, without sharing the pw (a new temporary pw is generated)
 
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
@@ -1098,6 +1099,8 @@ function sockJsConnection(connection) {
 					//console.log(IP + " loggingin as " + username + ": " + (new Date()).getTime());
 					console.time("Login " + IP); // user=guest can change to user###
 					
+					var nonHashedPw = password;
+					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
 						password = module_pwHash(password);
@@ -1188,6 +1191,16 @@ username = guestUser;
 					}
 					
 					function checkPw() {
+						
+						var invitations = INVITATIONS[username];
+						
+						if(invitations) {
+							for (var i=0; i<invitations.length; i++) {
+								if(invitations[i] == nonHashedPw) {
+									return idSuccess();
+								}
+							}
+						}
 						
 						module_fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
 							if(err) {
@@ -1542,10 +1555,32 @@ username = guestUser;
 					}
 				}
 			}
+			else if(command == "invite") {
+				
+				if(!INVITATIONS.hasOwnProperty(userConnectionName)) INVITATIONS[userConnectionName] = [];
+				
+				var password = module_generator.generate({
+					length: 5,
+					numbers: true
+				});
+				
+				INVITATIONS[userConnectionName].push(password);
+				
+				var answer = {
+					resp: {
+						username: userConnectionName,
+						password: password
+					}
+				};
+				send(answer);
+				
+				
+			}
 			else {
 				console.time(id);
 				userWorker.send({commands: {command: command, json: json, id: id}});
 			}
+			
 		}
 		
 		function send(answer, conn) {

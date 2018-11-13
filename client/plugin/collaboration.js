@@ -45,6 +45,7 @@
 	var undoRedoHistory = {}; // filePath:changeEvent
 	var saveUndoRedoHistory = true;
 	var carets = {}; // filePath: {cId, caret}
+	var menu;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -74,6 +75,8 @@
 			
 			EDITOR.bindKey({desc: "Redo change", charCode: 89, fun: collabRedo, combo: CTRL});
 			EDITOR.bindKey({desc: "Undo change", charCode: 90, fun: collabUndo, combo: CTRL});
+			
+			menu = EDITOR.addMenuItem("Invite collaborator", invite);
 			
 			if(EDITOR.settings.devMode) {
 				var charC = 67;
@@ -107,6 +110,34 @@
 		order: 100
 	});
 	
+	function invite(file, combo, character, charCode, direction, clickEvent) {
+		EDITOR.hideMenu();
+		
+		CLIENT.cmd("invite", {}, function(err, login) {
+			
+			if(err) return alertBox(err.message);
+			
+			var txt = "Let someone else login to your account using:\n" + 
+			"Username: " + login.username + "\n" + 
+			"Password: " + login.password + "\n" + 
+			"\n";
+			
+			var url = window.location.protocol + "//" + window.location.host + "/?user=" + login.username + "&pw=" + login.password;
+			
+			if(file) {
+				txt += "And tell them to open (Ctrol+O) the file:\n" + file.path + "\n\n";
+				
+				url += "&open=" + file.path;
+			}
+			
+			txt += "Or use the following url:\n" + url + "\n\n";
+			
+			EDITOR.openFile("/tmp/collaboration_instructions.txt", txt);
+			
+		});
+		
+	}
+	
 	function collabLoginSuccess(json) {
 		// Login success comes before collabConnect!
 		// json: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}
@@ -122,6 +153,8 @@
 		CLIENT.cmd("echo", {eventOrder: -1, ping: new Date().getTime()});
 		
 		if(connectionClosedDialog) connectionClosedDialog.close();
+		
+		if(QUERY_STRING.open && !EDITOR.files.hasOwnProperty(QUERY_STRING.open)) EDITOR.openFile(QUERY_STRING.open);
 		
 	}
 	
