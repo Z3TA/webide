@@ -291,6 +291,8 @@
 				else fireKey(char.charCodeAt(0));
 				}
 				
+			EDITOR.beep(0.1, 120, "sine", 39);
+			
 				b.style.marginTop = "2px";
 			b.style.marginBottom = "-2px";
 				setTimeout(function() {

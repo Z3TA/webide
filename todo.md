@@ -42,6 +42,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Invite collaborator
+
 
 When pressing shift-up the text on the row (left side) gets selected, but the caret moves to the line above.
 When you then do anything, like enter text, the caret moves down to the selection.

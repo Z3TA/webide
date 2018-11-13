@@ -555,6 +555,10 @@ EDITOR.bindKey(b);
 		console.warn("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
+	
+	var audio = window.AudioContext || window.webkitAudioContext
+	var audioCtx = new audio;
+	
 	EDITOR.beep = function beep(volume, frequency, type, duration) {
 		// Makes a beep sound
 		
@@ -563,13 +567,11 @@ EDITOR.bindKey(b);
 		if(type == undefined) type = "square";
 		if(duration == undefined) duration = 120;
 		
-		var audio = window.AudioContext || window.webkitAudioContext
-		var audioCtx = new audio;
 		var oscillator = audioCtx.createOscillator();
 		var gainNode = audioCtx.createGain();
-		
 		oscillator.connect(gainNode);
 		gainNode.connect(audioCtx.destination);
+		
 		
 		gainNode.gain.value = volume;
 		oscillator.frequency.value = frequency;
