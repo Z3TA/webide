@@ -1900,6 +1900,7 @@ file.mode = "text";
 		var firstBox = selection[0];
 		var firstIndex = firstBox.index;
 		var optimized = false;
+		var rowsBefore = file.grid.length;
 		
 		if(isContinuous(selection)) {
 			var lastIndex = selection[selection.length-1].index;
@@ -1955,6 +1956,16 @@ file.mode = "text";
 		// Deselect all 
 		selection.length = 0;
 		
+		var rowsAfter = file.grid.length;
+		
+		//console.log("file.caret.index=" + file.caret.index + " firstIndex=" + firstIndex + " rowsBefore=" + rowsBefore + " rowsAfter=" + rowsAfter);
+		
+		if(rowsBefore > rowsAfter) {
+			// Rows where deleted
+			if(file.caret.index > firstIndex) {
+				file.caret.row -= (rowsBefore-rowsAfter);
+			}
+		}
 		file.fixCaret(file.caret);
 		
 		console.timeEnd("deleteSelection");
