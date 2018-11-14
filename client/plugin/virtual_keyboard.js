@@ -557,30 +557,7 @@
 			
 		});
 		
-		return;
-		
-		insertAtCaret(input, "a");
-		
-		setTimeout(function() {
-			input.blur();
-			insertAtCaret(input, "b");
-			setTimeout(function() {
-				input.blur();
-				insertAtCaret(input, "c");
-				setTimeout(function() {
-					
-					if(input.value != "abc") throw new Error("Unexpected input.value=" + input.value);
-					
-					footer.removeChild(input);
-					
-					return callback(true);
-					
-				}, 500);
-			}, 500);
-		}, 4500);
-		
-	}, 1);
-	
+	});
 	
 	// TEST-CODE-END
 	

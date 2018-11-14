@@ -26,10 +26,12 @@
 			var renderNotNeeded = EDITOR.settings.clearColumnOptimization;
 			
 			if(file.selected.length > 0) {
+				
 				renderNotNeeded = false;
 				file.deleteSelection();
+				
 				EDITOR.renderNeeded();
-				return false; // Only delete the selection
+				return false; // Don't delete any more
 			}
 			
 			if(caret.index > 0) {

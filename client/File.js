@@ -1396,7 +1396,7 @@ file.mode = "text";
 		
 	}
 	
-	File.prototype.checkSelection = function() {
+	File.prototype.checkSelection = function(selection) {
 		/* 
 			Sanity check selection
 			
@@ -1406,9 +1406,11 @@ file.mode = "text";
 		
 		if(EDITOR.settings.devMode == false) return; // Do not check in production
 		
-		
 		var file = this;
-		var box = file.selected;
+		
+		if(selection == undefined) selection = file.selected;
+		
+		var box = selection;
 		
 		for(var i=0; i<box.length; i++) {
 			// Each box must have an index!
@@ -1879,8 +1881,6 @@ file.mode = "text";
 		
 		var file = this;
 		var box;
-		var row = 0;
-		
 		
 		if(selection == undefined) {
 			selection = file.selected;
@@ -1901,7 +1901,6 @@ file.mode = "text";
 		var firstIndex = firstBox.index;
 		var optimized = false;
 		
-		
 		if(isContinuous(selection)) {
 			var lastIndex = selection[selection.length-1].index;
 			
@@ -1912,13 +1911,7 @@ file.mode = "text";
 				lastIndex = tmpIndex;
 			}
 			
-			// Place the caret where the selection was
-			file.caret = file.moveCaretToIndex(firstIndex);
-			
 			file.deleteTextRange(firstIndex, lastIndex);
-			
-			firstRow = file.caret.row;
-			firstCol = file.caret.col;
 			
 			//console.log("after selection removed, text.length=" + text.length);
 			
@@ -1934,10 +1927,7 @@ file.mode = "text";
 			// Witch will be very slow because file.deleteCharacter calls file.change witch updates stuff (like parsing the file)
 			// We can optimze by having isContinuous return an index, call file.deleteTextRange, then repeat for every continous string
 			
-			file.caret = file.moveCaretToIndex(firstBox.index);
-			
-			var firstRow = file.caret.row;
-			var firstCol = file.caret.col;
+			var caret = file.createCaret(firstBox.index);
 			
 			for(var i=0; i<selection.length; i++) {
 				
@@ -1948,13 +1938,13 @@ file.mode = "text";
 				//console.log("Deselecting box:\n" + JSON.stringify(box));
 				
 				// Move caret to the box
-				file.caret = file.moveCaretToIndex(box.index);
+				caret = file.moveCaretToIndex(box.index, caret);
 				
 				// Deselect the box
 				box.selected = false;
 				
 				// Delete character
-				file.deleteCharacter(file.caret);
+				file.deleteCharacter(caret);
 				
 			}
 			
@@ -1964,6 +1954,8 @@ file.mode = "text";
 		
 		// Deselect all 
 		selection.length = 0;
+		
+		file.fixCaret(file.caret);
 		
 		console.timeEnd("deleteSelection");
 		
