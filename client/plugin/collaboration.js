@@ -125,7 +125,7 @@
 			var url = window.location.protocol + "//" + window.location.host + "/?user=" + login.username + "&pw=" + login.password;
 			
 			if(file) {
-				txt += "And tell them to open (Ctrol+O) the file:\n" + file.path + "\n\n";
+				txt += "And tell them to open (Ctrl+O) the file:\n" + file.path + "\n\n";
 				
 				url += "&open=" + file.path;
 			}
