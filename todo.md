@@ -42,6 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+deleteTextRange doesn't seem to return the correct removed text!
+
+
 Undo-redo doesn't work correctly when multiple lines have been removed
 
 ---

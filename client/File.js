@@ -1564,6 +1564,8 @@ file.mode = "text";
 	File.prototype.deleteTextRange = function(firstIndex, lastIndex) {
 		var file = this;
 		
+		console.log("deleteTextRange: firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " " + JSON.stringify(file.rowFromIndex(firstIndex)));
+		
 		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
@@ -1606,6 +1608,7 @@ file.mode = "text";
 		console.time("deleteTextRange");
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
+		//var removedText = file.text.slice(firstIndex, lastIndex);
 		
 		console.log("file.text=" + UTIL.lbChars(file.text));
 		console.log("removedText=" + UTIL.lbChars(removedText));
@@ -1775,6 +1778,8 @@ file.mode = "text";
 							
 							removedText = file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2) + removedText;
 							
+							console.log("removedText=" + UTIL.lbChars(removedText));
+							
 							file.text = deletePart(file.text, checkSpaceFrom, checkSpaceFrom + deleteExtra2 - 1);
 							
 							deletionLength += deleteExtra2;
@@ -1854,6 +1859,8 @@ file.mode = "text";
 		
 		// Create dummy caret to get row and col for the change event
 		var dummyCaret = file.createCaret(cursorIndex);
+		// Why use cursorIndex and not firstIndex !??
+		
 		
 		if(file.caret.index >= firstIndex) {
 			file.fixCaret(file.caret);

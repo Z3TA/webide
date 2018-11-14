@@ -73,15 +73,18 @@
 			CLIENT.on("clientLeave", collabLeave);
 			CLIENT.on("connectionLost", collabConnectionLost);
 			
-			EDITOR.bindKey({desc: "Redo change", charCode: 89, fun: collabRedo, combo: CTRL});
-			EDITOR.bindKey({desc: "Undo change", charCode: 90, fun: collabUndo, combo: CTRL});
+			var Y = 89;
+			var Z = 90;
+			
+			EDITOR.bindKey({desc: "Redo change", charCode: Y, fun: collabRedo, combo: CTRL});
+			EDITOR.bindKey({desc: "Undo change", charCode: Z, fun: collabUndo, combo: CTRL});
 			
 			menu = EDITOR.addMenuItem("Invite collaborator", invite);
 			
 			if(EDITOR.settings.devMode) {
-				var charC = 67;
-				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: charC, combo: CTRL+SHIFT});
-				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: 90, combo: CTRL+SHIFT});
+				var C = 67;
+				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: C, combo: CTRL+SHIFT});
+				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: Z, combo: CTRL+SHIFT});
 			}
 			
 		},
@@ -355,6 +358,8 @@
 		if(ignoreFileChange) return true;
 		
 		console.log("fileChangeEvents: " + JSON.stringify(fileChangeEvents, null, 2));
+		
+		console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
 		
 if(file == undefined) throw new Error("file=" + file);
 			if(change == undefined) throw new Error("change=" + file);
@@ -903,7 +908,7 @@ transformBackwards(change, history[i]);
 			console.log("Undoing " + JSON.stringify(ev) + " at caret=" + JSON.stringify(caret));
 			file.deleteCharacter(caret);
 		}
-		else if(ev.type == "deleteTextRange") { // Delete a bunch of text
+		else if(ev.type == "deleteTextRange") { // Deleted a bunch of text
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
 			console.log("Undoing deleting of " + ev.text.length + " characters at index=" + ev.index);
 			file.insertText(ev.text, caret);
@@ -1250,6 +1255,17 @@ file.fixCaret();
 			EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo delete
 			if(file.text != "\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			
+			// Removing many lines
+			file.insertText("123\nabc\ndef\n456");
+			if(file.text != "123\nabc\ndef\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			var sel = file.createTextRange(4,10);
+			file.select(sel);
+			file.deleteSelection();
+			if(file.text != "123\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo delete selection
+			if(file.text != "123\nabc\ndef\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
 			if(typeof callback == "function") callback(true);

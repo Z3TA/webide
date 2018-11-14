@@ -212,20 +212,23 @@
 			
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
 			
-			// Also make sure the deleted character are correct
+			// Also make sure the change event is giving the correct data
 			EDITOR.on("fileChange", change);
 			var charsAfter = ""; // Will update in change
 			var charactersDeleted = "";
 			
-			test("<body>#<div>#→Hello World!#→</div>##</body>#", 13,25);
+			test("<body>#<div>#→Hello World!#→</div>##</body>#", 13,25, "\tHello World!");
 			
-			test("<body>#<div>#→#→Hello World!#→#</div>#→#→</body>#→", 15,27);
+			test("<body>#<div>#→#→Hello World!#→#</div>#→#→</body>#→", 15,27, "\tHello World!");
 			
-			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18);
+			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18, "\r\n\t\tabc\r\n\t\tdef");
 			
-			test("{@#→abc@#→def@#}", 4,12);
+			test("{@#→abc@#→def@#}", 4,12, "\r\n\tabc\r\n\tdef");
 			
 			test("abc#def##", 0,6);
+			// What side should the line break and indentation characters be deleted from !?
+			// Where was it deleted from !? (text only contain one LB)
+			
 			
 			test("abcd#efghijk", 0,11);
 			
@@ -252,7 +255,7 @@
 			
 			callback(true);
 			
-			function test(txt, start, end) {
+			function test(txt, start, end, expectedRemovedText) {
 				
 				// Also run the same tests but with CRLF instead of LF
 				//if(txt.indexOf("#") != -1 && txt.indexOf("@") == -1) test(txt.replace(/#/g, "@#"), start, end)
@@ -268,11 +271,16 @@
 				var charsBefore = file.text;
 				
 				file.grid = file.createGrid();
-				file.deleteTextRange(start,end); // will run sanity check
+				
+				if(expectedRemovedText == undefined) expectedRemovedText = file.text.slice(start, end);
+				
+				file.deleteTextRange(start,end); // will run sanity check, removed text saved as charactersDeleted
 				
 				if(charsBefore.length - charactersDeleted.length != charsAfter.length) {
 					throw new Error("Expected charsBefore=" + charsBefore.length + " - charactersDeleted=" + charactersDeleted.length + " = charsAfter=" + charsAfter.length + "\ncharsAfter=" + UTIL.lbChars(charsAfter) + "\ncharactersDeleted=" + UTIL.lbChars(charactersDeleted) + "");
 				}
+				
+				if(charactersDeleted != expectedRemovedText) throw new Error("charactersDeleted=" + UTIL.lbChars(charactersDeleted) + " expectedRemovedText=" + UTIL.lbChars(expectedRemovedText));
 				
 				file.putCharacter("z"); // will also check file.caret
 				
@@ -299,7 +307,7 @@
 			
 		});
 		
-	});
+	}, 1);
 	
 	
 	EDITOR.addTest(function dblClickRemovedSpace(callback) {

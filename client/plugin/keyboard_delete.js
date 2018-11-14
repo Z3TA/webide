@@ -72,21 +72,24 @@
 		return true;
 	}
 
-	// TEST-CODE-START
-	// damnit, it turned out the be very hard to get the behaviour corrent, so better need automated test
-	function testDeleteSelectedText(callback) {
+	/*
+		
+		// TEST-CODE-START
+		// damnit, it turned out the be very hard to get the behaviour corrent, so better need automated test
+		function testDeleteSelectedText(callback) {
 		
 		EDITOR.openFile("testDeleteSelectedText-1.txt", "1\n\n\n\n", function(err, file) {
-			if(err) throw err;
-			callback(true);
+		if(err) throw err;
+		callback(true);
 		});
 		
-	}
-	
-	EDITOR.addTest(testDeleteSelectedText, 1);
-	
-	
-	// TEST-CODE-END
-	
-	
+		}
+		
+		EDITOR.addTest(testDeleteSelectedText, 1);
+		
+		
+		// TEST-CODE-END
+		
+	*/
+
 })();
