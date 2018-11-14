@@ -46,27 +46,6 @@ Undo-redo doesn't work correctly when multiple lines have been removed
 
 ---
 
-Annoying when you press delete and the caret moves
-When multiple rows are selected, deleteSelection calls deleteTextRange which removes the rows!
-
-When pressing shift-up the text on the row (left side) gets selected, but the caret moves to the line above.
-When you then do anything, like enter text, the caret moves down to the selection.
-When selecting text, always move the caret to the beginning of or end of the selection!
-But then you can't select further up!
-instead: When having selected and pressing delete, delete all the way to the caret
-
-
-
-idea: When using the scroll wheel on a hex color, you make the color darker och lighter, and see the changes live in the preview.
-When holding down shift and scrolling on a color you change the color hue.
-It changes faster if you scroll faster, or slower if you scroll slow.
-With touch (two fingers) you can scroll sideways to change hue and up/down to change lightness.
-Or use HTML5 color picker !!!? (can you see changes live ? It seems to)
-When you double click #ababab on a hex color you get the html5 color picker.
-The undo/redo should not save until you click OK
-
----
-
 *.johan.webide.se magically renewed, I did not see anything in cron log, so I don't know how it managed to be renewed ....
 
 This however allow us to use wildcard domains for all users!
@@ -75,20 +54,6 @@ and /sock/foo will be redirected from foo.username.webide.se
 Make a custom 502 Bad Gateway error message:
 "Can not connect to port: /sock/foo
 Replace port number with /sock/foo in your app!
-
-----
-
-Testing webdav
-
-davs://webdav.johan.webide.se
-
-davs://<username>@<webdav_address>
-
-----
-
-Implement syntax highliting pre-renderer, using standard JS lib:
-Maybe we can make use of https://github.com/highlightjs/highlight.js !?
-
 
 ----
 
