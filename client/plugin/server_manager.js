@@ -76,7 +76,7 @@
 			EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
 			EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 			
-			menuItem = EDITOR.addMenuItem("Remote connections", showServerManger);
+			menuItem = EDITOR.addMenuItem("Remote connections", showServerManger, 15);
 		});
 		
 		

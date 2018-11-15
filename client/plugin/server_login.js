@@ -37,7 +37,7 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
-		menuItem = EDITOR.addMenuItem("Switch user", showLoginDialog);
+		menuItem = EDITOR.addMenuItem("Switch user", showLoginDialog, 13);
 		
 		var server = undefined;
 		if(EDITOR.localStorage) {

@@ -84,7 +84,7 @@
 		progressBarWidget.show();
 		progressBarWidget.hide();
 		
-		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
+		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog, 12);
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		

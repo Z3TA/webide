@@ -12,7 +12,7 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.addMenuItem("Convert line-breaks", convertLinebreaks);
+		menuItem = EDITOR.addMenuItem("Convert line-breaks", convertLinebreaks, 7);
 		
 	}
 	

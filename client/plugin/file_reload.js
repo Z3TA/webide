@@ -12,7 +12,7 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.addMenuItem("Relode from disk", reloadFile);
+		menuItem = EDITOR.addMenuItem("Relode from disk", reloadFile, 6);
 		
 	}
 	

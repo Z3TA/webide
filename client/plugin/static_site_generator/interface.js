@@ -229,7 +229,7 @@
 		
 		//build();
 		
-		menuItem = EDITOR.addMenuItem("Static site generator", showSSG);
+		menuItem = EDITOR.addMenuItem("Static site generator", showSSG, 11);
 		
 		EDITOR.on("fileShow", fileShow);
 		

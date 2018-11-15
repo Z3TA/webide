@@ -2395,13 +2395,30 @@ text = file;
 		}
 		
 		if(position) {
-			if(position < 0) position = 0
-			else if(position >= menu.children.length) position = menu.children.length-1;
-			menu.insertBefore(li, menu.children[position]);
+			li.setAttribute("position", position);
+			//menu.insertBefore(li, menu.children[position]);
 		}
 		else {
-			menu.appendChild(li);
+			li.setAttribute("position", "10");
+			//menu.insertBefore(li, menu.children[position]);
 		}
+		
+			menu.appendChild(li);
+		
+		// Re-order the menu items
+		var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
+		items.sort(function(a,b) {
+			var pA = parseInt(a.getAttribute("position"));
+			var pB = parseInt(b.getAttribute("position"));
+			
+			if(pA > pB) return 1;
+			else if(pB > pA) return -1;
+			else return 0;
+			
+		});
+		items.forEach(function (li) {
+			menu.appendChild(li);
+		});
 		
 		// Don't forget to call EDITOR.hideMenu() after the item has been clicked!
 		
@@ -5638,7 +5655,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		}
 		
 		// Add the virtual keyboard menu item after the plugins so it will be placed low in the menu
-		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
+		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard, 25); // Add items to the canvas context menu
 		
 		function toggleVirtualKeyboard() {
 			EDITOR.hideMenu();

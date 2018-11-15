@@ -18,7 +18,7 @@ var menuItem;
 EDITOR.plugin({
 	desc: "Mount Google Drive",
 	load: function() {
-			menuItem = EDITOR.addMenuItem(GD_MENU_NOT_CONNECTED, googleDriveInit);
+			menuItem = EDITOR.addMenuItem(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
 
 },
 	unload: function() {

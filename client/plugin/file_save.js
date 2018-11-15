@@ -45,7 +45,7 @@
 		EDITOR.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
 		// Add items to the canvas context meny
-		menu = EDITOR.addMenuItem("Save as ...", saveAs);
+		menu = EDITOR.addMenuItem("Save as ...", saveAs, 2);
 		
 		EDITOR.on("showMenu", showSaveOption);
 		

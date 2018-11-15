@@ -20,7 +20,7 @@
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
 			
-			menuItem = EDITOR.addMenuItem("Terminal", startTerminalFromMenu);
+			menuItem = EDITOR.addMenuItem("Terminal", startTerminalFromMenu, 16);
 			
 			CLIENT.on("terminal", terminalMessage);
 			

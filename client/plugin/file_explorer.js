@@ -50,7 +50,7 @@
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.addMenuItem("File explorer", toggleFileExplorer);
+		menuItem = EDITOR.addMenuItem("File explorer", toggleFileExplorer, 9);
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");

@@ -39,7 +39,7 @@
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
+			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools, 21); // Built in Chromium dev tools
 			
 			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			
@@ -105,7 +105,7 @@
 		
 		EDITOR.unbindKey(runOneTest);
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode);
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode, 20);
 		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Editor debugmode");
 		
 		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
@@ -149,10 +149,10 @@
 		
 		// todo: How can I show the menu item further down !? So it does not annoy end users
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode);
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode, 18);
 		EDITOR.updateMenuItem(toggleDevmodeMenuItem, true, "Editor debugmode");
 		
-		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests);
+		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests, 19);
 		
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;

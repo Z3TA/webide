@@ -76,7 +76,7 @@
 		CLIENT.on("fileFound", gotoFileFileFound);
 		CLIENT.on("pathGlob", gotoFilePathGlob);
 		
-		menuItem = EDITOR.addMenuItem('Open/search file', show_gotoFileInput);
+		menuItem = EDITOR.addMenuItem('Open/search file', show_gotoFileInput, 4);
 		
 		//menu = EDITOR.addMenuItem('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		

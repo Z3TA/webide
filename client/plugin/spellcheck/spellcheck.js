@@ -51,7 +51,7 @@
 	
 	function loadSpellchecker() {
 		
-		menuItem = EDITOR.addMenuItem("Spellcheck ", toggleSpellCheck);
+		menuItem = EDITOR.addMenuItem("Spellcheck ", toggleSpellCheck, 10);
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		

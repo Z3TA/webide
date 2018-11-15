@@ -79,7 +79,7 @@
 			EDITOR.bindKey({desc: "Redo change", charCode: Y, fun: collabRedo, combo: CTRL});
 			EDITOR.bindKey({desc: "Undo change", charCode: Z, fun: collabUndo, combo: CTRL});
 			
-			menu = EDITOR.addMenuItem("Invite collaborator", invite);
+			menu = EDITOR.addMenuItem("Invite collaborator", invite, 14);
 			
 			if(EDITOR.settings.devMode) {
 				var C = 67;

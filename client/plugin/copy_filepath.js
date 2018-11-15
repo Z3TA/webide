@@ -44,7 +44,7 @@
 				EDITOR.hideMenu();
 				
 				
-			});
+			}, 5);
 			
 		},
 		unload: function unload() {

@@ -33,8 +33,6 @@
 			//EDITOR.on("mouseMove", touchHooverEffect);
 			//EDITOR.on("mouseClick", resetAfterClick);
 			
-			
-			
 		},
 		unload: function unloadVirtualKeyboard() {
 			

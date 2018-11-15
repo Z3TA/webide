@@ -9,7 +9,7 @@
 		desc: "Set the indentation convention and fix all indentation errors",
 		load: function loadIndentationManager() {
 			
-			menuItem = EDITOR.addMenuItem("Indentation ...", showIndentationManager);
+			menuItem = EDITOR.addMenuItem("Indentation ...", showIndentationManager, 8);
 			
 			var charEscape = 27;
 			EDITOR.bindKey({desc: "Hide indentation manager", fun: hideIndentationManager, charCode: charEscape, combo: 0});
