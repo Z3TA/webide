@@ -42,6 +42,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Reordering the menu
 
 ---
 
