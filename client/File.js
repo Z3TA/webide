@@ -1973,7 +1973,12 @@ file.mode = "text";
 				file.caret.row -= (rowsBefore-rowsAfter);
 			}
 		}
-		file.fixCaret(file.caret);
+		
+		if(file.grid[file.caret.row].length > 0) {
+			// Place the caret where the selection started
+			file.moveCaretToIndex(firstIndex);
+		}
+		else file.fixCaret(file.caret);
 		
 		console.timeEnd("deleteSelection");
 		
@@ -2658,16 +2663,14 @@ file.mode = "text";
 		}
 		else if(isNaN(index)) throw new Error("moveCaretToIndex: index=" + index + " is not a number!");
 		
-		if(caret == undefined || caret == file.caret) {
-			file.checkCaret(file.caret);
+		if(caret == undefined) {
 			caret = file.caret;
 		}
-		// else: Do not check the caret in the argument, because it might be a dummy caret that use this function to place it correctly!
+		
 		
 		/*
 			If the file text contains Anything, file grid will have at least one row.
-			
-		*/
+			*/
 		
 		console.log("moveCaretToIndex: " + index + " (text.length=" + file.text.length + ")");
 		
