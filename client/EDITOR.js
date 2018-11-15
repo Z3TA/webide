@@ -3960,14 +3960,30 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		return false;
 	}
 	
-	EDITOR.addTest = function(fun, order) {
+	EDITOR.addTest = function(order, parallel, fun) {
+		
+		var defaultTestOrder = 1000;
+		var defaultParallel = true;
+		
+		if(typeof order == "function") {
+			fun = order;
+			order = defaultTestOrder;
+			parallel = defaultParallel;
+		}
+		else if(typeof order == "boolan" && typeof parallel == "function") {
+			fun = parallel;
+			parallel = order;
+			order = defaultTestOrder;
+		}
+		
+		if(order == undefined) order = defaultTestOrder;
+		if(parallel == undefined) parallel = defaultParallel;
+		
+		if(fun == undefined) throw new Error("fun not specified!");
 		
 		var funName = UTIL.getFunctionName(fun);
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
-		
-		var defaultTestOrder = 1000;
-		if(order == undefined) order = defaultTestOrder;
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {
@@ -3986,11 +4002,17 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			}
 		}
 		
-		EDITOR.tests.push({fun: fun, text: funName, order: order});
+		EDITOR.tests.push({fun: fun, text: funName, order: order, parallel: parallel});
 		
-		// Sort the tests by order
+		// Sort the tests by parallel and order
 		EDITOR.tests.sort(function sortTests(a, b) {
-			return a.order - b.order;
+			if(a.oparallel && !b.parallel) return 1; // Tests with parallel==false should be first!
+			else if(b.parallel && !a.parallel) return -1;
+			else if(a.parallel == b.parallel) {
+				if(a.order > b.order) return 1;
+				if(b.order > a.order) return -1;
+				else return 0;
+			}
 		});
 		
 	}
@@ -5768,14 +5790,45 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			var testsCompleted = []; // Prevent same test to make several callbacks
 			var allDone = false; // Prevent calling allTestsDone twice
 			var testsToRun = testFirstTest ? 1 : EDITOR.tests.length;
-			
+			//var testsToRun = 5;
+			var waitingForSync = false;
+			var currentRunningTest;
+			var currentlyInParallel = 0;
+			var stillRunning = []; 
+
 			if(testsToRun == 1) {
-				alertBox("Testing: " + EDITOR.tests[0].text);
+				for (var i=0; i<EDITOR.tests.length; i++) {
+					if(EDITOR.tests[i].order == 1) {
+						alertBox("Testing: " + EDITOR.tests[i].text);
+						started = 1;
+						asyncInitTest(EDITOR.tests[i]);
+						return;
+					}
+				}
+				throw new Error("Could not find a test with id=1");
+			}
+			else {
+				console.log("testInfo: Running " + testsToRun + " tests ...");
+				testLoop();
 			}
 			
-			for(var i=0; i<testsToRun; i++) {
-				started++;// This counter here to prevent any sync test to finish all tests
-				asyncInitTest(EDITOR.tests[i]);
+			function testLoop() {
+				if(waitingForSync) return console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+				
+				if(finished == testsToRun) return allTestsDone();
+				
+				for(var i=started; i<testsToRun; i++) {
+					started++;// This counter here to prevent any sync test to finish all tests
+					
+					if(EDITOR.tests[i].parallel) {
+asyncInitTest(EDITOR.tests[i]);
+					}
+					else {
+						waitingForSync = true;
+						runTest(EDITOR.tests[i]);
+						break;
+					}
+				}
 			}
 			
 			function asyncInitTest(test) {
@@ -5785,24 +5838,34 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			}
 			
 			function runTest(test) {
+				currentRunningTest = test.text;
 				
-				//console.log("Running test:" + test.text);
+				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel);
+				
+				if(!test.parallel && currentlyInParallel > 0) {
+					throw new Error("No other test is allowed to be running while a non-parallel test is about to run!");
+				}
+				
+				currentlyInParallel++;
+				
+				stillRunning.push(test.text);
 				
 				try{
 					test.fun(testResult);
 				}
 				catch(err) {
 					finished++;
+					currentlyInParallel--;
 					testFail(test.text, err.message + "\n" + err.stack);
 				}
 				
-				if(finished == started && !allDone) allTestsDone();
-				
+				testLoop();
 				
 				
 				function testResult(result) {
+					currentlyInParallel--;
 					
-					console.log("Test: " + test.text + " result:" + result);
+					console.log("testInfo: Testresult: " + test.text + " result:" + (result ? "SUCCESS" : "FAIL!"));
 					
 					if(testsCompleted.indexOf(test.text) != -1) {
 						throw new Error("Test called callback more then once, or there's two tests with the same name: " + test.text);
@@ -5813,15 +5876,33 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 					
 					finished++;
 					
-					console.log("finished=" + finished + " started=" + started + "")
+					stillRunning.splice(stillRunning.indexOf(test.text), 1);
+					
+					console.log("testInfo: finished=" + finished + " started=" + started + " testsToRun=" + testsToRun + " currentlyInParallel=" + currentlyInParallel);
 					
 					if(result !== true) testFail(test.text, result);
 					
-					if(finished == started) allTestsDone();
+					if(waitingForSync) {
+						console.log("testInfo: " + currentRunningTest + " completed. Continuing test loop ...");
+waitingForSync = false;
+						testLoop();
+					}
+					
+					if(finished == testsToRun) allTestsDone();
+					else if(testsToRun / finished > .9) {
+						// 90% of tests are done, show those that are still not finished
+						
+						console.log("testInfo: Not finished: " + stillRunning.join(", "));
+						
+					}
 				}
 			}
 			
 			function allTestsDone() {
+				
+				if(allDone) return console.warn("testInfo: allDone() already called!");
+				
+				console.warn("testInfo: All tests done!");
 				
 				EDITOR.runningTests = false;
 				allDone = true;

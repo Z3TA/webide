@@ -68,7 +68,11 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		}
 		else {
 			for (var i=0; i<fileList.length; i++) {
-				if(fileList[i].name == ".hg") return callback( new Error(".hg folder already exist in " + localPath) );
+				if(fileList[i].name == ".hg") {
+					var error = new Error(".hg folder already exist in " + localPath);
+					error.code="EXIST";
+					return callback( error );
+				}
 			}
 			clone();
 		}
@@ -97,28 +101,28 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		
 		var spawn = require('child_process').spawn;
 		console.log("Spawning hg with arg=" + JSON.stringify(arg));
-var clone = spawn("hg", arg, {env: execFileOptions.env, shell: false});
-var stdout = "";
-var stderr = "";
-
-var progressCounter = 0;
-var progressMax = 30;
-
+		var clone = spawn("hg", arg, {env: execFileOptions.env, shell: false});
+		var stdout = "";
+		var stderr = "";
+		
+		var progressCounter = 0;
+		var progressMax = 30;
+		
 		user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
-
-var progressInterval = setInterval(function() {
-progressCounter++;
-progressMax++;
+		
+		var progressInterval = setInterval(function() {
+			progressCounter++;
+			progressMax++;
 			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
-}, 500); // Fake progress
-
-clone.stdout.on('data', function cloneStdout(data) {
-stdout += data;
-
-console.log("clone stdout data=" + data);
-
-/*
-todo: Better estimation on progress!
+		}, 500); // Fake progress
+		
+		clone.stdout.on('data', function cloneStdout(data) {
+			stdout += data;
+			
+			console.log("clone stdout data=" + data);
+			
+			/*
+				todo: Better estimation on progress!
 
 Total 33 (delta 10), reused 19 (delta 0), pack-reused 4
 importing git objects into hg

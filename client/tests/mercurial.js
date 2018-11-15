@@ -88,32 +88,52 @@ if(err) throw err;
 	
 	EDITOR.addTest(function mercurialCloneRepo(callback) {
 		var testFolder = "/mercurialCloneRepoUniqueName/test/";
+		var testCounter = 0;
 		
-		CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function(err, json) {
-			if(err) throw err
-			else {
-				
-				CLIENT.cmd("mercurial.status", {directory: testFolder}, function(err, json) {
-					if(err) throw err
-					else {
-						
-						if(json.rootDir != testFolder) throw new Error("Wrong rootDir=" + json.rootDir + ". Expected testFolder=" + testFolder + " ! json=" + JSON.stringify(json));
-						
-						// Cleanup
-						CLIENT.cmd("deleteDirectory", {directory: "/mercurialCloneRepoUniqueName/", recursive: true}, function(err, json) {
-							if(err) throw err
-					else {
-						
-						callback(true);
-						
-					}
-				});
-				
-					}
-				});
-				
-			}
-		});
+		testClone();
+		
+function testClone() {
+			if(++testCounter > 2) throw new Error("Clone test retry more then twice!");
+			
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function(err, json) {
+				if(err && err.code == "EXIST") {
+					// The folder might already exist from and earlier test that failed.
+					cleanup(function(err) {
+						if(err) throw err;
+						testClone();
+					});
+				}
+				else if(err) {
+					throw err
+				}
+				else {
+					
+					CLIENT.cmd("mercurial.status", {directory: testFolder}, function(err, json) {
+						if(err) throw err
+						else {
+							
+							if(json.rootDir != testFolder) throw new Error("Wrong rootDir=" + json.rootDir + ". Expected testFolder=" + testFolder + " ! json=" + JSON.stringify(json));
+							
+							cleanup(function(err) {
+								if(err) throw err;
+								callback(true);
+							});
+							
+						}
+					});
+					
+				}
+			});
+		}
+		
+		function cleanup(cleanupCallback) {
+			CLIENT.cmd("deleteDirectory", {directory: "/mercurialCloneRepoUniqueName/", recursive: true}, function(err, json) {
+				if(err) throw err
+				else {
+					cleanupCallback();
+				}
+			});
+		}
 		
 	});
 	

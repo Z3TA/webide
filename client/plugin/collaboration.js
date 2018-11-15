@@ -1123,7 +1123,10 @@ file.fixCaret();
 			console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
 			
-			if(typeof callback == "function") callback(true);
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+				callback(true);
+			}
 			else {
 				file.write("\n\nCollaboration test suite passed!"); // Write at EOF
 				EDITOR.renderNeeded();
@@ -1268,7 +1271,10 @@ file.fixCaret();
 			if(file.text != "123\nabc\ndef\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
-			if(typeof callback == "function") callback(true);
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+				callback(true);
+			}
 			else {
 				file.write("\n\nundo/redo test suite passed!"); // Write at EOF
 				EDITOR.renderNeeded();

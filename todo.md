@@ -42,6 +42,10 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Deploy and test unix pipes
+
+
+Undo/redo still has issues with deleteTextRange
 
 ---
 

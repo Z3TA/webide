@@ -1656,7 +1656,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function testDoubleLogin(callback) {
+	EDITOR.addTest(1, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		
 		var userValue = "";
@@ -1727,7 +1727,7 @@
 			});
 		}
 		
-	});
+	}); // Run this last because it will interfere (logging out) with other tests 
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {
