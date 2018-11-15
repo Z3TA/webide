@@ -367,25 +367,11 @@ function adduser() {
 		if(err.code != "ENOENT") throw err;
 	}
 	
-		
-	// Update demo site 
-	var cmsjz_sites = fs.readFileSync(homeDir + ".jzeditStorage/cmsjz_sites", ENCODING);
-	cmsjz_sites = cmsjz_sites.replace(/%USERNAME%/g, username);
-	cmsjz_sites = cmsjz_sites.replace(/%HOMEDIR%/g, homeDir);
-	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + ".jzeditStorage/cmsjz_sites", cmsjz_sites);
-	
-		// Update RSS file in demo site
-		var rss_file = fs.readFileSync(homeDir + "my_web_site/source/rss_en.xml", ENCODING);
-		rss_file = rss_file.replace(/%USERNAME%/g, username);
-		rss_file = rss_file.replace(/%DOMAIN%/g, DOMAIN);
-		fs.writeFileSync(homeDir + "my_web_site/source/rss_en.xml", rss_file);
-		
-	// Update welcome file
-	var welcome_file = fs.readFileSync(homeDir + "wwwpub/welcome.htm", ENCODING);
-	welcome_file = welcome_file.replace(/%USERNAME%/g, username);
-	welcome_file = welcome_file.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + "wwwpub/welcome.htm", welcome_file);
+		// Replace %USERNAME% %HOMEDIR% and %DOMAIN%
+		updateFile(homeDir + ".jzeditStorage/cmsjz_sites");
+		updateFile(homeDir + "my_web_site/source/rss_en.xml");
+		updateFile(homeDir + "wwwpub/welcome.htm");
+		updateFile(homeDir + "nodejs/http_server_example.js");
 		
 		
 	// add wwwpub
@@ -520,6 +506,15 @@ function adduser() {
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	
+		
+		function updateFile(path) {
+			var str = fs.readFileSync(path, ENCODING);
+			str = str.replace(/%USERNAME%/g, username);
+			str = str.replace(/%HOMEDIR%/g, homeDir);
+			str = str.replace(/%DOMAIN%/g, DOMAIN);
+			fs.writeFileSync(path, str);
+		}
+		
 	});
 }
 
@@ -680,7 +675,6 @@ function getGroupId(groupName) {
 	
 	throw new Error("Unable to find id for groupName=" + groupName);
 }
-
 
 function replaceInFileSync(filePath, arrSearchReplace) {
 	var fs = require("fs");
