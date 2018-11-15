@@ -208,7 +208,7 @@
 	
 	EDITOR.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
-		EDITOR.openFile("testDeleteTextRange.js", '', function(err, file) {
+		EDITOR.openFile("testDeleteTextRange.js", '', function (err, file) {
 			
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
 			
@@ -221,33 +221,30 @@
 			
 			test("<body>#<div>#→#→Hello World!#→#</div>#→#→</body>#→", 15,27, "\tHello World!");
 			
-			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18, "\r\n\t\tabc\r\n\t\tdef");
+			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18, "\t\tabc\r\n\t\tdef\r\n");
 			
-			test("{@#→abc@#→def@#}", 4,12, "\r\n\tabc\r\n\tdef");
+			test("{@#→abc@#→def@#}", 4,12, "\tabc\r\n\tdef\r\n");
 			
-			test("abc#def##", 0,6);
-			// What side should the line break and indentation characters be deleted from !?
-			// Where was it deleted from !? (text only contain one LB)
+			test("abc#def##", 0,6, "abc\ndef\n");
 			
-			
-			test("abcd#efghijk", 0,11);
+			test("abcd#efghijk", 0,11, "abcd\nefghijk");
 			
 			test("foo bar", 2,4);
 			
 			test("abc#def#ghi#jkl#", 1,13);
 			
-			test("{#    abc#    def#}#", 6,16);
-			test("{#→→→→abc#→→→→def#}#", 6,16);
+			test("{#    abc#    def#}#", 6,16, "    abc\n    def\n");
+			test("{#→→→→abc#→→→→def#}#", 6,16, "\t\t\t\tabc\n\t\t\t\tdef\n");
 			
-			test("{#    abc#    def#}gfi#", 7,20);
+			test("{#    abc#    def#}gfi#", 7,20, "bc\n    def\n}gf");
 			
-			test("{ab#    cde#", 0,10);
+			test("{ab#    cde#", 0,10, "{ab\n    cde\n");
 			
-			test("{#    {#    }#}", 12,14);
+			test("{#    {#    }#}", 12,14, "    }\n}");
 			
 			test("→abc#→def", 1,3);
 			
-			test("→abc#→def", 1,8);
+			test("→abc#→def", 1,8, "\tabc\n\tdef");
 			
 			EDITOR.closeFile(file.path);
 			
@@ -272,7 +269,7 @@
 				
 				file.grid = file.createGrid();
 				
-				if(expectedRemovedText == undefined) expectedRemovedText = file.text.slice(start, end);
+				if(expectedRemovedText == undefined) expectedRemovedText = file.text.slice(start, end+1);
 				
 				file.deleteTextRange(start,end); // will run sanity check, removed text saved as charactersDeleted
 				

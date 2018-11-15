@@ -1776,7 +1776,7 @@ file.mode = "text";
 							
 							console.log("extra removed text CC: " + UTIL.lbChars(file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2)));
 							
-							removedText = file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2) + removedText;
+							removedText = removedText + file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2);
 							
 							console.log("removedText=" + UTIL.lbChars(removedText));
 							
