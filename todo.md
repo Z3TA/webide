@@ -42,14 +42,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-can not click on the top of the file-tabs!
-
----
-
-terminal locks when running 
-create-react-app foo
-
-probably a loop
 
 ---
 

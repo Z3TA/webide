@@ -329,6 +329,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			if(!file.terminal) file.terminal = new TerminalState();
 			var terminalState = file.terminal;
 			
+			var charBuffer = "";
+			
 			for (var i=0; i<data.length; i++) {
 				char = data.charAt(i);
 				code = data.charCodeAt(i);
@@ -337,12 +339,14 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				" inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
 				
 				if(code == 7) { // BEL
+					if(charBuffer) print();
 					inNumber = "";
 					inNumberSerie = false;
 					numberSerie.length = 0;
 					inText = true;
 				}
 				else if(code == 27) { // ESC
+					if(charBuffer) print();
 					inEsc = true;
 					inText = false;
 					inBracket = false;
@@ -351,10 +355,12 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					numberSerie.length = 0;
 				}
 				else if(inEsc && code == 93) { // 93=]  
+					if(charBuffer) print();
 					// Undocumented
 					inEsc = false;
 				}
 				else if(inEsc && code == 91) { // 91=[
+					if(charBuffer) print();
 					inBracket = true;
 					inEsc = false;
 				}
@@ -440,13 +446,14 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				}
 				
 				else if(inBracket && code == 109) { // m
+					if(charBuffer) print();
 					resetDisplay();
 					inBracket = false;
 					inText = true;
 				}
 				
 				else if(inNumberSerie && inNumber && char == "r") {
-					
+					if(charBuffer) print();
 					var bottom = parseInt(inNumber);
 					var top = parseInt(numberSerie.pop());
 					
@@ -467,6 +474,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				
 				// ### Clearing lines
 				else if(char == "K" && (inBracket || inNumber == "0") ) {
+					
 					console.log("Clear line from cursor right ");
 					var row = file.grid[file.caret.row];
 					if(row.length > file.caret.col) {
@@ -524,6 +532,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				
 				// ### Moving the cursor
 				else if((inEsc || inNumber || inBracket) && char == "A") {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -543,6 +553,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if((inEsc || inNumber || inBracket) && char == "B") {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -572,6 +584,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if((inEsc || inNumber || inBracket) && char == "C") {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -586,6 +600,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if((inEsc || inNumber || inBracket) && char == "D") {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -598,6 +614,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) {
+					if(charBuffer) print();
+					
 					console.log("Move cursor to upper left corner");
 					file.moveCaret(undefined, file.startRow, 0);
 					inEsc = false;
@@ -605,6 +623,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if(inNumberSerie && (char == "H" || char == "f")) {
+					if(charBuffer) print();
+					
 					var toCol = parseInt(inNumber) - 1;
 					var toRow = parseInt(file.startRow + parseInt(numberSerie.pop())) - 1; // + terminalState.topLine;
 					
@@ -637,16 +657,22 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if(inEsc && char == "E") {
+					if(charBuffer) print();
+					
 					console.log("todo: Move to next line");
 					inEsc = false;
 					inText = true;
 				}
 				else if(inEsc && char == "7") {
+					if(charBuffer) print();
+					
 					console.log("todo: Save cursor position and attributes");
 					inEsc = false;
 					inText = true;
 				}
 				else if(inEsc && char == "8") {
+					if(charBuffer) print();
+					
 					console.log("todo: Restore cursor position and attributes");
 					inEsc = false;
 					inText = true;
@@ -654,6 +680,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				
 				// ### Scrolling
 				else if( (inEsc || inNumber) && (char == "D" || char == "L")) {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					console.log("todo: Move/scroll window UP " + times + " line(s)");
@@ -683,6 +711,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if( (inEsc || inNumber) && char == "M") {
+					if(charBuffer) print();
+					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -724,6 +754,8 @@ var topLineText = "";
 				
 				
 				else if(inNumber && char == "h") {
+					if(charBuffer) print();
+					
 					/*
 						Esc[20h 	Set new line mode 	LMN
 						Esc[?1h 	Set cursor key to application 	DECCKM
@@ -747,6 +779,8 @@ var topLineText = "";
 					inText = true;
 				}
 				else if(inNumber && char == "l") { // small L
+					if(charBuffer) print();
+					
 					/*
 						Esc[20l 	Set line feed mode 	LMN
 						Esc[?1l 	Set cursor key to cursor 	DECCKM
@@ -889,6 +923,8 @@ var topLineText = "";
 				else if(inNumber && char == "m") { // code=109
 					// ### Display mode
 					
+					if(charBuffer) print();
+					
 					numberSerie.push(inNumber);
 					
 					for (var j=0; j<numberSerie.length; j++) {
@@ -960,6 +996,8 @@ var topLineText = "";
 				
 				else if(inNumber && char == "P") {
 					// This is not in the spec!!?!? But bash sends it
+					if(charBuffer) print();
+					
 					var times = parseInt(inNumber);
 					
 					console.log("Delete " + times + " characters");
@@ -970,6 +1008,8 @@ var topLineText = "";
 				}
 				
 				else if(inEsc && code == 109) { // m
+					if(charBuffer) print();
+					
 					inText = true;
 					inEsc = false;
 				}
@@ -977,6 +1017,8 @@ var topLineText = "";
 					// ### Text
 					
 					if(code == 10) { // New Line \n
+						
+						if(charBuffer) print();
 						
 						console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + 
 						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
@@ -990,16 +1032,19 @@ var topLineText = "";
 							file.writeLineBreak();
 						}
 						else {
+							if(charBuffer) print();
 file.insertLineBreak();
 						}
 					}
 					else if(code == 13) {// Carriage Return \r
+						if(charBuffer) print();
 						//file.moveCaretToEndOfLine();
 						file.moveCaretToStartOfLine();
 						//file.moveCaretDown();
 					}
 					else if(code == 8) { // BS  (backspace)  
 						//if(file.caret.col > 0) file.moveCaretLeft();
+						if(charBuffer) print();
 						file.moveCaretLeft();
 						//file.deleteCharacter();
 					}
@@ -1011,28 +1056,54 @@ file.insertLineBreak();
 						file.insertText(spaces);
 					}
 					else {
-						console.log("Terminal Insert: " + UTIL.lbChars(char) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
-						//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
-						// terminal always overwrite !?
-						if(!file.caret.eol && !terminalState.smoothScrolling) file.deleteCharacter();
-						file.putCharacter(char);
+						/*
+							Optimization:
+							Buffer characters instead of inserting them one by one.
+						*/
+						charBuffer += char;
 						
-						if(backgroundColor != defaultBackgroundColor) file.grid[file.caret.row][file.caret.col-1].bgColor = backgroundColor;
-						
-						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
-						else if(reverse) {
-							// Make the (default?) text color the background and the bacgkround the text color
-							file.grid[file.caret.row][file.caret.col-1].bgColor = EDITOR.settings.style.textColor;
-							file.grid[file.caret.row][file.caret.col-1].color = EDITOR.settings.style.bgColor;
-						}
-						}
+					}
 					
 					terminalState.caret.row = file.caret.row;
 					terminalState.caret.col = file.caret.col;
 					
 				}
+				
 			}
+			
+			if(charBuffer) print();
+			
 			EDITOR.renderNeeded();
+			
+			function print() {
+				
+				console.log("Terminal Insert: " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
+				//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+				// terminal always overwrite !?
+				var colStart = file.caret.col;
+				if(!file.caret.eol && !terminalState.smoothScrolling) {
+					var deleteTo = Math.min(file.caret.index + charBuffer.length-1, file.caret.index + file.grid[file.caret.row].length - file.caret.col - 1);
+					file.deleteTextRange(file.caret.index, deleteTo);
+				}
+				file.insertText(charBuffer);
+				charBuffer = "";
+				
+				if(backgroundColor != defaultBackgroundColor) {
+					for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].bgColor = backgroundColor;
+				}
+				if(foregroundColor != defaultForeGroundColor) {
+					for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].color = foregroundColor;
+				}
+				else if(reverse) {
+					// Make the (default?) text color the background and the bacgkround the text color
+					for(var col=colStart; col<file.caret.col; col++) {
+						file.grid[file.caret.row][col].bgColor = EDITOR.settings.style.textColor;
+						file.grid[file.caret.row][col].color = EDITOR.settings.style.bgColor;
+					}
+				}
+				
+				terminalState.caret.col = file.caret.col;
+			}
 			
 			function resetDisplay() {
 				bright = false;
@@ -1058,7 +1129,7 @@ file.insertLineBreak();
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
 		if(EDITOR.mode != "default") return ALLOW_DEFAULT;
-			
+		
 		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});
