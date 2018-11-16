@@ -47,7 +47,6 @@ What I'm working on
 
 enable npx
 
-Able to npm install -g
 
 
 Deploy and test unix pipes

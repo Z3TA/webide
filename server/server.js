@@ -2593,7 +2593,8 @@ function createUserWorker(name, uid, gid, homeDir) {
 		USER: name,
 		LOGNAME: name,
 		USER_NAME: name,
-		PATH: "/usr/bin:/bin"
+		PATH: "/usr/bin:/bin:/.npm-packages/bin",
+		NPM_CONFIG_PREFIX: "/.npm-packages"
 	}
 	
 	if(NO_CHROOT) {

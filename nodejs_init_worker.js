@@ -466,8 +466,10 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	var opt = {
 		silent: true,
 		env: {
-			prod: true,
-			myName: USERNAME
+			prod: true, // Tell scripts we are in "production"
+			myName: USERNAME,
+			PATH: "/usr/bin:/bin:/.npm-packages/bin", // Able to find "executables"
+			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where global packages are
 		},
 		execPath: "/usr/bin/node" // note: we are in chroot!
 	};

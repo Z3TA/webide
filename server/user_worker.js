@@ -53,8 +53,9 @@ log("process.env.uid=" + process.env.uid, 7);
 var npmOptions = {
 	env: {
 		HOME: "/",
-		PATH: "/usr/bin:/bin", // npm want node to be inside PATH
-		dev: true
+		PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
+		NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
+		dev: true // So that scripts know we're in "development"
 	},
 };
 
