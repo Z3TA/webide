@@ -1584,7 +1584,7 @@ username = guestUser;
 		}
 		
 		function send(answer, conn) {
-			console.timeEnd(id||answer.id);
+			if(id || answer-id) console.timeEnd(id||answer.id);
 			if(conn == undefined) conn = connection;
 			
 			//console.log("answer.id=" + answer.id);
