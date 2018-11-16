@@ -236,6 +236,7 @@
 			file.mode = "text";
 			file.parse = false;
 			file.parsed = null;
+			file.noChangeEvents = true;
 			
 			terminalFiles.push(file);
 			file.write(file.path + " session started " + (new Date()) + "\n");

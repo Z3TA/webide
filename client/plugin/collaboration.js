@@ -429,7 +429,7 @@ if(file == undefined) throw new Error("file=" + file);
 	
 	function saveUndoRedoHistoryEvent(ev) {
 		
-		console.warn("Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
+		//console.warn("Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
 		
 		var path = ev.filePath;
 		
@@ -481,7 +481,7 @@ if(file == undefined) throw new Error("file=" + file);
 		
 		console.log("history.index=" + history.index + " history.length=" + history.length);
 		
-		console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
+		//console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
 		
 		// Sanity check
 		for (var i=0; i<history.length.length; i++) {
@@ -1120,7 +1120,7 @@ file.fixCaret();
 			if(file.text != "åäab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
-			console.log(JSON.stringify(fileChangeEvents, null, 2));
+			//console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
 			
 			if(typeof callback == "function") {

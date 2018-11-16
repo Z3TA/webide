@@ -28,6 +28,8 @@ var File; // File object is global
 		file.savedAs = false;
 		file.lastChange = new Date();
 		
+		file.noChangeEvents = false; // Do not call file change event listeners if set to true
+		
 		file.isCallingChangeEventListeners = undefined; // Prevent fileChange event listeners from changing the file. Will point to the offending function
 		
 		file.text = text;
@@ -3360,6 +3362,8 @@ file.mode = "text";
 			
 		*/
 		var file = this;
+		
+		if(file.noChangeEvents===true) return;
 		
 		if(file.isCallingChangeEventListeners) {
 			throw new Error("fileChange event listeners (" + UTIL.getFunctionName(file.isCallingChangeEventListeners) + 
