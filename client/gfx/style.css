@@ -598,14 +598,12 @@ ul#tabList li.tabFolderItem {
 	
 }
 
-
 ul#tabList li.tabFolderItem.active {
 	color: #000000;
 	border-bottom: 1px solid #ffffff; /* same color as canvas */
 	background: linear-gradient(#d7dde6 10%, #f6f6f6 60%, #ffffff);
 	z-index: 2;
 	}
-
 
 ul#tabList ul.folderFileList {
 	
@@ -614,6 +612,13 @@ ul#tabList ul.folderFileList {
 	
 	display: flex;
 	}
+
+/* Able to click all the way up */
+ul#tabList .single ul.folderFileList li.tabFileItem {
+	line-height: 40px;
+	margin-top: -10px;
+}
+
 
 ul#tabList li ul {
 	margin: 0;
