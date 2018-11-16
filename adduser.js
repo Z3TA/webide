@@ -371,7 +371,7 @@ function adduser() {
 		updateFile(homeDir + ".jzeditStorage/cmsjz_sites");
 		updateFile(homeDir + "my_web_site/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
-		updateFile(homeDir + "nodejs/http_server_example.js");
+		updateFile(homeDir + "nodejs/http_server/http_server_example.js");
 		
 		
 	// add wwwpub
