@@ -117,5 +117,7 @@ if ! shopt -oq posix; then
 fi
 
 #  Ensure npm will find installed binaries and man pages.
-NPM_PACKAGES="~/.npm-packages"
-PATH="$NPM_PACKAGES/bin:$PATH"
+NPM_PACKAGES="/.npm-packages"
+export PATH="$NPM_PACKAGES/bin:$PATH"
+
+

@@ -83,7 +83,8 @@ unlink("/etc/apparmor.d/home." + username + ".bin.bash");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
 unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");
-	
+unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-cli.js");
+
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
@@ -264,7 +265,7 @@ function userdel() {
 	
 	child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
 		
-		var error = err.message || stderr;
+		var error = (err && err.message) || stderr;
 		
 		var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
 		

@@ -10,6 +10,9 @@
   signal receive set=hup peer=%HOME%%USERNAME%/bin/bash,
   signal send set=hup peer=%HOME%%USERNAME%/bin/bash,
 
+  signal send set=hup peer=%HOME%%USERNAME%/usr/bin/node,
+  signal send set=hup peer=%HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js,
+
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rwl,
 
@@ -18,7 +21,6 @@
 
   #/dev/tty rw,
 
-  %HOME%%USERNAME%/** Cx -> scripts,
   %HOME%%USERNAME%/usr/bin/hg Px,
   %HOME%%USERNAME%/usr/bin/node Px,
   %HOME%%USERNAME%/usr/bin/bash Px,
@@ -34,12 +36,17 @@
   %HOME%%USERNAME%/usr/bin/unzip ix,
   %HOME%%USERNAME%/usr/bin/unrar ix,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+  %HOME%%USERNAME%/** Cx -> scripts,
 
   profile scripts {
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** rwl,
     %HOME%%USERNAME%/usr/bin/node Px,
     %HOME%%USERNAME%/usr/bin/bash Px,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+
   }
 
 }

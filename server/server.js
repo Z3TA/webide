@@ -1647,9 +1647,19 @@ function checkMounts(options, checkMountsCallback) {
 	console.log("Checking mounts for username=" + username + " ...");
 	console.time("check " + username + " mounts");
 	
+	var apparmorProfiles = [
+		"../etc/apparmor/usr.bin.nodejs_someuser",
+		"../etc/apparmor/home.someuser.usr.bin.node",
+		"../etc/apparmor/home.someuser.usr.bin.python",
+		"../etc/apparmor/home.someuser.usr.bin.hg",
+		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
+		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npx-cli.js",
+		"../etc/apparmor/home.someuser.bin.bash"
+	];
+	
 	var nginxProfileOK = false;
 	var foldersToMount = 24;
-	var apparmorProfilesToCreate = 6;
+	var apparmorProfilesToCreate = apparmorProfiles.length;
 	var reloadApparmor = false;
 	var reloadedApparmor = false;
 	var checkMountsReady = false;
@@ -1658,15 +1668,6 @@ function checkMounts(options, checkMountsCallback) {
 	var hgrccacertsUptodate = true;
 	var passwdCreated = false;
 	var checkMountsAbort = false;
-	
-	var apparmorProfiles = [
-		"../etc/apparmor/usr.bin.nodejs_someuser",
-		"../etc/apparmor/home.someuser.usr.bin.node",
-		"../etc/apparmor/home.someuser.usr.bin.python",
-		"../etc/apparmor/home.someuser.usr.bin.hg",
-		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
-		"../etc/apparmor/home.someuser.bin.bash"
-	];
 	
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
@@ -2037,10 +2038,16 @@ function checkMounts(options, checkMountsCallback) {
 		
 		if(foldersToMount === 0) {
 			// Be able to type npm in terminal:
+			// Yeh, there is also a npm installed in /usr/local/lib, but we want to use the one with the latest version (currently the one in /usr/lib/ )
 			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
 				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-				npmSymLinkCreated = true;
-				if(!checkMountsReady) checkMountsReadyMaybe();
+				
+				module_fs.symlink("../lib/node_modules/npm/bin/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
+					if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+					npmSymLinkCreated = true;
+					if(!checkMountsReady) checkMountsReadyMaybe();
+				});
+				
 			});
 		}
 		

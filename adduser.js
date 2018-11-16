@@ -407,7 +407,7 @@ function adduser() {
 		
 		// Create a directory where npm can install packages globally
 		fs.mkdirSync(homeDir + ".npm-packages");
-		chmodrSync(homeDir + ".npm-packages", "770");
+		chmodrSync(homeDir + ".npm-packages", "775");
 		chownrDirSync(homeDir + ".npm-packages", uid, gid);
 	
 		
