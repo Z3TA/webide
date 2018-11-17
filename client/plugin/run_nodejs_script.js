@@ -46,7 +46,9 @@
 		
 		if(login.user != "admin") {
 			firstRunMsg = firstRunMsgDefault + "Don't forget to use unix pipes instead of port numbers!\n" +
-			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname;
+			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname + "\n" +
+			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /sock/socketname file)\n';
+			
 		}
 	}
 	
