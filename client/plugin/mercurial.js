@@ -1328,6 +1328,9 @@ var error = err.message;
 						alertBox(error);
 					}
 					else {
+						// Show the files in file explorer
+						EDITOR.fileExplorer(resp.path);
+						
 						// Show readme if one exist ...
 						EDITOR.listFiles(resp.path, function(err, files) {
 							if(err) throw err;
