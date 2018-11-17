@@ -47,7 +47,8 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 			"-d",
 			domain + ',*.' + domain, 
 			'--manual-auth-hook=' + path + '/certbot-manual-auth-hook.sh', 
-			'--manual-cleanup-hook=' + path + '/certbot-manual-cleanup-hook.sh'
+			'--manual-cleanup-hook=' + path + '/certbot-manual-cleanup-hook.sh',
+			"--expand"
 		];
 	}
 	else {
