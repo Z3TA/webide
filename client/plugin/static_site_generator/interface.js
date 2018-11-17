@@ -2303,7 +2303,7 @@ whenAllFilesReloaded();
 				var sourceFilePath = url.replace(previewBaseUrl, site.source);
 			}
 			catch(err) {
-				console.error(err);
+				console.log("Unable to get previewWin url: " + err.message);
 				// Unable to get the file currently being previewed.
 				// The preview window has probably been closed.
 				return pickFileToPreview(site, makeItEditable);
