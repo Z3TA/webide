@@ -17,7 +17,7 @@
 	
 	
 	var defaultServer = {
-		name: "Default",
+		name: "CHANGE ME (press edit)",
 		protocol: "SFTP",
 		host: "127.0.0.1",
 		user: "test",
@@ -42,6 +42,7 @@
 	var menuItem;
 	var selectConnection;
 	
+	var menuString = "FTP/SFTP ...";
 	
 	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
@@ -76,7 +77,8 @@
 			EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
 			EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 			
-			menuItem = EDITOR.addMenuItem("Remote connections", showServerManger, 15);
+			menuItem = EDITOR.addMenuItem(menuString, showServerManger, 15);
+			
 		});
 		
 		
@@ -154,14 +156,13 @@
 		var labelConn = document.createElement("label");
 		labelConn.setAttribute("for", "selectConnection");
 		labelConn.appendChild(document.createTextNode("Connection:")); // Language settings!?
-		
-		var labelPw= document.createElement("label");
-		labelPw.setAttribute("for", "inputPw");
-		labelPw.appendChild(document.createTextNode("Password:")); // Language settings!?
+		connectionView.appendChild(labelConn);
 		
 		selectConnection = document.createElement("select");
 		selectConnection.setAttribute("id", "selectConnection");
 		selectConnection.setAttribute("class", "select");
+		selectConnection.addEventListener("change", changeSelectConnection);
+		connectionView.appendChild(selectConnection)
 		
 		if(!selectConnection) throw new Error("You are insane!");
 		
@@ -169,24 +170,36 @@
 			remoteConnections.forEach(addConnectionOption);
 		}
 		
+		
+		var labelPw= document.createElement("label");
+		labelPw.setAttribute("for", "inputPw");
+		labelPw.appendChild(document.createTextNode("Password:")); // Language settings!?
+		connectionView.appendChild(labelPw)
+		
 		inputPw = document.createElement("input");
 		inputPw.setAttribute("type", "password");
 		inputPw.setAttribute("id", "inputPw");
 		inputPw.setAttribute("class", "inputtext");
 		inputPw.setAttribute("value", selectedConnection.pw);
 		inputPw.setAttribute("size", "12");
+		connectionView.appendChild(inputPw)
+		
 		
 		var buttonConnect = document.createElement("input");
 		buttonConnect.setAttribute("type", "button");
 		buttonConnect.setAttribute("class", "button");
 		buttonConnect.setAttribute("id", "buttonConnect");
 		buttonConnect.setAttribute("value", "Connect");
+		buttonConnect.addEventListener("click", connectToConnection, false);
+		connectionView.appendChild(buttonConnect)
 		
 		var buttonEdit = document.createElement("input");
 		buttonEdit.setAttribute("type", "button");
 		buttonEdit.setAttribute("class", "button");
 		buttonEdit.setAttribute("id", "buttonEdit");
 		buttonEdit.setAttribute("value", "Edit");
+		buttonEdit.addEventListener("click", editConnection, false);
+		connectionView.appendChild(buttonEdit)
 		
 		buttonDisconnect = document.createElement("input");
 		buttonDisconnect.setAttribute("type", "button");
@@ -194,35 +207,19 @@
 		buttonDisconnect.setAttribute("id", "buttonCancel");
 		buttonDisconnect.setAttribute("value", "Disconnect");
 		buttonDisconnect.setAttribute("style", "dislay: none");
+		buttonDisconnect.addEventListener("click", disconnectConnection, false);
+		connectionView.appendChild(buttonDisconnect)
 		
 		var buttonCancel = document.createElement("input");
 		buttonCancel.setAttribute("type", "button");
 		buttonCancel.setAttribute("class", "button");
 		buttonCancel.setAttribute("id", "buttonCancel");
 		buttonCancel.setAttribute("value", "Cancel");
-		
 		buttonCancel.addEventListener("click", function() {
 			hideServerManger(); // Hide the whole connection manager
 		}, false);
-		
-		buttonEdit.addEventListener("click", editConnection, false);
-		
-		selectConnection.addEventListener("change", changeSelectConnection);
-		
-		buttonConnect.addEventListener("click", connectToConnection, false);
-		
-		buttonDisconnect.addEventListener("click", disconnectConnection, false);
-		
-		connectionView.appendChild(labelConn);
-		connectionView.appendChild(selectConnection)
-		
-		connectionView.appendChild(labelPw)
-		connectionView.appendChild(inputPw)
-		
-		connectionView.appendChild(buttonConnect)
-		connectionView.appendChild(buttonEdit)
-		connectionView.appendChild(buttonDisconnect)
 		connectionView.appendChild(buttonCancel)
+		
 		
 		if(remoteConnections.length > 0) changeSelectConnection(); // Select the one currently selected
 		
@@ -238,6 +235,7 @@
 		
 		function disconnectConnection() {
 			// Close the connection
+			EDITOR.updateMenuItem(menuItem, false, menuString);
 			
 			if(EDITOR.connections.hasOwnProperty(selectedConnection.host)) {
 				
@@ -296,26 +294,21 @@
 		var labelName = document.createElement("label");
 		labelName.setAttribute("for", "inputName");
 		labelName.appendChild(document.createTextNode("Alias:")); // Language settings!?
+		editView.appendChild(labelName);
+		
+		inputName = document.createElement("input");
+		inputName.setAttribute("type", "text");
+		inputName.setAttribute("id", "inputName");
+		inputName.setAttribute("class", "inputtext");
+		inputName.setAttribute("value", selectedConnection.name);
+		inputName.setAttribute("size", "14");
+		editView.appendChild(inputName);
+		
 		
 		var labelProtocol = document.createElement("label");
 		labelProtocol.setAttribute("for", "selectProtocol");
 		labelProtocol.appendChild(document.createTextNode("Protocol:")); // Language settings!?
-		
-		var labelHost = document.createElement("label");
-		labelHost.setAttribute("for", "inputHost");
-		labelHost.appendChild(document.createTextNode("Hostname(:port):")); // Language settings!?
-		
-		var labelUser= document.createElement("label");
-		labelUser.setAttribute("for", "inputUser");
-		labelUser.appendChild(document.createTextNode("User:")); // Language settings!?
-		
-		var labelPw= document.createElement("label");
-		labelPw.setAttribute("for", "inputPw");
-		labelPw.appendChild(document.createTextNode("Password:")); // Language settings!?
-		
-		var labelKey= document.createElement("label");
-		labelKey.setAttribute("for", "inputKey");
-		labelKey.appendChild(document.createTextNode("Key (path):")); // Language settings!?
+		editView.appendChild(labelProtocol);
 		
 		selectProtocol = document.createElement("select");
 		selectProtocol.setAttribute("id", "selectProtocol");
@@ -336,15 +329,14 @@
 		selectProtocol.appendChild(FTP);
 		selectProtocol.appendChild(SFTP);
 		selectProtocol.appendChild(FTPS);
+		editView.appendChild(selectProtocol);
 		// PS. Create a createOption function if you add more options
 		
 		
-		inputName = document.createElement("input");
-		inputName.setAttribute("type", "text");
-		inputName.setAttribute("id", "inputName");
-		inputName.setAttribute("class", "inputtext");
-		inputName.setAttribute("value", selectedConnection.name);
-		inputName.setAttribute("size", "14");
+		var labelHost = document.createElement("label");
+		labelHost.setAttribute("for", "inputHost");
+		labelHost.appendChild(document.createTextNode("Hostname(:port):")); // Language settings!?
+		editView.appendChild(labelHost);
 		
 		inputHost = document.createElement("input");
 		inputHost.setAttribute("type", "text");
@@ -352,6 +344,13 @@
 		inputHost.setAttribute("class", "inputtext");
 		inputHost.setAttribute("value", selectedConnection.host);
 		inputHost.setAttribute("size", "14");
+		editView.appendChild(inputHost);
+		
+		
+		var labelUser= document.createElement("label");
+		labelUser.setAttribute("for", "inputUser");
+		labelUser.appendChild(document.createTextNode("User:")); // Language settings!?
+		editView.appendChild(labelUser);
 		
 		inputUser = document.createElement("input");
 		inputUser.setAttribute("type", "text");
@@ -359,6 +358,13 @@
 		inputUser.setAttribute("class", "inputtext");
 		inputUser.setAttribute("value", selectedConnection.user);
 		inputUser.setAttribute("size", "12");
+		editView.appendChild(inputUser);
+		
+		
+		var labelKey= document.createElement("label");
+		labelKey.setAttribute("for", "inputKey");
+		labelKey.appendChild(document.createTextNode("Key (path):")); // Language settings!?
+		editView.appendChild(labelKey);
 		
 		inputKey = document.createElement("input");
 		inputKey.setAttribute("type", "text");
@@ -366,6 +372,20 @@
 		inputKey.setAttribute("class", "inputtext");
 		inputKey.setAttribute("value", selectedConnection.key);
 		inputKey.setAttribute("size", Math.max(30, selectedConnection.key.length+1));
+		editView.appendChild(inputKey);
+		if(EDITOR.user == "admin" || location.hostname == "127.0.0.1") {
+		var buttonBrowseKey = document.createElement("input");
+		buttonBrowseKey.setAttribute("type", "button");
+		buttonBrowseKey.setAttribute("class", "button half");
+		buttonBrowseKey.setAttribute("value", "Browse");
+		buttonBrowseKey.addEventListener("click", browseKey, false);
+			editView.appendChild(buttonBrowseKey);
+		}
+		
+		var labelPw= document.createElement("label");
+		labelPw.setAttribute("for", "inputPw");
+		labelPw.appendChild(document.createTextNode("Password:")); // Language settings!?
+		editView.appendChild(labelPw);
 		
 		inputEditPw = document.createElement("input");
 		inputEditPw.setAttribute("type", "password");
@@ -373,12 +393,7 @@
 		inputEditPw.setAttribute("class", "inputtext");
 		inputEditPw.setAttribute("value", selectedConnection.pw);
 		inputEditPw.setAttribute("size", "12");
-		
-		var buttonBrowseKey = document.createElement("input");
-		buttonBrowseKey.setAttribute("type", "button");
-		buttonBrowseKey.setAttribute("class", "button half");
-		buttonBrowseKey.setAttribute("value", "Browse");
-		buttonBrowseKey.addEventListener("click", browseKey, false);
+		editView.appendChild(inputEditPw);
 		
 		
 		var buttonSave = document.createElement("input");
@@ -387,51 +402,20 @@
 		buttonSave.setAttribute("id", "buttonSave");
 		buttonSave.setAttribute("value", "Save");
 		buttonSave.addEventListener("click", saveConnection, false);
-		
+		editView.appendChild(buttonSave);
 		
 		var buttonSaveAs = document.createElement("input");
 		buttonSaveAs.setAttribute("type", "button");
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save as new");
 		buttonSaveAs.addEventListener("click", saveNewConnection, false);
-		
+		editView.appendChild(buttonSaveAs);
 		
 		var buttonCancel = document.createElement("input");
 		buttonCancel.setAttribute("type", "button");
 		buttonCancel.setAttribute("class", "button");
 		buttonCancel.setAttribute("value", "Cancel");
 		buttonCancel.addEventListener("click", cancelEdit, false);
-		
-		
-		editView.appendChild(labelName);
-		editView.appendChild(inputName);
-		
-		
-		editView.appendChild(labelProtocol);
-		editView.appendChild(selectProtocol);
-		
-		editView.appendChild(labelHost);
-		editView.appendChild(inputHost);
-		
-		
-		
-		editView.appendChild(labelUser);
-		editView.appendChild(inputUser);
-		
-		
-		
-		editView.appendChild(labelKey);
-		editView.appendChild(inputKey);
-		editView.appendChild(buttonBrowseKey);
-		
-		
-		editView.appendChild(labelPw);
-		editView.appendChild(inputEditPw);
-		
-		
-		
-		editView.appendChild(buttonSave);
-		editView.appendChild(buttonSaveAs);
 		editView.appendChild(buttonCancel);
 		
 		
@@ -591,8 +575,10 @@
 				console.log("Connection error: " + err.message);
 			}
 			else {
-				alertBox("Connected to " + protocol + " on " + hostName + "!");
+				//alertBox("Connected to " + protocol + " on " + hostName + "!");
+				EDITOR.fileExplorer(protocol + "://" + hostName);
 				hideServerManger();
+				EDITOR.updateMenuItem(menuItem, true, menuString);
 }
 }
 		
