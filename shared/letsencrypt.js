@@ -29,6 +29,9 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 		
 		certonly = Don't mess with nginx config files
 		
+		Check logs:
+		/var/log/letsencrypt/letsencrypt.log
+		
 	*/
 	
 	if(wildcard) {
