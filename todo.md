@@ -42,6 +42,13 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Automatic updates on the server can break the editor.
+Need to have a service that checks if it's possible to login!
+
+---
+
+Unable to switch site (to local) in file explorer when connected to a sftp server.
+
 
 ---
 
