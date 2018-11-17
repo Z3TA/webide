@@ -2030,7 +2030,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			}
 			else {
 				filesToBeDeleted++;
-				sftpClient.remove(path, function sftpFileDeleted(err) {
+				sftpClient.unlink(path, function sftpFileDeleted(err) {
 					filesToBeDeleted--;
 					allFilesAndFoldersDeletedMaybe(err);
 				});
