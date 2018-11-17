@@ -1602,6 +1602,7 @@ text = file;
 			var bufferStartRow = Math.max(0, file.startRow);
 			var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
 			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see
+			if(maxColumns <= 20) maxColumns = 20;
 			for(var row = bufferStartRow; row < bufferEndRow; row++) {
 				buffer.push(file.cloneRow(row, maxColumns)); // Clone the row
 			}

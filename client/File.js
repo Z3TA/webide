@@ -3335,6 +3335,12 @@ file.mode = "text";
 			throw new Error("row=" + row + " > grid.length=" + grid.length);
 			return;
 		}
+		else if(maxColumns == undefined) {
+			throw new Error("maxColumns=" + maxColumns);
+		}
+		else if(maxColumns <= 0) {
+			throw new Error("maxColumns=" + maxColumns + " can not be zero or less!");
+		}
 		
 		var clone = grid[row].slice(0);
 		

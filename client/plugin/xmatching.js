@@ -55,7 +55,7 @@
 		//console.log("row=" + row + " col=" + col + "");
 		
 		// Is the caret inside the buffer!?
-		var caretInsideBuffer = row >= 0 && row < buffer.length;
+		var caretInsideBuffer = row >= 0 && row < buffer.length && buffer[row].length >= col-1;
 		
 		if(caretInsideBuffer) {
 			// What type of character is the caret on?
@@ -63,6 +63,7 @@
 			var charToTheLeft = "";
 			
 			if(!file.caret.eol && buffer[row].length > 0) {
+				
 				charAtCaret = buffer[row][col].char;
 			}
 			
