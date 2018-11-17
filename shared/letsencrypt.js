@@ -2,6 +2,8 @@
 	Running certbot (letsencrypt) to install SSL certificate
 */
 
+"use strict";
+
 const module_path = require("path");
 
 var letsencrypt = {};
@@ -35,11 +37,14 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 			"certonly", 
 			"--manual", 
 			"--manual-public-ip-logging-ok", 
-			"--preferred-challenges dns", 
+			"--preferred-challenges",
+			"dns", 
 			"--noninteractive", 
 			"--agree-tos", 
-			"--email " + adminEmail, 
-			"-d '" + domain + ",*." + domain + "'", 
+			"--email",
+			adminEmail,
+			"-d",
+			'"' + domain + ',*.' + domain + '"', 
 			'--manual-auth-hook="' + path + '/certbot-manual-auth-hook.sh"', 
 			'--manual-cleanup-hook="' + path + '/certbot-manual-cleanup-hook.sh"'
 		];
