@@ -5,7 +5,7 @@
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
 var EDITOR = {};
 
-EDITOR.version = 1; // Populated by release.sh, And from the server when logging in
+EDITOR.version = 0; // Populated by release.sh, And from the server when logging in
 console.log("EDITOR.version=" + EDITOR.version);
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
 else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
