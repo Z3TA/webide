@@ -46,6 +46,7 @@
 	var saveUndoRedoHistory = true;
 	var carets = {}; // filePath: {cId, caret}
 	var menu;
+	var bindTest = false;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -83,6 +84,7 @@
 			
 			if(EDITOR.settings.devMode) {
 				var C = 67;
+				bindTest = true;
 				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: C, combo: CTRL+SHIFT});
 				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: Z, combo: CTRL+SHIFT});
 			}
@@ -105,7 +107,11 @@
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
 			
+			if(bindTest) {
 			EDITOR.unbindKey(testCollaboration);
+				EDITOR.unbindKey(testUndoRedo);
+			}
+			
 			EDITOR.unbindKey(collabRedo);
 			EDITOR.unbindKey(collabUndo);
 			
