@@ -815,6 +815,9 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 	}
 	
 	function collabUndo(file) {
+		if(!file) return true;
+		if(!EDITOR.input) return true;
+			
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
 console.warn(file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
