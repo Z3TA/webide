@@ -1149,6 +1149,14 @@ updateCommitFileSelect();
 		repo.setAttribute("size", "40");
 		repo.setAttribute("value", defaultRepo.url);
 		form.appendChild(repo);
+		repo.onchange = function() {
+			if(localDir.value == defaultRepo.into) {
+				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
+if(matchRepoName && matchRepoName[1]) {
+localDir.value = "/repo/" + matchRepoName[1] + "/";
+}
+			}
+		}
 		
 		// ### Local directory
 		var labelLocalDir = document.createElement("label");
