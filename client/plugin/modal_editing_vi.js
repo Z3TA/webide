@@ -172,6 +172,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var repeatCommand = null; // If the insert is preceded by a command, repeat this command before each insert
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
+	var bindTest = false;
+	
 	var commandHistory = [];
 	commandHistory.index = -1;
 	var searchOnlyCommandHistoryStartingWith = ""; // When using up/down arrows to toggle command history
@@ -246,6 +248,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Scroll a whole a screen down", fun: vimScrollWholeScreenDown, charCode: F, combo: CTRL, mode: "vimNormal"});
 			
 			if(EDITOR.settings.devMode) {
+				bindTest = true;
 				var ONE = 49;
 				var TWO = 50;
 				var THREE = 51;
@@ -271,6 +274,15 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.unbindKey(toggleVim);
 			EDITOR.unbindKey(escapeFromInsert);
 			EDITOR.unbindKey(vimRedo);
+			
+			// todo: unbind them all!
+			
+			if(bindTest) {
+				EDITOR.unbindKey(vimTest1);
+				EDITOR.unbindKey(vimTest2);
+				EDITOR.unbindKey(vimTest3);
+			}
+			
 		}
 		});
 		
