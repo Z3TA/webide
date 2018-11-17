@@ -9,6 +9,11 @@
 	
 	var LINE_DEBUG = 20;
 	
+	var firstRunMsg = "";
+	var firstRunMsgDefault = "This program was started from the IDE\n" + 
+	"(Which gives you inline console log's and Error message.)\n" + 
+	"If there however are problems, try running the script from the Terminal instead.\n";
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -24,6 +29,7 @@
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
+		CLIENT.on("loginSuccess", updateRunMsg);
 		
 	}
 	
@@ -33,6 +39,18 @@
 		
 		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
 	}
+	
+	function updateRunMsg(login) {
+		
+		//alertBox(JSON.stringify(login));
+		
+		if(login.user != "admin") {
+			firstRunMsg = firstRunMsgDefault + "Don't forget to use unix pipes instead of port numbers!\n" +
+			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname;
+		}
+	}
+	
+	
 	
 	function showRunNodejsScriptMenuItem() {
 		var file = EDITOR.currentFile;
@@ -563,7 +581,7 @@
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, firstRunMsg + "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
 				if(err) {
 					if(err.code == "IN_QUEUE") {
 						setTimeout(function waitForFileToOpen() {
