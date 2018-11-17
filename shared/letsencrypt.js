@@ -4,7 +4,7 @@
 
 "use strict";
 
-const module_path = require("path");
+var module_path = require("path");
 
 var letsencrypt = {};
 
@@ -32,7 +32,8 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 	*/
 	
 	if(wildcard) {
-		var path = module_path.resolve("./../letsencrypt/");
+		// Use __dirname as this module can be required from many places
+		var path = module_path.resolve(__dirname + "./../letsencrypt/");
 		var args = [
 			"certonly", 
 			"--manual", 
