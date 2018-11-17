@@ -899,6 +899,8 @@ function sockJsConnection(connection) {
 	
 	connection.on("close", sockJsClose);
 	
+	connection.write('{"editorVersion": ' + EDITOR_VERSION + '}');
+	
 	function sockJsMessage(message) {
 		
 		if(message.length > 300) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
@@ -1074,6 +1076,11 @@ function sockJsConnection(connection) {
 				
 				// # Identify
 				var createUserRetries = 0;
+				
+				if(json.editorVersion == undefined) {
+					return send({error: "You are using an old version of the client. Try reloading the editor and refresh the service worker!", errorCode: "OLD_VERSION"});
+				}
+				// No need to compare version, the server has already sent it's version to the client, and the client will deal with it ...
 				
 				if(!json.sessionId) return send({error: "sessionId required", errorCode: "SESSIONID_REQUIRED"});
 				

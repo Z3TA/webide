@@ -84,10 +84,71 @@ self.addEventListener('message', function(msg) {
 	else if(matchVersion) {
 		var editorVersion = parseInt(matchVersion[1]);
 		if(editorVersion != version) console.warn("serviceWorker version=" + version + " editorVersion=" + editorVersion);
+		if(editorVersion > version) {
+			
+			console.log("serviceWorker Attempting to update to version=" + editorVersion + " (current version=" + version + ")");
+			var newCacheVersion = "jzedit_v" + editorVersion;
+			caches.open(newCacheVersion).then(function(cache) {
+				console.log("serviceWorker adding files to cache " + newCacheVersion + "");
+				return Promise.all( ressourcesToSaveInCache.map(function(url){cache.add(url)}) );
+			}).then(function() {
+				
+				notifyClientUpdate(version, editorVersion);
+				
+				console.log("serviceWorker updated to version=" + editorVersion + "");
+				version = editorVersion;
+				
+			}).catch(function(err) {
+				console.log("serviceWorker having problems updating from version=" + version + " to " + editorVersion);
+				console.error(err);
+			});
+			
+		}
 	}
 	
 	console.log("serviceWorker devMode=" + devMode + " version=" + version);
 });
+
+setTimeout(function() {
+	sendToClients("Hello from service worker!");
+}, 5000);
+
+function notifyClientUpdate(fromVersion, toVersion) {
+	console.log("serviceWorker sending update notification to clients ...");
+	var msg = "The editor has been updated from version=" + fromVersion + " to " + toVersion + "";
+	sendToClients(msg);
+}
+
+function sendToClients(msg) {
+	// Why isn't this working !?!?
+	
+	console.log("serviceWorker sending message to clients: " + msg);
+	
+	try {
+	var channel = new BroadcastChannel('sw-messages');
+	channel.postMessage(msg);
+	}
+	catch(err) {
+		console.log("Unable to send to clients: " + err.message);
+	}
+	
+	/*
+		.then(function() {
+		console.log("serviceWorker successfully sent message to clients: " + msg);
+		}).catch(function(err) {
+		console.log("serviceWorker failed to send message to clients: " + msg);
+		console.error(err);
+		});
+	*/
+	
+	/*
+		self.clients.matchAll().then(clients => {
+		clients.forEach(function(client) {
+		return client.postMessage(msg);
+		});
+		});
+	*/
+}
 
 self.addEventListener('install', function(event) {
 	console.log("serviceWorker install event (version=" + version + ")");

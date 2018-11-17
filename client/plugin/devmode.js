@@ -240,55 +240,8 @@
 			if(answer == yes) {
 				//EDITOR.closeFile(testfile);
 				
-				// Call exit listeners before reloading
-				EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
-					if(err) throw err;
-					
-					var gotError = false;
-					
-					for(var fName in returns) {
-						console.log(fName + " returned " + returns[fName]);
-						if(returns[fName] === false || returns[fName] instanceof Error) {
-							gotError = true;
-							break;
-						}
-					}
-					
-					if(gotError) {
-						throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
-					}
-					else {
-						
-						// Unload all plugins
-						for(var i=0; i<EDITOR.plugins.length; i++) {
-							console.log("unloading plugin: " + EDITOR.plugins[i].desc);
-							EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
-						}
-						
-						// Close all open windows
-						for(var win in EDITOR.openedWindows) {
-							try{EDITOR.openWindows[win].close();}
-							catch(err) {};
-						}
-						
-						/*
-							for(var file in EDITOR.files) {
-							delete EDITOR.files[file];
-							}
-						*/
-						
-						//document.location = "about:blank";
-						//document.location = "file:///" + require("dirname") + "/client/index.htm";
-						
-						console.log("Reloading! RUNTIME=" + RUNTIME);
-						
-							window.onbeforeunload = null;
-						location.reload();
-						
-						// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-						
-					}
-				});
+				EDITOR.reload();
+				
 			}
 		});
 		

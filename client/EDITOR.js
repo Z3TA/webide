@@ -5,7 +5,7 @@
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
 var EDITOR = {};
 
-EDITOR.version = 0; // Populated by release.sh, or from the server when logging in
+EDITOR.version = 1; // Populated by release.sh, And from the server when logging in
 console.log("EDITOR.version=" + EDITOR.version);
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
 else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
@@ -15,6 +15,26 @@ else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.se
 	catch(err) {
 		console.warn("Failed to post message to server worker: " + err.message);
 	}
+	
+	// Handler for messages coming from the service worker
+	// Doesn't seem to work :(
+	if(typeof BroadcastChannel != "undefined") {
+		(new BroadcastChannel('sw-messages')).addEventListener('message', messageFromServiceWorker);
+	}
+	else console.warn("BroadcastChannel not supported!");
+	
+	if(typeof navigator.serviceWorker.addEventListener == "function") {
+ navigator.serviceWorker.addEventListener('message', messageFromServiceWorker);
+	}
+	else {
+		console.warn("navigator.serviceWorker.addEventListener() not supported!");
+	}
+}
+
+function messageFromServiceWorker(event) {
+	console.log("Received Message from serviceWorker: " + event.data);
+	var reUpdated = /The editor has been updated from version=(\d+) to (\d+)/;
+	var matchUpdated = event.data.match(reUpdated);
 }
 
 EDITOR.sessionId = Math.random().toString(36).substring(7); // A hopefully unique ID for this session 
@@ -5027,6 +5047,59 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		}
 	}
 	
+	EDITOR.reload = function reload() {
+		console.warn("Reloading the editor ...");
+		// Call exit listeners before reloading
+		EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
+			if(err) throw err;
+			
+			var gotError = false;
+			
+			for(var fName in returns) {
+				console.log(fName + " returned " + returns[fName]);
+				if(returns[fName] === false || returns[fName] instanceof Error) {
+					gotError = true;
+					break;
+				}
+			}
+			
+			if(gotError) {
+				throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+			}
+			else {
+				
+				// Unload all plugins
+				for(var i=0; i<EDITOR.plugins.length; i++) {
+					console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+					EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
+				}
+				
+				// Close all open windows
+				for(var win in EDITOR.openedWindows) {
+					try{EDITOR.openWindows[win].close();}
+					catch(err) {};
+				}
+				
+				/*
+					for(var file in EDITOR.files) {
+					delete EDITOR.files[file];
+					}
+				*/
+				
+				//document.location = "about:blank";
+				//document.location = "file:///" + require("dirname") + "/client/index.htm";
+				
+				console.log("Reloading! RUNTIME=" + RUNTIME);
+				
+				window.onbeforeunload = null;
+				location.reload();
+				
+				// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+				
+			}
+		});
+	}
+	
 	
 	// # Virtual keyboard
 	var virtualKeyboardElement;
@@ -5569,17 +5642,6 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			
 			EDITOR.installDirectory = login.installDirectory || "/";
 			//alertBox(JSON.stringify(login));
-			
-			if(!EDITOR.version) EDITOR.version = parseInt(login.editorVersion);
-			
-			if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-				try {
-					navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
-				}
-				catch(err) {
-					console.warn("Failed to post message to server worker: " + err.message);
-				}
-			}
 			
 			console.log("Logged in as user: " + EDITOR.user);
 			

@@ -318,6 +318,49 @@ callbackWaitList[id] = callback;
 		loggedIn = json;
 	});
 	
+	CLIENT.on("editorVersion", function(version) {
+		
+		var newVersion = parseInt(version);
+		var oldVersion = EDITOR.version;
+		
+		if(isNaN(newVersion)) throw new Error("newVersion=" + newVersion + " version=" + version);
+		
+		if(newVersion > oldVersion) {
+			if(EDITOR.version == 0 && EDITOR.settings.devMode) {
+				console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
+				return;
+			}
+			
+			// Wait until serviceWorker has updated the cache ...
+			setTimeout(refresh, 5000);
+		}
+		
+		function refresh() {
+			var ok = "Reload now!";
+			var cancel = "Update another time"
+			confirmBox("The editor has been updated from version=" + oldVersion + " to " + newVersion + "\nReload to get the new version.", [cancel, ok], function(answer) {
+				if(answer == ok) {
+					EDITOR.reload();
+				}
+			});
+		}
+		
+		EDITOR.version = newVersion;
+		console.log("Set EDITOR.version=" + EDITOR.version);
+		
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+			console.log("Telling the serviceWorker EDITOR.version=" + EDITOR.version);
+			try {
+				navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
+			}
+			catch(err) {
+				console.warn("Failed to post message to server worker: " + err.message);
+			}
+		}
+		else console.log("serviceWorker not supported on BROWSER=" + BROWSER);
+		
+		
+	});
 	
 	function connSend(msg, callback) {
 		var websockOpen = 1;
