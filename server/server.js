@@ -6,6 +6,7 @@
 if(process.version.indexOf("v8.") != 0) console.warn("The editor has only been tested with node.js version 8!");
 
 var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
+var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
 
 var DEFAULT = require("./default_settings.js");
 
@@ -189,12 +190,18 @@ process.on("exit", function () {
 	log("Program exit\n\n", 6, true);
 });
 
-function unixTimeStamp() {
-	return Math.floor(Date.now() / 1000);
+function unixTimeStamp(date) {
+	if(date) return Math.floor(date.getTime() / 1000);
+	else return Math.floor(Date.now() / 1000);
 }
 
 function fillGuestPool(id, callback) {
-	// Increase the guest pool
+	/*
+		Increase the guest pool ...
+		If id is specified, and guest#id exist, thet guest user will be added to the guest pool
+		Otherwise if id is undefined or the guest#id user does not exist, a *new* user is created and added to the guest pool
+	*/ 
+	
 	
 	if(typeof id == "function") {
 		callback = id;
@@ -202,10 +209,10 @@ function fillGuestPool(id, callback) {
 	}
 	
 	if(id == undefined) {
-		createGuestUser(id, guestUserCreatedMaybe);
+		createGuestUser(undefined, guestUserCreatedMaybe);
 	}
 	else if(typeof id == "number") {
-		readPasswd("guest" + id, function(err, passwd) {
+		readEtcPasswd("guest" + id, function(err, passwd) {
 			if(err) {
 				if(err.code == "USER_NOT_FOUND") {
 					createGuestUser(id, guestUserCreatedMaybe);
@@ -213,6 +220,7 @@ function fillGuestPool(id, callback) {
 				else throw err;
 			}
 			else {
+				console.warn("Existing user " + passwd.username + " will be added to the guest pool!..");
 				guestUserCreatedMaybe(null, passwd);
 			}
 		});
@@ -243,13 +251,13 @@ function fillGuestPool(id, callback) {
 	}
 }
 
-function readPasswd(username, readPasswdCallback) {
+function readEtcPasswd(username, readEtcPasswdCallback) {
 	if(username == undefined) throw new Error("username=" + username);
 	console.log("Check for username=" + username + " in /etc/passwd ...");
-	module_fs.readFile("/etc/passwd", "utf8", function readPasswdFile(err, etcPasswd) {
+	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
 		if(err) {
 			console.warn("Unable to read /etc/passwd !");
-return readPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
+			return readEtcPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
 		}
 		else {
 			// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
@@ -267,7 +275,7 @@ return readPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message
 				if(pName == username) {
 					console.log("Found username=" + username + " in /etc/passwd");
 					
-					readPasswdCallback(null, {
+					readEtcPasswdCallback(null, {
 						username: username,
 						homeDir: UTIL.trailingSlash(pDir), 
 						uid: parseInt(pUid), 
@@ -279,11 +287,11 @@ return readPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message
 				}
 			}
 			
-			console.warn("Did not find username=" + username + " in /etc/passwd");
+			console.log("Did not find username=" + username + " in /etc/passwd");
 			
 			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
 			error.code = "USER_NOT_FOUND";
-			readPasswdCallback(error);
+			readEtcPasswdCallback(error);
 			// Add user account: sudo useradd -r -s /bin/false nameofuser
 		}
 	});
@@ -299,9 +307,9 @@ function recycleGuestAccounts(callback) {
 	for (var i=1; i<GUEST_COUNTER; i++) tryRecycle(i);
 	
 	function tryRecycle(id) {
-		console.log("tryRecycle: id=" + id);
+		console.log("tryRecycle: guest" + id);
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
-		module_fs.readdir(homeDir, function dir(err, files) {
+		module_fs.stat(homeDir, function dir(err, homeDirStat) {
 			if(err && err.code == "ENOENT") {
 				console.log(homeDir + " doesn't exist! Attempting to re-create guest" + id + " ...");
 				// If the home dir doesn't exist usually mean there is a gap in the GUEST_COUNTER series, so try filling that gap
@@ -313,8 +321,9 @@ function recycleGuestAccounts(callback) {
 							log(err.message);
 							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message);
 						}
+						processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
 					}
-					processedGuestId(id);
+					else processedGuestId(id, "Added to guest pool");
 					
 				});
 			}
@@ -326,9 +335,24 @@ function recycleGuestAccounts(callback) {
 						// If no lastLogin file exist should mean the user has *never* logged in
 						console.log("guest" + id + ": " + err.code + " " + lastLoginFile);
 						
-						fillGuestPool(id);
+						/*
+							Problem: We don't want to add old users to the guest pool as they will have outdated example files and settings
+							Solution: Check when the home dir was created, and only add it to the guest pool if it's fresh, otherwise deleted it
+						*/
 						
-						return processedGuestId(id);
+						var homeDirLastModified = unixTimeStamp(homeDirStat.mtime);
+						var daysSinceLastChanged = Math.floor( ( currentTime - homeDirLastModified ) / (60 * 60 * 24) );
+						var daysSinceRelease = Math.floor( ( homeDirLastModified - LAST_RELEASE_TIME ) / (60 * 60 * 24) );
+						
+						if(homeDirLastModified < LAST_RELEASE_TIME && daysSinceLastChanged > 2) {
+							// Home dir was last changed before last release, and, it was last changed over two days ago
+							return resetGuest(id);
+						}
+						else {
+							fillGuestPool(id);
+							return processedGuestId(id, "Are going to be added to guest pool (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + ")");
+						}
+						
 					}
 					else if(err) throw err;
 					else {
@@ -339,7 +363,7 @@ function recycleGuestAccounts(callback) {
 							console.log("guest" + id + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin);
 							return resetGuest(id);
 						}
-						else return processedGuestId(id);
+						else return processedGuestId(id, "Not inactive: daysSinceLastLogin=" + daysSinceLastLogin);
 					}
 				});
 			}
@@ -374,7 +398,6 @@ function recycleGuestAccounts(callback) {
 		//console.log("command=" + command);
 		
 		exec(command, options, function removeuser(error, stdout, stderr) {
-			CREATE_USER_LOCK = false;
 			
 			if(error) {
 				log("Error when removing user: (error is probably in " + scriptPath + ")");
@@ -399,17 +422,18 @@ function recycleGuestAccounts(callback) {
 			if(reG1User != username) throw new Error("Wrong user deleted !? reG1User=" + reG1User + " username=" + username);
 			
 			// Do not re-create the user right away. Wait for next call to recycleGuestAccounts.
+			// WHY ?
 			
-			processedGuestId(id);
+			processedGuestId(id, "Account was successfully deleted");
 			
 		});
 		
 	}
 	
-	function processedGuestId(id) {
+	function processedGuestId(id, debugComment) {
 		countLeft--;
 		
-		console.log("Done recycling id=" + id + " countLeft=" + countLeft);
+		console.log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft);
 		
 		if(countLeft == 0) {
 callback(null);
@@ -1254,7 +1278,7 @@ username = guestUser;
 						}
 						else {
 							// Get home, uid and gid
-							readPasswd(username, function(err, passwd) {
+							readEtcPasswd(username, function(err, passwd) {
 								if(err) throw err;
 								
 								homeDir = passwd.homeDir;
