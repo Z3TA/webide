@@ -5,37 +5,9 @@
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
 var EDITOR = {};
 
-EDITOR.version = 0; // Populated by release.sh, And from the server when logging in
+EDITOR.version = 0; // Populated by release.sh, DO NOT ALTER!
 console.log("EDITOR.version=" + EDITOR.version);
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
-else if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-	try {
-		navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
-	}
-	catch(err) {
-		console.warn("Failed to post message to server worker: " + err.message);
-	}
-	
-	// Handler for messages coming from the service worker
-	// Doesn't seem to work :(
-	if(typeof BroadcastChannel != "undefined") {
-		(new BroadcastChannel('sw-messages')).addEventListener('message', messageFromServiceWorker);
-	}
-	else console.warn("BroadcastChannel not supported!");
-	
-	if(typeof navigator.serviceWorker.addEventListener == "function") {
- navigator.serviceWorker.addEventListener('message', messageFromServiceWorker);
-	}
-	else {
-		console.warn("navigator.serviceWorker.addEventListener() not supported!");
-	}
-}
-
-function messageFromServiceWorker(event) {
-	console.log("Received Message from serviceWorker: " + event.data);
-	var reUpdated = /The editor has been updated from version=(\d+) to (\d+)/;
-	var matchUpdated = event.data.match(reUpdated);
-}
 
 EDITOR.sessionId = Math.random().toString(36).substring(7); // A hopefully unique ID for this session 
 

@@ -1,20 +1,31 @@
 /*
 	
 	Debugging the service worker:
-	ur: chrome://inspect/#service-workers
+	url: chrome://inspect/#service-workers
 	
 	The browser will automatically activate a *new* service worker if something in this file changes!
 	But it will only check for changes if more then 24 hours has passed !?
+	
+	When a new service worker is found, it will however not replace the current one right away,
+	it will wait until the current one is stopped, which can take a while (until browser restart?).
+	
+	The service worker can only cummunicate via the outside world by recieving messages.
+	It can Not access window or document, so it can not access localStorage or get cookies!
+	
+	The service worker turned out to be a lot of hassle, 
+	but it allows starting the editor while Offline,
+	and also speeds up the loading time as the editor is fetched from cache.
+	
 */
 
-
+//throw new Error("serviceWorker test error");
+// A throw error in the service worker will get caught in the Promise to register the service worker. See register_service_worker.js
 
 var devMode = false;
-var version = 0; // Will automatically update in new releases using ./release.sh
+var version = 0;
 
-console.log("Running serviceWorker.js version=" + version + " devMode=" + devMode);
+console.log("serviceWorker started ...");
 
-if(version === 0) devMode = true;
 
 var ressourcesToSaveInCache = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
@@ -73,7 +84,7 @@ var ressourcesToSaveInCache = [
 
 
 self.addEventListener('message', function(msg) {
-	console.log("serviceWorker Received Message: ", msg.data);
+	console.log("serviceWorker (version=" + version + " devMode=" + devMode + ") Received Message: ", msg.data);
 	var matchVersion = msg.data.match(/editorVersion=(\d+)/);
 	if(msg.data == "devModeOff") {
 		devMode = false;
@@ -83,30 +94,62 @@ self.addEventListener('message', function(msg) {
 	}
 	else if(matchVersion) {
 		var editorVersion = parseInt(matchVersion[1]);
-		if(editorVersion != version) console.warn("serviceWorker version=" + version + " editorVersion=" + editorVersion);
-		if(editorVersion > version) {
+		
+		// See if we have this version cached ...
+		var cacheVersion = "jzedit_v" + editorVersion;
+		var cacheVersionExist = false;
+		
+		caches.keys().then(function(keys) {
+			return Promise.all(keys.map(function(key) {
+				console.log("serviceWorker found cache key=" + key);
+				if(key == cacheVersion) {
+					cacheVersionExist = true;
+					return true;
+				}
+				else {
+					return false;
+				}
+			}));
+		}).then(function(keyBools) {
+			// var cacheVersionExist = keyBools.reduce( (acc, current) => acc+current );
 			
-			console.log("serviceWorker Attempting to update to version=" + editorVersion + " (current version=" + version + ")");
-			var newCacheVersion = "jzedit_v" + editorVersion;
-			caches.open(newCacheVersion).then(function(cache) {
-				console.log("serviceWorker adding files to cache " + newCacheVersion + "");
+			if(cacheVersionExist) return true; // No need to update cache
+			
+			console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " (current cache version=" + version + ")");
+			
+			caches.open(cacheVersion).then(function(cache) {
+				console.log("serviceWorker adding files to cacheVersion=" + cacheVersion + "");
 				return Promise.all( ressourcesToSaveInCache.map(function(url){cache.add(url)}) );
 			}).then(function() {
 				
+				// It would be optimal if we could tell the client to refresh, 
+// insteading of having it wait before refreshing - hoping the serviceWorker has updated the cache
 				notifyClientUpdate(version, editorVersion);
 				
-				console.log("serviceWorker updated to version=" + editorVersion + "");
 				version = editorVersion;
+				console.log("serviceWorker successfully filled cache cacheVersionn=" + cacheVersion + "");
+				
+				// Delete old caches
+				return caches.keys().then(function(keys) {
+					return Promise.all(keys.map(function(key) {
+						if(key != cacheVersion) {
+							console.log("serviceWorker deleting old cache: " + key);
+							return caches.delete(key);
+						}
+					})).then(function() {
+						console.log("serviceWorker finished deleting old caches!");
+						return true;
+					});
+				});
 				
 			}).catch(function(err) {
-				console.log("serviceWorker having problems updating from version=" + version + " to " + editorVersion);
+				console.log("serviceWorker having problems filling cacheVersion=" + cacheVersion + " (from version=" + version + ") See error below:");
 				console.error(err);
 			});
 			
-		}
+			
+		});
 	}
-	
-	console.log("serviceWorker devMode=" + devMode + " version=" + version);
 });
 
 setTimeout(function() {
@@ -114,8 +157,8 @@ setTimeout(function() {
 }, 5000);
 
 function notifyClientUpdate(fromVersion, toVersion) {
-	console.log("serviceWorker sending update notification to clients ...");
-	var msg = "The editor has been updated from version=" + fromVersion + " to " + toVersion + "";
+	console.log("serviceWorker sending cache update notification to clients ...");
+	var msg = "serviceWorker cache version has been updated from version=" + fromVersion + " to " + toVersion + "";
 	sendToClients(msg);
 }
 
@@ -150,33 +193,36 @@ function sendToClients(msg) {
 	*/
 }
 
-self.addEventListener('install', function(event) {
-	console.log("serviceWorker install event (version=" + version + ")");
-	var currentCacheVersion = "jzedit_v" + version;
-	event.waitUntil(caches.open(currentCacheVersion).then(function(cache) {
-		console.log("serviceWorker adding files to cache " + currentCacheVersion + "");
-		//return cache.addAll(ressourcesToSaveInCache);
-		return Promise.all( ressourcesToSaveInCache.map(function(url){cache.add(url)}) );
-	}));
+/*
+	The install event is called when the browser has installed a *new* service worker (this script)
+	It will however not be active until the old service worker (a prior version of this script) has stopped,
+	which can take some time (hours,years? :P).
+*/
+self.addEventListener('install', function serviceWorkerInstall(event) {
+	console.log("serviceWorker install event!");
+	
+	caches.keys().then(function(keys) {
+		return Promise.all(keys.map(function(key) {
+			console.log("serviceWorker install event found cache key=" + key);
+}));
+	});
+
 });
 
 
-self.addEventListener('activate', function(event) {
-	console.log("serviceWorker activate event (version=" + version + ")");
-	// Called when the browser has created a *new* service worker
-	// Delete old caches
-	var currentCacheVersion = "jzedit_v" + version;
-	return event.waitUntil(caches.keys().then(function(keys) {
-return Promise.all(keys.map(function(key) {
-			console.log("serviceWorker cache key=" + key);
-			if(key != currentCacheVersion) {
-				console.log("serviceWorker deleting old cache: " + key);
-				return caches.delete(key);
-			}
-		})).then(function() {
-			console.log("serviceWorker version=" + version + " now ready to handle fetches!");
-		});
-	}));
+
+/*
+	The activate event is called when the new service worker (this script) is in control.
+	eg. the old service worker (old version of this script) has stopped.
+*/
+self.addEventListener('activate', function serviceWorkerActivate(event) {
+	console.log("serviceWorker activate event!");
+	
+	caches.keys().then(function(keys) {
+		return Promise.all(keys.map(function(key) {
+			console.log("serviceWorker activate event found cache key=" + key);
+		}));
+	});
 });
 
 
@@ -186,9 +232,11 @@ return Promise.all(keys.map(function(key) {
 	
 	The following rules do Not apply the first time the page is loaded! 
 	Only when it's loaded After the service worked has been activated!
+	
+	caches.match() is a convenience method which checks all caches
 */
-self.addEventListener('fetch', function(event) {
-	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode + " version=" + version);
+self.addEventListener('fetch', function serviceWorkerFetch(event) {
+	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode + " cache version=" + version);
 	if(devMode) { // Skip cache
 		event.respondWith(fetch(event.request));
 	}

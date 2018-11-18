@@ -42,11 +42,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
 Deploy and test unix pipes
 
 ---
 
-Automatic updates on the server can break the editor.
+Automatic OS updates on the server can break the editor.
 Need to have a service that checks if it's possible to login!
 
 ---

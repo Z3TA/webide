@@ -34,7 +34,6 @@
 	
 	<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
 	
-	<script src="register_service_worker.js"></script>
 	<script src="polyfill.js"></script>
 	<script src="UTIL.js"></script>
 	<script src="global.js"></script>
@@ -46,13 +45,12 @@
 	<script src="JsDiff.js"></script>
 	
 	
-	<!-- Make your custom setting changes in here: -->
+	<!-- Put custom settings here: -->
 	<script src="settings_overload.js"></script> 
 	
 	
 	
 	<!-- Place plugins here: (note that the order *should* not matter, use EDITOR.plugin({... order: 100}), or EDITOR.on("start", function, order) !! -->
-	
 	
 	<script async="true" src="plugin/self_debug.js"></script>
 	
@@ -227,6 +225,8 @@
 	
 	<!-- END TESTS -->
 	
+	<!-- Loading the service worker is not a prio as it will not run intil the page has refreshed anyway -->
+	<script async="true" src="register_service_worker.js"></script>
 	
 	<meta name="description" content="Code/text editor/IDE for full stack JavaScript programming">
 	<meta name="keywords" content="code editor, text editor, javascript editor, node editor, node.js editor, nodejs editor">

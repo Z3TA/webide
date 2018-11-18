@@ -33,7 +33,6 @@ echo "Update version"
 
 sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 sed -i -e "s/var EDITOR_VERSION = 0;/var EDITOR_VERSION = $commit;/g" temp/release/linux/server/server.js
-sed -i -e "s/var version = 0;/var version = $commit;/g" temp/release/linux/client/serviceWorker.js
 
 # The package.json want a semver version, not to be confused with latest commit id
 sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/package.json

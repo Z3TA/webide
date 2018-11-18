@@ -325,14 +325,31 @@ callbackWaitList[id] = callback;
 		
 		if(isNaN(newVersion)) throw new Error("newVersion=" + newVersion + " version=" + version);
 		
-		if(newVersion > oldVersion) {
-			if(EDITOR.version == 0 && EDITOR.settings.devMode) {
-				console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
-				return;
+		// Always tell the service worker what version the server is on, so it can update the cache if needed
+		var serviceWorkerError = true;
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+			console.log("Telling the serviceWorker about server version=" + newVersion);
+			serviceWorkerError = false;
+			try {
+				navigator.serviceWorker.controller.postMessage("editorVersion=" + newVersion);
 			}
-			
+			catch(err) {
+				serviceWorkerError = true;
+				console.warn("Failed to post message to server worker: " + err.message);
+			}
+		}
+		else {
+console.log("serviceWorker not supported on BROWSER=" + BROWSER);
+		}
+		
+		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
+			console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
+			return;
+		}
+		else if(newVersion > oldVersion) {
 			// Wait until serviceWorker has updated the cache ...
-			setTimeout(refresh, 5000);
+			if(serviceWorkerError) console.warn("Unable to talk to service worker! No point refreshing.");
+			else setTimeout(refresh, 10000); // The wait must be enought to make sure the service worker has refreshed the cache!
 		}
 		
 		function refresh() {
@@ -344,21 +361,6 @@ callbackWaitList[id] = callback;
 				}
 			});
 		}
-		
-		EDITOR.version = newVersion;
-		console.log("Set EDITOR.version=" + EDITOR.version);
-		
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-			console.log("Telling the serviceWorker EDITOR.version=" + EDITOR.version);
-			try {
-				navigator.serviceWorker.controller.postMessage("editorVersion=" + EDITOR.version);
-			}
-			catch(err) {
-				console.warn("Failed to post message to server worker: " + err.message);
-			}
-		}
-		else console.log("serviceWorker not supported on BROWSER=" + BROWSER);
-		
 		
 	});
 	
