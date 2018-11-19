@@ -16,18 +16,38 @@
 	but it allows starting the editor while Offline,
 	and also speeds up the loading time as the editor is fetched from cache.
 	
+	
+	Problem1: We might not get the editor version from the editor-client, and the user will be stuck with a bad editor-client forever.
+	Sulution1: Update the cache version in every release, so when the user get his service worker replaced, it will also replace the editor-client
+	
+	Problem2: The editor-client might report an old version, and the user will be stuck with that version
+	Solution2: Solution1
+	
+	Problem3: We can not wait for a new service worker to register, which can take forever
+	Solution3: The editor-client passes the editor version from the server, and if it's newer then the current version, the cache is updated.
+	
+	Problem4: We always want to get the latest version of each file while in development
+	Solution4: Have a DEV_MODE variable and override cache if it's set to true
+	
 */
+
+"use strict";
 
 //throw new Error("serviceWorker test error");
 // A throw error in the service worker will get caught in the Promise to register the service worker. See register_service_worker.js
 
-var devMode = false;
-var version = 0;
+var DEV_MODE = false;
+var VERSION = 0; // The id of the cache version. Updated by the release script. And also by the editor-client. 
 
-console.log("serviceWorker started ...");
+if(VERSION === 0) {
+	// VERSION variable not populated means we are in development mode!
+	DEV_MODE = true;
+}
+
+console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + DEV_MODE + " started ...");
 
 
-var ressourcesToSaveInCache = [
+var CACHE_FILES = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
 	// Asume the bundle is loaded, and don't cache each induvidual .js file!
 	
@@ -84,82 +104,108 @@ var ressourcesToSaveInCache = [
 
 
 self.addEventListener('message', function(msg) {
-	console.log("serviceWorker (version=" + version + " devMode=" + devMode + ") Received Message: ", msg.data);
+	console.log("serviceWorker (VERSION=" + VERSION + " DEV_MODE=" + DEV_MODE + ") Received Message: ", msg.data);
 	var matchVersion = msg.data.match(/editorVersion=(\d+)/);
 	if(msg.data == "devModeOff") {
-		devMode = false;
+		DEV_MODE = false;
 	}
 	else if(msg.data == "devModeOn") {
-		devMode = true;
+		DEV_MODE = true;
 	}
 	else if(matchVersion) {
 		var editorVersion = parseInt(matchVersion[1]);
-		
-		// See if we have this version cached ...
-		var cacheVersion = "jzedit_v" + editorVersion;
-		var cacheVersionExist = false;
-		
-		caches.keys().then(function(keys) {
-			return Promise.all(keys.map(function(key) {
-				console.log("serviceWorker found cache key=" + key);
-				if(key == cacheVersion) {
-					cacheVersionExist = true;
-					return true;
-				}
-				else {
-					return false;
-				}
-			}));
-		}).then(function(keyBools) {
-			// var cacheVersionExist = keyBools.reduce( (acc, current) => acc+current );
-			
-			if(cacheVersionExist) return true; // No need to update cache
-			
-			console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " (current cache version=" + version + ")");
-			
-			caches.open(cacheVersion).then(function(cache) {
-				console.log("serviceWorker adding files to cacheVersion=" + cacheVersion + "");
-				return Promise.all( ressourcesToSaveInCache.map(function(url){cache.add(url)}) );
-			}).then(function() {
-				
-				// It would be optimal if we could tell the client to refresh, 
-// insteading of having it wait before refreshing - hoping the serviceWorker has updated the cache
-				notifyClientUpdate(version, editorVersion);
-				
-				version = editorVersion;
-				console.log("serviceWorker successfully filled cache cacheVersionn=" + cacheVersion + "");
-				
-				// Delete old caches
-				return caches.keys().then(function(keys) {
-					return Promise.all(keys.map(function(key) {
-						if(key != cacheVersion) {
-							console.log("serviceWorker deleting old cache: " + key);
-							return caches.delete(key);
-						}
-					})).then(function() {
-						console.log("serviceWorker finished deleting old caches!");
-						return true;
-					});
-				});
-				
-			}).catch(function(err) {
-				console.log("serviceWorker having problems filling cacheVersion=" + cacheVersion + " (from version=" + version + ") See error below:");
-				console.error(err);
-			});
-			
-			
-		});
+		updateCache(editorVersion);
 	}
 });
 
-setTimeout(function() {
-	sendToClients("Hello from service worker!");
+
+function updateCache(latestVersionMaybe) {
+	
+	var latestVersion = latestVersionMaybe;
+	
+	return caches.keys().then(function(keys) {
+		
+		var versions = keys.map(versionNrFromKey);
+		var highestVersion = Math.max.apply(null, versions);
+		console.log("serviceWorker cache versions: " + JSON.stringify(versions) + " highestVersion=" + highestVersion + " latestVersionMaybe=" + latestVersionMaybe);
+		
+		if(keys.length > 1) {
+			console.warn("serviceWorker has more then one cached version!");
+			// Delete all caches besides the highest version
+			var highestCacheVersion = "jzedit_v" + highestVersion;
+			return caches.keys().then(function(keys) {
+				return Promise.all(keys.map(function(key) {
+					if(key != highestCacheVersion) {
+						console.log("serviceWorker deleting old cache: " + key);
+						return caches.delete(key);
+					}
+				}));
+			}).then(function() {
+				return highestVersion;
+			});
+		}
+		else return highestVersion;
+		
+	}).then(function(highestVersion) {
+		
+		if(typeof highestVersion != "number") throw new Error("highestVersion=" + highestVersion + " is not a number!");
+		
+		if(highestVersion >= latestVersionMaybe) {
+			console.log("serviceWorker highestVersion=" + highestVersion + ". No need to update cache.");
+			VERSION = highestVersion;
+			return false;
+		}
+		
+		VERSION = latestVersionMaybe;
+		
+		var cacheVersion = "jzedit_v" + latestVersionMaybe;
+		console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " because it's newer then highestVersion=" + highestVersion + "");
+		
+		// Delete all caches before filling the new cache to prevent the new cache being filled from the old cache
+		return caches.keys().then(function(keys) {
+			return Promise.all(keys.map(function(key) {
+				return caches.delete(key);
+			}));
+		}).then(function() {
+			console.log("serviceWorker finished deleting *all* caches!");
+			return caches.open(cacheVersion).then(function(cache) {
+				console.log("serviceWorker adding files to cacheVersion=" + cacheVersion + "");
+				return Promise.all( CACHE_FILES.map(function(url){cache.add(url)}) );
+			}).then(function() {
+				console.log("serviceWorker successfully filled the cache for " + cacheVersion + "");
+				
+// It would be optimal if we could tell the client to refresh,
+				// insteading of having it wait before refreshing - hoping the serviceWorker has updated the cache
+				return notifyClientUpdate(highestVersion, latestVersionMaybe);
+
+			});
+		});
+	});
+	}
+	
+	function deleteAllCachesExcept(currentCacheVersion) {
+		// Delete old caches
+		return caches.keys().then(function(keys) {
+			return Promise.all(keys.map(function(key) {
+				if(key != currentCacheVersion) {
+					console.log("serviceWorker deleting old cache: " + key);
+					return caches.delete(key);
+				}
+			}));
+		});
+	}
+	
+	
+	
+	setTimeout(function() {
+		sendToClients("Hello from service worker!");
 }, 5000);
 
 function notifyClientUpdate(fromVersion, toVersion) {
 	console.log("serviceWorker sending cache update notification to clients ...");
 	var msg = "serviceWorker cache version has been updated from version=" + fromVersion + " to " + toVersion + "";
-	sendToClients(msg);
+		sendToClients(msg);
+		return true;
 }
 
 function sendToClients(msg) {
@@ -175,6 +221,7 @@ function sendToClients(msg) {
 		console.log("Unable to send to clients: " + err.message);
 	}
 	
+		return true;
 	/*
 		.then(function() {
 		console.log("serviceWorker successfully sent message to clients: " + msg);
@@ -197,16 +244,15 @@ function sendToClients(msg) {
 	The install event is called when the browser has installed a *new* service worker (this script)
 	It will however not be active until the old service worker (a prior version of this script) has stopped,
 	which can take some time (hours,years? :P).
+		
+		caches are global! So updating the cache will also affect the currently running service worker!
+		Only problem is that the files will be fetched by the currently running service worker,
+		meaning the files will probably be fetches from an *old* cache.
+		So there is no point in filling the cache on the install event. We have to wait for the activate event!
 */
 self.addEventListener('install', function serviceWorkerInstall(event) {
-	console.log("serviceWorker install event!");
+	console.log("serviceWorker witch current cache VERSION=" + VERSION + " got install event!");
 	
-	caches.keys().then(function(keys) {
-		return Promise.all(keys.map(function(key) {
-			console.log("serviceWorker install event found cache key=" + key);
-}));
-	});
-
 });
 
 
@@ -216,14 +262,11 @@ self.addEventListener('install', function serviceWorkerInstall(event) {
 	eg. the old service worker (old version of this script) has stopped.
 */
 self.addEventListener('activate', function serviceWorkerActivate(event) {
-	console.log("serviceWorker activate event!");
+	console.log("serviceWorker with current cache VERSION=" + VERSION + " got activate event!");
 	
-	caches.keys().then(function(keys) {
-		return Promise.all(keys.map(function(key) {
-			console.log("serviceWorker activate event found cache key=" + key);
-		}));
+	event.waitUntil(updateCache(VERSION));
+		
 	});
-});
 
 
 /*
@@ -236,8 +279,8 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 	caches.match() is a convenience method which checks all caches
 */
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
-	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode + " cache version=" + version);
-	if(devMode) { // Skip cache
+	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
+		if(DEV_MODE) { // Skip cache
 		event.respondWith(fetch(event.request));
 	}
 	else {
@@ -253,3 +296,11 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		}));
 	}
 });
+
+	function versionNrFromKey(key) {
+		var prefix = "jzedit_v";
+		var nr = key.replace(prefix, "");
+		if(key == nr) throw new Error("Not a cache key=" + key);
+		return parseInt(nr);
+	}
+	
