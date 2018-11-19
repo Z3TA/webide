@@ -42,7 +42,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Test unix pipes in production
+Able to copy a folder
+"new Folder" from any file or folder.
+
+.ssgconf JSON files
+
+Writing guides/tutorials
+
+
 
 
 
