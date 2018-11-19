@@ -2228,9 +2228,8 @@ function checkMounts(options, checkMountsCallback) {
 					return;
 				}
 				
-				data = data.replace(/#SSL#/g, "");
-				data = data.replace(/listen 80;#NOSSL#/g, "");
-				data = data.replace(/listen \[::\]:80;#NOSSL#/g, "");
+				data = data.replace(/#SSL#/g, ""); // Remove the comment before "listen 443 ssl"
+				data = data.replace(/.*#NOSSL#/g, ""); // Remove all lines that have #NOSSL# in it
 				
 				module_fs.writeFile(nginxProfilePath, data, function(err) {
 					if(err) throw err;

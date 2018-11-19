@@ -44,7 +44,7 @@ What I'm working on
 
 Test unix pipes in production
 
-You get vierd characters when visiting http://johan.webide.se/safari.htm (without https)
+
 
 Issues when starting a nodejs script in collab mode, the log file gets overwritten. (set file.changeEvents=false)
 
