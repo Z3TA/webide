@@ -374,7 +374,7 @@
 			}, 100);
 			
 		});
-	}, 2);
+	});
 	
 	
 	EDITOR.addTest(function inlineErrorMessages(callback) {
@@ -397,7 +397,7 @@
 			}, 100);
 			
 		});
-	}, 2);
+	});
 	
 	EDITOR.addTest(function previewAutocomplete(callback) {
 		

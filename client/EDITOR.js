@@ -167,7 +167,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		previewTool: [],
 	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
 	select: [], // Selecting text
-	sanitize: [] // For example foramtting and santizing text pasted or dropped into the editor
+	sanitize: [], // For example foramtting and santizing text pasted or dropped into the editor
+	parse: [] // Language parsers should listen to this event and parse any string on request and return a parse-object {}
 };
 
 EDITOR.renderFunctions = [];
@@ -3958,15 +3959,23 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		var defaultTestOrder = 1000;
 		var defaultParallel = true;
 		
-		if(typeof order == "function") {
+		if(typeof order == "function" && parallel == undefined && fun == undefined) {
 			fun = order;
 			order = defaultTestOrder;
 			parallel = defaultParallel;
 		}
-		else if(typeof order == "boolan" && typeof parallel == "function") {
+		else if(typeof order == "boolan" && typeof parallel == "function" && fun == undefined) {
 			fun = parallel;
 			parallel = order;
 			order = defaultTestOrder;
+		}
+		else if(typeof order == "number" && typeof parallel == "function" && fun == undefined) {
+			fun = parallel;
+			parallel = false;
+		}
+		else if(typeof order == "function") {
+			// I'ts OK to omit order and parallel, but not flip them
+			throw new Error("Parameters should be in this order: order, parallel, fun");
 		}
 		
 		if(order == undefined) order = defaultTestOrder;
@@ -3977,6 +3986,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		var funName = UTIL.getFunctionName(fun);
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
+		
+		console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {
@@ -5072,6 +5083,47 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		});
 	}
 	
+	var waitingForFileToBeParsed = {};
+	EDITOR.parse = function parse(fileOrString, lang, path, callback) {
+		/*
+			Useful for when you want to parse a file, but not open it. Returns:
+			{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
+		*/
+		
+		if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
+		
+		if(callback == undefined && typeof lang == "function") {
+			callback = lang;
+			lang = undefined;
+		}
+		else if(callback == undefined && typeof path == "function") {
+			callback = path;
+			path = undefined;
+		}
+		
+		if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
+		
+		if(path == undefined) path = UTIL.hash(fileOrString);
+		
+		// Prevent race conditions
+		var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
+		
+		waitingForFileToBeParsed[path].push(callback);
+		
+		if(typeof callback != "function") throw new Error("Third parameter callback needs to be a callback function!");
+		
+		for(var i=0, ret=false; i<EDITOR.eventListeners.parse.length; i++) {
+			ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path, parseDone);
+			if(ret) return ret; // Only let one parser parse it
+		}
+		
+		function parseDone(err, parseResult) {
+			for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
+				waitingForFileToBeParsed[path][i](err, parseResult);
+			}
+			delete waitingForFileToBeParsed[path];
+		}
+	}
 	
 	// # Virtual keyboard
 	var virtualKeyboardElement;

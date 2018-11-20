@@ -42,6 +42,12 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+JS-parser-worker
+Find related files and autocomplete global variables
+Better autocomplete support.
+
+
+
 Able to copy a folder
 "new Folder" from any file or folder.
 

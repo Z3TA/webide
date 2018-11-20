@@ -481,7 +481,8 @@ for(var i=0; i<list.length; i++) {
 	
 	// ## Tests
 	
-	EDITOR.addTest(function changeFileTabOrder(callback) {
+	// Run this early, so it doesn't also fail if another test fails
+	EDITOR.addTest(100, function changeFileTabOrder(callback) {
 		// Close all open files
 		for(var path in EDITOR.files) {
 			EDITOR.closeFile(path);
@@ -552,8 +553,7 @@ for(var i=0; i<list.length; i++) {
 				});
 			});
 		});
-		
-	},100); // Run this early, so it doesn't also fail if another test fails
+		}); 
 	
 	// TEST-CODE-END
 	

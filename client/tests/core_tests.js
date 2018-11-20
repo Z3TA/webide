@@ -304,7 +304,7 @@
 			
 		});
 		
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function dblClickRemovedSpace(callback) {
@@ -1656,7 +1656,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, false, function testDoubleLogin(callback) {
+	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		
 		var userValue = "";

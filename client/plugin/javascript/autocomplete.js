@@ -1,10 +1,10 @@
 (function() {
 	/*
-	
+		
 		Todo: search prototype and include built-in prototypes
 		
 		todo: Use JSdoc info to show variable types for function arguments
-	
+		
 	*/
 	
 	"use strict";
@@ -19,30 +19,180 @@
 	
 	// todo: Check if we are browser or nodejs or other JS platform
 	var globalContextVariables = {
-
+		
 		document: {
 			keys: {
 				getElementById: {type: "Method", arguments: "id"},
 				createElement: {type: "Method", arguments: "tagName"}
 			}
 		}
-
+		
 	}
+	
+	var relatedScripts = {}; // path: [array of parsed-object's ref] 
+	var parsedFiles = {}; // path: parsed-object ref
+	var reScripts = /<script[^>]*src="([^"]*)"[^>]*><\/script>/ig; // The g flag is important, or exec will run in an endless loop!
+	var reHTML = /html?$/i;
+	var reJS = /js$/i;
 	
 	
 	EDITOR.plugin({
 		desc: "Autocomplete for JavaScript",
 		load: function load() {
 			EDITOR.on("autoComplete", autoCompleteJS);
+			EDITOR.on("afterSave", autoCompleteJS_fileSave);
+			EDITOR.on("fileOpen", autoCompleteJS_fileOpen);
+			EDITOR.on("fileParse", autoCompleteJS_fileParse);
+			
+			
 		},
 		unload: function unload() {
 			EDITOR.removeEvent("autoComplete", autoCompleteJS);
+			EDITOR.removeEvent("afterSave", autoCompleteJS_fileSave);
+			EDITOR.removeEvent("fileOpen", autoCompleteJS_fileOpen);
+			EDITOR.removeEvent("fileParse", autoCompleteJS_fileParse);
 		},
 	});
 	
 	
+	function autoCompleteJS_fileParse(file) {
+		parsedFiles[file.path] = file.parsed; // Save a reference to the parse-object
+	}
+	
+	function autoCompleteJS_fileSave(file) {
+		
+		if(file.path.match(reHTML)) {
+			updateRelatedScripts(file);
+		}
+		
+		return true;
+	}
+	
+	function autoCompleteJS_fileOpen(file) {
+		
+		if(file.path.match(reHTML)) {
+			updateRelatedScripts(file);
+		}
+		else if(file.path.match(reJS)) {
+			if(!relatedScripts.hasOwnProperty(file.path)) {
+				relatedScripts[file.path] = [];
+				console.log("Set relatedScripts[" + file.path + "] after opening it");
+			}
+		}
+		
+		return true;
+	}
+	
+	function updateRelatedScripts(htmlFile) {
+		console.time("updateRelatedScripts in " + htmlFile.path);
+		var directory = UTIL.getDirectoryFromPath(htmlFile.path);
+		var scripts = findScriptFiles(directory, htmlFile.text);
+		
+		console.log("scripts=" + scripts);
+		
+		for (var i=0; i<scripts.length; i++) {
+			// Go through all files and update related files parse objects
+			
+			if(!relatedScripts.hasOwnProperty(scripts[i])) {
+				relatedScripts[ scripts[i] ] = [];
+				console.log("Set relatedScripts[" + scripts[i] + "] !");
+			}
+			
+			for (var path in relatedScripts) {
+				
+				if(path == scripts[i]) {
+					// path is related to other files in the html file
+					
+					// We do not want to hold on to old parsed-objects! 
+					// As it will prevent the carbage collector from deleting them !?!?
+					relatedScripts[path] = [];
+					console.log("Resetted relatedScripts[" + path + "] !");
+					
+					for (var j=0; j<scripts.length; j++) {
+						if(scripts[j] == path) continue;
+						
+						console.log("Adding " + scripts[j] + " to related scripts for " + path);
+						if(!parsedFiles.hasOwnProperty(scripts[j])) {
+							parsedFiles[scripts[j]] = loadAndParse(scripts[j], path);
+						}
+						else {
+							relatedScripts[path].push( parsedFiles[scripts[j]] );
+							console.log("Added parsed data from " + scripts[j] + " to relatedScripts[" + path + "] because it had been parsed before.");
+						}
+					}
+				}
+			}
+		}
+		console.timeEnd("updateRelatedScripts in " + htmlFile.path);
+	}
+	
+	function loadAndParse(fileToParse, relatedFile) {
+		
+		console.log("loadAndParse: fileToParse=" + fileToParse + " relatedFile=" + relatedFile);
+		
+		// Wait 5 seconds in case the file is opened or parsed, so that we do not do it many times
+		setTimeout(maybeParsedAlready, 5000);
+		
+		function maybeParsedAlready() {
+			if(EDITOR.files.hasOwnProperty(fileToParse)) {
+				if(!parsedFiles.hasOwnProperty(fileToParse)) throw new Error("Expected file to be in fileToParse=" + Object.keys(fileToParse) + ": fileToParse=" + fileToParse);
+				if(!relatedScripts.hasOwnProperty(relatedFile)) throw new Error("Expected file to be in relatedScripts=" + Object.keys(relatedScripts) + " relatedFile=" + relatedFile);
+				if(relatedScripts[relatedFile].indexOf( parsedFiles[fileToParse] ) == -1) {
+					relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
+					console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] after it had been opened (and parsed)");
+				}
+				return; // It has already been related!
+			}
+			else if(parsedFiles.hasOwnProperty(fileToParse)) {
+				
+				if(relatedScripts[relatedFile].indexOf( parsedFiles[fileToParse] ) == -1) {
+					relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
+					console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] it had not been opened, but it had been parsed!");
+				}
+				else {
+					console.log("fileToParse=" + fileToParse + " has already been parsed and added to related scripts for relatedFile=" + relatedFile);
+				}
+			}
+			else {
+				EDITOR.readFromDisk(filePath, function(err, path, data, hash) {
+					if(err) {
+						console.warn("Failed to load from disk: fileToParse=" + fileToParse + " err=" + err.message);
+						return;
+					}
+					EDITOR.parse(data, "JS", function(err, parseResult) {
+						if(err) {
+							console.warn("Failed to parse: fileToParse=" + fileToParse + " err=" + err.message);
+							return;
+						}
+						
+						parsedFiles[fileToParse] = parseResult;
+						relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
+						console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] after parsering.");
+					});
+				});
+			}
+		}
+		
+	}
+	
+	
+	
+	function findScriptFiles(dir, str) {
+		var matches;
+		var filesPaths = [];
+		var filePath = "";
+		while( matches = reScripts.exec(str) ) {
+			console.log(matches);
+			filePath = matches[1];
+			if(filePath.indexOf("/") == -1 && filePath.charAt(0) != ".") filePath = "./" + filePath;
+			filesPaths.push( UTIL.resolvePath(dir, filePath) );
+		}
+		return filesPaths;
+	}
 	
 	function autoCompleteJS(file, wordToComplete, wordLength, gotOptions) {
+		
+		console.log("autoCompleteJS: wordToComplete=" + wordToComplete);
 		
 		var options = [];
 		var js = file.parsed;
@@ -51,7 +201,7 @@
 		if(!js) {
 			console.log("File has not been parsed. No JavaScript auto-complete available");
 			return;
-			}
+		}
 		
 		/*
 			When pushing to options,
@@ -89,10 +239,21 @@
 			searchVariables(globalContextVariables, wordToComplete);
 			
 			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete); // Check global variables
-
+			
+			// Global variables from other files
+			console.log(file.path + " related scripts =" + (relatedScripts[file.path] && relatedScripts[file.path].length));
+			console.log(relatedScripts[file.path]);
+			
+			if(relatedScripts[file.path]) {
+			for (var i=0; i<relatedScripts[file.path].length; i++) {
+				console.log( "Checking related script " + i + ": globalVariables=" + (relatedScripts[file.path][i] ? relatedScripts[file.path][i].globalVariables : "not parsed!") );
+					if(relatedScripts[file.path][i] && relatedScripts[file.path][i].globalVariables) {
+					searchVariables(relatedScripts[file.path][i].globalVariables, wordToComplete); // Check global variables
+				}
+			}
+			}
 			
 		}
-		
 		
 		return options; // disable default action
 		
@@ -110,15 +271,15 @@
 		function sharedStart(array) {
 			var wholeWord = 1;
 			var A= array.concat().sort(), 
-				a1= A[0][wholeWord], 
-				a2= A[A.length-1][wholeWord], 
-				L= a1.length, 
-				i= 0;
-				
+			a1= A[0][wholeWord], 
+			a2= A[A.length-1][wholeWord], 
+			L= a1.length, 
+			i= 0;
+			
 			while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
 			return a1.substring(0, i);
 		}
-
+		
 		
 		function findFunctions(functions) {
 			// Find out if we are inside functions, then check those functions for variables and name of sub-functions.
@@ -134,7 +295,7 @@
 				func = functions[i];
 				
 				console.log("checking function=" + func.name + " start=" + func.start + " end=" + func.end + "  ...");
-
+				
 				if(func.start <= charIndex && func.end >= charIndex) {
 					// Cursor is inside this function!
 					
@@ -204,7 +365,7 @@
 					var keyName = properties[propertyIndex]; // This is the word we are gonna auto-complete
 					
 					console.log("keyName=" + keyName + "");
-
+					
 					if(variable.hasOwnProperty("keys")) {
 						// Search for keys
 						for(var key in variable.keys) {
@@ -225,7 +386,7 @@
 						searchVariables(stringPrototype, keyName);
 					}
 					else if(variable.type == "unknown") { // Variable
-							
+						
 						// Check for functions with that name, then check if the function has a property that match the word
 						
 						if(properties.length > propertyIndex) {
@@ -243,7 +404,7 @@
 						searchFunctionThis(p[0], keyName);
 					}
 				}
-
+				
 			}
 			else {
 				// Check each variable in the list
@@ -264,9 +425,9 @@
 					}
 				}
 			}
-
+			
 			if(variables.hasOwnProperty("prototype")) searchVariables(variables["prototype"].keys, word);
-
+			
 			
 			function pushVariable(word, variable, variableName) {
 				
@@ -281,7 +442,7 @@
 				
 				if(variable.type=="Array") {
 					options.push([fullName + "[]", 1]);
-
+					
 				}
 				else if(variable.type == "Method") {
 					options.push([fullName + "()", 1]);
@@ -298,7 +459,7 @@
 				else {
 					options.push([fullName, 0]);
 				}
-
+				
 			}
 			
 			function optionExist(options, variableName) {
@@ -324,10 +485,10 @@
 			console.log("searchFunctionThis functionName=" + functionName + " keyName=" + keyName + "");
 			
 			/*
-			
+				
 				Note that js.functions is a tree!
 				
-			
+				
 			*/
 			
 			// Looking for this.keyName... in a function called functionName
@@ -378,7 +539,7 @@
 		}
 		
 	}
-
+	
 	function isWhiteSpace(char) {
 		return /\s/.test(char);
 	}
@@ -391,20 +552,20 @@
 		if(caret == undefined) caret = file.caret;
 		
 		var row = caret.row,
-			gridRow = file.grid[row],
-			rowStartIndex = gridRow.startIndex,
-			rowEndIndex = rowStartIndex + gridRow.length + gridRow.indentationCharacters,
-			text = file.text,
-			char,
-			endOfArguments,
-			startOfArguments,
-			endOfFunctionName,
-			startOfFunctionName,
-			charIndex = file.caret.index,
-			functionArguments = "",
-			functionName = "",
-			argumentIndex,
-			index = caret.index;
+		gridRow = file.grid[row],
+		rowStartIndex = gridRow.startIndex,
+		rowEndIndex = rowStartIndex + gridRow.length + gridRow.indentationCharacters,
+		text = file.text,
+		char,
+		endOfArguments,
+		startOfArguments,
+		endOfFunctionName,
+		startOfFunctionName,
+		charIndex = file.caret.index,
+		functionArguments = "",
+		functionName = "",
+		argumentIndex,
+		index = caret.index;
 		
 		// Go left to find function name
 		// If we have found a character that is not a letter, we've found the function name
@@ -439,18 +600,18 @@
 			console.log("functionName=" + functionName);
 			
 			/* Go right to find end of arguments
-			for(var i=index; i<rowEndIndex; i++) {
+				for(var i=index; i<rowEndIndex; i++) {
 				char = text.charAt(i);
 				
 				if(char == ")") {
-					endOfArguments = i;
-					break;
+				endOfArguments = i;
+				break;
 				}
-			}
-			
-			if(endOfArguments == undefined) {
+				}
+				
+				if(endOfArguments == undefined) {
 				endOfArguments = index;
-			}
+				}
 			*/
 			
 			functionArguments = text.substring(startOfArguments, index);
@@ -509,8 +670,8 @@
 			
 			if(!theFunction) {
 				/* Try the unknown variables to see if we can find the function
-				   Ex: foo = new Bar() // Function is "Bar"
-				   
+					Ex: foo = new Bar() // Function is "Bar"
+					
 				*/ 
 				for(var vName in js.globalVariables) {
 					var variable = js.globalVariables[vName];
@@ -518,15 +679,15 @@
 						var possibleFunctionName = variable.value;
 						
 						theFunction = getFunctionWithName(js.functions, possibleFunctionName)
-
+						
 					}
 				}
-
+				
 			}
 			
 			if(!theFunction) {
 				/* Try variable names and use their type to display built in prototype method info
-				   Ex: myString.substring( ... )
+					Ex: myString.substring( ... )
 				*/
 				
 				if(scope.variables.hasOwnProperty(property[0])) {
@@ -550,21 +711,21 @@
 			}
 			else {
 				/* Traverse dot tree, foo.bar.baz() of theFunction...
-
+					
 				*/
 				for(var i=1; i<property.length; i++) {
 					
 					theFunction = getFunctionWithName(js.functions.subFunctions, property[i]);
 					
 					if(theFunction) break;
-			
+					
 					// Include the prototype!?
 				}
 			}
 			
-
+			
 			if(theFunction) {
-
+				
 				var args = theFunction.arguments.split(",");
 				
 				console.log("arguments=" + args.length + " index=" + argumentIndex + "");
@@ -586,9 +747,9 @@
 					};
 				}
 			}
-
+			
 		}
-
+		
 		return false;
 		
 	}
@@ -631,22 +792,22 @@
 		}
 		else {
 			// Insade a function scope
-		foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
-		
-		// Add local varibales for each function
-		for(var i=0; i<foundFunctions.length; i++) {
-			var func = foundFunctions[i];
-			for(var variableName in func.variables) {
-				foundVariables[variableName] = func.variables[variableName];
-				// Deeper nests over-rides globals as intended!
+			foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
+			
+			// Add local varibales for each function
+			for(var i=0; i<foundFunctions.length; i++) {
+				var func = foundFunctions[i];
+				for(var variableName in func.variables) {
+					foundVariables[variableName] = func.variables[variableName];
+					// Deeper nests over-rides globals as intended!
+				}
 			}
-		}
-		
-		// "this" is always the latest function
+			
+			// "this" is always the latest function
 			// Or is it the first !?!?
-		if(foundFunctions.length > 0) {
-			thisIs = foundFunctions[foundFunctions.length-1];
-		}
+			if(foundFunctions.length > 0) {
+				thisIs = foundFunctions[foundFunctions.length-1];
+			}
 		}
 		
 		// Make foundFunctions into an object literal, now when the order doesn't matter
@@ -693,15 +854,15 @@
 				foundFunctions.sort(function(a, b) {
 				// Sort by position in the code (line number) ascending
 				return a.start - b.start;
-			});
+				});
 			*/
 			
 			function searchScope(functions) {
 				
 				for(var i=0, func, cursorInside; i<functions.length; i++) {
-
+					
 					func = functions[i];
-						
+					
 					console.log("Look: name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
 					
 					cursorInside = (func.start <= charIndex && func.end >= charIndex);

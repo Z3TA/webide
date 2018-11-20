@@ -4,7 +4,7 @@
 		
 		warning: There be dragons!
 		
-		This file parses javascript and returns an object with the following objects:
+		This file parses javascript/HTML and returns an object with the following objects:
 		functions
 		quotes
 		comments
@@ -45,7 +45,7 @@
 		
 		
 		
-		About var declarations: They will not be indented, witch will encurage you to write:
+		About var declarations: They will not be indented, which will encurage you to write:
 		var a, b, c;
 		var a;
 		var b;
@@ -91,6 +91,8 @@
 	
 	var character = "";     // Keep track of what character was inserted before
 	var lastCharacter = "";
+	var parseRequestId = 0;
+	var parseWorkerCallbacks = {}; // id: callback-function
 	
 	EDITOR.plugin({
 		desc: "Parse JavaScript etc",
@@ -99,16 +101,103 @@
 			
 			EDITOR.on("fileOpen", onFileOpen);
 			EDITOR.on("fileChange", parseJsOnChange, 100);
+			EDITOR.on("parse", parseRequest);
 			
 		},
 		unload: function unloadJsParser() {
 			
 			EDITOR.removeEvent("fileOpen", onFileOpen);
 			EDITOR.removeEvent("fileChange", parseJsOnChange);
-			
+			EDITOR.removeEvent("parse", parseRequest);
 		}
 	});
 	
+	function parseRequest(fileOrString, lang, path, callback) {
+		if(lang != "JS" && lang != "JavaScript") {
+			console.log("Ignoring parse request because lang=" + lang + " is not JavaScript!");
+			return false;
+		}
+		
+		var id = ++parseRequestId;
+		
+		var options = {
+			noIndention: true
+		}
+		
+		if(fileOrString instanceof File) {
+			var file = fileOrString;
+		}
+		else {
+			var file = {
+				text: fileOrString,
+				lineBreak: UTIL.determineLineBreakCharacters(fileOrString),
+				fileExtension: "js",
+				path: path || "parse-request" + id + ".js"
+			}
+		}
+		
+		console.time("parseRequest" + id);
+		
+		if(typeof Worker == "undefined") {
+			var parseError = null;
+			options.parseError = function registerParseError(err) {
+				parseError = err;
+			}
+			var parseResult = parseJavaScript(file, options);
+			console.timeEnd("parseRequest" + id);
+			callback(parseError, parseResult);
+		}
+		else {
+parseWorkerCallbacks[id] = callback;
+			console.log("Posting message to parseWorker ...");
+			parseWorker.postMessage({id: id, file: file, options: options});
+		}
+		
+		return true;
+}
+	
+	function messageFromParseWorker(e) {
+		console.log("Recived message from parseWorker ...");
+		
+		var id = e.data.id;
+		console.timeEnd("parseRequest" + id);
+		
+		var callback = parseWorkerCallbacks[id];
+		if(!parseWorkerCallbacks.hasOwnProperty(id)) throw new Error("No callback function for id=" + id);
+		parseWorkerCallbacks[id](e.data.error, e.data.result);
+		delete parseWorkerCallbacks[id];
+	}
+	
+	
+	/* ### start: Helper code for parse worker */
+	
+	function workerReciveMessage(e) {
+		console.log("parseWorker recived message ...");
+		
+		var id = e.data.id;
+		var file = e.data.file;
+		var options = e.data.options;
+		
+		var parseError = null;
+		options.parseError = function registerParseError(err) {
+			parseError = err;
+		}
+		var parseResult = parseJavaScript(file, options);
+		console.log("parseWorker posting message ...");
+		postMessage({id: id, error: parseError, result: parseResult});
+		
+	}
+	
+	/* ### end: Helper code for parse worker */
+	
+	
+	if(typeof Worker != "undefined") {
+		var parseWorker = new Worker(URL.createObjectURL( new Blob(['console.log("parseWorker loading ...");' + 
+			'onmessage='+ workerReciveMessage + ';Func=' + Func + ';Obj=' + Obj + ';Comment=' + Comment + ';Quote=' + Quote + 
+		';Variable=' + Variable + '; XmlTag=' + XmlTag + ';parseJavaScript=' + parseJavaScript + ';console.log("parseWorker loaded!");']) ));
+		
+		parseWorker.onmessage = messageFromParseWorker;
+	}
 	
 	function onFileOpen(file) {
 		//console.log("jsParser.js");
@@ -128,8 +217,6 @@
 		}
 		
 	}
-	
-	
 	
 	
 	
@@ -774,6 +861,10 @@
 		
 	}
 	
+	function parseError(error) {
+		throw error;
+	}
+	
 	function parseJavaScript(file, options) {
 		
 		console.log("parseJavaScript: options=" + JSON.stringify(options));
@@ -787,6 +878,7 @@
 		var baseIndentation = options.baseIndentation;
 		var parseStartRow = options.startRow;
 		var indentate = options.noIndention ? false : true;
+		var parseError = options.parseError;
 		var text = file.text;
 		var textLength = text.length;
 		
@@ -861,7 +953,7 @@
 		insideXmlTagEnding = false,
 		xmlTag = "",
 		lastXmlTag = "",
-		tagBreak = EDITOR.settings.indentAfterTags,
+		tagBreak = indentate ? EDITOR.settings.indentAfterTags : [],
 		codeBlockLeftRow = -1,
 		codeBlockRightRow = -2,
 		insideArray = [],
@@ -1011,8 +1103,8 @@
 			
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
-			if(parentCodeBlock.indentation < 0) throw new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation);
-				
+			if(parentCodeBlock.indentation < 0) error(new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation));
+			
 			codeBlock[codeBlockDepth] = {word: lastWord, indentation: parentCodeBlock.indentation+1, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
 			insideArray[codeBlockDepth] = false;
@@ -1022,7 +1114,7 @@
 			parenthesisStart[codeBlockDepth] = -1;
 			
 			
-			if(codeBlockDepth == 0) throw new Error("codeBlockDepth can not be zero")
+			if(codeBlockDepth == 0) error( new Error("codeBlockDepth can not be zero") );
 				
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
@@ -1058,7 +1150,7 @@
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
 			//console.log()
 			
-			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow && indentate) {
+			if(indentate && file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
 				file.grid[row].indentation--;
 			}
 		}
@@ -1104,7 +1196,7 @@
 			else if(rightSide.indexOf("*") > -1 || rightSide.indexOf("-") > -1 || rightSide.indexOf("+") > -1 || rightSide.indexOf("/") > -1 || rightSide.indexOf("%") > -1) {
 				type = "Number";
 			}
-			else if(UTIL.isNumeric(rightSide)) {
+			else if( !isNaN(parseFloat(rightSide)) && isFinite(rightSide) ) {
 				type = "Number";
 			}
 			else {
@@ -1190,7 +1282,7 @@
 				leftSide = lastWord;
 			}
 			else {
-				throw new Error("Unexpected pointerCharacter=" + pointerCharacter + " (line=" + lineNumber + ")");
+				error( new Error("Unexpected pointerCharacter=" + pointerCharacter + " (line=" + lineNumber + ")") );
 			}
 			
 			//console.log("findLeftSide return leftSide=" + leftSide);
@@ -1434,14 +1526,14 @@
 					insideBlockComment = true;
 					insideRegExp = false;
 					commentStart = i-1;
-					commentStartIndentation = file.grid[row].indentation;
+					commentStartIndentation = indentate && file.grid[row].indentation;
 					//console.log("insideBlockComment!");
 				}
 				else if(char == "/" && lastChar == "*" && insideBlockComment) {
 					insideBlockComment = false;
 					comments.push(new Comment(commentStart, i));
 					//console.log("Found block comment: " + text.substring(commentStart, i));
-					if(file.grid[row].indentation > 0 && indentate) {
+					if(indentate && file.grid[row].indentation > 0) {
 						// Set same indentation as the start of the comment
 						file.grid[row].indentation = commentStartIndentation;
 					}
@@ -1651,7 +1743,7 @@
 						xmlModeBeforeTag = xmlMode; // xmlMode when the tag starts
 						xmlMode = false; // Why end xmlMode inside tags !?? 
 					}
-					if(insideHTMLComment) throw new Error("WTF");
+					if(insideHTMLComment) error( new Error("WTF") );
 					}
 				
 				// Exit out of style
@@ -1740,7 +1832,7 @@
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
 							openXmlTags--;
-							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0 && indentate) file.grid[row].indentation--;
+							if(indentate && xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
 							}
 						else {
 							// It's a tag opening
@@ -1848,7 +1940,7 @@
 					
 					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
 						
-					if(file.grid[row].indentation > 0 && arrayStartRow != row && indentate) file.grid[row].indentation--;				
+					if(indentate && file.grid[row].indentation > 0 && arrayStartRow != row) file.grid[row].indentation--;				
 						
 				}
 				else if(char == "}") {
@@ -2004,7 +2096,7 @@
 					
 					if(singleStatementContext == 1) singleStatementContext = 0;
 						
-					if(singleStatementContext == 2 && file.grid[row].indentation > 0) {
+					if(indentate && singleStatementContext == 2 && file.grid[row].indentation > 0) {
 						file.grid[row].indentation--;
 					}
 					// ### Found function maybe
@@ -2383,10 +2475,10 @@
 				
 				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
 				
-				if(!file.grid[row]) throw new Error("Grid row=" + row + " does not exist!");
-					
-				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
-					
+				if(indentate) {
+					if(!file.grid[row]) error( new Error("Grid row=" + row + " does not exist!") );
+					file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
+				}
 				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
 					
 				if(singleStatementContext==1) singleStatementContext++;
@@ -2684,6 +2776,13 @@
 				if(functions[i].name == name) return functions[i];
 				}
 			return null;
+		}
+		
+		function error(err) {
+			i = parseEnd; // Exit the loop
+			
+			if(typeof parseError != "undefined") parseError(err);
+			else throw err;
 		}
 		
 	}
