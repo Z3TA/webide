@@ -170,7 +170,7 @@ function updateCache(latestVersionMaybe) {
 			console.log("serviceWorker finished deleting *all* caches!");
 			return caches.open(cacheVersion).then(function(cache) {
 				console.log("serviceWorker adding files to cacheVersion=" + cacheVersion + "");
-				return Promise.all( CACHE_FILES.map(function(url){cache.add(url)}) );
+				return Promise.all( CACHE_FILES.map(function(url){cache.add(url+"?v=" + latestVersionMaybe)}) );
 			}).then(function() {
 				console.log("serviceWorker successfully filled the cache for " + cacheVersion + "");
 				
@@ -303,4 +303,3 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		if(key == nr) throw new Error("Not a cache key=" + key);
 		return parseInt(nr);
 	}
-	
