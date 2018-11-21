@@ -136,9 +136,16 @@
 			}
 		}
 		
+		console.log("parseRequest" + id + " = " + file.path);
+		
 		console.time("parseRequest" + id);
 		
-		if(typeof Worker == "undefined") {
+		if(parseWorker) {
+			parseWorkerCallbacks[id] = callback;
+			console.log("Posting message to parseWorker ...");
+			parseWorker.postMessage({id: id, file: file, options: options});
+		}
+		else {
 			var parseError = null;
 			options.parseError = function registerParseError(err) {
 				parseError = err;
@@ -146,11 +153,6 @@
 			var parseResult = parseJavaScript(file, options);
 			console.timeEnd("parseRequest" + id);
 			callback(parseError, parseResult);
-		}
-		else {
-parseWorkerCallbacks[id] = callback;
-			console.log("Posting message to parseWorker ...");
-			parseWorker.postMessage({id: id, file: file, options: options});
 		}
 		
 		return true;
@@ -190,8 +192,13 @@ parseWorkerCallbacks[id] = callback;
 	
 	/* ### end: Helper code for parse worker */
 	
-	
-	if(typeof Worker != "undefined") {
+	if(typeof Worker == "undefined") {
+		console.warn("Web Worker not supported on " + BROWSER);
+	}
+	else if(typeof URL == "undefined") {
+		console.warn("URL object not supported on " + BROWSER);
+	}
+	else {
 		var parseWorker = new Worker(URL.createObjectURL( new Blob(['console.log("parseWorker loading ...");' + 
 			'onmessage='+ workerReciveMessage + ';Func=' + Func + ';Obj=' + Obj + ';Comment=' + Comment + ';Quote=' + Quote + 
 		';Variable=' + Variable + '; XmlTag=' + XmlTag + ';parseJavaScript=' + parseJavaScript + ';console.log("parseWorker loaded!");']) ));

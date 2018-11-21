@@ -43,7 +43,10 @@
 			
 			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			
-			if(QUERY_STRING.debug && EDITOR.settings.devMode == true) {
+			if(QUERY_STRING.dev == "false") {
+				disableDevMode(true);
+			}
+			else if(QUERY_STRING.debug && EDITOR.settings.devMode == true) {
 				enableDevMode();
 				enableDebugMode();
 			}
@@ -115,12 +118,12 @@
 		console.log = console.warn = function() {}; // Perf mode
 		
 		// These are also an overhead
-		console.time = console.timeEnd = function() {};
-		
-		try {
-			require('nw.gui').Window.get().closeDevTools();
+		if(!QUERY_STRING.time) {
+console.time = console.timeEnd = function() {};
 		}
-		catch(e) {}; // We are in the browser
+		// Use for example ?dev=false&time=true to turn off console.logs but show console.time
+		
+		if(RUNTIME == "nw.js") require('nw.gui').Window.get().closeDevTools();
 		
 		/*
 			The console.error(new Error("custom error")) way of *handling* errors has been depricated in favor for the self_debug.js plugin.

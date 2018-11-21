@@ -348,7 +348,7 @@
 		
 		var alt = (char.length == 1 && char != char.toUpperCase()) && char.toUpperCase();
 		
-		var click = function(e) {
+		var click = function virtualKeyboardButtonClicked(e) {
 				
 				e.preventDefault();
 				
@@ -364,7 +364,7 @@
 			
 				b.style.marginTop = "2px";
 			b.style.marginBottom = "-2px";
-				setTimeout(function() {
+				setTimeout(function resetButtonStyleAfterClick() {
 					b.style.marginTop = "0px";
 				b.style.marginBottom = "0px";
 				}, 50);

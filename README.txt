@@ -471,4 +471,38 @@ This is because the program is mounted in user dir's. Stop jzedit and then reboo
 
 
 
+Testing in Opera Mobile
+========================
+
+Download Opera Classic Mobile Emulator: https://www.opera.com/developer/mobile-emulator
+Download Opera Browser version 12 (we need the debugger)
+
+Goto any web page in Opera 12 - right click and select "Inspect Element". This will start the debugger
+
+In the Opera 12 Debugger, top right corner there is an icon that looks like |))) it says "Remote Debug Configuration"
+Click the "Remote Debug Configuration" icon, and then click on the Apply  button next to the port number.
+
+Now start Opera Classic Mobile Emulator.
+Enter opera:debug in the URL field.
+Enter the IP for the machine Opera 12 is running on. Then enter the port nr (default 7001).
+Click Connect.
+
+Note: This also work on the Opera Mobile app
+
+Once Opera Mobile is connected to the Debugger, you can control it from the debugger.
+
+If you have not done it alredy, start up a node JZedit server:
+sudo node server/server.js -p 8080 -ip 192.168.0.1
+(change IP to the machine's IP)
+
+Click "Console" in the Opera 12 debugger
+Type: 
+document.location="http://192.168.0.1:8080/";
+And click Enter.
+This should make Opera Mobile to navigate to that page.
+And you will see all console.log's etc in the debugger!
+
+
+
+
 

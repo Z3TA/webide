@@ -549,11 +549,17 @@ EDITOR.bindKey(b);
 	}
 	
 	
-	var audio = window.AudioContext || window.webkitAudioContext
-	var audioCtx = new audio;
+	var Audio = window.AudioContext || window.webkitAudioContext;
+	if(Audio) var audioCtx = new Audio;
+	else console.warn("Audio API not supported on " + BROWSER);
 	
 	EDITOR.beep = function beep(volume, frequency, type, duration) {
 		// Makes a beep sound
+		
+		if(!audioCtx) {
+			console.warn("Audio API not supported on " + BROWSER);
+			return;
+		}
 		
 		if(volume == undefined) volume = 0.15;
 		if(frequency == undefined) frequency = 100;
@@ -4222,7 +4228,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 	}
 	
-	EDITOR.mock = function(mock, options) {
+	EDITOR.mock = function mockSomeUserInput(mock, options) {
 		
 		// Simulate ... 
 		
