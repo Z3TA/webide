@@ -50,7 +50,9 @@ Slightly better with clone optimizeation
 
 The slowest function is the text render
 
+Next, try rendering only one row when typing text
 
+---
 
 Able to copy a folder
 "new Folder" from any file or folder.
