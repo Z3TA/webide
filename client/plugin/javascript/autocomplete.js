@@ -29,7 +29,7 @@
 		
 	}
 	
-	var relatedScripts = {}; // path: [array of parsed-object's ref] 
+	var relatedScripts = {}; // path: [array of file paths] 
 	var parsedFiles = {}; // path: parsed-object ref
 	var reScripts = /<script[^>]*src="([^"]*)"[^>]*><\/script>/ig; // The g flag is important, or exec will run in an endless loop!
 	var reHTML = /html?$/i;
@@ -76,7 +76,6 @@
 		else if(file.path.match(reJS)) {
 			if(!relatedScripts.hasOwnProperty(file.path)) {
 				relatedScripts[file.path] = [];
-				console.log("Set relatedScripts[" + file.path + "] after opening it");
 			}
 		}
 		
@@ -91,44 +90,27 @@
 		console.log("scripts=" + scripts);
 		
 		for (var i=0; i<scripts.length; i++) {
-			// Go through all files and update related files parse objects
-			
 			if(!relatedScripts.hasOwnProperty(scripts[i])) {
 				relatedScripts[ scripts[i] ] = [];
-				console.log("Set relatedScripts[" + scripts[i] + "] !");
 			}
 			
-			for (var path in relatedScripts) {
-				
-				if(path == scripts[i]) {
-					// path is related to other files in the html file
-					
-					// We do not want to hold on to old parsed-objects! 
-					// As it will prevent the carbage collector from deleting them !?!?
-					relatedScripts[path] = [];
-					console.log("Resetted relatedScripts[" + path + "] !");
-					
-					for (var j=0; j<scripts.length; j++) {
-						if(scripts[j] == path) continue;
-						
-						console.log("Adding " + scripts[j] + " to related scripts for " + path);
-						if(!parsedFiles.hasOwnProperty(scripts[j])) {
-							parsedFiles[scripts[j]] = loadAndParse(scripts[j], path);
-						}
-						else {
-							relatedScripts[path].push( parsedFiles[scripts[j]] );
-							console.log("Added parsed data from " + scripts[j] + " to relatedScripts[" + path + "] because it had been parsed before.");
-						}
-					}
-				}
+			for (var j=0; j<scripts.length; j++) {
+				if(scripts[i] != scripts[j]) relatedScripts[ scripts[i] ].push( scripts[j] );
 			}
 		}
+		
+		// Check if the scripts have been parsed
+		for (var i=0; i<scripts.length; i++) {
+			if(!parsedFiles.hasOwnProperty(scripts[i])) {
+				loadAndParse(scripts[i]);
+			}
+		}
+		
 		console.timeEnd("updateRelatedScripts in " + htmlFile.path);
 	}
 	
-	function loadAndParse(fileToParse, relatedFile) {
-		
-		console.log("loadAndParse: fileToParse=" + fileToParse + " relatedFile=" + relatedFile);
+	function loadAndParse(fileToParse) {
+		console.log("loadAndParse: fileToParse=" + fileToParse);
 		
 		// Wait 5 seconds in case the file is opened or parsed, so that we do not do it many times
 		setTimeout(maybeParsedAlready, 5000);
@@ -136,25 +118,15 @@
 		function maybeParsedAlready() {
 			if(EDITOR.files.hasOwnProperty(fileToParse)) {
 				if(!parsedFiles.hasOwnProperty(fileToParse)) throw new Error("Expected file to be in fileToParse=" + Object.keys(fileToParse) + ": fileToParse=" + fileToParse);
-				if(!relatedScripts.hasOwnProperty(relatedFile)) throw new Error("Expected file to be in relatedScripts=" + Object.keys(relatedScripts) + " relatedFile=" + relatedFile);
-				if(relatedScripts[relatedFile].indexOf( parsedFiles[fileToParse] ) == -1) {
-					relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
-					console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] after it had been opened (and parsed)");
-				}
+				if(!relatedScripts.hasOwnProperty(fileToParse)) throw new Error("Expected file to be in relatedScripts=" + Object.keys(relatedScripts) + " fileToParse=" + fileToParse);
 				return; // It has already been related!
 			}
 			else if(parsedFiles.hasOwnProperty(fileToParse)) {
 				
-				if(relatedScripts[relatedFile].indexOf( parsedFiles[fileToParse] ) == -1) {
-					relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
-					console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] it had not been opened, but it had been parsed!");
-				}
-				else {
-					console.log("fileToParse=" + fileToParse + " has already been parsed and added to related scripts for relatedFile=" + relatedFile);
-				}
+				return; // It has already been related!
 			}
 			else {
-				EDITOR.readFromDisk(filePath, function(err, path, data, hash) {
+				EDITOR.readFromDisk(fileToParse, function(err, path, data, hash) {
 					if(err) {
 						console.warn("Failed to load from disk: fileToParse=" + fileToParse + " err=" + err.message);
 						return;
@@ -164,15 +136,13 @@
 							console.warn("Failed to parse: fileToParse=" + fileToParse + " err=" + err.message);
 							return;
 						}
-						
-						parsedFiles[fileToParse] = parseResult;
-						relatedScripts[relatedFile].push( parsedFiles[fileToParse] );
-						console.log("Added parsed data from " + fileToParse + " to relatedScripts[" + relatedFile + "] after parsering.");
+						else {
+							parsedFiles[fileToParse] = parseResult;
+						}
 					});
 				});
 			}
 		}
-		
 	}
 	
 	
@@ -245,12 +215,20 @@
 			console.log(relatedScripts[file.path]);
 			
 			if(relatedScripts[file.path]) {
-			for (var i=0; i<relatedScripts[file.path].length; i++) {
-				console.log( "Checking related script " + i + ": globalVariables=" + (relatedScripts[file.path][i] ? relatedScripts[file.path][i].globalVariables : "not parsed!") );
-					if(relatedScripts[file.path][i] && relatedScripts[file.path][i].globalVariables) {
-					searchVariables(relatedScripts[file.path][i].globalVariables, wordToComplete); // Check global variables
+				for (var i=0, script, globalVariables; i<relatedScripts[file.path].length; i++) {
+					script = relatedScripts[file.path][i]
+					if( !parsedFiles.hasOwnProperty(script) ) {
+						console.warn(script + " has not been parsed!");
+						continue;
+					}
+					globalVariables = parsedFiles[script].globalVariables;
+					if(!globalVariables) {
+						console.warn(script + " does not have a globalVariables member!");
+						continue;
+					}
+					console.log("Search global variables (" + Object.keys(globalVariables).length + ") in related script: " + script + " ...");
+					searchVariables(globalVariables, wordToComplete); // Check global variables
 				}
-			}
 			}
 			
 		}

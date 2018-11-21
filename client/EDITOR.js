@@ -3223,8 +3223,9 @@ var word = "";
 						
 						console.log("addWord=" + addWord + " addMcl=" + addMcl);
 						
-						if(word.length > 0 && addWord.indexOf(word) != 0) throw new Error("Function " + UTIL.getFunctionName(fun) + " returned '" + addWord + "' witch does not have word=" + word + " in it!") 
-						
+						if(word.length > 0 && addWord.indexOf(word) != 0) {
+							console.warn("Function " + UTIL.getFunctionName(fun) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
+						}
 						if(options.indexOf(addWord) == -1) {
 							options.push(addWord);
 							mcl.push(addMcl);
@@ -5114,6 +5115,8 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		// Prevent race conditions
 		var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
 		
+		if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
+
 		waitingForFileToBeParsed[path].push(callback);
 		
 		if(typeof callback != "function") throw new Error("Third parameter callback needs to be a callback function!");
