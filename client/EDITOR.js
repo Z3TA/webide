@@ -103,8 +103,6 @@ EDITOR.settings = {
 	bigFileSize: 1024*1024, // (Bytes), all files larger then this will be opened as streams
 	bigFileLoadRows: 4000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
-	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
-	clearColumnOptimization: false, // When deleting a character, clears only the character
 	insert: false,
 	useCliboardcatcher: false // Some browsers (IE) can only capture clipboard events if a text element is focused
 };
@@ -6788,56 +6786,9 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:
 			
-			if(EDITOR.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
-				// Makes characters appear on the screen faster ...
-				
-				/*
-					var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
-					//var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-					var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-					ctx.fillStyle = "rgb(0,0,0)";
-					ctx.fillText(character, left, top);
-					tempTest++;
-				*/
-				
-				// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
-				
-				// What will happen if we clear the canvas before? No impact on performace!
-				EDITOR.clearColumn(file.caret.row, file.caret.col);
-				
-				// There's a higher "chance" to get faster responses if this function is inlined
-				EDITOR.renderColumn(file.caret.row, file.caret.col, character);
-				
-				// Repaint the caret
-				EDITOR.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
-				
-				/*
-					Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
-					And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
-					
-					note: Canvas size didn't have an impact when only writing one character
-					
-					Benchmark results are all over the place 2-20ms probably because of vsync or refresh syncing not in sync with the benchmark tool (Typometer)
-					
-					THIS OPTIMIZATION SEEMS TO HAVE VERY LITTLE EFFECT!
-					
-					
-					We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
-					
-				*/
-				
-				//setTimeout(function waitforrender() {
-				
-				file.putCharacter(character);
-				// No render needed!
-				
-				//}, 22);
-				
-			}
-			else {
 				file.putCharacter(character);
 				EDITOR.renderNeeded();
-			}
+			
 		}
 		
 		EDITOR.interact("keyPressed", keyPressEvent);

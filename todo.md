@@ -46,6 +46,10 @@ The editor is still pretty slow on my old Smartphone ...
 putCharacter: 20ms (20446µsec)
 render: 122ms (122314µsec)
 
+Slightly better with clone optimizeation
+
+The slowest function is the text render
+
 
 
 Able to copy a folder
