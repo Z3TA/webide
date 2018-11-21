@@ -42,9 +42,9 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-JS-parser-worker
-Find related files and autocomplete global variables
-Better autocomplete support.
+The editor is still pretty slow on my old Smartphone ...
+putCharacter: 20ms (20446µsec)
+render: 122ms (122314µsec)
 
 
 

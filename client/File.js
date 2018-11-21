@@ -3342,14 +3342,47 @@ file.mode = "text";
 			throw new Error("maxColumns=" + maxColumns + " can not be zero or less!");
 		}
 		
-		var clone = grid[row].slice(0);
+		/*
+			Calling clone[i].clone(); Chrome on dev machine: createBuffer: 0.264892578125ms, Opera on Mobile: createBuffer: 41ms (41168µsec)
+			Creating a Object (no prototype): Chrome on dev machine: createBuffer: 0.185791015625ms, Opera on Mobile: createBuffer: 7ms (6561µsec)
+			Box.prototype.clone() was depricated because it was too slow!
+			
+			new Array() instead of slice ? No major difference, maybe fluctuating more. Also seem to fluctuate more in Opera mobile
+			[] and push instead of cline[i] ? createBuffer: 0.2060546875ms slightly slower in Chrome, and maybe 25% slower in Opera mobile createBuffer: 9ms (8636µsec)
+			hmm maybe it was grid[row] that made it slower? not in Opera though (back to 5ms)
+			var gridRow = grid[row] ? Back to 0.18 in Chrome and no difference in Opera
+		*/
+		
+		var gridRow = grid[row];
+		var clone = gridRow.slice(0);
 		
 		if(clone.length > maxColumns) clone.length = maxColumns; // Optimization for files without line breaks
 		
-		for (var i=0; i<clone.length; i++) {
-			clone[i] = clone[i].clone();
+		// Copy the values so preRenders doesn't have to reset them
+		for (var i=0; i<grid[row].length; i++) {
+			clone[i] = {
+				char: gridRow[i].char,
+				index: gridRow[i].index,
+				color: gridRow[i].color,
+				bgColor: gridRow[i].bgColor,
+				selected: gridRow[i].selected,
+				highlighted: gridRow[i].highlighted,
+				hasCharacter: true,
+				wave: grid[row][i].wave,
+				circle: false,
+				quote: false,
+				comment: false
+			};
 		}
 		
+		/*
+			we are not cloning circle, quote or comment because those are set by pre-renders
+			(only used in the javascript plugin, and added to the Box template to prevent "hidden classes".
+			. We probably will have to refactor how this work. )
+			
+			Avoid setting box color and bgcolor. Instead apply the color via preRender functions !
+			
+		*/
 		
 		// slice wont copy these
 		clone.indentation = grid[row].indentation;
@@ -4748,28 +4781,6 @@ file.mode = "text";
 		box.comment = false; // part of a comment
 	}
 	
-	
-	Box.prototype.clone = function() {
-		var box = this,
-		newBox = new Box(box.char, box.index);
-		
-		newBox.color = box.color;
-		newBox.bgColor = box.bgColor;
-		newBox.selected = box.selected;
-		newBox.highlighted = box.highlighted;
-		newBox.highlighted = box.highlighted;
-		newBox.wave = box.wave;
-		
-		/* 
-			we are not cloning circle, quote or comment because those are set by pre-renders 
-			(only used in the javascript plugin, and added to the Box template to prevent "hidden classes".
-			. We probably will have to refactor how this work. )
-			
-			Avoid setting box color and bgcolor. Instead apply the color via preRender functions !
-			
-		*/
-		return newBox;
-	}
 	
 	function determineIndentationConvention(text, lineBreak) {
 		/*

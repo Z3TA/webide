@@ -1581,17 +1581,10 @@ text = file;
 				return;
 			}
 			
-			
-			
-			var file = EDITOR.currentFile,
-			buffer = [],
-			grid = EDITOR.currentFile.grid;
-			
-			
-			
-			
+			var file = EDITOR.currentFile;
+			var buffer = [];
+			var grid = EDITOR.currentFile.grid;
 			var funName = "";
-			
 			var startRow = 0; // Used for only rendering some rows for optimization. This functions renders all row, so startRow = 0
 			
 			// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
