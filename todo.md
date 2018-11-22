@@ -42,15 +42,14 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-The editor is still pretty slow on my old Smartphone ...
-putCharacter: 20ms (20446µsec)
-render: 122ms (122314µsec)
+Trying to improve scrolling performance in Opera Mobile:
 
-Slightly better with clone optimizeation
+resize: 71ms (70983µsec)
+render: 456ms (456420µsec)
 
-The slowest function is the text render
-
-Next, try rendering only one row when typing text
+Try to make it not resize when scrolling !?
+Render takes 200-280ms in vertical when the canvas is not resized before every render.
+41-121ms in horizontal.
 
 ---
 

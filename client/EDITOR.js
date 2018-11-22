@@ -1951,17 +1951,14 @@ text = file;
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
 		
-		
-		var contentComputedStyle = window.getComputedStyle(content, null); // Center column
-		var columnsComputedStyle = window.getComputedStyle(columns, null);
+		var windowHeight = parseInt(window.innerHeight);
+		var windowWidth = parseInt(window.innerWidth);
 		var headerHeight = parseInt(header.offsetHeight);
 		var footerHeight = parseInt(footer.offsetHeight);
 		var headerFooterHeight = headerHeight + footerHeight;
 		var leftColumnWidth = parseInt(leftColumn.offsetWidth);
 		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
 		var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
-		var windowHeight = parseInt(window.innerHeight);
-		var windowWidth = parseInt(window.innerWidth);
 		var contentWidth = windowWidth - leftRightColumnWidth;
 		//var contentHeight = parseInt(contentComputedStyle.height);
 		var contentHeight = windowHeight - headerFooterHeight;
@@ -1992,9 +1989,9 @@ text = file;
 			console.log("headerHeight=" + headerHeight);
 			console.log("footerHeight=" + footerHeight);
 			console.log("headerFooterHeight=" + headerFooterHeight);
-			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " computedWidth=" + contentComputedStyle.width + ")");
-			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
-			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
+			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " )");
+			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " )");
+			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " )");
 			
 			console.log("offsetWidth=" + content.offsetWidth)
 			console.log("innerWidth=" + content.innerWidth)
@@ -2083,7 +2080,7 @@ text = file;
 		//console.log("topMargin=" + EDITOR.settings.topMargin);
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
-		if(canvas) {
+		if( canvas && (canvas.width != EDITOR.view.canvasWidth * pixelRatio || canvas.height != EDITOR.view.canvasHeight * pixelRatio) ) {
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
