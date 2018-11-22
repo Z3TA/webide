@@ -251,7 +251,7 @@ function sendToClients(msg) {
 		So there is no point in filling the cache on the install event. We have to wait for the activate event!
 */
 self.addEventListener('install', function serviceWorkerInstall(event) {
-	console.log("serviceWorker witch current cache VERSION=" + VERSION + " got install event!");
+	console.log("serviceWorker with current cache VERSION=" + VERSION + " got install event!");
 	
 });
 
