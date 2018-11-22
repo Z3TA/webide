@@ -796,7 +796,12 @@
 				if(!path) {
 					console.log("selectedItem::");
 					console.log(selectedItem);
-					throw new Error("path=" + path + " selectedItem=" + selectedItem);
+					var attributes = {}; // For debugging
+					for (var att, i = 0, atts = selectedItem.attributes, n = atts.length; i < n; i++){
+						att = atts[i];
+						attributes[att.nodeName] = att.nodeValue
+					}
+					throw new Error("path=" + path + " selectedItem: tagName=" + selectedItem.tagName + " (" + JSON.stringify(attributes) + ")");
 				}
 				
 				console.log("Opening " + path);
