@@ -42,6 +42,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+
+
+---
+
 renderRow optimization when typing is significantly faster,
 most of the lag is due to the virtual keyboard.
 
@@ -54,11 +59,15 @@ for (
 
 if (foo && || == != ) 
 
-if(foo==bar) {
+if(foo==bar) 
 
 autocomplete can figure it out, and toggle between options (presseing autocomplete repeatably togges between eg. if inside a if() it toggles between && || == !=
 
+Can the virtual keyboard figure out when it's time to type a special character !?
 
+To make sure the keyboard is big enought, but without taking up too much space, we can only show this many buttons!
+
+We also need to have a different keyboard layout for when the phone is vertical or horizontal, due to the very wide screen of mobile phones.
 
 
 ---

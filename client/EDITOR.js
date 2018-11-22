@@ -7359,14 +7359,17 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		}
 		
 		if(mouseDownEvent.type == "touchstart" && recognition) {
-			try {
+			// Dont start recording right away, because Android makes a very annoying sound when the recordning starts.
+			setTimeout(function stillDownMaybe() {
+				if(!EDITOR.touchDown) return;
+				try {
 				recognition.start();
 			}
 			catch(err) {
 				console.warn(err.message);
 			}
+			}, 400);
 		}
-		
 		
 		lastMouseDownEventType = mouseDownEvent.type;
 		
