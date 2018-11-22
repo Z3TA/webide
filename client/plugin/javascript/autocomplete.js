@@ -173,6 +173,8 @@
 			return;
 		}
 		
+		if(js.language != "JS") return;
+		
 		/*
 			When pushing to options,
 			Push an array with 0:text, 1: characters to move
@@ -836,7 +838,6 @@
 			*/
 			
 			function searchScope(functions) {
-				
 				for(var i=0, func, cursorInside; i<functions.length; i++) {
 					
 					func = functions[i];

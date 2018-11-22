@@ -1005,7 +1005,7 @@
 		foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
-		language = "JavaScript", // Update the language to vbScript, PHP depending on ... ?
+		language = "JS", // Update the language to vbScript, PHP depending on ... ?
 		ASP = false,
 		PHP = false,
 		CSS = false,

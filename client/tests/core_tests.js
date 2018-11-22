@@ -1385,7 +1385,7 @@
 		EDITOR.openFile("functionInCallArgument.js", "foo(function bar() {});\nmeh\nfoo(function () {});\nfunction baz() {}", function(err, file) {
 			
 			if(!file.parsed) throw new Error("The file was not parsed!");
-			if(!file.parsed.language=="JavaScript") throw new Error("The file was not parsed as JavaScript!");
+			if(!file.parsed.language=="JS") throw new Error("The file was not parsed as JavaScript!");
 			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Function bar was not found when parsing!");
 			if(existFunctionWithName(file.parsed.functions, "meh")) throw new Error("The second function should be anonymous!");
 			if(!existFunctionWithName(file.parsed.functions, "baz")) throw new Error("Function baz was not found when parsing!");

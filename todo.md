@@ -42,21 +42,23 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Trying to improve scrolling performance in Opera Mobile:
-
-While scrolling:
-Render takes 170-280ms in vertical and 41-121ms in horizontal when the canvas is not resized before every render.
-
-
-While typing:
-putCharacter: 21ms (20721µsec)
-render: 148ms (147583µsec)
----
-putCharacter: 21ms (20904µsec)
-renderRow: 8ms (8026µsec)
-
 renderRow optimization when typing is significantly faster,
 most of the lag is due to the virtual keyboard.
+
+Is it possible to get a good typing experience on a small smartphone !?
+
+{} are hard to type on Mac, can we make it so special characters like () and {} are inserted automatically !?
+
+if (
+for (
+
+if (foo && || == != ) 
+
+if(foo==bar) {
+
+autocomplete can figure it out, and toggle between options (presseing autocomplete repeatably togges between eg. if inside a if() it toggles between && || == !=
+
+
 
 
 ---

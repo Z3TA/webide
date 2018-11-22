@@ -149,7 +149,7 @@
 				
 				file.deleteSelection();
 				
-				if(file.parsed.language=="JavaScript") {
+				if(file.parsed.language=="JS") {
 					file.insertText(quote + " +  + " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					EDITOR.renderNeeded();
