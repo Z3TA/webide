@@ -502,6 +502,8 @@ And click Enter.
 This should make Opera Mobile to navigate to that page.
 And you will see all console.log's etc in the debugger!
 
+If the connection is lost you must restart Opera Mobile.
+
 
 
 

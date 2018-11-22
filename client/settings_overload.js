@@ -31,30 +31,35 @@
 		
 		//alert("width=" + width + " height=" + height + "");
 		
+		
 		if( (!isNaN(width) && width <= 600) || (!isNaN(height) && height <= 250) ) {
 			// Use a smaller text size on small screens
-			EDITOR.settings.style.font = "Courier New, Courier, monospace";
-			EDITOR.settings.style.highlightMatchFont = "bold 10px Courier New, Courier, monospace";
-			EDITOR.settings.style.fontSize = 10;
-			EDITOR.settings.gridHeight = 14;
-			EDITOR.settings.gridWidth = 6;
-			EDITOR.settings.leftMargin = 24;
-			EDITOR.settings.rightMargin = 24;
-			EDITOR.settings.topMargin = 4;
-			EDITOR.settings.bottomMargin = 2;
+			// On some devices which doesn't have high DPI screen, the small text size is undreadable
+			/*
+				alert("Setting extra small text size due to width=" + width + " and height=" + height);
+				EDITOR.settings.style.font = "Courier New, Courier, monospace";
+				EDITOR.settings.style.highlightMatchFont = "bold 10px Courier New, Courier, monospace";
+				EDITOR.settings.style.fontSize = 10;
+				EDITOR.settings.gridHeight = 14;
+				EDITOR.settings.gridWidth = 6;
+				EDITOR.settings.leftMargin = 24;
+				EDITOR.settings.rightMargin = 24;
+				EDITOR.settings.topMargin = 4;
+				EDITOR.settings.bottomMargin = 2;
+			*/
 		}
 		else {
-		
-		// Web safe fonts are ugly, try to load a nice font ...
-		
-		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
-		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
-		EDITOR.settings.style.font = "DejaVuSansMono";
-			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
-		EDITOR.settings.style.fontSize = 13;
-		EDITOR.settings.gridHeight = 22;
-		EDITOR.settings.gridWidth = 7.83;
-	}
+			
+			// Web safe fonts are ugly, try to load a nice font ...
+			
+			if(browser != "Firefox") { // Firefox have wierd kerning/spacing
+				UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+				EDITOR.settings.style.font = "DejaVuSansMono";
+				EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
+				EDITOR.settings.style.fontSize = 13;
+				EDITOR.settings.gridHeight = 22;
+				EDITOR.settings.gridWidth = 7.83;
+			}
 		}
 		
 		/*
