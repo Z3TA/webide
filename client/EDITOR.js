@@ -1557,6 +1557,11 @@ text = file;
 			//ctx.scale(1,1);
 		}
 		
+		/*
+			I tried over-riding the pixel ratio to 1 in order to get better performace on mobile,
+			but it had no effect of rending performance, while making the text blurry!
+		*/
+		
 		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
 		
 		//console.warn("rendering ...");
@@ -1648,47 +1653,7 @@ text = file;
 			}
 			//console.timeEnd("renders");
 			
-			// Experiment: Hide the caret while typing !?
-			// First remove any old ones so they do not stop before the caret is fully filled
-			clearTimeout(renderCaretTimer);
-			EDITOR.removeAnimation(fadeInCaretAnimation);
-			
-			/*
-				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
-				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) + 
-				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
-			*/
-			
-			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
-				//console.log("Rendering caret");
-				EDITOR.renderCaret(file.caret);
-				document.getElementById('canvas').style.cursor = 'text';
-			}
-			else {
-				//console.log("Fading caret");
-				EDITOR.addAnimation(fadeInCaretAnimation);
-				
-				var caret = UTIL.canvasLocation(file.caret);
-				var mouse = {x: EDITOR.canvasMouseX, y: EDITOR.canvasMouseY};
-				var distanceX = caret.x - mouse.x;
-				var distanceY = caret.y - mouse.y;
-				//console.log("distanceX=" + distanceX + " Math.abs(distanceY)=" + Math.abs(distanceY) + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
-				var mouseCursorAhead = distanceX < 0 && Math.abs(distanceY) < EDITOR.settings.gridHeight*2;
-				var distanceToMouseCursor = Math.sqrt(Math.pow (distanceX, 2) + Math.pow (distanceY, 2));
-				
-				//UTIL.drawCircle(ctx, caret.x, caret.y, "blue");
-				//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
-				
-				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
-					document.getElementById('canvas').style.cursor = 'none'; // Hide mouse pointer while typing
-				}
-				
-				renderCaretTimer = setTimeout(function() {
-					EDITOR.removeAnimation(fadeInCaretAnimation);
-					EDITOR.renderCaret(file.caret);
-					document.getElementById('canvas').style.cursor = 'text';
-				}, 3000);
-			}
+			EDITOR.renderCaret(file.caret);
 			
 			console.timeEnd("render");
 			
@@ -1776,7 +1741,7 @@ text = file;
 			var buffer = [];
 			
 			// Create the buffer
-			buffer.push(file.cloneRow(gridRow)); // Clone the row
+			buffer.push(file.cloneRow(gridRow, 100)); // Clone the row
 			
 			
 			// Load on the fly functionality on the buffer
@@ -6784,7 +6749,57 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			// Put character at current caret position:
 			
 				file.putCharacter(character);
-				EDITOR.renderNeeded();
+			
+			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
+				//EDITOR.renderNeeded();
+			EDITOR.renderRow();
+			
+			
+			// Experiment: Hide the caret while typing !?
+			// First remove any old ones so they do not stop before the caret is fully filled
+			clearTimeout(renderCaretTimer);
+			EDITOR.removeAnimation(fadeInCaretAnimation);
+			
+			/*
+				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) +
+				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) +
+				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
+			*/
+			
+			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
+				//console.log("Rendering caret");
+				EDITOR.renderCaret(file.caret);
+				document.getElementById('canvas').style.cursor = 'text';
+			}
+			else {
+				//console.log("Fading caret");
+				EDITOR.addAnimation(fadeInCaretAnimation);
+				
+				var caret = UTIL.canvasLocation(file.caret);
+				var mouse = {x: EDITOR.canvasMouseX, y: EDITOR.canvasMouseY};
+				var distanceX = caret.x - mouse.x;
+				var distanceY = caret.y - mouse.y;
+				//console.log("distanceX=" + distanceX + " Math.abs(distanceY)=" + Math.abs(distanceY) + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
+				var mouseCursorAhead = distanceX < 0 && Math.abs(distanceY) < EDITOR.settings.gridHeight*2;
+				var distanceToMouseCursor = Math.sqrt(Math.pow (distanceX, 2) + Math.pow (distanceY, 2));
+				
+				//UTIL.drawCircle(ctx, caret.x, caret.y, "blue");
+				//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
+				
+				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
+					document.getElementById('canvas').style.cursor = 'none'; // Hide mouse pointer while typing
+				}
+				
+				renderCaretTimer = setTimeout(function() {
+					EDITOR.removeAnimation(fadeInCaretAnimation);
+					EDITOR.renderCaret(file.caret);
+					document.getElementById('canvas').style.cursor = 'text';
+				}, 3000);
+			}
+			
+			
+			
+			
 			
 		}
 		

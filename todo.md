@@ -44,12 +44,20 @@ What I'm working on
 
 Trying to improve scrolling performance in Opera Mobile:
 
-resize: 71ms (70983µsec)
-render: 456ms (456420µsec)
+While scrolling:
+Render takes 170-280ms in vertical and 41-121ms in horizontal when the canvas is not resized before every render.
 
-Try to make it not resize when scrolling !?
-Render takes 200-280ms in vertical when the canvas is not resized before every render.
-41-121ms in horizontal.
+
+While typing:
+putCharacter: 21ms (20721µsec)
+render: 148ms (147583µsec)
+---
+putCharacter: 21ms (20904µsec)
+renderRow: 8ms (8026µsec)
+
+renderRow optimization when typing is significantly faster,
+most of the lag is due to the virtual keyboard.
+
 
 ---
 
