@@ -1925,7 +1925,6 @@ text = file;
 		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
 		var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
 		var contentWidth = windowWidth - leftRightColumnWidth;
-		//var contentHeight = parseInt(contentComputedStyle.height);
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
@@ -1958,11 +1957,9 @@ text = file;
 			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " )");
 			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " )");
 			
-			console.log("offsetWidth=" + content.offsetWidth)
-			console.log("innerWidth=" + content.innerWidth)
-			console.log("outherWidth=" + content.outherWidth)
-			console.log("width=" + contentComputedStyle.width);
-			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
+			console.log("offsetWidth=" + content.offsetWidth);
+			console.log("innerWidth=" + content.innerWidth);
+			console.log("outherWidth=" + content.outherWidth);
 		}
 		
 		EDITOR.height = windowHeight;
@@ -2046,6 +2043,7 @@ text = file;
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
 		if( canvas && (canvas.width != EDITOR.view.canvasWidth * pixelRatio || canvas.height != EDITOR.view.canvasHeight * pixelRatio) ) {
+			
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
@@ -2056,6 +2054,11 @@ text = file;
 			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
 			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			EDITOR.canvasContext.textBaseline = "top";
+			
+			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
+		}
+		else {
+			console.log("Not restting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
 		}
 		
 		if(EDITOR.currentFile) {
@@ -7243,7 +7246,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 		EDITOR.touchDown = true;
 		
-		console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
+		//console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
 		
 		window.focus(); // Enable capturing key events if we are in an iframe
 		
@@ -7472,6 +7475,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
 		
+		console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
+		
 		if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
 			EDITOR.canvasMouseX = mouseX;
 			EDITOR.canvasMouseY = mouseY;
@@ -7491,14 +7496,16 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			EDITOR.mouseY = parseInt(mouseEvent.clientY);
 		}
 		
-		if(mouseEvent.changedTouches && mouseX == undefined && mouseY == undefined) {
+		var badLocation = mouseX == undefined || mouseY == undefined || mouseX <= 0 || mouseY <= 0;
+		
+		if(mouseEvent.changedTouches && badLocation) {
 			
 			mouseX = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageX); // pageX
 			mouseY = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageY);
 			
-			// The editor doesn't allow scrolling so pageX is thus the same as clientX !
+			// The editor doesn't allow scrolling, so pageX is thus the same as clientX !
 			
-			// Touch events only have pageX with is the whole page. We only want the position on the canvas !?
+			// Touch events only have pageX which is the whole page. We only want the position on the canvas !?
 			if(mouseEvent.target == canvas) {
 				var rect = canvas.getBoundingClientRect();
 				//console.log(rect.top, rect.right, rect.bottom, rect.left);
@@ -7528,8 +7535,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
 		}
 		
-		//console.log("mouseX=" + mouseX);
-		//console.log("mouseY=" + mouseY);
+		console.log("mouseX=" + mouseX);
+		console.log("mouseY=" + mouseY);
 		
 		if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
 			throw new Error("Mouse position is unknown!");

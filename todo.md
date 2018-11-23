@@ -38,14 +38,25 @@ Happy path: (manually check on prod after each release)
 2. WYSIWYG edit said page
 3. Publish changes
 
+Meego browser silently exit any function that tries to access a member on a undefined object!
+
 
 What I'm working on
 -------------------
+
+Improving performace and usability on mobile devices.
 
 
 
 
 ---
+ide: Faster (and smoth) scrolling by rendering "pages" to other canvases, then copy them to the main canvas when scrolling.
+
+On touch use touch down and touch up, scroll when moving the "mouse" while it's down.
+( smooth scrolling is really only needed on mobile devices. And laptops using two finger mouse-pad !? )
+
+---
+
 
 renderRow optimization when typing is significantly faster,
 most of the lag is due to the virtual keyboard.
@@ -833,6 +844,17 @@ and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to m
 new versions of nw.js though.
 ubuntu: webapp-container / unity-webapps-runner ?
 
+---
+
+Annoying when the mobile browser zooms in 500% and brings up the native keyboard when you click on a html input elemnt!
+Maybe we can replace all input elements with File canvas's ? 
+
+---
+
+Both Opera Mobile and Chrome on Android hides the URL and search bar when scrolling down ...
+Can we use this to get a "full screen" experience !? Only on Opera and it's complicated.
+Android always show the URL bar when you scroll up.
+We could however come up with a another way to scroll files, instead of up/down motions.
 
 
 
@@ -3617,6 +3639,18 @@ modal editing, like in VIM
 
 Integrated testing and code coverage tools. See which lines that wasn't executed by the tests.
 
+---
+
+idea: A way to explore members of an object, 
+for example, you want to use something in UTIL, but doesn't remember the name,
+when you type UTIL.foo the auto completer, unless it finds a perfect match, should also show members that has foo in it,
+not just the ones that start with foo. !?
+
+---
+
+Idea, when accessing a member in an object, you get a warning if that member has not been declared.
+
+---
 
 
 Need though
