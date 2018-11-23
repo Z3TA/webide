@@ -1634,8 +1634,8 @@ text = file;
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
-			//ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			//ctx.clearRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
+			ctx.fillRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
 			
 			/*
 				ctx.fillStyle = "#FF0000";
@@ -2042,13 +2042,25 @@ text = file;
 		//console.log("topMargin=" + EDITOR.settings.topMargin);
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
-		if( canvas && (canvas.width != EDITOR.view.canvasWidth * pixelRatio || canvas.height != EDITOR.view.canvasHeight * pixelRatio) ) {
+		
+		//if(pixelRatio >= 1) {
+		var canvasWidth = EDITOR.view.canvasWidth * pixelRatio;
+		var canvasHeight = EDITOR.view.canvasHeight * pixelRatio;
+		//}
+		//else {
+		//var canvasWidth = EDITOR.view.canvasWidth / pixelRatio;
+		//var canvasHeight = EDITOR.view.canvasHeight / pixelRatio;
+		//}
+		
+		console.log("pixelRatio=" + pixelRatio + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
+		
+		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight) ) {
 			
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
-			canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
-			canvas.height = EDITOR.view.canvasHeight * pixelRatio;
+			canvas.width  = canvasWidth;
+			canvas.height = canvasHeight;
 			
 			// The canvas seem to be reset when resizing!
 			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
@@ -2057,7 +2069,7 @@ text = file;
 			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
 		}
-		else {
+		else if(canvas) {
 			console.log("Not restting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
 		}
 		

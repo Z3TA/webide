@@ -44,6 +44,9 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+Try moving the virtual keyboard !?
+
+
 Improving performace and usability on mobile devices.
 
 
