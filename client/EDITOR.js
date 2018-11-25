@@ -7487,7 +7487,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
 		
-		console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
+		//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
 		
 		if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
 			EDITOR.canvasMouseX = mouseX;
@@ -7547,8 +7547,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
 		}
 		
-		console.log("mouseX=" + mouseX);
-		console.log("mouseY=" + mouseY);
+		//console.log("mouseX=" + mouseX);
+		//console.log("mouseY=" + mouseY);
 		
 		if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
 			throw new Error("Mouse position is unknown!");
