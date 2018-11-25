@@ -1534,9 +1534,24 @@ text = file;
 		EDITOR.shouldResize = true;
 	}
 	
-	EDITOR.render = function() {
+	EDITOR.render = function render(file, canvas, ctx) {
 		
-		if(!EDITOR.shouldRender) {
+		if(file == undefined) file = EDITOR.currentFile;
+		
+		if(canvas == undefined) {
+canvas = EDITOR.canvas;
+			ctx = EDITOR.canvasContext;
+		}
+		else if(ctx == undefined) {
+			if(EDITOR.settings.sub_pixel_antialias == false) {
+				ctx = canvas.getContext("2d");
+			}
+			else {
+				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
+			}
+		}
+		
+		if(!EDITOR.shouldRender && canvas == EDITOR.canvas) {
 			console.warn("Not rendering because it's not needed!");
 			return;
 		}

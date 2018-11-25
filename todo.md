@@ -44,7 +44,61 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-Try moving the virtual keyboard !?
+Coding on a mobile phone sucks!
+I want to make the experience better.
+I learned to code on a 800x600 display on a 386 computer. 
+Now a days smartphones have HD displays and are many times faster then that computer.
+Only problem is text input is kinda awkward on mobile.
+
+
+---
+
+See if the input lag gets better if we put the virtual keyboard keys on the canvas, instead of HTML buttons.
+
+Make ONE button: virtual_keyboard2.js plugin just to test input lag
+
+---
+Issue when you click on a input field, the native keyboard comes up and zooms in like crazy, it's also laggy.
+When you go to a html input while having the editor's virtual keyboard visible,
+instantly .blur() and open a new file instead, then put the content of the file into the input !?
+
+Some widget, like the file-open-tool use a lot of screen real-estate ...
+Hide it when typing, then show it again when you click "DONE" on the virtual keyboard !?
+problem: Some widgets, like the file-open-tool, shows auto-complete suggestions ...
+It's however not a problem if the zoom is set to 100% instead of 275% and the smartphone have a relative big screen,
+also asuming the phone has a stulys which is must have in order to use the phone with 100% zoom.
+
+Preventing the native keyboard will be diffucult on all devices,
+better make all input fields, pseudo-input fileds, to prevent the onboard keyboard.
+Make them into small canvas's instead!?
+
+new TextInput();
+
+
+
+---
+
+An animation where the character flyes to it's destinatio !?
+
+Need to make the virtual keyboard wayyy bigger!?
+So you can type using your hands.
+Make more rows,
+most common used buttons in the middle, the rest around
+Have different layouts for wide and narrow !?
+Only problem it would take up most of the screen.
+Which is however not a problem,
+It's very nice to see what you write ...
+The editor should zoom in so you can see the text.
+
+My first smartphone came with a foldable keyboard,
+I however ended up using the stylus to write text !
+Laser keyboards suck.
+The fastest smartphone keyboard is the "swype" which guess words based on the direction you swipe.
+
+
+
+Long hold to show a magnifying glass, that helps to place the cursor.
+Long hold with two fingers to show the menu !?
 
 
 Improving performace and usability on mobile devices.
@@ -83,6 +137,10 @@ To make sure the keyboard is big enought, but without taking up too much space, 
 
 We also need to have a different keyboard layout for when the phone is vertical or horizontal, due to the very wide screen of mobile phones.
 
+
+---
+
+Don't forget copy/paste on mobiles
 
 ---
 
