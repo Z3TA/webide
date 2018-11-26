@@ -50,9 +50,6 @@
 			throw new Error("Can not find the footer!");
 		}
 		
-		// Insert text into translation dictionary if they dont exist
-		//dictionary.default("gotofile", "Goto file")
-		
 		// Create the hypertext markup if it doesn't existpppp
 		
 		//build_gotoInput();

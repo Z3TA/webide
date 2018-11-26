@@ -34,8 +34,6 @@
 			throw new Error("Can not find the footer!");
 		}
 		
-		// Insert text into translation dictionary if they dont exist
-		//dictionary.default("gotoline", "Goto line")
 		
 		// Create the hypertext markup if it doesn't exist
 		

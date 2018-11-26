@@ -4133,7 +4133,7 @@ var word = "";
 							return callback(error);
 						}
 						else if(answer == another) {
-							EDITOR.pathPickerTool({default: fullPath}, function changedPath(err, newPath) {
+							EDITOR.pathPickerTool({defaultPath: fullPath}, function changedPath(err, newPath) {
 								if(err) {
 									return callback(err);
 								}
@@ -4811,7 +4811,7 @@ var word = "";
 		}
 		
 		// If no path picker wanted to handle it: Use the stone-age path picker
-		var defaultPath = options && options.default;
+		var defaultPath = options && options.defaultPath;
 		promptBox("Choose a file path:", false, defaultPath, function(path) {
 			if(!path) {
 				var error = new Error("Aborted when picking path");

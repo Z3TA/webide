@@ -44,7 +44,18 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-Testing the editor on an old Android phone ...
+Is EDITOR.js too big !?
+Content-Length: 269173
+
+I have a vauge memory that the Android browser will bail out of javascript files larger then X bytes !!!? ...
+Last time the Android browser refused to loat EDITOR.js was because I had misspelled width with with, which is a reserved keyword!
+EDITOR.with
+
+This time it was a variable named default!
+
+
+
+Testing the editor on an old Android phone so I can get the percived input latency ...
 There's an error somewhere that makes the editor not run
 
 
