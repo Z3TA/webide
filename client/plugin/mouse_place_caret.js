@@ -11,7 +11,7 @@
 		desc: "Place the caret using the mouse",
 		load: function loadMousePlaceCaret() {
 			// Set dir to "up" so that the caret col and row doesn't change between down and up !??
-			EDITOR.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "down", targetClass:"fileCanvas", button: 0, combo: 0});
+			EDITOR.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "up", targetClass:"fileCanvas", button: 0, combo: 0, order: 2000}); // Default order is 1000
 },
 unload: function unloadMousePlaceCaret() {
 			EDITOR.removeEvent("mouseClick", placeCaretOnCursor);
@@ -20,10 +20,6 @@ unload: function unloadMousePlaceCaret() {
 	
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 
-		// Prevent placing the caret in the scroll area 
-		if(mouseDownEvent.type == "touchstart" && mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
-		if(mouseDownEvent.type == "touchstart" && mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
-		
 		if(EDITOR.currentFile && caret) {
 			
 			console.log("Setting caret to " + JSON.stringify(caret));
@@ -40,6 +36,8 @@ unload: function unloadMousePlaceCaret() {
 			EDITOR.fireEvent("moveCaret", [EDITOR.currentFile, caret]);
 			
 			EDITOR.renderNeeded();
+			
+			return false;
 			
 			/*
 			var canvas =EDITOR.currentFile.canvas,

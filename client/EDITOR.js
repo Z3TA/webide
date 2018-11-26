@@ -1931,6 +1931,8 @@ canvas = EDITOR.canvas;
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
 		
+		if(!footer) return; // Page has not yet fully loaded
+		
 		var windowHeight = parseInt(window.innerHeight);
 		var windowWidth = parseInt(window.innerWidth);
 		var headerHeight = parseInt(header.offsetHeight);
@@ -4303,6 +4305,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			for (var i=0, uppercase; i<text.length; i++) {
 				EDITOR.mock("keypress", { charCode: text.charCodeAt(i), shiftKey: (text.charAt(i).toUpperCase() ==  text.charAt(i)) });
 			}
+		}
+		else {
+			throw new Error("Unknown mock=" + mock);
 		}
 	}
 	
@@ -6778,6 +6783,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:
 			
+			console.timeEnd("foo");
+			
 				file.putCharacter(character);
 			
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
@@ -7264,13 +7271,17 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 	}
 	
-	
+	function isInputElement(el) {
+		return el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA");
+	}
 	
 	function mouseDown(mouseDownEvent) {
 		
 		mouseDownEvent = mouseDownEvent || windows.event;
 		
 		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
+		// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
+		
 		EDITOR.touchDown = true;
 		
 		//console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
@@ -7374,16 +7385,20 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				//console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
-				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
 				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
 				
+				console.log("mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseDown returned " + funReturn);
+				
 				if(funReturn === false) {
 					preventDefault = true;
+					console.log("" + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
+					break;
 				}
-				
+				else if(funReturn !== true) {
+					throw new Error(UTIL.getFunctionName(click.fun) + " did not return true or false!");
+				}
 				
 			}
 		}
@@ -7413,7 +7428,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		EDITOR.interact("mouseDown", mouseDownEvent);
 		
 		if(preventDefault) {
-			e.preventDefault(); // To prevent the annoying menus
+			mouseDownEvent.preventDefault(); // To prevent the annoying menus
 			return false;
 		}
 		
@@ -7458,7 +7473,25 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			mouseUpEvent.preventDefault();
 		}
 		
+		/*
+			if(EDITOR.virtualKeyboard.isVisible && isInputElement(document.activeElement)) {
+			setTimeout(function() {
+				console.log("Blurring ", document.activeElement);
+				
+				document.activeElement.setAttribute("readonly", "true");
+				
+				//EDITOR.input = false;
+			}, 1000);
+			
+		}
+		else {
+			console.log("EDITOR.virtualKeyboard.isVisible=" + EDITOR.virtualKeyboard.isVisible + " ", document.activeElement, " isInputElement=" + isInputElement(document.activeElement));
+		}
+		*/
+		
 		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		var funReturn = true;
+		var preventDefault = false;
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
 			click = EDITOR.eventListeners.mouseClick[i];
 			
@@ -7470,9 +7503,19 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
+				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
 				
-				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
+				console.log("mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseUp returned " + funReturn);
+				
+				if(funReturn === false) {
+					preventDefault = true;
+					console.log("" + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
+					break;
+				}
+				else if(funReturn !== true) {
+					throw new Error(UTIL.getFunctionName(click.fun) + " did not return true or false!");
+				}
+				
 			}
 		}
 		
@@ -7491,8 +7534,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		EDITOR.interact("mouseUp", mouseUpEvent);
 		
-		return false;
-		//return true;
+		if(preventDefault) {
+			mouseUpEvent.preventDefault();
+			return false;
+		}
+		
 		
 	}
 	

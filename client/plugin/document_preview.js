@@ -51,9 +51,9 @@
 		
 		console.log("mouseClick! Mouse direction" + direction + " button=" + button);
 		
-		if(button > -1) {
-			
-			console.log("yes scroll");
+		if(button <= -1) return true;
+		
+		console.log("yes scroll");
 			
 			// Scroll using the right mouse button
 		
@@ -69,8 +69,7 @@
 				stopScrolling();
 			}
 		
-		}
-		
+		return false;
 	}
 	
 	function stopScrolling() {
@@ -169,9 +168,9 @@
 		
 		var file = EDITOR.currentFile;
 		
-		if(button == 0) {
-			
-			// Translate mouse position to row
+		if(button != 0) return true;
+		
+		// Translate mouse position to row
 			
 			var mouseRow = Math.floor(mouseY / EDITOR.settings.gridHeight * minification) + previewStartRow + 1;
 
@@ -189,7 +188,8 @@
 			}
 			
 			EDITOR.renderNeeded();
-		}
+		
+		return false;
 		
 	}
 	

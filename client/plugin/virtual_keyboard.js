@@ -360,7 +360,7 @@
 				else fireKey(char.charCodeAt(0));
 				}
 				
-			EDITOR.beep(0.1, 120, "sine", 39);
+			
 			
 				b.style.marginTop = "2px";
 			b.style.marginBottom = "-2px";
@@ -380,7 +380,9 @@
 		
 		b.addEventListener("click", click, true); // true=Prevent bubbling
 		b.addEventListener("touchend", click, true); // true=Prevent bubbling
-		
+		b.addEventListener("touchstart", function() {
+			EDITOR.beep(0.1, 120, "sine", 39);
+		}, true); // true=Prevent bubbling
 		var pos = undefined;
 		
 		EDITOR.virtualKeyboard.addKey(b, row, pos, group);

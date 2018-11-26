@@ -35,18 +35,18 @@
 	EDITOR.on("start", mouse_select_init);
 	
 	function mouse_select_init() {
-		EDITOR.addEvent("mouseClick", {fun: mouseSelectDown, dir: "down", targetClass:"fileCanvas", button: 0});
-		EDITOR.addEvent("mouseClick", {fun: mouseSelectUp, dir: "up", targetClass:"fileCanvas", button: 0});
+		EDITOR.addEvent("mouseClick", {fun: mouseSelectDown, dir: "down", targetClass:"fileCanvas", button: 0, order: 1500});
+		EDITOR.addEvent("mouseClick", {fun: mouseSelectUp, dir: "up", targetClass:"fileCanvas", button: 0, order: 1500});
 		
 		EDITOR.on("mouseMove", mouseSelectMouseMove);
 	}
 	
 	function mouseSelectDown() {
-		mouseSelect.apply(this, arguments);
+		return mouseSelect.apply(this, arguments);
 	}
 	
 	function mouseSelectUp() {
-		mouseSelect.apply(this, arguments);
+		return mouseSelect.apply(this, arguments);
 	}
 	
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
@@ -56,14 +56,9 @@
 		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
 		console.log(" llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
 		
+		if(llEvType=="touchend" && lastEvType=="mousedown" && ev.type=="mouseup") return true; // Prevent "double" click when doing touch
 		
-		// Prevent selection in the scroll area
-		if(ev.type == "touchstart" && mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return false; 
-		if(ev.type == "touchstart" && mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return false;
-		
-		if(llEvType=="touchend" && lastEvType=="mousedown" && ev.type=="mouseup") return; // Prevent "double" click when doing touch
-		
-		if(llEvType=="touchstart" && lastEvType=="touchend" && ev.type=="mousedown") return; // Prevent "double" mousedown after touchstart
+		if(llEvType=="touchstart" && lastEvType=="touchend" && ev.type=="mousedown") return true; // Prevent "double" mousedown after touchstart
 		
 		llEvType = lastEvType;
 		lastEvType = ev.type;
@@ -74,8 +69,8 @@
 		
 		// Note that caret is a temporary position caret (not the current file.caret)!
 
-		if(EDITOR.currentFile && caret) {
-			
+if(!EDITOR.currentFile || !caret) return true;
+
 			var file = EDITOR.currentFile;
 			
 			file.removeHighlights();
@@ -215,16 +210,9 @@
 							
 							makeSelection(file, caret);
 						}
-						
-						
-					}
-					
-
-
-
-					
-				}
-
+						}
+			}
+			
 				
 				//makeSelection(file, caret);
 
@@ -238,11 +226,12 @@
 				
 				// But if we return here it *will* call mouseup and mousedown !
 				}
-			
+		
+		if(file.selected.length == 0) return true;
+		
 			EDITOR.renderNeeded();
-			
 			return false;
-			}
+			
 		
 		function selectWholeLine() {
 			startIndex = file.grid[caret.row].startIndex;

@@ -45,9 +45,6 @@
 		
 		if(mouseDownEvent.type != "touchstart") return true;
 		
-		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return true;
-		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return true;
-		
 		//console.log(mouseDownEvent);
 		
 		touchDownTimer = setTimeout(function showMenu() {
@@ -60,13 +57,15 @@
 			console.log("ltTouchDown touchTooLongTimer!");
 		}, 1500);
 		
+		return true;
+		
 	}
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
 		console.log("ltTouchUp showTheMenu=" + showTheMenu);
 		
-		if(mouseDownEvent.type != "touchend") return;
+		if(mouseDownEvent.type != "touchend") return true;
 		
 		//console.log(mouseDownEvent);
 		
@@ -77,6 +76,8 @@
 EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
 			showTheMenu = false;
 		}
+		
+		return true;
 	}
 	
 	

@@ -44,6 +44,8 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+The HTML buttons doesn't seem to slow down text input ...
+
 Coding on a mobile phone sucks!
 I want to make the experience better.
 I learned to code on a 800x600 display on a 386 computer. 
@@ -273,6 +275,15 @@ Doesn't do the right thing: if(|abc)
 (hitting autocomplete when caret is at a)
 should insert abcdef but inserts defabc
 do nothing !?
+
+
+---
+
+Test the editor in Edge browser!
+Error: Permission denied
+   at testWindow (https://webide.se/:1579:62429)
+   at EDITOR.createWindow (https://webide.se/:1579:61675)
+   at WysiwygEditor (https://webide.se/:1883:6537)
 
 ---
 

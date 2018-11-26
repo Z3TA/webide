@@ -33,8 +33,8 @@
 			EDITOR.addRender(verticalScrollingRender, 25);
 			EDITOR.addRender(horizontalScrollingRender, 26);
 			
-			EDITOR.addEvent("mouseClick", {fun: tsTouchDown, dir: "down", targetClass:"fileCanvas", button: 0});
-			EDITOR.addEvent("mouseClick", {fun: tsTouchUp, dir: "up", targetClass:"fileCanvas", button: 0});
+			EDITOR.addEvent("mouseClick", {fun: tsTouchDown, dir: "down", targetClass:"fileCanvas", button: 0, order: 10});
+			EDITOR.addEvent("mouseClick", {fun: tsTouchUp, dir: "up", targetClass:"fileCanvas", button: 0, order: 10});
 			
 			EDITOR.on("mouseMove", tsTouchMove);
 			
@@ -53,7 +53,10 @@
 	});
 	
 	function tsTouchDown(x, y) {
-		console.log("touchdown!");
+		
+		console.log("tsTouchDown: x=" + x + " y=" + y);
+		
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
 		
 		horizontalScrolling = false;
 		verticalScrolling = false;
@@ -63,10 +66,16 @@
 		touchDownY = y;
 		//EDITOR.removeRender(verticalScrollingRender);
 		//EDITOR.removeRender(horizontalScrollingRender);
+		return false;
 		}
 	
-	function tsTouchUp() {
-		console.log("touchUP!");
+	function tsTouchUp(x, y) {
+		
+		console.log("tsTouchUp: x=" + x + " y=" + y);
+		
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return true;
+		if( y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return true;
+		
 		horizontalScrolling = false;
 		verticalScrolling = false;
 		maybeScroll = false;
@@ -76,6 +85,7 @@
 		
 		if(virtualKeyboardWasVisible && !EDITOR.virtualKeyboard.isVisible) EDITOR.virtualKeyboard.show();
 		
+		return false;
 		}
 	
 	
