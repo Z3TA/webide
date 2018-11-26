@@ -5424,9 +5424,9 @@ var word = "";
 		Add your own key listeners via EDITOR.bindKey()
 		Your function should return false to prevent default action.
 	*/
-	window.addEventListener("keydown",keyIsDown,true);  // captures 
-	window.addEventListener("keyup",keyIsUp,true);      // keyBindings
-	window.addEventListener("keypress",keyPressed,true); // Writes to the document at caret position
+	window.addEventListener("keydown",keyIsDown,false);  // captures 
+	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
+	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
 	
 	
 	/*
@@ -5436,19 +5436,19 @@ var word = "";
 	
 	
 	// Capture mobile events
-	window.addEventListener("touchstart", mouseDown, true);
-	window.addEventListener("touchend", mouseUp, true);
-	window.addEventListener("touchmove", mouseMove, true);
+	window.addEventListener("touchstart", mouseDown, false);
+	window.addEventListener("touchend", mouseUp, false);
+	window.addEventListener("touchmove", mouseMove, false);
 	
 	
 	//window.addEventListener("touchcancel", mouseUp, false);
 	//window.addEventListener("touchleave", mouseUp, false);
 	
-	window.addEventListener("click", mouseclick, true);
-	window.addEventListener("mousedown", mouseDown, true);
-	window.addEventListener("mouseup", mouseUp, true);
+	window.addEventListener("click", mouseclick, false);
+	window.addEventListener("mousedown", mouseDown, false);
+	window.addEventListener("mouseup", mouseUp, false);
 	
-	window.addEventListener("mousemove", mouseMove, true);
+	window.addEventListener("mousemove", mouseMove, false);
 	
 	
 	// Disable annoying menus
@@ -6792,8 +6792,6 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:
 			
-			console.timeEnd("foo");
-			
 				file.putCharacter(character);
 			
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
@@ -7472,28 +7470,6 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		console.log(mouseUpEvent);
 		
 		if(target.className == "fileCanvas") {
-			
-			/*
-				Optimization: Inline virtual keyboard click handler:
-				before: 
-				
-				after: mouseUp: 1.638671875ms on Chrome, 
-				
-			*/
-			
-			if(mouseY < 50 && EDITOR.currentFile) {
-				//EDITOR.mock("keypress", {charCode: 65});
-				EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
-				EDITOR.currentFile.putCharacter("X");
-				
-				//EDITOR.renderRow();
-				console.timeEnd("mouseUp");
-				mouseUpEvent.preventDefault();
-				mouseUpEvent.stopPropagation();
-				
-				return false;
-			}
-			
 			
 			// Only get a caret if the click is on the canvas 
 			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);

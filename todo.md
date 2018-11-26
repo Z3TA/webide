@@ -44,22 +44,17 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-Is EDITOR.js too big !?
-Content-Length: 269173
-
-I have a vauge memory that the Android browser will bail out of javascript files larger then X bytes !!!? ...
-Last time the Android browser refused to loat EDITOR.js was because I had misspelled width with with, which is a reserved keyword!
-EDITOR.with
-
-This time it was a variable named default!
+Making a non-HTML based virtual keyboard
 
 
 
-Testing the editor on an old Android phone so I can get the percived input latency ...
-There's an error somewhere that makes the editor not run
-
-
-CLICK EVENT FEELS SIGNIFIFACNTLY FASTER ON OPERA MOBILE WITHOUT THE BUBBLING!!!
+Opera mobile feel faster without the debugger attached.
+With the render column optimization it almost feels as fast as native keyboard when registering click on the canvas.
+There is a noticable render slowdown on Opera Mobile if HTML element is placed ontop of the canvas.
+There is no difference between event bubbling or capturing phase on Opera Mobile.
+The difference was because the debugger was attached and HTML elements was rendered above the canvas!
+There is only a tiny difference between render-column optization before putcharacter and putcharacter+renderow on opera mobile
+Inlining or calling putCharacter directly instead mocking keypress did not feel any different on Opera Mobile.
 
 
 keyboardPushbuttonUp: 278ms (278442µsec)
@@ -76,11 +71,9 @@ EDITOR.renderColumn INSTEAD OF putCharacter & renderRow ?
 renderColumn instead of renderRow ?
 Although renderColumn is faster then renderRow there is to percived difference on Chrome nor Opera Mobile
 
-Typing on the native keyboard into a text element feels instant on Opera Mobile, while the editors virtual keyboard feels very laggy!
-
 On Chrome (PC and x86 touchscreen) there is no percived difference between a canvas keyboard, html keyboard, or "native" keyboard.
-On an old Android phone: ... Need to make it work there first
-
+On an old Android phone: The HTML buttons feels slightly slower. 
+On Opera Mobile the HTML buttons feels slower (because they are rendered ontop of the canvas, slowing down rendering)
 
 
 
@@ -96,8 +89,6 @@ Slighly higher spikes in Chrome, no difference in Opera Mobile.
 
 
 
-
-The HTML buttons doesn't seem to slow down text input ...
 
 Coding on a mobile phone sucks!
 I want to make the experience better.
