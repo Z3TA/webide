@@ -20,8 +20,8 @@ unload: function unloadMousePlaceCaret() {
 	
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 
-		if(EDITOR.currentFile && caret) {
-			
+		if(!EDITOR.currentFile || !caret) return true;
+		
 			console.log("Setting caret to " + JSON.stringify(caret));
 
 			console.log("caret.row=" + caret.row);
@@ -50,7 +50,6 @@ unload: function unloadMousePlaceCaret() {
 				ctx.stroke();
 			
 			*/
-		}
 		
 	}
 
