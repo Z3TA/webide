@@ -1,3 +1,8 @@
+/*
+	
+	todo: Find a way to distinct between scroll movement and click (to place cursor)
+	
+*/
 (function() {
 	"use strict";
 	
@@ -52,9 +57,11 @@
 		}
 	});
 	
-	function tsTouchDown(x, y) {
+	function tsTouchDown(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("tsTouchDown: x=" + x + " y=" + y);
+		console.log("tsTouchDown: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
+		
+		if( mouseDownEvent.type != "touch") return true;
 		
 		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
 		
@@ -69,12 +76,13 @@
 		return false;
 		}
 	
-	function tsTouchUp(x, y) {
+	function tsTouchUp(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("tsTouchUp: x=" + x + " y=" + y);
+		console.log("tsTouchUp: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
 		
-		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return true;
-		if( y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return true;
+		if( mouseDownEvent.type != "touch") return true;
+		
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
 		
 		horizontalScrolling = false;
 		verticalScrolling = false;
