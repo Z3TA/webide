@@ -7448,6 +7448,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 	
 	
 	function mouseUp(mouseUpEvent) {
+		console.time("mouseUp");
+		
 		mouseUpEvent = mouseUpEvent || window.event;
 		
 		EDITOR.touchDown = false;
@@ -7470,6 +7472,28 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		console.log(mouseUpEvent);
 		
 		if(target.className == "fileCanvas") {
+			
+			/*
+				Optimization: Inline virtual keyboard click handler:
+				before: 
+				
+				after: mouseUp: 1.638671875ms on Chrome, 
+				
+			*/
+			
+			if(mouseY < 50 && EDITOR.currentFile) {
+				//EDITOR.mock("keypress", {charCode: 65});
+				EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
+				EDITOR.currentFile.putCharacter("X");
+				
+				//EDITOR.renderRow();
+				console.timeEnd("mouseUp");
+				mouseUpEvent.preventDefault();
+				mouseUpEvent.stopPropagation();
+				
+				return false;
+			}
+			
 			
 			// Only get a caret if the click is on the canvas 
 			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
@@ -7500,8 +7524,10 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		*/
 		
 		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		console.time("mouseClick listeners");
 		var funReturn = true;
 		var preventDefault = false;
+		
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
 			click = EDITOR.eventListeners.mouseClick[i];
 			
@@ -7513,7 +7539,10 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
+				var fName = UTIL.getFunctionName(click.fun)
+				console.time(fName);
 				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
+				console.timeEnd(fName);
 				
 				console.log("mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseUp returned " + funReturn);
 				
@@ -7528,7 +7557,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 			}
 		}
-		
+		console.timeEnd("mouseClick listeners");
+		console.timeEnd("mouseUp");
 		
 		//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 		
