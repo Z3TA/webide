@@ -45,9 +45,10 @@ What I'm working on
 -------------------
 
 Testing the editor on an old Android phone ...
-The "built in" Android browser is very aggressive with caching!
+There's an error somewhere that makes the editor not run
 
 
+CLICK EVENT FEELS SIGNIFIFACNTLY FASTER ON OPERA MOBILE WITHOUT THE BUBBLING!!!
 
 
 keyboardPushbuttonUp: 278ms (278442µsec)
@@ -67,7 +68,7 @@ Although renderColumn is faster then renderRow there is to percived difference o
 Typing on the native keyboard into a text element feels instant on Opera Mobile, while the editors virtual keyboard feels very laggy!
 
 On Chrome (PC and x86 touchscreen) there is no percived difference between a canvas keyboard, html keyboard, or "native" keyboard.
-On an old Android phone: 
+On an old Android phone: ... Need to make it work there first
 
 
 

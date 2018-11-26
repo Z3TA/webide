@@ -5402,6 +5402,15 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 	}, false);
 	
+	/*
+		
+		The third argumentin addEventListener is a Boolean value 
+		that specifies whether the event should be executed in the capturing or in the bubbling phase.
+		true = capturing phase: start with the top (window)
+		false = bubbling phase: start with the inner-most element 
+		
+	*/
+	
 	
 	/*
 		Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
@@ -5415,9 +5424,9 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		Add your own key listeners via EDITOR.bindKey()
 		Your function should return false to prevent default action.
 	*/
-	window.addEventListener("keydown",keyIsDown,false);  // captures 
-	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
-	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
+	window.addEventListener("keydown",keyIsDown,true);  // captures 
+	window.addEventListener("keyup",keyIsUp,true);      // keyBindings
+	window.addEventListener("keypress",keyPressed,true); // Writes to the document at caret position
 	
 	
 	/*
@@ -5427,19 +5436,19 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 	
 	
 	// Capture mobile events
-	window.addEventListener("touchstart", mouseDown, false);
-	window.addEventListener("touchend", mouseUp, false);
-	window.addEventListener("touchmove", mouseMove, false);
+	window.addEventListener("touchstart", mouseDown, true);
+	window.addEventListener("touchend", mouseUp, true);
+	window.addEventListener("touchmove", mouseMove, true);
 	
 	
 	//window.addEventListener("touchcancel", mouseUp, false);
 	//window.addEventListener("touchleave", mouseUp, false);
 	
-	window.addEventListener("click", mouseclick, false);
-	window.addEventListener("mousedown", mouseDown, false);
-	window.addEventListener("mouseup", mouseUp, false);
+	window.addEventListener("click", mouseclick, true);
+	window.addEventListener("mousedown", mouseDown, true);
+	window.addEventListener("mouseup", mouseUp, true);
 	
-	window.addEventListener("mousemove", mouseMove, false);
+	window.addEventListener("mousemove", mouseMove, true);
 	
 	
 	// Disable annoying menus
