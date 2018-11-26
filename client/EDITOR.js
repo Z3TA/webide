@@ -2236,7 +2236,7 @@ canvas = EDITOR.canvas;
 			}
 		}
 		
-		console.log("Adding function " + UTIL.getFunctionName(options.fun) + " to event " + eventName);
+		//console.log("Adding function " + UTIL.getFunctionName(options.fun) + " to event " + eventName);
 		
 		var index = EDITOR.eventListeners[eventName].push(options);
 		
@@ -3017,7 +3017,7 @@ EDITOR.fireEvent("btk");
 
 		renderOrder[fName] = order;
 		
-		console.log("Adding render: " + UTIL.getFunctionName(fun));
+		//console.log("Adding render: " + UTIL.getFunctionName(fun));
 		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + fName);
 		
 		EDITOR.renderFunctions.push(fun);
@@ -3813,7 +3813,7 @@ var word = "";
 		if(!b.desc) UTIL.getStack("Key binding should have a description!");
 		
 		if(b.mode == undefined) {
-console.warn('No mode defined for "' + b.desc + '" asuming default mode');
+//console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			b.mode = "default";
 		}
 		else if(EDITOR.modes.indexOf(b.mode) == -1) {
@@ -3979,7 +3979,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
-		console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
+		//console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {
@@ -5127,7 +5127,7 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 	var virtualKeyboard = {};
 	EDITOR.virtualKeyboard = {
 		addKey: function addVirtualKeyboardKey(newElement, row, position, group) {
-			console.log("Adding virtual keyboard key: row=" + row + " position=" + position + " group=" + group);
+			//console.log("Adding virtual keyboard key: row=" + row + " position=" + position + " group=" + group);
 			if(group == undefined) group = "main";
 			if(row == undefined) row = 0;
 			if(!virtualKeyboard.hasOwnProperty(group)) throw new Error("The virtual keyboard has no group called " + group);
