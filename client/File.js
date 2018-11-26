@@ -1289,6 +1289,14 @@ file.mode = "text";
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
 			
 			
+			perf: Make box into a plain object ?
+			Slighly higher spikes in Chrome, no difference in Opera Mobile.
+			
+			perf: gridRow variable in nested for loop ?
+			Higher spikes in Chrome, no differeence in Opera Mobile
+			
+			
+			
 		*/
 		var file = this;
 		
@@ -1302,10 +1310,10 @@ file.mode = "text";
 			caret = file.caret;
 		}
 		
-		var grid = file.grid,
-		row = caret.row,
-		col = caret.col,
-		index = caret.index;
+		var grid = file.grid;
+		var row = caret.row;
+		var col = caret.col;
+		var index = caret.index;
 		
 		
 		if(character == undefined) {
