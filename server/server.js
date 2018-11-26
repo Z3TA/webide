@@ -2379,7 +2379,12 @@ function handleHttpRequest(request, response) {
 		http "endpoints" needs to pass same origin policy!
 	*/
 	
-	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
+	var responseHeaders = {
+		'Content-Type': 'text/plain; charset=utf-8', 
+		"Cache-Control": "no-cache, must-revalidate",
+		"Pragma": "no-cache",
+		"Expires": "Sat, 1 Jan 2005 00:00:00 GMT"
+	};
 	
 	//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
 	

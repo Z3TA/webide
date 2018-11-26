@@ -44,6 +44,47 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+Testing the editor on an old Android phone ...
+The "built in" Android browser is very aggressive with caching!
+
+
+
+
+keyboardPushbuttonUp: 278ms (278442µsec)
+calling putCharacter and renderRow directly instead of mock ? No difference!
+
+mouseUp: 3-7ms on Chrome,  285ms (284881µsec) on Opera Mobile
+
+Inline virtual keyboard click handler into the main mouseUp:
+50% faster on Chrome, no difference on Opera Mobile!
+
+EDITOR.renderColumn INSTEAD OF putCharacter & renderRow ?
+3ms instead of 280ms on Opera Mobile.
+
+renderColumn instead of renderRow ?
+Although renderColumn is faster then renderRow there is to percived difference on Chrome nor Opera Mobile
+
+Typing on the native keyboard into a text element feels instant on Opera Mobile, while the editors virtual keyboard feels very laggy!
+
+On Chrome (PC and x86 touchscreen) there is no percived difference between a canvas keyboard, html keyboard, or "native" keyboard.
+On an old Android phone: 
+
+
+
+
+
+Unable to make putCharacter faster.
+
+putCharacterCore: 17ms (16876µsec)
+1-2ms in Chrome.
+
+Make box into a plain object ? 
+Slighly higher spikes in Chrome, no difference in Opera Mobile.
+
+
+
+
+
 The HTML buttons doesn't seem to slow down text input ...
 
 Coding on a mobile phone sucks!
