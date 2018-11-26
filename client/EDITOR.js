@@ -7429,6 +7429,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		if(preventDefault) {
 			mouseDownEvent.preventDefault(); // To prevent the annoying menus
+			mouseDownEvent.stopPropagation();
 			return false;
 		}
 		
@@ -7536,6 +7537,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		if(preventDefault) {
 			mouseUpEvent.preventDefault();
+			mouseUpEvent.stopPropagation();
 			return false;
 		}
 		
