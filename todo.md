@@ -44,6 +44,12 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+Fiddling with the renderRow and render_lineNumbers.js optimization.
+
+Working on canvas based virtual keyboard ...
+
+
+
 Should it be possible to add keyboard buttons dynamicly, or should it be static?
 Dynamic is probably best so users can customize, and plugins can add special keys.
 

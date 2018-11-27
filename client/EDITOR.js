@@ -5620,6 +5620,8 @@ var word = "";
 		
 		window.onbeforeunload = confirmExit;
 		
+		if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
+		
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");

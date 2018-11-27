@@ -1,3 +1,29 @@
+/*
+	
+	Reason for making a canvas based virtual keyboard instead of a html-button's based:
+	* Slighly faster to render
+	* Can be rendered on-top of the main canvas, where html elements on-top of a canvas will slow down rendering.
+	* Easier to ajust buttons so they fill the whole screen, compared to CSS and old browser support
+	
+	Problem: Smartphone screens are way too small for touch typing. 4x9 buttons work great, but it gets problematic if you need 5x20
+	Solution: Use a stulys !? Not many mobile phones support a stylus though
+	
+	Problem: The virtual keyboard is too large to fit on the screen.
+	Solution: Hide the file tabs while the virtual keyboard is visible !?
+	
+	
+	Q: Why not use the device's keyboard !?
+	A: Programming on it is a pain as keys souch as {[]}" is hard to reach
+	
+	Note: We will need two views: one for when the device is in horizontal, and one for when it's vertical!
+	
+	Problem: When a widget is fired, there's simply no more space available, can't have both the keyboard and the widget visible at the same time.
+	
+	
+	Problem: When clicking on an input element inside a widget, the device wants to bring up the devices's virtual keyboard
+	
+*/
+
 (function() {
 
 	"use strict";
@@ -18,11 +44,18 @@
 	var radius = 8;
 	var margin = 4;
 	var lineWidth = 1;
+	var buttonsPerRow = [0,0,0,0,0,0];
+	var verticalLayout = [];
+	var horizontalLayout = [];
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
 	canvas.ontouchstart = canvasMouseDown;
 	canvas.ontouchend = canvasMouseUp;
+	
+	
+	
+	
 	
 	EDITOR.plugin({
 		desc: "Testing canvas based virtual keyboard",
@@ -57,9 +90,18 @@
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
 		pixelRatio = window.devicePixelRatio || 1;
 		
-		if(windowWidth > windowHeight) buttonWithToHeightRatio = 0.7;
-		else buttonWithToHeightRatio = 1.5;
-		
+		if(windowWidth > windowHeight) {
+			buttonWithToHeightRatio = 0.8;
+			buttons = horizontalLayout;
+buttonsPerRow = calcButtonsPerRow(buttons);
+}
+		else {
+			buttonWithToHeightRatio = 1.5;
+buttons = verticalLayout;
+			buttonsPerRow = calcButtonsPerRow(buttons);
+}
+
+
 		canvasWidth = windowWidth;
 		buttonWidth = Math.floor(canvasWidth / maxButtonsPerRow);
 		buttonHeight = Math.floor(buttonWithToHeightRatio * buttonWidth);
@@ -109,12 +151,6 @@
 
 		
 		
-		// First draw button backgrounds
-		
-		
-		
-		
-		// Draw the button background once, then copy it
 		
 		var cX = 0;
 		var cY = 0;
@@ -123,21 +159,24 @@
 		var x2 = 0;
 		var y2 = 0;
 		var gradient;
+		var startX = 0;
+		
+		// ### Button backgrounds
 		
 		ctx.fillStyle = "blue";
 		ctx.strokeStyle="white";
 		ctx.lineWidth=lineWidth;
 		for (var i=0; i<buttons.length; i++) {
 			
-			// Center the row depending on how many characters in it
+			startX = Math.floor( (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2 );
 			
-			x1 = buttons[i].col * buttonWidth - buttonWidth + margin;
+			x1 = startX + buttons[i].col * buttonWidth - buttonWidth + margin;
 			y1 = buttons[i].row * buttonHeight - buttonHeight + margin;
 			
-			x2 = buttons[i].col * buttonWidth - margin*2;
+			x2 = startX + buttons[i].col * buttonWidth - margin*2;
 			y2 = buttons[i].row * buttonHeight - margin*2;
 			
-			cX = buttons[i].col * buttonWidth - buttonWidth/2 - margin;
+			cX = startX + buttons[i].col * buttonWidth - buttonWidth/2 - margin;
 			cY = buttons[i].row * buttonHeight - buttonHeight/2 - margin;
 			
 			// A path with rounded corners
@@ -170,7 +209,7 @@
 		}
 		
 		
-		// Then draw button letters
+		// ### Button letters
 		ctx.fillStyle = "#FFFFFF";
 		ctx.textAlign = "center";
 		
@@ -183,7 +222,9 @@
 		
 		for (var i=0; i<buttons.length; i++) {
 			
-			cX = buttons[i].col * buttonWidth - buttonWidth/2 - margin;
+			startX = Math.floor( (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2 );
+			
+			cX = startX + buttons[i].col * buttonWidth - buttonWidth/2 - margin;
 			cY = buttons[i].row * buttonHeight - buttonHeight/2 - margin;
 			
 			buttonLocations.push({id: i, x: cX, y: cY});
@@ -203,6 +244,10 @@
 		else return 0; 
 	}
 	
+	
+	function calcButtonsPerRow() {
+		return [0,0,0,0,0,0];
+	}
 	
 	function canvasMouseDown(mouseDownEvent) {
 		
@@ -236,13 +281,16 @@
 		return true;
 	}
 	
+	
 	function clickButton(id) {
 		
 		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
 		//file.putCharacter("X");
 		//EDITOR.renderRow();
 		
-		fireKey(capsLock ? buttons[id].charCodeCaps : buttons[id].charCode);
+		var button = buttons[id];
+		
+		fireKey(capsLock ? button.charCodeCaps : button.charCode);
 		
 		return false;
 	}
@@ -351,7 +399,60 @@
 	
 	function addButtons() {
 		
-		var buttonsPerRow = [0,0,0,0,0,0];
+		buttonsPerRow = [0,0,0,0,0,0];
+		
+		
+		
+		// ## Horizontal
+		var row = 1;
+		var orientation = "vertical";
+		
+		add("@");
+		
+		add("1");
+		add("2");
+		add("3");
+		add("4");
+		add("5");
+		add("6");
+		add("7");
+		add("8");
+		add("9");
+		add("0");
+		
+		add("(");
+		add(")");
+		
+		add("[");
+		add("]");
+		
+		add("back", 0, function space(click) {
+			click.target.blur();
+			clearSelection();
+			fireKey(8, "keydown");
+			return false;
+		});
+		
+		add("-", 0);
+		add("+", 0);
+		
+		add("#", 0);
+		
+		
+		
+		// ## Vertical
+		var row = 1;
+		var orientation = "vertical";
+		
+		add("1");
+		add("2");
+		add("3");
+		add("4");
+		add("5");
+		add("6");
+		add("7");
+		add("8");
+		add("9");
 		
 		add("Q", 3, 1);
 		add("W", 3, 2);
@@ -363,6 +464,14 @@
 		add("I", 3, 8);
 		add("O", 3, 9);
 		add("P", 3, 10);
+		
+		
+		add(")", 3, 11);
+		add("{", 3, 12);
+		add("}", 3, 13);
+		add("'", 3, 14);
+		add('"', 3, 15);
+		
 		
 		add("A", 4, 1);
 		add("S", 4, 2);
