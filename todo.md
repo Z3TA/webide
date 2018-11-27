@@ -44,7 +44,15 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-Making a non-HTML based virtual keyboard
+Should it be possible to add keyboard buttons dynamicly, or should it be static?
+Dynamic is probably best so users can customize, and plugins can add special keys.
+
+It's actually possinle to capture CAPS LOCK from JS!
+Should there be a EDITOR.capsLock !?
+
+keys: {clickEvent, showText, width, altChar?, active, }
+
+Making a canvas based virtual keyboard
 
 
 
@@ -971,7 +979,8 @@ Both Opera Mobile and Chrome on Android hides the URL and search bar when scroll
 Can we use this to get a "full screen" experience !? Only on Opera and it's complicated.
 Android always show the URL bar when you scroll up.
 We could however come up with a another way to scroll files, instead of up/down motions.
-
+But it's probably not worth it when both Android and iOS has a add2desktop for web app,
+that lets the web app run in full screen (without the browser chrome).
 
 
 Things I've learned

@@ -13,6 +13,8 @@
 	var touchCounter = 0;
 	var keyDownCounter = 0;
 	
+	return false;
+	
 	//var afterClick = false, background, oldTop = 0, oldLeft = 0;
 	
 	EDITOR.plugin({

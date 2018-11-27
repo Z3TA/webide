@@ -2113,7 +2113,7 @@ canvas = EDITOR.canvas;
 		// Resize listeners (after)
 		console.log("Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
-			EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile);
+			EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile, windowWidth, windowHeight);
 		}
 		
 		// Show the canvas nodes again
