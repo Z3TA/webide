@@ -5760,7 +5760,12 @@ var word = "";
 		console.log("Loading plugins (length=" + EDITOR.eventListeners.start.length + ")");
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			console.log("plugin: " + EDITOR.plugins[i].desc);
-			// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
+			
+			if(EDITOR.settings.devMode) {
+				EDITOR.plugins[i].load(EDITOR);
+			}
+			else {
+				// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
 			try {
 				EDITOR.plugins[i].load(EDITOR); // Call function (and pass global objects!?)
 			}
@@ -5768,6 +5773,7 @@ var word = "";
 				console.error(err.message);
 				console.log(err.stack);
 				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"</i>\nError: ' + err.message);
+			}
 			}
 		}
 		

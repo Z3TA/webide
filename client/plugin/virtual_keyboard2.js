@@ -22,6 +22,10 @@
 	
 	Problem: When clicking on an input element inside a widget, the device wants to bring up the devices's virtual keyboard
 	
+	Long-press: Inserts the character, then auto-complete
+	
+	
+	
 */
 
 (function() {
@@ -34,12 +38,11 @@
 	var buttonWithToHeightRatio = 1.5;
 	var buttonWidth = 10;
 	var buttonHeight = 10;
-	var capsLock = false;
+	var CAPS = false;
 	var buttonLocations = [];
 	var buttons = [];
 	var canvasWidth = 500;
 	var canvasHeight = 200;
-	var keyRows = 5;
 	var maxButtonsPerRow = 10;
 	var radius = 8;
 	var margin = 4;
@@ -47,6 +50,11 @@
 	var buttonsPerRow = [0,0,0,0,0,0];
 	var verticalLayout = [];
 	var horizontalLayout = [];
+	var totalRows = 3;
+	
+	// Each key can have 3 alternative functions, depending if alt1, alt2 or both alt1 and alt2 is active
+	var ALT1 = false;
+	var ALT2 = false;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -91,21 +99,31 @@
 		pixelRatio = window.devicePixelRatio || 1;
 		
 		if(windowWidth > windowHeight) {
+			var orientation = "horizontal";
 			buttonWithToHeightRatio = 0.8;
 			buttons = horizontalLayout;
 buttonsPerRow = calcButtonsPerRow(buttons);
 }
 		else {
+			var orientation = "vertical";
 			buttonWithToHeightRatio = 1.5;
 buttons = verticalLayout;
 			buttonsPerRow = calcButtonsPerRow(buttons);
 }
 
-
+		if(buttons.length == 0) throw new Error("No buttons found! windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " (orientation=" + orientation + ") horizontalLayout.length=" + horizontalLayout.length + " verticalLayout.length=" + verticalLayout.length);
+		if(buttonsPerRow[0] == 0) throw new Error("First row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
+		if(buttonsPerRow[1] == 0) throw new Error("Second row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
+		if(buttonsPerRow[2] == 0) throw new Error("Third row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
+		
+		console.log("maxButtonsPerRow=" + maxButtonsPerRow);
+		console.log("buttonsPerRow=" + JSON.stringify(buttonsPerRow));
+		console.log("totalRows=" + totalRows);
+		
 		canvasWidth = windowWidth;
 		buttonWidth = Math.floor(canvasWidth / maxButtonsPerRow);
 		buttonHeight = Math.floor(buttonWithToHeightRatio * buttonWidth);
-		canvasHeight = buttonHeight * keyRows;
+		canvasHeight = buttonHeight * totalRows;
 		
 		canvas.width = canvasWidth * pixelRatio;
 		canvas.height = canvasHeight * pixelRatio;
@@ -121,8 +139,7 @@ buttons = verticalLayout;
 		ctx.scale(pixelRatio,pixelRatio);
 		//ctx.scale(1,1);
 		
-		ctx.textBaseline = "middle";
-		ctx.font=  Math.floor(buttonHeight * 0.6)  + "px Arial";
+		ctx.textBaseline = "middle"; // Will also be reset when setting canvas.width!
 		
 		canvas.style.width=canvasWidth + "px";
 		canvas.style.height=canvasHeight + "px";
@@ -134,7 +151,39 @@ buttons = verticalLayout;
 		
 	}
 	
+	function calcButtonsPerRow(buttons) {
+		
+		if(buttons.length == 0) throw new Error("buttons.length=" + buttons.length);
+		
+		var buttonsPerRow = [0,0,0,0,0,0];
+		
+		for (var i=0; i<buttons.length; i++) {
+			buttonsPerRow[buttons[i].row] += buttons[i].width;
+		}
+		
+		for (var i=0; i<buttonsPerRow.length; i++) {
+			if(buttonsPerRow[i] == 0) {
+totalRows = i;
+				break;
+			}
+		}
+		
+		maxButtonsPerRow = Math.max(buttonsPerRow[0], buttonsPerRow[1], buttonsPerRow[2], buttonsPerRow[3], buttonsPerRow[4], buttonsPerRow[5]);
+		
+		if(maxButtonsPerRow == 0) throw new Error("maxButtonsPerRow=" + maxButtonsPerRow + " buttonsPerRow=" + JSON.stringify(buttonsPerRow));
+		if(isNaN(maxButtonsPerRow)) throw new Error("maxButtonsPerRow=" + maxButtonsPerRow + " buttonsPerRow=" + JSON.stringify(buttonsPerRow));
+		
+		return buttonsPerRow;
+		
+	}
+	
 	function renderVirtualKeyboard() {
+		
+		console.time("renderVirtualKeyboard");
+		
+		console.log(buttons);
+		
+		if(buttons.length == 0) throw new Error("buttons.length=" + buttons.length);
 		
 		/*
 			if(pixelRatio !== 1) {
@@ -160,24 +209,36 @@ buttons = verticalLayout;
 		var y2 = 0;
 		var gradient;
 		var startX = 0;
+		var accumulatedWidth = 0;
+		var lastRow = 0;
 		
 		// ### Button backgrounds
 		
 		ctx.fillStyle = "blue";
 		ctx.strokeStyle="white";
 		ctx.lineWidth=lineWidth;
+		
 		for (var i=0; i<buttons.length; i++) {
 			
-			startX = Math.floor( (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2 );
+			if(buttons[i].row != lastRow) {
+				lastRow = buttons[i].row;
+				accumulatedWidth = 0;
+			}
 			
-			x1 = startX + buttons[i].col * buttonWidth - buttonWidth + margin;
-			y1 = buttons[i].row * buttonHeight - buttonHeight + margin;
+			console.log("buttonsPerRow[" + buttons[i].row + "]=" + buttonsPerRow[buttons[i].row]);
 			
-			x2 = startX + buttons[i].col * buttonWidth - margin*2;
-			y2 = buttons[i].row * buttonHeight - margin*2;
+			startX = Math.floor( (canvasWidth - (buttonsPerRow[buttons[i].row]) * buttonWidth) / 2 );
 			
-			cX = startX + buttons[i].col * buttonWidth - buttonWidth/2 - margin;
-			cY = buttons[i].row * buttonHeight - buttonHeight/2 - margin;
+			x1 = startX + accumulatedWidth + margin;
+			y1 = (buttons[i].row+1) * buttonHeight - buttonHeight + margin;
+			
+			x2 = startX + accumulatedWidth + buttons[i].width*buttonWidth - margin*2;
+			y2 = (buttons[i].row+1) * buttonHeight - margin*2;
+			
+			accumulatedWidth += buttons[i].width * buttonWidth;
+			
+			//cX = startX + buttons[i].col * buttonWidth - buttonWidth/2 - margin;
+			//cY = (buttons[i].row+1) * buttonHeight - buttonHeight/2 - margin;
 			
 			// A path with rounded corners
 			ctx.beginPath();
@@ -197,7 +258,12 @@ buttons = verticalLayout;
 			//gradient=ctx.createLinearGradient(cX-buttonWidth/2, cY-buttonHeight/2, buttonWidth, buttonHeight);
 			gradient=ctx.createLinearGradient(x2, y1, x2, y2);
 			gradient.addColorStop(0,"#656565");
-			gradient.addColorStop(1,"black");
+			
+			if(ALT1 && ALT2 && buttons[i].highlightAlt3) gradient.addColorStop(1,"orange");
+			else if(ALT1 && buttons[i].highlightAlt1) gradient.addColorStop(1,"green");
+			else if(ALT2 && buttons[i].highlightAlt2) gradient.addColorStop(1,"yellow");
+			else gradient.addColorStop(1,"black");
+			
 			ctx.fillStyle=gradient;
 			
 			ctx.fill(); // Fill the path with rounded corners
@@ -212,6 +278,7 @@ buttons = verticalLayout;
 		// ### Button letters
 		ctx.fillStyle = "#FFFFFF";
 		ctx.textAlign = "center";
+		ctx.font=  Math.floor(buttonHeight * 0.6)  + "px Arial";
 		
 		buttonLocations.length = 0;
 		
@@ -220,33 +287,58 @@ buttons = verticalLayout;
 		ctx.lineWidth="1";
 		ctx.strokeStyle="red";
 		
+		//var textWidth = 0;
+		var text = "";
 		for (var i=0; i<buttons.length; i++) {
 			
 			startX = Math.floor( (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2 );
 			
-			cX = startX + buttons[i].col * buttonWidth - buttonWidth/2 - margin;
-			cY = buttons[i].row * buttonHeight - buttonHeight/2 - margin;
+			ctx.font = Math.floor(buttonHeight * 0.6 * buttons[i].textSize)  + "px Arial";
+			//textWidth = ctx.measureText(comment.count.toString()).width;
+			
+			if(buttons[i].row != lastRow) {
+				lastRow = buttons[i].row;
+				accumulatedWidth = 0;
+			}
+			
+			cX = startX + accumulatedWidth + buttonWidth*buttons[i].width/2 - margin;
+			cY = (buttons[i].row+1) * buttonHeight - buttonHeight/2 - margin;
+			
+			accumulatedWidth += buttons[i].width * buttonWidth;
 			
 			buttonLocations.push({id: i, x: cX, y: cY});
 			
 			//ctx.rect(cX-buttonWidth/2+margin, cY-buttonHeight/2+margin, buttonWidth-margin*2, buttonHeight-margin*2);
 			
-			ctx.fillText(buttons[i].char, cX, cY);
+			if(CAPS && buttons[i].charCodeCaps != buttons[i].charCode) {
+				text = String.fromCharCode(buttons[i].charCodeCaps);
+			}
+			else if(ALT1 && ALT2 && buttons[i].alt3) {
+				text = buttons[i].alt3;
+			}
+			else if(ALT1 && buttons[i].alt1) {
+				text = buttons[i].alt1;
+			}
+			else if(ALT2 && buttons[i].alt2) {
+				text = buttons[i].alt2;
+			}
+			else {
+				text = buttons[i].char
+			}
+			
+			ctx.fillText(text, cX, cY);
 		}
 		ctx.stroke();
 		buttonLocations.sort(sortLocationsX);
 		
+		
+		console.timeEnd("renderVirtualKeyboard");
 	}
 	
 	function sortLocationsX(a, b) {
 		if(a.x > b.x) return -1;
 		else if(b.x > a.x) return 1;
 		else return 0; 
-	}
-	
-	
-	function calcButtonsPerRow() {
-		return [0,0,0,0,0,0];
 	}
 	
 	function canvasMouseDown(mouseDownEvent) {
@@ -290,11 +382,20 @@ buttons = verticalLayout;
 		
 		var button = buttons[id];
 		
-		fireKey(capsLock ? button.charCodeCaps : button.charCode);
+		button.fun();
 		
 		return false;
 	}
 	
+	// Buttons that have a function specified need to handle ALT1, ALT2, ALT2 && ALT2, and CAPS in that function
+	// If ALT is a special function, the key need to have a function specified.
+	function normalButtonClick() {
+		var button  = this;
+		if(ALT1 && ALT2 && button.alt3) fireKey( button.alt3.charCodeAt(0) );
+		else if(ALT1 && button.alt1) fireKey( button.alt1.charCodeAt(0) );
+		else if(ALT2 && button.alt2) fireKey( button.alt2.charCodeAt(0) );
+		else fireKey(CAPS ? button.charCodeCaps : button.charCode);
+	}
 	
 	function fireKey(charCode, eventType) {
 		
@@ -399,15 +500,14 @@ buttons = verticalLayout;
 	
 	function addButtons() {
 		
+		
 		buttonsPerRow = [0,0,0,0,0,0];
 		
 		
-		
 		// ## Horizontal
-		var row = 1;
-		var orientation = "vertical";
-		
-		add("@");
+		var row = 0;
+		var col = 0;
+		var orientation = "horizontal";
 		
 		add("1");
 		add("2");
@@ -426,25 +526,161 @@ buttons = verticalLayout;
 		add("[");
 		add("]");
 		
-		add("back", 0, function space(click) {
-			click.target.blur();
-			clearSelection();
+		add("back", {
+			fun: function space(click) {
 			fireKey(8, "keydown");
 			return false;
+		},
+			charCode: 8,
+			width: 2,
+			textSize: 0.8
 		});
 		
-		add("-", 0);
-		add("+", 0);
 		
-		add("#", 0);
+		add("-");
+		add("+");
+		
+		add("#");
+		
+		
+		// ### Horizontal second row
+		row = 1;
+		col = 0
+		
+		add("@");
+		add("q");
+		add("w");
+		add("e");
+		add("r");
+		add("t");
+		add("y");
+		add("u");
+		add("i");
+		add("o");
+		add("p");
+		add("å");
+		
+		add("=");
+		
+		add("'");
+		add('"');
+		
+		add("/");
+		add("*");
+		add("%");
+		add("~");
+		
+		
+		// ### Horizontal third row
+		row = 2;
+		col = 0
+		
+		add("CAPS", {
+fun: function capsLock(click) {
+				CAPS = !CAPS;
+				renderVirtualKeyboard();
+			},
+			charCode: -1,
+			width: 1.5,
+			textSize: 0.6
+});
+		
+		add("a");
+		add("s");
+		add("d");
+		add("f");
+		add("g");
+		add("h");
+		add("j");
+		add("k");
+		add("l");
+		add("ö");
+		add("ä");
+		
+		add(".");
+		
+		add(";");
+		
+		add("{");
+		
+		add("Enter", {
+fun: function space(click) {
+				fireKey(13, "keydown");
+			},
+			charCode: 13,
+			width: 1.5,
+			textSize: 0.8
+		});
+		
+		add("}");
+		
+		add("\\");
+		
+		
+		// ### Horizontal fourth row
+		row = 3;
+		col = 0
+		
+		add("^");
+		
+		add("&");
+		
+		
+		add("z");
+		add("x");
+		add("c");
+		add("v");
+		add("b");
+		add("n");
+		add("m");
+		
+		add("space", {
+			charCode: 32,
+			width: 1.5,
+			textSize: 0.8
+});
+		
+		add("compl", {
+fun: function space(click) {
+				fireKey(EDITOR.settings.autoCompleteKey, "keydown");
+			},
+			charCode: -1,
+			width: 1.5,
+			textSize: 0.8
+});
+		
+		add("<");
+		add(">");
+		
+		add(",");
+		add("!");
+		add("?");
+		add(":");
+		
+		
+		add("|");
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		
 		// ## Vertical
-		var row = 1;
-		var orientation = "vertical";
+		row = 0;
+		col = 0
+		orientation = "vertical";
 		
-		add("1");
+		/*
+			
+			
+			add("1");
 		add("2");
 		add("3");
 		add("4");
@@ -453,60 +689,149 @@ buttons = verticalLayout;
 		add("7");
 		add("8");
 		add("9");
+			add("0");
+		*/
 		
-		add("Q", 3, 1);
-		add("W", 3, 2);
-		add("E", 3, 3);
-		add("R", 3, 4);
-		add("T", 3, 5);
-		add("Y", 3, 6);
-		add("U", 3, 7);
-		add("I", 3, 8);
-		add("O", 3, 9);
-		add("P", 3, 10);
+		// ### Vertical first row
+		row = 0;
+		col = 0
 		
+		add("q", {alt1: "1"});
+		add("w", {alt1: "2"});
+		add("e", {alt1: "3"});
+		add("r", {alt1: "4"});
+		add("t", {alt1: "5"});
+		add("y", {alt1: "6"});
+		add("u", {alt1: "7"});
+		add("i", {alt1: "8"});
+		add("o", {alt1: "9"});
+		add("p", {alt1: "0"});
 		
-		add(")", 3, 11);
-		add("{", 3, 12);
-		add("}", 3, 13);
-		add("'", 3, 14);
-		add('"', 3, 15);
-		
-		
-		add("A", 4, 1);
-		add("S", 4, 2);
-		add("D", 4, 3);
-		add("F", 4, 4);
-		add("G", 4, 5);
-		add("H", 4, 6);
-		add("J", 4, 7);
-		add("K", 4, 8);
-		add("L", 4, 9);
-		
-		add("Z", 5, 1);
-		add("X", 5, 2);
-		add("C", 5, 3);
-		add("V", 5, 4);
-		add("B", 5, 5);
-		add("N", 5, 6);
-		add("M", 5, 7);
-		
-		maxButtonsPerRow = Math.max(buttonsPerRow[0], buttonsPerRow[1], buttonsPerRow[2], buttonsPerRow[3], buttonsPerRow[4], buttonsPerRow[5]);
+		add("back", {
+			fun: function space(click) {
+				fireKey(8, "keydown");
+				return false;
+			},
+			charCode: 8,
+			width: 1,
+			textSize: 0.3,
+		});
 		
 		
-		function add(char, row, col) {
+		// ### Vertical second row
+		row = 1;
+		col = 0
+		
+		add("CAPS", {
+			fun: function capsLock(click) {
+				CAPS = !CAPS;
+				if(CAPS) {
+					ALT1 = false;
+					ALT2 = false;
+				}
+				renderVirtualKeyboard();
+			},
+			charCode: -1,
+			width: 1,
+			textSize: 0.3
+		});
+		
+		add("a");
+		add("s");
+		add("d");
+		add("f");
+		add("g");
+		add("h");
+		add("j");
+		add("k", {alt2: "{"});
+		add("l", {alt2: "}"});
+		
+		add("space", {
+			fun: function space(click) {
+				if(ALT2) fireKey(13, "keydown"); // Enter
+				else fireKey(32, "keypress"); // space
+			},
+			charCode: 32,
+			width: 1,
+			textSize: 0.3,
+			alt2: "Enter"
+		});
+		
+		
+		
+		// ### Vertical third row
+		row = 2;
+		col = 0;
+		
+		add("Alt-1", {
+			fun: function alternate1() {
+				ALT1=!ALT1;
+				CAPS = false;
+				renderVirtualKeyboard();
+			},
+			charCode: -1,
+			highlightWhenActive: true,
+			width: 1.5,
+			textSize: 0.7,
+			highlightAlt1: true,
+			highlightAlt3: true
+		});
+		
+		add("z");
+		add("x");
+		add("c");
+		add("v");
+		add("b");
+		add("n");
+		add("m");
+		add(".", {alt1: '"', alt2: ","});
+		
+		add("Alt-2", {
+			fun: function alternate1() {
+				ALT2=!ALT2;
+				renderVirtualKeyboard();
+			},
+			charCode: -1,
+			highlightWhenActive: true,
+			width: 1.5,
+			textSize: 0.7,
+			highlightAlt2: true,
+			highlightAlt3: true
+		});
+		
+		
+		
+		
+		function add(char, options) {
+			
+			console.log("Adding virtual keyboard key: char=" + char + " orientation=" + orientation);
+			
+			if(options == undefined) options = {};
+			
 			var lowerCase = char.toLowerCase();
 			var upperCase = char.toUpperCase();
 			var charCode = lowerCase.charCodeAt(0);
 			var charCodeCaps = upperCase.charCodeAt(0);
+			var buttons = orientation == "horizontal" ? horizontalLayout : verticalLayout;
+			
+			if(options.charCode && !options.charCodeCaps) options.charCodeCaps = options.charCode;
+			
 			buttons.push({
 				char: char, 
-				charCode: charCode, 
-				charCodeCaps: charCodeCaps, 
-				row: row, 
-				col: col
+				charCode: options.charCode || charCode, 
+				charCodeCaps: options.charCodeCaps || charCodeCaps, 
+				row: options.row || row, 
+				col: options.col || ++col,
+				width: options.width || 1,
+				textSize: options.textSize || 1,
+				fun: options.fun || normalButtonClick,
+				alt1: options.alt1,
+				alt2: options.alt2,
+				alt3: options.alt3,
+				highlightAlt1: options.highlightAlt1 || false,
+				highlightAlt2: options.highlightAlt2 || false,
+				highlightAlt3: options.highlightAlt3 || false
 			});
-			buttonsPerRow[row]++;
 		}
 		
 	}

@@ -44,6 +44,9 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+CAPS vs ALT1 and ALT2 and ALT3 ... what about ÅÄÖ !?
+
+
 Fiddling with the renderRow and render_lineNumbers.js optimization.
 
 Working on canvas based virtual keyboard ...

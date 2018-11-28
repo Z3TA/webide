@@ -36,8 +36,8 @@
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
 			// debug
-			var rightColumn = document.getElementById("rightColumn");
-			rightColumn.appendChild(cacheCanvas);
+			//var rightColumn = document.getElementById("rightColumn");
+			//rightColumn.appendChild(cacheCanvas);
 			
 		},
 		unload: function() {
@@ -60,8 +60,8 @@
 		//cacheCanvas.style.height = EDITOR.view.canvasHeight + "px";
 		
 		// debug
-		cacheCanvas.style.width=cacheCanvasWidth + "px";
-		cacheCanvas.style.height=cacheCanvasHeight + "px";
+		//cacheCanvas.style.width=cacheCanvasWidth + "px";
+		//cacheCanvas.style.height=cacheCanvasHeight + "px";
 		
 	}
 	
@@ -100,9 +100,9 @@ return;
 			cacheCtx.fillRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
 			
 			// debug
-			cacheCtx.fillStyle ="darkred";
-			cacheCtx.fillRect(5, 5, cacheCanvasWidth-10, cacheCanvasHeight-10);
-			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			//cacheCtx.fillStyle ="darkred";
+			//cacheCtx.fillRect(5, 5, cacheCanvasWidth-10, cacheCanvasHeight-10);
+			//cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
 			cacheCtx.fillStyle = EDITOR.settings.style.textColor;
 
@@ -125,10 +125,10 @@ return;
 			}
 			
 			// debug
-			cacheCtx.fillText(startRow, 10, 0) ;
-			cacheCtx.font=EDITOR.settings.style.fontSize/2 + "px " + EDITOR.settings.style.font;
-			var tmp = 0;
-			for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=EDITOR.settings.gridHeight) cacheCtx.fillText(++tmp, 20, i) ;
+			//cacheCtx.fillText(startRow, 10, 0) ;
+			//cacheCtx.font=EDITOR.settings.style.fontSize/2 + "px " + EDITOR.settings.style.font;
+			//var tmp = 0;
+			//for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=EDITOR.settings.gridHeight) cacheCtx.fillText(++tmp, 20, i) ;
 			
 			
 		}
