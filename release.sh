@@ -69,6 +69,7 @@ rm -rf temp/release/linux/hosted_chrome_app/
 rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/client/plugin/jswordwrap/
 
+rm temp/release/linux/charStats.js
 rm temp/release/linux/webide_release.sh
 rm temp/release/linux/release.sh
 rm temp/release/linux/todo.md

@@ -44,6 +44,8 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+hmm, weird, text on main canvas gets blurry (LCD-text) because of virtual keyboard canvas !?
+
 CAPS vs ALT1 and ALT2 and ALT3 ... what about ÅÄÖ !?
 
 

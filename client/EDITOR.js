@@ -79,7 +79,7 @@ EDITOR.settings = {
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
-	sub_pixel_antialias: true, // For the main text area (canvas) only.
+	sub_pixel_antialias: false, // For the main text area (canvas) only.
 	style: {
 		// These are the default/fallback styles. Over-ride them in settings_overload.js !
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
@@ -1546,10 +1546,10 @@ canvas = EDITOR.canvas;
 		}
 		else if(ctx == undefined) {
 			if(EDITOR.settings.sub_pixel_antialias == false) {
-				ctx = canvas.getContext("2d");
+				ctx = canvas.getContext("2d", {antialias: false});
 			}
 			else {
-				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
+				ctx = canvas.getContext("2d", {alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
 			}
 		}
 		
@@ -1938,7 +1938,7 @@ canvas = EDITOR.canvas;
 		
 		var headerHeight = parseInt(header.offsetHeight);
 		var footerHeight = parseInt(footer.offsetHeight);
-		var virtualKeyboardHeight = EDITOR.virtualKeyboardHeight || parseInt(virtualKeyboard.offsetHeight);
+		var virtualKeyboardHeight = parseInt(virtualKeyboard.offsetHeight);
 		var headerFooterHeight = headerHeight + footerHeight + virtualKeyboardHeight;
 		var leftColumnWidth = parseInt(leftColumn.offsetWidth);
 		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
@@ -5601,11 +5601,11 @@ var word = "";
 		canvas.ondrop = fileDrop;
 		
 		if(EDITOR.settings.sub_pixel_antialias == false) {
-			ctx = canvas.getContext("2d");
+			ctx = canvas.getContext("2d", {antialias: false});
 			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 		}
 		else {
-			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
+			ctx = canvas.getContext("2d", {alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
 		
 		// Set the font only once for performance

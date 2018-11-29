@@ -24,7 +24,53 @@
 	
 	Long-press: Inserts the character, then auto-complete
 	
+	We tried having alt-keys, but typing was too slow, where alt keys required 3 key presses.
 	
+	Most common characters, beside the normal latin letters:
+	space=6772002 
+	Enter=986014 
+	,=679396 
+	.=591280 
+	)=506646 
+	(=506640 
+	==456621 
+	"=378701 
+	;=374216 
+	/=284895 
+	0=275398 
+	'=265540 
+	-=224118 
+	1=206276 
+	{=203136 
+	}=202922 
+	_=198407 
+	:=195979 
+	=165540 
+	2=154382 
+	*=129766 
+	+=123478 
+	3=119448 
+	[=99911 
+	]=99547 
+	4=99258 
+	5=97924 
+	6=89885 
+	7=81554 
+	8=79697 
+	9=71607 
+	\=69728 
+	&=68828 
+	>=57232 
+	<=56023 
+	!=55563 
+	|=51660 
+	`=33476 
+	?=29721 
+	@=24256 
+	$=17894 
+	%=12639 
+	#=10033 
+	^=4949  
 	
 */
 
@@ -135,6 +181,8 @@ EDITOR.resizeNeeded();
 			EDITOR.updateMenuItem(menuItem, ACTIVE);
 		}
 		
+		console.log("Virtual keyboard visible ? " + ACTIVE);
+		
 		return ACTIVE;
 	}
 	
@@ -147,7 +195,7 @@ EDITOR.resizeNeeded();
 			Claim the height needed
 		*/
 		
-		
+		if(!ACTIVE) return;
 		
 		if(windowWidth > windowHeight) {
 			var orientation = "horizontal";
@@ -171,17 +219,17 @@ buttons = verticalLayout;
 		console.log("buttonsPerRow=" + JSON.stringify(buttonsPerRow));
 		console.log("totalRows=" + totalRows);
 		
+		
 		canvasWidth = windowWidth;
-		buttonWidth = canvasWidth / maxButtonsPerRow;
-		buttonHeight = buttonWithToHeightRatio * buttonWidth;
-		canvasHeight = buttonHeight * totalRows;
-		
-		
-		
 		
 		radius = canvasWidth / 150; // Rounded corners
 		margin = canvasWidth / 300;
 		lineWidth = canvasWidth / 1500;
+		buttonWidth = canvasWidth / maxButtonsPerRow;
+		
+		buttonHeight = buttonWithToHeightRatio * buttonWidth;
+		canvasHeight = Math.ceil(buttonHeight * totalRows + margin);
+		
 		
 		
 		var wrapper = document.getElementById("virtualKeyboard2");
@@ -189,13 +237,15 @@ buttons = verticalLayout;
 		wrapper.style.height=canvasHeight + "px";
 		
 		
-		EDITOR.virtualKeyboardHeight = canvasHeight;
+		//EDITOR.virtualKeyboardHeight = canvasHeight;
 		
 		console.log("virtualKeyboardClaimHeight: canvasWidth=" + canvasWidth + " buttonWidth=" + buttonWidth + " canvasHeight=" + canvasHeight + " buttonHeight=" + buttonHeight);
 		
 	}
 	
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
+		
+		if(!ACTIVE) return;
 		
 		// debug
 		var wrapper = document.getElementById("virtualKeyboard2");
