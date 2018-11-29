@@ -57,6 +57,7 @@
 	var ALT1 = false;
 	var ALT2 = false;
 	
+	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
 	canvas.ontouchstart = canvasMouseDown;
@@ -74,7 +75,9 @@
 			EDITOR.addEvent( "mouseClick", {dir: "down", fun: keyboardPushbuttonDown, targetClass:"fileCanvas", order: 10} );
 			EDITOR.addEvent( "mouseClick", {dir: "up", fun: keyboardPushbuttonUp, targetClass:"fileCanvas", order: 10} );
 			
+			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
+			
 			
 			addButtons();
 			
@@ -82,17 +85,29 @@
 			
 			toggleVirtualKeyboard2();
 			
+			var wrapper = document.getElementById("virtualKeyboard2");
+			
+			
+			
+			//wrapper.setAttribute("style", "border: 2px solid red; overflow: hide;");
+			
+			wrapper.appendChild(canvas);
+			
 		},
 		unload: function unloadVirtualKeyboard() {
 			
 			EDITOR.removeEvent("mouseClick", keyboardPushbuttonDown);
 			EDITOR.removeEvent("mouseClick", keyboardPushbuttonUp);
 			
+			EDITOR.removeEvent("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.removeEvent("afterResize", resizeVirtualKeyboard);
 			
 			toggleVirtualKeyboard2(false);
 			
 			EDITOR.removeMenuItem(menuItem);
+			
+			var wrapper = document.getElementById("virtualKeyboard2");
+			wrapper.removeChild(canvas);
 			
 		}
 	});
@@ -106,13 +121,13 @@
 		
 		ACTIVE = !ACTIVE;
 		
-		var footer = document.getElementById("footer");
+		var wrapper = document.getElementById("virtualKeyboard2");
 		
 		if(ACTIVE && !oldState) {
-footer.appendChild(canvas);
+			wrapper.style.display="block";
 		}
 		else if(!ACTIVE && oldState) {
-footer.removeChild(canvas);
+			wrapper.style.display="none";
 		}
 		
 		if(oldState != ACTIVE) {
@@ -123,8 +138,16 @@ EDITOR.resizeNeeded();
 		return ACTIVE;
 	}
 	
-	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
-		pixelRatio = window.devicePixelRatio || 1;
+	
+	
+	
+	function virtualKeyboardClaimHeight(file, windowWidth, windowHeight) {
+		
+		/*
+			Claim the height needed
+		*/
+		
+		
 		
 		if(windowWidth > windowHeight) {
 			var orientation = "horizontal";
@@ -134,7 +157,7 @@ buttonsPerRow = calcButtonsPerRow(buttons);
 }
 		else {
 			var orientation = "vertical";
-			buttonWithToHeightRatio = 1.5;
+			buttonWithToHeightRatio = 1.7;
 buttons = verticalLayout;
 			buttonsPerRow = calcButtonsPerRow(buttons);
 }
@@ -149,35 +172,58 @@ buttons = verticalLayout;
 		console.log("totalRows=" + totalRows);
 		
 		canvasWidth = windowWidth;
-		buttonWidth = Math.floor(canvasWidth / maxButtonsPerRow);
-		buttonHeight = Math.floor(buttonWithToHeightRatio * buttonWidth);
+		buttonWidth = canvasWidth / maxButtonsPerRow;
+		buttonHeight = buttonWithToHeightRatio * buttonWidth;
 		canvasHeight = buttonHeight * totalRows;
 		
-		canvas.width = canvasWidth * pixelRatio;
-		canvas.height = canvasHeight * pixelRatio;
 		
-		// Setting the width and height will clear the canvas!
+		
 		
 		radius = canvasWidth / 150; // Rounded corners
 		margin = canvasWidth / 300;
 		lineWidth = canvasWidth / 1500;
 		
+		
+		var wrapper = document.getElementById("virtualKeyboard2");
+		wrapper.style.width=canvasWidth + "px";
+		wrapper.style.height=canvasHeight + "px";
+		
+		
+		EDITOR.virtualKeyboardHeight = canvasHeight;
+		
+		console.log("virtualKeyboardClaimHeight: canvasWidth=" + canvasWidth + " buttonWidth=" + buttonWidth + " canvasHeight=" + canvasHeight + " buttonHeight=" + buttonHeight);
+		
+	}
+	
+	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
+		
+		// debug
+		var wrapper = document.getElementById("virtualKeyboard2");
+		var wrapperBefore = wrapper.offsetWidth + "x" + wrapper.offsetHeight;
+		
+		var pixelRatio = window.devicePixelRatio || 1;
+		
+		canvas.width = canvasWidth * pixelRatio;
+		canvas.height = canvasHeight * pixelRatio;
+		// Setting the width and height will clear the canvas!
+		
+		
 		ctx.restore();
 		ctx.save();
 		ctx.scale(pixelRatio,pixelRatio);
 		//ctx.scale(1,1);
-		
 		ctx.textBaseline = "middle"; // Will also be reset when setting canvas.width!
 		
 		canvas.style.width=canvasWidth + "px";
 		canvas.style.height=canvasHeight + "px";
 		
-		
-		console.log("resizeVirtualKeyboard: canvasWidth=" + canvasWidth + " buttonWidth=" + buttonWidth + " canvasHeight=" + canvasHeight + " buttonHeight=" + buttonHeight);
-		
 		renderVirtualKeyboard();
 		
+		// debug
+		var wrapperAfter = wrapper.offsetWidth + "x" + wrapper.offsetHeight;
+		console.log("resizeVirtualKeyboard: pixelRatio=" + pixelRatio + " windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " actual window size=" + window.innerWidth + "x" + window.innerHeight + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight + " wrapperBefore=" + wrapperBefore + " wrapperAfter=" + wrapperAfter);
 	}
+	
 	
 	function calcButtonsPerRow(buttons) {
 		
@@ -255,7 +301,7 @@ totalRows = i;
 			
 			console.log("buttonsPerRow[" + buttons[i].row + "]=" + buttonsPerRow[buttons[i].row]);
 			
-			startX = Math.floor( (canvasWidth - (buttonsPerRow[buttons[i].row]) * buttonWidth) / 2 );
+			startX = (canvasWidth - (buttonsPerRow[buttons[i].row]) * buttonWidth) / 2;
 			
 			x1 = startX + accumulatedWidth + margin;
 			y1 = (buttons[i].row+1) * buttonHeight - buttonHeight + margin;
@@ -319,7 +365,7 @@ totalRows = i;
 		var text = "";
 		for (var i=0; i<buttons.length; i++) {
 			
-			startX = Math.floor( (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2 );
+			startX = (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2;
 			
 			ctx.font = Math.floor(buttonHeight * 0.6 * buttons[i].textSize)  + "px Arial";
 			//textWidth = ctx.measureText(comment.count.toString()).width;
@@ -329,8 +375,8 @@ totalRows = i;
 				accumulatedWidth = 0;
 			}
 			
-			cX = startX + accumulatedWidth + buttonWidth*buttons[i].width/2 - margin;
-			cY = (buttons[i].row+1) * buttonHeight - buttonHeight/2 - margin;
+			cX = startX + accumulatedWidth + buttonWidth*buttons[i].width/2 - margin/2;
+			cY = (buttons[i].row+1) * buttonHeight - buttonHeight/2 - margin/2;
 			
 			accumulatedWidth += buttons[i].width * buttonWidth;
 			
@@ -800,7 +846,7 @@ fun: function space(click) {
 			charCode: -1,
 			highlightWhenActive: true,
 			width: 1.5,
-			textSize: 0.7,
+			textSize: 0.6,
 			highlightAlt1: true,
 			highlightAlt3: true
 		});
@@ -822,7 +868,7 @@ fun: function space(click) {
 			charCode: -1,
 			highlightWhenActive: true,
 			width: 1.5,
-			textSize: 0.7,
+			textSize: 0.6,
 			highlightAlt2: true,
 			highlightAlt3: true
 		});
