@@ -51,7 +51,8 @@
 	var verticalLayout = [];
 	var horizontalLayout = [];
 	var totalRows = 3;
-	
+	var ACTIVE = false;
+	var menuItem;
 	// Each key can have 3 alternative functions, depending if alt1, alt2 or both alt1 and alt2 is active
 	var ALT1 = false;
 	var ALT2 = false;
@@ -77,9 +78,9 @@
 			
 			addButtons();
 			
+			menuItem = EDITOR.addMenuItem("Virtual Keyboard 2", toggleVirtualKeyboard2, 26);
 			
-			var footer = document.getElementById("footer");
-			footer.appendChild(canvas);
+			toggleVirtualKeyboard2();
 			
 		},
 		unload: function unloadVirtualKeyboard() {
@@ -89,11 +90,38 @@
 			
 			EDITOR.removeEvent("afterResize", resizeVirtualKeyboard);
 			
-			footer.removeChild(canvas);
+			toggleVirtualKeyboard2(false);
+			
+			EDITOR.removeMenuItem(menuItem);
 			
 		}
 	});
 	
+	function toggleVirtualKeyboard2(state) {
+		var oldState = ACTIVE;
+		
+		if(typeof state == "boolean") {
+			ACTIVE = state;
+		}
+		
+		ACTIVE = !ACTIVE;
+		
+		var footer = document.getElementById("footer");
+		
+		if(ACTIVE && !oldState) {
+footer.appendChild(canvas);
+		}
+		else if(!ACTIVE && oldState) {
+footer.removeChild(canvas);
+		}
+		
+		if(oldState != ACTIVE) {
+EDITOR.resizeNeeded();
+			EDITOR.updateMenuItem(menuItem, ACTIVE);
+		}
+		
+		return ACTIVE;
+	}
 	
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
 		pixelRatio = window.devicePixelRatio || 1;
