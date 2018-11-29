@@ -375,24 +375,21 @@ totalRows = i;
 			
 			accumulatedWidth += buttons[i].width * buttonWidth;
 			
-			buttonLocations.push({id: i, x: cX, y: cY});
+			buttonLocations.push({id: i, x: cX, y: cY, width: buttons[i].width});
 			
 			//ctx.rect(cX-buttonWidth/2+margin, cY-buttonHeight/2+margin, buttonWidth-margin*2, buttonHeight-margin*2);
 			
-			if(CAPS && buttons[i].charCodeCaps != buttons[i].charCode) {
-				text = String.fromCharCode(buttons[i].charCodeCaps);
-			}
-			else if(ALT1 && ALT2 && buttons[i].alt3) {
-				text = buttons[i].alt3;
+			if(ALT1 && ALT2 && buttons[i].alt3) {
+				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt3.toUpperCase() : buttons[i].alt3;
 			}
 			else if(ALT1 && buttons[i].alt1) {
-				text = buttons[i].alt1;
+				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt1.toUpperCase() : buttons[i].alt1;
 			}
 			else if(ALT2 && buttons[i].alt2) {
-				text = buttons[i].alt2;
+				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt2.toUpperCase() : buttons[i].alt2;
 			}
 			else {
-				text = buttons[i].char
+				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].char.toUpperCase() : buttons[i].char;
 			}
 			
 			ctx.fillText(text, cX, cY);
@@ -435,7 +432,7 @@ totalRows = i;
 			
 			console.log("click.x=" + click.x + " click.y=" + click.y + " button.x=" + buttonLocations[i].x + " button.y=" + buttonLocations[i].y + " buttonWidth=" + buttonWidth + " buttonHeight=" + buttonHeight + " ");
 			
-			if( click.x > (buttonLocations[i].x - buttonWidth/2)  &&  click.x < (buttonLocations[i].x + buttonWidth/2) && 
+			if( click.x > (buttonLocations[i].x - buttonWidth * buttonLocations[i].width / 2)  &&  click.x < (buttonLocations[i].x + buttonWidth * buttonLocations[i].width / 2) && 
 			click.y > (buttonLocations[i].y - buttonHeight/2)  &&  click.y < (buttonLocations[i].y + buttonHeight/2) ) return clickButton(buttonLocations[i].id);
 		}
 		
@@ -458,15 +455,22 @@ totalRows = i;
 	
 	// Buttons that have a function specified need to handle ALT1, ALT2, ALT2 && ALT2, and CAPS in that function
 	// If ALT is a special function, the key need to have a function specified.
-	function normalButtonClick() {
+	function normalButton() {
 		var button  = this;
-		if(ALT1 && ALT2 && button.alt3) fireKey( button.alt3.charCodeAt(0) );
-		else if(ALT1 && button.alt1) fireKey( button.alt1.charCodeAt(0) );
-		else if(ALT2 && button.alt2) fireKey( button.alt2.charCodeAt(0) );
+		if(ALT1 && ALT2 && button.alt3) fireKey( CAPS ? button.alt3.toUpperCase().charCodeAt(0) : button.alt3.toLowerCase().charCodeAt(0) );
+		else if(ALT1 && button.alt1) fireKey( CAPS ? button.alt1.toUpperCase().charCodeAt(0) : button.alt1.toLowerCase().charCodeAt(0) );
+		else if(ALT2 && button.alt2) fireKey(CAPS ? button.alt2.toUpperCase().charCodeAt(0) : button.alt2.toLowerCase().charCodeAt(0) );
 		else fireKey(CAPS ? button.charCodeCaps : button.charCode);
 	}
 	
 	function fireKey(charCode, eventType) {
+		
+		if(charCode == 8592) charCode = 37; // ← left
+		if(charCode == 8594) charCode = 39; // → right
+		if(charCode == 8593) charCode = 38; // ↑ up
+		if(charCode == 8595) charCode = 40; // ↓ down
+		
+		if(charCode == 37 || charCode == 39 || charCode == 38 || charCode == 40) eventType = "keydown";
 		
 		//event.preventDefault();
 		
@@ -765,16 +769,16 @@ fun: function space(click) {
 		row = 0;
 		col = 0
 		
-		add("q", {alt1: "1"});
-		add("w", {alt1: "2"});
-		add("e", {alt1: "3"});
-		add("r", {alt1: "4"});
-		add("t", {alt1: "5"});
-		add("y", {alt1: "6"});
-		add("u", {alt1: "7"});
-		add("i", {alt1: "8"});
-		add("o", {alt1: "9"});
-		add("p", {alt1: "0"});
+		add("q", {alt1: "1", alt2: "!", alt3: "ä"});
+		add("w", {alt1: "2", alt2: "@", alt3: "å"});
+		add("e", {alt1: "3", alt2: "#", alt3: "é"});
+		add("r", {alt1: "4", alt2: "$", atl3: "£"});
+		add("t", {alt1: "5", alt2: "%", alt3: "þ"});
+		add("y", {alt1: "6", alt2: "^", alt3: "ü"});
+		add("u", {alt1: "7", alt2: "&", alt3: "ú"});
+		add("i", {alt1: "8", alt2: "*", alt3: "í"});
+		add("o", {alt1: "9", alt2: "(", alt3: "ó"});
+		add("p", {alt1: "0", alt2: ")", alt3: "ö"});
 		
 		add("back", {
 			fun: function space(click) {
@@ -793,27 +797,29 @@ fun: function space(click) {
 		
 		add("CAPS", {
 			fun: function capsLock(click) {
-				CAPS = !CAPS;
-				if(CAPS) {
-					ALT1 = false;
-					ALT2 = false;
+				if(ALT2) {
+					fireKey(9, "keydown"); // Tab
 				}
+				else {
+					CAPS = !CAPS;
 				renderVirtualKeyboard();
+				}
 			},
 			charCode: -1,
 			width: 1,
-			textSize: 0.3
+			textSize: 0.3,
+			alt2: "TAB"
 		});
 		
-		add("a");
-		add("s");
-		add("d");
-		add("f");
-		add("g");
-		add("h");
-		add("j");
-		add("k", {alt2: "{"});
-		add("l", {alt2: "}"});
+		add("a", {alt1: "~", alt2: "`", alt3: "á"});
+		add("s", {alt1: "a", alt2: "§", alt3: "ß"});
+		add("d", {alt1: "b", alt2: "#", alt3: "Ð"});
+		add("f", {alt1: "c", alt2: "-"});
+		add("g", {alt1: "d", alt2: "="});
+		add("h", {alt1: "e", alt2: "/", alt3: "←"}); // move left
+		add("j", {alt1: "f", alt2: "{", alt3: "↓"}); // move down
+		add("k", {alt1: "+", alt2: "}", alt3: "↑"}); // move up
+		add("l", {alt1: ":", alt2: ";", alt3: "→"}); // move right
 		
 		add("space", {
 			fun: function space(click) {
@@ -846,13 +852,13 @@ fun: function space(click) {
 			highlightAlt3: true
 		});
 		
-		add("z");
-		add("x");
-		add("c");
-		add("v");
-		add("b");
-		add("n");
-		add("m");
+		add("z", {alt1: "<", alt2: "_", alt3: "œ"});
+		add("x", {alt1: ">", alt2: "\\"});
+		add("c", {alt1: "*", alt2: "|", alt3: "©"});
+		add("v", {alt1: "-",  alt2: "^"});
+		add("b", {alt1: "o", alt2: "~"}); // o for octal
+		add("n", {alt1: "n", alt2: "["}); // Leave n as n might be used as bigint annotator
+		add("m", {alt1: "'", alt2: "]", alt3: "µ"});
 		add(".", {alt1: '"', alt2: ","});
 		
 		add("Alt-2", {
@@ -893,7 +899,7 @@ fun: function space(click) {
 				col: options.col || ++col,
 				width: options.width || 1,
 				textSize: options.textSize || 1,
-				fun: options.fun || normalButtonClick,
+				fun: options.fun || normalButton,
 				alt1: options.alt1,
 				alt2: options.alt2,
 				alt3: options.alt3,
