@@ -11,6 +11,8 @@ if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not popu
 
 EDITOR.sessionId = Math.random().toString(36).substring(7); // A hopefully unique ID for this session 
 
+EDITOR.touchScreen = false;
+
 var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
@@ -1890,12 +1892,13 @@ canvas = EDITOR.canvas;
 		console.time("resize");
 		
 		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
-		
+		var windowHeight = parseInt(window.innerHeight);
+		var windowWidth = parseInt(window.innerWidth);
 		
 		// Resize listeners (before)
 		console.log("Calling beforeResize listeners (" + EDITOR.eventListeners.beforeResize.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.beforeResize.length; i++) {
-			EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile);
+			EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile, windowWidth, windowHeight);
 		}
 		
 		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
@@ -1930,14 +1933,13 @@ canvas = EDITOR.canvas;
 		var rightColumn = document.getElementById("rightColumn");
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
-		
+		var virtualKeyboard = document.getElementById("virtualKeyboard2");
 		if(!footer) return; // Page has not yet fully loaded
 		
-		var windowHeight = parseInt(window.innerHeight);
-		var windowWidth = parseInt(window.innerWidth);
 		var headerHeight = parseInt(header.offsetHeight);
 		var footerHeight = parseInt(footer.offsetHeight);
-		var headerFooterHeight = headerHeight + footerHeight;
+		var virtualKeyboardHeight = EDITOR.virtualKeyboardHeight || parseInt(virtualKeyboard.offsetHeight);
+		var headerFooterHeight = headerHeight + footerHeight + virtualKeyboardHeight;
 		var leftColumnWidth = parseInt(leftColumn.offsetWidth);
 		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
 		var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
@@ -1946,7 +1948,7 @@ canvas = EDITOR.canvas;
 		var columnsHeight = contentHeight;
 		
 		
-		// Position the virtual keyboard
+		// Position the OLD virtual keyboard
 		if(virtualKeyboardElement) {
 			var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
 			var vkWidth = parseInt(vkcs.width);
@@ -6805,10 +6807,13 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
 				//EDITOR.renderNeeded();
 			EDITOR.renderRow();
-			
+			if(EDITOR.touchScreen) EDITOR.renderCaret(file.caret);
 			
 			// Experiment: Hide the caret while typing !?
-			// First remove any old ones so they do not stop before the caret is fully filled
+			
+			if(!EDITOR.touchScreen) { // Hiding caret is annoying when typing using the virtual keyboard
+				
+				// First remove any old ones so they do not stop before the caret is fully filled
 			clearTimeout(renderCaretTimer);
 			EDITOR.removeAnimation(fadeInCaretAnimation);
 			
@@ -6848,11 +6853,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					document.getElementById('canvas').style.cursor = 'text';
 				}, 3000);
 			}
-			
-			
-			
-			
-			
+			}
 		}
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
@@ -7296,6 +7297,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 		// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
+		
+		if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
 		
 		EDITOR.touchDown = true;
 		
