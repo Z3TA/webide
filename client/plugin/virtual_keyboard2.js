@@ -33,7 +33,7 @@
 	"use strict";
 	
 	var canvas = document.createElement("canvas");
-	var ctx = canvas.getContext('2d');
+	var ctx = canvas.getContext('2d', {alpha: false, antialias: false});
 	var pixelRatio = 1;
 	var buttonWithToHeightRatio = 1.5;
 	var buttonWidth = 10;
@@ -206,8 +206,6 @@ buttons = verticalLayout;
 		canvas.width = canvasWidth * pixelRatio;
 		canvas.height = canvasHeight * pixelRatio;
 		// Setting the width and height will clear the canvas!
-		
-		
 		ctx.restore();
 		ctx.save();
 		ctx.scale(pixelRatio,pixelRatio);
@@ -252,10 +250,14 @@ totalRows = i;
 	}
 	
 	function renderVirtualKeyboard() {
-		
+		/*
+			
+			Optimization: Measured when clicking ALt keys
+			Naive/Original: 1.4 - 2.6 ms on Chrome
+			Cache background: 1.9 - 3.5 on Chrome. Huh? Seems like copying from another canvas cost a lot!
+			Use translate: 
+		*/
 		console.time("renderVirtualKeyboard");
-		
-		console.log(buttons);
 		
 		if(buttons.length == 0) throw new Error("buttons.length=" + buttons.length);
 		
@@ -272,9 +274,6 @@ totalRows = i;
 		ctx.fillStyle = "#000000";
 		ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-		
-		
-		
 		var cX = 0;
 		var cY = 0;
 		var x1 = 0;
@@ -288,7 +287,6 @@ totalRows = i;
 		
 		// ### Button backgrounds
 		
-		ctx.fillStyle = "blue";
 		ctx.strokeStyle="white";
 		ctx.lineWidth=lineWidth;
 		
@@ -298,8 +296,6 @@ totalRows = i;
 				lastRow = buttons[i].row;
 				accumulatedWidth = 0;
 			}
-			
-			console.log("buttonsPerRow[" + buttons[i].row + "]=" + buttonsPerRow[buttons[i].row]);
 			
 			startX = (canvasWidth - (buttonsPerRow[buttons[i].row]) * buttonWidth) / 2;
 			
@@ -347,7 +343,6 @@ totalRows = i;
 			
 			//ctx.drawImage(canvas, m, m, buttonWidth, buttonHeight, cX-buttonWidth/2+m, cY-buttonHeight/2+m, buttonWidth, buttonHeight);
 		}
-		
 		
 		// ### Button letters
 		ctx.fillStyle = "#FFFFFF";
