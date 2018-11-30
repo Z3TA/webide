@@ -108,7 +108,7 @@
 	// Each key can have 3 alternative functions, depending if alt1, alt2 or both alt1 and alt2 is active
 	var ALT1 = false;
 	var ALT2 = false;
-	
+	var clickTimer;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -414,11 +414,13 @@ totalRows = i;
 		
 		//var textWidth = 0;
 		var text = "";
+		var alt1 = "";
+		var alt2 = "";
 		for (var i=0; i<buttons.length; i++) {
 			
 			startX = (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2;
 			
-			ctx.font = Math.floor(buttonHeight * 0.6 * buttons[i].textSize)  + "px Arial";
+			ctx.font = Math.floor(buttonHeight * 0.4 * buttons[i].textSize)  + "px Arial";
 			//textWidth = ctx.measureText(comment.count.toString()).width;
 			
 			if(buttons[i].row != lastRow) {
@@ -435,20 +437,37 @@ totalRows = i;
 			
 			//ctx.rect(cX-buttonWidth/2+margin, cY-buttonHeight/2+margin, buttonWidth-margin*2, buttonHeight-margin*2);
 			
+			
+			
 			if(ALT1 && ALT2 && buttons[i].alt3) {
 				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt3.toUpperCase() : buttons[i].alt3;
 			}
-			else if(ALT1 && buttons[i].alt1) {
+			else if(ALT1 && !ALT2 && buttons[i].alt1) {
 				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt1.toUpperCase() : buttons[i].alt1;
 			}
-			else if(ALT2 && buttons[i].alt2) {
+			else if(ALT2 && !ALT1 && buttons[i].alt2) {
 				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt2.toUpperCase() : buttons[i].alt2;
 			}
-			else {
+			else if(!ALT1 && !ALT2 && !(ALT1 && ALT2)) {
 				text = (CAPS && buttons[i].fun == normalButton) ? buttons[i].char.toUpperCase() : buttons[i].char;
 			}
+			else text = null;
 			
-			ctx.fillText(text, cX, cY);
+			if(text) ctx.fillText(text, cX, cY);
+			
+			alt1 = buttons[i].alt1 && (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt1.toUpperCase() : buttons[i].alt1;
+			alt2 = buttons[i].alt2 && (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt2.toUpperCase() : buttons[i].alt2;
+			
+			//if(alt1 && ALT1) alt1 = (CAPS && buttons[i].fun == normalButton) ? buttons[i].char.toUpperCase() : buttons[i].char;
+			//if(alt2 && ALT2) alt2 = (CAPS && buttons[i].fun == normalButton) ? buttons[i].char.toUpperCase() : buttons[i].char;
+			
+			if( (alt1 || alt2) && (!ALT1 && !ALT2) ) {
+				ctx.font = Math.floor(buttonHeight * 0.2 * buttons[i].textSize)  + "px Arial";
+				//textWidth = ctx.measureText(comment.count.toString()).width;
+				
+				if(alt1) ctx.fillText(alt1, cX, cY-buttonHeight/3 + margin);
+				if(alt2) ctx.fillText(alt2, cX, cY+buttonHeight/3 - margin);
+			}
 		}
 		ctx.stroke();
 		buttonLocations.sort(sortLocationsX);
@@ -506,6 +525,20 @@ totalRows = i;
 		
 		button.fun();
 		
+		clearTimeout(clickTimer);
+		
+		if(!button.alt) {
+			// To save one click you automatically go back to normal
+			// But give enough time to allow many clicks
+			clickTimer = setTimeout(function restore() {
+				if(ALT1 || ALT2) {
+					ALT1 = false;
+					ALT2 = false;
+					renderVirtualKeyboard();
+				} 
+			}, 400);
+		}
+		
 		return false;
 	}
 	
@@ -521,18 +554,23 @@ totalRows = i;
 	
 	function fireKey(charCode, eventType) {
 		
-		if(charCode == 8592) charCode = 37; // ← left
-		if(charCode == 8594) charCode = 39; // → right
-		if(charCode == 8593) charCode = 38; // ↑ up
-		if(charCode == 8595) charCode = 40; // ↓ down
-		
-		if(charCode == 37 || charCode == 39 || charCode == 38 || charCode == 40) eventType = "keydown";
-		
-		//event.preventDefault();
+		/*
+			Note: KeyCode is NOT the same as charCode!!
+			
+		*/
 		
 		console.log("fireKey: charCode=" + charCode + " eventType=" + eventType +
 		" document.activeElement: id=" + document.activeElement.id + " node=" + document.activeElement.nodeName +
 		" EDITOR.lastElementWithFocus: id=" + EDITOR.lastElementWithFocus.id + " node=" + EDITOR.lastElementWithFocus.nodeName);
+		
+		if(charCode == 8592) var KeyCode = 37; // ← left
+		if(charCode == 8594) var KeyCode = 39; // → right
+		if(charCode == 8593) var KeyCode = 38; // ↑ up
+		if(charCode == 8595) var KeyCode = 40; // ↓ down
+		
+		if(KeyCode) eventType = "keydown";
+		
+		//event.preventDefault();
 		
 		if(eventType == undefined) eventType = "keypress";
 		
@@ -806,87 +844,125 @@ fun: function space(click) {
 		col = 0
 		orientation = "vertical";
 		
-		add(")"); // 506646
-		add("("); // 506640
-		add("="); // 456621
-		add('"'); // 378701
-		add(";"); // 374216
-		add("/"); // 284895
-		add("0"); // 275398
-		add("'"); // 265540
-		add("-"); // 224118
-		add("1"); // 206276
+		add("1", {width: 1.1, alt1: "!", alt2: "~"}); // 206276
+		
+		add("q", {alt1: "2", alt2: "@", alt3: "ä"});
+		add("w", {alt1: "3", alt2: "#", alt3: "å"});
+		add("e", {alt1: "4", alt2: "$", alt3: "é"});
+		add("r", {alt1: "5", alt2: "%", atl3: "£"});
+		add("t", {           alt2: "^", alt3: "þ"});
+		
+		add('"', {alt1: "'", alt2: "`", width: 1.6}); // 378701
+		add("&", {width: 1.2}); // 195979
+		
+		add("y", {                      alt3: "ü"});
+		add("u", {alt1: "6", alt2: "µ", alt3: "ú"});
+		add("i", {alt1: "7",            alt3: "í"});
+		add("o", {alt1: "8",            alt3: "ó"});
+		add("p", {alt1: "9",            alt3: "ö"});
+		
+		add("0", {width: 1.2}); // 275398
 		
 		
-		
-		
-		// ### Vertical first row
+		// ### Vertical second row
 		row = 1;
 		col = 0
 		
-		add("q", {alt1: "1", alt2: "!", alt3: "ä"});
-		add("w", {alt1: "2", alt2: "@", alt3: "å"});
-		add("e", {alt1: "3", alt2: "#", alt3: "é"});
-		add("r", {alt1: "4", alt2: "$", atl3: "£"});
-		add("t", {alt1: "5", alt2: "%", alt3: "þ"});
-		add("y", {alt1: "6", alt2: "^", alt3: "ü"});
-		add("u", {alt1: "7", alt2: "&", alt3: "ú"});
-		add("i", {alt1: "8", alt2: "*", alt3: "í"});
-		add("o", {alt1: "9", alt2: "(", alt3: "ó"});
-		add("p", {alt1: "0", alt2: ")", alt3: "ö"});
+		add("(", {alt1: "{", alt2: "[", width: 1.5}); // 506640
+		
+		add("a", {alt1: "å", alt2: "ä", alt3: "á"});
+		add("s", {           alt2: "§", alt3: "ß"});
+		add("d", {           alt2: "#", alt3: "Ð"});
+		add("f", {           alt2: "-"});
+		add("g", {});
+		
+		add("=", {width: 1.4}); // 456621
+		
+		add("CAPS", {
+			fun: function capsLock(click) {
+				CAPS = !CAPS;
+				renderVirtualKeyboard();
+			},
+			charCode: -1,
+			width: 1.6,
+			textSize: 0.7
+		});
+		
+		add("h", {alt1: "←"}); // move left
+		add("j", {alt1: "↓"}); // move down
+		add("k", {alt1: "↑"}); // move up
+		add("l", {alt1: "→"}); // move right
+		
+		add(")", {alt1: "}", alt2: "]", width: 1.6}); // 506646
+		
+		
+		// ### Vertical third row
+		row = 2;
+		col = 0;
+		
+		add("copy", {
+			fun: function copyPaste(click) {
+				if(ALT1) alertBox("paste");
+				else alertBox("copy");
+			},
+			charCode: 8,
+			width: 1.2,
+			textSize: 0.6,
+			alt1: "paste"
+		});
+		
+		add("!", {width: 0.8}); // 55563
+		
+		add("z", {                      alt3: "œ"});
+		add("x");
+		add("c", {                      alt3: "©"});
+		add("v");
+		add("b");
+		
+		add("/", {alt1: "\\", alt2: "|", width: 1}); // 284895
+		add("+", {width: 1}); // 123478
+		add("-", {alt1: "_", width: 1}); // 198407
+		
+		
+		add("n"); // n might be used as bigint annotator
+		add("m");
+		
+		add("*", {alt1: "?"}); // 129766
+		
+		
 		
 		add("back", {
-			fun: function space(click) {
+			fun: function back(click) {
 				fireKey(8, "keydown");
 				return false;
 			},
 			charCode: 8,
-			width: 1,
-			textSize: 0.3,
+			width: 2.1,
+			textSize: 0.8,
 		});
 		
 		
-		// ### Vertical second row
-		row = 2;
-		col = 0
 		
-		add("CAPS", {
-			fun: function capsLock(click) {
-				if(ALT2) {
-					fireKey(9, "keydown"); // Tab
-				}
-				else {
-					CAPS = !CAPS;
-				renderVirtualKeyboard();
-				}
-			},
-			charCode: -1,
-			width: 1,
-			textSize: 0.3,
-			alt2: "TAB"
-		});
-		
-		add("a", {alt1: "~", alt2: "`", alt3: "á"});
-		add("s", {alt1: "a", alt2: "§", alt3: "ß"});
-		add("d", {alt1: "b", alt2: "#", alt3: "Ð"});
-		add("f", {alt1: "c", alt2: "-"});
-		add("g", {alt1: "d", alt2: "="});
-		add("h", {alt1: "e", alt2: "/", alt3: "←"}); // move left
-		add("j", {alt1: "f", alt2: "{", alt3: "↓"}); // move down
-		add("k", {alt1: "+", alt2: "}", alt3: "↑"}); // move up
-		add("l", {alt1: ":", alt2: ";", alt3: "→"}); // move right
-		
-		
-		
-		
-		// ### Vertical third row
+		// ### Vertical fourth row
 		row = 3;
 		col = 0;
+		
+		add("Compl", {
+			fun: function autocomplete(click) {
+				if(ALT1) toggleVirtualKeyboard2(false);
+				else alertBox("Autocomplete");
+			},
+			charCode: 8,
+			width: 1.3,
+			textSize: 0.5,
+			alt1: "Done"
+		});
+		
+		add(";", {width: 1.4}); // 374216
 		
 		add("Alt-1", {
 			fun: function alternate1() {
 				ALT1=!ALT1;
-				CAPS = false;
 				renderVirtualKeyboard();
 			},
 			charCode: -1,
@@ -894,24 +970,22 @@ fun: function space(click) {
 			width: 1.5,
 			textSize: 0.6,
 			highlightAlt1: true,
-			highlightAlt3: true
+			highlightAlt3: true,
+			alt: true
 		});
 		
-		add("z", {alt1: "<", alt2: "_", alt3: "œ"});
-		add("x", {alt1: ">", alt2: "\\"});
-		add("c", {alt1: "*", alt2: "|", alt3: "©"});
-		add("v", {alt1: "-",  alt2: "^"});
-		add("b", {alt1: "o", alt2: "~"}); // o for octal
-		add("n", {alt1: "n", alt2: "["}); // Leave n as n might be used as bigint annotator
-		add("m", {alt1: "'", alt2: "]", alt3: "µ"});
-		add(".", {alt1: '"', alt2: ","});
+		add(",", {width: 1.8, textSize: 1.5}); // 679396
 		
+		add("space", {
+			fun: function space(click) {
+				fireKey(32, "keypress"); // space
+			},
+			charCode: 32,
+			width: 2,
+			textSize: 0.9,
+		});
 		
-		
-		// ### Vertical fourth row
-		row = 4;
-		col = 0;
-		
+		add(".", {alt1: ":", width: 1.6, textSize: 1.5}); // 591280
 		
 		add("Alt-2", {
 			fun: function alternate1() {
@@ -923,23 +997,12 @@ fun: function space(click) {
 			width: 1.5,
 			textSize: 0.6,
 			highlightAlt2: true,
-			highlightAlt3: true
+			highlightAlt3: true,
+			alt: true
 		});
 		
-		add(".");
-		
-		add("space", {
-			fun: function space(click) {
-				if(ALT2) fireKey(13, "keydown"); // Enter
-				else fireKey(32, "keypress"); // space
-			},
-			charCode: 32,
-			width: 3,
-			textSize: 0.3,
-			alt2: "Enter"
-		});
-		
-		add(",");
+		add("<"); // 56023
+		add(">"); // 57232
 		
 		add("Enter", {
 			fun: function enter(click) {
@@ -947,49 +1010,9 @@ fun: function space(click) {
 			},
 			charCode: 13,
 			width: 2,
-			textSize: 0.6
+			textSize: 0.8
 		});
 		
-		add("Done", {
-			fun: function done(click) {
-				toggleVirtualKeyboard2(false);
-			},
-			charCode: 0,
-			width: 2,
-			textSize: 0.6
-		});
-		
-		
-		
-		// ### Vertical fifth row
-		row = 5;
-		col = 0;
-		
-		
-		add("{"); // 203136
-		add("}"); // 202922
-		add("_"); // 198407
-		add(":"); // 195979
-		add("="); // 165540
-		add("2"); // 154382
-		add("*"); // 129766
-		add("+"); // 123478
-		add("3"); // 119448
-		add("["); // 99911
-		add("]"); // 99547
-		add("\\"); // 69728
-		add("&"); // 68828
-		add(">"); // 57232
-		add("<"); // 56023
-		add("!"); // 55563
-		add("|"); // 51660
-		add("`"); // 33476
-		add("?"); // 29721
-		add("@"); // 24256
-		add("$"); // 17894
-		add("%"); // 12639
-		add("#"); // 10033
-		add("^"); // 4949
 		
 		function add(char, options) {
 			
@@ -1019,7 +1042,8 @@ fun: function space(click) {
 				alt3: options.alt3,
 				highlightAlt1: options.highlightAlt1 || false,
 				highlightAlt2: options.highlightAlt2 || false,
-				highlightAlt3: options.highlightAlt3 || false
+				highlightAlt3: options.highlightAlt3 || false,
+				alt: options.alt || false // If it's an button that changes ALT1,ALT2
 			});
 		}
 		
