@@ -445,15 +445,24 @@ var altNr = 0;
 		ctx.lineWidth="1";
 		ctx.strokeStyle="red";
 		
-		//var textWidth = 0;
 		var text = "";
 		var alt1 = "";
 		var alt2 = "";
+		var textWidth = 0;
+		var textHeight = 0;
+		var textArr = [];
+		var textMeasure;
+		var fontSize = 0;
+		
+		// Note: ctx.measureText() only has one property: width (not height)
+		
 		for (var i=0; i<buttons.length; i++) {
 			
 			startX = (canvasWidth - buttonsPerRow[buttons[i].row] * buttonWidth) / 2;
 			
-			ctx.font = Math.floor(buttonHeight * 0.4 * buttons[i].textSize)  + "px Arial";
+			fontSize = Math.floor(buttonHeight * 0.4 * buttons[i].textSize)
+			
+			ctx.font = fontSize + "px Arial";
 			//textWidth = ctx.measureText(comment.count.toString()).width;
 			
 			if(buttons[i].row != lastRow) {
@@ -486,7 +495,7 @@ var altNr = 0;
 			}
 			else text = null;
 			
-			if(text) ctx.fillText(text, cX, cY);
+			if(text) printText(text, cX, cY, fontSize);
 			
 			alt1 = buttons[i].alt1 && (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt1.toUpperCase() : buttons[i].alt1;
 			alt2 = buttons[i].alt2 && (CAPS && buttons[i].fun == normalButton) ? buttons[i].alt2.toUpperCase() : buttons[i].alt2;
@@ -495,11 +504,14 @@ var altNr = 0;
 			//if(alt2 && ALT2) alt2 = (CAPS && buttons[i].fun == normalButton) ? buttons[i].char.toUpperCase() : buttons[i].char;
 			
 			if( (alt1 || alt2) && (!ALT1 && !ALT2) ) {
-				ctx.font = Math.floor(buttonHeight * 0.2 * buttons[i].textSize)  + "px Arial";
+				
+				fontSize = Math.floor(buttonHeight * 0.2 * buttons[i].textSize);
+				
+				ctx.font = fontSize + "px Arial";
 				//textWidth = ctx.measureText(comment.count.toString()).width;
 				
-				if(alt1) ctx.fillText(alt1, cX, cY-buttonHeight/3 + margin);
-				if(alt2) ctx.fillText(alt2, cX, cY+buttonHeight/3 - margin);
+				if(alt1) printText(alt1, cX, cY-buttonHeight/3 + margin, fontSize, true); // ctx.fillText(alt1, cX, cY-buttonHeight/3 + margin);
+				if(alt2) printText(alt2, cX, cY+buttonHeight/3 + margin, fontSize, true); // ctx.fillText(alt2, cX, cY+buttonHeight/3 - margin);
 			}
 		}
 		ctx.stroke();
@@ -507,6 +519,35 @@ var altNr = 0;
 		
 		
 		console.timeEnd("renderVirtualKeyboard");
+		
+		function printText(text, cX, cY, fontSize, noSplit) {
+			var textArr = [text];
+			
+			// Make sure the text fits
+			var textWidth = ctx.measureText(text).width;
+			var maxWidth = (buttonWidth*buttons[i].width+margin*2);
+			if(textWidth > maxWidth) {
+				console.warn("text=" + text + " fontSize=" + fontSize + " textWidth=" + textWidth + " buttonWidth=" + buttonWidth);
+				
+				if(!noSplit) {
+					// Attempt to split it
+					textArr = text.split(" ");
+					textWidth = ctx.measureText(textArr[0]).width;
+				}
+				
+				if(textWidth > maxWidth) {
+					// Still too wide, use smaller font
+					fontSize = Math.floor(fontSize * 0.8 * maxWidth / textWidth);
+					ctx.font =  fontSize + "px Arial";
+					console.log("Using fontSize=" + fontSize + " for text=" + text + " because textWidth was " + textWidth);
+				}
+			}
+			
+			for (var j=0; j<textArr.length; j++) {
+				ctx.fillText( textArr[j], cX, cY + j*(fontSize+margin) - (textArr.length-1) * fontSize );
+			}
+		}
+		
 	}
 	
 	function sortLocationsX(a, b) {
@@ -555,7 +596,8 @@ var altNr = 0;
 		//EDITOR.renderRow();
 		
 		var button = buttons[id];
-		var fun = button.fun;
+		var customFunction;
+		
 		var altNr = 0;
 		
 		if(ALT1 && ALT2) altNr = 3;
@@ -564,12 +606,15 @@ var altNr = 0;
 		
 		for (var i=0; i<customAltKeys.length; i++) {
 			if(customAltKeys[i].id == id && customAltKeys[i].alt == altNr) {
-				fun = customAltKeys[i].fun;
-				console.log("Using custom function " + UTIL.getFunctionName(fun) + " from alt keys!");
+				customFunction = customAltKeys[i].fun;
+				console.log("Using custom function " + UTIL.getFunctionName(customFunction) + " from alt keys!");
+				break;
 			}
 		}
 		
-		fun();
+		if(customFunction) customFunction(EDITOR.currentFile, {shift: false, alt: false, ctrl: false, sum: 0});
+		else button.fun(); // Need to be button.fun so that the function will get the proper this
+		
 		
 		clearTimeout(clickTimer);
 		
