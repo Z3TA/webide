@@ -72,6 +72,12 @@
 	#=10033 
 	^=4949  
 	
+	Don't forget about the clipboard!
+	
+	Split keyboard!?
+	
+	Numbers: 3x3 !?
+	
 */
 
 (function() {
@@ -277,7 +283,7 @@ buttons = verticalLayout;
 		
 		if(buttons.length == 0) throw new Error("buttons.length=" + buttons.length);
 		
-		var buttonsPerRow = [0,0,0,0,0,0];
+		var buttonsPerRow = [0,0,0,0,0,0,0];
 		
 		for (var i=0; i<buttons.length; i++) {
 			buttonsPerRow[buttons[i].row] += buttons[i].width;
@@ -800,23 +806,22 @@ fun: function space(click) {
 		col = 0
 		orientation = "vertical";
 		
-		/*
-			
-			
-			add("1");
-		add("2");
-		add("3");
-		add("4");
-		add("5");
-		add("6");
-		add("7");
-		add("8");
-		add("9");
-			add("0");
-		*/
+		add(")"); // 506646
+		add("("); // 506640
+		add("="); // 456621
+		add('"'); // 378701
+		add(";"); // 374216
+		add("/"); // 284895
+		add("0"); // 275398
+		add("'"); // 265540
+		add("-"); // 224118
+		add("1"); // 206276
+		
+		
+		
 		
 		// ### Vertical first row
-		row = 0;
+		row = 1;
 		col = 0
 		
 		add("q", {alt1: "1", alt2: "!", alt3: "ä"});
@@ -842,7 +847,7 @@ fun: function space(click) {
 		
 		
 		// ### Vertical second row
-		row = 1;
+		row = 2;
 		col = 0
 		
 		add("CAPS", {
@@ -871,21 +876,11 @@ fun: function space(click) {
 		add("k", {alt1: "+", alt2: "}", alt3: "↑"}); // move up
 		add("l", {alt1: ":", alt2: ";", alt3: "→"}); // move right
 		
-		add("space", {
-			fun: function space(click) {
-				if(ALT2) fireKey(13, "keydown"); // Enter
-				else fireKey(32, "keypress"); // space
-			},
-			charCode: 32,
-			width: 1,
-			textSize: 0.3,
-			alt2: "Enter"
-		});
 		
 		
 		
 		// ### Vertical third row
-		row = 2;
+		row = 3;
 		col = 0;
 		
 		add("Alt-1", {
@@ -911,6 +906,13 @@ fun: function space(click) {
 		add("m", {alt1: "'", alt2: "]", alt3: "µ"});
 		add(".", {alt1: '"', alt2: ","});
 		
+		
+		
+		// ### Vertical fourth row
+		row = 4;
+		col = 0;
+		
+		
 		add("Alt-2", {
 			fun: function alternate1() {
 				ALT2=!ALT2;
@@ -924,8 +926,70 @@ fun: function space(click) {
 			highlightAlt3: true
 		});
 		
+		add(".");
+		
+		add("space", {
+			fun: function space(click) {
+				if(ALT2) fireKey(13, "keydown"); // Enter
+				else fireKey(32, "keypress"); // space
+			},
+			charCode: 32,
+			width: 3,
+			textSize: 0.3,
+			alt2: "Enter"
+		});
+		
+		add(",");
+		
+		add("Enter", {
+			fun: function enter(click) {
+				fireKey(13, "keydown");
+			},
+			charCode: 13,
+			width: 2,
+			textSize: 0.6
+		});
+		
+		add("Done", {
+			fun: function done(click) {
+				toggleVirtualKeyboard2(false);
+			},
+			charCode: 0,
+			width: 2,
+			textSize: 0.6
+		});
 		
 		
+		
+		// ### Vertical fifth row
+		row = 5;
+		col = 0;
+		
+		
+		add("{"); // 203136
+		add("}"); // 202922
+		add("_"); // 198407
+		add(":"); // 195979
+		add("="); // 165540
+		add("2"); // 154382
+		add("*"); // 129766
+		add("+"); // 123478
+		add("3"); // 119448
+		add("["); // 99911
+		add("]"); // 99547
+		add("\\"); // 69728
+		add("&"); // 68828
+		add(">"); // 57232
+		add("<"); // 56023
+		add("!"); // 55563
+		add("|"); // 51660
+		add("`"); // 33476
+		add("?"); // 29721
+		add("@"); // 24256
+		add("$"); // 17894
+		add("%"); // 12639
+		add("#"); // 10033
+		add("^"); // 4949
 		
 		function add(char, options) {
 			
