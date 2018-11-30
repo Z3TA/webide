@@ -76,8 +76,6 @@
 	
 	Split keyboard!?
 	
-	Numbers: 3x3 !?
-	
 */
 
 (function() {
@@ -109,14 +107,12 @@
 	var ALT1 = false;
 	var ALT2 = false;
 	var clickTimer;
+	var customAltKeys = [];
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
 	canvas.ontouchstart = canvasMouseDown;
 	canvas.ontouchend = canvasMouseUp;
-	
-	
-	
 	
 	
 	EDITOR.plugin({
@@ -130,19 +126,16 @@
 			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
 			
-			
 			addButtons();
 			
 			menuItem = EDITOR.addMenuItem("Virtual Keyboard 2", toggleVirtualKeyboard2, 26);
 			
+			EDITOR.on("registerAltKey", updateAltKey);
+			EDITOR.on("unregisterAltKey", removeAltKey);
+			
 			toggleVirtualKeyboard2();
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
-			
-			
-			
-			//wrapper.setAttribute("style", "border: 2px solid red; overflow: hide;");
-			
 			wrapper.appendChild(canvas);
 			
 		},
@@ -154,6 +147,8 @@
 			EDITOR.removeEvent("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.removeEvent("afterResize", resizeVirtualKeyboard);
 			
+			EDITOR.removeEvent("registerAltKey", updateAltKey);
+			
 			toggleVirtualKeyboard2(false);
 			
 			EDITOR.removeMenuItem(menuItem);
@@ -164,14 +159,52 @@
 		}
 	});
 	
+	function removeAltKey(fun) {
+		var id = 0;
+var altNr = 0;
+		for (var i=0; i<customAltKeys.length; i++) {
+			if(customAltKeys[i].fun == fun) {
+				
+				id = customAltKeys[i].id;
+				altNr = customAltKeys[i].alt;
+
+				customAltKeys.splice(i, 1);
+				
+				delete verticalLayout[i]["alt" + altNr];
+				
+				console.log("Removed alternate key for " + UTIL.getFunctionName(fun) + " from " + verticalLayout[i].char + " !");
+				
+				return;
+			}
+		}
+		
+		console.log("No match for " + UTIL.getFunctionName(fun) + " in customAltKeys!");
+	}
+	
+	function updateAltKey(key) {
+		for (var i=0; i<verticalLayout.length; i++) {
+			if(verticalLayout[i].char == key.char) {
+				for(var j=1; j<3; j++) {
+					if(!verticalLayout[i]["alt" + j]) {
+						verticalLayout[i]["alt" + j] = key.label;
+						customAltKeys.push({id: i, alt: j, fun: key.fun});
+						console.log("Added " + UTIL.getFunctionName(key.fun) + " as ALT" + j + " on " + key.char + " !");
+						return;
+					}
+				}
+			}
+		}
+	}
+	
 	function toggleVirtualKeyboard2(state) {
 		var oldState = ACTIVE;
 		
 		if(typeof state == "boolean") {
 			ACTIVE = state;
 		}
+		else ACTIVE = !ACTIVE;
 		
-		ACTIVE = !ACTIVE;
+		console.log("toggleVirtualKeyboard2: oldState=" + oldState + " newState=" + ACTIVE);
 		
 		var wrapper = document.getElementById("virtualKeyboard2");
 		
@@ -183,7 +216,7 @@
 		}
 		
 		if(oldState != ACTIVE) {
-EDITOR.resizeNeeded();
+			EDITOR.resizeNeeded();
 			EDITOR.updateMenuItem(menuItem, ACTIVE);
 		}
 		
@@ -207,15 +240,15 @@ EDITOR.resizeNeeded();
 			var orientation = "horizontal";
 			buttonWithToHeightRatio = 0.8;
 			buttons = horizontalLayout;
-buttonsPerRow = calcButtonsPerRow(buttons);
-}
+			buttonsPerRow = calcButtonsPerRow(buttons);
+		}
 		else {
 			var orientation = "vertical";
-			buttonWithToHeightRatio = 1.7;
-buttons = verticalLayout;
+			buttonWithToHeightRatio = 2;
+			buttons = verticalLayout;
 			buttonsPerRow = calcButtonsPerRow(buttons);
-}
-
+		}
+		
 		if(buttons.length == 0) throw new Error("No buttons found! windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " (orientation=" + orientation + ") horizontalLayout.length=" + horizontalLayout.length + " verticalLayout.length=" + verticalLayout.length);
 		if(buttonsPerRow[0] == 0) throw new Error("First row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
 		if(buttonsPerRow[1] == 0) throw new Error("Second row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
@@ -291,7 +324,7 @@ buttons = verticalLayout;
 		
 		for (var i=0; i<buttonsPerRow.length; i++) {
 			if(buttonsPerRow[i] == 0) {
-totalRows = i;
+				totalRows = i;
 				break;
 			}
 		}
@@ -329,7 +362,7 @@ totalRows = i;
 		// Background
 		ctx.fillStyle = "#000000";
 		ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
+		
 		var cX = 0;
 		var cY = 0;
 		var x1 = 0;
@@ -505,7 +538,7 @@ totalRows = i;
 		// Locations are sorted in X axis
 		for (var i=0; i<buttonLocations.length; i++) {
 			
-			console.log("click.x=" + click.x + " click.y=" + click.y + " button.x=" + buttonLocations[i].x + " button.y=" + buttonLocations[i].y + " buttonWidth=" + buttonWidth + " buttonHeight=" + buttonHeight + " ");
+			//console.log("click.x=" + click.x + " click.y=" + click.y + " button.x=" + buttonLocations[i].x + " button.y=" + buttonLocations[i].y + " buttonWidth=" + buttonWidth + " buttonHeight=" + buttonHeight + " ");
 			
 			if( click.x > (buttonLocations[i].x - buttonWidth * buttonLocations[i].width / 2)  &&  click.x < (buttonLocations[i].x + buttonWidth * buttonLocations[i].width / 2) && 
 			click.y > (buttonLocations[i].y - buttonHeight/2)  &&  click.y < (buttonLocations[i].y + buttonHeight/2) ) return clickButton(buttonLocations[i].id);
@@ -522,8 +555,21 @@ totalRows = i;
 		//EDITOR.renderRow();
 		
 		var button = buttons[id];
+		var fun = button.fun;
+		var altNr = 0;
 		
-		button.fun();
+		if(ALT1 && ALT2) altNr = 3;
+		else if(ALT1) altNr = 1;
+		else if(ALT2) altNr = 2;
+		
+		for (var i=0; i<customAltKeys.length; i++) {
+			if(customAltKeys[i].id == id && customAltKeys[i].alt == altNr) {
+				fun = customAltKeys[i].fun;
+				console.log("Using custom function " + UTIL.getFunctionName(fun) + " from alt keys!");
+			}
+		}
+		
+		fun();
 		
 		clearTimeout(clickTimer);
 		
@@ -590,7 +636,7 @@ totalRows = i;
 		else {
 			
 			EDITOR.input = true;
-			var doDefaultAction = EDITOR.mock( eventType, { charCode: charCode } );
+			var doDefaultAction = EDITOR.mock( eventType, { charCode: KeyCode || charCode } );
 			
 			console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 			
@@ -749,7 +795,7 @@ fun: function capsLock(click) {
 			},
 			charCode: -1,
 			width: 1.5,
-			textSize: 0.6
+			textSize: 0.8
 });
 		
 		add("a");
@@ -844,7 +890,7 @@ fun: function space(click) {
 		col = 0
 		orientation = "vertical";
 		
-		add("1", {width: 1.1, alt1: "!", alt2: "~"}); // 206276
+		add("1", {width: 1.1, alt1: "1", alt2: "~"}); // 206276
 		
 		add("q", {alt1: "2", alt2: "@", alt3: "ä"});
 		add("w", {alt1: "3", alt2: "#", alt3: "å"});
@@ -861,7 +907,7 @@ fun: function space(click) {
 		add("o", {alt1: "8",            alt3: "ó"});
 		add("p", {alt1: "9",            alt3: "ö"});
 		
-		add("0", {width: 1.2}); // 275398
+		add("0", {alt1: "0", width: 1.2}); // 275398
 		
 		
 		// ### Vertical second row
@@ -885,7 +931,7 @@ fun: function space(click) {
 			},
 			charCode: -1,
 			width: 1.6,
-			textSize: 0.7
+			textSize: 0.5
 		});
 		
 		add("h", {alt1: "←"}); // move left
@@ -902,8 +948,18 @@ fun: function space(click) {
 		
 		add("copy", {
 			fun: function copyPaste(click) {
-				if(ALT1) alertBox("paste");
-				else alertBox("copy");
+				if(!EDITOR.currentFile) return;
+				
+				if(ALT1) {
+					var clipboardData = EDITOR.getClipboardContent(gotClipboard);
+				}
+				else {
+					EDITOR.putIntoClipboard(EDITOR.currentFile.getSelectedText());
+				}
+				
+				function gotClipboard(err, data) {
+					EDITOR.mock("paste", {data: data});
+				}
 			},
 			charCode: 8,
 			width: 1.2,
@@ -950,9 +1006,9 @@ fun: function space(click) {
 		add("Compl", {
 			fun: function autocomplete(click) {
 				if(ALT1) toggleVirtualKeyboard2(false);
-				else alertBox("Autocomplete");
+				else fireKey(EDITOR.settings.autoCompleteKey, "keydown");
 			},
-			charCode: 8,
+			charCode: EDITOR.settings.autoCompleteKey,
 			width: 1.3,
 			textSize: 0.5,
 			alt1: "Done"
@@ -982,7 +1038,7 @@ fun: function space(click) {
 			},
 			charCode: 32,
 			width: 2,
-			textSize: 0.9,
+			textSize: 0.7,
 		});
 		
 		add(".", {alt1: ":", width: 1.6, textSize: 1.5}); // 591280

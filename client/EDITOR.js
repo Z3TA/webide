@@ -124,7 +124,8 @@ EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
 EDITOR.installDirectory = "/";
-
+EDITOR.pseudoClipboard = "";
+EDITOR.registeredAltKeys = []; // Alt keys for the virtual keyboard(s)
 
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
@@ -168,7 +169,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
 	select: [], // Selecting text
 	sanitize: [], // For example foramtting and santizing text pasted or dropped into the editor
-	parse: [] // Language parsers should listen to this event and parse any string on request and return a parse-object {}
+	parse: [], // Language parsers should listen to this event and parse any string on request and return a parse-object {}
+	registerAltKey: [], // Virtual keyboards can choose to update alternate keys so you can for example save file via Alt + S etc. Kinda like key-bindings but for virtual keyboards
+	unregisterAltKey: []
 };
 
 EDITOR.renderFunctions = [];
@@ -580,7 +583,9 @@ EDITOR.bindKey(b);
 		oscillator.stop(audioCtx.currentTime + duration/1000)
 	}
 	
-	EDITOR.copyToClipboard = function copyToClipboard(text, callback) {
+	EDITOR.putIntoClipboard = function putIntoClipboard(text, callback) {
+		
+		EDITOR.pseudoClipboard = text;
 		
 		if (!navigator.clipboard) {
 			fallbackCopyTextToClipboard(text);
@@ -617,6 +622,37 @@ EDITOR.bindKey(b);
 				window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 				if(callback) callback(null);
 			}
+		}
+		
+	}
+	
+	EDITOR.getClipboardContent = function getClipboardContent(callback) {
+		
+		if(typeof callback != "function") throw new Error("First argument needs to be a callback function!");
+		
+		if(navigator.clipboard) {
+			navigator.clipboard.readText().then(copySuccess).catch(readFail);
+		}
+		else {
+			try {
+				var data = window.clipboardData.getData('Text')
+			}
+			catch(err) {
+				var error = err;
+			}
+			if(error) readFail(error);
+			else readSuccess(data)
+		}
+		
+		function readSuccess(text) {
+			callback(null, text);
+		}
+		
+		function readFail(err) {
+			if(EDITOR.pseudoClipboard) {
+				callback(null, EDITOR.pseudoClipboard);
+			}
+			else callback(err);
 		}
 		
 	}
@@ -2280,6 +2316,12 @@ canvas = EDITOR.canvas;
 		
 		if(eventName == "voiceCommand" && !recognition) {
 			console.warn("Speech Recognition not supported in your browser!");
+		}
+		
+		if(eventName == "registerAltKey" && EDITOR.registeredAltKeys.length > 0) {
+			for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+				options.fun(EDITOR.registeredAltKeys[i]); 
+			}
 		}
 		
 	}
@@ -5124,6 +5166,48 @@ var word = "";
 		}
 	}
 	
+	EDITOR.registerAltKey = function registerAltKey(options) {
+		if(typeof options != "object") throw new Error("First argument need to be an option object!");
+		if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
+		if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
+		if(typeof options.label != "string") throw new Error("The option object need to have a label string!");
+		
+		var key;
+		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+			key = EDITOR.registeredAltKeys[i];
+			if(key.char==options.char) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char);
+		}
+		
+		EDITOR.registeredAltKeys.push(options);
+		
+		for (var j=0; j<EDITOR.eventListeners.registerAltKey.length; j++) {
+			EDITOR.eventListeners.registerAltKey[j].fun(options);
+		}
+		
+	}
+	
+	EDITOR.unregisterAltKey = function unregisterAltKey(fun) {
+		if(typeof fun != "function") throw new Error("The first argument needs to be a function!");
+		
+		var key;
+		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+			key = EDITOR.registeredAltKeys[i];
+			if(key.fun == fun) {
+				EDITOR.registeredAltKeys.splice(i, 1);
+				notifyListeners();
+				return;
+			}
+		}
+		
+		console.warn("Did not find " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
+		
+		function notifyListeners() {
+			for (var j=0; j<EDITOR.eventListeners.unregisterAltKey.length; j++) {
+				EDITOR.eventListeners.unregisterAltKey[j].fun(fun);
+			}
+		}
+	}
+	
 	// # Virtual keyboard
 	var virtualKeyboardElement;
 	var virtualKeyboard = {};
@@ -6582,6 +6666,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
 		
 		EDITOR.interact("copy", copyEvent);
+		
+		EDITOR.pseudoClipboard = textToPutOnClipboard;
 		
 		return textToPutOnClipboard;
 		

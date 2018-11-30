@@ -2831,7 +2831,7 @@ if(err) return alertBox(err.message);
 				});
 			}
 			else {
-				EDITOR.copyToClipboard(pubkey, function(err) {
+				EDITOR.putIntoClipboard(pubkey, function(err) {
 					if(err) throw err;
 					console.log("Public key copied to clipboard!");
 });
