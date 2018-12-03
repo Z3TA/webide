@@ -6,7 +6,7 @@ Also see LICENCE.txt and contribute.txt.
 
 webide.se
 ---------
-webide.se is jzedit running as a cloud editor.
+https://webide.se/ is jzedit running as a cloud editor.
 In this readme you will find instructions on how to run the editor locally on your computer, 
 or host it on your own server.
 
