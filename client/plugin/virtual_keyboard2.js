@@ -935,22 +935,22 @@ fun: function space(click) {
 		col = 0
 		orientation = "vertical";
 		
-		add("1", {width: 1.1, alt1: "1", alt2: "~"}); // 206276
+		add("1", {alt1: "1", alt2: "~", alt3: "¹", width: 1.1}); // 206276
 		
-		add("q", {alt1: "2", alt2: "@", alt3: "ä"});
-		add("w", {alt1: "3", alt2: "#", alt3: "å"});
-		add("e", {alt1: "4", alt2: "$", alt3: "é"});
-		add("r", {alt1: "5", alt2: "%", atl3: "£"});
+		add("q", {alt1: "2", alt2: "@", alt3: "²"});
+		add("w", {alt1: "3", alt2: "#", alt3: "³"});
+		add("e", {alt1: "4", alt2: "$", alt3: "£"});
+		add("r", {alt1: "5", alt2: "%", atl3: "®"});
 		add("t", {           alt2: "^", alt3: "þ"});
 		
-		add('"', {alt1: "'", alt2: "`", width: 1.6}); // 378701
+		add('"', {alt1: "'", alt2: "`", alt3: "་", width: 1.6}); // 378701
 		add("&", {width: 1.2}); // 195979
 		
 		add("y", {                      alt3: "ü"});
 		add("u", {alt1: "6", alt2: "µ", alt3: "ú"});
 		add("i", {alt1: "7",            alt3: "í"});
-		add("o", {alt1: "8",            alt3: "ó"});
-		add("p", {alt1: "9",            alt3: "ö"});
+		add("o", {alt1: "8",            alt3: "¤"});
+		add("p", {alt1: "9", alt2: "ö"});
 		
 		add("0", {alt1: "0", width: 1.2}); // 275398
 		
@@ -961,11 +961,11 @@ fun: function space(click) {
 		
 		add("(", {alt1: "{", alt2: "[", width: 1.5}); // 506640
 		
-		add("a", {alt1: "å", alt2: "ä", alt3: "á"});
-		add("s", {           alt2: "§", alt3: "ß"});
-		add("d", {           alt2: "#", alt3: "Ð"});
-		add("f", {           alt2: "-"});
-		add("g", {});
+		add("a", {alt1: "ä", alt2: "á", alt3: "д"});
+		add("s", {alt1: "å", alt2: "§", alt3: "ß"});
+		add("d", {alt1: "€",            alt3: "Ð"});
+		add("f", {                      alt3: "т"});
+		add("g", {                      alt3: "я"});
 		
 		add("=", {width: 1.4}); // 456621
 		
@@ -979,9 +979,9 @@ fun: function space(click) {
 			textSize: 0.5
 		});
 		
-		add("h", {alt1: "←"}); // move left
+		add("h", {alt1: "←",    alt3: "н"}); // move left
 		add("j", {alt1: "↓"}); // move down
-		add("k", {alt1: "↑"}); // move up
+		add("k", {alt1: "↑",    alt3: "к"}); // move up
 		add("l", {alt1: "→"}); // move right
 		
 		add(")", {alt1: "}", alt2: "]", width: 1.6}); // 506646
@@ -1017,17 +1017,17 @@ fun: function space(click) {
 		
 		add("z", {                      alt3: "œ"});
 		add("x");
-		add("c", {                      alt3: "©"});
+		add("c", {alt1: "¢",            alt3: "©"});
 		add("v");
-		add("b");
+		add("b", {                      alt3: "в"});
 		
 		add("/", {alt1: "\\", alt2: "|", width: 1}); // 284895
 		add("+", {width: 1}); // 123478
 		add("-", {alt1: "_", width: 1}); // 198407
 		
 		
-		add("n"); // n might be used as bigint annotator
-		add("m");
+		add("n", {      alt2: "π",       alt3: "и"}); // n might be used as bigint annotator
+		add("m", {                       alt3: "м"});
 		
 		add("*", {alt1: "?"}); // 129766
 		
