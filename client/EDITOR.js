@@ -628,31 +628,72 @@ EDITOR.bindKey(b);
 	
 	EDITOR.getClipboardContent = function getClipboardContent(callback) {
 		
+		/*
+			You need to be on HTTPS or 127.0.0.1 to get access to navigator.clipboard !?
+			
+			When calling navigator.clipboard.readText() in Chrome there is a confirm box.
+			If the user says "No" we won't be able to access the clipboard until the user manually clears all settings.
+			
+		*/
+		
 		if(typeof callback != "function") throw new Error("First argument needs to be a callback function!");
 		
 		if(navigator.clipboard) {
-			navigator.clipboard.readText().then(copySuccess).catch(readFail);
+			console.log("getClipboardContent: Trying navigator.clipboard ...");
+			navigator.clipboard.readText().then(function(data) {
+				console.log("getClipboardContent: navigator.clipboard.readText succeeded!");
+				readSuccess(data);
+			}).catch(function(err, something) {
+				console.log("getClipboardContent: navigator.clipboard.readText failed!");
+				readFail(err || something);
+			});
 		}
-		else {
+		else if(window.clipboardData) {
+			console.log("getClipboardContent: Trying  window.clipboardData.getData ...");
 			try {
 				var data = window.clipboardData.getData('Text')
 			}
 			catch(err) {
 				var error = err;
 			}
-			if(error) readFail(error);
-			else readSuccess(data)
+			if(error) {
+				console.log("getClipboardContent: window.clipboardData.getData failed!");
+				readFail(error);
+			}
+			else {
+				console.log("getClipboardContent: window.clipboardData.getData succeeded!");
+readSuccess(data);
+			}
+		}
+		else {
+			console.log("getClipboardContent: navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
+			readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 		}
 		
 		function readSuccess(text) {
+			console.log("getClipboardContent: readSuccess: text=" + text);
 			callback(null, text);
 		}
 		
 		function readFail(err) {
-			if(EDITOR.pseudoClipboard) {
-				callback(null, EDITOR.pseudoClipboard);
+			
+			// The Promise catch from navigator.clipboard.readText doesn't seem to give a proper error message ...
+			if(!(err instanceof Error)) {
+				if(typeof err == "undefined") err = new Error("Accessing the clipboard is Not supported by your browser!"+ 
+					" You might have to clear all browsning data and answer Yes when prompted to allow accessing the clipboard.");
+				else if(typeof err == "object") err = new Error(err.message || JSON.stringify(err));
+				else err = new Error(JSON.stringify(err));
 			}
-			else callback(err);
+			
+			console.log("getClipboardContent: readFail: err.message=" + err.message);
+			if(EDITOR.pseudoClipboard) {
+				console.log("getClipboardContent: Using pseudoClipboard! data=" + EDITOR.pseudoClipboard);
+				return callback(null, EDITOR.pseudoClipboard);
+			}
+			else {
+				console.log("getClipboardContent: Nothing in pseudoClipboard! All attempts to read clipboard failed!");
+				callback(err);
+			}
 		}
 		
 	}

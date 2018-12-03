@@ -1003,7 +1003,8 @@ fun: function space(click) {
 				}
 				
 				function gotClipboard(err, data) {
-					EDITOR.mock("paste", {data: data});
+					if(err) alertBox(err.message);
+					else EDITOR.mock("paste", {data: data});
 				}
 			},
 			charCode: 8,
