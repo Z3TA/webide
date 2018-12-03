@@ -121,8 +121,8 @@
 		load: function loadVirtualKeyboard() {
 			
 			// Wait for touch events before showing the virtual keyboard
-			EDITOR.addEvent( "mouseClick", {dir: "down", fun: keyboardPushbuttonDown, targetClass:"fileCanvas", order: 10} );
-			EDITOR.addEvent( "mouseClick", {dir: "up", fun: keyboardPushbuttonUp, targetClass:"fileCanvas", order: 10} );
+			EDITOR.addEvent( "mouseClick", {dir: "down", fun: keyboardPushbuttonDown, targetClass:"fileCanvas", order: 1000} );
+			EDITOR.addEvent( "mouseClick", {dir: "up", fun: keyboardPushbuttonUp, targetClass:"fileCanvas", order: 1000} );
 			
 			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
@@ -658,8 +658,8 @@
 					ALT1 = false;
 					ALT2 = false;
 					renderVirtualKeyboard();
-				} 
-			}, 400);
+				}
+			}, 500);
 		}
 		
 		return false;
@@ -1228,7 +1228,7 @@ fun: function space(click) {
 	
 	function keyboardPushbuttonUp(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
-		if(mouseUpEvent.type == "touchstart") {
+		if(mouseUpEvent.type == "touchend") {
 			toggleVirtualKeyboard2(true);
 		}
 		

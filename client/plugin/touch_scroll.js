@@ -71,30 +71,34 @@
 		touching = true;
 		touchDownX = x;
 		touchDownY = y;
-		//EDITOR.removeRender(verticalScrollingRender);
-		//EDITOR.removeRender(horizontalScrollingRender);
+		
+		// We are competing with select text, so always return false to prevent selecting text while scrolling
 		return false;
-		}
+	}
 	
 	function tsTouchUp(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
 		console.log("tsTouchUp: x=" + x + " y=" + y + " mouseUpEvent.type=" + mouseUpEvent.type);
 		
+		
 		if( mouseUpEvent.type != "touch" && mouseUpEvent.type != "touchend") return true;
 		
 		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
 		
-		if(virtualKeyboardWasVisible && verticalScrolling) EDITOR.showVirtualKeyboard(virtualKeyboardWasVisible);
+		//if(virtualKeyboardWasVisible && verticalScrolling) EDITOR.showVirtualKeyboard(virtualKeyboardWasVisible);
+		
+		// Make it possible to place the caret inside the scroll area if you haven't scrolled!
+		var wasScrolling = horizontalScrolling || verticalScrolling;
 		
 		horizontalScrolling = false;
 		verticalScrolling = false;
 		maybeScroll = false;
 		touching = false;
-		//EDITOR.removeRender(verticalScrollingRender);
-		//EDITOR.removeRender(horizontalScrollingRender);
 		
-		return false;
-		}
+		if(wasScrolling) return false;
+		else return true;
+	}
+	
 	
 	
 	function tsTouchMove(x, y, target, ev) {
