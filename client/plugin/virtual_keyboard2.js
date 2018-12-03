@@ -935,7 +935,7 @@ fun: function space(click) {
 		col = 0
 		orientation = "vertical";
 		
-		add("1", {alt1: "1", alt2: "~", alt3: "¹", width: 1.1}); // 206276
+		add("1", {           alt2: "~", alt3: "¹", width: 1.1}); // 206276
 		
 		add("q", {alt1: "2", alt2: "@", alt3: "²"});
 		add("w", {alt1: "3", alt2: "#", alt3: "³"});
@@ -947,12 +947,12 @@ fun: function space(click) {
 		add("&", {width: 1.2}); // 195979
 		
 		add("y", {                      alt3: "ü"});
-		add("u", {alt1: "6", alt2: "µ", alt3: "ú"});
+		add("u", {alt1: "6",            alt3: "µ"});
 		add("i", {alt1: "7",            alt3: "í"});
 		add("o", {alt1: "8",            alt3: "¤"});
 		add("p", {alt1: "9", alt2: "ö"});
 		
-		add("0", {alt1: "0", width: 1.2}); // 275398
+		add("0", {width: 1.2}); // 275398
 		
 		
 		// ### Vertical second row
@@ -961,9 +961,9 @@ fun: function space(click) {
 		
 		add("(", {alt1: "{", alt2: "[", width: 1.5}); // 506640
 		
-		add("a", {alt1: "ä", alt2: "á", alt3: "д"});
-		add("s", {alt1: "å", alt2: "§", alt3: "ß"});
-		add("d", {alt1: "€",            alt3: "Ð"});
+		add("a", {alt1: "ä",            alt3: "á"});
+		add("s", {alt1: "å",            alt3: "§"});
+		add("d", {                      alt3: "€"});
 		add("f", {                      alt3: "т"});
 		add("g", {                      alt3: "я"});
 		
@@ -1016,8 +1016,8 @@ fun: function space(click) {
 		add("!", {width: 0.8}); // 55563
 		
 		add("z", {                      alt3: "œ"});
-		add("x");
-		add("c", {alt1: "¢",            alt3: "©"});
+		add("x", {                      alt3: "¢"});
+		add("c", {                      alt3: "©"});
 		add("v");
 		add("b", {                      alt3: "в"});
 		
@@ -1026,7 +1026,7 @@ fun: function space(click) {
 		add("-", {alt1: "_", width: 1}); // 198407
 		
 		
-		add("n", {      alt2: "π",       alt3: "и"}); // n might be used as bigint annotator
+		add("n", {                       alt3: "π"}); // n might be used as bigint annotator
 		add("m", {                       alt3: "м"});
 		
 		add("*", {alt1: "?"}); // 129766
