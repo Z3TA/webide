@@ -26,7 +26,7 @@
 	var touching = false;
 	var lastMoveDirectionX = 0;
 	var lastMoveDirectionY = 0;
-	var virtualKeyboardWasVisible = false;
+	var virtualKeyboardWasVisible = [];
 	
 	EDITOR.plugin({
 		desc: "Allow touch scrolling in right and bottom screen area",
@@ -61,7 +61,7 @@
 		
 		console.log("tsTouchDown: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
 		
-		if( mouseDownEvent.type != "touch") return true;
+		if( mouseDownEvent.type != "touch" && mouseDownEvent.type != "touchstart") return true;
 		
 		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
 		
@@ -76,13 +76,15 @@
 		return false;
 		}
 	
-	function tsTouchUp(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
+	function tsTouchUp(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
-		console.log("tsTouchUp: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
+		console.log("tsTouchUp: x=" + x + " y=" + y + " mouseUpEvent.type=" + mouseUpEvent.type);
 		
-		if( mouseDownEvent.type != "touch") return true;
+		if( mouseUpEvent.type != "touch" && mouseUpEvent.type != "touchend") return true;
 		
 		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
+		
+		if(virtualKeyboardWasVisible && verticalScrolling) EDITOR.showVirtualKeyboard(virtualKeyboardWasVisible);
 		
 		horizontalScrolling = false;
 		verticalScrolling = false;
@@ -90,8 +92,6 @@
 		touching = false;
 		//EDITOR.removeRender(verticalScrollingRender);
 		//EDITOR.removeRender(horizontalScrollingRender);
-		
-		if(virtualKeyboardWasVisible && !EDITOR.virtualKeyboard.isVisible) EDITOR.virtualKeyboard.show();
 		
 		return false;
 		}
@@ -215,10 +215,9 @@
 		" startColumn=" + startColumn +
 		" startRow=" + startRow + "");
 			
-		if(verticalScrolling || horizontalScrolling) {
-			if(EDITOR.virtualKeyboard.isVisible) virtualKeyboardWasVisible = true;
-			//virtualKeyboardWasVisible = EDITOR.virtualKeyboard.isVisible;
-			EDITOR.virtualKeyboard.hide();
+		if(verticalScrolling) {
+			virtualKeyboardWasVisible = EDITOR.hideVirtualKeyboard();
+			console.log("Hidden keyboards: " + JSON.stringify(virtualKeyboardWasVisible));
 		}
 		
 			if(verticalScrolling) {

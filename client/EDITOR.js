@@ -19,6 +19,8 @@ var benchmarkCharacterCode = 190;
 var inputCount = 0;
 var menuVisibleOnce = false;
 var menuIsFullScreen = false;
+var usePseudoClipboard = undefined;
+
 
 // List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
 // Note: The file parsers should fill this list!
@@ -171,7 +173,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	sanitize: [], // For example foramtting and santizing text pasted or dropped into the editor
 	parse: [], // Language parsers should listen to this event and parse any string on request and return a parse-object {}
 	registerAltKey: [], // Virtual keyboards can choose to update alternate keys so you can for example save file via Alt + S etc. Kinda like key-bindings but for virtual keyboards
-	unregisterAltKey: []
+	unregisterAltKey: [],
+	hideVirtualKeyboard: [], // Virtual keyboards need to listen to this and hide itself when their name is called
+	showVirtualKeyboard: []
 };
 
 EDITOR.renderFunctions = [];
@@ -619,9 +623,50 @@ EDITOR.bindKey(b);
 				if(callback) callback(null);
 			}
 			else {
-				window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-				if(callback) callback(null);
+				
+				if(usePseudoClipboard === true) {
+					return pseudo();
+				}
+				else if(usePseudoClipboard === false) {
+					return prm();
+				}
+				else if(usePseudoClipboard === undefined) {
+					var usePseudo = "Use pseudo clipboard";
+					var alwaysAsk = "Ask me every time";
+					var manualCopy = "Manually copy";
+					confirmBox("Your browser wont allow putting data into the clipboard. Use a pseudo clipboard within the editor ?", [usePseudo, alwaysAsk, manualCopy], function(answer) {
+						if(answer == usePseudo) {
+							usePseudoClipboard = true;
+							return pseudo();
+						}
+						else if(answer == manualCopy) {
+usePseudoClipboard = false;
+							return prm();
+						}
+						else if(answer == alwaysAsk) {
+							return prm();
+						}
+						else {
+							console.warn("answer=" + answer);
+							return prm();
+						}
+					});
+				}
+				else throw new Error("usePseudoClipboard=" + usePseudoClipboard);
+				
 			}
+		}
+		
+		function prm() {
+			window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+			if(callback) callback(null);
+			return false;
+		}
+		
+		function pseudo() {
+			EDITOR.pseudoClipboard = text;
+			if(callback) callback(null);
+			return false;
 		}
 		
 	}
@@ -662,7 +707,7 @@ EDITOR.bindKey(b);
 			}
 			else {
 				console.log("getClipboardContent: window.clipboardData.getData succeeded!");
-readSuccess(data);
+				readSuccess(data);
 			}
 		}
 		else {
@@ -680,7 +725,7 @@ readSuccess(data);
 			// The Promise catch from navigator.clipboard.readText doesn't seem to give a proper error message ...
 			if(!(err instanceof Error)) {
 				if(typeof err == "undefined") err = new Error("Accessing the clipboard is Not supported by your browser!"+ 
-					" You might have to clear all browsning data and answer Yes when prompted to allow accessing the clipboard.");
+				" You might have to clear all browsning data and answer Yes when prompted to allow accessing the clipboard.");
 				else if(typeof err == "object") err = new Error(err.message || JSON.stringify(err));
 				else err = new Error(JSON.stringify(err));
 			}
@@ -789,7 +834,7 @@ readSuccess(data);
 		}
 		
 		if(state && state.show) {
-showFile = path;
+			showFile = path;
 			setTimeout(function() {
 				showFile = undefined;
 			}, 5000);
@@ -869,7 +914,7 @@ showFile = path;
 				if(!fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path] = [];
 				
 				if(fileOpenExtraCallbacks[path].indexOf(callback) != -1) {
-throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in fileOpenExtraCallbacks for path=" + path);
+					throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in fileOpenExtraCallbacks for path=" + path);
 				}
 				
 				console.log("Pushing callback=" + UTIL.getFunctionName(callback) + " to fileOpenExtraCallbacks for path=" + path);
@@ -5247,6 +5292,31 @@ var word = "";
 				EDITOR.eventListeners.unregisterAltKey[j].fun(fun);
 			}
 		}
+	}
+	
+	EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
+		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+		var returns = [];
+		for (var j=0, ret; j<EDITOR.eventListeners.hideVirtualKeyboard.length; j++) {
+			ret = EDITOR.eventListeners.hideVirtualKeyboard[j].fun(keyboards);
+			// Should return an array of virtual keyboards hidden, or false
+			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected an array of keyboard names!");
+			returns.concat(ret);
+		}
+		return returns;
+	}
+	
+	EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
+		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+		console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
+		var returns = [];
+		for (var j=0, ret; j<EDITOR.eventListeners.hideVirtualKeyboard.length; j++) {
+			ret = EDITOR.eventListeners.showVirtualKeyboard[j].fun(keyboards);
+			// Should return an array of virtual keyboards that was turned on.
+			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected a list of keyboard names! (list can be empty)");
+			returns.concat(ret);
+		}
+		return returns;
 	}
 	
 	// # Virtual keyboard

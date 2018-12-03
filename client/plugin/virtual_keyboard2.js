@@ -108,6 +108,7 @@
 	var ALT2 = false;
 	var clickTimer;
 	var customAltKeys = [];
+	var MY_NAME = "virtual_keyboard2";
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -125,6 +126,9 @@
 			
 			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
+			EDITOR.on("hideVirtualKeyboard", hideVirtualKeyboard2);
+			EDITOR.on("showVirtualKeyboard", showVirtualKeyboard2);
+			
 			
 			addButtons();
 			
@@ -146,6 +150,8 @@
 			
 			EDITOR.removeEvent("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.removeEvent("afterResize", resizeVirtualKeyboard);
+			EDITOR.removeEvent("hideVirtualKeyboard", hideVirtualKeyboard2);
+			EDITOR.removeEvent("showVirtualKeyboard", showVirtualKeyboard2);
 			
 			EDITOR.removeEvent("registerAltKey", updateAltKey);
 			
@@ -159,9 +165,35 @@
 		}
 	});
 	
+	function hideVirtualKeyboard2(keyboards) {
+		if( keyboards.length==0 || keyboards.indexOf(MY_NAME) != -1 ) {
+			if(ACTIVE) {
+				toggleVirtualKeyboard2(false);
+				return [MY_NAME];
+			}
+		}
+		else {
+			console.log("keyboards=" + JSON.stringify(keyboards) + " ACTIVE=" + ACTIVE);
+		}
+		return [];
+	}
+	
+	function showVirtualKeyboard2(keyboards) {
+		if( keyboards.length==0 || keyboards.indexOf(MY_NAME) != -1 ) {
+			if(!ACTIVE) {
+				toggleVirtualKeyboard2(true);
+				return [MY_NAME];
+			}
+		}
+		else {
+			console.log("keyboards=" + JSON.stringify(keyboards));
+		}
+		return [];
+	}
+	
 	function removeAltKey(fun) {
 		var id = 0;
-var altNr = 0;
+		var altNr = 0;
 		for (var i=0; i<customAltKeys.length; i++) {
 			if(customAltKeys[i].fun == fun) {
 				
@@ -998,6 +1030,10 @@ fun: function space(click) {
 				if(ALT1) {
 					var clipboardData = EDITOR.getClipboardContent(gotClipboard);
 				}
+				else if(ALT2) {
+					EDITOR.putIntoClipboard(EDITOR.currentFile.getSelectedText());
+					EDITOR.currentFile.deleteSelection();
+				}
 				else {
 					EDITOR.putIntoClipboard(EDITOR.currentFile.getSelectedText());
 				}
@@ -1010,7 +1046,8 @@ fun: function space(click) {
 			charCode: 8,
 			width: 1.2,
 			textSize: 0.6,
-			alt1: "paste"
+			alt1: "paste",
+			alt2: "cut"
 		});
 		
 		add("!", {width: 0.8}); // 55563
@@ -1051,13 +1088,13 @@ fun: function space(click) {
 		
 		add("Compl", {
 			fun: function autocomplete(click) {
-				if(ALT1) toggleVirtualKeyboard2(false);
+				if(ALT2) toggleVirtualKeyboard2(false);
 				else fireKey(EDITOR.settings.autoCompleteKey, "keydown");
 			},
 			charCode: EDITOR.settings.autoCompleteKey,
 			width: 1.3,
 			textSize: 0.5,
-			alt1: "Done"
+			alt2: "Done"
 		});
 		
 		add(";", {width: 1.4}); // 374216
@@ -1184,26 +1221,26 @@ fun: function space(click) {
 	
 	
 	function keyboardPushbuttonDown (mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
+	
+		
 		return true;
-		if(mouseY > 50) return true;
-		else {
-			if(vibrate) vibrate(50);
-			EDITOR.beep(0.1, 120, "sine", 39);
-			return false;
-		}
 	}
 	
 	function keyboardPushbuttonUp(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
+		
+		if(mouseUpEvent.type == "touchstart") {
+			toggleVirtualKeyboard2(true);
+		}
+		
 		return true;
+		
 		if(mouseY > 50) return true;
 		
 		var file = EDITOR.currentFile;
 		if(!file)  return true;
 		
-		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
+		// Is it faster to click on the file canvas ? It's no difference.
 		EDITOR.mock("keypress", {charCode: 65});
-		//file.putCharacter("X");
-		//EDITOR.renderRow();
 		
 		return false;
 		}
