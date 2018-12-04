@@ -20,7 +20,11 @@ var inputCount = 0;
 var menuVisibleOnce = false;
 var menuIsFullScreen = false;
 var usePseudoClipboard = undefined;
-
+var cacheCanvas = document.createElement("canvas");
+var cacheCanvasCtx = cacheCanvas.getContext("2d", {alpha: false});
+var lastBufferStartRow = 0;
+var lastCacheBufferStartRow = 0;
+var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 
 // List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
 // Note: The file parsers should fill this list!
@@ -128,6 +132,7 @@ EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/
 EDITOR.installDirectory = "/";
 EDITOR.pseudoClipboard = "";
 EDITOR.registeredAltKeys = []; // Alt keys for the virtual keyboard(s)
+EDITOR.isScrolling = false; // Render optimization for scrolling
 
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
@@ -1658,7 +1663,7 @@ text = file;
 		EDITOR.shouldResize = true;
 	}
 	
-	EDITOR.render = function render(file, canvas, ctx) {
+	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride) {
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -1675,7 +1680,7 @@ canvas = EDITOR.canvas;
 			}
 		}
 		
-		if(!EDITOR.shouldRender && canvas == EDITOR.canvas) {
+		if(!EDITOR.shouldRender && (canvas == EDITOR.canvas && !renderOverride)) {
 			console.warn("Not rendering because it's not needed!");
 			return;
 		}
@@ -1687,8 +1692,12 @@ canvas = EDITOR.canvas;
 		
 		if(ctx == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined)
 		
+		if(screenStartRow == undefined) screenStartRow = 0; 
+		// Used for only rendering some rows for optimization. 
+		// Default is to render all rows, so screenStartRow = 0
+		
+		
 		// Fix blurryness for screens with high pixel ratio
-		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		if(pixelRatio !== 1) {
 			ctx.restore();
 			ctx.save();
@@ -1701,7 +1710,7 @@ canvas = EDITOR.canvas;
 			but it had no effect of rending performance, while making the text blurry!
 		*/
 		
-		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
+		if(canvas == EDITOR.canvas) EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
 		
 		//console.warn("rendering ...");
 		
@@ -1727,23 +1736,30 @@ canvas = EDITOR.canvas;
 			var buffer = [];
 			var grid = EDITOR.currentFile.grid;
 			var funName = "";
-			var startRow = 0; // Used for only rendering some rows for optimization. This functions renders all row, so startRow = 0
 			
 			// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
 			
 			// Create the buffer
 			//console.time("createBuffer");
-			var bufferStartRow = Math.max(0, file.startRow);
-			var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
+			
+			// For the render functions, the first row is always at the top!
+			
+			if(fileStartRow == undefined) fileStartRow = file.startRow;
+			if(fileEndRow == undefined) fileEndRow = fileStartRow + EDITOR.view.visibleRows;
+			
+			var bufferStartRow = Math.max(0, fileStartRow);;
+			var bufferEndRow = Math.min(grid.length, fileEndRow);
 			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see
-			if(maxColumns <= 20) maxColumns = 20;
+			if(maxColumns < 20) maxColumns = 20;
 			for(var row = bufferStartRow; row < bufferEndRow; row++) {
 				buffer.push(file.cloneRow(row, maxColumns)); // Clone the row
 			}
 			//console.timeEnd("createBuffer");
 			
+			
+			
 			if(buffer.length == 0) {
-				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				console.warn("buffer is zero! fileStartRow=" + fileStartRow + " file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 			}
 			
 			// Load on the fly functionality on the buffer
@@ -1772,9 +1788,16 @@ canvas = EDITOR.canvas;
 			//ctx.translate(0,0);
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
-			
+			//ctx.fillStyle = "orange";
+			// Clear the screen
 			//ctx.clearRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
-			ctx.fillRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
+			var fillX = 0;
+			var fillY = screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
+			var fillWidth = EDITOR.view.canvasWidth;
+			var fillHeight = (fileEndRow-fileStartRow) * EDITOR.settings.gridHeight;
+			console.log("fillX=" + fillX + " fillY=" + fillY + " fillWidth=" + fillWidth + " fillHeight=" + fillHeight);
+			ctx.fillRect(fillX, fillY, fillWidth, fillHeight);
+			
 			
 			/*
 				ctx.fillStyle = "#FF0000";
@@ -1787,12 +1810,16 @@ canvas = EDITOR.canvas;
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
 				//console.time("render: " + funName);
-				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, screenStartRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow); // Call render
 				//console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
 			
-			EDITOR.renderCaret(file.caret);
+			if(file.caret.row >= bufferStartRow && file.caret.row <= bufferEndRow) {
+				EDITOR.renderCaret(file.caret, 0, EDITOR.settings.caret.color, screenStartRow, bufferStartRow, bufferEndRow);
+			}
+			
+			lastBufferStartRow = bufferStartRow;
 			
 			console.timeEnd("render");
 			
@@ -1873,7 +1900,7 @@ canvas = EDITOR.canvas;
 				return;
 			}
 			
-			var screenRow = Math.max(0, gridRow - file.startRow);
+			var screenStartRow = Math.max(0, gridRow - file.startRow);
 			
 			console.time("renderRow");
 			
@@ -1890,11 +1917,19 @@ canvas = EDITOR.canvas;
 				buffer = EDITOR.preRenderFunctions[i](buffer, file);
 			}
 			
+			// Find out if the buffer contains zero with characters ( might need optimization )
+			if(buffer.length > 0) {
+				var startIndex = buffer[0].startIndex;
+				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
+				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+			}
+			else var containZeroWidthCharacters = false;
+			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
-			var top = EDITOR.settings.topMargin + screenRow * EDITOR.settings.gridHeight;
+			var top = EDITOR.settings.topMargin + screenStartRow * EDITOR.settings.gridHeight;
 			
 			// Clear only that row
 			ctx.fillRect(0, top, canvas.width, EDITOR.settings.gridHeight);
@@ -1905,8 +1940,10 @@ canvas = EDITOR.canvas;
 				ctx.lineWidth = 1;
 			*/
 			
+			console.log("Rendering gridRow=" + gridRow);
+			
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-				EDITOR.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containZeroWidthCharacters, gridRow, gridRow); // Call render
 			}
 			
 			console.timeEnd("renderRow");
@@ -1956,12 +1993,14 @@ canvas = EDITOR.canvas;
 		
 	}
 	
-	EDITOR.renderCaret = function(caret, colPlus, fillStyle) {
+	EDITOR.renderCaret = function(caret, colPlus, fillStyle, screenStartRow, bufferStartRow) {
 		var file = EDITOR.currentFile;
 		if(file == undefined) return;
 		
 		if(colPlus == undefined) colPlus = 0;
 		if(fillStyle == undefined) fillStyle = EDITOR.settings.caret.color;
+		if(screenStartRow == undefined) screenStartRow = 0;
+		if(bufferStartRow == undefined) bufferStartRow = file.startRow;
 		
 		var row = caret.row;
 		var col = caret.col + colPlus;
@@ -1969,7 +2008,7 @@ canvas = EDITOR.canvas;
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
 		
 		// Math.floor to prevent sub pixels
-		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		ctx.fillStyle = fillStyle;
@@ -2013,7 +2052,8 @@ canvas = EDITOR.canvas;
 		
 		console.time("resize");
 		
-		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		
 		var windowHeight = parseInt(window.innerHeight);
 		var windowWidth = parseInt(window.innerWidth);
 		
@@ -2201,6 +2241,9 @@ canvas = EDITOR.canvas;
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
 			canvas.width  = canvasWidth;
+			canvas.height = canvasHeight;
+			
+			cacheCanvas.width = canvasWidth;
 			canvas.height = canvasHeight;
 			
 			// The canvas seem to be reset when resizing!
@@ -7074,7 +7117,99 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		if(EDITOR.shouldResize) EDITOR.resize();
 		
 		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
-		if(EDITOR.shouldRender) EDITOR.render();
+		if(EDITOR.shouldRender) {
+			
+			console.warn("Rendering!");
+			
+			var file = EDITOR.currentFile;
+			var fileStartRow = file ? file.startRow : 0;
+			var fileEndRow = fileStartRow + EDITOR.view.visibleRows;
+			var screenStartRow = 0;
+			var lastFileStartRow = lastBufferStartRow;
+			var tmpLastBufferStartRow = 0;
+			/*
+				
+				Optimization for when scrolling (on mobile)
+				Copying from one canvas to another seemt to be to slow for it to be worth it !?
+				
+				
+			*/
+			
+			if(EDITOR.isScrolling && file && 1 == 1) {
+				
+				console.time("Scrolling optimization");
+				
+				// Only render the missing part, copy the rest from the cache canvas, and fill the cache canvas with new content
+				
+				tmpLastBufferStartRow = fileStartRow;
+				
+				var rowDiff = lastFileStartRow - fileStartRow;
+				var scrollDirection = rowDiff > 0 ? 1 : -1;
+				
+				if(scrollDirection == 1) {
+					// Move image down
+					
+					var dy = Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
+					var sy = EDITOR.settings.topMargin;
+					var sHeight = EDITOR.view.canvasHeight - dy;
+					
+					// Render above
+					fileEndRow =  Math.abs(rowDiff);
+					
+				}
+				else {
+					
+					// Move image up
+					var dy = EDITOR.settings.topMargin;
+					var sy =  Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;;
+					var sHeight = EDITOR.view.canvasHeight - sy;
+					
+					// Render the missing rows
+					screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff);
+					fileStartRow = fileEndRow - Math.abs(rowDiff);
+					
+				}
+				
+				var dx = 0;
+				var sx = 0;
+				var sWidth = EDITOR.view.canvasWidth;
+				var dWidth = sWidth;
+				var dHeight = sHeight;
+				
+				console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
+				
+				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+				
+				
+				//lastBufferStartRow = tmpLastBufferStartRow;
+				//EDITOR.shouldRender = false;
+				
+				console.timeEnd("Scrolling optimization");
+				//return;
+			}
+			
+			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
+			
+			if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
+			
+			if(EDITOR.isScrolling && lastCacheBufferStartRow == 0 && 1 == 2) {
+				console.time("scrollong opt init");
+				// Are we scrolling up or down ?
+				var scrollDirection = (lastFileStartRow - fileStartRow) > 0 ? 1 : -1;
+				if(scrollDirection == 1) {
+					fileStartRow = fileEndRow + 1;
+				}
+				else {
+					fileStartRow = fileStartRow - EDITOR.view.visibleRows
+					
+				}
+				fileEndRow = fileStartRow + EDITOR.view.visibleRows;
+				
+				// Render the next "page" on the cache canvas
+				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, cacheCanvas, cacheCanvasCtx);
+			}
+			
+		}
 		
 		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
 		

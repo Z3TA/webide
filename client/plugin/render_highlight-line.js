@@ -5,9 +5,11 @@
 
 	var color = EDITOR.settings.style.currentLineColor;
 	
-	function highLightLine(ctx, buffer, file) {
+	function highLightLine(ctx, buffer, file, screenStartRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
 		
-		var top = EDITOR.settings.topMargin + (file.caret.row - file.startRow) * EDITOR.settings.gridHeight;
+		if(file.caret.row > bufferEndRow || file.caret.row < bufferStartRow) return;
+		
+		var top = EDITOR.settings.topMargin + (file.caret.row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight;
 		
 		ctx.fillStyle = color;
 		

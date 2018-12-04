@@ -44,9 +44,7 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-
-
-
+scrolling optimization
 
 Fiddling with the renderRow and render_lineNumbers.js optimization.
 

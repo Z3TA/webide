@@ -18,7 +18,7 @@
 	var pixelRatio = window.devicePixelRatio || 1;
 	var cacheCanvasWidth = 0;
 	var cacheCanvasHeight = 0;
-	
+	var debug = false;
 	
 	EDITOR.plugin({
 		desc: "Render line numbers",
@@ -35,9 +35,12 @@
 			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
-			// debug
-			//var rightColumn = document.getElementById("rightColumn");
-			//rightColumn.appendChild(cacheCanvas);
+			// START DEBUG CODE
+			if(debug) {
+			var rightColumn = document.getElementById("rightColumn");
+			rightColumn.appendChild(cacheCanvas);
+			}
+			// END DEBUG CODE
 			
 		},
 		unload: function() {
@@ -59,33 +62,23 @@
 		lastLineNr = 0;
 		//cacheCanvas.style.height = EDITOR.view.canvasHeight + "px";
 		
-		// debug
-		//cacheCanvas.style.width=cacheCanvasWidth + "px";
-		//cacheCanvas.style.height=cacheCanvasHeight + "px";
-		
+		// START DEBUG CODE
+		if(debug) {
+		cacheCanvas.style.width=cacheCanvasWidth + "px";
+		cacheCanvas.style.height=cacheCanvasHeight + "px";
+		}
+		// END DEBUG CODE
 	}
 	
-	function paintLineNumbers(ctx, buffer, file, startRow) {
+	function paintLineNumbers(ctx, buffer, file, screenStartRow, containZeroWidthCharacters, fileStartRow, fileEndRow) {
 		if(buffer.length == 0) return;
 		if(EDITOR.settings.showLineNumbers == false) return;
 		
+		if(screenStartRow == undefined) screenStartRow = 0;
+		if(fileStartRow == undefined) fileStartRow = file.startRow;
+		
 		var lineNr = buffer[0].lineNumber + file.partStartRow,
 			lastLine = -1;
-		
-		if(buffer.length==1) {
-			var sourceX = 0; // the left X position to start clipping
-			var sourceY = startRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y position to start clipping
-			var sourceRectWidth = cacheCanvasWidth * pixelRatio; // clip this width of pixels from the source
-			var sourceRectHeight = (EDITOR.settings.gridHeight + EDITOR.settings.topMargin) * pixelRatio; // clip this height of pixels from the source
-			var destinationX = leftMargin; // the left X canvas position to start drawing the clipped sub-image
-			var destinationY =  sourceY; // the top Y canvas position to start drawing the clipped sub-image
-			var destinationWidth = sourceRectWidth / pixelRatio; // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
-			var destinationHeight = sourceRectHeight / pixelRatio; // scale sourceRectHeight to destinationHeight and draw a destinationHeight high sub-image on the canvas
-			
-			ctx.drawImage(cacheCanvas, sourceX, sourceY, sourceRectWidth, sourceRectHeight, destinationX, destinationY, destinationWidth, destinationHeight);
-			
-return;
-		}
 		
 		if(!(lineNr == lastLineNr && lastRowCount == buffer.length)) {
 			
@@ -96,20 +89,27 @@ return;
 				//cacheCtx.scale(1,1);
 			}
 			
+			var fillX = 0;
+			var fillY = screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
+			var fillWidth = EDITOR.view.canvasWidth;
+			var fillHeight = (fileEndRow-fileStartRow) * EDITOR.settings.gridHeight;
 			cacheCtx.fillStyle = EDITOR.settings.style.bgColor;
-			cacheCtx.fillRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
+			cacheCtx.fillRect(fillX, fillY, fillWidth, fillHeight);
 			
-			// debug
-			//cacheCtx.fillStyle ="darkred";
-			//cacheCtx.fillRect(5, 5, cacheCanvasWidth-10, cacheCanvasHeight-10);
-			//cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			// START DEBUG CODE
+			if(debug) {
+			cacheCtx.fillStyle ="darkred";
+			cacheCtx.fillRect(5, 5, cacheCanvasWidth-10, cacheCanvasHeight-10);
+			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			}
+			// End DEBUG CODE
 			
 			cacheCtx.fillStyle = EDITOR.settings.style.textColor;
 
 			lastLineNr = lineNr;
 			lastRowCount = buffer.length;
 			
-		if(startRow == undefined) startRow = 0;
+			
 		
 			cacheCtx.textBaseline = "top";
 			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
@@ -120,16 +120,18 @@ return;
 			//console.log("Line " + line);
 			if(lineNr > lastLine) {
 					lastLine = lineNr;
-					cacheCtx.fillText(lineNr, leftMargin, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
+					cacheCtx.fillText(lineNr, leftMargin, EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight);
 				}
 			}
 			
-			// debug
-			//cacheCtx.fillText(startRow, 10, 0) ;
-			//cacheCtx.font=EDITOR.settings.style.fontSize/2 + "px " + EDITOR.settings.style.font;
-			//var tmp = 0;
-			//for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=EDITOR.settings.gridHeight) cacheCtx.fillText(++tmp, 20, i) ;
-			
+			// START DEBUG CODE
+			if(debug) {
+				cacheCtx.fillText(screenStartRow, 10, 0) ;
+			cacheCtx.font=EDITOR.settings.style.fontSize/2 + "px " + EDITOR.settings.style.font;
+			var tmp = 0;
+			for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=EDITOR.settings.gridHeight) cacheCtx.fillText(++tmp, 20, i) ;
+			}
+			// END DEBUG CODE
 			
 		}
 		
@@ -137,13 +139,17 @@ return;
 		
 		
 		var sourceX = 0; // the left X position to start clipping
-		var sourceY = 0; // the top Y position to start clipping
+		var sourceY = screenStartRow==0 ? 0 : EDITOR.settings.topMargin*2; //screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y position to start clipping
 		var sourceRectWidth = cacheCanvasWidth * pixelRatio; // clip this width of pixels from the source
-		var sourceRectHeight = cacheCanvasHeight * pixelRatio; // clip this height of pixels from the source
+		var sourceRectHeight = Math.max(1, fileEndRow-fileStartRow) * EDITOR.settings.gridHeight * pixelRatio; // clip this height of pixels from the source
 		var destinationX = leftMargin; // the left X canvas position to start drawing the clipped sub-image
-		var destinationY =  sourceY; // the top Y canvas position to start drawing the clipped sub-image
+		var destinationY =  screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y canvas position to start drawing the clipped sub-image
 		var destinationWidth = sourceRectWidth / pixelRatio; // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
 		var destinationHeight = sourceRectHeight / pixelRatio; // scale sourceRectHeight to destinationHeight and draw a destinationHeight high sub-image on the canvas
+		
+		console.log("screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
+		" sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + 
+		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight);
 		
 		ctx.drawImage(cacheCanvas, sourceX, sourceY, sourceRectWidth, sourceRectHeight, destinationX, destinationY, destinationWidth, destinationHeight);
 		

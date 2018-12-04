@@ -32,9 +32,6 @@
 		desc: "Allow touch scrolling in right and bottom screen area",
 		load: function loadTochScroll() {
 			
-			// Wait for touch events before activating touch scrolling
-			//EDITOR.on("mouseClick", touchMaybeOnMouseDown);
-			
 			EDITOR.addRender(verticalScrollingRender, 25);
 			EDITOR.addRender(horizontalScrollingRender, 26);
 			
@@ -72,6 +69,8 @@
 		touchDownX = x;
 		touchDownY = y;
 		
+		EDITOR.isScrolling = true;
+		
 		// We are competing with select text, so always return false to prevent selecting text while scrolling
 		return false;
 	}
@@ -94,6 +93,8 @@
 		verticalScrolling = false;
 		maybeScroll = false;
 		touching = false;
+		
+		EDITOR.isScrolling = false;
 		
 		if(wasScrolling) return false;
 		else return true;
@@ -298,25 +299,6 @@
 			
 			lastMeasuredMove = new Date();
 			
-		}
-	}
-	
-	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
-		console.log(mouseDownEvent);
-		if(mouseDownEvent.type == "touchstart") {
-			
-			touchCounter++;
-			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
-			EDITOR.virtualKeyboard.show();
-		}
-		else if(mouseDownEvent.type == "mousedown") {
-			// Mobile browsers also send mousedown events on touchstart events!
-			mouseCounter++;
-			if(mouseCounter > 1 && mouseCounter > touchCounter) {
-				
-				EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
-				EDITOR.virtualKeyboard.hide();
-			}
 		}
 	}
 	
