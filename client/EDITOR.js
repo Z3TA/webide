@@ -715,6 +715,10 @@ usePseudoClipboard = false;
 		else {
 			console.log("getClipboardContent: navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
 			
+			// Should we use the pseudo clipboard or always prompt !?
+			//if(usePseudoClipboard === true && EDITOR.pseudoClipboard) 
+			// It would be more annoying if you couln't copy in stuff, then showing the prompt every time !?
+			
 			var data = prompt("Paste the clipboard content here:", EDITOR.pseudoClipboard);
 			
 			if(typeof data == "string" && data.length > 0) readSuccess(data);
