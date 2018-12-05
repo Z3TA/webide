@@ -714,7 +714,11 @@ usePseudoClipboard = false;
 		}
 		else {
 			console.log("getClipboardContent: navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
-			readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
+			
+			var data = prompt("Paste the clipboard content here:", EDITOR.pseudoClipboard);
+			
+			if(typeof data == "string" && data.length > 0) readSuccess(data);
+			else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 		}
 		
 		function readSuccess(text) {
