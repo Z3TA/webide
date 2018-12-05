@@ -1748,10 +1748,10 @@ canvas = EDITOR.canvas;
 			if(fileEndRow == undefined) fileEndRow = fileStartRow + EDITOR.view.visibleRows;
 			
 			var bufferStartRow = Math.max(0, fileStartRow);;
-			var bufferEndRow = Math.min(grid.length, fileEndRow);
+			var bufferEndRow = Math.min(grid.length-1, fileEndRow);
 			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see
 			if(maxColumns < 20) maxColumns = 20;
-			for(var row = bufferStartRow; row < bufferEndRow; row++) {
+			for(var row = bufferStartRow; row <= bufferEndRow; row++) {
 				buffer.push(file.cloneRow(row, maxColumns)); // Clone the row
 			}
 			//console.timeEnd("createBuffer");
@@ -1759,7 +1759,8 @@ canvas = EDITOR.canvas;
 			
 			
 			if(buffer.length == 0) {
-				console.warn("buffer is zero! fileStartRow=" + fileStartRow + " file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				console.warn("buffer is zero! bufferStartRow=" + bufferStartRow + " bufferEndRow=" + bufferEndRow + " fileStartRow=" + fileStartRow + 
+				" file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 			}
 			
 			// Load on the fly functionality on the buffer
@@ -1794,7 +1795,7 @@ canvas = EDITOR.canvas;
 			var fillX = 0;
 			var fillY = screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
 			var fillWidth = EDITOR.view.canvasWidth;
-			var fillHeight = (fileEndRow-fileStartRow) * EDITOR.settings.gridHeight;
+			var fillHeight = (fileEndRow-fileStartRow+1) * EDITOR.settings.gridHeight + (screenStartRow==0 ? EDITOR.settings.topMargin : 0);
 			console.log("fillX=" + fillX + " fillY=" + fillY + " fillWidth=" + fillWidth + " fillHeight=" + fillHeight);
 			ctx.fillRect(fillX, fillY, fillWidth, fillHeight);
 			
@@ -7130,14 +7131,12 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			/*
 				
 				Optimization for when scrolling (on mobile)
-				Copying from one canvas to another seemt to be to slow for it to be worth it !?
-				
+				Copying from one canvas to another seem to be too slow for it to be worth it !?
+				The EDITOR.render() function has a lot of over-head, we should try to avoid it!
 				
 			*/
 			
 			if(EDITOR.isScrolling && file && 1 == 1) {
-				
-				console.time("Scrolling optimization");
 				
 				// Only render the missing part, copy the rest from the cache canvas, and fill the cache canvas with new content
 				
@@ -7145,6 +7144,12 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				var rowDiff = lastFileStartRow - fileStartRow;
 				var scrollDirection = rowDiff > 0 ? 1 : -1;
+				
+				if(rowDiff == 0) {
+					EDITOR.shouldRender = false;
+					return;
+				}
+				console.time("Scrolling optimization");
 				
 				if(scrollDirection == 1) {
 					// Move image down
@@ -7154,7 +7159,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					var sHeight = EDITOR.view.canvasHeight - dy;
 					
 					// Render above
-					fileEndRow =  Math.abs(rowDiff);
+					fileEndRow = fileStartRow + Math.abs(rowDiff)-1;
 					
 				}
 				else {
@@ -7176,7 +7181,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				var dWidth = sWidth;
 				var dHeight = sHeight;
 				
-				console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
+				//console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 				
 				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
 				
@@ -7187,6 +7192,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				console.timeEnd("Scrolling optimization");
 				//return;
 			}
+			
+			console.log("resizeAndRender: render! fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
 			
 			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
 			

@@ -89,17 +89,18 @@
 				//cacheCtx.scale(1,1);
 			}
 			
+			// The cache canvas does not take into account screenStartRow!
 			var fillX = 0;
-			var fillY = screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
+			var fillY = 0;
 			var fillWidth = EDITOR.view.canvasWidth;
-			var fillHeight = (fileEndRow-fileStartRow) * EDITOR.settings.gridHeight;
+			var fillHeight = (fileEndRow-fileStartRow+1) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
 			cacheCtx.fillStyle = EDITOR.settings.style.bgColor;
 			cacheCtx.fillRect(fillX, fillY, fillWidth, fillHeight);
 			
 			// START DEBUG CODE
 			if(debug) {
 			cacheCtx.fillStyle ="darkred";
-			cacheCtx.fillRect(5, 5, cacheCanvasWidth-10, cacheCanvasHeight-10);
+				cacheCtx.fillRect(16, 5, 2, cacheCanvasHeight-10);
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			}
 			// End DEBUG CODE
@@ -141,7 +142,7 @@
 		var sourceX = 0; // the left X position to start clipping
 		var sourceY = screenStartRow==0 ? 0 : EDITOR.settings.topMargin*2; //screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y position to start clipping
 		var sourceRectWidth = cacheCanvasWidth * pixelRatio; // clip this width of pixels from the source
-		var sourceRectHeight = Math.max(1, fileEndRow-fileStartRow) * EDITOR.settings.gridHeight * pixelRatio; // clip this height of pixels from the source
+		var sourceRectHeight = ( (fileEndRow-fileStartRow+1) * EDITOR.settings.gridHeight + (screenStartRow==0 ? EDITOR.settings.topMargin : 0) ) * pixelRatio; // clip this height of pixels from the source
 		var destinationX = leftMargin; // the left X canvas position to start drawing the clipped sub-image
 		var destinationY =  screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y canvas position to start drawing the clipped sub-image
 		var destinationWidth = sourceRectWidth / pixelRatio; // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
