@@ -109,6 +109,7 @@
 	var clickTimer;
 	var customAltKeys = [];
 	var MY_NAME = "virtual_keyboard2";
+	var oldCanvasHeight = 0; // Optimization: Don't resize and re-render if the size is the same as before
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -255,6 +256,7 @@ return false;
 			wrapper.style.display="block";
 		}
 		else if(!ACTIVE && oldState) {
+			oldCanvasHeight = canvasHeight;
 			wrapper.style.display="none";
 		}
 		
@@ -328,6 +330,8 @@ return false;
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
 		
 		if(!ACTIVE) return;
+		
+		if(canvasHeight == oldCanvasHeight) return;
 		
 		// debug
 		var wrapper = document.getElementById("virtualKeyboard2");
