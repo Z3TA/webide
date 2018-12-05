@@ -2450,7 +2450,7 @@ canvas = EDITOR.canvas;
 		
 		if(eventName == "registerAltKey" && EDITOR.registeredAltKeys.length > 0) {
 			for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
-				options.fun(EDITOR.registeredAltKeys[i]); 
+				options.fun(EDITOR.registeredAltKeys[i]);
 			}
 		}
 		
@@ -5301,18 +5301,26 @@ var word = "";
 		if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
 		if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
 		if(typeof options.label != "string") throw new Error("The option object need to have a label string!");
+		if(typeof options.alt != "number" && typeof options.alt != "undefined") throw new Error("The alt option need to be a number!");
+		
+		if(options.alt == undefined) options.alt = 1; // One button can have many alternatives
 		
 		var key;
 		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
 			key = EDITOR.registeredAltKeys[i];
-			if(key.char==options.char) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char);
+			if(key.char==options.char && key.alt == options.alt) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char + " on alt=" + options.alt);
 		}
 		
 		EDITOR.registeredAltKeys.push(options);
 		
+		var reg = false;
+		var regSuccess = false;
 		for (var j=0; j<EDITOR.eventListeners.registerAltKey.length; j++) {
-			EDITOR.eventListeners.registerAltKey[j].fun(options);
+			reg = EDITOR.eventListeners.registerAltKey[j].fun(options);
+			if(reg==true) regSuccess = true;
 		}
+		// Note: The keybard plugion might not yet have loaded!
+		//if(!regSuccess) throw new Error(UTIL.getFunctionName(options.fun) + " did not register for char=" + options.char + " on alt=" + options.alt + " on any of the keyboards!");
 		
 	}
 	

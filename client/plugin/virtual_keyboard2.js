@@ -214,18 +214,29 @@
 	}
 	
 	function updateAltKey(key) {
-		for (var i=0; i<verticalLayout.length; i++) {
-			if(verticalLayout[i].char == key.char) {
-				for(var j=1; j<3; j++) {
-					if(!verticalLayout[i]["alt" + j]) {
-						verticalLayout[i]["alt" + j] = key.label;
-						customAltKeys.push({id: i, alt: j, fun: key.fun});
-						console.log("Added " + UTIL.getFunctionName(key.fun) + " as ALT" + j + " on " + key.char + " !");
-						return;
-					}
+		console.log("updateAltKey: char=" + key.char + " alt=" + key.alt);
+if(key.alt > 3) {
+			console.log("Virtual keyboard only allow 3 alternatives per button!");
+return false;
+}
+		for (var i=0, button; i<verticalLayout.length; i++) {
+			button = verticalLayout[i];
+			if(button.char == key.char) {
+				console.log("Found char=" + key.char);
+				if(verticalLayout[i]["alt" + key.alt] != undefined) {
+					console.log("There is already something registered on " + button.char + " for alt=" + key.alt + " !");
+					return false;
+				}
+				else {
+					verticalLayout[i]["alt" + key.alt] = key.label;
+					customAltKeys.push({id: i, alt: key.alt, fun: key.fun});
+					console.log("Added " + UTIL.getFunctionName(key.fun) + " as alt" + key.alt + " on " + key.char + " !");
+					return true;
 				}
 			}
 		}
+		console.log("Could not find char=" + key.char + " on the virtual keyboard!");
+		return false;
 	}
 	
 	function toggleVirtualKeyboard2(state) {
@@ -1001,14 +1012,14 @@ fun: function space(click) {
 		
 		add("=", {width: 1.4}); // 456621
 		
-		add("CAPS", {
+		add("ABC", { // Could use 🔠 but not supported by all browsers
 			fun: function capsLock(click) {
 				CAPS = !CAPS;
 				renderVirtualKeyboard();
 			},
 			charCode: -1,
 			width: 1.6,
-			textSize: 0.5
+			textSize: 0.8
 		});
 		
 		add("h", {alt1: "←",    alt3: "н"}); // move left
@@ -1045,7 +1056,7 @@ fun: function space(click) {
 			},
 			charCode: 8,
 			width: 1.2,
-			textSize: 0.6,
+			textSize: 0.8,
 			alt1: "paste",
 			alt2: "cut"
 		});
@@ -1093,7 +1104,7 @@ fun: function space(click) {
 			},
 			charCode: EDITOR.settings.autoCompleteKey,
 			width: 1.3,
-			textSize: 0.5,
+			textSize: 0.7,
 			alt2: "Done"
 		});
 		

@@ -80,6 +80,9 @@
 			EDITOR.bindKey({desc: "Redo change", charCode: Y, fun: collabRedo, combo: CTRL});
 			EDITOR.bindKey({desc: "Undo change", charCode: Z, fun: collabUndo, combo: CTRL});
 			
+			EDITOR.registerAltKey({char: "ABC", label: "undo", alt: 1, fun: collabUndo}); 
+			EDITOR.registerAltKey({char: "ABC", label: "redo", alt: 2, fun: collabRedo});
+			
 			menu = EDITOR.addMenuItem("Invite collaborator", invite, 14);
 			
 			if(EDITOR.settings.devMode) {
@@ -114,6 +117,9 @@
 			
 			EDITOR.unbindKey(collabRedo);
 			EDITOR.unbindKey(collabUndo);
+			
+			EDITOR.unregisterAltKey(collabUndo);
+			EDITOR.unregisterAltKey(collabRedo);
 			
 		},
 		order: 100
