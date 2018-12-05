@@ -20,10 +20,7 @@ var inputCount = 0;
 var menuVisibleOnce = false;
 var menuIsFullScreen = false;
 var usePseudoClipboard = undefined;
-var cacheCanvas = document.createElement("canvas");
-var cacheCanvasCtx = cacheCanvas.getContext("2d", {alpha: false});
-var lastBufferStartRow = 0;
-var lastCacheBufferStartRow = 0;
+var lastBufferStartRow = -1; // 
 var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 
 // List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
@@ -1663,7 +1660,9 @@ text = file;
 		EDITOR.shouldResize = true;
 	}
 	
-	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride) {
+	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
+		
+		console.warn("EDITOR.render!");
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -1788,7 +1787,9 @@ canvas = EDITOR.canvas;
 			
 			//ctx.translate(0,0);
 			
-			ctx.fillStyle = EDITOR.settings.style.bgColor;
+			if(background == undefined) background = EDITOR.settings.style.bgColor;
+			
+			ctx.fillStyle = background;
 			//ctx.fillStyle = "orange";
 			// Clear the screen
 			//ctx.clearRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
@@ -2244,10 +2245,8 @@ canvas = EDITOR.canvas;
 			canvas.width  = canvasWidth;
 			canvas.height = canvasHeight;
 			
-			cacheCanvas.width = canvasWidth;
-			canvas.height = canvasHeight;
-			
-			// The canvas seem to be reset when resizing!
+			// The canvas is reset when resizing!
+			// Font is only set *once* (when resizing) because it's very expensive
 			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
 			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			EDITOR.canvasContext.textBaseline = "top";
@@ -2295,8 +2294,9 @@ canvas = EDITOR.canvas;
 		
 		console.timeEnd("resize");
 		
-		EDITOR.renderNeeded();
-		EDITOR.render(); // Always render (right away to brevent black background blink) after a resize
+		// Always render (right away to brevent black background blink) after a resize
+		EDITOR.shouldRender = true;
+		resizeAndRender(true);
 		
 		//EDITOR.renderNeeded(); // Always render after a resize (but nor right away!?
 		
@@ -2935,7 +2935,7 @@ canvas = EDITOR.canvas;
 			console.log("Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
 			// todo: only re-render if the info is in view
 			EDITOR.renderNeeded();
-			EDITOR.render();
+			resizeAndRender();
 			
 		}
 		
@@ -7111,34 +7111,45 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		}
 	}
 	
-	function resizeAndRender() {
-		//console.warn("resizeAndRender");
-		// Only do the resize or render if it's actually needed
+	function resizeAndRender(afterResize) {
 		
-		if(EDITOR.shouldResize) EDITOR.resize();
+		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling);
+		
+		// Only do the resize or render if it's actually needed
+		if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
 		
 		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
 		if(EDITOR.shouldRender) {
 			
-			console.warn("Rendering!");
+			if(EDITOR.isScrolling) console.time("Scrolling optimization");
 			
 			var file = EDITOR.currentFile;
 			var fileStartRow = file ? file.startRow : 0;
-			var fileEndRow = fileStartRow + EDITOR.view.visibleRows;
+			var fileEndRow = fileStartRow + EDITOR.view.visibleRows; // Don't use Math.max or the bottom will not be cleared!
 			var screenStartRow = 0;
 			var lastFileStartRow = lastBufferStartRow;
 			var tmpLastBufferStartRow = 0;
+			
 			/*
 				
 				Optimization for when scrolling (on mobile)
 				Copying from one canvas to another seem to be too slow for it to be worth it !?
 				The EDITOR.render() function has a lot of over-head, we should try to avoid it!
 				
+				Scrolling optimization: 1.5 - 1.7 ms including render 1 - 1.4ms
+				Full render: 1.8 - 2.5 ms
+				
+				The render optimizations does feel a little snappier on a slow mobile
+
+				I also tried using a cache canvas but it was too complicated and didn't feel much faster.
+
 			*/
 			
-			if(EDITOR.isScrolling && file && 1 == 1) {
+			// The canvas is reset after a resize, so we need to make a full render!
+			
+			if(EDITOR.isScrolling && file && !afterResize && 1 == 1) {
 				
-				// Only render the missing part, copy the rest from the cache canvas, and fill the cache canvas with new content
+				// Only render what is not already rendered.
 				
 				tmpLastBufferStartRow = fileStartRow;
 				
@@ -7149,7 +7160,6 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					EDITOR.shouldRender = false;
 					return;
 				}
-				console.time("Scrolling optimization");
 				
 				if(scrollDirection == 1) {
 					// Move image down
@@ -7160,10 +7170,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					
 					// Render above
 					fileEndRow = fileStartRow + Math.abs(rowDiff)-1;
-					
-				}
+					}
 				else {
-					
 					// Move image up
 					var dy = EDITOR.settings.topMargin;
 					var sy =  Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;;
@@ -7172,8 +7180,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					// Render the missing rows
 					screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff);
 					fileStartRow = fileEndRow - Math.abs(rowDiff);
-					
-				}
+					}
 				
 				var dx = 0;
 				var sx = 0;
@@ -7181,42 +7188,25 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				var dWidth = sWidth;
 				var dHeight = sHeight;
 				
-				//console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
+				console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 				
 				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
 				
-				
-				//lastBufferStartRow = tmpLastBufferStartRow;
 				//EDITOR.shouldRender = false;
-				
-				console.timeEnd("Scrolling optimization");
 				//return;
 			}
 			
-			console.log("resizeAndRender: render! fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
-			
+			if(EDITOR.shouldRender) {
+				console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
+				
 			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
+				}
 			
 			if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
 			
-			if(EDITOR.isScrolling && lastCacheBufferStartRow == 0 && 1 == 2) {
-				console.time("scrollong opt init");
-				// Are we scrolling up or down ?
-				var scrollDirection = (lastFileStartRow - fileStartRow) > 0 ? 1 : -1;
-				if(scrollDirection == 1) {
-					fileStartRow = fileEndRow + 1;
-				}
-				else {
-					fileStartRow = fileStartRow - EDITOR.view.visibleRows
-					
-				}
-				fileEndRow = fileStartRow + EDITOR.view.visibleRows;
-				
-				// Render the next "page" on the cache canvas
-				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, cacheCanvas, cacheCanvasCtx);
-			}
-			
+			if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
 		}
+		
 		
 		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
 		
@@ -7228,6 +7218,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			// Try do do as little as possible to save power
 			clearInterval(mainLoopInterval);
 		}
+	
 	}
 	
 	function keyIsDown(keyDownEvent) {

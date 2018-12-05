@@ -30,10 +30,10 @@
 
 
 		var name = "xMatcher" + xMatcher.length;
-		var customRender = function(ctx, buffer, file, startRow) {
-			highlightMatch(ctx, buffer, file, a, b, startRow);
+		var customRender = function(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
+			highlightMatch(ctx, buffer, file, a, b, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow);
 		}
-		var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow){ render" + name + "(ctx, buffer, file, startRow) };")(customRender);
+		var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
 
 		xMatcher.push(func);
 
@@ -41,7 +41,7 @@
 
 	}
 	
-	function highlightMatch(ctx, buffer, file, lP, rP, startRow) {
+	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -55,7 +55,7 @@
 		//console.log("row=" + row + " col=" + col + "");
 		
 		// Is the caret inside the buffer!?
-		var caretInsideBuffer = row >= 0 && row < buffer.length && buffer[row].length >= col-1;
+		var caretInsideBuffer = row >= 0 && row < buffer.length && buffer[row].length >= col;
 		
 		if(caretInsideBuffer) {
 			// What type of character is the caret on?
@@ -68,7 +68,8 @@
 			}
 			
 			if(col > 0) {
-				if(!buffer[row][col-1]) throw new Error("row=" + row + " col=" + col + " buffer[row][col-1]=" + buffer[row][col-1]);
+				if(!buffer[row][col-1]) throw new Error("row=" + row + " col=" + col + " buffer[row][col-1]=" + buffer[row][col-1] + " bufferStartRow=" + bufferStartRow + 
+				" bufferEndRow=" + bufferEndRow + " startRow=" + startRow + " buffer.length=" + buffer.length + " buffer[" + row + "].length=" + (buffer[row] && buffer[row].length));
 				charToTheLeft = buffer[row][col-1].char;
 			}
 			

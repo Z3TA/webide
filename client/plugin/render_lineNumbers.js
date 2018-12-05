@@ -140,7 +140,7 @@
 		
 		
 		var sourceX = 0; // the left X position to start clipping
-		var sourceY = screenStartRow==0 ? 0 : EDITOR.settings.topMargin*2; //screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y position to start clipping
+		var sourceY = screenStartRow==0 ? 0 : EDITOR.settings.topMargin * pixelRatio; //screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin; // the top Y position to start clipping
 		var sourceRectWidth = cacheCanvasWidth * pixelRatio; // clip this width of pixels from the source
 		var sourceRectHeight = ( (fileEndRow-fileStartRow+1) * EDITOR.settings.gridHeight + (screenStartRow==0 ? EDITOR.settings.topMargin : 0) ) * pixelRatio; // clip this height of pixels from the source
 		var destinationX = leftMargin; // the left X canvas position to start drawing the clipped sub-image
