@@ -69,7 +69,7 @@
 		touchDownX = x;
 		touchDownY = y;
 		
-		EDITOR.isScrolling = true;
+		
 		
 		// We are competing with select text, so always return false to prevent selecting text while scrolling
 		return false;
@@ -223,6 +223,7 @@
 		if(verticalScrolling) {
 			virtualKeyboardWasVisible = EDITOR.hideVirtualKeyboard();
 			console.log("Hidden keyboards: " + JSON.stringify(virtualKeyboardWasVisible));
+			EDITOR.isScrolling = true;
 		}
 		
 			if(verticalScrolling) {
@@ -305,17 +306,21 @@
 	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		if(!verticalScrolling) return;
 		
-		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
-		ctx.fillStyle="rgba(210, 210, 210, 0.1)";
+		//ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
+		//ctx.fillStyle="rgba(210, 210, 210, 0.1)";
+		
+		ctx.fillStyle="rgb(210, 210, 210)";
 		
 		var x = EDITOR.view.canvasWidth - EDITOR.settings.scrollZone;
 		var y = 0;
 		var width = EDITOR.settings.scrollZone;
 		var height = EDITOR.view.canvasHeight;
 		
-		ctx.rect(x,y,width,height);
-		ctx.fill();
-		ctx.stroke();
+		ctx.fillRect(x,y,1,height);
+		
+		//ctx.rect(x,y,width,height);
+		//ctx.fill();
+		//ctx.stroke();
 		
 	}
 	
@@ -323,17 +328,20 @@
 		
 		if(!horizontalScrolling) return;
 		
-		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
-		ctx.fillStyle="rgba(210, 210, 210, 0.3)";
+		//ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
+		//ctx.fillStyle="rgba(210, 210, 210, 0.3)";
+		ctx.fillStyle="rgb(210, 210, 210)";
 		
 		var x = 0;
 		var y = EDITOR.view.canvasHeight - EDITOR.settings.scrollZone;
 		var width = EDITOR.view.canvasWidth;
 		var height = EDITOR.settings.scrollZone;
 		
-		ctx.rect(x,y,width,height);
-		ctx.stroke();
-		ctx.fill();
+		ctx.fillRect(x,y,width,1);
+		
+		//ctx.rect(x,y,width,height);
+		//ctx.stroke();
+		//ctx.fill();
 		
 	}
 	
