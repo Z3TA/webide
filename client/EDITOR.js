@@ -2803,6 +2803,8 @@ canvas = EDITOR.canvas;
 		else {
 			menu.style.top = posY + "px";
 			menu.style.left = posX + "px";
+			
+			fullScreenMenuMaybe();
 		}
 		
 		menu.style.visibility = "visible";
@@ -2815,21 +2817,13 @@ canvas = EDITOR.canvas;
 			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 			clearSelection();
 			
-			var offsetHeight = parseInt(menu.offsetHeight);
-			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+			//var offsetHeight = parseInt(menu.offsetHeight);
+			//if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 			
 			if(!EDITOR.touchDown) {
 				console.log("There where no touch down!");
 				giveUp();
-				
-				if(offsetHeight > EDITOR.height || offsetWidth*2 > EDITOR.width) {
-					// Hide everything besides the menu
-					fullScreenMenu(menu);
-				}
-				else {
-					menu.style.top = posY + "px";
-					menu.style.left = posX + "px";
-				}
+				fullScreenMenuMaybe();
 			}
 			else {
 				console.log("There was a touch down!");
@@ -2841,6 +2835,19 @@ canvas = EDITOR.canvas;
 		function giveUp() {
 			clearInterval(interval);
 			clearTimeout(timeout);
+		}
+		
+		function fullScreenMenuMaybe() {
+			var offsetHeight = parseInt(menu.offsetHeight);
+			console.log("fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
+			if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
+				// Hide everything besides the menu
+				fullScreenMenu(menu);
+			}
+			else {
+				menu.style.top = posY + "px";
+				menu.style.left = posX + "px";
+			}
 		}
 		
 	}
