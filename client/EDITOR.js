@@ -1534,8 +1534,8 @@ usePseudoClipboard = false;
 		
 		// Only works with text files !
 		
-		if(!path) throw new Error("path=" + path);
-		if(!text) throw new Error("text=" + text);
+		if(typeof path != "string") throw new Error("path=" + path + " is not a string!");
+		if(typeof text != "string") throw new Error("text=" + text + " is not a string!");
 		
 		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
 		
