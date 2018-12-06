@@ -2259,6 +2259,13 @@ canvas = EDITOR.canvas;
 			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			EDITOR.canvasContext.textBaseline = "top";
 			
+			// Squeeze the margin on really small screens
+			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
+				var maxLine = EDITOR.currentFile.grid.length+1;
+				var lineLetters = (" " + maxLine).trim().length;
+				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters) + 5;
+			}
+			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
 		}
 		else if(canvas) {
