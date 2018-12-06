@@ -2261,7 +2261,7 @@ canvas = EDITOR.canvas;
 			
 			// Squeeze the margin on really small screens
 			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
-				var maxLine = EDITOR.currentFile.grid.length+1;
+				var maxLine = Math.max(10, EDITOR.currentFile.grid.length+1);
 				var lineLetters = (" " + maxLine).trim().length;
 				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters) + 5;
 			}
