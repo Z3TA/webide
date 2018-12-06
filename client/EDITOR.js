@@ -74,7 +74,6 @@ EDITOR.settings = {
 		width: 1,
 		color: "rgb(0,0,0)"
 	},
-	scrollZone: 80, // Scrollbar zone, right and bottom. When touching down in the zone we should scroll
 	showLineNumbers: true, // Can be used to toggle line-numbers on/off
 	leftMargin: 50,
 	rightMargin: 50,
@@ -83,6 +82,8 @@ EDITOR.settings = {
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
 	sub_pixel_antialias: false, // For the main text area (canvas) only.
+	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
+	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
 	style: {
 		// These are the default/fallback styles. Over-ride them in settings_overload.js !
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
@@ -2265,6 +2266,12 @@ canvas = EDITOR.canvas;
 				var lineLetters = (" " + maxLine).trim().length;
 				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters) + 5;
 			}
+			
+			// Calculate the scroll zone
+			// To make sure the line do not cross letters, so the line can be cleared for the vertical scroll optimization
+			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
+			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
+			
 			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
 		}

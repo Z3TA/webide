@@ -60,9 +60,9 @@
 		
 		if( mouseDownEvent.type != "touch" && mouseDownEvent.type != "touchstart") return true;
 		
-		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
 		
-		horizontalScrolling = false;
+		stopHorizontalScrolling();
 		verticalScrolling = false;
 		maybeScroll = true;
 		touching = true;
@@ -82,14 +82,14 @@
 		
 		if( mouseUpEvent.type != "touch" && mouseUpEvent.type != "touchend") return true;
 		
-		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)  ) return true;
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
 		
 		//if(virtualKeyboardWasVisible && verticalScrolling) EDITOR.showVirtualKeyboard(virtualKeyboardWasVisible);
 		
 		// Make it possible to place the caret inside the scroll area if you haven't scrolled!
 		var wasScrolling = horizontalScrolling || verticalScrolling;
 		
-		horizontalScrolling = false;
+		stopHorizontalScrolling();
 		verticalScrolling = false;
 		maybeScroll = false;
 		touching = false;
@@ -130,7 +130,7 @@
 			
 		// User has touched the screen! Are we gonna scroll ? And in what plane ?
 			
-				if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone) && y > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) {
+				if(x > (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone) && y > (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)) {
 					// In the bottom right corner
 					if(Math.abs(x - lastPosX) > Math.abs(y - lastPosY)) {
 				//if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender);
@@ -139,21 +139,23 @@
 					else if(Math.abs(x - lastPosX) < Math.abs(y - lastPosY)) {
 				//if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 						verticalScrolling = true;
+				stopHorizontalScrolling();
 					}
 					// else: Unable to determine if the user is scrolling horizontally or vertical
 				}
-				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
+				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)) {
 					// Inside vertical (row) scroll area
 			//if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 					verticalScrolling = true;
 				}
-				else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
+				else if(y > EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone) {
 					// Inside horizontal (column) scroll area
 			//if(!horizontalScrolling) EDITOR.addRender(horizontalScrollingRender, renderOrder+1);
 					horizontalScrolling = true;
 				}
 		else {
-			console.log("Not in scroll zone! x=" + x + " y=" + y + " EDITOR.view.canvasWidth=" + EDITOR.view.canvasWidth + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + " EDITOR.settings.scrollZone=" + EDITOR.settings.scrollZone + " ");
+			console.log("Not in scroll zone! x=" + x + " y=" + y + " EDITOR.view.canvasWidth=" + EDITOR.view.canvasWidth + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + 
+			" EDITOR.settings.verticalScrollZone=" + EDITOR.settings.verticalScrollZone + " EDITOR.settings.verticalScrollZone=" + EDITOR.settings.horizontalScrollZone);
 			reset();
 			return; // Outside the scrolling zone. Do nothing!
 		}
@@ -280,7 +282,6 @@
 		lastPosX = x;
 		lastPosY = y;
 		
-		
 		function reset() {
 			touchDownX = x;
 			touchDownY = y;
@@ -290,60 +291,33 @@
 			
 			maybeScroll = false;
 			
-			/*
-			verticalScrolling = false;
-			horizontalScrolling = false;
-			
-			EDITOR.removeRender(verticalScrollingRender);
-			EDITOR.removeRender(horizontalScrollingRender);
-			*/
-			
 			lastMeasuredMove = new Date();
+			}
+	}
+	
+	function stopHorizontalScrolling() {
+		if(horizontalScrolling) {
+			// Clear the line
+			EDITOR.canvasContext.fillStyle=EDITOR.settings.style.bgColor;
+			EDITOR.canvasContext.fillRect(0, EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone,EDITOR.view.canvasWidth,1);
 			
+			horizontalScrolling = false;
 		}
 	}
 	
 	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		if(!verticalScrolling) return;
 		
-		//ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
-		//ctx.fillStyle="rgba(210, 210, 210, 0.1)";
-		
 		ctx.fillStyle="rgb(210, 210, 210)";
-		
-		var x = EDITOR.view.canvasWidth - EDITOR.settings.scrollZone;
-		var y = 0;
-		var width = EDITOR.settings.scrollZone;
-		var height = EDITOR.view.canvasHeight;
-		
-		ctx.fillRect(x,y,1,height);
-		
-		//ctx.rect(x,y,width,height);
-		//ctx.fill();
-		//ctx.stroke();
-		
-	}
+		ctx.fillRect(EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone,0,1,EDITOR.view.canvasHeight);
+		}
 	
 	function horizontalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		if(!horizontalScrolling || verticalScrolling) return;
 		
-		if(!horizontalScrolling) return;
-		
-		//ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
-		//ctx.fillStyle="rgba(210, 210, 210, 0.3)";
 		ctx.fillStyle="rgb(210, 210, 210)";
-		
-		var x = 0;
-		var y = EDITOR.view.canvasHeight - EDITOR.settings.scrollZone;
-		var width = EDITOR.view.canvasWidth;
-		var height = EDITOR.settings.scrollZone;
-		
-		ctx.fillRect(x,y,width,1);
-		
-		//ctx.rect(x,y,width,height);
-		//ctx.stroke();
-		//ctx.fill();
-		
-	}
+		ctx.fillRect(0, EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone,EDITOR.view.canvasWidth,1);
+		}
 	
 	
 })();
