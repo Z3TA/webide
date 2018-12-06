@@ -33,29 +33,7 @@
 		
 		EDITOR.addRender(showMarkdownHeadings, 3000);
 
-		var strZoomIn = "zoom in "; // special " " space so the with of the button will be the same when chaning text
-		var strZoomOut = "zoom out";
-		
-		var zoomButton = document.createElement("button");
-		zoomButton.setAttribute("class", "kb");
-		zoomButton.innerText = strZoomIn;
-		
-		zoomButton.onclick = function() {
-			zoomSwitch(EDITOR.currentFile);
-			if(zoomedIn) {
-				zoomButton.innerText = strZoomOut;
-				zoomButton.setAttribute("class", "kb on");
-			}
-			else {
-				zoomButton.innerText = strZoomIn;
-				zoomButton.setAttribute("class", "kb");
-			}
-		}
-		
-		var keyboardRow = 0;
-		var keyboardGroup = "misc";
-		var keyboardPosition = 0;
-		EDITOR.virtualKeyboard.addKey(zoomButton, keyboardRow, keyboardPosition, keyboardGroup);
+		EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch}); 
 		
 	}
 	

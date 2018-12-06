@@ -2121,21 +2121,6 @@ canvas = EDITOR.canvas;
 		var columnsHeight = contentHeight;
 		
 		
-		// Position the OLD virtual keyboard
-		if(virtualKeyboardElement) {
-			var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
-			var vkWidth = parseInt(vkcs.width);
-			var vkHeight = parseInt(vkcs.height);
-			console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
-			
-			// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
-			virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
-			virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
-			
-			//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
-			//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
-		}
-		
 		if(QUERY_STRING["debug"]) {
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -5393,59 +5378,6 @@ var word = "";
 		return returns;
 	}
 	
-	// # Virtual keyboard
-	var virtualKeyboardElement;
-	var virtualKeyboard = {};
-	EDITOR.virtualKeyboard = {
-		addKey: function addVirtualKeyboardKey(newElement, row, position, group) {
-			//console.log("Adding virtual keyboard key: row=" + row + " position=" + position + " group=" + group);
-			if(group == undefined) group = "main";
-			if(row == undefined) row = 0;
-			if(!virtualKeyboard.hasOwnProperty(group)) throw new Error("The virtual keyboard has no group called " + group);
-			
-			if(!virtualKeyboard[group].rows[row]) {
-				for (var i=virtualKeyboard[group].rows.length-1; i<row; i++) {
-					virtualKeyboard[group].rows[row] = document.createElement("nobr");
-					virtualKeyboard[group].rows[row].setAttribute("class", "virtualKeyboardRow");
-					virtualKeyboard[group].el.appendChild(virtualKeyboard[group].rows[row]);
-				}
-			}
-			
-			var parentElement = virtualKeyboard[group].rows[row];
-			
-			if(position == undefined) {
-				virtualKeyboard[group].rows[row].appendChild(newElement);
-			}
-			else {
-				
-				if(position > parentElement.children.length) {
-					throw new Error("Virtual keyboard row " + row + " only has " + 
-					parentElement.children.length + " keys. So we can not insert on position " + position + " ");
-				}
-				
-				parentElement.insertBefore(newElement, parentElement.children[position]);
-				
-				//virtualKeyboard[group].rows[row].appendChild(newElement);
-			}
-		},
-		removeKey: function removeVirtualKeyboardKey(el, row, group) {
-			virtualKeyboard[group].rows[row].removeChild(el);
-		},
-		hide: function hideVirutalKeyboard() {
-			virtualKeyboardElement.style.display = "none";
-			if(this.isVisible) EDITOR.resizeNeeded();
-			else console.warn("Virtual keyboard already hidden!");
-			this.isVisible = false;
-		},
-		show: function showVirutalKeyboard() {
-			virtualKeyboardElement.style.display = "block";
-			this.isVisible = true;
-			EDITOR.resizeNeeded();
-		},
-		isVisible: true
-		
-	}
-	
 	EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		// Finds a currently opened file from the stack trace, and show the message on the line from the stack trace
 		
@@ -5785,24 +5717,6 @@ var word = "";
 		
 		canvas = document.getElementById("canvas");
 		
-		virtualKeyboardElement = document.getElementById("virtualKeyboard");
-		var virtualKeyboardGroups = document.getElementById("virtualKeyboardGroups");
-		virtualKeyboard.main = {
-			el: document.createElement("td"),
-			rows: []
-		}
-		virtualKeyboard.main.el.setAttribute("class", "virtualKeyboardGroup");
-		virtualKeyboardGroups.appendChild(virtualKeyboard.main.el);
-		
-		virtualKeyboard.misc = {
-			el: document.createElement("td"),
-			rows: []
-		}
-		virtualKeyboard.misc.el.setAttribute("class", "virtualKeyboardGroup");
-		virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
-		
-		EDITOR.virtualKeyboard.hide();
-		
 		canvas.onpaste = function() {alert("paste canvas");};
 		
 		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
@@ -6048,21 +5962,6 @@ var word = "";
 			}
 		}
 		
-		// Add the virtual keyboard menu item after the plugins so it will be placed low in the menu
-		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard, 25); // Add items to the canvas context menu
-		
-		function toggleVirtualKeyboard() {
-			EDITOR.hideMenu();
-			
-			if(EDITOR.virtualKeyboard.isVisible) {
-				EDITOR.virtualKeyboard.hide();
-				EDITOR.updateMenuItem(virtualKeyboardMenuItem, false);
-			}
-			else {
-				EDITOR.virtualKeyboard.show();
-				EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
-			}
-		}
 		
 		console.log("Setting mainLoopInterval because first load!");
 		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
@@ -7742,8 +7641,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 		}
 		
-		if(target.className == "fileCanvas" || target.className == "keyboardButton" ||
-		target.className == "virtualKeyboardRow" || target.className == "virtualKeyboardGroup") {
+		if(target.className == "fileCanvas") {
 			// Prevent whatever nasty thing the browser wants to do
 			// like zooming out etc.
 			mouseDownEvent.preventDefault();
@@ -7848,28 +7746,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 		}
 		
-		if(target.className == "fileCanvas" || target.className == "keyboardButton" || 
-		target.className == "virtualKeyboardRow" || target.className == "virtualKeyboardGroup") {
+		if(target.className == "fileCanvas") {
 			// Prevent whatever nasty thing the browser wants to do
 			// like zooming out etc.
 			mouseUpEvent.preventDefault();
 		}
-		
-		/*
-			if(EDITOR.virtualKeyboard.isVisible && isInputElement(document.activeElement)) {
-			setTimeout(function() {
-				console.log("Blurring ", document.activeElement);
-				
-				document.activeElement.setAttribute("readonly", "true");
-				
-				//EDITOR.input = false;
-			}, 1000);
-			
-		}
-		else {
-			console.log("EDITOR.virtualKeyboard.isVisible=" + EDITOR.virtualKeyboard.isVisible + " ", document.activeElement, " isInputElement=" + isInputElement(document.activeElement));
-		}
-		*/
 		
 		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
 		console.time("mouseClick listeners");
@@ -8348,8 +8229,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		// The menu will cover the whole screen
 		
 		var wireframe = document.getElementById("wireframe");
-		//EDITOR.virtualKeyboard.hide();
 		wireframe.style.display = "none";
+		
 		menu.style.position="relative";
 		menu.style.top = "0px";
 		menu.style.left = "0px";
