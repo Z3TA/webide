@@ -7186,7 +7186,6 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				if(scrollDirection == 1) {
 					// Move image down
-					
 					var dy = Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
 					var sy = EDITOR.settings.topMargin;
 					var sHeight = EDITOR.view.canvasHeight - dy;
@@ -7200,9 +7199,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					var sy =  Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;;
 					var sHeight = EDITOR.view.canvasHeight - sy;
 					
+					// The last line can be cut in half, so don't use the last line!
+					
 					// Render the missing rows
-					screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff);
-					fileStartRow = fileEndRow - Math.abs(rowDiff);
+					screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff) - 1;
+					fileStartRow = fileEndRow - Math.abs(rowDiff) - 1;
 					}
 				
 				var dx = 0;
