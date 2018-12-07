@@ -4489,9 +4489,9 @@ var word = "";
 				offsetY: options.y, 
 				target: options.target, 
 				button: options.button,
-				preventDefault: function() {console.log("Mocked doubleClick event prevent default.")}
-				
-			}
+				preventDefault: function() {console.log("Mocked doubleClick event prevent default.")},
+				stopPropagation: function() {console.log("Mocked doubleClick event stop propagation.")}
+				}
 			console.log(doubleClickEvent);
 			
 			mouseDown(doubleClickEvent);
@@ -7826,13 +7826,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		EDITOR.interact("mouseUp", mouseUpEvent);
 		
 		if(preventDefault) {
-			mouseUpEvent.preventDefault();
-			mouseUpEvent.stopPropagation();
+			if(typeof mouseUpEvent.preventDefault == "function") mouseUpEvent.preventDefault();
+			if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
 			return false;
 		}
-		
-		
-	}
+		}
 	
 	function getMousePosition(mouseEvent) {
 		
