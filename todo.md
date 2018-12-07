@@ -44,13 +44,22 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-Work on the wide keyboard layout
+Finish blog post about mobile support
 
 Go through all plugins and add functions to the virtual keyboard for discovery!
+
+Work on the wide keyboard layout
+
 
 using the context menu is slow.
 put functionality like save
 on the virtual keyboard
+
+
+50% of first time users doesn't interact with the editor, and just close it down after staring on it for one second.
+Even though the text on the screen say "Right click to show th meny", they do nothing. Any ideas !?
+
+Sometimes the menu doesn't come up when long pressing on mobile! Because I'm clicking in the scroll area !?
 
 When clicking on selected text, offer to "Copy selection" or "Cut selection" it using right click menu
 Offer to "Paste from clipboard" when the text is not selected
