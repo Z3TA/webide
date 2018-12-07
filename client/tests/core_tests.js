@@ -1656,6 +1656,38 @@
 		});
 	});
 	
+	EDITOR.addTest(1, function renderCaretWhenSwitchingBetweenFiles(callback) {
+		/*
+			bug: You will get an error if you type in a big file, then switch to another file that has less rows
+		*/
+		EDITOR.openFile("smallFile.txt", '1\n2\n3\n', function(err, smallFile) {
+if(err) throw err;
+			EDITOR.openFile("bigFile.txt", '1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n', function(err, bigFile) {
+				if(err) throw err;
+				
+				for (var i=0; i<10000; i++) {
+					bigFile.writeLineBreak();
+				}
+				bigFile.moveCaretToEndOfFile();
+				EDITOR.showFile(bigFile);
+				EDITOR.mock("typing", "abc");
+				EDITOR.showFile(smallFile);
+				// We would now get an error: Uncaught Error: row=9 does not exist in file grid! 
+				// Hmm, the error is not thrown right away !?
+				// It was due to the render-caret animation, which renders the caret after 3 seconds!
+				// So make sure the bigFile is BIG so that whatever file we land into after 3 seconds are smaller in order to trigger the bug
+				
+				setTimeout(function() {
+					EDITOR.closeFile(bigFile);
+					EDITOR.closeFile(smallFile);
+					
+					callback(true);
+				}, 5000);
+				
+			});
+		});
+	});
+	
 	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		

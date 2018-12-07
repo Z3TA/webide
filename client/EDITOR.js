@@ -2016,7 +2016,7 @@ canvas = EDITOR.canvas;
 		var row = caret.row;
 		var col = caret.col + colPlus;
 		
-		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
+		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
@@ -7026,7 +7026,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
-					EDITOR.renderCaret(file.caret);
+					if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
 					document.getElementById('canvas').style.cursor = 'text';
 				}, 3000);
 			}
