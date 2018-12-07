@@ -5,7 +5,7 @@
 		Reason we ditched the old self_debugger (that Attached itself to the chromium debug tool's console)
 		is that ONLY ONE socket can connect to the chromium debug tool's console.
 		
-		The goal of this plugin is to create automatic tests ceases and bug-repeats
+		The goal of this plugin is to create automatic tests cases and bug-repeat's
 		 by recording all editor inputs and save state. 
 		
 		It might require several steps to put the editor in a bad state.
@@ -37,48 +37,68 @@
 		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 		
 		EDITOR.on("error", windowError);
+		EDITOR.on("showMenu", showSendBugReportMenuItem);
+		
 	}
 	
 	function bugReportUnload() {
 		EDITOR.unbindKey(sendBugReport);
 		
 		EDITOR.removeEvent("error", windowError);
+		EDITOR.removeEvent("showMenu", showSendBugReportMenuItem);
 	}
 	
-	function sendBugReport() {
+	function showSendBugReportMenuItem() {
+		var file = EDITOR.currentFile;
+		
+		if(!file) return true;
+		
+		if(file.name.indexOf("bugreport") != -1) {
+			var addSeparator = true;
+			var tmpMenuItem = EDITOR.addTempMenuItem("Send bug report", addSeparator, function sendBugReportWithoutAsking() {
+				sendBugReport(false);
+			});
+		}
+	}
+	
+	function sendBugReport(askFirst) {
+		if(typeof askFirst != "boolean") askFirst = true; 
+		
+		EDITOR.hideMenu();
 		
 		var file = EDITOR.currentFile;
 		
 		if(file) {
 			if(file.name.indexOf("bugreport") != -1) {
-				
-				var yes = "Send bug report";
+				if(askFirst) {
+					var yes = "Send bug report";
 				var no = "Cancel";
 				confirmBox("Send this file as bug report?\n" + file.path, [yes, no], function (answer) {
-				
-					if(answer == yes) {
-				
-				var message = file.text;
-				
-					UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (err, respStr) {
-					if(err) {
-						alertBox("Problem sending bug report:  " + err.message);
-						throw err;
-					}
-					else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
-						alertBox("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
-						console.log("respStr=" + respStr);
-					}
-					else {
-						alertBox("Bug report sent!");
-					}
-					});
+				if(answer == yes) sendit();
+});
 				}
-		});
-				return false;
-		}
+				else sendit();
+			}
+			return false;
 		}
 		return true;
+		
+		function sendit() {
+			var message = file.text;
+			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (err, respStr) {
+				if(err) {
+					alertBox("Problem sending bug report:  " + err.message);
+					throw err;
+				}
+				else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
+					alertBox("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
+					console.log("respStr=" + respStr);
+				}
+				else {
+					alertBox("Bug report sent!");
+				}
+			});
+		}
 	}
 	
 	function selfDebugFileOpen(file) {
@@ -277,14 +297,19 @@
 		'Browser: ' + BROWSER + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
-		errMessage + '\n\n' +
-		(error ? error.stack : "Error stack:") + '\n' +
+		errMessage + '\n' +
+		'\n' +
+		(error ? error.stack + '\n' : "") +
 		'\n' +
 		'How to repeat:\n' + 
+		'Please provide instruction on how to reproduce the error!\n' + 
 		'\n' + 
 		'\n' + 
-		'Ctrl + Shift + S to send this report over HTTPS. (this only works if "bugreport" is in the file-name)\n' + 
-		'Or e-mail the bug report with your favorite email client (to the e-mail address at the top)\n';
+		'\n' + 
+		'How to send: Use keboard Ctrl + Shift + S,\n' + 
+		'or "Send bug report" via the menu.\n' + 
+		'(this only works if "bugreport" is in the file-name)\n' + 
+		'Or send the bug report via e-mail (to the e-mail address at the top)\n';
 		
 		return message;
 	}
