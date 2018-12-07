@@ -130,18 +130,17 @@
 			EDITOR.on("hideVirtualKeyboard", hideVirtualKeyboard2);
 			EDITOR.on("showVirtualKeyboard", showVirtualKeyboard2);
 			
-			
 			addButtons();
 			
-			menuItem = EDITOR.addMenuItem("Virtual Keyboard 2", toggleVirtualKeyboard2, 26);
+			menuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard2, 26);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
 			
-			toggleVirtualKeyboard2();
-			
 			var wrapper = document.getElementById("virtualKeyboard2");
+			wrapper.style.display="none";
 			wrapper.appendChild(canvas);
+			
 			
 		},
 		unload: function unloadVirtualKeyboard() {
@@ -225,7 +224,7 @@ return false;
 			if(button.char == key.char) {
 				console.log("Found char=" + key.char);
 				if(verticalLayout[i]["alt" + key.alt] != undefined) {
-					console.log("There is already something registered on " + button.char + " for alt=" + key.alt + " !");
+					throw new Error("There is already something registered on " + button.char + " for alt=" + key.alt + " ! Unable to register function " + UTIL.getFunctionName(key.fun));
 					return false;
 				}
 				else {
@@ -241,6 +240,8 @@ return false;
 	}
 	
 	function toggleVirtualKeyboard2(state) {
+		EDITOR.hideMenu();
+		
 		var oldState = ACTIVE;
 		
 		if(typeof state == "boolean") {

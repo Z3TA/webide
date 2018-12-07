@@ -44,169 +44,25 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
-no transp when touch scrolling
+Work on the wide keyboard layout
 
-scrolling optimization
+Go through all plugins and add functions to the virtual keyboard for discovery!
 
-Fiddling with the renderRow and render_lineNumbers.js optimization.
+using the context menu is slow.
+put functionality like save
+on the virtual keyboard
+
+When clicking on selected text, offer to "Copy selection" or "Cut selection" it using right click menu
+Offer to "Paste from clipboard" when the text is not selected
+
+not all file tabs are visible on mobile device when there are many file tabs open and the screen is small.
+
+
 
 Working on canvas based virtual keyboard ...
 
 
 
-Should it be possible to add keyboard buttons dynamicly, or should it be static?
-Dynamic is probably best so users can customize, and plugins can add special keys.
-
-It's actually possinle to capture CAPS LOCK from JS!
-Should there be a EDITOR.capsLock !?
-
-keys: {clickEvent, showText, width, altChar?, active, }
-
-Making a canvas based virtual keyboard
-
-
-
-Opera mobile feel faster without the debugger attached.
-With the render column optimization it almost feels as fast as native keyboard when registering click on the canvas.
-There is a noticable render slowdown on Opera Mobile if HTML element is placed ontop of the canvas.
-There is no difference between event bubbling or capturing phase on Opera Mobile.
-The difference was because the debugger was attached and HTML elements was rendered above the canvas!
-There is only a tiny difference between render-column optization before putcharacter and putcharacter+renderow on opera mobile
-Inlining or calling putCharacter directly instead mocking keypress did not feel any different on Opera Mobile.
-
-
-keyboardPushbuttonUp: 278ms (278442µsec)
-calling putCharacter and renderRow directly instead of mock ? No difference!
-
-mouseUp: 3-7ms on Chrome,  285ms (284881µsec) on Opera Mobile
-
-Inline virtual keyboard click handler into the main mouseUp:
-50% faster on Chrome, no difference on Opera Mobile!
-
-EDITOR.renderColumn INSTEAD OF putCharacter & renderRow ?
-3ms instead of 280ms on Opera Mobile.
-
-renderColumn instead of renderRow ?
-Although renderColumn is faster then renderRow there is to percived difference on Chrome nor Opera Mobile
-
-On Chrome (PC and x86 touchscreen) there is no percived difference between a canvas keyboard, html keyboard, or "native" keyboard.
-On an old Android phone: The HTML buttons feels slightly slower. 
-On Opera Mobile the HTML buttons feels slower (because they are rendered ontop of the canvas, slowing down rendering)
-
-
-
-
-Unable to make putCharacter faster.
-
-putCharacterCore: 17ms (16876µsec)
-1-2ms in Chrome.
-
-Make box into a plain object ? 
-Slighly higher spikes in Chrome, no difference in Opera Mobile.
-
-
-
-
-
-Coding on a mobile phone sucks!
-I want to make the experience better.
-I learned to code on a 800x600 display on a 386 computer. 
-Now a days smartphones have HD displays and are many times faster then that computer.
-Only problem is text input is kinda awkward on mobile.
-
-
----
-
-See if the input lag gets better if we put the virtual keyboard keys on the canvas, instead of HTML buttons.
-
-Make ONE button: virtual_keyboard2.js plugin just to test input lag
-
----
-Issue when you click on a input field, the native keyboard comes up and zooms in like crazy, it's also laggy.
-When you go to a html input while having the editor's virtual keyboard visible,
-instantly .blur() and open a new file instead, then put the content of the file into the input !?
-
-Some widget, like the file-open-tool use a lot of screen real-estate ...
-Hide it when typing, then show it again when you click "DONE" on the virtual keyboard !?
-problem: Some widgets, like the file-open-tool, shows auto-complete suggestions ...
-It's however not a problem if the zoom is set to 100% instead of 275% and the smartphone have a relative big screen,
-also asuming the phone has a stulys which is must have in order to use the phone with 100% zoom.
-
-Preventing the native keyboard will be diffucult on all devices,
-better make all input fields, pseudo-input fileds, to prevent the onboard keyboard.
-Make them into small canvas's instead!?
-
-new TextInput();
-
-
-
----
-
-An animation where the character flyes to it's destinatio !?
-
-Need to make the virtual keyboard wayyy bigger!?
-So you can type using your hands.
-Make more rows,
-most common used buttons in the middle, the rest around
-Have different layouts for wide and narrow !?
-Only problem it would take up most of the screen.
-Which is however not a problem,
-It's very nice to see what you write ...
-The editor should zoom in so you can see the text.
-
-My first smartphone came with a foldable keyboard,
-I however ended up using the stylus to write text !
-Laser keyboards suck.
-The fastest smartphone keyboard is the "swype" which guess words based on the direction you swipe.
-
-
-
-Long hold to show a magnifying glass, that helps to place the cursor.
-Long hold with two fingers to show the menu !?
-
-
-Improving performace and usability on mobile devices.
-
-
-
-
----
-ide: Faster (and smoth) scrolling by rendering "pages" to other canvases, then copy them to the main canvas when scrolling.
-
-On touch use touch down and touch up, scroll when moving the "mouse" while it's down.
-( smooth scrolling is really only needed on mobile devices. And laptops using two finger mouse-pad !? )
-
----
-
-
-renderRow optimization when typing is significantly faster,
-most of the lag is due to the virtual keyboard.
-
-Is it possible to get a good typing experience on a small smartphone !?
-
-{} are hard to type on Mac, can we make it so special characters like () and {} are inserted automatically !?
-
-if (
-for (
-
-if (foo && || == != ) 
-
-if(foo==bar) 
-
-autocomplete can figure it out, and toggle between options (presseing autocomplete repeatably togges between eg. if inside a if() it toggles between && || == !=
-
-Can the virtual keyboard figure out when it's time to type a special character !?
-
-To make sure the keyboard is big enought, but without taking up too much space, we can only show this many buttons!
-
-We also need to have a different keyboard layout for when the phone is vertical or horizontal, due to the very wide screen of mobile phones.
-
-
----
-
-Don't forget copy/paste on mobiles
-
----
 
 Able to copy a folder
 "new Folder" from any file or folder.
