@@ -118,37 +118,48 @@ function Dialog(msg, icon, dialogDelay) {
 		EDITOR.input = false;
 	}
 }
-Dialog.prototype.close = function(someEvent) {
+Dialog.prototype.close = function(someEvent, callback) {
 	if(this.div.parentElement) this.div.parentElement.removeChild(this.div);
 	else console.warn("Parent element does not exist for div=", this.div);
 	
 	if(this.editorHadInputFocus) {
-		// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
+
+		if(!EDITOR.input) {
+			console.log("Dialog.prototype.close: Giving focus/input back to the editor. EDITOR.input=" + EDITOR.input);
+			EDITOR.input = true;
+			EDITOR.canvas.focus();
+		}
 		
-		var waitTime = 0; 
+		// This will work if the button was clicked on using "Enter" key
+		// The editor however watches for clicks outside the "editor" area (canvas), and will disable input if such event is detected.
+		// So wait until that is done before giving back input
 		
+		var waitTime = 10; 
 		
 		if(!someEvent) {
-			console.warn("No event given! someEvent=" + someEvent);
+			console.warn("Dialog.prototype.close: No event given! someEvent=" + someEvent);
 		}
 else {
 			//console.log(someEvent);
 			
-			console.log("someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
+			console.log("Dialog.prototype.close: someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
 			// If the user closes the dialog using the keyboard, we don't want to give back focus too fast, or a bunch of spaces will be inserted (if the user used the space key)
 			if(someEvent.screenX == 0 && someEvent.screenY == 0) {
 				// It was probably a "keyboard click"
-				waitTime = 500;
+				waitTime = 100;
 			}
 			else {
-				waitTime = 0; // Probably a mouse click
+				waitTime = 10; // Probably a mouse click
 			}
 		}
 		
 		setTimeout(function() {
-			console.log("Giving back editor focus/input ... EDITOR.input=" + EDITOR.input + "")
+			console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
 			EDITOR.input = true;
 			EDITOR.canvas.focus();
+			
+			if(callback) callback();
+			
 		}, waitTime);
 	}
 }
@@ -298,8 +309,9 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 		
 		var value = input.value || input.innerText;
 		
-		callback(value); 
-		dialog.close(clickEvent);
+		dialog.close(clickEvent, function() {
+			callback(value); 
+		});
 		
 	}, false);
 	

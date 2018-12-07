@@ -714,16 +714,22 @@ usePseudoClipboard = false;
 			}
 		}
 		else {
-			console.log("getClipboardContent: navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
+			console.log("getClipboardContent: Using prompt! navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
 			
-			// Should we use the pseudo clipboard or always prompt !?
-			//if(usePseudoClipboard === true && EDITOR.pseudoClipboard) 
-			// It would be more annoying if you couln't copy in stuff, then showing the prompt every time !?
+			/*
+				Should we use the pseudo clipboard or always prompt !?
+				//if(usePseudoClipboard === true && EDITOR.pseudoClipboard)
+				It would be more annoying if you couln't copy in stuff, then showing the prompt every time !?
+				
+				//var data = prompt("Paste the clipboard content here:", EDITOR.pseudoClipboard);
+				prompt will only get the first row. We need a textarea so you can paste many rows!
+			*/
 			
-			var data = prompt("Paste the clipboard content here:", EDITOR.pseudoClipboard);
+			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboardadasd, function(data) {
+				if(typeof data == "string" && data.length > 0) readSuccess(data);
+				else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
+			});
 			
-			if(typeof data == "string" && data.length > 0) readSuccess(data);
-			else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 		}
 		
 		function readSuccess(text) {
@@ -6871,6 +6877,9 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				//file.fixCaret();
 			}
 		}
+		else {
+			console.log("paste: EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
+		}
 		
 		// else: Do the default action (enable pasting outside the canvas)
 		
@@ -7611,7 +7620,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				// Remove focus from everything else
 				if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-				else console.log("Unable to blur active element!:");
+				else console.log("mouseDown: Unable to blur active element!:");
 				
 				canvas.focus();
 				
@@ -7644,6 +7653,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		}
 		else{
 			
+			console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
 			EDITOR.input = false;
 			
 		}
@@ -7654,10 +7664,10 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			mouseDownEvent.preventDefault();
 		}
 		
-		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
+		console.log("mouseDown:  caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 		console.log(mouseDownEvent);
 		
-		console.log("Calling mouseClick (down) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		console.log("mouseDown: Calling mouseClick (down) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
 			
 			click = EDITOR.eventListeners.mouseClick[i];
@@ -7673,11 +7683,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
 				
-				console.log("mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseDown returned " + funReturn);
+				console.log("mouseDown: mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseDown returned " + funReturn);
 				
 				if(funReturn === false) {
 					preventDefault = true;
-					console.log("" + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
+					console.log("mouseDown: " + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
 					break;
 				}
 				else if(funReturn !== true) {
@@ -7695,7 +7705,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				recognition.start();
 			}
 			catch(err) {
-				console.warn(err.message);
+					console.warn("mouseDown: speach recognition error: " + err.message);
 			}
 			}, 400);
 		}
