@@ -1115,7 +1115,7 @@ function sockJsConnection(connection) {
 				if(json.alias) userAlias = json.alias;
 				
 				if(checkingUser) {
-					return send({error: "Authorizing in progress ... Please wait for a login success/error before trying agian !", errorCode: "AUTH_IN_PROGRESS"});
+					return send({error: "Authorizing in progress ... Please wait for a login success/error before trying agian! Or reload the browser if this error message persist.", errorCode: "AUTH_IN_PROGRESS"});
 				}
 				
 				checkingUser = true;
@@ -1154,8 +1154,9 @@ if(GUEST_POOL.length == 0) {
 								if(err) {
 									if(err.code != "LOCK") throw err;
 									if(++createUserRetries > 3) {
-										return send({error: "Unable to create guest account. Try again later. Or login with existing account."});
+										return idFail(new Error("Unable to create guest account. Try again later. Or login with existing account."));
 									}
+									
 									return setTimeout(function retryCreateAccount() {
 										console.log("Retrying guest login ...");
 										checkUser(username, password);
