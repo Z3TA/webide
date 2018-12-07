@@ -661,8 +661,13 @@ usePseudoClipboard = false;
 		}
 		
 		function prm() {
-			window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-			if(callback) callback(null);
+			// prompt can not handle multiple lines
+			//window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+			
+			promptBox("Copy to clipboard: Ctrl+C, Enter", text, 0, function() {
+				if(callback) callback(null);
+			});
+			
 			return false;
 		}
 		
@@ -725,7 +730,7 @@ usePseudoClipboard = false;
 				prompt will only get the first row. We need a textarea so you can paste many rows!
 			*/
 			
-			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboard, function(data) {
+			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboard, 0, function(data) {
 				if(typeof data == "string" && data.length > 0) readSuccess(data);
 				else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 			});

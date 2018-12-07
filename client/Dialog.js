@@ -264,7 +264,18 @@ defaultValue = isPassword;
 	}
 	else if(typeof dialogDelay == "function" && callback == undefined) {
 		callback = dialogDelay;
-		dialogDelay = undefined;
+		
+		if(typeof defaultValue == "number") {
+dialogDelay = defaultValue;
+			
+			if(typeof isPassword == "string") {
+				defaultValue = isPassword;
+				isPassword = false;
+			}
+			else defaultValue = undefined;
+			
+		}
+		else dialogDelay = undefined;
 	}
 	
 	if(typeof callback != "function") throw new Error("No callback function! callback=" + callback + " arguments=" + JSON.stringify(arguments));
