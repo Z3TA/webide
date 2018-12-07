@@ -194,7 +194,7 @@ Font settings and styling
 
 The editor only works with mono-space font's (because of the "grid").
 
-Make style changes in settings_overload.js instead of editor.js
+Make style changes in settings_overload.js instead of EDITOR.js
 
 For the optimal text experience, try different system/OS font settings like hinting etc.
 
