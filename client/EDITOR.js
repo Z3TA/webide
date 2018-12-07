@@ -725,7 +725,7 @@ usePseudoClipboard = false;
 				prompt will only get the first row. We need a textarea so you can paste many rows!
 			*/
 			
-			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboardadasd, function(data) {
+			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboard, function(data) {
 				if(typeof data == "string" && data.length > 0) readSuccess(data);
 				else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 			});

@@ -247,7 +247,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 
 function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursionCount) {
 	
-	console.log("typeof isPassword = " + (typeof isPassword));
+	console.log("promptBox: typeof isPassword = " + (typeof isPassword));
 	
 	if(typeof isPassword == "function" && callback == undefined) {
 		callback = isPassword;
@@ -256,7 +256,11 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 	}
 	else if(typeof defaultValue == "function" && callback == undefined) {
 		callback = defaultValue;
-		defaultValue = undefined;
+		if(typeof isPassword == "string") {
+defaultValue = isPassword;
+			isPassword = false;
+		}
+		else defaultValue = undefined;
 	}
 	else if(typeof dialogDelay == "function" && callback == undefined) {
 		callback = dialogDelay;
@@ -265,16 +269,18 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 	
 	if(typeof callback != "function") throw new Error("No callback function! callback=" + callback + " arguments=" + JSON.stringify(arguments));
 	
+	console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
+	
 	var dialog = new Dialog(msg, undefined, dialogDelay);
 	
 	if(!dialog.div) {
+		console.log("promptBox: Waiting until the body element is available ...");
 		return setTimeout(function wait() {
-			// Wait until the body element is available
 			
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) console.warn("Unable to show promptBox msg=" + msg + "");
+			if(recursionCount > 4) console.warn("promptBox: Unable to show promptBox msg=" + msg + "");
 			
 			promptBox(msg, isPassword, defaultValue, callback, dialogDelay, recursionCount);
 			
@@ -297,7 +303,9 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 	
 	if(defaultValue) {
 		if(isPassword) input.setAttribute("value", defaultValue);
-		else input.innerText = defaultValue;
+		else input.value = defaultValue;
+		
+		input.select();
 	}
 	
 	var ok = document.createElement("button");
