@@ -1629,13 +1629,13 @@
 		callback(true);
 	});
 	
-	EDITOR.addTest(function noTextOusideScreen(callback) {
+	EDITOR.addTest(1, function noTextOusideScreen(callback) {
 		
 		EDITOR.openFile("textOutsideScreen.txt", 'Row 0', function(err, file) {
 			
 			if(err) throw err;
 			
-			var canvasHeight = EDITOR.canvas.height;
+			var canvasHeight = EDITOR.view.canvasHeight;
 			var gridBoxHeight = EDITOR.settings.gridHeight;
 			var topMargin = EDITOR.settings.topMargin;
 			var bottomMargin = EDITOR.settings.bottomMargin;
@@ -1656,7 +1656,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function renderCaretWhenSwitchingBetweenFiles(callback) {
+	EDITOR.addTest(function renderCaretWhenSwitchingBetweenFiles(callback) {
 		/*
 			bug: You will get an error if you type in a big file, then switch to another file that has less rows
 		*/
