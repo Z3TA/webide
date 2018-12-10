@@ -44,20 +44,44 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+
+cant bring up the menu when somthing covers most of the screen.
+
+make the file explorer "full screen" if it covers more then 80%
+and allow scrolling like with full screen menu.
+
+
+
+
+Command discovery: When holding down Ctrl or Alt, you see all avaible commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
+
+
+
+bug: Virtual keyboard switches to wide format even though the screen
+is in vertical mode, ! probably because of dialog making the screen wider.
+
+
+
+
+
+
+
+
 Live preview is not working on Opera Mobile, it seems you can not access the opened window.
 Live preview is however not as useful on mobile as it's really too little screen real estate to show both the editor and a preview ...
 
 Finish blog post about mobile support
 
-Always get "Authorizing in progress" when logging in with another account! But the login suceeeds!!!?
-The client is sctually sending TWO login requests! Is it because I always hit the button twice, or first enter, then hit the button, because it's so slow !?
+Always get "Authorizing in progress" when logging in with another account! But the login succeeds!!!?
+The client is actually sending TWO login requests! Is it because I always hit the button twice, or first enter, then hit the button, because it's so slow !?
 
-Th user IP is always 127.0.0.1
+The user IP is always 127.0.0.1
 
 
 Go through all plugins and add functions to the virtual keyboard for discovery!!?
 
 Work on the wide keyboard layout
+
 
 
 using the context menu is slow.
@@ -3044,6 +3068,12 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+
+When pressing Ctrl+W it word wraps the code block, until matching }])
+
+---
 
 Auto parenthese spacing:
 (when adding a space next to a parenthese - also make sure the matching parenthese have the same amount of space)!
