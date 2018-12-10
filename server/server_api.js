@@ -1064,6 +1064,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 				
 				if(err) {
 					listFilesCallback(err);
+					listFilesCallback = null;
 				}
 				else {
 					
@@ -1090,6 +1091,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					}
 					
 					listFilesCallback(null, list);
+					listFilesCallback = null;
 					
 				}
 				
@@ -1100,6 +1102,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 		}
 		else {
 			listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to SFTP on " + hostname + " !"));
+			listFilesCallback = null;
 		}
 	}
 	else {
@@ -1109,6 +1112,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 		fs.readdir(pathToFolder, function readdir(err, folderItems) {
 			if(err) {
 				listFilesCallback(err);
+				listFilesCallback = null;
 			}
 			else {
 				var filePath;
@@ -1117,6 +1121,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 				if(folderItems.length == 0) {
 					// It's an emty folder
 					listFilesCallback(null, list);
+					listFilesCallback = null;
 				}
 				else {
 					var path = require("path");
@@ -1163,11 +1168,15 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 							ENOTCONN = socket is not connected, stat '/googleDrive'
 						*/
 						
-						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN") {
+						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN" || err.code == "EACCES") {
 							problem = err.code;
 							type = "*"
 						}
-						else return listFilesCallback(err);
+						else {
+listFilesCallback(err);
+							listFilesCallback = null;
+							return;
+						}
 					}
 					
 					//console.log("stat: " + stats);
@@ -1199,8 +1208,10 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					//console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
 					
-					if(statCounter==folderItems.length) listFilesCallback(null, list);
-					
+					if(statCounter==folderItems.length) {
+listFilesCallback(null, list);
+						listFilesCallback = null;
+					}
 					
 				});
 			}

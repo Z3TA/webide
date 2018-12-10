@@ -113,14 +113,41 @@ npm start
 
 
 Android
---------
+-------
 
-You might be able to run both the server and client on the phone if you first install Node.JS
+We recommend installing the editor on a server. A small VPS will do.
+Then open the app in a web browser (Chrome) and you will get a "add to desktop" request.
 
-We however recommend installing the editor on a server. A small VPS will do.
-Then open the app in a web browser and you will get a "add to desktop" request.
+But if you however want to run the editor locally on your phone, you can do this:
 
-Also see "Running as a cloud editor" below in this file.
+1. Download and run the "Termux" app from the Play store.
+
+2. Within the Termux app, type "apt update" (without the quotes) and press Enter
+
+3. Then type "apt install nodejs" and press Enter
+
+4. Type "Y" and press Enter to confirm you want to install nodejs ...
+
+5. Type "npm install jzedit" (without the quotes) and press Enter
+
+6. Type "cd node_modules/jzedit/server" (without the quotes) and press Enter
+
+7. Type "node server.js --user=admin --pw=admin -nochroot" (without the quotes) and press Enter
+
+8. Start Chrome and go to url: http://127.0.0.1:8099
+
+9. You will probably get a dialog about adding JZedit to your home screen.
+It is recommended that you do so, as it will allow running the editor without browser bars.
+(note: Add-to-home-screen might not work on some Android versions)
+
+10. If you added JZedit to your home screen you can now close Chrome and click on JZedit on your home screen.
+
+Note that while you can start the client and connect to another server, in order to run the server on your 
+Android device you have to start Termux and repeat step 6-7 above every time, so you might want to automate it,
+for example adding it to your .bashrc so that the server starts every time you start the Termux app.
+And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
+
+
 
 
 How to update

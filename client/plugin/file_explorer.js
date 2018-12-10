@@ -336,6 +336,11 @@ gapi.auth2.getAuthInstance().signOut();
 					openFolders.splice(openFolders.indexOf(dir), 1);
 					return alertBox("Google Drive error: " + err.message);
 				}
+				else if(err.code == "EACCES") {
+					console.warn("Unable to access " + dir);
+					if(callback) callback(dirFound);
+return;
+				}
 else throw err;
 			}
 			

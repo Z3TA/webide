@@ -44,9 +44,18 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+Live preview is not working on Opera Mobile, it seems you can not access the opened window.
+Live preview is however not as useful on mobile as it's really too little screen real estate to show both the editor and a preview ...
+
 Finish blog post about mobile support
 
-Go through all plugins and add functions to the virtual keyboard for discovery!
+Always get "Authorizing in progress" when logging in with another account! But the login suceeeds!!!?
+The client is sctually sending TWO login requests! Is it because I always hit the button twice, or first enter, then hit the button, because it's so slow !?
+
+Th user IP is always 127.0.0.1
+
+
+Go through all plugins and add functions to the virtual keyboard for discovery!!?
 
 Work on the wide keyboard layout
 
@@ -66,7 +75,10 @@ Offer to "Paste from clipboard" when the text is not selected
 
 not all file tabs are visible on mobile device when there are many file tabs open and the screen is small.
 
+The virtual keyboard often get stuck in horizontal mode because widget that doesn't fit makes the screen wider.
+Revaluate what keyboard to load every time it comes back from being hidden.
 
+Selecting stuff is hard as the thing you try to select is covered by your fingers.
 
 Working on canvas based virtual keyboard ...
 

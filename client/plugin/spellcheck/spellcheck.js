@@ -137,13 +137,17 @@
 	}
 	
 	function showSpellSuggestion(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo) {
-		if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
+		if(mouseDirection != "up" || button != 2) return true; // Only add suggestion on up, and right
 		
 		var file = EDITOR.currentFile;
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
 		}
+		
+		// todo: Use file.wordAtCaret instead!
+		
+		return true;
 		
 		function wordOnCaret(word, start, end) {
 			

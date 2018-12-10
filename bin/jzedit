@@ -21,7 +21,7 @@
 	-------------------------------
 	export EDITOR='jzedit'
 
-	or export EDITOR='/path/tp/jzedit/bin/jzedit')
+	or export EDITOR='/path/to/jzedit/bin/jzedit')
 
 	permanent: Add the export command (above) to .bashrc
 

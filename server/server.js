@@ -1404,13 +1404,29 @@ username = guestUser;
 								}
 							}
 							
-							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), unixTimeStamp(), function(err) {
-								if(err) throw err;
+							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]), unixTimeStamp(), function(err) {
+								if(err && err.code == "ENOENT") {
+									// The .jzeditStorage probably doesn't exist!
+									module_fs.mkdir(UTIL.joinPaths([homeDir, ".jzeditStorage/"]), function(err) {
+										if(err) throw err;
+										// Try again
+										module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]), unixTimeStamp(), function(err) {
+											if(err) throw err;
+											else lastLoginFileUpdated()
+										});
+									});
+									return;
+								}
+								else if(err) throw err;
+								else lastLoginFileUpdated();
 								
-								console.timeEnd("Login " + IP);
-								console.log(IP + " logged in as " + username + "");
+								function lastLoginFileUpdated() {
+									console.timeEnd("Login " + IP);
+									console.log(IP + " logged in as " + username + "");
+									
+									checkingUser = false;
+								}
 								
-								checkingUser = false;
 							});
 							
 							return true;
@@ -2636,8 +2652,12 @@ function createUserWorker(name, uid, gid, homeDir) {
 		USER: name,
 		LOGNAME: name,
 		USER_NAME: name,
-		PATH: "/usr/bin:/bin:/.npm-packages/bin",
-		NPM_CONFIG_PREFIX: "/.npm-packages"
+		PATH: "/usr/bin:/bin:/.npm-packages/bin"
+	}
+	
+	// For forking when running in the Termux Adnorid app
+	if(module_os.platform()=="android") {
+		options.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
 	if(NO_CHROOT) {
@@ -2647,6 +2667,8 @@ function createUserWorker(name, uid, gid, homeDir) {
 	else {
 		options.env.uid = uid;
 		options.env.gid = gid;
+		
+		options.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		
 		if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 		}
