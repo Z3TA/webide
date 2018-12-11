@@ -897,7 +897,6 @@ function sockJsConnection(connection) {
 	var recreateUserProcessSleepTime = 0;
 	var lastUserProcessCrash = new Date();
 	var userBrowser = UTIL.checkBrowser(agent);
-	var userAlias = userBrowser + "(" + IP + ")";
 	var clientSessionId = "";
 	var checkingUser = false;
 	
@@ -906,6 +905,8 @@ function sockJsConnection(connection) {
 	//console.log(connection);
 	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
 	else console.log("connection.headers=" + JSON.stringify(connection.headers));
+	
+	var userAlias = userBrowser + "(" + IP + ")";
 	
 	// ipv6 can give ::ffff:127.0.0.1 or 127.0.0.1-xxxx
 	// PS: SockJS filters connection headers! The version we use lets x-real-ip through though.
