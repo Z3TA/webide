@@ -41,6 +41,11 @@
 		usernameAlertDiv.style.display = "none";
 		pwAlertDiv.style.display = "none";
 		
+		if(inputUsername.value.indexOf("@") != -1) {
+			// The browser has auto-filled an e-mail address
+			inputUsername.value = inputUsername.value.slice(0, inputUsername.value.indexOf("@"));
+		}
+		
 		inputUsername.addEventListener("keyup", inputUserNameKeyUp);
 		inputPassword.addEventListener("keyup", inputPasswordKeyUp);
 		inputPassword2.addEventListener("keyup", inputPasswordKeyUp);

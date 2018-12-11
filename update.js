@@ -74,7 +74,11 @@ eachUser(HOME, function(user) {
 	}, function allUsersFound() {
 
 run("systemctl reload apparmor");
+	run("systemctl reload nginx");
 	run("systemctl restart jzedit");
+	run("systemctl restart jzedit_signup");
+	run("systemctl restart jzedit_nodejs_init");
+	
 });
 
 
