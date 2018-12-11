@@ -3,6 +3,9 @@ body {
 	font-size: 13px;
 	line-height: 1.3em;
 	color: #242729;
+	max-width: 600px;
+	padding: 1em;
+	margin: auto;
 }
 
 kbd {
