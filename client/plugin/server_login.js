@@ -8,6 +8,9 @@
 	var menuItem;
 	var clickedConnectLogin = false; // If the user has clicked login from the login dialog
 	
+	var loggingIn = false;
+	var loginButton;
+	
 	// Page speed score hack
 	if(navigator.userAgent.indexOf("Speed Insights") != -1) return; // Don't connect to server or show login screen
 	
@@ -98,6 +101,9 @@
 	
 	function serverLoginOnConnected(err) {
 		// ## Automaitcally logging in when connected to server
+		
+		if(loggingIn) return;
+			
 		console.log("Got connect callback! err=" + err);
 		if(err) {
 			if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
@@ -171,7 +177,11 @@
 			
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
+				loggingIn = true;
+				if(loginButton) loginButton.disabled = true;
 				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
+					loggingIn = false;
+					if(loginButton) loginButton.disabled = false;
 					if(err) {
 						console.error(err);
 						
@@ -348,12 +358,11 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		form.appendChild(pw);
 		
 		// ### Connect button
-		var connectButton = document.createElement("input");
-		connectButton.setAttribute("type", "submit");
-		connectButton.setAttribute("class", "button");
-		connectButton.setAttribute("value", "Login");
-		//connectButton.onclick = connectToServer;
-		form.appendChild(connectButton);
+		loginButton = document.createElement("input");
+		loginButton.setAttribute("type", "submit");
+		loginButton.setAttribute("class", "button");
+		loginButton.setAttribute("value", "Login");
+		form.appendChild(loginButton);
 		
 		
 		// ### Default url checkbox
@@ -462,15 +471,21 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			else {
 				CLIENT.connect(server, function connectionOpen(err) {
 					if(err) alertBox("Problem connecting to JZedit server on " + JSON.stringify(server));
-					else identify()
+					else {
+						console.log("Attempting logging in after connection ...");
+						identify();
+					}
 				});
 			}
 			
 			return false; // Don't navigate away (on form submit)
 			
 			function identify() {
-				
+				loggingIn = true;
+				if(loginButton) loginButton.disabled = true;
 				CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedIn(err, resp) {
+					loggingIn = false;
+					if(loginButton) loginButton.disabled = false;
 					if(err) {
 						console.error(err);
 						alertBox("Unable to login: " + err.message + "\nURL: " + server.url);
