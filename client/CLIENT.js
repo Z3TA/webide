@@ -346,10 +346,13 @@ console.log("serviceWorker not supported on BROWSER=" + BROWSER);
 			console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
 			return;
 		}
+		else if(newVersion != oldVersion && lastUsedserver.indexOf(window.location.hostname) == -1) {
+			alertBox("Your client is running version " + oldVersion + " while the server is running version " + newVersion + " ! While there might not be any issues, it's recommended to run the same version on both client and server!");
+		}
 		else if(newVersion > oldVersion) {
 			// Wait until serviceWorker has updated the cache ...
 			if(serviceWorkerError) console.warn("Unable to talk to service worker! No point refreshing.");
-			else setTimeout(refresh, 10000); // The wait must be enought to make sure the service worker has refreshed the cache!
+			else setTimeout(refresh, 10000); // The wait must be enough to make sure the service worker has refreshed the cache!
 		}
 		
 		function refresh() {
