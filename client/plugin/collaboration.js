@@ -47,6 +47,7 @@
 	var carets = {}; // filePath: {cId, caret}
 	var menu;
 	var bindTest = false;
+	var ignoreFileSave = "";
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -60,6 +61,7 @@
 			EDITOR.on("fileOpen", collabFileOpen);
 			EDITOR.on("fileClose", collabFileClose);
 			EDITOR.on("fileChange", collabFileChange);
+			EDITOR.on("afterSave", callabFileSaved);
 			EDITOR.on("select", collabSelectText);
 			
 			/*
@@ -102,6 +104,7 @@
 			EDITOR.removeEvent("fileClose", collabFileClose);
 			EDITOR.removeEvent("fileChange", collabFileChange);
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
+			EDITOR.removeEvent("afterSave", callabFileSaved);
 			EDITOR.removeEvent("select", collabSelectText);
 			
 			CLIENT.removeEvent("echo", collabHandleEcho);
@@ -124,6 +127,19 @@
 		},
 		order: 100
 	});
+	
+	function callabFileSaved(file) {
+		console.log("callabFileSaved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+		if(ignoreFileSave == file.path) return true;
+		
+		var fileSaveEvent = {
+			path: file.path,
+			hash: file.hash
+		};
+		CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileSaved: fileSaveEvent});
+		
+		return true;
+	}
 	
 	function invite(file, combo, character, charCode, direction, clickEvent) {
 		EDITOR.hideMenu();
@@ -559,7 +575,7 @@ if(file == undefined) throw new Error("file=" + file);
 					var update = "Just update";
 					var backup = "Save a backup"
 					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, backup], function(answer) {
-						if(answer == update) updateFileConent(file, sync.text);
+						if(answer == update) updateFileConent(file, sync.text, sync.hash);
 						else if(answer == backup) {
 							var backupPath = file.path + ".bak";
 							EDITOR.saveFile(file, backupPath, function(err) {
@@ -710,15 +726,32 @@ if(file == undefined) throw new Error("file=" + file);
 			
 			EDITOR.renderNeeded();
 		}
+		else if(json.fileSaved) {
+			// ### File saved
+			var file = EDITOR.files[json.fileSaved.path];
+			if(file) {
+				// Update the hash so we do not get an error when saving
+				file.hash = json.fileSaved.hash;
+				
+				// Mark the file as saved
+				ignoreFileSave = file.path; // Ignore the save event we will get when the file is marked as saved - to prevent endless loop
+				console.log("Marking file as saved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+				file.saved(function(err) {
+					if(ignoreFileSave==file.path) ignoreFileSave = "";
+					console.log("File now marked as saved! file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+				});
+			}
+		}
 		
 		return true;
 		
 		
 		
-		function updateFileConent(file, text) {
+		function updateFileConent(file, text, hash) {
 			ignoreFileChange = true;
 			file.reload(text);
 			ignoreFileChange = false;
+			if(hash != undefined) file.hash = hash; // So that we do not get an error when saving
 		}
 	}
 	
