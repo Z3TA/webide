@@ -123,10 +123,10 @@ alertGeneralMessage("Connection to signup service closed! Attempting to reconnec
 							setTimeout(function() { connect(signupUrl); }, 3000);
 						}
 						else if(connectionTries >= 6) {
-							alertGeneralMessage("Unable to reconnect to signup service. Please try again later by refreshing the page!");
+							alertGeneralMessage("Unable to reconnect to signup service. Reload the page to try again.");
 						}
 					}
-					else alertGeneralMessage("Unable to connect to signup service! Please contact server administrator!\nTry again by refreshing the page!");
+					else alertGeneralMessage("Unable to connect to signup service! Please contact server administrator!\nReload the page to try again.");
 				}
 			};
 		}
@@ -219,20 +219,31 @@ alertGeneralMessage("Connection to signup service closed! Attempting to reconnec
 			var username = inputUsername.value;
 			var password = inputPassword.value;
 			emtyGeneralAlerts();
-			alertGeneralMessage("Creating user " + username + ". Please wait ... You will be redirected to the editor once the account is created.");
+			alertGeneralMessage("Creating user " + username + " ... This can take a while! You will be redirected to the editor once it's done. By the way, did you notice that the clouds in the background are moving?", true);
 			createButton.disabled = true;
+			inputUsername.disabled = true;
+			inputPassword.disabled = true;
+			inputPassword2.disabled = true;
 			if(localStorageAvailable) {
+				localStorage.setItem("editorServerUser", username);
 				localStorage.setItem("editorServerPw", password);
 				// todo: use access token instead of saving pw
 			}
 			connSend("createAccount:" + username + "," + password);
 		}
 		
-		function alertGeneralMessage(msg) {
+		function alertGeneralMessage(msg, success) {
 			var newMessage = document.createElement("p");
 			newMessage.innerText = msg;
 			generalAlertDiv.appendChild(newMessage);
 			generalAlertDiv.style.display = "block";
+			if(success) {
+				generalAlertDiv.setAttribute("class", "alert success");
+			}
+			else {
+				generalAlertDiv.setAttribute("class", "alert");
+			}
+			
 			return false;
 		}
 		

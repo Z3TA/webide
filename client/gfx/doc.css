@@ -217,6 +217,10 @@ input[type=button]:disabled, button:disabled, .button:disabled {
 	font-family: 'sans-serif';
 }
 
+.alert.success {
+	background-color: #9fffbd;
+}
+
 div.alert {
 	margin-top: 1em;
 	margin-bottom: 1em;

@@ -49,7 +49,7 @@ var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
-var NO_CERT = !!getArg(["nocert", "no_cert"]);
+var NO_CERT = !!getArg(["nocert", "no_cert"]) || true; // Default to true because creating a certificate is really slow!
 
 var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
 
