@@ -1118,8 +1118,9 @@ file.fixCaret();
 			EDITOR.mock("typing", "abc");
 			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			// This test fill fail if we are in collaboration mode already when running the test!
 			fileChangeOrder = 2; // 3 characters typed (abc) fileChangeOrder:0-1-2
-			if(fileChangeEventOrderCounters[file.path] != fileChangeOrder) throw new Error("Unexpected: fileChangeOrder=" + fileChangeOrder + " fileChangeEventOrderCounters[" + file.path + "]=" + fileChangeEventOrderCounters[file.path]);
+			if(fileChangeEventOrderCounters[file.path] != fileChangeOrder) throw new Error("Unexpeced fileChangeOrder=" + fileChangeOrder + " but got fileChangeEventOrderCounters[" + file.path + "]=" + fileChangeEventOrderCounters[file.path]);
 			
 			f({change: "linebreak", index: 3, text: "\n"});
 			if(file.text != "abc\n\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
