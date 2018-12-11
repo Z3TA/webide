@@ -95,7 +95,7 @@
 				}
 				else if(code == "serviceError") alertGeneralMessage(arr[1]);
 				else if(code == "created") {
-					alertGeneralMessage("Successfully created user " + arr[1]);
+					alertGeneralMessage("Successfully created user " + arr[1], true);
 					
 					if(localStorageAvailable) {
 						window.localStorage.setItem("editorServerUser", arr[1]);
