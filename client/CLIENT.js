@@ -85,88 +85,8 @@ var CLIENT = {}; // Client object is global
 			
 		}
 		
-		connection.onmessage = function serverMessage(sockJsEvent) {
-			
-			var msg = sockJsEvent.data;
-			
-			console.log("Server: " + UTIL.shortString(msg));
-			//console.log( "Server: " + msg );
-			
-			CLIENT.connected = true;
-			
-			if(msg.length == 0) console.warn("Recieved emty messsage from server");
-			else {
-				try {
-					var json = JSON.parse(msg)
-				}
-				catch(err) {
-					throw new Error("Unable to parse server message: " + msg);
-					return;
-				}
-				
-				if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
-				
-				if(json.resp) {
-					var resp = json.resp;
-					for(var method in resp) {
-						// Call event listeners
-						// note: event listeners are also called If json has no id, and no resp ...
-						if(eventListeners.hasOwnProperty(method)) {
-							CLIENT.fireEvent(method, resp[method]);
-						}
-						//else console.log("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
-					}
-				}
-				
-				if(json.id) {
-					if(callbackWaitList.hasOwnProperty(json.id)) {
-						
-						console.log("Got server response for id=" + json.id);
-						
-						var err = null;
-						
-						if(json.error) {
-							var errMsg = "Server: " + json.error;
-							err = properCallStackError[json.id] ||  new Error();
-							err.message = errMsg;
-							// Seems it's not possible to overwrite error.message, but can we overwrite error.stack ?
-							if(err.message != errMsg) {
-err = new Error(errMsg);
-								err.stack = properCallStackError[json.id].stack;
-							}
-							if(json.errorCode) err.code = json.errorCode;
-						}
-						
-						callbackWaitList[json.id](err, json.resp);
-						delete callbackWaitList[json.id];
-						delete properCallStackError[json.id];
-					}
-					else if( noCallbackList.hasOwnProperty(json.id)) {
-						throw noCallbackList[json.id];
-}
-					else {
-						throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
-					// If the above happends, check to make sure the callback in the server command is only called once!
-					}
-				}
-				else if(json.msg) {
-					console.warn(json.msg);
-					alertBox(json.msg);
-				}
-				else if(!json.resp) {
-					
-					for(var method in json) {
-						if(eventListeners.hasOwnProperty(method)) {
-							CLIENT.fireEvent(method, json[method]);
-						}
-						else throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
-						// Might be an event without a listener!
-					}
-
-				}
-				
-			}
-		}
+		connection.onmessage = serverMessage;
+		
 		
 		connection.onclose = function serverDisconnected() {
 			console.log("connection closed");
@@ -312,6 +232,8 @@ callbackWaitList[id] = callback;
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 
+	CLIENT.mock = serverMessage; // When you want to manually fire server messages
+	
 	CLIENT.on("loginSuccess", function(json) {
 		if(json.cId == undefined) throw new Error("Did not get cId from loginSuccess event!");
 		CLIENT.connectionId = json.cId;
@@ -346,7 +268,7 @@ console.log("serviceWorker not supported on BROWSER=" + BROWSER);
 			console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
 			return;
 		}
-		else if(newVersion != oldVersion && lastUsedserver.indexOf(window.location.hostname) == -1) {
+		else if(newVersion != oldVersion && lastUsedserver && lastUsedserver.url.indexOf(window.location.hostname) == -1) {
 			alertBox("Your client is running version " + oldVersion + " while the server is running version " + newVersion + " ! While there might not be any issues, it's recommended to run the same version on both client and server!");
 		}
 		else if(newVersion > oldVersion) {
@@ -413,6 +335,89 @@ reconnectTimeoutTime += 10000;
 				}
 				return true;
 			});
+		}
+	}
+	
+	function serverMessage(sockJsEvent) {
+		
+		var msg = sockJsEvent.data;
+		
+		console.log("Server: " + UTIL.shortString(msg));
+		//console.log( "Server: " + msg );
+		
+		CLIENT.connected = true;
+		
+		if(msg.length == 0) console.warn("Recieved emty messsage from server");
+		else {
+			try {
+				var json = JSON.parse(msg)
+			}
+			catch(err) {
+				throw new Error("Unable to parse server message: " + msg);
+				return;
+			}
+			
+			if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
+			
+			if(json.resp) {
+				var resp = json.resp;
+				for(var method in resp) {
+					// Call event listeners
+					// note: event listeners are also called If json has no id, and no resp ...
+					if(eventListeners.hasOwnProperty(method)) {
+						CLIENT.fireEvent(method, resp[method]);
+					}
+					//else console.log("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
+				}
+			}
+			
+			if(json.id) {
+				if(callbackWaitList.hasOwnProperty(json.id)) {
+					
+					console.log("Got server response for id=" + json.id);
+					
+					var err = null;
+					
+					if(json.error) {
+						var errMsg = "Server: " + json.error;
+						err = properCallStackError[json.id] ||  new Error();
+						err.message = errMsg;
+						// Seems it's not possible to overwrite error.message, but can we overwrite error.stack ?
+						if(err.message != errMsg) {
+							err = new Error(errMsg);
+							err.stack = properCallStackError[json.id].stack;
+						}
+						if(json.errorCode) err.code = json.errorCode;
+					}
+					
+					callbackWaitList[json.id](err, json.resp);
+					delete callbackWaitList[json.id];
+					delete properCallStackError[json.id];
+				}
+				else if( noCallbackList.hasOwnProperty(json.id)) {
+					throw noCallbackList[json.id];
+				}
+				else {
+					throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
+					// If the above happends, check to make sure the callback in the server command is only called once!
+				}
+			}
+			else if(json.msg) {
+				console.warn(json.msg);
+				alertBox(json.msg);
+			}
+			else if(!json.resp) {
+				
+				for(var method in json) {
+					if(eventListeners.hasOwnProperty(method)) {
+						CLIENT.fireEvent(method, json[method]);
+					}
+					else throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
+					// Might be an event without a listener!
+				}
+				
+			}
+			
 		}
 	}
 	
