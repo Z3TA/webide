@@ -37,6 +37,8 @@
 			fun: findInFile
 		});
 		
+		EDITOR.registerAltKey({char: "f", alt:2, label: "find", fun: findReplace});
+		
 		// Point variables to the document object model
 		findReplaceDiv = document.getElementById("findReplace");
 		inputFind = document.getElementById("inputFind");
@@ -60,6 +62,8 @@
 		
 		CLIENT.removeEvent("moveCaret", resetLastSearchStrLength);
 		CLIENT.removeEvent("voiceCommand", findInFile);
+		
+		EDITOR.unregisterAltKey(findReplace);
 		
 		// Cleanup
 		hide_search();

@@ -49,6 +49,7 @@
 		
 		EDITOR.on("showMenu", showSaveOption);
 		
+		EDITOR.registerAltKey({char: "s", alt:2, label: "save", fun: saveCurrentFile});
 		
 	}
 	
@@ -62,6 +63,8 @@
 		EDITOR.removeMenuItem(menu);
 		
 		EDITOR.removeEvent("showMenu", showSaveOption);
+		
+		EDITOR.unregisterAltKey(saveCurrentFile);
 		
 		hideSaveDialog();
 	}
