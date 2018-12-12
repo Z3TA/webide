@@ -746,23 +746,23 @@ return false;
 	function insertAtCaret(t, text) {
 		/*
 			The caret is lost when the element is blurred, eg when you push a button on the virtual keyboard.
-			Solution: Save the caret posited every time the element blurs
+			Solution: Save the caret position every time the element blurs
 		*/
 		
-		console.log("insertAtCaret: text=" + text + " Element: id=" + t.id);
+		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop")) || 0;
+		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;
+		var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd")) || 0;
 		
-		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
-		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
-		var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
+		console.log("insertAtCaret: text=" + text + " Element: id=" + t.id + " sTop=" + sTop + " selStart=" + selStart + " selEnd=" + selEnd);
 		
 		if( typeof selStart != "number" || isNaN(selStart) ){
-			throw new Error("Unable to get caret position for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
+			throw new Error("Unable to get caret position (selStart=" + selStart + ") for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") + " value=" + t.value );
 		}
 		if( typeof selEnd != "number" || isNaN(selEnd) ){
-			throw new Error("Unable to get selection end for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+			throw new Error("Unable to get selection end (selEnd=" + selEnd + ") for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") + " value=" + t.value );
 		}
 		if( typeof sTop != "number" || isNaN(sTop) ) {
-			throw new Error("Unable to get scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
+			throw new Error("Unable to get scroll position (sTop=" + sTop + ") for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") + " value=" + t.value );
 		}
 		
 		//console.log("selStart=" + selStart + " (" + t.getAttribute("sTop") + ")");
@@ -770,7 +770,20 @@ return false;
 		var front = (t.value).substring(0, selStart);
 		var back = (t.value).substring(selEnd, t.value.length);
 		
-		if(text == "\b") {
+		
+		if(text == "←") {
+			if(selStart>0) selStart--;
+		}
+		else if(text == "→") {
+			if(selStart<t.value.length) selStart++;
+		}
+		else if(text == "↑") {
+			if(sTop>0) sTop--;
+		}
+		else if(text == "↓") {
+			sTop++;
+		}
+		else if(text == "\b") {
 			console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
 			t.value = front.slice(0, -1) + back;
 			selStart = selStart - 1;
@@ -1275,6 +1288,67 @@ fun: function space(click) {
 		return false;
 	}
 	
+	
+	// TEST-CODE-START
+	// ### Test(s)
+	
+	function clickLetter(letter) {
+		
+		var id;
+		
+		if(buttons.length == 0) buttons = verticalLayout;
+		
+		for (var i=0; i<buttons.length; i++) {
+			if(buttons[i].char==letter) {
+				id = i;
+				break;
+			}
+		}
+		
+		if(!id) throw new Error("Unable to find button " + letter + " buttons.length=" + (buttons && buttons.length));
+		
+		clickButton(id);
+		
+	}
+	
+	EDITOR.addTest(1, function testInsertAtCaret(callback) {
+		// Make sure the characters are inserted in the right order.
+		
+		var input = document.createElement("input");
+		
+		var footer = document.getElementById("footer");
+		
+		footer.appendChild(input);
+		EDITOR.resizeNeeded();
+		
+		
+		// Seems we need an event to trigger the click event
+		input.focus(); // Element needs to have focus *before* clicking on it for the click() event to trigger.
+		//input.setAttribute("placeholder", "Double Click here to trigger the test!");
+		input.setAttribute("id", "testVirtualKeyboardInput");
+		
+		
+		//input.addEventListener("dblclick", function enterText() {
+		
+		clickLetter("a");
+		clickLetter("b");
+		clickLetter("c");
+		
+		setTimeout(function() {
+			
+			if(input.value != "abc") throw new Error("Unexpected input.value=" + input.value);
+			
+			footer.removeChild(input);
+			
+			return callback(true);
+			
+		}, 0);
+		
+		//});
+		
+	});
+	
+	// TEST-CODE-END
 	
 	
 })();

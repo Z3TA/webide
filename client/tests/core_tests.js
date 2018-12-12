@@ -1629,7 +1629,7 @@
 		callback(true);
 	});
 	
-	EDITOR.addTest(1, function noTextOusideScreen(callback) {
+	EDITOR.addTest(function noTextOusideScreen(callback) {
 		
 		EDITOR.openFile("textOutsideScreen.txt", 'Row 0', function(err, file) {
 			
