@@ -6832,7 +6832,30 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			alertBox("Unable to get platform/OS clipboard data!");
 		}
 		
-		if(text && text.length > EDITOR.settings.bigFileSize) return alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
+		if(text && text.length > EDITOR.settings.bigFileSize) {
+			var yes = "Save as file";
+			var no = "Never mind";
+			
+			confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
+				if(answer == yes) {
+					var file = EDITOR.currentFile;
+					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
+					var filePath = file.path;
+					EDITOR.saveToDisk(filePath, combinedText, function(err, path, hash) {
+						if(err) return alertBox("Unable to save the file! " + err.message);
+						
+						EDITOR.closeFile(filePath, true);
+						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
+							if(err) return alertBox("The file was saved, but unabled to open! " + err.message);
+});
+						
+					});
+				}
+			});
+			
+//alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
+			return;
+		}
 		
 		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 			// Give focus back to the editor/canvas
