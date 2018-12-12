@@ -44,6 +44,8 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+Handle pasting 100,000 lines of code benchmark.
+
 
 Finish blog post about mobile support!
 
@@ -282,6 +284,8 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+When moving a file (via file explorer) belonging to a Mercurial repo, also do a "hg move" !
 
 Code debt cleanup: Upload functionality, currently have different paths for single file and multiple files, refactor so there's one path.
 
