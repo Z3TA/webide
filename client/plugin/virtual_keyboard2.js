@@ -282,18 +282,29 @@ return false;
 		
 		if(!ACTIVE) return;
 		
+		buttons = verticalLayout;
+		
+		canvasWidth = windowWidth;
+		
 		if(windowWidth > windowHeight) {
 			var orientation = "horizontal";
-			buttonWithToHeightRatio = 0.8;
-			buttons = horizontalLayout;
-			buttonsPerRow = calcButtonsPerRow(buttons);
+			buttonWithToHeightRatio = 0.9;
+			//buttons = horizontalLayout;
+			
+			radius = canvasWidth / 200; // Rounded corners
+			margin = canvasWidth / 500;
+			lineWidth = canvasWidth / 2000;
 		}
 		else {
 			var orientation = "vertical";
 			buttonWithToHeightRatio = 2;
-			buttons = verticalLayout;
-			buttonsPerRow = calcButtonsPerRow(buttons);
+			
+			radius = canvasWidth / 150; // Rounded corners
+			margin = canvasWidth / 300;
+			lineWidth = canvasWidth / 1500;
 		}
+		
+		buttonsPerRow = calcButtonsPerRow(buttons);
 		
 		if(buttons.length == 0) throw new Error("No buttons found! windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " (orientation=" + orientation + ") horizontalLayout.length=" + horizontalLayout.length + " verticalLayout.length=" + verticalLayout.length);
 		if(buttonsPerRow[0] == 0) throw new Error("First row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
@@ -305,11 +316,6 @@ return false;
 		console.log("totalRows=" + totalRows);
 		
 		
-		canvasWidth = windowWidth;
-		
-		radius = canvasWidth / 150; // Rounded corners
-		margin = canvasWidth / 300;
-		lineWidth = canvasWidth / 1500;
 		buttonWidth = canvasWidth / maxButtonsPerRow;
 		
 		buttonHeight = buttonWithToHeightRatio * buttonWidth;
@@ -809,7 +815,9 @@ return false;
 		
 		buttonsPerRow = [0,0,0,0,0,0];
 		
-		
+		/*
+			
+			
 		// ## Horizontal
 		var row = 0;
 		var col = 0;
@@ -966,7 +974,7 @@ fun: function space(click) {
 		
 		add("|");
 		
-		
+		*/
 		
 		
 		
@@ -979,9 +987,9 @@ fun: function space(click) {
 		
 		
 		// ## Vertical
-		row = 0;
-		col = 0
-		orientation = "vertical";
+		var row = 0;
+		var col = 0
+		var orientation = "vertical";
 		
 		add("1", {           alt2: "~", alt3: "¹", width: 1.1}); // 206276
 		
@@ -1129,18 +1137,18 @@ fun: function space(click) {
 			alt: true
 		});
 		
-		add(",", {width: 1.8, textSize: 1.5}); // 679396
+		add(",", {width: 1.5, textSize: 1.5}); // 679396
 		
 		add("space", {
 			fun: function space(click) {
 				fireKey(32, "keypress"); // space
 			},
 			charCode: 32,
-			width: 2,
+			width: 2.4,
 			textSize: 0.7,
 		});
 		
-		add(".", {alt1: ":", width: 1.6, textSize: 1.5}); // 591280
+		add(".", {alt1: ":", width: 1.5, textSize: 1.5}); // 591280
 		
 		add("Alt-2", {
 			fun: function alternate1() {
@@ -1246,6 +1254,12 @@ fun: function space(click) {
 		
 		if(mouseUpEvent.type == "touchend") {
 			toggleVirtualKeyboard2(true);
+			if(EDITOR.currentFile) {
+				// Wait for the resize, then scroll to the caret (where you clicked)
+				setTimeout(function() {
+					EDITOR.currentFile.scrollToCaret();
+				}, 500);
+			}
 		}
 		
 		return true;
@@ -1259,7 +1273,7 @@ fun: function space(click) {
 		EDITOR.mock("keypress", {charCode: 65});
 		
 		return false;
-		}
+	}
 	
 	
 	

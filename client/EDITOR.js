@@ -7093,6 +7093,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 
 				I also tried using a cache canvas but it was too complicated and didn't feel much faster.
 
+				This function sometimes give DOMException INDEX_SIZE_ERR on opera mobile! Why?
+				
 			*/
 			
 			// The canvas is reset after a resize, so we need to make a full render!
@@ -7141,7 +7143,13 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				
 				console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 				
+				try {
 				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+				}
+				catch(err) {
+					var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
+					throw error;
+				}
 				
 				//EDITOR.shouldRender = false;
 				//return;
