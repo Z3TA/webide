@@ -46,6 +46,12 @@ What I'm working on
 
 Handle pasting 100,000 lines of code benchmark.
 
+---
+User optin: First time opening the editor.
+Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
+
+User testing: Do you want all intaractions with the editor to be recorded ?
+---
 
 Finish blog post about mobile support!
 

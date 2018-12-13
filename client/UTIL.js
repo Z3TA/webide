@@ -596,7 +596,8 @@ console.warn("fun=" + fun);
 		
 		if(text.length == 0) {
 			console.warn("Can't determine line breaks without any text!");
-			return EDITOR.settings.defaultLineBreakCharacter;
+			if(typeof EDITOR != "undefined") return EDITOR.settings.defaultLineBreakCharacter;
+			else return "\n";
 		}
 		
 		var nr = UTIL.occurrences(text, "\n\r", true),

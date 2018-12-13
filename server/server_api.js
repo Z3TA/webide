@@ -469,6 +469,232 @@ API.readLines = function readLines(user, json, callback) {
 		}
 	}
 
+API.writeLines = function writeLines(user, json, writeLinesCallback) {
+	/*
+		
+		start: Start line
+		end: End line
+		content: The content to write
+		overwrite: If the current text between start and end line should be overwritten with the new content
+		If overwrite is set to false or undefined the content will be added at the start line
+		
+	*/
+	
+	var start = json.start;
+	var end = json.end;
+	var content = json.content;
+	var overwrite = json.overwrite;
+	var path = json.path;
+var encoding = "utf8";
+	var fs = require("fs");
+	var tmpPath = path + ".tmp";
+	var lb = determineLineBreakCharacters(content);
+	var contentRows = content.split(lb);
+	
+	console.log("writeLines: start=" + start + " end=" + end + " overwrite=" + overwrite + " path=" + path + " lb=" + UTIL.lbChars(lb) + " content.length=" + content.length + "  ");
+	
+	if(!UTIL.isLocalPath(path)) return writeLinesCallback(new Error("writeLines currently only supports local files!"));
+	if(overwrite && !end) return writeLinesCallback(new Error("end line need to be specified if overwriting!"));
+	
+	var StringDecoder = require('string_decoder').StringDecoder;
+	var decoder = new StringDecoder(encoding);
+	var text = "";
+	var doneReading = false;
+	var line = 1;
+	var isWriting = false;
+	var contentWritten = false;
+	var tmpClosed = false;
+	var originalClosed = false;
+	var finished = false;
+
+	var original = fs.createReadStream(path);
+	originalReadAble = false;
+	original.on('readable', function() {
+		// The 'readable' event is emitted when there is data available to be read from the stream
+		console.log("Original stream now readable!");
+		originalReadAble = true;
+		if(tmpReady) begin();
+});
+	original.on("end", function() {
+		// The 'end' event is emitted when there is no more data to be consumed from the stream.
+		console.log("Original stream ended!");
+		doneReading = true;
+	});
+	original.on("error", function(err) {
+		console.log("Original stream error: " + err.message);
+	});
+	original.on("close", function() {
+		// The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed. The event indicates that no more events will be emitted, and no further computation will occur.
+		console.log("Original stream closed!");
+		originalClosed = true;
+		if(tmpClosed) finish();
+	});
+
+var tmp = fs.createWriteStream(tmpPath);
+	var tmpReady = false;
+	tmp.on('ready', function() {
+		// Emitted when the fs.WriteStream is ready to be used.
+		tmpReady = true;
+		if(originalReadAble) begin();
+	});
+	tmp.on("error", function(rtt) {
+		console.log("tmp stream error: " + err.message);
+	});
+	tmp.on("close", function() {
+		// Emitted when the WriteStream's underlying file descriptor has been closed.
+		console.log("tmp stream closed!");
+		tmpClosed = true;
+		if(originalClosed) finish();
+	});
+	
+	function finish() {
+		console.log("writeLines: finish!");
+		if(finished) throw new Error("finished=" + finished + " tmpClosed=" + tmpClosed + " originalClosed=" + originalClosed + ". Close called twice !?");
+		finished = true;
+		
+		// We should now have a .tmp file containing the original file with the inserted content
+		fs.stat(tmpPath, function(err, stats) {
+			if(err) return writeLinesCallback(new Error("Unable to stat tmpPath=" + tmpPath + " Error: " + err.message));
+			
+			if(stat.size == 0) return writeLinesCallback(new Error("tmpPath=" + tmpPath + "stat.size=" + stat.size));
+			
+			// Remove the original file
+			fs.unlink(path, function(err) {
+				if(err) return writeLinesCallback(new Error("Failed to remove original file: path=" + path + ""));
+				
+				// Rename the tmp file to the original
+				fs.rename(tmpPath, path, function(err) {
+					if(err) return writeLinesCallback(new Error("Failed to rename tmpPath=" + tmpPath + " to path=" + path));
+					else writeLinesCallback(null);
+				});
+				
+			});
+			
+		});
+		
+		writeLinesCallback();
+	}
+	
+function begin() {
+		console.log("writeLines: begin!");
+		read();
+	}
+	
+	function read() {
+		var chunk = original.read();
+		
+		if(chunk == null) {
+			console.log("chunk=" + chunk + " doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+			
+			return;
+		}
+		
+		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+		text += decoder.write(chunk);
+		
+		var rows = text.split(lb);
+		
+		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + chunk.length + " bytes from " + path);
+		
+		if(line >= start && !end) {
+			// We have reached the start. It's time to insert the content
+			// Then write all row's except the last one
+			text = rows.pop();
+			line += rows.length;
+			
+			if(!contentWritten) {
+				write(contentRows, function() {
+					write(rows, read);
+				});
+				contentWritten = true;
+			}
+			// Or keep writing if the content has already been inserted
+			else write(rows, read); 
+		}
+		else if( (line + rows.length < start) || (end && line > end) ) {
+			// We have not, and will not reach start, or we are past end
+			// Write all rows except the last one, then continue reading
+			text = rows.pop();
+			line += rows.length;
+			writeRows(rows, read);
+		}
+		else if( overwrite && line >= start && line+rows.length <= end ) {
+			// We have reached the start, but have not and will not reach the end
+			// We are going to overwrite this part, so it can be discarded. Only count the lines!
+			text = rows.pop();
+			line += rows.length;
+			if(!contentWritten) {
+				write(contentRows, read);
+				contentWritten = true;
+			}
+		}
+		else if(line + rows.length >= start) {
+			// We will reach the start
+			// Only write the part that is less then start
+			
+			var leftOverIndex = start-line + 1;
+			text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb);
+			
+			write(rows, function() {
+				if(!contentWritten) {
+					write(contentRows, read);
+					contentWritten = true;
+				}
+				else read();
+			});
+		}
+		else if(end && line + rows.length > start && line + rows.length < end) {
+			// We have already reached start, and will now reach end
+			// Ignore everything up intil end
+			// Then write all rows except the last one
+			var untilIndex = end-line+1;
+			rows = rows.splice(untilIndex, rows.length-untilIndex+1);
+			text = rows.pop();
+			writeRows(rows, read);
+		}
+		else throw new Error("Not anticipated: line=" + line + " rows.length=" + rows.length + " start=" + start + " end=" + end + " doneReading=" + doneReading + " isWriting=" + isWriting + " contentWritten=" + contentWritten);
+	}
+	
+	
+	function writeRows(rows, callback) {
+		var row = 0;
+		
+		write();
+		
+		function write() {
+			isWriting = true;
+			var ok = true;
+			do {
+				if (row == rows.length-1) {
+					// last time!
+					tmp.write(rows[row], encoding, function() {
+						isWriting = false;
+						callback();
+					});
+				}
+				else {
+					// see if we should continue, or wait
+					// don't pass the callback, because we're not done yet.
+					ok = tmp.write(rows[row], encoding);
+				}
+				row++;
+			} while (row < rows.length && ok);
+				
+			
+			if (row < rows.length) {
+				// had to stop early!
+				// write some more once it drains
+				tmp.once('drain', write);
+			}
+		}
+	}
+	
+	
+}
+
+
+
+
 API.readFromDisk = function readFromDisk(user, json, callback) {
 	
 	var path = user.translatePath(json.path);
@@ -481,32 +707,32 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 	var stream;
 	var fileBuffer = [];
 	
-		if(!callback) {
-			throw new Error("No callback defined!");
-		}
-		
-		var fs = require("fs");
+	if(!callback) {
+		throw new Error("No callback defined!");
+	}
+	
+	var fs = require("fs");
 	var crypto = require('crypto');
 	
 	var shasum = crypto.createHash('sha256');
 	
-		console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
-		//console.log(UTIL.getStack("Read from disk"));
+	console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
+	//console.log(UTIL.getStack("Read from disk"));
+	
+	// Check path for protocol
+	var url = require("url");
+	var parse = url.parse(path);
+	
+	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 		
-		// Check path for protocol
-		var url = require("url");
-		var parse = url.parse(path);
-		
-		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 			
-			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Getting file from FTP server: " + parse.pathname);
+			
+			c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
 				
-				var c = user.remoteConnections[parse.hostname].client;
-				
-				console.log("Getting file from FTP server: " + parse.pathname);
-				
-				c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
-					
 					if(err) throw err;
 					
 					console.log("Reading file from FTP ...");
