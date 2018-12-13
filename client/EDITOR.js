@@ -106,7 +106,7 @@ EDITOR.settings = {
 	},
 	scrollSpeedMultiplier: 1/17,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
-	bigFileSize: 1024*1024, // (Bytes), all files larger then this will be opened as streams
+	bigFileSize: 1024*1024, // (Bytes), all files larger then this will be opened as streams. 1048576 = ca 30k LOC
 	bigFileLoadRows: 4000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	insert: false,
@@ -1424,6 +1424,11 @@ usePseudoClipboard = false;
 		
 		if(!file) {
 			throw new Error("No file open when save was called");
+		}
+		
+		if(file.isBig) {
+			alertBox("The file is opened read-only. Unable to save!");
+			return;
 		}
 		
 		if(path == undefined) {
@@ -6832,13 +6837,22 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			alertBox("Unable to get platform/OS clipboard data!");
 		}
 		
+		var file = EDITOR.currentFile;
+		
+		if(file && file.isBig)  {
+			//alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
+			alertBox("Unable to paste. The file is read only!");
+			return;
+		}
+		
 		if(text && text.length > EDITOR.settings.bigFileSize) {
-			var yes = "Save as file";
+			var yes = "Save the file";
 			var no = "Never mind";
 			
-			confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
+			confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. " + 
+			"Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
 				if(answer == yes) {
-					var file = EDITOR.currentFile;
+					
 					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
 					var filePath = file.path;
 					EDITOR.saveToDisk(filePath, combinedText, function(err, path, hash) {
@@ -6846,14 +6860,13 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						
 						EDITOR.closeFile(filePath, true);
 						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
-							if(err) return alertBox("The file was saved, but unabled to open! " + err.message);
+							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message);
 });
 						
 					});
 				}
 			});
 			
-//alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
 			return;
 		}
 		

@@ -384,7 +384,7 @@ API.readLines = function readLines(user, json, callback) {
 		
 		else {
 			
-			// Asume local file system
+			// Assume local file system
 			var fs = require("fs");
 			if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
 			
