@@ -592,7 +592,7 @@ var encoding = "utf8";
 		fs.stat(tmpPath, function(err, stats) {
 			if(err) return writeLinesCallback(new Error("Unable to stat tmpPath=" + tmpPath + " Error: " + err.message));
 			
-			if(stats.size == 0) return writeLinesCallback(new Error("tmpPath=" + tmpPath + "stats.size=" + stats.size));
+			if(stats.size == 0) return writeLinesCallback(new Error("tmpPath=" + tmpPath + " stats.size=" + stats.size));
 			
 			// Remove the original file
 			fs.unlink(path, function(err) {
@@ -643,6 +643,12 @@ function begin() {
 		
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
+		
+		// Remove any ending line break to prevent it from creating an extra row
+		if(text.lastIndexOf(lb) == text.length-lb.length) {
+			text = text.slice(0,-1);
+			console.log("Removed trailing linebreak!");
+		}
 		
 		var rows = text.split(lb);
 		
@@ -735,16 +741,16 @@ function begin() {
 			// Only write the part that is less then start
 			console.log("line=" + line + " + rows.length-1=" + (rows.length-1) + " will reach start=" + start);
 			
-			var leftOverIndex = start-line + 1;
+			var leftOverIndex = start-line;
 			if(leftOverIndex < rows.length) {
-				console.log("leftOverIndex=" + leftOverIndex + " at rows[" + leftOverIndex + "]=" + rows[leftOverIndex]);
-				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb);
+				console.log("leftOverIndex=" + leftOverIndex + " rows=" + JSON.stringify(rows));
+				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb); // Text *not* to be written right now
 			}
 			else {
 text = rows.pop(); // Always remove the last row because we might not yet have all of it!
 			}
 			
-			console.log("text.length=" + text.length);
+			console.log("text.length=" + text.length + " rows=" + JSON.stringify(rows));
 			
 			line += rows.length;
 			write(rows, function() {

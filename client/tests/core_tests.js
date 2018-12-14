@@ -1690,6 +1690,7 @@ if(err) throw err;
 	
 	EDITOR.addTest(1, function writeLines(callback) {
 		var filePath = "/tmp/writeLinesTest";
+		var chunkSize = 1024;
 		var tests = [
 			{
 				add: "Hello\nworld\n\n",
@@ -1724,7 +1725,7 @@ if(err) throw err;
 				return;
 			}
 			var item = tests.shift();
-			var options = {path: filePath, chunkSize: 3, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
+			var options = {path: filePath, chunkSize: chunkSize, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
 			CLIENT.cmd("writeLines", options, function(err) {
 				if(err) throw err;
 

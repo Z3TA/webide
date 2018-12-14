@@ -44,6 +44,8 @@ Meego browser silently exit any function that tries to access a member on a unde
 What I'm working on
 -------------------
 
+fiddling with writeLines stream api ...
+
 Handle pasting 100,000 lines of code benchmark.
 
 ---
