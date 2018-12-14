@@ -847,8 +847,12 @@ usePseudoClipboard = false;
 		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
 		
 		
-		if(typeof text === "function") throw new Error("The callback should be in the third argument. Second argument is for file content");
-		
+		if(typeof text === "function" && callback == undefined) {
+			callback = text;
+			text = undefined;
+			// throw new Error("The callback should be in the third argument. Second argument is for file content");
+		}
+
 		// State parameter is optional
 		if(typeof state === "function" && !callback) {
 			callback = state;
@@ -1545,7 +1549,7 @@ usePseudoClipboard = false;
 	}
 	
 	
-	EDITOR.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
+	EDITOR.saveToDisk = function(path, text, inputBuffer, encoding, saveToDiskCallback) {
 		// You probably want to use EDITOR.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
@@ -1553,6 +1557,18 @@ usePseudoClipboard = false;
 		
 		if(typeof path != "string") throw new Error("path=" + path + " is not a string!");
 		if(typeof text != "string") throw new Error("text=" + text + " is not a string!");
+		
+		if(typeof inputBuffer == "function" && saveToDiskCallback == undefined) {
+			saveToDiskCallback = inputBuffer;
+			inputBuffer = undefined;
+		}
+		else if(typeof encoding == "function" && saveToDiskCallback == undefined) {
+			saveToDiskCallback = encoding;
+			encoding = undefined;
+		}
+		
+		if(inputBuffer != undefined && typeof inputBuffer != "boolean") throw new Error("Third argument inputBuffer need to be true,false or undefined!");
+		if(inputBuffer != undefined && typeof encoding != "string") throw new Error("Fourth argument encoding need to be a string or undefined!");
 		
 		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
 		
@@ -6645,7 +6661,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				else saveToDisk();
 				
 				function saveToDisk() {
-					EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+					EDITOR.saveToDisk(filePath, data, false, "base64", callback);
 				}
 			};
 			reader.readAsDataURL(file); // For binary files (will be base64 encoded)

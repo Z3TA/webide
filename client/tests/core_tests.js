@@ -1688,6 +1688,68 @@ if(err) throw err;
 		});
 	});
 	
+	EDITOR.addTest(1, function writeLines(callback) {
+		var filePath = "/tmp/writeLinesTest";
+		var tests = [
+			{
+				add: "Hello\nworld\n\n",
+				start: 1,
+				result: "Hello\nworld\n\n\n"
+			},
+			{
+				add: "Line 2\nLine 3",
+				start: 2,
+				result: "Hello\nLine 2\nLine 3\nworld\n\n\n"
+			},
+			{
+				add: "Line 2 foo\nLine 3 bar",
+				start: 2,
+				end: 3,
+				overwrite: true,
+				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n\n"
+			}
+		];
+		
+		EDITOR.saveToDisk(filePath, "\n", function(err) {
+			if(err) throw err;
+			test();
+		});
+		
+		function test() {
+			if(tests.length == 0) {
+				CLIENT.cmd("deleteFile", {filePath: filePath}, function(err) {
+					if(err && err.code != "ENOENT") throw err;
+					callback(true);
+				});
+				return;
+			}
+			var item = tests.shift();
+			var options = {path: filePath, chunkSize: 3, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
+			CLIENT.cmd("writeLines", options, function(err) {
+				if(err) throw err;
+
+				CLIENT.cmd("readFromDisk", {path: filePath}, function(err, read) {
+					if(err) throw err;
+					
+					if(read.data != item.result) {
+						console.log("Added: " + item.add);
+						console.log("start=" + item.start + " end=" + item.end);
+						console.log("Expected file content: " + UTIL.lbChars(item.result));
+						console.log("Actual file content: " + UTIL.lbChars(read.data));
+						EDITOR.openFile(filePath, function(err) {
+							if(err) throw err;
+							
+							throw new Error("Unexpected file content after writeLines operation! See " + filePath + " and console.logs for more details.");
+						}); 
+					}
+					else test(); // Run next test
+					
+				});
+				
+			});
+		}
+	});
+	
 	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		

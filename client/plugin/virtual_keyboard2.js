@@ -1311,7 +1311,7 @@ fun: function space(click) {
 		
 	}
 	
-	EDITOR.addTest(1, function testInsertAtCaret(callback) {
+	EDITOR.addTest(function testInsertAtCaret(callback) {
 		// Make sure the characters are inserted in the right order.
 		
 		var input = document.createElement("input");

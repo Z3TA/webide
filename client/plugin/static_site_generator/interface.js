@@ -528,7 +528,7 @@
 						// Specifying encoding:base64 will magically convert to binary!
 						// We do have to remove the data:image/png metadata though!
 						data = data.replace("data:" + fileType + ";base64,", "");
-						EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+						EDITOR.saveToDisk(filePath, data, false, "base64", callback);
 					};
 					reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
 				}
