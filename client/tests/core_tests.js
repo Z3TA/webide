@@ -1695,19 +1695,26 @@ if(err) throw err;
 			{
 				add: "Hello\nworld\n\n",
 				start: 1,
-				result: "Hello\nworld\n\n"
+				result: "Hello\nworld\n\n\n"
 			},
 			{
 				add: "Line 2\nLine 3",
 				start: 2,
-				result: "Hello\nLine 2\nLine 3\nworld\n\n"
+				result: "Hello\nLine 2\nLine 3\nworld\n\n\n"
 			},
 			{
 				add: "Line 2 foo\nLine 3 bar",
 				start: 2,
 				end: 3,
 				overwrite: true,
-				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n"
+				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n\n"
+			},
+			{
+				add: "Replaced line 3",
+				start: 3,
+				end: 3,
+				overwrite: true,
+				result: "Hello\nLine 2 foo\nReplaced line 3\nworld\n\n\n"
 			}
 		];
 		

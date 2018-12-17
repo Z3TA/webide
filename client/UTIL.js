@@ -620,7 +620,7 @@ console.warn("fun=" + fun);
 		else {
 			// Text has no line breaks. Use the default: (cr lf in windows)
 			console.warn("Text has no line breaks!");
-			if(navigator.platform.indexOf("Win") > -1) {
+			if(typeof navigator != "undefined" && navigator.platform.indexOf("Win") > -1) {
 				console.log("Using CRLF (Because it's Windows)");
 				return "\r\n";
 			}
