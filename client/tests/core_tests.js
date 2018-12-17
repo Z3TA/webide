@@ -1690,37 +1690,53 @@ if(err) throw err;
 	
 	EDITOR.addTest(1, function writeLines(callback) {
 		var filePath = "/tmp/writeLinesTest";
-		var chunkSize = 1024;
+		
 		var tests = [
 			{
 				add: "Hello\nworld\n\n",
 				start: 1,
-				result: "Hello\nworld\n\n\n"
+				result: "Hello\nworld\n\n"
 			},
 			{
 				add: "Line 2\nLine 3",
 				start: 2,
-				result: "Hello\nLine 2\nLine 3\nworld\n\n\n"
+				result: "Hello\nLine 2\nLine 3\nworld\n\n"
 			},
 			{
 				add: "Line 2 foo\nLine 3 bar",
 				start: 2,
 				end: 3,
 				overwrite: true,
-				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n\n"
+				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n"
 			}
 		];
 		
-		EDITOR.saveToDisk(filePath, "\n", function(err) {
+		// Run the tests with different chunk sizes
+		run(tests, 1024, function(err) {
 			if(err) throw err;
-			test();
+			run(tests, 3, function(err) {
+				if(err) throw err;
+				callback(true);
+			});
 		});
 		
+		
+		function run(originalTests, chunkSize, callback) {
+			
+			console.log("chunkSize=" + chunkSize);
+			
+			var tests = originalTests.slice(); // Copy array
+			
+			EDITOR.saveToDisk(filePath, "\n", function(err) {
+				if(err) throw err;
+				test();
+			});
+			
 		function test() {
 			if(tests.length == 0) {
 				CLIENT.cmd("deleteFile", {filePath: filePath}, function(err) {
 					if(err && err.code != "ENOENT") throw err;
-					callback(true);
+						callback(null);
 				});
 				return;
 			}
@@ -1740,7 +1756,7 @@ if(err) throw err;
 						EDITOR.openFile(filePath, function(err) {
 							if(err) throw err;
 							
-							throw new Error("Unexpected file content after writeLines operation! See " + filePath + " and console.logs for more details.");
+								throw new Error("Unexpected file content after writeLines operation! See " + filePath + " and console.logs for more details. chunkSize=" + chunkSize);
 						}); 
 					}
 					else test(); // Run next test
@@ -1748,6 +1764,7 @@ if(err) throw err;
 				});
 				
 			});
+		}
 		}
 	});
 	

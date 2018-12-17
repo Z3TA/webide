@@ -489,6 +489,13 @@ var encoding = "utf8";
 	var fs = require("fs");
 	var tmpPath = path + ".tmp";
 	var lb = UTIL.determineLineBreakCharacters(content);
+	
+	// Content must end with a line break!
+	if(content.slice(content.length-lb.length) != lb) {
+		console.warn("content.length=" + content.length + " does not end with a " + UTIL.lbChars(lb) + " line break - it will be added!");
+		content += lb;
+	}
+	
 	var contentRows = content.split(lb);
 	var chunkSize = json.chunkSize; // Useful when testing
 	
@@ -530,11 +537,19 @@ var encoding = "utf8";
 		console.log("Original stream ended!");
 		doneReading = true;
 		
-		if(text.length > 0 && text != lb) {
+		if(text.length > 0) {
 			console.log("Writing remaining text ...");
 			var rows = text.split(lb);
 			write(rows, function() {
 				console.log("Ending write stream because the last text was just written! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+				tmp.end();
+			});
+		}
+		else if(!contentWritten) {
+			// The content has not been written. Most likely because the original file was empty
+			write(contentRows, function() {
+				contentWritten = true;
+				console.log("Ending write after writing the content because there where nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
 				tmp.end();
 			});
 		}
@@ -644,11 +659,9 @@ function begin() {
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
 		
-		// Remove any ending line break to prevent it from creating an extra row
-		if(text.lastIndexOf(lb) == text.length-lb.length) {
-			text = text.slice(0,-1);
-			console.log("Removed trailing linebreak!");
-		}
+		console.log("text=" + UTIL.lbChars(text));
+		
+		// Don't remove any line breaks here! Doing so might concatenate two rows!
 		
 		var rows = text.split(lb);
 		
@@ -667,8 +680,9 @@ function begin() {
 		if(line >= start && !end) {
 			// We have reached the start. It's time to insert the content
 			// Then write all row's except the last one
-			console.log("line=" + line + " start=" + start + " reached!");
+			console.log("line=" + line + " start=" + start + " reached! rows.length=" + rows.length + " text=" + UTIL.lbChars(text));
 			text = rows.pop();
+			if(text == "" && rows.length>1) text = lb;
 			line += rows.length;
 			
 			if(!contentWritten) {
@@ -690,6 +704,7 @@ function begin() {
 			// Write all rows except the last one, then continue reading
 			console.log("line=" + line + " + rows.length=" + rows.length + " is before start=" + start + " or end=" + end);
 			text = rows.pop();
+			if(text == "" && rows.length>1) text = lb;
 			line += rows.length;
 			write(rows, read);
 		}
@@ -698,6 +713,7 @@ function begin() {
 			// We are going to overwrite this part, so it can be discarded. Only count the lines!
 			console.log("overwrite=" + overwrite + " line=" + line + " rows.length-1=" + (rows.length-1) + " we will be between start=" + start + " and end=" + end);
 			text = rows.pop();
+			if(text == "" && rows.length>1) text = lb;
 			console.log("text.length=" + text.length + " rows.length=" + rows.length);
 			line += rows.length;
 			console.log("ignored " + rows.length + " lines. update to line=" + line);
@@ -739,21 +755,35 @@ function begin() {
 		else if(line < start && line + rows.length-1 >= start) {
 			// We have not reached the start, but will reach the start now!
 			// Only write the part that is less then start
-			console.log("line=" + line + " + rows.length-1=" + (rows.length-1) + " will reach start=" + start);
+			console.log("line=" + line + " + rows.length-1=" + (rows.length-1) + " will reach start=" + start + " overwrite=" + overwrite + " end=" + end);
 			
 			var leftOverIndex = start-line;
+			
+			if(overwrite) {
+				// Remve the rows to be overwritten, but not the last one
+				var removed = rows.splice( leftOverIndex, Math.min(end-line, rows.length-leftOverIndex) );
+				console.log("Removed " + JSON.stringify(removed) + " because overwrite=" + overwrite + " rows=" + JSON.stringify(rows) + " leftOverIndex=" + leftOverIndex + " rows.length=" + rows.length);
+			}
+			
 			if(leftOverIndex < rows.length) {
-				console.log("leftOverIndex=" + leftOverIndex + " rows=" + JSON.stringify(rows));
+				console.log("leftOverIndex=" + leftOverIndex + " rows=" + JSON.stringify(rows) + "");
 				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb); // Text *not* to be written right now
 			}
-			else {
+			else if(leftOverIndex != rows.length) {
 text = rows.pop(); // Always remove the last row because we might not yet have all of it!
+				if(text == "" && rows.length>1) text = lb;
+			}
+			else {
+				text = "";
+				if(rows.length > 1) text = lb; // Remaining text is a line break because when multi rows are written, there are no line break appended to the last one
+				console.log("Empty text because leftOverIndex=" + leftOverIndex + " rows.length=" + rows.length + "");
 			}
 			
-			console.log("text.length=" + text.length + " rows=" + JSON.stringify(rows));
+			console.log("text.length=" + text.length + " rows.length=" + rows.length + " rows=" + JSON.stringify(rows) + " text=" + UTIL.lbChars(text));
 			
 			line += rows.length;
-			write(rows, function() {
+			if(rows.length == 0) read();
+			else write(rows, function() {
 				if(!contentWritten) {
 					write(contentRows, read);
 					contentWritten = true;
@@ -770,6 +800,7 @@ text = rows.pop(); // Always remove the last row because we might not yet have a
 			var untilIndex = end-line+1;
 			rows = rows.splice(untilIndex, rows.length-untilIndex+1);
 			text = rows.pop();
+			if(text == "" && rows.length>1) text = lb;
 			line += rows.length;
 			write(rows, read);
 		}
@@ -783,6 +814,12 @@ text = rows.pop(); // Always remove the last row because we might not yet have a
 		console.log("Writing rows.length=" + rows.length + " ...");
 		console.log(JSON.stringify(rows));
 
+		if(rows.length == 0) {
+			console.warn("Zero rows!");
+			callback();
+			return;
+		}
+		
 		var onlyOneRow = (rows.length == 1);
 		
 		writeRow();
@@ -790,19 +827,15 @@ text = rows.pop(); // Always remove the last row because we might not yet have a
 		function writeRow() {
 			isWriting = true;
 			var ok = true;
-			var writeLineBreak = true;
 			do {
 				if (row == rows.length-1) {
-					// last time!
-					
-					//writeLineBreak = onlyOneRow && rows[row].length > 0;
-					//console.log("Writing last row[" + row + "].length=" + rows[row].length + " writeLineBreak=" + writeLineBreak);
-					tmp.write(rows[row] + (writeLineBreak ? lb : ""), encoding, function() {
+					// last write and last row
+					// Only write a line break if it was a single row
+					tmp.write(rows[row] + (onlyOneRow ? lb : ""), encoding, function() {
 						isWriting = false;
 						callback();
 					});
-					
-				}
+					}
 				else {
 					// see if we should continue, or wait
 					// don't pass the callback, because we're not done yet.
