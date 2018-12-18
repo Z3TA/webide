@@ -97,6 +97,8 @@
 				console.log("... startRow=" +startRow);
 				console.log("EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
 
+				if(startRow < 0) startRow = 0;
+				
 				file.scrollTo(undefined, startRow);
 				
 				/*
