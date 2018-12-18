@@ -44,7 +44,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-fiddling with writeLines stream api ...
+readLines: What if endLine > total available rows !?
+
+Allow saving and big-pasting in a big file
 
 Handle pasting 100,000 lines of code benchmark.
 
