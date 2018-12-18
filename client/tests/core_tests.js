@@ -1723,7 +1723,10 @@ if(err) throw err;
 			if(err) throw err;
 			run(tests, 3, function(err) {
 				if(err) throw err;
-				callback(true);
+				run(tests, 12, function(err) {
+					if(err) throw err;
+					callback(true);
+				});
 			});
 		});
 		

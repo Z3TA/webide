@@ -539,11 +539,19 @@ var encoding = "utf8";
 });
 	original.on("end", function() {
 		// The 'end' event is emitted when there is no more data to be consumed from the stream.
-		console.log("Original stream ended!");
+		console.log("Original stream ended! textHead=" + UTIL.lbChars(textHead) + " text=" + UTIL.lbChars(textHead));
 		doneReading = true;
 		
 		if(text.length > 0) {
 			console.log("Writing remaining text ...");
+			
+			if(text.slice(text.length-lb.length) != lb) {
+				console.warn("text=" + UTIL.lbChars(text) + " does not end with a line break! textHead=" + UTIL.lbChars(textHead) + "");
+			}
+			else {
+				text = text.slice(0, -lb.length); // Remove the ending lb
+			}
+			
 			var rows = text.split(lb);
 			write(rows, function() {
 				console.log("Ending write stream because the last text was just written! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
@@ -553,10 +561,10 @@ var encoding = "utf8";
 		else if(!contentWritten) {
 			// The content has not been written. Most likely because the original file was empty
 			write(contentRows, function() {
-				contentWritten = true;
 				console.log("Ending write after writing the content because there where nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
 				tmp.end();
 			});
+			contentWritten = true;
 		}
 		else {
 			console.log("Ending write stream because there's nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
@@ -647,7 +655,7 @@ text = textHead + text;
 		var chunk = original.read();
 		
 		if(chunk == null) {
-			console.log("chunk=" + chunk + " doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+			console.log("chunk=" + chunk + " text=" + UTIL.lbChars(text) + " textHead=" + UTIL.lbChars(textHead) + " doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
 			// This has a probability to happen *before* the read stream end event!
 			
 			if(!doneReading) {
@@ -696,6 +704,7 @@ text = textHead + text;
 		text = ""; // Reset the text, that has been converted into rows, that will now be inserted
 		
 		if(line >= start && !end) {
+			console.log("writeLinesBranchA");
 			// We have reached the start. It's time to insert the content
 			// Then write all row's
 			console.log("line=" + line + " start=" + start + " reached! rows.length=" + rows.length + " text=" + UTIL.lbChars(text));
@@ -713,6 +722,7 @@ text = textHead + text;
 			else write(rows, read); 
 		}
 		else if( (line + rows.length <= start) || (end && line > end) ) {
+			console.log("writeLinesBranchB");
 			// We have not, and will not reach start, or we are past end
 			// Write all rows, then continue reading
 			console.log("line=" + line + " + rows.length=" + rows.length + " is before start=" + start + " or paste end=" + end);
@@ -720,6 +730,7 @@ text = textHead + text;
 			write(rows, read);
 		}
 		else if( overwrite && line >= start && line+rows.length-1 <= end ) {
+			console.log("writeLinesBranchC");
 			// We have reached the start, but have not and will not reach the end
 			// We are going to overwrite this part, so it can be discarded. Only count the lines!
 			console.log("overwrite=" + overwrite + " line=" + line + " rows.length-1=" + (rows.length-1) + " we will be between start=" + start + " and end=" + end);
@@ -732,6 +743,7 @@ text = textHead + text;
 			else read();
 		}
 		else if( overwrite && line >= start && line+rows.length-1 >= end ) {
+			console.log("writeLinesBranchD");
 			// We have reached the start. And will also reach the end
 			// We are going to overwrite until the end, then write the rest
 			console.log("overwrite=" + overwrite + " line=" + line + " rows.length=" + rows.length + " have reached start=" + start + " and will also reach end=" + end);
@@ -739,7 +751,7 @@ text = textHead + text;
 			var leftOverIndex = end-line + 1;
 			if(leftOverIndex > 0) {
 				console.log("leftOverIndex=" + leftOverIndex + " at rows[" + leftOverIndex + "]=" + rows[leftOverIndex]);
-				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb);
+				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb) + lb;
 				console.log("Ignored " + leftOverIndex + " lines");
 			}
 			else {
@@ -760,6 +772,7 @@ text = textHead + text;
 			
 		}
 		else if(line < start && line + rows.length-1 >= start) {
+			console.log("writeLinesBranchE");
 			// We have not reached the start, but will reach the start now!
 			// Only write the part that is less then start
 			console.log("line=" + line + " + rows.length-1=" + (rows.length-1) + " will reach start=" + start + " overwrite=" + overwrite + " end=" + end);
@@ -774,7 +787,7 @@ text = textHead + text;
 			
 			if(leftOverIndex < rows.length) {
 				console.log("leftOverIndex=" + leftOverIndex + " rows=" + JSON.stringify(rows) + "");
-				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb); // Text *not* to be written right now
+				text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb) + lb; // Text *not* to be written right now
 			}
 			else {
 				console.warn("leftOverIndex=" + leftOverIndex + " rows.length=" + rows.length + "");
@@ -792,21 +805,8 @@ text = textHead + text;
 				else read();
 			});
 		}
-		else if(end && line + rows.length > start && line + rows.length < end) {
-			// We have already reached start, and will now reach end
-			// Ignore everything up intil end
-			// Then write all rows
-			console.log("line=" + line + " + rows.length=" + rows.length + " already reached start=" + start + " and end=" + end + " will now be reached");
-			
-			var untilIndex = end-line+1;
-			rows = rows.splice(untilIndex, rows.length-untilIndex+1);
-			
-			line += rows.length;
-			write(rows, read);
-		}
 		else throw new Error("Not anticipated: line=" + line + " rows.length=" + rows.length + " start=" + start + " end=" + end + " doneReading=" + doneReading + " isWriting=" + isWriting + " contentWritten=" + contentWritten);
 	}
-	
 	
 	function write(rows, callback) {
 		var row = 0;
