@@ -291,15 +291,27 @@ API.readLines = function readLines(user, json, callback) {
 	var parse = url.parse(path);
 	
 	var encoding = json.encoding || "utf8";
-	var lineBreak = json.lineBreak || "\n";
+	var lb = json.lineBreak;
 	var startLine = json.start || 1;
 	var MAX_LINES = json.max || 10000;
 	var endLine = json.end || MAX_LINES;
 	var lines = [];
 	var stream;
 	var text = "";
-	var totalLines = 1; // The first line is line 1 (even if the file contains no line breaks)
-	var flush = false;
+	var totalLines = 0;
+	var chunkSize = json.chunkSize; // Useful when testing
+	
+	var doneReading = false;
+	var readWhenReady = true;
+	var text = "";
+	var textHead = "";
+	var StringDecoder = require('string_decoder').StringDecoder;
+	var decoder = new StringDecoder(encoding);
+	var lb;
+	var rowsWanted = (endLine-startLine) + 1;
+	
+	var readOptions = {};
+	if(chunkSize) readOptions.highWaterMark = chunkSize;
 	
 	if(!callback) {
 		throw new Error("No callback defined!");
@@ -331,7 +343,7 @@ API.readLines = function readLines(user, json, callback) {
 				stream = fileReadStream;
 				
 				stream.setEncoding('utf8');
-				stream.on('readable', readStream);
+				stream.on('readable', streamReadable);
 				stream.on("end", streamEnded);
 				stream.on("error", streamError);
 				stream.on("close", streamClose);
@@ -364,7 +376,7 @@ API.readLines = function readLines(user, json, callback) {
 				console.log("Getting file from SFTP server: " + parse.pathname);
 				
 				var options = {
-					encoding: "utf8"
+				encoding: encoding
 				}
 				// Could also use sftp.createReadStream
 				c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
@@ -388,8 +400,8 @@ API.readLines = function readLines(user, json, callback) {
 			var fs = require("fs");
 			if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
 			
-			stream = fs.createReadStream(path);
-			stream.on('readable', readStream);
+		stream = fs.createReadStream(path, readOptions);
+		stream.on('readable', streamReadable);
 			stream.on("end", streamEnded);
 			stream.on("error", streamError);
 			stream.on("close", streamClose);
@@ -400,6 +412,9 @@ API.readLines = function readLines(user, json, callback) {
 		// Functions to handle NodeJS ReadableStream's
 		function streamClose() {
 			console.log("Stream closed! path=" + path);
+		
+		if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
+		callback = null;
 		}
 		
 		function streamError(err) {
@@ -409,65 +424,108 @@ API.readLines = function readLines(user, json, callback) {
 		}
 		
 		function streamEnded() {
-			console.log("Stream ended! path=" + path + "flush=" + flush + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
-			
-			if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
-			callback = null;
+		console.log("Stream ended! path=" + path + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " textHead.length=" + textHead.length + " text.length=" + text.length );
+		doneReading = true;
+		
+		if(text) readRows();
+		}
+	
+	function streamReadable() {
+		// The 'readable' event is emitted when there is data available to be read from the stream
+		// note: It will be called many times!
+		console.log("stream readable!");
+		if(readWhenReady) read();
+	}
+		
+	
+	function read() {
+		// Read from the stream
+		readWhenReady = false;
+		
+		if(textHead) {
+			text = textHead + text;
+			textHead = "";
 		}
 		
-		function readStream() {
-			// Called each time there is something comming down the stream
-			
-			var chunk;
-			var StringDecoder = require('string_decoder').StringDecoder;
-			var decoder = new StringDecoder('utf8');
-		var tempLines = [];
+		var chunk; // note: chunk is not a string! use decoder!
 		
-			//var chunkSize = 512; // How many bytes to recive in each chunk
+		// Use a while loop instead of recursively calling read to avoid stack limits
+		while(chunk = stream.read()) {
 			
-			console.log("Reading stream ... isPaused=" + stream.isPaused());
-			
-			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
-				
-				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
-				
+			// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 			text += decoder.write(chunk);
-				
-			// Todo: Handle different line break convenctions. For now asume Line-feeds (unix/Linux)
 			
-			tempLines = text.split(lineBreak);
+			console.log("text=" + UTIL.lbChars(text));
+			console.log("text.length=" + text.length);
 			
-			if(tempLines.length > 1) { // It contains at least one line break
-				totalLines += tempLines.length-1;
-				
-				if(lines.length == 0 && startLine > 0 && totalLines > startLine) {
-					console.log("First: tempLines.length=" + tempLines.length + " ");
-					lines = tempLines.splice(startLine - totalLines + tempLines.length-1, (endLine-startLine) + 1);
-					console.log("First: lines.length=" + lines.length);
-				}
-				else if(!flush && totalLines >= startLine) {
-					console.log("Middle: lines.length=" + lines.length);
-					lines = lines.concat(tempLines.splice(0, tempLines.length-1)); // Add lines up to the last line break
-				}
-				text = text.substr(text.lastIndexOf(lineBreak) + lineBreak.length); // text now contains the text after the last line break
-				
-				console.log("flush=" + flush + " tempLines.length=" + tempLines.length + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
-				
+			if(!lb) lb = UTIL.determineLineBreakCharacters(text);
+			
+			// Don't remove any line breaks here! Doing so might concatenate two rows!
+			
+			if(text.indexOf(lb) == -1) {
+				console.log("Text does not contain a line break. Continue reading ...");
+				continue;
 			}
 			
-			if(!flush && totalLines >= endLine) {
-				
-				console.log("All lines found! lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + "  ");
-				
-				if(lines.length > (endLine-startLine+1)) lines.splice((endLine-startLine), lines.length);
-				
-				// Continue, so that we know how many lines the file has
-				flush = true;
+			if(text.slice(text.length-lb.length) != lb) {
+				textHead = text.slice(text.lastIndexOf(lb)+1); // Will be the start of the text at next read
+				text = text.slice(0, text.lastIndexOf(lb)); // Last lb not included
+				console.log("textHead.length=" + textHead.length + " text.length=" + text.length);
+			}
+			else {
+				text = text.slice(0, -lb.length); // Remove the ending lb
 			}
 			
-			}
+			// As the ending line-break was removed above - one single linebreak actually means two empty rows!
+			
+			console.log("Read " + chunk.length + " bytes from " + path);
+			
+			readRows();
+			
+		}
+		
+		if(!doneReading) {
+			//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
+			readWhenReady = true;
+			console.log("Waiting for stream readable ...");
 		}
 	}
+	
+	function readRows() {
+		
+		var rows = text.split(lb);
+		
+		totalLines += rows.length;
+		
+		console.log("rows.length=" + rows.length + " lb=" + UTIL.lbChars(lb) + " text.length=" + text.length);
+		
+		text = "";
+		
+		/*
+			What if endLine > total available rows !?
+			
+			endLine > totalLines ? 
+			
+		*/
+		
+		var start = 0;
+		
+		if(endLine > totalLines && rows.length > (111)) {
+			start = rows.length - (endLine - totalLines) + 1;
+		}
+		
+		var rowsToAdd = rowsWanted - lines.length;
+		
+		console.log("rows.length=" + rows.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " lines.length=" + lines.length + " rowsWanted=" + rowsWanted + " start=" + start + " rowsToAdd=" + rowsToAdd);
+		
+		if(totalLines >= startLine && lines.length < rowsWanted) {
+			if( rowsToAdd < rows.length || start > 0) rows = rows.splice(start, rowsToAdd);
+			lines = lines.concat(rows);
+			console.log(" Added " + rows.length + " rows.");
+		}
+	}
+}
+
 
 API.writeLines = function writeLines(user, json, writeLinesCallback) {
 	/*
@@ -521,7 +579,6 @@ var encoding = "utf8";
 	var hasStarted = false;
 	var fileEndsWithLineBreak = false;
 	var readWhenReady = false;
-
 
 	var readOptions = {};
 	if(chunkSize) readOptions.highWaterMark = chunkSize;

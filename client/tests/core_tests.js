@@ -1688,7 +1688,7 @@ if(err) throw err;
 		});
 	});
 	
-	EDITOR.addTest(1, function writeLines(callback) {
+	EDITOR.addTest(function writeLines(callback) {
 		var filePath = "/tmp/writeLinesTest";
 		
 		var tests = [
@@ -1777,6 +1777,7 @@ if(err) throw err;
 		}
 		}
 	});
+	
 	
 	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice

@@ -64,6 +64,8 @@
 		
 		var testFileLocation = "testfile.txt";
 		
+		// Trying to read more lines then what exist
+		
 		EDITOR.readLines(testFileLocation, {start: 33996, end: 34005}, function(err, lines) {
 			
 			if(err) return callback(err);
@@ -79,6 +81,112 @@
 		
 	});
 	
+	
+	EDITOR.addTest(1, function testReadLines5(callback) {
+		var filePath = "/tmp/readLinesTest";
+		
+		var tests = [
+			{
+				txt: "Hello world",
+				start: 1,
+				end: 1,
+				result: ["Hello world"]
+			},
+			{
+				txt: "foo\nbar",
+				start: 1,
+				end: 2,
+				result: ["foo", "bar"]
+			},
+			{
+				txt: "foo\nbar\nbaz",
+				start: 1,
+				end: 3,
+				result: ["foo", "bar", "baz"]
+			},
+			{
+				txt: "LineA\nLineB\nLineC\nLineD\nLineE\n",
+				start: 3,
+				end: 4,
+				result: ["LineC", "LineD"]
+			},
+			{
+				txt: "Line1\nLine2\nLine3\nLine4\nLine5\n",
+				start: 5,
+				end: 5,
+				result: ["Line5"]
+			}
+		];
+		
+		// Run the tests with different chunk sizes
+		run(tests, 1, function(err) {
+			if(err) throw err;
+			run(tests, 8, function(err) {
+				if(err) throw err;
+				run(tests, 12, function(err) {
+					if(err) throw err;
+					run(tests, 1024, function(err) {
+						if(err) throw err;
+						callback(true);
+					});
+				});
+			});
+		});
+		
+		
+		function run(originalTests, chunkSize, callback) {
+			
+			console.log("Testing readLines with chunkSize=" + chunkSize);
+			
+			var tests = originalTests.slice(); // Copy array to not change the original when it get shifted
+			
+			test();
+			
+			function test() {
+				var item = tests.shift();
+				
+				if(tests.length == 0) {
+					CLIENT.cmd("deleteFile", {filePath: filePath}, function(err) {
+						if(err && err.code != "ENOENT") throw err;
+						callback(null);
+					});
+					return;
+				}
+				
+				EDITOR.saveToDisk(filePath, item.txt, function(err) {
+					if(err) throw err;
+					
+					var options = {path: filePath, chunkSize: chunkSize, start: item.start, end: item.end};
+					CLIENT.cmd("readLines", options, function(err, json) {
+						if(err) throw err;
+						
+						for (var i=0; i<item.result.length; i++) {
+							if(item.result[i] != json.lines[i]) {
+								return error(i+item.start, "Expected item.result[" + i + "]=" + item.result[i] + " but got json.lines[" + i + "]=" + json.lines[i]);
+							}
+						}
+						
+						function error(line, msg) {
+							// Show the file to see what's going on
+							EDITOR.openFile(filePath, function(err, file) {
+								if(err) throw err;
+								
+								file.gotoLine(line, function(err) {
+									if(err) throw err;
+									
+									throw new Error("Unexpected file content on line " + line + "! " + msg + " chunkSize=" + chunkSize);
+								});
+								
+							});
+						}
+						
+						test(); // Run next test
+						
+					});
+				});
+			}
+		}
+	});
 	
 })();
 
