@@ -293,8 +293,7 @@ console.log("serviceWorker not supported on BROWSER=" + BROWSER);
 		var websockOpen = 1;
 		
 		if(connection.readyState==websockOpen) {
-			if(msg.length > 100) console.log("Sending: " + msg.length + " characters to server ...");
-			else console.log("Sending: " + msg + " to server ...");
+			console.log("Sending: " + UTIL.shortString(msg) + " to server ...");
 			
 			connection.send(msg);
 			if(callback) callback(null);

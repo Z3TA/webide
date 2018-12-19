@@ -3076,7 +3076,9 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+If you get a EACCESS error when saving a file, try sudo cp, ... like in Sublime Text
 
+---
 
 When pressing Ctrl+W it word wraps the code block, until matching }])
 

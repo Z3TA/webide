@@ -450,10 +450,10 @@ console.log("reopenFiles!");
 						});
 					});
 				}
-				else updateLastSate();
+				else updateLastState();
 				
-				function updateLastSate() {
-					console.log("updateLastSate path=" + path);
+				function updateLastState() {
+					console.log("updateLastState path=" + path);
 				if(lastFileState) {
 					console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
 					
@@ -489,6 +489,7 @@ console.log("reopenFiles!");
 						if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
 						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
 						if(lastFileState.hash !== undefined) file.hash = lastFileState.hash;
+						if(lastFileState.isBig !== undefined) file.isBig = lastFileState.isBig;
 						
 						if(lastFileState.isSaved !== undefined && content) {
 							file.isSaved = lastFileState.isSaved;
@@ -797,6 +798,7 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		state.isSaved = file.isSaved;
 		state.savedAs = file.savedAs;
 		state.startRow = file.startRow;
+		state.isBig = file.isBig;
 		state.partStartRow = file.partStartRow; // For loading big files as streams
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;

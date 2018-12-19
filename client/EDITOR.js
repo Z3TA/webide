@@ -1430,14 +1430,23 @@ usePseudoClipboard = false;
 			throw new Error("No file open when save was called");
 		}
 		
-		if(file.isBig) {
-			alertBox("The file is opened read-only. Unable to save!");
-			return;
+		if(typeof path == "function" && callback == undefined) {
+			callback = path;
+			path = file.path;
 		}
 		
 		if(path == undefined) {
 			path = file.path;
 		}
+		
+		if(file.isBig) {
+			// Save the current buffer inside the original file
+			CLIENT.cmd("writeLines", {start: file.partStartRow, end: file.partStartRow+EDITOR.settings.bigFileLoadRows+1, overwrite: true, path: path, content: file.text}, function linesWritten(err) {
+				doneSaving(err, path);
+			});
+			return;
+		}
+		
 		
 		var trimmedPath = path.trim();
 		if(path != trimmedPath) {
@@ -6631,13 +6640,21 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		}
 		
 		function saveFile(file, filePath, createPath, callback) {
-			if(typeof filePath != "string") throw new Error("filePath=" + filePath + " (" + typeof filePath + ") needs to be a string!");
 			
 			if(typeof createPath == "function" && callback == undefined) {
 				callback = createPath;
 				createPath = false;
 			}
 			
+			/*
+				if(typeof filePath == "function" && callback == undefined) {
+				callback = filePath;
+				filePath = file.path;
+				createPath = false;
+				}
+			*/
+			
+			if(typeof filePath != "string") throw new Error("filePath=" + filePath + " (" + typeof filePath + ") needs to be a string!");
 			if(typeof createPath != "boolean") throw new Error("createPath=" + createPath + " (" + typeof createPath + ") needs to be a boolean!");
 			
 			var reader = new FileReader();
@@ -6869,7 +6886,23 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			"Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
 				if(answer == yes) {
 					
-					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
+					if(file.isBig) {
+						// First save the current buffer
+						EDITOR.saveFile(file, function fileSaved(err, path) {
+							if(err) return alertBox("Failed to save " + path);
+							// Then save the pasted data
+							CLIENT.cmd("writeLines", {path: file.path, content: text, start: file.partStartRow+file.caret.row+1}, function linesWritten(err) {
+								if(err) return alertBox("Failed to save pasted data!");
+								// Then reload the file buffer
+								var loadRow = file.partStartRow+file.caret.row;
+								file.loadFilePart(loadRow, function(err) {
+									if(err) return alertBox("Failed to load row=" + loadRow + " !");
+								});
+							});
+						});
+					}
+					else {
+						var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
 					var filePath = file.path;
 					EDITOR.saveToDisk(filePath, combinedText, function(err, path, hash) {
 						if(err) return alertBox("Unable to save the file! " + err.message);
@@ -6880,6 +6913,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 });
 						
 					});
+					}
 				}
 			});
 			

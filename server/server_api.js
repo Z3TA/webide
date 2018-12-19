@@ -598,10 +598,21 @@ var encoding = "utf8";
 });
 	original.on("end", function() {
 		// The 'end' event is emitted when there is no more data to be consumed from the stream.
-		console.log("Original stream ended! textHead=" + UTIL.lbChars(textHead) + " text=" + UTIL.lbChars(textHead));
+		console.log("Original stream ended! textHead.length=" + textHead.length + " text.length=" + text.length);
 		doneReading = true;
 		
+		if(textHead) {
+text = textHead + text;
+			textHead = "";
+		}
+		
 		if(text.length > 0) {
+			/*
+				How can we be sure that the text should be written !?
+				Use a readRows function !?
+				
+			*/
+			
 			console.log("Writing remaining text ...");
 			
 			if(text.slice(text.length-lb.length) != lb) {
@@ -766,7 +777,7 @@ var encoding = "utf8";
 		var rows = text.split(lb);
 		// As the ending line-break was removed above, one single linebreak actually means two empty rows!
 		
-		console.log("rows=" + JSON.stringify(rows));
+		//console.log("rows=" + JSON.stringify(rows));
 		
 		console.log("Line " + line + ": " + rows[0]);
 		
@@ -814,9 +825,9 @@ var encoding = "utf8";
 		
 		console.log(" head.length=" + head.length + " tail.length=" + tail.length + " rows.length=" + rows.length + " overwrite=" + overwrite + "");
 		
-		console.log("head=" + JSON.stringify(head));
-		console.log("tail=" + JSON.stringify(tail));
-		console.log("rows=" + JSON.stringify(rows));
+		//console.log("head=" + JSON.stringify(head));
+		//console.log("tail=" + JSON.stringify(tail));
+		//console.log("rows=" + JSON.stringify(rows));
 		
 		//if(tail.length == 0 && rows.length > 0 && !overwrite) tail = rows;
 		
@@ -978,7 +989,7 @@ var encoding = "utf8";
 		var row = 0;
 		
 		console.log("Writing rows.length=" + rows.length + " : 0=" + rows[0]);
-		console.log(" write: " + JSON.stringify(rows));
+		//console.log(" write: " + JSON.stringify(rows));
 		
 		if(rows.length == 0) {
 			console.warn("Zero rows!");
