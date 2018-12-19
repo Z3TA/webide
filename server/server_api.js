@@ -501,27 +501,21 @@ API.readLines = function readLines(user, json, callback) {
 		
 		text = "";
 		
-		/*
-			What if endLine > total available rows !?
-			
-			endLine > totalLines ? 
-			
-		*/
-		
-		var start = 0;
-		
-		if(endLine > totalLines && rows.length > (111)) {
-			start = rows.length - (endLine - totalLines) + 1;
-		}
+		// Where on the rows to start in case endLine > total available rows
+		var start = startLine - lines.length - totalLines + rows.length - 1;
 		
 		var rowsToAdd = rowsWanted - lines.length;
 		
-		console.log("rows.length=" + rows.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " lines.length=" + lines.length + " rowsWanted=" + rowsWanted + " start=" + start + " rowsToAdd=" + rowsToAdd);
+		console.log("rows.length=" + rows.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + 
+		" lines.length=" + lines.length + " rowsWanted=" + rowsWanted + " start=" + start + " rowsToAdd=" + rowsToAdd);
+		
+		//console.log(rows);
 		
 		if(totalLines >= startLine && lines.length < rowsWanted) {
 			if( rowsToAdd < rows.length || start > 0) rows = rows.splice(start, rowsToAdd);
 			lines = lines.concat(rows);
 			console.log(" Added " + rows.length + " rows.");
+			//console.log(rows);
 		}
 	}
 }
