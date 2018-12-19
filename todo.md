@@ -44,14 +44,21 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-readLines: What if endLine > total available rows !?
+
+
+Goto line *sometimes* go to the wrong line in a big file! (unable to repeat)
+
+When saving after edit on line 1512, the file get screwed up!
 
 Allow saving and big-pasting in a big file
 
 Handle pasting 100,000 lines of code benchmark.
 
+
+todo: reopen_files.js support for big files
+
 ---
-User optin: First time opening the editor.
+User option: First time opening the editor.
 Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
 
 User testing: Do you want all intaractions with the editor to be recorded ?

@@ -1715,7 +1715,16 @@ if(err) throw err;
 				end: 3,
 				overwrite: true,
 				result: "Hello\nLine 2 foo\nReplaced line 3\nworld\n\n\n"
+			},
+			{
+				add: "Line1\nLine2\nLine3",
+				start: 1,
+				end: 3,
+				overwrite: true,
+				result: "Line1\nLine2\nLine3\nworld\n\n\n"
 			}
+			
+			
 		];
 		
 		// Run the tests with different chunk sizes
@@ -1778,6 +1787,70 @@ if(err) throw err;
 		}
 	});
 	
+	EDITOR.addTest(function editBigFile(callback) {
+		var filePath = "/testfile.txt";
+		var testFile = "/editBigFileTest.txt";
+		
+		console.log("Saving copy of " + filePath + " at " + testFile + " ...");
+		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {
+			if(err) throw err;
+			
+			console.log("Opening " + testFile + " ...");
+			EDITOR.openFile(testFile, function(err, file) {
+				
+				console.log("Going to line 2000 in " + testFile + " ...");
+				file.gotoLine(2000, function(err) {
+					if(err) throw err;
+					
+					file.moveCaretToEndOfLine();
+					
+					var insertedText = " test edit on l2k";
+					file.insertText(insertedText);
+
+					console.log("Saving " + testFile + " ...");
+					EDITOR.saveFile(file, function(err) {
+						if(err) throw err;
+						
+						EDITOR.closeFile(file);
+						
+						console.log("(Re)opening " + testFile + " ...");
+						EDITOR.openFile(testFile, function(err, file) {
+							if(err) throw err;
+							
+							var text = file.rowText(1999);
+							var expectedText = "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL" + insertedText;
+							if(text != expectedText) {
+								console.log("Going to line 2000 to show error in " + testFile + " ...");
+								file.gotoLine(2000, function(err) {
+									if(err) throw err;
+									throw new Error("Expected Line 2000 to be " + expectedText);
+								});
+							}
+							else {
+								console.log("Going to line 5000 in " + testFile + " ...");
+								file.gotoLine(5000, function(err) {
+									if(err) throw err;
+									
+									var text = file.rowText(file.caret.row);
+									var expectedText = "L5000_abcdefghijklmnopqrstuvwxyzåäöABCD";
+									
+									if(text != expectedText) throw new Error("Expected line 5000 to be " + expectedText);
+									else {
+										console.log("Deleting " + testFile + " ...");
+										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
+											if(err) throw err;
+											
+											callback(true);
+										});
+									}
+								});
+							}
+						});
+					});
+				});
+			});
+		});
+	});
 	
 	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
@@ -1833,7 +1906,7 @@ if(err) throw err;
 				loginAttempts++;
 				if(err) {
 					console.log("testDoubleLogin: First login attempt failed! Error: " + err.message);
-}
+				}
 				else {
 					console.log("testDoubleLogin: First login attempt succeeded!");
 				}

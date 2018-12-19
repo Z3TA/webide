@@ -455,7 +455,7 @@ API.readLines = function readLines(user, json, callback) {
 			// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 			text += decoder.write(chunk);
 			
-			console.log("text=" + UTIL.lbChars(text));
+			//console.log("text=" + UTIL.lbChars(text));
 			console.log("text.length=" + text.length);
 			
 			if(!lb) lb = UTIL.determineLineBreakCharacters(text);
@@ -551,6 +551,8 @@ var encoding = "utf8";
 	// Expect all lines to end with a line break.
 	// But do not include the last line break, so that a lb can be appended after all contentRows 
 	var contentRows = content.split(lb);
+	var totalRowsWritten = 0;
+	var totalRowsRead = 0;
 	
 	var chunkSize = json.chunkSize; // Useful when testing
 	
@@ -680,15 +682,15 @@ var encoding = "utf8";
 				// Rename the tmp file to the original
 				fs.rename(tmpPath, path, function(err) {
 					if(err) return writeLinesCallback(new Error("Failed to rename tmpPath=" + tmpPath + " to path=" + path));
-					else writeLinesCallback(null);
+					else writeLinesCallback(null, {totalRowsWritten: totalRowsWritten, totalRowsRead: totalRowsRead, contentRows: contentRows.length});
 				});
 				
 			});
 			
 		});
-		}
+	}
 	
-function begin() {
+	function begin() {
 		console.log("writeLines: begin!");
 		if(hasStarted) throw new Error("begin() called twice!");
 		hasStarted = true;
@@ -699,7 +701,7 @@ function begin() {
 		readWhenReady = false;
 		
 		if(textHead) {
-text = textHead + text;
+			text = textHead + text;
 			textHead = "";
 		}
 		
@@ -710,7 +712,7 @@ text = textHead + text;
 			// This has a probability to happen *before* the read stream end event!
 			
 			if(!doneReading) {
-//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
+				//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
 				readWhenReady = true;
 				console.log("Waiting for readable ...");
 				return;
@@ -728,7 +730,7 @@ text = textHead + text;
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
 		
-		console.log("text=" + UTIL.lbChars(text));
+		//console.log("text=" + UTIL.lbChars(text));
 		
 		// Don't remove any line breaks here! Doing so might concatenate two rows!
 		
@@ -741,7 +743,7 @@ text = textHead + text;
 		if(text.slice(text.length-lb.length) != lb) {
 			textHead = text.slice(text.lastIndexOf(lb)+1); // Will be the start of the text at next read
 			text = text.slice(0, text.lastIndexOf(lb)); // Last lb not included
-			console.log("textHead=" + UTIL.lbChars(textHead) + " text=" + UTIL.lbChars(text));
+			console.log("textHead.length=" + textHead.length + " text.length=" + text.length);
 		}
 		else {
 			text = text.slice(0, -lb.length); // Remove the ending lb
@@ -749,6 +751,8 @@ text = textHead + text;
 		
 		var rows = text.split(lb);
 		// As the ending line-break was removed above, one single linebreak actually means two empty rows!
+		
+		totalRowsRead += rows.length;
 		
 		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + chunk.length + " bytes from " + path);
 		
@@ -862,8 +866,8 @@ text = textHead + text;
 	function write(rows, callback) {
 		var row = 0;
 		
-		console.log("Writing rows.length=" + rows.length + " ...");
-		console.log(JSON.stringify(rows));
+		console.log("Writing rows.length=" + rows.length + " : 0=" + rows[0]);
+		//console.log(JSON.stringify(rows));
 
 		if(rows.length == 0) {
 			console.warn("Zero rows!");
@@ -895,6 +899,7 @@ text = textHead + text;
 					ok = tmp.write(rows[row] + lb, encoding);
 				}
 				row++;
+				totalRowsWritten++;
 			} while (row < rows.length && ok);
 				
 			

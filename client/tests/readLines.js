@@ -60,7 +60,7 @@
 		
 	});
 	
-	EDITOR.addTest(1, function testReadLines4(callback) {
+	EDITOR.addTest(function testReadLines4(callback) {
 		
 		var testFileLocation = "testfile.txt";
 		
@@ -187,6 +187,51 @@
 			}
 		}
 	});
+	
+	
+	EDITOR.addTest(1, function testReadLines6(callback) {
+		var filePath = "/testfile.txt";
+		var testFile = "/editBigFileTest.txt";
+		var lb = "\n";
+		
+		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {
+			if(err) throw err;
+
+			CLIENT.cmd("readLines", {start: 1, end: 4001, path: testFile}, function(err, json) {
+				if(err) throw err;
+				
+				var lines = json.lines;
+				
+				if(lines[0] != "L1_First_line") throw new Error("lines[0]=" + lines[0]);
+				if(lines[1999] != "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL") throw new Error("lines[1999]=" + lines[1999]);
+				if(lines[3999] != "L4000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄ") throw new Error("lines[3999]=" + lines[3999]);
+				
+				CLIENT.cmd("writeLines", {start: 1, end: 4001, path: testFile, content: lines.join(lb)}, function(err) {
+					if(err) throw err;
+					
+					CLIENT.cmd("readLines", {start: 2000, end: 6000}, function(err, json) {
+						if(err) throw err;
+						
+						var lines = json.lines;
+						
+						if(lines[0] != "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL") throw new Error("lines[0]=" + lines[0]);
+						
+						// Line 5000
+						if(lines[2999] != "L5000_abcdefghijklmnopqrstuvwxyzåäöABCD") throw new Error("lines[2999]=" + lines[2999]);
+						
+						CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
+							if(err) throw err;
+							
+							callback(true);
+						});
+						
+					});
+				});
+			});
+		});
+	});
+	
+	
 	
 })();
 
