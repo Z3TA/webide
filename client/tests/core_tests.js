@@ -1695,33 +1695,40 @@ if(err) throw err;
 			{
 				add: "Hello\nworld\n\n",
 				start: 1,
-				result: "Hello\nworld\n\n\n"
+				result: "Hello\nworld\n\nFirst\nSecond\n"
 			},
 			{
 				add: "Line 2\nLine 3",
 				start: 2,
-				result: "Hello\nLine 2\nLine 3\nworld\n\n\n"
+				result: "Hello\nLine 2\nLine 3\nworld\n\nFirst\nSecond\n"
 			},
 			{
 				add: "Line 2 foo\nLine 3 bar",
 				start: 2,
 				end: 3,
 				overwrite: true,
-				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\n\n"
+				result: "Hello\nLine 2 foo\nLine 3 bar\nworld\n\nFirst\nSecond\n"
 			},
 			{
 				add: "Replaced line 3",
 				start: 3,
 				end: 3,
 				overwrite: true,
-				result: "Hello\nLine 2 foo\nReplaced line 3\nworld\n\n\n"
+				result: "Hello\nLine 2 foo\nReplaced line 3\nworld\n\nFirst\nSecond\n"
 			},
 			{
 				add: "Line1\nLine2\nLine3",
 				start: 1,
 				end: 3,
 				overwrite: true,
-				result: "Line1\nLine2\nLine3\nworld\n\n\n"
+				result: "Line1\nLine2\nLine3\nworld\n\nFirst\nSecond\n"
+			},
+			{
+				add: "A\nB\nC",
+				start: 4,
+				end: 6,
+				overwrite: true,
+				result: "Line1\nLine2\nLine3\nA\nB\nC\nSecond\n"
 			}
 			
 			
@@ -1746,7 +1753,7 @@ if(err) throw err;
 			
 			var tests = originalTests.slice(); // Copy array
 			
-			EDITOR.saveToDisk(filePath, "\n", function(err) {
+			EDITOR.saveToDisk(filePath, "First\nSecond\n", function(err) {
 				if(err) throw err;
 				test();
 			});

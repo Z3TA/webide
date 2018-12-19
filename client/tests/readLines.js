@@ -190,6 +190,7 @@
 	
 	
 	EDITOR.addTest(1, function testReadLines6(callback) {
+		// Tests both readLine and writeLine!
 		var filePath = "/testfile.txt";
 		var testFile = "/editBigFileTest.txt";
 		var lb = "\n";
@@ -206,10 +207,14 @@
 				if(lines[1999] != "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL") throw new Error("lines[1999]=" + lines[1999]);
 				if(lines[3999] != "L4000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄ") throw new Error("lines[3999]=" + lines[3999]);
 				
-				CLIENT.cmd("writeLines", {start: 1, end: 4001, path: testFile, content: lines.join(lb)}, function(err) {
+				CLIENT.cmd("writeLines", {start: 1, end: 4001, overwrite: true, path: testFile, content: lines.join(lb)}, function(err, json) {
 					if(err) throw err;
 					
-					CLIENT.cmd("readLines", {start: 2000, end: 6000}, function(err, json) {
+					if(json.contentRows != 4001) throw new Error("Expected 4001 contentRows: " + JSON.stringify(json));
+					if(json.totalRowsRead != 40000) throw new Error("Expected 40000 totalRowsRead: " + JSON.stringify(json));
+					if(json.totalRowsWritten != 40000) throw new Error("Expected 40000 totalRowsWritten: " + JSON.stringify(json));
+					
+					CLIENT.cmd("readLines", {start: 2000, end: 6000, path: testFile}, function(err, json) {
 						if(err) throw err;
 						
 						var lines = json.lines;
@@ -217,7 +222,7 @@
 						if(lines[0] != "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL") throw new Error("lines[0]=" + lines[0]);
 						
 						// Line 5000
-						if(lines[2999] != "L5000_abcdefghijklmnopqrstuvwxyzåäöABCD") throw new Error("lines[2999]=" + lines[2999]);
+						if(lines[2999] != "L5000_abcdefghijklmnopqrstuvwxyzåäöABCD") throw new Error("lines[2999]=" + lines[2999] + " (Expected line 5000)");
 						
 						CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 							if(err) throw err;
