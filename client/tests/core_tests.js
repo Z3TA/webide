@@ -1688,7 +1688,7 @@ if(err) throw err;
 		});
 	});
 	
-	EDITOR.addTest(function writeLines(callback) {
+	EDITOR.addTest(1, function writeLines(callback) {
 		var filePath = "/tmp/writeLinesTest";
 		
 		var tests = [

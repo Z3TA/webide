@@ -581,7 +581,8 @@ var encoding = "utf8";
 	var hasStarted = false;
 	var fileEndsWithLineBreak = false;
 	var readWhenReady = false;
-
+	var lastWrite = false; // Set to true before calling write for the last time
+	
 	var readOptions = {};
 	if(chunkSize) readOptions.highWaterMark = chunkSize;
 	var original = fs.createReadStream(path, readOptions);
@@ -589,7 +590,7 @@ var encoding = "utf8";
 	original.on('readable', function() {
 		// The 'readable' event is emitted when there is data available to be read from the stream
 		// note: It will be called many times!
-		console.log("Original stream now readable!");
+		console.log("Read stream now readable!");
 		//if(originalReadable) console.warn("read stream readable called twice!");
 		originalReadable = true;
 		if(tmpReady && !hasStarted) begin();
@@ -598,65 +599,21 @@ var encoding = "utf8";
 });
 	original.on("end", function() {
 		// The 'end' event is emitted when there is no more data to be consumed from the stream.
-		console.log("Original stream ended! textHead.length=" + textHead.length + " text.length=" + text.length);
+		console.log("Read stream ended! textHead.length=" + textHead.length + " text.length=" + text.length + " isWriting=" + isWriting);
+		
 		doneReading = true;
-		
-		if(textHead) {
-text = textHead + text;
-			textHead = "";
-		}
-		
-		if(text.length > 0) {
-			/*
-				How can we be sure that the text should be written !?
-				Use a readRows function !?
-				
-			*/
-			
-			console.log("Writing remaining text ...");
-			
-			if(text.slice(text.length-lb.length) != lb) {
-				console.warn("text=" + UTIL.lbChars(text) + " does not end with a line break! textHead=" + UTIL.lbChars(textHead) + "");
-			}
-			else {
-				text = text.slice(0, -lb.length); // Remove the ending lb
-			}
-			
-			var rows = text.split(lb);
-			if(!contentWritten) {
-				write(contentRows, function() {
-					write(rows, function() {
-						console.log("Ending write stream after writing the content and the remaining text! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
-						tmp.end();
-					});
-				});
-			}
-			else write(rows, function() {
-				console.log("Ending write stream because the last text was just written! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
-				tmp.end();
-			});
-		}
-		else if(!contentWritten) {
-			// The content has not been written. Most likely because the original file was empty
-			write(contentRows, function() {
-				console.log("Ending write after writing the content because there where nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
-				tmp.end();
-			});
-			contentWritten = true;
-		}
-		else {
-			console.log("Ending write stream because there's nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
-			tmp.end();
-		}
+
+		// Call read one last time to make sure everything get written
+		read();
 	});
 	original.on("error", function(err) {
-		console.log("Original stream error: " + err.message);
+		console.log("Read stream error: " + err.message);
 		finished = true;
 		writeLinesCallback(new Error("Problem with read stream: " + err.message));
 	});
 	original.on("close", function() {
 		// The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed. The event indicates that no more events will be emitted, and no further computation will occur.
-		console.log("Original stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
+		console.log("Read stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
 		if(originalClosed) console.warn("read stream close called twice!");
 		originalClosed = true;
 		if(tmpClosed && !finished) finish();
@@ -723,6 +680,12 @@ text = textHead + text;
 	}
 	
 	function read() {
+		
+		if(isWriting) {
+console.log("Waiting for write to be done ...");
+			return;
+		}
+		
 		readWhenReady = false;
 		
 		if(textHead) {
@@ -739,44 +702,60 @@ text = textHead + text;
 			if(!doneReading) {
 				//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
 				readWhenReady = true;
-				console.log("Waiting for readable ...");
+				console.log("Waiting for readable ... doneReading=" + doneReading);
 				return;
 			}
 			
-			if(!contentWritten) console.warn("Nothing more to read, but contentWritten=" + contentWritten + " ...");
-			
-			// There's nothing left to read, so I guess it's OK to end the write stream !?
-			console.log("Ending write stream because read stream is done! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
-			tmp.end();
-			
-			return;
+			if(text.length == 0 && contentWritten && !isWriting) {
+				console.log("Ending write stream because there's nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+				tmp.end(function() {
+					console.log("Write stream ended! isWriting=" + isWriting);
+				});
+				return;
+			}
 		}
-		
+		else {
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
-		
+		}
 		//console.log("text=" + UTIL.lbChars(text));
 		
 		// Don't remove any line breaks here! Doing so might concatenate two rows!
 		
-		if(text.indexOf(lb) == -1) {
+		if(!doneReading) {
+			if(text.indexOf(lb) == -1) {
 			console.log("Text does not contain a line break. Continue reading ...");
 			read();
 			return;
 		}
 		
-		if(text.slice(text.length-lb.length) != lb) {
+			if(text.slice(text.length-lb.length) != lb) {
 			textHead = text.slice(text.lastIndexOf(lb)+1); // Will be the start of the text at next read
 			text = text.slice(0, text.lastIndexOf(lb)); // Last lb not included
 			console.log("textHead.length=" + textHead.length + " text.length=" + text.length);
 		}
-		else {
+			else {
 			text = text.slice(0, -lb.length); // Remove the ending lb
+		}
+		}
+		
+		if(text.length == 0 && contentWritten) {
+			console.log("Not processing text.length=" + text.length + " contentWritten=" + contentWritten + " Continue reading ...");
+			return read();
 		}
 		
 		var rows = text.split(lb);
 		// As the ending line-break was removed above, one single linebreak actually means two empty rows!
 		
+		processRows(rows, read);
+		
+		text = ""; // Reset the text, that has been converted into rows, that will now be inserted
+		
+		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + (chunk && chunk.length) + " bytes from " + path);
+		
+	}
+	
+	function processRows(rows, callback) {
 		//console.log("rows=" + JSON.stringify(rows));
 		
 		console.log("Line " + line + ": " + rows[0]);
@@ -784,10 +763,6 @@ text = textHead + text;
 		console.log("totalRowsRead=" + totalRowsRead);
 		
 		totalRowsRead += rows.length;
-		
-		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + chunk.length + " bytes from " + path);
-		
-		text = ""; // Reset the text, that has been converted into rows, that will now be inserted
 		
 		/*
 			Cut off head and tail off the rows depending on where in the stream we are
@@ -801,7 +776,7 @@ text = textHead + text;
 		*/
 		
 		var headIndex = 0; // head always start at zero
-		var headLength = start-line; 
+		var headLength = start-line;
 		
 		if(end) {
 			var tailIndex = end-line +1;
@@ -831,178 +806,48 @@ text = textHead + text;
 		
 		//if(tail.length == 0 && rows.length > 0 && !overwrite) tail = rows;
 		
-		if(rows.length > 0 && !overwrite) throw new Error("Unexpected rows length! rows.length=" + rows.length + " overwrite=" + overwrite + " head.length=" + head.length + " tail.length=" + tail.length); 
+		if(rows.length > 0 && !overwrite) throw new Error("Unexpected rows length! rows.length=" + rows.length + " overwrite=" + overwrite + " head.length=" + head.length + " tail.length=" + tail.length);
 		
 		write(head, function() {
 			if(line < start) {
-				if(tail.length > 0) throw new Error("Unexpected tail length! rows.length=" + rows.length + " overwrite=" + overwrite + " head.length=" + head.length + " tail.length=" + tail.length); 
-				read();
+				if(tail.length > 0) throw new Error("Unexpected tail length! rows.length=" + rows.length + " overwrite=" + overwrite + " head.length=" + head.length + " tail.length=" + tail.length);
+				callback();
 			}
 			else if(!contentWritten) {
 				write(contentRows, function() {
-					write(tail, read);
+					write(tail, callback);
 				});
 				contentWritten = true;
 			}
-			else write(tail, read);
+			else write(tail, callback);
 		});
-		
-		/*
-			
-			if(line >= start && !end) {
-			console.log("writeLinesBranchA");
-			// We have reached the start. It's time to insert the content
-			// Then write all row's
-			console.log("line=" + line + " start=" + start + " reached! rows.length=" + rows.length + " text=" + UTIL.lbChars(text));
-			
-			line += rows.length;
-			
-			if(!contentWritten) {
-			console.log("Inserting content ...");
-			write(contentRows, function() {
-			write(rows, read);
-			});
-			contentWritten = true;
-			}
-			// Or keep writing if the content has already been inserted
-			else write(rows, read); 
-			}
-			else if( (line + rows.length <= start) || (end && line > end) ) {
-			console.log("writeLinesBranchB");
-			// We have not, and will not reach start, or we are past end
-			// Write all rows, then continue reading
-			console.log("line=" + line + " + rows.length=" + rows.length + " is before start=" + start + " or paste end=" + end);
-			line += rows.length;
-			write(rows, read);
-			}
-			else if( overwrite && line >= start && line+rows.length-1 <= end ) {
-			console.log("writeLinesBranchC");
-			// We have reached the start, but have not and will not reach the end
-			// We are going to overwrite this part, so it can be discarded. Only count the lines!
-			console.log("overwrite=" + overwrite + " line=" + line + " rows.length-1=" + (rows.length-1) + " we will be between start=" + start + " and end=" + end);
-			line += rows.length;
-			console.log("ignored " + rows.length + " lines. update to line=" + line);
-			if(!contentWritten) {
-			write(contentRows, read);
-			contentWritten = true;
-			}
-			else read();
-			}
-			else if( overwrite && line >= start && line+rows.length-1 >= end ) {
-			console.log("writeLinesBranchD");
-			// We have reached the start. And will also reach the end
-			// We are going to overwrite until the end, then write the rest
-			console.log("overwrite=" + overwrite + " line=" + line + " rows.length=" + rows.length + " have reached start=" + start + " and will also reach end=" + end);
-			
-			var rowsToOverwrite = end-line;
-			rows.splice(0, rowsToOverwrite);
-			console.log("ignored " + rowsToOverwrite + " rows");
-			
-			line = end +1;
-			console.log("updated to line=" + line);
-			
-			if(!contentWritten) {
-			write(contentRows, function(err) {
-			write(rows, read);
-			});
-			contentWritten = true;
-			}
-			else write(rows, read);
-			}
-			else if( overwrite && line < start && line + rows.length >= start && line + rows.length > end) {
-			// We have not reached the start, but will reach the start now
-			// We will *also* reach the end!
-			// Write the part until start,
-			// then ignore until the end
-			// and write the part after the end
-			
-			var headIndex = 0;
-			var headLength = start-line;
-			
-			var tailIndex = end-line;
-			var tailLength = rows.length - tailIndex + 1;
-			
-			// Cut off the tail first to make the calculation above easier
-			console.log("line=" + line + " start=" + start + " end=" + end + " headIndex=" + headIndex + " headLength=" + headLength + " tailIndex=" + tailIndex + " tailLength=" + tailLength + "");     ");
-			
-			var tail = rows.splice(tailIndex, tailLength);
-			var head = rows.splice(headIndex, headLength);
-			
-			console.log("Ignoring " + rows.length + " rows. tail.length=" + tail.length + " head.length=" + head.length + "");
-			rows.length = 0;
-			
-			write(head, function() {
-			if(!contentWritten) {
-			write(contentRows, function() {
-			write(tail, read);
-			});
-			contentWritten = true;
-			}
-			else write(tail, read);
-			});
-			}
-			else if( overwrite && line < start && line + rows.length-1 >= start) {
-			// We have not reached the start, but will reach the start now!
-			// Write the part until start, then ignore the rest
-			}
-			else if(line < start && line + rows.length-1 >= start) {
-			console.log("writeLinesBranchE");
-			// We have not reached the start, but will reach the start now!
-			// Only write the part that is less then start
-			console.log("line=" + line + " + rows.length-1=" + (rows.length-1) + " will reach start=" + start + " overwrite=" + overwrite + " end=" + end);
-			
-			var leftOverIndex = start-line;
-			
-			if(overwrite) {
-			// Remve the rows to be overwritten
-			var removed = rows.splice( leftOverIndex, Math.min(end-leftOverIndex, rows.length-leftOverIndex+1) );
-			console.log("Removed " + JSON.stringify(removed) + " because overwrite=" + overwrite + " rows=" + JSON.stringify(rows) + " leftOverIndex=" + leftOverIndex + " rows.length=" + rows.length);
-			}
-			
-			if(leftOverIndex < rows.length) {
-			console.log("leftOverIndex=" + leftOverIndex + " rows=" + JSON.stringify(rows) + "");
-			text = rows.splice(leftOverIndex, rows.length-leftOverIndex+1).join(lb) + lb; // Text *not* to be written right now
-			}
-			else {
-			console.warn("leftOverIndex=" + leftOverIndex + " rows.length=" + rows.length + "");
-			}
-			
-			console.log("text.length=" + text.length + " rows.length=" + rows.length + " rows=" + JSON.stringify(rows) + " text=" + UTIL.lbChars(text));
-			
-			line += rows.length;
-			
-			write(rows, function() {
-			if(!contentWritten) {
-			write(contentRows, read);
-			contentWritten = true;
-			}
-			else read();
-			});
-			}
-			else throw new Error("Not anticipated: line=" + line + " rows.length=" + rows.length + " start=" + start + " end=" + end + 
-			" doneReading=" + doneReading + " isWriting=" + isWriting + " contentWritten=" + contentWritten + " overwrite=" + overwrite);
-			
-		*/
 	}
 	
 	function write(rows, callback) {
-		var row = 0;
-		
+		if(isWriting) console.warn("Write in progress!");
 		console.log("Writing rows.length=" + rows.length + " : 0=" + rows[0]);
+		
+		isWriting = true;
+		var row = 0;
+		var rowsToWrite = rows.length;
+		
 		//console.log(" write: " + JSON.stringify(rows));
 		
 		if(rows.length == 0) {
 			console.warn("Zero rows!");
-			callback();
-			return;
+			return done();
 		}
-		
-		var onlyOneRow = (rows.length == 1);
 		
 		writeRow();
 		
+		function done() {
+			isWriting = false;
+			console.log("Last row of " + rowsToWrite + " rows written. totalRowsWritten=" + totalRowsWritten);
+			callback();
+		}
+		
 		function writeRow() {
-			isWriting = true;
+			
 			var ok = true;
 			do {
 				if (row == rows.length-1) {
@@ -1010,11 +855,8 @@ text = textHead + text;
 					// Always write a line break after each row! 
 					// Or the read logic would become very complicated. For example when the chunk stops right before a lb.
 					// All rows need to end with a lb!
-					tmp.write(rows[row] + lb, encoding, function() {
-						isWriting = false;
-						callback();
-					});
-					}
+					tmp.write(rows[row] + lb, encoding, done);
+				}
 				else {
 					// see if we should continue, or wait
 					// don't pass the callback, because we're not done yet.
@@ -1033,9 +875,7 @@ text = textHead + text;
 			}
 		}
 	}
-	
-	
-}
+	}
 
 
 
