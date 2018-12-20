@@ -482,7 +482,7 @@
 					// We are in this function. Check it's subfunctions
 					
 					for(var j=0; j<func.subFunctions.length; j++) {
-						if(func.subFunctions[i].name == functionName) analyze(func.subFunctions[i]);
+						if(func.subFunctions[j].name == functionName) analyze(func.subFunctions[j]);
 					}
 					
 				}
