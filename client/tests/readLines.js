@@ -83,7 +83,7 @@
 	
 	
 	EDITOR.addTest(function testReadLines5(callback) {
-		var filePath = "/tmp/readLinesTest";
+		var filePath = "/tmp/readLinesTest.txt";
 		
 		var tests = [
 			{
@@ -189,10 +189,10 @@
 	});
 	
 	
-	EDITOR.addTest(function testReadLines6(callback) {
+	EDITOR.addTest(1, function testReadLines6(callback) {
 		// Tests both readLine and writeLine!
 		var filePath = "/testfile.txt";
-		var testFile = "/editBigFileTest.txt";
+		var testFile = "/testReadLines6.txt";
 		var lb = "\n";
 		
 		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {

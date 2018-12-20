@@ -1688,8 +1688,10 @@ if(err) throw err;
 		});
 	});
 	
-	EDITOR.addTest(1, function writeLines(callback) {
+	EDITOR.addTest(function writeLines(callback) {
 		var filePath = "/tmp/writeLinesTest";
+		
+		// Todo: test with \r\n line breaks
 		
 		var tests = [
 			{
@@ -1843,6 +1845,7 @@ if(err) throw err;
 									
 									if(text != expectedText) throw new Error("Expected line 5000 to be " + expectedText);
 									else {
+										EDITOR.closeFile(file);
 										console.log("Deleting " + testFile + " ...");
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;

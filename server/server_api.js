@@ -681,6 +681,8 @@ var encoding = "utf8";
 	
 	function read() {
 		
+		console.log("read: textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
+		
 		if(isWriting) {
 console.log("Waiting for write to be done ...");
 			return;
@@ -718,7 +720,7 @@ console.log("Waiting for write to be done ...");
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
 		}
-		//console.log("text=" + UTIL.lbChars(text));
+		console.log("text=" + UTIL.lbChars(UTIL.shortString(text)));
 		
 		// Don't remove any line breaks here! Doing so might concatenate two rows!
 		
@@ -730,26 +732,26 @@ console.log("Waiting for write to be done ...");
 		}
 		
 			if(text.slice(text.length-lb.length) != lb) {
-			textHead = text.slice(text.lastIndexOf(lb)+1); // Will be the start of the text at next read
-			text = text.slice(0, text.lastIndexOf(lb)); // Last lb not included
+				textHead = text.slice(text.lastIndexOf(lb)+lb.length); // Will be the start of the text at next read
+				text = text.slice(0, text.lastIndexOf(lb)); // Set the text to everything up until but not including the last line break
 			console.log("textHead.length=" + textHead.length + " text.length=" + text.length);
+				console.log("Sliced textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
 		}
 			else {
 			text = text.slice(0, -lb.length); // Remove the ending lb
 		}
 		}
 		
-		if(text.length == 0 && contentWritten) {
-			console.log("Not processing text.length=" + text.length + " contentWritten=" + contentWritten + " Continue reading ...");
-			return read();
-		}
+		// text.length==0 means the text had a line break, but it has been removed!
+		// So continue and insert a empty line!
+		
 		
 		var rows = text.split(lb);
 		// As the ending line-break was removed above, one single linebreak actually means two empty rows!
 		
-		processRows(rows, read);
-		
 		text = ""; // Reset the text, that has been converted into rows, that will now be inserted
+		
+		processRows(rows, read);
 		
 		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + (chunk && chunk.length) + " bytes from " + path);
 		
@@ -825,7 +827,8 @@ console.log("Waiting for write to be done ...");
 	
 	function write(rows, callback) {
 		if(isWriting) console.warn("Write in progress!");
-		console.log("Writing rows.length=" + rows.length + " : 0=" + rows[0]);
+		
+		console.log("  Writing rows.length=" + rows.length + " : 0=" + rows[0]);
 		
 		isWriting = true;
 		var row = 0;
