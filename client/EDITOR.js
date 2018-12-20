@@ -1092,7 +1092,7 @@ usePseudoClipboard = false;
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
 				
-				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"! Some editor operations/plugins might not work.');
+				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.');
 				
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);

@@ -118,6 +118,10 @@ function Dialog(msg, icon, dialogDelay) {
 		EDITOR.input = false;
 	}
 }
+Dialog.prototype.isOpen = function(someEvent, callback) {
+	if(this.div.parentElement) return true;
+	else return false;
+}
 Dialog.prototype.close = function(someEvent, callback) {
 	if(this.div.parentElement) this.div.parentElement.removeChild(this.div);
 	else console.warn("Parent element does not exist for div=", this.div);

@@ -61,6 +61,8 @@ var File; // File object is global
 		
 		file.setFileExtension(); // Also sets file.mode = "code" || "text"
 		
+		this.loadFilePartDialog = undefined; // To prevent many dialogs from loadFilePart
+		
 		if(file.mode == "code") {
 			// Don't let the file start or end with a tab
 			while(file.text.charAt(0) == "\t") file.text = file.text.slice(1);
@@ -4114,6 +4116,39 @@ file.mode = "text";
 	
 	File.prototype.loadFilePart = function loadFilePart(partStartRow, callback) {
 		var file = this;
+		
+		/*
+			if(this.loadFilePartDialog && this.loadFilePartDialog.isOpen()) {
+			var error = new Error("Waiting for user dialog to choose if to save the current buffer/chunk or abort ...");
+			if(callback) callback(error);
+			else console.warn(error);
+			return;
+			}
+		*/
+		
+		if(!file.isSaved && file.totalRows != -1) {
+			var yes = "Save now";
+			var no = "Abort";
+			if(this.loadFilePartDialog) this.loadFilePartDialog.close();
+			this.loadFilePartDialog = confirmBox("Current chunk/buffer need to be saved before loading a new one!", [yes, no], function(answer) {
+				if(answer == yes) {
+					EDITOR.saveFile(file, function(err) {
+						if(err) {
+							if(callback) return callback(err);
+							else throw err;
+						}
+						file.loadFilePart(partStartRow, callback);
+					});
+				}
+				else {
+					var error = new Error("loadFilePart aborted by user because unsaved changes.");
+					if(callback) callback(error);
+					else console.warn(error.message);
+				}
+			});
+			return;
+		}
+		
 		if(partStartRow == undefined) partStartRow = 0;
 		
 		if(partStartRow < 0) throw new Error("Can not begin stream in negative row:" + partStartRow);
@@ -4127,13 +4162,13 @@ file.mode = "text";
 		var endRow = partStartRow + EDITOR.settings.bigFileLoadRows;
 		
 		CLIENT.cmd("readLines", {path: file.path, start: partStartRow+1, end: endRow+1, lineBreak: file.lineBreak, max: EDITOR.settings.bigFileLoadRows}, function readLines(err, resp) {
-
+			
 			if(err) {
 				if(callback) callback(err);
 				else alertBox("Unable to load file part: " + err.message);
 			}
 			else {
-			
+				
 				// resp: {path, lines, end, totalLines}
 				file.text = resp.lines.join(file.lineBreak);
 				
