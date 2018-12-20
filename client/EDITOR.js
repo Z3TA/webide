@@ -6872,12 +6872,6 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		var file = EDITOR.currentFile;
 		
-		if(file && file.isBig)  {
-			//alertBox("Unable to paste " + text.length + " characters ! Max length is currently " + EDITOR.settings.bigFileSize);
-			alertBox("Unable to paste. The file is read only!");
-			return;
-		}
-		
 		if(text && text.length > EDITOR.settings.bigFileSize) {
 			var yes = "Save the file";
 			var no = "Never mind";
@@ -6891,12 +6885,17 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						EDITOR.saveFile(file, function fileSaved(err, path) {
 							if(err) return alertBox("Failed to save " + path);
 							// Then save the pasted data
-							CLIENT.cmd("writeLines", {path: file.path, content: text, start: file.partStartRow+file.caret.row+1}, function linesWritten(err) {
-								if(err) return alertBox("Failed to save pasted data!");
+							CLIENT.cmd("writeLines", {start: file.partStartRow+file.caret.row+1, path: file.path, content: text}, function linesWritten(err) {
+								if(err) return alertBox("Failed to save pasted data! " + err.message);
 								// Then reload the file buffer
-								var loadRow = file.partStartRow+file.caret.row;
-								file.loadFilePart(loadRow, function(err) {
-									if(err) return alertBox("Failed to load row=" + loadRow + " !");
+								var lineNr = file.partStartRow+file.caret.row+1;
+								var startRow = file.partStartRow;
+								file.loadFilePart(startRow, function(err) {
+									if(err) return alertBox("Failed to load startRow=" + startRow + " ! " + err.message);
+									file.gotoLine(lineNr, function(err) {
+										if(err) return alertBox("Failed to go to lineNr=" + lineNr + " ! " + err.message);
+										
+									});
 								});
 							});
 						});

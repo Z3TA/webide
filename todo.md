@@ -44,16 +44,13 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-
-
-Goto line *sometimes* go to the wrong line in a big file! (unable to repeat)
-
-When saving after edit on line 1512, the file get screwed up!
+Pasting huge amounts of data "benchmark" optimization
 
 Allow saving and big-pasting in a big file
 
 Handle pasting 100,000 lines of code benchmark.
 
+Problems with big files when they are being reopened after closing (if the file was not saved) ...
 
 todo: reopen_files.js support for big files
 
