@@ -189,7 +189,7 @@
 	});
 	
 	
-	EDITOR.addTest(1, function testReadLines6(callback) {
+	EDITOR.addTest(function testReadLines6(callback) {
 		// Tests both readLine and writeLine!
 		var filePath = "/testfile.txt";
 		var testFile = "/testReadLines6.txt";
