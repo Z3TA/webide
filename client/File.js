@@ -1981,7 +1981,8 @@ file.mode = "text";
 			}
 		}
 		
-		if(file.grid[file.caret.row].length > 0) {
+		// Note: file.caret.row might be above file.grid.length!
+		if(file.grid[file.caret.row] && file.grid[file.caret.row].length > 0) {
 			// Place the caret where the selection started
 			file.moveCaretToIndex(firstIndex);
 		}
