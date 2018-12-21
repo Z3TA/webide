@@ -1862,7 +1862,7 @@ if(err) throw err;
 		});
 	});
 	
-	EDITOR.addTest(1, function editBigFile2(callback) {
+	EDITOR.addTest(function editBigFile2(callback) {
 		var filePath = "/testfile.txt";
 		var testFile = "/editBigFileTest2.txt";
 		

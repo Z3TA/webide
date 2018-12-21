@@ -1467,15 +1467,17 @@ usePseudoClipboard = false;
 				}
 				alertBox(errors.length + " tool(s) failed. Which might effect formatting etc of the file on disk!\n" + errorMessages.join("\n"), "warning");
 			}
-			
-			if(!file.savedAs && path == file.path) {
+			/*
+				if(!file.savedAs && path == file.path) {
 				EDITOR.pathPickerTool(path, function(err, newPath) {
 					if(err) return callback(err);
 					path = newPath;
 					beginSaving();
 				});
 			}
-			else beginSaving();
+			else 
+			*/
+			beginSaving();
 		});
 		
 		function beginSaving() {
