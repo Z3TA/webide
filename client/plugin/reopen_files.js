@@ -407,8 +407,6 @@ console.log("reopenFiles!");
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
-				var loadFilePart = false;
-				
 				if(openFileError) {
 					console.error(openFileError.message);
 					console.log(openFileError.stack);
@@ -454,27 +452,20 @@ console.log("reopenFiles!");
 				
 				function updateLastState() {
 					console.log("updateLastState path=" + path);
-				if(lastFileState) {
-					console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
-					
-					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
-					
-					if(lastFileState.partStartRow > 0) loadFilePart = true;
-					}
-				
-				if(loadFilePart) {
-					file.loadFilePart(lastFileState.partStartRow, function setStateAtReopen() {
-						
-						console.log("setStateAtReopen");
-						setLastState();
-						callback(null, file, fileWasCurrentfile);
-						
-					});
-					}
-				else {
 					setLastState();
-					callback(null, file, fileWasCurrentfile);
-				}
+					
+					//console.log("file.partStartRow=" + file.partStartRow + " content=" + content);
+					
+					if(file.partStartRow > 0 && content == undefined) {
+						/*
+							If the file was re-loaded from disk, it started at first line.
+							But if it was loaded from state, just leave it as is.
+						*/
+						file.gotoLine(file.partStartRow+file.caret.row+1, function(err) {
+							callback(err, file, fileWasCurrentfile);
+						});
+					}
+					else callback(null, file, fileWasCurrentfile);
 				}
 				
 				function setLastState() {
@@ -489,7 +480,10 @@ console.log("reopenFiles!");
 						if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
 						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
 						if(lastFileState.hash !== undefined) file.hash = lastFileState.hash;
+
 						if(lastFileState.isBig !== undefined) file.isBig = lastFileState.isBig;
+						if(lastFileState.totalRows !== undefined) file.totalRows = lastFileState.totalRows;
+						if(lastFileState.partStartRow !== undefined) file.partStartRow = lastFileState.partStartRow;
 						
 						if(lastFileState.isSaved !== undefined && content) {
 							file.isSaved = lastFileState.isSaved;
@@ -798,13 +792,17 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		state.isSaved = file.isSaved;
 		state.savedAs = file.savedAs;
 		state.startRow = file.startRow;
-		state.isBig = file.isBig;
-		state.partStartRow = file.partStartRow; // For loading big files as streams
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
 		state.mode = file.mode;
 		state.hash = file.hash;
+		
+		// For loading big files as streams
+		state.isBig = file.isBig;
+		state.totalRows = file.totalRows;
+		state.partStartRow = file.partStartRow; 
+		
 		
 		var sizeLimit = 2551000; // Max size for localStorage in Chrome is 2,551,000 characters (5 MB)
 		

@@ -231,8 +231,9 @@
 		
 		//console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
 		
-		if(file.parse === false) return;
-			
+		if(file.parse === false) return false;
+		if(file.isBig) return false;
+		
 		/* 
 			Dilemma: Should we also parse ASP and PHP here!? (Go into vbScript PHP , etc mode when encontering <% or <?PHP)
 			Yes, this is the easiest solution, and we do not have to redo xmlParsing (like we would have to if we had separate plugins)

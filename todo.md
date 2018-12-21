@@ -44,15 +44,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Pasting huge amounts of data "benchmark" optimization
+todo: file.isStreaming usage
 
-Allow saving and big-pasting in a big file
-
-Handle pasting 100,000 lines of code benchmark.
-
-Problems with big files when they are being reopened after closing (if the file was not saved) ...
-
-todo: reopen_files.js support for big files
+bug: Nuked the editor by accidently pasting 50k LOC into the search box in the find/replace widget
 
 ---
 User option: First time opening the editor.

@@ -48,7 +48,6 @@ var File; // File object is global
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
 		file.head = false, // We are on the first part of the stream if true
-		file.byteRow = []; // Indexing of byte to row for faster seeking in big files [[row, byte],[row, byte],[row, byte]]
 		
 		file.isStreaming = false; // If the file is currently pulling data from the file read stream
 		file.render = true; // Can (temporary) disable rendering for this file by setting it to false
@@ -68,10 +67,6 @@ var File; // File object is global
 			while(file.text.charAt(0) == "\t") file.text = file.text.slice(1);
 			while(file.text.charAt(file.text.length-1) == "\t") file.text = file.text.slice(0, file.text.length-1);
 		}
-		
-		// We'll give each new character a unique id: file.charIdCounter++ + EDITOR.username + userSessionId
-		file.charIdCounter = 0;
-		
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
 		//console.log("Gonna create the grid for file.path=" + file.path);	
