@@ -1424,6 +1424,8 @@ usePseudoClipboard = false;
 			It can handle "save-as". 
 		*/
 		
+		console.log("EDITOR.saveFile: path=" + path + " file.path=" + file.path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed)
+		
 		if(file == undefined) file = EDITOR.currentFile;
 		
 		if(!file) {
@@ -1465,13 +1467,21 @@ usePseudoClipboard = false;
 				}
 				alertBox(errors.length + " tool(s) failed. Which might effect formatting etc of the file on disk!\n" + errorMessages.join("\n"), "warning");
 			}
-			beginSaving();
+			
+			if(!file.savedAs && path == file.path) {
+				EDITOR.pathPickerTool(path, function(err, newPath) {
+					if(err) return callback(err);
+					path = newPath;
+					beginSaving();
+				});
+			}
+			else beginSaving();
 		});
 		
 		function beginSaving() {
-			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash);
-			if(file.path != path) {
-				if(EDITOR.files.hasOwnProperty(path)) {
+			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
+			if(file.path != path || !file.savedAs) {
+				if(EDITOR.files.hasOwnProperty(path) && EDITOR.files[path] != file) {
 					var err = new Error("There is already a file open with path=" + path);
 					if(callback) callback(err, path);
 					else throw err;
@@ -1484,15 +1494,19 @@ usePseudoClipboard = false;
 						var overwrite = "Overwrite";
 						var cancel = "Cancel";
 						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
-							if(answer == overwrite) reOpen(file.path, path);
+							if(answer == overwrite) {
+if(path != file.path) reOpen(file.path, path);
+								else EDITOR.saveToDisk(file.path, file.text, doneSaving);
+							}
 							else {
-								var err = new Error("You canceled the save (as) to prevent overwriting existing file");
+								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
 								callback(err);
 							}
 						});
 					}
-					else reOpen(file.path, path);
+					else if(path != file.path) reOpen(file.path, path);
+					else EDITOR.saveToDisk(file.path, file.text, doneSaving);
 				});
 			}
 			else if(file.hash)  {
@@ -1541,6 +1555,10 @@ usePseudoClipboard = false;
 			}
 			
 			if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
+			else if(path != file.path) {
+				console.warn("File path updated: old=" + file.path + " new=" + path);
+				file.path = path;
+			}
 			
 			if(hash) file.hash = hash;
 			
@@ -4320,6 +4338,8 @@ var word = "";
 		// Check if path exists
 		// And ask's to create the path if it doesn't exist
 		
+		console.log("EDITOR.checkPath: fullPath=" + fullPath);
+		
 		if(typeof dontMsg == "function") {
 			callback = dontMsg;
 			dontMsg = undefined;
@@ -4331,6 +4351,9 @@ var word = "";
 		
 		var includeHostInfo = true;
 		var folderDelimiter = UTIL.getPathDelimiter(fullPath);
+		
+		if(fullPath.indexOf(folderDelimiter) == -1) fullPath = folderDelimiter + fullPath;
+		
 		var folderPath = fullPath.slice(0, fullPath.lastIndexOf(folderDelimiter)) + folderDelimiter;
 		var folderPaths = UTIL.getFolders(folderPath, includeHostInfo);
 		
@@ -4363,6 +4386,7 @@ var word = "";
 						}
 						else if(answer == another) {
 							EDITOR.pathPickerTool({defaultPath: fullPath}, function changedPath(err, newPath) {
+								console.log("EDITOR.checkPath: EDITOR.pathPickerTool: err=" + (err && err.message) + " newPath=" + newPath); 
 								if(err) {
 									return callback(err);
 								}
@@ -5023,6 +5047,8 @@ var word = "";
 	EDITOR.pathPickerTool = function pathPicker(options, callback) {
 		// Show a tool for picking a file path, which will callback with the chosen path
 		
+		console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
+		
 		if(typeof options == "function") {
 			callback = options;
 			options = undefined;
@@ -5030,12 +5056,14 @@ var word = "";
 		
 		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
 		
-		console.log("Calling pathPicker listeners (" + EDITOR.eventListeners.pathPicker.length + ") ");
+		if(typeof options == "string") options = {defaultPath: options};
+		
+		console.log("Calling pathPickerTool listeners (" + EDITOR.eventListeners.pathPickerTool.length + ") ");
 		
 		var ret = false;
 		
-		for(var i=0, f; i<EDITOR.eventListeners.pathPicker.length; i++) {
-			ret = EDITOR.eventListeners.pathPicker[i].fun(options, callback);
+		for(var i=0, f; i<EDITOR.eventListeners.pathPickerTool.length; i++) {
+			ret = EDITOR.eventListeners.pathPickerTool[i].fun(options, gotPath);
 			if(ret === true) return true; // Only open one tool, hope it will call back!
 		}
 		
@@ -5045,12 +5073,24 @@ var word = "";
 			if(!path) {
 				var error = new Error("Aborted when picking path");
 				error.code = "CANCEL";
-				return callback(error);
+				return gotPath(error);
 			}
-			else return callback(null, path);
+			else return gotPath(null, path);
 		});
 		
 		return true; // True as in "we found a path picker"
+	
+		function gotPath(err, path) {
+			if(err) return callback(err);
+			
+			console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
+			
+			// EDITOR.checkPath will call EDITOR.pathPickerTool
+			// So it's safest to not call it from here to prevent and endless loop
+			// You can instead call EDITOR.checkPath directly to get a path
+			
+			return callback(null, path);
+		}
 	}
 	
 	EDITOR.previewTool = function previewTool(file, ev) {
@@ -6883,7 +6923,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					if(file.isBig) {
 						// First save the current buffer
 						EDITOR.saveFile(file, function fileSaved(err, path) {
-							if(err) return alertBox("Failed to save " + path);
+							if(err) return alertBox("Failed to save " + path + ":\n" + err.message, "error");
 							// Then save the pasted data
 							CLIENT.cmd("writeLines", {start: file.partStartRow+file.caret.row+1, path: file.path, content: text}, function linesWritten(err) {
 								if(err) return alertBox("Failed to save pasted data! " + err.message);
@@ -6901,19 +6941,31 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						});
 					}
 					else {
-						var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
-					var filePath = file.path;
-					EDITOR.saveToDisk(filePath, combinedText, function(err, path, hash) {
-						if(err) return alertBox("Unable to save the file! " + err.message);
-						
-						EDITOR.closeFile(filePath, true);
-						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
-							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message);
-});
-						
-					});
+						// Normal file
+						if(!file.savedAs) {
+							EDITOR.checkPath(file.path, function(err, path) {
+								if(err) return alertBox("Unable to save " + file.path + ".\nIt does not have a proper path!", "error");
+								else saveToDisk(path);
+							});
+						}
+						else saveToDisk(file.path)
 					}
 				}
+				
+				function saveToDisk(filePath) {
+					console.log("Saving file content with the pasted data as " + filePath + " ...");
+					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
+					EDITOR.saveToDisk(filePath, combinedText, function saveToDiskComplete(err, path, hash) {
+						if(err) return alertBox("Unable to save the file! " + err.message, "error");
+						
+						EDITOR.closeFile(file.path, true);
+						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
+							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "warning");
+						});
+						
+					});
+				}
+				
 			});
 			
 			return;

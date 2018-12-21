@@ -156,7 +156,8 @@ else {
 				waitTime = 10; // Probably a mouse click
 			}
 		}
-		
+		}
+
 		setTimeout(function() {
 			console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
 			EDITOR.input = true;
@@ -165,7 +166,7 @@ else {
 			if(callback) callback();
 			
 		}, waitTime);
-	}
+	
 }
 
 function alertBox(msg, icon, recursionCount) {
@@ -331,7 +332,7 @@ dialogDelay = defaultValue;
 	ok.addEventListener("click", function(clickEvent) {
 		
 		var value = input.value || input.innerText;
-		
+		console.log("promptBox: Closing dialog ...");
 		dialog.close(clickEvent, function() {
 			callback(value); 
 		});
