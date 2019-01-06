@@ -150,24 +150,6 @@ And/or use Tasker or other app to make the both the server and the client start 
 
 
 
-How to update
-=============
-
-If you installed using npm: 
-`npm update -g jzedit`
-
-
-
-
-Reporting bugs
-==============
-
-Open a new file, and write down instructions on how to repeat the bug.
-Save the file with "bugreport" in the file name (without the quotes)
-Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
-
-
-
 Running the editor in Google Cloud Shell
 ========================================
 
@@ -214,6 +196,23 @@ Click on the icon that looks like <> and say "Web preview". And select "Preview 
 This will open a new browser tab, that will hopefully load the editor!
 
 Note that some things will be a bit slow as the Google proxy does not support websockets.
+
+
+How to update
+=============
+
+If you installed using npm: 
+`npm update -g jzedit`
+
+
+
+
+Reporting bugs
+==============
+
+Open a new file, and write down instructions on how to repeat the bug.
+Save the file with "bugreport" in the file name (without the quotes)
+Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
 
 
 Font settings and styling

@@ -16,6 +16,7 @@
   "private": true,
   "license": "SEE LICENSE IN LICENSE.txt",
   "description": "A text/code editor for JavaScript made in JavaScript",
+  "keywords": ["editor", "IDE"],
   "version": "1.0.0",
   "author": "Johan Zetterberg <zeta@zetafiles.org>",
   "dependencies": {
