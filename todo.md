@@ -44,9 +44,16 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+the spellchecker can clog up the server! (start with removing console.log's from the spellcheck server plugin)
+
+Fix tests errors in Firefox!!
+
 Release large file "benchmark" optimization changes, and blog about it
 
 
+Allow git !?
+
+More and better examples and tutorials!
 
 
 todo: file.isStreaming usage
