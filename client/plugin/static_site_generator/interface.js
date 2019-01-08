@@ -88,7 +88,7 @@
 					// If the site is published in a folder eg /foo/ remove /foo/ from filePath
 					if(filePath.indexOf(pubUrlPath) == 0) filePath = filePath.slice(pubUrlPath.length);
 					
-					filePath = UTIL.trailingSlash(site.source) + filePath;
+					filePath = UTIL.trailingSlash(resolvePath(site, site.source)) + filePath;
 					while(filePath.indexOf("//") != -1) filePath = filePath.replace("//", "/");
 					
 					console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
@@ -195,11 +195,11 @@
 					console.log("B url=" + url + " is in site.url=" + site.url + "");
 					return site;
 				}
-				else if(url.indexOf(site.publish) == 0) {
+				else if(url.indexOf(resolvePath(site, site.publish)) == 0) {
 					console.log("C site.publish=" + site.publish + " is in url=" + url + "");
 					return site;
 				}
-				else if(url.indexOf(site.preview) == 0) {
+				else if(url.indexOf(resolvePath(site, site.preview)) == 0) {
 					console.log("D site.preview=" + site.preview + " is in url=" + url + "");
 					return site;
 				}
@@ -348,7 +348,7 @@
 			var filePath = file.path;
 			
 			for (var i=0; i<sites.length; i++) {
-				if(filePath.indexOf(sites[i].source) != -1) {
+				if(filePath.indexOf(resolvePath(sites[i], sites[i].source)) != -1) {
 					selectedSite = sites[i];
 					break;
 				}
@@ -368,7 +368,7 @@
 				console.log("askToOpenSourceFileIfOpenedPreviewFile=" + askToOpenSourceFileIfOpenedPreviewFile);
 				console.log("filePath=" + filePath + " sites[" + i + "].preview=" + sites[i].preview);
 				
-				if(filePath.indexOf(sites[i].source) != -1) {
+				if(filePath.indexOf(resolvePath(sites[i], sites[i].source)) != -1) {
 					showSSG();
 					switchSite(i);
 					break;
@@ -377,8 +377,8 @@
 				/*
 					Warn user when opening a file from the preview folder
 				*/
-				else if(filePath.indexOf(sites[i].preview) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
-					var openInstead = file.path.replace(sites[i].preview, sites[i].source);
+				else if(filePath.indexOf(resolvePath(sites[i], sites[i].preview)) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
+					var openInstead = file.path.replace(resolvePath(sites[i], sites[i].preview), resolvePath(sites[i], sites[i].source));
 					
 					EDITOR.doesFileExist(openInstead, function fileExistMaybe(fileExists) {
 						
@@ -420,7 +420,7 @@
 		
 		// Check if the currently opened file belongs to a SSG project:
 		for(var i=0; i<sites.length; i++) {
-			if(currentFile.path.indexOf(sites[i].source) != -1) {
+			if(currentFile.path.indexOf(resolvePath(sites[i], sites[i].source)) != -1) {
 				handleFile(sites[i], dataFile);
 				return true;
 			}
@@ -440,8 +440,7 @@
 			
 			var defaultPath;
 			if(filePath.match(/\/\\/)) defaultPath = filePath;
-			//else if(isImage) defaultPath = site.source + "gfx/" + filePath;
-			else defaultPath = site.source + filePath;
+			else defaultPath = resolvePath(site, site.source) + filePath;
 			
 			if(isImage) var whereToSaveMessage = "Where to save the image ?"
 			else var whereToSaveMessage = "Where to save the file ?";
@@ -460,12 +459,12 @@
 							var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
 							
 							if(currentFileName.match(/^(header|footer).html?/)) {
-								var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
+								var fileSrc = path.replace(resolvePath(site, site.source), "/"); // File paths needs to be absolute!
 							}
 							else {
 								// File paths needs to be relative!
-								var relativePath = getRelativePath(currentFile.path, site.source);
-								var fileSrc = relativePath + path.replace(site.source, ""); 
+								var relativePath = getRelativePath(currentFile.path, resolvePath(site, site.source));
+								var fileSrc = relativePath + path.replace(resolvePath(site, site.source), ""); 
 							}
 							
 							if(isImage) {
@@ -610,19 +609,6 @@
 		labelSite.appendChild(document.createTextNode("Static Site Generator:")); // Language settings!?
 		labelSite.appendChild(selectSite);
 		
-		/*
-			var buttonSetWorkingDirectory = document.createElement("input");
-			buttonSetWorkingDirectory.setAttribute("type", "button");
-			buttonSetWorkingDirectory.setAttribute("class", "button");
-			buttonSetWorkingDirectory.setAttribute("value", "Set working directory");
-			buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
-			buttonSetWorkingDirectory.addEventListener("click", function() {
-			if(!selectedSite) throw new Error("No site selected!");
-			EDITOR.changeWorkingDir(selectedSite.source);
-			hideSSG();
-			}, false);
-		*/
-		
 		var buttonOpenEdit = document.createElement("input");
 		buttonOpenEdit.setAttribute("type", "button");
 		buttonOpenEdit.setAttribute("class", "button");
@@ -633,9 +619,9 @@
 			
 			hideSSG(); // Sets EDITOR.input to true
 			
-			EDITOR.changeWorkingDir(selectedSite.source);
+			EDITOR.changeWorkingDir(resolvePath(selectedSite, selectedSite.source));
 			
-			EDITOR.openFileTool({directory: selectedSite.source}); // Sets EDITOR.input to false
+			EDITOR.openFileTool({directory: resolvePath(selectedSite, selectedSite.source)}); // Sets EDITOR.input to false
 			
 			
 		}, false);
@@ -648,9 +634,9 @@
 		buttonExplore.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			
-			EDITOR.changeWorkingDir(selectedSite.source);
+			EDITOR.changeWorkingDir(resolvePath(selectedSite, selectedSite.source));
 			
-			EDITOR.fileExplorer(selectedSite.source);
+			EDITOR.fileExplorer(resolvePath(selectedSite, selectedSite.source));
 			
 		}, false);
 		
@@ -923,6 +909,12 @@
 		
 		// Buttons
 		
+		var buttonImport = document.createElement("input");
+		buttonImport.setAttribute("type", "button");
+		buttonImport.setAttribute("class", "button");
+		buttonImport.setAttribute("value", "Import ...");
+		buttonImport.addEventListener("click", importSiteSettings, false);
+		
 		var buttonSave = document.createElement("input");
 		buttonSave.setAttribute("type", "button");
 		buttonSave.setAttribute("class", "button");
@@ -1135,10 +1127,13 @@
 		tr = document.createElement("tr");
 		td = document.createElement("td");
 		td.setAttribute("colspan", "2");
+		
+		td.appendChild(buttonImport);
 		td.appendChild(buttonSave);
 		td.appendChild(buttonSaveAs);
 		td.appendChild(buttonDelete);
 		td.appendChild(buttonCancel);
+		
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
@@ -1185,6 +1180,8 @@
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
 			EDITOR.resizeNeeded();
+			
+			saveCnf(selectedSite);
 			
 		}
 		
@@ -1251,6 +1248,8 @@
 			controlView.style.display = "block";
 			EDITOR.resizeNeeded();
 			
+			saveCnf(selectedSite);
+			
 		}
 		
 		
@@ -1279,6 +1278,82 @@
 			
 		}
 		
+		function importSiteSettings() {
+			var fileName = "ssgconf.json";
+			var defaultPath = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			
+			if(defaultPath.indexOf(fileName) != -1) importCfg(defaultPath);
+			else EDITOR.pathPickerTool({instruction: "Select a " + fileName + " file", defaultPath: defaultPath}, function(err, path) {
+				if(err) alertBox("Unable to pick a project folder: " + err.message);
+				else {
+					if(path.indexOf(fileName) == -1) path = UTIL.joinPaths([path, fileName]);
+					importCfg(path);
+				}
+			});
+			
+			function importCfg(cfgPath) {
+				EDITOR.readFromDisk(cfgPath, function(err, path, data, hash) {
+					if(err) alertBox("Failed to import from " + cfgPath + ": " + err.message);
+					else {
+						try {
+							var site = JSON.parse(data); 
+						}
+						catch(err) {
+							return alertBox("Failed to parse " + cfgPath + ": " + err.message);
+						}
+
+						inputSiteName.value = site.name;
+						inputProjectFolder.value = site.projectFolder;
+						inputSourceFolder.value = site.source;
+						inputPreviewFolder.value = site.preview;
+						inputPublishFolder.value = site.publish;
+						inputTemplate.value = site.template;
+						inputPubAuthUser.value = site.pubUser;
+						inputPubAuthPw.value = site.pubPw;
+						inputPubAuthKey.value = site.key;
+						inputRepoAuthUser.value = site.repoUser;
+						inputRepoAuthPw.value = site.repoPw;
+						inputRepository.value = site.repository;
+						inputUrl.value = site.url;
+						
+						saveNewSite();
+						
+					} 
+				});
+			}
+		}
+		
+	}
+	
+	function saveCnf(site) {
+		if(selectedSite != site) throw new Error("site=", site, " selectedSite=", selectedSite);
+		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
+		var fileName = "ssgconf.json";
+		var folder = site.projectFolder;
+		if(folder == undefined || folder == ".") {
+			var defaultPath = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			EDITOR.pathPickerTool({instruction: "Choose a project folder", defaultPath: defaultPath}, function gotPath(err, folder) {
+				if(err) alertBox("Unable to pick a project folder: " + err.message);
+				else {
+					// Update the project folder
+					site.projectFolder = folder;
+					inputProjectFolder.value = site.projectFolder;
+					if(selectedSite.projectFolder != folder) throw new Error("Folder didn't update for selectedSite=" + JSON.stringify(selectedSite) + " folder=" + folder);
+					
+					EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
+					
+					save(folder);
+				}
+			});
+		}
+		else save(folder);
+		
+		function save(folder) {
+			var path = UTIL.joinPaths([folder, fileName]);
+			EDITOR.saveToDisk(path, JSON.stringify(site, null, 2), function(err, path, hash) {
+				if(err) alertBox("Unable to save " + fileName + ": " + err.message);
+			});
+		}
 	}
 	
 	function addSiteOption(site, index) {
@@ -1350,7 +1425,7 @@
 			return false;
 		}
 		
-		if(file.path.indexOf(selectedSite.source) == -1) {
+		if(file.path.indexOf(resolvePath(selectedSite, selectedSite.source)) == -1) {
 			console.log("selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
 			return false;
 		}
@@ -1366,6 +1441,10 @@
 		else previewPage(selectedSite, undefined, false, file, combo.ctrl);
 		
 		return false;
+	}
+	
+	function resolvePath(site, relativePath) {
+		return UTIL.resolvePath(site.projectFolder, relativePath);
 	}
 	
 	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
@@ -1430,9 +1509,8 @@
 			}
 			else {
 				
-				if(sourceFile.path.indexOf(site.source) !== 0) {
-					//throw new Error('Source file does not belong to "' + site.name + '"!\nsourceFile.path=' + sourceFile.path + '\nsite.source=' + site.source);
-					alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.\n\n(have you saved the file ?)');
+				if(sourceFile.path.indexOf(resolvePath(site, site.source)) !== 0) {
+					alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + resolvePath(site, site.source) + ' and try again.\n\n(have you saved the file ?)');
 					newWindow.close();
 				}
 				else compileIt(sourceFile);
@@ -1467,7 +1545,7 @@
 					recursionCounter = 1;
 					
 					
-					var relativePath = getRelativePath(sourceFile.path, site.source);
+					var relativePath = getRelativePath(sourceFile.path, resolvePath(site, site.source));
 					
 					var text = sourceFile.text; // Don't change file.text directly or we'll mess up the grid!
 					
@@ -1512,10 +1590,10 @@
 			else {
 				
 				console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
-				compile(site.source, site.preview, ignoreDraft, function compiled_static(err) {
+				compile(resolvePath(site, site.source), resolvePath(site, site.preview), ignoreDraft, function compiled_static(err) {
 					if(err) throw err;
 					
-					var protocol = UTIL.urlProtocol(site.preview);
+					var protocol = UTIL.urlProtocol(resolvePath(site, site.preview));
 					
 					if(protocol) {
 						alertBox("Preview uploaded to: " + site.preview);
@@ -1526,17 +1604,17 @@
 					// Provided that the preview url is not a ftp/sft/ftps url
 					console.log("site.preview=" + site.preview);
 					
-					if(site.preview.match(/^(ftp|sftp|ftps):/i)) {
+					if(resolvePath(site, site.preview).match(/^(ftp|sftp|ftps):/i)) {
 						alertBox("Preview uploaded to: " + site.preview);
 						alertBox("Can not preview from remote location such as ftp, sftp or ftps. The preview location must be a local folder.");
 					}
 					else if(document.location.href.match(/^file:/)) {
 						// Don't have to serve
-						previewServed(site.preview)
+						previewServed(resolvePath(site, site.preview));
 					}
 					else {
 						
-						CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
+						CLIENT.cmd("serve", {folder: resolvePath(site, site.preview)}, function httpServerStarted(err, json) {
 							
 							if(err) throw err;
 							
@@ -1578,7 +1656,7 @@
 						previewBaseUrl = url;
 						
 						if(sourceFile) {
-							url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
+							url += sourceFile.path.replace(resolvePath(site, site.source), "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 							
 							openPreviewWin();
 							
@@ -1589,7 +1667,7 @@
 							notEditableReason = "No file open";
 							editable = false;
 							
-							EDITOR.listFiles(site.preview, function(err, list) {
+							EDITOR.listFiles(resolvePath(site, site.preview), function(err, list) {
 								
 								if(err) throw err;
 								
@@ -1619,7 +1697,7 @@
 							
 							// Get the source code for the compiled page in review, in order to compute ignoreTransform
 							
-							var previewPath = sourceFile.path.replace(site.source, site.preview);
+							var previewPath = sourceFile.path.replace(resolvePath(site, site.source), resolvePath(site, site.preview));
 							
 							EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
 								
@@ -1681,7 +1759,7 @@
 								}
 								
 								function reCompile(reCompileCallback) {
-									compile(site.source, site.preview, ignoreDraft, function recompiled(err) {
+									compile(resolvePath(site, site.source), resolvePath(site, site.preview), ignoreDraft, function recompiled(err) {
 										reCompileCallback(err);
 									});
 								}
@@ -1903,7 +1981,7 @@
 			*/
 			
 			var unsavedFiles = [];
-			var rootPath = selectedSite.source;
+			var rootPath = resolvePath(selectedSite, selectedSite.source);
 			
 			for(var path in EDITOR.files) {
 				if(path.indexOf(rootPath) != -1 && !EDITOR.files[path].isSaved) {
@@ -2208,7 +2286,7 @@ whenAllFilesReloaded();
 			if(!site.source) throw new Error("Site name=" + site.name + " has no source folder specified! site.source=" + site.source);
 			if(!site.publish) throw new Error("Site name=" + site.name + " has no publish url specified! site.publish=" + site.publish);
 			
-			compile(site.source, site.publish, true, function buildDone(err) {
+			compile(resolvePath(site, site.source), resolvePath(site, site.publish), true, function buildDone(err) {
 				if(err) throw err;
 				
 				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));
@@ -2230,9 +2308,9 @@ whenAllFilesReloaded();
 		
 		if(!site.template) return alertBox("No template file for new file/page specified! Edit settings and set a path for template file.");
 		
-		EDITOR.changeWorkingDir(site.source);
+		EDITOR.changeWorkingDir(resolvePath(site, site.source));
 		
-		EDITOR.readFromDisk(site.template, function fileRead(err, path, text) {
+		EDITOR.readFromDisk(resolvePath(site, site.template), function fileRead(err, path, text) {
 			
 			if(err) alertBox("Unable to find new file/page template! (site.template=" + site.template + "). " + err.message);
 			else {
@@ -2261,7 +2339,7 @@ whenAllFilesReloaded();
 	
 	function compile(source, destination, publish, callback) {
 		
-		var opt = {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: selectedSite.key};
+		var opt = {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: resolvePath(selectedSite, selectedSite.key)};
 		
 		CLIENT.cmd("SSG.compile", opt, function(err, json) {
 			
@@ -2300,7 +2378,7 @@ whenAllFilesReloaded();
 		if(previewWin) {
 			try {
 				var url = previewWin.location.href;
-				var sourceFilePath = url.replace(previewBaseUrl, site.source);
+				var sourceFilePath = url.replace(previewBaseUrl, resolvePath(site, site.source));
 			}
 			catch(err) {
 				console.log("Unable to get previewWin url: " + err.message);
@@ -2383,7 +2461,7 @@ whenAllFilesReloaded();
 		}
 		else {
 			// Open any of the source files
-			EDITOR.listFiles(site.source, function sourceFileList(err, list) {
+			EDITOR.listFiles(resolvePath(site, site.source), function sourceFileList(err, list) {
 				
 				if(err) return callback(err);
 				
@@ -2425,7 +2503,7 @@ whenAllFilesReloaded();
 			return false;
 		}
 		
-		if(file.path.indexOf(site.source) != 0) {
+		if(file.path.indexOf(resolvePath(site, site.source)) != 0) {
 			console.log("We don't like " + file.path + " because it's not part of site.source=" + site.source);
 			return false;
 		}

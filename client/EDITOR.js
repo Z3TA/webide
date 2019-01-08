@@ -5071,7 +5071,8 @@ var word = "";
 		
 		// If no path picker wanted to handle it: Use the stone-age path picker
 		var defaultPath = options && options.defaultPath;
-		promptBox("Choose a file path:", false, defaultPath, function(path) {
+		var instruction = (options && options.instruction) || "Choose a file path:";
+		promptBox(instruction, false, defaultPath, function(path) {
 			if(!path) {
 				var error = new Error("Aborted when picking path");
 				error.code = "CANCEL";

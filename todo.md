@@ -44,12 +44,34 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-the spellchecker can clog up the server! (start with removing console.log's from the spellcheck server plugin)
+Save SSG settings in ssgconf.json!
+
+Able to use the SSG compiler outside the editor! (make it into a Node.JS module !?)
+
+Make the about pages a SSG site!
+
+Very few users do anything after loading the editor ... 
+
+There is a welcome guide, but almost no one use it.
+
+Showcase editor core features when opening the editor for the first time !?
+
+
+<ul>
+	<li>Editor basics: Code navigation, auto-complete etc</li>
+	<li>Making a "Hello world" web site</li>
+	<li>Hello world Node.JS service, and deployemnt to the cloud</li>
+	<li>Working with third party libraries and modules.</li>
+	<li>Designing a web/app using CSS and live preview</li>
+	<li>Using the static site generator to write a blog post</li>
+	<li>Connecting to Google Drive</li>
+	<li>Connecting to a SSH/FTP server and edit files remotely</li>
+	<li>Clone a Git repository</li>
+	<li>Working with version control (Mercurial/Git)</li>
+	<li>Implementing a Agar.io clone (multiplayer web game)</li>
+</ul>
 
 Fix tests errors in Firefox!!
-
-Release large file "benchmark" optimization changes, and blog about it
-
 
 Allow git !?
 
@@ -304,6 +326,8 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 todo
 ----
+
+Make the terminal work propertly with the Node.JS REPL.
 
 When moving a file (via file explorer) belonging to a Mercurial repo, also do a "hg move" !
 
@@ -964,6 +988,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Parameter hints and autocomplete in nested functions. Example: foo(par1, bar(something, ))
 
 Issue when editing a SVG file. Colors where off. After reloading from disk, there where spaces inserted in the middle of tags.
 Then when switching to a txt the txt file got a huge left margin.
