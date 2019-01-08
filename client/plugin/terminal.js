@@ -105,10 +105,6 @@
 				}
 			}
 		}
-		
-		if(mouseDirection == "up") {
-			
-		}
 		else return true;
 		
 		// scroll wheel = paste sel, or clipboard !?
