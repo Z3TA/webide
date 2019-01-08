@@ -44,9 +44,10 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Save SSG settings in ssgconf.json!
-
 Able to use the SSG compiler outside the editor! (make it into a Node.JS module !?)
+
+Compile about pages when making a release.
+Put them in /client/about for the cloud editor, and keep them in /guide/src for the desktop version !?
 
 Make the about pages a SSG site!
 

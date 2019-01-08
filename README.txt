@@ -1,14 +1,15 @@
 
 JZedit is a text/code editor/IDE for JavaScript, CSS, HTML and Node.JS development.
 
-Also see LICENCE.txt and contribute.txt.
+Also see LICENCE.txt, contribute.txt and guides in guides/src/ or on https://webide.se/about/about.htm
 
 
-webide.se
----------
-https://webide.se/ is jzedit running as a cloud editor.
+webide.se ?
+-----------
+https://webide.se/ is the jzedit editor running as a cloud editor.
 In this readme you will find instructions on how to run the editor locally on your computer, 
 or host it on your own server.
+
 
 
 Install instructions
