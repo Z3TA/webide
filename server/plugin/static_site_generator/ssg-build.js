@@ -1938,8 +1938,9 @@ if (require.main === module) {
 			console.log(o.scriptName + " : " + o.location + " : " + o.msg);
 		}
 		else if(o.type == "error") {
+			console.log("Static Site Generator error!");
 			if(o.msg) console.log(o.msg);
-			process.exit();
+			process.exit(1);
 		}
 		else throw new Error("Unexpected: ", o);
 	};
