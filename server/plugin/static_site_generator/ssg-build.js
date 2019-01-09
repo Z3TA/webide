@@ -1925,7 +1925,7 @@ if (require.main === module) {
 		}
 		else if(o.type == "file") {
 			filesToSave++;
-			module_fs.writeFile(o.path, o.data, "utf8", function(err) {
+			module_fs.writeFile(o.path, o.text, "utf8", function(err) {
 				filesToSave--;
 				if(err) throw err;
 			});
