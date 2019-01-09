@@ -44,17 +44,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-move help files to guides
 
-copy about to client/about !?
-
-
-Able to use the SSG compiler outside the editor! (make it into a Node.JS module !?)
-
-Compile about pages when making a release.
-Put them in /client/about for the cloud editor, and keep them in /guide/src for the desktop version !?
-
-Make the about pages a SSG site!
 
 Very few users do anything after loading the editor ... 
 
@@ -78,6 +68,8 @@ Showcase editor core features when opening the editor for the first time !?
 </ul>
 
 Fix tests errors in Firefox!!
+
+x to close a tab is too far down when screen is small in Firefox!
 
 Allow git !?
 
