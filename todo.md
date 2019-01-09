@@ -44,7 +44,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Plugins must register query string options !?
+Plugins must register query string options !? So documentation can be auto generated... ?
 
 working on embed example
 
