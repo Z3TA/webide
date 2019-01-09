@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 
+	console.log("Hello from embed.js");
+	
 /*
 	How to embed the editor in a web site:
 	
@@ -10,7 +12,6 @@
 		Then place code snippets in textarea elements, with editor in the class atrribute, like this:
 		<textarea class="editor" name="code.js">alert("Hello World");</textarea>
 	
-		
 		
 		(tip: Turn off JavaScript and adjust the rows and cols attributes for the textarea elements to make the text fit)
 		
@@ -69,7 +70,10 @@ window.addEventListener("load", function windowLoaded() {
 		var editorWidth = offsetWidth || defaultEditorWidth;
 		var editorHeight = offsetHeight || defaultEditorHeight;
 			var editorLocation = getEditorLocation();
-		var editorSettings = "?";
+			var editorQuery = "?embed=true&disable=menu,file_tabs";
+			var query = ta.getAttribute("query");
+			
+			if(query) editor += "&" + query;
 		
 			var counter = 0;
 			var fileNameOriginal = fileName;
@@ -122,7 +126,7 @@ window.addEventListener("load", function windowLoaded() {
 				}
 				
 				});
-		iframe.src = editorLocation + editorSettings;
+			iframe.src = editorLocation + editorQuery;
 		}
 	
 });
@@ -147,7 +151,10 @@ window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 	});
 	
 	function getEditorLocation() {
-		// The location of the editor should be the same as this file, or postMessage will not work! (meaning the textarea's wont be updated)
+		/*
+			The location of the editor should be the same as this file, 
+			or postMessage will not work! (meaning the textarea's wont be updated)
+		*/
 		
 		var url;
 		
