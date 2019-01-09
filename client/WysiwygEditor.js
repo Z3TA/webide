@@ -2084,7 +2084,8 @@ var WysiwygEditor;
 		
 		if(!inlinedMessage) {
 			console.warn("Unable to inline msg=" + msg);
-			alertBox(msg);
+			consoleLogOriginal(msg);
+			//alertBox(msg);
 		}
 	}
 	
