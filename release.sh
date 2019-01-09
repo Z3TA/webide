@@ -54,8 +54,12 @@ sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 
+# Build the documentation/guides
+nodejs temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/release/linux/guide/src/ temp/release/linux/documentation/ true
+
+
 # Generate bundle
-# Make sure the bundle is generater After any scripts has been modified
+# Make sure the bundle is generated *after* any scripts has been modified!
 cd temp/release/linux/
 nodejs makebundle.js
 gzip client/bundle.htm --best --keep
@@ -68,6 +72,7 @@ rm -rf temp/release/linux/webextension/
 rm -rf temp/release/linux/hosted_chrome_app/
 rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/client/plugin/jswordwrap/
+rm -rf temp/release/linux/guide/
 
 rm temp/release/linux/charStats.js
 rm temp/release/linux/webide_release.sh
@@ -91,6 +96,10 @@ find temp/release/linux/client/gfx/font/ -type d -empty -delete
 
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
+
+# Move the documentation
+mv temp/release/linux/documentation/ temp/release/linux/client/about/
+
 
 echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/

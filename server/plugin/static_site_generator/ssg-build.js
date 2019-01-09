@@ -1,6 +1,9 @@
 /*
 	
 	Debug using nodejs:
+	nodejs ssg-build.js /path/to/source/ path/to/preview [publish]
+	
+	publish: true = Ignore files names starting with _underscore
 	
 	
 	### todo:
@@ -77,19 +80,19 @@ if(require.main === module) {
 */
 
 // Require modules before we are put into chroot!
-var FS = require("fs");
-var PATH = require('path');
-var MAMMOTH = require("mammoth");
-var MARKED = require('marked');
-var JSCHARDET = require("jschardet");
-var LOGMODULE = require("../../../shared/log.js");
+var module_fs = require("fs");
+var module_path = require('path');
+var module_mammoth = require("mammoth");
+var module_marked = require('marked');
+var module_jschardet = require("jschardet");
+var module_logmodule = require("../../../shared/log.js");
 
 // These paths needs to be absolute!
 var BASEPATH; // Path to files that should be processed
 var PUBFOLDER; // The bublic/publication folder 
 
 // todo: Allow more flags
-var PUBLISH = process.argv[4];
+var PUBLISH; // Ignores _underscore files if set to true.
 
 //log("PUBLISH=" + PUBLISH);
 
@@ -184,7 +187,7 @@ var main = {
 				// FTP upload is separate script! (deploy.js)
 				
 				console.timeEnd("total time");
-					main_callback(null);
+					if(MAIN_CALLBACK) MAIN_CALLBACK(null);
 				
 			});
 			
@@ -203,7 +206,7 @@ var main = {
 	function saveURLs(callback) {
 	var filePath = resolvePath(BASEPATH, "url.json")
 	
-	FS.writeFile(filePath, JSON.stringify(URL, null, 2), "utf8", function(err) {
+	module_fs.writeFile(filePath, JSON.stringify(URL, null, 2), "utf8", function(err) {
 	if(err) error(err);
 	
 	callback();
@@ -215,7 +218,7 @@ var main = {
 	
 	var filePath = resolvePath(BASEPATH, "url.json")
 	
-	FS.readFile(filePath, "utf8", function (err, data) {
+	module_fs.readFile(filePath, "utf8", function (err, data) {
 	if(err == null) {
 	URL = JSON.parse(data);
 	callback();
@@ -269,7 +272,7 @@ function copyOtherFiles(callback) {
 			// Asume som detective work has been done to figure out what files are used
 			if(fileInUse(src)) {
 			log("Copying file=" + path);
-			FS.copy(OTHERFILES[i], path, function (err) {
+			module_fs.copy(OTHERFILES[i], path, function (err) {
 			if (err) error(err);
 			
 			if(--filesToCopy == 0) callback();
@@ -280,7 +283,7 @@ function copyOtherFiles(callback) {
 			else {
 			
 			log("Not used: " + src);
-			FS.unlink(path, function (err, path) {
+			module_fs.unlink(path, function (err, path) {
 			if(err == null) {
 			log("Deleted file=" + path);
 			}
@@ -792,7 +795,7 @@ function findFiles(dir, parentBranch, done) {
 		
 		wait_readdir++;
 		
-		FS.readdir(dir, function(err, list) {
+		module_fs.readdir(dir, function(err, list) {
 			if (err) error(err);
 			
 			if(ERROR) return;
@@ -812,7 +815,7 @@ function findFiles(dir, parentBranch, done) {
 				
 				var fileType = "";
 				
-				FS.stat(filePath, function(err, file) {
+				module_fs.stat(filePath, function(err, file) {
 					
 					if(err) error(err);
 					if(!file) error(new Error("Stat error!?"));
@@ -918,7 +921,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	document.lead = "";
 	document.head = "";
 	
-	FS.stat(filePath, function(err, stat) {
+	module_fs.stat(filePath, function(err, stat) {
 		
 		if(!document.created) document.created = new Date(stat.ctime);
 		
@@ -934,7 +937,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		document.path = changeFileType(document.path, "docx", "htm");
 		
 		var options = {
-			convertImage: MAMMOTH.images.inline(function(element) {
+			convertImage: module_mammoth.images.inline(function(element) {
 				return element.read("base64").then(function(imageBuffer) {
 					return {
 						src: "data:" + element.contentType + ";base64," + imageBuffer
@@ -943,7 +946,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 			})
 		};
 		
-		MAMMOTH.convertToHtml({path: filePath}, options)
+		module_mammoth.convertToHtml({path: filePath}, options)
 		.then(function(result){
 			var html = result.value; // The generated HTML
 			
@@ -952,14 +955,14 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		.done();
 	}
 	else {
-		FS.readFile(filePath, function (err, data) {
+		module_fs.readFile(filePath, function (err, data) {
 			
 			if (err) error(err);
 			
 			if(ERROR) return;
 			
 			// Detect encoding
-			var  enc = JSCHARDET.detect(data);
+			var  enc = module_jschardet.detect(data);
 			
 			//log("enc=" + JSON.stringify(enc) + " path=" + filePath);
 			
@@ -993,11 +996,11 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				
 				log("metaEnds=" + metaEnds);
 				
-				data = MARKED(data); // Convert markdown to html
+				data = module_marked(data); // Convert markdown to html
 				
 			}
 			else if(fileType == "docx") {
-				data = MAMMOTH.convertToHtml(input, options);
+				data = module_mammoth.convertToHtml(input, options);
 				document.path = changeFileType(document.path, "md", "htm");
 			}
 			
@@ -1561,15 +1564,22 @@ function mustBePath(path) {
 	if(ERROR) return;
 	
 	// Make sure it ends with / or \
-	
 	var endsWidth = path.substring(path.length-1);
 	
-	if(endsWidth == "/" || endsWidth == "\\") {
-		return path;
-	}
-	else {
+	if(! (endsWidth == "/" || endsWidth == "\\") ) {
 		error(new Error("Path must end with a slash! path=" + path));
+		return null;
 	}
+	
+	if(path.slice(0,1) == ".") {
+		// Resolve relative path
+		path = module_path.resolve(path);
+	}
+	else if(! module_path.isAbsolute(path) ) {
+		path = module_path.join(process.cwd() || __dirname, path);
+	}
+	
+	return path;
 }
 
 function fileInUse(src) {
@@ -1606,7 +1616,7 @@ function findMedia(txt, lookFor, group) {
 			files[i] = replaceAll(files[i], "\\", "/");
 			
 			if(MEDIAFILES.indexOf(files[i]) == -1) {
-				console.log("Found media file: " + files[i]);
+				log("Found media file: " + files[i]);
 				MEDIAFILES.push(files[i]);
 				}
 		}
@@ -1671,8 +1681,8 @@ Folder.prototype.latest = function(limit) {
 }
 
 
-/*
-	function copyFile(source, target, cb) {
+
+function copyFile(source, target, cb) {
 	// Not used!
 	var cbCalled = false;
 	var rdOpen = false;
@@ -1684,7 +1694,7 @@ Folder.prototype.latest = function(limit) {
 	// Make sure the target path exist!
 	
 	
-	var rd = FS.createReadStream(source);
+	var rd = module_fs.createReadStream(source);
 	rd.on("error", function(err) {
 	log("read error!");
 	done(err);
@@ -1696,7 +1706,7 @@ Folder.prototype.latest = function(limit) {
 	if(rdOpen && wrOpen) startPipe();
 	});
 	
-	var wr = FS.createWriteStream(target, { flags: 'w'});
+	var wr = module_fs.createWriteStream(target, { flags: 'w'});
 	wr.on("error", function(err) {
 	log("write error!");
 	done(err);
@@ -1721,7 +1731,6 @@ Folder.prototype.latest = function(limit) {
 	}
 	}
 	}
-*/
 
 function parseError(doc, scriptCount, err) {
 	var arr = err.stack.match(/at evalmachine.<anonymous>:(\d):(\d)/);
@@ -1792,7 +1801,7 @@ function occurrences(string, subString, allowOverlapping) {
 
 function log(str) {
 	if(SEND_MESSAGE) SEND_MESSAGE({type: "debug", msg: str});
-	else LOGMODULE.log(str);
+	else module_logmodule.log(str);
 }
 
 function resolvePath(dir, file) {
@@ -1895,15 +1904,51 @@ function getStack(scriptName, lineNr) {
 
 
 if (require.main === module) {
-	console.log('called directly');
+	console.log('Static Site Generator spawned.');
 	
 	// These paths needs to be absolute!
-	BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
-	PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder
+	main.basePath = mustBePath(process.argv[2], "."); // Path to files that should be processed
+	main.pubFolder = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder
+	main.publish = !!process.argv[4];
+	
+	var debug = !!process.argv[5];
+	var filesToCopy = 0;
+	var filesToSave = 0;
+	
+	main.onMessage = function io(o) {
+		if(o.type == "copy") {
+			filesToCopy++;
+			copyFile(o.from, o.to, function(err) {
+				filesToCopy--;
+				if(err) throw err;
+			});
+		}
+		else if(o.type == "file") {
+			filesToSave++;
+			module_fs.writeFile(o.path, o.data, "utf8", function(err) {
+				filesToSave--;
+				if(err) throw err;
+			});
+		}
+		else if(o.type == "debug") {
+			if(debug) console.log("debug: " + o.msg);
+		}
+		else if(o.type == "console") {
+			// Messages from scrips
+			console.log(o.scriptName + " : " + o.location + " : " + o.msg);
+		}
+		else if(o.type == "error") {
+			if(o.msg) console.log(o.msg);
+			process.exit();
+		}
+		else throw new Error("Unexpected: ", o);
+	};
 	
 	main.compile();
-} else {
-	console.log('required as a module');
+	
+}
+else {
+	console.log('Static Site Generator required as a module');
 	module.exports = main;
 }
 
