@@ -50,6 +50,15 @@ blockquote {
 	box-sizing: border-box;
 }
 
+textarea {
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+table, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
 
 p {
 	margin-top: 1.0em;
