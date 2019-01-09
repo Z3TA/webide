@@ -7983,8 +7983,15 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 	function getMousePosition(mouseEvent) {
 		
 		// Mouse position is on the current element (most likely Canvas) 
-		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
+		
+		// We might get an error if running in an iframe: Error: Permission denied to access property "offsetX"
+		try {
+			var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
+		}
+		catch(err) {
+			console.warn(err.message);
+		}
 		
 		//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
 		
