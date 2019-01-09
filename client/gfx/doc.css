@@ -41,6 +41,13 @@ abstract {
 	margin: 1em;
 	padding-top: 0;
 	padding-bottom: 0;
+	
+	box-sizing: border-box;
+}
+
+blockquote {
+	width: 100%;
+	box-sizing: border-box;
 }
 
 
@@ -130,7 +137,8 @@ legend span {
 
 fieldset {
 	display: inline-block;
-	width: 750px;
+	width: 100%;
+	max-width: 750px;
 	margin: 16px;
 	padding: 16px;
 	border: 0px;
@@ -144,6 +152,7 @@ fieldset {
 	background-repeat: repeat;
 	box-shadow: 0 0 0 1px rgba(14,41,57,.12),0 2px 5px #c9cfd5,inset 0 -1px 2px rgba(14,41,57,.15);
 	
+	box-sizing: border-box;
 }
 
 .alpha.warning {
@@ -275,3 +284,26 @@ code {
 	padding: 1px;
 	border-radius: 2px;
 }
+
+@media (max-width: 820px) {
+	
+	.main {
+		/*border: 1px solid red;*/
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+	
+	fieldset {
+		/*border: 1px solid blue;*/
+		margin-left: 0;
+		margin-right: 0;
+	}
+	
+	blockquote {
+		margin: 0;
+		max-width: 90%;
+	}
+	
+}
+
+
