@@ -1,11 +1,11 @@
 <DOCTYPE HTML>
 <html>
 <head>
-	<meta charset="utf-8">
 	
 	<title>Embed editor example</title>
 	
 	<!--<script src="https://webide.se/embed.js"></script>-->
+	
 	<script src="http://127.0.0.1:8080/embed.js"></script>
 	
 	<style>
@@ -17,7 +17,7 @@
 			border-right: 1px solid #aaa;
 			border-bottom: 1px solid #aaa;
 			margin-bottom: 1em;
-			box-shadow:         3px 3px 5px 2px #eee;
+			box-shadow: 3px 3px 5px 2px #eee;
 		}
 		
 		
@@ -29,15 +29,43 @@
 		
 		<h1>Embedding the editor into a web page</h1>
 		
-		
-		<textarea class="editor" rows="20" cols="80">
-		Hello world!
-		</textarea>
-		
-		<textarea name="filename.txt" class="editor">some code ...</textarea>
-		
+<h3>Option A: Iframe</h3>
+
+<textarea rows="4" cols="80">
+<iframe src="https://webide.se/?embed=true&disable=menu,file_tabs" width="600" height="400" border="0" class="editor"></iframe>
+</textarea>
+
+<p>Also see <a href="querystring.htm">Querty string options</a>.</p>
+
+<h3>Option B: Replace an textarea</h3>
+
+<p>Put the following script in the page header. It will replace any textarea with class="editor".
+The script will also disable a bunch of plugins to make the editor feel more lightweight.</p>
+
+<textarea rows="2" cols="80">
+<script src="https://webide.se/embed.js"></script>
+</textarea>
+
+<p>Then inser the editable text as a textarea.</p>
+
+<textarea rows="2" cols="80" onload="this.innerText='foo';">
+<textarea class="editor" rows="20" cols="80" name="code.js">alert("Hello World");&lt;/textarea>
+</textarea>
+
+<p>The script will automatically update the content of the textarea when you edit the file in the editor!<br>
+You can access the text by accessing the textarea value, for example:</p>
+
+<textarea rows="2" cols="80">
+document.getElementsByName('code.js')[0].value
+</textarea>
+
+<p>See the textarea below, it should have been replaced by the editor. Try typing something then click "Run code" to evaulate it:</p>
+
+<textarea class="editor" rows="20" cols="80" name="code.js">alert("Hello World");</textarea>
+<br>
+<button onclick="eval(document.getElementsByName('code.js')[0].value)">Run code</button>
+
 		</body>
 		</html>
-		
 		
 		
