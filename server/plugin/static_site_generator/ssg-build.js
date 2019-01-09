@@ -1349,10 +1349,17 @@ Document.prototype.findReplace = function(reString, group, replaceWith, searchPa
 	var result = [];
 	var replace = [];
 	
+	var reCommentedOut;
+	
 	while ((arr = re.exec(searchInStr)) !== null) {
 		//log("Found: " + JSON.stringify(arr));
-		replace.push(arr[0]);
-		result.push(arr[group]);
+		
+		// Only add it if it's not commented out!
+		reCommentedOut = new RegExp("<!--\\s*" + escapeRegExp(arr[0]) + "\\s*");
+		if(! searchInStr.match(reCommentedOut) ) {
+			replace.push(arr[0]);
+			result.push(arr[group]);
+		}
 	}
 	
 	if(result.length == 0) {
@@ -1369,7 +1376,9 @@ Document.prototype.findReplace = function(reString, group, replaceWith, searchPa
 	
 }
 
-
+function escapeRegExp(str) {
+	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
 function contentOfHtmlTag(text, tag, nr) {
 	
