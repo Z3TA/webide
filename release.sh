@@ -55,7 +55,8 @@ sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 
 # Build the documentation/guides
-nodejs temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/release/linux/guide/src/ temp/release/linux/documentation/ true
+mkdir temp/release/linux/documentation/
+nodejs temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/release/linux/guides/src/ temp/release/linux/documentation/ true true
 
 
 # Generate bundle
@@ -98,7 +99,7 @@ echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
 # Move the documentation
-mv temp/release/linux/documentation/ temp/release/linux/client/about/
+mv temp/release/server/documentation/ temp/release/server/client/about/
 
 
 echo "Clean up the local-desktop release"
@@ -172,6 +173,8 @@ cd ../../
 
 echo "Remove files no longer needed"
 rm version.inc
+
+exit
 
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/

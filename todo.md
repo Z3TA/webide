@@ -44,6 +44,11 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+move help files to guides
+
+copy about to client/about !?
+
+
 Able to use the SSG compiler outside the editor! (make it into a Node.JS module !?)
 
 Compile about pages when making a release.
