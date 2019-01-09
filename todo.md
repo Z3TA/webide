@@ -44,7 +44,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Plugins must register query string options !?
 
+working on embed example
 
 Very few users do anything after loading the editor ... 
 
