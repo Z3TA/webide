@@ -7,22 +7,24 @@
 
 <h1>Node.JS</h1>
 
-<p>Node.JS is a framework for creating small server apps and micro services in the JavaScript programming language.<br>
-Node.JS have relative good performance and scalability.</p>
+<p>Node.JS is a open source JavaScript engine and library for creating high performance and scalable server apps and micro services.</p>
 
 
 
-<h2>Running Node.JS scripts in the editor</h2>
+<h2>Running Node.JS via the editor</h2>
 
-<p>Open any JavaScript (Node.JS) file and press <kbd>F1</kbd>
-(or click "Run nodejs script" in the menu) to run it ...<br>
+<p>Open any JavaScript (node.js) file and press <kbd>F1</kbd>
+(or click "Run nodejs script" in the menu).<br>
 Try any of the example files in the /nodejs/ folder.</p>
+
+<p>Press <kbd>F3</kbd> to stop the script.</p>
 
 
 <h2>Use Unix sockets (named pipes) instead of ports!</h2>
 
-<p>Use for example /sock/nameofsocket instead of a port 80.
-Eg. replace server.listen(80) with server.listen("/sock/nameofsocket") </p>
+<p>The cloud editor communicates with the Internet via unix sockets.<br>
+So instead of using for example port 80, use /sock/nameofsocket.<br>
+Eg. replace <i>server.listen(80)</i> with <i>server.listen("/sock/nameofsocket")</i></p>
 
 <p>All HTTP (and websocket) request going to
 https://nameofsocket.username.webide.se
@@ -35,11 +37,7 @@ The editor will automatically delete sockets files when the script exit.</p>
 
 <h2>Deploying to production</h2>
 
-<p>Your nodejs scrips will automatically stop when you disconnect from the editor server.
-It's however possible to make a Node.JS script run forever,
-and have it automatically restart on errors and server reboot.</p>
-
-<p>Press <kbd>Ctrl + F1</kbd> to deploy the currently open Node.js script to "production".<br>
+<p>The cloud editor makes it easy to deploy an app into production. Just press <kbd>Ctrl + F1</kbd>.<br>
 This will copy the entire project into a production environment and (re)start the script.<br>
 (Make sure you test the script before deploying it.)</p>
 
@@ -53,14 +51,14 @@ This will copy the entire project into a production environment and (re)start th
 <p>Production log files can be found in the /log/ directory.</p>
 
 
+
 <h3>Production vs Development enviroment</h3>
 
 <p>The "production" enviroment will append prod: true,
 and myName: username to the process.env (enviroment variables).<br>
-While normal (development) will have dev: true (no prod variable).</p>
-
-<p>This can be useful if you for example want to use a different
-unix socket for production then in development.</p>
+Scripts started from the editor will have process.env.dev set to true.<br>
+This is useful if you for example want to use a <i>different</i> 
+unix sockets for production then in development.</p>
 
 
 </body>
