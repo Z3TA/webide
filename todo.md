@@ -44,21 +44,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-
-
-working on embed example
-
-Very few users do anything after loading the editor ... 
-
-There is a welcome guide, but almost no one use it.
-
-Showcase editor core features when opening the editor for the first time !?
-
-
 <ul>
-	<li>Editor basics: Code navigation, auto-complete etc</li>
 	<li>Making a "Hello world" web site</li>
-	<li>Hello world Node.JS service, and deployemnt to the cloud</li>
+	<li>Hello world Node.JS service, and deployment to the cloud</li>
 	<li>Working with third party libraries and modules.</li>
 	<li>Designing a web/app using CSS and live preview</li>
 	<li>Using the static site generator to write a blog post</li>
@@ -66,7 +54,7 @@ Showcase editor core features when opening the editor for the first time !?
 	<li>Connecting to a SSH/FTP server and edit files remotely</li>
 	<li>Clone a Git repository</li>
 	<li>Working with version control (Mercurial/Git)</li>
-	<li>Implementing a Agar.io clone (multiplayer web game)</li>
+	<li>Implementing a Agar.io clone (multi-player web game)</li>
 </ul>
 
 Fix tests errors in Firefox!!
@@ -80,25 +68,28 @@ More and better examples and tutorials!
 
 todo: file.isStreaming usage
 
-bug: Nuked the editor by accidently pasting 50k LOC into the search box in the find/replace widget
+bug: Nuked the editor by accidentally pasting 50k LOC into the search box in the find/replace widget
 
 ---
 User option: First time opening the editor.
 Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
 
-User testing: Do you want all intaractions with the editor to be recorded ?
+User testing: Do you want all interactions with the editor to be recorded ?
 ---
 
 Finish blog post about mobile support!
 
 
-cant bring up the menu when somthing covers most of the screen.
+Annoying when you accidentally go into vim modal mode
+
+
+cant bring up the menu when something covers most of the screen.
 
 make the file explorer "full screen" if it covers more then 80%
 and allow scrolling like with full screen menu.
 
 
-Command discovery: When holding down Ctrl or Alt, you see all avaible commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
+Command discovery: When holding down Ctrl or Alt, you see all available commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
 
 
 bug: Virtual keyboard switches to wide format even though the screen

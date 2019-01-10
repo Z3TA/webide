@@ -131,11 +131,9 @@
 (function() {
 	"use strict";
 	
-	if(window.location.href.indexOf("&vim") == -1) {
-console.warn("vim mode hidden behind &vim query string flag"); // Work in progress!
-		return;
-	}
+	//if(window.location.href.indexOf("&vim") == -1) {return console.warn("vim mode hidden behind &vim query string flag");} // Work in progress!
 	
+
 	// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	var BACKSPACE = 8;
 	var UP = 38;
@@ -259,7 +257,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 				
 			}
 			
-			EDITOR.addRender(showCommandBuffer);
+			EDITOR.addRender(showCommandBuffer, 4600);
 			
 			if((window.location.href.indexOf("&vimactive") != -1)) {
 				toggleVim();
