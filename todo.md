@@ -44,7 +44,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Plugins must register query string options !? So documentation can be auto generated... ?
+
 
 working on embed example
 
@@ -926,6 +926,8 @@ Android always show the URL bar when you scroll up.
 We could however come up with a another way to scroll files, instead of up/down motions.
 But it's probably not worth it when both Android and iOS has a add2desktop for web app,
 that lets the web app run in full screen (without the browser chrome).
+
+Plugins must register query string options !? So documentation can be auto generated... ?
 
 
 Things I've learned

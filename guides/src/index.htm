@@ -5,10 +5,32 @@
 </head>
 <body>
 
-	<h1>Guides and articles</h1>
+<h1>Document index</h1>
 	
-	<p>Under construction ...</p>
+<p>List of all documents:</p>
+
+<ul>
+	<?JS
+	
+	var docs = document.folder.documents;
+	
+	var doc;
+	for(var name in docs) {
+		
+		doc = docs[name];
+		
+		document.write('\n\t\t<li>\n');
+		
+		document.write('\t\t\t<a href="' + doc.url + '">' + doc.title + '</a>\n');
+		//document.write('\t\t\t<p>' + doc.lead.replace(/<[^>]*>/g, " ") + '</p>\n');
+		
+		document.write('\t\t</li>\n');
+		
+	}
+	
+	?>
+</ul>
+
 
 </body>
 </html>
-	
