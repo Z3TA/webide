@@ -500,25 +500,23 @@ function compile(baseTree) {
 			//document.console = console; // todo: send the message to the IDE client
 			document.console = {
 				log: function () {
-					var msg = parseString(arguments[0]);
-					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
-					var where = getStack(scriptName);
-					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+					reportConsole(arguments);
 				},
 				warn: function () {
-					var msg = parseString(arguments[0]);
-					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
-					var where = getStack(scriptName);
-					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+					reportConsole(arguments);
 				},
 				error: function () {
-					var msg = parseString(arguments[0]);
-					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
-					var where = getStack(scriptName, 0);
-					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+					reportConsole(arguments);
 				}
-				
-			};
+				};
+			
+			function reportConsole(args) {
+				var msg = parseString(args[0]);
+				for (var i = 1; i < args.length; i++) msg += " " + parseString(args[i]);
+				var where = getStack(scriptName);
+				var loc = getEvelLocation(document);
+				SEND_MESSAGE({type: "eval-console", message: msg, source: loc.source, line: loc.line, col: loc.col});
+			}
 			
 			
 			document.require = function(moduleName) {
@@ -1288,7 +1286,7 @@ Document.prototype.evaluate = function(str) {
 			//log("code=" + code);
 			
 			insideCode = false;
-			scriptCount++;
+			document.scriptId = ++scriptCount;
 			
 			//buffer.pop(); // Remove the % from the buffer
 			
@@ -1299,7 +1297,7 @@ Document.prototype.evaluate = function(str) {
 					document.write(script.runInContext(context));
 				}
 				catch(err) {
-					if(err) parseError(document, scriptCount, err);
+					if(err) reportEvalError(parseEvalError(document, scriptCount, err));
 				}
 				
 				//document.write(eval(code.substring(1)));
@@ -1313,7 +1311,7 @@ Document.prototype.evaluate = function(str) {
 					script.runInContext(context);
 				}
 				catch(err) {
-					if(err) parseError(document, scriptCount, err);
+					if(err) reportEvalError(parseEvalError(document, scriptCount, err));
 				}
 				//eval(code);
 				//(1, eval)(code);
@@ -1328,6 +1326,18 @@ Document.prototype.evaluate = function(str) {
 		lastChar3 = lastChar2;
 		lastChar2 = lastChar;
 		lastChar = char;
+		
+		function reportEvalError(evalError) {
+			SEND_MESSAGE({
+				type: "eval-error",
+				msg: "Line:" + evalError.line + ": " + evalError.source + ": " + evalError.message + "",
+				message: evalError.message,
+				source: evalError.source,
+				line: evalError.line,
+				col: evalError.col
+			});
+		}
+		
 	}
 }
 
@@ -1741,10 +1751,17 @@ function copyFile(source, target, cb) {
 	}
 	}
 
-function parseError(doc, scriptCount, err) {
-	var arr = err.stack.match(/at evalmachine.<anonymous>:(\d):(\d)/);
+function parseEvalError(doc, scriptCount, err) {
+	var arr = err.stack.match(/at evalmachine.<anonymous>:(\d+):(\d+)?/);
 	
 	if(err == null) return;
+	
+	if(arr == null) {
+		// evalmachine is missing from the stack trace
+		arr = err.stack.match(/evalmachine.<anonymous>:(\d+)/);
+	}
+	
+	if(arr == null) return error( new Error("Unable to parse error stack=" + err.stack + " message=" + err.message) );
 	
 	//log(doc.original);
 	
@@ -1759,7 +1776,7 @@ function parseError(doc, scriptCount, err) {
 	filePath = filePath.replace(workingDir, "");
 	
 	var line = parseInt(arr[1]);
-	var column = parseInt(arr[2]);
+	var column = arr[2] && parseInt(arr[2]);
 	
 	var msg = err.message.replace('evalmachine.<anonymous>:' + line, "");
 	
@@ -1773,15 +1790,11 @@ function parseError(doc, scriptCount, err) {
 	var upUntil = str.substr(0, startIndex);
 	var lines = occurrences(upUntil, "\n");
 	
+	console.log("line=" + line + " lines=" + lines);
+	
 	line += lines + 2;
 	
-	//var errMessage = "" + msg + "\nLine:" + line + " column: " + column + " of script nr: " + scriptCount + " of file: " + filePath;
-	
-	var errMessage = "Line:" + line + ": " + filePath + ": " + msg + "";
-	
-	//log(errMessage);
-	SEND_MESSAGE({type: "error", msg: errMessage});
-	
+	return {message: msg, source: filePath, line: line, col: column}
 }
 
 function occurrences(string, subString, allowOverlapping) {
@@ -1846,6 +1859,16 @@ function error(err) {
 function parseString(obj) {
 	if(typeof obj == "object") return JSON.stringify(obj, null, 2);
 	else return obj + "";
+}
+
+function getEvelLocation(document) {
+	
+	// Make an error to get the stack
+	var err = new Error();
+	
+	var scriptCount = document.scriptId;
+	
+	return parseEvalError(document, scriptCount, err);
 }
 
 function getStack(scriptName, lineNr) {

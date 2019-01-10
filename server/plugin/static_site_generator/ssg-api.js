@@ -201,11 +201,10 @@ API.compile = function compile(user, json, callback) {
 			}
 			
 			//console.log("SSG data: " + JSON.stringify(data));
-			if(data.type == "console" || data.type == "error") {
+			if(data.type == "eval-console" || data.type == "eval-error") {
 			user.send({ssgBuildMessage: data});
 			}
-			
-			if(data.type == "file") {
+			else if(data.type == "file") {
 				filesToSave++;
 				user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
 				createFile(user.toVirtualPath(data.path), data.text)
@@ -219,6 +218,7 @@ API.compile = function compile(user, json, callback) {
 				console.log("SSG: " + data.msg);
 			}
 			else if(data.type == "error") {
+				user.send({ssgBuildMessage: data});
 				//console.log(data);
 				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
 				else if(data.code == "ENOENT") console.warn("Problem occured when opening file...\n" + data.stack);

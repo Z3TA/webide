@@ -2927,6 +2927,8 @@ canvas = EDITOR.canvas;
 		
 		console.time("addInfo");
 		
+		if(isNaN(col)) col = 0;
+		
 		var info = EDITOR.info;
 		
 		if(info.length > 100) {
@@ -5560,7 +5562,6 @@ var word = "";
 		
 		return FAIL;
 	}
-	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		

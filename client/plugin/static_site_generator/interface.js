@@ -292,6 +292,28 @@
 	function ssgBuildMessage(msg) {
 		console.log("ssgBuildMessage: " + JSON.stringify(msg));
 		
+		// Inlinde errors and console.log's
+		if(msg.type=="eval-console" || msg.type=="eval-error") {
+			var file = EDITOR.files[msg.source];
+			if(file) {
+				if(msg.type=="eval-console") var level = 3;
+				if(msg.type=="eval-error") var level = 1;
+				
+				if(msg.col && msg.line) {
+					var indentationCharacters = file.grid[msg.line-1].indentationCharacters.length;
+					var col = msg.col - indentationCharacters;
+				}
+				
+				if(msg.line) {
+					file.scrollToLine(msg.line);
+					EDITOR.addInfo(msg.line-1, col, msg.message, file, level);
+					if(EDITOR.currentFile != file) EDITOR.showFile(file);
+				}
+				
+			}
+		}
+		
+		
 		var stdOutFile = selectedSite.name + ".build.log";
 		
 		if(EDITOR.files.hasOwnProperty(stdOutFile)) {
@@ -330,8 +352,9 @@
 		
 		console.log("appendBuildLog: " + file.path + " msg=" + msg);
 		
-		if(msg.type == "console") file.writeLine('"' + msg.msg + '" ' + msg.location + "");
+		if(msg.type == "eval-console") file.writeLine('"' + msg.message + '" ' + msg.source + "");
 		else if(msg.type == "error") file.writeLine('ERROR: ' + msg.msg);
+		else if(msg.type == "eval-error") file.writeLine('Script error: ' + msg.msg);
 		else file.writeLine(JSON.stringify(msg, null, 2));
 		
 		//else if(msg.exit) file.writeLine(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
