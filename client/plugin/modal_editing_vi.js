@@ -153,7 +153,7 @@
 	var Y = 89;
 	var F = 70;
 	var B = 66;
-	var M = 109;
+	var M = 77;
 
 	var vimMenuItem;
 	var vimCommandBuffer = "";
