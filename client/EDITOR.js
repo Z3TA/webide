@@ -4251,17 +4251,6 @@ var word = "";
 		
 		EDITOR.tests.push({fun: fun, text: funName, order: order, parallel: parallel});
 		
-		// Sort the tests by parallel and order
-		EDITOR.tests.sort(function sortTests(a, b) {
-			if(a.oparallel && !b.parallel) return 1; // Tests with parallel==false should be first!
-			else if(b.parallel && !a.parallel) return -1;
-			else if(a.parallel == b.parallel) {
-				if(a.order > b.order) return 1;
-				if(b.order > a.order) return -1;
-				else return 0;
-			}
-		});
-		
 	}
 	
 	EDITOR.connect = function(callback, protocol, serverAddress, user, passw, keyPath, workingDir) {
@@ -6117,6 +6106,17 @@ var word = "";
 		
 		// Prepare for tests ...
 		
+		// Sort the tests by parallel and order
+		EDITOR.tests.sort(function sortTests(a, b) {
+			if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
+			else if(b.parallel && !a.parallel) return -1;
+			else if(a.parallel == b.parallel) {
+				if(a.order > b.order) return 1;
+				if(b.order > a.order) return -1;
+				else return 0;
+			}
+		});
+		
 		if(!onlyOne) {
 		// Close all files
 		for(var path in EDITOR.files) {
@@ -6168,10 +6168,13 @@ var word = "";
 						return;
 					}
 				}
-				throw new Error("Could not find a test with id=1");
+				throw new Error("testInfo: Could not find a test with id=1");
 			}
 			else {
 				console.log("testInfo: Running " + testsToRun + " tests ...");
+				
+				//console.log(EDITOR.tests);
+				
 				testLoop();
 			}
 			
@@ -6203,10 +6206,10 @@ asyncInitTest(EDITOR.tests[i]);
 			function runTest(test) {
 				currentRunningTest = test.text;
 				
-				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel);
+				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync);
 				
 				if(!test.parallel && currentlyInParallel > 0) {
-					throw new Error("No other test is allowed to be running while a non-parallel test is about to run!");
+					throw new Error("No other test is allowed to be running while a non-parallel test is about to run! waitingForSync=" + waitingForSync + " currentlyInParallel=" + currentlyInParallel + " test.text=" + test.text);
 				}
 				
 				currentlyInParallel++;
@@ -6241,7 +6244,7 @@ asyncInitTest(EDITOR.tests[i]);
 					
 					stillRunning.splice(stillRunning.indexOf(test.text), 1);
 					
-					console.log("testInfo: finished=" + finished + " started=" + started + " testsToRun=" + testsToRun + " currentlyInParallel=" + currentlyInParallel);
+					console.log("testInfo: finished=" + finished + " started=" + started + " testsToRun=" + testsToRun + " currentlyInParallel=" + currentlyInParallel + " waitingForSync=" + waitingForSync);
 					
 					if(result !== true) testFail(test.text, result);
 					
@@ -6252,7 +6255,7 @@ waitingForSync = false;
 					}
 					
 					if(finished == testsToRun) allTestsDone();
-					else if(testsToRun / finished > .9) {
+					else if( (testsToRun / finished) < 1.1 ) {
 						// 90% of tests are done, show those that are still not finished
 						
 						console.log("testInfo: Not finished: " + stillRunning.join(", "));
