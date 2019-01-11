@@ -3014,7 +3014,11 @@ firstTimeVim = false;
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
-			if(typeof callback == "function") callback(true);
+			
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+callback(true);
+			}
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest1 passed!");
@@ -3299,7 +3303,10 @@ firstTimeVim = false;
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			
 			//EDITOR.closeFile(file.path);
-			if(typeof callback == "function") callback(true);
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+				callback(true);
+			}
 			else {
 				EDITOR.mock("typing", "kkk4dd");
 				EDITOR.mock("typing", "aTest2 passed!");
@@ -3594,7 +3601,10 @@ firstTimeVim = false;
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
-			if(typeof callback == "function") callback(true);
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+				callback(true);
+			}
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest3 passed!");
@@ -3616,7 +3626,10 @@ firstTimeVim = false;
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
-			if(typeof callback == "function") callback(true);
+			if(typeof callback == "function") {
+				EDITOR.closeFile(file);
+				callback(true);
+			}
 			else {
 				EDITOR.mock("typing", "dd");
 				EDITOR.mock("typing", "aTest4 passed!");
