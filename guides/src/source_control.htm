@@ -15,11 +15,11 @@ and with the ability to use Git repositories.</p>
 <p>Also see <a href="collaborate_live_editing.htm">live collaborate editing</a></p>
 
 	
-<h3>How to clone a Git or Mercurial repository</h3>
+<h2>How to clone a Git or Mercurial repository</h2>
 	
 	<ol>
 		<li>Select "Clone/add Repo" in the menu.</li>
-		<li>Fill in the http or git url for the repository, and where the files should be saved.</li>
+	<li>Fill in the HTTP or Git Uniform Resource Locator (URL) for the repository (repo), and a folder path for where the files should be saved.</li>
 		<li>Click <kbd>Clone repository</kbd></li>
 	</ol>
 	
@@ -27,5 +27,70 @@ and with the ability to use Git repositories.</p>
 	Example: https//webide.se/?repo=git@github.com:Z3TA/2dgeometry.git<br>
 	Useful for example showing others your code, and letting them clone the repo, and run the code!</p>
 	
+
+<h2>Creating a new software repository</h2>
+
+<p>There are many services that lets you host your Mercurial or Git code repository (repo) for free,
+and access it via Hypertext Transfer Protocol (HTTP) or Secure Shell (SSH).
+For example <a href="https://bitbucket.org/">Bitbucket</a> and <a href="https://github.com/">Github</a>.</p>
+
+<p>Here's how you create a new repository on Github:</p>
+
+<ol>
+	<li><a href="https://github.com/login">Login</a> or <a href="https://github.com/join">signup</a></li>
+	<li>Click <a href="https://github.com/new">Start a Project</a></li>
+	<li>Fill in a repository name.</li>
+	<li>Click "Create repository"</li>
+	<li>Switch to SSH under Quick Setup and Copy the URL for the repo: git@github.com:yourName/nameOfRepo.git</li>
+	<li>Right click in the editor and select "Clone a repository"</li>
+	<li>Paste the repo URL into the repository field</li>
+	<li>Click on the <kbd>Copy SSH public key</kbd> button in the editor's clone widget</li>
+	<li>If you are asked to generate a new SSH key, click <kbd>Yes</kbd></li>
+	<li>If a copy dialog-box comes up, click <kbd>Manually copy</kbd>. Then select all the text and click <kbd>Ctrl+C</kbd> to copy</li>
+	<li>Go to Github settings/SSH keys and click <a href="https://github.com/settings/ssh/new">new key</a></li>
+	<li>Paste the SSH public key you just copied. It starts with ssh-rsa and has a bunch of random letters. Then click Add SSH key</li>
+	<li>Go to the editor's clone widget and click <kbd>Clone repository</kbd></li>
+</ol> 
+
+<p>If you get an error message:</p>
+<ul>
+	<li>Make sure you use the SSH git@github.com URL. Or try filling in your Github username and password.</li>
+	<li>Make sure the "Clone into" field is a valid folder path.</li>
+	<li>If it's a Git repository, make sure the repository URL ends with .git</li>
+	<li>If it's still not working, right click in the editor and select "Terminal", and in the terminal type <i>hg clone git@github.com:yourName/nameOfRepo.git</i></li>
+	<li>If nothing works, please contact support</li>
+</ul>
+
+
+<h2>Make a new commit</h2>
+
+<p>A commit is a set of changes ...<br>
+Edit any of the files in the repository, or add a new file ...</p>
+
+<p>Then click <kbd>Alt+C</kbd> or right click in the editor and select "Commit" to show the commit widget.<br>
+If there are no "Commit" option in the menu, select "Version control" and then click <kbd>Commit</kbd>.</p>
+
+<p>In the commit widget select the file(s) to the left, then write a comment int the box to the right.
+It's useful to write <i>why</i> you made the changes, so that you or your colleges can go back and se <i>why</i> the change(s) was made.<br>
+Then click <kb>Commit & Push</kb> to both make the commit and push the change to the repository.</p>
+
+<p>If you are an "expert" you can write <i>hg commit -m "why the change(s)"</i> in the Termial. And then write <i>hg push</i></p>
+
+
+
+<h2>Pull new changes</h2>
+
+<p>It's a good idea to often pull in changes from the repository. You might for example have made some work on another editor/computer, 
+or your colleges might have updated something.</p>
+
+<p>Right click in the editor and select "Version control". In the version control widget click <kbd>Pull & Update</kbd> to both pull and update/merge.
+Hopefully it will be all good and no merge conflicts occurred. If a merge conflict occured, the editor will guide you though the merge process.<br>
+Clicking only "pull" will just download the updates, while "Update" actually updates the files.</p>
+
+<p>If you are an "expert" you can write <i>hg pull && hg update</i> in the Terminal</p>
+
+
+
+
 </body>
 </html>

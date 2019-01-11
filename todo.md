@@ -44,6 +44,10 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+hover on folder suggestions when saving a file makes them gray (blend in to the background)
+
+There should be a way to show help files, but F1 seem to be taken !?
+
 <ul>
 	<li>Making a "Hello world" web site</li>
 	<li>Hello world Node.JS service, and deployment to the cloud</li>
