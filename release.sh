@@ -101,8 +101,8 @@ echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
 # Move the documentation
-mv temp/release/server/documentation/ temp/release/server/client/about/
-
+mv temp/release/server/documentation/* temp/release/server/client/about/
+rmdir temp/release/server/documentation/
 
 echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/
