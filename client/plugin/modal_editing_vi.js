@@ -153,7 +153,8 @@
 	var Y = 89;
 	var F = 70;
 	var B = 66;
-	
+	var M = 109;
+
 	var vimMenuItem;
 	var vimCommandBuffer = "";
 	var commandCaretPosition = 0;
@@ -171,6 +172,8 @@
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
 	var bindTest = false;
+	
+	var firstTimeVim = true;
 	
 	var commandHistory = [];
 	commandHistory.index = -1;
@@ -206,7 +209,7 @@
 	EDITOR.plugin({
 		desc: "Modal editing using vim key bindings",
 		load: function loadVim() {
-			vimMenuItem = EDITOR.addMenuItem("Vim/modal mode", toggleVim);
+			//vimMenuItem = EDITOR.addMenuItem("Vim/modal mode", toggleVim);
 			
 			EDITOR.on("keyPressed", vimKeyPress);
 			
@@ -215,8 +218,8 @@
 			EDITOR.on("fileShow", vimFileShow);
 			EDITOR.on("fileHide", vimFileHide);
 			
-			
-			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
+			// If more modes are added we want to move the toggle modes out
+			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: M, combo: CTRL, mode: "*"});
 			
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
@@ -265,7 +268,8 @@
 			
 		},
 		unload: function unloadVim() {
-			EDITOR.removeMenuItem(vimMenuItem);
+			if(vimMenuItem) EDITOR.removeMenuItem(vimMenuItem);
+			
 			EDITOR.removeEvent("keyPressed", vimKeyPress);
 			EDITOR.removeRender(showCommandBuffer);
 			
@@ -406,16 +410,12 @@ return escapeFromInsert(file);
 	}
 	
 	function vimKeyPress(file, char, combo) {
-		/*
-			
-		*/
-		
-		if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
-		
+		if(!VIM_ACTIVE) return true;
+
 		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode + " Enter?" + (char == "\n" || char == "\r") + " Delete?" + (char == String.fromCharCode(127)) );
 		
-		if(!VIM_ACTIVE) return true;
-		
+if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+
 		//char = getNormalMap(char); // It's possible to remap keys
 		// map keys inside the parse function !?
 		
@@ -2710,23 +2710,32 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 	
 	function toggleVim() {
 		if(VIM_ACTIVE) {
-			messageToShow = '"MERE MORTAL" MODE';
+			messageToShow = 'DEFAULT (non modal) MODE';
 			showCommandBuffer(EDITOR.canvasContext);
 			// Need to be active to render message
 			VIM_ACTIVE = false;
 			
 			EDITOR.setMode("default");
-			EDITOR.updateMenuItem(vimMenuItem, false);
+			if(vimMenuItem) EDITOR.updateMenuItem(vimMenuItem, false);
 			
 		}
 		else {
 			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
-			EDITOR.updateMenuItem(vimMenuItem, true);
+			
+			if(vimMenuItem) EDITOR.updateMenuItem(vimMenuItem, true);
+			
 			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
+			
 			noEol();
 			showMessage("(VIM*) NORMAL MODE");
+			
+			if(firstTimeVim) {
+				alertBox('You are now in "VIM" mode. Press ' + EDITOR.getKeyFor("toggleVim") + ' to toggle to another mode.');
+firstTimeVim = false;
+			}
 		}
+		
 		EDITOR.hideMenu();
 		
 		return false;
