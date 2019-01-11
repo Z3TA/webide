@@ -176,7 +176,7 @@ cd ../../
 echo "Remove files no longer needed"
 rm version.inc
 
-exit
+
 
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/

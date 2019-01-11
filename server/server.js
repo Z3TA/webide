@@ -157,6 +157,8 @@ var module_httpProxy = require('http-proxy');
 var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
+//var module_copyFile = require("../shared/copyFile.js");
+var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 
 // Optional modules:
 try {
@@ -338,6 +340,7 @@ function recycleGuestAccounts(callback) {
 						/*
 							Problem: We don't want to add old users to the guest pool as they will have outdated example files and settings
 							Solution: Check when the home dir was created, and only add it to the guest pool if it's fresh, otherwise deleted it
+							Also update the example files! 
 						*/
 						
 						var homeDirLastModified = unixTimeStamp(homeDirStat.mtime);
@@ -349,6 +352,9 @@ function recycleGuestAccounts(callback) {
 							return resetGuest(id);
 						}
 						else {
+							// No need to reset, but we should update example files !
+							// First delete, then copy, then chown
+							
 							fillGuestPool(id);
 							return processedGuestId(id, "Are going to be added to guest pool (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + ")");
 						}
@@ -1741,7 +1747,7 @@ function checkMounts(options, checkMountsCallback) {
 			checkMountsReadyMaybe();
 			}
 			else {
-			copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
+			module_copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
 			if(err) return checkMountsError(err);
 			hgrccacertsUptodate = true;
 			checkMountsReadyMaybe();
@@ -3136,6 +3142,7 @@ function getGroupId(groupName, callback) {
 	});
 }
 
+
 function chownDirRecursive(path, uid, gid, callback) {
 	
 	if(typeof callback != "function") throw new Error("Expected fourth parameter callback=" + callback + " to be a callback function!");
@@ -3270,30 +3277,6 @@ function umount(path, callback) {
 		
 	});
 	
-}
-
-function copyFile(source, target, cb) {
-	var cbCalled = false;
-	
-	var rd = module_fs.createReadStream(source);
-	rd.on("error", function(err) {
-		done(err);
-	});
-	var wr = module_fs.createWriteStream(target);
-	wr.on("error", function(err) {
-		done(err);
-	});
-	wr.on("close", function(ex) {
-		done();
-	});
-	rd.pipe(wr);
-	
-	function done(err) {
-		if (!cbCalled) {
-			cb(err);
-			cbCalled = true;
-		}
-	}
 }
 
 function sendMail(from, to, subject, text) {

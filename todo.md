@@ -44,6 +44,12 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+need copyDirRecursive and rmDirRecursive functions!
+
+Make it so guest users get their home files updated!
+
+
+
 hover on folder suggestions when saving a file makes them gray (blend in to the background)
 
 There should be a way to show help files, but F1 seem to be taken !?
