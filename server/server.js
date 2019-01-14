@@ -159,6 +159,7 @@ var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 //var module_copyFile = require("../shared/copyFile.js");
 var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
+var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
 
 // Optional modules:
 try {
@@ -354,9 +355,29 @@ function recycleGuestAccounts(callback) {
 						else {
 							// No need to reset, but we should update example files !
 							// First delete, then copy, then chown
+							// Only bother with updating welcome.htm so we don't have to chown, chmod, and do async rm
+							var welcomeFile = UTIL.joinPaths([homeDir, "wwwpub", "welcome.htm"]);
+							var username = "guest" + id;
+							var welcomeSrc = module_path.join(__dirname, "../etc/userdir_skeleton/wwwpub/welcome.htm");
 							
-							fillGuestPool(id);
-							return processedGuestId(id, "Are going to be added to guest pool (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + ")");
+							module_fs.readFile(welcomeSrc, 'utf8', function (err,data) {
+								if(err) throw err;
+								
+								data = data.replace(/%USERNAME%/g, username);
+								data = data.replace(/%HOMEDIR%/g, homeDir);
+								data = data.replace(/%DOMAIN%/g, DOMAIN);
+								
+								module_fs.writeFile(welcomeFile, data, 'utf8', function (err) {
+									if(err) throw err;
+									
+									// Do we have to chown !?
+									
+									fillGuestPool(id);
+									processedGuestId(id, "Are going to be added to guest pool. welcome.htm updated! (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + ")");
+								});
+							})
+							
+							return;
 						}
 						
 					}

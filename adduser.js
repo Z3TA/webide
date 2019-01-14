@@ -322,9 +322,9 @@ function adduser() {
 	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs_examples", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/my_web_site", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_example", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
@@ -369,9 +369,9 @@ function adduser() {
 	
 		// Replace %USERNAME% %HOMEDIR% and %DOMAIN%
 		updateFile(homeDir + ".jzeditStorage/cmsjz_sites");
-		updateFile(homeDir + "my_web_site/source/rss_en.xml");
+		updateFile(homeDir + "website_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
-		updateFile(homeDir + "nodejs/http_server/http_server_example.js");
+		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
 		
 		
 	// add wwwpub

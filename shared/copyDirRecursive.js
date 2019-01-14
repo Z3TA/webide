@@ -21,6 +21,8 @@ var dirsToMake = 0;
 	var finish = false;
 var dirsToRead = 0;
 
+	console.time("copyDirRecursive: " + sourceDir + " -> " + targetDir);
+	
 	copyDir(sourceDir, targetDir);
 	
 function copyDir(source, target) {
@@ -88,7 +90,10 @@ doneMaybe();
 
 function fail(err) {
 finish = true;
+		
+		console.timeEnd("copyDirRecursive: " + sourceDir + " -> " + targetDir);
 		console.log("copyDirRecursive: fail: " + err.message);
+		
 		if(callback) callback(err);
 callback = null;
 	}
@@ -99,10 +104,12 @@ console.log("copyDirRecursive: doneMaybe? finish=" + finish + " filesToCopy=" + 
 if(finish) throw new Error("Should not be finish when checking if done!");
 
 if(filesToCopy==0 && pathsToStat==0 && dirsToRead==0 && dirsToMake==0) {
-finish = true;
+			finish = true;
 
 if(!callback) throw new Error("callback=" + callback);
 
+			console.timeEnd("copyDirRecursive: " + sourceDir + " -> " + targetDir);
+			
 callback(null);
 callback = null;
 }
