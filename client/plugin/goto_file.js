@@ -807,6 +807,9 @@
 				
 				console.log("Opening " + path);
 				
+				console.log("abortFindFiles because: We are opening " + path + "...");
+				abortFindFiles();
+				
 				EDITOR.openFile(path, undefined, function(err, file) {
 					
 					if(err) {

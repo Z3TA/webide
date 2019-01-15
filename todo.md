@@ -44,8 +44,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-find files API is never aborted! It keeps on searching millions of files ...in goto file plugin
-
 
 Manual testing in Windows
 
