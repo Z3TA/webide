@@ -324,7 +324,7 @@ function adduser() {
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs_examples", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_example", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/website_example", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);

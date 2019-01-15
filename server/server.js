@@ -158,8 +158,8 @@ var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 //var module_copyFile = require("../shared/copyFile.js");
-var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
-var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
+//var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
+//var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
 
 // Optional modules:
 try {
@@ -327,8 +327,7 @@ function recycleGuestAccounts(callback) {
 						processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
 					}
 					else processedGuestId(id, "Added to guest pool");
-					
-				});
+					});
 			}
 			else if(err) throw err;
 			else {
@@ -341,44 +340,33 @@ function recycleGuestAccounts(callback) {
 						/*
 							Problem: We don't want to add old users to the guest pool as they will have outdated example files and settings
 							Solution: Check when the home dir was created, and only add it to the guest pool if it's fresh, otherwise deleted it
-							Also update the example files! 
+							Solution 2: Check if the skeleton files (examples, etc) have been updated after the home dir was made
 						*/
 						
-						var homeDirLastModified = unixTimeStamp(homeDirStat.mtime);
-						var daysSinceLastChanged = Math.floor( ( currentTime - homeDirLastModified ) / (60 * 60 * 24) );
-						var daysSinceRelease = Math.floor( ( homeDirLastModified - LAST_RELEASE_TIME ) / (60 * 60 * 24) );
+						var skeletonDir = module_path.join(__dirname, "../etc/userdir_skeleton/");
+						module_fs.stat(skeletonDir, function dir(err, skeletonDirStat) {
+							if(err) throw err;
+							
+							var homeDirLastModified = unixTimeStamp(homeDirStat.mtime);
+							var daysSinceLastChanged = Math.floor( ( currentTime - homeDirLastModified ) / (60 * 60 * 24) );
+							var daysSinceRelease = Math.floor( ( homeDirLastModified - LAST_RELEASE_TIME ) / (60 * 60 * 24) );
+							var skeletonDirLastModified = unixTimeStamp(skeletonDirStat.mtime);
+							var daysSinceSkeleton = Math.floor( ( currentTime - skeletonDirLastModified ) / (60 * 60 * 24) );
+							
+							console.log("homeDirLastModified=" + homeDirLastModified + " skeletonDirLastModified=" + skeletonDirLastModified + " currentTime=" + currentTime + " LAST_RELEASE_TIME=" + LAST_RELEASE_TIME);
+							
+							if(homeDirLastModified - skeletonDirLastModified > 0 && daysSinceLastChanged < 5) {
+								// Home dir is fresh
+								fillGuestPool(id);
+								processedGuestId(id, "Are going to be added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
+							}
+							else {
+								console.log("Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "");
+								resetGuest(id);
+							}
+						});
 						
-						if(homeDirLastModified < LAST_RELEASE_TIME && daysSinceLastChanged > 2) {
-							// Home dir was last changed before last release, and, it was last changed over two days ago
-							return resetGuest(id);
-						}
-						else {
-							// No need to reset, but we should update example files !
-							// First delete, then copy, then chown
-							// Only bother with updating welcome.htm so we don't have to chown, chmod, and do async rm
-							var welcomeFile = UTIL.joinPaths([homeDir, "wwwpub", "welcome.htm"]);
-							var username = "guest" + id;
-							var welcomeSrc = module_path.join(__dirname, "../etc/userdir_skeleton/wwwpub/welcome.htm");
-							
-							module_fs.readFile(welcomeSrc, 'utf8', function (err,data) {
-								if(err) throw err;
-								
-								data = data.replace(/%USERNAME%/g, username);
-								data = data.replace(/%HOMEDIR%/g, homeDir);
-								data = data.replace(/%DOMAIN%/g, DOMAIN);
-								
-								module_fs.writeFile(welcomeFile, data, 'utf8', function (err) {
-									if(err) throw err;
-									
-									// Do we have to chown !?
-									
-									fillGuestPool(id);
-									processedGuestId(id, "Are going to be added to guest pool. welcome.htm updated! (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + ")");
-								});
-							})
-							
-							return;
-						}
+						return;
 						
 					}
 					else if(err) throw err;
