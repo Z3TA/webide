@@ -335,6 +335,7 @@ var UTIL = {
 		else {
 			if(path.indexOf("/") != -1) return "/";
 			else if(path.indexOf("\\") != -1) return "\\";
+			else if(path.slice(1,2) == ":") return "\\"; // It has a drive letter, eg. C:\\
 			else {
 				//console.warn("Unable to determine file path folder separator/delimiter of path=" + path);
 				return UTIL.toSystemPathDelimiters("/");
@@ -1159,6 +1160,10 @@ else {
 		
 		var delimiter = UTIL.getPathDelimiter(base);
 		
+		// Make sure the delimiter for base is the same as the delimiter for path
+		if(delimiter == "/") path = path.replace(/\\/g, "/");
+		else if(delimiter == "\\") path = path.replace(/\//g, "\\");
+		
 		if(url) {
 			// Remove all ending delimiters from url so we can add one later and prevent double
 while(url.slice(-1) == delimiter) url = url.slice(0,-1);
@@ -1168,8 +1173,10 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		while(base.indexOf(delimiter+delimiter) != -1) base = base.replace(delimiter+delimiter, delimiter);
 		while(path.indexOf(delimiter+delimiter) != -1) path = path.replace(delimiter+delimiter, delimiter);
 		
-		// Base should always start with a delimiter!
+		if(delimiter == "/") {
+			// Unix paths should always start with a delimiter!
 		if(base.slice(0,1) != delimiter) base = delimiter + base;
+		}
 		
 		// Base should always end with a delimiter!
 		if(base.slice(-1) != delimiter) base = base + delimiter;
@@ -1184,6 +1191,11 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			if(folders[i] != "") noEmtyFolders.push(folders[i]);
 		}
 		folders = noEmtyFolders;
+		
+		if(folders.length > 0) {
+			var firstFolder = UTIL.trailingSlash(folders[0]);
+		}
+		else var firstFolder = delimiter;
 		
 		console.log("folders=" + folders);
 		
@@ -1217,11 +1229,13 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		base = folders.join(delimiter);
 		if(base.length > 1) {
 			console.log("concatenating base");
-			var absolutePath = delimiter + base + delimiter + path;
+			if(delimiter == "/") var absolutePath = delimiter + base + delimiter + path;
+			else var absolutePath = base + delimiter + path;
 		}
 		else {
 			console.log("base is emty");
-			var absolutePath = delimiter + path;
+			if(delimiter == "/") var absolutePath = delimiter + path;
+			else var absolutePath = firstFolder + path;
 		}
 		
 		console.log("absolutePath=" + absolutePath);
@@ -1298,7 +1312,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	assert: function assert(x, y) {
 		if(x !== y) {
 			if(y === undefined && (x === true || x === false)) throw new Error("assert takes two arguments and throws an error if they are not equal. Example: assert(42, 42)");
-			throw new Error("Expected x = '" + x + "' = y = '" + y + "'");
+			throw new Error("Result: '" + x + "'\nExpect: '" + y + "'");
 		}
 	},
 

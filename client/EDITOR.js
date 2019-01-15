@@ -4218,7 +4218,7 @@ var word = "";
 		}
 		else if(typeof order == "function") {
 			// I'ts OK to omit order and parallel, but not flip them
-			throw new Error("Parameters should be in this order: order, parallel, fun");
+			throw new Error("EDITOR.addTest arguments should be in this order: order:number, parallel:boolen, fun:function");
 		}
 		
 		if(order == undefined) order = defaultTestOrder;

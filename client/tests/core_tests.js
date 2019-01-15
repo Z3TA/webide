@@ -1574,10 +1574,16 @@
 		});
 	});
 	
-	EDITOR.addTest(function testUtilResolvePath(callback) {
+	EDITOR.addTest(1, function testUtilResolvePath(callback) {
 		
 		var R = UTIL.resolvePath;
 		
+		// Windows path's
+		UTIL.assert(R("C:\\foo\\bar\\", "baz/"), "C:\\foo\\bar\\baz\\");
+		UTIL.assert(R("C:\\foo\\bar\\", "../"), "C:\\foo\\");
+		UTIL.assert(R("C:\\foo\\bar\\", "../../../fizz.txt"), "C:\\fizz.txt");
+		
+		// Unix/Linux paths
 		UTIL.assert(R("/foo/bar/", "baz"), "/foo/bar/baz");
 		UTIL.assert(R("/foo/bar/", "../baz"), "/foo/baz");
 		UTIL.assert(R("/foo/bar/", "../../baz"), "/baz");
