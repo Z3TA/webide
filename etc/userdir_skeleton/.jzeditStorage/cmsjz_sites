@@ -7,11 +7,11 @@
 		"repository": "",
 		"repoUser": "",
 		"repoPw": "",
-		"projectFolder": "/my_web_site/",
-		"source": "/my_web_site/source/",
-		"preview": "/my_web_site/preview/",
+		"projectFolder": "/website_example/",
+		"source": "/website_example/source/",
+		"preview": "/website_example/preview/",
 		"publish": "/wwwpub/",
-		"template": "/my_web_site/template.htm",
+		"template": "/website_example/template.htm",
 		"url": "%USERNAME%.%DOMAIN%"
 	}
 ]
