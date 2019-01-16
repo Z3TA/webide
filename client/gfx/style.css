@@ -1254,8 +1254,12 @@ div.group {
 	margin-bottom: 4px;
 	border-radius: 5px;
 	min-width: 2em;
-	}
+	background-color: #dcdcdc;
+}
 
+.folderPicker button:focus {
+	background-color: #ffffff;
+}
 
 @keyframes flash
 {
