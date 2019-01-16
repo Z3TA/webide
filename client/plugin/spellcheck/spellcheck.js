@@ -38,6 +38,9 @@
 	var waitTimer;
 	var isWaiting = false;
 	var wordsInQueue = 0;
+	var maxConcurrency = 5;
+	var waitlist = [];
+	
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
 	var menuItem;
 	var enabled = false;
@@ -48,6 +51,13 @@
 	var fileExtensions = ["js", "htm", "css", "txt", "json"];
 	var programmersAbbr = ["onerror", "png", "gfx", "onclick", "onload", "src", "@media", "nowrap", "charset", "lang", "rx", "ry", "cx", "cy", "rgba", "url", "xmlns", "xlink", "&raquo", "&laquo", "&nbsp", "stringify", "str", "num", "refactor", "refactoring", "substr", "substring", "undefined", "href", "async", "chroot"];
 	var regexIgnore = [/^\d+(em|px)$/, /^#?([A-Fa-f0-9]{1,6})$/, /^\d+.{1,6}/];
+	
+	var progressBar = document.createElement("progress");
+	progressBar.setAttribute("title", "spellcheck");
+	var totalRequests = 0;
+	var totalResponses = 0;
+	progressBar.max = totalRequests;
+	progressBar.value = totalResponses;
 	
 	function loadSpellchecker() {
 		
@@ -112,6 +122,8 @@
 		EDITOR.on("fileChange", runSpellCheck);
 		EDITOR.on("fileOpen", spellCheckFile);
 		EDITOR.on("mouseClick", showSpellSuggestion);
+		
+		showProgressBar();
 	}
 	
 	function disable() {
@@ -129,7 +141,31 @@
 				}
 			}
 		}
+		
+		hideProgressBar();
+		// Make sure the progress bar doesn't show again when the requests in flight comes in
+		totalRequests = wordsInQueue;
+		totalResponses = 0;
+		
+		waitlist.length = 0;
+		
 		EDITOR.renderNeeded();
+	}
+	
+	function hideProgressBar() {
+		var footer = document.getElementById("footer");
+		if(footer.contains(progressBar)) {
+			footer.removeChild(progressBar);
+			EDITOR.resizeNeeded();
+		}
+	}
+	
+	function showProgressBar() {
+		var footer = document.getElementById("footer");
+		if(!footer.contains(progressBar)) {
+ footer.appendChild(progressBar);
+			EDITOR.resizeNeeded(); // To show the progress bar
+		}
 	}
 	
 	function spellCheckFile(file) {
@@ -407,9 +443,29 @@
 			if(cache[word] == false) spellingError(file.path, word, row, col);
 		}
 		else {
-			wordsInQueue++;
+			totalRequests++;
+			progressBar.max = totalRequests;
+			progressBar.value = totalResponses;
+			
+			if(wordsInQueue >= maxConcurrency) {
+				waitlist.push([file, word, row, col]);
+			}
+			else {
+				wordsInQueue++;
 			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
-				if(!enabled) return;
+					totalResponses++;
+					
+					progressBar.max = totalRequests;
+					progressBar.value = totalResponses;
+					
+					if(totalRequests == totalResponses) {
+						hideProgressBar();
+					}
+					else {
+						showProgressBar();
+					}
+					
+					if(!enabled) return;
 				
 				if(err) {
 					alertBox("Failed to spellcheck word=" + word + " Error: " + err.message);
@@ -432,10 +488,19 @@
 				wordsInQueue--;
 				//console.log("wordsInQueue=" + wordsInQueue);
 				if(wordsInQueue==0) {
+						//totalRequests = 0;
+						//totalResponses = 0;
 					EDITOR.renderNeeded();
 				}
-				
-			});
+					
+					if(waitlist.length > 0) {
+						while(waitlist.length > 0 && wordsInQueue < maxConcurrency) {
+							spellCheck.apply(null, waitlist.shift());
+						}
+					}
+					
+				});
+			}
 		}
 		//console.timeEnd("spell-check " + word);
 	}
