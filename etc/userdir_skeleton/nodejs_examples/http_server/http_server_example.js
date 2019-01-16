@@ -2,8 +2,8 @@
 	Boilerplate code to get a http server runnning.
 	Can for example be used to create a REST API.
 	
-	Press F1 to run this Node.JS program
-	Then press F3 (or close the editor) to stop it.
+	Press F2 to run this Node.JS program
+	Then press F4 (or close the editor) to stop it.
 	
 	All HTTP requests to *.%USERNAME%.%DOMAIN% will be proxied
 	to the corresponding unix socket in your /sock/ folder.
@@ -14,12 +14,12 @@
 	When the script is started in the editor, process.env.dev will exist.
 	When the script is started in "production", process.env.prod will exist.
 
-	Press Ctrl+F1 to deploy into production.
+	Press Ctrl+F2 to deploy into production.
 	
 	Scripts deployed to production will keep running even if you close the editor.
-	Press Ctrl+F3 to stop a in-production script.
+	Press Ctrl+F4 to stop a in-production script.
 	(note: A script in production will be restarted after a server machine reboot, even if it was stopped!)
-	Press Shift+Ctrl+F3 to remove a script prom production.
+	Press Shift+Ctrl+F4 to remove a script prom production.
 	
 	
 */

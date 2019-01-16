@@ -45,8 +45,6 @@ What I'm working on
 -------------------
 
 
-There should be a way to show help files, but F1 seem to be taken !?
-
 <ul>
 	<li>Making a "Hello world" web site</li>
 	<li>Hello world Node.JS service, and deployment to the cloud</li>

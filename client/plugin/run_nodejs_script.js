@@ -21,10 +21,11 @@
 	});
 	
 	function loadNodeJS() {
-		var keyF1 = 112;
-		var keyF3 = 114;
-		EDITOR.bindKey({desc: "Runs the current (nodejs) file", fun: runNodeJsScript, charCode: keyF1, combo: 0});
-		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF3, combo: 0});
+		
+		var keyF2 = 113;
+		var keyF4 = 115;
+		EDITOR.bindKey({desc: "Runs the current (nodejs) file", fun: runNodeJsScript, charCode: keyF2, combo: 0});
+		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		
