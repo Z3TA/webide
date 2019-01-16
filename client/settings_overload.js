@@ -51,7 +51,7 @@
 	}
 	else if(process.platform == "win32" && (RUNTIME == "nw.js" || browser == "Chrome") && window.devicePixelRatio == 1) {
 		// Only Chrome/Chromium/nw.js supports sub-pixel antialias. Consolas needs sub-pixel antialias to look good
-		EDITOR.settings.sub_pixel_antialias == true;
+		EDITOR.settings.sub_pixel_antialias = true;
 		
 	/*
 			When Windows with "Smooth edges of screen fonts" turned off, these font's look good:
