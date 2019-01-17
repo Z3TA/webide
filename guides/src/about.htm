@@ -9,73 +9,92 @@
 <body>
 
 <abstract>
-<p>Want to make a web-site or app ?<br>
-And have it running <i>live</i> on the web/cloud five minutes from now ?<br>
-<i>With</i> dev-tools integration. <i>Without</i> any configuration or setup.</p>
-
-<p>Deploy your web apps and micro-services in one click ...</p>
+<p>Make a web-site or app,
+and make it run <i>live</i> in the cloude with one click,
+<i>without</i> having to download, setup, or configurate anything.</p>
 
 <ul class="horizontal">
-	<li>😍 <a href="signup/signup.htm">Signup</a></li>
+	<li>😍 <a href="signup/signup.htm">Try it now</a></li>
 </ul>
 <br>
 
 </abstract>
 
-<h1>Free JZedit server: webide.se</h1>
+<h1>JZedit editor/IDE</h1>
 
 <!--<p><a href="https://webide.se/">webide.se</a> is a free <a href="#jzedit">JZedit</a> server.</p>-->
 
-<p><a href="https://webide.se/">webide.se</a> is a online web editor/IDE, 
-and cloud shell/workspace for developing and editing web sites/documents, apps and Node.JS services.
-With integrated dev-tools, cloud hosting service, source control and content management system.
-Making it easy to both develop and deploy (run, in production) full stack JavaScript web applications 
-<i>from anywhere</i> in any device or platform that comes with a web browser. 
-And Without installing anything, configuration, setup, or touching a terminal or command line!</p>
+<p><a href="https://webide.se/">webide.se</a> runs JZedit - a editor/IDE for the cloud, 
+and offers shell/workspace for developing and editing web sites, apps and Node.JS services.</p>
 
 
-<h2>Why should I use webide.se to edit my web site !?</h2>
-
-<p>Besides being an online editor where you can edit the HTML, CSS and JavaScript, 
-It also has a built in static site generator (SSG).<br>
-Press <kbd>F9</kbd> or select "Static site generator" from the menu to see the tool-buttons for the SSG.
-There you can press the <kbd>preview</kbd> button, that lets you see changes in real time. Or the <kbd>WYSIWYG</kbd>-button 
-which enables edits in the preview window aka. "What you see is what you get".</p>
-
-
-
-<a name="jzedit"></a>
-<h1>JZedit</h1>
-
-<p>webide.se is a free server for JZedit which is a code editor for JavaScript, CSS, and HTML, 
-with IDE-like features such as auto-complete and built in version
-control (Mercurial with hggit).</p>
-
-
-
-<h2>Some features</h2>
+<h2>JZedit selling points</h2>
 
 <ul>
+	<li>Runs in the browser</li>
+	<li>JavaScript integration</li>
+	<li>Easy to customize using vanilla JS</li>
+</ul>
+
+<h3>No tracking or telemetry</h3>
+
+<p>User statistics is a slippery slope,
+first you want to know how many use your software,
+then you want to know what features they use, 
+then you want to know other apps installed, 
+then you want to know what web sites they visit and what they search for.
+That's why JZedit has no telemetry or tracking whatsoever.</p>
+
+
+<h3>JavaScript integration</h3>
+
+<ul>
+	<li>Incremental JavaScript parsing (in web worker)</li>
 	<li>Function list for quick navigation</li>
 	<li>Automatic indentation</li>
 	<li>Auto-completion and function-argument hinting.</li>
-	<li>Connect to FTP/FTPS/SFTP servers and edit files remotely.</li>
+</ul>
+
+<h3>Edit files remotely</h3>
+
+<ul>
+	<li>Connect to FTP/FTPS/SFTP servers.</li>
 	<li>Google Drive support</li>
+	<li>VNC support (for connecting to GUI based servers and desktops)</li>
+</ul>
+
+<h3>Runs everywhere</h3>
+
+<ul>
 	<li>Chromebook and Smartphone support</li>
-	<li>Grouped file tabs</li>
-	<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted for faster navigation.</li>
-	<li>Static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
-	<li>WYSIYG and editor side by side - Write HTML without knowing HTML.</li>
-	<li>Source control: Commit from within the editor and show annotations.</li>
 	<li>It's possible to run the editor embedded on a web site.</li>
 	<li>The editor can run on mobile phones and tablets (or any HTML5 compatible device).</li>
 </ul>
+
+<h3>Additional features</h3>
+
+<ul>
+	<li>Integrated source control: Commit from within the editor and show annotations.</li>
+	<li>Built in static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
+	<li>Live preview and WYSIYG editing.</li>
+	<li>Grouped file tabs</li>
+	<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted for faster navigation.</li>
+	<li>Talk to the editor using voice commands</li>
+	<li>Built in virtual keyboard</li> 
+	<li>Collaborate editing: Edit the same document with others - at the same time!</li>
+	<li>Able to run emulators and GUI applications (via VNC).</li>
+</ul>
+
+
+<p>Despite the above features, the editor is pretty fast and ligh-weight.</p>
+
+
 
 
 <h2>For non-technical users</h2>
 
 <p>The editor is not only for developers, it can also be setup so that a non-technical user can use it,
-for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. with automated source control management.<br>
+for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. with simplified source control management.<br>
 For example when using the built in static site generator together with a software repository, it will automatically pull new updates from the repo,
 merge if necessary, and ask the user to write a commit message before publishing.</p>
 
@@ -94,28 +113,32 @@ Each plugin is a independent unit and do not depend on, or interfere with other 
 Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 
 
-<h2>What makes JZeidt better then existing editors/IDE's, or what does it do differently !?</h2>
+<h2>What makes JZedit better then existing editors/IDE's, or what does it do differently !?</h2>
 
 <p>You can run both the server and the client on your computer and it will feel just like a normal editor/IDE.<br>
 But you can also run the back-end on a server machine, either self hosted, 
-or on a public server like webide.se or a server hosted by your organisation
+or on a public server like <a href="https://webide.se/">webide.se</a> or a server hosted by your organisation
 - and connect to it from anywhere to get a full developer environment that lets you run Nodejs, and more. 
 Making it possible to develop from a smartphone or Chromebook.</p>
 
-<p>JZedit has a graphical interface for accessing files on remote servers via SSH/FTP.
+<p>Has a graphical interface for accessing files on remote servers via SSH/FTP.
 But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.</p>
 
-<p>JZedit is easier to use then some code editors. 
-And if you know HTML/CSS/JavaScript it's easy to modify or add new features to the editor.<br>
-JZedit is written in "vanilla" JavaScript, where other similar editors use "compile to Javascript" languages like CoffeeScript and  TypeScript.<br>
-JZedit has no build step. You do not need to compile! Just refresh it like a normal web page.<br>
-You can use the editor to make changes to the editor itself, and modules can be hot loaded (hitting F7 reloads the file/module you are working on).<br>
-JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
+<p>Easier to use then some code editors. 
+And if you know HTML/CSS/JavaScript it's easy to modify or add new features to the editor.</p>
+
+<p>Written in "vanilla" JavaScript, where other similar editors use "compile to Javascript" languages like CoffeeScript and  TypeScript.</p>
+
+<p>No build step. You do not need to compile! Just refresh it like a normal web page.<br>
+You can use the editor to make changes to the editor itself, and modules can be hot loaded (hitting F7 reloads the file/module you are working on).</p>
+
+<p>Does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
 
 
 <h2>But does it have Vim key-bindings?</h2>
 
-<p>Yes, "there is a editor, inside the editor", called Vim mode (vim normal), hit <keyb>CTRL+SPACE</keyb> to activate it.</p>
+<p>Yes, "there is a editor, inside the editor", called Vim mode (vim normal), 
+hit <keyb>Ctrl+M</keyb> until you see "VIM* NORMAL MODE" in the bottom right corner.</p>
 
 <p>We want hardcore vim users to feel at home, but it's a lot of work, so only expect basic support for now.</p>
 
@@ -124,7 +147,7 @@ JZedit does Not use the DOM (content-editable) for text rendering like other web
 <h2>Why are you not working on something more important, text-editing is a solved problem</h2>
 
 <p>Writing a text editor turned out to be much more fun then anticipated.<br>
-And we also think there are room for improvements to make writing code more easier and fun, especially for beginners.</p>
+And we also think there are room for improvements to make writing code easier and more fun, especially for beginners.</p>
 
 <p>We want to bring professional tools like source control, and static-site-generation to organisations to help them more efficiently 
 manage, share and collaborate with documents and (public or intranet) web sites.</p> 
@@ -152,7 +175,7 @@ Or if you only want to run the server and open the editor in a browser, type <b>
 
 <hr>
 
-<p><br><a href="../signup/signup.htm" class="button">Signup</a>
+<p><br><a href="../signup/signup.htm" class="button">Create an account on webide.se</a>
 
 </body>
 </html>

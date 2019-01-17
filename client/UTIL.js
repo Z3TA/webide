@@ -1697,6 +1697,16 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			hash = hash & hash; // Convert to 32bit integer
 		}
 		return hash;
+	},
+	
+	es6Support: function es6Support() {
+		try {
+			new Function("(a = 0) => a");
+			return true;
+		}
+		catch (err) {
+			return false;
+		}
 	}
 	
 }

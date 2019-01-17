@@ -52,13 +52,10 @@ Writing guies/articles ...
 	<li>Working with third party libraries and modules.</li>
 	<li>Designing a web/app using CSS and live preview</li>
 
-
-	<li>Connecting to a SSH/FTP server and edit files remotely</li>
-
-	<li>Implementing a Agar.io clone (multi-player web game)</li>
+	<li>Multi-player game example</li>
 </ul>
 
-Fix tests errors in Firefox!!
+
 
 x to close a tab is too far down when screen is small in Firefox!
 
