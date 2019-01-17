@@ -37,8 +37,8 @@
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",
     "pty.js": "^0.3.1",
-    "nodehun": "^2.0.12",
-    "ps-node": "^0.1.6"
+    "ps-node": "^0.1.6",
+    "nodehun": "^2.0.12"
   },
   "repository": {
     "type": "Mercurial",
