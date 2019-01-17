@@ -44,10 +44,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-
-
-Clean up deps for desktop release (nodemailer)
-
 Writing guies/articles ...
 
 <ul>

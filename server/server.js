@@ -149,20 +149,24 @@ var module_letsencrypt = require("../shared/letsencrypt.js");
 var module_os = require("os");
 var module_sockJs = require("sockjs");
 var module_http = require("http");
-var module_generator = require('generate-password');
+
 var module_dgram = require('dgram');
 var module_pwHash = require("./pwHash.js");
 var module_mimeMap = require("./mimeMap.js");
-var module_httpProxy = require('http-proxy');
+
 var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
+
 //var module_copyFile = require("../shared/copyFile.js");
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 //var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
 
 // Optional modules:
 try {
+	var module_generator = require('generate-password');
+	var module_httpProxy = require('http-proxy');
+	
 	var module_nodemailer = require('nodemailer');
 	var module_smtpTransport = require('nodemailer-smtp-transport');
 	var module_ps = require('ps-node');

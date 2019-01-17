@@ -122,6 +122,14 @@ rm temp/release/linux/client/bundle.htm.gz
 rm temp/release/linux/client/sitemap.txt
 rm temp/release/linux/backup.sh
 
+# Remove dependencies not needed when running on the "desktop"
+sed -i '/generate-password/d' temp/release/linux/package.json
+sed -i '/http-proxy/d' temp/release/linux/package.json
+sed -i '/nodemailer/d' temp/release/linux/package.json
+sed -i '/nodemailer-smtp-transport/d' temp/release/linux/package.json
+sed -i '/ps-node/d' temp/release/linux/package.json
+
+
 echo "Make a npm release (based on local-desktop)"
 cp -rf temp/release/linux/. temp/release/npm/
 
