@@ -45,16 +45,20 @@ What I'm working on
 -------------------
 
 
+
+Clean up deps for desktop release (nodemailer)
+
+Writing guies/articles ...
+
 <ul>
 	<li>Making a "Hello world" web site</li>
-	<li>Hello world Node.JS service, and deployment to the cloud</li>
+
 	<li>Working with third party libraries and modules.</li>
 	<li>Designing a web/app using CSS and live preview</li>
-	<li>Using the static site generator to write a blog post</li>
-	<li>Connecting to Google Drive</li>
+
+
 	<li>Connecting to a SSH/FTP server and edit files remotely</li>
-	<li>Clone a Git repository</li>
-	<li>Working with version control (Mercurial/Git)</li>
+
 	<li>Implementing a Agar.io clone (multi-player web game)</li>
 </ul>
 
@@ -476,6 +480,11 @@ Forgot why we are using Nodesource ...
 
 What I'm thinking
 -----------------
+
+what's the selling point of your editor/ide?
+
+<cdunklau> zeta: the in-browser thing is interesting
+"A IDE/editor that runs in the browser"
 
 Should users have their own /usr/lib/node_modules folder so they can install nodejs modules globally!?
 

@@ -2801,45 +2801,16 @@ if(err) return alertBox(err.message);
 	}
 	
 	function getSSHPublicKey() {
-		var pubKeyPath = "/.ssh/id_rsa.pub";
-		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
 		
-		function gotPubKeyMaybe(err, path, pubkey, hash) {
-			if(err) {
-				var yes = "Yes";
-				var no = "No";
-				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
-					
-					if(answer == yes) {
-						
-						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
-							
-							if(err) {
-								alertBox("ssh-keygen failed! " + err.message);
-							}
-							else {
-								
-								console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
-								
-								EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
-							}
-							
-						});
-						
-					}
-					
-				});
-			}
-			else {
-				EDITOR.putIntoClipboard(pubkey, function(err) {
-					if(err) throw err;
-					console.log("Public key copied to clipboard!");
-});
-			}
-		}
+		EDITOR.getSSHPublicKey(function(err, pubkey) {
+			if(err) return alertBox(err.message);
+			EDITOR.putIntoClipboard(pubkey, function(err) {
+				if(err) throw err;
+				console.log("Public key copied to clipboard!");
+			});
+		});
 		
 		return false;
-		
 	}
 	
 	function getSelects(selEl) {

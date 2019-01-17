@@ -286,7 +286,6 @@
 	
 	
 	function buildEdit() {
-		
 		console.log("building edit view");
 		
 		editView = document.createElement("div");
@@ -361,27 +360,6 @@
 		editView.appendChild(inputUser);
 		
 		
-		var labelKey= document.createElement("label");
-		labelKey.setAttribute("for", "inputKey");
-		labelKey.appendChild(document.createTextNode("Key (path):")); // Language settings!?
-		editView.appendChild(labelKey);
-		
-		inputKey = document.createElement("input");
-		inputKey.setAttribute("type", "text");
-		inputKey.setAttribute("id", "inputKey");
-		inputKey.setAttribute("class", "inputtext");
-		inputKey.setAttribute("value", selectedConnection.key);
-		inputKey.setAttribute("size", Math.max(30, selectedConnection.key.length+1));
-		editView.appendChild(inputKey);
-		if(EDITOR.user == "admin" || location.hostname == "127.0.0.1") {
-		var buttonBrowseKey = document.createElement("input");
-		buttonBrowseKey.setAttribute("type", "button");
-		buttonBrowseKey.setAttribute("class", "button half");
-		buttonBrowseKey.setAttribute("value", "Browse");
-		buttonBrowseKey.addEventListener("click", browseKey, false);
-			editView.appendChild(buttonBrowseKey);
-		}
-		
 		var labelPw= document.createElement("label");
 		labelPw.setAttribute("for", "inputPw");
 		labelPw.appendChild(document.createTextNode("Password:")); // Language settings!?
@@ -394,6 +372,29 @@
 		inputEditPw.setAttribute("value", selectedConnection.pw);
 		inputEditPw.setAttribute("size", "12");
 		editView.appendChild(inputEditPw);
+		
+		
+		var labelKey= document.createElement("label");
+		labelKey.setAttribute("for", "inputKey");
+		labelKey.appendChild(document.createTextNode("Path to SSH key:")); // Language settings!?
+		editView.appendChild(labelKey);
+		
+		inputKey = document.createElement("input");
+		inputKey.setAttribute("type", "text");
+		inputKey.setAttribute("id", "inputKey");
+		inputKey.setAttribute("class", "inputtext");
+		inputKey.setAttribute("value", selectedConnection.key);
+		inputKey.setAttribute("placeholder", "/.ssh/id_rsa");
+		inputKey.setAttribute("size", Math.max(30, selectedConnection.key.length+1));
+		editView.appendChild(inputKey);
+		if(RUNTIME == "nw.js") {
+			var buttonBrowseKey = document.createElement("input");
+			buttonBrowseKey.setAttribute("type", "button");
+			buttonBrowseKey.setAttribute("class", "button half");
+			buttonBrowseKey.setAttribute("value", "Browse");
+			buttonBrowseKey.addEventListener("click", browseKey, false);
+			editView.appendChild(buttonBrowseKey);
+		}
 		
 		
 		var buttonSave = document.createElement("input");
@@ -410,6 +411,13 @@
 		buttonSaveAs.setAttribute("value", "Save as new");
 		buttonSaveAs.addEventListener("click", saveNewConnection, false);
 		editView.appendChild(buttonSaveAs);
+		
+		var buttonCopyKey = document.createElement("input");
+		buttonCopyKey.setAttribute("type", "button");
+		buttonCopyKey.setAttribute("class", "button");
+		buttonCopyKey.setAttribute("value", "Copy public key");
+		buttonCopyKey.addEventListener("click", copyPublicKey, false);
+		editView.appendChild(buttonCopyKey);
 		
 		var buttonCancel = document.createElement("input");
 		buttonCancel.setAttribute("type", "button");
@@ -513,9 +521,17 @@
 				inputKey.value = path;
 });
 }
-		
-	}
+		}
 	
+	function copyPublicKey() {
+		EDITOR.getSSHPublicKey(function(err, pubkey) {
+			if(err) return alertBox(err.message);
+			EDITOR.putIntoClipboard(pubkey, function(err) {
+				if(err) throw err;
+				alertBox("Public key copied to clipboard!");
+			});
+		});
+	}
 	
 	function showServerManger() {
 		

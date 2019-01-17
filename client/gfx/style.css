@@ -382,6 +382,10 @@ label, span, p, legend {
 	font-family: caption;
 	}
 
+label {
+	break-after: avoid;
+}
+
 a.signup {
 	padding: 3px;
 	border-radius: 3px;

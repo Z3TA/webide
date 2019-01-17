@@ -5552,6 +5552,39 @@ var word = "";
 		return FAIL;
 	}
 	
+	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
+		var pubKeyPath = "/.ssh/id_rsa.pub";
+		
+		// Figure out the home dir
+		var reHome = /[\/\\](home|users)[\/\\]([^\/\\]*)/i;
+		var matchHome = EDITOR.workingDirectory.match(reHome);
+		if(matchHome) pubKeyPath = matchHome[0] + pubKeyPath;
+		
+		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+		
+		function gotPubKeyMaybe(err, path, pubkey, hash) {
+			if(err) {
+				var yes = "Yes";
+				var no = "No";
+				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
+					if(answer == yes) {
+						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
+							if(err) return callback(err);
+							console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
+							EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+						});
+					}
+					else {
+						callback(err);
+					}
+				});
+			}
+			else {
+				callback(null, pubkey);
+			}
+		}
+	}
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
