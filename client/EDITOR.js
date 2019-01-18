@@ -110,7 +110,8 @@ EDITOR.settings = {
 	bigFileLoadRows: 4000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	insert: false,
-	useCliboardcatcher: false // Some browsers (IE) can only capture clipboard events if a text element is focused
+	useCliboardcatcher: false, // Some browsers (IE) can only capture clipboard events if a text element is focused
+	caretAnimation: true
 };
 
 EDITOR.runningTests = false;   // Able to ignore some stuff like alerts while tests are running
@@ -7175,11 +7176,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
 				//EDITOR.renderNeeded();
 			EDITOR.renderRow();
-			if(EDITOR.touchScreen) EDITOR.renderCaret(file.caret);
+			if(EDITOR.touchScreen || !EDITOR.settings.caretAnimation) EDITOR.renderCaret(file.caret);
 			
 			// Experiment: Hide the caret while typing !?
 			
-			if(!EDITOR.touchScreen) { // Hiding caret is annoying when typing using the virtual keyboard
+			if(!EDITOR.touchScreen && EDITOR.settings.caretAnimation) { // Hiding caret is annoying when typing using the virtual keyboard
 				
 				// First remove any old ones so they do not stop before the caret is fully filled
 			clearTimeout(renderCaretTimer);
