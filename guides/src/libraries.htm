@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<title>Working with third party JS libraries</title>
+</head>
+
+<body>
+
+<h1>Working with third party JS libraries</h1>
+
+<p>The editor will give you auto-completion for any JavaScript library!</p>
+
+<p>Put the library into a script-element, like this:</p>
+
+<textarea rows="7">
+<script src="https://somecdn.com/library.js"></script>
+<script src="yourscript.js"></script>
+&lt;body>
+
+&lt;/body>
+ 
+</textarea>
+
+<p>And put put your own code in "yourscript.js".<br>
+Then right click and select "Preview" in the editor menu.<br>
+The window will now auto-refresh every time you save your script,
+and the editor will be aware of all the variables and methods in the library script!</p> 
+
+<p>(Don't mind the body elements. Just leave them there or the editor will complain).</p> 
+
+
+<h2>Non-minified version</h2>
+
+<p>Some libraries minify/uglify their releases so that variables and function names
+are replaced with single letter names, and that is not very useful,
+so you want to find the non-minified version of the library!</p>
+
+
+</body>
+</html>

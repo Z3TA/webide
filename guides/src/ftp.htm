@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<title>Edit files remotely via FTP(S) or SSH (SFTP)</title>
+</head>
+
+<body>
+
+<h1>Edit files remotely via FTP(S) or SSH (SFTP)</h1>
+
+<ol>
+	
+	<li>Click FTP/SFTP in the right-click menu.</li>
+	<li>Click the Edit button</li>
+	<li>Change protocol, hostname, username, password.</li>
+	<li>Click Save button</li>
+	<li>Click Connect button</li>
+</ol>
+
+
+<p>You should now be connected to the FTP server. And your working directory should have changed to the remote directory.</p>
+
+
+<h2>SSH</h2>
+
+<p>Secure Shell (SSH) is a common protocol for connecting to a remote shell. 
+Most SSH servers also support SSH File Transfer Protocol (SFTP)</p>
+
+<p>To connect to a SSH/SFTP server you probably need a SSH key.
+Your SSH key is most likely located in ~/.ssh/id_rsa<br>
+In the FTP/SFTP server widget, click Edit button and fill in the path your your SSH key.</p>
+
+<p>If the SSH server doesn't accept your key, you need to put your <i>public</i> SSH key into ~/.ssh/authorized_keys<br>
+You can copy your <i>public</i> SSH key into the clipboard by pushing the "Copy public key" button.</p>
+
+<p>Note the difference between public and private key, the private key is secret, and when asked - you should only give out your <i>public</i> key,
+most likely located in ~/.ssh/id_rsa.pub</p>
+
+
+</body>
+</html>
