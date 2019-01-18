@@ -389,12 +389,14 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		form.appendChild(cancel);
 		
 		// ### Signup
+		if(!EDITOR.user || EDITOR.user != "admin") {
 		var signupLink = document.createElement("a");
 		signupLink.appendChild(document.createTextNode("Signup"));
 		signupLink.setAttribute("title", "Click here to create an account");
 		signupLink.setAttribute("href", "/signup/signup.htm");
 		signupLink.setAttribute("class", "signup link");
 		form.appendChild(signupLink);
+		}
 		
 		// ### about
 		var aboutLink = document.createElement("a");
