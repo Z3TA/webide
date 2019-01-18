@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<title>Designing with CSS and live preview</title>
+</head>
+
+<body>
+
+<h1>Designing a web/app using CSS and live preview</h1>
+
+<p>When previewing a web site, the editor will automatically reload 
+the style-sheet when the corresponding CSS file is saved.</p>
+
+<p>And you can click on any element in the preview window to navigate to the corresponding CSS rule.</p>
+
+<h2>Example</h2>
+
+<p>Lets try changing the style of the static site generator example site:</p>
+
+<ol>
+	<li>Press F9 or select "Static site generator" in the right-click menu.</li>
+	<li>Click the <kbd>Preview</kbd> button in the SSG widget</li>
+	<li>In the SSG widget click on <kbd>Open/edit file</kbd> button.</li>
+	<li>In the file-open-widget type "style.css" (without the quotes). And press Enter on your keyboard, or click on the path to style.css in the list.</li>
+	<li>Select the preview window and click on the header "About me".</li>
+</ol>
+
+<p>If you followed the steps above you should now have opened the style sheet (CSS) file for the example site.<br>
+Try changing the #hex color to red.<br>
+Then press <kbd>Ctrl + S</kbd> to save the file, or right click and select "Save file" in the menu.</p>
+
+<p>The CSS rule should now look like this:</p>
+
+<textarea rows="8">
+h1 {
+	font-size: 3em;
+	margin-top: 2em;
+	margin-bottom: 0.5em;
+	font-weight: bold;
+	color: red;
+}
+</textarea>
+
+
+<p>And the header color should have updated in the preview window!</p>
+
+
+
+</body>
+</html>
