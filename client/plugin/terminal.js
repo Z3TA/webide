@@ -100,12 +100,12 @@
 						var data = code;
 						
 						for (var i=0; i<deltaCol; i++) CLIENT.cmd("terminal.write", {id: id, data: data}, caretMoved);
-						
-					}
+						}
 				}
 			}
 		}
-		else return true;
+		
+		return true;
 		
 		// scroll wheel = paste sel, or clipboard !?
 		
