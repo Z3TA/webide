@@ -36,7 +36,7 @@
   %HOME%%USERNAME%/** rwl,
 
 
-  #%HOME%%USERNAME%/usr/bin/ssh ix,
-  #%HOME%%USERNAME%/usr/lib/git-core/* ix,
+  %HOME%%USERNAME%/usr/bin/ssh ix,
+  %HOME%%USERNAME%/usr/lib/git-core/* ix,
 
 }
