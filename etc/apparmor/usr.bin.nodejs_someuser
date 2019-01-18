@@ -70,6 +70,7 @@
 
   # P means "use profile" (and clear enviroment), x means execute
   %HOME%%USERNAME%/usr/bin/hg px,
+  %HOME%%USERNAME%/usr/bin/git px,
   %HOME%%USERNAME%/usr/bin/node px,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
   %HOME%%USERNAME%/bin/bash px,

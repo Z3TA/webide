@@ -1030,7 +1030,7 @@ function sockJsConnection(connection) {
 	function unmountMounts(username, callback) {
 		throw new Error("DEPRECATED");
 		
-		var toUnmount = 9;
+		var toUnmount = 10;
 		
 		if(!DEBUG_CHROOT) {
 			toUnmount++;
@@ -1044,6 +1044,7 @@ function sockJsConnection(connection) {
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/local/lib"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/share"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/hg"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/git"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/python"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/nodejs"]), unmounted);
 		
@@ -1720,6 +1721,7 @@ function checkMounts(options, checkMountsCallback) {
 		"../etc/apparmor/home.someuser.usr.bin.node",
 		"../etc/apparmor/home.someuser.usr.bin.python",
 		"../etc/apparmor/home.someuser.usr.bin.hg",
+		"../etc/apparmor/home.someuser.usr.bin.git",
 		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
 		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npx-cli.js",
 		"../etc/apparmor/home.someuser.bin.bash"
@@ -1789,12 +1791,13 @@ function checkMounts(options, checkMountsCallback) {
 		console.time("Mount " + username + " files and folders");
 		
 		if(!DEBUG_CHROOT) {
-			foldersToMount += 9; // <-- Update
+			foldersToMount += 10; // <-- Update
 			
 			module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 			
 			module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 			module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+			module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
 			module_mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
 			module_mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
 			module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)

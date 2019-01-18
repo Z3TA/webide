@@ -44,6 +44,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Allow git!
+
+
 Writing guies/articles ...
 
 <ul>

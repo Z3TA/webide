@@ -22,6 +22,7 @@
   #/dev/tty rw,
 
   %HOME%%USERNAME%/usr/bin/hg Px,
+  %HOME%%USERNAME%/usr/bin/git Px,
   %HOME%%USERNAME%/usr/bin/node Px,
   %HOME%%USERNAME%/usr/bin/bash Px,
   %HOME%%USERNAME%/usr/bin/npm ix,
@@ -40,12 +41,18 @@
   %HOME%%USERNAME%/** Cx -> scripts,
 
   profile scripts {
+    network,
+
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** rwl,
+    %HOME%%USERNAME%/usr/bin/hg Px,
+    %HOME%%USERNAME%/usr/bin/git Px,
     %HOME%%USERNAME%/usr/bin/node Px,
     %HOME%%USERNAME%/usr/bin/bash Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+
+    %HOME%%USERNAME%/usr/bin/ssh ix,
 
   }
 
