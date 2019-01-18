@@ -82,6 +82,7 @@ unlink("/etc/apparmor.d/home." + username + ".bin.bash");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.node");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.git");
 unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");
 unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-cli.js");
 
