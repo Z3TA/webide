@@ -41,107 +41,39 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
+
+
 What I'm working on
 -------------------
 
+blog about testing and code coverage !?
+
+Use debugger instead of capturing console.logs in nodejs scripts!
 
 
+blog about yak shaving !?
 
-Writing guies/articles ...
+reload postfix and watch logs in the mainframe (are we gonna bomb out mail from virtual machines!?)
 
-<ul>
-	<li>Making a "Hello world" web site</li>
+fixing bug in ssh connect
+configuring postfix
+trying to send an e-mail
 
-
-
-	<li>Multi-player game example</li>
-</ul>
-
-
-
-x to close a tab is too far down when screen is small in Firefox!
-
-Allow git !?
-
-More and better examples and tutorials!
-
-
-todo: file.isStreaming usage
-
-bug: Nuked the editor by accidentally pasting 50k LOC into the search box in the find/replace widget
-
----
-User option: First time opening the editor.
-Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
-
-User testing: Do you want all interactions with the editor to be recorded ?
----
-
-Finish blog post about mobile support!
-
-
-Annoying when you accidentally go into vim modal mode
-
-
-cant bring up the menu when something covers most of the screen.
-
-make the file explorer "full screen" if it covers more then 80%
-and allow scrolling like with full screen menu.
-
-
-Command discovery: When holding down Ctrl or Alt, you see all available commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
-
-
-bug: Virtual keyboard switches to wide format even though the screen
-is in vertical mode, ! probably because of dialog making the screen wider.
-
-
-Live preview is not working on Opera Mobile, it seems you can not access the opened window.
-Live preview is however not as useful on mobile as it's really too little screen real estate to show both the editor and a preview ...
-
-
-Go through all plugins and add functions to the virtual keyboard for discovery!!?
-
-Work on the wide keyboard layout
-
-
-using the context menu is slow.
-put functionality like save
-on the virtual keyboard
-
-
-50% of first time users doesn't interact with the editor, and just close it down after staring on it for one second.
-Even though the text on the screen say "Right click to show th meny", they do nothing. Any ideas !?
-
-Sometimes the menu doesn't come up when long pressing on mobile! Because I'm clicking in the scroll area !?
 
 When clicking on selected text, offer to "Copy selection" or "Cut selection" it using right click menu
 Offer to "Paste from clipboard" when the text is not selected
 
-not all file tabs are visible on mobile device when there are many file tabs open and the screen is small.
-
-The virtual keyboard often get stuck in horizontal mode because widget that doesn't fit makes the screen wider.
-Revaluate what keyboard to load every time it comes back from being hidden.
-
-Selecting stuff is hard as the thing you try to select is covered by your fingers.
-
-Working on canvas based virtual keyboard ...
-
+Go through all plugins and add functions to the virtual keyboard for discovery!!?
+using the context menu is slow. put functionality like save on the virtual keyboard!
 
 
 
 Able to copy a folder
+
 "new Folder" from any file or folder.
 
-.ssgconf JSON files
-
-Writing guides/tutorials
 
 
-
-
-
-Issues when starting a nodejs script in collab mode, the log file gets overwritten. (set file.changeEvents=false)
 
 
 
@@ -475,6 +407,9 @@ Forgot why we are using Nodesource ...
 
 What I'm thinking
 -----------------
+
+50% of first time users doesn't interact with the editor, and just close it down after staring on it for one second.
+Even though the text on the screen say "Right click to show they meny", they do nothing. Any ideas !?
 
 what's the selling point of your editor/ide?
 
@@ -987,9 +922,39 @@ Make server run under apparmor profile ...
 
 
 
+Mobile (small screen) issues
+============================
+
+Selecting stuff is hard as the thing you try to select is covered by your fingers.
+
+check if fixed: The virtual keyboard often get stuck in horizontal mode because widget that doesn't fit makes the screen wider.
+Revaluate what keyboard to load every time it comes back from being hidden.
+
+Sometimes the menu doesn't come up when long pressing on mobile! Because I'm clicking in the scroll area !?
+
+cant bring up the menu when something covers most of the screen.
+
+make the file explorer "full screen" if it covers more then 80%
+and allow scrolling like with full screen menu.
+
+not all file tabs are visible on mobile device when there are many file tabs open and the screen is small.
+
+
+
+
 
 BUGS (and issues)
 =================
+
+A Mercurial diff can be so large that it freezes the editor!
+
+Issues when starting a nodejs script in collab mode, the log file gets overwritten. (set file.changeEvents=false)
+
+x to close a tab is too far down when screen is small in Firefox!
+
+issue: file.isStreaming usage
+
+bug: Nuked the editor by accidentally pasting 50k LOC into the search box in the find/replace widget
 
 Parameter hints and autocomplete in nested functions. Example: foo(par1, bar(something, ))
 
@@ -3106,6 +3071,15 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+---
+User option: First time opening the editor.
+Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
+
+User testing: Do you want all interactions with the editor to be recorded ?
+---
+
+Command discovery: When holding down Ctrl or Alt, you see all available commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
 
 If you get a EACCESS error when saving a file, try sudo cp, ... like in Sublime Text
 

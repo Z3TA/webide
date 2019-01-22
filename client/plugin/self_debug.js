@@ -5,7 +5,9 @@
 		Reason we ditched the old self_debugger (that Attached itself to the chromium debug tool's console)
 		is that ONLY ONE socket can connect to the chromium debug tool's console.
 		
-		The goal of this plugin is to create automatic tests cases and bug-repeat's
+		Idea
+		----
+		Create automatic tests cases and bug-repeat's
 		 by recording all editor inputs and save state. 
 		
 		It might require several steps to put the editor in a bad state.
