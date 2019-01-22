@@ -1334,7 +1334,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			//data = data.replace(/(console\.log ?\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line);$1");
 			//data = data.replace(/console\.log *\( *(['"`])(.*)\1 *\)/g, "console.log('\x02' + __line + '\\n' + '$2')");
-			data = data.replace(/(console\.log *\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line) || $1");
+			data = data.replace(/(console\.log *\(.*\))/g, "__W_R_I_T_E_L_I_N_E('\x01' + __line + '\x02') || $1");
 			
 			var debugFunc = `
 			Object.defineProperty(global, '__stack', {
@@ -1351,11 +1351,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			Object.defineProperty(global, '__line', {
 			get: function(){
-			return __stack[1].getLineNumber();
+			return __stack[1].getLineNumber()-20;
 			}
 			});
 			
-			var __C_S_L_O_G_O_R = console.log;
+			var __W_R_I_T_E_L_I_N_E = function() {process.stdout.write.apply(process.stdout, arguments);}
 			`;
 			
 			// 19 lines
@@ -1383,7 +1383,12 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var whenDebuggerReady;
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
+		
+		// For parsing line numbers
 		var lineNr = 0;
+		var strLine = "";
+		var inStrLine = false;
+		var strText = "";
 		
 		if(USE_CHROOT) {
 			var nodejsPath = "/usr/bin/node";
@@ -1488,6 +1493,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			delete user.runningNodeJsScripts[filePath];
 			
+			if(strText && lineNr) {
+				user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": strText.trim()}});
+			}
+			
 			user.send({nodejsMessage: {scriptName: filePath, close: {code: code, signal: signal}}});
 			
 			function deleteFile(filePath) {
@@ -1518,18 +1527,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		}
 		
 		function nodejsScriptStdout(data) {
-			var text = data.toString("utf8").trim();
-			console.log(user.name + ":" + filePath + ":stdout: " + data + "");
+			var text = data.toString("utf8");
+			console.log(user.name + ":" + filePath + ":stdout: " + UTIL.lbChars(text) + "");
 			console.log("text=" + debugText(text) + "  nextBreakPoint=" + JSON.stringify(nextBreakPoint));
 			
-			if(lineNr) {
-				user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": text}});
-				lineNr = 0;
-				return;
-			}
-			
-			if(text.charAt(0) == "\x02") return parseLines(text);
-			else console.log("text.charAt(0)=" + text.charAt(0));
+			parseLines(text);
 			
 			if(debugit) {
 				
@@ -1570,54 +1572,35 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					console.log("Unexpected: " + debugText(text));
 				}
 			}
-			else {
-				user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
+			else if(!lineNr && !inStrLine) {
+				user.send({nodejsMessage: {scriptName: filePath, stdout: text.trim()}});
 			}
 			
 			function parseLines(text) {
-				/*
-					
-					text can contain many console.logs!
-					
-				*/
-				
-				var newLine = text.indexOf("\n");
-				
-				if(newLine == -1) {
-					lineNr = parseInt(text.slice(1)) - 20;
-					return; // next stdout will be a console.log !
-				}
-				else {
-					// text contains one ore more lines
-					lineNr = parseInt(text.slice(1, newLine)) - 20;
-					var lines = text.trim().split("\n");
-					lines.shift(); // Remove the line with ESC + lineNr
-					
-					var lineText = "";
-					var string = "";
-					
-					while(lines.length > 0) {
-						lineText = lines.shift();
-						if(lineText.charAt(0) == "\x02") {
-							// a new console log
-							if(string) {
-								// send last console.log
-								user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": string.trim()}});
-								string = "";
-							}
-							lineNr = parseInt(text.slice(1)) - 20;
-						}
-						else {
-							// asume it's the same console.log but it has many lines
-							string += "\n" + lineText;
+				for (var i=0; i<text.length; i++) {
+					if(text[i] == "\x01") {
+						// A new console.log
+						inStrLine = true;
+						if(strText.length > 0) {
+							user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": strText.trim()}});
+							strText = "";
 						}
 					}
-					if(string) {
-						user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": string.trim()}});
+					else if(text[i] == "\x02") {
+						// End of line number
+						inStrLine = false;
+						lineNr = parseInt(strLine);
+						strLine = "";
 					}
-					lineNr = 0;
+					else if(inStrLine) {
+						// Inside line number
+						strLine += text[i];
+					}
+					else {
+						strText += text[i];
+					}
+					}
 				}
-			}
 			
 			function checkText() {
 				// break in undefinedProperty.js:18

@@ -709,6 +709,22 @@
 		
 	}
 	
+	function infoHas(obj) {
+		outer: for (var i=0; i<EDITOR.info.length; i++) {
+			for(var prop in obj) {
+				console.log("info " + 1 + " " + prop + "='" + EDITOR.info[i][prop] + "' = '" + obj[prop] + "'");
+				if(EDITOR.info[i][prop] != obj[prop]) continue outer;
+			}
+			console.log("TRUE!");
+			return true;
+		}
+		console.log("FALSE!");
+		return false;
+	}
+	
+	
+	// TEST-CODE-START
+	
 	EDITOR.addTest(function testNodeErroMessage1(callback) {
 		
 		var errMsg = "Error: What a great name!";
@@ -736,22 +752,6 @@
 			
 		});
 	});
-	
-	function infoHas(obj) {
-		outer: for (var i=0; i<EDITOR.info.length; i++) {
-			for(var prop in obj) {
-				console.log("info " + 1 + " " + prop + "='" + EDITOR.info[i][prop] + "' = '" + obj[prop] + "'");
-				if(EDITOR.info[i][prop] != obj[prop]) continue outer;
-			}
-			console.log("TRUE!");
-			return true;
-		}
-		console.log("FALSE!");
-		return false;
-	}
-	
-	
-	// TEST-CODE-START
 	
 	EDITOR.addTest(function testNodeErroMessage2(callback) {
 		
