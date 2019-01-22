@@ -1958,6 +1958,7 @@ API.connect = function connect(user, json, callback) {
 			
 			if(callback) callback(err);
 			else user.send(err.message + " (serverAddress=" + serverAddress + ")");
+			
 			callback = null;
 			user.remoteConnectionClosed("ftp", serverAddress);
 			
@@ -2001,8 +2002,7 @@ API.connect = function connect(user, json, callback) {
 	else if(protocol == "ssh") {
 		
 		sshConnect(function sshConnected(err, sshClient, workingDir) {
-			if(err) callback(err);
-			else {
+			if(err) return callback(err);
 				
 				user.remoteConnections[serverAddress] = {client: sshClient, protocol: protocol};
 				
@@ -2018,22 +2018,21 @@ API.connect = function connect(user, json, callback) {
 				
 				callback(null, {workingDirectory: user.workingDirectory});
 				callback = null; // Don't callback again when the connection timeouts
-			}
+			
 		});
 		
 	}
 	else if(protocol == "sftp") {
 		
 		sshConnect(function sshConnected(err, sshClient, workingDir) {
-			if(err) callback(err);
-			else {
-				// Initiate "SFTP mode"
+			if(err) return callback(err);
+			
+			// Initiate "SFTP mode"
 				sshClient.sftp(function(err, sftpClient) {
 					if (err) {
 						sshClient.end();
-						callback(err);
-
-					}
+						return callback(err);
+}
 					else {
 						user.remoteConnections[serverAddress] = {client: sftpClient, protocol: protocol};
 						user.changeWorkingDir(workingDir);
@@ -2052,7 +2051,7 @@ API.connect = function connect(user, json, callback) {
 						callback = null; // Don't callback again when the connection timeouts
 					}
 				});
-			}
+			
 		});
 	}
 	else {
@@ -2072,6 +2071,8 @@ API.connect = function connect(user, json, callback) {
 		if(keyPath) {
 			// Connect using key
 			API.readFromDisk(user, {path: keyPath}, function readKey(err, json) { // Read key
+				if(err) return cb(err);
+				
 				var path = json.path
 				var keyStr = json.data;
 				
@@ -2118,20 +2119,23 @@ API.connect = function connect(user, json, callback) {
 						}
 						
 						cb(null, c, workingDir);
-						
+						cb = null;
+
 						//c.end();
 					}).on('data', function(data) {
 						console.log('SFTP pwd stdout: ' + data);
 						dir += data;
 					}).stderr.on('data', function(data) {
-						cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
-						//user.send("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
+//cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
+						user.send("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
 						console.warn('SFTP pwd stderr: ' + data);
 					});
 				});
 				
 			}).on('error', function(err) {
 				cb(err);
+cb = null;
+				
 				if(err.message == "All configured authentication methods failed") {
 					user.send("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
 				}
