@@ -420,7 +420,9 @@ function recycleGuestAccounts(callback) {
 			
 			if(error) {
 				log("Error when removing user: (error is probably in " + scriptPath + ")");
-				throw error;
+				console.error(error);
+				processedGuestId(id, "Failed to delete account! Error: " + error.message);
+				return;
 			}
 			
 			stderr = stderr.trim(); // Can be a new line (LF)
