@@ -5556,10 +5556,8 @@ var word = "";
 	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
 		var pubKeyPath = "/.ssh/id_rsa.pub";
 		
-		// Figure out the home dir
-		var reHome = /[\/\\](home|users)[\/\\]([^\/\\]*)/i;
-		var matchHome = EDITOR.workingDirectory.match(reHome);
-		if(matchHome) pubKeyPath = matchHome[0] + pubKeyPath;
+		var homeDir = UTIL.homeDir(EDITOR.workingDirectory);
+		if(homeDir) pubKeyPath = homeDir + pubKeyPath;
 		
 		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
 		

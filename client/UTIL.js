@@ -1707,6 +1707,17 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		catch (err) {
 			return false;
 		}
+	},
+	
+	homeDir: function extractHomeDir(path) {
+		// Extract's the home dir from a path
+		// Returns null if no home dir is found
+		
+		var reHome = /[\/\\](home|users)[\/\\]([^\/\\]*)/i;
+		var matchHome = path.match(reHome);
+		
+		if(matchHome) return UTIL.trailingSlash( matchHome[0] );
+		else return null;
 	}
 	
 }

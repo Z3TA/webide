@@ -49,15 +49,25 @@ var USER_PROD_FOLDER = "/.prod/";
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
 log("process.env.uid=" + process.env.uid, 7);
+log("process.env=" + JSON.stringify(process.env));
 
-var npmOptions = {
+
+if(USE_CHROOT) {
+	var npmOptions = {
 	env: {
-		HOME: "/",
+			HOME: "/",
 		PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
 		NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
 		dev: true // So that scripts know we're in "development"
 	},
 };
+}
+else {
+	var npmOptions = {
+		env: process.env
+	}
+}
+
 
 if(parseInt(process.env.uid)) {
 	
@@ -1428,12 +1438,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
-			
+			if(USE_CHROOT) {
 			// Watch for new unix named pipes (unix sockets) so we can delete them when script stops
 			var fs = require("fs");
 			var sockWatcher = fs.watch('/sock/', sockEvent);
 			var createdSockets = [];
-
+			}
+			
 			nodeScript = child_process.fork(patchedFilePath, nodeScriptArgs, nodeScriptOptions);
 			// The node worker will chroot to user's home dir, setegid and seteuid ????? HUH ?
 			
@@ -1472,8 +1483,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			var script = user.runningNodeJsScripts[filePath];
 			
-			script.createdSockets.forEach(deleteFile); // Delete so user wont get "address in use" error next time the script is run
-			script.sockWatcher.close(); // Stop watching for changes!
+			if(script.createdSockets) script.createdSockets.forEach(deleteFile); // Delete so user wont get "address in use" error next time the script is run
+			if(script.sockWatcher) script.sockWatcher.close(); // Stop watching for changes!
 			
 			delete user.runningNodeJsScripts[filePath];
 			
