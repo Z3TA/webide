@@ -53,6 +53,8 @@ var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 
 var INVITATIONS = {}; // Users can invite other users, which allows them to login as the same user, without sharing the pw (a new temporary pw is generated)
 
+var PROXY = {}; // id: {proxy: http-proxy, startedBy: username}
+
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
 	// Enhanced console.log ...
@@ -194,6 +196,7 @@ process.on("SIGINT", function sigInt() {
 });
 
 process.on("exit", function () {
+	
 	log("Program exit\n\n", 6, true);
 });
 
@@ -1008,6 +1011,13 @@ function sockJsConnection(connection) {
 				if(VNC_CHANNEL[displayId].startedBy == userConnectionName) stopVncChannel(displayId);
 			}
 			
+			for(var name in PROXY) {
+				if(PROXY[name].startedBy == userConnectionName) {
+					if(PROXY[name].proxy) PROXY[name].proxy.close();
+					delete PROXY[name];
+				}
+			}
+			
 		}
 		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 		
@@ -1554,6 +1564,72 @@ username = guestUser;
 										}
 									}
 									
+									else if(req.tcpPort) {
+										// Find a free TCP port
+										var tcpPort = parseInt(req.tcpPort);
+										if(isNaN(tcpPort)) tcpPort = 1024;
+										// Make sure the port is not used
+										getTcpPort(tcpPort, function(err, port) {
+											if(err) workerResp(err);
+											else workerResp(null, port);
+										});
+									}
+									
+									else if(req.proxy) {
+										// So the editor client can access another url from the current server URL to avoid CORS-errors
+										// only works for http(s)!? Not Websockets!?
+										
+										var proxyName = req.proxy.name;
+										var proxyUrl = req.proxy.url;
+										var proxyWs = req.proxy.ws;
+										
+										for(var name in PROXY) {
+											if(name == proxyName) return workerResp(new Error("There's already a proxy named " + proxyName));
+										}
+										
+										PROXY[proxyName] = {
+											startedBy: username,
+											proxy: new module_httpProxy.createProxyServer({
+												target: proxyUrl,
+												ws: proxyWs
+											})
+										};
+										
+										PROXY[proxyName].proxy.on('error', function (err, req, res) {
+											res.writeHead(502, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+											res.end("Proxy failed: " + err.message);
+										});
+										
+										PROXY[proxyName].proxy.on('proxyReq', function(proxyReq, req, res, options){
+											var rewritedPath = req.url.replace('/proxy/' + proxyName, '');
+											proxyReq.path = rewritedPath;
+										});
+										
+										var resp = {
+											name: proxyName,
+											url: proxyUrl
+										};
+										
+										workerResp(null, resp);
+										
+									}
+									else if(req.stopProxy) {
+										var proxyName = req.proxy.name;
+										
+										if(!PROXY.hasOwnProperty(proxyName)) {
+											return workerResp(new Error("There's no proxy named " + proxyName));
+										}
+										
+										if(PROXY[proxyName].startedBy != username) {
+											return workerResp(new Error("The proxy named " + proxyName + " was not started by you!"));
+										}
+										
+										if(PROXY[proxyName].proxy) PROXY[proxyName].proxy.close();
+										
+										delete PROXY[proxyName]
+									}
+									
+									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 									
 								}
@@ -1590,10 +1666,10 @@ username = guestUser;
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
 										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
-									userWorker.send({identify: userInfo});
-									
-									userWorker.on("message", messageFromWorker);
-									userWorker.on("close", workerCloseHandler);
+										userWorker.send({identify: userInfo});
+										
+										userWorker.on("message", messageFromWorker);
+										userWorker.on("close", workerCloseHandler);
 									}, recreateUserProcessSleepTime);
 								}
 								
@@ -2462,6 +2538,38 @@ function handleHttpRequest(request, response) {
 		response.end('{"type": "rich", "provider_name": "' + DOMAIN + '", "provider_url": "' + protocol + '://' + DOMAIN + '/", "width": 800, "height": 500, "html": "<iframe width=\\\"800\\\" height=\\\"500\\\" src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
 		return;
 	}
+	else if(firstDir == "inspector") {
+		if(INSPECTOR.hasOwnProperty(secondDir)) {
+			if(request.url.indexOf("/json")) {
+				console.log("Proxying request to inspector " + secondDir + " using http? " + request.protocol);
+				INSPECTOR[secondDir].proxy.web(request, response);
+			}
+			else {
+				console.log("Proxying request to inspector " + secondDir + " using websockets (request.protocol=" + request.protocol + " dirs[2]=" + dirs[2] + ")");
+				
+				INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port });
+				//INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port + "/" +  });
+			}
+			
+		}
+		else {
+			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Inspector not found: " + secondDir);
+		}
+		return;
+	}
+	else if(firstDir == "proxy") {
+		if(PROXY.hasOwnProperty(secondDir)) {
+			console.log("Proxying request to proxy " + secondDir);
+			//request.url = request.url.replace("/proxy/secondDir", "");
+			PROXY[secondDir].proxy.web(request, response);
+		}
+		else {
+			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Proxy not found: " + secondDir);
+		}
+		return;
+	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
 		localFolder = HTTP_ENDPOINTS[firstDir];
@@ -2696,7 +2804,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		options.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		
 		if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
-		}
+	}
 	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
@@ -2711,7 +2819,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
 	
 	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
-
+	
 	try {
 		var worker = module_child_process.fork(scriptPath, args, options);
 	}
@@ -2744,7 +2852,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 	// Update between node4 and node8: It no longer calls exit, only close
 	worker.on("exit", function workerExit(code, signal) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
-		});
+	});
 	
 	return worker;
 	
@@ -2798,6 +2906,12 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	var x11vncOptions = {};
 	
 	var chromiumDebuggerPort = getTcpPort(CHROMIUM_DEBUG_PORT);
+	
+	if(chromiumDebuggerPort instanceof Error) {
+		stopVncChannel(displayId);
+		return callback(chromiumDebuggerPort);
+	}
+	
 	var chromeWindowId = "0x400001"; // It's hopefully always the same
 	
 	
@@ -3026,6 +3140,12 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		// x11vnc    
 		var x11vncPort = getTcpPort(VNC_PORT);
 		
+		if(x11vncPort instanceof Error) {
+			stopVncChannel(displayId);
+			return callback(x11vncPort);
+		}
+		
+		
 		if(modifiedLibvncserver) x11vncPort = 0;
 		
 		// note: x11vnc supports both websockets and normal tcp on the same port! 
@@ -3117,21 +3237,45 @@ function generatePassword(n) {
 	return pw;
 }
 
-function getTcpPort(preferPort) {
+function getTcpPort(preferPort, cb) {
 	// There are only 65,535 ports ...
+	// Don't record ports in use, that way we don't have to implement a "free port" api. Just test ports until we find a free one!
 	
-	var port = preferPort;
+	var port = preferPort || 1024;
 	
-	while(PORTS_IN_USE.indexOf(port) != -1 && port < 65535) {
-		port++;
-	} 
+	isPortTaken(port, portTakenMaybe);
 	
-	if(port >= 65535) throw new Error("We are out of ports!");
+	function portTakenMaybe(err, taken) {
+		if(err) return cb(err);
+		
+		if(taken) {
+			console.log("Port " + port + " is already in use!");
+			port++;
+			if(port >= 65535) return cb(new Error("Server has used up all TCP ports!"));
+			isPortTaken(port, portTakenMaybe);
+		}
+		else {
+			console.log("Port " + port + " seems to be free!");
+			cb(null, port);
+		}
+	}
 	
-	PORTS_IN_USE.push(port);
-	
-	return port;
+	function isPortTaken(port, fn) {
+		console.log("Checking if port " + port + " is in use ...");
+		var net = require('net')
+		var tester = net.createServer()
+		.once('error', function (err) {
+			if (err.code != 'EADDRINUSE') return fn(err)
+			fn(null, true)
+		})
+		.once('listening', function() {
+			tester.once('close', function() { fn(null, false) })
+			.close()
+		})
+		.listen(port)
+	}
 }
+
 
 function freeTcpPort(port) {
 	while(PORTS_IN_USE.indexOf(port) != -1) PORTS_IN_USE.splice(PORTS_IN_USE.indexOf(port), 1);
@@ -3347,11 +3491,11 @@ function gcsfLogin(username, loginRetries, gcsfLoginCallback) {
 	if(typeof username != "string") throw new Error("typeof username=" + typeof username);
 	if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
 	if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
-
+	
 	var maxLoginRetries = 1;
 	
 	if(GCSF.hasOwnProperty(username)) {
-gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
+		gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 		gcsfLoginCallback = null;
 		return;
 	}
@@ -3365,9 +3509,9 @@ gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 	console.log("configDir=" + configDir);
 	
 	var gcsfOptions = {};
-
+	
 	//gcsfOptions.env = {XDG_CONFIG_HOME: configDir,HOME: configDir};
-
+	
 	
 	var gcsfArgs = ["login", username];
 	
@@ -3379,13 +3523,13 @@ gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 	var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
 	
 	GCSF[username] = {};
-
+	
 	GCSF[username].loginSession = gcsfLoginSession;
 	GCSF[username].enterCode = function enterGcsfCodeForLoginSession(code, cb) {
 		log("enter gcsf code called for " + username + " from login session", DEBUG);
-			enterCodeCallback = cb;
+		enterCodeCallback = cb;
 		this.loginSession.stdin.write(code + "\n");
-		}
+	}
 	
 	gcsfLoginSession.on("close", function (code, signal) {
 		log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
@@ -3441,7 +3585,7 @@ gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
 				}
 				else {
 					log("gcsf mount successful for " + username + " after gcsf login success!", DEBUG);
-enterCodeCallback(null, {mounted: true});
+					enterCodeCallback(null, {mounted: true});
 				}
 				
 				enterCodeCallback = null;
@@ -3653,7 +3797,7 @@ enterCodeCallback(null, {mounted: true});
 				
 			}
 		}
-		}
+	}
 }
 
 function gcsfUmount(username, callback) {

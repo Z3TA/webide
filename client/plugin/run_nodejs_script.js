@@ -1,13 +1,10 @@
+
 (function() {
 	"use strict";
 	
 	var defaultArguments = "";
 	
 	var runningScripts = [];
-	
-	var debugStr = "__C_S_L_O_G_O_R('\x02' + __line) || ";
-	
-	var LINE_DEBUG = 20;
 	
 	var firstRunMsg = "";
 	var firstRunMsgDefault = "This program was started from the IDE\n" + 
@@ -31,6 +28,8 @@
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
+		CLIENT.on("nodejsDebug", nodejsDebugMsg);
+		
 		
 	}
 	
@@ -39,21 +38,40 @@
 		EDITOR.unbindKey(stopNodeJsScript);
 		
 		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
+		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
+		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
 	}
 	
 	function updateRunMsg(login) {
-		
 		//alertBox(JSON.stringify(login));
-		
 		if(login.user != "admin") {
 			firstRunMsg = firstRunMsgDefault + "Don't forget to use unix pipes instead of port numbers!\n" +
 			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname + "\n" +
 			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /sock/socketname file)\n';
-			
-		}
+			}
 	}
 	
-	
+	function nodejsDebugMsg(json) {
+		if(json.console) {
+			var type = json.console.type;
+			var level = 3;
+			
+			if(type=="warn") level = 2;
+			else if(type=="error") level = 1;
+			
+			var text = json.console.msg;
+			
+			text = text.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
+			text = text.replace(">", "&gt;");
+			
+			var loc = findFile(json.console.stack);
+			
+			if(loc) {
+				var col = columnMinusIndention(loc.file, loc.row, loc.col);
+				EDITOR.addInfo(loc.row, col, text, loc.file, level);
+			}
+}
+	}
 	
 	function showRunNodejsScriptMenuItem() {
 		var file = EDITOR.currentFile;
@@ -142,6 +160,9 @@
 		else if(msg.stderr) {
 			// ## stderr
 			
+			// todo: use EDITOR.showMessageFromStackTrace();
+			
+			
 			/*
 				
 				Error example:
@@ -181,17 +202,6 @@
 			*/
 			
 			var text = msg.stderr;
-			
-			// First update line number and remove .tmp
-			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
-			var arr, line=0, actualLine=0;
-			console.log("Update line numbers:");
-			while(arr = reFileRun.exec(text)) {
-				console.log(arr);
-				line = arr[1];
-				actualLine = parseInt(line) - LINE_DEBUG;
-				text = text.replace(reFileRun, filePath + ":" + actualLine);
-			}
 			
 			text = text.trim(); // throw "foo" errors start with a line break ! :P
 			
@@ -310,11 +320,6 @@
 				else console.warn("No stack trace vailable. Unable to find source of error in text=" + text);
 			}
 			
-			// Remove debug strings from error message before showing it in the stdout file
-			while(msg.stderr.indexOf(debugStr) != -1) {
-				msg.stderr = msg.stderr.replace(debugStr, "");
-			}
-			
 			stdout(msg);
 			
 			// end if(msg.stderr)
@@ -324,41 +329,6 @@
 			stdout(msg);
 		}
 		else if(msg.noMoreBreakPoints) {
-			
-		}
-		
-		else if(msg["console.log"]) {
-			// ## console.log
-			
-			stdout(msg);
-			
-			// Also show it inline
-			if(!msg.line) throw new Error("msg.line=" + msg.line);
-			var line = parseInt(msg.line);
-			if(isNaN(line)) throw new Error("msg.line=" + msg.line + " is not a number!");
-			
-			if(!EDITOR.files.hasOwnProperty(filePath)) {
-				console.warn("The source file is not open: filePath=" + filePath);
-				return;
-			}
-			
-			var file = EDITOR.files[filePath];
-			
-			if(!file) throw new Error("The file is gone: filePath=" + filePath);
-			
-			var row = line-1;
-			//if(file.rowVisible(row)) {
-			var rowText = file.rowText(row, false);
-			var col = rowText.indexOf("console.log") + 12;
-			var txt = msg["console.log"];
-			txt = txt.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
-			txt = txt.replace(">", "&gt;");
-			//EDITOR.addInfo(row-1, col, "WTF!?", file);
-			
-			//EDITOR.showFile(file); // Make sure it's in view
-			
-			EDITOR.addInfo(row, col, txt, file);
-			//}
 			
 		}
 		
@@ -466,15 +436,6 @@
 			var lineNr = parseInt(matchLine[2]);
 			console.log("lineNr=" + lineNr);
 			
-			// Remove debug console.log's
-			console.log("inline=" + inline);
-			console.log("inDebugStr=" + inDebugStr);
-			if(inline.indexOf(debugStr) != -1) {
-				inDebugStr = true;
-				inline = inline.replace(debugStr, "");
-			}
-			console.log("inDebugStr=" + inDebugStr);
-			
 			// Trim inline string
 			while(inline.charAt(0).match(/\s/)) {
 				inlineTrim++;
@@ -563,8 +524,6 @@
 			
 		}
 		
-		if(inDebugStr && col >= debugStr.length) col-= debugStr.length;
-		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
 		file.scrollToLine(lineNr);
@@ -635,7 +594,6 @@
 	}
 	
 	function runNodeJsScript() {
-		
 		var file = EDITOR.currentFile;
 		
 		EDITOR.hideMenu();
@@ -646,7 +604,7 @@
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
-		var json = {filePath: filePath};
+		var json = {filePath: filePath, debug: true};
 		
 		// Check if the file requires arguments
 		if(file.text.indexOf("process.argv") != -1) {
@@ -672,11 +630,10 @@
 				else {
 					if(runningScripts.indexOf(filePath) == -1) runningScripts.push(filePath);
 					console.log("Started script: " + json.filePath);
-				}
+					}
 			});
 		}
-		
-	}
+		}
 	
 	function appendFile(file, msg) {
 		
@@ -722,6 +679,31 @@
 		return false;
 	}
 	
+	function columnMinusIndention(file, row, col) {
+		var gridRow = file.grid[row];
+		var indentation = gridRow.indentationCharacters.length;
+		return col - indentation;
+	}
+	
+	function findFile(stackTrace) {
+		var callFrames = stackTrace.callFrames;
+		
+		if(!stackTrace.callFrames) throw new Error( "Expected stackTrace to have a callFrames property: " + JSON.stringify(stackTrace, null, 2) );
+		
+		for (var i=0; i<callFrames.length; i++) {
+			for(var path in EDITOR.files) {
+				if( UTIL.isSamePath(path, callFrames[i].url) ) return {
+					file: EDITOR.files[path],
+					row: callFrames[i].lineNumber-1,
+					col: callFrames[i].columnNumber
+				};
+			}
+		}
+		
+		return null;
+	}
+	
+	
 	
 	// TEST-CODE-START
 	
@@ -759,7 +741,7 @@
 		
 		var msg = {
 			"scriptName":"/some_node_script2.js",
-			"stderr" : errMsg + "\n    at /some_node_script2.js.tmp:" + (1+LINE_DEBUG) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
+			"stderr" : errMsg + "\n    at /some_node_script2.js.tmp:" + (1) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
 		};
 		
 		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js.tmp:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"

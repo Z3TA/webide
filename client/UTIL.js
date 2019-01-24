@@ -145,6 +145,7 @@ var UTIL = {
 	},
 	
 	root: function rootPath(path) {
+		// Returns the root folder
 		if(path == undefined && typeof EDITOR == "object") path = EDITOR.workingDirectory;
 		
 		var folders = UTIL.getFolders(path);
@@ -1718,6 +1719,40 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		if(matchHome) return UTIL.trailingSlash( matchHome[0] );
 		else return null;
+	},
+	
+	isSamePath: function isSamePath(a, b) {
+		// Compares two paths
+		
+		if(typeof a == "object") a = a.path;
+		if(typeof b == "object") b = b.path;
+		
+		if(typeof a != "string") throw new Error("The paths need to be String's! a=" + a);
+		if(typeof b != "string") throw new Error("The paths need to be String's! b=" + b);
+		
+		a = a.trim();
+		b = b.trim();
+		
+		if(a.indexOf("file:") == 0) a = a.slice(5);
+		if(b.indexOf("file:") == 0) b = b.slice(5);
+		
+		a = a.replace(/\\/g, "/");
+		b = b.replace(/\\/g, "/");
+		
+		while(a.indexOf("//") != -1) a = a.replace(/\/\//g, "/");
+		while(b.indexOf("//") != -1) b = b.replace(/\/\//g, "/");
+		
+		if(a.indexOf("./") > 0) {
+			var root = UTIL.root(a);
+			a = UTIL.resolvePath(root, a.replace(root, ""));
+		}
+		if(b.indexOf("./") > 0) {
+			var root = UTIL.root(b);
+			b = UTIL.resolvePath(root, b.replace(root, ""));
+		}
+		
+		return (a==b);
+		
 	}
 	
 }

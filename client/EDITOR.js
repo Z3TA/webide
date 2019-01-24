@@ -5462,7 +5462,7 @@ var word = "";
 	}
 	
 	EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
-		// Finds a currently opened file from the stack trace, and show the message on the line from the stack trace
+		// Finds a currently opened file from the stack trace, and shows the message on the line from the stack trace
 		
 		console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(options));
 		
