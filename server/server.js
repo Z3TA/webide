@@ -3100,11 +3100,8 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		chromiumBrowser.on("close", function (code, signal) {
 			log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-			freeTcpPort(chromiumDebuggerPort);
-			
 			// Should we restart chromium-browser !?
-			
-		});
+			});
 		
 		chromiumBrowser.on("disconnect", function () {
 			log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
@@ -3199,7 +3196,6 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		x11vnc.on("close", function (code, signal) {
 			log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-			freeTcpPort(chromiumDebuggerPort);
 		});
 		
 		x11vnc.on("disconnect", function () {
@@ -3301,10 +3297,6 @@ function getTcpPort(preferPort, cb) {
 	}
 }
 
-
-function freeTcpPort(port) {
-	while(PORTS_IN_USE.indexOf(port) != -1) PORTS_IN_USE.splice(PORTS_IN_USE.indexOf(port), 1);
-}
 
 function getGroupId(groupName, callback) {
 	module_fs.readFile("/etc/group", "utf8", function(err, groupData) {
