@@ -2905,7 +2905,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	var chromiumBrowserOptions = {};
 	var x11vncOptions = {};
 	
-	var chromiumDebuggerPort = getTcpPort(CHROMIUM_DEBUG_PORT);
+	var chromiumDebuggerPort = CHROMIUM_DEBUG_PORT;
 	
 	if(chromiumDebuggerPort instanceof Error) {
 		stopVncChannel(displayId);
@@ -3050,13 +3050,21 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 				}
 				else {
 					// Xvfb has started, and no chromium-browser window exists (yet)
-					startChromiumBrowser();
+					getTcpPort(CHROMIUM_DEBUG_PORT, gotChromiumDebuggerPort);
+					
 				}
 				
 			});
 		}
 	}
 	
+	function gotChromiumDebuggerPort(err, port) {
+		if(err) callback(new Error("Failed to get a tcp port for the chromium debugger: " + err.message));
+		else {
+			chromiumDebuggerPort = port;
+			startChromiumBrowser();
+		}
+	}
 	
 	function startChromiumBrowser() {
 		
@@ -3125,7 +3133,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
 			module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
 				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
-				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
+				if(stdout.indexOf(chromeWindowId) != -1) getTcpPort(VNC_PORT, gotX11vncPort);
 				else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
 				else {
 					VNC_CHANNEL[displayId].xvfb.kill();
@@ -3135,10 +3143,18 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		}
 	}
 	
-	function startX11vnc() {
+	function gotX11vncPort(err, port) {
+		if(err) callback(new Error("Failed to get a tcp port for x11vnc: " + err.message));
+		else {
+			startX11vnc(port);
+		}
+	}
+	
+	function startX11vnc(x11vncPort) {
 		
-		// x11vnc    
-		var x11vncPort = getTcpPort(VNC_PORT);
+		if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
+		
+		// ### x11vnc    
 		
 		if(x11vncPort instanceof Error) {
 			stopVncChannel(displayId);
@@ -3240,6 +3256,15 @@ function generatePassword(n) {
 function getTcpPort(preferPort, cb) {
 	// There are only 65,535 ports ...
 	// Don't record ports in use, that way we don't have to implement a "free port" api. Just test ports until we find a free one!
+	
+	if(typeof preferPort == "function") {
+		cb = preferPort;
+		preferPort = undefined;
+	}
+	else if(typeof preferPort != "number" && preferPort != undefined) {
+		preferPort = parseInt(preferPort);
+		if(isNaN(preferPort)) throw new Error("First argument preferPort=" + preferPort + " needs to be a numeric value, or undefined");
+	}
 	
 	var port = preferPort || 1024;
 	

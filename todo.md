@@ -46,6 +46,12 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+
+Test the editor on Google cloudshell:
+pty.js can't be installed! Replace with node-pty!
+
+
+
 blog about testing and code coverage !?
 
 Use debugger instead of capturing console.logs in nodejs scripts!
