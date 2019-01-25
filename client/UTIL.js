@@ -713,7 +713,7 @@ console.warn("fun=" + fun);
 		
 		console.log("parseStackTrace: stackTrace=" + stackTrace);
 		
-		var reStack = /at ([^ ]*) ?\(?(.*):(\d*):(\d*)/g; // Chromium
+		var reStack = /at ([^ \n]*) ?\(?(.*):(\d*):(\d*)/g; // Chromium
 		var stackLength = 0;
 		var lines = [];
 		var fName="";
@@ -725,7 +725,7 @@ console.warn("fun=" + fun);
 		
 
 		if(stackTrace.match(reStack)) {
-			console.log("Using reStack=" + reStack);
+			console.log("parseStackTrace:Using reStack=" + reStack);
 		}
 		else {
 			/*
@@ -736,7 +736,7 @@ console.warn("fun=" + fun);
 		}
 		
 		if(stackTrace.match(reStack)) {
-			console.log("Using reStack=" + reStack);
+			console.log("parseStackTrace:Using reStack=" + reStack);
 		}
 		else {
 			/*
@@ -746,14 +746,74 @@ console.warn("fun=" + fun);
 			var reStack = /@?(.*):(\d*):(\d*)/g; // Firefox
 		}
 		
+		if(stackTrace.match(reStack)) {
+			console.log("parseStackTrace:Using reStack=" + reStack);
+		}
+		else if(stackTrace.match(/throw/)) {
+			/*
+				Node.JS throw 
+				
+				/nodejs/app.js:10
+				throw "banana";
+				^
+				banana
+			*/
+			var reStack = /(.*):(\d*)/;
+			var match = stackTrace.match(reStack);
+			if(match) {
+				console.log("parseStackTrace: Using reStack=" + reStack + " (Node.JS throw)");
+				source = match[1];
+				lineno = match[2];
+				var rows = stackTrace.split(/\n|\r\n/);
+				console.log("parseStackTrace: rows=" + JSON.stringify(rows, null, 2));
+				for (var i=0; i<rows.length; i++) {
+					if(rows[i].indexOf("^") != -1) {
+						colno = rows[i].length-1;
+						console.log("parseStackTrace: Found colno=" + colno);
+					}
+					else if(colno!=undefined && !rows[i].match(reStack) && rows[i].indexOf("throw") != 0 && rows[i].trim().length > 0) {
+						lines.message = rows[i];
+						console.log("parseStackTrace: Found message=" + lines.message);
+					}
+					else {
+						console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);
+					}
+				}
+				obj = {};
+				if(fName) obj.fName = fName;
+				if(source) obj.source = source;
+				if(lineno) obj.lineno = lineno;
+				if(colno) obj.colno = colno;
+				
+				lines.push(obj);
+				
+				return lines;
+				
+			}
+			else {
+				console.warn("parseStackTrace:" + reStack + " does not match stackTrace=" + stackTrace );
+				return null;
+			}
+		}
+		else {
+			console.warn("parseStackTrace: " + reStack + " does not match stackTrace=" + stackTrace );
+			return null;
+		}
+		
+		var firstMatch = "";
+		
 		while ((match = reStack.exec(stackTrace)) !== null && stackLength < 100) {
 			stackLength++;
 			
+			if(!firstMatch) firstMatch = match[0];
+			
+			console.log("parseStackTrace: match.length=" + match.length);
+			
 			if(match.length == 5) {
-			fName = match[1];
-			source = match[2];
-			lineno = match[3];
-			colno = match[4];
+				fName = match[1];
+				source = match[2];
+				lineno = match[3];
+				colno = match[4];
 			}
 			else if(match.length == 4) {
 				fName ="";
@@ -763,8 +823,10 @@ console.warn("fun=" + fun);
 			}
 			
 			if(fName && !source) {
-source = fName;
+				source = fName;
 				fName = "";
+				//lineno = undefined;
+				//colno = undefined;
 			}
 			
 			obj = {};
@@ -777,8 +839,60 @@ source = fName;
 			
 		}
 		
+		console.log("parseStackTrace: firstMatch=" + firstMatch);
+		
 		if(lines.length == 0) {
-			throw new Error(reStack + " does not match stackTrace=" + stackTrace);
+			console.warn("parseStackTrace: " + reStack + " did not find any stack rows in stackTrace=" + stackTrace );
+			return null;
+		}
+		
+		if(stackTrace.indexOf(firstMatch) > 0) {
+			// We might have an error message!
+			// The error message should be right above the stack trace
+			var rows = stackTrace.split(/\n|\r\n/);
+			console.log("parseStackTrace: Checking for message in rows=" + JSON.stringify(rows, null, 2));
+			for (var i=0; i<rows.length; i++) {
+				if(rows[i].indexOf(firstMatch) != -1) {
+					lines.message = rows[--i];
+					console.log('Found message: "' + lines.message + '"');
+					break;
+				}
+			}
+			
+			if(!lines.message) lines.message = stackTrace.slice(0, stackTrace.indexOf(firstMatch)).trim();
+			
+			
+			// The source might be missing in the stack trace, but it can be at the first row
+			fName = undefined;
+			source = undefined;
+			lineno = undefined;
+			colno = undefined;
+			var reStack = /(.*):(\d+)/;
+			for (; i>-1; i--) {
+				match = rows[i].match(reStack);
+				if(rows[i].indexOf("^") != -1) {
+					colno = rows[i].length-1;
+					console.log("parseStackTrace: Found colno=" + colno);
+				}
+				else if(match) {
+					source = match[1];
+					lineno = match[2];
+					console.log("parseStackTrace: Found source=" + source + " and lineno=" + lineno);
+				}
+				else {
+					console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);
+				}
+			}
+			if(source && lineno) {
+				obj = {};
+				if(fName) obj.fName = fName;
+				if(source) obj.source = source;
+				if(lineno) obj.lineno = lineno;
+				if(colno) obj.colno = colno;
+				lines.unshift(obj);
+			}
+			
+			
 		}
 		
 		return lines;
@@ -801,12 +915,12 @@ source = fName;
 		return typeOf == string || instanceofString || objectToString == objectString;
 		
 	},
-
-
+	
+	
 	escapeRegExp: function escapeRegExp(str) {
 		return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	},
-
+	
 	getFilenameFromPath: function getFilenameFromPath(path) {
 		// Returns the file name, including the file extension part
 		if(typeof path != "string") throw new Error("Not a string: path=" + path);
@@ -818,9 +932,9 @@ source = fName;
 			return path.substr(path.lastIndexOf('\\')+1);
 		}
 	},
-
-
-
+	
+	
+	
 	isFilePath: function isFilePath(filePath) {
 		if(RUNTIME == "browser") {
 			if(linuxPathValidation(filePath)) return true

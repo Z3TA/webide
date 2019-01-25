@@ -158,6 +158,15 @@
 			stdout(msg);
 		}
 		else if(msg.stderr) {
+			
+			stdout(msg);
+			
+			var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr}) == SUCCESS);
+			
+			
+			return;
+			
+			
 			// ## stderr
 			
 			// todo: use EDITOR.showMessageFromStackTrace();
@@ -173,7 +182,7 @@
 				
 				Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
 				at ServerResponse.OutgoingMessage.setHeader (_http_outgoing.js:333:11)
-				at Server.httpRequest (/nodejs/jsql/server.js.tmp:69:11)
+				at Server.httpRequest (/nodejs/jsql/server.js:69:11)
 				at Server.new_handler (/nodejs/jsql/node_modules/sockjs/lib/utils.js:89:20)
 				at emitTwo (events.js:87:13)
 				at Server.emit (events.js:172:7)
@@ -188,7 +197,7 @@
 				Another example:
 				
 				TypeError: Cannot read property 'indexOf' of undefined\n
-				at /nodejs/minesweeper/server.js.tmp:37:34\n
+				at /nodejs/minesweeper/server.js:37:34\n
 				at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
 				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
 				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
@@ -498,7 +507,7 @@
 			/*
 				
 				TypeError: Cannot read property 'indexOf' of undefined\n
-				at /nodejs/minesweeper/server.js.tmp:37:34\n
+				at /nodejs/minesweeper/server.js:37:34\n
 				at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
 				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
 				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
@@ -707,7 +716,7 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(function testNodeErroMessage1(callback) {
+	EDITOR.addTest(1, function testNodeErroMessage1(callback) {
 		
 		var errMsg = "Error: What a great name!";
 		
@@ -741,10 +750,10 @@
 		
 		var msg = {
 			"scriptName":"/some_node_script2.js",
-			"stderr" : errMsg + "\n    at /some_node_script2.js.tmp:" + (1) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
+			"stderr" : errMsg + "\n    at /some_node_script2.js:" + (1) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
 		};
 		
-		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js.tmp:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
+		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
 		
 		EDITOR.openFile("/some_node_script2.js", 'console.log("hello world!");\n', function(err, file) {
 			if(err) throw err;
@@ -752,7 +761,7 @@
 			nodejsMessage(msg);
 			
 			setTimeout(function checkEditorInfo() {
-				if(!infoHas({file: file, str: errMsg, row: 0, col: 12})) throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
+				if(!infoHas({file: file, str: errMsg, row: 0, col: 12})) throw new Error("Expected EDITOR.info in " + file.path + " to have errMsg: " + errMsg);
 				
 				EDITOR.removeAllInfo(file);
 				EDITOR.closeFile(file.path + ".stdout");

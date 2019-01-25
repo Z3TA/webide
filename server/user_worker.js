@@ -1483,7 +1483,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log(user.name + ":" + filePath + ":stderr: " + debugText(stderr) + " (" + (typeof data) + ") =  " + data + "");
 			
 			if(debugit) {
-				if(stderr == "Debugger attached.\n") return; // Ignore msg
+				
+				// Ignore debugger messages
+				if(stderr == "Debugger attached.\n") return; 
+				if(stderr == "Waiting for the debugger to disconnect...\n") return;
+				
 				
 				// Check for debugger url
 				// Debugger listening on ws://127.0.0.1:1030/3ad4f49d-215f-40b7-b85a-1fd27c0bd0e5
@@ -1537,11 +1541,11 @@ function createInspector(url) {
 	});
 	
 	ws.on('close', function wsClose(code, reason) {
-		ws.send('something');
+		console.log("wsClose: code=" + code + " reason=" + reason);
 	});
 	
 	ws.on('error', function wsError(err) {
-		ws.send('something');
+		console.log("wsError: code=" + code + " reason=" + reason);
 	});
 	
 	ws.on('message', function wsMessage(data) {

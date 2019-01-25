@@ -2924,7 +2924,9 @@ canvas = EDITOR.canvas;
 		if(! file instanceof File) throw new Error("Third argument file is supposed to be a File object");
 		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
 		
-		console.log("EDITOR.addInfo! row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+		console.log("EDITOR.addInfo: row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+		
+		if(textString == undefined) throw new Error("EDITOR.addInfo: Third argument textString=" + textString + " can not be undefined! arguments=" + JSON.stringify(arguments));
 		
 		console.time("addInfo");
 		
@@ -3063,7 +3065,8 @@ canvas = EDITOR.canvas;
 			}
 			
 			var stackTrace = UTIL.parseStackTrace(errorStack);
-			var firstLine = stackTrace[0];
+			
+			var firstLine = stackTrace && stackTrace[0];
 			if(firstLine) {
 				source = firstLine.source;
 				lineno = firstLine.lineno;
@@ -5489,9 +5492,25 @@ var word = "";
 			var errorStack = UTIL.getStack(message);
 		}
 		
-		if(!errorStack) return EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
+		if(!errorStack) {
+EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
+			return FAIL;
+		}
 		
 		var stackLines = UTIL.parseStackTrace(errorStack);
+		
+		if(!stackLines) {
+			console.warn("Failed to parse errorStack: " + errorStack);
+			//alertBox(message || errorStack, "error");
+			return FAIL;
+		}
+		
+		if(stackLines && !message && stackLines.message) message = stackLines.message;
+		
+		if(!message) {
+			EDITOR.error(  new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) )  );
+			return FAIL;
+		}
 		
 		if(options.url) {
 			var urlPath = UTIL.getDirectoryFromPath(options.url);
@@ -5520,6 +5539,12 @@ var word = "";
 				
 				console.log("sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
 				if(filePath.indexOf(sourcePath) != -1) {
+					var fileExt = UTIL.getFileExtension(filePath);
+					if(fileExt == "stdout") {
+						console.log("Yes, but it's a " + fileExt + " file!");
+						continue;
+					}
+					
 					console.log("yes!");
 					var file = EDITOR.files[filePath];
 					var lineno = stackLines[i].lineno;
@@ -5534,7 +5559,8 @@ var word = "";
 			var row = lineno - 1;
 			var gridRow = file.grid[row];
 			if(!gridRow) { // Sanity check
-				return EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
+				EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
+				return FAIL;
 			}
 			var indentationCharacters = file.grid[row].indentationCharacters.length;
 			var col = colno - indentationCharacters;
