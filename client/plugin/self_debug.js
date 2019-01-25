@@ -290,7 +290,7 @@
 		
 		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
 		
-		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
+		var message = 'To: "Editor bug report" <zeta@zetafiles.org>\n' +
 		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
