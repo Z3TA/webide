@@ -1486,7 +1486,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				
 				// Ignore debugger messages
 				if(stderr == "Debugger attached.\n") return; 
-				if(stderr == "Waiting for the debugger to disconnect...\n") return;
+				
+				if(stderr == "Waiting for the debugger to disconnect...\n") {
+					if( user.runningNodeJsScripts[filePath].inspector ) user.runningNodeJsScripts[filePath].inspector.stop();
+					return;
+				}
 				
 				
 				// Check for debugger url
