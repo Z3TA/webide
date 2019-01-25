@@ -552,7 +552,7 @@
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, firstRunMsg + "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, firstRunMsg + "\n\n" + (new Date()) + ":\nRunning " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
 				if(err) {
 					if(err.code == "IN_QUEUE") {
 						setTimeout(function waitForFileToOpen() {
@@ -632,7 +632,15 @@
 		
 		function start(json) {
 			var stdOutFile = filePath + ".stdout";
-			if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.files[stdOutFile].writeLine(" \n \n" + (new Date()) + ": Running " + filePath + " ...");
+			
+			if(EDITOR.files.hasOwnProperty(stdOutFile)) {
+				EDITOR.files[stdOutFile].writeLineBreak();
+				EDITOR.files[stdOutFile].writeLineBreak();
+				EDITOR.files[stdOutFile].writeLine((new Date()) + ":");
+				EDITOR.files[stdOutFile].writeLine("Running " + filePath + " ...");
+				EDITOR.files[stdOutFile].writeLineBreak();
+				EDITOR.files[stdOutFile].writeLineBreak();
+			}
 			
 			CLIENT.cmd("run_nodejs", json, function(err, json) {
 				if(err) throw err;
@@ -690,8 +698,21 @@
 	
 	function columnMinusIndention(file, row, col) {
 		var gridRow = file.grid[row];
+		
+		if(!gridRow) throw new Error("gridRow=" + gridRow + " row=" + row);
+		
 		var indentation = gridRow.indentationCharacters.length;
-		return col - indentation;
+		
+		// The v8 debugger gets the line number wrong because module stuff is inserted at the first line by Node.js
+		if(row==0 && col >= 62) col -= 62;
+		
+		console.log("columnMinusIndention: row=" + row + " col=" + col + " indentation=" + indentation);
+		
+		var sum = col - indentation;
+		
+		if(isNaN(sum)) throw new Error("sum=" + sum + " col=" + col + " indentation=" + indentation);
+		
+		return sum;
 	}
 	
 	function findFile(stackTrace) {
@@ -703,7 +724,7 @@
 			for(var path in EDITOR.files) {
 				if( UTIL.isSamePath(path, callFrames[i].url) ) return {
 					file: EDITOR.files[path],
-					row: callFrames[i].lineNumber-1,
+					row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
 					col: callFrames[i].columnNumber
 				};
 			}
