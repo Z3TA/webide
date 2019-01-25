@@ -5,13 +5,16 @@
 	
 */
 
-var ptyMissing = false;
+var module_os = require("os");
 
+var ptyMissing = false;
+console.log("Requiring node-pty module ...");
 try {
-var pty = require('pty.js');
+	var module_pty = require('node-pty');
 }
 catch(err) {
-	ptyMissing = true;
+	console.warn("Unable to require module node-pty: " + err.message);
+	ptyMissing = err.message;
 }
 
 var TERMINAL_COUNTER = 0;
@@ -39,7 +42,8 @@ function newTerminal(user, json, callback) {
 	var rows = json.rows || 30;
 	var cwd = json.cwd || process.env.HOME;
 	var env = json.env || process.env;
-	var exec = json.exec || "/bin/bash";
+	var defaultShell = module_os.platform() == 'win32' ? 'powershell.exe' : '/bin/bash';
+	var exec = json.exec || defaultShell;
 	var termId = json.id || ++TERMINAL_COUNTER;
 	
 	console.log("env=" + JSON.stringify(env));
@@ -52,7 +56,7 @@ function newTerminal(user, json, callback) {
 	
 	if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;
 	
-	TERMINALS[termId] = pty.spawn(exec, [], {
+	TERMINALS[termId] = module_pty.spawn(exec, [], {
 		name: 'xterm-color',
 		cols: cols,
 		rows: rows,
@@ -132,7 +136,7 @@ function terminalClose(user, json, callback) {
 }
 
 function ptyModuleNotLoaded(user, json, callback) {
-	var error = new Error("pty module is not installed on the server!");
+	var error = new Error("node-pty module is not installed on the server! (" + ptyMissing + ")");
 	error.code = "MODULE_MISSING";
 	callback(error);
 };

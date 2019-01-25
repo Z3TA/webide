@@ -25,11 +25,11 @@
   "dependencies": {
     "dirname": "https://github.com/Z3TA/nwjs_dirname/tarball/master",
     "ftp": "https://github.com/Z3TA/node-ftp/tarball/master",
-    "generate-password": "^1.4.0",
+    "generate-password": "^1.4.1",
     "http-proxy": "^1.17.0",
     "iconv-lite": "https://github.com/Z3TA/iconv-lite/tarball/master",
     "jschardet": "^1.6.0",
-    "mammoth": "^1.4.6",
+    "mammoth": "^1.4.7",
     "marked": "^0.4.0",
     "ncp": "^2.0.0",
     "sockjs": "^0.3.4",
@@ -37,12 +37,12 @@
     "ws": "^6.1.3"
   },
   "optionalDependencies": {
+    "nodehun": "^2.0.12",
     "nodemailer": "^2.6.4",
     "nodemailer-smtp-transport": "^2.7.2",
+    "node-pty": "^0.8.1",
     "posix": "^4.1.2",
-    "pty.js": "^0.3.1",
-    "ps-node": "^0.1.6",
-    "nodehun": "^2.0.12"
+    "ps-node": "^0.1.6"
   },
   "repository": {
     "type": "Mercurial",
