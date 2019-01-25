@@ -1577,6 +1577,13 @@ function createInspector(url) {
 			}
 			var text = strings.join(" ");
 			
+			/*
+				todo: Handle type=object
+				
+				
+				
+			*/
+			
 			user.send({
 				nodejsDebug: {
 					console: {
