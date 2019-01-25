@@ -372,7 +372,7 @@ function adduser() {
 		updateFile(homeDir + "website_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
-		
+		updateFile(homeDir + "wwwpub/html_examples.htm");
 		
 	// add wwwpub
 		var wwwgid = getGroupId("www-data");

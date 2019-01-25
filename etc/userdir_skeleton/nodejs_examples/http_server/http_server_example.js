@@ -1,12 +1,12 @@
 /*
-	Boilerplate code to get a http server runnning.
+	Boilerplate code to get a http server running.
 	Can for example be used to create a REST API.
 	
 	Press F2 to run this Node.JS program
 	Then press F4 (or close the editor) to stop it.
 	
-	All HTTP requests to *.%USERNAME%.%DOMAIN% will be proxied
-	to the corresponding unix socket in your /sock/ folder.
+	All HTTP requests to app.%USERNAME%.%DOMAIN% will be proxied
+	to the corresponding unix socket at /sock/app .
 	Instead of a port number, use the path to the unix socket:
 	For example port 80 can be replaced with /sock/test 
 	which can be accessed from test.%USERNAME%.%DOMAIN%
@@ -18,15 +18,16 @@
 	
 	Scripts deployed to production will keep running even if you close the editor.
 	Press Ctrl+F4 to stop a in-production script.
-	(note: A script in production will be restarted after a server machine reboot, even if it was stopped!)
-	Press Shift+Ctrl+F4 to remove a script prom production.
+	(note: A script in production will be automatically restarted after 
+	a server machine reboot, even if it was stopped!)
+	Press Shift+Ctrl+F4 to remove a script from production.
 	
 	
 */
 
 if(process.env.dev) var unixSocket = "/sock/http_server_example_dev";
 else if(process.env.prod) var unixSocket = "/sock/http_server_example";
-else throw new Error("Did not find dev nor prod enviroment variables!");
+else throw new Error("Did not find dev nor prod environment variables!");
 
 // We need the group (www-data) to have write access to the unix socket
 // This is only needed in production, the editor will do it automatically in dev

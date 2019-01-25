@@ -9,6 +9,16 @@
 </head>
 <body>
 
+<!--
+
+Here are some example HTML code!
+
+* Right click and select "Web Preview" in the menu to experience live editing.
+* Autocomplete a HTML element/tag-ending with the keyboard Tab button
+* Notice how the editor indentate the HTML for you!
+
+--->
+
 <h1>Header1</h1>
 
 <h2>Header2</h2>
@@ -30,7 +40,7 @@
 	<!--A rx ry x-axis-rotation large-arc-flag sweep-flag x y -->
 </svg>
 
-<hr>
+<hr />
 
 <p>A paragraph with a line<br>
 break in it</p>
@@ -54,15 +64,20 @@ break in it</p>
 <p>A paragraph in the center</p>
 </center>
 
-<form action="mailto:me@mycompany.com?subject=web">
+<form action="http://http_server_example_dev.%USERNAME%.%DOMAIN%">
+	<!--
 	
-	<input type="hidden" name="secret" value="Can't see this">
+	In order the recive form data, start the Node.JS script: 
+	nodejs_examples/http_server/http_server_example.js
 	
-	<input type="text" name="textinput" placeholder="type text here" size="30"><br>
+	--->
+	<input type="hidden" name="secret" value="Can't see this" />
+	
+	<input type="text" name="textinput" placeholder="type text here" size="30" /><br>
 	<br>
 	<textarea name="bigtext" rows="4" cols="40">Type a lot of text here</textarea><br>
 	<br>
-	<label for="date">Pick a date: <input type="date" id="date" name="date"></label><br>
+	<label for="date">Pick a date: <input type="date" id="date" name="date" /></label><br>
 	<br>
 	<label for="phone">Your nr: <input type="text" id="phone" name="phone" /></label><br>
 	<br>
@@ -76,5 +91,5 @@ break in it</p>
 	
 </form>
 
-
 </body>
+</html>
