@@ -1573,7 +1573,7 @@ function createInspector(url) {
 			var strings = [];
 			var args = json.params.args;
 			for (var i=0; i<args.length; i++) {
-				if(args[i].type == "string") strings.push(args[i].value);
+				if(args[i].hasOwnProperty("value")) strings.push( string(args[i].value) );
 			}
 			var text = strings.join(" ");
 			
@@ -1596,6 +1596,10 @@ function createInspector(url) {
 		}
 		
 	});
+	
+	function string(x) {
+		return JSON.stringify(x);
+	}
 	
 	function req(method, params) {
 		if(ws.readyState != ws.OPEN) return console.warn("Winsocket not open! Unable to send req: method=" + method + " params=" + params);
