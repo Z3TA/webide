@@ -61,6 +61,8 @@ nodejs temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/
 mkdir temp/release/linux/client/about/
 cp temp/release/linux/documentation/about.htm temp/release/linux/client/about/
 
+
+
 # Generate bundle
 # Make sure the bundle is generated *after* any scripts has been modified!
 cd temp/release/linux/
@@ -70,6 +72,7 @@ cd ../../../
 
 
 echo "Clean up"
+rm -rf temp/release/linux/guides/
 rm -rf temp/release/linux/.hg/
 rm -rf temp/release/linux/webextension/
 rm -rf temp/release/linux/hosted_chrome_app/
@@ -77,6 +80,7 @@ rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/client/plugin/jswordwrap/
 rm -rf temp/release/linux/guide/
 
+rm temp/release/linux/make_test_file.js
 rm temp/release/linux/charStats.js
 rm temp/release/linux/webide_release.sh
 rm temp/release/linux/release.sh
@@ -107,6 +111,7 @@ rmdir temp/release/server/documentation/
 echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/letsencrypt/
+rm -rf temp/release/linux/client/signup/
 rm temp/release/linux/gcsf
 rm temp/release/linux/adduser.js
 rm temp/release/linux/cloudide_install.js
