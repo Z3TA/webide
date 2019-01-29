@@ -1574,15 +1574,12 @@ function createInspector(url) {
 			var args = json.params.args;
 			for (var i=0; i<args.length; i++) {
 				if(args[i].hasOwnProperty("value")) strings.push( string(args[i].value) );
+				else if( args[i].type=="object" && args[i].preview) {
+					strings.push( getProps( args[i].preview.properties ) );
+				}
 			}
-			var text = strings.join(" ");
 			
-			/*
-				todo: Handle type=object
-				
-				
-				
-			*/
+			var text = strings.join(" ");
 			
 			user.send({
 				nodejsDebug: {
@@ -1593,6 +1590,22 @@ function createInspector(url) {
 					}
 				} 
 			});
+		}
+		
+		function getProps(prop) {
+			var str = "{";
+			for (var i=0; i<prop.length; i++) {
+				str = str + prop[i].name + ": ";
+				
+				if( prop[i].type == "string") str = str + '"' + prop[i].value + '"';
+				else str = str + prop[i].value
+				
+				str += ", ";
+			}
+			
+			str = str.slice(0, -2) + "}";
+			
+			return str;
 		}
 		
 	});

@@ -46,47 +46,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Handle type=object in console.log v8 inspector
-
-{
-  "method": "Runtime.consoleAPICalled",
-  "params": {
-    "type": "log",
-    "args": [
-      {
-        "type": "object",
-        "subtype": "null",
-        "value": null
-      },
-      {
-        "type": "object",
-        "subtype": "array",
-        "className": "Array",
-        "description": "Array(1)",
-        "objectId": "{\"injectedScriptId\":1,\"id\":1}",
-        "preview": {
-          "type": "object",
-          "subtype": "array",
-          "description": "Array(1)",
-          "overflow": false,
-          "properties": [
-            {
-              "name": "0",
-              "type": "string",
-              "value": "Rot"
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-
-
-
-
-
-
 
 blog about testing and code coverage !?
 
