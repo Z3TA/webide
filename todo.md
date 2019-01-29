@@ -46,19 +46,11 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Thinking about making web sites, how to get (free) templates !?
+
 
 blog about testing and code coverage !?
 
-Use debugger instead of capturing console.logs in nodejs scripts!
-
-
-blog about yak shaving !?
-
-reload postfix and watch logs in the mainframe (are we gonna bomb out mail from virtual machines!?)
-
-fixing bug in ssh connect
-configuring postfix
-trying to send an e-mail
 
 
 When clicking on selected text, offer to "Copy selection" or "Cut selection" it using right click menu

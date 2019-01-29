@@ -47,7 +47,7 @@ EDITOR.plugin({
 				if(err) return alertBox("Failed to create new file (" + filePath + "): " + err.message);
 				
 				// Find scripts
-				var reScripts = /<script.*src="([^"]*)"><\/script>/g;
+				var reScripts = /<script.*src="([^"]*)"><\/script>/ig;
 				var scripts = [];
 				var arr;
 				while ((arr = reScripts.exec(text)) !== null) {
@@ -56,16 +56,31 @@ EDITOR.plugin({
 				
 				// Find stylesheets
 				// <link rel="stylesheet" type="text/css" href="gfx/style.css">
-				var reStylesheets = /<link.*stylesheet.*href="([^"]*)"/g;
+				var reStylesheets = /<link.*stylesheet.*href="([^"]*)"/ig;
 				var stylesheets = [];
 				var arr;
 				while ((arr = reStylesheets.exec(text)) !== null) {
 					downloadFile(arr[1]);
 				}
 				
+				var get = makeGet(text, downloadFile);
+				
+				// Find media
+				get(/<img.*src="([^"]*)".*>/ig);
+				
+				
+				function get(re) {
+					var arr;
+					while ((arr = re.exec(text)) !== null) {
+						downloadFile(arr[1]);
+					}
+				}
+				
 			});
 			
+			
 		});
+		
 		
 		function downloadFile(srcPath) {
 			if(srcPath.indexOf("://") != -1 || srcPath.slice(0,2) == "//") return console.log("Not relative srcPath: " + srcPath);
@@ -76,20 +91,33 @@ EDITOR.plugin({
 			
 			path = UTIL.joinPaths([loc.host, path]);
 			
-			console.log("Downloading url=" + url + " path=" + path + " srcPath=" + srcPath);
+			var fileName = UTIL.getFilenameFromPath(path);
+			
+			if(fileName == "") path = path + "index.htm";
+
+			var ext = UTIL.getFileExtension(path);
+			
+			console.log("Downloading url=" + url + " path=" + path + " srcPath=" + srcPath + " fileName=" + fileName);
 			
 			CLIENT.cmd("httpGet", {url: url}, function (err, text) {
 				filesDownloaded++;
 				if(err) {
 					return downloadErrors.push({url: url, err: err, code: err.code});
 				}
-				EDITOR.openFile(path, text, function(err, file) {
+				
+				if(ext.match(/htm|html|css/i) {
+					EDITOR.openFile(path, text, function(err, file) {
 					if(err) {
 return alertBox("Failed to create new file (" + path + "): " + err.message);
 					}
+					});
+				}
+				
+				if( ext.match(/css/i) ) {
+					// todo: Download media from CSS
 					
-					
-				});
+				}
+				
 			});
 		}
 		
