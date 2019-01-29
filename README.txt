@@ -1,7 +1,8 @@
 
 JZedit is a text/code editor/IDE for JavaScript, CSS, HTML and Node.JS development.
 
-Also see LICENCE.txt, contribute.txt and guides in guides/src/ or on https://webide.se/about/about.htm
+Also see LICENCE.txt, contribute.txt and guides/articles in the documentation/ 
+folder (also available on https://webide.se/about/about.htm)
 
 
 webide.se ?
