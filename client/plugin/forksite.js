@@ -56,7 +56,7 @@ EDITOR.plugin({
 				
 				// Find stylesheets
 				// <link rel="stylesheet" type="text/css" href="gfx/style.css">
-				var reStylesheets = /<link.*stylesheet.*href="([^"]*)">/g;
+				var reStylesheets = /<link.*stylesheet.*href="([^"]*)"/g;
 				var stylesheets = [];
 				var arr;
 				while ((arr = reStylesheets.exec(text)) !== null) {
