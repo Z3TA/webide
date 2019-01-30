@@ -48,6 +48,8 @@ What I'm working on
 
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 
+EDITOR.say !?
+
 Thinking about making web sites, how to get (free) templates !?
 
 

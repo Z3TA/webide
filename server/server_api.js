@@ -313,14 +313,12 @@ API.download = function download(user, json, callback) {
 		else save();
 		
 		function save() {
-			var saveOptions = {path: json.path}
+			var saveOptions = {path: json.path, text: buffer}
 			
 			if(binary) {
-				saveOptions.inputBuffer = buffer;
+				saveOptions.inputBuffer = true;
 			}
 			else {
-				saveOptions.text = buffer;
-				
 				downloadResp.text = buffer;
 			}
 			
@@ -1329,11 +1327,13 @@ API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return saveToDiskCallback(path);
 	
-	var inputBuffer = json.inputBuffer;
-	var encoding = json.encoding;
-	var text = json.text;
+	var inputBuffer = json.inputBuffer || false;
+	var encoding = json.encoding || "utf-8";
+	var text = json.text; // string, or (if json.inputBuffer==true) Buffer
 	
-	if(encoding == undefined) encoding = "utf-8";
+	if(typeof inputBuffer != "boolean") throw new Error("saveToDisk: Error: inputBuffer (" + (typeof inputBuffer) + ") should be a Boolean (true or false)");
+	if(!inputBuffer && !UTIL.isString(text)) throw new Error("saveToDisk: Error: text (" + (typeof text) + ") should be a string when inputBuffer is false");
+	if(inputBuffer && !Buffer.isBuffer(text)) throw new Error("saveToDisk: Error: text (" + (typeof text) + ") should be a Buffer when inputBuffer is true");
 
 // Check path for protocol
 var url = require("url");
@@ -1348,7 +1348,7 @@ console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname
 
 	var crypto = require('crypto');
 	var shaSum = crypto.createHash('sha256');
-	shaSum.update(inputBuffer || text);
+	shaSum.update(text);
 	var hash = shaSum.digest('hex')
 	
 if(protocol == "ftp:" || protocol == "ftps:") {
