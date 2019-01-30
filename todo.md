@@ -46,6 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Doesn't get fonts when forking https://zäta.com/en/index.htm
+
 Thinking about making web sites, how to get (free) templates !?
 
 

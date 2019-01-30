@@ -1574,7 +1574,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function testUtilResolvePath(callback) {
+	EDITOR.addTest(1, function testUtilResolvePath(callback) {
 		
 		var R = UTIL.resolvePath;
 		
@@ -1593,6 +1593,7 @@
 		UTIL.assert(R("http://www.foo.com/foo/bar/", "/baz/"), "http://www.foo.com/baz/");
 		UTIL.assert(R("http://www.foo.com/foo/bar/", "../baz/"), "http://www.foo.com/foo/baz/");
 		UTIL.assert(R("http://www.foo.com/", "/baz"), "http://www.foo.com/baz");
+		UTIL.assert(R("http://www.foo.com/bar/", "baz/file.htm"), "http://www.foo.com/bar/baz/file.htm");
 		
 		callback(true);
 		
@@ -1936,7 +1937,7 @@ if(err) throw err;
 		});
 	});
 	
-	EDITOR.addTest(1, function testJoinPath(callback) {
+	EDITOR.addTest(function testJoinPath(callback) {
 		
 		var assert = UTIL.assert;
 		

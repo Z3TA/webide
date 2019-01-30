@@ -298,7 +298,7 @@ API.download = function download(user, json, callback) {
 	
 	var downloadResp = {};
 	
-	API.httpGet(user, {url: json.url, binary: true}, function gotHttpData(err, buffer) {
+	API.httpGet(user, {url: json.url, binary: binary}, function gotHttpData(err, buffer) {
 		if(err) return callback(new Error("Failed to request URL " + json.url + " : " + err.message));
 		
 		console.log("buffer.length=" + buffer.length);
@@ -320,6 +320,7 @@ API.download = function download(user, json, callback) {
 			}
 			else {
 				saveOptions.text = buffer;
+				
 				downloadResp.text = buffer;
 			}
 			
