@@ -957,7 +957,7 @@ usePseudoClipboard = false;
 			*/
 		}
 		
-		if(!UTIL.isString(path)) return fileOpenError(new Error("path is not a string: " + path));
+		if(!UTIL.isString(path)) return fileOpenError(new Error("EDITOR.openFile: Error: First argument is not a string: path=" + path));
 		
 		EDITOR.openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
 		console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
@@ -1007,18 +1007,16 @@ usePseudoClipboard = false;
 			
 		}
 		else {
-			
 			//console.log("text is NOT undefined! But is it a string?");
 			if(!UTIL.isString(text)) {
 				console.log("text=" + text);
-				return fileOpenError(new Error("text is not a string!"));
+				return fileOpenError(new Error("EDITOR.openFile: Error: Second argument is not a string: text=" + text));
 				
 			}
 			else {
 				load(null, path, text, null, true);
 			}
-			
-		}
+			}
 		
 		function load(err, path, text, hash, notFromDisk, tooBig) {
 			
@@ -5476,6 +5474,10 @@ var word = "";
 			var message = options.error.message;
 		}
 		else if(options.errorEvent) {
+			if(!options.errorEvent.error) {
+				console.log("options.errorEvent: ", options.errorEvent);
+				return FAIL;
+			}
 			var message = options.errorEvent.error.message;
 		}
 		
@@ -5580,10 +5582,10 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	}
 	
 	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
-		var pubKeyPath = "/.ssh/id_rsa.pub";
+		var pubKeyPath = ".ssh/id_rsa.pub";
 		
 		var homeDir = UTIL.homeDir(EDITOR.workingDirectory);
-		if(homeDir) pubKeyPath = homeDir + pubKeyPath;
+		if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
 		
 		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
 		

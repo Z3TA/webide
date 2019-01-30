@@ -27,101 +27,172 @@ EDITOR.plugin({
 			The server has to do the http get due to CORS !
 		*/
 		
+		var aborted = false;
 		var loc = UTIL.getLocation(mainUrl);
 		var filePath = loc.pathname;
 		var folder = UTIL.getFolderName(filePath);
-		var fileName = UTIL.getFilenameFromPath(filePath);
-		var filesToDownload = 0;
-		var filesDownloaded = 0;
+		var urlFileName = UTIL.getFilenameFromPath(filePath);
+		var filesToDownload = [];
+		var filesDownloaded = [];
+		var filesToOpen = 0;
+		var filesOpened = 0;
 		var downloadErrors = [];
+		var datadirCreated = 0; // 1=creating 2=Failed 3=Created
+		var thirdParty = [];
+		var doneAlready = false;
+		var homeDir = UTIL.homeDir(EDITOR.workingDirectory);
+		var dataDir = UTIL.trailingSlash(UTIL.joinPaths([homeDir, "forked-sites", loc.host]));
+		var targetDir;
 		
-		if(fileName == "") {
-			filePath = UTIL.trailingSlash(filePath) + fileName;
+		if(urlFileName == "") {
+			filePath = UTIL.trailingSlash(filePath) + "index.htm";
 		}
 		
-		filePath = UTIL.joinPaths([loc.host, filePath]); 
-		
-		CLIENT.cmd("httpGet", {url: mainUrl}, function (err, text) {
-			if(err) return alertBox("Failed to fetch url=" + mainUrl + " : Error: " + err.message + " Code: " + err.code + " ");
-			EDITOR.openFile(filePath, text, function(err, file) {
-				if(err) return alertBox("Failed to create new file (" + filePath + "): " + err.message);
+		EDITOR.pathPickerTool({defaultPath: dataDir, instruction: "Where to save the data from " + mainUrl + " ?"}, function gotDataDir(err, path) {
+			if(err) return abort(err);
+			
+			dataDir = path;
+			
+			CLIENT.cmd("createPath", {pathToCreate: dataDir}, function(err) {
+				if(err) return abort(err);
 				
-				// Find scripts
-				var reScripts = /<script.*src="([^"]*)"><\/script>/ig;
-				var scripts = [];
-				var arr;
-				while ((arr = reScripts.exec(text)) !== null) {
-					downloadFile(arr[1]);
-				}
+				var folderPath = UTIL.getDirectoryFromPath(filePath);
+				console.log("forksite: folderPath=" + folderPath + " filePath=" + filePath);
+				targetDir = UTIL.trailingSlash( UTIL.joinPaths([dataDir, folderPath]) );
 				
-				// Find stylesheets
-				// <link rel="stylesheet" type="text/css" href="gfx/style.css">
-				var reStylesheets = /<link.*stylesheet.*href="([^"]*)"/ig;
-				var stylesheets = [];
-				var arr;
-				while ((arr = reStylesheets.exec(text)) !== null) {
-					downloadFile(arr[1]);
-				}
+				filePath = UTIL.joinPaths([dataDir, filePath]);
 				
-				var get = makeGet(text, downloadFile);
-				
-				// Find media
-				get(/<img.*src="([^"]*)".*>/ig);
-				
-				
-				function get(re) {
-					var arr;
-					while ((arr = re.exec(text)) !== null) {
-						downloadFile(arr[1]);
-					}
-				}
-				
+				CLIENT.cmd("download", {url: mainUrl, path: filePath, createPath: true, type: "text"}, function (err, downloadResp) {
+					if(err) return abort(new Error("Failed to download url=" + mainUrl + " : Error: " + err.message + " Code: " + err.code + " "));
+					EDITOR.openFile(filePath, undefined, {show: true}, function(err, file) {
+						if(err) return abort(new Error("Failed to open file (" + filePath + "): " + err.message));
+						
+						console.log("forksite: downloadResp=" + JSON.stringify(downloadResp));
+						
+						var arr;
+						var text = file.text;
+						
+						// Find scripts
+						var re = /<script.*src="([^"]*)"><\/script>/ig;
+						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+						
+						// Find stylesheets
+						// <link rel="stylesheet" type="text/css" href="gfx/style.css">
+						var re = /<link.*stylesheet.*href="([^"]*)"/ig;
+						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+						
+						// Find media
+						var re = /<img.*src="([^"]*)".*>/ig;
+						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+						
+						doneMaybe();
+					});
+				});
 			});
-			
-			
 		});
 		
-		
-		function downloadFile(srcPath) {
-			if(srcPath.indexOf("://") != -1 || srcPath.slice(0,2) == "//") return console.log("Not relative srcPath: " + srcPath);
-			// An url beginning with // (slash slash) is a vaild url which means: use the same protocol as the site
+		function doneMaybe() {
+			if(aborted) return;
 			
-			var url = UTIL.resolvePath(mainUrl.slice(0, mainUrl.lastIndexOf(fileName)), srcPath);
-			var path = UTIL.resolvePath(folder, srcPath);
-			
-			path = UTIL.joinPaths([loc.host, path]);
-			
-			var fileName = UTIL.getFilenameFromPath(path);
-			
-			if(fileName == "") path = path + "index.htm";
-
-			var ext = UTIL.getFileExtension(path);
-			
-			console.log("Downloading url=" + url + " path=" + path + " srcPath=" + srcPath + " fileName=" + fileName);
-			
-			CLIENT.cmd("httpGet", {url: url}, function (err, text) {
-				filesDownloaded++;
-				if(err) {
-					return downloadErrors.push({url: url, err: err, code: err.code});
-				}
+			if(filesToDownload.length == filesDownloaded.length && filesToOpen == filesOpened) {
+				if(doneAlready) throw new Error("forksite: Already done!");
 				
-				if(ext.match(/htm|html|css/i) {
-					EDITOR.openFile(path, text, function(err, file) {
-					if(err) {
-return alertBox("Failed to create new file (" + path + "): " + err.message);
+				doneAlready = true;
+				
+				var msg = "Finished forking " + mainUrl + '.\n';
+				msg = msg + 'Data have been saved in <a href="JavaScript: EDITOR.fileExplorer(\'' + dataDir + '\') ">' + dataDir + "</a>";
+				
+				if(thirdParty.length > 0) msg = msg + "\nThird party resources: " + thirdParty.join("\n");
+				if(downloadErrors.length > 0) {
+					msg = msg + "\nDownload errors:\n"
+					for(var i=0; i<downloadErrors.length; i++) {
+						msg = msg + downloadErrors[i].url + ": " + downloadErrors[i].err.message + "\n";
 					}
-					});
 				}
 				
-				if( ext.match(/css/i) ) {
-					// todo: Download media from CSS
-					
-				}
-				
-			});
+				alertBox(msg);
+			}
+			else console.log("forksite: filesToDownload=" + filesToDownload.length + " filesDownloaded=" + filesDownloaded.length + " filesToOpen=" + filesToOpen 
+			+ " filesOpened=" + filesOpened + " Waiting for " + UTIL.compare(filesToDownload, filesDownloaded).join(", ") );
 		}
 		
+		function abort(err) {
+			aborted = true;
+			if(err) alertBox("Forking canceled! " + err.message);
+		}
+		
+		function saveFile(srcPath) {
+			
+			var CREATE_WAIT = 1;
+			var CREATE_ERROR = 2;
+			var CREATE_SUCCESS = 3;
+			
+			var res = resolve(srcPath);
+			
+			if(res == null) return thirdParty.push(srcPath);
+			
+			var url = res.url;
+			var path = res.path;
+			
+			filesToDownload.push(url);
+			
+			console.log("forksite: Downloading url=" + url + " path=" + path + " srcPath=" + srcPath);
+			
+			CLIENT.cmd("download", {url: url, path: path, createPath: true, type: "text"}, function(err, downloadResp) {
+				filesDownloaded.push(url);
+				
+				if(err) {
+					downloadErrors.push({url: url, err: err, code: err.code});
+				}
+				else {
+					var ext = UTIL.getFileExtension(path);
+					if( ext.match(/css/i) ) {
+						// Download media from CSS
+						var text = downloadResp.text;
+						var arr;
+						var re= /url\((['"])?([^'"]*)\1\)/ig;
+						while ((arr = re.exec(text)) !== null) saveFile(arr[2]);
+					}
+					
+					if(  ext.match( /css|htm|html|js/i )  ) {
+						// Open the file in the editor
+						filesToOpen++;
+						EDITOR.openFile(path, function(err, file) {
+							filesOpened++;
+							
+							if(err) {
+								abort(new Error("Failed to open file (" + path + "): " + err.message));
+							}
+							
+							doneMaybe();
+						});
+					}
+				}
+				
+				doneMaybe();
+			});
+			
+		}
+		
+		function resolve(srcPath) {
+			console.log("forksite: resolve: srcPath=" + srcPath + " mainUrl=" + mainUrl + " targetDir=" + targetDir + " ");
+			
+			if(srcPath.indexOf("://") != -1 || srcPath.slice(0,2) == "//") { // An url beginning with // (slash slash) is a valid url which means: use the same protocol as the site
+				
+				// It's not a relative path, most likely because it's a third party script
+				return null;
+				
+			}
+			else {
+				var url = UTIL.resolvePath(mainUrl.slice(0, mainUrl.lastIndexOf(urlFileName)), srcPath);
+				var path = UTIL.resolvePath(targetDir, srcPath);
+			}
+			
+			var fileName = UTIL.getFilenameFromPath(path);
+			if(fileName == "") path = path + "index.htm";
+			
+			return {path: path, url: url};
+		}
 	}
-	
 	
 })();

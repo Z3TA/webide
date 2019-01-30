@@ -737,7 +737,7 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function testNodeErroMessage1(callback) {
+	EDITOR.addTest(function testNodeErroMessage1(callback) {
 		
 		var errMsg = "Error: What a great name!";
 		

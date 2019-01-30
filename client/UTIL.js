@@ -59,7 +59,7 @@ var UTIL = {
 			return folderPath;
 		}
 		
-		if(typeof folderPath != "string") throw new Error("folderPath=" + folderPath + " (" + typeof folderPath + ") needs to be a string!");
+		if(typeof folderPath != "string") throw new Error("UTIL.trailingSlash: Error: folderPath=" + folderPath + " (" + typeof folderPath + ") needs to be a string!");
 		
 		var delimiter = UTIL.getPathDelimiter(folderPath);
 		var lastCharacter = folderPath.substr(folderPath.length-1, 1);
@@ -77,7 +77,7 @@ var UTIL = {
 	
 	getDirectoryFromPath: function getDirectoryFromPath(path) {
 		/*
-			Returns the directory of a file path
+			Returns the path to the directory of a file path
 			If no path is specified it uses current file or working directory
 			
 			todo: replace EDITOR.getDir
@@ -136,6 +136,24 @@ var UTIL = {
 		if(folders.length > 1) return folders[folders.length-2];
 		else return folders[0];
 		
+	},
+	
+	splitPath: function splitPath(path) {
+		var delimiter = UTIL.getPathDelimiter(path);
+		var root = UTIL.root(path);
+		
+		path = path.replace(root, "");
+		
+		while(path.indexOf(delimiter+delimiter) != -1) path = path.replace(delimiter+delimiter, delimiter);
+		
+		if( path[0]==delimiter ) path = path.slice(1);
+		if( path[path.length-1]==delimiter ) path = path.slice(0,-1);
+		
+		var arr = path.split(delimiter);
+		
+		//arr.unshift(root);
+		
+		return arr;
 	},
 	
 	isLocalPath: function isLocalPath(path) {
@@ -993,6 +1011,9 @@ console.warn("fun=" + fun);
 
 	getFileExtension: function getFileExtension(filePath) {
 		// Returns the file extension, not including the dot. eg foo.bar => bar
+		
+		if(filePath == undefined) throw new Error("getFileExtension: filePath=" + filePath);
+		
 		var lastDot = filePath.lastIndexOf(".");
 		if(lastDot == -1) return "";
 		
@@ -1363,16 +1384,50 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	joinPaths: function joinPaths(paths) {
 		/*
 			
-			Ex: ["foo", "bar/baz/"] => "/foo/bar/baz/"
+			Puts a folder delimiter between each items in the array. Examples:
+			["foo", "bar/baz/"] => "/foo/bar/baz/"
+			["foo", "bar", "baz"] => "/foo/bar/baz"
 			
 		*/
 		
-		if(Object.prototype.toString.call( paths ) != '[object Array]') throw new Error("Argument needs to be an array: paths=" + paths);
+		"use strict";
+		
+		console.log("joinPaths: arguments=" + JSON.stringify(arguments));
+		
+		if(Object.prototype.toString.call( paths ) != '[object Array]') {
+			paths = Array.prototype.slice.call(arguments);
+			//throw new Error("joinPaths: Argument needs to be an array: paths=" + paths);
+		}
+		
+		console.log("joinPaths: (before flatten): paths=" + JSON.stringify(paths));
+		
+		paths = flatten(paths);
+		
+		function flatten(paths) {
+			console.log("flatten: paths=" + JSON.stringify(paths));
+			for (var i=0; i<paths.length; i++) {
+				if( Array.isArray(paths[i]) ) {
+					if(paths[i].length == 0) {
+						paths.splice(i, 1);
+						return flatten(paths);
+					}
+					else {
+						console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
+						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
+						return flatten(paths);
+					}
+				}
+			}
+			return paths;
+		}
+		
+		console.log("joinPaths: (after flatten): paths=" + JSON.stringify(paths));
 		
 		var pathDelimiter = UTIL.getPathDelimiter(paths[0]);
 		
 		for (var i=0; i<paths.length-1; i++) {
-			if(!paths[i]) throw new Error("Item " + i + "=" + paths[i] + " is emty or undefined!");
+			if(!paths[i]) throw new Error("joinPaths: Item " + i + "=" + paths[i] + " is emty or undefined!");
+			
 			paths[i] = UTIL.trailingSlash(paths[i]);
 			//if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
 		}
@@ -1382,17 +1437,21 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		var path = paths.join(pathDelimiter);
 		
-		if(pathDelimiter == "/" && path.indexOf("\\") == -1) {
-			// Want to be sure path does not contain and backslash
-			// or node would turn /C:/ into C:\C:\
+		console.log("joinPaths: (after join): path=" + path);
+		
+		if(pathDelimiter == "/" && path.indexOf(":/") == -1) {
+			// Add root 
 			path = "/" + path;
 			path = path.replace(/\\/g, "/");
+			console.log("joinPaths: Added root: path=" + path);
 		}
 		else if(pathDelimiter == "\\") {
 			path = path.replace(/\//g, "\\");
 		}
 		
 		while(path.indexOf(pathDelimiter + pathDelimiter) != -1) path = path.replace(pathDelimiter + pathDelimiter, pathDelimiter);
+		
+		if(path.indexOf(":/") != -1) path = path.replace(":/", "://"); // Re-add the extra slash in ex http://
 		
 		return path;
 	},
@@ -1404,7 +1463,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		if(!res) return -1;
 		return re.lastIndex - res[0].length;
 	},
-
+	
 	reLastIndexOf: function reLastIndexOf(regex, str, startpos) {
 		
 		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
@@ -1423,14 +1482,14 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		}
 		return lastIndexOf;
 	},
-
+	
 	assert: function assert(x, y) {
 		if(x !== y) {
 			if(y === undefined && (x === true || x === false)) throw new Error("assert takes two arguments and throws an error if they are not equal. Example: assert(42, 42)");
 			throw new Error("Result: '" + x + "'\nExpect: '" + y + "'");
 		}
 	},
-
+	
 	regexpAssert: function regexpAssert(re, strings, subIndex, expectedResult) {
 		var match;
 		for (var i=0; i<strings.length; i++) {
@@ -1456,7 +1515,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		return -1;
 	},
-
+	
 	loadCSS: function loadCSS(url) {
 		var head  = document.getElementsByTagName('head')[0];
 		var link  = document.createElement('link');
@@ -1467,7 +1526,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		link.media = 'all';
 		head.appendChild(link);
 	},
-
+	
 	checkBrowser: function checkBrowser(userAgent) {
 		var browser = "Unknown browser";
 		
@@ -1826,13 +1885,13 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	
 	homeDir: function extractHomeDir(path) {
 		// Extract's the home dir from a path
-		// Returns null if no home dir is found
+		// Returns / if no home dir is found
 		
 		var reHome = /[\/\\](home|users)[\/\\]([^\/\\]*)/i;
 		var matchHome = path.match(reHome);
 		
 		if(matchHome) return UTIL.trailingSlash( matchHome[0] );
-		else return null;
+		else return "/";
 	},
 	
 	isSamePath: function isSamePath(a, b) {
@@ -1867,7 +1926,19 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		return (a==b);
 		
+	},
+	
+	compare: function compareArray(a, b) {
+		// Returns the strings that exist in array a, but not in array b
+		var arr = [];
+		
+		for (var i=0; i<a.length; i++) {
+			if(b.indexOf(a[i]) == -1) arr.push(a[i]);
+		}
+		
+		return arr;
 	}
+	
 	
 }
 

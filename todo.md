@@ -244,8 +244,7 @@ todo
 ----
 
 
-
-
+Support third party script when parsing files in autocomplete.js (scripts found in html files)
 
 Make the terminal work propertly with the Node.JS REPL.
 

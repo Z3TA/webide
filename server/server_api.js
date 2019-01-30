@@ -235,6 +235,12 @@ API.httpGet = function httpGet(user, options, callback) {
 			
 			
 			var buffer = Buffer.concat(data);
+			
+			if(options.binary) {
+				callback(null, buffer);
+				return;
+			}
+			
 			var body = buffer.toString('utf8');
 			
 			// Detect encoding
@@ -278,6 +284,54 @@ API.httpGet = function httpGet(user, options, callback) {
 			callback(null, body);
 		}
 	}
+}
+
+API.download = function download(user, json, callback) {
+	
+	console.log("download: " + JSON.stringify(json));
+	
+	var binary = true;
+	
+	if(json.type == "text") {
+		binary = false;
+	}
+	
+	var downloadResp = {};
+	
+	API.httpGet(user, {url: json.url, binary: true}, function gotHttpData(err, buffer) {
+		if(err) return callback(new Error("Failed to request URL " + json.url + " : " + err.message));
+		
+		console.log("buffer.length=" + buffer.length);
+		
+		if(json.createPath) {
+			var parentFolder = UTIL.getDirectoryFromPath(json.path);
+			API.createPath(user, {pathToCreate: parentFolder}, function pathCreated(err) {
+				if(err) return callback(new Error("Problem creating path to folder " + parentFolder + ": " + err.message)); 
+				else save();
+			});
+		}
+		else save();
+		
+		function save() {
+			var saveOptions = {path: json.path}
+			
+			if(binary) {
+				saveOptions.inputBuffer = buffer;
+			}
+			else {
+				saveOptions.text = buffer;
+				downloadResp.text = buffer;
+			}
+			
+			API.saveToDisk(user, saveOptions, function saved(err, saveResp) {
+				if(err) return callback(new Error("Failed to save file to disk " + json.path + ": " + err.message));
+				
+				for(var key in saveResp) downloadResp[key] = saveResp[key];
+				
+				callback(err, downloadResp);
+			});
+		}
+	});
 }
 
 API.readLines = function readLines(user, json, callback) {
@@ -1278,12 +1332,7 @@ API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 	var encoding = json.encoding;
 	var text = json.text;
 	
-	var crypto = require('crypto');
-	var shaSum = crypto.createHash('sha256');
-	shaSum.update(text);
-	var hash = shaSum.digest('hex')
-	
-if(encoding == undefined) encoding = "utf-8";
+	if(encoding == undefined) encoding = "utf-8";
 
 // Check path for protocol
 var url = require("url");
@@ -1296,6 +1345,11 @@ var pathname = parse.pathname;
 	
 console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname + " pathname=" + pathname);
 
+	var crypto = require('crypto');
+	var shaSum = crypto.createHash('sha256');
+	shaSum.update(inputBuffer || text);
+	var hash = shaSum.digest('hex')
+	
 if(protocol == "ftp:" || protocol == "ftps:") {
 	
 	if(ftpBusy) {

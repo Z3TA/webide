@@ -2114,7 +2114,7 @@ var WysiwygEditor;
 			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 			
 			console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
-			" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.error.stack);
+			" urlPath=" + urlPath + " folder=" + folder + " stack=" + (errorEvent.error && errorEvent.error.stack));
 			
 			var filePath = folder + source.replace(urlPath, "");
 			

@@ -56,11 +56,35 @@
 	
 	
 	function openPreviewWindow(file) {
+		
+		// Need to start in a shallow folder if there are ../ relative paths
+		var backCount = 0;
+		var relPath = "../";
+		while(file.text.indexOf(relPath) != -1) {
+			backCount++;
+			relPath += "../";
+		}
+		
 		var folder = UTIL.getDirectoryFromPath(file.path);
+		
+		if(backCount) {
+			var root = UTIL.root(folder);
+			var folders = UTIL.splitPath(folder);
+			var folderIndex = folders.length - backCount;
+			var paths = folders.slice(folderIndex);
+			var serveFolders = folders.slice(0, folderIndex);
+			var folder = UTIL.trailingSlash(UTIL.joinPaths(root, serveFolders));
+			console.log("web_preview: file.path=" + file.path + " folders=" + JSON.stringify(folders) + " folderIndex=" + folderIndex + 
+			" backCount=" + backCount + " paths=" + paths + " serveFolders=" + serveFolders + " folder=" + folder);
+		}
+		else {
+			var folder = UTIL.getDirectoryFromPath(file.path);
+		}
+		
 		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
 			if(err) return alertBox(err.message);
 			
-			console.log("Serve URL=" + json.url);
+			console.log("web_preview: json.url=" + json.url);
 			
 			var urlPath = json.url;
 			
@@ -72,7 +96,10 @@
 				}
 				else urlPath = "http://" + urlPath;
 			}
-			var url = urlPath + UTIL.getFilenameFromPath(file.path);
+			var fileName = UTIL.getFilenameFromPath(file.path);
+			var url = UTIL.joinPaths(urlPath, paths, fileName);
+			
+			console.log("web_preview: url=" + url + " urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
 			
 			var wEditor = new WysiwygEditor({
 				sourceFile: file,

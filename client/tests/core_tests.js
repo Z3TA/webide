@@ -1936,6 +1936,19 @@ if(err) throw err;
 		});
 	});
 	
+	EDITOR.addTest(1, function testJoinPath(callback) {
+		
+		var assert = UTIL.assert;
+		
+		assert(UTIL.joinPaths(["foo", "bar", "baz"]), "/foo/bar/baz");
+		assert(UTIL.joinPaths(["foo", ["keff", "beff"], "baz"]), "/foo/keff/beff/baz");
+		assert(UTIL.joinPaths("foo", ["keff", "beff"], "baz"), "/foo/keff/beff/baz");
+		assert(UTIL.joinPaths("http://127.0.0.1:8080/xucxrrklac/", ["en"], "index.htm"), "http://127.0.0.1:8080/xucxrrklac/en/index.htm");
+		
+		
+		callback(true);
+	});
+	
 	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		
