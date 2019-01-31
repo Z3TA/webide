@@ -5388,6 +5388,8 @@ var word = "";
 	}
 	
 	EDITOR.registerAltKey = function registerAltKey(options) {
+		// Alternate keys for virtual keyboard
+		
 		if(typeof options != "object") throw new Error("First argument need to be an option object!");
 		if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
 		if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
@@ -5410,7 +5412,7 @@ var word = "";
 			reg = EDITOR.eventListeners.registerAltKey[j].fun(options);
 			if(reg==true) regSuccess = true;
 		}
-		// Note: The keybard plugion might not yet have loaded!
+		// Note: The keybard plugin might not yet have loaded!
 		//if(!regSuccess) throw new Error(UTIL.getFunctionName(options.fun) + " did not register for char=" + options.char + " on alt=" + options.alt + " on any of the keyboards!");
 		
 	}

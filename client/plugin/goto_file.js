@@ -758,7 +758,7 @@
 		return false; // false: prevent default browser action
 	}
 	
-	function gotoFile(e) {
+	function gotoFile(clickEventMaybe) {
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 		
@@ -771,8 +771,15 @@
 			
 			var selectedItem;
 			
-			if(e) {
-selectedItem = e.target;
+			if(clickEventMaybe) {
+				
+				selectedItem = clickEventMaybe.target;
+				// Target might be the <b> element depending on how the browser implement event bubbling
+				while(selectedItem.parentElement) {
+					if(selectedItem.tagName == "LI") break;
+					else selectedItem = selectedItem.parentElement;
+				}
+				
 				if(selectedItem.tagName != "LI") {
 					console.warn("Not a list item: ", selectedItem);
 					selectedItem = undefined;
