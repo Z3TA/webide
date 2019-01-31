@@ -1022,26 +1022,25 @@ str = decoder.write(data);
 				}
 				// Could also use sftp.createReadStream
 				c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
-					
-					if(err) console.warn(err.message);
-					
-				shasum.update(buffer);
-				
 					var resp = {path: path};
-					
-				resp.hash = shasum.digest('hex');
 				
+					if(err) {
+console.warn(err.message);
+				}
+				else {
+				shasum.update(buffer);
+					resp.hash = shasum.digest('hex');
+					
 					if(returnBuffer) {
 						resp.data = buffer;
-						}
+					}
 					else {
 						resp.data = buffer.toString("utf8");
-						}
-					
+					}
+				}
+				
 					callback(err, resp);
-					
-					
-				});
+					});
 				
 			}
 			else {
