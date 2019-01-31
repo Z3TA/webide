@@ -84,11 +84,10 @@
 	function gotoFile_unload() {
 		EDITOR.unbindKey(show_gotoFileInput);
 		EDITOR.unbindKey(show_gotoFileInput2);
-		
 		EDITOR.unbindKey(hide_gotoFileInput);
-		
 		EDITOR.unbindKey(gotoFile_moveUp);
 		EDITOR.unbindKey(gotoFile_moveDown);
+		EDITOR.unbindKey(openFile);
 		
 		EDITOR.unregisterAltKey(show_gotoFileInput);
 		
@@ -708,7 +707,7 @@
 		
 		//inputGoto.blur(); // why ?
 		
-		// Witch list item is selected?
+		// Which item is selected?
 		for (var i=0; i<listItems.length; i++) {
 			if(listItems[i].getAttribute("class") == "selected") {
 				
@@ -773,7 +772,11 @@
 			var selectedItem;
 			
 			if(e) {
-				selectedItem = e.target;
+selectedItem = e.target;
+				if(selectedItem.tagName != "LI") {
+					console.warn("Not a list item: ", selectedItem);
+					selectedItem = undefined;
+				}
 			}
 			
 			if(!selectedItem) {
@@ -795,7 +798,7 @@
 				var lineNr = selectedItem.getAttribute("lineNr");
 				
 				if(!path) {
-					console.log("selectedItem::");
+					console.log("selectedItem:");
 					console.log(selectedItem);
 					var attributes = {}; // For debugging
 					for (var att, i = 0, atts = selectedItem.attributes, n = atts.length; i < n; i++){
