@@ -194,7 +194,7 @@ EDITOR.changeWorkingDir(directory);
 		}
 		else {
 			// Use the hostname
-			localName = window.location.hostname;
+			var localName = window.location.hostname;
 		}
 		
 		// Make a list of connected file-systems
@@ -211,7 +211,7 @@ EDITOR.changeWorkingDir(directory);
 			option.setAttribute("id", conn);
 			// Select the file-system that we are currently exploring
 			console.log("connName=" + connName + " fullPath=" + fullPath);
-			if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
+			if(fullPath.indexOf(connName) == 0) option.setAttribute("selected", "true");
 			fsSelect.appendChild(option);
 		}
 		
@@ -767,7 +767,7 @@ else throw err;
 			if(EDITOR.connections.hasOwnProperty(host)) {
 				var url = EDITOR.connections[host].protocol;
 				if(!url) throw new Error("url=" + url);
-				url += "://" + host + "/";
+				url = url.toLowerCase() + "://" + host + "/";
 				exploreDir(url);
 			}
 			else throw new Error("Not connected to " + host);
