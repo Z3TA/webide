@@ -103,7 +103,7 @@
 		for (var i=0; i<scripts.length; i++) {
 			if(!parsedFiles.hasOwnProperty(scripts[i])) {
 				
-				if( scripts[i].match(/^(https?:)?\/\//i) ) console.warn("todo: Support third party scripts");
+				if( scripts[i].match(/^.*:\/\//i) ) console.warn("todo: Support third party scripts");
 				else loadAndParse(scripts[i]);
 			}
 		}
