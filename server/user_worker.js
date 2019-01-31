@@ -270,6 +270,10 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 	
+	if(pathToFileOrDir[0] == "~") {
+		pathToFileOrDir = pathToFileOrDir.replace("~", user.homeDir);
+	}
+	
 	if(user.rootPath && !USE_CHROOT) {
 		var urlModule = require("url");
 		var pathModule = require("path");
