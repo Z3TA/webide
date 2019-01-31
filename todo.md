@@ -46,7 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-automcomplete don't try to load files containing :// or it will be concatenated /some/path/http://some.url
+Testing "full screen" for widgets for when the screen is too small, on mobile, for example the file explorer,
+make it cover the whole screen if it already covers 75% of the screen.
 
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 

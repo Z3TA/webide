@@ -156,9 +156,16 @@ EDITOR.changeWorkingDir(directory);
 			
 			fileExplorerWrap.style.display="block";
 			
+			
+			//EDITOR.fullScreenWidget(fileExplorerWrap);
+			
+			
 		}
 		else {
 			fileExplorerWrap.style.display="none";
+			
+			//EDITOR.exitFullScreenWidget(fileExplorerWrap);
+			
 			EDITOR.resizeNeeded();
 			
 		}

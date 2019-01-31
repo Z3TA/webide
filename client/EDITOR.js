@@ -5614,6 +5614,39 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		}
 	}
 	
+	EDITOR.fullScreenWidget = function fullScreen(widgetElement) {
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "none";
+		
+		widgetElement.style.position="relative";
+		widgetElement.style.top = "0px";
+		widgetElement.style.left = "0px";
+		widgetElement.style.border="0px solid";
+		//widgetElement.style.width="100%";
+		widgetElement.style.maxWidth="100%";
+		widgetElement.style.height="100%";
+		widgetElement.style.overflow="auto";
+		
+		EDITOR.scrollingEnabled = true;
+	}
+	
+	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement) {
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "block";
+		
+		widgetElement.style.position="";
+		widgetElement.style.border="";
+		//widgetElement.style.width="";
+		widgetElement.style.maxWidth="";
+		widgetElement.style.height="";
+		widgetElement.style.overflow="";
+		
+		EDITOR.scrollingEnabled = false;
+		
+		EDITOR.resizeNeeded();
+	}
+	
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
@@ -8465,6 +8498,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			window.getSelection().removeAllRanges();
 		}
 	}
+	
+	
 	
 	function fullScreenMenu(menu) {
 		// The menu will cover the whole screen
