@@ -46,9 +46,17 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Can't switch between local-fil-system and Remote in File explorer!
+
+
+
+automcomplete don't try to load files containing :// or it will be concatenated /some/path/http://some.url
+
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 
 EDITOR.say !?
+
+Start to use Chromebook full time!
 
 Thinking about making web sites, how to get (free) templates !?
 

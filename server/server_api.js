@@ -1017,9 +1017,11 @@ str = decoder.write(data);
 				
 				console.log("Getting file from SFTP server: " + parse.pathname);
 				
-				var options = {
-					encoding: "utf8"
-				}
+			var options = {};
+			// Having encoding in options encodes the buffer,
+			// So if we want the buffer we should not set the encoding option!
+			if(!returnBuffer) options.encoding = encoding || "utf8";
+			
 				// Could also use sftp.createReadStream
 				c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
 					var resp = {path: path};
@@ -1028,15 +1030,19 @@ str = decoder.write(data);
 console.warn(err.message);
 				}
 				else {
-				shasum.update(buffer);
-					resp.hash = shasum.digest('hex');
+				
+					console.log("getSftpFile: returnBuffer=" + returnBuffer + " typeof buffer=" + (typeof buffer) + " isBuffer=" + Buffer.isBuffer(buffer));
 					
 					if(returnBuffer) {
 						resp.data = buffer;
+						shasum.update(buffer);
 					}
 					else {
 						resp.data = buffer.toString("utf8");
+						shasum.update(resp.data);
 					}
+					
+					resp.hash = shasum.digest('hex');
 				}
 				
 					callback(err, resp);
@@ -1201,8 +1207,6 @@ API.move = function move(user, json, callback) {
 		
 		Use EDITOR.move ! (don't call this directly)
 		
-		todo: Make it work with remote connections!
-		
 	*/
 	
 	var oldPath = json.oldPath;
@@ -1211,37 +1215,53 @@ API.move = function move(user, json, callback) {
 	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
 	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
 	
-	// First make a copy of the file, and then delete it !?
+	API.readFromDisk(user, {path: oldPath, returnBuffer: true}, function fileRead(err, read) {
+		if(err) return callback(err);
+		
+		if(!Buffer.isBuffer(read.data)) throw new Error("readFromDisk did not give a Buffer! typeof read.data=" + typeof read.data);
+		
+		API.saveToDisk(user, {path: newPath, text: read.data, inputBuffer: true, public: json.public}, function fileWrite(err, write) {
+			if(err) return callback(err);
+			
+			API.deleteFile(user, {path: oldPath}, function fileDelete(err) {
+				if(err) return callback(err);
+				else callback(err, {oldPath: oldPath, newPath: newPath});
+			});
+		});
+	});
 	
-	var fs = require("fs");
-	fs.rename(oldPath, newPath, function(err) {
+	/*
+		var fs = require("fs");
+		fs.rename(oldPath, newPath, function(err) {
 		
 		if(err) {
-			if(err.code == "EISDIR") {
-err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
-				err.code = "EISDIR";
-			}
-			else if(err.code == "EXDEV") {
-				console.log(err.message + " ... Trying copy ...");
-				/*
-					Most likely a gcsf error: EXDEV: cross-device link not permitted, rename '/googleDrive/hello.js' -> '/wwwpub/hello.js'
-				*/ 
-				return API.copyFile(user, {from: oldPath, to: newPath}, function afterCopy(err, copy) {
-					if(err) {
-						var error = new Error("Failed to move (EXDEV), and also failed to copy (" + err.code + "): " + err.message);
-						error.code = err.code;
-						return callback(error);
-					}
-					else callback(null, {oldPath: oldPath, newPath: copy.to});
-				});
-			}
+		if(err.code == "EISDIR") {
+		err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
+		err.code = "EISDIR";
+		}
+		else if(err.code == "EXDEV") {
+		console.log(err.message + " ... Trying copy ...");
+		
+		// Most likely a gcsf error: EXDEV: cross-device link not permitted, rename '/googleDrive/hello.js' -> '/wwwpub/hello.js'
+		
+		return API.copyFile(user, {from: oldPath, to: newPath}, function afterCopy(err, copy) {
+		if(err) {
+		var error = new Error("Failed to move (EXDEV), and also failed to copy (" + err.code + "): " + err.message);
+		error.code = err.code;
+		return callback(error);
+		}
+		else callback(null, {oldPath: oldPath, newPath: copy.to});
+		});
+		}
 		}
 		
 		callback(err, {oldPath: oldPath, newPath: newPath});
 		
 		// EDITOR.move fires move event
 		
-	});
+		});
+	*/
+	
 }
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
@@ -2321,7 +2341,7 @@ API.storageRemove = function storageRemove(user, json, callback) {
 
 API.deleteFile = function deleteFile(user, json, callback) {
 	
-	var filePath = user.translatePath(json.filePath);
+	var filePath = user.translatePath(json.filePath || json.path);
 	if(filePath instanceof Error) return callback(filePath);
 	
 	// Check path for protocol
