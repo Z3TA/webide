@@ -25,6 +25,7 @@
 	var maxNameLength = 40;
 	var lastMovedFrom = "";
 	var lastMovedTo = "";
+	var lastPathExplored = "";
 	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
 	
 	EDITOR.plugin({
@@ -119,8 +120,12 @@ gapi.auth2.getAuthInstance().signOut();
 		// The user wants to explore ...
 		// ATM this is the only file explorer, so always take the job!
 		
-		if(typeof directory == "string") EDITOR.changeWorkingDir(directory);
+		console.log("openFileExplorerTool: directory=" + directory);
 		
+		if(typeof directory == "string") {
+EDITOR.changeWorkingDir(directory);
+		
+		}
 		toggleFileExplorer(true);
 		return true; 
 	}
@@ -138,7 +143,17 @@ gapi.auth2.getAuthInstance().signOut();
 		EDITOR.updateMenuItem(menuItem, visible, "File explorer");
 		
 		if(visible) {
-			exploreDir(EDITOR.workingDirectory);
+			if(lastPathExplored.indexOf(EDITOR.workingDirectory) == 0) {
+				var pathToExplore = lastPathExplored;
+			}
+			else {
+				var pathToExplore = EDITOR.workingDirectory;
+			}
+			
+			console.log("pathToExplore=" + pathToExplore + " lastPathExplored=" + lastPathExplored + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+			
+			exploreDir(pathToExplore);
+			
 			fileExplorerWrap.style.display="block";
 			
 		}
@@ -706,6 +721,8 @@ else throw err;
 			
 			console.log("Opening file explorer folder: " + path);
 			
+			lastPathExplored = path;
+			
 			buildList(path, item, function() {
 				
 			});
@@ -786,6 +803,13 @@ else throw err;
 		lastMovedFrom = fromPath;
 		lastMovedTo = toFolder;
 		
+		setTimeout(function reseLastMoved() {
+			// If the move fails, or if the user moves the same file again,
+			// we don't want to silently cancel (due to drop event being called many times)
+			lastMovedFrom = null;
+			lastMovedTo = null;
+		}, 500);
+		
 		// Ignore when dropping at the same place
 		var fromFolder = UTIL.getDirectoryFromPath(fromPath);
 		if(fromPath == dropOnPath) return console.warn("Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
@@ -801,6 +825,7 @@ else throw err;
 		var oldPath = fromPath;
 		var newPath = UTIL.trailingSlash(toFolder) + (UTIL.getFilenameFromPath(oldPath) || UTIL.getFolderName(oldPath));
 		console.log("fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
+		
 		EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 			if(err) return alertBox(err.message);
 			

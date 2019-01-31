@@ -27,6 +27,8 @@ EDITOR.plugin({
 	
 	function updateWorkingDirectory(file) {
 		
+		console.log("updateWorkingDirectory: After save or show event: " + file.path);
+		
 		if(!file) return true;
 		
 		if(!file.savedAs) return true;
@@ -50,7 +52,7 @@ EDITOR.plugin({
 					return;
 				}
 				
-				console.log("Checking if working directory: " + currentFolder);
+				console.log("updateWorkingDirectory: Checking if working directory: " + currentFolder);
 				
 				for (var i=0; i<files.length; i++) {
 					if(files[i].name == "package.json" || files[i].name.indexOf("index.htm") != -1) {
@@ -75,7 +77,8 @@ EDITOR.plugin({
 			var currentFolder = UTIL.getDirectoryFromPath(file.path);
 			
 			if(currentFolder.indexOf(EDITOR.workingDirectory) == -1) {
-				// The file switched to or saved is not part of the current woring directory, so change working directory!
+				// The file switched to or saved is not part of the current working directory, so change working directory!
+				console.log("updateWorkingDirectory: Chaning working directory because you saved or switched to " + file.path);
 				EDITOR.changeWorkingDir(currentFolder);
 			}
 			

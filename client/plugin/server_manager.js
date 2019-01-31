@@ -592,7 +592,7 @@
 			}
 			else {
 				//alertBox("Connected to " + protocol + " on " + hostName + "!");
-				EDITOR.fileExplorer(protocol + "://" + hostName);
+				EDITOR.fileExplorer(protocol.toLowerCase() + "://" + hostName);
 				hideServerManger();
 				EDITOR.updateMenuItem(menuItem, true, menuString);
 }
