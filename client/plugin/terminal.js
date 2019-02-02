@@ -3,6 +3,9 @@
 	Question: Should terminals be reopened when the file re-opens !?
 	Answer: No! Because we wouln't be able to get back to the old state (bash session)
 	
+	Problem: The terminal's shell have it's own key-bindings which overlaps the editor's key bindings! Example Ctrl+C to copy, is used to exit a program in bash shell.
+	Solution 1: Use Alt for Ctrl and Shift+Alt for Alt !?  (AltGr doesn't seem to work)
+	
 */
 (function() {
 	"use strict";
@@ -15,7 +18,9 @@
 	var reTerm = new RegExp(termPrefix + "(\\d+)");
 	var oldCols = 0;
 	var oldRows = 0;
-	
+	var altKeyPressed = false;
+	var ctrlKeyPressed = false;
+
 	EDITOR.plugin({
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
@@ -34,7 +39,10 @@
 			
 			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
 				CLIENT.on("loginSuccess", startTerminalOnLogin);
-			} 
+			}
+			
+			EDITOR.registerAltKey({char: "=", alt:1, label: "Ctrl", fun: ctrlKey});
+			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			
 		},
 		unload: function unloadTerminal() {
@@ -52,8 +60,39 @@
 			CLIENT.removeEvent("terminal", terminalMessage);
 			EDITOR.removeEvent("exit", exitAllTerminals);
 			
+			EDITOR.unregisterAltKey(altKey);
+			EDITOR.unregisterAltKey(ctrlKey);
 		}
 	});
+	
+	function altKey(file) {
+		altKeyPressed = true;
+		
+		paintCaret(file, "⎋");
+	}
+	
+	function ctrlKey(file) {
+		ctrlKeyPressed = true;
+		
+		paintCaret(file, "✲");
+	}
+	
+	function paintCaret(file, symbol) {
+		var caret = file.caret;
+		var fillStyle = EDITOR.settings.caret.color;
+		var bufferStartRow = file.startRow;
+		var screenStartRow = 0;
+		var row = caret.row;
+		var col = caret.col;
+		
+		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		
+		var ctx = EDITOR.canvasContext;
+		
+		ctx.fillStyle = fillStyle;
+		ctx.fillText(symbol, left, top);
+	}
 	
 	function terminalMouseClick(mouseX, mouseY, caret, mouseDirection, button) {
 		if(!caret) return true; // Means the click was outside the file grid
@@ -236,7 +275,7 @@
 			
 			terminalFiles.push(file);
 			file.write(file.path + " session started " + (new Date()) + "\n");
-			file.writeLine("Use Alt key instead of Ctrl to send control characters!");
+			file.writeLine("Use Alt key instead of Ctrl to send control characters! And Alt+Shift instead of Alt (to send Esc+character)");
 			file.writeLineBreak();
 			file.writeLineBreak();
 			EDITOR.renderNeeded();
@@ -1116,17 +1155,32 @@ file.insertLineBreak();
 	}
 	
 	function terminalKeyPressed(file, character, combo) {
-		if(terminalFiles.indexOf(file) == -1) return ALLOW_DEFAULT;
 		
-		var id = file.path.match(reTerm)[1];
+		var isTerminal = terminalFiles.indexOf(file) != -1;
 		
-		console.log("key pressed: " + character);
+		if(!isTerminal) return ALLOW_DEFAULT;
+		
+		var terminalId = file.path.match(reTerm)[1];
+		
+		console.log("terminalKeyPressed: " + character);
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
 		if(EDITOR.mode != "default") return ALLOW_DEFAULT;
 		
-		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
+		if(ctrlKeyPressed) {
+			// Turn the character into a control character
+			var ascii = character.toUpperCase().charCodeAt(0) - 64;
+			character = String.fromCharCode(ascii);
+			ctrlKeyPressed = false;
+		}
+		else if(altKeyPressed) {
+			// Send an Escape character before the character
+			character = ESC + character;
+			altKeyPressed = false;
+		}
+		
+		CLIENT.cmd("terminal.write", {id: terminalId, data: character}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});
 		
@@ -1134,11 +1188,18 @@ file.insertLineBreak();
 	}
 	
 	function terminalKeyDown(file, character, combo, keyDownEvent) {
+		/*
+			
+			Sending alt-combois: First send Esc, then the letter!?
+			Example: Alt+A = Esc+A
+			
+		*/
+		
 		if(terminalFiles.indexOf(file) == -1) return ALLOW_DEFAULT;
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
-		console.log("key down: " + character + " (" + code + ")");
+		console.log("terminalKeyDown: character=" + character + " (" + code + ") combo=" + JSON.stringify(combo));
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
@@ -1277,7 +1338,9 @@ file.insertLineBreak();
 		else if(character == "Z" && combo.alt) {
 			data = String.fromCharCode(26);
 		}
-		
+		else if(combo.alt && combo.shift) {
+			data = ESC + character;
+		}
 		else return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {

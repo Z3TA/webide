@@ -76,6 +76,8 @@
 	
 	Split keyboard!?
 	
+	Symbols: http://xahlee.info/comp/unicode_computing_symbols.html
+	
 */
 
 (function() {
@@ -672,19 +674,25 @@ return false;
 		
 		clearTimeout(clickTimer);
 		
-		if(!button.alt) {
+		if(customFunction) {
+			restore();
+		}
+		else if(!button.alt) {
 			// To save one click you automatically go back to normal
 			// But give enough time to allow many clicks
-			clickTimer = setTimeout(function restore() {
-				if(ALT1 || ALT2) {
-					ALT1 = false;
-					ALT2 = false;
-					renderVirtualKeyboard();
-				}
-			}, 500);
+			clickTimer = setTimeout(restore, 500);
 		}
 		
 		return false;
+		
+		function restore() {
+			if(ALT1 || ALT2) {
+				ALT1 = false;
+				ALT2 = false;
+				renderVirtualKeyboard();
+			}
+		}
+		
 	}
 	
 	// Buttons that have a function specified need to handle ALT1, ALT2, ALT2 && ALT2, and CAPS in that function

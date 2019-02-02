@@ -7689,18 +7689,22 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 	function getCombo(eventObject) {
 		
 		var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+		
 		if(eventObject.shiftKey) {
 			combo.shift = true;
 			combo.sum += SHIFT;
 		}
+		
 		if(eventObject.altKey) {
 			combo.alt = true;
 			combo.sum  += ALT;
 		}
+		
 		if(eventObject.ctrlKey) {
 			combo.ctrl = true;
 			combo.sum  += CTRL;
 		}
+		
 		return combo;
 	}
 	
