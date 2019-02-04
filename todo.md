@@ -46,6 +46,13 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+able to see inlined removed
+lines for diffs,
+and folded block
+so you always see the diff
+when making a commit.
+
+
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 
 EDITOR.say !?
@@ -3077,6 +3084,17 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+
+markdown live preview
+
+---
+
+easy way to merge in changes
+made directly on ftp for a SSG
+site, eg. when someone have
+not used the SSG to make the change.
 
 ---
 User option: First time opening the editor.

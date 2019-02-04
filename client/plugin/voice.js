@@ -1,8 +1,18 @@
 (function() {
-	
+	/*
+		
+		Chromium will have issues. You could try:
+		
+		sudo apt-get install espeak
+		chromium-browser http://127.0.0.1:8080 --enable-speech-dispatcher
+		
+		or use Firefox.
+		
+	*/
 	"use strict";
 	
-	return console.warn("Speech Synthesis under construction");
+	if(!QUERY_STRING["voice"]) console.warn("Voice aid not enabled because no voice in query-string!");
+	
 	
 	if (!('speechSynthesis' in window)) {
 		console.warn("Speech Synthesis not possible in your browser!");
@@ -23,7 +33,7 @@
 			
 			var key_M = 77;
 			
-			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: CTRL, fun: test}); // Ctrl + M
+			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
 			
 			EDITOR.on("moveCaret", speakMoveCaret);
 			
@@ -115,6 +125,8 @@
 		lastRow = caret.row;
 		lastCol = caret.col;
 		
+		return true;
+		
 		function add(str) {
 			if(msg.length != 0) msg += " ";
 			msg += str;
@@ -152,6 +164,8 @@
 	}
 	
 	function speak(text, rate) {
+		
+		console.log("speak: text=" + text);
 		
 		window.speechSynthesis.cancel(); // Stop ongoing speach
 		
