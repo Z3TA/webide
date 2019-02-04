@@ -1051,9 +1051,9 @@ file.mode = "text";
 		
 		var grid = file.grid;
 		
-		if(row == undefined) throw new Error("Argument row is undefined!");
-		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
-		if(row < 0) throw new Error("row=" + row + " is below zero!");
+		if(row == undefined) throw new Error("removeRow: Argument row is undefined!");
+		if(row >= grid.length) throw new Error("removeRow: row=" + row + " is above grid.length=" + grid.length);
+		if(row < 0) throw new Error("removeRow: row=" + row + " is below zero!");
 		
 		
 		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
