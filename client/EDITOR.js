@@ -5614,34 +5614,76 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		}
 	}
 	
+	
+	var fullScreenWidgetParent;
+	var oldFullScreenWidget;
 	EDITOR.fullScreenWidget = function fullScreen(widgetElement) {
+		
+		if(oldFullScreenWidget) {
+			// There can only be one element in full screen mode
+			if(oldFullScreenWidget == widgetElement) return console.warn("Element already in full screen: ", widgetElement);
+			EDITOR.exitFullScreenWidget(oldFullScreenWidget, fullScreenWidgetParent);
+		}
+		
+		fullScreenWidgetParent = widgetElement.parentElement;
+		
+		var body = document.getElementById('body');
+		
+		if(fullScreenWidgetParent != body) {
+			// Move the widget from it's current position in the DOM,
+			// And place it directly under the body element
+			fullScreenWidgetParent.removeChild(widgetElement);
+			body.appendChild(widgetElement);
+		}
+		
+		// Hide everything besides the widget
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "none";
 		
+		// Give the widget free roam over the entire screen
 		widgetElement.style.position="relative";
 		widgetElement.style.top = "0px";
 		widgetElement.style.left = "0px";
-		widgetElement.style.border="0px solid";
-		//widgetElement.style.width="100%";
+		widgetElement.style.border="0px solid red";
+		widgetElement.style.width="100%";
 		widgetElement.style.maxWidth="100%";
 		widgetElement.style.height="100%";
-		widgetElement.style.overflow="auto";
+		widgetElement.style.maxHeight="100%"; // This is that magically allows scrolling on the wrapper
 		
+		
+		// Enable scrolling on the editor window
 		EDITOR.scrollingEnabled = true;
+	
+		oldFullScreenWidget = widgetElement;
 	}
 	
-	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement) {
+	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
+		
+		if(widgetElement != oldFullScreenWidget) return console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
+		
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "block";
 		
 		widgetElement.style.position="";
+		widgetElement.style.top = "";
+		widgetElement.style.left = "";
 		widgetElement.style.border="";
-		//widgetElement.style.width="";
+		widgetElement.style.width="";
 		widgetElement.style.maxWidth="";
 		widgetElement.style.height="";
-		widgetElement.style.overflow="";
+		widgetElement.style.maxHeight="";
+		
 		
 		EDITOR.scrollingEnabled = false;
+		
+		if(!oldParent) oldParent = fullScreenWidgetParent;
+		// Move the widget back to where it was
+		var body = document.getElementById('body');
+		body.removeChild(widgetElement);
+		oldParent.appendChild(widgetElement);
+		
+		oldFullScreenWidget = null;
+		fullScreenWidgetParent = null;
 		
 		EDITOR.resizeNeeded();
 	}
@@ -8311,17 +8353,14 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
 		
-		
-		
 		//console.log("wheelDelta=" + scrollWheelEvent.wheelDelta + " wheelDeltaY=" + scrollWheelEvent.wheelDeltaY + " deltaY=" + scrollWheelEvent.deltaY + " detail=" + scrollWheelEvent.detail );
 		
-		var delta = scrollWheelEvent.wheelDelta || -scrollWheelEvent.detail,
-		target = scrollWheelEvent.target,
-		tagName = target.tagName,
-		combo = getCombo(scrollWheelEvent),
-		dir = delta > 0 ? -1 : 1,
-		steps = Math.abs(delta);
-		
+		var delta = scrollWheelEvent.wheelDelta || -scrollWheelEvent.detail;
+		var target = scrollWheelEvent.target;
+		var tagName = target.tagName;
+		var combo = getCombo(scrollWheelEvent);
+		var dir = delta > 0 ? -1 : 1;
+		var steps = Math.abs(delta);
 		
 		console.log("Scrolling on " + tagName);
 		
@@ -8334,6 +8373,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		EDITOR.interact("mouseScroll", scrollWheelEvent);
 		
+		return true;
 	}
 	
 	

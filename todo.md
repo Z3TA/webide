@@ -46,9 +46,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Testing "full screen" for widgets for when the screen is too small, on mobile, for example the file explorer,
-make it cover the whole screen if it already covers 75% of the screen.
-
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 
 EDITOR.say !?
@@ -916,6 +913,10 @@ Run all tests! (to make sure you did not break anything else)
 Security
 ========
 
+Encrypt/decrypt .jzeditStorage using the login password !?
+Hold the content in memory, encrypt on write.
+
+
 make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
 
 Make server run under apparmor profile ...
@@ -946,6 +947,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+Can't open the editor while offline!! Damn you service worker!
 
 A Mercurial diff can be so large that it freezes the editor!
 
@@ -1889,6 +1892,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+The login form doesn't get submitted when you press Enter!
 
 Should be able to see changes to svg live while editing!
 

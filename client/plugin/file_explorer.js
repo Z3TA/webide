@@ -27,6 +27,7 @@
 	var lastMovedTo = "";
 	var lastPathExplored = "";
 	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
+	var hideButton;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -84,6 +85,9 @@
 	}
 	
 	function unload() {
+		
+		EDITOR.exitFullScreenWidget(fileExplorerWrap);
+		
 		rightColumn.removeChild(fileExplorerWrap);
 		
 		EDITOR.removeMenuItem(menuItem);
@@ -157,14 +161,31 @@ EDITOR.changeWorkingDir(directory);
 			fileExplorerWrap.style.display="block";
 			
 			
-			//EDITOR.fullScreenWidget(fileExplorerWrap);
-			
+			var fileExplorerWidth = fileExplorerWrap.offsetWidth;
+			var canvasWidth = EDITOR.view.canvasWidth;
+			var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+			// Hight pixel density screens will report a bigger screen area then they actually have.
+			var windowWidth = window.innerWidth / pixelRatio;
+			if(windowWidth < 350) {
+EDITOR.fullScreenWidget(fileExplorerWrap);
+				if(!hideButton) {
+					hideButton = document.createElement("button");
+					hideButton.onclick = function hideFileExplorer() {
+						toggleFileExplorer(false);
+					};
+					hideButton.innerText = "Hide file explorer";
+
+					fileExplorerWrap.insertBefore(hideButton, fileExplorerWrap.firstChild);
+				}
+			}
+			else console.log("fileExplorerWidth=" + fileExplorerWidth + " windowWidth=" + windowWidth + " window.innerWidth=" + window.innerWidth + " pixelRatio=" + pixelRatio);
 			
 		}
 		else {
+			
 			fileExplorerWrap.style.display="none";
 			
-			//EDITOR.exitFullScreenWidget(fileExplorerWrap);
+			EDITOR.exitFullScreenWidget(fileExplorerWrap);
 			
 			EDITOR.resizeNeeded();
 			
@@ -747,6 +768,8 @@ else throw err;
 		
 		var filePath = item.getAttribute("path");
 		EDITOR.openFile(filePath);
+		
+		if(hideButton) toggleFileExplorer(false);
 	}
 	
 	function changeFs(selectChangeEvent) {
