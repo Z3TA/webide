@@ -287,10 +287,11 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		// Check cache first
 		event.respondWith(caches.match(event.request).then(function(response) {
 			if (response) {
+				console.log("serviceWorker Serving from cache: " + event.request.url);
 				return response;
 			}
 			else {
-				console.warn("Cache miss url=" + event.request.url);
+				console.warn("serviceWorker Cache miss: " + event.request.url);
 				return fetch(event.request);
 			}
 		}));
