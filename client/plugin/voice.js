@@ -11,7 +11,7 @@
 	*/
 	"use strict";
 	
-	if(!QUERY_STRING["voice"]) console.warn("Voice aid not enabled because no voice in query-string!");
+	if(!QUERY_STRING["voice"]) return console.warn("Voice aid not enabled because no voice in query-string!");
 	
 	
 	if (!('speechSynthesis' in window)) {
@@ -23,7 +23,8 @@
 	var lastCol = 0;
 	var lastTime = new Date();
 	var lastFile = EDITOR.currentFile;
-	var aboutToSay;
+	var aboutToSayTimer;
+	var sayingTimer;
 	
 	EDITOR.plugin({
 		desc: "Speech Synthesis",
@@ -42,6 +43,8 @@
 			
 			EDITOR.unbindKey(test);
 			
+			EDITOR.removeEvent("moveCaret", speakMoveCaret);
+			
 		}
 	});
 	
@@ -55,21 +58,22 @@
 		var msg = "";
 		var time = new Date();
 		
-		clearTimeout(aboutToSay); // Preventing speaking last message
+		clearTimeout(aboutToSayTimer); // Preventing speaking last message
 		
-		aboutToSay = setTimeout(function() {
+		aboutToSayTimer = setTimeout(function() {
 			
 		if(caret.row != lastRow) add("line " + (parseInt(caret.row) +1) + ", ");
 		
+			//if(file.grid[caret.row].length == 0) add("empty line");
 		
 			// Say char or word
 			var char = file.text.charAt(caret.index).toString("utf-8");
 			var charToTheLeft = file.text.charAt(caret.index-1);
 			
-			console.log("char=" + char + " is a non-letter-character ? " + (char.match(/W/)) );
+			console.log("char=" + char + " is a non-letter-character ? " + (char.match(/\W/)) );
 			
 			if(char == " ") add("space");
-			else if(char.match(/W/)) {
+			else if(char.match(/\W/)) {
 				console.log("Non word character: " + char);
 				//add("spec.");
 				if(char == "_") add("underscore");
@@ -95,7 +99,9 @@
 				else if(char == '"') add("double quote");
 				else if(char == "@") add("at");
 				else if(char == "#") add("hashtag");
-				else throw new Error("Unknown character: char=" + char);
+				else if(char == "\n") ; // Don't say anything'
+				else if(char == ";") add("semi-colon");
+				else throw new Error("Unknown character: char=" + UTIL.lbChars(char) + " (" + char.charCodeAt(0) + ")");
 			}
 		else if(charToTheLeft.match(/\W/) || caret.col == 0) {
 			console.log("get word caret.index=" + caret.index + " char=" + char + " ...");
@@ -113,17 +119,16 @@
 		}
 			else add(char);
 			
+			if(caret.eol && file.grid[caret.row].length > 0) add("End of line");
+			if(caret.eof) add("End of file!");
 		
-		if(caret.eol) add("End of line");
-		if(caret.eof) add("End of file!");
-		
-		
+			lastRow = caret.row;
+			lastCol = caret.col;
+			
 			speak(msg);
 		
 		}, 3); // To Preventing speak when moving fast
 		
-		lastRow = caret.row;
-		lastCol = caret.col;
 		
 		return true;
 		
@@ -169,8 +174,10 @@
 		
 		window.speechSynthesis.cancel(); // Stop ongoing speach
 		
+		//clearTimeout(sayingTimer);
+		
 		// Prevent current text from canceling
-		setTimeout(function() {
+		sayingTimer = setTimeout(function() {
 			
 			if(text == undefined) throw new Error("No text! text=" + text);
 			
@@ -195,7 +202,7 @@
 			
 			window.speechSynthesis.speak(msg);
 			
-		}, 1);
+		}, 10);
 		
 	}
 	
