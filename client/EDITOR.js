@@ -1741,10 +1741,10 @@ canvas = EDITOR.canvas;
 		}
 		else if(ctx == undefined) {
 			if(EDITOR.settings.sub_pixel_antialias == false) {
-				ctx = canvas.getContext("2d", {antialias: false});
+				ctx = canvas.getContext("2d", {lowLatency: true, antialias: false});
 			}
 			else {
-				ctx = canvas.getContext("2d", {alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
+				ctx = canvas.getContext("2d", {alpha: false, lowLatency: true, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
 			}
 		}
 		
@@ -1895,6 +1895,8 @@ canvas = EDITOR.canvas;
 			if(file.caret.row >= bufferStartRow && file.caret.row <= bufferEndRow) {
 				EDITOR.renderCaret(file.caret, 0, EDITOR.settings.caret.color, screenStartRow, bufferStartRow, bufferEndRow);
 			}
+			
+			if (ctx.commit) ctx.commit();
 			
 			lastBufferStartRow = bufferStartRow;
 			
@@ -6030,11 +6032,11 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		canvas.ondrop = fileDrop;
 		
 		if(EDITOR.settings.sub_pixel_antialias == false) {
-			ctx = canvas.getContext("2d", {antialias: false});
+			ctx = canvas.getContext("2d", {lowLatency: true, antialias: false});
 			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 		}
 		else {
-			ctx = canvas.getContext("2d", {alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
+			ctx = canvas.getContext("2d", {lowLatency: true, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
 		
 		// Set the font only once for performance
