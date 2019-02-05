@@ -46,6 +46,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Make login when pressing enter work!
+
+
 Investigate Chrome's lowLatency canvas flag !
 var context_2d = canvas_a.getContext("2d", {lowLatency: true});
 https://docs.google.com/document/d/1-Z_dj9AQ4SjgDLAEY3ELR0YrlHR3JZyJPhaHAstS5WU/edit#
