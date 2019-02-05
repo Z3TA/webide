@@ -46,12 +46,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-forksite: When it's not a html file, just open it like before.
-
-Share code snippets
-?fork=https://www.webtigerteam.com/websearch/websearch.js
-
-
 
 
 When running on a bare server (no GUI) when installed via npm -ig jzedit, 

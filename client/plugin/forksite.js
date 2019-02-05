@@ -48,48 +48,78 @@ EDITOR.plugin({
 			filePath = UTIL.trailingSlash(filePath) + "index.htm";
 		}
 		
-		EDITOR.pathPickerTool({defaultPath: dataDir, instruction: "Where to save the data from " + mainUrl + " ?"}, function gotDataDir(err, path) {
-			if(err) return abort(err);
-			
-			dataDir = path;
-			
-			CLIENT.cmd("createPath", {pathToCreate: dataDir}, function(err) {
+		var isHtmlFile = !!filePath.match(/\.html?$/);
+		
+		if( isHtmlFile ) {
+			downloadFiles();
+		}
+		else {
+			// Download it without saving
+			fetchFile(mainUrl, filePath);
+		}
+		
+		function fetchFile(url, path) {
+			// Only download one file, do not save it
+			CLIENT.cmd("httpGet", {url: url}, function (err, text) {
+				
+				if(err) {
+					alertBox("Failed to get " + url);
+					return downloadErrors.push({url: url, err: err, code: err.code});
+				}
+				
+				EDITOR.openFile(path, text, function(err, file) {
+					if(err) {
+						return alertBox("Failed to create new file (" + path + "): " + err.message);
+					}
+				});
+				
+			});
+		}
+		
+		function downloadFiles() {
+			EDITOR.pathPickerTool({defaultPath: dataDir, instruction: "Where to save the data from " + mainUrl + " ?"}, function gotDataDir(err, path) {
 				if(err) return abort(err);
 				
-				var folderPath = UTIL.getDirectoryFromPath(filePath);
-				console.log("forksite: folderPath=" + folderPath + " filePath=" + filePath);
-				targetDir = UTIL.trailingSlash( UTIL.joinPaths([dataDir, folderPath]) );
+				dataDir = path;
 				
-				filePath = UTIL.joinPaths([dataDir, filePath]);
-				
-				CLIENT.cmd("download", {url: mainUrl, path: filePath, createPath: true, type: "text"}, function (err, downloadResp) {
-					if(err) return abort(new Error("Failed to download url=" + mainUrl + " : Error: " + err.message + " Code: " + err.code + " "));
-					EDITOR.openFile(filePath, undefined, {show: true}, function(err, file) {
-						if(err) return abort(new Error("Failed to open file (" + filePath + "): " + err.message));
-						
-						console.log("forksite: downloadResp=" + JSON.stringify(downloadResp));
-						
-						var arr;
-						var text = file.text;
-						
-						// Find scripts
-						var re = /<script.*src="([^"]*)"><\/script>/ig;
-						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
-						
-						// Find stylesheets
-						// <link rel="stylesheet" type="text/css" href="gfx/style.css">
-						var re = /<link.*stylesheet.*href="([^"]*)"/ig;
-						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
-						
-						// Find media
-						var re = /<img.*src="([^"]*)".*>/ig;
-						while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
-						
-						doneMaybe();
+				CLIENT.cmd("createPath", {pathToCreate: dataDir}, function(err) {
+					if(err) return abort(err);
+					
+					var folderPath = UTIL.getDirectoryFromPath(filePath);
+					console.log("forksite: folderPath=" + folderPath + " filePath=" + filePath);
+					targetDir = UTIL.trailingSlash( UTIL.joinPaths([dataDir, folderPath]) );
+					
+					filePath = UTIL.joinPaths([dataDir, filePath]);
+					
+					CLIENT.cmd("download", {url: mainUrl, path: filePath, createPath: true, type: "text"}, function (err, downloadResp) {
+						if(err) return abort(new Error("Failed to download url=" + mainUrl + " : Error: " + err.message + " Code: " + err.code + " "));
+						EDITOR.openFile(filePath, undefined, {show: true}, function(err, file) {
+							if(err) return abort(new Error("Failed to open file (" + filePath + "): " + err.message));
+							
+							console.log("forksite: downloadResp=" + JSON.stringify(downloadResp));
+							
+							var arr;
+							var text = file.text;
+							
+							// Find scripts
+							var re = /<script.*src="([^"]*)"><\/script>/ig;
+							while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+							
+							// Find stylesheets
+							// <link rel="stylesheet" type="text/css" href="gfx/style.css">
+							var re = /<link.*stylesheet.*href="([^"]*)"/ig;
+							while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+							
+							// Find media
+							var re = /<img.*src="([^"]*)".*>/ig;
+							while ((arr = re.exec(text)) !== null) saveFile(arr[1]);
+							
+							doneMaybe();
+						});
 					});
 				});
 			});
-		});
+		}
 		
 		function doneMaybe() {
 			if(aborted) return;
