@@ -46,13 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Virtual keyboard are pushed down by widgets!
 
-
-When running on a bare server (no GUI) when installed via npm -ig jzedit, 
-when running jzedit foo.txt,
-auto detect "no gui" and don't try running the client, 
-instead auto generate a password (or -pw to make the command prompt ask for a pw)
-When SSH:ed into a server, npm install -g jzedit, jzedit foo.txt ... Jzedit listening on foo.bar:8080 using username admin and password [generated]
 
 
 able to see inlined removed
@@ -2916,8 +2911,15 @@ Use node-inspect instead of "nodejs debug"
 Optimization
 ============
 
-Test server response time:
+---
+When running on a bare server (no GUI) when installed via npm -ig jzedit, 
+when running jzedit foo.txt,
+auto detect "no gui" and don't try running the client, 
+instead auto generate a password (or -pw to make the command prompt ask for a pw)
+When SSH:ed into a server, npm install -g jzedit, jzedit foo.txt ... Jzedit listening on foo.bar:8080 using username admin and password [generated]
+---
 
+Test server response time:
 CLIENT.cmd("ping", {time: new Date().getTime()}, (err, json) => console.log( ((new Date()).getTime() - json.ping ) + "ms") );
 
 The terminal have issues when it gets a lot of data. Try for example playing snake in the terminal: snake-cli

@@ -739,6 +739,27 @@ return false;
 			insertAtCaret(el, String.fromCharCode(charCode));
 			
 			el.focus();
+			
+			// Fire events
+			var ev = {
+				charCode: charCode,
+				shiftKey: false,
+				altKey: false,
+				ctrlKey: false,
+			}
+			
+			var keydown = new Event('keydown');
+			var keyup = new Event('keyup');
+			var keypress = new Event('keyup');
+			
+			addProps(ev, keydown);
+			addProps(ev, keyup);
+			addProps(ev, keypress);
+			
+			el.dispatchEvent(keydown);
+			el.dispatchEvent(keyup);
+			el.dispatchEvent(keypress);
+			
 		}
 		else {
 			
@@ -749,7 +770,11 @@ return false;
 			
 		}
 		
+		function addProps(from, to) {
+			for(var name in from) to[name] = from[name];
+		}
 	}
+	
 	
 	function insertAtCaret(t, text) {
 		/*
@@ -810,6 +835,7 @@ return false;
 		t.setAttribute("sTop", sTop);
 		t.setAttribute("selStart", selStart);
 		t.setAttribute("selEnd", selStart);
+		
 		
 		if(EDITOR.settings.devMode) {
 			// Sanity check
