@@ -1135,7 +1135,7 @@ function sockJsConnection(connection) {
 				var createUserRetries = 0;
 				
 				if(json.editorVersion == undefined) {
-					return send({error: "You are using an old version of the client. Try restarting the browser (two times) and refresh the page.\nIf that doesn't work, go to developer tools (Ctrl+Shift+I) for Chrome, click Application tab at the top, then Service Workers to the left, and and try Update, Reload, Unregister, or check Update on reload. Then reload the page.", errorCode: "OLD_VERSION"});
+					return send({error: "You are using an old version of the client. Try restarting the browser (two times) and refresh the page.\nIf that doesn't work, go to developer tools (Ctrl+Shift+I) for Chrome, click Application tab at the top, then Service Workers to the left, and try clicking on the links labaled Update, Reload, Unregister, or check Update on reload. Then reload the page.", errorCode: "OLD_VERSION"});
 				}
 				// No need to compare version, the server has already sent it's version to the client, and the client will deal with it ...
 				
