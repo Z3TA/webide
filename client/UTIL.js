@@ -1287,10 +1287,15 @@ else {
 			var loc = UTIL.getLocation(base);
 			var url = base.slice(0, base.lastIndexOf(loc.pathname));
 			base = loc.pathname;
-			console.log("new base=" + base + "");
-			if(url.indexOf("://") == -1) { // Sanity check
+			console.log("new base=" + base + " url=" + url);
+			
+			// Sanity check
+			if(url.indexOf("://") == -1) { 
 				console.warn("url lost it's protocol!");
 				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname);
+			}
+			if(url.slice(-1) == "/") {
+				throw new Error("url=" + url + " ends with a slash! loc.pathname=" + loc.pathname);
 			}
 		}
 		
@@ -1305,9 +1310,11 @@ else {
 while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		}
 		
-		// Remode dublicate delimiters
+		// Remove dublicate delimiters
 		while(base.indexOf(delimiter+delimiter) != -1) base = base.replace(delimiter+delimiter, delimiter);
 		while(path.indexOf(delimiter+delimiter) != -1) path = path.replace(delimiter+delimiter, delimiter);
+		
+		console.log("resolvePath: base=" + base + " path=" + path + " (after removing dublicate delimiters)");
 		
 		if(delimiter == "/") {
 			// Unix paths should always start with a delimiter!
@@ -1328,9 +1335,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		}
 		folders = noEmtyFolders;
 		
-		if(folders.length > 0) {
-			var firstFolder = UTIL.trailingSlash(folders[0]);
-		}
+		if(folders.length > 0) var firstFolder = UTIL.trailingSlash(folders[0]);
 		else var firstFolder = delimiter;
 		
 		console.log("folders=" + folders);
@@ -1345,7 +1350,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		else if(path.charAt(0) != ".") {
 			// ex: foo/bar
 			console.log("path=" + path + " is relative-absolute!");
-			if(url) return url + delimiter + UTIL.trailingSlash(base) + path;
+			if(url) return url + UTIL.trailingSlash(base) + path;
 			else return base + path;
 		}
 		else if(path.charAt(0) == "." && path.charAt(1) == delimiter) {
@@ -1370,6 +1375,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		}
 		else {
 			console.log("base is emty");
+			
 			if(delimiter == "/") var absolutePath = delimiter + path;
 			else var absolutePath = firstFolder + path;
 		}
