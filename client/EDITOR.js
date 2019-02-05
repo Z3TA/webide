@@ -1736,7 +1736,8 @@ text = file;
 		if(file == undefined) file = EDITOR.currentFile;
 		
 		if(canvas == undefined) {
-canvas = EDITOR.canvas;
+			canvas = EDITOR.canvas;
+			if(canvas == undefined) return; // Wait until canvas is set !?
 			ctx = EDITOR.canvasContext;
 		}
 		else if(ctx == undefined) {
