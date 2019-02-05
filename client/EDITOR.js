@@ -1758,6 +1758,12 @@ canvas = EDITOR.canvas;
 			return; // resize always re-renders!
 		}
 		
+		if(canvas.width <= 0 || canvas.height <= 0) {
+			EDITOR.shouldRender = false;
+			console.warn("Not rendering because the canvas is too small! canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " ");
+			return;
+		}
+		
 		if(ctx == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined)
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
@@ -2205,6 +2211,26 @@ canvas = EDITOR.canvas;
 		
 		//UTIL.objInfo(centerColumn);
 		
+		if(contentHeight < 0) {
+			/*
+				The header and footer is too high to fit on the page!
+				The footer is probably the biggest offender, try to limit it's height ...
+			*/ 
+			
+			console.log("resize: contentHeight=" + contentHeight);
+			
+			var someMargin = 15;
+			var footerHeightLimit = footerHeight + contentHeight - someMargin;
+			
+			footer.style.maxHeight = footerHeightLimit + "px";
+			
+			//shareHeight(footer.childNodes, footerHeightLimit);
+			contentHeight = 0;
+			
+			setTimeout(function resetFooterMaxHeight() {
+				footer.style.maxHeight = "";
+			}, 1000);
+		}
 		
 		//EDITOR.view.canvasWidth = windowWidth - leftRightColumnWidth;
 		EDITOR.view.canvasWidth = contentWidth;
@@ -2370,6 +2396,8 @@ canvas = EDITOR.canvas;
 		function shareHeight(elements, maxTotalHeight) {
 			
 			// If there are many elements in leftColumn or rightColumn, they have to share the height
+			
+			console.log("resize: shareHeight: maxTotalHeight=" + maxTotalHeight + " elements: ", elements);
 			
 			var devidedHeight = Math.floor(maxTotalHeight / elements.length);
 			var computedStyle;

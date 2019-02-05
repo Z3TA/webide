@@ -635,6 +635,16 @@
 			//var heightNeeded = 45;
 			// The div function will take up as much place as it needs!
 			
+			console.log("show_gotoFileInput: footerHeight=" + footerHeight + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + " defaultMaxResults=" + defaultMaxResults);
+			
+			defaultMaxResults = Math.min(defaultMaxResults, Math.ceil(EDITOR.view.canvasHeight / 29));
+			
+			console.log("show_gotoFileInput: defaultMaxResults=" + defaultMaxResults);
+			if(defaultMaxResults < 5) {
+				console.warn("show_gotoFileInput: Screen too small! adjusting defaultMaxResults=" + defaultMaxResults + " to 5");
+				defaultMaxResults = 5;
+			}
+			
 			gotoDiv.style.display="block";
 			
 			/* We need the footer to be this high

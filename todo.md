@@ -46,7 +46,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Virtual keyboard are pushed down by widgets!
+Pressing Enter on virtual keyboard doesn't register on input elemet!
 
 
 
