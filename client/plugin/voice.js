@@ -1,12 +1,17 @@
 (function() {
 	/*
 		
+		Proof of concept: Voice aid, for when you can not see the screen.
+		
 		Chromium will have issues. You could try:
 		
 		sudo apt-get install espeak
 		chromium-browser http://127.0.0.1:8080 --enable-speech-dispatcher
 		
 		or use Firefox.
+		
+		Problem: Sometimes when many SpeechSynthesisUtterance is created in short time, it stops working!
+		Solution:
 		
 	*/
 	"use strict";
