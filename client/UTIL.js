@@ -1979,11 +1979,15 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			So if you must use code, use keyCode instead. And be aware that a keyCode can mean different things on different keyboards!
 			
 		*/
+		
 		if(typeof keyEvent == "string") return fromString(keyEvent);
 		
-		if(typeof keyEvent.charCode == "number") return keyEvent.charCode;
-		if(typeof keyEvent.which == "number") return keyEvent.which;
-		if(typeof keyEvent.keyCode == "number") return keyEvent.keyCode;
+		//console.log("UTIL.code: charCode=" + keyEvent.charCode + " which=" + keyEvent.which + " keyCode=" + keyEvent.keyCode +" key="  + keyEvent.key);
+		
+		// note: keyEvent.charCode can be zero!
+		if(keyEvent.charCode) return keyEvent.charCode;
+		if(keyEvent.which) return keyEvent.which;
+		if(keyEvent.keyCode) return keyEvent.keyCode;
 		
 		if(keyEvent.key) return fromString(keyEvent.key);
 		
