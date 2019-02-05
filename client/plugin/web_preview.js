@@ -97,9 +97,12 @@
 				else urlPath = "http://" + urlPath;
 			}
 			var fileName = UTIL.getFilenameFromPath(file.path);
+			
+			console.log("web_preview: urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
+			
 			var url = UTIL.joinPaths(urlPath, paths, fileName);
 			
-			console.log("web_preview: url=" + url + " urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
+			console.log("web_preview: url=" + url);
 			
 			var wEditor = new WysiwygEditor({
 				sourceFile: file,

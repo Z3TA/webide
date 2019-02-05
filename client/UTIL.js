@@ -1401,7 +1401,11 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		console.log("joinPaths: arguments=" + JSON.stringify(arguments));
 		
 		if(Object.prototype.toString.call( paths ) != '[object Array]') {
-			paths = Array.prototype.slice.call(arguments);
+			paths = [];
+			for (var i=0; i<arguments.length; i++) {
+				if(arguments[i]) paths.push(arguments[i]);
+			}
+			//paths = Array.prototype.slice.call(arguments);
 			//throw new Error("joinPaths: Argument needs to be an array: paths=" + paths);
 		}
 		
