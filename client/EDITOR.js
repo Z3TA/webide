@@ -7244,7 +7244,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var preventDefault = false;
 		var funReturn = true;
 		
-		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 		
 		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {
@@ -7527,7 +7527,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			}
 		*/
 		
-		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode);
+		console.log("keyDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode);
 		
 		// Mac command key ?
 		if(charCode == charCodeCtrl) {
@@ -7791,7 +7791,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var combo = getCombo(keyUpEvent);
 		var funReturn;
 		
-		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
+		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
 		
 		/*
 			

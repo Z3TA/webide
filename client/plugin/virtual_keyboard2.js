@@ -736,17 +736,22 @@ return false;
 		// If a input or textarea element had focus, send it the character!
 		if(el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")) {
 			
-			insertAtCaret(el, String.fromCharCode(charCode));
+			var key = String.fromCharCode(charCode);
+			
+			insertAtCaret(el, key);
 			
 			el.focus();
 			
 			// Fire events
 			var ev = {
 				charCode: charCode,
+				key: key,
 				shiftKey: false,
 				altKey: false,
 				ctrlKey: false,
 			}
+			
+			if(KeyCode) ev.KeyCode = KeyCode;
 			
 			var keydown = new Event('keydown');
 			var keyup = new Event('keyup');
@@ -764,11 +769,11 @@ return false;
 		else {
 			
 			EDITOR.input = true;
-			var doDefaultAction = EDITOR.mock( eventType, { charCode: KeyCode || charCode } );
-			
-			console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 			
 		}
+		
+		var doDefaultAction = EDITOR.mock( eventType, { charCode: KeyCode || charCode } );
+		console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 		
 		function addProps(from, to) {
 			for(var name in from) to[name] = from[name];

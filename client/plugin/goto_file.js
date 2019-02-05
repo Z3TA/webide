@@ -328,7 +328,10 @@
 	
 	function keydown(keyDownEvent) {
 		while(folderPicker.firstChild) folderPicker.removeChild(folderPicker.firstChild); // Clear options
-		if(keyDownEvent.keyCode == keyTab) {
+		
+		var code = UTIL.code(keyDownEvent);
+		
+		if(code == keyTab) {
 			var text = inputGoto.value;
 			if(text.length == 0) return ALLOW_DEFAULT;
 			
@@ -401,25 +404,27 @@
 		var text = inputGoto.value;
 		
 		if(typeof keyUpEvent == "object") {
-			console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+			
+			var code = UTIL.code(keyUpEvent);
+			
+			console.log("typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 			
 			keyUpEvent.preventDefault();
 			
-			if (keyUpEvent.keyCode == charEnter) {
+			if (code == charEnter) {
 				gotoFile();
 			return;
 		}
-		else if(keyUpEvent.keyCode == charEscape) {
+			else if(code == charEscape) {
 			hide_gotoFileInput();
 			return;
 		}
-		
-		else if(keyUpEvent.keyCode == keyUp) {
+			else if(code == keyUp) {
 			//gotoFile_moveUp();
 			inputGoto.focus();
 			return;
 		}
-		else if(keyUpEvent.keyCode == keyDown) {
+			else if(code == keyDown) {
 			//gotoFile_moveDown();
 			inputGoto.focus();
 			return;

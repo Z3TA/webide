@@ -46,9 +46,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Pressing Enter on virtual keyboard doesn't register on input elemet!
-
-
+Refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 able to see inlined removed
 lines for diffs,
@@ -416,6 +414,9 @@ Forgot why we are using Nodesource ...
 
 What I'm thinking
 -----------------
+
+Support non mono-space font (variable gluph width) !? 
+file.colToX() = Measure the text to get the x position.
 
 50% of first time users doesn't interact with the editor, and just close it down after staring on it for one second.
 Even though the text on the screen say "Right click to show they meny", they do nothing. Any ideas !?
