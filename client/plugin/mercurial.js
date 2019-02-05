@@ -1821,13 +1821,20 @@ var error = err.message;
 		
 	}
 	
-	function showVersionHistory() {
+	function showVersionHistory(file) {
 		versionHistoryVisible = true;
 		EDITOR.hideMenu();
 		
 		versionHistoryWidget.show();
 		
-		fillHistoryTable();
+		var filePath;
+		
+		if(file) {
+			if(!(file instanceof File) && !file.hasOwnproperty("path")) throw new Error("showVersionHistory: First argument (file) should be a file object or have a path property!");
+			filePath = file.path;
+		}
+		
+		fillHistoryTable(filePath);
 		
 		return true;
 	}
@@ -2028,7 +2035,10 @@ var error = err.message;
 		
 	}
 	
-	function fillHistoryTable() {
+	function fillHistoryTable(filePath) {
+		
+		if(typeof filePath != "string" && filePath != undefined) throw new Error("fillHistoryTable: FIrst argument filePath should be a file path (string)");
+		
 		while(historyTableBody.firstChild) historyTableBody.removeChild(historyTableBody.firstChild); // Emty table
 		
 		if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
@@ -2038,8 +2048,14 @@ var error = err.message;
 			var directory = EDITOR.workingDirectory;
 		}
 		
+		var options = {
+			directory: directory
+		}
+		
+		if(filePath) options.file = filePath;
+		
 		// todo: The log can be very long, have it paged (many pages, only show 100? at a time) Most of the time you are only interested in the latest's
-		CLIENT.cmd("mercurial.log", {directory: directory}, function resolveList(err, changes) {
+		CLIENT.cmd("mercurial.log", options, function resolveList(err, changes) {
 			if(err) throw err;
 			
 			//console.log("mercurial.log changes:");
@@ -2050,9 +2066,11 @@ var error = err.message;
 				return a.rev - b.rev; // Lowest rev first
 			});
 			
+			if(filePath == undefined) {
 			// sanity: Check for gaps, there should be no gaps
 			for (var i=0; i<changes.length; i++) {
 				if(changes[i].rev != i) throw new Error("changes[" + i + "].rev=" + changes[i].rev);
+			}
 			}
 			
 			var reEmail = /<(.*)>/;
@@ -2141,15 +2159,23 @@ var error = err.message;
 				var rev = parseInt(tr.id.slice(3)); // remove rev from rev123
 				console.log("rev=" + rev);
 				
-				if(!changes.hasOwnProperty(rev)) throw new Error("Unable to find rev=" + rev + " in changes! tr.id=" + tr.id);
 				
-				// Why does this select the wrong change/rev !? Example selecting rev 2763 sets selectedRev to rev 17!
-				selectedRev = changes[rev];
-				console.log(selectedRev);
+				for (var i=0; i<changes.length; i++) {
+					if(changes[i].rev == rev) return selectRev( changes[i] );
+				}
 				
-				tr.setAttribute("class", "selected");
+				throw new Error("Unable to find rev=" + rev + " in changes! tr.id=" + tr.id + " changes=" + JSON.stringify(changes, null, 2));
 				
-				lastActiveHistoryTableRow = tr;
+				
+				function selectRev(changeSet) {
+					selectedRev = changeSet;
+					
+					console.log(selectedRev);
+					
+					tr.setAttribute("class", "selected");
+					
+					lastActiveHistoryTableRow = tr;
+				}
 				
 			};
 		});
@@ -2246,10 +2272,18 @@ var error = err.message;
 		log.setAttribute("title", "Show log/revision history");
 		log.setAttribute("class", "button half");
 		log.onclick = function() {
-			//widget.hide();
 			showVersionHistory();
 		}
 		div.appendChild(log);
+		
+		var logFile = document.createElement("button");
+		logFile.appendChild(document.createTextNode("File history"));
+		logFile.setAttribute("title", "Show log/revision history for current file");
+		logFile.setAttribute("class", "button");
+		logFile.onclick = function() {
+			showVersionHistory(EDITOR.currentFile);
+		}
+		div.appendChild(logFile);
 		
 		var annotations = document.createElement("button");
 		annotations.appendChild(document.createTextNode("Annotations"));

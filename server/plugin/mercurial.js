@@ -1541,7 +1541,12 @@ var directory = json.directory;
 		
 		if(json.rev != undefined) args.push("--rev " + json.rev);
 		
-			var spawn = require('child_process').spawn;
+		if(json.file != undefined) {
+args.push("--follow");
+			args.push(json.file);
+		}
+		
+		var spawn = require('child_process').spawn;
 		var log = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
 			var stdout = "";
 			var stderr = "";

@@ -46,6 +46,21 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+forksite: When it's not a html file, just open it like before.
+
+Share code snippets
+?fork=https://www.webtigerteam.com/websearch/websearch.js
+
+
+
+
+When running on a bare server (no GUI) when installed via npm -ig jzedit, 
+when running jzedit foo.txt,
+auto detect "no gui" and don't try running the client, 
+instead auto generate a password (or -pw to make the command prompt ask for a pw)
+When SSH:ed into a server, npm install -g jzedit, jzedit foo.txt ... Jzedit listening on foo.bar:8080 using username admin and password [generated]
+
+
 able to see inlined removed
 lines for diffs,
 and folded block
