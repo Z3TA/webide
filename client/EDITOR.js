@@ -1754,10 +1754,17 @@ text = file;
 			console.warn("Not rendering because it's not needed!");
 			return;
 		}
+		
 		if(EDITOR.shouldResize) {
 			console.warn("Resizing before rendering!");
 			EDITOR.resize();
 			return; // resize always re-renders!
+		}
+		
+		if(ctx == undefined || canvas == undefined) {
+			console.warn("Not rendering because ctx or canvas is not yet available!");
+			EDITOR.shouldRender = false;
+			return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined, or can ot get canvas.width of undefined)
 		}
 		
 		if(canvas.width <= 0 || canvas.height <= 0) {
@@ -1765,8 +1772,6 @@ text = file;
 			console.warn("Not rendering because the canvas is too small! canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " ");
 			return;
 		}
-		
-		if(ctx == undefined || canvas == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined, or can ot get canvas.width of undefined)
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
 		// Used for only rendering some rows for optimization. 
