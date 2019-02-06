@@ -46,8 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Make login when pressing enter work!
-
+Very annoying when you have annotations on, and switching to another line changes the annotation (with one row off) making the whole editor jump.
+Don't render when resizeNeeded !?
 
 Investigate Chrome's lowLatency canvas flag !
 var context_2d = canvas_a.getContext("2d", {lowLatency: true});

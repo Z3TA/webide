@@ -7361,16 +7361,21 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
 		
-		if(typeof keyPressEvent.preventDefault == "function") {
-			// Prevent Firefox's quick search (/ slash)
-			if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
-			
-			// Prevent Firefox's quick find (' single quote)
-			if(EDITOR.input && charCode == 39) keyPressEvent.preventDefault();
-			
-			// Prevent scrolling down when hitting space in Firefox
-			if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
+		// Prevent Firefox's quick search (/ slash)
+		if(EDITOR.input && charCode == 47) preventDefault = true;
+		
+		// Prevent Firefox's quick find (' single quote)
+		if(EDITOR.input && charCode == 39) preventDefault = true;
+		
+		// Prevent scrolling down when hitting space in Firefox
+		if(EDITOR.input && charCode == 32) preventDefault = true;
+		
+		if(preventDefault) {
+			console.log("keyPressed: Preventing default browser action!");
+			if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
+			return false;
 		}
+		else return true;
 	}
 	
 	function resizeAndRender(afterResize) {
@@ -7573,7 +7578,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 			if(funReturn === false) {
 				preventDefault = true;
-				console.log("Default action will be prevented!");
+				console.log("keyIsDown: Default browser action prevented by keyDown listener " + UTIL.getFunctionName(EDITOR.eventListeners.keyDown[i].fun) + "!");
 			}
 		}
 		
@@ -7613,7 +7618,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						
 						if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 							preventDefault = true;
-							//console.log("Default action will be prevented!");
+							console.log("keyIsDown: Default browser action prevented by key binding" + UTIL.getFunctionName(binding.fun) + "!");
 						}
 						else if(funReturn !== true) {
 							throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
@@ -7734,14 +7739,16 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		// In case the user has no mouse, pressing Enter should hide the "Right click to show the menu" message
 		if(!menuVisibleOnce && charCode == 13) {
 			menuVisibleOnce = true;
-			EDITOR.input = true;
-			preventDefault = true;
+			
+			// Can not give editor input or prevent default as that would prevent form submit by pressing Enter.
+			//EDITOR.input = true;
+			//preventDefault = true;
 			EDITOR.renderNeeded();
 		}
 		
 		if(preventDefault) {
 			//alert("Preventing default browser action!");
-			//console.log("Preventing default browser action!");
+			console.log("keyIsDown: Preventing default browser action!");
 			
 			if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
 			if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
@@ -7793,6 +7800,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var character = String.fromCharCode(charCode);
 		var combo = getCombo(keyUpEvent);
 		var funReturn;
+		var preventDefault = false;
 		
 		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
 		
@@ -7888,7 +7896,12 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		
 		EDITOR.interact("keyUp", keyUpEvent);
 		
-		//return false;
+		if(preventDefault) {
+			console.log("keyIsUp: Preventing default browser action!");
+			if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
+			return false;
+		}
+		else return true;
 		
 	}
 	

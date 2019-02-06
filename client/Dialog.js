@@ -156,8 +156,12 @@ else {
 				waitTime = 10; // Probably a mouse click
 			}
 		}
-		}
-
+		
+		/*
+			Issue: When in a html widget form, a Dialog comes up, which then gives focus to the EDITOR, so you can't click Enter to submit the form
+			Isse2: Copy/paste using virtual keyboard !? 
+		*/
+		
 		setTimeout(function() {
 			console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
 			EDITOR.input = true;
@@ -166,7 +170,8 @@ else {
 			if(callback) callback();
 			
 		}, waitTime);
-	
+		
+		}
 }
 
 function alertBox(msg, icon, recursionCount) {
