@@ -82,6 +82,7 @@ EDITOR.settings = {
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
 	sub_pixel_antialias: false, // For the main text area (canvas) only.
+	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
 	style: {
@@ -1742,10 +1743,10 @@ text = file;
 		}
 		else if(ctx == undefined) {
 			if(EDITOR.settings.sub_pixel_antialias == false) {
-				ctx = canvas.getContext("2d", {lowLatency: true, antialias: false});
+				ctx = canvas.getContext("2d", {lowLatency: EDITOR.settings.lowLatencyCanvas, antialias: false});
 			}
 			else {
-				ctx = canvas.getContext("2d", {alpha: false, lowLatency: true, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
+				ctx = canvas.getContext("2d", {alpha: false, lowLatency: EDITOR.settings.lowLatencyCanvas, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
 			}
 		}
 		
@@ -2346,8 +2347,11 @@ text = file;
 			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
 			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
 			
-			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
+		
+			// Need to re-render after resizing the canvas!
+			EDITOR.shouldRender = true;
+			
 		}
 		else if(canvas) {
 			console.log("Not restting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
@@ -2390,11 +2394,9 @@ text = file;
 		
 		console.timeEnd("resize");
 		
-		// Always render (right away to brevent black background blink) after a resize
-		EDITOR.shouldRender = true;
-		resizeAndRender(true);
 		
-		//EDITOR.renderNeeded(); // Always render after a resize (but nor right away!?
+		if(EDITOR.shouldRender) resizeAndRender(true);
+		
 		
 		function shareHeight(elements, maxTotalHeight) {
 			
@@ -6033,11 +6035,11 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		canvas.ondrop = fileDrop;
 		
 		if(EDITOR.settings.sub_pixel_antialias == false) {
-			ctx = canvas.getContext("2d", {lowLatency: true, antialias: false});
+			ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, antialias: false});
 			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 		}
 		else {
-			ctx = canvas.getContext("2d", {lowLatency: true, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
+			ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
 		
 		// Set the font only once for performance
