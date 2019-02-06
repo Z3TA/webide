@@ -48,6 +48,8 @@ What I'm working on
 
 Issues loading the page with Chrome in Windows !? (with 3d acceleration on)
 
+Problem: IE doesn't support Canvas sub-pixel antialias. Which Consolas needs.
+But it also doesn't support custom fonts!
 Doesn't detect IE/Windows to use Consolas!
 
 Goto-file widget pushes up the header!!

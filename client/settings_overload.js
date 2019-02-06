@@ -75,7 +75,7 @@
 	EDITOR.settings.gridWidth = 8.25;
 	
 }
-else if(process.platform == "linux" && RUNTIME == "nw.js") {
+	else if(process.platform == "linux" && RUNTIME == "nw.js") {
 	
 	/*
 			Linux does not have Consolas (see README.txt on how to download it if you are desperate)
@@ -114,7 +114,7 @@ else if(process.platform == "linux" && RUNTIME == "nw.js") {
 	EDITOR.settings.gridWidth = 7.83;
 	
 }
-	else if(RUNTIME=="browser" && browser != "Firefox") {
+	else if(RUNTIME=="browser" && browser != "Firefox" && browser.indexOf("IE") != 0) {
 		// Firefox have font render issues
 		// Web safe fonts are ugly, try to load a nice font ...
 		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
@@ -127,6 +127,10 @@ else if(process.platform == "linux" && RUNTIME == "nw.js") {
 		}
 	}
 	else if(RUNTIME=="browser") {
+		
+		// Internet Explorer doesn't support sub-pixel rendering / LCD-text in the Canvas!
+		// So Consolas wont look that good ...
+		// Nor does Internet Explorer support custom fonts!
 		
 		// We better use a web safe font in the browser
 		EDITOR.settings.style.font = "Courier New, Courier, monospace";
@@ -144,7 +148,7 @@ else if(process.platform == "linux" && RUNTIME == "nw.js") {
 		
 		if( (!isNaN(width) && width <= 600) || (!isNaN(height) && height <= 250) ) {
 			// Use a smaller text size on small screens
-			// On some devices which doesn't have high DPI screen, the small text size is undreadable
+			// On some devices which doesn't have high DPI screen, the small text size is undreadable!
 			/*
 				alert("Setting extra small text size due to width=" + width + " and height=" + height);
 				EDITOR.settings.style.font = "Courier New, Courier, monospace";
