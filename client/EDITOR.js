@@ -1766,7 +1766,7 @@ text = file;
 			return;
 		}
 		
-		if(ctx == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined)
+		if(ctx == undefined || canvas == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined, or can ot get canvas.width of undefined)
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
 		// Used for only rendering some rows for optimization. 
