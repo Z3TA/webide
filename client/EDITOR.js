@@ -82,7 +82,7 @@ EDITOR.settings = {
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
 	sub_pixel_antialias: false, // For the main text area (canvas) only.
-	lowLatencyCanvas: false,
+	lowLatencyCanvas: true,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
 	style: {
@@ -2124,7 +2124,7 @@ text = file;
 			
 		*/
 		
-		if(!EDITOR.shouldResize) return; // Don't resize if it's not needed.
+		if(!EDITOR.shouldResize) return console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
@@ -2177,7 +2177,7 @@ text = file;
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
 		var virtualKeyboard = document.getElementById("virtualKeyboard2");
-		if(!footer) return; // Page has not yet fully loaded
+		if(!footer) return console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
 		
 		var headerHeight = parseInt(header.offsetHeight);
 		var footerHeight = parseInt(footer.offsetHeight);
@@ -6041,6 +6041,9 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		else {
 			ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
+		
+		ctx.imageSmoothingEnabled = false; // Do not "smooth" the image, keep it sharp!
+		
 		
 		// Set the font only once for performance
 		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;

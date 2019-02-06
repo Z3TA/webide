@@ -48,18 +48,7 @@ What I'm working on
 
 Goto-file widget pushes up the header!!
 
-The annoying jumping was due to the canvas lowLatency setting!!
-
-Very annoying when you have annotations on, and switching to another line changes the annotation (with one row off) making the whole editor jump.
-Don't render when resizeNeeded !?
-
-
 Reload from disk option in a large file .... reloades the whole file !? without big-file mode !?
-
-
-Investigate Chrome's lowLatency canvas flag !
-var context_2d = canvas_a.getContext("2d", {lowLatency: true});
-https://docs.google.com/document/d/1-Z_dj9AQ4SjgDLAEY3ELR0YrlHR3JZyJPhaHAstS5WU/edit#
 
 
 Refactor: Use KeyboardEvent.key  instead of charCode and keyCode
