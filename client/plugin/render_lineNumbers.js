@@ -150,7 +150,9 @@
 		
 		console.log("screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
 		" sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + 
-		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight);
+		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight + 
+		" cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " cacheCanvas.height=" + cacheCanvas.height + 
+		" cacheCanvasHeight=" + cacheCanvasHeight);
 		
 		// todo: Check the clipping to prevent IndexSizeError in IE!
 		
