@@ -29,6 +29,7 @@
 	Problem4: We always want to get the latest version of each file while in development
 	Solution4: Have a DEV_MODE variable and override cache if it's set to true
 	
+	
 */
 
 "use strict";
@@ -49,7 +50,9 @@ console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + D
 
 var CACHE_FILES = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
-	// Asume the bundle is loaded, and don't cache each induvidual .js file!
+	// Asume the bundle is loaded, and don't cache each induvidual .js files!
+	
+	'/gfx/style.css',
 	
 	// Cache font
 	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
@@ -120,6 +123,7 @@ self.addEventListener('message', function(msg) {
 
 
 function updateCache(latestVersionMaybe) {
+	console.log("serviceWorker updateCache: latestVersionMaybe=" + latestVersionMaybe);
 	
 	var latestVersion = latestVersionMaybe;
 	
@@ -164,13 +168,24 @@ function updateCache(latestVersionMaybe) {
 		// Delete all caches before filling the new cache to prevent the new cache being filled from the old cache
 		return caches.keys().then(function(keys) {
 			return Promise.all(keys.map(function(key) {
+				console.log("serviceWorker deleting cache key=" + key);
 				return caches.delete(key);
 			}));
 		}).then(function() {
 			console.log("serviceWorker finished deleting *all* caches!");
 			return caches.open(cacheVersion).then(function(cache) {
 				console.log("serviceWorker adding files to cacheVersion=" + cacheVersion + "");
-				return Promise.all( CACHE_FILES.map(function(url){cache.add(url+"?v=" + latestVersionMaybe)}) );
+				return Promise.all( CACHE_FILES.map(function(url){
+					
+					// Maybe it's adding ?v=### that makes the offline fetch fail !?
+					//console.log("serviceWorker adding to cache (version " + latestVersionMaybe + ") url=" + url+"?v=" + latestVersionMaybe);
+					//return cache.add(url+"?v=" + latestVersionMaybe);
+					// Yes, appending the ?v=### is what was causing the cache bailout
+					
+					console.log("serviceWorker adding to cache (version " + latestVersionMaybe + ") url=" + url);
+					return cache.add(url);
+					
+				}) );
 			}).then(function() {
 				console.log("serviceWorker successfully filled the cache for " + cacheVersion + "");
 				
@@ -185,27 +200,31 @@ function updateCache(latestVersionMaybe) {
 	
 	function deleteAllCachesExcept(currentCacheVersion) {
 		// Delete old caches
+	console.log("serviceWorker deleteAllCachesExcept: currentCacheVersion=" + currentCacheVersion);
 		return caches.keys().then(function(keys) {
 			return Promise.all(keys.map(function(key) {
 				if(key != currentCacheVersion) {
-					console.log("serviceWorker deleting old cache: " + key);
+				console.log("serviceWorker deleteAllCachesExcept: Deleting old cache: " + key);
 					return caches.delete(key);
 				}
-			}));
-		});
-	}
-	
-	
-	
-	setTimeout(function() {
-		sendToClients("Hello from service worker!");
+			else {
+				console.log("serviceWorker deleteAllCachesExcept: Keeping key=" + key + " because currentCacheVersion=" + currentCacheVersion);
+			}
+		}));
+	});
+}
+
+
+
+setTimeout(function() {
+	sendToClients("Hello from service worker!");
 }, 5000);
 
 function notifyClientUpdate(fromVersion, toVersion) {
 	console.log("serviceWorker sending cache update notification to clients ...");
 	var msg = "serviceWorker cache version has been updated from version=" + fromVersion + " to " + toVersion + "";
-		sendToClients(msg);
-		return true;
+	sendToClients(msg);
+	return true;
 }
 
 function sendToClients(msg) {
@@ -214,14 +233,14 @@ function sendToClients(msg) {
 	console.log("serviceWorker sending message to clients: " + msg);
 	
 	try {
-	var channel = new BroadcastChannel('sw-messages');
-	channel.postMessage(msg);
+		var channel = new BroadcastChannel('sw-messages');
+		channel.postMessage(msg);
 	}
 	catch(err) {
 		console.log("Unable to send to clients: " + err.message);
 	}
 	
-		return true;
+	return true;
 	/*
 		.then(function() {
 		console.log("serviceWorker successfully sent message to clients: " + msg);
@@ -244,11 +263,11 @@ function sendToClients(msg) {
 	The install event is called when the browser has installed a *new* service worker (this script)
 	It will however not be active until the old service worker (a prior version of this script) has stopped,
 	which can take some time (hours,years? :P).
-		
-		caches are global! So updating the cache will also affect the currently running service worker!
-		Only problem is that the files will be fetched by the currently running service worker,
-		meaning the files will probably be fetches from an *old* cache.
-		So there is no point in filling the cache on the install event. We have to wait for the activate event!
+	
+	caches are global! So updating the cache will also affect the currently running service worker!
+	Only problem is that the files will be fetched by the currently running service worker,
+	meaning the files will probably be fetches from an *old* cache.
+	So there is no point in filling the cache on the install event. We have to wait for the activate event!
 */
 self.addEventListener('install', function serviceWorkerInstall(event) {
 	console.log("serviceWorker with current cache VERSION=" + VERSION + " got install event!");
@@ -265,8 +284,8 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 	console.log("serviceWorker with current cache VERSION=" + VERSION + " got activate event!");
 	
 	event.waitUntil(updateCache(VERSION));
-		
-	});
+	
+});
 
 
 /*
@@ -280,11 +299,14 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 */
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
 	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
-		if(DEV_MODE) { // Skip cache
-		event.respondWith(fetch(event.request));
+	
+	
+	if(DEV_MODE) { // Skip cache
+		event.respondWith(fetch(event.request).catch(fetchError));
 	}
 	else {
 		// Check cache first
+		// event.respondWith returns undefined!
 		event.respondWith(caches.match(event.request).then(function(response) {
 			if (response) {
 				console.log("serviceWorker Serving from cache: " + event.request.url);
@@ -292,15 +314,46 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 			}
 			else {
 				console.warn("serviceWorker Cache miss: " + event.request.url);
-				return fetch(event.request);
+				return fetch(event.request).catch(fetchError);
 			}
+		}, function(err) {
+			console.log("serviceWorker fetch caches.match error: " + err.message);
+			return fetch(event.request).catch(fetchError);
 		}));
+	}
+	
+	function fetchError(err) {
+		console.log("serviceWorker fetchError:" + err.message);
+		
+		var body = "<!DOCTYPE HTML>" +
+		"<h1>Service Worker Error</h1>" +
+		"<p>The service worker was unable to fetch the page. " + 
+		"Most probably cause is that you are offline and the page has not been cached by the service worker. " + 
+		"Send the following error message to your server administrator:</p>" + 
+		"<p>" +
+		"date: " + (new Date()) + "<br>" +
+		"url: " + event.request.url + "<br>" +
+		"editor cache/client version: " + VERSION + "<br>" +
+		"editor developer mode: " + DEV_MODE + "<br>" +
+		"fetch error message: " + err.message + "<br>" +
+		"navigator.onLine: " + (typeof navigator == "object" && navigator.onLine) + "<br>" + 
+		"navigator.userAgent: " + (typeof navigator == "object" && navigator.userAgent) + "<br>" +
+		"</p>";
+		
+		var response = new Response(body, {
+			status: 503,
+			statusText: "Service worker error",
+			headers: {'Content-Type': 'text/html'}
+		});
+		
+		return response;
 	}
 });
 
-	function versionNrFromKey(key) {
-		var prefix = "jzedit_v";
-		var nr = key.replace(prefix, "");
-		if(key == nr) throw new Error("Not a cache key=" + key);
-		return parseInt(nr);
-	}
+
+function versionNrFromKey(key) {
+	var prefix = "jzedit_v";
+	var nr = key.replace(prefix, "");
+	if(key == nr) throw new Error("Not a cache key=" + key);
+	return parseInt(nr);
+}
