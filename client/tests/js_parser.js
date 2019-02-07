@@ -154,10 +154,14 @@ EDITOR.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 	});
 });
 
-EDITOR.addTest(function templateLiterals(callback) {
+EDITOR.addTest(1, function templateLiterals(callback) {
 	EDITOR.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
 		
 		if(file.parsed.quotes.length != 2) throw new Error("Did not find all template literals");
+		
+		file.reload('{\n`<div>Hello</div>`;\n}\n');
+		
+		UTIL.assert(file.grid[2].indentation, 0);
 		
 		EDITOR.closeFile(file.path);
 		callback(true);

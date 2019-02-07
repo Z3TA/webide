@@ -982,6 +982,7 @@
 		xmlModeBeforeTag = false,
 		xmlTagInsideDblQuote = false,
 		xmlTagInsideSingleQuote = false,
+		xmlTagInsideTemplateLiteral = false,
 		insideScriptTag = false,
 		llChar = "",
 		lllChar = "",
@@ -1615,6 +1616,14 @@
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
 							insideTemplateLiteral = false;
 							quotes.push(new Quote(quoteStart, i));
+							
+							// Leave xml tag if it was opened inside the quote
+							if(insideXmlTag && xmlTagInsideTemplateLiteral) {
+								insideXmlTag = false;
+								xmlTagInsideTemplateLiteral = false;
+								return;
+							}
+							
 							return;
 						}
 					}
@@ -1743,6 +1752,7 @@
 					
 					if(insideDblQuote) xmlTagInsideDblQuote = true;
 						if(insideSingleQuote) xmlTagInsideSingleQuote = true;
+					if(insideTemplateLiteral) xmlTagInsideTemplateLiteral = true;
 						
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
@@ -1790,7 +1800,7 @@
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
 				}
-				else if(char == ">" && insideXmlTag && (!insideQuote || (xmlTagInsideDblQuote || xmlTagInsideSingleQuote)) && !insideParenthesis[codeBlockDepth]) {
+				else if(char == ">" && insideXmlTag && (!insideQuote || (xmlTagInsideDblQuote || xmlTagInsideSingleQuote || xmlTagInsideTemplateLiteral)) && !insideParenthesis[codeBlockDepth]) {
 					if(pastChar0 == "/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
@@ -1858,6 +1868,7 @@
 					
 					xmlTagInsideDblQuote = false;
 					xmlTagInsideSingleQuote = false;
+					xmlTagInsideTemplateLiteral = false;
 					
 				}
 				
