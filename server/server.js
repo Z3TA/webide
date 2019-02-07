@@ -924,7 +924,7 @@ function sockJsConnection(connection) {
 	var clientSessionId = "";
 	var checkingUser = false;
 	
-	console.log("connection.remoteAddress=" + connection.remoteAddress);
+	console.log("connection.remoteAddress=" + connection.remoteAddress + " browser=" + userBrowser);
 	
 	//console.log(connection);
 	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
