@@ -46,9 +46,33 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+regression: open/edit no longer works in the terminal on prod!!
+
+
+String literals bug:
+{
+  `<div>Hello</div>`;
+}
 
 
 
+
+
+When running "npm start" but there are no browsers to start, also stop the server!
+
+
+---
+
+Test the editor in Edge browser!
+Error: Permission denied
+   at testWindow (https://webide.se/:1579:62429)
+   at EDITOR.createWindow (https://webide.se/:1579:61675)
+   at WysiwygEditor (https://webide.se/:1883:6537)
+
+---
+
+
+Demo happy path for SCM integration
 
 
 
@@ -58,8 +82,37 @@ todo
 Go through all plugins and add functions to the virtual keyboard for discovery!!?
 using the context menu is slow. put functionality like save on the virtual keyboard!
 
+Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?
 
+----
 
+Database support: 
+Integrated tools for managing a database, and hosted db on webide.se
+But which database ?? It must support push!
+RethingDB !?
+
+Install MongoDB and Postgres on webide.se
+Try running wiki js
+
+Persistent storage! Database !? People need somewhere to host their data.
+
+---
+
+Example on how to make a form and save the data to a db/file
+
+Put tutorials on Githb. Auto clone when double clicking? on a git url !?
+Examples: 
+HTML forms. Save results in a database.
+HTML form, personality test. (worth 145.000 SEK)
+HTML form + school enrollment system (worth 2,000,000 SEK)
+
+Some multiplayer game examples. like multiplayer snake
+Simple tutorial apps, eyes that looks at the mouse.
+Making a clock in the canvas
+
+Make some multiplayer game exampes 
+
+----
 
 
 able to see inlined removed
@@ -88,7 +141,7 @@ Able to copy a folder
 
 Automatic OS updates on the server can break the editor.
 Need to have a service that checks if it's possible to login!
-
+Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
 
 Do NOT use the browser's localstorage for settings, save them in the user home dir so they are not lost when changing browser or clearing history!
 
@@ -105,28 +158,8 @@ Replace all doesn't replace the first!
 
 When hitting Replace when there is nothing selected does a case insensitive search and replace!
 
-Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?
-
-See what people are using the editor for, make that work (the things new users tries to do) ...
-
-It seems like people are actually reading through the welcome notes!!
-
-Some people actually do read the welcome and example files.
-I should have good welcome and example files! Showing off the editor's cool features.
-And maybe even some tutorials
-Put tutorials on Githb. Auto clone when double clicking? on a git url !?
-Examples: 
-HTML forms. Save results in a database.
-HTML form, personality test. (worth 145.000 SEK)
-HTML form + school enrollment system (worth 2,000,000 SEK)
 
 
-Install MongoDB and Postgres on webide.se
-Try running wiki js
-
-Example on how to make a form and save the data to a db/file
-
-tensorflow (JS) example
 
 
 test:
@@ -137,19 +170,8 @@ npm install -g jzedit on Mac
 
 
 
-Test on different platform.
-Distribute a "evaluation" copy on npm!?
-
-
-Merge help/ and about/ files into one folder !?
-
 Turn README.txt files into .htm files and put them in client/about/ !??
 (search for all readme and txt files)
-
----
-
-Detect if running from chrome-book, then auto connect to Google drive. ?
-If not running in Chrome app mode, you must click on Google drive in the menu.
 
 ---
 
@@ -161,12 +183,6 @@ Permission denied when trying to clone a git repo using git@github.com:user/repo
 
 works when using https url! (auto convert github git urls to github https urls !?)
 
-automatically open readme or browser files after cloning!
-
----
-
-Reloaded using F5 and got an old version of a file!!
-
 ---
 
 Doesn't do the right thing: if(|abc)
@@ -174,24 +190,11 @@ Doesn't do the right thing: if(|abc)
 should insert abcdef but inserts defabc
 do nothing !?
 
-
 ---
-
-Test the editor in Edge browser!
-Error: Permission denied
-   at testWindow (https://webide.se/:1579:62429)
-   at EDITOR.createWindow (https://webide.se/:1579:61675)
-   at WysiwygEditor (https://webide.se/:1883:6537)
-
----
-
 Vim mode:
 
 Vim tests, continue with vim tutorial and write a test for each feature in the tutorial:
 http://vimdoc.sourceforge.net/htmldoc/usr_03.html
-
-
-
 http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 
 Implementing vim/modal mode (command mode)
@@ -201,7 +204,9 @@ https://www.funfunforum.com/t/vim-tips/4541/16
 Anders Evenrud
 Apr 17
 
-I made some mental notes today while I was doing some work, so I could compile a list of keycombos I use a lot (that you’d possibly find interesting) :slight_smile:
+I made some mental notes today while I was doing some work, 
+so I could compile a list of keycombos I use a lot 
+(that you’d possibly find interesting) :slight_smile:
 
     gt & gT - Move bewteen tabs
     gg - Jump to first line
@@ -224,63 +229,6 @@ I made some mental notes today while I was doing some work, so I could compile a
         An example here would be to prepend something to a set of lines or comment out blocks
 
 
-
-
-
-
-
-
-
-Support third party script when parsing files in autocomplete.js (scripts found in html files)
-
-Make the terminal work propertly with the Node.JS REPL.
-
-When moving a file (via file explorer) belonging to a Mercurial repo, also do a "hg move" !
-
-Code debt cleanup: Upload functionality, currently have different paths for single file and multiple files, refactor so there's one path.
-
-Support for the node REPL in the terminal.
-Some users just opens up terminal, type node, then work from there.
-
-Swedish translation
-
-Demo happy path for SCM integration
-
-Many npm modules want to put stuff in /lib/ when installing globally,
-investigate where, and if we can somehow allow it.
-
-work flow: Creating a new html form quiz, with radio-boxes and some JavaScript to show the correct answer.
-
-prio: Fix indentation characters so the source code gets clean.
-
-Change hostname in production to webide.se instead of ben
-
----
-Make it possible to install the editor via : npm install jzedit
-npm install -g ?
-
----
-
-Database support: 
-Integrated tools for managing a database, and hosted db on webide.se
-But which database ?? It must support push!
-RethingDB !?
-
-
-
-Open repo readme after cloning using query string
-
----
-
-Able to make a react app work flow:
-npm install create-react-app
-npm init react-app my-app
-
-Able to right click on a folder in file explorer and create a new folder (or file)
-Also allow mkdir in the terminal
-
----
-
 Support for vi/vim key bindings: We don't want to implement all of vim!
 Just enough commands so that you can use the editor without a mouse!
 And withour reaching for the arrows keys or using the navigation keys (Home/End/PgUp/PgDn).
@@ -294,64 +242,55 @@ https://stackoverflow.com/questions/5400806/what-are-the-most-used-vim-commands-
 https://www.fprintf.net/vimCheatSheet.html
 https://gist.github.com/awidegreen/3854277
 
-
----
-Opening the editor from command line. eg jzedit somefile
-Piping to the editor. Send stdin stream to server, that sends to the client !?
 ---
 
-When running "npm start" but there are no browsers to start, also stop the server!
+Make the terminal work propertly with the Node.JS REPL.
+Support for the node REPL in the terminal.
+Some users just opens up terminal, type node, then work from there.
+
+When moving a file (via file explorer) belonging to a Mercurial repo, also do a "hg move" !
+
+Code debt cleanup: Upload functionality, currently have different paths for single file and multiple files, refactor so there's one path.
+
+Swedish translation
+
 
 When using repo/clone in url search, automatically make a shallow clone !?
 Add option in clone dialog to make shallow clone.
 
-Able to use the editor as a "native" editor. Open files from network smb
-
-can I fix Annoying Chrome icon when clicking on the jzedit launcher in Linux ?
-
----
-Some multiplayer game examples. like multiplayer snake
-Simple tutorial apps, eyes that looks at the mouse.
-Making a clock in the canvas
----
-
-Use node-pty insted of pty.js and try to get Terminal to work on Windows
 
 Update promo images on Chrome app store to make it look more like a editor/IDE. {} brackets and lines of code
 
----
-
-Able to just leave the "console" and continue developing somwhere else, on another machine ...
-Save state to server !?
-
-use server storage for reopen files. !? ...
-Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
-if the local copy is newer, update the server storage. !??
-
-----
 
 Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
 
 debug: Editor freaks out when trying to scroll (first scroll up -negative row) bundle.htm
 
-debug having zetafiles as username in bash terminal
+debug: having zetafiles as username in bash terminal
 
-Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
+
 
 Password protect files and folders
+Encrypt .jzeditorStorage. Have decrypted version in memory! So you can store passwords.
+Encrypt using user password.
+Need to be a way to update password.
 
-Persistent storage! Database !? People need somewhere to host their data.
+
 
 trying vumoviemaker again ... 
+Still can't run it, missing node-gyp !?
 
-Make some multiplayer game exampes 
 
-in terminal, when selecting text and pressing delete
+
+
+in terminal, when selecting text and pressing delete ... nothing gets deleted. Need to implement it, so the delete commands is sent to the terminal emulator.
 
 write a test for starting and stopping nodejs processes
 
 fix problem: npm deletes unknown module dirname (which is used by nw.js)
 Remove all dependendcies on dirname !?
+dirname is only there because nw.js has no __dirname support.
+We however do no longer need nw.js because everything works in chromeless chromium.
 
 ---
 Recive pull request!
@@ -370,25 +309,30 @@ Able to create new repositories and manage users piblic read or push access
 * Test existing features and write automatic tests
 * Fix bugs!
 
----
-See if johan.webide.se is auto renewed before deploying 
-(Your cert will expire on 2018-12-03.)
-
-So that you don't need to put _socket as prefix in express, socket.io etc
-register wildcard socket.user.webide.se SSL
-proxy *.user. to the socket!
----
 
 Piping curl to sudo bash is not OK (remove any such instructions). 
-Forgot why we are using Nodesource ...
+Forgot why we are using Nodesource ... answer: Because it was the most easy way to get updated Node.JS
+
 ---
 
 Check if the editor works on different keyboard layouts!
 Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 
+
 What I'm thinking
 -----------------
+
+---
+
+Able to just leave the "console" and continue developing somwhere else, on another machine ...
+Save state to server !?
+
+use server storage for reopen files. !? ...
+Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
+if the local copy is newer, update the server storage. !??
+
+----
 
 Support non mono-space font (variable gluph width) !? 
 file.colToX() = Measure the text to get the x position.
