@@ -15,7 +15,7 @@
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
 
-	console.log("RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + " ligatures=" + false);
+	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + " ligatures=" + false);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 		/*
@@ -27,7 +27,7 @@
 			
 			<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
 			
-			Ligatures are confirmed to work in: Chrome/Chromium/Opera, Firefox, Safari, but not IE
+			Ligatures are confirmed to work in: Chrome/Chromium/Opera, Firefox, Safari, but not MSIE
 			Download Fira Code (https://github.com/tonsky/FiraCode/releases/) and put it in gfx/font/ 
 			and change the path (/FiraCode_1.204/) below:
 			
@@ -114,7 +114,7 @@
 	EDITOR.settings.gridWidth = 7.83;
 	
 }
-	else if(RUNTIME=="browser" && browser != "Firefox" && browser.indexOf("IE") != 0) {
+	else if(  RUNTIME=="browser" && browser != "Firefox" && (browser.indexOf("MSIE") != 0 || location.host == "127.0.0.1" || location.host == "localhost")  ) {
 		// Firefox have font render issues
 		// Web safe fonts are ugly, try to load a nice font ...
 		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
@@ -130,7 +130,7 @@
 		
 		// Internet Explorer doesn't support sub-pixel rendering / LCD-text in the Canvas!
 		// So Consolas wont look that good ...
-		// Nor does Internet Explorer support custom fonts!
+		// Nor does Internet Explorer support custom fonts (unless on localhost)!
 		
 		// We better use a web safe font in the browser
 		EDITOR.settings.style.font = "Courier New, Courier, monospace";
