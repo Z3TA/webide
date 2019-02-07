@@ -1398,7 +1398,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		"use strict";
 		
-		console.log("joinPaths: arguments=" + JSON.stringify(arguments));
+		//console.log("joinPaths: arguments=" + JSON.stringify(arguments));
 		
 		if(Object.prototype.toString.call( paths ) != '[object Array]') {
 			paths = [];
@@ -1409,12 +1409,12 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			//throw new Error("joinPaths: Argument needs to be an array: paths=" + paths);
 		}
 		
-		console.log("joinPaths: (before flatten): paths=" + JSON.stringify(paths));
+		//console.log("joinPaths: (before flatten): paths=" + JSON.stringify(paths));
 		
 		paths = flatten(paths);
 		
 		function flatten(paths) {
-			console.log("flatten: paths=" + JSON.stringify(paths));
+			//console.log("flatten: paths=" + JSON.stringify(paths));
 			for (var i=0; i<paths.length; i++) {
 				if( Array.isArray(paths[i]) ) {
 					if(paths[i].length == 0) {
@@ -1422,7 +1422,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 						return flatten(paths);
 					}
 					else {
-						console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
+						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
 						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
 						return flatten(paths);
 					}
@@ -1431,7 +1431,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			return paths;
 		}
 		
-		console.log("joinPaths: (after flatten): paths=" + JSON.stringify(paths));
+		//console.log("joinPaths: (after flatten): paths=" + JSON.stringify(paths));
 		
 		var pathDelimiter = UTIL.getPathDelimiter(paths[0]);
 		
@@ -1447,13 +1447,13 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		var path = paths.join(pathDelimiter);
 		
-		console.log("joinPaths: (after join): path=" + path);
+		//console.log("joinPaths: (after join): path=" + path);
 		
 		if(pathDelimiter == "/" && path.indexOf(":/") == -1) {
 			// Add root 
 			path = "/" + path;
 			path = path.replace(/\\/g, "/");
-			console.log("joinPaths: Added root: path=" + path);
+			//console.log("joinPaths: Added root: path=" + path);
 		}
 		else if(pathDelimiter == "\\") {
 			path = path.replace(/\//g, "\\");
