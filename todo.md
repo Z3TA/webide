@@ -46,6 +46,11 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Detect Edge browser.
+Edge also doesn't support subpixel antialias!
+So don't user Consolas in Edge.
+
+
 regression: open/edit no longer works in the terminal on prod!!
 
 
