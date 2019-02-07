@@ -46,9 +46,21 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Goto-file widget pushes up the header!!
 
-Refactor: Use KeyboardEvent.key  instead of charCode and keyCode
+
+
+
+
+
+todo
+----
+
+Go through all plugins and add functions to the virtual keyboard for discovery!!?
+using the context menu is slow. put functionality like save on the virtual keyboard!
+
+
+
+
 
 able to see inlined removed
 lines for diffs,
@@ -57,77 +69,37 @@ so you always see the diff
 when making a commit.
 
 
+Thinking about making web sites, how to get (free) templates !? ...
 Doesn't get fonts when forking https://zäta.com/en/index.htm
 
-EDITOR.say !?
+
 
 Start to use Chromebook full time!
-
-Thinking about making web sites, how to get (free) templates !?
-
-
-blog about testing and code coverage !?
 
 
 
 When clicking on selected text, offer to "Copy selection" or "Cut selection" it using right click menu
 Offer to "Paste from clipboard" when the text is not selected
 
-Go through all plugins and add functions to the virtual keyboard for discovery!!?
-using the context menu is slow. put functionality like save on the virtual keyboard!
-
-
-
 Able to copy a folder
 
 "new Folder" from any file or folder.
 
 
-
-
-
-
----
-
 Automatic OS updates on the server can break the editor.
 Need to have a service that checks if it's possible to login!
 
----
 
-Unable to switch site (to local) in file explorer when connected to a sftp server.
-
-
----
-
-test 
-
-@media (prefers-dark-interface) { color: white; background: black }
-
----
+Do NOT use the browser's localstorage for settings, save them in the user home dir so they are not lost when changing browser or clearing history!
 
 
-Undo/redo still has issues with deleteTextRange
 
----
-
-*.johan.webide.se magically renewed, I did not see anything in cron log, so I don't know how it managed to be renewed ....
-
-This however allow us to use wildcard domains for all users!
-and /sock/foo will be redirected from foo.username.webide.se
-
-Make a custom 502 Bad Gateway error message:
-"Can not connect to port: /sock/foo
-Replace port number with /sock/foo in your app!
-
-----
+Undo/redo still has issues with deleteTextRange!
 
 Test undo/redo and collaboration
 
----
 
-When working in preview mode and editing html with style's the CSS-file gets ignored.
-
----
+When working in preview mode and editing html with style's the CSS-file gets ignored!!????
 
 Replace all doesn't replace the first!
 
@@ -257,8 +229,6 @@ I made some mental notes today while I was doing some work, so I could compile a
 
 
 
-todo
-----
 
 
 Support third party script when parsing files in autocomplete.js (scripts found in html files)
@@ -412,6 +382,9 @@ proxy *.user. to the socket!
 Piping curl to sudo bash is not OK (remove any such instructions). 
 Forgot why we are using Nodesource ...
 ---
+
+Check if the editor works on different keyboard layouts!
+Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 
 What I'm thinking
@@ -1906,6 +1879,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Goto-file widget pushes up the header!!
 
 The login form doesn't get submitted when you press Enter!
 

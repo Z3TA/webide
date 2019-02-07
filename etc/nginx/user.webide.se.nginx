@@ -81,4 +81,12 @@ server {
     proxy_set_header connection        "upgrade";
   }
 
+  location @badgateway {
+    add_header Access-Control-Allow-Origin * always;
+    default_type text/plain;
+    return 502 "Cannot connect to port: /sock/$1\nReplace port number with /sock/$1 in your app!\n";
+  }
+  
+  error_page 502 @badgateway;
+
 }
