@@ -45,6 +45,13 @@ if(!file) return true;
 		EDITOR.hideMenu();
 		
 		function reload() {
+			
+			if(file.isBig) {
+				var filePath = file.path;
+				EDITOR.closeFile(file);
+				EDITOR.openFile(filePath);
+			}
+			else {
 			EDITOR.readFromDisk(file.path, function(err, path, text, hash) {
 				if(err) {
 					if(err.code == "ENOENT") {
@@ -58,6 +65,7 @@ if(!file) return true;
 					file.saved(); // Because we reloaded from disk
 				}
 				});
+		}
 		}
 		
 	}

@@ -46,16 +46,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Issues loading the page with Chrome in Windows !? (with 3d acceleration on)
-
-Problem: IE doesn't support Canvas sub-pixel antialias. Which Consolas needs.
-But it also doesn't support custom fonts!
-Doesn't detect IE/Windows to use Consolas!
-
 Goto-file widget pushes up the header!!
-
-Reload from disk option in a large file .... reloades the whole file !? without big-file mode !?
-
 
 Refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
