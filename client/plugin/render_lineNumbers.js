@@ -151,12 +151,20 @@
 		console.log("screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
 		" sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + 
 		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight + 
-		" cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " cacheCanvas.height=" + cacheCanvas.height + 
-		" cacheCanvasHeight=" + cacheCanvasHeight);
+		" cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " EDITOR.canvas.width=" + EDITOR.canvas.width + 
+		" cacheCanvas.height=" + cacheCanvas.height + " cacheCanvasHeight=" + cacheCanvasHeight + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		
-		// todo: Check the clipping to prevent IndexSizeError in IE!
-		
-		ctx.drawImage(cacheCanvas, sourceX, sourceY, sourceRectWidth, sourceRectHeight, destinationX, destinationY, destinationWidth, destinationHeight);
+		ctx.drawImage(
+		cacheCanvas, 
+		sourceX, 
+		sourceY, 
+		sourceRectWidth, 
+		Math.min(sourceRectHeight,cacheCanvasHeight), 
+		destinationX, 
+		destinationY, 
+		destinationWidth, 
+		Math.min(destinationHeight,EDITOR.canvas.height)
+		);
 		
 	}
 	
