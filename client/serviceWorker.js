@@ -29,6 +29,10 @@
 	Problem4: We always want to get the latest version of each file while in development
 	Solution4: Have a DEV_MODE variable and override cache if it's set to true
 	
+	Problem 5: The service worker will update the cache using the *old* version of the service worker (old version of this script)
+	So if there's something wrong with the service worker, the cache will not be updated until next editor release!
+	
+	self.registration.unregister() !?
 	
 */
 
