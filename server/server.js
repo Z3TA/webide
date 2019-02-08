@@ -1724,14 +1724,14 @@ username = guestUser;
 				
 			}
 			else {
-				console.time(id);
+				
 				userWorker.send({commands: {command: command, json: json, id: id}});
 			}
 			
 		}
 		
 		function send(answer, conn) {
-			if(id || answer-id) console.timeEnd(id||answer.id);
+			
 			if(conn == undefined) conn = connection;
 			
 			//console.log("answer.id=" + answer.id);
