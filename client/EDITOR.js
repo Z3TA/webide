@@ -82,7 +82,7 @@ EDITOR.settings = {
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
 	sub_pixel_antialias: false, // For the main text area (canvas) only.
-	lowLatencyCanvas: true,
+	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
 	style: {
