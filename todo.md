@@ -46,38 +46,10 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Detect Edge browser.
-Edge also doesn't support subpixel antialias!
-So don't user Consolas in Edge.
+Server encrypted storage for passwords and settings.
 
 
-regression: open/edit no longer works in the terminal on prod!!
-
-
-String literals bug:
-{
-  `<div>Hello</div>`;
-}
-
-
-
-
-
-When running "npm start" but there are no browsers to start, also stop the server!
-
-
----
-
-Test the editor in Edge browser!
-Error: Permission denied
-   at testWindow (https://webide.se/:1579:62429)
-   at EDITOR.createWindow (https://webide.se/:1579:61675)
-   at WysiwygEditor (https://webide.se/:1883:6537)
-
----
-
-
-Demo happy path for SCM integration
+Database support
 
 
 
@@ -103,6 +75,32 @@ Persistent storage! Database !? People need somewhere to host their data.
 
 ---
 
+
+Detect Edge browser.
+Edge also doesn't support subpixel antialias!
+So don't user Consolas in Edge.
+
+
+regression: open/edit no longer works in the terminal on prod!!
+
+
+When running "npm start" but there are no browsers to start, also stop the server!
+
+
+---
+
+Test the editor in Edge browser!
+Error: Permission denied
+   at testWindow (https://webide.se/:1579:62429)
+   at EDITOR.createWindow (https://webide.se/:1579:61675)
+   at WysiwygEditor (https://webide.se/:1883:6537)
+
+---
+
+
+Demo happy path for SCM integration
+
+---
 Example on how to make a form and save the data to a db/file
 
 Put tutorials on Githb. Auto clone when double clicking? on a git url !?
