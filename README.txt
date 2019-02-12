@@ -330,8 +330,8 @@ sudo apt update
 sudo apt install xvfb x11vnc chromium-browser
 ````
 
-Adding and removing users
--------------------------
+Adding and removing jzedit users
+--------------------------------
 Use the following script to add users to the cloud ide:
 `./adduser.js username password`
 
@@ -345,6 +345,23 @@ kill -s 2 810460
 sudo -u username kill 810460
 ````
 You might have to reboot in order to unmount all directories.
+
+
+mySQL setup
+-----------
+
+ref: https://dev.mysql.com/doc/mysql-secure-deployment-guide/5.7/en/secure-deployment-configure-authentication.html
+
+Add these options under the [mysqld] option group in the MySQL configuration file (/etc/my.cnf): 
+
+[mysqld]
+plugin-load-add=auth_socket.so
+auth_socket=FORCE_PLUS_PERMANENT
+
+mysql> install plugin auth_socket SONAME 'auth_socket.so'; 
+
+??
+
 
 
 Apparmor debugging

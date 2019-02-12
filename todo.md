@@ -46,7 +46,44 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+trying to make auth_socket module to work
+
+Issues in Chrome on Android:
+
+
+
+how should the database password be stored ?
+
+
+mySQL database support
+
+
+
 Server encrypted storage for passwords and settings.
+
+.jzeditStorage
+.jzeditPw
+.jzeditEncryptedStorage
+
+Make a .jzedit folder!
+(need to use update.js to move the files to the correct place)
+
+.jzedit {storage, encryptedStorage, pw}
+
+threat model: Someone reads the password for the database login
+database pw needs to be supplied to nodejs script env both in prod and dev.
+
+The only thing someone who has hdd access doesn't know is the user pw.
+So the encryption key need to be derived from the user pw
+The key is then sent to the worker process.
+The worker process decrypts the encrypted storage.
+Then encrypt it every time something is changed.
+
+
+The encryption key/password is changed every time something is stored!?
+
+
+
 
 
 Database support
@@ -96,6 +133,8 @@ Error: Permission denied
    at WysiwygEditor (https://webide.se/:1883:6537)
 
 ---
+
+Support for let and const in the js parser
 
 
 Demo happy path for SCM integration
