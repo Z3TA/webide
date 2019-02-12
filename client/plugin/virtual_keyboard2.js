@@ -619,9 +619,11 @@ return false;
 		
 		if (navigator.vibrate) {
 			// vibration API supported
-			navigator.vibrate(50);
+			var vibrateSuccess = navigator.vibrate([1]);
 		}
-		EDITOR.beep(0.1, 120, "sine", 39);
+		
+		if(!vibrateSuccess) EDITOR.beep(0.1, 120, "sine", 39);
+		
 		return false;
 	}
 	
