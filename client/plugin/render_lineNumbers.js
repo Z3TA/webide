@@ -156,14 +156,14 @@
 		
 		ctx.drawImage(
 		cacheCanvas, 
-		sourceX, 
-		sourceY, 
-		sourceRectWidth, 
-		Math.min(sourceRectHeight,cacheCanvasHeight), 
-		destinationX, 
-		destinationY, 
-		destinationWidth, 
-		Math.min(destinationHeight,EDITOR.canvas.height)
+		sourceX, // the left X position to start clipping
+		sourceY, // the top Y position to start clipping
+		sourceRectWidth, // clip this width of pixels from the source
+		Math.min(sourceRectHeight,cacheCanvasHeight*pixelRatio), // clip this height of pixels from the source
+		destinationX, // the left X canvas position to start drawing the clipped sub-image
+		destinationY, // the top Y canvas position to start drawing the clipped sub-image
+		destinationWidth, // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
+		Math.min(destinationHeight,EDITOR.canvas.height) // scale sourceRectHeight to destinationHeight and draw a destinationHeight high sub-image on the canvas
 		);
 		
 	}
