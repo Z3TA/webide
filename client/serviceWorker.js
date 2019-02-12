@@ -332,8 +332,8 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		var body = "<!DOCTYPE HTML>" +
 		"<h1>Service Worker Error</h1>" +
 		"<p>The service worker was unable to fetch the page. " + 
-		"Most probably cause is that you are offline and the page has not been cached by the service worker. " + 
-		"Send the following error message to your server administrator:</p>" + 
+		'<a href="JavaScript: location.reload();">Refresh</a> to try again.</p>' +
+		"<p>Send the following error message to your server administrator:</p>" + 
 		"<p>" +
 		"date: " + (new Date()) + "<br>" +
 		"url: " + event.request.url + "<br>" +
