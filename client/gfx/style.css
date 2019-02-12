@@ -38,6 +38,7 @@
 	text-rendering: optimizeLegibility;
 	text-rendering: geometricPrecision;
 	*/
+	
 }
 
 html {
@@ -169,6 +170,7 @@ body {
 canvas {
 	text-rendering: optimizeLegibility;
 	font-kerning : normal;
+	z-index: 2; /* Try not to cover the canvas as it might impact performance */
 }
 
 .wireframe {
@@ -496,8 +498,21 @@ td input[type=text] {
 	}
 
 
-/* ############### File Tabs ############## */
+/* ############### Top right menu button (plugin) ############## */
 
+.topRightMenuButton {
+	z-index: 0; /* So that it does not cover something else */
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 10%;
+	height: 32px;
+	text-transform: uppercase;
+	border-radius: 0px 0px 0px 12px;
+}
+
+
+/* ############### File Tabs ############## */
 
 ul#tabList {
 	margin: 0;
@@ -1350,8 +1365,12 @@ div.group {
 		font-size: 10px;
 		
 }
+	
+	.topRightMenuButton {
+		height: 21px;
+		border-radius: 0px 0px 0px 10px;
 }
-
+}
 
 @media (max-width: 1315px) {
 	div.group, .repoCommit .group.buttons {
