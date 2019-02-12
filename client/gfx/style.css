@@ -515,6 +515,7 @@ td input[type=text] {
 /* ############### File Tabs ############## */
 
 ul#tabList {
+	z-index: 1;
 	margin: 0;
 	padding: 0;
 	padding-left: 3px;
@@ -525,6 +526,7 @@ ul#tabList {
 }
 
 ul#tabList li.tabFolderItem {
+	z-index: 1;
 	border-radius: 10px 10px 0px 0px;
 	
 	border-top: 1px solid #d6d6d6;
