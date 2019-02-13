@@ -123,6 +123,8 @@ Dialog.prototype.isOpen = function(someEvent, callback) {
 	else return false;
 }
 Dialog.prototype.close = function(someEvent, callback) {
+	console.log("Dialog.prototype.close ...");
+	
 	if(this.div.parentElement) this.div.parentElement.removeChild(this.div);
 	else console.warn("Parent element does not exist for div=", this.div);
 	
@@ -158,7 +160,8 @@ else {
 		}
 		
 		/*
-			Issue: When in a html widget form, a Dialog comes up, which then gives focus to the EDITOR, so you can't click Enter to submit the form
+			Issue: When in a html widget form, a Dialog comes up, 
+			which then gives focus to the EDITOR, so you can't click Enter to submit the form
 			Isse2: Copy/paste using virtual keyboard !? 
 		*/
 		
@@ -172,6 +175,10 @@ else {
 		}, waitTime);
 		
 		}
+	else if(callback) {
+		console.log("Dialog.prototype.close: Calling callback without waiting!");
+		callback();
+	}
 }
 
 function alertBox(msg, icon, recursionCount) {
@@ -339,7 +346,8 @@ dialogDelay = defaultValue;
 		var value = input.value || input.innerText;
 		console.log("promptBox: Closing dialog ...");
 		dialog.close(clickEvent, function() {
-			callback(value); 
+			console.log("promptBox: Dialog closed. Calling back with value=" + value);
+			callback(value);
 		});
 		
 	}, false);

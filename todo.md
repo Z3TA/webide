@@ -46,13 +46,15 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-trying to make auth_socket module to work
+test for regression: 
+Login by pressing Enter
+Virtual keyboard (IE 11)
 
-Issues in Chrome on Android:
 
 
 
-how should the database password be stored ?
+
+
 
 
 mySQL database support
