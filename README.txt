@@ -358,9 +358,28 @@ Add these options under the [mysqld] option group in the MySQL configuration fil
 plugin-load-add=auth_socket.so
 auth_socket=FORCE_PLUS_PERMANENT
 
-mysql> install plugin auth_socket SONAME 'auth_socket.so'; 
+You might have to run the following query (logged in as root to the mysql console):
+install plugin auth_socket SONAME 'auth_socket.so'; 
 
-??
+Then run:
+service mysql restart
+
+Login to mysql again to make sure auth_socket is activated:
+SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME LIKE '%socket%';
+
+Try creating a user:
+CREATE USER somelocaluser@localhost IDENTIFIED WITH auth_socket;
+DROP USER somelocaluser@localhost;
+
+Make it so root can login without a password:
+ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
+
+PS. You can then only login to mySQL using the system root user and via the unix socket!
+sudo -u root mysql --socket /var/run/mysqld/mysqld.sock
+
+
+
+
 
 
 
@@ -401,6 +420,12 @@ Complain to allow everything but show logs
 
 Put a profile back into enforce
 `sudo aa-enforce /home/demo/usr/bin/hg`
+
+See systemd logs:
+`sudo journalctl -x`
+
+Try running the command inside/outside the chroot:
+`sudo chroot --userspec=ltest1:ltest1 /home/ltest1/ bash`
 
 
 

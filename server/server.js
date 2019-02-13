@@ -38,6 +38,8 @@ var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);
 
+var MYSQL_PORT = getArg(["mysql", "mysql-port", "mysql-unix-socket"]) || "/var/run/mysqld/mysqld.sock";
+
 // Log levels
 var ERROR = 3;
 var WARN = 4;
@@ -160,6 +162,8 @@ var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 
+var module_mysql = require("mysql");
+
 //var module_copyFile = require("../shared/copyFile.js");
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 //var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
@@ -182,6 +186,9 @@ var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order t
 var stdinChannelBuffer = "";
 var editorProcessArguments = "";
 var STDOUT_SOCKETS = [];
+
+var mysqlClient = new module_mysql.createConnection({port: MYSQL_PORT});
+
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -1816,6 +1823,7 @@ function checkMounts(options, checkMountsCallback) {
 	var hgrccacertsUptodate = true;
 	var passwdCreated = false;
 	var checkMountsAbort = false;
+	var mysqlCheck = false;
 	
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
@@ -1867,6 +1875,35 @@ function checkMounts(options, checkMountsCallback) {
 		*/
 		
 		console.time("Mount " + username + " files and folders");
+		
+		// ### MySQL
+		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
+			if(err) {
+				if(err.code == "ENOENT") {
+					console.warn("MySQL socket does not exit: " + MYSQL_PORT);
+					mysqlCheck = true;
+					checkMountsReadyMaybe();
+					return;
+				}
+				else throw err;
+			}
+			else if(DEBUG_CHROOT) {
+				// /usr/bin will be mounted anyway
+				mysqlCheck = true;
+				checkMountsReadyMaybe();
+				return;
+			}
+			else  {
+				module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
+					if(err) throw err;
+					
+					mysqlCheck = true;
+					checkMountsReadyMaybe();
+					return;
+				});
+			}
+		});
+		
 		
 		if(!DEBUG_CHROOT) {
 			foldersToMount += 10; // <-- Update
@@ -2163,11 +2200,9 @@ function checkMounts(options, checkMountsCallback) {
 	
 	function folderMounted(err) {
 		foldersToMount--;
-		if(err) {
-			// Error: Target directory not empty! Can not mount to targetPath=/home/johan/etc/ssl/certs targetStats=[object Object]
-			return checkMountsError(err);
-			//throw err;
-		}
+		
+		if(err) return checkMountsError(err);
+		
 		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
 		
 		if(foldersToMount == 0) console.timeEnd("Mount " + username + " files and folders");
@@ -2182,7 +2217,7 @@ function checkMounts(options, checkMountsCallback) {
 			console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
 			" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
 			+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
-			+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
+			+ " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck);
 		*/
 		
 		if(foldersToMount === 0) {
@@ -2200,7 +2235,7 @@ function checkMounts(options, checkMountsCallback) {
 			});
 		}
 		
-		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL)) {
+		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
