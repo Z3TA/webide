@@ -197,18 +197,19 @@ process.on("SIGINT", function sigInt() {
 	
 	for(var displayId in VNC_CHANNEL) stopVncChannel(displayId);
 	
-	
-	mysqlConnection.end(function(err) {
-		if(err) console.error(err);
-		
-		end();
-	});
+	if(mysqlConnection) {
+		mysqlConnection.end(function(err) {
+			if(err) console.error(err);
+			
+			end();
+		});
+	}
+	else end();
+
 	
 	function end() {
 		process.exit();
 	}
-	
-	
 });
 
 process.on("exit", function () {
