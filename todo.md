@@ -55,10 +55,12 @@ Virtual keyboard (IE 11)
 
 
 
-
-
 mySQL database support
 
+
+When offline, only show one row for the server-login plugin.
+
+Hide the menu button if the user manages to do a right-click/long-press !?
 
 
 Server encrypted storage for passwords and settings.

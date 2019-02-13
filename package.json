@@ -31,7 +31,6 @@
     "jschardet": "^1.6.0",
     "mammoth": "^1.4.7",
     "marked": "^0.4.0",
-    "mysql": "^2.16.0",
     "ncp": "^2.0.0",
     "sockjs": "^0.3.4",
     "ssh2": "^0.5.0",
@@ -39,6 +38,7 @@
   },
   "optionalDependencies": {
     "nodemailer": "^2.6.4",
+    "mysql": "^2.16.0",
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",
     "ps-node": "^0.1.6",

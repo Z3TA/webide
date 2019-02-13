@@ -427,6 +427,7 @@ See systemd logs:
 Try running the command inside/outside the chroot:
 `sudo chroot --userspec=ltest1:ltest1 /home/ltest1/ bash`
 
+Also see: http://manpages.ubuntu.com/manpages/bionic/man5/apparmor.d.5.html
 
 
 Installing more programs to the users folder (chroot)

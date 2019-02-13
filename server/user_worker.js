@@ -662,93 +662,6 @@ process.on('message', function commandMessage(message) {
 });
 
 
-
-// ## Special API's (that has to use parentRequest)...
-
-API.identify = function identify(user, json, callback) {
-	// Handle weird edge case when the user manages to login twice
-	
-	if(!user.name) throw new Error("Unexpected: user.name=" + user.name);
-	
-	callback(new Error("Already identified as " + user.name));
-}
-
-API.serve = function serve(user, json, callback) {
-	
-	// Serve a folder via HTTP
-	
-	var folder = user.translatePath(json.folder);
-	if(folder instanceof Error) return callback(folder);
-	
-	console.log("user.name=" + user.name + " serving folder=" + folder);
-	
-	parentRequest({createHttpEndpoint: {folder: folder}}, function(err, resp) {
-		if(err) callback(err);
-		else callback(err, {url: resp.url});
-	});
-}
-
-API.stop_serve = function serve(user, json, callback) {
-	
-	// Stop serving a folder
-	
-	var folder = user.translatePath(json.folder);
-	if(folder instanceof Error) return callback(folder);
-	
-	console.log("user.name=" + user.name + " wants to stop serving folder=" + folder);
-	
-	parentRequest({removeHttpEndpoint: {folder: folder}}, function(err, resp) {
-		callback(err, {folder: resp.folder});
-	});
-}
-
-API.proxy = function createProxy(user, json, callback) {
-	// Proxy a URL so it can be accesses from http://currentDomain.com/proxy/name/
-	parentRequest({proxy: {name: json.name, url: json.url}}, function(err, resp) {
-		if(err) callback(err);
-		else callback(err, {name: resp.name, url: resp.url});
-	});
-}
-
-API.stopProxy = function serve(user, json, callback) {
-	// Stop serving a folder
-	parentRequest({stopProxy: {name: json.name}}, function(err, resp) {
-		callback(err);
-	});
-}
-
-API.debugInBrowserVnc = function serve(user, json, callback) {
-	
-	var url = json.url;
-	var scriptUrl = json.scriptUrl;
-	var breakPoints = json.breakPoints;
-	var sourceFile = json.sourceFile;
-	
-	console.log("user.name=" + user.name + " requesting chromium-browser in VNC and node-inspect");
-	
-	parentRequest({debugInBrowserVnc: {url: url}}, function(err, resp) {
-		console.log("parentRequest returned err=" + err + " resp=" + resp);
-		
-		if(err) return callback(err);
-		
-		//debugUsingChromeDebuggingProtocol(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
-		callback(err, resp);
-		//});
-		
-	});
-}
-
-API.googleDrive = function googleDrive(user, options, callback) {
-	/*
-		Mount google drive
-	*/
-	
-	parentRequest({googleDrive: options}, function(err, resp) {
-		if(err) callback(err);
-		else callback(err, resp);
-	});
-}
-
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);
@@ -844,7 +757,6 @@ API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
 }
 
 API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
-	
 	var folder = json.folder;
 	var pw = json.pw;
 	
@@ -890,7 +802,6 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 		
 		var fs = require("fs");
 		fs.mkdir(USER_PROD_FOLDER, function makeSureProdFolderExist(err) {
-			
 			if(err) {
 				if(err.code != "EEXIST") return callback(err);
 			}
@@ -906,13 +817,103 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 				if(path.match(/data\/?$/)) return false;
 				else return true;
 			}
-			
+			});
 		});
+	}
+
+
+// ## Special API's (that has to use parentRequest)...
+
+API.identify = function identify(user, json, callback) {
+	// Handle weird edge case when the user manages to login twice
+	
+	if(!user.name) throw new Error("Unexpected: user.name=" + user.name);
+	
+	callback(new Error("Already identified as " + user.name));
+}
+
+API.serve = function serve(user, json, callback) {
+	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	if(folder instanceof Error) return callback(folder);
+	
+	console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	parentRequest({createHttpEndpoint: {folder: folder}}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, {url: resp.url});
+	});
+}
+
+API.stop_serve = function serve(user, json, callback) {
+	
+	// Stop serving a folder
+	
+	var folder = user.translatePath(json.folder);
+	if(folder instanceof Error) return callback(folder);
+	
+	console.log("user.name=" + user.name + " wants to stop serving folder=" + folder);
+	
+	parentRequest({removeHttpEndpoint: {folder: folder}}, function(err, resp) {
+		callback(err, {folder: resp.folder});
+	});
+}
+
+API.proxy = function createProxy(user, json, callback) {
+	// Proxy a URL so it can be accesses from http://currentDomain.com/proxy/name/
+	parentRequest({proxy: {name: json.name, url: json.url}}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, {name: resp.name, url: resp.url});
+	});
+}
+
+API.stopProxy = function serve(user, json, callback) {
+	// Stop serving a folder
+	parentRequest({stopProxy: {name: json.name}}, function(err, resp) {
+		callback(err);
+	});
+}
+
+API.debugInBrowserVnc = function serve(user, json, callback) {
+	
+	var url = json.url;
+	var scriptUrl = json.scriptUrl;
+	var breakPoints = json.breakPoints;
+	var sourceFile = json.sourceFile;
+	
+	console.log("user.name=" + user.name + " requesting chromium-browser in VNC and node-inspect");
+	
+	parentRequest({debugInBrowserVnc: {url: url}}, function(err, resp) {
+		console.log("parentRequest returned err=" + err + " resp=" + resp);
 		
+		if(err) return callback(err);
+		
+		//debugUsingChromeDebuggingProtocol(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
+		callback(err, resp);
+		//});
 		
 	});
+}
+
+API.googleDrive = function googleDrive(user, options, callback) {
+	/*
+		Mount google drive
+	*/
 	
+	parentRequest({googleDrive: options}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, resp);
+	});
+}
+
+API.createMysqlDb = function createMysqlDb(user, options, callback) {
 	
+	parentRequest({createMysqlDb: options}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, resp);
+	});
 }
 
 

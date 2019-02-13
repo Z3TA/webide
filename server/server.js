@@ -187,7 +187,7 @@ var stdinChannelBuffer = "";
 var editorProcessArguments = "";
 var STDOUT_SOCKETS = [];
 
-var mysqlClient = new module_mysql.createConnection({port: MYSQL_PORT});
+var mysqlConnection;
 
 
 process.on("SIGINT", function sigInt() {
@@ -198,7 +198,16 @@ process.on("SIGINT", function sigInt() {
 	for(var displayId in VNC_CHANNEL) stopVncChannel(displayId);
 	
 	
-	process.exit();
+	mysqlConnection.end(function(err) {
+		if(err) console.error(err);
+		
+		end();
+	});
+	
+	function end() {
+		process.exit();
+	}
+	
 	
 });
 
@@ -206,6 +215,99 @@ process.on("exit", function () {
 	
 	log("Program exit\n\n", 6, true);
 });
+
+function mysqlConnect() {
+	
+	log("Connecting to mySQL database ...", DEBUG);
+	
+	var mysqlConnectionOptions = {port: MYSQL_PORT, database: "mysql", user: "root"};
+	
+	// Recreate the connection, since the old one cannot be reused.
+	mysqlConnection = module_mysql.createConnection(mysqlConnectionOptions);          
+	
+	mysqlConnection.connect(function(err) {                       
+		if(err) {                                  
+			// The server is either down or restarting (takes a while sometimes).
+			console.error(err);
+			log("Failed to connect to mySQL database!", WARN);
+			// We introduce a delay before attempting to reconnect, to avoid a hot loop
+			setTimeout(mysqlConnect, 2000);    
+		}
+		else {
+			log("Successfully connected to mySQL database!", INFO);
+		}
+	});                                              
+	
+	mysqlConnection.on('error', function(err) {
+		log("MySQL error: " + err.message, NOTICE);
+		if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
+			/*
+				Connection to the MySQL server is usually lost due to either server restart, 
+				or a connnection idle timeout (the wait_timeout server variable configures this)
+			*/
+			mysqlConnect();
+		} else {
+			console.error(err);
+			setTimeout(mysqlConnect, 10000);    
+		}
+	});
+}
+
+function createMysqlDb(username, options, callback) {
+	var dbName = options.name;
+	if(dbName == undefined) return callback("name can not be undefined!");
+	
+	var db = mysqlConnection;
+	
+	console.log("db.state=" + db.state);
+	
+	// First check if user exist
+	db.query("SELECT user FROM user WHERE user = ? AND host = 'localhost'", [username], function(err, rows, fields) {
+		if (err) {
+			console.error(err);
+			return callback(err);
+		}
+		
+		if(rows.length == 0) {
+			db.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
+				if (err) {
+					console.error(err);
+					return callback(err);
+				}
+				
+				crate();
+			});
+		}
+		else crate();
+	});
+	
+	function create() {
+		/*
+			GRANT SELECT ON *.* TO 'username'@'localhost'
+			
+			CREATE DATABASE mydatabase CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+			https://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
+			
+			Also dont forget "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" when creating the tables!!?
+		*/
+		
+		db.query("CREATE DATABASE ? CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", [dbName], function(err, rows, fields) {
+			if (err) {
+				console.error(err);
+				return callback(err);
+			}
+			
+			db.query("GRANT SELECT,UPDATE;DELETE,INSERT,ALTER,DROP,CREATE,INDEX,LOCK TABLES ON ?.* TO ?@'localhost'", [dbName, username], function(err, rows, fields) {
+				if (err) {
+					console.error(err);
+					return callback(err);
+				}
+				
+				callback(null);
+			});
+		});
+	}
+}
 
 function unixTimeStamp(date) {
 	if(date) return Math.floor(date.getTime() / 1000);
@@ -519,6 +621,9 @@ function main() {
 	
 	function getGuestCount() {
 		if(!USERNAME && !NO_CHROOT) {
+			
+			mysqlConnect();
+			
 		module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
@@ -1636,6 +1741,9 @@ username = guestUser;
 										delete PROXY[proxyName]
 									}
 									
+									else if(req.createMysqlDb) {
+										createMysqlDb(username, req.createMysqlDb, workerResp);
+									}
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 									
