@@ -32,6 +32,9 @@
   /usr/lib/** r,
   /run/resolvconf/resolv.conf r,
 
+  # Connecting to mySQL
+  /run/mysqld/mysqld.sock rw,
+
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rwl,

@@ -45,6 +45,10 @@
 
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** rwl,
+
+    # Connecting to mySQL
+    /run/mysqld/mysqld.sock rw,
+
     %HOME%%USERNAME%/usr/bin/hg Px,
     %HOME%%USERNAME%/usr/bin/git Px,
     %HOME%%USERNAME%/usr/bin/node Px,
