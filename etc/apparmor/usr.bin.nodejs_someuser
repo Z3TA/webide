@@ -68,6 +68,9 @@
   /bin/** r,
   /usr/bin/** r,
 
+  # Connecting to mySQL
+  /run/mysqld/mysqld.sock rw,
+
   # P means "use profile" (and clear enviroment), x means execute
   %HOME%%USERNAME%/usr/bin/hg px,
   %HOME%%USERNAME%/usr/bin/git px,
@@ -83,6 +86,7 @@
   %HOME%%USERNAME%/usr/bin/ssh-keygen Cx -> util,
   %HOME%%USERNAME%/bin/sh Cx -> util,
   
+
   profile util {
     /bin/** r,
     /usr/bin/** r,
