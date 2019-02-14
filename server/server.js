@@ -277,10 +277,10 @@ function createMysqlDb(username, options, callback) {
 					return callback(err);
 				}
 				
-				crate();
+				create();
 			});
 		}
-		else crate();
+		else create();
 	});
 	
 	function create() {
@@ -293,13 +293,14 @@ function createMysqlDb(username, options, callback) {
 			Also dont forget "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" when creating the tables!!?
 		*/
 		
-		db.query("CREATE DATABASE ? CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", [dbName], function(err, rows, fields) {
+		db.query("CREATE DATABASE " + module_mysql.escapeId(dbName) + " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", function(err, rows, fields) {
+			// database name can not have 'name' quotes around it
 			if (err) {
 				console.error(err);
 				return callback(err);
 			}
 			
-			db.query("GRANT SELECT,UPDATE;DELETE,INSERT,ALTER,DROP,CREATE,INDEX,LOCK TABLES ON ?.* TO ?@'localhost'", [dbName, username], function(err, rows, fields) {
+			db.query("GRANT SELECT,UPDATE,DELETE,INSERT,ALTER,DROP,CREATE,INDEX,LOCK TABLES ON ?.* TO ?@'localhost'", [dbName, username], function(err, rows, fields) {
 				if (err) {
 					console.error(err);
 					return callback(err);
@@ -1756,7 +1757,7 @@ username = guestUser;
 								function workerResp(err, resp) {
 									if(id == undefined) throw new Error("id=" + id);
 									var obj = {id: id, parentResponse: resp};
-									if(err) obj.err = err.message ? err.message : err;
+									if(err) obj.err = err.message ? {message: err.message, code: err.code} : err;
 									userWorker.send(obj);
 								}
 								
