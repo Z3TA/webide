@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<title>Using a database</title>
+</head>
+
+<body>
+
+<h1>Using a database</h1>
+
+<p>The cloud editor has built in support for mySQL databases.</p>
+
+
+<h2>Creating a database</h2>
+
+<p>In the menu, click "Database manager", and then the button "Create new database".<br>
+You then get a dialog box where you type the name of the database.</p>
+
+
+<h2>Connecting to a database</h2>
+
+<p>To connect to a database via your Node.JS code, see example below:</p>
+
+<textarea>
+var mysql = require("mysql2");
+var db = mysql.createConnection(process.env.mysql);
+db.connect();
+</textarea>
+
+<h2>Making a database query</h2>
+
+<p>Assuming you have already made a connection:</p>
+
+<textarea>
+db.query("SELECT foo FROM my_database.bar", function(err, rows, fields) {
+	if (err) {
+		// Handle error
+		//console.error(err);
+	}
+	else {
+		console.log(rows);
+	}
+});
+</textarea>
+
+<p>The mysql2 module supports Promises and thus async/await. So you can also make a database query like this:</p>
+
+<textarea>
+const [rows,fields] = await db.query("SELECT foo FROM my_database.bar");
+</textarea>
+
+
+<h2>Switching database</h2>
+
+<p>For example using a different database for production and development.</p>
+
+<textarea>
+if(process.env.prod) var myDatabase = "my_database_prod";
+else var myDatabase = "my_database_dev";
+
+connection.changeUser({database : myDatabase}, function(err) {
+	if (err) {
+		// Handle error
+		//console.error(err);
+	}
+	else {
+		console.log("Now using " + myDatabase);
+	}
+});
+</textarea>
+
+<p>When specifying a database to use you do not have to prepend the database infront of all table names:</p>
+
+<textarea>
+const [rows,fields] = await db.query("SELECT foo FROM bar"); // note: no my_database
+</textarea>
+
+
+<h2>Technical details</h2>
+
+<p>The editor uses the auth_socket mySQL plugin for authentication to the database,
+so you must use the <b>mysql2</b> Node.JS module with <i>authSwitchHandler</i> specified in connection options.<br>
+With the auth_socket mySQL plugin you can login securely to the mySQL server
+without using a password. Only you can login using your username!</p>
+
+<textarea>
+var mysql = require('mysql2');
+var db = mysql.createConnection({
+	user: 'your_username',
+	socketPath: '/sock/mysql',
+	authSwitchHandler: true, // Need to be true:ish (preferably a authSwitchHandler function)
+	database: "information_schema"
+});
+</textarea>
+
+
+
+ 
+
+
+
+</body>
+</html>

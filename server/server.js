@@ -162,7 +162,7 @@ var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 
-var module_mysql = require("mysql");
+var module_mysql = require("mysql2");
 
 //var module_copyFile = require("../shared/copyFile.js");
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
@@ -221,7 +221,8 @@ function mysqlConnect() {
 	
 	log("Connecting to mySQL database ...", DEBUG);
 	
-	var mysqlConnectionOptions = {port: MYSQL_PORT, database: "mysql", user: "root"};
+	var mysqlConnectionOptions = {port: MYSQL_PORT, database: "mysql", user: "root", authSwitchHandler: true};
+	// note: without authSwitchHandler auth_socket will fail!
 	
 	// Recreate the connection, since the old one cannot be reused.
 	mysqlConnection = module_mysql.createConnection(mysqlConnectionOptions);          
