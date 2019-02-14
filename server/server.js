@@ -291,16 +291,18 @@ function createMysqlDb(username, options, callback) {
 			https://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
 			
 			Also dont forget "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" when creating the tables!!?
+			
+			Need to use module_mysql.escapeId(dbName) for identifiers such as database / table / column name (can't be surrounded by ')
+			
 		*/
 		
 		db.query("CREATE DATABASE " + module_mysql.escapeId(dbName) + " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", function(err, rows, fields) {
-			// database name can not have 'name' quotes around it
 			if (err) {
 				console.error(err);
 				return callback(err);
 			}
 			
-			db.query("GRANT SELECT,UPDATE,DELETE,INSERT,ALTER,DROP,CREATE,INDEX,LOCK TABLES ON ?.* TO ?@'localhost'", [dbName, username], function(err, rows, fields) {
+			db.query("GRANT SELECT,UPDATE,DELETE,INSERT,ALTER,DROP,CREATE,INDEX,LOCK TABLES ON " + module_mysql.escapeId(dbName) + ".* TO ?@'localhost'", [username], function(err, rows, fields) {
 				if (err) {
 					console.error(err);
 					return callback(err);
