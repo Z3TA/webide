@@ -46,6 +46,11 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Use npm Shrink Wrap to force mysql2 to use my iconvlite ?!
+
+
+
+
 test for regression: 
 Login by pressing Enter
 Virtual keyboard (IE 11)

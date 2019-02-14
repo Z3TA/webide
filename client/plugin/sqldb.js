@@ -3,6 +3,7 @@
 	
 	var dbManagerWidget;
 	var menuItem;
+	var selectedDb = "information_schema";
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -43,6 +44,13 @@
 		createDbButton.onclick = createDatabase;
 		holder.appendChild(createDbButton);
 		
+		var queryButton = document.createElement("button");
+		queryButton.setAttribute("class", "button");
+		queryButton.innerText = "Execute selected text";
+		queryButton.title = "Runs text selected in the editor as a database query"
+		queryButton.onclick = runQuery;
+		holder.appendChild(queryButton);
+		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
 		cancelButton.innerText = "Cancel";
@@ -73,6 +81,18 @@
 		});
 	}
 	
+	function runQuery() {
+		
+		var selectedText = EDITOR.currentFile && EDITOR.currentFile.getSelectedText();
+		
+		if(!selectedText) return alertBox("No text is selected! You need to select some text!");
+		
+		CLIENT.cmd("mysql.query", {database: selectedDb, query: selectedText}, function(err, resp) {
+			
+		});
+		
+		
+	}
 	
 	
 })();

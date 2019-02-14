@@ -17,9 +17,8 @@ var API = require("./server_api.js");
 API.SSG = require("./plugin/static_site_generator/ssg-api.js");
 API.mercurial = require("./plugin/mercurial.js");
 API.spellcheck = require("./plugin/spellcheck/spellcheck.js");
-
 API.terminal = require("./plugin/terminal.js");
-
+API.mysql = require("./plugin/mysql.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -1553,7 +1552,7 @@ function createInspector(url) {
 		console.log("wsClose: code=" + code + " reason=" + reason);
 	});
 	
-	ws.on('error', function wsError(err) {
+	ws.on('error', function wsError(err, code, reason) {
 		console.log("wsError: code=" + code + " reason=" + reason);
 	});
 	
