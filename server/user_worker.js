@@ -1380,7 +1380,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				dev: true,
 				PATH: "/usr/bin:/bin"
 			},
-			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
 		};
 		
 		if(debugit) {
@@ -1399,7 +1399,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
 			if(USE_CHROOT) {
-			// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
+				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
 			var fs = require("fs");
 			var sockWatcher = fs.watch('/sock/', sockEvent);
 			var createdSockets = [];
