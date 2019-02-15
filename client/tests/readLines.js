@@ -82,7 +82,7 @@
 	});
 	
 	
-	EDITOR.addTest(function testReadLines5(callback) {
+	EDITOR.addTest(1, function testReadLines5(callback) {
 		var filePath = "/tmp/readLinesTest.txt";
 		
 		var tests = [
@@ -118,6 +118,10 @@
 			}
 		];
 		
+		// First make sure the /tmp/ folder exist
+		EDITOR.createPath("/tmp/", function(err, path) {
+			if(err) throw err;
+			
 		// Run the tests with different chunk sizes
 		run(tests, 1, function(err) {
 			if(err) throw err;
@@ -132,7 +136,7 @@
 				});
 			});
 		});
-		
+		});
 		
 		function run(originalTests, chunkSize, callback) {
 			

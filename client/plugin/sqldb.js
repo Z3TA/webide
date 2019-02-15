@@ -373,8 +373,7 @@ else {
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function testMysqlResultFromCreateTable(callback) {
-		
+	EDITOR.addTest(function testMysqlResultFromCreateTable(callback) {
 		EDITOR.openFile("testMysqlResultFromCreateTable", "", function(err, file) {
 			if(err) throw err;
 			
@@ -413,14 +412,11 @@ name: "Lord of the Rings",
 			
 			write(results, file);
 			
-			return callback(true);
+			EDITOR.closeFile(file);
 			
+			return callback(true);
+			});
 		});
-		
-		
-	});
-	
-	
 	
 	// TEST-CODE-END
 	
