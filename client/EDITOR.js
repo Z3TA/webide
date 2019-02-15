@@ -2359,7 +2359,7 @@ text = file;
 			
 		}
 		else if(canvas) {
-			console.log("Not restting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
+			console.log("Not resetting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
 		}
 		
 		if(EDITOR.currentFile) {
