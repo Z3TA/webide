@@ -5,6 +5,7 @@
 	var menuItem;
 	var selectedDb = "information_schema";
 	var queryFileId = 0;
+	var selectMysqlDb; // Select element
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -39,18 +40,33 @@
 		var holder = document.createElement("div");
 		holder.setAttribute("class", "wrapper sqldbManager");
 		
-		var createDbButton = document.createElement("button");
-		createDbButton.setAttribute("class", "button");
-		createDbButton.innerText = "Create new database ...";
-		createDbButton.onclick = createDatabase;
-		holder.appendChild(createDbButton);
+		var selectDbLabel = document.createElement("label");
+		selectDbLabel.setAttribute("for", "selectMysqlDb");
+		selectDbLabel.innerText = "Select database: ";
+		holder.appendChild(selectDbLabel);
+		
+		selectMysqlDb = document.createElement("select");
+		selectMysqlDb.setAttribute("id", "selectMysqlDb");
+		selectMysqlDb.onchange = changeDb;
+		holder.appendChild(selectMysqlDb);
+		
+		var informationSchemaOption = document.createElement("option");
+		informationSchemaOption.innerText = "information_schema";
+		selectMysqlDb.appendChild(informationSchemaOption);
 		
 		var queryButton = document.createElement("button");
 		queryButton.setAttribute("class", "button");
-		queryButton.innerText = "Execute selected text";
-		queryButton.title = "Runs text selected in the editor as a database query"
+		queryButton.innerText = "Run selected text as query";
+		queryButton.title = "Runs the selected text as a query on the currently selected database";
 		queryButton.onclick = runQuery;
 		holder.appendChild(queryButton);
+		
+		var createDbButton = document.createElement("button");
+		createDbButton.setAttribute("class", "button");
+		createDbButton.innerText = "Create New database ...";
+		createDbButton.onclick = createDatabase;
+		holder.appendChild(createDbButton);
+		
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
@@ -65,8 +81,34 @@
 			
 		*/
 		
+		getDatabases();
 		
 		return holder;
+	}
+	
+	function changeDb(e) {
+		console.log(e);
+		
+		selectedDb = selectMysqlDb.options[selectMysqlDb.selectedIndex].value;
+	}
+	
+	function getDatabases() {
+		CLIENT.cmd("mysql.query", {database: selectedDb, query: "SHOW DATABASES"}, function(err, resp) {
+			if(err) return alertBox(err.message);
+			
+			// Empty options
+			while (selectMysqlDb.options.length > 0) selectMysqlDb.remove(0);
+			
+			var results = resp.results;
+			var fields = resp.fields;
+			
+			// Fill options
+			for (var i=0; i<results.length; i++) {
+				var option = document.createElement("option");
+				option.innerText = results[i].Database;
+				selectMysqlDb.add(option);
+			}
+		});
 	}
 	
 	function createDatabase() {
@@ -209,6 +251,10 @@
 		
 		//file.writeLineBreak();
 		file.writeLine("Total: " + results.length + " records");
+		file.writeLineBreak();
+		file.writeLineBreak();
+		
+		EDITOR.renderNeeded();
 		
 	}
 	
