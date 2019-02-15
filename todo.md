@@ -46,10 +46,6 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Use npm Shrink Wrap to force mysql2 to use my iconvlite ?!
-
-
-
 
 test for regression: 
 Login by pressing Enter
@@ -59,49 +55,55 @@ fix regression (add test!):
 When selecting text from EOL to left, then selecting additional text to the left, the last character gets unselected!
 
 
+Hide the top-right menu button if the user manages to do a right-click/long-press !?
 
 
-mySQL database support
+When copying file path, and it's in the wwwpub folder, 
+ask if user wants to copy file path or public url !?
+or file link to open it in an editor session, using fork
 
+When auto completing folders, keep the file name - in save as.
+
+Clone repo widget, allow using ~ for home dir in clone into dir, 
+and make home dir the default!
+
+
+
+Mobile fixes:
 
 When offline, only show one row for the server-login plugin.
 
-Hide the menu button if the user manages to do a right-click/long-press !?
+spelling sugg/correctoon via menu doest work on mobile
+spellcheck progress bar only fills halfway.
 
+when menu is in full screen make min height 100%
+so it covers the whole screen.
+in horizontal split into boxes to cover
+also the width.
 
-Server encrypted storage for passwords and settings.
+when switching from horizontal to vertical
+then back to horizontal again,
+the virtual keyboard get split in half
 
-.jzeditStorage
-.jzeditPw
-.jzeditEncryptedStorage
+function to increase the text size. without zooming.
 
-Make a .jzedit folder!
-(need to use update.js to move the files to the correct place)
-
-.jzedit {storage, encryptedStorage, pw}
-
-threat model: Someone reads the password for the database login
-database pw needs to be supplied to nodejs script env both in prod and dev.
-
-The only thing someone who has hdd access doesn't know is the user pw.
-So the encryption key need to be derived from the user pw
-The key is then sent to the worker process.
-The worker process decrypts the encrypted storage.
-Then encrypt it every time something is changed.
-
-
-The encryption key/password is changed every time something is stored!?
+text gets blurry when scrolling.
 
 
 
 
-
-Database support
 
 
 
 todo
 ----
+
+Tutorials!
+
+
+
+
+---
 
 Go through all plugins and add functions to the virtual keyboard for discovery!!?
 using the context menu is slow. put functionality like save on the virtual keyboard!
@@ -112,11 +114,6 @@ Make it possible to run "npx create-react-app my-app" and "npm install -g polyme
 
 Database support: 
 Integrated tools for managing a database, and hosted db on webide.se
-But which database ?? It must support push!
-RethingDB !?
-
-Install MongoDB and Postgres on webide.se
-Try running wiki js
 
 Persistent storage! Database !? People need somewhere to host their data.
 
@@ -375,6 +372,14 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 What I'm thinking
 -----------------
 
+----
+
+Share documents, either private or publicly. Colaborate with others.
+Making it easier to share files.
+
+---
+Command discovery: When holding down Ctrl or Alt, you see all avaible commands,
+for example Ctrl+Om Ctrl+Shit+O etc with a description.
 ---
 
 Able to just leave the "console" and continue developing somwhere else, on another machine ...
@@ -3071,6 +3076,8 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+
+When pressing Ctrl+W it word wraps the code block, until matching }])
 
 markdown live preview
 
