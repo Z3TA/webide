@@ -14,18 +14,15 @@
 
 <h2>Creating a database</h2>
 
-<p>In the menu, click "Database manager", and then the button "Create new database".<br>
+<p>In the menu, click "Database manager", and then click <kbd>Create new database</kbd>.<br>
 You then get a dialog box where you type the name of the database.</p>
 
+<a name="connect"></a>
+<h2>Connecting to a database from Node.JS</h2>
 
-<h2>Connecting to a database</h2>
+<p>Use the <a href="https://www.npmjs.com/package/mysql2">mysql2</a> Node.JS module. See example code below:</p>
 
-<p>The editor uses the auth_socket mySQL plugin for authentication to the database,
-so you must use the <b>mysql2</b> Node.JS module with <i>authSwitchHandler</i> specified in connection options.<br>
-With the auth_socket mySQL plugin you can login securely to the mySQL server
-without using a password. Only you can login using your username!</p>
-
-<textarea>
+<textarea rows="8">
 var mysql = require('mysql2');
 var db = mysql.createConnection({
 	user: 'your_username',
@@ -35,12 +32,14 @@ var db = mysql.createConnection({
 });
 </textarea>
 
+<p><a href="#auth_socket">No password is required!</a></p>
 
-<h2>Making a database query</h2>
+
+<h2>Making a database query from Node.JS</h2>
 
 <p>Assuming you have already made a connection:</p>
 
-<textarea>
+<textarea rows="10">
 db.query("SELECT foo FROM bar", function(err, rows, fields) {
 	if (err) {
 		// Handle error
@@ -58,6 +57,30 @@ db.query("SELECT foo FROM bar", function(err, rows, fields) {
 const [rows,fields] = await db.query("SELECT foo FROM bar");
 </textarea>
 
+
+<h2>Running a database query from the Editor</h2>
+
+<ol>
+	<li>In the menu, click "Database manager".</li>
+	<li>Select which database to run the query on.</li>
+	<li>Write the SQL query somewhere, then select it.</li>
+	<li>Click <kbd>Run selected text as query</kbd> in the database manager widget.</li>
+</ol>
+
+<p>The result from the query will show up in a new file.<br>
+You can write additional SQL queries in that file, 
+and the result will be appended to the end of the file.</p>
+
+
+
+<a name="auth_socket"></a>
+<h2>Passwordless autentication (auth_socket)</h2>
+
+<p>The editor uses auth_socket mySQL plugin for authentication to the database
+to make it possible to login securely to the mySQL server without using a password.</p>
+
+<p>The only mysql module I have found that works with auth_socket is <a href="https://www.npmjs.com/package/mysql2">mysql2</a>.<br>
+And you have to specify <i>authSwitchHandler</i> in the connection options. <a href="#connect">See example above</a>.</p>
 
 </body>
 </html>
