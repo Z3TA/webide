@@ -124,20 +124,27 @@
 		});
 	}
 	
-	function runQuery() {
+	function runQuery(ev) {
+		
+		console.log("runQuery: event:");
+		console.log(ev);
+		
+		ev.target.blur(); // Prevent further key presses/runs
 		
 		var selectedText = EDITOR.currentFile && EDITOR.currentFile.getSelectedText();
 		
 		if(!selectedText) return alertBox("No text is selected! You need to select some text!");
 		
-		CLIENT.cmd("mysql.query", {database: selectedDb, query: selectedText}, function(err, resp) {
-			var results = resp.results;
-			var fields = resp.fields;
+		CLIENT.cmd("mysql.query", {database: selectedDb, query: selectedText}, function(queryError, resp) {
+			
+			var results = resp && resp.results;
+			var fields = resp && resp.fields;
 			
 			console.log("runQuery: results=" + JSON.stringify(results, null, 2));
 			console.log("runQuery: fields=" + JSON.stringify(fields, null, 2));
+			console.log("runQuery: queryError=" + (!!queryError ? queryError.message : queryError) );
 			
-			if(results.length == 0) return alertBox("The query returned no results!\n\n<pre>" + selectedText.trim() + "</pre>");
+			if(results && results.length == 0) return alertBox("The query returned no results!\n\n<pre>" + selectedText.trim() + "</pre>");
 			
 			// ## Show query results
 			if(queryFileId == 0) {
@@ -162,9 +169,9 @@
 			
 			var file = EDITOR.files[fileName];
 			
-			if(file) write(results, file);
+			if(file) showResult(file);
 			else {
-				EDITOR.openFile(fileName, "", function(err, file) {
+				EDITOR.openFile(fileName, "", function dbQueryResultFileOpened(err, file) {
 					if(err) throw err;
 					
 					file.parse = false; // Tell eager parsers not to parse it
@@ -174,105 +181,248 @@
 					
 					file.write(queryText);
 					file.writeLineBreak();
-					file.writeLineBreak();
 					
-					write(results, file);
+					showResult(file);
 				});
 			}
+			
+			function showResult(file) {
+				if(queryError) {
+					alertBox(queryError.message);
+					/*
+						file.writeLineBreak();
+						file.write(queryError.message);
+						file.writeLineBreak();
+					*/
+}
+				else write(results, file);
+			}
+			
 		});
 		}
 	
 	function write(results, file) {
 		// todo: Handle results larger then the editor can handle
 		
+		file.writeLineBreak();
+		file.writeLineBreak();
 		
-		// Figure out the field names
-		var keys = Object.keys(results[0]);
-		var keyLength = keys.length;
+		if(Array.isArray(results)) {
+			var keys = Object.keys(results[0]);
+		}
+else {
+			var keys = Object.keys(results);
+		}
 		
 		// Calculate optimal padding
 		
 		var maxColumns = EDITOR.view.visibleColumns;
-		var maxLength = [];
+		var maxLength = {};
+		var hasLineBreaks = {};
+		
 		for (var j=0; j<keys.length; j++) {
-			maxLength[keys[j]] = len(keys[j]);
+			//console.log("sqldb.js:write: keys[" + j + "]=" + keys[j]);
+			maxLength[ keys[j] ] = len(keys[j]);
+			//console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
 		}
 		
-		console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
+		//console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength) + " keys=" + JSON.stringify(keys));
 		
-		for (var i=0; i<results.length; i++) {
-			for (var j=0; j<keys.length; j++) {
-				console.log("sqldb.js:write: maxLength[" + keys[j] + "]=" + maxLength[keys[j]] + " len(results[" + i + "][" + keys[j] + "])=" + len(results[i][keys[j]]) );
-				maxLength[keys[j]] = Math.max( maxLength[keys[j]], len(results[i][keys[j]]) );
+		if(Array.isArray(results)) {
+			
+			var value = "";
+			var key = "";
+			for (var i=0; i<results.length; i++) {
+				for (var j=0; j<keys.length; j++) {
+					key = keys[j];
+					value = UTIL.toString(results[i][key]);
+					results[i][key] = value; // So we don't have to convert to string again at next run'
+					
+					console.log("sqldb.js:write: maxLength[" + key + "]=" + maxLength[key] + " len(results[" + i + "][" + keys[j] + "])=" + len(value) );
+					maxLength[key] = Math.max( maxLength[key], len(value) );
+					if( value.indexOf("\n") != -1 ) hasLineBreaks[ key ] = true;
+					
+				}
 			}
-		}
-		
-		console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
-		
-		var totalLength = 0;
-		for(var key in maxLength) totalLength += maxLength[key];
-		
-		console.log("sqldb.js:write: totalLength=" + totalLength + " maxColumns=" + maxColumns + " keys=" + JSON.stringify(keys) + " maxLength=" + JSON.stringify(maxLength));
-		
-		if(totalLength > maxColumns) {
+			
+			console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
+			
+			var totalLength = 0;
+			for(var key in maxLength) totalLength += maxLength[key];
+			
+			console.log("sqldb.js:write: totalLength=" + totalLength + " maxColumns=" + maxColumns + " keys=" + JSON.stringify(keys) + " maxLength=" + JSON.stringify(maxLength));
+			
+			
 			// Sort the keys so that the longest is last
+			// Or if it contains line breaks, it should also be last
 			
 			keys.sort(function(a, b) {
-				if(maxLength[a] > maxLength[b]) return 1;
-				else if(maxLength[b] > maxLength[a]) return -1;
+				if(hasLineBreaks[a] && !hasLineBreaks[b]) return 1;
+				else if(hasLineBreaks[b] && !hasLineBreaks[a]) return -1;
+				else {
+					// Sort by text length
+					if(maxLength[a] > maxLength[b]) return 1;
+					else if(maxLength[b] > maxLength[a]) return -1;
+					else return 0;
+				}
+			});
+			
+			
+			// Print key headings with padding
+			for (var j=0; j<keys.length; j++) {
+				file.write(keys[j]);
+				
+				if(j<keys.length-1) file.write(  padding( maxLength[keys[j]] - len(keys[j]) + 1 )  ); 
+			}
+			// Print a fat line
+			var line = "";
+			for (var i=0; i<totalLength+keys.length; i++) {
+				line += "=";
+			}
+			file.writeLine(line);
+			
+			file.writeLineBreak();
+			
+			// Print the data with padding
+			var lastPadding = totalLength - maxLength[keys[keys.length-1]] + keys.length-1;
+			for (var i=0; i<results.length; i++) {
+				for (var j=0; j<keys.length; j++) {
+					key = keys[j];
+					value = results[i][key]; // Already converted to string
+					
+					if(j == keys.length-1 && value.indexOf("\n") != -1) {
+						// The last item, we can split it 
+						var rows = value.split(/\r\n|\n/);
+						console.log("sqldb.js:write: rows.length=" + rows.length + " lastPadding=" + lastPadding);
+						for (var row=0; row<rows.length; row++) {
+							file.write( (row==0 ? "": padding(lastPadding)) + rows[row], true );
+						}
+					}
+					else {
+						console.log("sqldb.js:write: j=" + j + " keys.length=" + keys.length + " value.indexOf('\\n')=" + value.indexOf("\n") );
+						file.write( value );
+					}
+					
+					if(j<keys.length-1) file.write(  padding( maxLength[keys[j]] - len(results[i][keys[j]]) + 1 )  );
+					
+				}
+				file.writeLineBreak();
+			}
+			
+			//file.writeLineBreak();
+			file.writeLine("Total: " + results.length + " records");
+		}
+		else {
+			/*
+				If results is not an array, print the keys
+				
+				Place the longest result last
+			*/
+			
+			var longestKeyLength = 0;
+			for (var j=0; j<keys.length; j++) {
+				if( len(keys[j]) > longestKeyLength) longestKeyLength = len(keys[j]);
+			}
+			
+			keys.sort(function(a, b) {
+				if( len(results[a]) > len(results[b]) ) return 1;
+				else if( len(results[b]) > len(results[a]) ) return -1;
 				else return 0;
 			});
-		}
-		
-		// Print key headings with padding
-		for (var j=0; j<keys.length; j++) {
-			file.write(keys[j]);
 			
-			if(j<keys.length-1) file.write(  padding( maxLength[keys[j]] - len(keys[j]) + 1 )  ); 
-		}
-		// Print a fat line
-		var line = "";
-		for (var i=0; i<totalLength+keys.length; i++) {
-			line += "=";
-		}
-		file.writeLine(line);
-		
-		file.writeLineBreak();
-		
-		// Print the data with padding
-		for (var i=0; i<results.length; i++) {
 			for (var j=0; j<keys.length; j++) {
-				file.write( results[i][keys[j]] );
+				file.write( keys[j] + ": " );
+				file.write(  padding( longestKeyLength - len(keys[j]) )  );
 				
-				if(j<keys.length-1) file.write(  padding( maxLength[keys[j]] - len(results[i][keys[j]]) + 1 )  );
+				file.write(results[keys[j]]);
+				file.writeLineBreak();
 			}
-			file.writeLineBreak();
+			
 		}
 		
-		//file.writeLineBreak();
-		file.writeLine("Total: " + results.length + " records");
+		
 		file.writeLineBreak();
 		file.writeLineBreak();
 		
 		EDITOR.renderNeeded();
-		
+		EDITOR.showFile(file);
 	}
 	
+	
+	
 	function padding(n) {
-		var str = "";
-		for (var i=0; i<n; i++) {
-			str += " ";
-		}
-		return str;
+		var space = " ";
+		return space.repeat(n);
 	}
 	
 	function len(obj) {
+		
+		//console.log("len: ", obj);
+		
 		if(typeof obj == "string") return obj.length;
-		else if(typeof obj.toString == "function") return obj.toString().length;
-		else if(obj == null) return String(obj).length;
-		else throw new Error("Unable to get length of obj=" + JSON.stringify(obj));
+		
+		var str = UTIL.toString(obj);
+		
+		//console.log("len: str=" + str);
+		
+		//console.log("len: returning " + str.length);
+		
+		return str.length;
 	}
 	
+	
+	// TEST-CODE-START
+	
+	EDITOR.addTest(1, function testMysqlResultFromCreateTable(callback) {
+		
+		EDITOR.openFile("testMysqlResultFromCreateTable", "", function(err, file) {
+			if(err) throw err;
+			
+			var results= {
+				"fieldCount": 0,
+				"affectedRows": 0,
+				"insertId": 0,
+				"info": "",
+				"serverStatus": 2,
+				"warningStatus": 0
+			};
+			
+			write(results, file);
+			
+			var results = [
+				{name: "Jon Doe", age: 35},
+				{name: "Åke Åkare", age: 61},
+				{name: "Magda Marit", age: 31},
+				{name: "Peeter Potatis", age: 28},
+				{name: "My Musk", age: 42}
+			];
+			
+write(results, file);
+			
+			var results = [
+				{
+name: "Lord of the Rings", 
+					text: "Gandalf: A wizard is never late, Frodo Baggins. ...\nFrodo Baggins: I wish the ring had never come to me. ...\nSauron: You can not hide, I see you! ...\nGandalf: YOU SHALL NOT PASS! ...\nFrodo Baggins: Mordor! ...\nBilbo Baggins: No, thank you!"
+				},
+				
+				{
+					name: "Short story",
+					text: "Det var en gång en gång som var krattad"
+				}
+			];
+			
+			write(results, file);
+			
+			return callback(true);
+			
+		});
+		
+		
+	});
+	
+	
+	
+	// TEST-CODE-END
 	
 })();
 

@@ -2002,6 +2002,30 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			else if(str.length != 1) throw new Error("UTIL.charCode: str=" + str + " length=" + str.length);
 			else return str.charCodeAt(0);
 		}
+	},
+	
+	toString: function objToString(obj, level) {
+		// Tries to convert the obj to a string
+		
+		if(level == undefined) level = 1;
+		
+		if(typeof obj == "string") return obj;
+		else if(typeof obj == "number") return obj.toString();
+		else if(obj == null || typeof obj == "boolean") return String(obj);
+		else if(typeof obj.toString == "function") return obj.toString();
+		else {
+			try {
+				var str = JSON.stringify(obj, null, 2);
+			}
+			catch(err) {
+				// Probably circular
+				var str = "{";
+				for(var key in obj) {
+					str = str + "\n" + " ".repeat(" ", level*2) + key + ": " + UTIL.toString(obj[key]); // Recursive
+				}
+				str = str + "\n" + " ".repeat(" ", (level-1)*2) + "}";
+			}
+		}
 	}
 	
 	
