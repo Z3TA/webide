@@ -374,11 +374,14 @@ DROP USER somelocaluser@localhost;
 Make it so root can login without a password:
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 
-PS. You can then only login to mySQL using the system root user and via the unix socket!
+PS. You might then only be able to login to mySQL using the system root user and via the unix socket!
 sudo -u root mysql --socket /var/run/mysqld/mysqld.sock
 
-
-
+Delete iconv-lite in mysql2 Node.JS module:
+iconv-lite lazy loads some files, which will not work once the editor have chrooted and changed user id,
+so we need to use the editors patched version of iconv-lite.
+Simply delete node_modules/mysql2/node_modules/iconv-lite
+(you might have to do this every time you have run npm, awaiting a better fix)
 
 
 
