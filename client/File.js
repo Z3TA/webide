@@ -818,6 +818,11 @@ file.mode = "text";
 	File.prototype.write = function(text, addLineBreak) {
 		// Writes text at EOF (faster then insertText)
 		
+		if(typeof text != "string") {
+			// Try to convert it to a string
+			if(text && text.toString) text = text.toString();
+		}
+		
 		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
 		if(text.length == 0) {

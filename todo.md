@@ -55,7 +55,8 @@ test for regression:
 Login by pressing Enter
 Virtual keyboard (IE 11)
 
-
+fix regression (add test!):
+When selecting text from EOL to left, then selecting additional text to the left, the last character gets unselected!
 
 
 

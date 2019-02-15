@@ -3,6 +3,10 @@
 # Exit if anything fails
 set -e
 
+# Delete dependency of dependency to for dependencies to use our patched dependency
+rm -rf node_modules/mysql2/node_modules/iconv-lite
+
+
 node semver.js
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
