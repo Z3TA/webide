@@ -61,6 +61,12 @@
 		queryButton.onclick = runQuery;
 		holder.appendChild(queryButton);
 		
+		var createTableButton = document.createElement("button");
+		createTableButton.setAttribute("class", "button");
+		createTableButton.innerText = "Create Table ...";
+		createTableButton.onclick = createTable;
+		holder.appendChild(createTableButton);
+		
 		var createDbButton = document.createElement("button");
 		createDbButton.setAttribute("class", "button");
 		createDbButton.innerText = "Create New database ...";
@@ -133,6 +139,30 @@ option.setAttribute("selected", "selected");
 		});
 	}
 	
+	function createTable() {
+		openQueryFile(function(err, file) {
+			if(err) throw err;
+			
+			file.writeLineBreak();
+			file.writeLineBreak();
+			
+			var selStart = file.caret.index;
+			
+			file.writeLine("CREATE TABLE foo (");
+			file.writeLine("bar VARCHAR(20) DEFAULT NULL");
+			file.writeLine(")");
+			
+			var selEnd = file.caret.index;
+			
+			file.writeLineBreak();
+			file.writeLineBreak();
+			
+			var selectRange = file.createTextRange(selStart, selEnd);
+			file.select(selectRange);
+			
+		});
+	}
+	
 	function runQuery(ev) {
 		
 		console.log("runQuery: event:");
@@ -155,47 +185,12 @@ option.setAttribute("selected", "selected");
 			
 			if(results && results.length == 0) return alertBox("The query returned no results!\n\n<pre>" + selectedText.trim() + "</pre>");
 			
-			// ## Show query results
-			if(queryFileId == 0) {
-				/*
-					This is the first time we run db queries in this session
-					We do not want to add stuff to already opened query results.
-				*/
+			// Show the query commented out
+			var queryText = "# " + selectedText.trim().replace(/(\r\n|\n)/, "$1# ") + "\n\n";
+			
+			openQueryFile(queryText, function showResult(err, file) {
+				if(err) return alertBox(err.message);
 				
-				var reQueryFile = /db\-queries(\d*)$/
-				
-				for(var path in EDITOR.files) {
-					var fileName = UTIL.getFilenameFromPath(path);
-					var match = fileName.match(reQueryFile);
-					if(match && match.length > 1) {
-						var id = parseInt(match[1]);
-						if(id >= queryFileId) queryFileId = id+1;
-					}
-				}
-			}
-			
-			var fileName = "db-queries" + queryFileId;
-			
-			var file = EDITOR.files[fileName];
-			
-			if(file) showResult(file);
-			else {
-				EDITOR.openFile(fileName, "", function dbQueryResultFileOpened(err, file) {
-					if(err) throw err;
-					
-					file.parse = false; // Tell eager parsers not to parse it
-					
-					// Show the query commented out
-					var queryText = "# " + selectedText.trim().replace(/(\r\n|\n)/, "$1# ");
-					
-					file.write(queryText);
-					file.writeLineBreak();
-					
-					showResult(file);
-				});
-			}
-			
-			function showResult(file) {
 				if(queryError) {
 					alertBox(queryError.message);
 					/*
@@ -205,10 +200,63 @@ option.setAttribute("selected", "selected");
 					*/
 }
 				else write(results, file);
-			}
+			
+			});
 			
 		});
 		}
+	
+	function openQueryFile(initialText, callback) {
+		/*
+			Opens a file for writing and showing SQL queries
+			
+			note: initialText is only appended if a new file is opened!
+			
+		*/
+		
+		if(typeof initialText == "function" && callback == undefined) {
+			callback = initialText;
+			initialText = undefined;
+		}
+		
+		if(queryFileId == 0) {
+			/*
+				This is the first time we run db queries in this session
+				We do not want to add stuff to already opened query results.
+			*/
+			
+			var reQueryFile = /db\-queries(\d*)$/
+			
+			for(var path in EDITOR.files) {
+				var fileName = UTIL.getFilenameFromPath(path);
+				var match = fileName.match(reQueryFile);
+				if(match && match.length > 1) {
+					var id = parseInt(match[1]);
+					if(id >= queryFileId) queryFileId = id+1;
+				}
+			}
+		}
+		
+		var fileName = "db-queries" + queryFileId;
+		
+		var file = EDITOR.files[fileName];
+		
+		if(initialText == undefined) initialText = "";
+		
+		if(file) {
+callback(null, file);
+		}
+		else {
+			
+			EDITOR.openFile(fileName, initialText, function dbQueryResultFileOpened(err, file) {
+				if(err) return callback(err);
+				
+				file.parse = false; // Tell eager parsers not to parse it
+				
+				callback(null, file);
+			});
+		}
+	}
 	
 	function write(results, file) {
 		// todo: Handle results larger then the editor can handle
