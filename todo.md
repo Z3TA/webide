@@ -46,7 +46,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-
+Write tests for cloning from Github, both via Git and HTTPS!
 
 Unable to clone from Github using both Git and HTTPS from cloud IDE!
 
