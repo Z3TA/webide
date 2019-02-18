@@ -46,13 +46,27 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-chrome mobile doesnt support many rows ex. the functipn list.
+
+
+Unable to clone from Github using both Git and HTTPS from cloud IDE!
+
+
+Unable to clone from a git repo when running on desktop!
+https://github.com/Z3TA/survey-example.git
+
+Writing a guide on how to make a survey
+
+
+
+
+chrome mobile doesnt support many rows in select boxes ex. the functipn list.
+If screen width is less then 500px? move the function list to the header and make it one item big !?
+
+
 
 chrome mobile shows an annoying blue box when holding down on a file tab.
 
 
-need an easier way to create db tables
-then typing SQL
 
 
 test for regression: 
@@ -64,6 +78,7 @@ When selecting text from EOL to left, then selecting additional text to the left
 
 
 Hide the top-right menu button if the user manages to do a right-click/long-press !?
+Firefox mobile browser doesn't seem to support long press !?
 
 
 When copying file path, and it's in the wwwpub folder, 
@@ -119,27 +134,9 @@ using the context menu is slow. put functionality like save on the virtual keybo
 Make it possible to run "npx create-react-app my-app" and "npm install -g polymer-cli" !?
 
 ----
-
-Database support: 
-Integrated tools for managing a database, and hosted db on webide.se
-
-Persistent storage! Database !? People need somewhere to host their data.
-
----
-
-
 Detect Edge browser.
 Edge also doesn't support subpixel antialias!
 So don't user Consolas in Edge.
-
-
-regression: open/edit no longer works in the terminal on prod!!
-
-
-When running "npm start" but there are no browsers to start, also stop the server!
-
-
----
 
 Test the editor in Edge browser!
 Error: Permission denied
@@ -148,6 +145,12 @@ Error: Permission denied
    at WysiwygEditor (https://webide.se/:1883:6537)
 
 ---
+
+regression: open/edit no longer works in the terminal on prod!!
+
+
+When running "npm start" but there are no browsers to start, also stop the server!
+
 
 Support for let and const in the js parser
 

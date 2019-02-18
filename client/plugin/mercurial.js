@@ -2838,9 +2838,10 @@ if(err) return alertBox(err.message);
 		
 		EDITOR.getSSHPublicKey(function(err, pubkey) {
 			if(err) return alertBox(err.message);
-			EDITOR.putIntoClipboard(pubkey, function(err) {
+			EDITOR.putIntoClipboard(pubkey, function(err, manual) {
 				if(err) throw err;
 				console.log("Public key copied to clipboard!");
+				if(!manual) alertBox("Public key copied to clipboard!");
 			});
 		});
 		

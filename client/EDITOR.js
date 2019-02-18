@@ -602,7 +602,7 @@ EDITOR.bindKey(b);
 		}
 		navigator.clipboard.writeText(text).then(function() {
 			console.log('Async: Copying to clipboard was successful!');
-			if(callback) callback(null);
+			if(callback) callback(null, false);
 		}, function(err) {
 			console.error('Async: Could not copy text: ', err);
 			fallbackCopyTextToClipboard(text);
@@ -625,7 +625,7 @@ EDITOR.bindKey(b);
 			document.body.removeChild(textArea);
 			
 			if(successful) {
-				if(callback) callback(null);
+				if(callback) callback(null, false);
 			}
 			else {
 				
@@ -667,7 +667,7 @@ usePseudoClipboard = false;
 			//window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 			
 			promptBox("Copy to clipboard: Ctrl+C, Enter", text, 0, function() {
-				if(callback) callback(null);
+				if(callback) callback(null, true);
 			});
 			
 			return false;
@@ -675,7 +675,7 @@ usePseudoClipboard = false;
 		
 		function pseudo() {
 			EDITOR.pseudoClipboard = text;
-			if(callback) callback(null);
+			if(callback) callback(null, false);
 			return false;
 		}
 		
