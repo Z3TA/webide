@@ -46,6 +46,16 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+chrome mobile doesnt support many rows ex. the functipn list.
+
+chrome mobile shows an annoying blue box when holding down on a file tab.
+
+
+new database doesn't show up in list after creation.
+
+need an easier way to create db tables
+then typing SQL
+
 
 test for regression: 
 Login by pressing Enter
@@ -3075,6 +3085,18 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+
+---
+
+Tutorial mode inspired by scrimba.com
+Lets you record while you type,
+then when someone plays back, the code is re-written in collaboration mode,
+so that you can write at the same time while listening to the instructions!!
+
+Should also be possible to pause, go back and retake,
+
+
+---
 
 
 When pressing Ctrl+W it word wraps the code block, until matching }])

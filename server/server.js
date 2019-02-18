@@ -2000,7 +2000,23 @@ function checkMounts(options, checkMountsCallback) {
 				}
 				else throw err;
 			}
-			else if(DEBUG_CHROOT) {
+			
+			// Make sure a mysql user exist
+			mysqlConnection.query("SELECT user FROM user WHERE user = ? AND host = 'localhost'", [username], function(err, rows, fields) {
+				if(err) throw err;
+				
+				if(rows.length == 0) {
+					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
+						if(err) throw err;
+						
+						mountMysqlClient();
+					});
+				}
+				else mountMysqlClient();
+			});
+			
+			function mountMysqlClient() {
+				if(DEBUG_CHROOT) {
 				// /usr/bin will be mounted anyway
 				mysqlCheck = true;
 				checkMountsReadyMaybe();
@@ -2014,6 +2030,7 @@ function checkMounts(options, checkMountsCallback) {
 					checkMountsReadyMaybe();
 					return;
 				});
+			}
 			}
 		});
 		
