@@ -51,8 +51,6 @@ chrome mobile doesnt support many rows ex. the functipn list.
 chrome mobile shows an annoying blue box when holding down on a file tab.
 
 
-new database doesn't show up in list after creation.
-
 need an easier way to create db tables
 then typing SQL
 

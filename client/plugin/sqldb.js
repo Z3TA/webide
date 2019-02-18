@@ -92,7 +92,7 @@
 		selectedDb = selectMysqlDb.options[selectMysqlDb.selectedIndex].value;
 	}
 	
-	function getDatabases() {
+	function getDatabases(selectedName) {
 		CLIENT.cmd("mysql.query", {database: selectedDb, query: "SHOW DATABASES"}, function(err, resp) {
 			if(err) return alertBox(err.message);
 			
@@ -103,9 +103,16 @@
 			var fields = resp.fields;
 			
 			// Fill options
-			for (var i=0; i<results.length; i++) {
+			for (var i=0, name=""; i<results.length; i++) {
+				name = results[i].Database
 				var option = document.createElement("option");
-				option.innerText = results[i].Database;
+				option.innerText = name;
+				
+				if(name == selectedName) {
+option.setAttribute("selected", "selected");
+					selectedDb = selectedName;
+				}
+				
 				selectMysqlDb.add(option);
 			}
 		});
@@ -116,10 +123,12 @@
 			console.log("createDatabase: dbName=" + dbName);
 			CLIENT.cmd("createMysqlDb", {name: dbName}, function(err) {
 				if(err) {
-					if(err.code == "ER_DB_CREATE_EXISTS") alertBox("The name " + dbName + " is already in use. Try another name or prepend it (" + EDITOR.user + "_" + dbName + ")");
+					if(err.code == "ER_DB_CREATE_EXISTS") alertBox("The name " + dbName + " is already taken. Try another name or prepend it (" + EDITOR.user + "_" + dbName + ")");
 					else alertBox("Unable to create database " + dbName + ": " + err.message + "\ncode=" + err.code);
 				}
 				else alertBox("Successfully created database " + dbName + " !");
+				
+				getDatabases(dbName);
 			});
 		});
 	}
