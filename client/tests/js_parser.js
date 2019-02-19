@@ -386,3 +386,22 @@ EDITOR.addTest(function singleStatementContext(callback) {
 		
 	});
 });
+
+
+EDITOR.addTest(1, function nameOfArrowFunction(callback) {
+	EDITOR.openFile("singleStatementContext.js", 'window.onload = function() {\n' +
+	'for (var i=0; i<4; i++) {\n' +
+	'var b = document.createElement("button");\n' +
+	'b.onclick = e => alert(i);\n'+
+	'body.appendChild(b);\n' +
+	'}\n', function(err, file) {
+		
+		// Will crash right away: Uncaught TypeError: Cannot read property 'variables' of undefined
+		
+		
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+});

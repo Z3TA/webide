@@ -82,7 +82,7 @@
 	});
 	
 	
-	EDITOR.addTest(1, function testReadLines5(callback) {
+	EDITOR.addTest(function testReadLines5(callback) {
 		var filePath = "/tmp/readLinesTest.txt";
 		
 		var tests = [

@@ -2536,7 +2536,7 @@
 					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
 						// This is a variable (method) for a function: foo.bar.baz = () => {}
 						// Change the variable type to Method
-						variable = myFunction[subFunctionDepth-1].variables[properties[0]];
+						variable = myFunction[subFunctionDepth].variables[properties[0]];
 						startIndex = 1;
 						variable = traverseVariableTree(properties, variable, startIndex);
 						
