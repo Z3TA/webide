@@ -49,12 +49,6 @@ What I'm working on
 false posetive: if(functionName.indexOf("=") != -1) functionName = lastVariableName;
 
 
-
-fixing name issue with arrow functions
-
-indent after (left parentheses and line-break 
-until closing right parentheses)
-
 Write tests for cloning from Github, both via Git and HTTPS!
 
 Unable to clone from Github using both Git and HTTPS from cloud IDE!

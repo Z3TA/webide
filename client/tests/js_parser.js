@@ -388,8 +388,8 @@ EDITOR.addTest(function singleStatementContext(callback) {
 });
 
 
-EDITOR.addTest(1, function nameOfArrowFunction(callback) {
-	EDITOR.openFile("singleStatementContext.js", 'window.onload = function() {\n' +
+EDITOR.addTest(function nameOfArrowFunction(callback) {
+	EDITOR.openFile("nameOfArrowFunction.js", 'window.onload = function() {\n' +
 	'for (var i=0; i<4; i++) {\n' +
 	'var b = document.createElement("button");\n' +
 	'b.onclick = e => alert(i);\n'+
@@ -428,3 +428,31 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 	});
 });
 
+
+
+/*
+	
+	### parentheses Indenting
+	Opinioned opinion: There should not be line breaks inside parentheses
+	
+	Reasons to have line breaks in parentheses:
+	* Doesn't fit arbitrary line length? (Then you probably don't want to add extra indentation !?)
+	
+	
+	EDITOR.addTest(1, function parenthesesIndenting(callback) {
+	EDITOR.openFile("parenthesesIndenting.js", 'console.log("foo" +\n' +
+	'"bar" + \n' +
+	'"baz");\n' +
+	'\n' + 
+	'console.log(\n'+
+	'"cat"\n' +
+	'"dog"\n' +
+	'"fish"\n'
+	');', function(err, file) {
+
+	EDITOR.closeFile(file.path);
+	callback(true);
+	
+});
+	});
+*/
