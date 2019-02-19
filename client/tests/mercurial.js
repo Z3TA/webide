@@ -138,5 +138,59 @@ function testClone() {
 	});
 	
 	
+	EDITOR.addTest(1, function cloneFromGithub(callback) {
+		/*
+			Cloning from Github has stopped working 3-4 times already so we need an automatic test
+			Make sure the test user has a SSH key registered on Github!
+			
+			Of course it works in dev!
+			Is it because we have more then one user/ssh-key per IP !?
+			
+		*/
+		var testFolderParent = "/cloneFromGithub/";
+		var testCounter = 0;
+		var cloneSuccess = 0;
+		
+		testClone("https://github.com/Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "http/")); // Using HTTP
+		testClone("git@github.com:Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "ssh/")); // Using Git/SSH 
+		
+		function testClone(repository, testFolder) {
+			if(++testCounter > 3) throw new Error("Clone test retry more 3 times!");
+			
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, function(err, json) {
+				if(err && err.code == "EXIST") {
+					// The folder might already exist from and earlier test that failed.
+					cleanup(function(err) {
+						if(err) throw err;
+						testClone(repository);
+					});
+				}
+				else if(err) {
+					throw err
+				}
+				else {
+					
+					if(++cloneSuccess == 2) {
+						cleanup(function(err) {
+							if(err) throw err;
+							callback(true);
+						});
+					}
+					
+				}
+			});
+		}
+		
+		function cleanup(cleanupCallback) {
+			CLIENT.cmd("deleteDirectory", {directory: testFolderParent, recursive: true}, function(err, json) {
+				if(err) throw err
+				else {
+					cleanupCallback();
+				}
+			});
+		}
+		
+	});
+	
 		
 })();
