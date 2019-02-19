@@ -394,6 +394,7 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 	'var b = document.createElement("button");\n' +
 	'b.onclick = e => alert(i);\n'+
 	'body.appendChild(b);\n' +
+	'}\n' +
 	'}\n', function(err, file) {
 		
 		// Will crash right away: Uncaught TypeError: Cannot read property 'variables' of undefined
@@ -407,8 +408,16 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 		// Make sure the arguments are current (argument was i)
 		UTIL.assert(file.parsed.functions[0].subFunctions[0].arguments, "e");
 		
-		EDITOR.closeFile(file.path);
-		callback(true);
+		
+		file.moveCaret(0, 6);
+		EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+		//EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+		
+		// Uncaught Error: Expected func.name=b.onclick start=113 character=> to be a {
+		
+		
+		//EDITOR.closeFile(file.path);
+		//callback(true);
 		
 	});
 });

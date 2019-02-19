@@ -850,6 +850,8 @@
 		for(var i=0; i<functions.length; i++) {
 			func = functions[i];
 			
+			if(func.arrowFunction) continue;
+			
 			// Make sure the function starts with an { and ends with an }
 			if(file.text.charAt(func.start) != "{") {
 				file.debugGrid();
