@@ -411,10 +411,10 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 		
 		file.moveCaret(0, 6);
 		EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-		//EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-		
 		// Uncaught Error: Expected func.name=b.onclick start=113 character=> to be a {
 		
+		// Variable b should by type Element
+		UTIL.assert(file.parsed.functions[0].variables["b"].type, "Element");
 		
 		//EDITOR.closeFile(file.path);
 		//callback(true);

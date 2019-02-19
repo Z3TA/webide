@@ -1210,6 +1210,9 @@
 			else if( !isNaN(parseFloat(rightSide)) && isFinite(rightSide) ) {
 				type = "Number";
 			}
+			else if(rightSide.indexOf("createElement") != -1) {
+				type = "Element";
+			}
 			else {
 				
 				var par = rightSide.indexOf("(");
