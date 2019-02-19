@@ -5529,6 +5529,17 @@ var word = "";
 		}
 		else if(options.errorEvent) {
 			var errorStack = options.errorEvent.error.stack;
+			
+			if(!errorStack) {
+				console.log("options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
+				//Firefox browser wont give access to the error event, because it's in another window !?
+				
+				console.log("options.errorEvent.filename=" + options.errorEvent.filename);
+				// It seems we can still extract some data out of it! ...
+				
+				errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
+			}
+			
 		}
 		else {
 			var errorStack = UTIL.getStack(message);
