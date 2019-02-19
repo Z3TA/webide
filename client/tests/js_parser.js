@@ -404,6 +404,9 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 		UTIL.assert(file.parsed.functions[0].name, "window.onload");
 		UTIL.assert(file.parsed.functions[0].subFunctions[0].name, "b.onclick");
 		
+		// Make sure the arguments are current (argument was i)
+		UTIL.assert(file.parsed.functions[0].subFunctions[0].arguments, "e");
+		
 		EDITOR.closeFile(file.path);
 		callback(true);
 		

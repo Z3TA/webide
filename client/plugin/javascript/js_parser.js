@@ -2516,7 +2516,10 @@
 			
 			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments + " subFunctionDepth=" + subFunctionDepth + " lastVariableName=" + lastVariableName);
 			
-			if(functionName.indexOf("=") != -1) functionName = lastVariableName;
+			if(functionName.indexOf("=") != -1) {
+				functionArguments = functionName.slice(functionName.indexOf("=")+1).trim();
+				functionName = lastVariableName;
+			}
 			
 			newFunc = new Func(functionName, functionArguments, arrowFunctionStart, lineNumber+parseStartRow);
 			
