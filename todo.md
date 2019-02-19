@@ -46,6 +46,10 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+false posetive: if(functionName.indexOf("=") != -1) functionName = lastVariableName;
+
+
+
 fixing name issue with arrow functions
 
 indent after (left parentheses and line-break 

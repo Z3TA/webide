@@ -398,10 +398,15 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 		
 		// Will crash right away: Uncaught TypeError: Cannot read property 'variables' of undefined
 		
+		// Also make sure we get the proper name (function name was "b.onclick = e")
+		console.log("Functions: " + JSON.stringify(file.parsed.functions, null, 2));
 		
+		UTIL.assert(file.parsed.functions[0].name, "window.onload");
+		UTIL.assert(file.parsed.functions[0].subFunctions[0].name, "b.onclick");
 		
 		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
+
