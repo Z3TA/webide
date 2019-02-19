@@ -416,8 +416,14 @@ EDITOR.addTest(1, function nameOfArrowFunction(callback) {
 		// Variable b should by type Element
 		UTIL.assert(file.parsed.functions[0].variables["b"].type, "Element");
 		
-		//EDITOR.closeFile(file.path);
-		//callback(true);
+		// There should be no ("button") variable
+		for(var variable in file.parsed.functions[0].variables) {
+			if(variable != "b") throw new Error("Unexpected variable: " + variable + " type=" + file.parsed.functions[0].variables[variable].type);
+		}
+		
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
 		
 	});
 });

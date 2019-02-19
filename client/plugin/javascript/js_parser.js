@@ -1406,7 +1406,7 @@
 		
 		
 		function traverseVariableTree(properties, variable, startindex) {
-			// Go though a object dot notation (foo.bar.baz) add keys if they do not exist and return the final variable
+			// Go through a object dot notation (foo.bar.baz) - add keys if they do not exist, and return the final variable
 			for(var i=startindex; i<properties.length; i++) {
 				if(!Object.hasOwnProperty.call(variable.keys, properties[i])) {
 					variable.keys[properties[i]] = new Variable();
@@ -2685,11 +2685,18 @@
 						word = "";
 						return;
 					}
+					else if(word.charAt(0) == "(" && word.charAt(word.length-1) == ")") {
+						// We got parameters for function call/declaration, or for/while/do loops
+						console.log("In parentheses: word=" + word + " lastWord=" + lastWord);
+						//lastWord = lastWord + word;
+						word = "";
+						return;
+					}
 					else {
 						
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
@@ -2719,7 +2726,7 @@
 								
 								// We are inside a var declaration!
 								
-								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "");
+								console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "");
 								
 								
 								if(!insideCodeBlock) {
@@ -2748,7 +2755,7 @@
 										
 										if(!Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, rootWord)) {
 											myFunction[subFunctionDepth].variables[word] = new Variable("");
-											//console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
+											console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 										}
 										else {
 											
