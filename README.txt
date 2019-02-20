@@ -533,8 +533,11 @@ How to install:
 ````
 sudo apt-get install python-pip
 sudo pip install --upgrade pip
-sudo pip install hg-git
+sudo /usr/local/bin/pip install hg-git
 ````
+
+You might need to reboot the server to clear mounted libs
+
 
 Problems running apt 
 --------------------

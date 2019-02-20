@@ -46,21 +46,23 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-false posetive: if(functionName.indexOf("=") != -1) functionName = lastVariableName;
+Maybe upgrading to the new version of Ubuntu will fix it !?
 
+Cloning from HTTPS stopped working when CHROOTED after upgrading hg-git!
 
-Write tests for cloning from Github, both via Git and HTTPS!
+Made cloning from git using SSH work after specifying HOME in env.PATH
+
 
 Unable to clone from Github using both Git and HTTPS from cloud IDE!
-
 
 Unable to clone from a git repo when running on desktop!
 https://github.com/Z3TA/survey-example.git
 
+
 Writing a guide on how to make a survey
 
 
-
+false posetive: if(functionName.indexOf("=") != -1) functionName = lastVariableName;
 
 chrome mobile doesnt support many rows in select boxes ex. the functipn list.
 If screen width is less then 500px? move the function list to the header and make it one item big !?

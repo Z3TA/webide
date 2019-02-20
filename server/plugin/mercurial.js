@@ -39,6 +39,8 @@ var execFileOptions = {
 	}
 }
 
+// PATH: "/usr/bin:/bin"
+
 MERCURIAL.clone = function hgclone(user, json, callback) {
 	// Clone a remote repository
 	
@@ -190,16 +192,22 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 				
 				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 				// Warning: Permanently added 'github.com,192.30.253.113' (RSA) to the list of known hosts.
+				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 				
 				var reAddedHost1 = /Warning: Permanently added (.*) \(RSA\) to the list of known hosts\./;
 				var reAddedHost2 = /Warning: Permanently added the RSA host key for IP address (.*) to the list of known hosts\./;
 				
 				var reNoSuchFileOrDirectory = /: No such file or directory$/;
 				
-				stderr.replace(reAddedHost1, "");
-				stderr.replace(reAddedHost2, "");
+				stderr = stderr.replace(reAddedHost1, "");
+				stderr = stderr.replace(reAddedHost2, "");
 				
 				stderr = stderr.trim();
+				
+				if(stderr.match(/unknown exception encountered, please report/)) {
+					stderr = "Failed to clone " + remote + " due to a bug in Mercurial/hg-git. ";
+					if(remote.indexOf("http") == 0) stderr = stderr + "Try using SSH instead of HTTP!";
+				}
 				
 				console.log("hg clone final stderr=" + stderr);
 				

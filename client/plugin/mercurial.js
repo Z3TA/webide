@@ -1153,7 +1153,7 @@ updateCommitFileSelect();
 			if(localDir.value == defaultRepo.into) {
 				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
 if(matchRepoName && matchRepoName[1]) {
-localDir.value = "/repo/" + matchRepoName[1] + "/";
+localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";
 }
 			}
 		}
