@@ -34,7 +34,7 @@ var MERCURIAL = {};
 
 var execFileOptions = {
 	env: {
-		HOME: "/",
+		HOME: process.env.HOME || "/",
 		HGENCODING: "utf-8"
 	}
 }
