@@ -9,6 +9,7 @@
 "use strict";
 
 function Dialog(msg, icon, dialogDelay) {
+	var dialog = this;
 	
 	console.log(UTIL.getStack("Creating dialog: msg=" + msg));
 	
@@ -46,9 +47,9 @@ function Dialog(msg, icon, dialogDelay) {
 	}
 	
 	
-	this.div = document.createElement("div");
+	dialog.div = document.createElement("div");
 	
-	var div = this.div;
+	var div = dialog.div;
 	
 	div.setAttribute("class", "dialog");
 	div.setAttribute("style", "position: absolute; top: 50px; left: 50px");
@@ -58,6 +59,10 @@ function Dialog(msg, icon, dialogDelay) {
 	div.appendChild(message);
 	
 	body.appendChild(div);
+	
+	dialog.openedDate = new Date();
+	
+	EDITOR.openDialogs.push(dialog);
 	
 	if(img) {
 		//alert(icon);
@@ -93,7 +98,7 @@ function Dialog(msg, icon, dialogDelay) {
 	
 	
 	// Give the focus to the box
-	this.editorHadInputFocus = EDITOR.input;
+	dialog.editorHadInputFocus = EDITOR.input;
 	EDITOR.input = false;
 	
 	// Give the program time to add buttons etc to the dialog
@@ -123,12 +128,16 @@ Dialog.prototype.isOpen = function(someEvent, callback) {
 	else return false;
 }
 Dialog.prototype.close = function(someEvent, callback) {
+	var dialog = this;
+	
 	console.log("Dialog.prototype.close ...");
 	
-	if(this.div.parentElement) this.div.parentElement.removeChild(this.div);
-	else console.warn("Parent element does not exist for div=", this.div);
+	EDITOR.openDialogs.splice(EDITOR.openDialogs.indexOf(dialog), 1);
 	
-	if(this.editorHadInputFocus) {
+	if(dialog.div.parentElement) dialog.div.parentElement.removeChild(dialog.div);
+	else console.warn("Parent element does not exist for div=", dialog.div);
+	
+	if(dialog.editorHadInputFocus) {
 
 		if(!EDITOR.input) {
 			console.log("Dialog.prototype.close: Giving focus/input back to the editor. EDITOR.input=" + EDITOR.input);

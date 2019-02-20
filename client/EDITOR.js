@@ -5737,6 +5737,15 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		EDITOR.resizeNeeded();
 	}
 	
+	EDITOR.openDialogs = [];
+	EDITOR.closeAllDialogs = function closeAllDialogs() {
+		console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs...");
+		for (var i=0; i<EDITOR.openDialogs.length; i++) {
+			console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+			EDITOR.openDialogs[i].close();
+		}
+	}
+	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
@@ -6462,7 +6471,10 @@ waitingForSync = false;
 				EDITOR.runningTests = false;
 				allDone = true;
 				
-				if(fails === 0) testResults.push("All " + finished + " tests passed!")
+				if(fails === 0) {
+					EDITOR.closeAllDialogs();
+testResults.push("All " + finished + " tests passed!")
+				}
 				else testResults.push(fails + " of " + finished + " test failed:");
 				
 				EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
