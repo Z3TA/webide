@@ -152,6 +152,8 @@ console.log("clone error stderr=" + stderr);
 
 			var destinationNotEmpty = stderr.match(/abort: destination '(.*)' is not empty/);
 				
+			// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
+			
 				if(destinationNotEmpty) {
 				cloneDone("The destination folder is not empty: " + local + destinationNotEmpty[1]);
 				}
@@ -186,14 +188,20 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 			
 			if(stderr) {
 				
-				var reAddedHost1 = /Warning: Permanently added (.*) (RSA) to the list of known hosts\./;
+				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
+				// Warning: Permanently added 'github.com,192.30.253.113' (RSA) to the list of known hosts.
+				
+				var reAddedHost1 = /Warning: Permanently added (.*) \(RSA\) to the list of known hosts\./;
 				var reAddedHost2 = /Warning: Permanently added the RSA host key for IP address (.*) to the list of known hosts\./;
+				
 				var reNoSuchFileOrDirectory = /: No such file or directory$/;
 				
 				stderr.replace(reAddedHost1, "");
 				stderr.replace(reAddedHost2, "");
 				
 				stderr = stderr.trim();
+				
+				console.log("hg clone final stderr=" + stderr);
 				
 				if(!stderr) return cloneSuccess();
 				
