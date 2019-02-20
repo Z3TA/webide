@@ -149,8 +149,6 @@ Error: Permission denied
 
 ---
 
-regression: open/edit no longer works in the terminal on prod!!
-
 
 When running "npm start" but there are no browsers to start, also stop the server!
 

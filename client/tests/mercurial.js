@@ -138,13 +138,16 @@ function testClone() {
 	});
 	
 	
-	EDITOR.addTest(1, function cloneFromGithub(callback) {
+	EDITOR.addTest(function cloneFromGithub(callback) {
 		/*
 			Cloning from Github has stopped working 3-4 times already so we need an automatic test
 			Make sure the test user has a SSH key registered on Github!
 			
 			Of course it works in dev!
 			Is it because we have more then one user/ssh-key per IP !?
+			
+			Cloning from HTTP gives long Python error in prod (works in dev)
+			Clinging via SSH gives "Host key verification failed" (works in dev), (yes, SSH key has been added to Github)
 			
 		*/
 		var testFolderParent = "/cloneFromGithub/";

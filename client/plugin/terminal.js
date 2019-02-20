@@ -1222,8 +1222,11 @@ file.insertLineBreak();
 			
 			var rowText = file.rowText(file.caret.row);
 			// ltest1@zpc:/repo/tensorflow$ open README.md
+			// bash-4.3$ open README.md
 			var reCmd = /^(.*)?:(.*)\$ ([^ ]*) (.*)$/
-			var match = rowText.match(reCmd);
+			var reBash = /bash\-([\d.]*)\$() ([^ ]*) (.*)$/
+			
+			var match = rowText.match(reCmd) || rowText.match(reBash);
 			if(match && match.length == 5) {
 				var folder = match[2];
 				var command = match[3];
@@ -1236,7 +1239,12 @@ file.insertLineBreak();
 					
 					path = path.trim(); // Remove trailing space
 					
-					EDITOR.openFile(path, undefined, {show: true});
+					EDITOR.openFile(path, undefined, {show: true}, function(err, file) {
+						if(err && err.code == "ENOENT") {
+							EDITOR.openFile(path, "", {show: true}); // Create new empty file
+						}
+						else if(err) alertBox(err.message);
+					});
 				}
 			} 
 			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
@@ -1384,5 +1392,43 @@ file.insertLineBreak();
 		this.caret = {row: 0, col: 0};
 	}
 	
+	
+	// TEST-CODE-START
+	
+	EDITOR.addTest(1, function openFileFromTerminal(callback) {
+		
+		EDITOR.openFile("terminal1337", '', function(err, file) {
+			terminalFiles.push(file);
+			
+			var testFile = "testOpenFileFromTerminal"
+			
+			bash("ltest1@zpc:/repo/tensorflow$", "/repo/tensorflow/" + testFile);
+			bash("bash-4.3$", "/" + testFile);
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+			
+			
+			function bash(bashPrompt, filePath) {
+				file.write(bashPrompt + ' open ' + testFile);
+				
+				EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+				
+				if(! (filePath in EDITOR.files) && EDITOR.openFileQueue.indexOf(filePath) == -1) throw new Error("Expected " + filePath + " to be opened! bashPrompt=" + bashPrompt);
+				
+				file.writeLineBreak();
+				
+				// Wait until the file have been opened, then close it
+				setTimeout(function closeTheFile() {
+					EDITOR.closeFile(filePath);
+				}, 3000);
+				
+			}
+		});
+	});
+	
+	
+	// TEST-CODE-END
 	
 })();
