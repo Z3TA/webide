@@ -531,8 +531,9 @@ Make sure the server has hggit installed!
 (should not give an error if it's installed)
 How to install:
 ````
-apt-get install python-pip
-easy_install hg-git
+sudo apt-get install python-pip
+sudo pip install --upgrade pip
+sudo pip install hg-git
 ````
 
 Problems running apt 
