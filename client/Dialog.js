@@ -62,7 +62,7 @@ function Dialog(msg, icon, dialogDelay) {
 	
 	dialog.openedDate = new Date();
 	
-	EDITOR.openDialogs.push(dialog);
+	if(EDITOR && EDITOR.openDialogs) EDITOR.openDialogs.push(dialog);
 	
 	if(img) {
 		//alert(icon);
