@@ -579,6 +579,8 @@
 	
 	
 	function stopNodeJsScript() {
+		if(!EDITOR.currentFile) return;
+		
 		var filePath = EDITOR.currentFile.path;
 		
 		EDITOR.hideMenu();

@@ -46,7 +46,16 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+showFile
+
+Nothing is written to the file because it's not EDITOR.currentFile!!
+
+
 It seems to be the openFileFromTerminal test that is causing the problems ...
+
+Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
+
+---
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
 
@@ -59,7 +68,7 @@ Unable to clone from Github using both Git and HTTPS from cloud IDE!
 
 Unable to clone from a git repo when running on desktop!
 https://github.com/Z3TA/survey-example.git
-
+---
 
 Writing a guide on how to make a survey
 

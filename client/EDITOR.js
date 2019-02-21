@@ -1082,6 +1082,9 @@ usePseudoClipboard = false;
 					EDITOR.showFile(file);
 					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				}
+				else if(showFile != undefined) {
+					console.warn("Not switching to " + path + " because showFile is set to " + showFile);
+				}
 				
 				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
 				
@@ -3723,6 +3726,11 @@ var word = "";
 		*/
 		window.close();
 		
+	}
+	
+	EDITOR.showFileReset = function showFileReset() {
+		// Useful in tests where file open show state is set, to allow showing other files
+		showFile = undefined;
 	}
 	
 	EDITOR.showFile = function(file, focus, overrideShowFile) {

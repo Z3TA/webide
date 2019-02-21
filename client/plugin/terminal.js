@@ -1396,8 +1396,8 @@ file.insertLineBreak();
 	
 	// TEST-CODE-START
 	
-	
-	EDITOR.addTest(1, false, function openFileFromTerminal(callback) {
+	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
+	EDITOR.addTest(1000, false, function openFileFromTerminal(callback) {
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			terminalFiles.push(file);
@@ -1429,10 +1429,13 @@ file.insertLineBreak();
 						// Test finished!
 						
 						EDITOR.closeFile(file.path);
+						
+						EDITOR.showFileReset(); // Because files opened from the editor get show state to prevent other files to get shown
+						
 						callback(true);
 					}
 					
-				}, 2000);
+				}, 100);
 				
 			}
 		});
