@@ -231,7 +231,8 @@
 				if(!file.isSaved && file.savedAs) syncFile(file);
 			}
 			
-			
+			var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
+			if(showCollaborationNotice) {
 			if(json.cId == userConnectionId) {
 				var msg = "You are in collaboration mode with ";
 				var others = connectedClientIds.filter(notMe);
@@ -263,6 +264,7 @@
 					
 					alertBox(msg);
 				}
+			}
 			}
 			
 		}
@@ -300,7 +302,9 @@
 			msg += "\nWe are no longer in collaboration mode !";
 		}
 		
-		if(!clientLeaveDialog.hasOwnProperty(json.alias)) clientLeaveDialog[json.alias] = alertBox(msg);
+		var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
+		
+		if(!clientLeaveDialog.hasOwnProperty(json.alias) && showCollaborationNotice) clientLeaveDialog[json.alias] = alertBox(msg);
 		
 		return true;
 	}

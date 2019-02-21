@@ -17,8 +17,8 @@
 		
 	*/
 
-	if(QUERY_STRING["embed"]) return;
-	
+	if(QUERY_STRING["embed"]) return console.warn("Reopen-files disabled by embed in query string");
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("reopen_files") != -1) return console.warn("Reopen-files disabled by disable containing reopen_files in query string");
 	
 	var fileDelimiter = ";"; // Used to separate the file paths in the openedFiles string
 

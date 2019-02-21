@@ -2122,7 +2122,7 @@ text = file;
 		}
 	}
 	
-	EDITOR.resize = function(resizeEvent) {
+	EDITOR.resize = function() {
 		/*
 			
 			Note: Chaning the width/height of the canvas will clear it!
@@ -2134,7 +2134,7 @@ text = file;
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
 		
-		console.log("Resizing ... resizeEvent=" + resizeEvent + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
+		
 		
 		console.time("resize");
 		
@@ -4809,6 +4809,11 @@ var word = "";
 	EDITOR.createWindow = function(options, callback) {
 		// A callback is needed because we might have to show a button for the user to click to open the new window (if the browser has a popup stopper)
 		
+		// options object needs to be specified, because we need at least an url option
+		if(typeof options == "string") {
+			var options = {url: options};
+		}
+		
 		if(typeof options != "object") throw new Error("options need to be an object (with at least a url property) !");
 		if(typeof callback != "function") throw new Error("EDITOR.createWindow needs a callback function as second parameter! callback=" + callback + " (" + (typeof callback) + ")");
 		
@@ -5745,6 +5750,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			EDITOR.openDialogs[i].close();
 		}
 	}
+	
 	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {

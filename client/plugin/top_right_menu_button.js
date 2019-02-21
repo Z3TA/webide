@@ -1,12 +1,14 @@
 /*
 	
-	In some browsers (Chrome on Android) it can be almost impossible to bring up the menu
+	In some browsers (Firefox on Android) you can't bring up the meny by long pressing!
+	So show a menu button just in case the "irght click" menu doesn't work!
 	
 */
 (function() {
-
 "use strict";
-
+	
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu_button") != -1) return;
+	
 var button;
 
 EDITOR.plugin({

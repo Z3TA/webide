@@ -46,6 +46,13 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Easy way to hide the function list
+
+Floating windows!
+
+
+
+
 Maybe upgrading to the new version of Ubuntu will fix it !?
 
 Cloning from HTTPS stopped working when CHROOTED after upgrading hg-git!
@@ -125,6 +132,11 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Allow specifying port when connecting to a FTP!!
+host:21 !?
+remove default port from host if specified! eg remove 21 from "host:21"
+
 
 Tutorials!
 
