@@ -7,7 +7,8 @@
 (function() {
 "use strict";
 	
-	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu_button") != -1) return;
+	// cant't have menu in the name or the menu will also be disabled!
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("trmb") != -1) return;
 	
 var button;
 

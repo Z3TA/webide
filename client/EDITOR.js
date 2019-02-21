@@ -2624,7 +2624,20 @@ text = file;
 		
 	}
 	
-	EDITOR.addMenuItem = function(htmlText, callback, position) {
+	EDITOR.addMenuItem = function(htmlText, position, callback) {
+		if(typeof position == "function" && typeof callback == "number") {
+			var posTemp = callback;
+			callback = position;
+			position = posTemp;
+		}
+		else if(typeof position == "function" && callback == undefined) {
+			callback = position;
+			position = undefined;
+		}
+		
+		if(typeof htmlText != "string") throw new Error("EDITOR.addMenuItem: First argument htmlText need to be a (HTML) string!");
+		
+		
 		var menu = document.getElementById("canvasContextmenu");
 		
 		var li = document.createElement("li");

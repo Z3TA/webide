@@ -16,6 +16,8 @@
 	var domModel = [];
 	var leftColumn;
 	var rightColumn;
+	var menu;
+	var alwaysShowFunctionList = true;
 	
 	EDITOR.plugin({
 		desc: "Show list of JS functions in left column",
@@ -23,9 +25,8 @@
 		unload: unload,
 		order: 200
 	});
-
+	
 	function functionListMain() {
-		
 		console.log("Initiating functionlist");
 		
 		EDITOR.on("fileParse", updateFunctionList); // Update existing function list if it already exist
@@ -34,18 +35,41 @@
 		EDITOR.on("fileClose", hideFunctionList);
 		
 		EDITOR.on("fileShow", loadFunctionList); // Build the function list (when switching to this file)
-				
+		
 		EDITOR.on("moveCaret", highlightCurrentFunction);
 		
 		EDITOR.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
 		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
-
+		
 		functionListWrap = document.createElement("div");
 		
 		functionListWrap.setAttribute("id", "functionListWrap");
 		functionListWrap.setAttribute("class", "wrap functionListWrap");
 		functionListWrap.setAttribute("style", "display: none"); // Start hidden
+		
+		functionListWrap.oncontextmenu = function hideMaybe() {
+			var disable = "Always hide the function list";
+			var hide = "Hide function list";
+			var cancel = "Cancel";
+			
+			confirmBox('Hide the function list ?\nClick <i>Show function list</i> in the meny to show it again.', [disable, hide, cancel], function(answer) {
+				if(answer == cancel) return;
+				
+				if(answer == disable) {
+					alwaysShowFunctionList = false;
+				}
+				
+				if(!menu) menu = EDITOR.addMenuItem("Show function list", 20, function showFunctionListAgain() {
+					alwaysShowFunctionList = true;
+					showFunctionList();
+					EDITOR.hideMenu();
+					EDITOR.removeMenuItem(menu);
+				});
+				
+				hideFunctionList();
+			});
+		}
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
@@ -63,7 +87,7 @@
 	
 	function leftOrRight() {
 		// If we are inside the function list, pressing left or right should go back to the caret
-
+		
 		functionListSelect.blur();
 		
 		EDITOR.currentFile.scrollToCaret();
@@ -132,7 +156,7 @@
 		
 		return true;
 	}
-		
+	
 	
 	function blurFunctionList() {
 		// Remove focus from the select box
@@ -243,7 +267,7 @@
 					if(updatedDomModel[i].level != domModel[i].level) {
 						updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName);
 					}
-						
+					
 				}
 				
 				// Update longest function name
@@ -268,11 +292,11 @@
 			console.log("Creating the DOM for the function list from scratch!");
 			loadFunctionList(file);
 		}
-
+		
 		
 		// Find the function we are in and highlight it
 		highlightCurrentFunction(file, file.caret);
-
+		
 		
 		if(lengthOfLongestFunction > functionlistMaxCharacters) {
 			console.warn("There is a very long function name! The function list will not show all of it.");
@@ -285,7 +309,7 @@
 			
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
-
+			
 		}
 		
 		console.timeEnd("updateFunctionList");
@@ -300,8 +324,8 @@
 	
 	
 	function findCurrentFunction(functions, charIndex) {
-
-for(var func, element, i=0; i<functions.length; i++) {
+		
+		for(var func, element, i=0; i<functions.length; i++) {
 			func = functions[i];
 			
 			if(func.start <= charIndex && func.end >= charIndex) {
@@ -342,18 +366,18 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			name = func.name;
 			
-				if(name.search(new RegExp(UTIL.escapeRegExp(str), "i")) != -1) {
-					matches.push(name);
-					//console.log(name);
-				}
-				
-				if(func.subFunctions.length > 0) {
-				var result = searchFunctions(str, func.subFunctions);
-					
-					if(result.length > 0) matches = matches.concat(result);
-				}
-				
+			if(name.search(new RegExp(UTIL.escapeRegExp(str), "i")) != -1) {
+				matches.push(name);
+				//console.log(name);
 			}
+			
+			if(func.subFunctions.length > 0) {
+				var result = searchFunctions(str, func.subFunctions);
+				
+				if(result.length > 0) matches = matches.concat(result);
+			}
+			
+		}
 		
 		return matches;
 		
@@ -401,6 +425,9 @@ for(var func, element, i=0; i<functions.length; i++) {
 	}
 	
 	function showFunctionList(file) {
+		
+		if(!alwaysShowFunctionList) return console.warn("Now showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
+		
 		if(functionListWrap) {
 			
 			if(functionListWrap.style.display != "block") { // bugfix: editor resized at every key stroke because of fileParse event
@@ -429,7 +456,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 		if(!functionListWrap) return console.warn("functionListWrap not available!");
 		
 		functionListSelect = document.getElementById("functionList");
-
+		
 		showFunctionList();
 		
 		if(!functionListSelect) {
@@ -481,8 +508,8 @@ for(var func, element, i=0; i<functions.length; i++) {
 		
 		// Fill the list
 		domModel.forEach(addOption);
-
-
+		
+		
 		
 		// Adjust the height
 		functionListSelect.setAttribute("size", domModel.length);		
@@ -492,7 +519,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 		EDITOR.resizeNeeded();
 		
 		console.timeEnd("buildFunctionList");
-				
+		
 		
 		function addOption(func, thisIndex, array) {
 			
@@ -534,7 +561,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 				
 				functionListSelect.appendChild(option);
 				
-
+				
 			}
 		}
 	}
@@ -555,7 +582,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 		// Returns an array of the parsed functions
 		
 		var domModel = [];
-				
+		
 		add(functions, 0);
 		
 		function add(functions, level) {
@@ -573,7 +600,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 	// TEST-CODE-START
 	
 	EDITOR.addTest(function test_removeAddSubfunctionIndentation(callback) {
-			EDITOR.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
+		EDITOR.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
 			
 			file.moveCaretToIndex(file.text.length);
 			file.moveCaretLeft();

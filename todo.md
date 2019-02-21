@@ -46,11 +46,9 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Easy way to hide the function list
+Move terminal to other window !?
 
 Floating windows!
-
-
 
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
