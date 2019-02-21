@@ -2344,7 +2344,7 @@ text = file;
 			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
 				var maxLine = Math.max(10, EDITOR.currentFile.grid.length+1);
 				var lineLetters = (" " + maxLine).trim().length;
-				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters) + 5;
+				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters + EDITOR.settings.gridWidth + 5);
 			}
 			
 			// Calculate the scroll zone
