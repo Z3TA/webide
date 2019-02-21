@@ -20,7 +20,8 @@
 		Dilemma: Should we keep track of undo/redo history branches
 		Answer: No, keep it simple!
 		
-		Hmm, how will this work with the terminal !? Make the terminal only send to the client with the terminal !?
+		problem: Hmm, how will this work with the terminal !? Make the terminal only send to the client with the terminal !?
+		solution: The terminal plugin marks the file with file.noCollaboration. Terminal events are already sent out to all client, so no other sync is needed!
 		
 		todo: Handle file renaming (keep history)
 		
@@ -329,6 +330,8 @@
 	
 	function collabMoveCaret(file, caret) {
 		
+		if(file.noCollaboration) return console.warn("Not moving caret because collaboration disabled in " + file.path);
+		
 		var caretEvent = {
 			filePath: file.path,
 			caret: caret,
@@ -366,6 +369,7 @@
 	
 	function collabSelectText(file, selection) {
 		if(!collabMode) return true;
+		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
 		
 		console.log(selection);
 		
@@ -392,6 +396,8 @@
 		console.log("fileChangeEvents: " + JSON.stringify(fileChangeEvents, null, 2));
 		
 		console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
+		
+		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
 		
 if(file == undefined) throw new Error("file=" + file);
 			if(change == undefined) throw new Error("change=" + file);
@@ -572,6 +578,7 @@ if(file == undefined) throw new Error("file=" + file);
 			var file = EDITOR.files[sync.path];
 			if(!file) console.log("File not opened, no need to sync: path=" + sync.path);
 			else {
+				if(file.noCollaboration) return console.warn("Not syncing because collaboration is disabled in " + file.path);
 				
 				if(file.isSaved && file.hash == sync.hash) updateFileConent(file, sync.text);
 				else if(file.text == sync.text) console.log("No update needed, sync and file is the same!");
@@ -613,6 +620,8 @@ if(file == undefined) throw new Error("file=" + file);
 				console.warn("Got change to a file that we do not have open: " + ev.filePath);
 				return;
 			}
+			
+			if(file.noCollaboration) return console.warn("Not updating because collaboration disabled in " + file.path);
 			
 			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 			

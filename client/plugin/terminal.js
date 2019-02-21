@@ -272,6 +272,7 @@
 			file.parse = false;
 			file.parsed = null;
 			file.noChangeEvents = true;
+			file.noCollaboration = true;
 			
 			terminalFiles.push(file);
 			file.write(file.path + " session started " + (new Date()) + "\n");
