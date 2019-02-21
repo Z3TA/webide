@@ -4283,7 +4283,7 @@ var word = "";
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
-		//console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
+		console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {
@@ -6376,15 +6376,21 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			var currentlyInParallel = 0;
 			var stillRunning = []; 
 			var aborted = false;
-			
+			var firstTestOrder = 10000;
+			var firstTest;
+
 			if(testsToRun == 1) {
 				for (var i=0; i<EDITOR.tests.length; i++) {
-					if(EDITOR.tests[i].order == 1) {
-						alertBox("Testing: " + EDITOR.tests[i].text);
-						started = 1;
-						asyncInitTest(EDITOR.tests[i]);
-						return;
+					if(EDITOR.tests[i].order < firstTestOrder) {
+						firstTestOrder = EDITOR.tests[i].order;
+						firstTest = EDITOR.tests[i];
 					}
+				}
+				if(firstTest) {
+					alertBox("Testing: " + firstTest.text);
+					started = 1;
+					asyncInitTest(firstTest);
+					return;
 				}
 				throw new Error("testInfo: Could not find a test with id=1");
 			}

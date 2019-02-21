@@ -3641,10 +3641,10 @@ callback(true);
 	
 	
 	
+	// These can not run in parallel as it would affect other tests when we're in "vim" mode
 	
-	
-	EDITOR.addTest(vimTest1);
-	EDITOR.addTest(vimTest2);
+	EDITOR.addTest(5001, false, vimTest1);
+	EDITOR.addTest(5002, false, vimTest2);
 	
 	// TEST-CODE-END
 	

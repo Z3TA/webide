@@ -169,7 +169,7 @@ function testClone() {
 					});
 				}
 				else if(err) {
-					throw err
+					throw err;
 				}
 				else {
 					
