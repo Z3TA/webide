@@ -6375,7 +6375,8 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			var currentRunningTest;
 			var currentlyInParallel = 0;
 			var stillRunning = []; 
-
+			var aborted = false;
+			
 			if(testsToRun == 1) {
 				for (var i=0; i<EDITOR.tests.length; i++) {
 					if(EDITOR.tests[i].order == 1) {
@@ -6400,6 +6401,8 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 				
 				if(finished == testsToRun) return allTestsDone();
 				
+				if(aborted) return console.log("testLoop: Tests aborted!");
+				
 				for(var i=started; i<testsToRun; i++) {
 					started++;// This counter here to prevent any sync test to finish all tests
 					
@@ -6421,6 +6424,8 @@ asyncInitTest(EDITOR.tests[i]);
 			}
 			
 			function runTest(test) {
+				if(aborted) return console.log("runTest: Tests aborted!");
+				
 				currentRunningTest = test.text;
 				
 				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync);
@@ -6505,6 +6510,7 @@ testResults.push("All " + finished + " tests passed!")
 			}
 			
 			function testFail(description, result) {
+				aborted = true;
 				fails++;
 				testResults.push("");
 				testResults.push(description);

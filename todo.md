@@ -46,16 +46,13 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Move terminal to other window !?
-
-Floating windows!
 
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
 
 Cloning from HTTPS stopped working when CHROOTED after upgrading hg-git!
 
-Made cloning from git using SSH work after specifying HOME in env.PATH
+Made cloning from git using SSH work on Desktop after specifying HOME in env.PATH
 
 
 Unable to clone from Github using both Git and HTTPS from cloud IDE!

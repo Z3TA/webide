@@ -1396,7 +1396,7 @@ file.insertLineBreak();
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function openFileFromTerminal(callback) {
+	EDITOR.addTest(function openFileFromTerminal(callback) {
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			terminalFiles.push(file);

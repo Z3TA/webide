@@ -1184,6 +1184,9 @@ file.fixCaret();
 			
 			//console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
+			// Clean for next run
+			for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj]; 
+			for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
 			
 			if(typeof callback == "function") {
 				EDITOR.closeFile(file);
