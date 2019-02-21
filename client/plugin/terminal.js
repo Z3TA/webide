@@ -1396,23 +1396,24 @@ file.insertLineBreak();
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(function openFileFromTerminal(callback) {
+	
+	EDITOR.addTest(1, false, function openFileFromTerminal(callback) {
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			terminalFiles.push(file);
 			
 			var testFile = "testOpenFileFromTerminal"
+			var filesOpened = 0;
+			var filesClosed = 0;
 			
 			bash("ltest1@zpc:/repo/tensorflow$", "/repo/tensorflow/" + testFile);
 			bash("bash-4.3$", "/" + testFile);
 			
-			EDITOR.closeFile(file.path);
-			
-			callback(true);
-			
-			
 			function bash(bashPrompt, filePath) {
+				
 				file.write(bashPrompt + ' open ' + testFile);
+				
+				filesOpened++;
 				
 				EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 				
@@ -1423,7 +1424,15 @@ file.insertLineBreak();
 				// Wait until the file have been opened, then close it
 				setTimeout(function closeTheFile() {
 					EDITOR.closeFile(filePath);
-				}, 3000);
+					filesClosed++;
+					if(filesClosed==filesOpened) {
+						// Test finished!
+						
+						EDITOR.closeFile(file.path);
+						callback(true);
+					}
+					
+				}, 2000);
 				
 			}
 		});

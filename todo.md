@@ -46,7 +46,7 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-
+It seems to be the openFileFromTerminal test that is causing the problems ...
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
 

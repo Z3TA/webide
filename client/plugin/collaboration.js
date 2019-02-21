@@ -1124,7 +1124,9 @@ file.fixCaret();
 		EDITOR.openFile("collabtest.txt", "\n", function colaborationTestFileOpened(err, file) {
 			if(err) throw err;
 			
-			testFile = file;
+			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			
+			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
 			
 			eventOrder = 1;
 			

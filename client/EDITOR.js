@@ -5005,7 +5005,7 @@ var word = "";
 		}
 	}
 	
-	EDITOR.runTests = function runTests(onlyOne) {
+	EDITOR.runTests = function runTests(onlyOne, allInSync) {
 		
 		if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/" && !onlyOne) {
  return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
@@ -5014,7 +5014,7 @@ var word = "";
 		
 		if(!onlyOne) EDITOR.changeWorkingDir("/");
 		
-		runTests_5616458984153156(onlyOne);
+		runTests_5616458984153156(onlyOne, allInSync);
 		return true;
 	}
 	
@@ -6311,7 +6311,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
 	}
 	
-	function runTests_5616458984153156(onlyOne) { // Random numbers to make sure it's unique
+	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
 		if(onlyOne) testFirstTest = true;
 		
@@ -6412,7 +6412,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 				for(var i=started; i<testsToRun; i++) {
 					started++;// This counter here to prevent any sync test to finish all tests
 					
-					if(EDITOR.tests[i].parallel) {
+					if(EDITOR.tests[i].parallel && !allInSync) {
 asyncInitTest(EDITOR.tests[i]);
 					}
 					else {
