@@ -46,16 +46,27 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-showFile
-
-Nothing is written to the file because it's not EDITOR.currentFile!!
-
-
-It seems to be the openFileFromTerminal test that is causing the problems ...
-
 Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
 
 ---
+
+Using git
+
+> GET /Z3TA/test1.git/info/refs?service=git-upload-pack HTTP/1.1
+Host: github.com
+User-Agent: git/2.7.4
+Accept: */*
+Accept-Encoding: gzip
+Accept-Language: en, *;q=0.9
+Pragma: no-cache
+
+< HTTP/1.1 200 OK
+
+But when using curl we get redirected ... Maybe that is causing the error !?
+
+
+
+
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
 

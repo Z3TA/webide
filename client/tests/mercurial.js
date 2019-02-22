@@ -138,7 +138,7 @@ function testClone() {
 	});
 	
 	
-	EDITOR.addTest(function cloneFromGithub(callback) {
+	EDITOR.addTest(1, function cloneFromGithub(callback) {
 		/*
 			Cloning from Github has stopped working 3-4 times already so we need an automatic test
 			Make sure the test user has a SSH key registered on Github!
@@ -148,6 +148,8 @@ function testClone() {
 			
 			Cloning from HTTP gives long Python error in prod (works in dev)
 			Clinging via SSH gives "Host key verification failed" (works in dev), (yes, SSH key has been added to Github)
+			
+			Ufter updating hggit we can no longer clone using HTTP (same error as in prod). Downgrading didn't help
 			
 		*/
 		var testFolderParent = "/cloneFromGithub/";
@@ -159,6 +161,8 @@ function testClone() {
 		
 		function testClone(repository, testFolder) {
 			if(++testCounter > 3) throw new Error("Clone test retry more 3 times!");
+			
+			console.log("testClone: repository=" + repository + " testFolder=" + testFolder);
 			
 			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, function(err, json) {
 				if(err && err.code == "EXIST") {
