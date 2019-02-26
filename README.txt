@@ -34,7 +34,8 @@ Linux:
 
 2. Install nodejs from nodesource:
 ```
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+sudo apt-get update
 sudo apt-get install -y nodejs
 ```
 
@@ -292,7 +293,7 @@ See https://github.com/nodesource/distributions
 
 Using Ubuntu:
 ````
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt update && sudo apt install -y nodejs
 ````
 Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
