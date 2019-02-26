@@ -3,7 +3,7 @@
 
 "use strict";
 
-if(process.version.indexOf("v8.") != 0) console.warn("The editor has only been tested with node.js version 8!");
+if(process.version.indexOf("v10.") != 0) console.warn("The editor has only been tested with node.js version 0,io,4,6,8,10! You are running version=" + process.version);
 
 var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
 var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
@@ -197,8 +197,12 @@ process.on("SIGINT", function sigInt() {
 	
 	for(var displayId in VNC_CHANNEL) stopVncChannel(displayId);
 	
-	if(mysqlConnection) {
+	if(mysqlConnection && !mysqlConnection._fatalError) {
+		// It seems mysqlConnection.end never calls back if there is a problem ...
+		log("mysqlConnection=" + UTIL.objInfo(mysqlConnection), DEBUG);
+		
 		mysqlConnection.end(function(err) {
+			log("MySQL connection ended!");
 			if(err) console.error(err);
 			
 			end();
@@ -232,6 +236,9 @@ function mysqlConnect() {
 			// The server is either down or restarting (takes a while sometimes).
 			console.error(err);
 			log("Failed to connect to mySQL database!", WARN);
+			
+			if(err.code == "ENOENT") return; // Socket not found, meaning mySQL server is not installed !?
+			
 			// We introduce a delay before attempting to reconnect, to avoid a hot loop
 			setTimeout(mysqlConnect, 2000);    
 		}
@@ -241,8 +248,11 @@ function mysqlConnect() {
 	});                                              
 	
 	mysqlConnection.on('error', function(err) {
-		log("MySQL error: " + err.message, NOTICE);
-		if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
+		log("MySQL error: (code=" + err.code + ") " + err.message, NOTICE);
+		if(err.code == "ENOENT") {
+			log("Mysql server is probably not installed, will not bother to try connecting to it.", NOTICE);
+}
+		else if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
 			/*
 				Connection to the MySQL server is usually lost due to either server restart, 
 				or a connnection idle timeout (the wait_timeout server variable configures this)
@@ -1892,6 +1902,8 @@ function checkMounts(options, checkMountsCallback) {
 	var uid = options.uid;
 	var gid = options.gid;
 	
+	var mountErrorMessages = [];
+	
 	if(username == "guestundefined") throw new Error("username=" + username);
 	
 	if(username == undefined) throw new Error("username=" + username);
@@ -2110,10 +2122,20 @@ function checkMounts(options, checkMountsCallback) {
 		
 		
 		// Make sure nginx profile exist
-		console.time("Check " + username + " nginx profile");
-		var url_user = UTIL.urlFriendly(username);
-		var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-		module_fs.stat(nginxProfilePath, function (err, stats) {
+		var nginxSitesAvailable = "/etc/nginx/sites-available/"
+		// Allow Nginx not to be installed
+		module_fs.stat(nginxSitesAvailable, function (err, stats) {
+			if(err) {
+				log(err.message+ "\nNginx is probably not installed. User's Nginx profile was Not installed!", NOTICE);
+				mountErrorMessages.push(err);
+				nginxProfileOK = true;
+				sslCertChecked = true;
+				return;
+			}
+			console.time("Check " + username + " nginx profile");
+			var url_user = UTIL.urlFriendly(username);
+			var nginxProfilePath = nginxSitesAvailable + url_user + "." + DOMAIN + ".nginx";
+			module_fs.stat(nginxProfilePath, function (err, stats) {
 			if(checkMountsAbort) return;
 			
 			if(err) {
@@ -2182,7 +2204,7 @@ function checkMounts(options, checkMountsCallback) {
 			}
 			
 		});
-		
+		});
 	}); // checked user rights
 	
 	function checkUserRights(username, callback) {
@@ -2331,7 +2353,10 @@ function checkMounts(options, checkMountsCallback) {
 	function folderMounted(err) {
 		foldersToMount--;
 		
-		if(err) return checkMountsError(err);
+		//if(err) return checkMountsError(err);
+		
+		// Let the user login even if there is a mount error
+		f(err) mountErrorMessages.push(err);
 		
 		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
 		
@@ -2369,6 +2394,16 @@ function checkMounts(options, checkMountsCallback) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
+				
+				if(mountErrorMessages.length > 0) {
+					// Send the server admin a message !?
+					var errorMessages = "The following errors occured when the mount points where checked:\n";
+					for (var i=0; i<mountErrorMessages.length; i++) {
+						errorMessages = errorMessages+ mountErrorMessages[i] + "\n";
+					}
+					log(errorMessages, WARN);
+				}
+				
 				console.timeEnd("check " + username + " mounts");
 				checkMountsCallback(null);
 			}

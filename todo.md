@@ -46,6 +46,17 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Making the editor work in Ubuntu 18 !
+
+Allow running the cloud server without having mySQL or Nginx installed.
+
+
+Firefox issue!? After pressing Ctrl+V (only seems to be Ctrl+C, Ctrl+V and Ctrl+X) the next key press will not register!
+
+When typing // after a Ctrl+C Firefox goes into search!!
+
+
+
 Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
 
 ---
@@ -147,6 +158,14 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+
+---
+
+Partial commits !! 
+Select which parts to commit
+
+---
 
 Allow specifying port when connecting to a FTP!!
 host:21 !?
