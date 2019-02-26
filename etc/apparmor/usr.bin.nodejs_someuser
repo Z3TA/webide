@@ -59,7 +59,7 @@
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,
-  /lib/** r,
+  /lib/** mr,
   /run/resolvconf/resolv.conf r,
   /usr/lib/** r,
   /usr/share/zoneinfo/** r,
