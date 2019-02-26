@@ -46,6 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+todo: Was guest1 deleted!?
+
 Making the editor work in Ubuntu 18 !
 
 Allow running the cloud server without having mySQL or Nginx installed.
