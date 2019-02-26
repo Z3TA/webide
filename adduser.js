@@ -167,7 +167,7 @@ child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 				
 			}
 			else {
-				console.warn("No zfs file systems exist for " + HOME + " !");
+				console.log("Warning: No zfs file systems exist for " + HOME + " !");
 				NOZFS = true;
 			}
 			}
@@ -430,7 +430,7 @@ function adduser() {
 			if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
 	}
 	catch (err) {
-		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
+			console.log(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
 		if(!NO_CERT) {
