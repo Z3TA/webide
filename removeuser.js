@@ -73,7 +73,8 @@ var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN 
 	var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 1");
 	}
 	catch(err) {
-		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1) throw err;
+		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1 &&
+	err.message.indexOf("unrecognized service") == -1) throw err;
 	}
 	
 	// Remove apparmor profiles
@@ -304,6 +305,7 @@ function umount(path, ignoreErrors) {
 		if(!ignoreErrors) {
 			if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
+			&& err.message.indexOf("umount: " + path + ": no mount point specified") == -1
 			&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
 				
 				if(err.message.indexOf("umount: " + path + ": target is busy") != -1) {
