@@ -2356,7 +2356,7 @@ function checkMounts(options, checkMountsCallback) {
 		//if(err) return checkMountsError(err);
 		
 		// Let the user login even if there is a mount error
-		f(err) mountErrorMessages.push(err);
+		if(err) mountErrorMessages.push(err);
 		
 		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
 		
