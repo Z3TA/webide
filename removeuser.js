@@ -263,11 +263,11 @@ function restartEditorService() {
 
 function userdel() {
 	
-	var userDelCmd = 'userdel -f ';
+	var userDelCmd = 'userdel -f';
 	
 	if(NOZFS) userDelCmd += " -r"; // Also remove home dir
 	
-	userDelCmd += username;
+	userDelCmd = userDelCmd + " " + username;
 	
 	child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
 		
