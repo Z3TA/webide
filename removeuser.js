@@ -191,12 +191,16 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 					var zfsPool = matchPool[1];
 					var userHomeDir = HOME + username;
 					zfsDestroy(zfsPool, userHomeDir);
-					
-				}
+					}
 				else {
 					console.warn("No zfs file systems exist for " + HOME + " !");
 					NOZFS = true;
-				}
+				
+				//var deleteHomeDirStdout = child_process.execSync("sleep 2 && rm -r " + userHomeDir);
+				//deleteHomeDirStdout = deleteHomeDirStdout.toString(ENCODING).trim();
+				
+				userdel();
+			}
 				
 			}
 			
