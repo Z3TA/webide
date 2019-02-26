@@ -2,6 +2,6 @@
 Name=jzedit
 Comment=Run the editor
 Exec=bash -c '_PWD="$PWD"; cd "`echo $0 | sed s/linux_launcher.desktop$//`"; ./linux_start.sh run; cd "_PWD"' %k
-Icon=/home/Z/Projects/jzedit/client/gfx/jz64.png
-Terminal=false
+Icon=/zpcdata/projects/jzedit/client/gfx/jz64.png
+Terminal=true
 Type=Application

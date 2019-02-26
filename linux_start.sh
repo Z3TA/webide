@@ -1,10 +1,9 @@
 #!/bin/bash
 
 #
-# Start script for running the server locally
+# This script will run the editor locally.
 # 
-# If you want a always up server (shared by several users),
-# see README.txt, jzedit.service, and jzedit.apparmor
+# If you want to run a shared "cloud" server see README.txt, jzedit.service, and jzedit.apparmor
 #
 # We are using this bash script (instead of start.js) to fix the desktop icon ....
 #
@@ -87,6 +86,8 @@ else
 
 		startClient
 
+  # Problem: Firefox browser will exit
+  read -n 1 -s -r -p "Press any key to top the server"
 
 		# Kill the server when client exit
 		kill $!
