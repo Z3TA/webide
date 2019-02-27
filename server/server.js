@@ -2215,6 +2215,12 @@ function checkMounts(options, checkMountsCallback) {
 		console.time("Check " + username + " user rights");
 		module_fs.stat(HOME_DIR + username, function (err, stats) {
 			if(err) throw err;
+			/*
+				If you get ENOENT: no such file or directory, stat '/home/guest1'
+				It's possible that the user was not fully deleted, eg. the user exist, but not the home dir,
+				try userdel guest1, or restore the home dir from backup.
+			*/
+			
 			
 			if(stats.uid != uid || stats.gid != gid) {
 				// Reset the fs user rights
