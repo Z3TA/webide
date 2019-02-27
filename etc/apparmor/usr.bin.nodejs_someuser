@@ -61,7 +61,7 @@
   /etc/nsswitch.conf r,
   /lib/** mr,
   /run/resolvconf/resolv.conf r,
-  /usr/lib/** r,
+  /usr/lib/** mr,
   /usr/share/zoneinfo/** r,
 
   # Need to be able to read executables in order to run them !?
