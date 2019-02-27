@@ -7302,24 +7302,24 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 	function keyPressed(keyPressEvent) {
 		keyPressEvent = keyPressEvent || window.event; 
 		
-		//keyPressEvent.preventDefault();
-		
-		// Firefox and Safari go here before calling copy/paste/cut events
-		if(nativeCopy || nativePaste || nativeCut) {
-			nativeCopy = false;
-			nativePaste = false;
-			nativeCut = false;
-			return;
-		}
-		
 		var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
-		var character = String.fromCharCode(charCode); 
+		var character = String.fromCharCode(charCode);
 		var combo = getCombo(keyPressEvent);
 		var file = EDITOR.currentFile;
 		var preventDefault = false;
 		var funReturn = true;
 		
 		console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		
+		// Firefox and Safari go here before calling copy/paste/cut events
+		// Without this copy/paste will not work in Safari! Why !? 
+		if(nativeCopy || nativePaste || nativeCut) {
+			console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
+			nativeCopy = false;
+			nativePaste = false;
+			nativeCut = false;
+			return;
+		}
 		
 		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {
@@ -7727,7 +7727,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			if( (combo.ctrl || windowKey)  && character == "C") {
 				console.log("Native command: copy !?");
 				
-				if(BROWSER == "Firefox" || BROWSER == "Safari") nativeCopy = true;
+				if(BROWSER == "Safari") nativeCopy = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7750,7 +7750,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "V") {
 				console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
-				if(BROWSER == "Firefox" || BROWSER == "Safari") nativePaste = true;
+				if( BROWSER == "Safari") nativePaste = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7767,7 +7767,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "X") {
 				console.log("Native command: cut !?");
 				
-				if(BROWSER == "Firefox" || BROWSER == "Safari") nativeCut = true;
+				if( BROWSER == "Safari") nativeCut = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7969,12 +7969,14 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		EDITOR.interact("keyUp", keyUpEvent);
 		
 		if(preventDefault) {
-			console.log("keyIsUp: Preventing default browser action!");
+			console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
 			if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
 			return false;
 		}
-		else return true;
-		
+		else {
+			console.log("keyIsUp: Default browser action allowed ... key=" + keyUpEvent.key + "");
+			return true;
+		}
 	}
 	
 	function isInputElement(el) {
