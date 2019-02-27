@@ -550,6 +550,10 @@ function startClient(ip, port, proto) {
 			else {
 					// Depending on the program we wont get a callback until the browser/runtime has already exited!
 				log("Successfully started program=" + programOriginal);
+				log("If the program however failed to start,");
+				log("open your favorite browser and navigate to the URL below:");
+				log(proto + "://" + ip + ":" + port);
+				
 				programStarted = true;
 				
 				if(cp) { // Don't check if the cp is connected (it's not)
