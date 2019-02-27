@@ -46,16 +46,24 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-todo: Was guest1 deleted!?
+Copy/pasting doesn't work at all on Firefox on a Macbook.
+
+todo: Try Firefox on Windows 10, to see if copy/paste works
+
+todo: Test copy/paste and typing afterwards in different versions of Firefox in different OS's.
+
+Copy pasting no longer seem to work in Safari !?
+
+Firefox issue!? After pressing Ctrl+V (only seems to be Ctrl+C, Ctrl+V and Ctrl+X) the next key press will not register!
+
+When typing // after a Ctrl+C Firefox goes into search!!
+
 
 Making the editor work in Ubuntu 18 !
 
 Allow running the cloud server without having mySQL or Nginx installed.
 
 
-Firefox issue!? After pressing Ctrl+V (only seems to be Ctrl+C, Ctrl+V and Ctrl+X) the next key press will not register!
-
-When typing // after a Ctrl+C Firefox goes into search!!
 
 
 
