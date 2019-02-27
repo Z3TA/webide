@@ -50,7 +50,7 @@
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rw,
 
-  %JZEDIT%/node_modules/** r,
+  %JZEDIT%/node_modules/** mr,
   %JZEDIT%/server/** r,
   %JZEDIT%/shared/** r,
   %JZEDIT%/client/** r,
@@ -67,6 +67,10 @@
   # Need to be able to read executables in order to run them !?
   /bin/** r,
   /usr/bin/** r,
+
+  # New in Ubuntu 18
+  /run/systemd/resolve/stub-resolv.conf r,
+
 
   # Connecting to mySQL
   /run/mysqld/mysqld.sock rw,
