@@ -46,6 +46,11 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Don't allow guest:guest login with -nochroot flag
+
+
+
+
 Copy/pasting doesn't work at all on Firefox on a Macbook.
 
 todo: Try Firefox on Windows 10, to see if copy/paste works
