@@ -14,3 +14,4 @@ client/noVNC/*
 client/bundle.htm*
 SEMVER
 server/GUEST_COUNTER
+package-lock.json

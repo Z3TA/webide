@@ -7719,12 +7719,13 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var rightWindowKey = 92;
 		
 		var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
+		var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
 		
-		if((combo.sum > 0 || windowKey) && !captured) {
+		if((combo.sum > 0 || metaCmdKey) && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
 			// Enable native commands
-			if( (combo.ctrl || windowKey)  && character == "C") {
+			if( (combo.ctrl || metaCmdKey) && character == "C") {
 				console.log("Native command: copy !? MAC=" + MAC);
 				
 				if(BROWSER == "Firefox" && MAC) nativeCopy = true;
@@ -7747,7 +7748,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					//preventDefault = true;
 				}
 			}
-			else if( (combo.ctrl || windowKey) && character == "V") {
+			else if( (combo.ctrl || metaCmdKey) && character == "V") {
 				console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
 				if( BROWSER == "Firefox" && MAC) nativePaste = true;
@@ -7764,7 +7765,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					//preventDefault = true;
 				}
 			}
-			else if( (combo.ctrl || windowKey) && character == "X") {
+			else if( (combo.ctrl || metaCmdKey) && character == "X") {
 				console.log("Native command: cut !?");
 				
 				if( BROWSER == "Firefox" && MAC) nativeCut = true;
@@ -7795,7 +7796,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 			else if(combo.alt) {} // Wait for ALT+key combo!
 			else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
-			else if(windowKey) {console.log("Window/Cmd key ...");preventDefault = true;} // Do we want to capture Window/Cmd combos !?
+			else if(windowKey) {console.log("Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
+			else if(metaCmdKey) {console.log("meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
 			//else if(combo.shift) {} // Wait for Shift+key combo!
 			//&&//&&//
 			else {
