@@ -163,10 +163,18 @@ console.time = console.timeEnd = function() {};
 		console.time = consoleTimeOriginal
 		console.timeEnd = consoleTimeEndOriginal
 		
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("devModeOn");
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+			// Firefox on Macbook pro might give "Service Worker state is redudant"
+			try {
+				navigator.serviceWorker.controller.postMessage("devModeOn");
+			}
+			catch(err) {
+				console.log("Problem sending message to service worker: " + err.message);
+			}
+		}
 		
 		if(EDITOR.settings.devMode == false || devModeManuallOffOnce) alertBox("Editor devMode active! EDITOR.version=" + EDITOR.version);
-		}
+	}
 	
 	function enableDebugMode() {
 		/*
