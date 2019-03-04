@@ -97,6 +97,8 @@ var QUERY_STRING = function () {
 
 var BROWSER = UTIL.checkBrowser();
 
+// Browsers work differently on Mac
+var MAC = navigator.platform.indexOf("Mac") != -1;
 
 Error.stackTraceLimit = Infinity;
 
