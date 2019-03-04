@@ -41,7 +41,7 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
-
+Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
 
 What I'm working on
 -------------------
