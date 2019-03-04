@@ -46,35 +46,14 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Macbook: mysql problem
-
+Copy pasting no longer seem to work in Safari !?
 
 Windows 10: No version control option!
 
 Able to run on Windows 10
 Able to run on Macbook pro
-
-
-
-Copy/pasting doesn't work at all on Firefox on a Macbook.
-
-todo: Try Firefox on Windows 10, to see if copy/paste works
-
-todo: Test copy/paste and typing afterwards in different versions of Firefox in different OS's.
-
-Copy pasting no longer seem to work in Safari !?
-
-Firefox issue!? After pressing Ctrl+V (only seems to be Ctrl+C, Ctrl+V and Ctrl+X) the next key press will not register!
-
-When typing // after a Ctrl+C Firefox goes into search!!
-
-
-Making the editor work in Ubuntu 18 !
-
-Allow running the cloud server without having mySQL or Nginx installed.
-
-
-
+Able to run on Ubuntu 18
+Able to run on Arch Linux
 
 
 Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
