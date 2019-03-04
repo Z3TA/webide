@@ -7,7 +7,14 @@
 	
 */
 
+
+try {
 var module_mysql = require("mysql2");
+}
+catch(err) {
+	console.log(err.message);
+}
+
 var module_os = require("os");
 var module_fs = require("fs");
 var currentDb = "information_schema";
@@ -21,9 +28,16 @@ catch(err) {
 
 var env = process.env;
 
-
-var MYSQL = {
-	query: function mysqlQuery(user, json, callback) {
+if(!module_mysql) {
+	var MYSQL = {
+		query: moduleDoesntExist,
+		databases: moduleDoesntExist
+	}
+}
+else {
+	
+	var MYSQL = {
+		query: function mysqlQuery(user, json, callback) {
 		
 		var dbName = json.database;
 		
@@ -52,6 +66,7 @@ var MYSQL = {
 	}
 	
 	
+}
 }
 
 
@@ -100,6 +115,11 @@ function connect(username, database, callback) {
 	
 }
 
+function moduleDoesntExist(user, json, callback) {
+	var error = new Error("mysql2 module is not installed on the server!");
+	error.code = "MODULE_MISSING";
+	callback(error);
+}
 
 
 module.exports = MYSQL;
