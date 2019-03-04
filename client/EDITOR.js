@@ -7721,6 +7721,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
 		var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
 		
+		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " BROWSER=" + BROWSER + " MAC=" + MAC);
+		
 		if((combo.sum > 0 || metaCmdKey) && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
@@ -7728,7 +7730,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			if( (combo.ctrl || metaCmdKey) && character == "C") {
 				console.log("Native command: copy !? MAC=" + MAC);
 				
-				if(BROWSER == "Firefox" && MAC) nativeCopy = true;
+				if(MAC) nativeCopy = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7751,7 +7753,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || metaCmdKey) && character == "V") {
 				console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
-				if( BROWSER == "Firefox" && MAC) nativePaste = true;
+				if(MAC) nativePaste = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7768,7 +7770,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || metaCmdKey) && character == "X") {
 				console.log("Native command: cut !?");
 				
-				if( BROWSER == "Firefox" && MAC) nativeCut = true;
+				if(MAC) nativeCut = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
