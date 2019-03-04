@@ -162,8 +162,6 @@ var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 
-var module_mysql = require("mysql2");
-
 //var module_copyFile = require("../shared/copyFile.js");
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 //var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
@@ -176,6 +174,7 @@ try {
 	var module_nodemailer = require('nodemailer');
 	var module_smtpTransport = require('nodemailer-smtp-transport');
 	var module_ps = require('ps-node');
+	var module_mysql = require("mysql2");
 }
 catch(err) {
 	log("Unable to load optional module(s): " + err.message);
@@ -227,6 +226,8 @@ function mysqlConnect() {
 	
 	var mysqlConnectionOptions = {port: MYSQL_PORT, database: "mysql", user: "root", authSwitchHandler: true};
 	// note: without authSwitchHandler auth_socket will fail!
+	
+	if(!module_mysql) return log("module_mysql not loaded!");
 	
 	// Recreate the connection, since the old one cannot be reused.
 	mysqlConnection = module_mysql.createConnection(mysqlConnectionOptions);          
@@ -602,7 +603,7 @@ function main() {
 	
 	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
-	if(info.uid < 0) log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user!", 4);
+	if(info.uid < 0) log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	
 	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
