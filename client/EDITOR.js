@@ -7725,7 +7725,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			
 			// Enable native commands
 			if( (combo.ctrl || windowKey)  && character == "C") {
-				console.log("Native command: copy !?");
+				console.log("Native command: copy !? MAC=" + MAC);
 				
 				if(BROWSER == "Safari" || MAC) nativeCopy = true;
 				
@@ -7748,7 +7748,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 				}
 			}
 			else if( (combo.ctrl || windowKey) && character == "V") {
-				console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+				console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
 				if( BROWSER == "Safari" || MAC) nativePaste = true;
 				
