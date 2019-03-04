@@ -3003,7 +3003,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		USER: name,
 		LOGNAME: name,
 		USER_NAME: name,
-		PATH: "/usr/bin:/bin:/.npm-packages/bin"
+		PATH: process.env.PATH
 	}
 	
 	// For forking when running in the Termux Adnorid app
@@ -3018,6 +3018,9 @@ function createUserWorker(name, uid, gid, homeDir) {
 	else {
 		options.env.uid = uid;
 		options.env.gid = gid;
+		
+		// Assume unix like system
+		options.env.PATH = "/usr/bin:/bin:/.npm-packages/bin";
 		
 		options.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		

@@ -35,7 +35,8 @@ var MERCURIAL = {};
 var execFileOptions = {
 	env: {
 		HOME: process.env.HOME || "/",
-		HGENCODING: "utf-8"
+		HGENCODING: "utf-8",
+		PATH: process.env.path
 	}
 }
 
@@ -304,7 +305,9 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
-				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
+				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + 
+			" rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + 
+			" env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
 				
 				if(err) return callback(err);
 				else if(stderr) return callback(stderr);

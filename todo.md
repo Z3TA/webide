@@ -48,7 +48,8 @@ What I'm working on
 
 Copy pasting no longer seem to work in Safari !?
 
-Windows 10: No version control option!
+Windows 10: Function list in Firefox has double scroll-bars!
+
 
 Able to run on Windows 10
 Able to run on Macbook pro
