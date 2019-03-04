@@ -46,7 +46,8 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
-Copy pasting no longer seem to work in Safari !?
+Copy/pasting does not work on Firefox on Macbook!
+
 
 Windows 10: Function list in Firefox has double scroll-bars!
 
