@@ -218,7 +218,7 @@ process.on("SIGINT", function sigInt() {
 
 process.on("exit", function () {
 	
-	log("Program exit\n\n", 6, true);
+	log("Program exit\n\n", DEBUG, true);
 });
 
 function mysqlConnect() {
@@ -600,7 +600,7 @@ function main() {
 	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
 	
-	log("Server running as user=" + CURRENT_USER);
+	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
 	if(info.uid < 0) log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user!", 4);
 	
@@ -608,6 +608,17 @@ function main() {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
 		log(info);
 		process.exit();
+	}
+	
+	if(NO_CHROOT && !USERNAME && CURRENT_USER) {
+		var homeDir = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".jzeditpw");
+		module_fs.readFile(homeDir, "utf8", function(err, data) {
+			if(err.code == "ENOENT") {
+				log("Did not find " + homeDir, NOTICE);
+				log("Please specify username and password in argv!", NOTICE);
+				process.exit();
+			}
+		});
 	}
 	
 	if(EDITOR_VERSION == 0) {
@@ -1304,7 +1315,7 @@ function sockJsConnection(connection) {
 						if(USERNAME == username && PASSWORD == password) idSuccess();
 						else idFail("Wong username or password! (Username specified in server arguments)");
 					}
-					else if(username == "guest") {
+					else if(username == "guest" && !NO_CHROOT) {
 // ### Login as guest
 // Assign a user from the guest pool
 if(GUEST_POOL.length == 0) {
