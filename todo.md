@@ -46,18 +46,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-Copy/pasting does not work on Firefox on Macbook!
-
-todo: Include event.metaKey in combo to detect Meta+C in Firefox on Mac
-should we also include Windows-key in combo !?!?!? Can you capture Window+key or Meta(cmd)+key (on Mac) !?
-
-Windows 10: Function list in Firefox has double scroll-bars!
-
-
-Able to run on Windows 10
-Able to run on Macbook pro
-Able to run on Ubuntu 18
-Able to run on Arch Linux
+Damnit, I lost the floating window plugin!
 
 
 Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
