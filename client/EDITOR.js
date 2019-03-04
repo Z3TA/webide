@@ -7724,9 +7724,8 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " BROWSER=" + BROWSER + " MAC=" + MAC);
 		
 		if((combo.sum > 0 || metaCmdKey) && !captured) {
-			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
+			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
 			
-			// Enable native commands
 			if( (combo.ctrl || metaCmdKey) && character == "C") {
 				console.log("Native command: copy !? MAC=" + MAC);
 				
