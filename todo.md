@@ -46,6 +46,16 @@ Android browser will not run the script if it contains a default keyword such as
 What I'm working on
 -------------------
 
+Macbook: mysql problem
+
+
+Windows 10: No version control option!
+
+Able to run on Windows 10
+Able to run on Macbook pro
+
+
+
 Copy/pasting doesn't work at all on Firefox on a Macbook.
 
 todo: Try Firefox on Windows 10, to see if copy/paste works

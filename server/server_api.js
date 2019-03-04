@@ -1654,9 +1654,10 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 							EBUSY = resource busy or locked
 							ENOENT = no such file or directory
 							ENOTCONN = socket is not connected, stat '/googleDrive'
+							UNKNOWN = Windows 10 error (probably access denied)
 						*/
 						
-						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN" || err.code == "EACCES") {
+						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN" || err.code == "EACCES" || err.code == "UNKNOWN") {
 							problem = err.code;
 							type = "*"
 						}
