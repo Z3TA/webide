@@ -48,6 +48,8 @@ What I'm working on
 
 Copy/pasting does not work on Firefox on Macbook!
 
+todo: Include event.metaKey in combo to detect Meta+C in Firefox on Mac
+should we also include Windows-key in combo !?!?!? Can you capture Window+key or Meta(cmd)+key (on Mac) !?
 
 Windows 10: Function list in Firefox has double scroll-bars!
 

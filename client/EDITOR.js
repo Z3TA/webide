@@ -7727,7 +7727,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			if( (combo.ctrl || windowKey)  && character == "C") {
 				console.log("Native command: copy !? MAC=" + MAC);
 				
-				if(BROWSER == "Safari" || MAC) nativeCopy = true;
+				if(BROWSER == "Firefox" && MAC) nativeCopy = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7750,7 +7750,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "V") {
 				console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 				
-				if( BROWSER == "Safari" || MAC) nativePaste = true;
+				if( BROWSER == "Firefox" && MAC) nativePaste = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
@@ -7767,7 +7767,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			else if( (combo.ctrl || windowKey) && character == "X") {
 				console.log("Native command: cut !?");
 				
-				if( BROWSER == "Safari") nativeCut = true;
+				if( BROWSER == "Firefox" && MAC) nativeCut = true;
 				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
