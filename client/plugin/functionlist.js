@@ -53,7 +53,7 @@
 			var hide = "Hide function list";
 			var cancel = "Cancel";
 			
-			confirmBox('Hide the function list ?\nClick <i>Show function list</i> in the meny to show it again.', [disable, hide, cancel], function(answer) {
+			confirmBox('Hide the function list ?\nClick <i>Show function list</i> in the menu to show it again.', [disable, hide, cancel], function(answer) {
 				if(answer == cancel) return;
 				
 				if(answer == disable) {

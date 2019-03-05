@@ -156,6 +156,8 @@ text gets blurry when scrolling.
 todo
 ----
 
+Find in files "search report" doesn't work in collaboration mode!
+
 The XML parsers screws up indentation in for example css.svg icon (it keeps adding taps)
 
 ---
