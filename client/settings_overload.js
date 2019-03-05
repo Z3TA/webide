@@ -15,7 +15,8 @@
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
 
-	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + " ligatures=" + false);
+	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
+	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 		/*
@@ -32,6 +33,9 @@
 			and change the path (/FiraCode_1.204/) below:
 			
 			*/
+		
+		console.log("settings_overload.js: Using ligatures with FiraCode");
+		
 		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
 		EDITOR.settings.style.font = "Fira Code";
 		
@@ -51,6 +55,9 @@
 	}
 	else if(process.platform == "win32" && (RUNTIME == "nw.js" || browser == "Chrome") && window.devicePixelRatio == 1) {
 		// Only Chrome/Chromium/nw.js supports sub-pixel antialias. Consolas needs sub-pixel antialias to look good
+		
+		console.log("settings_overload.js: Using LCD sub pixel antialias!");
+		
 		EDITOR.settings.sub_pixel_antialias = true;
 		
 	/*
@@ -77,6 +84,8 @@
 }
 	else if(process.platform == "linux" && RUNTIME == "nw.js") {
 	
+		console.log("settings_overload.js: nw.js on Linux!");
+		
 	/*
 			Linux does not have Consolas (see README.txt on how to download it if you are desperate)
 			
@@ -115,6 +124,9 @@
 	
 }
 	else if(  RUNTIME=="browser" && browser != "Firefox" && (browser.indexOf("MSIE") != 0 || location.host == "127.0.0.1" || location.host == "localhost")  ) {
+		
+		console.log("settings_overload.js: Loading nice font ...");
+		
 		// Firefox have font render issues
 		// Web safe fonts are ugly, try to load a nice font ...
 		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
@@ -131,6 +143,8 @@
 		// Internet Explorer doesn't support sub-pixel rendering / LCD-text in the Canvas!
 		// So Consolas wont look that good ...
 		// Nor does Internet Explorer support custom fonts (unless on localhost)!
+		
+		console.log("settings_overload.js: Using web safe font");
 		
 		// We better use a web safe font in the browser
 		EDITOR.settings.style.font = "Courier New, Courier, monospace";
