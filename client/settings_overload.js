@@ -32,8 +32,8 @@
 (function() { // Self calling function to not clutter global scope
 	"use strict";
 	
-	// For example, changing the color of xml tags:
-	//EDITOR.settings.style.xmlTagColor = "rgb(255,0,0)";
+	if(LINUX) return; // I personally think the default settings (Courier New, 15px) looks best on Ubuntu 18!
+	// Mac(book) looks best with a modern font, Windows should use Consolas. (And LiberationMono looks really good on Edge which doesn't support LCD/Consolas)
 	
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
