@@ -46,6 +46,14 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Bigger text in Firefox and Edge on Windows because bigger text look better with no lcd-anti-alias
+The default text size on Firefox on Linux looks good!
+font: "Courier New, Courier, monospace"
+fontSize: 15
+
+For files that are not parsed, detect tabs vs spaces, then show tabs as x spaces and insert a tab when you make a space at beginning of line
+if it uses tabs.
+
 Damnit, I lost the floating window plugin!
 
 

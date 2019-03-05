@@ -30,7 +30,7 @@ function startClient {
 	chrome --app=$url > /dev/null 2>&1 ||
 	unity-webapps-runner -i JZedit -h http://127.0.0.1:8099/index.htm 2>&1 ||
 	firefox -new-tab $url > /dev/null 2>&1 ||
- open "$url" 2>&1 ||
+	open "$url" 2>&1 ||
 	echo "Failed to start the client!"
 }
 
@@ -75,9 +75,9 @@ else
 
 	# Make sure the server is running
 	if ! (ps ax | grep "[n]${CMD:1}" > /dev/null) then
-	    echo "Could not start the server!" >&2
-	    echo "[n]${CMD:1}"
-	    ps ax | grep "[n]${CMD:1}"
+		echo "Could not start the server!" >&2
+		echo "[n]${CMD:1}"
+		ps ax | grep "[n]${CMD:1}"
 	else
 		echo Server started!
 
@@ -86,8 +86,8 @@ else
 
 		startClient
 
-  # Problem: Firefox browser will exit
-  read -n 1 -s -r -p "Press any key to top the server"
+  		# Problem: Firefox browser will "exit" even though it started
+  		read -n 1 -s -r -p "Press any key to top the server"
 
 		# Kill the server when client exit
 		kill $!

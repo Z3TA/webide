@@ -22,7 +22,7 @@ https://www.webtigerteam.com/jzedit/download/
 If you only want the server/cloud version, download it from the link above.
 The easiest way to install the desktop version is via npm:
 
-`npm install -g jzedit`
+`npm install --global jzedit`
 
 Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
@@ -43,14 +43,17 @@ sudo apt-get install -y nodejs
 
 4. Install "node_modules" packages: `npm install`
 
-5. Make jzedit.desktop and linux_start.sh executable:
-Via terminal: `chmod +x jzedit.desktop linux_start.sh`
+5. Make linux_launcher.desktop and linux_start.sh executable:
+Via terminal: `chmod +x linux_launcher.desktop linux_start.sh`
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
-6. Add desktop shortcut (Unity/GNOME): Double click on jzedit.desktop to start the editor. 
+6. Add desktop shortcut (Unity/GNOME): 
+Unity: Double click on linux_launcher.desktop to start the editor.
 Then right click on the JZedit icon on the Launcher (left side menu), and select "Lock to Launcher"
 
-Or run the editor via `./linux_start.sh`
+Gnome: Run ./linux_create_desktop_shortcut.sh
+
+Or manually run the editor via `./linux_start.sh`
 
 
 Windows
