@@ -1548,15 +1548,17 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		var f = userAgent.search("Firefox");
 		var m8 = userAgent.search("MSIE 8.0");
 		var m9 = userAgent.search("MSIE 9.0");
+		var edge = userAgent.search("Edge");
 		
 		var isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
 		var isIe = (userAgent.toLowerCase().indexOf("msie") != -1 || userAgent.toLowerCase().indexOf("trident") != -1);
 		
 		if(isSafari) browser = "Safari";
-		else if (c > -1) browser = "Chrome";
-		else if (f > -1) browser = "Firefox";
-		else if (m9 > -1) browser ="MSIE 9.0";
-		else if (m8 > -1) browser ="MSIE 8.0";
+		else if (edge != -1) browser ="Edge"; // Edge masquerade as Chrome, so theck for Edge first!
+		else if (f != -1) browser = "Firefox";
+		else if (m9 != -1) browser ="MSIE 9.0";
+		else if (m8 != -1) browser ="MSIE 8.0";
+		else if (c != -1) browser = "Chrome";
 		else if(isIe) browser = "MSIE";
 		
 		return browser;

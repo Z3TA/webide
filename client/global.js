@@ -34,6 +34,8 @@ if (window.navigator.standalone === true) {
 	DISPLAY_MODE = "standalone";
 }
 
+// Browsers work differently on Mac
+var MAC = navigator.platform.indexOf("Mac") != -1;
 
 var __dirname;
 if(RUNTIME != "nw.js") {
@@ -43,6 +45,7 @@ if(RUNTIME != "nw.js") {
 			var platform = "win32";
 			if(navigator.platform == "Win32") platform = "win32";
 			if(navigator.platform.indexOf("Linux") != -1) platform = "linux";
+			if(navigator.platform.indexOf("Mac") != -1) platform = "darwin";
 			return platform;
 		})(),
 		cwd: function getWorkingDirectory() {
@@ -97,8 +100,6 @@ var QUERY_STRING = function () {
 
 var BROWSER = UTIL.checkBrowser();
 
-// Browsers work differently on Mac
-var MAC = navigator.platform.indexOf("Mac") != -1;
 
 Error.stackTraceLimit = Infinity;
 
