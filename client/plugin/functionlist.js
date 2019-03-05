@@ -510,11 +510,31 @@
 		domModel.forEach(addOption);
 		
 		
+		if(BROWSER == "Firefox" && process.platform == "win32") {
+			/*
+				Both the wrapper div and the select box have a scroll bar.
+				It would be best if the select alement only had a scrollbar,
+				but all widgets in left and right column needs to have a scrollbar to prevent stuff from getting hidden
+				So we need to hide the scrollbar of the select element
+				
+				margin-right on the wrapper only seem to hide the scrollbar on the wrapper.
+				
+			*/
+			//functionListSelect.style.marginLeft="18px"; // This gives a scrollbar-x on the wrapper that we cant hide
+			//functionListWrap.style.overflowX="hidden"; // Doesn't work
+			
+			//functionListWrap.style.marginRight="-30px"; // This will hide both scrollbars, but screw with the columns pushing the canvas to the right
+			
+			//functionListSelect.style.position="absolute"; 
+			functionListSelect.style.right="-16px"; // Wow this works!!
+			
+		}
+		
 		
 		// Adjust the height
 		functionListSelect.setAttribute("size", domModel.length);		
 		
-		// Why isn't the width pushing out width of the parent!?
+		
 		
 		EDITOR.resizeNeeded();
 		
