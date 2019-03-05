@@ -16,9 +16,13 @@
 	Chrome on Windows 10   Yes   Yes
 	Chrome on Ubuntu 16    Yes   Yes
 	Firefox on Ubuntu 16   Yes²  No
+	Safari on Macbook      Yes   No
+	Firefox on Macbook     Yes   Maybe³
+	Chrome on Macbook      Yes   Maybe³
 	
 	1) IE only supports web fonts on 127.0.0.1 or localhost!
 	2) Firefox on Ubuntu 16 renders font differently!
+	3) If you have a high pixel density screen you can turn off LCD-sub-pixel-antialias as it's no longer needed
 	
 */
 
@@ -98,7 +102,11 @@
 	EDITOR.settings.style.fontSize = 15;
 	EDITOR.settings.gridHeight = 23;
 		EDITOR.settings.gridWidth = 8;
-	
+		
+		if(process.platform == "win32" && browser == "Chrome") {
+			EDITOR.settings.gridWidth = 8.25;
+		}
+		
 }
 	else if(process.platform == "linux" && RUNTIME == "nw.js") {
 	
@@ -141,7 +149,10 @@
 	EDITOR.settings.gridWidth = 7.83;
 	
 }
-	else if(  RUNTIME=="browser" && (browser != "Firefox" || firefox_on_windows) && (browser.indexOf("MSIE") != 0 || location.host == "127.0.0.1" || location.host == "localhost")  ) {
+	else if(  RUNTIME=="browser" && 
+	(browser != "Firefox" || firefox_on_windows || MAC) && 
+	(browser.indexOf("MSIE") != 0 || location.host == "127.0.0.1" || location.host == "localhost")  
+	) {
 		
 		/*
 			Firefox have font render issues...
@@ -225,7 +236,7 @@
 	function debug(msg) {
 		
 		console.log("settings_overload.js: debug: " + msg);
-		return;
+		//return;
 		
 		// Because Edge and Firefox's Developer tools are so freaking slow
 		alert(msg + "\nRUNTIME=" + RUNTIME + "\nbrowser=" + browser + "\nprocess.platform=" + process.platform +
