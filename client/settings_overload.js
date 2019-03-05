@@ -154,17 +154,24 @@
 		
 		debug("Loading nice font ...");
 		
-			UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
-			EDITOR.settings.style.font = "DejaVuSansMono";
 		
 		if(process.platform == "win32") {
-			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a larger font
-			EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
+			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
+			
+			// LiberationMono looks nice in Edge!
+			
+			UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/LiberationMono.css");
+			EDITOR.settings.style.font = "LiberationMono";
+			EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
 			EDITOR.settings.style.fontSize = 14;
-			EDITOR.settings.gridHeight = 23;
+			EDITOR.settings.gridHeight = 22;
 			EDITOR.settings.gridWidth = 8.433;
+			
 		}
 		else {
+			
+			UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+			EDITOR.settings.style.font = "DejaVuSansMono";
 			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
 			EDITOR.settings.style.fontSize = 13;
 			EDITOR.settings.gridHeight = 22;

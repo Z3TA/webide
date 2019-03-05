@@ -1,0 +1,10 @@
+@font-face{
+	font-family: 'LiberationMono';
+	src: url('LiberationMono-Regular.ttf') format('truetype');
+}
+
+@font-face{
+	font-family: 'LiberationMono';
+	font-weight: bold;
+	src: url('LiberationMono-Bold.ttf') format('truetype');
+}
