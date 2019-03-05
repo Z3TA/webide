@@ -156,6 +156,7 @@ text gets blurry when scrolling.
 todo
 ----
 
+The XML parsers screws up indentation in for example css.svg icon (it keeps adding taps)
 
 ---
 
