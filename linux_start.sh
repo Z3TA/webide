@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "linux_start.sh running in folder: $PWD"
+
 #
 # This script will run the editor locally.
 # 
@@ -11,7 +13,7 @@
 # Users can then right click on the icon and select "Lock to launcher"
 # We must make sure it has the correct path
 mv linux_launcher.desktop linux_launcher.desktop-bak
-sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux_launcher.desktop-bak > linux_launcher.desktop
+sed -e "s,Path=.*,Path=$HOME,g; s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux_launcher.desktop-bak > linux_launcher.desktop
 rm linux_launcher.desktop-bak
 
 # Make it runable again

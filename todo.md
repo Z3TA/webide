@@ -48,6 +48,9 @@ What I'm working on
 
 Check font settings in Firefox and Chromium on Ubuntu 18
 
+
+Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
+
 When reloading while in collaboration mode and then editing I sometimes get errors like:
 Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
 

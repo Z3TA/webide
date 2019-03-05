@@ -1,7 +1,8 @@
 [Desktop Entry]
 Name=jzedit
-Comment=Run the editor
+Comment=JZedit web based edtior for JavaScript/Node.JS, web sites and apps.
 Exec=bash -c '_PWD="$PWD"; cd "`echo $0 | sed s/linux_launcher.desktop$//`"; ./linux_start.sh run; cd "_PWD"' %k
 Icon=/zpcdata/projects/jzedit/client/gfx/jz64.png
+Path=/home/zeta
 Terminal=true
 Type=Application

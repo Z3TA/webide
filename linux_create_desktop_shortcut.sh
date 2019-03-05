@@ -24,7 +24,7 @@ echo "Desktop: $desktop"
 # Create a launcher.desktop file
 appname="jzedit.desktop"
 destination=~/.local/share/applications/$appname
-sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g; s,Exec=.*,Exec=$PWD/linux_start.sh,g" linux_launcher.desktop > $destination
+sed -e "s,Path=.*,Path=$PWD,g; s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g; s,Exec=.*,Exec=$PWD/linux_start.sh,g" linux_launcher.desktop > $destination
 
 
 # Get the launcher favourites
