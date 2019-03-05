@@ -34,8 +34,6 @@ if (window.navigator.standalone === true) {
 	DISPLAY_MODE = "standalone";
 }
 
-// Browsers work differently on Mac
-var MAC = navigator.platform.indexOf("Mac") != -1;
 
 var __dirname;
 if(RUNTIME != "nw.js") {
@@ -75,7 +73,6 @@ else if(RUNTIME == "nw.js") {
 	__dirname = require("dirname");
 }
 
-
 var QUERY_STRING = function () {
 	// Self calling function to not clutter global scope
 	var query_string = {};
@@ -100,8 +97,11 @@ var QUERY_STRING = function () {
 
 var BROWSER = UTIL.checkBrowser();
 
-
-Error.stackTraceLimit = Infinity;
+// Browsers work differently depending on which platofrm they are running ...
+var MSIE = (BROWSER.indexOf("MSIE") == 0); // If we are on Internet Explorer
+var MSWIN = (process.platform == "win32"); // If we are on Windows (any version)
+var LINUX = (process.platform == "linux"); // If we are on Linux
+var MAC = (navigator.platform.indexOf("Mac") != -1); // If we are on a Mac(book)
 
 
 // Global constants, note that const is block scoped!! (can't if(foo) const bar =1)
@@ -116,3 +116,4 @@ var FAIL = false;
 var PREVENT_DEFAULT = false;
 var ALLOW_DEFAULT = true;
 
+Error.stackTraceLimit = Infinity;

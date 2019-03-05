@@ -46,7 +46,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-Check font settings in Firefox and Chromium on Ubuntu 18
 
 
 Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.

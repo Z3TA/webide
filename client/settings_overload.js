@@ -12,13 +12,16 @@
 	Browser                Fonts LCD 
 	IE11 on Windows 7      No¹   No 
 	Edge on Windows 10     Yes   No
-	Firefox on Windows 10  Yes   Yes
+	Safari on Macbook      Yes   Maybe³
+	
 	Chrome on Windows 10   Yes   Yes
 	Chrome on Ubuntu 16    Yes   Yes
-	Firefox on Ubuntu 16   Yes²  No
-	Safari on Macbook      Yes   No
-	Firefox on Macbook     Yes   Maybe³
 	Chrome on Macbook      Yes   Maybe³
+	
+	Firefox on Windows 10  Yes   Yes
+	Firefox on Ubuntu 16   Yes²  No
+	Firefox on Ubuntu 18   Yes   Yes
+	Firefox on Macbook     Yes   Maybe³
 	
 	1) IE only supports web fonts on 127.0.0.1 or localhost!
 	2) Firefox on Ubuntu 16 renders font differently!
@@ -27,13 +30,13 @@
 */
 
 (function() { // Self calling function to not clutter global scope
-
+	"use strict";
+	
 	// For example, changing the color of xml tags:
 	//EDITOR.settings.style.xmlTagColor = "rgb(255,0,0)";
 	
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
-	var firefox_on_windows = (process.platform == "win32" && browser == "Firefox");
 	
 	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
 	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
@@ -73,7 +76,7 @@
 			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
 		}
 	}
-	else if(process.platform == "win32" && (RUNTIME == "nw.js" || browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
+	else if(MSWIN && (RUNTIME == "nw.js" || browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
 		/*
 			IE and Edge does not suppport sub-pixel-antialias in the Canvas!
 			Consolas needs sub-pixel antialias to look good.
@@ -92,7 +95,7 @@
 		
 	*/
 		
-		debug("Using LCD sub pixel antialias!");
+		debug("Using Consolas with LCD sub pixel antialias!");
 		
 		// Tested in Firefox on Windows 10
 		
@@ -103,12 +106,12 @@
 	EDITOR.settings.gridHeight = 23;
 		EDITOR.settings.gridWidth = 8;
 		
-		if(process.platform == "win32" && browser == "Chrome") {
+		if(MSWIN && browser == "Chrome") {
 			EDITOR.settings.gridWidth = 8.25;
 		}
 		
 }
-	else if(process.platform == "linux" && RUNTIME == "nw.js") {
+	else if(LINUX && RUNTIME == "nw.js") {
 	
 		debug("nw.js on Linux!");
 		
@@ -150,23 +153,22 @@
 	
 }
 	else if(  RUNTIME=="browser" && 
-	(browser != "Firefox" || firefox_on_windows || MAC) && 
-	(browser.indexOf("MSIE") != 0 || location.host == "127.0.0.1" || location.host == "localhost")  
+	(!MSIE || location.host == "127.0.0.1" || location.host == "localhost")  
 	) {
 		
 		/*
-			Firefox have font render issues...
+			Try to load a web font (most browsers should now support them)
 			
-			Web safe fonts are ugly, try to load a nice font ...
-			
-			Font's seem to work nice on localhost/127.0.0.1!?
+			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 
 		*/
 		
-		debug("Loading nice font ...");
+		if(window.devicePixelRatio == 1) EDITOR.settings.sub_pixel_antialias = true;
+		
+		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
 		
-		if(process.platform == "win32") {
+		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
 			// LiberationMono looks nice in Edge!
@@ -236,11 +238,11 @@
 	function debug(msg) {
 		
 		console.log("settings_overload.js: debug: " + msg);
-		return;
+		//return;
 		
 		// Because Edge and Firefox's Developer tools are so freaking slow
-		alert(msg + "\nRUNTIME=" + RUNTIME + "\nbrowser=" + browser + "\nprocess.platform=" + process.platform +
-		"\nligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio);
+		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform +
+		"\nligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\nMSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE);
 	}
 	
 	
