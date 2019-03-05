@@ -46,6 +46,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Check font settings in Firefox and Chromium on Ubuntu 18
+
+When reloading while in collaboration mode and then editing I sometimes get errors like:
+Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
+
 Sometimes when hitting backspace in Firefox on Windows you trigger browser.back which is highly annoying!
 
 For files that are not parsed, detect tabs vs spaces, then show tabs as x spaces and insert a tab when you make a space at beginning of line
