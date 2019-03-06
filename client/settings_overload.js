@@ -32,9 +32,6 @@
 (function() { // Self calling function to not clutter global scope
 	"use strict";
 	
-	if(LINUX) return; // I personally think the default settings (Courier New, 15px) looks best on Ubuntu 18!
-	// Mac(book) looks best with a modern font, Windows should use Consolas. (And LiberationMono looks really good on Edge which doesn't support LCD/Consolas)
-	
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
 	
@@ -152,9 +149,7 @@
 	EDITOR.settings.gridWidth = 7.83;
 	
 }
-	else if(  RUNTIME=="browser" && 
-	(!MSIE || location.host == "127.0.0.1" || location.host == "localhost")  
-	) {
+	else if(    RUNTIME=="browser" && (   browser=="Firefox" || browser == "Chrome" || ( MSIE && (location.host == "127.0.0.1" || location.host == "localhost") )   )    ) {
 		
 		/*
 			Try to load a web font (most browsers should now support them)
@@ -163,7 +158,7 @@
 
 		*/
 		
-		if(window.devicePixelRatio == 1) EDITOR.settings.sub_pixel_antialias = true;
+		if(window.devicePixelRatio == 1 && MSWIN) EDITOR.settings.sub_pixel_antialias = true;
 		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
@@ -173,7 +168,7 @@
 			
 			// LiberationMono looks nice in Edge!
 			
-			UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/LiberationMono.css");
+			UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css");
 			EDITOR.settings.style.font = "LiberationMono";
 			EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
 			EDITOR.settings.style.fontSize = 14;
