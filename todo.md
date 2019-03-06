@@ -58,11 +58,6 @@ Sometimes when hitting backspace in Firefox on Windows you trigger browser.back 
 For files that are not parsed, detect tabs vs spaces, then show tabs as x spaces and insert a tab when you make a space at beginning of line
 if it uses tabs.
 
-Damnit, I lost the floating window plugin!
-
-
-Make it so you don't have to click "are you sure", when closing a floating window, (if the file is saved?)
-
 ---
 
 Using git

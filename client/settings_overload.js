@@ -233,7 +233,7 @@
 	function debug(msg) {
 		
 		console.log("settings_overload.js: debug: " + msg);
-		//return;
+		return;
 		
 		// Because Edge and Firefox's Developer tools are so freaking slow
 		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform +
