@@ -36,12 +36,16 @@ else {
 	TERMINAL.close = terminalClose;
 }
 
+var defaultEnv = {
+	PATH: "/usr/bin:/bin/"
+};
+
 function newTerminal(user, json, callback) {
 	
 	var cols = json.cols || 80;
 	var rows = json.rows || 30;
 	var cwd = json.cwd || process.env.HOME;
-	var env = json.env || process.env;
+	var env = json.env || process.env || defaultEnv;
 	var defaultShell = module_os.platform() == 'win32' ? 'powershell.exe' : '/bin/bash';
 	var exec = json.exec || defaultShell;
 	var termId = json.id || ++TERMINAL_COUNTER;
