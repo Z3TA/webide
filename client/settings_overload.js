@@ -162,7 +162,6 @@
 		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
-		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
@@ -184,6 +183,13 @@
 			EDITOR.settings.style.fontSize = 13;
 			EDITOR.settings.gridHeight = 22;
 			EDITOR.settings.gridWidth = 7.83;
+		
+			if(browser == "Firefox") {
+				// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
+				EDITOR.settings.gridWidth = 8;
+				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
+			}
+			
 		}
 	}
 	else if(RUNTIME=="browser") {
