@@ -36,7 +36,7 @@ var execFileOptions = {
 	env: {
 		HOME: process.env.HOME || "/",
 		HGENCODING: "utf-8",
-		PATH: process.env.path
+		PATH: process.env.PATH || "/usr/bin:/bin/"
 	}
 }
 
