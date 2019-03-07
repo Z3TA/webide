@@ -28,8 +28,9 @@ var fs = require("fs");
 var child_process = require('child_process');
 
 
-if(!FORCE) {
-	// Make sure it's a jzedit user!
+if(FORCE) startDelete();
+else {
+// Make sure it's a jzedit user!
 	try {
 var hashedPw = fs.readFileSync(UTIL.joinPaths([HOME, username, ".jzeditpw"]), ENCODING);
 // Should throw if the file doesn't exist!
@@ -39,8 +40,17 @@ catch(err) {
 		console.log(username + " is probably not a jzedit user. Use -force flag to delete anaway.");
 		process.exit();
 	}
+	
+	console.log("It's recommended to disable the jzedit service and reboot the server to release any mounted folders.");
+	console.log("Deleting a user while a folder is mounted will result in the mounted folder also getting deleted!");
+	console.log("Press any key to continue ... Or Ctrl+C to abort");
+	process.stdin.once('data', function () {
+		startDelete();
+	});
 }
 
+function startDelete() {
+	
 // Kill all processes owned by this user (for example scripts "in production")
 var ps = child_process.execSync("ps aux | grep ^" + username + " || true").toString(ENCODING).trim();
 if(ps) {
@@ -113,23 +123,31 @@ unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-c
 	
 */
 
+// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
+// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
 
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
-	/*
-		umount("/home/" + username + "/dev/", true);
-		umount("/home/" + username + "/lib/", true);
-		umount("/home/" + username + "/lib64/", true);
-		umount("/home/" + username + "/usr/", true);
-		umount("/home/" + username + "/etc/", true);
+
+	// Same order as in server.js to make it easier to spot what is missing
+	umount("/home/" + username + "/usr/", true);
+	umount("/home/" + username + "/etc/", true);
+	umount("/home/" + username + "/proc/", true);
+	umount("/home/" + username + "/dev/pts", true);
+	umount("/home/" + username + "/dev/", true);
+	
+	// Just in case
 		umount("/home/" + username + "/run/", true);
-	*/
+	umount("/home/" + username + "/bin/", true);
+
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
 
-umount("/home/" + username + "/etc/ssl/certs");
-
+	
+	umount("/home/" + username + "/etc/ssl/certs");
+	
 umount("/home/" + username + "/usr/bin/env");
 umount("/home/" + username + "/usr/bin/hg");
+	umount("/home/" + username + "/usr/bin/git");
 umount("/home/" + username + "/usr/bin/node");
 umount("/home/" + username + "/usr/bin/python");
 umount("/home/" + username + "/usr/bin/ssh");
@@ -137,8 +155,21 @@ umount("/home/" + username + "/usr/bin/ssh-keygen");
 umount("/home/" + username + "/usr/bin/unrar");
 umount("/home/" + username + "/usr/bin/unzip");
 
-// -----------------------------------------------
-
+	umount("/home/" + username + "/usr/lib");
+	umount("/home/" + username + "/usr/local/lib");
+	umount("/home/" + username + "/usr/share");
+	
+	umount("/home/" + username + "/proc/cpuinfo");
+	umount("/home/" + username + "/proc/stat");
+	umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
+	
+	umount("/home/" + username + "/dev/urandom");
+	umount("/home/" + username + "/dev/null");
+	umount("/home/" + username + "/dev/ptmx");
+	umount("/home/" + username + "/dev/pts");
+	
+	//umount("/home/" + username + "/dev/tty");
+	
 umount("/home/" + username + "/bin/bash");
 umount("/home/" + username + "/bin/gunzip");
 umount("/home/" + username + "/bin/gzip");
@@ -151,21 +182,8 @@ umount("/home/" + username + "/bin/rmdir");
 umount("/home/" + username + "/bin/sh");
 umount("/home/" + username + "/bin/tar");
 
-umount("/home/" + username + "/dev/urandom");
-umount("/home/" + username + "/dev/null");
-umount("/home/" + username + "/dev/ptmx");
-umount("/home/" + username + "/dev/pts");
-
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
-
-umount("/home/" + username + "/proc/cpuinfo");
-umount("/home/" + username + "/proc/stat");
-umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
-
-umount("/home/" + username + "/usr/lib");
-umount("/home/" + username + "/usr/local/lib");
-umount("/home/" + username + "/usr/share");
 
 fuseUmount("/home/" + username + "/googleDrive");
 
@@ -245,7 +263,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 	});
 }
 else userdel();
-
+}
 
 function restartEditorService() {
 	console.log("Restarting jzedit service ...");
@@ -273,16 +291,24 @@ function userdel() {
 		
 		var error = (err && err.message) || stderr;
 		
+		if(error) console.log(error);
+		
 		var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
+		error = error.replace(mailspool, "").trim();
+		
+		var userDoesNotExist = "userdel: user '" + username + "' does not exist";
+		error = error.replace(userDoesNotExist, "").trim();
+		
+		var comandFailed = "Command failed: " + userDelCmd;
+		error = error.replace(comandFailed, "").trim();
+		
 		
 		if (error) {
-			if(error.indexOf("userdel: user '" + username + "' does not exist") == -1
-			&& stderr.trim() != mailspool) {
-				throw err || new Error(stderr);
+			throw new Error(error);
 			}
-		}
 		
 		console.log("User " + username + " deleted!");
+		process.exit();
 		
 	});
 }
