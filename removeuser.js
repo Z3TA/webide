@@ -43,7 +43,7 @@ catch(err) {
 	
 	console.log("It's recommended to disable the jzedit service and reboot the server to release any mounted folders.");
 	console.log("Deleting a user while a folder is mounted will result in the mounted folder also getting deleted!");
-	console.log("Press any key to continue ... Or Ctrl+C to abort");
+	console.log("Press Enter to continue ... Or Ctrl+C to abort");
 	process.stdin.once('data', function () {
 		startDelete();
 	});
