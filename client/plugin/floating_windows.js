@@ -1,3 +1,10 @@
+/*
+	
+	Sugg: Detect if on desktop computer, only available if you got a big screen !?
+	Answer: Some mobiles support split screen, then it could be useful.
+	
+*/
+
 (function() {
 	"use strict";
 	
@@ -28,7 +35,7 @@
 		
 		
 		EDITOR.createWindow(browserWindowOptions, function windowOpened(err, browserWindow) {
-if(err) throw err;
+			if(err) throw err;
 			
 			// Load the file in the other window
 			console.log(browserWindow.window);
@@ -44,10 +51,10 @@ if(err) throw err;
 				otherEditor.on("fileClose", function fileClosed(closedFile) {
 					var openedFiles = Object.keys(otherEditor.files);
 					if(openedFiles.length == 1) {
-browserWindow.close();
-setTimeout(browserWindowClosed, 100);
+						browserWindow.close();
+						setTimeout(browserWindowClosed, 100);
 					}
-			});
+				});
 				
 				
 				// Close dialog about collaboratior joining
@@ -66,23 +73,23 @@ setTimeout(browserWindowClosed, 100);
 						return undefined; // Will not warn about unsaved changes
 					}
 				}, 1000);
-
+				
 				function checkIfClosed() {
 					if(!browserWindow || browserWindow.closed) {
-browserWindowClosed();
+						browserWindowClosed();
 					}
 				}
 				
-function browserWindowClosed() {
+				function browserWindowClosed() {
 					clearInterval(checkCloseInterval);
 					
 					// Close dialog about collaboratior leaving
 					EDITOR.closeAllDialogs();
 				}
-
+				
+			});
+			
 		});
-		
-	});
 	}
 	
 	
