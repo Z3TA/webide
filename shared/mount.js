@@ -47,21 +47,60 @@ function makeDirP(path, callback) {
 	}
 }
 
-function mount(sourcePath, targetPath, callback) {
-//console.time("mounting " + targetPath);
+function mount(sourcePath, targetPath, command, callback) {
+
+	if(typeof command == "function" && callback == undefined) {
+		callback = command;
+		command = undefined;
+	}
+	
+	//console.time("mounting " + targetPath);
 var abort = false;
 	var retryCounter = 0;
 // Are we mounting a file or a folder !?
 
-module_fs.stat(sourcePath, function(err, sourceStats) {
+	if(typeof type == "function" && callback == undefined) {
+		callback = type;
+		type = undefined;
+	}
+	
+	if(typeof targetPath != "string") throw new Error("Second parameter targetPath=" + targetPath + " is not optional!");
+	
+	var targetParent = UTIL.parentFolder(targetPath);
+	var targetParentStats;
+	
+	var sourceStats = { // For when sourcePath is null
+		isDirectory: function isDirectory() {
+			// Depends on the target
+			var lastChar = targetPath.slice(-1);
+			if(lastChar == "/") return true;
+			else return false;
+		}
+	};
+	
+	if(!sourcePath) {
+		// Stat the parent folder instead
+		module_fs.stat(targetParent, function(err, stats) {
+			if(err) return mountDone(err);
+			
+			targetParentStats = stats;
+			
+			statTarget();
+		});
+	}
+	else module_fs.stat(sourcePath, function(err, stats) {
+		if(err) return mountDone(err);
 
-if(err) return mountDone(err);
-
+		sourceStats = stats;
+		
 //console.log("Folder exist: " + sourcePath);
 
-// Does the target exist ?
+		statTarget();
+});
+
+	function statTarget() {
+		// We should *always* check the target to make sure it's not already mounted
 		module_fs.stat(targetPath, function targetStat(err, targetStats) {
-			
 			if(err) {
 				if(err.code != "ENOENT") return mountDone(err);
 				
@@ -117,10 +156,62 @@ if(err) return mountDone(err);
 			else {
 				
 				//console.log("Target exist: " + targetPath);
+				/*
+					
+					Problem: If no source is given, how to determen if target is already mounted or not !?
+					
+					not mounted:
+					dev: 51,
+					mode: 16877,
+					nlink: 2,
+					uid: 0,
+					gid: 0,
+					rdev: 0,
+					blksize: 512,
+					ino: 6,
+					size: 2,
+					blocks: 1,
+					
+					
+					mounted: 
+					dev: 66,
+					mode: 16877,
+					nlink: 2,
+					uid: 0,
+					gid: 0,
+					rdev: 0,
+					blksize: 1024,
+					ino: 1,
+					size: 0,
+					blocks: 0,
+					
+					mounted:
+					dev: 23,
+					mode: 16877,
+					nlink: 19,
+					uid: 0,
+					gid: 0,
+					rdev: 0,
+					blksize: 2048,
+					ino: 27,
+					size: 31,
+					blocks: 17,
+					
+					The only think that is different is dev!
+					If it's mounted, the dev is likely to be something else then the parent dir!
+					
+				*/
 				
-				if(sourceStats.ino == targetStats.ino) {
-					//console.timeEnd("mounting " + targetPath);
-					return mountDone(null); // Already mounted!
+				if(!sourcePath) {
+					if(targetParentStats.dev != targetStats.dev) {
+						return mountDone(null); // Already mounted!
+					}
+				}
+				else {
+					if(sourceStats.ino == targetStats.ino) {
+						//console.timeEnd("mounting " + targetPath);
+						return mountDone(null); // Already mounted!
+					}
 				}
 				
 				if(sourceStats.isDirectory()) {
@@ -166,26 +257,26 @@ if(err) return mountDone(err);
 					else targetCreated();
 				}
 			}
-			
-			function targetCreated() {
-				
-				var exec = module_child_process.exec;
-				
-				exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
-					if(error) return mountDone(error);
-					if(stderr) return mountDone(new Error(stderr));
-					if(stdout) return mountDone(new Error(stdout));
-					
-					//console.timeEnd("mounting " + targetPath);
-					return mountDone(null);
-				});
-				
-			}
-			
 		});
-
-});
-
+	}
+	
+	function targetCreated() {
+		
+		var exec = module_child_process.exec;
+		
+		if(!command) command = "mount --bind " + sourcePath + " " + targetPath;
+		
+		exec(command, function(error, stdout, stderr) {
+			if(error) return mountDone(error);
+			if(stderr) return mountDone(new Error(stderr));
+			if(stdout) return mountDone(new Error(stdout));
+			
+			//console.timeEnd("mounting " + targetPath);
+			return mountDone(null);
+		});
+		
+	}
+	
 function mountDone(err) {
 abort = true;
 if(callback) {

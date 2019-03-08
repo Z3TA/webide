@@ -32,7 +32,15 @@ var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
-var DEBUG_CHROOT = false;
+
+// DEBUG_CHROOT has to be set manually!
+// When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
+// Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
+// Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
+var DEBUG_CHROOT = false; // Mounts everyhing into the chroot if set to true
+var MOUNT_BINS = false; // Mounts /bin and /usr/bin
+if(MOUNT_BINS == true && DEBUG_CHROOT == true) throw new Error("Not both DEBUG_CHROOT and MOUNT_BINS can be true, choose one!");
+
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
@@ -1950,7 +1958,8 @@ function checkMounts(options, checkMountsCallback) {
 	];
 	
 	var nginxProfileOK = false;
-	var foldersToMount = 24;
+	var foldersToMount = 3;
+	var foldersMounted = 0;
 	var apparmorProfilesToCreate = apparmorProfiles.length;
 	var reloadApparmor = false;
 	var reloadedApparmor = false;
@@ -1999,8 +2008,7 @@ function checkMounts(options, checkMountsCallback) {
 		/*
 			Make sure mounts exist
 			----------------------
-			Mount these instead of copying to save hdd space
-			Don't forget to update var foldersToMount=
+			Mount instead of copying to save hdd space
 			
 			Problem: Racing to create folders
 			Solution: Create folder before mounting
@@ -2008,7 +2016,7 @@ function checkMounts(options, checkMountsCallback) {
 			Each mount takes ca 150ms, so only mount bare minimum for performance!
 			(it's better performance wise to mount a whole folder then many separate files in the same folder)
 			
-			Sort alpabetically. And don't forget to update removeuser.js !
+			Don't forget to update removeuser.js !
 		*/
 		
 		console.time("Mount " + username + " files and folders");
@@ -2040,7 +2048,7 @@ function checkMounts(options, checkMountsCallback) {
 			});
 			
 			function mountMysqlClient() {
-				if(DEBUG_CHROOT) {
+				if(DEBUG_CHROOT || MOUNT_BINS) {
 				// /usr/bin will be mounted anyway
 				mysqlCheck = true;
 				checkMountsReadyMaybe();
@@ -2058,61 +2066,97 @@ function checkMounts(options, checkMountsCallback) {
 			}
 		});
 		
+		// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
+		// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
 		
-		if(!DEBUG_CHROOT) {
-			foldersToMount += 10; // <-- Update
-			
-			module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
-			
-			module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-			module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-			module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
-			module_mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
-			module_mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-			module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-			module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
-			module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
-			module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
-			
-		}
-		else {
-			foldersToMount += 2;
-			module_mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
-			module_mount("/etc/", homeDir + "etc/", folderMounted);
-			npmSymLinkCreated = true;
-		}
+		// ALSO UPDATE removeuser.js !!!
 		
-		module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
-		module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
-		module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
-		module_mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
-		module_mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-		module_mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
-		module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
-		module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
-		module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
-		module_mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
-		module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
-		
-		// Some programs don't like if we create them using mkdnod
-		module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-		module_mount("/dev/null", homeDir + "dev/null", folderMounted);
-		module_mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
-		module_mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
+		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
 		
 		module_mount("/lib/", homeDir + "lib", folderMounted);
 		module_mount("/lib64/", homeDir + "lib64", folderMounted);
 		
-		module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
-		module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
-		module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+		if(DEBUG_CHROOT) {
+			foldersToMount += 5;
+			
+			// Note you need to manually delete /home/user/etc
+			
+			module_mount("/usr/", homeDir + "usr/", folderMounted);
+			module_mount("/etc/", homeDir + "etc/", folderMounted);
+			module_mount("/proc/", homeDir + "proc/", folderMounted);
+			module_mount("/bin/", homeDir + "bin/", folderMounted);
+			module_mount("/dev/", homeDir + "dev/", folderMounted);
+			
+			npmSymLinkCreated = true;
+			
+		}
+		else {
+			
+			if(MOUNT_BINS) {
+				// Useful if you want all programs available in the chroot
+				foldersToMount += 2;
+				module_mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
+				module_mount("/bin/", homeDir + "bin/", folderMounted);
+			}
+			else {
+				// Only pick some of the programs
+				
+				foldersToMount += 23;
+				
+				module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+				module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+				module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
+				module_mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+				module_mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+				module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+				module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+				module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+				module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+				
+				module_mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
+				module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+				module_mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+				
+				module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+				module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
+				module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
+				module_mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
+				module_mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
+				module_mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
+				module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
+				module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
+				module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
+				module_mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
+				module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+			}
+			
+			// ALSO UPDATE removeuser.js !!!
+			
+			
+			foldersToMount++;module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+			
+			foldersToMount += 3;
+			module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
+			module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
+			module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+			
+			
+			foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
+			
+			// /dev here
+			
+			foldersToMount++;module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
+			foldersToMount++;module_mount("/dev/null", homeDir + "dev/null", folderMounted);
+			
+			// Needed for pseudo terminals
+			foldersToMount++;module_mount(null, homeDir + "dev/pts", 'mount -t devpts none "' + homeDir + 'dev/pts" -o ptmxmode=0666,newinstance', folderMounted);
+			foldersToMount++;module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", "devpts", folderMounted);
+			
+		}
 		
-		module_mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
-		module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-		module_mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+		// ALSO UPDATE removeuser.js !!!
 		
-		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
-		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
 		
 		
 		// Create apparmor profiles unless they already exist
@@ -2369,16 +2413,16 @@ function checkMounts(options, checkMountsCallback) {
 	}
 	
 	function folderMounted(err) {
-		foldersToMount--;
+		foldersMounted++;
 		
 		//if(err) return checkMountsError(err);
 		
 		// Let the user login even if there is a mount error
 		if(err) mountErrorMessages.push(err);
 		
-		if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
+		if(foldersMounted > foldersToMount) throw new Error("foldersMounted=" + foldersMounted + " foldersToMount=" + foldersToMount);
 		
-		if(foldersToMount == 0) console.timeEnd("Mount " + username + " files and folders");
+		if(foldersMounted == foldersToMount) console.timeEnd("Mount " + username + " files and folders");
 		
 		checkMountsReadyMaybe();
 	}
@@ -2388,13 +2432,18 @@ function checkMounts(options, checkMountsCallback) {
 		
 		/*
 			console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
-			" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
+			" foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
 			+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
 			+ " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck);
 		*/
 		
-		if(foldersToMount === 0) {
-			// Be able to type npm in terminal:
+		if(foldersToMount == foldersMounted) {
+			
+			if(DEBUG_CHROOT || MOUNT_BINS) {
+				npmSymLinkCreated = true;
+			}
+			else {
+				// Be able to type npm in terminal:
 			// Yeh, there is also a npm installed in /usr/local/lib, but we want to use the one with the latest version (currently the one in /usr/lib/ )
 			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
 				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
@@ -2407,8 +2456,9 @@ function checkMounts(options, checkMountsCallback) {
 				
 			});
 		}
+		}
 		
-		if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
