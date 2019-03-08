@@ -60,8 +60,9 @@
 		EDITOR.unbindKey(findReplace);
 		EDITOR.unbindKey(hideFindReplaceGui);
 		
-		CLIENT.removeEvent("moveCaret", resetLastSearchStrLength);
-		CLIENT.removeEvent("voiceCommand", findInFile);
+		EDITOR.removeEvent("moveCaret", resetLastSearchStrLength);
+		EDITOR.removeEvent("voiceCommand", findInFile);
+		EDITOR.removeEvent("moveCaret", resetLastSearchStrLength);
 		
 		EDITOR.unregisterAltKey(findReplace);
 		
@@ -635,6 +636,9 @@
 		}
 		
 		EDITOR.renderNeeded();
+		
+		// Give focus to editor so you can copy all the selected strings
+		EDITOR.input = true;
 		
 	}
 	
