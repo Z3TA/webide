@@ -2149,9 +2149,14 @@ function checkMounts(options, checkMountsCallback) {
 			foldersToMount++;module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
 			foldersToMount++;module_mount("/dev/null", homeDir + "dev/null", folderMounted);
 			
-			// Needed for pseudo terminals
-			foldersToMount++;module_mount(null, homeDir + "dev/pts", 'mount -t devpts none "' + homeDir + 'dev/pts" -o ptmxmode=0666,newinstance', folderMounted);
-			foldersToMount++;module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", "devpts", folderMounted);
+			// Needed for pseudo terminals 
+			// First dev/pts need to be created with rwrwrw, then dev/pts/ptmx need to be mounted to dev/ptmx (Ubuntu 18)
+			module_mount(null, homeDir + "dev/pts", 'mount -t devpts none "' + homeDir + 'dev/pts" -o ptmxmode=0666,newinstance', function(err) {
+				if(err) throw err;
+				
+				foldersToMount++;module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", folderMounted);
+			});
+			
 			
 		}
 		
@@ -2430,12 +2435,9 @@ function checkMounts(options, checkMountsCallback) {
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
-		/*
-			console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
-			" foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
-			+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
-			+ " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck);
-		*/
+		
+		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck);
+		
 		
 		if(foldersToMount == foldersMounted) {
 			
