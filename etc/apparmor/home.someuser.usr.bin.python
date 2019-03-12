@@ -3,8 +3,18 @@
 
 %HOME%%USERNAME%/usr/bin/python {
 
+  deny %HOME%%USERNAME%/usr/** wl,
+  deny %HOME%%USERNAME%/bin/** wl,
+  deny %HOME%%USERNAME%/proc/** wl,
+  deny %HOME%%USERNAME%/lib/** wl,
+  deny %HOME%%USERNAME%/lib64/** wl,
+
+  # New in ubuntu 18
+  %HOME%%USERNAME%/lib/** mr,
+  %HOME%%USERNAME%/usr/lib/** mr,
+
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rw,
+  owner %HOME%%USERNAME%/** rw,
 
   #/dev/tty rw,
 

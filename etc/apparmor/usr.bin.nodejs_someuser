@@ -7,6 +7,21 @@
 # 
 
 /usr/bin/nodejs_%USERNAME% {
+
+  # Just in case (deny overrides allow)
+  deny %HOME%%USERNAME%/usr/** wl,
+  deny %HOME%%USERNAME%/bin/** wl,
+  deny %HOME%%USERNAME%/proc/** wl,
+  deny %HOME%%USERNAME%/lib/** wl,
+  deny %HOME%%USERNAME%/lib64/** wl,
+
+
+
+  # New in Ubuntu 18
+  /run/systemd/resolve/stub-resolv.conf r,
+  /proc/sys/vm/overcommit_memory r,
+
+
   #capability dac_override,
   capability setgid,
   capability setuid,
@@ -48,7 +63,15 @@
   
   # Nead read to list files
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rw,
+
+  # Only allow writing to files owned by the user
+  owner %HOME%%USERNAME%/** rw,
+
+  # Some files might be created by root, such as lastLogin
+  %HOME%%USERNAME%/.jzeditStorage/** rw,
+
+  # Open terminal (pty)
+  %HOME%%USERNAME%/dev/ptmx rw,
 
   %JZEDIT%/node_modules/** mr,
   %JZEDIT%/server/** r,
@@ -68,14 +91,13 @@
   /bin/** r,
   /usr/bin/** r,
 
-  # New in Ubuntu 18
-  /run/systemd/resolve/stub-resolv.conf r,
-
-
-  # Connecting to mySQL
+ # Connecting to mySQL
   /run/mysqld/mysqld.sock rw,
 
   # P means "use profile" (and clear enviroment), x means execute
+  # We don't want ANY process to inherit from this process as it got root privalages!
+
+  # All these have their own apparmor profile
   %HOME%%USERNAME%/usr/bin/hg px,
   %HOME%%USERNAME%/usr/bin/git px,
   %HOME%%USERNAME%/usr/bin/node px,
@@ -92,6 +114,14 @@
   
 
   profile util {
+
+    # Just in case (deny overrides allow)
+    deny %HOME%%USERNAME%/usr/** wl,
+    deny %HOME%%USERNAME%/bin/** wl,
+    deny %HOME%%USERNAME%/proc/** wl,
+    deny %HOME%%USERNAME%/lib/** wl,
+    deny %HOME%%USERNAME%/lib64/** wl,
+
     /bin/** r,
     /usr/bin/** r,
 

@@ -6,6 +6,12 @@
   deny capability dac_override,
   deny capability dac_read_search,
 
+  deny %HOME%%USERNAME%/usr/** wl,
+  deny %HOME%%USERNAME%/bin/** wl,
+  deny %HOME%%USERNAME%/proc/** wl,
+  deny %HOME%%USERNAME%/lib/** wl,
+  deny %HOME%%USERNAME%/lib64/** wl,
+
   signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=int peer=%HOME%%USERNAME%/usr/bin/node,
   signal receive set=int peer=/usr/bin/nodejs_%USERNAME%,
@@ -33,7 +39,7 @@
 
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rwl,
+  owner %HOME%%USERNAME%/** rwl,
 
 
   %HOME%%USERNAME%/usr/bin/ssh ix,

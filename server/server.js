@@ -1970,6 +1970,7 @@ function checkMounts(options, checkMountsCallback) {
 	var passwdCreated = false;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
+	var nodejsSymLinkCreated = false;
 	
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
@@ -2089,6 +2090,7 @@ function checkMounts(options, checkMountsCallback) {
 			module_mount("/dev/", homeDir + "dev/", folderMounted);
 			
 			npmSymLinkCreated = true;
+			nodejsSymLinkCreated = true;
 			
 		}
 		else {
@@ -2098,16 +2100,28 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount += 2;
 				module_mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
 				module_mount("/bin/", homeDir + "bin/", folderMounted);
+				
+				npmSymLinkCreated = true;
+				nodejsSymLinkCreated = true;
 			}
 			else {
 				// Only pick some of the programs
 				
-				foldersToMount += 23;
+				module_mount(process.argv[0], homeDir + "usr/bin/node", function(err) {
+					if(err) throw err;
+					// Some programs like to use nodejs instead of node
+					module_fs.symlink("node", homeDir + "usr/bin/nodejs", function (err) {
+						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+						nodejsSymLinkCreated = true;
+						if(!checkMountsReady) checkMountsReadyMaybe();
+					});
+				});
+				
+				foldersToMount += 22;
 				
 				module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 				module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 				module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
-				module_mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
 				module_mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
 				module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
 				module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
@@ -2142,7 +2156,7 @@ function checkMounts(options, checkMountsCallback) {
 			module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 			
 			
-			foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
+			//foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
 			
 			// /dev here
 			
@@ -2436,7 +2450,7 @@ function checkMounts(options, checkMountsCallback) {
 		if(checkMountsAbort) return;
 		
 		
-		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck);
+		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck + " nodejsSymLinkCreated=" + nodejsSymLinkCreated);
 		
 		
 		if(foldersToMount == foldersMounted) {
@@ -2445,22 +2459,41 @@ function checkMounts(options, checkMountsCallback) {
 				npmSymLinkCreated = true;
 			}
 			else {
-				// Be able to type npm in terminal:
-			// Yeh, there is also a npm installed in /usr/local/lib, but we want to use the one with the latest version (currently the one in /usr/lib/ )
-			module_fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+				/*
+					npm creastes a symlink in /usr/bin/
+					npm can be installed on different places depending on OS and distro and package maintainer ...
+					In Ubuntu run: dpkg -L npm
+					
+					Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
+					Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
+					
+					Put npm bin dir in process argv. Example: --npm-bin=/usr/share/npm/bin/
+					
+				*/
+				
+				var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "../lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
+				
+				if(npmBin.indexOf("/usr/") != 0) throw new Error("Not in /usr/ npmBin=" + npmBin);
+				
+				var usrBinRelativeNpmBinDir = npmBin
+				usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
+				usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/share/, "../share"); // Ubuntu 18
+				
+				module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
 				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
 				
-				module_fs.symlink("../lib/node_modules/npm/bin/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
+					module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
 					if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
 					npmSymLinkCreated = true;
 					if(!checkMountsReady) checkMountsReadyMaybe();
 				});
 				
 			});
-		}
+				
+			}
 		}
 		
-		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck && nodejsSymLinkCreated) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;

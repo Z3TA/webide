@@ -46,8 +46,17 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Getting node,python,npm,etc run via bash and also forked from node, in ubuntu 18
+
+todo: Update script that replace current apparmor profiles
+
+(maybe we can get rid of some apparmor profiles !?)
+
+
+Cleaning up apparmor profiles and making them more strict.
+
 Test terminal (pty)
-Cleam up apparmor profiles from when I tried to get pty to work
+Clean up apparmor profiles from when I tried to get pty to work
 
 todo: Limit access in home dir so user don't get write access to mounted folders!!!
 
@@ -315,6 +324,10 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Can no longer type ^ in Firefox on Ubuntu 18
+
+Hitting middle mouse makes a paste event on Firefox on Linux. Make it paste!
 
 Find in files "search report" doesn't work in collaboration mode!
 
@@ -3295,6 +3308,11 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+(Standalone?) service: SMS-push: Get SMS messages sent to your API,
+or get SMS messages sent to nr be stored in /sms/(one file for each from-nr.json)
+
+Same but with e-mail, e-mails to user@webide.se or user@domain.se get stored in /email/message-id
+Or sent via HTTP POST to specified URL.
 
 ---
 

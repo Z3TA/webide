@@ -6,6 +6,17 @@
 
 %HOME%%USERNAME%/usr/bin/node {
 	
+  # Just in case (deny overrides allow)
+  deny %HOME%%USERNAME%/usr/** wl,
+  deny %HOME%%USERNAME%/bin/** wl,
+  deny %HOME%%USERNAME%/proc/** wl,
+  deny %HOME%%USERNAME%/lib/** wl,
+  deny %HOME%%USERNAME%/lib64/** wl,
+
+  # New in ubuntu 18
+  %HOME%%USERNAME%/lib/** mr,
+  %HOME%%USERNAME%/usr/lib/** mr,
+
   signal receive set=hup peer=%HOME%%USERNAME%/bin/bash,
   signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=int peer=%HOME%%USERNAME%/usr/bin/node,
@@ -28,7 +39,7 @@
   network unix,
 
   # Running npm
-  /lib/** r,
+  /lib/** mr,
   /usr/lib/** r,
   /run/resolvconf/resolv.conf r,
 
@@ -37,10 +48,10 @@
 
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rwl,
+  owner %HOME%%USERNAME%/** rwl,
 		
   # Let node spawn/fork itselft
-  %HOME%%USERNAME%/usr/bin/node px,
+  %HOME%%USERNAME%/usr/bin/node pxm,
 
   # Possible to run npm:
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,

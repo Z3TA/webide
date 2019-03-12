@@ -393,7 +393,7 @@ Simply delete node_modules/mysql2/node_modules/iconv-lite
 Apparmor debugging
 ------------------
 ````
-apt install apparmor-utils
+sudo apt install apparmor-utils
 sudo service apparmor reload
 ````
 Add missing rules in profile:
@@ -457,8 +457,14 @@ See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a
 ````
 wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
 sudo chmod +x tracefile
+sudo apt install strace
 ./tracefile python
 ````
+
+Outside the chroot (where it works):
+./tracefile -deu node pty.js
+Then also run it inside the chroot, and compare the output
+
 
 Create an apparmor profile !
 

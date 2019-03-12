@@ -204,6 +204,7 @@ var abort = false;
 				
 				if(!sourcePath) {
 					if(targetParentStats.dev != targetStats.dev) {
+						console.log("targetParentStats.dev=" + targetParentStats.dev + " != targetStats.dev=" + targetStats.dev + ". Assuming the folder has already been mounted!");
 						return mountDone(null); // Already mounted!
 					}
 				}
@@ -265,6 +266,8 @@ var abort = false;
 		var exec = module_child_process.exec;
 		
 		if(!command) command = "mount --bind " + sourcePath + " " + targetPath;
+		
+		console.log("Running mount command=" + command);
 		
 		exec(command, function(error, stdout, stderr) {
 			if(error) return mountDone(error);
