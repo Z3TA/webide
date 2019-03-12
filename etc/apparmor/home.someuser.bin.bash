@@ -67,30 +67,21 @@
     deny %HOME%%USERNAME%/lib64/** wl,
 
     %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** mr,
     owner %HOME%%USERNAME%/** rwl,
-
-    %HOME%%USERNAME%/lib/** mr,
-    %HOME%%USERNAME%/lib64/** mr,
-    %HOME%%USERNAME%/usr/** mr,
-    %HOME%%USERNAME%/bin/** mr,
-
 
     # Connecting to mySQL
     /run/mysqld/mysqld.sock rw,
 
-    %HOME%%USERNAME%/bin/bash Px,
-
-    %HOME%%USERNAME%/usr/bin/hg Px,
-    %HOME%%USERNAME%/usr/bin/git Px,
-    %HOME%%USERNAME%/usr/bin/node Px,
+    %HOME%%USERNAME%/bin/bash Pmx,
+    %HOME%%USERNAME%/usr/bin/hg Pmx,
+    %HOME%%USERNAME%/usr/bin/git Pmx,
+    %HOME%%USERNAME%/usr/bin/node Pmx,
 
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
-    %HOME%%USERNAME%/usr/bin/ssh ix,
-
-    # pty in Ubuntu 18
-    %HOME%%USERNAME%/lib/x86_64-linux-gnu/** mr,
+    %HOME%%USERNAME%/usr/bin/ssh imx,
 
   }
 

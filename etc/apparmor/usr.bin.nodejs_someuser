@@ -136,10 +136,10 @@
     signal receive set=term peer=unconfined,
 
     %HOME%%USERNAME%/ r,
-    %HOME%%USERNAME%/** rwl,
+    owner %HOME%%USERNAME%/** rwl,
 
-    %HOME%%USERNAME%/bin/gzip rix,
-    %HOME%%USERNAME%/usr/bin/ssh-keygen rix,
+    %HOME%%USERNAME%/bin/gzip rimx,
+    %HOME%%USERNAME%/usr/bin/ssh-keygen rimx,
 
   }
 

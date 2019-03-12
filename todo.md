@@ -46,6 +46,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+python is a symlink
+
 Getting node,python,npm,etc run via bash and also forked from node, in ubuntu 18
 
 todo: Update script that replace current apparmor profiles
