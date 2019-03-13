@@ -46,6 +46,18 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+todo: In ubunto 18 /usr/bin/python is not a symlink to python2 which is a symlink to python2.7
+and /bin/sh is a symlink to /bin/dash, so check if python and sh is a link or not,
+then mount if it's an actual binary, otherwise following the link(s) recursevely, mount the source and create the links.
+
+reboot and continue to make sense of apparmor profiles
+
+wtf Ubuntu seems to have shuffled everything around from 16 to 18 ...
+I need to write automatic tests for running all these execs!!! eg run npm from bash, etc
+
+todo: Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
+
+
 python is a symlink
 
 Getting node,python,npm,etc run via bash and also forked from node, in ubuntu 18
