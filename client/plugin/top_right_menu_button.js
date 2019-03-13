@@ -17,7 +17,8 @@ desc: "Adds a menu button in the top right corner",
 load: function loadTopRightMenuButton() {
 
 			button = document.createElement("button");
-			button.innerText = "Menu";
+			button.innerText = "☰";
+			button.setAttribute("title", "menu");
 			button.setAttribute("class", "topRightMenuButton"); // For styling
 
 			button.onclick = function(clickEvent) {

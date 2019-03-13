@@ -505,10 +505,12 @@ td input[type=text] {
 	position: absolute;
 	right: 0px;
 	top: 0px;
-	width: 10%;
 	height: 32px;
+	width: 32px;
+	margin: 4px;
 	text-transform: uppercase;
-	border-radius: 0px 0px 0px 12px;
+	font-size: 20px;
+	
 }
 
 
