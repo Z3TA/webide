@@ -47,6 +47,7 @@
 
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  owner %HOME%%USERNAME%/** rwl,
+  %HOME%%USERNAME%/** mr,
+  owner %HOME%%USERNAME%/** wl,
 
 }

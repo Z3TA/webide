@@ -471,5 +471,51 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		
 	});
 	
+	EDITOR.addTest(1, function cloudDep(callback) {
+		
+		// Test to make sure we can run the cloud bin's
+		
+		var commandsToRun = 0;
+		var commandsFinished = 0;
+		var ready = false;
+		
+		test("python --version");
+		test("hg --version");
+		test("git --version");
+		test("node --version");
+		test("npm --version");
+		test("bash --version");
+		test("tar --version");
+		test("gzip --version");
+		test("gunzip --version");
+		test("unzip --version");
+		test("unrar --version");
+		test("ssh-keygen --version");
+		test("sh --version");
+		
+		
+		function test(cmd) {
+			commandsToRun++;
+			CLIENT.cmd("run", {command: cmd}, function(err, resp) {
+				console.log( "cmd=" + cmd + " stdout=" + (resp && resp.stdout) + " stderr=" + (resp && resp.stderr) + " error=" + (err && err.message) );
+				if(error) return error(err);
+				if(resp.stderr) return error(new Error(stderr));
+				doneMaybe();
+			});
+		}
+		
+		function doneMaybe() {
+			if(commandsToRun == commandsFinished && !ready) {
+				ready = true;
+				return callback(true);
+			}
+		}
+		
+		function error(err) {
+			ready = true;
+			throw err;
+		}
+	});
+	
 	
 })();

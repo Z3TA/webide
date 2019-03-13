@@ -27,18 +27,24 @@
   signal send set=hup peer=%HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js,
 
   %HOME%%USERNAME%/ r,
-  owner %HOME%%USERNAME%/** rwl,
+  %HOME%%USERNAME%/** mr,
+  owner %HOME%%USERNAME%/** wl,
 
   # Connect to other servers via ssh
   network,
 
   #/dev/tty rw,
 
+  # bins that have their own profile
   %HOME%%USERNAME%/usr/bin/hg Px,
   %HOME%%USERNAME%/usr/bin/git Px,
   %HOME%%USERNAME%/usr/bin/node Px,
   %HOME%%USERNAME%/usr/bin/bash Px,
   %HOME%%USERNAME%/usr/bin/python Px,
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+
+  # bins without profile
   %HOME%%USERNAME%/usr/bin/npm ix,
   %HOME%%USERNAME%/usr/bin/env ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,
@@ -50,13 +56,14 @@
   %HOME%%USERNAME%/bin/gzip ix,
   %HOME%%USERNAME%/usr/bin/unzip ix,
   %HOME%%USERNAME%/usr/bin/unrar ix,
-  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
-  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+
+  # other bins
   %HOME%%USERNAME%/** Cx -> scripts,
 
   # pty in Ubuntu 18
   %HOME%%USERNAME%/lib/x86_64-linux-gnu/** mr,
 
+  # this profile should be more restrictive, otherwise put the bin as ix above
   profile scripts {
     network,
 
@@ -73,15 +80,20 @@
     # Connecting to mySQL
     /run/mysqld/mysqld.sock rw,
 
-    %HOME%%USERNAME%/bin/bash Pmx,
-    %HOME%%USERNAME%/usr/bin/hg Pmx,
-    %HOME%%USERNAME%/usr/bin/git Pmx,
-    %HOME%%USERNAME%/usr/bin/node Pmx,
-
+    # bins that have their own profile
+    %HOME%%USERNAME%/usr/bin/hg Px,
+    %HOME%%USERNAME%/usr/bin/git Px,
+    %HOME%%USERNAME%/usr/bin/node Px,
+    %HOME%%USERNAME%/usr/bin/bash Px,
+    %HOME%%USERNAME%/usr/bin/python Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
-    %HOME%%USERNAME%/usr/bin/ssh imx,
+    # Scripts of scripts
+    %HOME%%USERNAME%/usr/bin/** ix,
+    %HOME%%USERNAME%/bin/** ix,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/** ix,
+    %HOME%%USERNAME%/usr/share/npm/bin/** ix,
 
   }
 

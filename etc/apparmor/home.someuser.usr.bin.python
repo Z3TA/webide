@@ -9,13 +9,9 @@
   deny %HOME%%USERNAME%/lib/** wl,
   deny %HOME%%USERNAME%/lib64/** wl,
 
-  # New in ubuntu 18
-  %HOME%%USERNAME%/lib/** mr,
-  %HOME%%USERNAME%/usr/lib/** mr,
-
   %HOME%%USERNAME%/ r,
-  owner %HOME%%USERNAME%/** rw,
+  %HOME%%USERNAME%/** mr,
+  owner %HOME%%USERNAME%/** wl,
 
-  #/dev/tty rw,
 
 }

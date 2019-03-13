@@ -15,14 +15,14 @@
   deny %HOME%%USERNAME%/lib/** wl,
   deny %HOME%%USERNAME%/lib64/** wl,
 
-
+  deny /usr/bin/nodejs_%USERNAME% wx,
 
   # New in Ubuntu 18
   /run/systemd/resolve/stub-resolv.conf r,
   /proc/sys/vm/overcommit_memory r,
 
 
-  #capability dac_override,
+  deny capability dac_override,
   capability setgid,
   capability setuid,
   capability sys_chroot,
@@ -99,6 +99,7 @@
 
   # All these have their own apparmor profile
   %HOME%%USERNAME%/usr/bin/hg px,
+  %HOME%%USERNAME%/usr/bin/python px,
   %HOME%%USERNAME%/usr/bin/git px,
   %HOME%%USERNAME%/usr/bin/node px,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
@@ -122,10 +123,19 @@
     deny %HOME%%USERNAME%/lib/** wl,
     deny %HOME%%USERNAME%/lib64/** wl,
 
+    deny capability dac_override,
+    deny capability setgid,
+    deny capability setuid,
+    deny capability sys_chroot,
+
+    deny /usr/bin/nodejs_%USERNAME% mrwx,
+
     /bin/** r,
     /usr/bin/** r,
 
-    %HOME%%USERNAME%/bin/gzip rix,
+    %HOME%%USERNAME%/bin/** rix,
+    %HOME%%USERNAME%/usr/bin/** rix,
+    %HOME%%USERNAME%/usr/share/npm/bin/** rix,
 
     signal receive set=cont peer=unconfined,
     signal receive set=exists peer=unconfined,
@@ -134,12 +144,13 @@
     signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
     signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
     signal receive set=term peer=unconfined,
+    signal receive set=abrt peer=/usr/bin/nodejs_%USERNAME%//util,
+
+    signal send set=abrt peer=/usr/bin/nodejs_%USERNAME%//util,
 
     %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** mr,
     owner %HOME%%USERNAME%/** rwl,
-
-    %HOME%%USERNAME%/bin/gzip rimx,
-    %HOME%%USERNAME%/usr/bin/ssh-keygen rimx,
 
   }
 

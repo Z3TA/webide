@@ -96,6 +96,21 @@ var abort = false;
 			if(!err) console.warn("Source is a symlink: " + sourcePath + " -> " + linkString);
 		});
 		
+		if( !UTIL.isDirectory(sourcePath) && sourcePath.indexOf("bin") != -1 ) {
+			// Give a warning if we are mounting a non-default bin
+			var exec = module_child_process.exec;
+			var binName = UTIL.getFilenameFromPath(sourcePath);
+			exec("which " + binName, function(error, stdout, stderr) {
+				if(error) return console.error(error);
+				if(stderr) return console.error(new Error(stderr));
+				
+				var defaultBin = stdout.trim();
+				
+				if(defaultBin != sourcePath) return console.warn("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
+			});
+		}
+		
+		
 		sourceStats = stats;
 		
 //console.log("Folder exist: " + sourcePath);

@@ -1965,12 +1965,10 @@ function checkMounts(options, checkMountsCallback) {
 	var reloadedApparmor = false;
 	var checkMountsReady = false;
 	var sslCertChecked = false;
-	var npmSymLinkCreated = false;
 	var hgrccacertsUptodate = true;
 	var passwdCreated = false;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
-	var nodejsSymLinkCreated = false;
 	
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
@@ -2026,7 +2024,7 @@ function checkMounts(options, checkMountsCallback) {
 		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
 			if(err) {
 				if(err.code == "ENOENT") {
-					console.warn("MySQL socket does not exit: " + MYSQL_PORT);
+					console.warn("MySQL socket does not exist: " + MYSQL_PORT);
 					mysqlCheck = true;
 					checkMountsReadyMaybe();
 					return;
@@ -2089,9 +2087,6 @@ function checkMounts(options, checkMountsCallback) {
 			module_mount("/bin/", homeDir + "bin/", folderMounted);
 			module_mount("/dev/", homeDir + "dev/", folderMounted);
 			
-			npmSymLinkCreated = true;
-			nodejsSymLinkCreated = true;
-			
 		}
 		else {
 			
@@ -2101,48 +2096,108 @@ function checkMounts(options, checkMountsCallback) {
 				module_mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
 				module_mount("/bin/", homeDir + "bin/", folderMounted);
 				
-				npmSymLinkCreated = true;
-				nodejsSymLinkCreated = true;
 			}
 			else {
 				// Only pick some of the programs
 				
+				foldersToMount++;
 				module_mount(process.argv[0], homeDir + "usr/bin/node", function(err) {
 					if(err) throw err;
 					// Some programs like to use nodejs instead of node
 					module_fs.symlink("node", homeDir + "usr/bin/nodejs", function (err) {
 						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-						nodejsSymLinkCreated = true;
-						if(!checkMountsReady) checkMountsReadyMaybe();
+						foldersMounted++;
+						checkMountsReadyMaybe();
 					});
 				});
 				
-				foldersToMount += 22;
+				// gunzip will give ENOENT error without /bin/sh
+				foldersToMount++;
+				module_mount("/bin/dash", homeDir + "bin/dash", function(err) {
+					if(err) throw err;
+					module_fs.symlink("dash", homeDir + "bin/sh", function (err) {
+						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+						foldersMounted++;
+						checkMountsReadyMaybe();
+					});
+				}); 
 				
-				module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-				module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-				module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
-				module_mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-				module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-				module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
-				module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
-				module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+				// npm
+				foldersToMount += 2;
+				module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
+					if(err) throw err;
+					// Some python scripts (Mercurial) and sometimes npm need /usr/share
+					module_mount("/usr/share/", homeDir + "usr/share", function(err) {
+						if(err) throw err;
+						/*
+							npm creastes a symlink in /usr/bin/
+							npm can be installed on different places depending on OS and distro and package maintainer ...
+							In Ubuntu run: dpkg -L npm
+							
+							Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
+							Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
+							
+							Put npm bin dir in process argv. Example: --npm-bin=/usr/share/npm/bin/
+							
+						*/
+						
+						var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "../lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
+						
+						if(npmBin.indexOf("/usr/") != 0) throw new Error("Not in /usr/ npmBin=" + npmBin);
+						
+						var usrBinRelativeNpmBinDir = npmBin
+						usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
+						usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/share/, "../share"); // Ubuntu 18
+						
+						module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+							
+							module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
+								if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+								foldersMounted += 2;
+								checkMountsReadyMaybe();
+							});
+							
+						});
+						
+					});
+				});
 				
-				module_mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
-				module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-				module_mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+				foldersToMount++;
+				module_mount("/usr/bin/python2.7", homeDir + "usr/bin/python2.7", function(err) {
+					if(err) throw err;
+					module_fs.symlink("python2.7", homeDir + "usr/bin/python2", function (err) {
+						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+						module_fs.symlink("python2.7", homeDir + "usr/bin/python", function (err) {
+							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+							foldersMounted++;
+							checkMountsReadyMaybe();
+						});
+					});
+				});
 				
-				module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
-				module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
-				module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
-				module_mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
-				module_mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-				module_mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
-				module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
-				module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
-				module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
-				module_mount("/bin/sh", homeDir + "bin/sh", folderMounted); // gunzip will give ENOENT error without it
-				module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+				foldersToMount++;module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
+				
+				foldersToMount++;module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+				foldersToMount++;module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+				foldersToMount++;module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+				
+				foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+				
+				foldersToMount++;module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+				foldersToMount++;module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
+				foldersToMount++;module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
+				foldersToMount++;module_mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
+				foldersToMount++;module_mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
+				foldersToMount++;module_mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
+				foldersToMount++;module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
+				foldersToMount++;module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
+				foldersToMount++;module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
+				
+				foldersToMount++;module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
 			}
 			
 			// ALSO UPDATE removeuser.js !!!
@@ -2449,51 +2504,9 @@ function checkMounts(options, checkMountsCallback) {
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
+		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
-		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " npmSymLinkCreated=" + npmSymLinkCreated + " mysqlCheck=" + mysqlCheck + " nodejsSymLinkCreated=" + nodejsSymLinkCreated);
-		
-		
-		if(foldersToMount == foldersMounted) {
-			
-			if(DEBUG_CHROOT || MOUNT_BINS) {
-				npmSymLinkCreated = true;
-			}
-			else {
-				/*
-					npm creastes a symlink in /usr/bin/
-					npm can be installed on different places depending on OS and distro and package maintainer ...
-					In Ubuntu run: dpkg -L npm
-					
-					Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
-					Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
-					
-					Put npm bin dir in process argv. Example: --npm-bin=/usr/share/npm/bin/
-					
-				*/
-				
-				var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "../lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
-				
-				if(npmBin.indexOf("/usr/") != 0) throw new Error("Not in /usr/ npmBin=" + npmBin);
-				
-				var usrBinRelativeNpmBinDir = npmBin
-				usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
-				usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/share/, "../share"); // Ubuntu 18
-				
-				module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-				if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-				
-					module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
-					if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-					npmSymLinkCreated = true;
-					if(!checkMountsReady) checkMountsReadyMaybe();
-				});
-				
-			});
-				
-			}
-		}
-		
-		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && npmSymLinkCreated && (sslCertChecked || !options.waitForSSL) && mysqlCheck && nodejsSymLinkCreated) {
+		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;

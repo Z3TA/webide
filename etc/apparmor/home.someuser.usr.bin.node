@@ -26,10 +26,12 @@
   signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=term peer=%HOME%%USERNAME%/usr/bin/node,
   signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=abrt peer=%HOME%%USERNAME%/usr/bin/node,
 
   signal send set=int peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=rtmin+1 peer=%HOME%%USERNAME%/usr/bin/node,
 	 signal send set=term peer=%HOME%%USERNAME%/usr/bin/node,
+  signal send set=abrt peer=%HOME%%USERNAME%/usr/bin/node,
 
   # Must allow network in order to inspect/debug
   network inet stream,
@@ -48,7 +50,8 @@
 
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  owner %HOME%%USERNAME%/** rwl,
+  %HOME%%USERNAME%/** mr,
+  owner %HOME%%USERNAME%/** wl,
 		
   # Let node spawn/fork itselft
   %HOME%%USERNAME%/usr/bin/node pxm,

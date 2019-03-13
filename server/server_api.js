@@ -3204,8 +3204,6 @@ API.run = function run(user, json, callback) {
 		
 		console.log(command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
 		
-		
-		
 		if(err) {
 			console.log("err.code=" + err.code);
 			return callback(err);
