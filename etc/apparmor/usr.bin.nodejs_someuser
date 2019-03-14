@@ -60,7 +60,6 @@
   %HOME%%USERNAME%/dev/null rw,
 
   /dev/urandom r,
-  #/dev/tty rw,
 
   
   # Nead read to list files
