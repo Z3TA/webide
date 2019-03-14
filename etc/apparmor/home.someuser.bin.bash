@@ -30,10 +30,10 @@
   %HOME%%USERNAME%/** mr,
   owner %HOME%%USERNAME%/** wl,
 
+  %HOME%%USERNAME%/dev/null rw,
+
   # Connect to other servers via ssh
   network,
-
-  #/dev/tty rw,
 
   # bins that have their own profile
   %HOME%%USERNAME%/usr/bin/hg Px,
@@ -59,9 +59,6 @@
 
   # other bins
   %HOME%%USERNAME%/** Cx -> scripts,
-
-  # pty in Ubuntu 18
-  %HOME%%USERNAME%/lib/x86_64-linux-gnu/** mr,
 
   # this profile should be more restrictive, otherwise put the bin as ix above
   profile scripts {

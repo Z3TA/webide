@@ -57,6 +57,8 @@
   network unix,
 
   /dev/null r,
+  %HOME%%USERNAME%/dev/null rw,
+
   /dev/urandom r,
   /dev/tty rw,
 
@@ -65,7 +67,13 @@
   %HOME%%USERNAME%/ r,
 
   # Only allow writing to files owned by the user
-  owner %HOME%%USERNAME%/** rw,
+  owner %HOME%%USERNAME%/** wl,
+
+  # Allow reading all mounted files and folders
+  %HOME%%USERNAME%/** mr,
+
+  # Check users if we are root, not sure why this is needed !?
+  owner /etc/passwd r
 
   # Some files might be created by root, such as lastLogin
   %HOME%%USERNAME%/.jzeditStorage/** rw,
@@ -104,15 +112,11 @@
   %HOME%%USERNAME%/usr/bin/node px,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
   %HOME%%USERNAME%/bin/bash px,
-
-  %HOME%%USERNAME%/bin/tar Cx -> util,
-  %HOME%%USERNAME%/bin/gzip Cx -> util,
-  %HOME%%USERNAME%/bin/gunzip Cx -> util,
-  %HOME%%USERNAME%/usr/bin/unzip Cx -> util,
-  %HOME%%USERNAME%/usr/bin/unrar Cx -> util,
-  %HOME%%USERNAME%/usr/bin/ssh-keygen Cx -> util,
-  %HOME%%USERNAME%/bin/sh Cx -> util,
   
+  # Others
+  %HOME%%USERNAME%/bin/** Cx -> util,
+  %HOME%%USERNAME%/usr/bin/** Cx -> util,
+  %HOME%%USERNAME%/usr/share/npm/bin/** Cx -> util, 
 
   profile util {
 
@@ -129,6 +133,9 @@
     deny capability sys_chroot,
 
     deny /usr/bin/nodejs_%USERNAME% mrwx,
+
+    # hg needs to lookup stuff
+    network,
 
     /bin/** r,
     /usr/bin/** r,
@@ -151,6 +158,10 @@
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** mr,
     owner %HOME%%USERNAME%/** rwl,
+   
+    # Needed by ssh-keygen
+    %HOME%%USERNAME%/dev/null rw,
+
 
   }
 

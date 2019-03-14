@@ -136,10 +136,10 @@ exec("apt install mercurial -y");
 
 
 console.log("Installing hggit for Mercruial");
-exec("apt-get install python-pip -y");
-exec("apt-get -f install -y"); // Fix problems with Python
-exec("apt-get install python-pip -y");
-exec("easy_install hg-git");
+exec("apt install python-pip -y");
+//exec("apt -f install -y"); // Fix problems with Python
+//exec("apt install python-pip -y");
+exec("pip install hg-git");
 
 
 console.log("Installing NPM");

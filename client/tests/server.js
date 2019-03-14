@@ -481,30 +481,34 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		
 		test("python --version");
 		test("hg --version");
-		test("git --version");
 		test("node --version");
 		test("npm --version");
 		test("bash --version");
 		test("tar --version");
-		test("gzip --version");
-		test("gunzip --version");
-		test("unzip --version");
-		test("unrar --version");
-		test("ssh-keygen --version");
-		test("sh --version");
-		
+		test("echo test > testzip && gzip testzip && gunzip testzip && rm testzip");
+		test('ssh-keygen -b 2048 -t rsa -f ./testkey -q -N "" && rm testkey');
+		test('sh -c "echo hi"');
 		
 		function test(cmd) {
 			commandsToRun++;
 			CLIENT.cmd("run", {command: cmd}, function(err, resp) {
+				commandsFinished++;
+				
 				console.log( "cmd=" + cmd + " stdout=" + (resp && resp.stdout) + " stderr=" + (resp && resp.stderr) + " error=" + (err && err.message) );
-				if(error) return error(err);
-				if(resp.stderr) return error(new Error(stderr));
+				if(err) return error(err);
+				
+				var stderr = resp && resp.stderr.trim();
+				
+				// Python gives version in stderr ...
+				
+				if(stderr && stderr != "Python 2.7.15rc1") return error(new Error(resp.stderr));
+				
 				doneMaybe();
 			});
 		}
 		
 		function doneMaybe() {
+			console.log("test cloudDep: commandsToRun=" + commandsToRun + " commandsFinished=" + commandsFinished + " ready=" + ready);
 			if(commandsToRun == commandsFinished && !ready) {
 				ready = true;
 				return callback(true);

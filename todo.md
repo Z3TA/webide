@@ -46,7 +46,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-todo: In ubunto 18 /usr/bin/python is not a symlink to python2 which is a symlink to python2.7
+todo: In Ubuntu 18 /usr/bin/python is not a symlink to python2 which is a symlink to python2.7
 and /bin/sh is a symlink to /bin/dash, so check if python and sh is a link or not,
 then mount if it's an actual binary, otherwise following the link(s) recursevely, mount the source and create the links.
 
@@ -338,6 +338,8 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Partial commits ! (commit only some changes)
 
 Can no longer type ^ in Firefox on Ubuntu 18
 
