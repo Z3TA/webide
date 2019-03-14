@@ -3,7 +3,9 @@
 
 "use strict";
 
-if(process.version.indexOf("v10.") != 0) console.warn("The editor has only been tested with node.js version 0,io,4,6,8,10! You are running version=" + process.version);
+var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
+var testedNodeVersions = [0,4,6,8,10];
+if(testedNodeVersions.indexOf(nodeVersion) == -1) console.warn("The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version);
 
 var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
 var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
@@ -216,7 +218,7 @@ process.on("SIGINT", function sigInt() {
 		});
 	}
 	else end();
-
+	
 	
 	function end() {
 		process.exit();
@@ -260,7 +262,7 @@ function mysqlConnect() {
 		log("MySQL error: (code=" + err.code + ") " + err.message, NOTICE);
 		if(err.code == "ENOENT") {
 			log("Mysql server is probably not installed, will not bother to try connecting to it.", NOTICE);
-}
+		}
 		else if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
 			/*
 				Connection to the MySQL server is usually lost due to either server restart, 
@@ -467,7 +469,7 @@ function recycleGuestAccounts(callback) {
 						processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
 					}
 					else processedGuestId(id, "Added to guest pool");
-					});
+				});
 			}
 			else if(err) throw err;
 			else {
@@ -529,7 +531,7 @@ function recycleGuestAccounts(callback) {
 		/*
 			Just delete the user instead of trying to reset.
 			We could use ZFS to restore, but then the account might not get all the latest features
-			*/
+		*/
 		
 		var username = "guest" + id;
 		log("Removing guest user: " + username);
@@ -540,7 +542,7 @@ function recycleGuestAccounts(callback) {
 		var commandArg = {
 			username: username,
 			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
-			};
+		};
 		
 		var options = {
 			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
@@ -593,7 +595,7 @@ function recycleGuestAccounts(callback) {
 		console.log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft);
 		
 		if(countLeft == 0) {
-callback(null);
+			callback(null);
 			callback = null;
 		}
 	}
@@ -659,33 +661,33 @@ function main() {
 			
 			mysqlConnect();
 			
-		module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
-		if(err) {
-			if(err.code != "ENOENT") throw err;
-			// Create the file if it doesn't exist
-			// Creating a guest account will create the GUEST_COUNTER file!
-			fillGuestPool(function guestPoolFilledMaybe(err) {
-				if(err && err.code != "LOCK") throw err;
+			module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
+				if(err) {
+					if(err.code != "ENOENT") throw err;
+					// Create the file if it doesn't exist
+					// Creating a guest account will create the GUEST_COUNTER file!
+					fillGuestPool(function guestPoolFilledMaybe(err) {
+						if(err && err.code != "LOCK") throw err;
 					});
-			/*
-					module_fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
-				if (err) throw err;
-				console.log("Created " + __dirname + "/GUEST_COUNTER");
-			});
-			*/
-		}
-else {
-			GUEST_COUNTER = parseInt(data);
-			recycleGuestAccounts(function guestAccountsRecycled(err) {
-					log("GUEST_POOL.length=" + GUEST_POOL.length);
-				if(err) throw err;
+					/*
+						module_fs.writeFile(__dirname + "/GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
+						if (err) throw err;
+						console.log("Created " + __dirname + "/GUEST_COUNTER");
+						});
+					*/
+				}
+				else {
+					GUEST_COUNTER = parseInt(data);
+					recycleGuestAccounts(function guestAccountsRecycled(err) {
+						log("GUEST_POOL.length=" + GUEST_POOL.length);
+						if(err) throw err;
 					});
-		}
+				}
 				
 				startServer();
-	});
-	}
-	else startServer();
+			});
+		}
+		else startServer();
 	}
 	
 	function startServer() {
@@ -753,7 +755,7 @@ function openStdinChannel() {
 		
 		// Reset state for each connection
 		gotArguments = false;
-
+		
 		STDOUT_SOCKETS.push(socket);
 		
 		socket.on("data", stdIn);
@@ -883,7 +885,7 @@ function createGuestUser(id, callback) {
 			length: 10,
 			numbers: true
 		});
-
+		
 		console.log("Creating guest user: " + username);
 		
 		if(!username) throw new Error("username=" + username);
@@ -924,7 +926,7 @@ function createGuestUser(id, callback) {
 			
 			if(stderr) return callback(new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")"));
 			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
-
+			
 			log("stdout=" + stdout, DEBUG);
 			var checkre = /User with username=(.*), password=(.*), uid=(.*), gid=(.*), homeDir=(.*) successfully added!/g;
 			
@@ -1249,7 +1251,7 @@ function sockJsConnection(connection) {
 			try {
 				for (var i=0; i<STDOUT_SOCKETS.length; i++) {
 					STDOUT_SOCKETS[i].write(json.data);
-			}
+				}
 			}
 			catch(err) {
 				send({error: err.message});
@@ -1325,9 +1327,9 @@ function sockJsConnection(connection) {
 						else idFail("Wong username or password! (Username specified in server arguments)");
 					}
 					else if(username == "guest" && !NO_CHROOT) {
-// ### Login as guest
-// Assign a user from the guest pool
-if(GUEST_POOL.length == 0) {
+						// ### Login as guest
+						// Assign a user from the guest pool
+						if(GUEST_POOL.length == 0) {
 							// Need to wait until a new guest account is created
 							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
 							createGuestUser(function guestUserCreated(err, createdUser) {
@@ -1385,14 +1387,14 @@ if(GUEST_POOL.length == 0) {
 					}
 					
 					function loginAsGuest(guestUser, guestPassword, alreadyCheckedMounts) {
-
+						
 						console.log("New guest login: " + guestUser);
 						
 						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: user=" + guestUser + " IP=" + IP);
 						
-username = guestUser;
+						username = guestUser;
 						idSuccess(alreadyCheckedMounts);
-
+						
 						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
 						
 						if(GUEST_POOL.length <= 0) {
@@ -1436,7 +1438,7 @@ username = guestUser;
 						
 						send({error: errorMsg});
 						log("username=" + username + " failed to login: " + errorMsg);
-					
+						
 						console.timeEnd("Login " + IP);
 						
 						checkingUser = false;
@@ -1628,7 +1630,7 @@ username = guestUser;
 												obj[name] = workerMessage.message[name];
 											}
 											obj.id = 0;
-
+											
 											send(obj, USER_CONNECTIONS[userConnectionName].connections[i]);
 										}
 									}
@@ -1675,7 +1677,7 @@ username = guestUser;
 										startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
 											workerResp(err, resp);
 										});
-										}
+									}
 									else if(req.googleDrive) {
 										console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
 										if(req.googleDrive.code) {
@@ -2048,20 +2050,20 @@ function checkMounts(options, checkMountsCallback) {
 			
 			function mountMysqlClient() {
 				if(DEBUG_CHROOT || MOUNT_BINS) {
-				// /usr/bin will be mounted anyway
-				mysqlCheck = true;
-				checkMountsReadyMaybe();
-				return;
-			}
-			else  {
-				module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
-					if(err) throw err;
-					
+					// /usr/bin will be mounted anyway
 					mysqlCheck = true;
 					checkMountsReadyMaybe();
 					return;
-				});
-			}
+				}
+				else  {
+					module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
+						if(err) throw err;
+						
+						mysqlCheck = true;
+						checkMountsReadyMaybe();
+						return;
+					});
+				}
 			}
 		});
 		
@@ -2112,15 +2114,8 @@ function checkMounts(options, checkMountsCallback) {
 				});
 				
 				// gunzip will give ENOENT error without /bin/sh
-				foldersToMount++;
-				module_mount("/bin/dash", homeDir + "bin/dash", function(err) {
-					if(err) throw err;
-					module_fs.symlink("dash", homeDir + "bin/sh", function (err) {
-						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-						foldersMounted++;
-						checkMountsReadyMaybe();
-					});
-				}); 
+				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted);
+				
 				
 				// npm
 				foldersToMount += 2;
@@ -2163,16 +2158,14 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
-				foldersToMount++;
-				module_mount("/usr/bin/python2.7", homeDir + "usr/bin/python2.7", function(err) {
+				foldersToMount++;mountFollowSymlink("/usr/bin/python", homeDir, function(err, targetRelative) {
 					if(err) throw err;
-					module_fs.symlink("python2.7", homeDir + "usr/bin/python2", function (err) {
-						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-						module_fs.symlink("python2.7", homeDir + "usr/bin/python", function (err) {
-							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-							foldersMounted++;
-							checkMountsReadyMaybe();
-						});
+					
+					// Mercurial wants a python2
+					module_fs.symlink(targetRelative, homeDir + "usr/bin/python2", function (err) {
+						if(err && err.code != "EEXIST") throw(err);
+						foldersMounted++;
+						checkMountsReadyMaybe();
 					});
 				});
 				
@@ -2213,19 +2206,27 @@ function checkMounts(options, checkMountsCallback) {
 			
 			//foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
 			
-			// /dev here
-			
-			foldersToMount++;module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-			foldersToMount++;module_mount("/dev/null", homeDir + "dev/null", folderMounted);
-			
-			// Needed for pseudo terminals 
-			// First dev/pts need to be created with rwrwrw, then dev/pts/ptmx need to be mounted to dev/ptmx (Ubuntu 18)
-			module_mount(null, homeDir + "dev/pts", 'mount -t devpts none "' + homeDir + 'dev/pts" -o ptmxmode=0666,newinstance', function(err) {
-				if(err) throw err;
+			// ## mount dev
+			// Need to create the dev and dev/pts folder first because mount devpts wont create it
+			foldersToMount += 3;
+			module_fs.mkdir(homeDir + "dev/", function(err) {
+				if(err && err.code != "EEXIST") throw err;
 				
-				foldersToMount++;module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", folderMounted);
+				module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
+				module_mount("/dev/null", homeDir + "dev/null", folderMounted);
+				
+				// Needed for pseudo terminals 
+				// First dev/pts need to be created with rwrwrw, then dev/pts/ptmx need to be mounted to dev/ptmx (Ubuntu 18)
+				module_fs.mkdir(homeDir + "dev/pts/", function(err) {
+					if(err && err.code != "EEXIST") throw err;
+					
+					module_mount(null, homeDir + "dev/pts/", 'mount -t devpts none "' + homeDir + 'dev/pts/" -o ptmxmode=0666,newinstance', function(err) {
+						if(err) throw err;
+						
+						module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", folderMounted);
+					});
+				});
 			});
-			
 			
 		}
 		
@@ -2266,74 +2267,74 @@ function checkMounts(options, checkMountsCallback) {
 			var url_user = UTIL.urlFriendly(username);
 			var nginxProfilePath = nginxSitesAvailable + url_user + "." + DOMAIN + ".nginx";
 			module_fs.stat(nginxProfilePath, function (err, stats) {
-			if(checkMountsAbort) return;
-			
-			if(err) {
-				if(err.code != "ENOENT") throw err;
+				if(checkMountsAbort) return;
 				
-				module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
-					if(checkMountsAbort) return;
+				if(err) {
+					if(err.code != "ENOENT") throw err;
 					
-					if(err) throw err;
-					
-					nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
-					nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-					
-					module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+					module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+						if(checkMountsAbort) return;
+						
 						if(err) throw err;
-						console.log("Nginx profile created!");
-						console.timeEnd("Check " + username + " nginx profile");
-						checkNginxEnabled();
-					});
-					
-				});
-			}
-			else {
-				console.timeEnd("Check " + username + " nginx profile");
-				checkNginxEnabled();
-			}
-			
-			function checkNginxEnabled() {
-				console.time("Check " + username + " Nginx enabled");
-				var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
-				module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
-					if(checkMountsAbort) return;
-					
-					if(err) {
-						if(err.code != "ENOENT") throw err;
 						
-						module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
-							if(err && err.code != "EEXIST") throw err;
-							
-							var exec = module_child_process.exec;
-							exec("service nginx reload", function(error, stdout, stderr) {
-								if(error) throw(error);
-								if(stderr) throw new Error(stderr);
-								if(stdout) throw new Error(stdout);
-								
-								nginxProfileOK = true;
-								console.timeEnd("Check " + username + " Nginx enabled");
-								
-								checkSslCert();
-								
-								checkMountsReadyMaybe();
-							});
-							
+						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
+						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+						
+						module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+							if(err) throw err;
+							console.log("Nginx profile created!");
+							console.timeEnd("Check " + username + " nginx profile");
+							checkNginxEnabled();
 						});
-					}
-					else {
-						nginxProfileOK = true;
-						console.timeEnd("Check " + username + " Nginx enabled");
 						
-						checkSslCert();
+					});
+				}
+				else {
+					console.timeEnd("Check " + username + " nginx profile");
+					checkNginxEnabled();
+				}
+				
+				function checkNginxEnabled() {
+					console.time("Check " + username + " Nginx enabled");
+					var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
+					module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
+						if(checkMountsAbort) return;
 						
-						checkMountsReadyMaybe();
-					}
-				});
-			}
-			
-		});
+						if(err) {
+							if(err.code != "ENOENT") throw err;
+							
+							module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+								if(err && err.code != "EEXIST") throw err;
+								
+								var exec = module_child_process.exec;
+								exec("service nginx reload", function(error, stdout, stderr) {
+									if(error) throw(error);
+									if(stderr) throw new Error(stderr);
+									if(stdout) throw new Error(stdout);
+									
+									nginxProfileOK = true;
+									console.timeEnd("Check " + username + " Nginx enabled");
+									
+									checkSslCert();
+									
+									checkMountsReadyMaybe();
+								});
+								
+							});
+						}
+						else {
+							nginxProfileOK = true;
+							console.timeEnd("Check " + username + " Nginx enabled");
+							
+							checkSslCert();
+							
+							checkMountsReadyMaybe();
+						}
+					});
+				}
+				
+			});
 		});
 	}); // checked user rights
 	
@@ -2691,6 +2692,97 @@ function checkMounts(options, checkMountsCallback) {
 	} // checkSslCert
 	
 } // checkMounts
+
+function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallback) {
+	log("mountFollowSymlink: binaryFile=" + binaryFile + " homeDir=" + homeDir + " ", DEBUG);
+	 
+	// Check if binaryFile is a symlink, follows the symlinks,
+	// mounts the actual binary file, then creates the symlinks
+	var folder = UTIL.getDirectoryFromPath(binaryFile);
+
+	recursiveLinks(binaryFile, function(err, links, targetBinary, targetRelative) {
+		if(err) return mountFollowSymlinkCallback(err);
+
+		var targetInHomeDir = UTIL.joinPaths(homeDir, targetBinary);
+		
+		log("mountFollowSymlink: targetBinary=" + binaryFile + " targetInHomeDir=" + targetInHomeDir + " links=" + JSON.stringify(links) + " ", DEBUG);
+		
+		module_mount(targetBinary, targetInHomeDir, function(err) {
+			if(err) return mountFollowSymlinkCallback(err);
+			
+			createLinks(links, function(err) {
+				if(err) mountFollowSymlinkCallback(err);
+				else mountFollowSymlinkCallback(null, targetRelative);
+			});
+		});
+	});
+	
+	function mountFollowSymlinkCallback(err, target) {
+		mountFollowSymlinkActualCallback(err, target);
+		mountFollowSymlinkActualCallback = null; // Prevent further callbacks, and throw an error if it tries to call back again
+	}
+	
+	function createLinks(links, callback) {
+		if(links.length == 0) return callback(null);
+		
+		var linksToCreate = links.slice(); // Don't mess with the original array
+		
+		createLink(linksToCreate.pop());
+		
+		function createLink(link) {
+			
+			var pathInHomeDir = UTIL.joinPaths(homeDir, link.path);
+			
+			module_fs.symlink(link.target, pathInHomeDir, function (err) {
+				if(err && err.code != "EEXIST") return callback(err); // It's allright if the link already exist
+				
+				if(linksToCreate.length > 0) createLink(linksToCreate.pop());
+				else callback(null);
+			});
+		}
+	}
+	
+	function recursiveLinks(binaryFile, callback) {
+		// Returns an array of links, and the final binary they all link to
+		
+		var folder = UTIL.getDirectoryFromPath(binaryFile);
+		var links = [];
+		
+		checkLink(binaryFile);
+		
+		function checkLink(binaryFile) {
+			module_fs.readlink(binaryFile, function(err, linkString) {
+				if(!err) {
+					// No error means it's a symlink
+					
+					var targetAbsolutePath = UTIL.resolvePath(folder, linkString);
+					
+					// note: Target can NOT be an absolute path! Or chroot wont work.
+					
+					links.push({target: linkString, path: binaryFile});
+					
+					// Check if it's a symbolic link
+					checkLink(targetAbsolutePath, linkString);
+				}
+else if(err.code == "EINVAL") {
+					// We found the actually a binary!
+					
+					if(links.length > 0) {
+						var targetRelative = links[0].target;
+					}
+					else {
+						var targetRelative = UTIL.getFilenameFromPath(binaryFile);
+					}
+					
+					callback(null, links, binaryFile, targetRelative);
+}
+				else callback(err);
+});
+		}
+}
+}
+
+
 
 // Overload console.log 
 console.log = function() {
@@ -3420,7 +3512,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		chromiumBrowser.on("close", function (code, signal) {
 			log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			// Should we restart chromium-browser !?
-			});
+		});
 		
 		chromiumBrowser.on("disconnect", function () {
 			log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
