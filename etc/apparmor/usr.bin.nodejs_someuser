@@ -73,7 +73,7 @@
   %HOME%%USERNAME%/** mr,
 
   # Check users if we are root, not sure why this is needed !?
-  owner /etc/passwd r
+  owner /etc/passwd r,
 
   # Some files might be created by root, such as lastLogin
   %HOME%%USERNAME%/.jzeditStorage/** rw,
