@@ -67,8 +67,5 @@
   %HOME%%USERNAME%/usr/bin/env ix,
   %HOME%%USERNAME%/bin/sh ix,
 
-
-  #/dev/tty rw,
-
 }
 		

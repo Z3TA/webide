@@ -46,39 +46,14 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-todo: In Ubuntu 18 /usr/bin/python is not a symlink to python2 which is a symlink to python2.7
-and /bin/sh is a symlink to /bin/dash, so check if python and sh is a link or not,
-then mount if it's an actual binary, otherwise following the link(s) recursevely, mount the source and create the links.
-
-reboot and continue to make sense of apparmor profiles
-
-wtf Ubuntu seems to have shuffled everything around from 16 to 18 ...
-I need to write automatic tests for running all these execs!!! eg run npm from bash, etc
-
 todo: Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
-
-
-python is a symlink
-
-Getting node,python,npm,etc run via bash and also forked from node, in ubuntu 18
 
 todo: Update script that replace current apparmor profiles
 
 (maybe we can get rid of some apparmor profiles !?)
 
 
-Cleaning up apparmor profiles and making them more strict.
 
-Test terminal (pty)
-Clean up apparmor profiles from when I tried to get pty to work
-
-todo: Limit access in home dir so user don't get write access to mounted folders!!!
-
-
-Need to stat parent dir of target if no source is specified to check if target is mounted or not.
-Might not be needed as the script also checks to make sure the file or folder is empty!
-
-/dev/tty is not needed for pty!
 
 does this work? nope, need to have  -o ptmxmode=0666,newinstance !!
 sudo mount -t devpts none /home/guest2/dev/pts

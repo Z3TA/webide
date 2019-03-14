@@ -435,8 +435,11 @@ user.loadStorage = function loadStorage(callback) {
 			console.log("Loading item=" + itemName);
 			fs.readFile(user.storageDir + fileItemName, "utf8", function readStorageFileItem(err, data) {
 				if(err) {
-					callback(err);
-					throw err;
+					if(err.code == "EACCES") {
+						console.warn("Do not have access to read " + user.storageDir + fileItemName);
+						//return callback(err);
+					}
+					else throw err;
 				}
 				
 				user.storage[itemName] = data;
