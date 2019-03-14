@@ -53,99 +53,12 @@ todo: Update script that replace current apparmor profiles
 (maybe we can get rid of some apparmor profiles !?)
 
 
+Write blog post about fork-pty in Ubuntu 18 in a chroot
 
-
-does this work? nope, need to have  -o ptmxmode=0666,newinstance !!
-sudo mount -t devpts none /home/guest2/dev/pts
-
-
-
-This fixed it!!!!!!
 sudo mount -t devpts none "/home/guest2/dev/pts" -o ptmxmode=0666,newinstance
 sudo mount --bind /home/guest2/dev/pts/ptmx /home/guest2/dev/ptmx
 
-
-
-Have anyone tried running fork-pty (note-pty) in a chroot ?
-It worked fine for me in Ubuntu 16, but in Ubuntu 18 it doesn't even though I've mounted (--bind) these:
-
-It *does* work if I mount the whole /dev and /dev/pts
-
-But if does not work if I *only* mount these:
-urandom, null, ptmx, pts, tty
-
-If I mount *whole* /dev and /dev/pts and then deny rw for everything besides urandom, null, ptmx, pts, tty
-it *does* work.
-
-I'm getting crazy
-
-
-
-
-
-
-Now I have denyed everything besides:
-urandom, null, ptmx, pts, tty
-And then it works ... 
-But if I mount only those it does *not* work!
-
-
-
-Do I really have to try disabling *all* files in /dev !? *sight*
-deny /home/guest2/dev/loop0 rw,
-
-
-trying: sudo aa-logprof ... didn't help!
-
-deny /home/guest2/dev/** rw,
-makes it not work, but theres nothing in apparmor logs!
-
-Continuing strategy 3, denying /dev in apparmor ...
-
-I rebooted and now it works, even with Apparmor on!
-
-And now I can't get it to start even though I have mounted all dirs and disabled Apparmor!!
-I might have nuked some stuff in /dev ... reboot ...
-
-
-rw to %HOME%%USERNAME%/dev/ptmx might be the one !?!?!? nope
-
-
-hmm /usr/bin/bash should be /bin/bash
-
-
-
-todo: Add owner to /home/ rw apparmor rule
-als add deny rules for the mounts!
-
-
-Strategy 3:
-deny /dev/* rmw,
-
-
-
-Strategy 2: 
-Mount full /dev/ then try to figure out what needs to be mounted by looking at apparmor errors!
-Did not found any apparmor errors for /dev !
-
-
-
-AND I FUCKED UP AGAIN BY UNMOUNTING THE HOST DEV
-
-
-umount: /home/guest1/dev/pts: target is busy.
-try -l (lazy) flag
-
-Try mounting and unmounting manually until it works ...
-And pin down what (probably in /dev) that needs to be mounted (probably other places too)
-
-Disable Apparmor while debugging:
-sudo service apparmor stop
-sudo service apparmor teardown
-
-(but don't forget to update apparmor!)
-
-
+(be careful when unmounting!)
 
 sudo mkdir /home/guest1/bin
 sudo mkdir /home/guest1/etc
@@ -168,40 +81,7 @@ sudo chroot --userspec=guest1:guest1 /home/guest1/
 
 sudo umount /home/guest1/dev
 
-
-
-
-Can't just stay on Ubuntu 16
-
-but nothing happends.
-It also work without /dev! wtf !??
-
-
-pty works without /etc !
-It also works without /proc!!
-
-It must be something in dev that is missing!
-/dev/tty
-/dev/pts/3
-/dev/ptmx
-/dev/urandom
-/dev/null
-
-
-
-/dev/pts was missing in chroot and probably the reason why pty didn't work!? NOPE!
-
-
-oops ./removeuser.js deleted /usr/bin !?
-
-
-re-install nodejs modules!
-
-Try with node 8
-
-Why are pty accessing grub settings !?
-
-Problem running terminal in chroot!
+(also be carefuil when deleting the dir with the mounts in it, I accidentally deleted /usr/bin)
 
 
 Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
@@ -313,6 +193,8 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+test bin/jzedit in different OS, see if we can make it faster.
 
 Partial commits ! (commit only some changes)
 

@@ -9,8 +9,8 @@
 	echo hello | jzedit [filepath]
 
 	
-	Installation (optional, if npm didn't do this for us):
-	------------------------------------------------------
+	Installation (optional, if npm didn't do it):
+	---------------------------------------------
 	* Make sure this file is executable: chmod +x jzedit
 	* Add this folder to PATH
 	   * Or copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
