@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SERVER=$1
 
@@ -19,24 +19,57 @@ echo -n "Have you manually tested the happy path ? And does All automatic tests 
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
 
+# Make sure we are in the jzedit folder
+if ! [[ "$(pwd)" =~ /jzedit$ ]]
+  then
+    echo "Run this script from the jzedit folder!"
+    exit 1
+fi
 
-cd /home/Z/Projects/jzedit/
 
-./release.sh
+if ! ssh $SERVER stat /srv/jzedit/server/GUEST_COUNTER \> /dev/null 2\>\&1
+  then
+    echo "Manually login to the server and make sure /srv/jzedit/server/GUEST_COUNTER exist!"
+    echo "Or create it if it's a fresh install: mkdir -p /srv/jzedit/server/ && echo 0 > /srv/jzedit/server/GUEST_COUNTER"
+    exit 1
+fi
 
-# Backup server/GUEST_COUNTER
+ # Backup server/GUEST_COUNTER
 ssh $SERVER 'cp /srv/jzedit/server/GUEST_COUNTER /tmp/'
 
+
+if [[ "$@" =~ "-norelease" ]]
+then
+  echo "Using existing release in temp/release/server/"
+else
+   ./release.sh
+fi
+
+
+# sudo apt install rsync
 rsync -r --delete temp/release/server/ $SERVER:/srv/jzedit/
 rsync -r --delete node_modules/ $SERVER:/srv/jzedit/node_modules/
 rsync -r --delete client/noVNC/ $SERVER:/srv/jzedit/client/noVNC/
 
-ssh $SERVER /bin/bash << EOF
-cd /srv/jzedit/
-cp /tmp/GUEST_COUNTER server/GUEST_COUNTER
-nodejs update.js -headless
+#ssh -t $SERVER /bin/bash << EOF
+#cd /srv/jzedit/
+#cp /tmp/GUEST_COUNTER server/GUEST_COUNTER
+#sudo nodejs update.js -headless
+#
+#EOF
 
-EOF
+# Restore GUEST_COUNTER backup
+ssh $SERVER "cd /srv/jzedit/ && cp /tmp/GUEST_COUNTER server/GUEST_COUNTER"
+
+
+if [[ "$@" =~ "-noupdate" ]]
+then
+  echo "Not updating jzedit configuration!"
+else
+  ssh -t $SERVER "cd /srv/jzedit/ &&sudo nodejs update.js -headless"
+fi
+
+
 
 # rsync -rv
 
