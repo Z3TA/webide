@@ -25,11 +25,7 @@
   signal send set=rtmin+1 peer=%HOME%%USERNAME%/usr/bin/node,
 	 signal send set=term peer=%HOME%%USERNAME%/usr/bin/node,
 
-  network inet dgram,
-  network inet stream,
-  network inet6 dgram,
-  network inet6 stream,
-  network unix,
+  network,
 
   /dev/urandom r,
   /etc/mercurial/hgrc.d/** r,
@@ -37,6 +33,9 @@
   /lib/** r,
   /usr/lib/** r,
   /usr/local/lib/** r,
+
+  
+  %HOME%%USERNAME%/dev/null rw,
 
   %HOME%%USERNAME%/usr/bin/python2.7 ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,
