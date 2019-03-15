@@ -501,7 +501,7 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 				
 				// Python gives version in stderr ...
 				
-				if(stderr && stderr != "Python 2.7.15rc1") return error(new Error(resp.stderr));
+				if(stderr && stderr.indexOf("Python 2.") != 0) return error(new Error(resp.stderr));
 				
 				doneMaybe();
 			});
