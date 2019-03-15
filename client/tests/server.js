@@ -471,7 +471,7 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		
 	});
 	
-	EDITOR.addTest(1, function cloudDep(callback) {
+	EDITOR.addTest(function cloudDep(callback) {
 		
 		// Test to make sure we can run the cloud bin's
 		

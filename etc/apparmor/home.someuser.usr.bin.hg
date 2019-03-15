@@ -41,6 +41,8 @@
   %HOME%%USERNAME%/usr/bin/python2.7 ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,
   %HOME%%USERNAME%/bin/sh ix,
+  %HOME%%USERNAME%/bin/bash ix,
+  %HOME%%USERNAME%/bin/dash ix,
 
   #/run/resolvconf/resolv.conf r, # copied from userdir_skeleton
   #/etc/mercurial/hgrc.d/cacerts.rc # copied from userdir_skeleton
