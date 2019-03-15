@@ -1,5 +1,13 @@
 #!/bin/sh
 
+SERVER=$1
+
+if [ -z "$SERVER" ]
+  then
+    echo "Please write user@server-ip as first parameter"
+    exit 1
+fi
+
 # Exit if anything fails
 set -e
 
@@ -13,13 +21,13 @@ cd /home/Z/Projects/jzedit/
 ./release.sh
 
 # Backup server/GUEST_COUNTER
-ssh root@ben.100m.se 'cp /srv/jzedit/server/GUEST_COUNTER /tmp/'
+ssh $SERVER 'cp /srv/jzedit/server/GUEST_COUNTER /tmp/'
 
-rsync -r --delete temp/release/server/ root@ben.100m.se:/srv/jzedit/
-rsync -r --delete node_modules/ root@ben.100m.se:/srv/jzedit/node_modules/
-rsync -r --delete client/noVNC/ root@ben.100m.se:/srv/jzedit/client/noVNC/
+rsync -r --delete temp/release/server/ $SERVER:/srv/jzedit/
+rsync -r --delete node_modules/ $SERVER:/srv/jzedit/node_modules/
+rsync -r --delete client/noVNC/ $SERVER:/srv/jzedit/client/noVNC/
 
-ssh root@ben.100m.se /bin/bash << EOF
+ssh $SERVER /bin/bash << EOF
 cd /srv/jzedit/
 cp /tmp/GUEST_COUNTER server/GUEST_COUNTER
 nodejs update.js

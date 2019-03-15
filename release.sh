@@ -3,7 +3,7 @@
 # Exit if anything fails
 set -e
 
-# Delete dependency of dependency to for dependencies to use our patched dependency
+# Delete dependency of dependency to force dependencies to use our patched dependency
 rm -rf node_modules/mysql2/node_modules/iconv-lite
 
 
@@ -194,17 +194,25 @@ echo "Remove files no longer needed"
 rm version.inc
 
 
+if [[ "$@" =~ "-publish" ]]
+then
 
-# Move the files to www
-scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
-scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+  # Move the files to www
+  scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+  scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 
-echo "Make NPM release"
-cd temp/release/npm
-npm publish
+  echo "Make NPM release"
+  cd temp/release/npm
+  npm publish
 
-# Update the homepage
+  # Update the homepage
 
-# Update the RSS.xml
+  # Update the RSS.xml
+
+else
+    echo "Use -publish flag to publish"
+fi
+
+
 
 echo "Done!"
