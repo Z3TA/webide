@@ -49,13 +49,14 @@
 			<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
 			
 			Ligatures are confirmed to work in: Chrome/Chromium/Opera, Firefox, Safari, but not MSIE or Edge!
+			
+			INSTALL LIGATURE FONT:
 			Download Fira Code (https://github.com/tonsky/FiraCode/releases/) and put it in gfx/font/ 
 			and change the path (/FiraCode_1.204/) below:
 			
 			*/
 		
 		debug("Using ligatures with FiraCode");
-		
 		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
 		EDITOR.settings.style.font = "Fira Code";
 		
