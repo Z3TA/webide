@@ -2136,7 +2136,7 @@ function checkMounts(options, checkMountsCallback) {
 							
 						*/
 						
-						var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "../lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
+						var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "/usr/lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
 						
 						if(npmBin.indexOf("/usr/") != 0) throw new Error("Not in /usr/ npmBin=" + npmBin);
 						
