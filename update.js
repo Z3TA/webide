@@ -19,6 +19,7 @@ var eachUser = require("./shared/eachUser.js");
 
 var defaultHome = "/home/";
 var HOME = getArg(["home", "home"]) || defaultHome;
+var HEADLESS = !!getArg(["headless", "headless"]);
 
 var ENCODING = "utf8";
 
@@ -27,6 +28,17 @@ var child_process = require('child_process');
 
 var UTIL = require("./client/UTIL.js");
 
+if(HEADLESS) startUpdate();
+else {
+	console.log("This script is for when running as a cloud IDE. It will update the jzedit configuration!");
+	console.log("Press Enter to continue ... Or Ctrl+C to abort");
+	process.stdin.once('data', function () {
+		startUpdate();
+	});
+}
+
+function startUpdate() {
+	
 // Update services
 copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
 //copyFileSync("./etc/systemd/jzedit_signup.service", "/etc/systemd/system/jzedit_signup.service");
@@ -82,6 +94,7 @@ run("systemctl reload apparmor");
 	run("systemctl restart jzedit_nodejs_init");
 	
 });
+}
 
 
 function createApparmorProfile(template, username) {

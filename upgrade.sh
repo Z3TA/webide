@@ -34,7 +34,7 @@ rsync -r --delete client/noVNC/ $SERVER:/srv/jzedit/client/noVNC/
 ssh $SERVER /bin/bash << EOF
 cd /srv/jzedit/
 cp /tmp/GUEST_COUNTER server/GUEST_COUNTER
-nodejs update.js
+nodejs update.js -headless
 
 EOF
 
