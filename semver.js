@@ -14,8 +14,10 @@ process.on("exit", function () {
 
 var fs = require("fs");
 fs.readFile("SEMVER", "utf8", function(err, data) {
-	if(err) throw err;
-	
+	if(err) {
+		if(err.code == "ENOENT") console.log("Unable to find SEMVER file. Create it with the current semver X.Y.Z version!");
+		throw err;
+	}
 	var semver = data.split(".");
 	for (var i=0; i<semver.length; i++) {
 		semver[i] = parseInt(semver[i]);

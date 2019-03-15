@@ -11,6 +11,10 @@ fi
 # Exit if anything fails
 set -e
 
+# Make sure our machine and the server runs the same version of NodeJS and Linux distribution !? So that native npm packages doesn't break
+# Or just recompile after copying !?
+
+
 echo -n "Have you manually tested the happy path ? And does All automatic tests pass (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi

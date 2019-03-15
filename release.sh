@@ -6,9 +6,14 @@ set -e
 # Delete dependency of dependency to force dependencies to use our patched dependency
 rm -rf node_modules/mysql2/node_modules/iconv-lite
 
+if [[ "$@" =~ "-publish" ]]
+then
+  node semver.js
+  rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+else
+    echo "Not updating SEMVER because no -publish flag!"
+fi
 
-node semver.js
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # Get the current version (generates version.inc)
 node changeset.js
@@ -86,7 +91,7 @@ rm -rf temp/release/linux/guide/
 
 rm temp/release/linux/make_test_file.js
 rm temp/release/linux/charStats.js
-rm temp/release/linux/webide_release.sh
+rm temp/release/linux/upgrade.sh
 rm temp/release/linux/release.sh
 rm temp/release/linux/todo.md
 rm temp/release/linux/testfile.txt
@@ -146,13 +151,15 @@ echo "Clean up the server release"
 # CLient is meant to run in the browser
 rm -rf temp/release/server/bin/
 
+rm -rf temp/release/server/jzedit.app/
+
 rm temp/release/server/linux_start.sh
 rm temp/release/server/start.bat
 rm temp/release/server/windows_create_desktop_shortcut.vbs
 rm temp/release/server/linux_launcher.desktop
 rm temp/release/server/osx_start.sh
 rm temp/release/server/start.js
-
+rm temp/release/server/linux_create_desktop_shortcut.sh
 
 #echo "Clean up the npm release"
 
