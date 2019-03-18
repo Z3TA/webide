@@ -1432,6 +1432,8 @@ file.insertLineBreak();
 						
 						EDITOR.showFileReset(); // Because files opened from the editor get show state to prevent other files to get shown
 						
+						EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
+						
 						callback(true);
 					}
 					

@@ -417,7 +417,7 @@ API.readLines = function readLines(user, json, callback) {
 				
 			}
 			else {
-				user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
+			user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
 			}
 		}
 		else if(parse.protocol == "sftp:") {
@@ -445,7 +445,7 @@ API.readLines = function readLines(user, json, callback) {
 				
 			}
 			else {
-				user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
+			user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
 			}
 		}
 		
@@ -1006,7 +1006,7 @@ str = decoder.write(data);
 				
 			}
 			else {
-				user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
+			user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
 			}
 		}
 		else if(parse.protocol == "sftp:") {
@@ -1050,7 +1050,7 @@ console.warn(err.message);
 				
 			}
 			else {
-				user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
+			user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
 			}
 		}
 		
@@ -2040,7 +2040,7 @@ API.connect = function connect(user, json, callback) {
 		});
 		
 		ftpClient.on('close', function(hadErr) {
-			user.send("Connection to FTP on " + serverAddress + " closed.");
+			user.send("Connection to FTP on " + serverAddress + " closed.", "REMOTE_CONNECTION_CLOSE");
 			
 			user.remoteConnectionClosed("ftp", serverAddress);
 			
@@ -2158,7 +2158,6 @@ API.connect = function connect(user, json, callback) {
 				}
 				catch(err) {
 					cb(err);
-					//user.send("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
 				}
 			});
 		}
@@ -2220,7 +2219,7 @@ cb = null;
 				user.remoteConnectionClosed("ssh", serverAddress);
 				
 			}).on('end', function(msg) {
-				user.send("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
+				user.send("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg, "REMOTE_CONNECTION_CLOSE");
 				
 				user.remoteConnectionClosed("ssh", serverAddress);
 				

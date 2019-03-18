@@ -230,10 +230,11 @@ user.teardown = function teardown(msg, terddownComplete) {
 	}
 }
 
-user.send = function send(msg) {
+user.send = function send(msg, code) {
 	
 	if(msg !== Object(msg)) {
 		msg = {msg: msg};
+		if(code) msg.code = code;
 	}
 	
 	process.send({message: msg})

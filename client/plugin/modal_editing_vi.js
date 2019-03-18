@@ -2819,7 +2819,10 @@ firstTimeVim = false;
 	function vimTest1(callback) {
 		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim();
+			if(!vimWasActive) {
+				toggleVim();
+				EDITOR.closeLastOpenedDialog();
+			}
 			
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -3032,7 +3035,10 @@ callback(true);
 	function vimTest2(callback) {
 		EDITOR.openFile("vimTest2.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim();
+			if(!vimWasActive) {
+toggleVim();
+EDITOR.closeLastOpenedDialog();;
+			}
 			
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -3320,7 +3326,10 @@ callback(true);
 	function vimTest3(callback) {
 		EDITOR.openFile("vimTest3.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim();
+			if(!vimWasActive) {
+toggleVim();
+EDITOR.closeLastOpenedDialog();;
+			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -3618,7 +3627,10 @@ callback(true);
 	function vimTest4(callback) {
 		EDITOR.openFile("vimTest4.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim();
+			if(!vimWasActive) {
+toggleVim();
+EDITOR.closeLastOpenedDialog();;
+			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});

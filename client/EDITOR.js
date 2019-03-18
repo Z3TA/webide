@@ -223,7 +223,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	if(BROWSER.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
 	//if(BROWSER.indexOf("Firefox") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
-	//if(BROWSER != "Chrome") alertBox("The editor might be slow in your BROWSER (" + BROWSER + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
+	//if(BROWSER != "Chrome") alertBox("The editor might be slow in your BROWSER (" + BROWSER + ").\nThe editor runs best in Chrome/Chromium/Opera", "PERF", "warning");
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
@@ -1095,7 +1095,7 @@ usePseudoClipboard = false;
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
 				
-				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.');
+				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.', "BIG_FILE");
 				
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);
@@ -1468,7 +1468,7 @@ usePseudoClipboard = false;
 					console.error(errors[i]);
 					errorMessages.push(errors[i].message);
 				}
-				alertBox(errors.length + " tool(s) failed. Which might effect formatting etc of the file on disk!\n" + errorMessages.join("\n"), "warning");
+				alertBox(errors.length + " tool(s) failed. Which might effect formatting etc of the file on disk!\n" + errorMessages.join("\n"), "FILE", "warning");
 			}
 			/*
 				if(!file.savedAs && path == file.path) {
@@ -1526,7 +1526,7 @@ if(path != file.path) reOpen(file.path, path);
 					}
 					else if(file.hash != hash) {
 						console.log("file.hash=" + file.hash + " hash=" + hash);
-						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "warning");
+						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "FILE", "warning");
 						return;
 					}
 					
@@ -5580,7 +5580,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		
 		if(!stackLines) {
 			console.warn("Failed to parse errorStack: " + errorStack);
-			//alertBox(message || errorStack, "error");
+			//alertBox(message || errorStack, "ERROR_PARSING", "error");
 			return FAIL;
 		}
 		
@@ -5763,15 +5763,20 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		EDITOR.resizeNeeded();
 	}
 	
-	EDITOR.openDialogs = [];
-	EDITOR.closeAllDialogs = function closeAllDialogs() {
-		console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs...");
+	EDITOR.openDialogs = {}; // dialog-code: [Dialog, Dialog, ...]
+	
+	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode) {
+		
+		if(!dialogCode) console.warn("No dialogCode given to closeAllDialogs! ALL dialogs will be closed!");
+		
+		console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
 		for (var i=0; i<EDITOR.openDialogs.length; i++) {
 			console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+			if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) continue;
+			
 			EDITOR.openDialogs[i].close();
 		}
 	}
-	
 	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
@@ -6510,7 +6515,7 @@ waitingForSync = false;
 				allDone = true;
 				
 				if(fails === 0) {
-					EDITOR.closeAllDialogs();
+					//EDITOR.closeAllDialogs();
 testResults.push("All " + finished + " tests passed!")
 				}
 				else testResults.push(fails + " of " + finished + " test failed:");
@@ -7170,7 +7175,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					if(file.isBig) {
 						// First save the current buffer
 						EDITOR.saveFile(file, function fileSaved(err, path) {
-							if(err) return alertBox("Failed to save " + path + ":\n" + err.message, "error");
+							if(err) return alertBox("Failed to save " + path + ":\n" + err.message, "PASTE", "error");
 							// Then save the pasted data
 							CLIENT.cmd("writeLines", {start: file.partStartRow+file.caret.row+1, path: file.path, content: text}, function linesWritten(err) {
 								if(err) return alertBox("Failed to save pasted data! " + err.message);
@@ -7191,7 +7196,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						// Normal file
 						if(!file.savedAs) {
 							EDITOR.checkPath(file.path, function(err, path) {
-								if(err) return alertBox("Unable to save " + file.path + ".\nIt does not have a proper path!", "error");
+								if(err) return alertBox("Unable to save " + file.path + ".\nIt does not have a proper path!", "PASTE", "error");
 								else saveToDisk(path);
 							});
 						}
@@ -7203,11 +7208,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					console.log("Saving file content with the pasted data as " + filePath + " ...");
 					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
 					EDITOR.saveToDisk(filePath, combinedText, function saveToDiskComplete(err, path, hash) {
-						if(err) return alertBox("Unable to save the file! " + err.message, "error");
+						if(err) return alertBox("Unable to save the file! " + err.message, "FILE", "error");
 						
 						EDITOR.closeFile(file.path, true);
 						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
-							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "warning");
+							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "FILE", "warning");
 						});
 						
 					});

@@ -8,8 +8,13 @@
 
 "use strict";
 
-function Dialog(msg, icon, dialogDelay) {
+function Dialog(msg, options) {
 	var dialog = this;
+	
+	var icon = options.icon;
+	var dialogDelay = options.delay;
+	
+	dialog.code = options.code || "MISC";
 	
 	console.log(UTIL.getStack("Creating dialog: msg=" + msg));
 	
@@ -190,8 +195,8 @@ else {
 	}
 }
 
-function alertBox(msg, icon, recursionCount) {
-	var dialog = new Dialog(msg, icon);
+function alertBox(msg, code, icon, recursionCount) {
+	var dialog = new Dialog(msg, {icon: icon, code: code});
 	
 	if(!dialog.div) {
 		return setTimeout(function wait() {
@@ -202,7 +207,7 @@ function alertBox(msg, icon, recursionCount) {
 			
 			if(recursionCount > 4) console.warn("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
 			
-			alertBox(msg, icon, recursionCount);
+			alertBox(msg, code, icon, recursionCount);
 			
 		}, 150);
 	}
@@ -308,7 +313,7 @@ dialogDelay = defaultValue;
 	
 	console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
 	
-	var dialog = new Dialog(msg, undefined, dialogDelay);
+	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay});
 	
 	if(!dialog.div) {
 		console.log("promptBox: Waiting until the body element is available ...");

@@ -1878,6 +1878,8 @@ if(err) throw err;
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;
 											
+											EDITOR.closeAllDialogs("BIG_FILE");
+											
 											callback(true);
 										});
 									}
@@ -1945,6 +1947,8 @@ if(err) throw err;
 										console.log("Deleting " + testFile + " ...");
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;
+											
+											EDITOR.closeAllDialogs("BIG_FILE");
 											
 											callback(true);
 										});

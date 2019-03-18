@@ -459,6 +459,9 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 							setTimeout(function disconnectFromSftp() {
 CLIENT.cmd("disconnect", connJson, function(err, json) {
 									console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
+									
+									EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+									
 								});
 							}, 10000);
 							

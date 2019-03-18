@@ -403,7 +403,7 @@ reconnectTimeoutTime += 10000;
 			}
 			else if(json.msg) {
 				console.warn(json.msg);
-				alertBox(json.msg);
+				alertBox(json.msg, json.code || "SERVER_MSG");
 			}
 			else if(!json.resp) {
 				

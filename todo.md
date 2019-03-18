@@ -46,6 +46,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Doing something about annoying dialogs when running tests
+
 Testing on 192.168.122.50
 
 todo: Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16

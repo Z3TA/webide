@@ -988,7 +988,7 @@ updateCommitFileSelect();
 				for(var i=0; i<removed.length; i++) insertFile(removed[i], true);
 				for(var i=0; i<untracked.length; i++) insertFile(untracked[i], false);
 				
-				if(missing.length > 0) alertBox("The following files are missing:\n" + missing.join("\n"), "warning");
+				if(missing.length > 0) alertBox("The following files are missing:\n" + missing.join("\n"), "SCM", "warning");
 				// Ask to untrack them !?
 				
 			}

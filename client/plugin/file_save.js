@@ -366,7 +366,7 @@ var buttonSaveAs = document.createElement("input");
 					
 					if(err.code == "CANCEL") return console.warn("The save was canceled: " + err.message);
 					
-					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
+					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "FILE", "warning");
 					}
 				});
 			
