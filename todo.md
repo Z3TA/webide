@@ -46,9 +46,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-Error parsing in Firefox
-
 Doing something about annoying dialogs when running tests
+
+
+JS Error parsing ...
+
 
 Testing on 192.168.122.50
 

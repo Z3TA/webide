@@ -1471,7 +1471,7 @@ console.warn("Only store commands starting with :");
 		else if(str == ":help") {
 			// Reload file from disk, ignore changes
 			return function help() {
-				alertBox("Sorry, there is not yet any documentation besides the README.txt that comes with the program.");
+				alertBox("Sorry, there is not yet any documentation besides the README.txt that comes with the program.", "VIM_MODE");
 			}
 		}
 		
@@ -2731,7 +2731,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			showMessage("(VIM*) NORMAL MODE");
 			
 			if(firstTimeVim) {
-				alertBox('You are now in "VIM" mode. Press ' + EDITOR.getKeyFor("toggleVim") + ' to toggle to another mode.');
+				alertBox('You are now in "VIM" mode. Press ' + EDITOR.getKeyFor("toggleVim") + ' to toggle to another mode.', "VIM_MODE");
 firstTimeVim = false;
 			}
 		}
@@ -2821,7 +2821,7 @@ firstTimeVim = false;
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 				toggleVim();
-				EDITOR.closeLastOpenedDialog();
+				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			
 			// Get out from any mode
@@ -3037,7 +3037,7 @@ callback(true);
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-EDITOR.closeLastOpenedDialog();;
+				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			
 			// Get out from any mode
@@ -3328,7 +3328,7 @@ EDITOR.closeLastOpenedDialog();;
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-EDITOR.closeLastOpenedDialog();;
+				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -3629,7 +3629,7 @@ EDITOR.closeLastOpenedDialog();;
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-EDITOR.closeLastOpenedDialog();;
+				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});

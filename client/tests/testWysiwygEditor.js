@@ -356,7 +356,8 @@
 	
 	EDITOR.addTest(function inlineConsoleLog(callback) {
 		// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
-		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
+		var msgStr = '"console.log test ' + (new Date()).getTime() + '"';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, compiledPage: fileHtml, testFile: "inlineConsoleLog.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
@@ -366,6 +367,18 @@
 			setTimeout(function checkEditorInfo() {
 				console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 				if(EDITOR.info.length == 0) throw new Error("Expected something in EDITOR.info! Not EDITOR.info.length=" + EDITOR.info.length);
+				
+				var foundMessage = false;
+				var messages = [];
+				for(var i=0; i<EDITOR.info.length; i++) {
+					if(EDITOR.info[i].str == msgStr) {
+						foundMessage = true;
+						break;
+					}
+					messages.push( EDITOR.info[i].str );
+				}
+				
+				if(!foundMessage) throw new Error( "Did not find msgStr=" + msgStr + " in " + JSON.stringify(messages) );
 				
 				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();
@@ -379,7 +392,8 @@
 	
 	EDITOR.addTest(function inlineErrorMessages(callback) {
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
-		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error("This is an error! " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
+		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgString + ');\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, compiledPage: fileHtml, testFile: "inlineErrorMessages.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
@@ -389,6 +403,19 @@
 			setTimeout(function checkEditorInfo() {
 				console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info.length=" +EDITOR.info.length + " to be at least 1. EDITOR.info=" + EDITOR.info);
+				
+				var foundMessage = false;
+				var messages = [];
+				for(var i=0; i<EDITOR.info.length; i++) {
+					if(EDITOR.info[i].str == msgStr) {
+						foundMessage = true;
+						break;
+					}
+					messages.push( EDITOR.info[i].str );
+				}
+				
+				if(!foundMessage) throw new Error( "Did not find msgStr=" + msgStr + " in " + JSON.stringify(messages) );
+				
 				
 				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();

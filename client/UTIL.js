@@ -766,10 +766,10 @@ console.warn("fun=" + fun);
 		*/
 		if(errorString.match(/@.*:\d+:\d+$/)) {
 
-			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastSpace;
+			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastColonSpace;
 			
 			for(var row=rows.length-1; row>-1; row--) {
-				rowstr = rows[row];
+				rowstr = rows[row].trim();
 				lastColumn = rowstr.lastIndexOf(":");
 				
 				if(lastColumn == -1) throw new Error( "Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
@@ -801,20 +801,18 @@ console.warn("fun=" + fun);
 				rowstr = rowstr.slice(0, lastAt);
 				
 				if(rowstr.length > 0) {
-					lastSpace = rowstr.lastIndexOf(" ");
+					lastColonSpace = rowstr.lastIndexOf(": ");
 					
-					if(lastSpace == -1) {
+					if(lastColonSpace == -1) {
 						fun = rowstr;
 					}
 					else {
-						fun = rowstr.slice(lastSpace+1);
-						rowstr = rowstr.slice(0, lastSpace);
+						fun = rowstr.slice(lastColonSpace+2);
+						rowstr = rowstr.slice(0, lastColonSpace);
 						
 						if(message) throw new Error("Message have already been found! message=" + message + " rowstr="  + rowstr + " errorString=" + errorString);
 						
 						message = rowstr;
-						
-						if(message.charAt(message.length-1) == ":") message = message.slice(0, -1);
 						
 						console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
 					}
@@ -829,7 +827,11 @@ console.warn("fun=" + fun);
 		}
 		
 		/*
-			Node.JS and Chromium (v8) errors
+			Node.JS and Chromium (v8) errors:
+			
+			/home/zeta/test/error.js:7
+			a=1;
+			^
 			
 			ReferenceError: a is not defined
 			at /home/zeta/test/error.js:7:2
@@ -842,16 +844,77 @@ console.warn("fun=" + fun);
 			at Function.Module._load (module.js:497:3)
 			at Function.Module.runMain (module.js:693:10)
 			at startup (bootstrap_node.js:188:16)
-		*/
-		else if(errorString.match(/^at .*:\d+:\d+/)) {
 			
+		*/
+		else if( errorString.match(/at .*:\d+:\d+/) ) {
+			
+			var namedFunction = false;
+			var lastColumn, colMaybe, lineMaybe, lastSpaceAndLeftParenthese, firstAt
+			
+			for(var row=rows.length-1; row>-1; row--) {
+				rowstr = rows[row].trim();
+				
+				if( ! rowstr.match(/^at .*\d+:\d+\)?$/  ) != 0) {
+					// Start of stack trace reached
+					if(stack.length == 0) console.warn("parseErrorMessage: No stack trace found! rowstr=" + rowstr + " errorString=" + errorString);
+					break;
+				}
+				
+				if( rowstr.charAt(rowstr.length-1) == ")" ) {
+rowstr = rowstr.slice(0, -1); // Remove )
+					namedFunction = true;
+				}
+				else {
+namedFunction = false;
+				}
+				
+				lastColumn = rowstr.lastIndexOf(":");
+				
+				if(lastColumn == -1) throw new Error( "Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
+				
+				colMaybe = rowstr.slice(lastColumn+1);
+				rowstr = rowstr.slice(0, lastColumn);
+				lastColumn = rowstr.lastIndexOf(":");
+				lineMaybe = rowstr.slice(lastColumn+1);
+				
+				if( UTIL.isNumeric(colMaybe) && UTIL.isNumeric(lineMaybe) ) {
+					line = parseInt(lineMaybe);
+					col = parseInt(colMaybe);
+					rowstr = rowstr.slice(0, lastColumn);
+				}
+				else if(UTIL.isNumeric(colMaybe)) {
+					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					line = parseInt(colMaybe);
+					col = undefined;
+				}
+				
+				if(namedFunction) {
+					lastSpaceAndLeftParenthese = rowstr.lastIndexOf(" (");
+					source = rowstr.slice(lastSpaceAndLeftParenthese-2);
+					rowstr = rowstr.slice(0, lastSpaceAndLeftParenthese);
+				}
+				
+				firstAt = rowstr.indexOf("at ");
+				
+				if(firstAt == -1) throw new Error("No at in rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				
+				if(namedFunction) {
+					fun = rowstr.slice(firstAt+3);
+				}
+				else {
+					source = rowstr.slice(firstAt+3);
+				}
+				
+				if(source.length == 0) throw new Error("source.length=" + source.length + " namedFunction=" + namedFunction + " rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				
+				stack.unshift({fun: fun, source: source, line: line, col: col});
+			}
 			
 		}
 		
 		
 		/*
-			
-			Node.JS throw
+			Note that v8 error falls through to "Node.JS throw" error ...
 			
 			/nodejs/app.js:10
 			throw "banana";
@@ -859,13 +922,54 @@ console.warn("fun=" + fun);
 			banana
 			
 		*/
-		else if( errorString.match(/^throw.*/) && errorString.match(/^ *?\^*/) ) {
+		if( errorString.match(/.*:\d+/) && errorString.match(/ *?\^*/) ) {
 			
+			if(message) throw new Error("Message have already been found! message=" + message + " errorString=" + errorString);
+			
+			var upArrowFound = false;
+			var lastColumn, lineMaybe
+			var col = undefined;
+			var line = undefined;
+			var fun = undefined;
+			var source = undefined;
+			
+			for(var row=rows.length-stack.length-1; row>-1; row--) {
+				rowstr = rows[row];
+				
+				console.log("parseErrorMessage: row=" + row + " rowstr=" + rowstr + " ");
+				
+				if( rowstr.match(/^ *?\^$/) ) {
+					col = rowstr.length;
+					upArrowFound = true;
+					row--;
+				}
+				
+				rowstr = rows[row].trim();
+				
+				if(upArrowFound) {
+					lastColumn = rowstr.lastIndexOf(":");
+					lineMaybe = rowstr.slice(lastColumn+1);
+					
+					if( UTIL.isNumeric(lineMaybe) ) {
+						line = parseInt(lineMaybe);
+						rowstr = rowstr.slice(0, lastColumn);
+						source = rowstr;
+					}
+					else {
+						console.warn("parseErrorMessage: Unable to find line-nr: rowstr=" + rowstr + " errorString=" + errorString);
+					}
+				}
+				else {
+					message = !!message ? rowstr + "\n" + message : rowstr;
+				}
+			}
+			
+			return {message: message.trim(), source: source, line: line, col: col, fun: fun, stack: stack};
 			
 			
 		}
 		
-		else throw new Error("Unable to determine formatting of errorString=" + errorString);
+		throw new Error("Unable to determine formatting of errorString=" + errorString);
 		
 		
 		
@@ -875,18 +979,7 @@ console.warn("fun=" + fun);
 	
 	parseStackTrace: function parseStackTrace(stackTrace) {
 		/*
-			This function assumes a JavaScript error stack trace, or a error message, or both, or something ...
-			
-			There are endless variants of JavaScript error formats ...
-			Some engines includes stack traces, while others only give a short message,
-			in browsers it depends on which window the error was generated in,
-			and depending on browser, errors generated in other windows will have very little information
-			some engines give function names in the stack traces,
-			some engines only give line nr in stack traces ...
-			
-			YOU MUST WRITE A TEST IF YOU MODIFY THIS FUNCTION!
-			Even if it's just a tiny modification/fix. 
-			The more tests the better.
+			Deprecated. Use UTIL.parseErrorMessage()
 			
 			Example "stackTrace": (Chromium)
 			
