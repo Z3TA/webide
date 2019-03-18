@@ -5541,7 +5541,7 @@ var word = "";
 		}
 		else if(options.errorEvent) {
 			if(!options.errorEvent.error) {
-				console.log("options.errorEvent: ", options.errorEvent);
+				console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
 				return FAIL;
 			}
 			var message = options.errorEvent.error.message;
@@ -5557,10 +5557,10 @@ var word = "";
 			var errorStack = options.errorEvent.error.stack;
 			
 			if(!errorStack) {
-				console.log("options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
+				console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
 				//Firefox browser wont give access to the error event, because it's in another window !?
 				
-				console.log("options.errorEvent.filename=" + options.errorEvent.filename);
+				console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
 				// It seems we can still extract some data out of it! ...
 				
 				errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
@@ -5579,7 +5579,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		var stackLines = UTIL.parseStackTrace(errorStack);
 		
 		if(!stackLines) {
-			console.warn("Failed to parse errorStack: " + errorStack);
+			console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
 			//alertBox(message || errorStack, "ERROR_PARSING", "error");
 			return FAIL;
 		}
@@ -5616,21 +5616,21 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 				
 				if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
 				
-				console.log("sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
+				console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
 				if(filePath.indexOf(sourcePath) != -1) {
 					var fileExt = UTIL.getFileExtension(filePath);
 					if(fileExt == "stdout") {
-						console.log("Yes, but it's a " + fileExt + " file!");
+						console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
 						continue;
 					}
 					
-					console.log("yes!");
+					console.log("showMessageFromStackTrace: sourcePath in filePath: yes!");
 					var file = EDITOR.files[filePath];
 					var lineno = stackLines[i].lineno;
 					var colno = stackLines[i].colno;
 					break stackLoop;
 				}
-				else console.log("nope");
+				else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
 			}
 		}
 		
@@ -5653,7 +5653,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			return SUCCESS;
 			
 		}
-		else console.warn("Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+		else console.warn("showMessageFromStackTrace: Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
 		
 		return FAIL;
 	}

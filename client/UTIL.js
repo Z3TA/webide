@@ -719,8 +719,176 @@ console.warn("fun=" + fun);
 		}
 	},
 
+	parseErrorMessage: function parseJavaScriptErrorMessage(errorString) {
+		/*
+			This function assumes a JavaScript error stack trace, or a error message, or both, or something ...
+			
+			There are endless variants of JavaScript error formats ...
+			Some engines includes stack traces, while others only give a short message,
+			in browsers it depends on which window the error was generated in,
+			and depending on browser, errors generated in other windows will have very little information
+			some engines give function names in the stack traces,
+			some engines only give line nr in stack traces ...
+			
+			YOU MUST WRITE A TEST IF YOU MODIFY THIS FUNCTION!
+			Even if it's just a tiny modification/fix.
+			The more tests the better.
+			
+			Example "stackTrace": (Chromium)
+			
+			creating caret: at File.createCaret (http://127.0.0.1:8080/File.js:434:20)
+			at new File (http://127.0.0.1:8080/File.js:90:21)
+			at load (http://127.0.0.1:8080/EDITOR.js:798:18)
+			at Object.EDITOR.openFile (http://127.0.0.1:8080/EDITOR.js:783:5)
+			
+			
+			return: {message, source, line, col, fun, stack: [{fun, source, line, col}, ...]
+			
+		*/
+		
+		var message;
+		var source;
+		var line;
+		var col;
+		var fun;
+		var stack = [];
+		
+		errorString = errorString.trim();
+		
+		var rows = errorString.split(/\n|\r\n/);
+		
+		/*
+			Firefox desktop browser for Linux (Ubuntu)
+			
+			hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24
+			consoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4
+			@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1
+		*/
+		if(errorString.match(/@.*:\d+:\d+$/)) {
+
+			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastSpace;
+			
+			for(var row=rows.length-1; row>-1; row--) {
+				rowstr = rows[row];
+				lastColumn = rowstr.lastIndexOf(":");
+				
+				if(lastColumn == -1) throw new Error( "Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
+				
+				colMaybe = rowstr.slice(lastColumn+1);
+				rowstr = rowstr.slice(0, lastColumn);
+				lastColumn = rowstr.lastIndexOf(":");
+				lineMaybe = rowstr.slice(lastColumn+1);
+				
+				if( UTIL.isNumeric(colMaybe) && UTIL.isNumeric(lineMaybe) ) {
+					line = parseInt(lineMaybe);
+					col = parseInt(colMaybe);
+					rowstr = rowstr.slice(0, lastColumn);
+				}
+				else if(UTIL.isNumeric(colMaybe)) {
+					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					line = parseInt(colMaybe);
+					col = undefined;
+				}
+				
+				lastAt = rowstr.lastIndexOf("@");
+				
+				if(lastAt == -1) throw new Error("No @ in rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				
+				source = rowstr.slice(lastAt+1);
+				
+				if(source.length == 0) throw new Error("source.length=" + source.length + " rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				
+				rowstr = rowstr.slice(0, lastAt);
+				
+				if(rowstr.length > 0) {
+					lastSpace = rowstr.lastIndexOf(" ");
+					
+					if(lastSpace == -1) {
+						fun = rowstr;
+					}
+					else {
+						fun = rowstr.slice(lastSpace+1);
+						rowstr = rowstr.slice(0, lastSpace);
+						
+						if(message) throw new Error("Message have already been found! message=" + message + " rowstr="  + rowstr + " errorString=" + errorString);
+						
+						message = rowstr;
+						
+						if(message.charAt(message.length-1) == ":") message = message.slice(0, -1);
+						
+						console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
+					}
+				}
+				else fun = "";
+				
+				stack.unshift({fun: fun, source: source, line: line, col: col});
+				
+			}
+			
+			return {message: message, source: source, line: line, col: col, fun: fun, stack: stack};
+		}
+		
+		/*
+			Node.JS and Chromium (v8) errors
+			
+			ReferenceError: a is not defined
+			at /home/zeta/test/error.js:7:2
+			at /home/zeta/test/error.js:9:3
+			at Object.<anonymous> (/home/zeta/test/error.js:12:3)
+			at Module._compile (module.js:652:30)
+			at Object.Module._extensions..js (module.js:663:10)
+			at Module.load (module.js:565:32)
+			at tryModuleLoad (module.js:505:12)
+			at Function.Module._load (module.js:497:3)
+			at Function.Module.runMain (module.js:693:10)
+			at startup (bootstrap_node.js:188:16)
+		*/
+		else if(errorString.match(/^at .*:\d+:\d+/)) {
+			
+			
+		}
+		
+		
+		/*
+			
+			Node.JS throw
+			
+			/nodejs/app.js:10
+			throw "banana";
+			^
+			banana
+			
+		*/
+		else if( errorString.match(/^throw.*/) && errorString.match(/^ *?\^*/) ) {
+			
+			
+			
+		}
+		
+		else throw new Error("Unable to determine formatting of errorString=" + errorString);
+		
+		
+		
+		
+	},
+	
+	
 	parseStackTrace: function parseStackTrace(stackTrace) {
 		/*
+			This function assumes a JavaScript error stack trace, or a error message, or both, or something ...
+			
+			There are endless variants of JavaScript error formats ...
+			Some engines includes stack traces, while others only give a short message,
+			in browsers it depends on which window the error was generated in,
+			and depending on browser, errors generated in other windows will have very little information
+			some engines give function names in the stack traces,
+			some engines only give line nr in stack traces ...
+			
+			YOU MUST WRITE A TEST IF YOU MODIFY THIS FUNCTION!
+			Even if it's just a tiny modification/fix. 
+			The more tests the better.
+			
+			Example "stackTrace": (Chromium)
 			
 			creating caret: at File.createCaret (http://127.0.0.1:8080/File.js:434:20)
 			at new File (http://127.0.0.1:8080/File.js:90:21)
@@ -731,7 +899,7 @@ console.warn("fun=" + fun);
 		
 		console.log("parseStackTrace: stackTrace=" + stackTrace);
 		
-		var reStack = /at ([^ \n]*) ?\(?(.*):(\d*):(\d*)/g; // Chromium
+		
 		var stackLength = 0;
 		var lines = [];
 		var fName="";
@@ -740,34 +908,50 @@ console.warn("fun=" + fun);
 		var colno=0;
 		var obj = {};
 		var match;
+		var pickedRegex = false;
+		var reStack;
 		
-
-		if(stackTrace.match(reStack)) {
-			console.log("parseStackTrace:Using reStack=" + reStack);
+		var reChromium = /at ([^ \n]*) ?\(?(.*):(\d*):(\d*)/g;
+		if(stackTrace.match(reChromium) ) {
+			console.log("parseStackTrace:Using Chromium");
+			reStack = reChromium;
+		}
+		else {
+			/*
+				Firefox variant A:
+				
+				hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24
+				consoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4
+				@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1
+			*/
+			var reFirefoxA = /([^ ]*)@(.*):(\d*):(\d*)/g;
+		}
+		
+		/*
+			hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24
+			consoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4
+			@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1
+			
+		*/
+		
+		
+		if(!reStack && stackTrace.match(reFirefoxA)) {
+			console.log("parseStackTrace:Using Firefox A");
+			reStack = reFirefoxA;
 		}
 		else {
 			/*
 				Firefox variant B:
-				hi 1539955769156: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2085:24
-			*/
-			var reStack = /([^ ]*)@(.*):(\d*):(\d*)/g; // Firefox
-		}
-		
-		if(stackTrace.match(reStack)) {
-			console.log("parseStackTrace:Using reStack=" + reStack);
-		}
-		else {
-			/*
-				Firefox variant C:
 				@http://127.0.0.1:8080/rs9snkpfpe/inlineErrorMessages.htm:4:7
 			*/
-			var reStack = /@?(.*):(\d*):(\d*)/g; // Firefox
+			var reFirefoxB = /@?(.*):(\d*):(\d*)/g;
 		}
 		
-		if(stackTrace.match(reStack)) {
-			console.log("parseStackTrace:Using reStack=" + reStack);
+		if(!reStack && stackTrace.match(reFirefoxB)) {
+			console.log("parseStackTrace:Using Firefox B");
+			reStack = reFirefoxB;
 		}
-		else if(stackTrace.match(/throw/)) {
+		else if(!reStack && stackTrace.match(/throw/)) {
 			/*
 				Node.JS throw 
 				
@@ -776,10 +960,10 @@ console.warn("fun=" + fun);
 				^
 				banana
 			*/
-			var reStack = /(.*):(\d*)/;
+			reStack = /(.*):(\d*)/;
 			var match = stackTrace.match(reStack);
 			if(match) {
-				console.log("parseStackTrace: Using reStack=" + reStack + " (Node.JS throw)");
+				console.log("parseStackTrace: Using (Node.JS throw) reStack=" + reStack + "");
 				source = match[1];
 				lineno = match[2];
 				var rows = stackTrace.split(/\n|\r\n/);
@@ -813,8 +997,9 @@ console.warn("fun=" + fun);
 				return null;
 			}
 		}
-		else {
-			console.warn("parseStackTrace: " + reStack + " does not match stackTrace=" + stackTrace );
+		
+		if(reStack == undefined) {
+			console.warn("Unable to figure out a regexp for parsing stackTrace=" + stackTrace);
 			return null;
 		}
 		
@@ -825,7 +1010,7 @@ console.warn("fun=" + fun);
 			
 			if(!firstMatch) firstMatch = match[0];
 			
-			console.log("parseStackTrace: match.length=" + match.length);
+			console.log("parseStackTrace: match.length=" + match.length + " match=" + JSON.stringify(match, null, 2));
 			
 			if(match.length == 5) {
 				fName = match[1];
@@ -868,6 +1053,13 @@ console.warn("fun=" + fun);
 			// We might have an error message!
 			// The error message should be right above the stack trace
 			var rows = stackTrace.split(/\n|\r\n/);
+			
+			console.log("parseStackTrace: rows=" + JSON.stringify(rows));
+			
+			if(rows.length == 0) {
+				throw new Error("No rows in stackTrace=" + stackTrace);
+			}
+			
 			console.log("parseStackTrace: Checking for message in rows=" + JSON.stringify(rows, null, 2));
 			for (var i=0; i<rows.length; i++) {
 				if(rows[i].indexOf(firstMatch) != -1) {
@@ -885,8 +1077,10 @@ console.warn("fun=" + fun);
 			source = undefined;
 			lineno = undefined;
 			colno = undefined;
-			var reStack = /(.*):(\d+)/;
+			var reStack = /(.*):(\d+):?(\d+)?/;
+			if(i == rows.length) i--;
 			for (; i>-1; i--) {
+				console.log("rows[" + i + "]=" + rows[i]); 
 				match = rows[i].match(reStack);
 				if(rows[i].indexOf("^") != -1) {
 					colno = rows[i].length-1;
@@ -895,6 +1089,7 @@ console.warn("fun=" + fun);
 				else if(match) {
 					source = match[1];
 					lineno = match[2];
+					colno = match[3];
 					console.log("parseStackTrace: Found source=" + source + " and lineno=" + lineno);
 				}
 				else {
@@ -909,9 +1104,7 @@ console.warn("fun=" + fun);
 				if(colno) obj.colno = colno;
 				lines.unshift(obj);
 			}
-			
-			
-		}
+			}
 		
 		return lines;
 	},

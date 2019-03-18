@@ -46,6 +46,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Error parsing in Firefox
+
 Doing something about annoying dialogs when running tests
 
 Testing on 192.168.122.50
@@ -199,6 +201,8 @@ todo
 ----
 
 test bin/jzedit in different OS, see if we can make it faster.
+
+test on Arch Linux (I want to swtich to arch but it seems too unstable, but maybe it's easier then "enterprise" Linux)
 
 Partial commits ! (commit only some changes)
 

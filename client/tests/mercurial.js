@@ -138,7 +138,7 @@ function testClone() {
 	});
 	
 	
-	EDITOR.addTest(1, function cloneFromGithub(callback) {
+	EDITOR.addTest(function cloneFromGithub(callback) {
 		/*
 			Cloning from Github has stopped working 3-4 times already so we need an automatic test
 			Make sure the test user has a SSH key registered on Github!
