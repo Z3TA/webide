@@ -1696,7 +1696,10 @@ if(err) throw err;
 	});
 	
 	EDITOR.addTest(function writeLines(callback) {
-		var filePath = "/tmp/writeLinesTest";
+		var testFolder = "/bigFileWriteLines/"
+		var originalFilePath = testFolder + "/writeLinesTest";
+		var testFiles = [];
+		var testCounter = 0;
 		
 		// Todo: test with \r\n line breaks
 		
@@ -1743,6 +1746,9 @@ if(err) throw err;
 			
 		];
 		
+		EDITOR.createPath(testFolder, function(err) {
+			if(err) throw err;
+			
 		// Run the tests with different chunk sizes
 		run(tests, 1024, function(err) {
 			if(err) throw err;
@@ -1750,13 +1756,28 @@ if(err) throw err;
 				if(err) throw err;
 				run(tests, 12, function(err) {
 					if(err) throw err;
-					callback(true);
-				});
+						
+						cleanup();
+					});
 			});
 		});
+		});
+		
+		function cleanup() {
+			CLIENT.cmd("deleteDirectory", {recursive: true, directory: testFolder}, function(err) {
+				if(err) throw err;
+				
+				callback(true);
+				
+			});
+		}
 		
 		
 		function run(originalTests, chunkSize, callback) {
+			
+			testCounter++;
+			
+			var filePath = originalFilePath + testCounter;
 			
 			console.log("chunkSize=" + chunkSize);
 			
