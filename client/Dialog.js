@@ -11,6 +11,9 @@
 function Dialog(msg, options) {
 	var dialog = this;
 	
+	if(options == undefined) options = {};
+	else if(options != Object(options)) throw new Error("Second argument options need to be an object!");
+	
 	var icon = options.icon;
 	var dialogDelay = options.delay;
 	

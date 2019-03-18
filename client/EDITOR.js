@@ -5763,7 +5763,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		EDITOR.resizeNeeded();
 	}
 	
-	EDITOR.openDialogs = {}; // dialog-code: [Dialog, Dialog, ...]
+	EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
 	
 	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode) {
 		
