@@ -1413,23 +1413,6 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		paths = flatten(paths);
 		
-		function flatten(paths) {
-			//console.log("flatten: paths=" + JSON.stringify(paths));
-			for (var i=0; i<paths.length; i++) {
-				if( Array.isArray(paths[i]) ) {
-					if(paths[i].length == 0) {
-						paths.splice(i, 1);
-						return flatten(paths);
-					}
-					else {
-						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
-						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
-						return flatten(paths);
-					}
-				}
-			}
-			return paths;
-		}
 		
 		//console.log("joinPaths: (after flatten): paths=" + JSON.stringify(paths));
 		
@@ -1464,6 +1447,24 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		if(path.indexOf(":/") != -1) path = path.replace(":/", "://"); // Re-add the extra slash in ex http://
 		
 		return path;
+		
+		function flatten(paths) {
+			//console.log("flatten: paths=" + JSON.stringify(paths));
+			for (var i=0; i<paths.length; i++) {
+				if( Array.isArray(paths[i]) ) {
+					if(paths[i].length == 0) {
+						paths.splice(i, 1);
+						return flatten(paths);
+					}
+					else {
+						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
+						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
+						return flatten(paths);
+					}
+				}
+			}
+			return paths;
+		}
 	},
 	
 	reIndexOf: function reIndexOf(reIn, str, startIndex) {

@@ -160,6 +160,7 @@ function testClone() {
 		testClone("git@github.com:Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "ssh/")); // Using Git/SSH 
 		
 		function testClone(repository, testFolder) {
+			
 			if(++testCounter > 3) throw new Error("Clone test retry more 3 times!");
 			
 			console.log("testClone: repository=" + repository + " testFolder=" + testFolder);
@@ -169,7 +170,7 @@ function testClone() {
 					// The folder might already exist from and earlier test that failed.
 					cleanup(function(err) {
 						if(err) throw err;
-						testClone(repository);
+						testClone(repository, testFolder);
 					});
 				}
 				else if(err) {
