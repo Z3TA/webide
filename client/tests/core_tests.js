@@ -1975,9 +1975,13 @@ if(err) throw err;
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;
 											
-											EDITOR.closeAllDialogs("BIG_FILE");
-											
 											callback(true);
+										
+											setTimeout(function() {
+												var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+												if(dialogCodes.indexOf("BIG_FILE") != -1) EDITOR.closeAllDialogs("BIG_FILE");
+											}, 1000);
+											
 										});
 									}
 								});

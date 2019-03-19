@@ -392,7 +392,7 @@
 	});
 	
 	
-	EDITOR.addTest(function inlineErrorMessages(callback) {
+	EDITOR.addTest(1, function inlineErrorMessages(callback) {
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
 		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
 		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';

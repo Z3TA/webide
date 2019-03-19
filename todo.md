@@ -46,6 +46,10 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+test inline error messages in Firefox
+
+write stream ready works on nodejs v10 on Ubuntu 18, or any nodejs version on Ubuntu 16. But not on versions older then v10 on Ubuntu 18!
+
 writeLines writestream never get ready event
 
 Doing something about annoying dialogs when running tests
