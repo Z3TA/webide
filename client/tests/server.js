@@ -211,10 +211,13 @@
 			CLIENT.cmd("disconnect", connJson, function(err, json) {
 				if(err) throw new Error("Failed to disconnect from ftp! err=" + (err.msg ? err.msg : err) + " json=" + JSON.stringify(json));
 				
-				var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-				if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+				setTimeout(function() {
+					var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+					if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+					
+					callback(true);
+				}, 1000);
 				
-				callback(true);
 			});
 			
 		});
@@ -228,7 +231,7 @@
 		var testFile = "testfile.txt";
 		var testText = "Hello World!\n";
 		
-
+		
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
 			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
@@ -463,9 +466,11 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 CLIENT.cmd("disconnect", connJson, function(err, json) {
 									console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 									
-									var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-									if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
-									
+									setTimeout(function() {
+										var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+										if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+									}, 1000);
+								
 								});
 							}, 10000);
 							
