@@ -193,7 +193,10 @@
 	});
 	
 	
-	EDITOR.addTest(1, function testReadLines6(callback) {
+	EDITOR.addTest(function testReadLines6(callback) {
+		/*
+			write streams doesn't work on Node.JS <10 on Ubuntu 18!
+		*/
 		// Tests both readLine and writeLine!
 		var filePath = "/testfile.txt";
 		var testFile = "/testReadLines6.txt";

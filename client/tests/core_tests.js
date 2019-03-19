@@ -330,7 +330,7 @@
 	});
 	
 	
-	EDITOR.addTest(510, false, function scrambledTextSelecting(callback) {
+	EDITOR.addTest(function scrambledTextSelecting(callback) {
 		
 		var text = 'abcdefg\n1234567\n\n';
 		
@@ -351,11 +351,10 @@
 			
 			// Hmm these seems to be async ...	Try to make sure we cut/paste in the right file
 			EDITOR.showFile(file);
-			document.execCommand("cut");
-			EDITOR.showFile(file);
-			document.execCommand("paste");
 			
-			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + UTIL.lbChars(file.text) + " != " + UTIL.lbChars(text));
+			var data = file.getSelectedText();
+			
+			if(file.text.trim() != data.trim()) throw new Error("Unexpected text=" + UTIL.lbChars(file.text) + " != " + UTIL.lbChars(data));
 			
 			EDITOR.closeFile(file.path);
 			callback(true);

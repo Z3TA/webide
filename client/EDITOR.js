@@ -4574,6 +4574,16 @@ var word = "";
 			
 			return copy(copyEvent);
 		}
+		else if(mock == "cut") {
+			var cutEvent = {
+				clipboardData:  {
+					setData: function setData(format, data) { return true; }
+				},
+				preventDefault: function preventDefault() { return true; }
+			};
+			
+			return cut(cutEvent);
+		}
 		else if(mock == "paste") {
 			var pasteEvent = {
 				clipboardData:  {
