@@ -330,7 +330,7 @@
 	});
 	
 	
-	EDITOR.addTest(function scrambledTextSelecting(callback) {
+	EDITOR.addTest(510, false, function scrambledTextSelecting(callback) {
 		
 		var text = 'abcdefg\n1234567\n\n';
 		
