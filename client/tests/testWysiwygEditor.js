@@ -465,7 +465,7 @@
 		
 	});
 	
-	EDITOR.addTest(function pressEnterTwiceInWYSIWYG(callback) {
+	EDITOR.addTest(530, false, function pressEnterTwiceInWYSIWYG(callback) {
 		/*
 			Pressing enter *twice* seem to remove the line breaks before </main> end tag !?
 			It seem the browser removes the ending line break only *sometimes* (at random) so we need the WysiwygEditor to handle it and not blow up

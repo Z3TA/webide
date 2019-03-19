@@ -89,7 +89,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function autocompleteFromOtherFilesInProject(callback) {
+	EDITOR.addTest(610, false, function autocompleteFromOtherFilesInProject(callback) {
 		EDITOR.openFile("/mywebsiteproject/index.htm", '<html><head><script src="script1.js"></script><script src="script2.js"></script></head></html>', function(err, file0) {
 			EDITOR.openFile("/mywebsiteproject/script1.js", 'var globalVariableFromScript1 = "abcdefg";\n', function(err, file1) {
 				EDITOR.openFile("/mywebsiteproject/script2.js", 'globalVariableFromS\nanotherGlobalVariableB\n\n', function(err, file2) {
@@ -97,7 +97,7 @@
 						// file3 is just there to make sure file2 doesn't autocomplete global variables from file3.
 						
 						// There is a timer in place to prevent the same file from being parsed many times ...
-						setTimeout(test, 5200);
+						setTimeout(test, 200);
 						
 						function test() {
 							var atCaret = autoComplete(file2, 19);
