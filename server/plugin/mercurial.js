@@ -255,7 +255,8 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 		}
 		
 		function cloneDone(errorMessage) {
-			if(callback === null) throw new Error("clone callback already called!");
+			// We might get both an error and a close event
+			if(callback === null) return console.warn("clone callback already called!");
 			
 			clearInterval(progressInterval);
 			user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
