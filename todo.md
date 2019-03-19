@@ -46,16 +46,21 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-test inline error messages in Firefox
+trying to make hggit work on ubuntu-16 staging:
+
+sudo apt-cache depends python-pip | grep '[ |]Depends: [^<]' | cut -d: -f2 | tr -d ' ' | xargs sudo apt-get --reinstall install -y
+sudo pip install hg-git
+logout/login
+
+still same error:
+failed to import extension hggit: No module named dulwich.errors
+
+sudo easy_install hg-git
+
+
 
 write stream ready works on nodejs v10 on Ubuntu 18, or any nodejs version on Ubuntu 16. But not on versions older then v10 on Ubuntu 18!
 
-writeLines writestream never get ready event
-
-Doing something about annoying dialogs when running tests
-
-
-JS Error parsing ...
 
 
 Testing on 192.168.122.50
@@ -207,6 +212,8 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Check why ./removeuser.js hangs if you do not have zfs and not using -nozfs flag
 
 test bin/jzedit in different OS, see if we can make it faster.
 

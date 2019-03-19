@@ -541,9 +541,12 @@ Make sure the server has hggit installed!
 (should not give an error if it's installed)
 How to install:
 ````
+Ubuntu 16: 
+sudo easy_install hg-git
+
+Ubuntu 18:
 sudo apt-get install python-pip
-sudo pip install --upgrade pip
-sudo /usr/local/bin/pip install hg-git
+sudo pip install hg-git
 ````
 
 You might need to reboot the server to clear mounted libs

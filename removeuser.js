@@ -10,7 +10,7 @@ var username = process.argv[2];
 
 var DOMAIN = getArg(["d", "domain"]) || DEFAULT.domain;
 
-var NOZFS = !!getArg(["nozfs", "nozfs"]);
+var NOZFS = !!getArg(["nozfs", "nozfs"]); // Use this flag if you do not have ZFS!
 
 var HOME = getArg(["home", "home"]) || DEFAULT.home_dir;
 
@@ -194,6 +194,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 
 	if(!NOZFS) {
 		// Need to get the zfs pool
+		// todo: Check why this just hangs if you do not have zfs and not using -nozfs flag!
 		child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 			var zfsDestroyRetry = 0;
 			

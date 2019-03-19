@@ -48,8 +48,10 @@ fi
 
 # sudo apt install rsync
 rsync -r --delete temp/release/server/ $SERVER:/srv/jzedit/
-rsync -r --delete node_modules/ $SERVER:/srv/jzedit/node_modules/
 rsync -r --delete client/noVNC/ $SERVER:/srv/jzedit/client/noVNC/
+
+# todo: Make sure other machine have the same Node.JS version! Otherwise run npm update !?
+rsync -r --delete node_modules/ $SERVER:/srv/jzedit/node_modules/
 
 #ssh -t $SERVER /bin/bash << EOF
 #cd /srv/jzedit/
