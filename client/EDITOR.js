@@ -6341,6 +6341,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
 		var maxParallel = 5; // Running too many tests at once will cause timeout issues
+		var abortOnError = false;
 		
 		if(onlyOne) testFirstTest = true;
 		
@@ -6550,7 +6551,8 @@ testResults.push("All " + finished + " tests passed!")
 			}
 			
 			function testFail(description, result) {
-				aborted = true;
+				if(abortOnError) aborted = true;
+				
 				fails++;
 				testResults.push("");
 				testResults.push(description);
