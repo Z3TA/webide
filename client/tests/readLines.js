@@ -15,8 +15,6 @@
 			if(lines[0] != "L1_First_line") throw new Error("lines[0]=" + lines[0]);
 			if(lines[9] != "L10_abcdefghijk") throw new Error("lines[9]=" + lines[9]);
 			
-			EDITOR.closeAllDialogs("BIG_FILE");
-			
 			callback(true);
 				
 		});
@@ -37,8 +35,6 @@
 			if(lines[0] != "L11_abcdefghijkl") throw new Error("lines[0]=" + lines[0]);
 			if(lines[9] != "L20_abcdefghijklmnopqrstu") throw new Error("lines[9]=" + lines[9]);
 			
-			EDITOR.closeAllDialogs("BIG_FILE");
-			
 			callback(true);
 		
 		});
@@ -58,9 +54,7 @@
 			if(lines[0] != "L30001_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅ") throw new Error("lines[0]=" + lines[0]);
 			if(lines[9] != "L30010_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQR") throw new Error("lines[9]=" + lines[9]);
 			
-			EDITOR.closeAllDialogs("BIG_FILE");
-			
-		callback(true);
+			callback(true);
 			
 		});
 		
@@ -80,8 +74,6 @@
 			
 			if(lines[0] != "L33996_abcde") throw new Error("lines[0]=" + lines[0]);
 			if(lines[4] != "L34000_Last_line!") throw new Error("lines[4]=" + lines[4]);
-			
-			EDITOR.closeAllDialogs("BIG_FILE");
 			
 		callback(true);
 		
@@ -240,8 +232,6 @@
 						
 						CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 							if(err) throw err;
-							
-							EDITOR.closeAllDialogs("BIG_FILE");
 							
 							callback(true);
 						});
