@@ -2821,6 +2821,7 @@ firstTimeVim = false;
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 				toggleVim();
+				// The Vim dialog will only show once!
 				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			
@@ -3037,7 +3038,6 @@ callback(true);
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			
 			// Get out from any mode
@@ -3328,7 +3328,6 @@ toggleVim();
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -3629,7 +3628,6 @@ toggleVim();
 			var vimWasActive = VIM_ACTIVE;
 			if(!vimWasActive) {
 toggleVim();
-				EDITOR.closeAllDialogs("VIM_MODE");
 			}
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});

@@ -211,6 +211,9 @@
 			CLIENT.cmd("disconnect", connJson, function(err, json) {
 				if(err) throw new Error("Failed to disconnect from ftp! err=" + (err.msg ? err.msg : err) + " json=" + JSON.stringify(json));
 				
+				var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+				if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+				
 				callback(true);
 			});
 			
@@ -249,7 +252,7 @@
 				
 				UTIL.httpGet(fileUrl, function httpGetResult(err, text) {
 					
-					if(err) throw err;
+					if(err) throw new Error(err.message + " fileUrl=" + fileUrl);
 					
 					if(text.length == 0) throw new Error("No text retrieved");
 					
@@ -460,7 +463,8 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 CLIENT.cmd("disconnect", connJson, function(err, json) {
 									console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 									
-									EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+									var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+									if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
 									
 								});
 							}, 10000);

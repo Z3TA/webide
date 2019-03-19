@@ -19,7 +19,7 @@ function Dialog(msg, options) {
 	
 	dialog.code = options.code || "MISC";
 	
-	console.log(UTIL.getStack("Creating dialog: msg=" + msg));
+	console.log(UTIL.getStack("Creating dialog: code=" + dialog.code + " msg=" + msg));
 	
 	if(msg == undefined) throw new Error("Dialog without a message! msg=" + msg);
 	

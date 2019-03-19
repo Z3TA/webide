@@ -1182,7 +1182,7 @@ file.insertLineBreak();
 		}
 		
 		CLIENT.cmd("terminal.write", {id: terminalId, data: character}, function terminalWrite(err) {
-			if(err) alertBox(err.message);
+			if(err) alertBox(err.message, err.code || "TERMINAL_ERROR");
 		});
 		
 		return PREVENT_DEFAULT;
@@ -1353,7 +1353,7 @@ file.insertLineBreak();
 		else return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
-			if(err) alertBox(err.message);
+			if(err) alertBox(err.message, err.code || "TERMINAL_ERROR");
 		});
 		
 		return PREVENT_DEFAULT;
@@ -1411,9 +1411,12 @@ file.insertLineBreak();
 			
 			function bash(bashPrompt, filePath) {
 				
-				file.write(bashPrompt + ' open ' + testFile);
-				
 				filesOpened++;
+				
+				filePath = filePath + filesOpened;
+				
+				file.write(bashPrompt + ' open ' + testFile + filesOpened);
+				
 				
 				EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 				
@@ -1423,6 +1426,7 @@ file.insertLineBreak();
 				
 				// Wait until the file have been opened, then close it
 				setTimeout(function closeTheFile() {
+					console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
 					EDITOR.closeFile(filePath);
 					filesClosed++;
 					if(filesClosed==filesOpened) {
@@ -1437,7 +1441,7 @@ file.insertLineBreak();
 						callback(true);
 					}
 					
-				}, 100);
+				}, 1000);
 				
 			}
 		});

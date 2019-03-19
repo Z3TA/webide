@@ -5765,16 +5765,30 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	
 	EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
 	
-	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode) {
+	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 		
-		if(!dialogCode) console.warn("No dialogCode given to closeAllDialogs! ALL dialogs will be closed!");
+		if(!dialogCode) throw new Error("No dialogCode given to closeAllDialogs! Use MISC to close all unspecified dialog, or close dialog specificly! Closing the wrong dialog(s) can be very confusing.");
+		
+		var closedCount = 0;
 		
 		console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
 		for (var i=0; i<EDITOR.openDialogs.length; i++) {
-			console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
-			if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) continue;
 			
+			if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) {
+				console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
+				continue;
+			}
+			console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+			closedCount++;
 			EDITOR.openDialogs[i].close();
+
+			if(i == EDITOR.openDialogs.length) break;
+			else i--; // Check all dialogs (don't skip one if one is closed)
+		}
+		
+		if(closedCount == 0) {
+			var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + ":" + UTIL.shortString(dialog.div.innerText, 50) });
+			throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
 		}
 	}
 	
@@ -6326,6 +6340,8 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
+		var maxParallel = 5; // Running too many tests at once will cause timeout issues
+		
 		if(onlyOne) testFirstTest = true;
 		
 		/*
@@ -6422,7 +6438,9 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 				
 				if(aborted) return console.log("testLoop: Tests aborted!");
 				
-				for(var i=started; i<testsToRun; i++) {
+				console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
+				
+				for(var i=started; i<testsToRun && (started-finished)<maxParallel; i++) {
 					started++;// This counter here to prevent any sync test to finish all tests
 					
 					if(EDITOR.tests[i].parallel && !allInSync) {
@@ -6433,6 +6451,13 @@ asyncInitTest(EDITOR.tests[i]);
 						runTest(EDITOR.tests[i]);
 						break;
 					}
+				}
+				
+				if( (testsToRun / finished) < 1.1 ) {
+					// 90% of tests are done, show those that are still not finished
+					
+					console.log("testInfo: Not finished: " + stillRunning.join(", "));
+					
 				}
 			}
 			
@@ -6447,7 +6472,7 @@ asyncInitTest(EDITOR.tests[i]);
 				
 				currentRunningTest = test.text;
 				
-				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync);
+				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync + " started=" + started + " testsToRun=" + testsToRun + " finished=" + finished + " currentlyInParallel=" + currentlyInParallel);
 				
 				if(!test.parallel && currentlyInParallel > 0) {
 					throw new Error("No other test is allowed to be running while a non-parallel test is about to run! waitingForSync=" + waitingForSync + " currentlyInParallel=" + currentlyInParallel + " test.text=" + test.text);
@@ -6492,16 +6517,12 @@ asyncInitTest(EDITOR.tests[i]);
 					if(waitingForSync) {
 						console.log("testInfo: " + currentRunningTest + " completed. Continuing test loop ...");
 waitingForSync = false;
-						testLoop();
 					}
 					
 					if(finished == testsToRun) allTestsDone();
-					else if( (testsToRun / finished) < 1.1 ) {
-						// 90% of tests are done, show those that are still not finished
-						
-						console.log("testInfo: Not finished: " + stillRunning.join(", "));
-						
-					}
+					
+					testLoop();
+					
 				}
 			}
 			
@@ -6541,6 +6562,8 @@ testResults.push("All " + finished + " tests passed!")
 				else {
 					testResults.push(result);
 				}
+
+				alertBox("Tests aborted due to failing test: " + description + ": " + (result.message ? result.message : result));
 				
 			}
 		}

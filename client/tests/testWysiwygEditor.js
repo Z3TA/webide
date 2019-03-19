@@ -370,15 +370,17 @@
 				
 				var foundMessage = false;
 				var messages = [];
+				var msgStrWithoutQuotes = msgStr.slice(1, -1);
 				for(var i=0; i<EDITOR.info.length; i++) {
-					if(EDITOR.info[i].str == msgStr) {
+					if(EDITOR.info[i].str == msgStrWithoutQuotes) {
 						foundMessage = true;
 						break;
 					}
+					else console.log("inlineConsoleLog: EDITOR.info[" + i + "].str=" + EDITOR.info[i].str + " is Not same as msgStrWithoutQuotes=" + msgStrWithoutQuotes);
 					messages.push( EDITOR.info[i].str );
 				}
 				
-				if(!foundMessage) throw new Error( "Did not find msgStr=" + msgStr + " in " + JSON.stringify(messages) );
+				if(!foundMessage) throw new Error( "Did not find msgStrWithoutQuotes=" + msgStrWithoutQuotes + " in " + JSON.stringify(messages) );
 				
 				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();
@@ -393,7 +395,7 @@
 	EDITOR.addTest(function inlineErrorMessages(callback) {
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
 		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
-		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgString + ');\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, compiledPage: fileHtml, testFile: "inlineErrorMessages.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
@@ -406,15 +408,16 @@
 				
 				var foundMessage = false;
 				var messages = [];
+				var msgStrWithoutQuotes = msgStr.slice(1, -1);
 				for(var i=0; i<EDITOR.info.length; i++) {
-					if(EDITOR.info[i].str == msgStr) {
+					if(EDITOR.info[i].str == msgStrWithoutQuotes) {
 						foundMessage = true;
 						break;
 					}
 					messages.push( EDITOR.info[i].str );
 				}
 				
-				if(!foundMessage) throw new Error( "Did not find msgStr=" + msgStr + " in " + JSON.stringify(messages) );
+				if(!foundMessage) throw new Error( "Did not find msgStrWithoutQuotes=" + msgStrWithoutQuotes + " in " + JSON.stringify(messages) );
 				
 				
 				EDITOR.removeAllInfo(preview.sourceFile);

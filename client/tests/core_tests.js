@@ -2003,18 +2003,22 @@ if(err) throw err;
 		callback(true);
 	});
 	
-	EDITOR.addTest(1, function closeDialogWithCode(callback) {
+	EDITOR.addTest(500, false, function closeDialogWithCode(callback) {
 
-		EDITOR.closeAllDialogs();
+		if(EDITOR.openDialogs.length > 0) throw new Error("Can not run test closeDialogWithCode while there are open dialogs!");
 		
 		alertBox("This dialog should be kept open", "OTHER_CODE");
-		alertBox("This dialog should be closed", "SPECIAL_DIALOG_CODE");
+		alertBox("This dialog should be closed 1", "SPECIAL_DIALOG_CODE");
+		alertBox("This dialog should be closed 2", "SPECIAL_DIALOG_CODE");
+		alertBox("This dialog should be closed 3", "SPECIAL_DIALOG_CODE");
 		
 		EDITOR.closeAllDialogs("SPECIAL_DIALOG_CODE");
 		
-		if(EDITOR.openDialogs.length != 1) throw new Error("The dialog didn't close!");
+		if(EDITOR.openDialogs.length != 1) throw new Error("The dialog's didn't close!");
 		
-		EDITOR.closeAllDialogs();
+		EDITOR.closeAllDialogs("OTHER_CODE");
+		
+		if(EDITOR.openDialogs.length != 0) throw new Error("The other dialog didn't close!");
 		
 		callback(true);
 		

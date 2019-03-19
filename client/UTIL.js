@@ -1435,7 +1435,7 @@ else {
 	httpGet: function httpGet(url, callback) {
 		var xmlHttp = new XMLHttpRequest();
 		var timeoutTimer;
-		var timeoutTimeMs = 3000;
+		var timeoutTimeMs = 4000;
 		
 		console.log("HTTP GET url=" + url);
 		
