@@ -29,7 +29,7 @@
 		function clone() {
 			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function(err, json) {
 				if(err) {
-					alertBox(err.code);
+					alertBox(err.message, err.code || "HG_CLONE_ERROR");
 					throw err
 				}
 				
