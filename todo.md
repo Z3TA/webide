@@ -46,6 +46,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+writeLines writestream never get ready event
+
 Doing something about annoying dialogs when running tests
 
 

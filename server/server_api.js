@@ -647,7 +647,7 @@ var encoding = "utf8";
 		//if(originalReadable) console.warn("read stream readable called twice!");
 		originalReadable = true;
 		if(tmpReady && !hasStarted) begin();
-		else if(!hasStarted) console.log("Waiting for write stream ready ...");
+		else if(!hasStarted) console.log("Waiting for write stream ready ... tmpReady=" + tmpReady + " hasStarted=" + hasStarted);
 		else if(readWhenReady) read();
 });
 	original.on("end", function() {
@@ -675,6 +675,7 @@ var encoding = "utf8";
 	
 	var writeOptions = {};
 	if(chunkSize) writeOptions.highWaterMark = chunkSize;
+	console.log("Creating write stream tmpPath=" + tmpPath + " writeOptions=" + JSON.stringify(writeOptions));
 	var tmp = fs.createWriteStream(tmpPath, writeOptions);
 	var tmpReady = false;
 	tmp.on('ready', function() {
