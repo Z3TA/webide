@@ -507,8 +507,9 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 				var stderr = resp && resp.stderr.trim();
 				
 				// Python gives version in stderr ...
+				stderr = stderr.trim().replace(/^Python 2\..*/, "");
 				
-				if(stderr && stderr.indexOf("Error: Python 2.") != 0) return error(new Error(resp.stderr));
+				if(stderr) return error(new Error(resp.stderr));
 				
 				doneMaybe();
 			});
