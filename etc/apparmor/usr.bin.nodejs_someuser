@@ -140,6 +140,8 @@
     %HOME%%USERNAME%/bin/** rix,
     %HOME%%USERNAME%/usr/bin/** rix,
     %HOME%%USERNAME%/usr/share/npm/bin/** rix,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/** rix,
+
 
     signal receive set=cont peer=unconfined,
     signal receive set=exists peer=unconfined,
