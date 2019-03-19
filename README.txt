@@ -541,14 +541,18 @@ Make sure the server has hggit installed!
 (should not give an error if it's installed)
 How to install:
 ````
-Ubuntu 16: 
-sudo easy_install hg-git
-
-Ubuntu 18:
 sudo apt-get install python-pip
 sudo pip install hg-git
 ````
 
+Make sure hg-git and dulwich is installed in /usr/local/lib/ and not /home
+If hggit doesn't work in chroot, try:
+````
+sudo su
+pip install dulwich
+pip install hg-git
+
+````
 You might need to reboot the server to clear mounted libs
 
 

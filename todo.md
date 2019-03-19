@@ -46,6 +46,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+todo: "open in new window" to use closeAllDialogs COLLABORATION_ALERT?
+
 trying to make hggit work on ubuntu-16 staging:
 
 sudo apt-cache depends python-pip | grep '[ |]Depends: [^<]' | cut -d: -f2 | tr -d ' ' | xargs sudo apt-get --reinstall install -y
@@ -56,6 +58,13 @@ still same error:
 failed to import extension hggit: No module named dulwich.errors
 
 sudo easy_install hg-git
+
+it probably have something to do with PATH !?
+
+Make sure hg-git and dulwich is installed in /usr/local/lib/ and not home.
+Become root: sudo su
+pip install dulwich
+pip install hg-git
 
 
 
@@ -500,6 +509,8 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Let users install their own version of nodejs and python !? and npm and packages !?
 
 ----
 
