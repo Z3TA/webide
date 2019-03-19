@@ -44,17 +44,15 @@
   signal send set=term peer=/usr/bin/nodejs_%USERNAME%,
 
   # Allow network so it can talk to jzedit_nodejs_init.service
-  network inet stream,
-  network inet6 stream,
-
   # It also needs internet access to connect to ftp/sftp/ftps servers!
-  network inet dgram,
-  network inet6 dgram,
+  # So Allow *all* network
+  network,
 
   # stream is TCP and dgram is UDP ? (UDP is needed for DNS lookups)
 
   # Unix sockets are a file system object, which means we can give it user permissions
-  network unix,
+  #network unix,
+
 
   /dev/null r,
   %HOME%%USERNAME%/dev/null rw,
