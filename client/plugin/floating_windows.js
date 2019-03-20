@@ -32,7 +32,7 @@
 			waitUntilLoaded: true
 		};
 		
-		
+		var thisEditor = window.EDITOR;
 		
 		EDITOR.createWindow(browserWindowOptions, function windowOpened(err, browserWindow) {
 			if(err) throw err;
@@ -40,6 +40,7 @@
 			// Load the file in the other window
 			console.log(browserWindow.window);
 			var otherEditor = browserWindow.window.EDITOR;
+			
 			
 			otherEditor.openFile(file.path, file.text, {isSaved: file.isSaved, savedAs: file.savedAs, changed: file.changed}, function(err, fileInOtherWindow) {
 				if(err) throw err;
@@ -57,19 +58,21 @@
 				});
 				
 				
-				// Close dialog about collaboratior joining
-				EDITOR.closeAllDialogs();
+				var checkOpenInterval = setInterval(checkIfOpen, 1);
+				/*
+					Callbacks from the other window will refer to the other window!??!?
+					So we can't actually have any code here, as that code wont run here !?!?
+				*/
 				
 				
 				// Hide "collaborator leaved" message when window is closed ...
-				
 				var checkCloseInterval = setInterval(checkIfClosed, 1000);
 				
 				setTimeout(function() {
+					// This callback function seem to run in this window context though !?!?
 					browserWindow.window.onbeforeunload = function() {
-						//alertBox("Other window unloading!");
 						clearInterval(checkCloseInterval);
-						checkCloseInterval = setInterval(checkIfClosed, 10);
+						checkCloseInterval = setInterval(checkIfClosed, 1);
 						return undefined; // Will not warn about unsaved changes
 					}
 				}, 1000);
@@ -80,11 +83,19 @@
 					}
 				}
 				
+				function checkIfOpen() {
+					if(browserWindow && browserWindow.window.EDITOR && thisEditor.openDialogs.length > 0) {
+						clearInterval(checkOpenInterval);
+						EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
+					}
+					//else console.log("File in other window not yet opened ... browserWindow? " + !!browserWindow + " browserWindow.window.EDITOR? " + !!browserWindow.window.EDITOR + " thisEditor.openDialogs.length=" + thisEditor.openDialogs.length + " ");
+				}
+				
 				function browserWindowClosed() {
 					clearInterval(checkCloseInterval);
 					
 					// Close dialog about collaboratior leaving
-					EDITOR.closeAllDialogs();
+					EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
 				}
 				
 			});

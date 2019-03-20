@@ -251,7 +251,7 @@
 				}
 				else throw new Error("others.length=" + others.length);
 				
-				alertBox(msg);
+					alertBox(msg, "COLLABORATION_NOTICE");
 			}
 			else {
 				if(clientLeaveDialog.hasOwnProperty(json.alias)) {
@@ -263,7 +263,7 @@
 					
 					if(!wasInCollabMode) msg += "\nYou are now in collaboration mode!";
 					
-					alertBox(msg);
+						alertBox(msg, "COLLABORATION_NOTICE");
 				}
 			}
 			}
@@ -305,7 +305,7 @@
 		
 		var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
 		
-		if(!clientLeaveDialog.hasOwnProperty(json.alias) && showCollaborationNotice) clientLeaveDialog[json.alias] = alertBox(msg);
+		if(!clientLeaveDialog.hasOwnProperty(json.alias) && showCollaborationNotice) clientLeaveDialog[json.alias] = alertBox(msg, "COLLABORATION_NOTICE");
 		
 		return true;
 	}

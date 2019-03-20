@@ -35,6 +35,8 @@
 	var browser = UTIL.checkBrowser();
 	var ligatures = false;
 	
+	var webFontLoading;
+	
 	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
 	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
@@ -73,6 +75,9 @@
 			EDITOR.settings.gridWidth = 7.83;
 			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
 		}
+		
+		webFontLoading = "FiraCode";
+		
 	}
 	else if(MSWIN && (RUNTIME == "nw.js" || browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
 		/*
@@ -148,7 +153,7 @@
 	EDITOR.settings.style.fontSize = 13;
 	EDITOR.settings.gridHeight = 22;
 	EDITOR.settings.gridWidth = 7.83;
-	
+		
 }
 	else if(    RUNTIME=="browser" && (   browser=="Firefox" || browser == "Chrome" || ( MSIE && (location.host == "127.0.0.1" || location.host == "localhost") )   )    ) {
 		
@@ -156,8 +161,7 @@
 			Try to load a web font (most browsers should now support them)
 			
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
-
-		*/
+*/
 		
 		if(window.devicePixelRatio == 1 && MSWIN) EDITOR.settings.sub_pixel_antialias = true;
 		
@@ -167,7 +171,7 @@
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
 			// LiberationMono looks nice in Edge!
-			
+			webFontLoading = "liberationMono";
 			UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css");
 			EDITOR.settings.style.font = "LiberationMono";
 			EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
@@ -177,7 +181,7 @@
 			
 		}
 		else {
-			
+			webFontLoading = "DejaVuSansMono";
 			UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 			EDITOR.settings.style.font = "DejaVuSansMono";
 			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
@@ -190,8 +194,10 @@
 				EDITOR.settings.gridWidth = 8;
 				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 			}
-			
-		}
+			}
+		
+		
+		
 	}
 	else if(RUNTIME=="browser") {
 		
@@ -235,6 +241,14 @@
 			*/
 		}
 		
+	}
+	
+	if(webFontLoading) {
+// Re-render after the font have fully loaded (we never know when)
+		setTimeout(function renderAfterFontLoad() {
+			EDITOR.renderNeeded();
+			EDITOR.render();
+		}, 1000);
 	}
 	
 	function debug(msg) {
