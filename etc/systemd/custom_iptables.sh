@@ -125,6 +125,7 @@ iptables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 
 
 # Prevent sending spam
+iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
 ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
 iptables -A OUTPUT -p tcp --dport 25 -j REJECT
 

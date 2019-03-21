@@ -1,0 +1,17 @@
+# cd /srv/jzedit (or where you put the files)
+# sudo cp etc/systemd/custom_iptables.service /etc/systemd/system/custom_iptables.service
+# sudo systemctl enable custom_iptables   or   sudo systemctl daemon-reload
+# sudo systemctl start custom_iptables
+
+[Unit]
+Before=network-pre.target
+Wants=network-pre.target
+#After=network.target
+
+[Service]
+Type=oneshot
+# Change dir below to where you put the script
+ExecStart=/bin/bash /srv/jzedit/etc/systemd/custom_iptables.sh
+
+[Install]
+WantedBy=default.target
