@@ -45,8 +45,8 @@ iptables -A OUTPUT -p icmp -j ACCEPT
 ip6tables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -i lo -j ACCEPT
 
-ip6tables -A OUTPUT -i lo -j ACCEPT
-iptables -A OUTPUT -i lo -j ACCEPT
+ip6tables -A OUTPUT -o lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
 
 
 # Accept DHCP traffic. 
