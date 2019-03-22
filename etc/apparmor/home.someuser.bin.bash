@@ -62,18 +62,21 @@
 
   # this profile should be more restrictive, otherwise put the bin as ix above
   profile scripts {
-    # Restrict network access! Only allow unix sockets
-    network unix,
-
     deny %HOME%%USERNAME%/usr/** wl,
     deny %HOME%%USERNAME%/bin/** wl,
     deny %HOME%%USERNAME%/proc/** wl,
     deny %HOME%%USERNAME%/lib/** wl,
     deny %HOME%%USERNAME%/lib64/** wl,
 
+    # Restrict network access! Only allow unix sockets
+    network unix,
+
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** mr,
     owner %HOME%%USERNAME%/** rwl,
+
+    # /dev/null is often used
+    %HOME%%USERNAME%/dev/null rw,
 
     # Connecting to mySQL
     /run/mysqld/mysqld.sock rw,
