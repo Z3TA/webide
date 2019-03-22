@@ -37,6 +37,8 @@
   /usr/lib/** r,
   /usr/local/lib/** r,
 
+  %HOME%%USERNAME%/dev/null w,
+
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** mr,
   owner %HOME%%USERNAME%/** wl,
