@@ -6988,9 +6988,14 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			reader.onload = function (readerEvent) {
 				var data = readerEvent.target.result;
 				
+				console.log("data:");
+				console.log(data);
+				
 				// Specifying encoding:base64 will magically convert to binary! 
 				// We do have to remove the data:image/png metadata though!
 				data = data.replace("data:" + file.type + ";base64,", "");
+				// Some browsers (Firefox) does not populate file.type
+				data = data.replace("data:application/octet-stream;base64,", "");
 				
 				if(createPath) {
 					var folder = UTIL.getDirectoryFromPath(filePath);
@@ -7037,7 +7042,25 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			reader.onload = function (readerEvent) {
 				console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
 				var content = readerEvent.target.result;
-				if(content.length > EDITOR.settings.bigFileSize) {
+				
+				// Check for weird characters
+				var weird = 0;
+				var total = Math.min(content.length, 100);
+				for (var i=0, charCode=0; i<total; i++) {
+					charCode = content.charCodeAt(i);
+					console.log("content " + i + " = " + charCode);
+					if(charCode < 30 || charCode > 56000) weird++;
+				}
+				
+				if(weird/total > 0.1) {
+					var createPath = true;
+					saveFile(file, filePath, createPath, function(err, filePath) {
+						if(err) return alertBox(err.message);
+						
+						alertBox("Weird characters found, so the file was saved: " + filePath);
+					});
+				}
+				else if(content.length > EDITOR.settings.bigFileSize) {
 					var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
 					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
 					

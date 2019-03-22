@@ -46,16 +46,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-npm is installing in different places depending on os distro, which is problematic when we want to mount it in chroot ...
-
-Ubuntu 18 default: /usr/share/npm/bin/npm-cli.js
-Installed via nodesource: /usr/lib/node_modules/npm/bin/npm-cli.js
-Arch Linux: /usr/lib/node_modules/npm/bin/npm-cli.js
-
-
-
-Running npm and npx via bash
-
 make sure all nodejs scripts work on mainframe! (after upgrading to to Ubuntu 18 and nodejs v8)
 
 upgrade bash script compare node versions
