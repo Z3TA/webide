@@ -2116,14 +2116,13 @@ function checkMounts(options, checkMountsCallback) {
 				// gunzip will give ENOENT error without /bin/sh
 				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted);
 				
+				// Some python scripts (Mercurial) need /usr/share
+				foldersToMount++;module_mount("/usr/share/", homeDir + "usr/share", folderMounted);
+				
 				
 				// npm
-				foldersToMount += 2;
-				module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
+				foldersToMount++;module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
 					if(err) throw err;
-					// Some python scripts (Mercurial) and sometimes npm need /usr/share
-					module_mount("/usr/share/", homeDir + "usr/share", function(err) {
-						if(err) throw err;
 						/*
 							npm creastes a symlink in /usr/bin/
 							npm can be installed on different places depending on OS and distro and package maintainer ...
@@ -2131,30 +2130,36 @@ function checkMounts(options, checkMountsCallback) {
 							
 							Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
 							Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
-							
-							Put npm bin dir in process argv. Example: --npm-bin=/usr/share/npm/bin/
-							
+						Arch Linux puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
+
+						So we'll force everyone to have it in /usr/lib/node_modules/npm/bin/ (sorry Ubuntu)
+						You need nodejs v10 to support Ubuntu-18 meanwhile Ubuntu-18 comes with nodejs v8 !
+						So Ubuntu server admins need to uninstall nodejs and npm and install it from nodesource
+						(see instructions in README.txt)
+						
 						*/
 						
-						var npmBin = getArg(["npm", "npm-bin", "npm-bin-dir"]) || "/usr/lib/node_modules/npm/bin/"; // Default assumes npm was installed via nodejs from Nodesource deb package
-						
-						if(npmBin.indexOf("/usr/") != 0) throw new Error("Not in /usr/ npmBin=" + npmBin);
+					var npmBin = "/usr/lib/node_modules/npm/bin/";
+					module_fs.stat(npmBin, function(err, stats) {
+						if(err && err.code == "ENOENT") {
+							log("npm-cli.js needs to be installed in " + npmBin, NOTICE);
+							log("Uninstall nodejs and npm, then install nodejs from nodesource!", NOTICE);
+							process.exit();
+						}
+						else if(err) throw err;
 						
 						var usrBinRelativeNpmBinDir = npmBin
 						usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
-						usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/share/, "../share"); // Ubuntu 18
 						
 						module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
 							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
 							
 							module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
 								if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-								foldersMounted += 2;
+								foldersMounted++;
 								checkMountsReadyMaybe();
 							});
-							
-						});
-						
+							});
 					});
 				});
 				
