@@ -46,7 +46,13 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-todo: "open in new window" to use closeAllDialogs COLLABORATION_ALERT?
+
+
+Running npm and npx via bash
+
+make sure all nodejs scripts work on mainframe! (after upgrading to to Ubuntu 18 and nodejs v8)
+
+upgrade bash script compare node versions
 
 trying to make hggit work on ubuntu-16 staging:
 
@@ -221,6 +227,8 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Make a docker image !?!?!?
 
 Check why ./removeuser.js hangs if you do not have zfs and not using -nozfs flag
 
@@ -509,6 +517,11 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Investigated using an emulator (jor1k) to run Linux in the browser ...
+Problems: It's very slow. You'll want a network connection, which doesn't work offline (doh).
+
+---
 
 Let users install their own version of nodejs and python !? and npm and packages !?
 

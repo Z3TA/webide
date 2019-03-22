@@ -62,7 +62,8 @@
 
   # this profile should be more restrictive, otherwise put the bin as ix above
   profile scripts {
-    network,
+    # Restrict network access! Only allow unix sockets
+    network unix,
 
     deny %HOME%%USERNAME%/usr/** wl,
     deny %HOME%%USERNAME%/bin/** wl,
