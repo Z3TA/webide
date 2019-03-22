@@ -2142,9 +2142,7 @@ function checkMounts(options, checkMountsCallback) {
 					var npmBin = "/usr/lib/node_modules/npm/bin/";
 					module_fs.stat(npmBin, function(err, stats) {
 						if(err && err.code == "ENOENT") {
-							log("npm-cli.js needs to be installed in " + npmBin, NOTICE);
-							log("Uninstall nodejs and npm, then install nodejs from nodesource!", NOTICE);
-							process.exit();
+							throw new Error("npm-cli.js needs to be installed in " + npmBin + "\nUninstall nodejs and npm, then install nodejs from nodesource!");
 						}
 						else if(err) throw err;
 						
