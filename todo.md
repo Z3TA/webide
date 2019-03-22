@@ -48,6 +48,8 @@ What I'm working on
 
 make sure all nodejs scripts work on mainframe! (after upgrading to to Ubuntu 18 and nodejs v8)
 
+Fixing npm (and npx react stuff) apparmor errors
+
 upgrade bash script compare node versions
 
 trying to make hggit work on ubuntu-16 staging:

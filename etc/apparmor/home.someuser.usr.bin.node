@@ -66,6 +66,7 @@
   # Some install scripts need these !?
   %HOME%%USERNAME%/usr/bin/env ix,
   %HOME%%USERNAME%/bin/sh ix,
+  %HOME%%USERNAME%/bin/dash ix,
 
 }
 		
