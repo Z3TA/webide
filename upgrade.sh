@@ -50,8 +50,17 @@ fi
 rsync -r --delete temp/release/server/ $SERVER:/srv/jzedit/
 rsync -r --delete client/noVNC/ $SERVER:/srv/jzedit/client/noVNC/
 
-# todo: Make sure other machine have the same Node.JS version! Otherwise run npm update !?
+
 rsync -r --delete node_modules/ $SERVER:/srv/jzedit/node_modules/
+
+REMOTE_NODE_VERSION=$(ssh $SERVER "node -v")
+LOCAL_NODE_VERSION=$(node -v)
+if [ "$REMOTE_NODE_VERSION" -ne "$LOCAL_NODE_VERSION" ]
+then
+  echo "Remote node.js version $REMOTE_NODE_VERSION is not the same as local $LOCAL_NODE_VERSION"
+  ssh $SERVER "cd /srv/jzedit/ && npm rebuild"
+fi
+
 
 #ssh -t $SERVER /bin/bash << EOF
 #cd /srv/jzedit/
