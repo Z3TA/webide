@@ -77,7 +77,7 @@ if [[ "$@" =~ "-noupdate" ]]
 then
   echo "Not updating jzedit configuration!"
 else
-  ssh -t $SERVER "cd /srv/jzedit/ &&sudo nodejs update.js -headless"
+  ssh -t $SERVER "cd /srv/jzedit/ && sudo nodejs update.js -headless"
 fi
 
 
