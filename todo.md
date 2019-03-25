@@ -43,10 +43,9 @@ Android browser will not run the script if it contains a default keyword such as
 
 Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
 
+
 What I'm working on
 -------------------
-
-Fixing npm (and npx react stuff) apparmor errors
 
 upgrade bash script compare node versions
 
@@ -223,6 +222,9 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+bug/regression: When you select from EOL using the mouse and holding down shift it pops the last character:
+select last word, then hold down shift and click further to the left.
 
 Apparmor profile parser
 
@@ -515,6 +517,12 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+---
+
+So many nodejs examples want to use tcp ports! Look into Linux net namespace
+
+----
 
 Make a docker image !?!?!? No, it's easier just to install via npm
 

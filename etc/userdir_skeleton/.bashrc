@@ -120,4 +120,8 @@ fi
 NPM_PACKAGES="/.npm-packages"
 export PATH="$NPM_PACKAGES/bin:$PATH"
 
+# Some Node.JS scripts read port from PORT by default
+# Make it use a unix socket instead of tcp port!
+export PORT="/sock/test"
+
 
