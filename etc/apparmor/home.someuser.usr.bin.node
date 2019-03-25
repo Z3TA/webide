@@ -68,5 +68,47 @@
   %HOME%%USERNAME%/bin/sh ix,
   %HOME%%USERNAME%/bin/dash ix,
 
+
+  # node can spawn scripts
+  %HOME%%USERNAME%/** Cx -> scripts,
+
+  # this profile should be more restrictive, otherwise put the bin as ix above
+  profile scripts {
+    deny %HOME%%USERNAME%/usr/** wl,
+    deny %HOME%%USERNAME%/bin/** wl,
+    deny %HOME%%USERNAME%/proc/** wl,
+    deny %HOME%%USERNAME%/lib/** wl,
+    deny %HOME%%USERNAME%/lib64/** wl,
+    
+    # Restrict network access! Only allow unix sockets
+    network unix,
+    
+    %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** mr,
+    owner %HOME%%USERNAME%/** rwl,
+    
+    # /dev/null is often used
+    %HOME%%USERNAME%/dev/null rw,
+    
+    # Connecting to mySQL
+    /run/mysqld/mysqld.sock rw,
+    
+    # bins that have their own profile
+    %HOME%%USERNAME%/usr/bin/hg Px,
+    %HOME%%USERNAME%/usr/bin/git Px,
+    %HOME%%USERNAME%/usr/bin/node Px,
+    %HOME%%USERNAME%/usr/bin/bash Px,
+    %HOME%%USERNAME%/usr/bin/python Px,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
+    
+    # Scripts of scripts
+    %HOME%%USERNAME%/usr/bin/** ix,
+    %HOME%%USERNAME%/bin/** ix,
+    %HOME%%USERNAME%/usr/lib/node_modules/npm/** ix,
+    %HOME%%USERNAME%/usr/share/npm/bin/** ix,
+    
+  }
+
 }
 		
