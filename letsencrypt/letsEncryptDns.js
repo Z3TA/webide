@@ -61,17 +61,23 @@
 
 "use strict";
 
-var module_http = require("http");
-var module_fs = require("fs");
-var module_child_process = require('child_process');
 
+var MODULE_FS = require("fs");
+var MODULE_CHILD_PROCESS = require('child_process');
 var IN_PROGRESS = false; // We can only process one request at a time
 var QUEUE = [];
 var PROGRESS_COUNTER = 0;
 var TTL = 20; // Time-to-live for the _acme-challenge TXT record
 
+// These variables are populated by the config file. See below ...
+var IP_OK;
+var TLDS;
+var HTTP_PORT;
+var HTTP_IP;
+var SECRET;
+
 var CONFIG_FILE = "./letsEncryptDns.conf.json";
-module_fs.readFile(CONFIG_FILE, function readDomains(err, data) {
+MODULE_FS.readFile(CONFIG_FILE, function readDomains(err, data) {
 	if(err) throw new Error("Unable to load configuration file: CONFIG_FILE=" + CONFIG_FILE + " Error: " + err.message);
 	
 	try {
@@ -81,17 +87,19 @@ module_fs.readFile(CONFIG_FILE, function readDomains(err, data) {
 		throw new Error("Unable to parse configuration file: data=" + data + " Error: " + err.message);
 	}
 	
-	var IP_OK = config.trusted_ip || ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
-	var TLDS = config.tld || ["webide.se"]; // Domains we handle
-	var HTTP_PORT = config.http_port || "8102";
-	var HTTP_IP = config.http_ip || "127.0.0.1";
-	var SECRET = config.secret || "changeme"; // Change this to prevent a malicious user to add custom TXT records to your TLD's!!
+	// Not having var infront makes variables global
+	IP_OK = config.trusted_ip || ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
+	TLDS = config.tld || ["webide.se"]; // Domains we handle
+	HTTP_PORT = config.http_port || "8102";
+	HTTP_IP = config.http_ip || "127.0.0.1";
+	SECRET = config.secret || "changeme"; // Change this to prevent a malicious user to add custom TXT records to your TLD's!!
 	
 	console.log("Trusted IP addresses: " + JSON.stringify(IP_OK));
 	console.log("Top level domains to handle: " + JSON.stringify(TLDS));
 	console.log("Secret code: " + SECRET);
 	console.log("HTTP server listening on: " + HTTP_IP + ":" + HTTP_PORT);
 	
+	var module_http = require("http");
 	var httpServer = module_http.createServer(handleHttpRequest);
 	httpServer.listen(HTTP_PORT, HTTP_IP);
 	
@@ -182,7 +190,7 @@ function processWork(work) {
 	
 	
 	var zoneFile = "/etc/bind/zones/db." + tld;
-	module_fs.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
+	MODULE_FS.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
 		if(err) {
 			resp.end("Error: Problem reading zone file: " + zoneFile);
 			log(err.message);
@@ -290,7 +298,7 @@ function processWork(work) {
 		serialNr++;
 		zoneData = zoneData.replace(reSerial, "$1" + serialNr + "$3");
 		
-		module_fs.writeFile(zoneFile, zoneData, function writeZoneFile(err) {
+		MODULE_FS.writeFile(zoneFile, zoneData, function writeZoneFile(err) {
 			if(err) {
 				resp.end("Problem writing to zone file: " + zoneFile);
 				log(err.message);
@@ -299,7 +307,7 @@ function processWork(work) {
 			}
 			
 			// Reload bind9/named
-			module_child_process.exec("service bind9 reload", function reloadNS(error, stdout, stderr) {
+			MODULE_CHILD_PROCESS.exec("service bind9 reload", function reloadNS(error, stdout, stderr) {
 				if(error || stderr) {
 					resp.end("Error: Failed to reload name servers");
 					console.error(error || stderr);
