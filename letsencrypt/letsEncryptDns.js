@@ -273,7 +273,7 @@ function processWork(work) {
 			86400 )       ; Negative Cache TTL
 			
 			Most admins advocate for using a time-stamp as serial,
-			but not us, we'll just increment with one =)
+			but not us, we'll just increment with one :P
 		*/
 		
 		var reSerial = /(\s*)(\d+)(\s*; Serial)/i;
