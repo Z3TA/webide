@@ -13,6 +13,9 @@ URL="$SERVER_URL?stage=$STAGE&name=$NAME&value=$VALUE&secret=$SECRET"
 
 RESULT=$(curl $URL --silent)
 
+# We might have to wait for the DNS to propagate
+sleep 3
+
 # Square brackets need spaces!
 [[ "$RESULT" == "OK" ]] && exit 0
 
