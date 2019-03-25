@@ -46,8 +46,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-make sure all nodejs scripts work on mainframe! (after upgrading to to Ubuntu 18 and nodejs v8)
-
 Fixing npm (and npx react stuff) apparmor errors
 
 upgrade bash script compare node versions
@@ -226,7 +224,9 @@ text gets blurry when scrolling.
 todo
 ----
 
-Make a docker image !?!?!?
+Apparmor profile parser
+
+Nginx profile parser
 
 Check why ./removeuser.js hangs if you do not have zfs and not using -nozfs flag
 
@@ -515,6 +515,10 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Make a docker image !?!?!? No, it's easier just to install via npm
+
+----
 
 Investigated using an emulator (jor1k) to run Linux in the browser ...
 Problems: It's very slow. You'll want a network connection, which doesn't work offline (doh).
