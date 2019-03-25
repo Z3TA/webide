@@ -61,24 +61,41 @@
 
 "use strict";
 
-var IP_OK = ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
-var TLDS = ["webide.se"]; // Domains we handle
-var HTTP_PORT = "8102";
-var HTTP_IP = "127.0.0.1";
-var SECRET = "changeme"; // Change this to prevent a malicious user to add custom TXT records to your TLD's!!
+var module_http = require("http");
+var module_fs = require("fs");
+var module_child_process = require('child_process');
 
 var IN_PROGRESS = false; // We can only process one request at a time
 var QUEUE = [];
 var PROGRESS_COUNTER = 0;
-
 var TTL = 20; // Time-to-live for the _acme-challenge TXT record
 
-const module_http = require("http");
-const module_fs = require("fs");
-const module_child_process = require('child_process');
-
-var httpServer = module_http.createServer(handleHttpRequest);
-httpServer.listen(HTTP_PORT, HTTP_IP);
+var CONFIG_FILE = "./letsEncryptDns.conf.json";
+module_fs.readFile(CONFIG_FILE, function readDomains(err, data) {
+	if(err) throw new Error("Unable to load configuration file: CONFIG_FILE=" + CONFIG_FILE + " Error: " + err.message);
+	
+	try {
+		var config = JSON.parse(data);
+	}
+	catch(err) {
+		throw new Error("Unable to parse configuration file: data=" + data + " Error: " + err.message);
+	}
+	
+	var IP_OK = config.trusted_ip || ["127.0.0.1", "5.9.139.7"]; // List of trusted IP addresses
+	var TLDS = config.tld || ["webide.se"]; // Domains we handle
+	var HTTP_PORT = config.http_port || "8102";
+	var HTTP_IP = config.http_ip || "127.0.0.1";
+	var SECRET = config.secret || "changeme"; // Change this to prevent a malicious user to add custom TXT records to your TLD's!!
+	
+	console.log("Trusted IP addresses: " + JSON.stringify(IP_OK));
+	console.log("Top level domains to handle: " + JSON.stringify(TLDS));
+	console.log("Secret code: " + SECRET);
+	console.log("HTTP server listening on: " + HTTP_IP + ":" + HTTP_PORT);
+	
+	var httpServer = module_http.createServer(handleHttpRequest);
+	httpServer.listen(HTTP_PORT, HTTP_IP);
+	
+});
 
 
 function handleHttpRequest(req, resp) {

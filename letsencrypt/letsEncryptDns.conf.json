@@ -1,0 +1,7 @@
+{
+	"trusted_ip": ["127.0.0.1", "5.9.139.7"],
+	"tld": "webide.se",
+	"http_port": 8102,
+	"http_ip": "127.0.0.1",
+	"secret": "changeme"
+}
