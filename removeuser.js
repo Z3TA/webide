@@ -198,7 +198,8 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 		child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 			var zfsDestroyRetry = 0;
 			
-			if(stderr.indexOf("zfs: not found") != -1) NOZFS = true;
+			if(stderr.indexOf("zfs: not found") != -1 || 
+			stderr.indexOf("The program 'zfs' can be found in the following packages") != -1) NOZFS = true;
 			else if(err) throw err;
 			else {
 				
