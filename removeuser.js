@@ -199,7 +199,10 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 			var zfsDestroyRetry = 0;
 			
 			if(stderr.indexOf("zfs: not found") != -1 || 
-			stderr.indexOf("The program 'zfs' can be found in the following packages") != -1) NOZFS = true;
+			stderr.indexOf("The program 'zfs' can be found in the following packages") != -1) {
+NOZFS = true;
+				userdel();
+			}
 			else if(err) throw err;
 			else {
 				
