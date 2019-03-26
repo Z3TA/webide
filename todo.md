@@ -47,8 +47,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-upgrade bash script compare node versions
-
 trying to make hggit work on ubuntu-16 staging:
 
 sudo apt-cache depends python-pip | grep '[ |]Depends: [^<]' | cut -d: -f2 | tr -d ' ' | xargs sudo apt-get --reinstall install -y
@@ -222,6 +220,14 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Let user edit "data" in fields and textareas. Example:
+
+<div data-file="footer.htm" data-group="Contact info">
+  <span data="Company name">Web tiger team</span>
+  <span data="address">World wide web 123</span>
+  <a data="e-mail link" data-attribute="href" href="mailto: mail@webide.se">Email</a> ---> e-mail link: [Email] href: [mailto: mail@webide.se]
+</div>
 
 bug/regression: When you select from EOL using the mouse and holding down shift it pops the last character:
 select last word, then hold down shift and click further to the left.
