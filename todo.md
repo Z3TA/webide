@@ -47,30 +47,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-trying to make hggit work on ubuntu-16 staging:
-
-sudo apt-cache depends python-pip | grep '[ |]Depends: [^<]' | cut -d: -f2 | tr -d ' ' | xargs sudo apt-get --reinstall install -y
-sudo pip install hg-git
-logout/login
-
-still same error:
-failed to import extension hggit: No module named dulwich.errors
-
-sudo easy_install hg-git
-
-it probably have something to do with PATH !?
-
-Make sure hg-git and dulwich is installed in /usr/local/lib/ and not home.
-Become root: sudo su
-pip install dulwich
-pip install hg-git
-
-
-
-write stream ready works on nodejs v10 on Ubuntu 18, or any nodejs version on Ubuntu 16. But not on versions older then v10 on Ubuntu 18!
-
-
-
 Testing on 192.168.122.50
 
 todo: Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
@@ -2049,6 +2025,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Add support for git, for example when cloning, detect if it's a git or mercurial repo, then use git if it's a git repo
 
 Goto-file widget pushes up the header!!
 
