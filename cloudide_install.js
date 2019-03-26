@@ -3,6 +3,8 @@
 
 /*
 	
+	todo: Rewrite in bash script to make it easier to use interactive commands, such as enter password, and using mysql-client.
+	
 	Only run this script if you want to install the editor as a cloud editor!
 	
 	Before running this you need to uninstall nodejs and then re-install it:
@@ -15,7 +17,7 @@ if(process.platform == "win32") throw new Error("This install script only runs u
 // You might be able to figure out the steps needed by reading this file ...
 // While it's possible to run the server in Windows, we highly recommend running in a unix-like system like Linux (Ubuntu)'
 
-if(process.version.indexOf("v8.") != 0) throw new Error("The editor currently only supports nodejs version 8.");
+if(process.version.indexOf("v10.") != 0) throw new Error("The editor currently only supports nodejs version 10.");
 // It will most likely also work with newer versions. But they have yet not been tested.
 
 var os = require("os");
@@ -34,7 +36,6 @@ var exec = require("child_process").execSync;
 // The following with crash the script if the files doesn't exist
 exec("chmod +x removeuser.js");
 exec("chmod +x adduser.js");
-
 
 
 var HOSTNAME = getArg(["host", "host", "hostname", "domain"]); // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
@@ -142,10 +143,6 @@ exec("apt install python-pip -y");
 exec("pip install hg-git");
 
 
-console.log("Installing NPM");
-exec("apt install npm -y");
-
-
 console.log("Installing Letsencrypt's certbot");
 exec("apt-get install software-properties-common -y");
 exec("add-apt-repository ppa:certbot/certbot -y");
@@ -159,6 +156,14 @@ exec("apt-get install unzip unrar -y");
 
 console.log("Installing CGSF dependencies");
 exec("apt-get install fuse -y");
+
+
+console.log("Installing MySQL server");
+exec("apt-get install mysql-server -y");
+exec("apt-get install mysql-client -y");
+
+console.log("Configuring MySQL server");
+addToFile("/etc/my.cnf", "\nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n", "[mysqld]\n");
 
 
 
@@ -180,6 +185,53 @@ function execTry(cmd) {
 	catch(err) {
 		console.log(err.message);
 	}
+}
+
+function addToFile(filePath, text, after, callback) {
+	var fs = require('fs');
+	
+	if(typeof after == "function" && callback == undefined) {
+		callback = after;
+		after = undefiend;
+	}
+	
+	fs.readFile(filePath, "utf8", function(err, data) {
+		if(err && err.code == "ENOENT") {
+			var data = "";
+		}
+		else if(err) {
+			var error = new Error("Unable to open " + filePath + ": (" + err.code + ") " + err.message);
+			if(callback) callback(error);
+			else throw err;
+		}
+		
+		if(after) {
+			var index = data.indexOf(after);
+			if(index != -1) {
+				// The after-string exist. Add the text after it.
+				index += after.length;
+				data = data.slice(0, index) + text + data.slice(index);
+			}
+			else {
+				// after-string doesn't exist, add both after-string and text
+				data += after + text;
+			} 
+		}
+		else {
+			// No after-string specified, just add the text.
+			data += text;
+		}
+		
+		fs.writeFile(filePath, data, "utf8", function(err) {
+			if(err) {
+				var error = new Error("Unable to write to " + filePath + ": (" + err.code + ") " + err.message);
+				if(callback) callback(error);
+				else throw err;
+			}
+			
+			if(callback) callback(err);
+		});
+	});
 }
 
 

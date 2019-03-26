@@ -38,7 +38,7 @@
   },
   "optionalDependencies": {
     "nodemailer": "^2.6.4",
-    "mysql2": "^1.6.5",
+    "mysql2": "https://github.com/Z3TA/node-mysql2/tarball/master",
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",
     "ps-node": "^0.1.6",
