@@ -316,7 +316,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
 	
 	// Don't show the firendly message on how to show the menu if the menu is disabled
-	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1 || EDITOR.startedCounter > 20) menuVisibleOnce = true;
+	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("menu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) menuVisibleOnce = true;
 	
 	var lastMouseDownEventType = "";
 	

@@ -94,11 +94,21 @@
 				function browserWindowClosed() {
 					clearInterval(checkCloseInterval);
 					
-					// Close dialog about collaboratior leaving
-					EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
+					closeCollabDialogs();
+					
+					// Sometimes the dialog comes up late ...
+					setTimeout(closeCollabDialogs, 50);
 				}
 				
+				
 			});
+			
+			function closeCollabDialogs() {
+				// Close dialog about collaboratior leaving
+				
+				var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+				if(dialogCodes.indexOf("COLLABORATION_NOTICE") != -1) EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
+			}
 			
 		});
 	}
