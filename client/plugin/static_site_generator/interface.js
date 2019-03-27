@@ -2143,6 +2143,20 @@
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
 						if(authNeeded) {
+							if(selectedSite.repoPw == "" && selectedSite.repoUser != "") {
+								// Only the username has been specified. Ask for the password
+								return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, function(pw) {
+									if(pw) {
+										CLIENT.cmd("mercurial.pull", {
+											directory: UTIL.trailingSlash(selectedSite.projectFolder),
+											user: selectedSite.repoUser,
+											pw: pw,
+											save: false
+										}, hgPull);
+									}
+								});
+								
+							}
 							if(selectedSite.repoUser == "" || selectedSite.repoPw == "") {
 								alertBox("The repository for " + selectedSite.name + " needs a username and password!");
 								editSiteSettings();
