@@ -2143,7 +2143,7 @@
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
 						if(authNeeded) {
-							if(selectedSite.repoUser == "") {
+							if(selectedSite.repoUser == "" || selectedSite.repoPw == "") {
 								alertBox("The repository for " + selectedSite.name + " needs a username and password!");
 								editSiteSettings();
 							}
