@@ -54,7 +54,7 @@ function done() {
 	//console.log("times.length=" + times.length);
 	
 	times.sort(function(a, b) {
-		return a.hours -b.hours;
+		return a.hours - b.hours;
 	});
 	
 	times.forEach(function(user) {
