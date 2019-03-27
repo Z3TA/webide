@@ -26,6 +26,8 @@ Note to myself
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
 
+
+
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
@@ -47,74 +49,13 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+
+
+Writing blog post about upgrading to Ubuntu 18
+
 Testing on 192.168.122.50
 
-todo: Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
-
-todo: Update script that replace current apparmor profiles
-
-(maybe we can get rid of some apparmor profiles !?)
-
-
-Write blog post about fork-pty in Ubuntu 18 in a chroot
-
-sudo mount -t devpts none "/home/guest2/dev/pts" -o ptmxmode=0666,newinstance
-sudo mount --bind /home/guest2/dev/pts/ptmx /home/guest2/dev/ptmx
-
-(be careful when unmounting!)
-
-sudo mkdir /home/guest1/bin
-sudo mkdir /home/guest1/etc
-sudo mkdir /home/guest1/usr
-sudo mkdir /home/guest1/dev
-sudo mkdir /home/guest1/proc
-sudo mkdir /home/guest1/lib
-sudo mkdir /home/guest1/lib64
-
-sudo mount --bind /lib64 /home/guest1/lib64
-sudo mount --bind /lib /home/guest1/lib
-sudo mount --bind /proc /home/guest1/proc
-sudo mount --bind /dev /home/guest1/dev
-sudo mount --bind /dev/pts /home/guest1/dev/pts
-sudo mount --bind /usr /home/guest1/usr
-sudo mount --bind /etc /home/guest1/etc
-sudo mount --bind /bin /home/guest1/bin
-
-sudo chroot --userspec=guest1:guest1 /home/guest1/
-
-sudo umount /home/guest1/dev
-
-(also be carefuil when deleting the dir with the mounts in it, I accidentally deleted /usr/bin)
-
-
-Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
-
-When reloading while in collaboration mode and then editing I sometimes get errors like:
-Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
-
-Sometimes when hitting backspace in Firefox on Windows you trigger browser.back which is highly annoying!
-
-For files that are not parsed, detect tabs vs spaces, then show tabs as x spaces and insert a tab when you make a space at beginning of line
-if it uses tabs.
-
----
-
-Using git
-
-> GET /Z3TA/test1.git/info/refs?service=git-upload-pack HTTP/1.1
-Host: github.com
-User-Agent: git/2.7.4
-Accept: */*
-Accept-Encoding: gzip
-Accept-Language: en, *;q=0.9
-Pragma: no-cache
-
-< HTTP/1.1 200 OK
-
-But when using curl we get redirected ... Maybe that is causing the error !?
-
-
-
+Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
 
 
 Maybe upgrading to the new version of Ubuntu will fix it !?
@@ -196,6 +137,12 @@ text gets blurry when scrolling.
 
 todo
 ----
+
+Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
+
+
+For files that are not parsed, detect tabs vs spaces, then show tabs as x spaces and insert a tab when you make a space at beginning of line
+if it uses tabs.
 
 Let user edit "data" in fields and textareas. Example:
 
@@ -1080,6 +1027,11 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+When reloading while in collaboration mode and then editing I sometimes get errors like:
+Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
+
+Sometimes when hitting backspace in Firefox on Windows you trigger browser.back which is highly annoying!
 
 Can't open the editor while offline!! Damn you service worker!
 
