@@ -26,7 +26,7 @@ if ! [[ "$(pwd)" =~ /jzedit$ ]]
     exit 1
 fi
 
-
+# Did you forget the username@SERVER !?
 if ! ssh $SERVER stat /srv/jzedit/server/GUEST_COUNTER \> /dev/null 2\>\&1
   then
     echo "Manually login to the server and make sure /srv/jzedit/server/GUEST_COUNTER exist!"
