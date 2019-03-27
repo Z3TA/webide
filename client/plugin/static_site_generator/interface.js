@@ -1843,7 +1843,20 @@
 		
 		var folders = UTIL.getFolders(site.projectFolder);
 		
-		lookInFolder(folders.pop());
+		var temporaryPassword = "";
+		if( selectedSite.repoPw == "") {
+			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, function(pw) {
+				if(pw) {
+					temporaryPassword = pw;
+					start();
+				}
+			});
+		}
+		else start();
+		
+		function start() {
+			lookInFolder(folders.pop());
+		}
 		
 		function lookInFolder(folder) {
 			EDITOR.folderExistIn(folder, ".hg", function(existingFolder) {
@@ -1968,8 +1981,8 @@
 				local: selectedSite.projectFolder,
 				remote: selectedSite.repository,
 				user: selectedSite.repoUser,
-				pw: selectedSite.repoPw,
-				save: true
+				pw: selectedSite.repoPw || temporaryPassword,
+				save: temporaryPassword ? false : true
 			}
 			
 			CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
@@ -2134,7 +2147,11 @@
 			}
 			
 			function pullFromRepo() {
-				CLIENT.cmd("mercurial.pull", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, hgPull);
+				CLIENT.cmd("mercurial.pull", {
+					directory: UTIL.trailingSlash(selectedSite.projectFolder),
+					user: selectedSite.repoUser,
+					pw: temporaryPassword,
+				}, hgPull);
 				
 				function hgPull(err, resp) {
 					if(err) {
@@ -2143,31 +2160,16 @@
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
 						if(authNeeded) {
-							if(selectedSite.repoPw == "" && selectedSite.repoUser != "") {
-								// Only the username has been specified. Ask for the password
-								return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, function(pw) {
-									if(pw) {
-										CLIENT.cmd("mercurial.pull", {
-											directory: UTIL.trailingSlash(selectedSite.projectFolder),
-											user: selectedSite.repoUser,
-											pw: pw,
-											save: false
-										}, hgPull);
-									}
-								});
-								
-							}
 							if(selectedSite.repoUser == "" || selectedSite.repoPw == "") {
 								alertBox("The repository for " + selectedSite.name + " needs a username and password!");
 								editSiteSettings();
 							}
 							else {
-								var save = true; // Save credentials in .hgrc
 								return CLIENT.cmd("mercurial.pull", {
 									directory: UTIL.trailingSlash(selectedSite.projectFolder), 
 									user: selectedSite.repoUser, 
 									pw: selectedSite.repoPw, 
-									save: save
+									save: temporaryPassword ? false : true
 								}, hgPull);
 							}
 						}
@@ -2275,7 +2277,12 @@ whenAllFilesReloaded();
 			
 			function pushToRepo() {
 				console.log("Calling mercurial.push!");
-				CLIENT.cmd("mercurial.push", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function pushed(err, resp) {
+				CLIENT.cmd("mercurial.push", {
+					directory: UTIL.trailingSlash(selectedSite.projectFolder),
+					user: selectedSite.repoUser,
+					pw: selectedSite.repoPw || temporaryPassword,
+					save: temporaryPassword ? false : true
+				}, function pushed(err, resp) {
 					
 					console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
