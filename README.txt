@@ -26,6 +26,24 @@ The easiest way to install the desktop version is via npm:
 
 Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
+When you install globally npm wants to put packages in places that might require root/administrator privileges.
+To fix this on a unix-like system such as Linux:
+```
+mkdir ~/.npm-packages
+
+cat <<EOT >> .bashrc
+# Install global NPM packages in home dir
+lNPM_PACKAGES="~/.npm-packages"
+export PATH="$NPM_PACKAGES/bin:$PATH"
+EO
+
+ecnpm config set prefix=$HOME/.npm-packagesNPnpm install --global jzedit
+```
+
+
+Before you install you also might have to install build dependencies for npm:
+
+
 Se instruction for making a desktop icon and manually installing below:
 
 Linux:

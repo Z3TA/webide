@@ -68,14 +68,36 @@ function main() {
 	
 	var stdinChannel;
 	
+	console.log("Initiating stdin stream ...");
 	var stdinStream = process.stdin;
-	stdinStream.on('readable', function() {
+	
+	var STDIN_STREAM_READABLE = false;
+	
+	stdinStream.on('readable', stdinStreamReadable);
+	stdinStream.on('end', stdinStreamEnd);
+	
+	stdinStream.setEncoding('utf8');
+	stdinStream.resume();
+	
+	// Some versions of nodejs wont call stream readably until it gets something, but we are in a hurry!
+	console.log("Press Enter to continue ...");
+	
+	function stdinStreamEnd() {
+		console.log("stdin stream ended!");
+		//if(stdinChannel) stdinChannel.end();
+	}
+	
+	function stdinStreamReadable() {
+		if(STDIN_STREAM_READABLE) return;
+		
+		STDIN_STREAM_READABLE = true;
+		
 		console.log("stdin stream readable!");
 		/*
-			readable will be called on program start 
+			readable will be called on program start
 			and after pressing enter while the program is running
 			
-*/
+		*/
 		var chunk = this.read();
 		// Note: Reading data will remove it from the internal buffer and it will not be piped
 		
@@ -94,25 +116,19 @@ function main() {
 		
 		/*
 			Connect to the editor server's stdin channel
-*/
-		console.log("stdinChannel=" + !!stdinChannel + 
-		" stdinChannel.destroyed=" + (stdinChannel && stdinChannel.destroyed) + 
-		" argsSent=" + argsSent + 
+		*/
+		console.log("stdinChannel=" + !!stdinChannel +
+		" stdinChannel.destroyed=" + (stdinChannel && stdinChannel.destroyed) +
+		" argsSent=" + argsSent +
 		" stdinStreamHasData=" + stdinStreamHasData +
 		" stdinChannel.connecting = " + (stdinChannel && stdinChannel.connecting) );
 		
-		if( (!stdinChannel || stdinChannel.destroyed) && 
-		(!argsSent || stdinStreamHasData) && 
+		if( (!stdinChannel || stdinChannel.destroyed) &&
+		(!argsSent || stdinStreamHasData) &&
 		!(stdinChannel && stdinChannel.connecting) ) connectToStdinChannel(stdinStreamHasData);
 		
 		
-	});
-	stdinStream.on('end', function() {
-		console.log("stdin stream ended!");
-		//if(stdinChannel) stdinChannel.end();
-		
-	});
-	
+	}
 	
 	function connectToStdinChannel(pipeStdin, secondTry) {
 		console.log("(re)connecting to editor server stdin channel. secondTry=" + secondTry + " ...");

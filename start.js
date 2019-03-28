@@ -544,7 +544,10 @@ function startClient(ip, port, proto) {
 				}
 				
 				programIndex++;
-				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
+				if(programIndex >= tryPrograms.length) {
+//throw new Error("Unable to start browser engine!");
+					log("Manually open a browser, and visit the following address/URL:\n" + url);
+				}
 				else tryProgram(tryPrograms[programIndex]);
 			}
 			else {
