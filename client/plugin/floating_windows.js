@@ -84,9 +84,9 @@
 				}
 				
 				function checkIfOpen() {
-					if(browserWindow && browserWindow.window.EDITOR && thisEditor.openDialogs.length > 0) {
+					if(browserWindow && browserWindow.window.EDITOR) {
 						clearInterval(checkOpenInterval);
-						EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
+						closeCollabDialogs();
 					}
 					//else console.log("File in other window not yet opened ... browserWindow? " + !!browserWindow + " browserWindow.window.EDITOR? " + !!browserWindow.window.EDITOR + " thisEditor.openDialogs.length=" + thisEditor.openDialogs.length + " ");
 				}
@@ -95,10 +95,7 @@
 					clearInterval(checkCloseInterval);
 					
 					closeCollabDialogs();
-					
-					// Sometimes the dialog comes up late ...
-					setTimeout(closeCollabDialogs, 50);
-				}
+					}
 				
 				
 			});
@@ -108,6 +105,9 @@
 				
 				var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
 				if(dialogCodes.indexOf("COLLABORATION_NOTICE") != -1) EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
+				
+				// Sometimes the dialog comes up late ...
+				setTimeout(closeCollabDialogs, 50);
 			}
 			
 		});

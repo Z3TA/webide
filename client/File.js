@@ -2669,7 +2669,7 @@ file.mode = "text";
 			throw new Error("moveCaretToIndex: index=" + index + " can not be less then zero!");
 		}
 		else if(index > file.text.length) {
-			throw new Error("moveCaretToIndex: index=" + index + " can not be over file length=" + file.text.length + "");
+			throw new Error("moveCaretToIndex: index=" + index + " can not be over file length=" + file.text.length + " file.path=" + file.path);
 		}
 		else if(isNaN(index)) throw new Error("moveCaretToIndex: index=" + index + " is not a number!");
 		

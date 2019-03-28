@@ -1048,18 +1048,35 @@ usePseudoClipboard = false;
 				if(state.changed != undefined) newFile.changed = state.changed;
 			}
 			
+			// Able to set file properties when opening the file, before openFile listers fire!?
+			if(state && state.props) {
+				for(var prop in state.props) {
+					newFile[prop] = state.props[prop];
+				}
+			}
+			
 			function fileLoaded(fileLoadError) {
 				
 				if(fileLoadError) return fileOpenError(fileLoadError);
 				
-				// Dilemma1: Should file open even listeners be called before or after the callback!??
-				// answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
-				// problem: The callback might change the file, triggering file.change() then plugins will go nuts because they have not seen the file (being opened) yet!
-				// sultion: The file open event listeners need to be called before the file open callback(s)! 
-				// problem2: The callback might close the file!
-				// solution: callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
-				
-				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
+				/*
+					
+					Dilemma1: Should file open even listeners be called before or after the callback!??
+					answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
+					
+					Dilemma 2: Should fileOpen events fire before or after fileShow events?
+					answer: Does it matter? I forgot why ...
+					
+					problem1: The callback might change the file, triggering file.change() then plugins will go nuts because they have not seen the file (being opened) yet!
+					sultion: The file open event listeners need to be called before the file open callback(s)!
+					
+					problem1.5: The callback might close the file!
+					solution: Same solution as problem 1. callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
+					
+					problem 2: You want to set properties to the file, that should be available when open-file-listeners are called
+					solution: Use state and state.props in parameters to populate state and properties
+					
+				*/
 				
 				EDITOR.files[path] = newFile;
 				file = EDITOR.files[path];

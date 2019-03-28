@@ -347,6 +347,8 @@
 		
 		if(!collabMode) return true;
 		
+		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
+		
 		if(!file.isSaved) syncFile(file);
 		else {
 			// Ask other clients if they have a newer version of the file

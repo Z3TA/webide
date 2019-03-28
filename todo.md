@@ -49,6 +49,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+
 test npm install -g jzedit on various systems
 
 When there is indention, but nothing is visible, horizontally scroll if there are stuff hidden.
@@ -1984,6 +1985,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+markdown preview (can't use wysiwygEdtiro, so we basically need to reimplement it, but for markdown instead of html)
 
 Add support for git, for example when cloning, detect if it's a git or mercurial repo, then use git if it's a git repo
 

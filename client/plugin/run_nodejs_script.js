@@ -37,9 +37,12 @@
 		EDITOR.unbindKey(runNodeJsScript);
 		EDITOR.unbindKey(stopNodeJsScript);
 		
+		EDITOR.removeEvent("showMenu", showRunNodejsScriptMenuItem);
+		
 		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
 		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
+		
 	}
 	
 	function updateRunMsg(login) {
@@ -552,7 +555,12 @@
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, firstRunMsg + "\n\n" + (new Date()) + ":\nRunning " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, 
+			firstRunMsg + "\n\n" + (new Date()) + ":\nRunning " + msg.scriptName + " ...\n\n", 
+			{
+				show: false, 
+				props: {noCollaboration: true}
+			}, function fileOpened(err, file) {
 				if(err) {
 					if(err.code == "IN_QUEUE") {
 						setTimeout(function waitForFileToOpen() {
@@ -657,6 +665,8 @@
 	function appendFile(file, msg) {
 		
 		console.log("appendFile: " + file.path + " msg=" + msg);
+		
+		file.noCollaboration = true; // Don't send changes of this file to collaborators (they will get the changes via the server anyway)
 		
 		var eof = file.caret.eof;
 		console.log("caret eof=" + eof + " " + JSON.stringify(file.caret));
