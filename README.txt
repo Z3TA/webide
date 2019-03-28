@@ -29,7 +29,8 @@ Then type `npm start` to start the editor. Or (if you installed globally) `jzedi
 
 Able to type jzedit via terminal without installing via npm --global
 --------------------------------------------------------------------
-You can open files and even pipe to bin/jzedit and it will be opened in the editor.
+In a unix like enviroment it's possible to open files and even pipe to bin/jzedit,
+in order to send streams of text to the editor.
 Just add the bin folder to your PATH environemnt varibale:
 ```
 export PATH="$PATH:/path/to/node_modules/jzedit/bin"
