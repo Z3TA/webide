@@ -31,16 +31,15 @@ Able to type jzedit via terminal without installing via npm --global
 --------------------------------------------------------------------
 You can open files and even pipe to bin/jzedit and it will be opened in the editor.
 Just add the bin folder to your PATH environemnt varibale:
-export PATH="$PATH://path/to/node_modules/jzedit/bin`
-+Pt it in ~/.bashrc to make the PATH update permanent.
+export PATH="$PATH:/path/to/node_modules/jzedit/bin`
+Put it in ~/.bashrc to make the PATH update permanent.
 
 
 
 Permission issues when installing via npm using --global flag
 -------------------------------------------------------------
 When installing globally npm wants to put packages in places that might require root/administrator privileges.
-To fix this on a unix-like system such as Linux:
- you can create a special folder for npm to put global files in:
+To fix this on a unix-like system such as Linux you can create a special folder for npm to put global files in:
 `
 mkdir ~/.npm-packages
 
@@ -61,6 +60,8 @@ All native module dependences are optional, but they are nice to have!
 Typical sign of missing build dependencies is that you get a bunch of errors when installing via npm.
 Installing the following packages might satisfy the build scripts:
 node-gyp python make gcc g++
+
+
 
 
 Making a desktop icon and manually installing
