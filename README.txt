@@ -58,10 +58,11 @@ Missing npm build dependencies
 ------------------------------
 All native module dependences are optional, but they are nice to have!
 Typical sign of missing build dependencies is that you get a bunch of errors when installing via npm.
-Installing the following packages might satisfy the build scripts:
-node-gyp python make gcc g++
+Installing the following packages should satisfy the build scripts:
+node-gyp python2 make gcc g++
 
-
+On Windows the following npm package will install the build dependencies: 
+`npm install --global --production windows-build-tools`
 
 
 Making a desktop icon and manually installing

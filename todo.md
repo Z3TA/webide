@@ -49,6 +49,10 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+figure out what packages are needed to build deps on Arch
+
+able to type jzedit -v to see version
+
 test npm install -g jzedit on various systems
 
 When there is indention, but nothing is visible, horizontally scroll if there are stuff hidden.
