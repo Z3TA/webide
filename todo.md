@@ -49,7 +49,19 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+root is the owner of /googleDrive/ and all files, which is the reason why we can't write to files
 
+grep -a oz_hNXf2jtwqM3S7enuXST_j gcsf
+
+s{"installed":{"client_id":"987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com","project_id":"webide-203608","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"oz_hNXf2jtwqM3S7enuXST_j","redirect_uris":["urn:ietf:wg:oauth:2.0:oob"]}}C
+
+
+Issues with Google Drive on Ubuntu 18
+
+test npm install -g jzedit on various systems
+
+When there is indention, but nothing is visible, horizontally scroll if there are stuff hidden.
+And don't scroll all the way left when moving the caret, unless there's hidden stuff.
 
 Writing blog post about upgrading to Ubuntu 18
 
