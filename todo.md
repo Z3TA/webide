@@ -1882,6 +1882,8 @@ Issues with Hg annotations after hot reloading the plugin!
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+When copy/pasting in a text file, everything become scrambled after saving/reloading
+
 After a bunch of edits I got error "can not find start of function". When I restarted the editor or copied the file to anohter instance of the editor the error was gone!
 
 The indentation "jumps"/is inconsistent when having breaks before {, [ or ( 
