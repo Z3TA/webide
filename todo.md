@@ -150,6 +150,8 @@ text gets blurry when scrolling.
 todo
 ----
 
+Able to use sudo jzedit [file] to edit files that require root permission
+
 Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
 
 
