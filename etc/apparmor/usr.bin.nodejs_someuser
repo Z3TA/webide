@@ -75,6 +75,9 @@
   # Some files might be created by root, such as lastLogin
   %HOME%%USERNAME%/.jzeditStorage/** rw,
 
+  # Write to Google Drive
+  %HOME%%USERNAME%/googleDrive/** rw,
+
   # Open terminal (pty)
   %HOME%%USERNAME%/dev/ptmx rw,
 
