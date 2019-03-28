@@ -1,6 +1,6 @@
 Contributing
 ============
-If you make changes to this software, feel free to a patch to zeta@zetafiles.org
+If you make changes to this software, feel free to e-mail a patch to zeta@zetafiles.org
 
 If it's a big update, (for example a new plugin), you also have to include the following note:
 "I give you full irrevocable copy rights for this code, including but not limited to the right to sell, distribute, and make changes."
@@ -11,10 +11,10 @@ Mercurial
 ---------
 Mercurial is a free, distributed source control management tool.
 
-We currently support version 3.7.3 (the one in Ubuntu LTS)
+We currently support version 4.5.3 (the one in Ubuntu-18 LTS)
 
-windows: https://www.mercurial-scm.org/release/windows/Mercurial-3.7.3-x64.exe
-linux: https://www.mercurial-scm.org/release/mercurial-3.7.3.tar.gz
+Windows: https://www.mercurial-scm.org/release/windows/Mercurial-4.5.3-x64.exe
+Linux: https://www.mercurial-scm.org/release/mercurial-4.5.3.tar.gz
 
 Follow the install instructions. Make sure hg is added to "PATH" !
 
@@ -76,7 +76,7 @@ for the following, but not limited to, these reasons: obsolete'ness, performance
 
 Tests
 -----
-You can increase the odds for your code not breaking by having tests - that check if it works.
+You can increase the odds for your code not breaking by having tests.
 
 EDITOR.addTest(function myTest(callback) {
   // For example, open a new file, run private function, or EDITOR.mock() keyboard input
@@ -97,9 +97,9 @@ add them to index.htm somwhere between <!-- BEGIN TESTS --> and <!-- END TESTS -
 
 Documentation
 -------------
-If you are a developer, you should look up what methods do by reading the source code. 😄
+If you are a developer, you should look up what methods do by reading_the_source_code. 😄
 Feel free to comment your code with reasons, as to why you choose to implement it that way.
 And why it's useful. And add notes about performance optimizations.
-Do not write what the code does in the comments, the code should be self explainable.
-Except for large public methods - where you should have a brief description of what it does.
+Do not write what the code does in the comments, the code should be self explainable,
+except for large public methods - where you should have a brief description of what it does.
 
