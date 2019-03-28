@@ -29,6 +29,7 @@
 
 var module_path = require("path");
 var module_net = require("net");
+var module_fs = require("fs");
 var module_log = require("../shared/log.js");
 var UTIL = require("../client/UTIL.js");
 
@@ -54,9 +55,35 @@ function main() {
 	var args = process.argv;
 	args.shift(); // Remove the path to node
 	args.shift(); // Remove the path to this script
-	args = args.join(" ");
+	args = args.join(" ").trim();
 	
 	if(args.length > 0) {
+		
+		
+		if(args == "-v" || args == "--version") {
+			module_fs.readFile(module_path.resolve(__dirname, "../package.json"), function(err, data) {
+				if(err) throw err;
+				
+				try {
+					var json = JSON.parse(data);
+				}
+				catch(err) {
+					throw new Error("Unable to parse package.json! " + err.message);
+				}
+				
+				log("Semver version: " + json.version);
+				
+				module_fs.readFile(module_path.resolve(__dirname, "../version.inc"), function(err, data) {
+					if(err) throw err;
+					
+					log("Mercurial commit id: " + data);
+				});
+				
+				
+			});
+			return;
+		}
+		
 		// Asume args is a file path. Resolve the path
 		var workingDir = process.cwd();
 		var filePath = module_path.resolve(workingDir, args);
