@@ -142,6 +142,9 @@ text gets blurry when scrolling.
 todo
 ----
 
+/bin/jzedit -> start.js detect if running headless (on a server) then ask the user for a password if not .jzeditpw file is found in home dir,
+and listen on all ip's.
+
 Able to use sudo jzedit [file] to edit files that require root permission
 
 Goto file: Annoying when you change the "in directory", then when you type something in search it changes back to the old directory value.
@@ -152,11 +155,16 @@ if it uses tabs.
 
 Let user edit "data" in fields and textareas. Example:
 
-<div data-file="footer.htm" data-group="Contact info">
-  <span data="Company name">Web tiger team</span>
-  <span data="address">World wide web 123</span>
-  <a data="e-mail link" data-attribute="href" href="mailto: mail@webide.se">Email</a> ---> e-mail link: [Email] href: [mailto: mail@webide.se]
+<div data-file="footer.htm" itemprop="Contact info" itemscope>
+  <span itemprop="Company name">Web tiger team</span>
+  <span itemprop="address">World wide web 123</span>
+  <a itemprop="e-mail link" data-attribute="href" href="mailto: mail@webide.se">Email</a> ---> e-mail link: [Email] href: [mailto: mail@webide.se]
 </div>
+
+https://html.spec.whatwg.org/multipage/microdata.html#microdata
+
+
+
 
 bug/regression: When you select from EOL using the mouse and holding down shift it pops the last character:
 select last word, then hold down shift and click further to the left.
