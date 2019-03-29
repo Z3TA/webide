@@ -1,22 +1,6 @@
-Prio:
-
-1) Demoable. Make sure things work when demoing the editor: use happy path, stay on happy path! (make tests that covers the demo happy path)
-
-2) Beta release?, get USER FEEDBACK!
-find beta testers!
-
-3) Bug/issue fixing and refactoring
-
-4) Polishing of existing features
-
-5) Optimization (toggle devMode off when testing!)
-
-6) New features
-
 
 WRITE TESTS FOR EACH BUG YOU FIX!! 
 AND REGRESSION TESTS FOR ALL NEW FEATURES!
-
 
 Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
 
@@ -25,12 +9,6 @@ Note to myself
 --------------
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
-
-
-
-ship with node_modules!
-can't depend on a third party package manager to do the right thing.
-and we want to be sane, and debug the same code that the users are running.
 
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
 Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a JavaScript file (detect nodejs ? require, no window)
@@ -49,48 +27,28 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-publish draft, -> hg mv _foo.htm foo.htm
+Writing a guide on how to make a survey
 
 
-test npm install -g jzedit on various systems
+todo
+----
+
+Able to right click on a SSG file named with _underscore to prevent publishing, and click "Publish draft"
+which triggers a hg mv _foo.htm foo.htm
+
+In goto/open file, and you change the "search in" dir, it changes back when you start searching ...
+
+A better path-picker widget. There are many plugins that let you write file paths in input text boxes,
 
 When there is indention, but nothing is visible, horizontally scroll if there are stuff hidden.
 And don't scroll all the way left when moving the caret, unless there's hidden stuff.
-
-Writing blog post about upgrading to Ubuntu 18
-
-Testing on 192.168.122.50
-
-Ubuntu 16 staging server to make sure changes made to support Ubuntu 18 still works on Ubuntu 16
-
-
-Maybe upgrading to the new version of Ubuntu will fix it !?
-
-Cloning from HTTPS stopped working when CHROOTED after upgrading hg-git!
-
-Made cloning from git using SSH work on Desktop after specifying HOME in env.PATH
-
-
-Unable to clone from Github using both Git and HTTPS from cloud IDE!
-
-Unable to clone from a git repo when running on desktop!
-https://github.com/Z3TA/survey-example.git
----
-
-Writing a guide on how to make a survey
-
 
 false posetive: if(functionName.indexOf("=") != -1) functionName = lastVariableName;
 
 chrome mobile doesnt support many rows in select boxes ex. the functipn list.
 If screen width is less then 500px? move the function list to the header and make it one item big !?
 
-
-
 chrome mobile shows an annoying blue box when holding down on a file tab.
-
-
-
 
 test for regression: 
 Login by pressing Enter
@@ -99,10 +57,8 @@ Virtual keyboard (IE 11)
 fix regression (add test!):
 When selecting text from EOL to left, then selecting additional text to the left, the last character gets unselected!
 
-
 Hide the top-right menu button if the user manages to do a right-click/long-press !?
 Firefox mobile browser doesn't seem to support long press !?
-
 
 When copying file path, and it's in the wwwpub folder, 
 ask if user wants to copy file path or public url !?
@@ -141,8 +97,6 @@ text gets blurry when scrolling.
 
 
 
-todo
-----
 
 /bin/jzedit -> start.js detect if running headless (on a server) then ask the user for a password if not .jzeditpw file is found in home dir,
 and listen on all ip's.
@@ -462,6 +416,40 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+There are 1-3 users trying out the editor every week, but none of them seem to write anything ...
+So how are they going to find the editor features !?
+They don't know what to do ... Very few reads the guides/articles. Make more guides/articles !?
+
+We need to show them success, or at least what success looks like ...
+
+Clone app, run ... edit !?
+
+Give users some alternatives:
+
+What do you want to create:
+
+Web site, Pure web app, database app
+
+Here are some examples 
+
+
+A shalboard
+
+Daily website visitors
+
+Hours spent coding
+Most files worked on
+
+Github stars !? =)
+
+npm downloads
+
+
+
+  
+
+
 
 ---
 
