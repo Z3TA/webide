@@ -49,6 +49,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+publish draft, -> hg mv _foo.htm foo.htm
+
 
 test npm install -g jzedit on various systems
 

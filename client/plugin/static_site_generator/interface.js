@@ -1467,6 +1467,11 @@
 	}
 	
 	function resolvePath(site, relativePath) {
+		
+		// Make sure relativePath doesn't contain protocol part
+		var reProtocol = /^(ftp|sftp|ftps|http|https|file|smb|ssh):\/\//;
+		if(relativePath.match(reProtocol)) return relativePath;
+		
 		return UTIL.resolvePath(site.projectFolder, relativePath);
 	}
 	
@@ -1845,7 +1850,7 @@
 		
 		var temporaryPassword = "";
 		if( selectedSite.repoPw == "") {
-			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, function(pw) {
+			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, undefined, 0, function(pw) {
 				if(pw) {
 					temporaryPassword = pw;
 					start();
