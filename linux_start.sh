@@ -89,7 +89,7 @@ else
 		startClient
 
   		# Problem: Firefox browser will "exit" even though it started
-  		read -n 1 -s -r -p "Press any key to top the server"
+  		read -n 1 -s -r -p "Press any key to stop the server"
 
 		# Kill the server when client exit
 		kill $!
