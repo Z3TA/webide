@@ -1,2 +1,2 @@
 @echo off
-node jzedit %*
+node %~dp0jzedit %*

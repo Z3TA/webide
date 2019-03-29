@@ -27,8 +27,8 @@ The easiest way to install the desktop version is via npm:
 Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
 
-Able to type jzedit via terminal without installing via npm --global
---------------------------------------------------------------------
+Able to type jzedit via "unix" terminal without installing via npm --global
+----------------------------------------------------------------------------
 In a unix like enviroment it's possible to open files and even pipe to bin/jzedit,
 in order to send streams of text to the editor.
 Just add the bin folder to your PATH environemnt varibale:
@@ -36,6 +36,19 @@ Just add the bin folder to your PATH environemnt varibale:
 export PATH="$PATH:/path/to/node_modules/jzedit/bin"
 ```
 Put it in ~/.bashrc to make the PATH update permanent.
+
+
+Able to type jzedit in Windows command prompt without installing via npm --global
+-----------------------------------------------------------------------------------
+Add the jzedit/bin folder to the Path environemnt varibale:
+(Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
+Select: Path, then click Edit, then New, and write:
+```
+C:\path\to\where\you\installed\node_modules\jzedit\bin\
+```
+(tip: Use the file explorer to navigate to the jzedit\bin folder, then copy the path/address)
+Click OK > OK > OK
+You have to open a new Command Prompt for the change to take effect.
 
 
 
