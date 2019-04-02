@@ -27,11 +27,21 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Implementing print 2 pdf
+
+Need to print ...
+
+
+
+
 Writing a guide on how to make a survey
 
 
 todo
 ----
+
+When logged into a server via SSH, able to type jzedit /path/to/file.conf
+And it will attempt to connect to the already running editor on the working machine !?
 
 Able to right click on a SSG file named with _underscore to prevent publishing, and click "Publish draft"
 which triggers a hg mv _foo.htm foo.htm
@@ -1984,6 +1994,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Find correct function name for 
+var convertDateToPDFDate = API.__private__.convertDateToPDFDate = function (parmDate) {
+
+
 markdown preview (can't use wysiwygEdtiro, so we basically need to reimplement it, but for markdown instead of html)
 
 Add support for git, for example when cloning, detect if it's a git or mercurial repo, then use git if it's a git repo
@@ -2996,6 +3010,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Text selection lags when selecting over a very long line
 
 ---
 When running on a bare server (no GUI) when installed via npm -ig jzedit, 

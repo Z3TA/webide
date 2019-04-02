@@ -53,6 +53,8 @@
 	function linerNumbersAfterResize() {
 		pixelRatio = window.devicePixelRatio || 1;
 		
+		console.log("render_lineNumbers: pixelRatio=" + pixelRatio);
+		
 		cacheCanvasWidth = EDITOR.settings.leftMargin - leftMargin;
 		cacheCanvasHeight = EDITOR.view.canvasHeight;
 		
@@ -148,7 +150,7 @@
 		var destinationWidth = sourceRectWidth / pixelRatio; // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
 		var destinationHeight = sourceRectHeight / pixelRatio; // scale sourceRectHeight to destinationHeight and draw a destinationHeight high sub-image on the canvas
 		
-		console.log("screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
+		console.log("render_lineNumbers: screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
 		" sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + 
 		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight + 
 		" cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " EDITOR.canvas.width=" + EDITOR.canvas.width + 

@@ -2142,14 +2142,14 @@ text = file;
 		}
 	}
 	
-	EDITOR.resize = function() {
+	EDITOR.resize = function(resizeOverride) {
 		/*
 			
 			Note: Chaning the width/height of the canvas will clear it!
 			
 		*/
 		
-		if(!EDITOR.shouldResize) return console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
+		if(!EDITOR.shouldResize && !resizeOverride) return console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
@@ -2346,7 +2346,7 @@ text = file;
 		
 		console.log("pixelRatio=" + pixelRatio + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
 		
-		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight) ) {
+		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight || resizeOverride) ) {
 			
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
@@ -5359,6 +5359,8 @@ var word = "";
 		var loc = UTIL.getLocation(src);
 		
 		if(host == loc.host) dontAsk = true;
+		
+		if(src.slice(0,1) == "/" || src.slice(0, 3) == "../") dontAsk = true;
 		
 		if(!dontAsk) {
 			var yes = "Yes, I trust " + loc.host;
