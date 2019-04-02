@@ -51,14 +51,15 @@
 			// Switch to a font that is included in PDF reader
 			EDITOR.settings.style.font = "Courier New, Courier, monospace";
 			EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New, Courier, monospace";
-			EDITOR.settings.style.fontSize = 12;
-			EDITOR.settings.gridHeight = 21;
-			EDITOR.settings.gridWidth = 7.2;
+			EDITOR.settings.style.fontSize = 10;
+			EDITOR.settings.gridHeight = 12;
+			EDITOR.settings.gridWidth = 6;
 			
 			//EDITOR.resize(true);
 			
 			if(file.mode == "text") {
-				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 2;
+				// Increase top/bottom margin
+				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 4;
 				
 				var disablePlugins = [
 					"Render line numbers",
