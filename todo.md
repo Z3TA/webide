@@ -1042,6 +1042,9 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 BUGS (and issues)
 =================
 
+When editing the white space is not touches, eg indentation, only where you make changes.
+But sometimes the { and } doesn't get the correct indentation in the source code!
+
 When reloading while in collaboration mode and then editing I sometimes get errors like:
 Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
 
