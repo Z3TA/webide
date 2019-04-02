@@ -35,6 +35,8 @@
 			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
+			if(!cacheCanvas) cacheCanvas = document.createElement('canvas');
+				
 			// START DEBUG CODE
 			if(debug) {
 			var rightColumn = document.getElementById("rightColumn");

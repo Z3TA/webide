@@ -38,9 +38,11 @@
 			
 			var pdf = new jsPDF({
 				orientation: "portrait",
-				format: "a4",
+				format: "A4",
 				unit: "pt" // For the context2d to work unit need to be in pt
 			});
+			
+			var file = EDITOR.currentFile;
 			
 			var pageHeight = pdf.internal.pageSize.getHeight();
 			var pageWidth = pdf.internal.pageSize.getWidth();
@@ -49,16 +51,30 @@
 			// Switch to a font that is included in PDF reader
 			EDITOR.settings.style.font = "Courier New, Courier, monospace";
 			EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New, Courier, monospace";
-			EDITOR.settings.style.fontSize = 15;
-			EDITOR.settings.gridHeight = 23;
-			EDITOR.settings.gridWidth = 9;
+			EDITOR.settings.style.fontSize = 12;
+			EDITOR.settings.gridHeight = 21;
+			EDITOR.settings.gridWidth = 7.2;
 			
 			//EDITOR.resize(true);
 			
-			// Adjust margins
-			var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight);
+			if(file.mode == "text") {
+				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 2;
+				
+				var disablePlugins = [
+					"Render line numbers",
+					"Highlight current line"
+				];
+				
+				for (var i=0; i<disablePlugins.length; i++) EDITOR.disablePlugin(disablePlugins[i]);
+				
+			}
+			else {
+				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight);
+			}
+			
 			var margin = pageHeight - rowsPerPage * EDITOR.settings.gridHeight;
 			
+			// Adjust margins
 			console.log("print2pdf: rowsPerPage=" + rowsPerPage + " margin=" + margin);
 			
 			var topMargin = margin/2 - 0.01;
@@ -93,7 +109,7 @@
 				EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile, pageWidth, pageHeight);
 			}
 			
-			var file = EDITOR.currentFile;
+			
 			var totalPages = Math.ceil(file.grid.length / rowsPerPage);
 			var fileStartRow = 0;
 			var fileEndRow = rowsPerPage;
@@ -118,11 +134,22 @@
 				}
 			}
 			
-			pdf.save('test.pdf');
+			var fileName = UTIL.getFilenameFromPath(file.path) + ".pdf";
 			
-			// Restore view properties
+			pdf.save(fileName);
+			
+			
+			// Restore
 			EDITOR.canvas = editorCanvasOriginal;
+			
+			if(disablePlugins) {
+				for (var i=0; i<disablePlugins.length; i++) {
+					EDITOR.enablePlugin(disablePlugins[i]);
+				}
+			}
+			
 			EDITOR.resize(true);
+			
 			
 			console.log("print2pdf: Finished print2pdf");
 			

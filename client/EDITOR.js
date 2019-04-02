@@ -1752,7 +1752,7 @@ text = file;
 	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
-		console.warn("EDITOR.render!");
+		console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas));
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -2129,7 +2129,7 @@ text = file;
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
-		//console.warn("Render needed!");
+		console.warn("Render needed!");
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
@@ -2375,6 +2375,7 @@ text = file;
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
 		
 			// Need to re-render after resizing the canvas!
+			console.log("re-render after resizing the canvas!");
 			EDITOR.shouldRender = true;
 			
 		}
@@ -3365,7 +3366,10 @@ EDITOR.fireEvent("btk");
 	
 	EDITOR.removeRender = function(fun) {
 		console.log("Removing render: " + UTIL.getFunctionName(fun));
-		return removeFrom(EDITOR.renderFunctions, fun);
+		
+		delete renderOrder[ UTIL.getFunctionName(fun) ];
+		
+		removeFrom(EDITOR.renderFunctions, fun);
 	}
 	
 	EDITOR.addPreRender = function(renderFunction) {
@@ -4254,19 +4258,40 @@ var word = "";
 	}
 	
 	EDITOR.disablePlugin = function(desc) {
-		
-		var f;
+		var plugin;
 		for(var i=0; i<EDITOR.plugins.length; i++) {
-			f = EDITOR.plugins[i];
-			if(f.desc == desc) {
+			plugin = EDITOR.plugins[i];
+			if(plugin.desc == desc) {
 				
-				if(f.loaded && !f.unload) throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+				if(plugin.loaded && !plugin.unload) {
+throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+				}
 				
-				if(f.unload) f.unload();
+				if(plugin.unload) plugin.unload();
+				else console.warn("Plugin has no unload method: " + desc);
 				
-				EDITOR.plugins.splice(i, 1);
+				//EDITOR.plugins.splice(i, 1);
 				
 				console.log("Plugin disabled: " + desc);
+				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	EDITOR.enablePlugin = function(desc) {
+		var plugin;
+		for(var i=0; i<EDITOR.plugins.length; i++) {
+			plugin = EDITOR.plugins[i];
+			if(plugin.desc == desc) {
+				
+				if(!plugin.load) throw new Error("The plugin has no load method!");
+				
+				plugin.load();
+				
+				console.log("Plugin re-enabled: " + desc);
 				
 				return true;
 			}
@@ -5860,11 +5885,10 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	function removeFrom(list, fun) {
 		// Removes an object from an array of objects
 		for(var i=0; i<list.length; i++) {
-			
-			//console.log(UTIL.getFunctionName(fun) + " = " + UTIL.getFunctionName(list[i]) + " ? " + (list[i] == fun));
-			
 			if(list[i] == fun) {
+				console.log("removeFrom: list length before: " + list.length);
 				list.splice(i, 1);
+				console.log("removeFrom: list length after: " + list.length);
 				removeFrom(list, fun); // Remove dublicates
 				return true;
 			}
