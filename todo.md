@@ -27,6 +27,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+
 Implementing print 2 pdf
 
 Need to print ...
@@ -39,6 +40,8 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+bug: When committing on Windows and you click Diff, and then Refresh, it says ENOENT C:\client\plugin'
 
 When logged into a server via SSH, able to type jzedit /path/to/file.conf
 And it will attempt to connect to the already running editor on the working machine !?
@@ -1041,6 +1044,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+bug: Cant open folders that have space in them in file explorer (probably don't work in the rest of the editor either)
 
 When editing the white space is not touches, eg indentation, only where you make changes.
 But sometimes the { and } doesn't get the correct indentation in the source code!
