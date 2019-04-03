@@ -110,6 +110,13 @@ find temp/release/linux/client/gfx/font/ ! -name 'liberationMono.css' ! -name 'L
 find temp/release/linux/client/gfx/font/ -type d -empty -delete
 
 
+echo "Adding jsPDF dependencies"
+# Get the pathed files: cd client && git clone git@github.com:Z3TA/jsPDF.git
+mkdir -p temp/release/linux/client/jsPDF/src/{libs,modules}
+cp client/jsPDF/src/jspdf.js temp/release/linux/client/jsPDF/src/
+cp client/jsPDF/src/libs/{rgbcolor.js,FileSaver.js} temp/release/linux/client/jsPDF/src/libs/
+cp client/jsPDF/src/modules/{cell.js,standard_fonts_metrics.js,split_text_to_size.js,context2d.js,canvas.js,addimage.js,jpeg_support.js,ttfsupport.js} temp/release/linux/client/jsPDF/src/modules/
+
 
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
