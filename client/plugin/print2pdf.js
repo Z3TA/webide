@@ -22,7 +22,7 @@
 		desc: "Print to PDF",
 		load: function() {
 			
-			menuItem = EDITOR.addMenuItem("Print to PDF", print2pdf, 1);
+			menuItem = EDITOR.addMenuItem("Print to PDF", print2pdf, 3);
 			
 		},
 		unload: function() {
@@ -33,6 +33,7 @@
 	});
 	
 	function print2pdf() {
+		EDITOR.hideMenu();
 		loadDependencies(function(err) {
 			// Errors returned by script.onerror is not normal errors (they have no message property), nor a call stack (at least not in Chrome)
 			if(err) return alertBox( "Problem loading jsPDF dependencies. Make sure the following files exist in client/jsPDF/\n" +  jsPdfDependencies.join("\n") );
