@@ -96,11 +96,13 @@
 			// Adjust margins
 			console.log("print2pdf: rowsPerPage=" + rowsPerPage + " margin=" + margin);
 			
-			var topMargin = margin/2 - 0.01;
-			var bottomMargin = margin/2 - 0.01;
+			// If margins are too large we will get an extra page
+			var topMargin = Math.floor(margin/2 - 0.01); // Make top margin an integer to prevent sub pixel rendering
+			var bottomMargin = margin - topMargin; // Fill out the remaining space
 			
 			console.log("print2pdf: Adjusting EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " to " + topMargin);
 			console.log("print2pdf: Adjusting EDITOR.settings.bottomMargin=" + EDITOR.settings.bottomMargin + " to " + bottomMargin);
+			console.log("print2pdf: Adjusting EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " to " + leftMargin);
 			
 			EDITOR.settings.topMargin = topMargin;
 			EDITOR.settings.bottomMargin = bottomMargin;
@@ -140,6 +142,9 @@
 			
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			ctx.textBaseline = "top";
+			
+			
+			// We don't have to add a first page, or it would be blank
 			
 			for (var page=0; page<totalPages; page++) {
 				fileStartRow = page * rowsPerPage;
