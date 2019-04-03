@@ -34,7 +34,8 @@
 	
 	function print2pdf() {
 		loadDependencies(function(err) {
-			if(err) return alertBox("Problem loading jsPDF dependencies: " + err.message);
+			// Errors returned by script.onerror is not normal errors (they have no message property), nor a call stack (at least not in Chrome)
+			if(err) return alertBox( "Problem loading jsPDF dependencies. Make sure the following files exist in client/jsPDF/\n" +  jsPdfDependencies.join("\n") );
 			
 			var pdf = new jsPDF({
 				orientation: "portrait",

@@ -5401,7 +5401,13 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			var script = document.createElement('script');
 			script.onload = function () {
 				callback(null);
+				callback = null;
 			};
+			script.onerror  = function (err) {
+				callback(err || new Error("Unable to load " + src));
+				callback = null;
+			};
+			
 			script.src = src;
 			
 			document.head.appendChild(script);
