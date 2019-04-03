@@ -4245,7 +4245,7 @@ var word = "";
 		
 		if(windowLoaded) { // && EDITOR.settings.devMode
 			//alertBox("Gonna reload unload and load " + UTIL.getFunctionName(p.load));
-			EDITOR.disablePlugin(p.desc); // Unload plugin before loading it 
+			EDITOR.disablePlugin(p.desc, true); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
 		}
 		
@@ -4254,10 +4254,9 @@ var word = "";
 		}
 		
 		EDITOR.plugins.push(p);
-		
-	}
+		}
 	
-	EDITOR.disablePlugin = function(desc) {
+	EDITOR.disablePlugin = function(desc, remove) {
 		var plugin;
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			plugin = EDITOR.plugins[i];
@@ -4270,9 +4269,9 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				if(plugin.unload) plugin.unload();
 				else console.warn("Plugin has no unload method: " + desc);
 				
-				//EDITOR.plugins.splice(i, 1);
+				if(remove) EDITOR.plugins.splice(i, 1);
 				
-				console.log("Plugin disabled: " + desc);
+				console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
 				
 				return true;
 			}
@@ -7161,7 +7160,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			});
 			
 		});
-		else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin)
+		else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true)
 		else {
 			console.warn("jzedit does not recognise msg=" + msg);
 			//throw new Error("Unable to handle message: " + msg);

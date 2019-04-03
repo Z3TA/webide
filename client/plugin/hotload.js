@@ -54,8 +54,11 @@ alertBox("Script is not in the plugin folder: " + currentScript);
 		console.log("currentScript=" + currentScript);
 		
 		var pluginDescription = "";
-		for(var i=0; i<EDITOR.plugins.length; i++) {
-			if(currentFile.text.indexOf(EDITOR.plugins[i].desc) != -1) {
+		for(var i=0, re; i<EDITOR.plugins.length; i++) {
+			
+			re = new RegExp("desc\\s*:\\s*['\"]" + EDITOR.plugins[i].desc);
+			
+			if(currentFile.text.match(re)) {
 				if(pluginDescription) throw new Error("There are more then one plugin with the same description: " + pluginDescription);
 pluginDescription = EDITOR.plugins[i].desc;
 				// Continue so we can detect dublicate descriptions
@@ -63,7 +66,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 		}
 		
 		if(!pluginDescription) {
-alertBox("Did not find a plugin description for " + currentFile.path);
+			alertBox("Did not find a plugin description in " + currentFile.path);
 			return true;
 		}
 		
