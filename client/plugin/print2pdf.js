@@ -51,6 +51,19 @@
 			console.log("print2pdf: pageHeight=" + pageHeight + " pageWidth=" + pageWidth);
 			
 			// Switch to a font that is included in PDF reader
+			
+			var settings = {
+				font: EDITOR.settings.style.font,
+				highlightMatchFont: EDITOR.settings.style.highlightMatchFont,
+				fontSize: EDITOR.settings.style.fontSize,
+				gridHeight: EDITOR.settings.gridHeight,
+				gridWidth: EDITOR.settings.gridWidth,
+				topMargin: EDITOR.settings.topMargin,
+				bottomMargin: EDITOR.settings.bottomMargin,
+				leftMargin: EDITOR.settings.leftMargin,
+				rightMargin: EDITOR.settings.rightMargin
+			}
+			
 			EDITOR.settings.style.font = "Courier New, Courier, monospace";
 			EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New, Courier, monospace";
 			EDITOR.settings.style.fontSize = 10;
@@ -70,9 +83,12 @@
 				
 				for (var i=0; i<disablePlugins.length; i++) EDITOR.disablePlugin(disablePlugins[i]);
 				
+				var leftMargin = 50; // Bigger margin for text
+				
 			}
 			else {
 				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight);
+				var leftMargin = 30; // Want as much code as possible to fit on the page
 			}
 			
 			var margin = pageHeight - rowsPerPage * EDITOR.settings.gridHeight;
@@ -89,7 +105,7 @@
 			EDITOR.settings.topMargin = topMargin;
 			EDITOR.settings.bottomMargin = bottomMargin;
 			
-			//EDITOR.settings.leftMargin = 0;
+			EDITOR.settings.leftMargin = leftMargin;
 			EDITOR.settings.rightMargin = 0;
 			
 			EDITOR.view.canvasHeight = pageHeight;
@@ -144,6 +160,16 @@
 			
 			// Restore
 			EDITOR.canvas = editorCanvasOriginal;
+			
+			EDITOR.settings.style.font = settings.font;
+			EDITOR.settings.style.highlightMatchFont =settings.highlightMatchFont;
+			EDITOR.settings.style.fontSize = settings.fontSize;
+			EDITOR.settings.gridHeight = settings.gridHeight;
+			EDITOR.settings.gridWidth = settings.gridWidth;
+			EDITOR.settings.topMargin = settings.topMargin;
+			EDITOR.settings.bottomMargin = settings.bottomMargin;
+			EDITOR.settings.leftMargin = settings.leftMargin;
+			EDITOR.settings.rightMargin = settings.rightMargin;
 			
 			if(disablePlugins) {
 				for (var i=0; i<disablePlugins.length; i++) {
