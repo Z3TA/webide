@@ -146,10 +146,12 @@
 			
 			// We don't have to add a first page, or it would be blank
 			
+			EDITOR.shouldResize = false; // Prevent EDITOR.render from doing a resize which could mess things up 
+			
 			for (var page=0; page<totalPages; page++) {
 				fileStartRow = page * rowsPerPage;
 				fileEndRow = Math.min(fileStartRow + rowsPerPage - 1, file.grid.length-1);
-				console.log("print2pdf: Render fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow);
+				console.log("print2pdf: page=" + page + " Render fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow);
 				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride);
 				
 				if(page < totalPages-1) {
