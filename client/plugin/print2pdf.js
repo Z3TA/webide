@@ -1,3 +1,8 @@
+/*
+	
+	Idea: Show a vertical line for when you should break the text for it to not go outside the paper when printed
+	
+*/
 
 (function() {
 	"use strict";
@@ -74,7 +79,7 @@
 			
 			if(file.mode == "text") {
 				// Increase top/bottom margin
-				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 4;
+				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 7;
 				
 				var disablePlugins = [
 					"Render line numbers",
@@ -83,7 +88,7 @@
 				
 				for (var i=0; i<disablePlugins.length; i++) EDITOR.disablePlugin(disablePlugins[i]);
 				
-				var leftMargin = 50; // Bigger margin for text
+				var leftMargin = 48; // Bigger margin for text
 				
 			}
 			else {
