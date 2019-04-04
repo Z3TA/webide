@@ -27,6 +27,9 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+When cloning from bitbucket and saving the credentials,
+the prefix under [auth] is wrong, there should be https:// instead of username@ 
+
 Use gitlab or bitbucket instead of Github because the hg-git issues !?
 So we can use Mercurial directly
 
