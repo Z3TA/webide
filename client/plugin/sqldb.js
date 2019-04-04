@@ -145,7 +145,7 @@ option.setAttribute("selected", "selected");
 	function createDatabase() {
 		promptBox("Database name: ", function(dbName) {
 			console.log("createDatabase: dbName=" + dbName);
-			CLIENT.cmd("createMysqlDb", {name: dbName}, function(err) {
+			if(dbName != null) CLIENT.cmd("createMysqlDb", {name: dbName}, function(err) {
 				if(err) {
 					if(err.code == "ER_DB_CREATE_EXISTS") alertBox("The name " + dbName + " is already taken. Try another name or prepend it (" + EDITOR.user + "_" + dbName + ")");
 					else alertBox("Unable to create database " + dbName + ": " + err.message + "\ncode=" + err.code);
