@@ -1650,20 +1650,21 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					if(err) {
 						
-						/*
-							EPERM = operation not permitted
-							EBUSY = resource busy or locked
-							ENOENT = no such file or directory
-							ENOTCONN = socket is not connected, stat '/googleDrive'
-							UNKNOWN = Windows 10 error (probably access denied)
-						*/
+						var knownErrors = [
+							"EPERM", // operation not permitted
+							"EBUSY", // resource busy or locked
+							"ENOENT", // no such file or directory
+							"ENOTCONN", // socket is not connected, stat '/googleDrive'
+							"UNKNOWN", // Windows 10 error (probably access denied)
+							"ELOOP" // too many symbolic links encountered
+						];
 						
-						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT" || err.code == "ENOTCONN" || err.code == "EACCES" || err.code == "UNKNOWN") {
+						if(knownErrors.indexOf(err.code) != -1) {
 							problem = err.code;
 							type = "*"
 						}
 						else {
-listFilesCallback(err);
+							if(listFilesCallback) listFilesCallback(err);
 							listFilesCallback = null;
 							return;
 						}
