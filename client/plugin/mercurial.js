@@ -1329,7 +1329,7 @@ localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName
 var error = err.message;
 						
 						// For git+ssh to work you need both a username/password and a known public ssh key 
-						if( error.match(/Permission denied \(publickey\)/) && repo.value.match(/github\.com/) ) {
+						if( error.match(/permission denied/i) && repo.value.match(/^git@/) ) {
 							error += "\n\nTip: Try using HTTPS instead"
 						}
 						

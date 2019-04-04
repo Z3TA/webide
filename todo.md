@@ -27,10 +27,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+ssh Host key verification failed
 
-Implementing print 2 pdf
+Automatically show database manager plugin when a .sql file is opened
 
-Need to print ...
+Able to cancel when clicking create database in database manager
 
 
 
