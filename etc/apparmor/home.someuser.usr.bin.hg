@@ -36,6 +36,8 @@
 
   
   %HOME%%USERNAME%/dev/null rw,
+  %HOME%%USERNAME%/dev/ptmx rw,
+
 
   %HOME%%USERNAME%/usr/bin/python2.7 ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,
