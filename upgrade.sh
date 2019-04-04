@@ -42,7 +42,8 @@ if [[ "$@" =~ "-norelease" ]]
 then
   echo "Using existing release in temp/release/server/"
 else
-   ./release.sh
+   # Note: you can publish at the same time, using the -publish flag
+   ./release.sh $@
 fi
 
 

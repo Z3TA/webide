@@ -27,13 +27,18 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Unable to push to Github after cloning via https
 
+Unable to clone from Github using ssh! (using account johan on webide.se, guest accounts seem to work though !?)
 
 Writing a guide on how to make a survey
 
 
 todo
 ----
+
+Error parsing problem on Firefox !? 
+When running tests on Firefox you get a dialog message about error detected, which should be shown inline !?
 
 bug: When committing on Windows and you click Diff, and then Refresh, it says ENOENT C:\client\plugin'
 

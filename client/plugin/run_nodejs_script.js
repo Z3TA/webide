@@ -587,7 +587,7 @@
 	
 	
 	function stopNodeJsScript() {
-		if(!EDITOR.currentFile) return;
+		if(!EDITOR.currentFile) return ALLOW_DEFAULT;
 		
 		var filePath = EDITOR.currentFile.path;
 		
