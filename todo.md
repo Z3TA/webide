@@ -27,6 +27,15 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Use gitlab or bitbucket instead of Github because the hg-git issues !?
+So we can use Mercurial directly
+
+Gitlab UI is terrible slow ...
+
+
+
+pip install -U git+https://dmitriyse@bitbucket.org/dmitriyse/hg-git-git.git@upstream
+
 Unable to push to Github after cloning via https
 
 Unable to clone from Github using ssh! (using account johan on webide.se, guest accounts seem to work though !?)
