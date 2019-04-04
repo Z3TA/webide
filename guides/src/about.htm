@@ -14,7 +14,7 @@ and make it run <i>live</i> in the cloud with one click,
 <i>without</i> having to download, setup, or configurate anything.</p>
 
 <ul class="horizontal">
-	<li>😍 <a href="signup/signup.htm">Try it now</a></li>
+	<li><a href="signup/signup.htm">Try it now</a></li>
 </ul>
 <br>
 
@@ -36,16 +36,14 @@ and offers shell/workspace for developing and editing web sites, apps and Node.J
 	<li>Fast and Simple.</li>
 </ul>
 
-
-<h3>Runs everywhere</h3>
+<li3>Runs everywhere</h3>
 <ul>
 	<li>Runs on Chromebook's, Smart-phones, tablets, and even smart-TV's and watches (that has HTML5 support)</li>
 	<li>It's possible to run the editor embedded on a web site.</li>
 	<li>It can run in the "cloud" or locally on your device.</li>
 </ul>
 
-
-<h3>JavaScript</h3>
+<h3>JavaScript support</h3>
 <ul>
 	<li>Incremental JavaScript parsing (in web worker)</li>
 	<li>Function list for quick navigation</li>
@@ -54,14 +52,12 @@ and offers shell/workspace for developing and editing web sites, apps and Node.J
 	<li>Shows console.log messages in the editor</li>
 </ul>
 
-
 <h3>Edit files remotely</h3>
 <ul>
 	<li>Connect to FTP/FTPS/SFTP servers.</li>
 	<li>Google Drive support</li>
 	<li>VNC support (for connecting to GUI based servers and desktops)</li>
 </ul>
-
 
 <h3>No tracking or telemetry</h3>
 <p>User statistics is a slippery slope,
@@ -74,6 +70,7 @@ That's why JZedit has no telemetry or tracking whatsoever.</p>
 <h3>Additional features</h3>
 <ul>
 	<li>Separate backend/frontend lets you run the server on your PC/server and connect to it from anywhere</li>
+	<li>The editor can run in "cloud mode" where each user share the same environment, but get separated isolated work spaces.</li>
 	<li>Integrated source control: Commit from within the editor and show annotations.</li>
 	<li>Built in static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
 	<li>Live preview and WYSIYG editing.</li>
@@ -85,8 +82,7 @@ That's why JZedit has no telemetry or tracking whatsoever.</p>
 	<li>Able to run emulators and GUI applications (via VNC).</li>
 </ul>
 
-
-<p>Despite the above features, the editor is pretty fast and light-weight.</p>
+<p>Despite the above features, the editor is pretty fast and light-weight. Total download size is only 2 MB.</p>
 
 
 
@@ -121,11 +117,10 @@ or on a public server like <a href="https://webide.se/">webide.se</a> or a serve
 - and connect to it from anywhere to get a full developer environment that lets you run Nodejs, and more. 
 Making it possible to develop from a smartphone or Chromebook.</p>
 
+<p>The editor can be turned into a cloud IDE, where each user share the same environment, but have separate isolated work spaces.</p>
+
 <p>Has a graphical interface for accessing files on remote servers via SSH/FTP.
 But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.</p>
-
-<p>Easier to use then some code editors. 
-And if you know HTML/CSS/JavaScript it's easy to modify or add new features to the editor.</p>
 
 <p>Written in "vanilla" JavaScript, where other similar editors use "compile to Javascript" languages like CoffeeScript and  TypeScript.</p>
 
@@ -140,7 +135,8 @@ You can use the editor to make changes to the editor itself, and modules can be 
 <p>Yes, "there is a editor, inside the editor", called Vim mode (vim normal), 
 hit <keyb>Ctrl+M</keyb> until you see "VIM* NORMAL MODE" in the bottom right corner.</p>
 
-<p>We want hardcore vim users to feel at home, but it's a lot of work, so only expect basic support for now.</p>
+<p>We want hardcore vim users to feel at home, but we are still in alpha, so only expect basic support for now.<br>
+Feel free to leave feedback to make it easier to prioritize what features to work on!</p>
 
 
 
@@ -154,21 +150,23 @@ to help them more efficiently manage, share and collaborate with documents and (
 <p>In 1975 an text editor was developed that made use of a video monitor so you could <i>see what you where typing</i>.
 That editor was however dismissed, because there where "really no need to see the text while editing" ...</p>
 
-<p>When <i>normal</i> people see "code" they get scared. We want to make "coding" natural for normal people.</p>
+<p>We think high level programming and web-development have become too complex. We want to make development easier and more simple.</p>
+
+<p>Many people have a computer in their pocket. We want to make it easier to develop using a smartphone.</p>
 
 <p>The web environment and JavaScript allows rapid development and we would like to experiment with stuff like speech-to-text,
 and visual aids to show which parts of the code does what, what parts are hot, the scope of variables etc.</p>
 
 
 
-
 <h3>Run JZedit locally</h3>
 
-<p>Don't want to use the hosted service ? You can install the editor on your own workstation or server!</p>
+<p>Skeptical about running the editor in the cloud?
+You can install the editor on your own workstation or server!</p>
 
 <p>First install nodejs, (sudo apt install nodejs) or download from <a href="https://nodejs.org/">Node.js website</a>.<br>
 With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install -g jzedit</b>.<br>
-To run the editor type <b>npm start</b>, or if you installed globally (-g flag) jzedit file-path.<br>
+To run the editor type <b>npm start</b>, or if you installed globally (-g flag) jzedit [path/to/file].<br>
 Or if you only want to run the server and open the editor in a browser, type <b>npm run server</b>.</p>
 
 

@@ -27,7 +27,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-ssh Host key verification failed
+
 
 Automatically show database manager plugin when a .sql file is opened
 
@@ -430,6 +430,13 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Thinking about docker support ... Able to run docker apps ?
+Some teams use docker so that all developers will have the same environment
+If you however run the editor as a cloud editor, all users will already have the same environment
+If you use docker and other tools, it's probably best to run the editor in  VPS or locally.
+
+---
 
 There are 1-3 users trying out the editor every week, but none of them seem to write anything ...
 So how are they going to find the editor features !?
