@@ -84,22 +84,20 @@ var log; // Using small caps because it looks and feels better
 
 (function() {
 	// Make sure we are in the server directory
-	var dir = process.cwd();
-	var folders = dir.split(/\/|\\/);
-	var lastFolder = folders[folders.length-1];
+	var workingDirectory = process.cwd();
+	var serverDirectory = __dirname;
+	console.log('Working directory: ' + workingDirectory);
 	
-	//console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
-	
-	if(lastFolder != "server") {
+	if(workingDirectory != serverDirectory) {
 		try {
-			process.chdir(__dirname);
-			//console.log('New directory: ' + process.cwd());
+			process.chdir(serverDirectory);
+			console.log('Changed working directory to ' + process.cwd());
 		}
 		catch (err) {
-			console.log('chdir: ' + err);
+			console.log('Unable to change working directory! chdir: ' + err);
 		}
-		
-	}
+		}
+	
 })();
 
 
