@@ -73,9 +73,12 @@ function getPassword(callback) {
 }
 
 function hash(pw) {
-	console.log("hasing: " + pw);
+	//console.log("hasing: " + pw);
 	
 console.time("Time taken");
-	console.log(pwHash(pw));
+	var hash = pwHash(pw);
 console.timeEnd("Time taken");
+	
+	console.log("Hash: " + hash);
+	console.log("echo -n " + hash + " > $HOME/.jzeditpw");
 }

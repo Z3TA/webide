@@ -622,11 +622,11 @@ function main() {
 	}
 	
 	if(NO_CHROOT && !USERNAME && CURRENT_USER) {
-		var homeDir = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".jzeditpw");
-		module_fs.readFile(homeDir, "utf8", function(err, data) {
-			if(err.code == "ENOENT") {
-				log("Did not find " + homeDir, NOTICE);
-				log("Please specify username and password in argv!", NOTICE);
+		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".jzeditpw");
+		module_fs.readFile(passwordFile, "utf8", function(err, data) {
+			if(err && err.code == "ENOENT") {
+				log("Did not find " + passwordFile, NOTICE);
+				log("Please specify --username=user and --password=pw in argv!\nOr use ./hashPw.js to generate a password hash and save it in " + passwordFile + "", NOTICE);
 				process.exit();
 			}
 		});
@@ -1416,12 +1416,17 @@ function sockJsConnection(connection) {
 							}
 						}
 						
-						module_fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
+						var passwordFile = UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]);
+						module_fs.readFile(passwordFile, "utf8", function readPw(err, pwstringFromFile) {
 							if(err) {
 								console.error(err);
 								idFail(err.message);
 							}
 							else {
+								if(pwstringFromFile.slice(-1) == "\n") {
+									log("Ignoring line-feed in " + passwordFile + "", DEBUG);
+									pwstringFromFile = pwstringFromFile.slice(0, -1);
+								}
 								if(password == pwstringFromFile) idSuccess();
 								else {
 									idFail("Wrong password for user: " + username);
