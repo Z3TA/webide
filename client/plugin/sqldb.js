@@ -16,15 +16,33 @@
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			menuItem = EDITOR.addMenuItem("Database manager", showDbManager, 20);
 			
+			EDITOR.on("fileOpen", sqlFileMaybe);
+			
 },
 		unload: function unloadSqldb() {
+			
+			EDITOR.removeMenuItem(menuItem);
+			
+			if(dbManagerWidget) dbManagerWidget.unload();
+			
+			EDITOR.removeEvent("fileOpen", sqlFileMaybe);
+			
 		}
 	});
+	
+	function sqlFileMaybe(file) {
+		
+		var ext = UTIL.getFileExtension(file.path);
+		
+		if(ext.match(/sql/i)) showDbManager();
+		
+		//return ALLOW_DEFAULT;
+	}
 	
 	function showDbManager() {
 		EDITOR.hideMenu();
 		
-		if(dbManagerWidget.visible) return hideDbManger();
+		//if(dbManagerWidget.visible) return hideDbManger();
 		
 		dbManagerWidget.show();
 		EDITOR.updateMenuItem(menuItem, true);
