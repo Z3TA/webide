@@ -2,6 +2,8 @@
 	
 	Idea: Show a vertical line for when you should break the text for it to not go outside the paper when printed
 	
+	Idea: Able to select which renders to use via check boxes
+	
 */
 
 (function() {
