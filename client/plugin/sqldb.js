@@ -18,6 +18,9 @@
 			
 			EDITOR.on("fileOpen", sqlFileMaybe);
 			
+			var char_Esc = 27;
+			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
+			
 },
 		unload: function unloadSqldb() {
 			
@@ -26,6 +29,8 @@
 			if(dbManagerWidget) dbManagerWidget.unload();
 			
 			EDITOR.removeEvent("fileOpen", sqlFileMaybe);
+			
+			EDITOR.unbindKey(hideDbManager);
 			
 		}
 	});
@@ -36,21 +41,22 @@
 		
 		if(ext.match(/sql/i)) showDbManager();
 		
-		//return ALLOW_DEFAULT;
 	}
 	
 	function showDbManager() {
 		EDITOR.hideMenu();
 		
-		//if(dbManagerWidget.visible) return hideDbManger();
+		//if(dbManagerWidget.visible) return hideDbManager();
 		
 		dbManagerWidget.show();
 		EDITOR.updateMenuItem(menuItem, true);
 	}
 	
-	function hideDbManger() {
+	function hideDbManager() {
 		dbManagerWidget.hide();
 		EDITOR.updateMenuItem(menuItem, false);
+		
+		return ALLOW_DEFAULT;
 	}
 	
 	function buildDbManager() {
@@ -95,7 +101,7 @@
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
 		cancelButton.innerText = "Cancel";
-		cancelButton.onclick = hideDbManger;
+		cancelButton.onclick = hideDbManager;
 		holder.appendChild(cancelButton);
 		
 		/*

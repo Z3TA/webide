@@ -29,13 +29,6 @@ What I'm working on
 
 
 
-Automatically show database manager plugin when a .sql file is opened
-
-Able to cancel when clicking create database in database manager
-
-
-
-
 Writing a guide on how to make a survey
 
 

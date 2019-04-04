@@ -79,7 +79,7 @@ function connect(username, database, callback) {
 	var socket = "/sock/mysql";
 	
 	module_fs.stat(socket, function(err, stats) {
-		if(err && err.code == "ENOENT") return callback(new Error("Can not find " + socket + ". MySQL is probably not installed on configured on this server. See mySQL section in README.txt for more info."));
+		if(err && err.code == "ENOENT") return callback(new Error("Can not find " + socket + ". MySQL is probably not installed or configured on this server. See mySQL section in README.txt for more info."));
 		else if(err) throw err;
 		
 		console.log(JSON.stringify(stats, null, 2));
