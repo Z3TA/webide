@@ -924,7 +924,7 @@ var fileName; // File name for this socket
 					
 					if(strBuffer.charAt(strBuffer.length-1) == EOF) {
 						strBuffer = strBuffer.slice(0, -1);
-						console.log("Recieved content (" + strBuffer.length + ") for " + fileName);
+						console.log("Recieved content (" + strBuffer.length + " bytes) for " + fileName);
 						
 						var msg = JSON.stringify({remoteFile: {fileName: fileName, content: strBuffer}}); // Serialize
 						sendToAll(client_connections, msg);
@@ -959,7 +959,7 @@ var fileName; // File name for this socket
 		}
 		
 		function remoteFileSocketEnd(endData) {
-			if(endData.length > 0) {
+			if(endData && endData.length > 0) {
 strBuffer += decoder.write(endData);
 				if(fileName == "STDIN") sendToStdin();
 			}
@@ -977,22 +977,20 @@ strBuffer += decoder.write(endData);
 		
 		function findClients(username) {
 			var clients = USER_CONNECTIONS[username];
-			
+			var users = Object.keys(USER_CONNECTIONS);
+
 			if(!clients && username == "root" && USER_CONNECTIONS.hasOwnProperty("admin")) {
 clients = USER_CONNECTIONS["admin"];
 				username = "admin";
 			}
 			
-			if(!clients && username == CURRENT_USER) {
-				var objKeys = Object.keys(USER_CONNECTIONS);
-				if(objKeys.length == 1) {
-					console.log("Assuming " + objKeys[0] + " == " + CURRENT_USER);
-					clients = USER_CONNECTIONS[ objKeys[0] ];
-				}
+			if(!clients && username == CURRENT_USER && users.length == 1) {
+				console.log("Assuming " + users[0] + " == " + CURRENT_USER);
+				clients = USER_CONNECTIONS[ users[0] ];
 			}
 			
 			if(!clients) {
-				log("Unable to find a connected client for username=" + username + "! Aborting remote file transfer!", NOTICE);
+				log("Unable to find a connected client for username=" + username + "! Aborting remote file transfer! Currently logged in users: " + JSON.stringify(users), NOTICE);
 				socket.destroy();
 			}
 			
