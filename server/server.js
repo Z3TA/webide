@@ -20,6 +20,8 @@ var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "adm
 
 var STDIN_PORT = DEFAULT.stdin_channel_port;
 
+var REMOTE_FILE_PORT =  getArg(["remote-file-port", "remote-file-port"]) || DEFAULT.remote_file_port || 8080;
+
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
 var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
 var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
@@ -49,6 +51,8 @@ var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);
 
 var MYSQL_PORT = getArg(["mysql", "mysql-port", "mysql-unix-socket"]) || "/var/run/mysqld/mysqld.sock";
+
+var EOF = String.fromCharCode(3);
 
 // Log levels
 var ERROR = 3;
@@ -193,6 +197,9 @@ var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order t
 var stdinChannelBuffer = "";
 var editorProcessArguments = "";
 var STDOUT_SOCKETS = [];
+
+var REMOTE_FILE_SOCKETS = {}; // username:fileName=socket
+var NO_REMOTE_FILES = getArg(["no-remote", "no-remote", "no-remote-files"]) || false;
 
 var mysqlConnection;
 
@@ -731,6 +738,8 @@ function main() {
 			broadcast(HTTP_IP);
 		}
 		
+		if(!NO_REMOTE_FILES) openRemoteFileServer();
+		
 	}
 }
 
@@ -831,6 +840,194 @@ function openStdinChannel() {
 	function stdEnd(endData) {
 		if(endData) sendOrBuffer(decoder.write(endData));
 		console.log("STDIN: END: endData.length=" + (endData && endData.length) );
+	}
+	
+	
+}
+
+function openRemoteFileServer() {
+	/*
+		Enable users to write
+		sudo jzeditr /path/to/file
+		while ssh:ed into a server
+		and the file will open in the editor client,
+		then sent back when saved.
+	*/
+	
+	var StringDecoder = module_string_decoder.StringDecoder;
+	var stdInFileName = "stdin";
+	
+	var remoteFileServer = module_net.createServer();
+	
+	remoteFileServer.on("listening", function stdinServerListening() {
+		log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
+	});
+	
+	remoteFileServer.on("connection", function stdinConnection(socket) {
+		log("Remote file server connection !");
+		
+		var decoder = new StringDecoder('utf8');
+		var username; // username for this socket
+var fileName; // File name for this socket
+		var strBuffer = "";
+		var content = "";
+		var client_connections; // Client connections for this file transfer session
+		var metadataFound = false;
+		var fileContentReceived = false;
+		
+		socket.on("data", remoteFileSocketData);
+		socket.on("end", remoteFileSocketEnd);
+		socket.on("close", remoteFileSocketClose);
+		
+		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
+		socket.on("error", remoteFileSocketError);
+		
+		function remoteFileSocketData(data) {
+			// The data will always start with username, linbreak, filename || STDIN, linebreak. 
+			
+			console.log("Remote file socket received " + data.length + " bytes of data ...");
+			
+			if(fileContentReceived) {
+				log("Received data after file content EOF! data=" + data + " Destroying socket!", WARN);
+				socket.destroy();
+				return;
+			}
+			
+			strBuffer += decoder.write(data);
+			
+			if(!username) username = findMetaData();
+			if(!fileName) fileName = findMetaData();
+			
+			if(username && fileName) {
+				
+				if(!metadataFound) {
+					metadataFound = true;
+					client_connections = findClients(username);
+					if(!client_connections) return;
+					
+					if(!REMOTE_FILE_SOCKETS.hasOwnProperty(username)) REMOTE_FILE_SOCKETS[username] = {};
+					
+					if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) {
+						log("An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
+						REMOTE_FILE_SOCKETS[username][fileName].close();
+					}
+					
+					REMOTE_FILE_SOCKETS[username][fileName] = socket;
+				}
+				
+				if(fileName == "STDIN") {
+					// We are receiving a stdin stream
+					sendToStdin();
+				}
+				else {
+					// We are receiving file conent
+					
+					if(strBuffer.charAt(strBuffer.length-1) == EOF) {
+						strBuffer = strBuffer.slice(0, -1);
+						console.log("Recieved content (" + strBuffer.length + ") for " + fileName);
+						
+						var msg = JSON.stringify({remoteFile: {fileName: fileName, content: strBuffer}}); // Serialize
+						sendToAll(client_connections, msg);
+						fileContentReceived = true;
+						// We want to keep the connection open, so we can send back the content when it's saved!
+						
+					}
+					else console.log("Waiting for file content ...");
+				}
+			}
+			
+			function findMetaData() {
+				// Look for a linebreak
+				var lbIndex = strBuffer.indexOf("\n");
+				if(lbIndex != -1) {
+					var value = strBuffer.slice(0, lbIndex);
+					console.log("found value=" + UTIL.lbChars(value));
+					strBuffer = strBuffer.slice(lbIndex+1); // Cut out the value
+					return value;
+				}
+				return null;
+			}
+			
+		}
+		
+		function sendToStdin() {
+			var msg = JSON.stringify({stdin: strBuffer}); // Serialize
+			
+			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
+			sendToAll(client_connections, msg);
+			strBuffer = ""; // Clear the buffer
+		}
+		
+		function remoteFileSocketEnd(endData) {
+			if(endData.length > 0) {
+strBuffer += decoder.write(endData);
+				if(fileName == "STDIN") sendToStdin();
+			}
+			console.log("remoteFileSocketEnd: endData.length=" + (endData && endData.length) );
+		}
+		
+		function remoteFileSocketError(err) {
+			console.log("Remote file socket server error: " + err.message);
+		}
+		
+		function remoteFileSocketClose(hadError) {
+			console.log("Remote file socket closed. hadError=" + hadError);
+			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
+		}
+		
+		function findClients(username) {
+			var clients = USER_CONNECTIONS[username];
+			
+			if(!clients && username == "root" && USER_CONNECTIONS.hasOwnProperty("admin")) {
+clients = USER_CONNECTIONS["admin"];
+				username = "admin";
+			}
+			
+			if(!clients && username == CURRENT_USER) {
+				var objKeys = Object.keys(USER_CONNECTIONS);
+				if(objKeys.length == 1) {
+					console.log("Assuming " + objKeys[0] + " == " + CURRENT_USER);
+					clients = USER_CONNECTIONS[ objKeys[0] ];
+				}
+			}
+			
+			if(!clients) {
+				log("Unable to find a connected client for username=" + username + "! Aborting remote file transfer!", NOTICE);
+				socket.destroy();
+			}
+			
+			return clients;
+		}
+		
+	});
+	
+	
+	remoteFileServer.on("error", function stdSocketError(err) {
+		console.warn("Remote file server error: " + err.message);
+	});
+	
+	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
+	// Listen on all IP's so that we can get files from anywhere ...
+	
+	
+	function sendToAll(user_connections, data) {
+		for (var i=0, conn; i<user_connections.connections.length; i++) {
+			user_connections.connections[i].write(data);
+		}
+	}
+	
+	function sendOrBuffer(str) {
+		client_connections = USER_CONNECTIONS[USERNAME];
+		
+		if(client_connections) {
+			var data = JSON.stringify({stdin: str}); // Serialize
+			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
+			sendToAll(client_connections, data);
+		}
+		else {
+			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
+			stdinChannelBuffer += str;
+		}
 	}
 	
 	
@@ -1637,6 +1834,21 @@ function sockJsConnection(connection) {
 											send(obj, USER_CONNECTIONS[userConnectionName].connections[i]);
 										}
 									}
+								}
+								else if(workerMessage.remoteFile) {
+									var fileName = workerMessage.remoteFile.name;
+									if( REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
+										var socket = REMOTE_FILE_SOCKETS[username][fileName];
+										if(workerMessage.remoteFile.save) {
+											// File saved
+											socket.send(workerMessage.remoteFile.content);
+										}
+										if(workerMessage.remoteFile.close) {
+											// File closed
+											socket.destroy();
+										}
+									}
+									else workerResp("No socket found for fileName= " + workerMessage.remoteFile.fileName);
 								}
 								else if(workerMessage.done) { // Not used! Saved if we need it in the future
 									if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {

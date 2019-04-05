@@ -1,0 +1,396 @@
+#!/usr/bin/env node
+
+/*
+	
+	For editing files remotely. For example when ssh:ed into a server:
+	sudo jzeditr /path/to/file
+	
+	
+*/
+
+var DEFAULT_PORT = 8080;
+
+var EOF = String.fromCharCode(3);
+
+var module_os = require("os");
+var module_string_decoder = require('string_decoder');
+var module_net = require("net");
+
+var homeDir = module_os.homedir();
+
+var settingsFileLocation1 = "/root/.jzedit/jzeditr.json";
+var settingsFileLocation2 = homeDir + "/.jzedit/jzeditr.json";
+
+var module_fs = require("fs");
+
+parseArguments(process.argv);
+
+function findSettings(settings) {
+	
+	console.log("findSettings: settings=" + JSON.stringify(settings));
+	
+	module_fs.readFile(settingsFileLocation1, function(err, data) {
+		
+		if(err) {
+			console.log("Unable to open settings from " + settingsFileLocation1 + " (" + err.code + ")");
+			module_fs.readFile(settingsFileLocation2, function(err, data) {
+				if(err) {
+					console.log("Unable to open settings from " + settingsFileLocation2 + " (" + err.code + ")");
+					
+					ask("Host name or IP of JZedit instance", "localhost", function(err, answer) {
+						if(err) throw err;
+						
+						settings.host = answer;
+						
+						ask("What tcp Port to connect to", DEFAULT_PORT, function(err, answer) {
+							if(err) throw err;
+							
+							settings.port = answer;
+							
+							ask("Save settings? [yN]", "Y", function(err, answer) {
+								if(err) throw err;
+								
+								if(answer.match(/y|yes/i)) saveSettings(settings);
+								
+								dance(settings);
+							});
+							
+						});
+					});
+				}
+				else if(err) throw err;
+				else {
+					console.log("Successfully loaded settings from " + settingsFileLocation2);
+					parseSettings(data, settings, settingsFileLocation2);
+				}
+			});
+		}
+		else if(err) throw err;
+		else {
+			console.log("Successfully loaded settings from " + settingsFileLocation1);
+			parseSettings(data, settings, settingsFileLocation1);
+		}
+	});
+}
+
+function saveSettings(settings) {
+	console.log("Saving settings ...");
+	
+	delete settings.filePath;
+	
+	save(settingsFileLocation1, function(err1) {
+		if(err1) save(settingsFileLocation2, function(err2) {
+			if(err2) console.log("Unable to save settings!\n" + err1.message + "\n" + err2.message);
+		});
+	});
+	
+	function save(path, saveCallback) {
+		var pathDelimiter = "/";
+		var folder = path.slice(0, path.lastIndexOf(pathDelimiter));
+		// Make sure the folder exist
+		module_fs.mkdir(folder, function(err) {
+			if(err && err.code == "EEXIST") err = null;
+			
+			if(err) return saveCallback(err);
+			
+			var data = JSON.stringify(settings, null, 2) + "\n";
+			
+			module_fs.writeFile(path, data, function(err) {
+				if(!err) console.log("Successfully saved settings in " + path);
+				
+				saveCallback(err);
+			});
+		});
+	}
+}
+
+
+function parseSettings(data, settings, fromFile) {
+	try {
+		var json = JSON.parse(data);
+	}
+	catch(err) {
+		console.warn("Unable to parse settings from " + fromFile + " data=" + data + " error: " + err.message);
+		return findSettings();
+	}
+	
+	for(var prop in json) {
+		settings[prop] = json[prop];
+	}
+	
+	gotSettings(settings, fromFile);
+}
+
+function gotSettings(settings, settingsFile) {
+	if(typeof settings != "object") throw new Error("Expected a settings object! settings=" + settings);
+
+	if(settings.filePath && settingsFile) console.warn("Path to file (" + settings.filePath + ") saved in: " +  settingsFile);
+	
+	console.log("Got settings: " + JSON.stringify(settings));
+	
+	if(!settings.host) return ask("Host name or IP of JZedit instance", function(err, answer) {
+		if(err) throw err;
+		
+		settings.host = answer;
+
+		dance(settings);
+	});
+	
+	dance(settings);
+}
+
+function ask(question, defaultAnswer, callback) {
+	
+	if(typeof defaultAnswer == "function" && callback == undefined) {
+		callback = defaultAnswer;
+		defaultAnswer = undefined;
+	}
+	
+	var BACKSPACE = String.fromCharCode(127);
+	
+	var prompt = question + ": ";
+	
+	var answer = "";
+	if(defaultAnswer) {
+		answer = defaultAnswer;
+	}
+	
+	var stdin = process.stdin;
+	stdin.resume();
+	stdin.setRawMode(true);
+	stdin.resume();
+	stdin.setEncoding('utf8');
+	
+	stdin.on('data', stdinData);
+	
+	write();
+	
+	
+	function stdinData(ch) {
+		ch = ch.toString('utf8');
+		
+		switch (ch) {
+			case "\n":
+			case "\r":
+			case "\u0004":
+			// finished typing
+			process.stdout.write('\n');
+			stdin.setRawMode(false);
+			stdin.pause();
+			stdin.removeListener("data", stdinData);
+			callback(null, answer);
+			callback = null;
+			break;
+			
+			case "\u0003":
+			// Ctrl-C
+			console.log("\n");
+			process.exit(1);
+			break;
+			
+			case BACKSPACE:
+			answer = answer.slice(0, answer.length - 1);
+			write();
+			break;
+			
+			default:
+			// More characters
+			answer += ch;
+			process.stdout.write(ch);
+			break;
+		}
+	}
+	
+	function write() {
+		
+		process.stdout.clearLine();
+		process.stdout.cursorTo(0);
+		process.stdout.write(prompt + answer);
+		// gotcha: can't have two stdout.write after each other. Only the first will be visible
+	}
+	
+}
+
+function parseArguments(args) {
+	
+	var host, port;
+	
+	// First item is path to nodejs
+	args.shift();
+	
+	var scriptPath = args.shift();
+	
+	parse();
+	
+	var filePath = args.join(" ").trim();
+	
+	console.log("filePath=" + filePath + "");
+	
+	if(filePath.length > 0 && filePath.charAt(0) != "/") {
+		// Resolve path
+		var module_path = require("path");
+		var workingDir = process.cwd();
+		var filePath = module_path.resolve(workingDir, filePath);
+	}
+	
+	console.log("filePath=" + filePath + "");
+	
+	var settings = {};
+
+	if(host) settings.host = host;
+	if(port) settings.port = port;
+if(filePath) settings.filePath = filePath;
+
+	if(!host) {
+		console.log("Looking up host and port from settings file(s) because it was not specified in arguments ...");
+		findSettings(settings);
+	}
+	else gotSettings(settings, true);
+	
+	function parse() {
+		for (var i=0; i<args.length; i++) {
+			if(args[i] == "-h") {
+				host = args[i+1];
+				if(!host) throw new Error("Expected a hostname or ip after -h");
+				args.splice(i, 2);
+				return parse(args);
+			}
+			else if(args[i] == "-p") {
+				port = args[i+1];
+				if(!port) throw new Error("Expected a port nr after -p");
+				args.splice(i, 2);
+				return parse(args);
+			}
+			
+		}
+	}
+	
+}
+
+function dance(settings) {
+	
+	var connection;
+	
+	var connected = false;
+	
+	var StringDecoder = module_string_decoder.StringDecoder;
+	var strBuffer = "";
+	var fileContent;
+	
+	if(!settings.host) throw new Error("No host in settings!");
+	
+	if(!settings.port) {
+console.log("Using default port " + DEFAULT_PORT);
+		settings.port = DEFAULT_PORT;
+	}
+	
+	if(settings.filePath) {
+		console.log("Opening file: " + settings.filePath + " ...");
+		
+		// Streams are really complicated! Open large files with scp instead.
+		// Assuming only small config files
+		// todo: Make sure the file is not too big!? then say "use scp instead"?
+		
+		module_fs.readFile(settings.filePath, function(err, data) {
+			if(err) return console.log(err.message);
+			fileContent = data;
+			conn();
+		});
+		
+	}
+	else {
+		console.warn("File path not specified! process.argv=" + JSON.stringify(process.argv) + " stdin will be streamed ...");
+		
+		conn();
+	}
+	
+	function conn() {
+		console.log("Conneting to " + settings.host + " on port " + settings.port + " ...");
+		
+		if(connection) throw new Error("We already have a connection!");
+		
+		/*
+			Will NodeJS keep the connection open for us, or do we have to send junk ?
+		*/
+		
+		connection = module_net.createConnection({port: settings.port});
+		connection.on("error", connectionError);
+		connection.on("connect", connectionConnected);
+		connection.on("close", connectionClosed);
+		connection.on("data", connectionData);
+		
+		
+	}
+	
+	function connectionError(err) {
+		console.log(  "Connection error: " + (err && (err.message || err) )  );
+		process.exit(1);
+	}
+	
+	function connectionConnected() {
+		connected = true;
+		console.log("Connected to editor server !");
+		
+		// When connecting we Must always send our username, and name of file
+		var username = module_os.userInfo().username;
+		connection.write(username + "\n");
+		
+		if(settings.filePath) {
+			connection.write(settings.filePath + "\n");
+			
+			connection.write(fileContent + EOF);
+			
+		}
+		else {
+			// Send stdin
+			connection.write("STDIN\n");
+			
+			//if(stdinData.length > 0) connection.write(stdinData);
+			//else console.log("No initial stdinData to send");
+			
+			// hmm, will we miss early data to stdin because we are late with the pipe !?
+			
+			console.log("Streaming stdin to editor ...");
+			var stdinStream = process.stdin;
+			stdinStream.pipe(connection);
+			// When piping, the socket will automatically end when the piped stream end!
+			
+		}
+	}
+	
+	function connectionClosed(hadError) {
+		console.log("connection closed. hadError=" + hadError);
+	}
+	
+	function connectionData(data) {
+		/*
+			Some programs like "crontab -e" assumes we are done when exiting ...
+			Solution: Keep the program running, and don't exit until we get a notice that the file has been closed
+		*/
+		
+		console.log("Recived " + data.length + " bytes ...");
+		
+		if(strBuffer == "") {
+			// Create a new string decoder
+			var decoder = new StringDecoder('utf8');
+		}
+		
+		strBuffer += decoder.write(data);
+		
+		if(strBuffer.charAt(strBuffer.length-1) == EOF) {
+			strBuffer = strBuffer.slice(0, -1);
+			console.log("Recieved content (" + strBuffer.length + ") for " + settings.filePath);
+			
+			module_fs.writeFile(settings.filePath, strBuffer, function(err) {
+				if(err) throw err;
+			});
+			
+			// Reset the buffer, so we can get the file content again.
+			strBuffer = "";
+			
+			// Connection will be kept open until we close the file in the editor
+			
+		}
+	}
+}
+
