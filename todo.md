@@ -27,6 +27,8 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+test on KaiOS
+
 todo: Implement client plugin to handle remoteFile.
 and user working to handle saving, and close when closing
 

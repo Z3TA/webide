@@ -4140,7 +4140,7 @@ var word = "";
 	
 	EDITOR.bindKey = function(b) {
 		
-		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
+		if(b.charCode != undefined && isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
 		if(!b.desc) UTIL.getStack("Key binding should have a description!");
@@ -7780,7 +7780,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 					" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
 				*/
 				
-				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+				if( (binding.char == character || binding.charCode == charCode || binding.key ==  keyDownEvent.key) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 					
 					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
 						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
@@ -7801,7 +7801,7 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 						
 						if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 							preventDefault = true;
-							console.log("keyIsDown: Default browser action prevented by key binding" + UTIL.getFunctionName(binding.fun) + "!");
+							console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
 						}
 						else if(funReturn !== true) {
 							throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
