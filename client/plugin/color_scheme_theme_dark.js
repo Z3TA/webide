@@ -15,13 +15,13 @@
 	
 	window.addEventListener("load", function figureTheme() {
 		var themeFromCss = window.getComputedStyle(document.documentElement).getPropertyValue('content').replace(/"/g, '');
-		alertBox("themeFromCss=" + themeFromCss);
+		console.log("themeFromCss=" + themeFromCss);
 	});
 	
 	function changeWebsiteTheme(scheme) {
 		// 'dark' or 'light' string is in scheme here
 		// so the website theme can be updated
-		alertBox("changeWebsiteTheme: scheme=" + scheme);
+		console.log("changeWebsiteTheme: scheme=" + scheme);
 	}
 	
 	function detectColorScheme() {
