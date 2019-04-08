@@ -79,7 +79,7 @@
 			var fileName = UTIL.getPathFromUrl(file.path);
 			
 			CLIENT.cmd("remoteFile", {name: fileName, close: true}, function(err) {
-				if(err) alertBox("Remote socket error: " + err.message);
+				if(err) console.warn("Remote socket error: " + err.message);
 		});
 		}
 		else if(file.path.indexOf("remote://") == 0) {
