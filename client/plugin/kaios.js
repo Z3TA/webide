@@ -22,12 +22,9 @@ https://developer.kaiostech.com/simulator
 		
 	}
 	
-	
-	
-	alertBox("KaiOS");
-	
 	function focusNextElement() {
-//add all elements we want to include in our selection
+		alertBox("KaiOS");
+		//add all elements we want to include in our selection
 var focussableElements = 'a:not([disabled]), button:not([disabled]), input[type=text]:not([disabled]), [tabindex]:not([disabled]):not([tabindex="-1"])';
 if (document.activeElement && document.activeElement.form) {
 var focussable = Array.prototype.filter.call(document.activeElement.form.querySelectorAll(focussableElements), function (element) {
@@ -44,7 +41,9 @@ nextElement.focus();
 		return PREVENT_DEFAULT;
 }
 
-	
+	/*
+		
+		
 	var allowedTags = {input: true, textarea: true, button: true};
 	
 	var walker = document.createTreeWalker(document.body,NodeFilter.SHOW_ELEMENT, {acceptNode: acceptNode}, false);
@@ -64,10 +63,8 @@ nextElement.focus();
 		else
 			NodeFilter.FILTER_SKIP;
 	}
+	*/
+
 	
-}
-
-
-
 
 })();
