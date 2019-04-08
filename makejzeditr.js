@@ -11,7 +11,9 @@ var result = UglifyJS.minify(content, {
 		keep_fnames: false,
 		compress:{
 			pure_funcs: [ 'console.log', 'console.warn' ]
-		}
+		},
+		mangle: true,
+		toplevel: true
 	});
 	if (result.error) {
 		console.log(content);
