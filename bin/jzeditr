@@ -388,7 +388,7 @@ console.log("Using default port " + DEFAULT_PORT);
 			// Reset the buffer, so we can get the file content again.
 			strBuffer = "";
 			
-			// Connection will be kept open until we close the file in the editor
+			// Connection will be kept open until the file is closed in the editor
 			
 		}
 	}

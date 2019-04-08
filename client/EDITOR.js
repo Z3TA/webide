@@ -1504,8 +1504,8 @@ usePseudoClipboard = false;
 					if(callback) callback( new Error(fName + " prevented file from being saved!") );
 					return;
 				}
-				else if ( returns[fName] === ALLOW_DEFAULT ) {
-					var error = new Error(fName + " did not return ALLOW_DEFAULT=" + ALLOW_DEFAULT + " or PREVENT_DEFAULT=" + PREVENT_DEFAULT + " !");
+				else if ( returns[fName] !== ALLOW_DEFAULT ) {
+					var error = new Error(fName + " returned " + returns[fName] + ". Expected ALLOW_DEFAULT=" + ALLOW_DEFAULT + " or PREVENT_DEFAULT=" + PREVENT_DEFAULT + " !");
 					console.warn(error.message);
 				}
 			}

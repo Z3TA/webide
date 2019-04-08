@@ -920,6 +920,7 @@ var fileName; // File name for this socket
 					}
 					
 					REMOTE_FILE_SOCKETS[username][fileName] = socket;
+					log("Added socket to username=" + username + " fileName=" + fileName);
 				}
 				
 				if(fileName == "STDIN") {
@@ -982,16 +983,16 @@ strBuffer += decoder.write(endData);
 			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
 		}
 		
-		function findClients(username) {
-			var clients = USER_CONNECTIONS[username];
+		function findClients(name) {
+			var clients = USER_CONNECTIONS[name];
 			var users = Object.keys(USER_CONNECTIONS);
 
-			if(!clients && username == "root" && USER_CONNECTIONS.hasOwnProperty("admin")) {
+			if(!clients && name == "root" && USER_CONNECTIONS.hasOwnProperty("admin")) {
 clients = USER_CONNECTIONS["admin"];
 				username = "admin";
 			}
 			
-			if(!clients && username == CURRENT_USER && users.length == 1) {
+			if(!clients && name == CURRENT_USER && users.length == 1) {
 				console.log("Assuming " + users[0] + " == " + CURRENT_USER);
 				clients = USER_CONNECTIONS[ users[0] ];
 				username = users[0];
@@ -1992,12 +1993,12 @@ function sockJsConnection(connection) {
 										var fileName = req.remoteFile.name;
 										
 										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
-											workerResp("No remote sockets found for username=" + username);
+											workerResp("No remote file sockets found for username=" + username);
 											log( "Users with sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
 											return;
 										}
 										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
-											workerResp("No socket found for fileName= " + fileName + " in " + username + " remote sockets.");
+											workerResp("No remote file socket found for fileName= " + fileName + "");
 											log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
 											return;
 										}
@@ -2005,12 +2006,13 @@ function sockJsConnection(connection) {
 											var socket = REMOTE_FILE_SOCKETS[username][fileName];
 											if(req.remoteFile.content) {
 												// File saved
-												socket.send(req.remoteFile.content);
+												socket.write(req.remoteFile.content + EOF);
 											}
 											if(req.remoteFile.close) {
 												// File closed
 												socket.destroy();
 											}
+											workerResp(null);
 										}
 									}
 									

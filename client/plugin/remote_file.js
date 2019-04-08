@@ -43,7 +43,7 @@
 		
 		console.log( "remoteFileSaved: file.path=" + file.path );
 		
-		console.log( "remoteFileSaved: remoteFiles=" + JSON.stringify(remoteFiles) );
+		console.log( "remoteFileSaved: remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) );
 		
 		if(remoteFiles.indexOf(file) != -1) {
 
@@ -51,6 +51,10 @@
 			
 			CLIENT.cmd("remoteFile", {name: fileName, content: file.text}, function(err) {
 				if(err) alertBox("Failed to save remote file " + fileName + ".\nError: " + err.message);
+			
+				console.log( "remoteFileSaved: Data sent to remote host!" );
+				
+				file.saved();
 			});
 
 return PREVENT_DEFAULT;
