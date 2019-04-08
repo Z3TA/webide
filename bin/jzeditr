@@ -16,6 +16,8 @@ var DEFAULT_PORT = 8080;
 
 var EOF = String.fromCharCode(3);
 
+var DEBUG = false; // global flag
+
 var module_os = require("os");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
@@ -31,15 +33,15 @@ parseArguments(process.argv);
 
 function findSettings(settings) {
 	
-	console.log("findSettings: settings=" + JSON.stringify(settings));
+	debug("findSettings: settings=" + JSON.stringify(settings));
 	
 	module_fs.readFile(settingsFileLocation1, function(err, data) {
 		
 		if(err) {
-			console.log("Unable to open settings from " + settingsFileLocation1 + " (" + err.code + ")");
+			debug("Unable to open settings from " + settingsFileLocation1 + " (" + err.code + ")");
 			module_fs.readFile(settingsFileLocation2, function(err, data) {
 				if(err) {
-					console.log("Unable to open settings from " + settingsFileLocation2 + " (" + err.code + ")");
+					debug("Unable to open settings from " + settingsFileLocation2 + " (" + err.code + ")");
 					
 					ask("Host name or IP of JZedit instance", "localhost", function(err, answer) {
 						if(err) throw err;
@@ -64,21 +66,21 @@ function findSettings(settings) {
 				}
 				else if(err) throw err;
 				else {
-					console.log("Successfully loaded settings from " + settingsFileLocation2);
+					debug("Successfully loaded settings from " + settingsFileLocation2);
 					parseSettings(data, settings, settingsFileLocation2);
 				}
 			});
 		}
 		else if(err) throw err;
 		else {
-			console.log("Successfully loaded settings from " + settingsFileLocation1);
+			debug("Successfully loaded settings from " + settingsFileLocation1);
 			parseSettings(data, settings, settingsFileLocation1);
 		}
 	});
 }
 
 function saveSettings(settings) {
-	console.log("Saving settings ...");
+	debug("Saving settings ...");
 	
 	var settingsCopy = {};
 	for (var prop in settings) {
@@ -104,7 +106,7 @@ function saveSettings(settings) {
 			var data = JSON.stringify(settingsCopy, null, 2) + "\n";
 			
 			module_fs.writeFile(path, data, function(err) {
-				if(!err) console.log("Successfully saved settings in " + path);
+				if(!err) debug("Successfully saved settings in " + path);
 				
 				saveCallback(err);
 			});
@@ -127,16 +129,14 @@ function parseSettings(data, settings, fromFile) {
 	}
 	
 	if(fromFile) settings.loadedFrom = fromFile;
-		
+	
 	gotSettings(settings, fromFile);
 }
 
 function gotSettings(settings, settingsFile) {
 	if(typeof settings != "object") throw new Error("Expected a settings object! settings=" + settings);
 
-	if(settings.filePath && settingsFile) console.warn("Path to file (" + settings.filePath + ") saved in: " +  settingsFile);
-	
-	console.log("Got settings: " + JSON.stringify(settings));
+	debug("Got settings: " + JSON.stringify(settings));
 	
 	if(!settings.host) return ask("Host name or IP of JZedit instance", function(err, answer) {
 		if(err) throw err;
@@ -234,7 +234,7 @@ function parseArguments(args) {
 	
 	var filePath = args.join(" ").trim();
 	
-	console.log("filePath=" + filePath + "");
+	debug("filePath=" + filePath + "");
 	
 	if(filePath.length > 0 && filePath.charAt(0) != "/") {
 		// Resolve path
@@ -243,7 +243,7 @@ function parseArguments(args) {
 		var filePath = module_path.resolve(workingDir, filePath);
 	}
 	
-	console.log("filePath=" + filePath + "");
+	debug("Resolved filePath=" + filePath + "");
 	
 	var settings = {};
 
@@ -253,7 +253,7 @@ if(filePath) settings.filePath = filePath;
 	if(!username) settings.username = username;
 
 	if(!host) {
-		console.log("Looking up host and port from settings file(s) because it was not specified in arguments ...");
+		debug("Looking up host and port from settings file(s) because it was not specified in arguments ...");
 		findSettings(settings);
 	}
 	else gotSettings(settings, true);
@@ -278,11 +278,17 @@ if(filePath) settings.filePath = filePath;
 				args.splice(i, 2);
 				return parse(args);
 			}
+			else if(args[i] == "-debug") {
+				DEBUG = true
+				args.splice(i, 1);
+				return parse(args);
+			}
+			
 			
 		}
 	}
-	
-}
+	}
+
 
 function dance(settings) {
 	
@@ -291,18 +297,19 @@ function dance(settings) {
 	var connected = false;
 	
 	var StringDecoder = module_string_decoder.StringDecoder;
+	var decoder;
 	var strBuffer = "";
 	var fileContent;
 	
 	if(!settings.host) throw new Error("No host in settings!");
 	
 	if(!settings.port) {
-console.log("Using default port " + DEFAULT_PORT);
+		debug("Using default port " + DEFAULT_PORT);
 		settings.port = DEFAULT_PORT;
 	}
 	
 	if(settings.filePath) {
-		console.log("Opening file: " + settings.filePath + " ...");
+		debug("Opening file: " + settings.filePath + " ...");
 		
 		// Streams are really complicated! Open large files with scp instead.
 		// Assuming only small config files
@@ -325,7 +332,7 @@ console.log("Using default port " + DEFAULT_PORT);
 	}
 	
 	function conn() {
-		console.log("Conneting to " + settings.host + " on port " + settings.port + " ...");
+		debug("Conneting to " + settings.host + " on port " + settings.port + " ...");
 		
 		if(connection) throw new Error("We already have a connection!");
 		
@@ -355,7 +362,7 @@ console.log("Using default port " + DEFAULT_PORT);
 	
 	function connectionConnected() {
 		connected = true;
-		console.log("Connected to editor server !");
+		debug("Connected to editor server !");
 		
 		// When connecting we Must always send our username, and name of file
 		var username = settings.username || module_os.userInfo().username;
@@ -376,7 +383,7 @@ console.log("Using default port " + DEFAULT_PORT);
 			
 			// hmm, will we miss early data to stdin because we are late with the pipe !?
 			
-			console.log("Streaming stdin to editor ...");
+			debug("Streaming stdin to editor ...");
 			var stdinStream = process.stdin;
 			stdinStream.pipe(connection);
 			// When piping, the socket will automatically end when the piped stream end!
@@ -385,7 +392,7 @@ console.log("Using default port " + DEFAULT_PORT);
 	}
 	
 	function connectionClosed(hadError) {
-		console.log("connection closed. hadError=" + hadError);
+		debug("connection closed. hadError=" + hadError);
 	}
 	
 	function connectionData(data) {
@@ -394,22 +401,25 @@ console.log("Using default port " + DEFAULT_PORT);
 			Solution: Keep the program running, and don't exit until we get a notice that the file has been closed
 		*/
 		
-		console.log("Recived " + data.length + " bytes ...");
+		debug("Recived " + data.length + " bytes ...");
 		
 		if(strBuffer == "") {
 			// Create a new string decoder
-			var decoder = new StringDecoder('utf8');
+			decoder = new StringDecoder('utf8');
 		}
 		
 		strBuffer += decoder.write(data);
 		
 		if(strBuffer.charAt(strBuffer.length-1) == EOF) {
 			strBuffer = strBuffer.slice(0, -1);
-			console.log("Recieved content (" + strBuffer.length + " characters) for " + settings.filePath);
+			
+			var totalCharacters = strBuffer.length;
+			
+			debug("Recieved content (" + totalCharacters + " characters) for " + settings.filePath);
 			
 			module_fs.writeFile(settings.filePath, strBuffer, function(err) {
 				if(err) throw err;
-				console.log("Data written to " + settings.filePath);
+				console.log(totalCharacters + " characters written to " + settings.filePath);
 			});
 			
 			// Reset the buffer, so we can get the file content again.
@@ -419,5 +429,9 @@ console.log("Using default port " + DEFAULT_PORT);
 			
 		}
 	}
+}
+
+function debug() {
+	if(DEBUG) console.log.apply(null, arguments);
 }
 
