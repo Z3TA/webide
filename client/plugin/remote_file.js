@@ -1,5 +1,4 @@
 (function() {
-	
 	var remoteFiles = [];
 	
 	EDITOR.plugin({
@@ -51,13 +50,13 @@
 			
 			CLIENT.cmd("remoteFile", {name: fileName, content: file.text}, function(err) {
 				if(err) alertBox("Failed to save remote file " + fileName + ".\nError: " + err.message);
-			
+				else {
 				console.log( "remoteFileSaved: Data sent to remote host!" );
-				
 				file.saved();
+				}
 			});
-
-return PREVENT_DEFAULT;
+			
+			return PREVENT_DEFAULT;
 		}
 		else if(file.path.indexOf("remote://") == 0) {
 			alertBox( "Unknown remote file: " + file.path + ". remote=" + JSON.stringify(remoteFiles.map(mapPath)) );
@@ -75,11 +74,11 @@ return PREVENT_DEFAULT;
 		console.log( "remoteFileClosed: file.path=" + file.path + " index=" + index + " remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) );
 		
 		if(index != -1) {
-remoteFiles.splice(index, 1);
-		
-		var fileName = UTIL.getPathFromUrl(file.path);
-		
-		CLIENT.cmd("remoteFile", {name: fileName, close: true}, function(err) {
+			remoteFiles.splice(index, 1);
+			
+			var fileName = UTIL.getPathFromUrl(file.path);
+			
+			CLIENT.cmd("remoteFile", {name: fileName, close: true}, function(err) {
 				if(err) alertBox("Remote socket error: " + err.message);
 		});
 		}
