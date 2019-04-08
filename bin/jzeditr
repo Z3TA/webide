@@ -80,7 +80,11 @@ function findSettings(settings) {
 function saveSettings(settings) {
 	console.log("Saving settings ...");
 	
-	delete settings.filePath;
+	var settingsCopy = {};
+	for (var prop in settings) {
+		settingsCopy[prop] = settings[prop];
+	}
+	delete settingsCopy.filePath;
 	
 	save(settingsFileLocation1, function(err1) {
 		if(err1) save(settingsFileLocation2, function(err2) {
@@ -97,7 +101,7 @@ function saveSettings(settings) {
 			
 			if(err) return saveCallback(err);
 			
-			var data = JSON.stringify(settings, null, 2) + "\n";
+			var data = JSON.stringify(settingsCopy, null, 2) + "\n";
 			
 			module_fs.writeFile(path, data, function(err) {
 				if(!err) console.log("Successfully saved settings in " + path);
