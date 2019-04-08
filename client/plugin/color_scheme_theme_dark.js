@@ -1,5 +1,13 @@
 (function() {
 
+	/*
+		
+		Works on:
+		* Safari on Macbook
+		
+		
+	*/
+	
 	var DARK = '(prefers-color-scheme: dark)'
 	var LIGHT = '(prefers-color-scheme: light)'
 	
