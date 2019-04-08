@@ -5,6 +5,10 @@
 	For editing files remotely. For example when ssh:ed into a server:
 	sudo jzeditr /path/to/file
 	
+	install:
+	wget https://www.webtigerteam.com/jzedit/download/jzedit
+	chomd +x jzedit
+	sudo mv jzedit /usr/local/bin
 	
 */
 
@@ -213,7 +217,7 @@ function ask(question, defaultAnswer, callback) {
 
 function parseArguments(args) {
 	
-	var host, port;
+	var host, port, username;
 	
 	// First item is path to nodejs
 	args.shift();
@@ -240,6 +244,7 @@ function parseArguments(args) {
 	if(host) settings.host = host;
 	if(port) settings.port = port;
 if(filePath) settings.filePath = filePath;
+	if(!username) settings.username = username;
 
 	if(!host) {
 		console.log("Looking up host and port from settings file(s) because it was not specified in arguments ...");
@@ -249,15 +254,21 @@ if(filePath) settings.filePath = filePath;
 	
 	function parse() {
 		for (var i=0; i<args.length; i++) {
-			if(args[i] == "-h") {
+			if(args[i] == "-h" || args[i] == "-host") {
 				host = args[i+1];
-				if(!host) throw new Error("Expected a hostname or ip after -h");
+				if(!host) throw new Error("Expected a hostname or ip after " + args[i]);
 				args.splice(i, 2);
 				return parse(args);
 			}
-			else if(args[i] == "-p") {
+			else if(args[i] == "-p" || args[i] == "-port") {
 				port = args[i+1];
-				if(!port) throw new Error("Expected a port nr after -p");
+				if(!port) throw new Error("Expected a port nr after " + args[i]);
+				args.splice(i, 2);
+				return parse(args);
+			}
+			else if(args[i] == "-u" || args[i] == "-user") {
+				username = args[i+1];
+				if(!username) throw new Error("Expected a user name nr after " + args[i]);
 				args.splice(i, 2);
 				return parse(args);
 			}
@@ -292,7 +303,10 @@ console.log("Using default port " + DEFAULT_PORT);
 		// todo: Make sure the file is not too big!? then say "use scp instead"?
 		
 		module_fs.readFile(settings.filePath, function(err, data) {
-			if(err) return console.log(err.message);
+			if(err) {
+				console.log(err.message);
+				return;
+			}
 			fileContent = data;
 			conn();
 		});
@@ -313,7 +327,7 @@ console.log("Using default port " + DEFAULT_PORT);
 			Will NodeJS keep the connection open for us, or do we have to send junk ?
 		*/
 		
-		connection = module_net.createConnection({port: settings.port});
+		connection = module_net.createConnection({host: settings.host, port: settings.port});
 		connection.on("error", connectionError);
 		connection.on("connect", connectionConnected);
 		connection.on("close", connectionClosed);
@@ -332,7 +346,7 @@ console.log("Using default port " + DEFAULT_PORT);
 		console.log("Connected to editor server !");
 		
 		// When connecting we Must always send our username, and name of file
-		var username = module_os.userInfo().username;
+		var username = settings.username || module_os.userInfo().username;
 		connection.write(username + "\n");
 		
 		if(settings.filePath) {
@@ -379,10 +393,11 @@ console.log("Using default port " + DEFAULT_PORT);
 		
 		if(strBuffer.charAt(strBuffer.length-1) == EOF) {
 			strBuffer = strBuffer.slice(0, -1);
-			console.log("Recieved content (" + strBuffer.length + ") for " + settings.filePath);
+			console.log("Recieved content (" + strBuffer.length + " characters) for " + settings.filePath);
 			
 			module_fs.writeFile(settings.filePath, strBuffer, function(err) {
 				if(err) throw err;
+				console.log("Data written to " + settings.filePath);
 			});
 			
 			// Reset the buffer, so we can get the file content again.
