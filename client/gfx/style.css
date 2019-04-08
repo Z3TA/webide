@@ -47,6 +47,8 @@ html {
 	/* Try to prevent click delay on mobile browsers */
 	-ms-touch-action: manipulation;
 	touch-action: manipulation;
+	
+	content: "default";
 	}
 
 body {
@@ -1438,3 +1440,15 @@ div.group {
 		font-size: 16px;
 		}
 	}
+
+@media (prefers-color-scheme: light) {
+	html {
+		content: "light";
+	}
+}
+@media (prefers-color-scheme: dark) {
+	html {
+		content: "dark";
+	}
+}
+
