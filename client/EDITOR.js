@@ -1478,7 +1478,7 @@ usePseudoClipboard = false;
 		
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
-		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors) {
+		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors, returns) {
 			if(errors.length > 0) {
 				var errorMessages = [];
 				for (var i=0; i<errors.length; i++) {
@@ -1497,6 +1497,19 @@ usePseudoClipboard = false;
 			}
 			else 
 			*/
+			
+			for(var fName in returns) {
+				if( returns[fName] === PREVENT_DEFAULT ) {
+					console.warn(fName + " prevented file from being saved!");
+					if(callback) callback( new Error(fName + " prevented file from being saved!") );
+					return;
+				}
+				else if ( returns[fName] === ALLOW_DEFAULT ) {
+					var error = new Error(fName + " did not return ALLOW_DEFAULT=" + ALLOW_DEFAULT + " or PREVENT_DEFAULT=" + PREVENT_DEFAULT + " !");
+					console.warn(error.message);
+				}
+			}
+			
 			beginSaving();
 		});
 		
@@ -5302,6 +5315,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		var waitingFor = [];
 		var eventFunsCalled = 0;
 		var errors = [];
+		var returns = [];
 		var alreadyTooLate = false;
 		var eventListeners = EDITOR.eventListeners[ev];
 		var uniqueFunctionNames = [];
@@ -5330,9 +5344,11 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			var ret = fun(file, evCallback);
 			eventFunsCalled++;
 			console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
-			if(ret || ret === false || ret === null) evCallback(null);// The function did not return void, asume it's done!
+			if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
 			
-			function evCallback(err) {
+			
+			
+			function evCallback(err, ret) {
 				console.log("Got " + ev + " event callback from " + fName + " err=" + err);
 				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
 				returnedOrCalledBack.push(fName);
@@ -5340,6 +5356,8 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				stackTrace[fName] = UTIL.getStack("callback");
 				
 				if(err) errors.push(err);
+				returns[fName] = ret;
+				
 				var index = waitingFor.indexOf(fName);
 				if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
 				" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
@@ -5347,7 +5365,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				waitingFor.splice(index, 1);
 				if(waitingFor.length == 0 && returnedOrCalledBack.length == eventListeners.length && !alreadyTooLate) {
 					if(checkInterval) clearInterval(checkInterval);
-					allListenersCalled(errors);
+					allListenersCalled(errors, returns);
 				}
 				return;
 			}

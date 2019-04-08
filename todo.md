@@ -27,8 +27,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-test on KaiOS
-
 todo: Implement client plugin to handle remoteFile.
 and user working to handle saving, and close when closing
 
@@ -64,6 +62,10 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Dark theme
+
+Support for KaiOS
 
 Error parsing problem on Firefox !? 
 When running tests on Firefox you get a dialog message about error detected, which should be shown inline !?

@@ -165,8 +165,8 @@ var module_letsencrypt = require("../shared/letsencrypt.js");
 var module_os = require("os");
 var module_sockJs = require("sockjs");
 var module_http = require("http");
-
-var module_dgram = require('dgram');
+var module_dns = require("dns");
+var module_dgram = require("dgram");
 var module_pwHash = require("./pwHash.js");
 var module_mimeMap = require("./mimeMap.js");
 
@@ -874,6 +874,13 @@ var fileName; // File name for this socket
 		var client_connections; // Client connections for this file transfer session
 		var metadataFound = false;
 		var fileContentReceived = false;
+		var remoteHost = socket.remoteAddress;
+		
+		module_dns.reverse(remoteHost, function(err, domains) {
+			if(err) return log("Unable to find DNS name for ip=" + remoteHost);
+			console.log("ip=" + remoteHost + " had domains: " + JSON.stringify(domains));
+			remoteHost = domains[0];
+		});
 		
 		socket.on("data", remoteFileSocketData);
 		socket.on("end", remoteFileSocketEnd);
@@ -926,7 +933,7 @@ var fileName; // File name for this socket
 						strBuffer = strBuffer.slice(0, -1);
 						console.log("Recieved content (" + strBuffer.length + " bytes) for " + fileName);
 						
-						var msg = JSON.stringify({remoteFile: {fileName: fileName, content: strBuffer}}); // Serialize
+						var msg = JSON.stringify({remoteFile: {fileName: fileName, content: strBuffer, host: remoteHost}}); // Serialize
 						sendToAll(client_connections, msg);
 						fileContentReceived = true;
 						// We want to keep the connection open, so we can send back the content when it's saved!
@@ -987,6 +994,7 @@ clients = USER_CONNECTIONS["admin"];
 			if(!clients && username == CURRENT_USER && users.length == 1) {
 				console.log("Assuming " + users[0] + " == " + CURRENT_USER);
 				clients = USER_CONNECTIONS[ users[0] ];
+				username = users[0];
 			}
 			
 			if(!clients) {
@@ -1833,21 +1841,6 @@ function sockJsConnection(connection) {
 										}
 									}
 								}
-								else if(workerMessage.remoteFile) {
-									var fileName = workerMessage.remoteFile.name;
-									if( REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
-										var socket = REMOTE_FILE_SOCKETS[username][fileName];
-										if(workerMessage.remoteFile.save) {
-											// File saved
-											socket.send(workerMessage.remoteFile.content);
-										}
-										if(workerMessage.remoteFile.close) {
-											// File closed
-											socket.destroy();
-										}
-									}
-									else workerResp("No socket found for fileName= " + workerMessage.remoteFile.fileName);
-								}
 								else if(workerMessage.done) { // Not used! Saved if we need it in the future
 									if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
 										awaitingMessagesFromWorker[workerMessage.done]();
@@ -1995,9 +1988,34 @@ function sockJsConnection(connection) {
 										createMysqlDb(username, req.createMysqlDb, workerResp);
 									}
 									
-									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+									else if(req.remoteFile) {
+										var fileName = req.remoteFile.name;
+										
+										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+											workerResp("No remote sockets found for username=" + username);
+											log( "Users with sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+											return;
+										}
+										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
+											workerResp("No socket found for fileName= " + fileName + " in " + username + " remote sockets.");
+											log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+											return;
+										}
+										else {
+											var socket = REMOTE_FILE_SOCKETS[username][fileName];
+											if(req.remoteFile.content) {
+												// File saved
+												socket.send(req.remoteFile.content);
+											}
+											if(req.remoteFile.close) {
+												// File closed
+												socket.destroy();
+											}
+										}
+									}
 									
-								}
+									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+									}
 								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 								
 								

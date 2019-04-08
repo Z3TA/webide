@@ -919,6 +919,17 @@ API.createMysqlDb = function createMysqlDb(user, options, callback) {
 	});
 }
 
+API.remoteFile = function remoteFile(user, options, callback) {
+	parentRequest({remoteFile: options}, function(err, resp) {
+		callback(err, resp);
+	});
+}
+
+API.remoteFileSave= function remoteFileSave(user, options, callback) {
+	parentRequest({remoteFileSave: options}, function(err, resp) {
+		callback(err, resp);
+	});
+}
 
 function nodejs_init_action(action, prodFolder, pw, callback) {
 	if(action == undefined) throw new Error("action=" + action);
