@@ -126,6 +126,8 @@ function parseSettings(data, settings, fromFile) {
 		settings[prop] = json[prop];
 	}
 	
+	if(fromFile) settings.loadedFrom = fromFile;
+		
 	gotSettings(settings, fromFile);
 }
 
@@ -342,6 +344,12 @@ console.log("Using default port " + DEFAULT_PORT);
 	
 	function connectionError(err) {
 		console.log(  "Connection error: " + (err && (err.message || err) )  );
+		
+		if(err && err.code == "ECONNREFUSED") {
+			if(settings.loadedFrom) console.log("Edit " + settings.loadedFrom + " or ");
+			console.log("try connecting to another host using -host and -port flags");
+		}
+		
 		process.exit(1);
 	}
 	
