@@ -27,8 +27,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-todo: Implement client plugin to handle remoteFile.
-and user working to handle saving, and close when closing
+todo: Implement piping from remote server to the editor while ssh:ed in
 
 It would be nice when in a SSH session be able to type:
 sudo jzedit /etc/some/conf.file
