@@ -866,7 +866,6 @@ function openRemoteFileServer() {
 	});
 	
 	remoteFileServer.on("connection", function stdinConnection(socket) {
-		log("Remote file server connection !");
 		
 		var decoder = new StringDecoder('utf8');
 		var username; // username for this socket
@@ -879,10 +878,12 @@ var fileName; // File name for this socket
 		var remoteHost = socket.remoteAddress;
 		var pipeId = false;
 		
+		log("Remote file server connection from " + remoteHost);
+		
 		module_dns.reverse(remoteHost, function(err, domains) {
 			if(err) return log("Unable to find DNS name for ip=" + remoteHost);
-			console.log("ip=" + remoteHost + " had domains: " + JSON.stringify(domains));
-			remoteHost = domains[0];
+			console.log("ip=" + remoteHost + " have domains: " + JSON.stringify(domains));
+			if(domains.length > 0) remoteHost = domains[0];
 		});
 		
 		socket.on("data", remoteFileSocketData);
@@ -2045,6 +2046,7 @@ function sockJsConnection(connection) {
 										else {
 											var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
 											if(req.pipe.content) {
+												log("Sending " + req.pipe.content.length + " characters through remote pipe " + req.pipe.id)
 												socket.write(req.pipe.content);
 											}
 											if(req.pipe.close) {

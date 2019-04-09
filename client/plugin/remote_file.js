@@ -30,9 +30,8 @@
 		EDITOR.on("fileClose", remoteFileClosed);
 		EDITOR.on("fileOpen", oldPipeFileOpenedMaybe);
 		
-		
-		
 	}
+	
 	
 	function unloadRemoteFileHandler() {
 		
@@ -43,7 +42,7 @@
 		EDITOR.removeEvent("fileClose", remoteFileClosed);
 		EDITOR.removeEvent("fileOpen", oldPipeFileOpenedMaybe);
 		
-		EDITOR.removeEvent("keyPressed", sendPipeData); // Event is only added when a pipe is opened (want to be careful not to slow down key presses)
+	EDITOR.unbindKey(sendPipeData);// Event is only added when a pipe is opened (want to be careful not to slow down key presses)
 		
 	}
 	
@@ -51,7 +50,8 @@
 		var fileExtension = UTIL.getFileExtension(file.path);
 		var matchPipe = fileExtension.match(/^pipe(\d*)/)
 		if(matchPipe) {
-			return parseInt(matchPipe[2]);
+			//console.log("remote_file: matchPipe=" + JSON.stringify(matchPipe));
+			return parseInt(matchPipe[1]);
 		}
 		else return 0;
 	}
@@ -71,11 +71,15 @@
 		console.log("remote_file: remotePipeData: remotePipe=" + JSON.stringify(remotePipe));
 		
 		if(remotePipe.start) {
-			// Do not use the same is as the socket it to prevent reusing old files
+			// Do not use the same is as the socket id to prevent reusing old files
 			pipeCounter++;
 			socketId[pipeCounter] = remotePipe.id
 		}
 		
+		if(remotePipe.end) {
+			console.log("remote_file: Remote pipe " + remotePipe.id + " ended!");
+return;
+		}
 		
 		var host = remotePipe.host;
 		var fileName = host + ".pipe" + pipeCounter;
@@ -105,22 +109,25 @@ return;
 				pipeBuffer = "";
 				EDITOR.renderNeeded();
 				
-				if(EDITOR.eventListeners["keyPressed"].indexOf(sendPipeData) == -1) {
-					EDITOR.on("keyPressed", sendPipeData);
+				
+				if( !EDITOR.getKeyFor(sendPipeData) ) {
+					console.log("remote_file: Binding Enter key to sendPipeData");
+					EDITOR.bindKey({desc: "Send the row through remote pipe", charCode: 13, fun: sendPipeData});
 				}
 			});
 		}
 	}
 	
-	function sendPipeData(file, character, combo) {
+	function sendPipeData(file) {
+		// User pressed Enter
 		
-		if(character == ENTER) {
-			var id = isPipe(file);
-			if(id) {
-				CLIENT.cmd("remotePipe", {id: socketId[id], content: file.rowText(file.caret.row-1)}, function(err) {
-					if(err) console.warn("remote_file: Remote pipe socket error: " + err.message);
-				});
-			}
+		
+		var localPipeId = isPipe(file);
+		console.log("remote_file: Pressed Enter! localPipeId=" + localPipeId);
+		if(localPipeId) {
+			CLIENT.cmd("remotePipe", {id: socketId[localPipeId], content: file.rowText(file.caret.row-1)}, function(err) {
+				if(err) console.warn("remote_file: Remote pipe socket error: " + err.message);
+			});
 		}
 		
 		return ALLOW_DEFAULT;
@@ -172,11 +179,12 @@ return;
 		
 		var index = remoteFiles.indexOf(file);
 		
-		console.log( "remote_file: remoteFileClosed: file.path=" + file.path + " index=" + index + " remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) );
-		
 		var localPipeId = isPipe(file);
 		
+		console.log( "remote_file: remoteFileClosed: file.path=" + file.path + " index=" + index + " remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) + " localPipeId=" + localPipeId );
+		
 		if(localPipeId) {
+			console.log( "remote_file: localPipeId=" + localPipeId + " server socketId=" + socketId[localPipeId] + " socketId=" + JSON.stringify(socketId));
 			CLIENT.cmd("remotePipe", {id: socketId[localPipeId], close: true}, function(err) {
 				if(err) console.warn("remote_file: Remote pipe socket error: " + err.message);
 			});
@@ -184,8 +192,12 @@ return;
 			delete socketId[localPipeId];
 			
 			var activePipes = Object.keys(socketId);
-			if(activePipes.length == 0) EDITOR.removeEvent("keyPressed", sendPipeData);
+			if(activePipes.length == 0) {
+				console.log("remote_file: Unbinding Enter listener");
+				EDITOR.unbindKey(sendPipeData);
+			}
 		}
+		
 		
 		if(index != -1) {
 			remoteFiles.splice(index, 1);

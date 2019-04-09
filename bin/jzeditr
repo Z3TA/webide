@@ -306,6 +306,7 @@ function dance(settings) {
 	var decoder;
 	var strBuffer = "";
 	var fileContent;
+	var isPipe = false;
 	
 	if(!settings.host) throw new Error("No host in settings!");
 	
@@ -382,6 +383,7 @@ function dance(settings) {
 		}
 		else {
 			// Send stdin
+			isPipe = true;
 			connection.write("STDIN\n");
 			
 			//if(stdinData.length > 0) connection.write(stdinData);
@@ -399,6 +401,9 @@ function dance(settings) {
 	
 	function connectionClosed(hadError) {
 		debug("connection closed. hadError=" + hadError);
+		
+		if(isPipe) process.stdin.unref(); // So the script can exit
+		
 	}
 	
 	function connectionData(data) {
@@ -407,7 +412,7 @@ function dance(settings) {
 			Solution: Keep the program running, and don't exit until we get a notice that the file has been closed
 		*/
 		
-		debug("Recived " + data.length + " bytes ...");
+		debug("Recived " + data.length + " bytes ... isPipe=" + isPipe);
 		
 		if(strBuffer == "") {
 			// Create a new string decoder
@@ -416,7 +421,11 @@ function dance(settings) {
 		
 		strBuffer += decoder.write(data);
 		
-		if(strBuffer.charAt(strBuffer.length-1) == EOF) {
+		if(isPipe) {
+			console.log(strBuffer);
+			strBuffer = "";
+		}
+		else if(strBuffer.charAt(strBuffer.length-1) == EOF) {
 			strBuffer = strBuffer.slice(0, -1);
 			
 			var totalCharacters = strBuffer.length;
