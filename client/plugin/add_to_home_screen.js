@@ -15,7 +15,10 @@
 	
 	console.log("A2HS: Loading ...");
 	
-	if(DISPLAY_MODE == "standalone") return console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE + '). Will not ask user to add to desktop/home screen"');
+	if(DISPLAY_MODE == "standalone") {
+console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE + '). Will not ask user to add to desktop/home screen"');
+	return;
+	}
 	
 	var deferredPrompt;
 	
@@ -30,7 +33,10 @@
 	function appinstalled(evt) {
 		console.log('A2HS: Got appinstalled event!');
 		
-		if(installed) return console.warn("A2HS: Already got appinstalled event!");
+		if(installed) {
+console.warn("A2HS: Already got appinstalled event!");
+		return;
+		}
 		
 		var yes = "OK, I will click on the JZ icon";
 		var no = "No, I'll keep using this"

@@ -829,7 +829,10 @@ else throw err;
 		var toFolder = UTIL.getDirectoryFromPath(dropOnPath);
 		
 		// For some reason the drop event is called many times ... Ignore repeated moves
-		if(fromPath == lastMovedFrom && toFolder == lastMovedTo) return console.warn("Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
+		if(fromPath == lastMovedFrom && toFolder == lastMovedTo) {
+console.warn("Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
+		return;
+		}
 		lastMovedFrom = fromPath;
 		lastMovedTo = toFolder;
 		
@@ -842,8 +845,14 @@ else throw err;
 		
 		// Ignore when dropping at the same place
 		var fromFolder = UTIL.getDirectoryFromPath(fromPath);
-		if(fromPath == dropOnPath) return console.warn("Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
-		if(fromFolder == toFolder) return console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
+		if(fromPath == dropOnPath) {
+console.warn("Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
+		return;
+		}
+		if(fromFolder == toFolder) {
+console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
+		return;
+		}
 		
 		var droppedOnFile = dropOnPath != toFolder;
 		var itemIsFolder = (fromFolder == fromPath);

@@ -33,7 +33,10 @@
 	function webPreview(file, combo, character, charCode, direction, clickEvent) {
 		
 		var file = EDITOR.currentFile;
-		if(!file) return console.warn("Unable to run preview: No file open!");
+		if(!file) {
+console.warn("Unable to run preview: No file open!");
+			return;
+		}
 		
 		// Use previewtool so that more specialied plugins get the chance to handle it
 		EDITOR.previewTool(file, clickEvent);

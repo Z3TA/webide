@@ -177,7 +177,10 @@
 		
 		function highLight(err) {
 			
-			if(err) return console.error(err);
+			if(err) {
+console.error(err);
+			return;
+			}
 			
 			if(pathIsFolder) return;
 			
@@ -364,7 +367,10 @@ var buttonSaveAs = document.createElement("input");
 					
 					//if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
 					
-					if(err.code == "CANCEL") return console.warn("The save was canceled: " + err.message);
+					if(err.code == "CANCEL") {
+console.warn("The save was canceled: " + err.message);
+					return;
+					}
 					
 					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "FILE", "warning");
 					}

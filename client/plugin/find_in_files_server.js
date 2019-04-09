@@ -206,7 +206,10 @@
 			
 			var matchSearchString = secondRowText.match(/RegExp: (.*)/);
 			
-			if(!matchSearchString) return console.warn("Could not find the search string that was used!");
+			if(!matchSearchString) {
+console.warn("Could not find the search string that was used!");
+			return;
+			}
 			
 			var regExpString = matchSearchString[1];
 			

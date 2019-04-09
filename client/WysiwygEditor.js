@@ -448,7 +448,8 @@ var WysiwygEditor;
 			//We get no baseNode in Safari when clicking on buttons!!
 			//Chromium also gets no baseNode the first time you click on a button. (it works afterwards)
 			var error = new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
-			return console.warn(error.message);
+			console.warn(error.message);
+			return;
 			//else throw error; 
 		}
 		
@@ -521,14 +522,20 @@ var WysiwygEditor;
 		
 		var innerText = elementFromContentEditable.innerText;
 		
-		if(!innerText) return console.warn("Unable to get innerText property from elementFromContentEditable=" + elementFromContentEditable);
+		if(!innerText) {
+console.warn("Unable to get innerText property from elementFromContentEditable=" + elementFromContentEditable);
+		return;
+		}
 		
 		if(innerText.length == 0) console.log("Element in content-editable does not contain text.");
 		else {
 			
 			var caretPos = wysiwygEditor.getCaretPosition();
 			
-			if(!caretPos) return console.warn("Unable to get caret position!");
+			if(!caretPos) {
+console.warn("Unable to get caret position!");
+			return;
+			}
 			
 			var index = sourceFile.text.indexOf(innerText);
 			
@@ -1414,7 +1421,10 @@ var WysiwygEditor;
 		
 		console.log("About to close wysiwygEditor" + wysiwygEditor.id + " wysiwygEditor.closed=" + wysiwygEditor.closed);
 		
-		if(wysiwygEditor.closed) return console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
+		if(wysiwygEditor.closed) {
+console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
+		return;
+		}
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterSave", wysiwygEditor.afterFileSaveEventListener);

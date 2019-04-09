@@ -16,8 +16,10 @@
 	*/
 	"use strict";
 	
-	if(!QUERY_STRING["voice"]) return console.warn("Voice aid not enabled because no voice in query-string!");
-	
+	if(!QUERY_STRING["voice"]) {
+		console.warn("Voice aid not enabled because no voice in query-string!");
+		return;
+	}
 	
 	if (!('speechSynthesis' in window)) {
 		console.warn("Speech Synthesis not possible in your browser!");

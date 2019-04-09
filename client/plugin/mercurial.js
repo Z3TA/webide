@@ -12,10 +12,6 @@
 (function() {
 	"use strict";
 	
-	// Hide behind feature flag
-	//if(window.location.href.indexOf("-hg") == -1) return console.log("Append -hg in the url to try out the Mercurial plugin");
-	
-	
 	var repoCommitDialog = EDITOR.createWidget(buildCommitDialog);
 	var repoCommitMenuItem;
 	var fileSelect;

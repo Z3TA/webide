@@ -426,7 +426,10 @@
 	
 	function showFunctionList(file) {
 		
-		if(!alwaysShowFunctionList) return console.warn("Now showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
+		if(!alwaysShowFunctionList) {
+console.warn("Now showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
+		return;
+		}
 		
 		if(functionListWrap) {
 			
@@ -453,7 +456,10 @@
 		
 		functionListWrap = document.getElementById("functionListWrap");
 		
-		if(!functionListWrap) return console.warn("functionListWrap not available!");
+		if(!functionListWrap) {
+console.warn("functionListWrap not available!");
+		return;
+		}
 		
 		functionListSelect = document.getElementById("functionList");
 		

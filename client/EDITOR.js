@@ -2162,7 +2162,11 @@ text = file;
 			
 		*/
 		
-		if(!EDITOR.shouldResize && !resizeOverride) return console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
+		if(!EDITOR.shouldResize && !resizeOverride) {
+console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
+		return;
+		}
+		
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
@@ -2215,7 +2219,10 @@ text = file;
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
 		var virtualKeyboard = document.getElementById("virtualKeyboard2");
-		if(!footer) return console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
+		if(!footer) {
+console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
+		return;
+		}
 		
 		var headerHeight = parseInt(header.offsetHeight);
 		var footerHeight = parseInt(footer.offsetHeight);
@@ -2745,7 +2752,10 @@ text = file;
 		
 		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
 		
-		if(menuElement.parentNode == undefined) return console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
+		if(menuElement.parentNode == undefined) {
+console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
+		return;
+		}
 		
 		if(menuElement.parentNode == menu) menu.removeChild(menuElement);
 		else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
@@ -3069,7 +3079,10 @@ text = file;
 					else {
 						// Add text ...
 						// Adding too many info boxes can freeze the computer because we'll run out of memory!
-						if(info[i].text.length > 100) return console.warn("Too many info messages added to row=" + row + " and col=" + col);
+						if(info[i].text.length > 100) {
+console.warn("Too many info messages added to row=" + row + " and col=" + col);
+						return;
+						}
 						
 						for(var j=0; j<imgArray.length; j++) {
 							info[i].text.push(imgArray[j]);
@@ -3775,7 +3788,10 @@ var word = "";
 		
 		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
 		
-		if(!overrideShowFile && showFile != undefined && showFile != file.path) return console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
+		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
+console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
+		return;
+		}
 		
 		console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		
@@ -5773,7 +5789,11 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 		
 		if(oldFullScreenWidget) {
 			// There can only be one element in full screen mode
-			if(oldFullScreenWidget == widgetElement) return console.warn("Element already in full screen: ", widgetElement);
+			if(oldFullScreenWidget == widgetElement) {
+console.warn("Element already in full screen: ", widgetElement);
+			return;
+			}
+			
 			EDITOR.exitFullScreenWidget(oldFullScreenWidget, fullScreenWidgetParent);
 		}
 		
@@ -5811,7 +5831,10 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	
 	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
 		
-		if(widgetElement != oldFullScreenWidget) return console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
+		if(widgetElement != oldFullScreenWidget) {
+console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
+		return;
+		}
 		
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "block";
@@ -6509,11 +6532,17 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			}
 			
 			function testLoop() {
-				if(waitingForSync) return console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+				if(waitingForSync) {
+console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+				return;
+				}
 				
 				if(finished == testsToRun) return allTestsDone();
 				
-				if(aborted) return console.log("testLoop: Tests aborted!");
+				if(aborted) {
+console.log("testLoop: Tests aborted!");
+				return;
+				}
 				
 				console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
 				
@@ -6545,7 +6574,10 @@ asyncInitTest(EDITOR.tests[i]);
 			}
 			
 			function runTest(test) {
-				if(aborted) return console.log("runTest: Tests aborted!");
+				if(aborted) {
+console.log("runTest: Tests aborted!");
+				return;
+				}
 				
 				currentRunningTest = test.text;
 				
@@ -6605,7 +6637,10 @@ waitingForSync = false;
 			
 			function allTestsDone() {
 				
-				if(allDone) return console.warn("testInfo: allDone() already called!");
+				if(allDone) {
+console.warn("testInfo: allDone() already called!");
+				return;
+				}
 				
 				console.warn("testInfo: All tests done!");
 				
@@ -6992,7 +7027,11 @@ promptBox("Where do you want to save the dropped " + fileType + " file ?", false
 			function uploadComplete() {
 				console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 				
-				if(done) return console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+				if(done) {
+console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+				return;
+				}
+				
 				done = true;
 				
 				if(lastPath == undefined) {

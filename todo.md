@@ -27,6 +27,14 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Making the bundle smaller:
+725540 Apr  9 23:57 client/bundle.htm
+723541 Apr 10 00:13 client/bundle.htm
+Don't return console.log, so it can be removed by the bundler.
+
+
+
+
 Removing certbot (0.23.0-1)
 config files are for certbot 0.28 !?
 installed certbot 0.31.0

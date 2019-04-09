@@ -15,7 +15,10 @@
 		
 		//console.warn(new Error("File loaded!").stack);
 		
-		if(!file.savedAs) return console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
+		if(!file.savedAs) {
+console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
+		return;
+		}
 		
 		var maxCharacters = 500; // Limit on how many characters to check for problems
 		var problem = false;

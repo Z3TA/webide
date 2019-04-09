@@ -330,7 +330,10 @@
 	
 	function collabMoveCaret(file, caret) {
 		
-		if(file.noCollaboration) return console.warn("Not moving caret because collaboration disabled in " + file.path);
+		if(file.noCollaboration) {
+console.warn("Not moving caret because collaboration disabled in " + file.path);
+		return;
+		}
 		
 		var caretEvent = {
 			filePath: file.path,
@@ -347,7 +350,10 @@
 		
 		if(!collabMode) return true;
 		
-		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
+		if(file.noCollaboration) {
+console.warn("Collaboration disabled in " + file.path);
+		return;
+		}
 		
 		if(!file.isSaved) syncFile(file);
 		else {
@@ -371,7 +377,10 @@
 	
 	function collabSelectText(file, selection) {
 		if(!collabMode) return true;
-		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
+		if(file.noCollaboration) {
+console.warn("Collaboration disabled in " + file.path);
+		return;
+		}
 		
 		console.log(selection);
 		
@@ -399,9 +408,12 @@
 		
 		console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
 		
-		if(file.noCollaboration) return console.warn("Collaboration disabled in " + file.path);
+		if(file.noCollaboration) {
+console.warn("Collaboration disabled in " + file.path);
+		return;
+		}
 		
-if(file == undefined) throw new Error("file=" + file);
+		if(file == undefined) throw new Error("file=" + file);
 			if(change == undefined) throw new Error("change=" + file);
 			if(text == undefined) throw new Error("text=" + file);
 			if(index == undefined) throw new Error("index=" + index);
@@ -580,7 +592,10 @@ if(file == undefined) throw new Error("file=" + file);
 			var file = EDITOR.files[sync.path];
 			if(!file) console.log("File not opened, no need to sync: path=" + sync.path);
 			else {
-				if(file.noCollaboration) return console.warn("Not syncing because collaboration is disabled in " + file.path);
+				if(file.noCollaboration) {
+console.warn("Not syncing because collaboration is disabled in " + file.path);
+				return;
+				}
 				
 				if(file.isSaved && file.hash == sync.hash) updateFileConent(file, sync.text);
 				else if(file.text == sync.text) console.log("No update needed, sync and file is the same!");
@@ -623,7 +638,10 @@ if(file == undefined) throw new Error("file=" + file);
 				return;
 			}
 			
-			if(file.noCollaboration) return console.warn("Not updating because collaboration disabled in " + file.path);
+			if(file.noCollaboration) {
+console.warn("Not updating because collaboration disabled in " + file.path);
+			return;
+			}
 			
 			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 			

@@ -75,7 +75,7 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 			var result = UglifyJS.minify(content, {
 			keep_fnames: true,
 			compress:{
-				pure_funcs: [ 'console.log', 'console.warn' ]
+				pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
 			}
 		});
 			if (result.error) {
