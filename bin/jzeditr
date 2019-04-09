@@ -25,8 +25,9 @@ var module_net = require("net");
 
 var homeDir = module_os.homedir();
 
-var settingsFileLocation1 = "/root/.jzedit/jzeditr.json";
-var settingsFileLocation2 = homeDir + "/.jzedit/jzeditr.json";
+var jsonFileLocation = "/.jzedit/jzeditr.json";
+var settingsFileLocation1 = "/root" + jsonFileLocation;
+var settingsFileLocation2 = homeDir + jsonFileLocation;
 
 var module_fs = require("fs");
 
@@ -121,8 +122,8 @@ function parseSettings(data, settings, fromFile) {
 		var json = JSON.parse(data);
 	}
 	catch(err) {
-		console.warn("Unable to parse settings from " + fromFile + " data=" + data + " error: " + err.message);
-		return findSettings();
+		console.log("Unable to parse settings from " + fromFile + " data=" + data + " error: " + err.message);
+		return;
 	}
 	
 	for(var prop in json) {
@@ -172,7 +173,11 @@ function ask(question, defaultAnswer, callback) {
 	stdin.resume();
 	stdin.setEncoding('utf8');
 	
+	var stdout = process.stdout;
+	
 	stdin.on('data', stdinData);
+	
+	
 	
 	write();
 	
@@ -185,7 +190,7 @@ function ask(question, defaultAnswer, callback) {
 			case "\r":
 			case "\u0004":
 			// finished typing
-			process.stdout.write('\n');
+			stdout.write('\n');
 			stdin.setRawMode(false);
 			stdin.pause();
 			stdin.removeListener("data", stdinData);
@@ -195,7 +200,7 @@ function ask(question, defaultAnswer, callback) {
 			
 			case "\u0003":
 			// Ctrl-C
-			console.log("\n");
+			stdout.write("\n");
 			process.exit(1);
 			break;
 			
@@ -207,16 +212,16 @@ function ask(question, defaultAnswer, callback) {
 			default:
 			// More characters
 			answer += ch;
-			process.stdout.write(ch);
+			stdout.write(ch);
 			break;
 		}
 	}
 	
 	function write() {
 		
-		process.stdout.clearLine();
-		process.stdout.cursorTo(0);
-		process.stdout.write(prompt + answer);
+		stdout.clearLine();
+		stdout.cursorTo(0);
+		stdout.write(prompt + answer);
 		// gotcha: can't have two stdout.write after each other. Only the first will be visible
 	}
 	
@@ -327,7 +332,7 @@ function dance(settings) {
 		
 	}
 	else {
-		console.warn("File path not specified! process.argv=" + JSON.stringify(process.argv) + " stdin will be streamed ...");
+		debug("File path not specified! process.argv=" + JSON.stringify(process.argv) + " stdin will be streamed ...");
 		
 		conn();
 	}
