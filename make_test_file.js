@@ -1,3 +1,6 @@
+#!/bin/sh
+':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
+
 /*
 	
 	Generates a test file with X LOC
