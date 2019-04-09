@@ -1298,6 +1298,10 @@ namedFunction = false;
 	getFileExtension: function getFileExtension(filePath) {
 		// Returns the file extension, not including the dot. eg foo.bar => bar
 		
+		if(typeof File != "undefined") {
+			if(filePath instanceof File) filePath = filePath.path;
+		}
+		
 		if(filePath == undefined) throw new Error("getFileExtension: filePath=" + filePath);
 		
 		var lastDot = filePath.lastIndexOf(".");

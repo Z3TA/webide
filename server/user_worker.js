@@ -925,8 +925,14 @@ API.remoteFile = function remoteFile(user, options, callback) {
 	});
 }
 
-API.remoteFileSave= function remoteFileSave(user, options, callback) {
+API.remoteFileSave = function remoteFileSave(user, options, callback) {
 	parentRequest({remoteFileSave: options}, function(err, resp) {
+		callback(err, resp);
+	});
+}
+
+API.remotePipe = function remotePipe(user, options, callback) {
+	parentRequest({pipe: options}, function(err, resp) {
 		callback(err, resp);
 	});
 }

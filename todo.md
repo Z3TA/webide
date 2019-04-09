@@ -27,6 +27,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+working on jzeditr bidirectional. need to use bindKey instead of keypressed to listen for Enter!
+
+close socket when closing the pipe file!
+
+jzeditr stdout, bidirectional, so that you can also recive messages from the editor, so that you can chat :P
 
 todo: Implement piping from remote server to the editor while ssh:ed in
 

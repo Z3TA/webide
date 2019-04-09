@@ -65,6 +65,8 @@ var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
 var DISPLAY_ID = 0; // Counter of visual displays
 
+var PIPE_COUNTER = 0;
+
 var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 
 var INVITATIONS = {}; // Users can invite other users, which allows them to login as the same user, without sharing the pw (a new temporary pw is generated)
@@ -852,11 +854,11 @@ function openRemoteFileServer() {
 		while ssh:ed into a server
 		and the file will open in the editor client,
 		then sent back when saved.
+		
+		The reason why we have this code here and not in the user worker is so that all users can share the same port
 	*/
 	
 	var StringDecoder = module_string_decoder.StringDecoder;
-	var stdInFileName = "stdin";
-	
 	var remoteFileServer = module_net.createServer();
 	
 	remoteFileServer.on("listening", function stdinServerListening() {
@@ -875,6 +877,7 @@ var fileName; // File name for this socket
 		var metadataFound = false;
 		var fileContentReceived = false;
 		var remoteHost = socket.remoteAddress;
+		var pipeId = false;
 		
 		module_dns.reverse(remoteHost, function(err, domains) {
 			if(err) return log("Unable to find DNS name for ip=" + remoteHost);
@@ -919,11 +922,19 @@ var fileName; // File name for this socket
 						REMOTE_FILE_SOCKETS[username][fileName].close();
 					}
 					
+					if(fileName == "STDIN") {
+						pipeId = ++PIPE_COUNTER;
+						fileName = "pipe" + pipeId;
+						sendToAll(client_connections, JSON.stringify({remotePipe: {host: remoteHost, start: true, id: pipeId}}));
+					}
+					
 					REMOTE_FILE_SOCKETS[username][fileName] = socket;
 					log("Added socket to username=" + username + " fileName=" + fileName);
+					
+					
 				}
 				
-				if(fileName == "STDIN") {
+				if(pipeId) {
 					// We are receiving a stdin stream
 					sendToStdin();
 				}
@@ -959,9 +970,9 @@ var fileName; // File name for this socket
 		}
 		
 		function sendToStdin() {
-			var msg = JSON.stringify({stdin: strBuffer}); // Serialize
+			var msg = JSON.stringify({remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}}); // Serialize
 			
-			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
+			console.log("Sending data to editor client user " + USERNAME + " (strBuffer.length=" + strBuffer.length + ")");
 			sendToAll(client_connections, msg);
 			strBuffer = ""; // Clear the buffer
 		}
@@ -969,7 +980,7 @@ var fileName; // File name for this socket
 		function remoteFileSocketEnd(endData) {
 			if(endData && endData.length > 0) {
 strBuffer += decoder.write(endData);
-				if(fileName == "STDIN") sendToStdin();
+				if(pipeId) sendToStdin();
 			}
 			console.log("remoteFileSocketEnd: endData.length=" + (endData && endData.length) );
 		}
@@ -981,6 +992,10 @@ strBuffer += decoder.write(endData);
 		function remoteFileSocketClose(hadError) {
 			console.log("Remote file socket closed. hadError=" + hadError);
 			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
+		
+			if(pipeId) {
+				sendToAll(client_connections, JSON.stringify({remotePipe: {host: remoteHost, end: true, id: pipeId}}));
+			}
 		}
 		
 		function findClients(name) {
@@ -1994,7 +2009,7 @@ function sockJsConnection(connection) {
 										
 										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
 											workerResp("No remote file sockets found for username=" + username);
-											log( "Users with sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+											log( "Users with remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
 											return;
 										}
 										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
@@ -2014,6 +2029,30 @@ function sockJsConnection(connection) {
 											}
 											workerResp(null);
 										}
+									}
+									
+									else if(req.pipe) {
+										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+											workerResp("No remote pipe sockets found for username=" + username);
+											log( "Users with pipe sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+											return;
+										}
+										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty("pipe" + req.pipe.id) ) {
+											workerResp("No remote pipe socket found for id= " + req.pipe.id + "");
+											log( "Remote sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+											return;
+										}
+										else {
+											var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
+											if(req.pipe.content) {
+												socket.write(req.pipe.content);
+											}
+											if(req.pipe.close) {
+												socket.destroy();
+											}
+											workerResp(null);
+										}
+										
 									}
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
