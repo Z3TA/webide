@@ -27,24 +27,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-Making the bundle smaller:
-725540 Apr  9 23:57 client/bundle.htm
-723541 Apr 10 00:13 client/bundle.htm
-Don't return console.log, so it can be removed by the bundler.
-
-
-
-
-Removing certbot (0.23.0-1)
-config files are for certbot 0.28 !?
-installed certbot 0.31.0
-
-sudo apt-get install python-certbot-nginx
-
-working on jzeditr bidirectional. need to use bindKey instead of keypressed to listen for Enter!
-
-close socket when closing the pipe file!
-
 jzeditr stdout, bidirectional, so that you can also recive messages from the editor, so that you can chat :P
 
 todo: Implement piping from remote server to the editor while ssh:ed in

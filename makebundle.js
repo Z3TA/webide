@@ -73,10 +73,11 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		content = content.replace(/\/\/ TEST-CODE-START[\s\S]+\/\/ TEST-CODE-END/gm, "");
 		
 			var result = UglifyJS.minify(content, {
-			keep_fnames: true,
+			keep_fnames: true, // prevent errors like: "Please give the event listener function a name!"
 			compress:{
 				pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
-			}
+			},
+			toplevel: false // if set to true it will also rename global variables
 		});
 			if (result.error) {
 			console.log(content);
