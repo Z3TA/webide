@@ -29,9 +29,9 @@ Then type `npm start` to start the editor. Or (if you installed globally) `jzedi
 
 Able to type jzedit via "unix" terminal without installing via npm --global
 ----------------------------------------------------------------------------
-In a unix like enviroment it's possible to open files and even pipe to bin/jzedit,
+In a unix like environment it's possible to open files and even pipe to bin/jzedit,
 in order to send streams of text to the editor.
-Just add the bin folder to your PATH environemnt varibale:
+Just add the bin folder to your PATH environment variable:
 ```
 export PATH="$PATH:/path/to/node_modules/jzedit/bin"
 ```
@@ -40,7 +40,7 @@ Put it in ~/.bashrc to make the PATH update permanent.
 
 Able to type jzedit in Windows command prompt without installing via npm --global
 -----------------------------------------------------------------------------------
-Add the jzedit/bin folder to the Path environemnt varibale:
+Add the jzedit/bin folder to the Path environment variable:
 (Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
 Select: Path, then click Edit, then New, and write:
 ```
@@ -278,6 +278,24 @@ Reporting bugs
 Open a new file, and write down instructions on how to repeat the bug.
 Save the file with "bugreport" in the file name (without the quotes)
 Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
+
+
+Editing files on remote computers
+=================================
+The editor opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
+You can install bin/jzeditr on the remote computer, and then use jzeditr as an editor replacement.
+The files will be opened on your your local developer machine that is running JZedit.
+
+installing jzeditr on a remote computer (it also need to have nodejs installed!):
+```
+wget https://www.webtigerteam.com/jzedit/download/jzeditr
+chmod +x jzeditr
+sudo mv jzedit r/usr/local/bin
+```
+
+You might also have to configure the firewall to allow incoming connections to your developler machine.
+And also allow the remote computer to connect to your developer machine.
+
 
 
 Font settings and styling
