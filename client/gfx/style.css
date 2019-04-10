@@ -251,9 +251,6 @@ canvas {
 	padding: 0px;
 }
 
-.sizer {
-	background-color: #682c35;
-}
 
 /* Add the wrap class to widgets living in the left or right column! */
 .wrap {

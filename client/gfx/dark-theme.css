@@ -1,0 +1,53 @@
+
+body {
+	
+}
+
+.centerColumn {
+	/* hack to get rid of line between the content and the footer */
+	margin-bottom: -4px;
+}
+
+.header {
+	background: linear-gradient(to right, #101010, #282c28, #212821);
+}
+
+.footer {
+	border-top: 1px solid #171b17;
+	background: linear-gradient(#282728, #555555);
+	box-shadow: inset 0px 4px 10px #302f30;
+}
+
+
+
+
+ul#tabList li.tabFolderItem {
+	color: #d2cdcd;
+	box-shadow: 0px 1px 2px #0e0e0e, inset 0px 1px 1px #2a2929;
+	background: linear-gradient(#30342d 1%, black 99%);
+	border-bottom: 1px solid #2a2929;
+	border-top: 1px solid #2a2929;
+}
+
+ul#tabList li.tabFolderItem.active {
+	color: #d2cdcd;
+	border-bottom: 1px solid black; /* same color as canvas */
+	background: linear-gradient(#30342d 1%, black 90%);
+	border-top: 1px solid #2a2929;
+}
+
+ul#tabList li.tabFileItem {
+	background: #262827;
+	background: linear-gradient(#30342d 1%, black 99%);
+}
+
+ul#tabList li.tabFileItem.active {
+	background: #383e39;
+	color: #f2f2f2;
+}
+
+
+
+
+
+

@@ -37,8 +37,6 @@ Writing a guide on how to make a survey
 todo
 ----
 
-Dark theme
-
 Support for KaiOS
 
 Error parsing problem on Firefox !? 
