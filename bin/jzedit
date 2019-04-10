@@ -74,8 +74,8 @@ function main() {
 				log("Semver version: " + json.version);
 				
 				module_fs.readFile(module_path.resolve(__dirname, "../version.inc"), function(err, data) {
-					if(err) throw err;
-					
+					if(err) return;
+						
 					log("Mercurial commit id: " + data);
 				});
 				
