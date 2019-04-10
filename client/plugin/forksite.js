@@ -40,7 +40,7 @@ EDITOR.plugin({
 		var datadirCreated = 0; // 1=creating 2=Failed 3=Created
 		var thirdParty = [];
 		var doneAlready = false;
-		var homeDir = UTIL.homeDir(EDITOR.workingDirectory);
+		var homeDir = (EDITOR.user && EDITOR.user.home) || UTIL.homeDir(EDITOR.workingDirectory);
 		var dataDir = UTIL.trailingSlash(UTIL.joinPaths([homeDir, "forked-sites", loc.host]));
 		var targetDir;
 		

@@ -5754,7 +5754,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
 		var pubKeyPath = ".ssh/id_rsa.pub";
 		
-		var homeDir = UTIL.homeDir(EDITOR.workingDirectory);
+		var homeDir = (EDITOR.user && EDITOR.user.home) || UTIL.homeDir(EDITOR.workingDirectory);
 		if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
 		
 		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
