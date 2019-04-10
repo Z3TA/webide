@@ -32,7 +32,7 @@
 		console.log("dark_theme: themeFromCss=" + themeFromCss);
 		if( themeFromCss == "dark") setDarkTheme();
 		
-		setDarkTheme();
+		if(QUERY_STRING["darkTheme"]) setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		
 	}
 	
