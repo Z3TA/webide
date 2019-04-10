@@ -1882,8 +1882,9 @@ function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 					if (err) throw err;
 					
 					var repoWithoutProtocol = remote.replace(/^.*:\/\//, "");
+					var repoWithoutUsernameOrProtocol = remote.replace(/^.*:\/\/(.*@)?/, "");
 					
-					data += "\n[auth]\nfoo.prefix = " + repoWithoutProtocol + "\nfoo.username = " + hguser + "\nfoo.password = " + pw + "\n";
+					data += "\n[auth]\nfoo.prefix = " + repoWithoutUsernameOrProtocol + "\nfoo.username = " + hguser + "\nfoo.password = " + pw + "\n";
 					
 					fs.writeFile(hgrc, data, 'utf8', function (err) {
 						if (err) callback(err);

@@ -23,40 +23,13 @@ Android browser will not run the script if it contains a default keyword such as
 
 Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
 
+Use bitbucket instead of Github because the hg-git issues. So we can use Mercurial directly
+
 
 What I'm working on
 -------------------
 
-jzeditr stdout, bidirectional, so that you can also recive messages from the editor, so that you can chat :P
 
-todo: Implement piping from remote server to the editor while ssh:ed in
-
-It would be nice when in a SSH session be able to type:
-sudo jzedit /etc/some/conf.file
-
-problems:
-How can the jzedit server know which user is sending the file !?
-answer: if only one user is logged in, then that user,
-otherwise the user mathcing the remove user name or admin=root.
-
-
-
-
-When cloning from bitbucket and saving the credentials,
-the prefix under [auth] is wrong, there should be https:// instead of username@ 
-
-Use gitlab or bitbucket instead of Github because the hg-git issues !?
-So we can use Mercurial directly
-
-Gitlab UI is terrible slow ...
-
-
-
-pip install -U git+https://dmitriyse@bitbucket.org/dmitriyse/hg-git-git.git@upstream
-
-Unable to push to Github after cloning via https
-
-Unable to clone from Github using ssh! (using account johan on webide.se, guest accounts seem to work though !?)
 
 Writing a guide on how to make a survey
 
