@@ -84,10 +84,6 @@
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
-		testRepo.into = UTIL.homeDir(EDITOR.workingDirectory) + "repo/test/"
-		
-		alertBox("homeDir=" + UTIL.homeDir(EDITOR.workingDirectory) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
-		
 	}
 	
 	function unloadMercurial() {
@@ -1141,6 +1137,8 @@ updateCommitFileSelect();
 		labelRepo.appendChild(document.createTextNode("Mercurial or Git Repository: "));
 		form.appendChild(labelRepo);
 		
+		var originalLocalDirValue = EDITOR.user ? UTIL.joinPaths(EDITOR.user.home, defaultRepo.into) : defaultRepo.into;
+		
 		var repo = document.createElement("input");
 		repo.setAttribute("type", "text");
 		repo.setAttribute("id", "repo");
@@ -1150,10 +1148,11 @@ updateCommitFileSelect();
 		repo.setAttribute("value", defaultRepo.url);
 		form.appendChild(repo);
 		repo.onchange = function() {
-			if(localDir.value == defaultRepo.into || localDir.value == "") {
+			if(localDir.value == originalLocalDirValue || localDir.value == "") {
 				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
 if(matchRepoName && matchRepoName[1]) {
-localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";
+					if(EDITOR.user) localDir.value = UTIL.joinPaths(EDITOR.user.home, "repo/" + matchRepoName[1] + "/")
+					else localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";
 }
 			}
 		}
@@ -1170,8 +1169,9 @@ localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName
 		localDir.setAttribute("class", "inputtext dir");
 		localDir.setAttribute("title", "Path to repositories");
 		localDir.setAttribute("size", "30");
-		localDir.setAttribute("value", defaultRepo.into);
+		localDir.setAttribute("value", originalLocalDirValue);
 		form.appendChild(localDir);
+		
 		
 		// ### user
 		var labelUser = document.createElement("label");

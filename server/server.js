@@ -1765,11 +1765,11 @@ function sockJsConnection(connection) {
 							};
 							
 							if(NO_CHROOT) {
-userInfo.homeDir = homeDir; 
-								userInfo.installDirectory = __dirname.replace(/server$/, "");,
+								userInfo.homeDir = homeDir;
+								userInfo.installDirectory = __dirname.replace(/server$/, "");
 							}
 							else {
-								userInfo.homeDir = "/"; 
+								userInfo.homeDir = "/";
 							}
 							
 							send({resp: {loginSuccess: userInfo}});
