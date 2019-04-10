@@ -9,7 +9,7 @@ body {
 }
 
 .header {
-	background: linear-gradient(to right, #101010, #282c28, #212821);
+	background: linear-gradient(to right, #2b2c27, #404036, #2c2727);
 }
 
 .footer {
@@ -18,36 +18,82 @@ body {
 	box-shadow: inset 0px 4px 10px #302f30;
 }
 
-
-
+.columns div {
+	/*border: 1px solid red; */
+	background: #2b2c27;
+}
 
 ul#tabList li.tabFolderItem {
 	color: #d2cdcd;
 	box-shadow: 0px 1px 2px #0e0e0e, inset 0px 1px 1px #2a2929;
-	background: linear-gradient(#30342d 1%, black 99%);
+	background: linear-gradient(#2f342f 1%, #30342d 99%);
 	border-bottom: 1px solid #2a2929;
 	border-top: 1px solid #2a2929;
 }
 
 ul#tabList li.tabFolderItem.active {
 	color: #d2cdcd;
-	border-bottom: 1px solid black; /* same color as canvas */
-	background: linear-gradient(#30342d 1%, black 90%);
+	border-bottom: 1px solid #2b2c27; /* same color as canvas */
+	background: linear-gradient(#2f342f 1%, #30342d 99%);
 	border-top: 1px solid #2a2929;
 }
 
 ul#tabList li.tabFileItem {
 	background: #262827;
-	background: linear-gradient(#30342d 1%, black 99%);
+	background: linear-gradient(#373737 1%, #322f2f 99%);
 }
 
 ul#tabList li.tabFileItem.active {
-	background: #383e39;
+	background: #2b2c27;
 	color: #f2f2f2;
 }
 
 
+select, select.functionList {
+	color: #ebebe5;
+	background-color: #2b2c27;
+	
+}
 
+option:checked {
+	color: red; 
+	background-color: blue;
+	background: "pink";
+}
+
+.fileExplorer {
+	border-left: 2px solid #2a2929;
+}
+
+
+.fileExplorer ul {
+	background-color: #2b2c27;
+	color: rgb(235, 235, 229);
+}
+
+.fileExplorer li.problem {
+	color: #ab70c0;
+}
+
+.tree li:last-child:before {
+	background: #2b2c27; /* same as body background */
+}
+
+
+
+
+::-webkit-scrollbar {
+	width: 9px;  /* for vertical scrollbars */
+	height: 9px; /* for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+	background: #2b2c27;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #30342d;
+}
 
 
 

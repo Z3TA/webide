@@ -8,7 +8,7 @@
 		
 	*/
 	
-	if(!QUERY_STRING["darkTheme"]) return;
+	//if(!QUERY_STRING["darkTheme"]) return;
 	
 	
 	var DARK = '(prefers-color-scheme: dark)'
@@ -43,18 +43,20 @@
 		}
 		console.log("dark_theme: Set dark theme! ...");
 		
+		// 
+		
 		// Backgrounds
-		EDITOR.settings.style.bgColor = "#202221";
-		EDITOR.settings.style.currentLineColor = "#2f2e29";
+		EDITOR.settings.style.bgColor = "#2b2c27";
+		EDITOR.settings.style.currentLineColor = "#404036";
 		EDITOR.settings.style.selectedTextBg = "#3e4765";
 		EDITOR.settings.style.highlightTextBg = "#3e5a3d";
 		
-		// Text
-		EDITOR.settings.style.textColor = "#ffffff";
-		EDITOR.settings.style.commentColor = "#4ce447";
-		EDITOR.settings.style.quoteColor = "#47b3e4";
-		EDITOR.settings.style.xmlTagColor = "#9988e3";
-		
+		// Text (Colors should be in rgb() format!)
+		EDITOR.settings.style.textColor = "rgb(235, 235, 229)"; // 
+		EDITOR.settings.style.commentColor = "rgb(162, 228, 64)";
+		EDITOR.settings.style.quoteColor = "rgb(228, 228, 183)"; // #f3f3d1
+		EDITOR.settings.style.xmlTagColor = "rgb(200, 241, 250)";
+		EDITOR.settings.style.lineNumberColor = "rgb(114, 114, 114)";
 		
 		EDITOR.settings.caret.color = "#ffffff";
 		
