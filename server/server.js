@@ -1753,26 +1753,26 @@ function sockJsConnection(connection) {
 							
 							console.log("userConnectionId=" + userConnectionId);
 							
-							var installDirectory = "/";
-							
-							if(NO_CHROOT) installDirectory = __dirname.replace(/server$/, "");
-							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
-							
 							// Respond to the client that the login was successful
-							send({
-								resp: {
-									loginSuccess: {
-										user: userConnectionName, 
-										alias: userAlias, 
-										sessionId: json.sessionId,
-										ip: IP, 
-										cId: userConnectionId, 
-										connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
-										installDirectory: installDirectory, 
-										editorVersion: EDITOR_VERSION
-									}
-								}
-							});
+							var userInfo = {
+								user: userConnectionName,
+								alias: userAlias,
+								sessionId: json.sessionId,
+								ip: IP,
+								cId: userConnectionId,
+								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
+								editorVersion: EDITOR_VERSION
+							};
+							
+							if(NO_CHROOT) {
+userInfo.homeDir = homeDir; 
+								userInfo.installDirectory = __dirname.replace(/server$/, "");,
+							}
+							else {
+								userInfo.homeDir = "/"; 
+							}
+							
+							send({resp: {loginSuccess: userInfo}});
 							
 							// Tell all client that a new client has connected
 							var clientJoin = {

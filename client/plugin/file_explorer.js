@@ -218,7 +218,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 		else if(CLIENT.url) {
 			// Use the hostname of the server we are connected to
 			var loc = UTIL.getLocation(CLIENT.url);
-			var localName = EDITOR.user + "@" + loc.host;
+			var localName = EDITOR.user.name + "@" + loc.host;
 		}
 		else {
 			// Use the hostname

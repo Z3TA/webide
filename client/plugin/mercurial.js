@@ -84,6 +84,10 @@
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
+		testRepo.into = UTIL.homeDir(EDITOR.workingDirectory) + "repo/test/"
+		
+		alertBox("homeDir=" + UTIL.homeDir(EDITOR.workingDirectory) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+		
 	}
 	
 	function unloadMercurial() {
@@ -1097,7 +1101,7 @@ updateCommitFileSelect();
 			defaultRepo = {
 			url: UTIL.trailingSlash("https://hg.webtigerteam.com/repo/" + lastFolder),
 			into: UTIL.trailingSlash(currentFolderPath),
-			user: EDITOR.user,
+			user: EDITOR.user.name,
 			pw: ""
 			}
 			}
@@ -1146,7 +1150,7 @@ updateCommitFileSelect();
 		repo.setAttribute("value", defaultRepo.url);
 		form.appendChild(repo);
 		repo.onchange = function() {
-			if(localDir.value == defaultRepo.into) {
+			if(localDir.value == defaultRepo.into || localDir.value == "") {
 				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
 if(matchRepoName && matchRepoName[1]) {
 localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";

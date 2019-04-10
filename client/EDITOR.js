@@ -6277,14 +6277,17 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		
 		// Attatch CLIENT listeners before plugins and start events load
 		CLIENT.on("loginSuccess", function loggedInToServer(login) {
-			EDITOR.user = login.user;
+			EDITOR.user = {
+name: login.user,
+				home: login.homeDir
+			};
 			
 			if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
 			
 			EDITOR.installDirectory = login.installDirectory || "/";
 			//alertBox(JSON.stringify(login));
 			
-			console.log("Logged in as user: " + EDITOR.user);
+			console.log("Logged in as user: " + EDITOR.user.name);
 			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {

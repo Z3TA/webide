@@ -141,7 +141,7 @@
 									"name": UTIL.getFolderName(folder),
 									"version": "1.0.0",
 									"description": "What this micro service does",
-									"author": EDITOR.username,
+									"author": EDITOR.user.name,
 									"main": UTIL.getFilenameFromPath(currentFile.path)
 								};
 								

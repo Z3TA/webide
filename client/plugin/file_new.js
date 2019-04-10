@@ -98,7 +98,7 @@
 		
 		htmlButton.appendChild(document.createTextNode("HTML"));
 		htmlButton.onclick = function(clickEvent) {
-			createNewFile("file.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
+			createNewFile("file.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
 			EDITOR.hideDashboard();
 		};
 		newFileWidget.appendChild(htmlButton);

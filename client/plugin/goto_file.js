@@ -197,7 +197,7 @@
 	
 	function openLocalFileTool(options) {
 		// Only answer on openFileTool events if we are running locally/"native"
-		if(EDITOR.user != "admin") return false;
+		if(EDITOR.user.home == "/") return false;
 		
 		var directory = options.directory;
 		

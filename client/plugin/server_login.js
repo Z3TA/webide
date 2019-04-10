@@ -389,7 +389,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		form.appendChild(cancel);
 		
 		// ### Signup
-		if(!EDITOR.user || EDITOR.user != "admin") {
+		if(!EDITOR.user || EDITOR.user.name != "admin") {
 		var signupLink = document.createElement("a");
 		signupLink.appendChild(document.createTextNode("Signup"));
 		signupLink.setAttribute("title", "Click here to create an account");
@@ -461,14 +461,14 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			var server = {url: url.value};
 			
 			if(CLIENT.connected) {
-				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user != user.value)) {
+				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user.name != user.value)) {
 					// Must disconnect in order to login as a different user!
-					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user=" + EDITOR.user + " user.value=" + user.value);
+					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user.name=" + EDITOR.user.name + " user.value=" + user.value);
 					CLIENT.disconnect();
 					connectToServer();
 				}
-				else if(EDITOR.user != user.value) identify();
-				else alertBox("Already logged in as user=" + EDITOR.user + " on \n" + CLIENT.url);
+				else if(EDITOR.user.name != user.value) identify();
+				else alertBox("Already logged in as user=" + EDITOR.user.name + " on \n" + CLIENT.url);
 			}
 			else {
 				CLIENT.connect(server, function connectionOpen(err) {

@@ -107,9 +107,9 @@ console.log("reopenFiles!");
 		
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
-		console.log("reopenFiles: serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
+		console.log("reopenFiles: serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user.name=" + EDITOR.user.name);
 		
-		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
+		if(serverUrl != CLIENT.url || serverUser != EDITOR.user.name) {
 			// Logged in as another user
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			clearInterval(saveStateIntervalTimer);

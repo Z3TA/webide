@@ -8,7 +8,7 @@
 		
 	*/
 	
-	//if(!QUERY_STRING["darkTheme"]) return;
+	if(!QUERY_STRING["darkTheme"]) return;
 	
 	
 	var DARK = '(prefers-color-scheme: dark)'
