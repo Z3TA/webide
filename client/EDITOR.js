@@ -7750,9 +7750,10 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		
 		//keyDownEvent.preventDefault();
 		
-		var charCode = keyDownEvent.charCode || keyDownEvent.keyCode;
+		var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
 		var character = String.fromCharCode(charCode);
 		var combo = getCombo(keyDownEvent);
+		var key = keyDownEvent.key || null; // Null so that it will not be the same as undefined
 		var preventDefault = false;
 		var funReturn;
 		var captured = false;
@@ -7827,6 +7828,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		
 		if(!preventDefault) {
 			// Check key bindings
+			var capturedBy = [];
 			console.log("combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
 			for(var i=0, binding; i<keyBindings.length; i++) {
 				
@@ -7840,7 +7842,10 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 					" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
 				*/
 				
-				if( (binding.char == character || binding.charCode == charCode || binding.key === keyDownEvent.key) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+				if( (binding.char === character || binding.charCode === charCode || binding.key === key) && // === so that undefined doesn't match null
+				(binding.combo == combo.sum || binding.combo === undefined) && 
+				(binding.dir == "down" || binding.dir === undefined) && // down is the default direction
+				(binding.mode == EDITOR.mode || binding.mode == "*") ) {
 					
 					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
 						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
@@ -7849,9 +7854,23 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 						
 						console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 						
-						if(captured) console.warn("Key combo has already been captured by " + UTIL.getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " keyDownEvent.key=" + keyDownEvent.key + " combo=" + JSON.stringify(combo) + " binding.fun=" + UTIL.getFunctionName(binding.fun));
+						if(captured) {
+							console.warn("Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : " +
+							" charCode=" + charCode + 
+							" character=" + character + 
+							" key=" + key + 
+							" combo=" + JSON.stringify(combo) + 
+							" binding.char=" + binding.char + 
+							" binding.charCode=" + binding.charCode + 
+							" binding.combo=" + binding.combo + 
+							" binding.dir=" + binding.dir + 
+							" binding.mode=" + binding.mode + 
+							" binding.fun=" + UTIL.getFunctionName(binding.fun)
+							);
+						}
 						
-						captured = binding.fun;
+						captured = true;
+						capturedBy.push(binding.fun);
 						
 						if(!EDITOR.currentFile) console.warn("No file open!");
 						
