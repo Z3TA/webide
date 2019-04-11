@@ -20,7 +20,7 @@ var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "adm
 
 var STDIN_PORT = DEFAULT.stdin_channel_port;
 
-var REMOTE_FILE_PORT =  getArg(["remote-file-port", "remote-file-port"]) || DEFAULT.remote_file_port || 8080;
+var REMOTE_FILE_PORT =  getArg(["remote-file-port", "remote-file-port"]) || DEFAULT.remote_file_port || 8103;
 
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
 var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
