@@ -7840,7 +7840,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 					" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
 				*/
 				
-				if( (binding.char == character || binding.charCode == charCode || binding.key ==  keyDownEvent.key) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+				if( (binding.char == character || binding.charCode == charCode || binding.key === keyDownEvent.key) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 					
 					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
 						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
@@ -7849,7 +7849,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 						
 						console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 						
-						if(captured) console.warn("Key combo has already been captured by " + UTIL.getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + UTIL.getFunctionName(binding.fun));
+						if(captured) console.warn("Key combo has already been captured by " + UTIL.getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " keyDownEvent.key=" + keyDownEvent.key + " combo=" + JSON.stringify(combo) + " binding.fun=" + UTIL.getFunctionName(binding.fun));
 						
 						captured = binding.fun;
 						

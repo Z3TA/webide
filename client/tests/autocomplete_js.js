@@ -89,7 +89,8 @@
 		});
 	});
 	
-	EDITOR.addTest(610, false, function autocompleteFromOtherFilesInProject(callback) {
+	// 610
+	EDITOR.addTest(1, false, function autocompleteFromOtherFilesInProject(callback) {
 		EDITOR.openFile("/mywebsiteproject/index.htm", '<html><head><script src="script1.js"></script><script src="script2.js"></script></head></html>', function(err, file0) {
 			EDITOR.openFile("/mywebsiteproject/script1.js", 'var globalVariableFromScript1 = "abcdefg";\n', function(err, file1) {
 				EDITOR.openFile("/mywebsiteproject/script2.js", 'globalVariableFromS\nanotherGlobalVariableB\n\n', function(err, file2) {
