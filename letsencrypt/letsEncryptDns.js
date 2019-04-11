@@ -253,7 +253,7 @@ function processWork(work) {
 				// It no longer contains any challange strings.
 				// We can also remove the padding
 				
-				console.log("Removing padding:\n" + zoneData.slice(start, end);
+				console.log( "Removing padding:\n" + zoneData.slice(start, end) );
 				
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
 			}
