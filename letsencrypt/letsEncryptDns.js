@@ -147,7 +147,10 @@ function workQueue() {
 	});
 	var work = QUEUE.pop();
 	
-	if(!work) throw new Error("No work to do!");
+	if(!work) {
+		log("No more work to do! QUEUE.length=" + QUEUE.length);
+		return;
+	}
 	
 	processWork(work);
 }
