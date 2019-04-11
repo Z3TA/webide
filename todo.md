@@ -30,7 +30,6 @@ What I'm working on
 -------------------
 
 
-
 Writing a guide on how to make a survey
 
 
@@ -3030,6 +3029,10 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+In order to get the bundle size down even forther, concat ALL JS files,
+then run uglify and allow mangling everything!
+---
 
 Text selection lags when selecting over a very long line
 
