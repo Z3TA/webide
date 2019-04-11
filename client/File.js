@@ -2532,12 +2532,12 @@ file.mode = "text";
 		
 		//file.debugGrid();
 		
-		console.time("deleteCharacter");
-		
 		if(caret.eof) {
 			console.warn("Can not delete at EOF!");
 			return;
 		}
+		
+		console.time("deleteCharacter");
 		
 		if(caret.eol) {
 			/*
