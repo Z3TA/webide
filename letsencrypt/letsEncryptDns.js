@@ -57,6 +57,9 @@
 	Check each slave server if it has the TXT records:
 	dig _acme-challenge.user.webide.se -t TXT @8.8.8.8
 	
+	
+	
+	
 */
 
 "use strict";
@@ -111,18 +114,18 @@ function handleHttpRequest(req, resp) {
 	
 	log("Request from " + IP + ": " + req.url);
 	
-	if(IP_OK.indexOf(IP) == -1) return resp.end("IP not authorized: " + IP);
+	if(IP_OK.indexOf(IP) == -1) return resp.end("IP not authorized: " + IP + "\n");
 	
 	var match = req.url.match(/.*\?stage=(before|after)&name=([A-Za-z0-9_.-]*)&value=([A-Za-z0-9_.-]*)&secret=([A-Za-z0-9_.-]*)/);
 	
-	if(match == null) return resp.end("Malformed request url: " + req.url);
+	if(match == null) return resp.end("Malformed request url: " + req.url + "\n");
 	
 	var stage = match[1];
 	var name = match[2];
 	var value = match[3];
 	var secret = match[4];
 	
-	if(secret != SECRET) return resp.end("Bad secret: " + secret);
+	if(secret != SECRET) return resp.end("Bad secret: " + secret + "\n");
 	
 	var work = {stage: stage, name: name, value: value, resp: resp, time: new Date()};
 	
@@ -189,8 +192,6 @@ function processWork(work) {
 	
 	var txtEntry = "_acme-challenge." + name + '. ' + TTL + ' IN TXT ';
 	var challangeString = txtEntry + '"' + value + '"\n';
-	var specificString = "*." + subname + " IN CNAME " + tld + ".\n";
-	
 	
 	var zoneFile = "/etc/bind/zones/db." + tld;
 	MODULE_FS.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
@@ -201,21 +202,34 @@ function processWork(work) {
 			return;
 		}
 		
-		// Find A and AAAA records for tld
-		var matchA = zoneData.match(/[@*]\s+IN\s+\d*?\s+A\s+([0-9.]*)/i);
-		var matchAAAA = zoneData.match(/[@*]\s+IN\s+\d*?\s+AAAA\s+([0-9a-f:]*)/i);
 		
-		if(!matchA) {
-			resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
-			console.error("Error: Unable match A record in " + zoneFile);
-		}
+		var specificString = "*." + subname + " IN CNAME " + tld + ".\n";
 		
-		var aRecord = matchA[1];
-		specificString += subname + " IN A " + aRecord + "\n";
+		/*
+			note: Zone file can not contain CNAME and A records pointing to the same host!
+			for example, if there's already www IN CNAME, we can not have a www IN A !
+		*/
 		
+		if(!zoneData.match( new RegExp(subname + " +IN +CNAME") )) {
+			
+			// Find A and AAAA records for tld
+			var matchA = zoneData.match(/[@*]\s+IN\s+\d*?\s+A\s+([0-9.]*)/i);
+			var matchAAAA = zoneData.match(/[@*]\s+IN\s+\d*?\s+AAAA\s+([0-9a-f:]*)/i);
+			
+			if(!matchA) {
+				resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
+				console.error("Error: Unable match A record in " + zoneFile);
+			}
+			
+			var aRecord = matchA[1];
+			
+			specificString += subname + " IN A " + aRecord + "\n";
+			
 		if(matchAAAA) {
 			var aaaaRecord = matchAAAA[1];
 			specificString += subname + " IN AAAA " + aaaaRecord + "\n";
+		}
+
 		}
 		
 		/*
@@ -317,6 +331,9 @@ function processWork(work) {
 				return;
 			}
 			
+			// Do we have to wait a bit before reloading bind9 !?!?
+			setTimeout(function waitForFs() {
+				
 			// Reload bind9/named
 			MODULE_CHILD_PROCESS.exec("service bind9 reload", function reloadNS(error, stdout, stderr) {
 				if(error || stderr) {
@@ -334,22 +351,152 @@ function processWork(work) {
 					
 					Certbot seem to send off both stage=before but waits for *both* before requesting the TXT records,
 					(problem: Letsencrypt challange only succeeds on *one* of the TXT entries)
-					so we only (should) have to make Certbot wait on the *seconds* request.
-				*/
+					so we only (should) have to make Certbot wait on the *second* request.
+						
+						problem: Google name server 8.8.8.8 can be lazy and use old cached value,
+						querying the record however seem to trigger a cache update (but you need to make another request to get the fresh data)
+						solution: Query the 8.8.8.8 so the cache is updated
+					*/
 				
-				if(stage == "before" && PROGRESS_COUNTER % 2 == 0) {
-					setTimeout(function wait() {
-						resp.end("OK");
-						//IN_PROGRESS = false;
-					}, 30000);
-				}
-				else {
-					resp.end("OK");
-				}
+					var dns = require('dns');
+					var resolver = new dns.Resolver();
+					var nameServer = '8.8.8.8'
+					resolver.setServers([nameServer]);
+					
+					if(stage == "before" && QUEUE.length == 0) {
+						setTimeout(function refreshGdnsCache() { //  wait for slave servers
+							log("Refreshing G DNS cache ...");
+							resolver.resolveTxt("_acme-challenge." + name, function(err, results) {
+								
+								var correctValue = false;
+								
+								if(err) {
+									if(err.code == "ENOTFOUND") {
+										log(nameServer + " can not find TXT record for _acme-challenge." + name + "");
+									}
+									else {
+										log("Something went wrong when making dns query to " + nameServer + ": " + err.message);
+									}
+								}
+								
+
+								if(!err) {
+									//log("dns results=" + JSON.stringify(results));
+									var strings = results[0];
+									if( strings[0] == value ) {
+										correctValue = true;
+										log(nameServer + " has the correct value!");
+									}
+									else {
+										correctValue = false;
+										log(nameServer + " has the wrong record " + strings[0] + "\nExpected " + value);
+									}
+								}
+								
+								if(correctValue) {
+									sendResp(true);
+								}
+								else {
+									// Try again
+									setTimeout(function tryRefreshGdnsAgain() {
+										log("Making another attempt to frefresh G DNS cache ...");
+										resolver.resolveTxt("_acme-challenge." + name, function(err, results) {
+											var correctValue = false;
+											
+											if(err) {
+												if(err.code == "ENOTFOUND") {
+													log(nameServer + " can still not find TXT record for _acme-challenge." + name + "");
+												}
+												else {
+													log("Something went wrong when making the second dns query to " + nameServer + ": " + err.message);
+												}
+											}
+											
+											if(!err) {
+												//log("dns results=" + JSON.stringify(results));
+												var strings = results[0];
+												if( strings[0] == value ) {
+													correctValue = true;
+													log(nameServer + " now has the correct value!");
+												}
+												else {
+													correctValue = false;
+													log(nameServer + " still has the wrong record " + strings[0] + "\nExpected " + value);
+												}
+											}
+											
+											if(correctValue) {
+												sendResp(true);
+											}
+											else {
+												
+												setTimeout(sendResp, 5000);
+												
+												// Test local DNS server for debugging purposes
+												nameServer = '127.0.0.1'
+												resolver.setServers([nameServer]);
+												
+												resolver.resolveTxt("_acme-challenge." + name, function(err, results) {
+													var correctValue = false;
+													
+													if(err) {
+														if(err.code == "ENOTFOUND") {
+															log(nameServer + " can not find TXT record for _acme-challenge." + name + "");
+														}
+														else {
+															log("Something went wrong making dns query to " + nameServer + ": " + err.message);
+														}
+													}
+													
+													if(!err) {
+														//log("dns results=" + JSON.stringify(results));
+														var strings = results[0];
+														if( strings[0] == value ) {
+															correctValue = true;
+															log(nameServer + " has the correct value!");
+														}
+														else {
+															correctValue = false;
+															log(nameServer + " has the wrong record " + strings[0] + "\nExpected " + value);
+														}
+													}
+													
+													if(!correctValue) throw new Error("Neither the local server has the correct value!");
+													
+												});
+												
+											}
+										});
+									}, 5000);
+								}
+							});
+						}, 1000);
+					}
+					else {
+						sendResp();
+					}
+					
+					function sendResp(noWait) {
+						// Only wait on the last request
+						if(stage == "before" && QUEUE.length == 0 && !noWait) {
+							setTimeout(function wait() {
+								resp.end("OK");
+								//IN_PROGRESS = false;
+							}, 5000);
+						}
+						else {
+							resp.end("OK");
+						}
+						
+						IN_PROGRESS = false;
+					}
+					
+				});
 				
-				IN_PROGRESS = false;
-			});
+			}, 10); // Waiting for fs before reloading bind9
+			
 		});
+		
 	});
 }
 
