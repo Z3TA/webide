@@ -184,8 +184,8 @@ function processWork(work) {
 		we must also add specific subdomain and subdomain wildcard
 	*/
 	
-	var paddingStart = "; Start Letsencrypt challange for " + subname + "\n";
-	var paddingEnd = "; End Letsencrypt challange for " + subname + "\n\n";
+	var paddingStart = "; Start Letsencrypt challange for " + (subname || tld) + "\n";
+	var paddingEnd = "; End Letsencrypt challange for " + (subname || tld) + "\n\n";
 	
 	var txtEntry = "_acme-challenge." + name + '. ' + TTL + ' IN TXT ';
 	var challangeString = txtEntry + '"' + value + '"\n';
@@ -242,11 +242,19 @@ function processWork(work) {
 			}
 			
 			// Only remove the challange string!
+			
+			if(zoneData.indexOf(challangeString) == -1) throw new Error("zoneData doesn't contain challangeString=" + challangeString + "\n\nzoneData=" + zoneData);
+			
 			zoneData = zoneData.slice(0, zoneData.indexOf(challangeString)) + zoneData.slice(zoneData.indexOf(challangeString) + challangeString.length);
+			console.log("Removed challangeString=" + challangeString);
+			end -= challangeString.length;
 			
 			if(zoneData.indexOf(txtEntry) == -1) {
 				// It no longer contains any challange strings.
 				// We can also remove the padding
+				
+				console.log("Removing padding:\n" + zoneData.slice(start, end);
+				
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
 			}
 		}
@@ -255,7 +263,7 @@ function processWork(work) {
 			if(start == -1) {
 				zoneData += paddingStart;
 				zoneData += challangeString;
-				zoneData += specificString;
+				if(subname) zoneData += specificString;
 				zoneData += paddingEnd;
 			}
 			else {
