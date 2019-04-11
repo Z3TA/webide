@@ -29,6 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Testing on G cloud console
+
+
 
 Writing a guide on how to make a survey
 
@@ -36,19 +39,23 @@ Writing a guide on how to make a survey
 todo
 ----
 
+Support for KaiOS
+
+work on mobile support ... ?
+
+
+
+
 when running the server without sudo,
 Make it possible to start the server without --username and --password flags,
 instead ask for password via stdin (use current user as username by default)
 
-Support for KaiOS
+
 
 Error parsing problem on Firefox !? 
 When running tests on Firefox you get a dialog message about error detected, which should be shown inline !?
 
 bug: When committing on Windows and you click Diff, and then Refresh, it says ENOENT C:\client\plugin'
-
-When logged into a server via SSH, able to type jzedit /path/to/file.conf
-And it will attempt to connect to the already running editor on the working machine !?
 
 Able to right click on a SSG file named with _underscore to prevent publishing, and click "Publish draft"
 which triggers a hg mv _foo.htm foo.htm
