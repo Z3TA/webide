@@ -4,13 +4,13 @@
 	
 	sudo node letsEncryptDns.js
 	
-	(Replace zetafiles.org below with your master DNS server)
+	(Replace zetafiles.org below with your master DNS server, and xn--zta-qla.com with the domain name you want to test with)
 	
-	curl "https://zetafiles.org/DNS/txt?stage=before&name=xn--zta-qla.com&value=testvaluexyz&secret=changeme"
-	curl "https://zetafiles.org/DNS/txt?stage=before&name=www.xn--zta-qla.com&value=testvaluxyze2&secret=changeme"
+	curl "https://zetafiles.org/DNS/txt?stage=before&name=xn--zta-qla.com&value=testvaluexyz1&secret=changeme"
+	curl "https://zetafiles.org/DNS/txt?stage=before&name=www.xn--zta-qla.com&value=testvaluxyz2&secret=changeme"
 	
-	curl "https://zetafiles.org/DNS/txt?stage=after&name=xn--zta-qla.com&value=testvaluexyz&secret=changeme"
-	curl "https://zetafiles.org/DNS/txt?stage=after&name=www.xn--zta-qla.com&value=testvaluxyze2&secret=changeme"
+	curl "https://zetafiles.org/DNS/txt?stage=after&name=xn--zta-qla.com&value=testvaluexyz1&secret=changeme"
+	curl "https://zetafiles.org/DNS/txt?stage=after&name=www.xn--zta-qla.com&value=testvaluxyz2&secret=changeme"
 	
 	named-checkconf -z
 	
