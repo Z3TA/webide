@@ -37,6 +37,10 @@ Writing a guide on how to make a survey
 todo
 ----
 
+when running the server without sudo,
+Make it possible to start the server without --username and --password flags,
+instead ask for password via stdin (use current user as username by default)
+
 Support for KaiOS
 
 Error parsing problem on Firefox !? 
