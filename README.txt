@@ -27,60 +27,6 @@ The easiest way to install the desktop version is via npm:
 Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
 
 
-Able to type jzedit via "unix" terminal without installing via npm --global
-----------------------------------------------------------------------------
-In a unix like environment it's possible to open files and even pipe to bin/jzedit,
-in order to send streams of text to the editor.
-Just add the bin folder to your PATH environment variable:
-```
-export PATH="$PATH:/path/to/node_modules/jzedit/bin"
-```
-Put it in ~/.bashrc to make the PATH update permanent.
-
-
-Able to type jzedit in Windows command prompt without installing via npm --global
------------------------------------------------------------------------------------
-Add the jzedit/bin folder to the Path environment variable:
-(Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
-Select: Path, then click Edit, then New, and write:
-```
-C:\path\to\where\you\installed\node_modules\jzedit\bin\
-```
-(tip: Use the file explorer to navigate to the jzedit\bin folder, then copy the path/address)
-Click OK > OK > OK
-You have to open a new Command Prompt for the change to take effect.
-
-
-
-Permission issues when installing via npm using --global flag
--------------------------------------------------------------
-When installing globally npm wants to put packages in places that might require root/administrator privileges.
-To fix this on a unix-like system such as Linux you can create a special folder for npm to put global files in:
-```
-mkdir ~/.npm-packages
-
-cat <<EOT >> .bashrc
-# Install global NPM packages in home dir
-NPM_PACKAGES="~/.npm-packages"
-export PATH="$NPM_PACKAGES/bin:$PATH"
-EOT
-
-npm config set prefix=$HOME/.npm-packages
-npm install --global jzedit
-```
-
-
-Missing npm build dependencies
-------------------------------
-All native module dependences are optional, but they are nice to have!
-Typical sign of missing build dependencies is that you get a bunch of errors when installing via npm.
-Installing the following packages should satisfy the build scripts:
-node-gyp python2 make gcc g++
-
-On Windows the following npm package will install the build dependencies: 
-```
-npm install --global --production windows-build-tools
-```
 
 Making a desktop icon and manually installing
 =============================================
@@ -212,6 +158,62 @@ Android device you have to start Termux and repeat step 6-7 above every time, so
 for example adding it to your .bashrc so that the server starts every time you start the Termux app.
 And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
 
+
+
+Able to type jzedit via "unix" terminal without installing via npm --global
+----------------------------------------------------------------------------
+In a unix like environment it's possible to open files and even pipe to bin/jzedit,
+in order to send streams of text to the editor.
+Just add the bin folder to your PATH environment variable:
+```
+export PATH="$PATH:/path/to/node_modules/jzedit/bin"
+```
+Put it in ~/.bashrc to make the PATH update permanent.
+
+
+Able to type jzedit in Windows command prompt without installing via npm --global
+-----------------------------------------------------------------------------------
+Add the jzedit/bin folder to the Path environment variable:
+(Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
+Select: Path, then click Edit, then New, and write:
+```
+C:\path\to\where\you\installed\node_modules\jzedit\bin\
+```
+(tip: Use the file explorer to navigate to the jzedit\bin folder, then copy the path/address)
+Click OK > OK > OK
+You have to open a new Command Prompt for the change to take effect.
+
+
+
+Permission issues when installing via npm using --global flag
+-------------------------------------------------------------
+When installing globally npm wants to put packages in places that might require root/administrator privileges.
+To fix this on a unix-like system such as Linux you can create a special folder for npm to put global files in:
+```
+mkdir ~/.npm-packages
+
+cat <<EOT >> .bashrc
+# Install global NPM packages in home dir
+NPM_PACKAGES="~/.npm-packages"
+export PATH="$NPM_PACKAGES/bin:$PATH"
+EOT
+
+npm config set prefix=$HOME/.npm-packages
+npm install --global jzedit
+```
+
+
+Missing npm build dependencies
+------------------------------
+All native module dependences are optional, but they are nice to have!
+Typical sign of missing build dependencies is that you get a bunch of errors when installing via npm.
+Installing the following packages should satisfy the build scripts:
+node-gyp python2 make gcc g++
+
+On Windows the following npm package will install the build dependencies: 
+```
+npm install --global --production windows-build-tools
+```
 
 
 
