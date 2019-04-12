@@ -29,15 +29,25 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Testing on G cloud console
-
-
 
 Writing a guide on how to make a survey
 
 
 todo
 ----
+
+When running a nodejs script for the same time, you get a question about installing modules.
+The script however don't start (too early?) and the modules are still missing,
+but when you run the script yet again the modueles are installed,
+or sometimes you have to continue clicking "install modules".
+
+Able to rename a file via VSC GUI,
+or automatically via file explorer (should detect .hg folder and do an hg mv instead of normal mv)
+
+Able to publicide an _article via SSG GUI, (just rename, or hg mv from _underscore to without _)
+
+Artifacts from iåäöl when typing, because of rendering optimization. 
+type here åäöil
 
 Support for KaiOS
 
