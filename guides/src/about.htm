@@ -25,7 +25,8 @@ and make it run <i>live</i> in the cloud with one click,
 <!--<p><a href="https://webide.se/">webide.se</a> is a free <a href="#jzedit">JZedit</a> server.</p>-->
 
 <p><a href="https://webide.se/">webide.se</a> runs JZedit - a editor/IDE for the cloud, 
-and offers shell/workspace for developing and editing web sites, apps and Node.JS services.</p>
+and offers shell/workspace for developing and editing web sites, apps and Node.JS services, 
+with database support for persistence, on always on containers.</p>
 
 
 <h2>JZedit selling points</h2>
@@ -33,14 +34,21 @@ and offers shell/workspace for developing and editing web sites, apps and Node.J
 <ul>
 	<li>Runs in the browser</li>
 	<li>JavaScript support</li>
+	<li>Written in vanilla JS with open source</li>
 	<li>Fast and Simple.</li>
 </ul>
 
-<li3>Runs everywhere</h3>
+<h3>Cloud edtior</h3>
 <ul>
-	<li>Runs on Chromebook's, Smart-phones, tablets, and even smart-TV's and watches (that has HTML5 support)</li>
+	<li>Separate backend/frontend lets you run the server on any PC/VPS/server and connect to it from anywhere</li>
+	<li>The server can be set up for multipiple users. Where each user share the same environment, but get separated isolated work spaces.</li>
+</ul>
+
+<h3>Runs everywhere</h3>
+<ul>
+	<li>You can run the (front-end) client on any device that has a HTML compatible web browser.
+	JZedit supports Chromebook's, Smart-phones, tablets, and even smart-TV's and watches (if they have a built in web browser)</li>
 	<li>It's possible to run the editor embedded on a web site.</li>
-	<li>It can run in the "cloud" or locally on your device.</li>
 </ul>
 
 <h3>JavaScript support</h3>
@@ -49,7 +57,10 @@ and offers shell/workspace for developing and editing web sites, apps and Node.J
 	<li>Function list for quick navigation</li>
 	<li>Automatic indentation</li>
 	<li>Auto-completion and function-argument hinting.</li>
-	<li>Shows console.log messages in the editor</li>
+	<li>Shows console.log messages inside the editor</li>
+	<li>Run Node.JS scripts.</li>
+	<li>Automatic quote insertion</li>
+	<li>Different colors for strings, comments and HTML tags (also inside strings/tamplates)</li>
 </ul>
 
 <h3>Edit files remotely</h3>
@@ -69,17 +80,57 @@ That's why JZedit has no telemetry or tracking whatsoever.</p>
 
 <h3>Additional features</h3>
 <ul>
-	<li>Separate backend/frontend lets you run the server on your PC/server and connect to it from anywhere</li>
-	<li>The editor can run in "cloud mode" where each user share the same environment, but get separated isolated work spaces.</li>
 	<li>Integrated source control: Commit from within the editor and show annotations.</li>
 	<li>Built in static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
 	<li>Live preview and WYSIYG editing.</li>
 	<li>Grouped file tabs</li>
 	<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted for faster navigation.</li>
 	<li>Talk to the editor using voice commands</li>
+	<li>Print support (PDF)</li>
 	<li>Built in virtual keyboard</li> 
 	<li>Collaborate editing: Edit the same document with others - at the same time!</li>
 	<li>Able to run emulators and GUI applications (via VNC).</li>
+	<li>Floating windows: De-attach a file and have it in another window which can be moved to a different monitor.</li>
+	<li>Integrated terminal emulator</li>
+	<li>A simple, yet powerful plugin API makes it fast and simple to add new features using vanilla JavaScript.</li>
+	<li>Plugins/extensions are hot loadable, no need to restart the editor</li>
+	<li>File explorer. <kbd>Ctrl+E</kbd></li>
+	<li>Go to any file. <kbd>Ctrl+O</kbd></li>
+	<li>Able to open and edit huge files several GB big</li>
+	<li>Open files from any remote machine, 
+	for example when SSH:ed just type jzeditr /path/to/file and it will open in the editor</li>
+	<li>Automatically wrap text <kbd>Ctrl+W</kbd></li>
+	<li>Spell checking with multiple languages and camelCase support.</li>
+	<li>Automatic CSS refresh in preview mode.</li>
+	<li>.diff file coloring.</li>
+	<li>File tabs.</li>
+	<li>Find <kbd>Ctrl+F</kbd></li>
+	<li>Find in any file. <kbd>Ctrl+Shif+F</kbd></li>
+	<li>Function to fork any web site, useful for totorials and examples. Append ?fork=url to the query string</li>
+	<li>Full screen support <kbd>F11</kbd></li>
+	<li>Modal/modes with VIM key binding. <kbd>Ctrl+M</kbd></li>
+	<li>Google drive integration</li>
+	<li>Quick file open/search <kbd>Ctrl+O</kbd></li>
+	<li>Goto line <kbd>Ctrl+G</kbd></li>
+	<li>Goto character <kbd>Ctrl+H</kbd></li>
+	<li>Lorem ipsum generator.<kbd>Ctrl+L</kbd></li>
+	<li>Support both LF and CRLF (unix and Windows line breaks) and able to convert between them</li>
+	<li>Parentheses highlightning</li>
+	<li>FTP,FTPS,SFTP protocol support</li>
+	<li>Highlight current line</li>
+	<li>Fading text in the margins.</li>
+	<li>Caret hides when you type</li>
+	<li>Double click to highlight words.</li>
+	<li>Line numers</li>
+	<li>Plugins can render info bubbles.</li>
+	<li>Speach synthesis reads out the current line, word and caret character. (append ?voice to the query string)</li>
+	<li>Pipe a text stream to the editor from a terminal, or from a different machine.</li>
+	<li>Touch scrolling</li>
+	<li>Undo/redo <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Y</kbd> </li>
+	<li>Indention line helpers <kbd>Ctrl+I</kbd></li>
+	<li>Mouse and touch screen support</li>
+	<li>Text selection using keyboard or mouse</li>
+	<li>Dark theme support (add ?darkTheme to query string)</li>
 </ul>
 
 <p>Despite the above features, the editor is pretty fast and light-weight. Total download size is only 2 MB.</p>
@@ -129,14 +180,6 @@ You can use the editor to make changes to the editor itself, and modules can be 
 
 <p>Does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
 
-
-<h2>But does it have Vim key-bindings?</h2>
-
-<p>Yes, "there is a editor, inside the editor", called Vim mode (vim normal), 
-hit <keyb>Ctrl+M</keyb> until you see "VIM* NORMAL MODE" in the bottom right corner.</p>
-
-<p>We want hardcore vim users to feel at home, but we are still in alpha, so only expect basic support for now.<br>
-Feel free to leave feedback to make it easier to prioritize what features to work on!</p>
 
 
 
