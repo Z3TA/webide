@@ -48,6 +48,12 @@
 	
 	(This was not actually a problem, but we'll keep using A and AAAA records instead of CNAME just in case)
 	---------------------------------------------------------------------------------------------------
+	Problem 4: When Certbot wants to register many domains, it first sends all stage=before, 
+	meaning we will have many TXT entries for the same domain!
+	
+	Solution: Check if there's already a value, then replace it
+	---------------------------------------------------------------------------------------------------
+	
 	
 	Check bind9 for zone file errors:
 	named-checkconf -z
@@ -260,14 +266,14 @@ function processWork(work) {
 			if(zoneData.indexOf(challangeString) == -1) throw new Error("zoneData doesn't contain challangeString=" + challangeString + "\n\nzoneData=" + zoneData);
 			
 			zoneData = zoneData.slice(0, zoneData.indexOf(challangeString)) + zoneData.slice(zoneData.indexOf(challangeString) + challangeString.length);
-			console.log("Removed challangeString=" + challangeString);
+			log("Removed challangeString=" + challangeString);
 			end -= challangeString.length;
 			
 			if(zoneData.indexOf(txtEntry) == -1) {
 				// It no longer contains any challange strings.
 				// We can also remove the padding
 				
-				console.log( "Removing padding:\n" + zoneData.slice(start, end) );
+				log( "Removing padding:\n" + zoneData.slice(start, end) );
 				
 				zoneData = zoneData.slice(0, start) + zoneData.slice(end);
 			}
@@ -275,6 +281,7 @@ function processWork(work) {
 		
 		if(stage == "before") {
 			if(start == -1) {
+				// No challange records exist
 				zoneData += paddingStart;
 				zoneData += challangeString;
 				if(subname) zoneData += specificString;
@@ -282,7 +289,19 @@ function processWork(work) {
 			}
 			else {
 				// A Letsencrypt TXT challange record already exist.
+				
+				var txtEntryIndex = zoneData.indexOf(txtEntry);
+				if(txtEntryIndex != -1) {
+					var endOfExistingTxtEntry = zoneData.indexOf("\n", txtEntryIndex);
+					if(endOfExistingTxtEntry == -1) throw new Error("Unable to find new line after " + txtEntry + " in " + zoneFile);
+					log("Removing existing TXT entry for " + name + " !");
+					zoneData = zoneData.slice(0, txtEntryIndex) + zoneData.slice(endOfExistingTxtEntry+1);
+				}
+				else log("No TXT record exist for " + name + "");
+				
+				
 				// Add another inside the padding
+				log("Adding challange string (TXT record) for " + name + "");
 				zoneData = zoneData.slice(0, start + paddingStart.length) + challangeString + zoneData.slice(start + paddingStart.length);
 			}
 		}
