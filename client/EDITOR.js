@@ -3398,11 +3398,11 @@ EDITOR.fireEvent("btk");
 		removeFrom(EDITOR.renderFunctions, fun);
 	}
 	
-	EDITOR.addPreRender = function(renderFunction) {
+	EDITOR.addPreRender = function(fun) {
 		// pre-renders modifies the buffer and returns the buffer, for example adding colors
 		return EDITOR.preRenderFunctions.push(fun) - 1;
 	}
-	EDITOR.removePreRender = function(renderFunction) {
+	EDITOR.removePreRender = function(fun) {
 		return removeFrom(EDITOR.preRenderFunctions, fun);
 	}
 	

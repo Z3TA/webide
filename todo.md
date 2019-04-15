@@ -29,12 +29,24 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Make color variables prerender also work with members (foo.bar) and gloal variables!
+
+Color variables in order to see which variables the editor doesn't recognize.
+
+Better autocomplete!
+
 
 Writing a guide on how to make a survey
 
 
+
 todo
 ----
+
+When you auto-complete EDITOR.settings.sty you get EDITOR.style
+
+Sometimes when opening a file and the goto file widget finds less then 10? files,
+and you hit arrow up on the keyboard, it goes back down again!
 
 When running a nodejs script for the same time, you get a question about installing modules.
 The script however don't start (too early?) and the modules are still missing,
@@ -2627,8 +2639,6 @@ Ignore quotes when matching parentheses
 Adding a quote at the start of a word should only insert a single quote not ""
 
 Confirmation when deleting SSG site
-
-Lazy autocomplete from other .js files ex: resources.gold
 
 Preserve indentation (spaces?) when commenting out code
 
