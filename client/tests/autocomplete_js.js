@@ -18,6 +18,21 @@
 	});
 	*/
 	
+	EDITOR.addTest(1, function autocompleteSubProp(callback) {
+		EDITOR.openFile("autocompleteSubProp.js", 'var object = {property: {subproperty: 1}}\nobject.property.s', function(err, file) {
+			
+			var index = 59;
+			
+			var atCaret = autoComplete(file, index);
+			
+			UTIL.assert(atCaret.word, "object.property.subproperty");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+			
+		});
+	});
+	
 	EDITOR.addTest(function autocompleteObjects(callback) {
 		EDITOR.openFile("autocompleteObjects.js", 'var object = {foo: 1, bar: 2}\nobject.b', function(err, file) {
 			

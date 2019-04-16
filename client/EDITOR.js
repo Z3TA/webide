@@ -1884,7 +1884,7 @@ text = file;
 			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
 				//console.time("prerender: " + funName);
-				buffer = EDITOR.preRenderFunctions[i](buffer, file); // Call render
+				buffer = EDITOR.preRenderFunctions[i](buffer, file, bufferStartRow); // Call render
 				//console.timeEnd("prerender: " + funName);
 			}
 			//console.timeEnd("preRenders");

@@ -36,7 +36,11 @@
 	var reHTML = /html?$/i;
 	var reJS = /js$/i;
 	
-	var colorScope = EDITOR.settings.style.altColors;
+	var localVariableColor = "rgb(51, 99, 172)"; // blue
+	var scopedVariableColor = "rgb(196, 162, 37)"; // orange
+	var globalVariableColor = "rgb(143, 15, 16)"; // red
+	
+	
 	
 	EDITOR.plugin({
 		desc: "Autocomplete for JavaScript",
@@ -46,8 +50,7 @@
 			EDITOR.on("fileOpen", autoCompleteJS_fileOpen);
 			EDITOR.on("fileParse", autoCompleteJS_fileParse);
 			
-			if(EDITOR.settings.devMode) EDITOR.addPreRender(variableColors);
-			
+			if(QUERY_STRING["variable_colors"]) EDITOR.addPreRender(variableColors);
 			
 		},
 		unload: function unload() {
@@ -243,6 +246,8 @@
 			
 		}
 		
+		console.log("autoCompleteJS: options=" + JSON.stringify(options, null, 2)); 
+		
 		return options; // disable default action
 		
 		
@@ -419,9 +424,11 @@
 			
 			function pushVariable(word, variable, variableName) {
 				
+				console.log("pushVariable: word=" + word + " variableName=" + variableName + " wordToComplete=" + wordToComplete + " variable=" + JSON.stringify(variable, null, 2) );
+				
 				var fullName = "";
 				
-				var lastIndexOfDot = wordToComplete.indexOf(".");
+				var lastIndexOfDot = wordToComplete.lastIndexOf(".");
 				
 				if(lastIndexOfDot != -1) {
 					fullName = wordToComplete.substring(0, lastIndexOfDot) + "." + variableName;
@@ -887,75 +894,148 @@
 	}
 	
 	
-	function variableColors(buffer, file) {
+	function variableColors(buffer, file, bufferStartRow) {
 		"use strict";
+		
+		if(!file.parse) return buffer;
 		
 		var words = [];
 		var word = "";
 		var char = "";
 		var gridRow;
+		var wordIndex = 0;
+		var wordCol = 0;
+		var wordBufferRow = 0;
+		var wordLine = 0; // Easier debugging
+		var wordDot = false;
 		for (var row=0; row<buffer.length; row++) {
 			gridRow = buffer[row];
+			word = "";
 			for (var col=0; col<gridRow.length; col++) {
 				
-				char = gridRow[col].char;
+				if(insideComment(gridRow[col].index, file)) continue;
+				if(insideQuote(gridRow[col].index, file)) continue;
 				
-				if(char.match(/\W/)) {
+				char = gridRow[col].char;
+				console.log("char=" + char + " word=" + word);
+				
+				if( char.match(/\W/) ) {
 					// It's a "non word" character
 					if(word) {
-						words.push({index: gridRow[col].index - word.length, word: word, row: row, col: col - word.length});
+						console.log("Got word=" + word + " on line=" + wordLine + " col=" + wordCol);
+						words.push({index: wordIndex, word: word, row: wordBufferRow, col: wordCol, dot: wordDot, line: wordLine});
 						word = "";
+						
+						if(char == ".") wordDot = true;
+						else wordDot = false;
 					}
 				}
 				else {
+					if(word == "") {
+						wordIndex = gridRow[col].index;
+						wordCol = col;
+						wordBufferRow = row;
+						wordLine = bufferStartRow + row + 1;
+					}
+					
 					word += char;
 				}
+			}
+			
+			if(word) {
+				console.log("Got word=" + word + " on line=" + wordLine + " col=" + wordCol);
+				words.push({index: wordIndex, word: word, row: wordBufferRow, col: wordCol, dot: wordDot, line: wordLine});
 			}
 		}
 		
 		console.log("variableColors: words=" + JSON.stringify(words, null, 2));
 		
 		var globalVariables = file.parsed.globalVariables;
+		var globalFunctionNames = file.parsed.functions && file.parsed.functions.map(function(f) { return f.name }) || [];
+		var functionScope;
+		var result;
+		
+		console.log( "globalFunctionNames=" + JSON.stringify(globalFunctionNames) );
 		
 		for (var i=0; i<words.length; i++) {
 			
-			// Check current function scope
-			var functionScope = getFunctionScope(words[i].index, file);
+			if(!isNaN(words[i].word)) continue; // It's a number
+			//if(jsKeywords.indexOf( words[i].word ) continue; // It's a JS keyword
 			
-			if(functionScope.length == 0) console.log("variableColors: No function scope for " + words[i].word + " on row=" + words[i].row + " col=" + words[i].col + " index=" + words[i].index);
+			if(file.parsed.functions) {
+			// Check current function scope
+			functionScope = getFunctionScope(words[i].index, file);
+			
+				if(functionScope.length == 0) console.log("variableColors: No function scope for " + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index);
 			else {
-				console.log( "variableColors: Function scope on " + words[i].word + " on row=" + words[i].row + " col=" + words[i].col + " index=" + words[i].index + ": " + JSON.stringify(functionScope, null, 2) )
-				
-				if(functionScope[0].indexOf(words[i].word) != -1) {
-					// It's a local variable!
-					console.log("variableColors: Local variable: " + words[i].word + " on row=" + words[i].row + " col=" + words[i].col + " index=" + words[i].index + ""); 
-					applyColor(words[i].row, words[i].col, words[i].word.length, 0);
-				}
-				else {
-					for (var level=1; level<functionScope.length; level++) {
-						if(functionScope[level].indexOf(words[i].word) != -1) {
-							// It's a scoped variable
-							console.log("variableColors: Scoped variable: " + words[i].word + " on row=" + words[i].row + " col=" + words[i].col + " index=" + words[i].index + "");
-							applyColor(words[i].row, words[i].col, words[i].word.length, level);
+					console.log( "variableColors: Checking function scope for word=" + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index + ": " + JSON.stringify(functionScope, null, 2) )
+					
+					for (var j=0; j<functionScope.length; j++) {
+						result = colorKeys( functionScope[j], words, i, (j == 0 ? localVariableColor: scopedVariableColor) );
+						if(result.index != i) {
+							console.warn("i=" + i + " result.index=" + result.index + " words.length=" + words.length + " Jumped " + (result.index-i) + " words forward");
+							i = result.index;
 						}
+						if(result.found) continue; // Don't check global or parent scope variables if we found a local or in scope variable!
 					}
 				}
 			}
+			
+			if(globalVariables) {
+				// Check global variables
+				console.log( "variableColors: Checking global scope for word=" + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index + ": " + JSON.stringify(globalVariables, null, 2) )
+				result = colorKeys( globalVariables, words, i, globalVariableColor );
+				if(result.index != i) {
+					console.warn("i=" + i + " result.index=" + result.index + " words.length=" + words.length + " Jumped " + (result.index-i) + " words forward");
+					i = result.index;
+				}
+				if(result.found) continue;
+			}
+			
+			if(globalFunctionNames) {
+				// Check global functions
+				console.log( "variableColors: Checking if word=" + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index + " is in globalFunctionNames=" + JSON.stringify(globalFunctionNames) )
+				if( globalFunctionNames.indexOf(words[i].word) != -1 ) {
+					applyColor(words[i].row, words[i].col, words[i].word.length, globalVariableColor);
+				}
+			}
+			
 		}
 		
 		return buffer;
 		
-		function applyColor(row, col, wordLength, level) {
-			var color = colorScope[level];
-			if(color == undefined) color = colorScope[colorScope.length-1];
+		function colorKeys(variables, words, i, color, recursive) {
 			
-			var gridRow = buffer[row];
+			if(!variables) throw new Error("variables=" + variables);
+			
+			console.log("variableColors: colorKeys: variables=" + Object.keys(variables) + " word=" + words[i].word);
+			
+			for(var variableName in variables) {
+				if( variableName == words[i].word ) {
+					console.log("variableColors: colorKeys: Found variable: " + variableName + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index + "");
+					applyColor(words[i].row, words[i].col, words[i].word.length, color);
+					
+					if(i == words.length-1 || !words[i+1].dot) return {index: i, found: true};
+					else return colorKeys(variables[variableName].keys, words, i+1, color, true);
+					
+				}
+			}
+			
+			console.log("variableColors: colorKeys: No variable found for word=" + words[i].word);
+			
+			if(recursive) return {index: i-1, found: true}; // Because no keys where found
+			else return {index: i, found: false};
+		}
+		
+		function applyColor(bufferRow, col, wordLength, color) {
+			
+			var gridRow = buffer[bufferRow];
 			
 			var column;
 			for (var i=0; i<wordLength; i++) {
 				column = gridRow[col+i];
 				if(!column) {
-console.warn("row=" + row + " buffer.length=" + buffer.length + " gridRow.length=" + gridRow.length + " col=" + col + " i=" + i + " wordLength=" + wordLength);
+					console.warn("bufferRow=" + bufferRow + " buffer.length=" + buffer.length + " gridRow.length=" + gridRow.length + " col=" + col + " i=" + i + " wordLength=" + wordLength);
 					break;
 				}
 				column.color = color;
@@ -963,40 +1043,91 @@ console.warn("row=" + row + " buffer.length=" + buffer.length + " gridRow.length
 		}
 	}
 	
+	function insideComment(index, file) {
+		if(!file.parsed) return null;
+		var comments = file.parsed.comments;
+		if(!comments) return null;
+		for (var i=0; i<comments.length; i++) {
+			if( comments[i].start < index && comments[i].end > index ) return true;
+		}
+		
+		return false;
+	}
+	
+	function insideQuote(index, file) {
+		if(!file.parsed) return null;
+		var quotes = file.parsed.quotes;
+		if(!quotes) return null;
+		for (var i=0; i<quotes.length; i++) {
+			if( quotes[i].start < index && quotes[i].end > index ) return true;
+		}
+		
+		return false;
+	}
 	
 	function getFunctionScope(index, file) {
 		var js = file.parsed;
 		
 		var functionScope = [];
+		var functionScopeLevel = [];
 		
-		if(js.functions) checkFunctions(js.functions);
+		if(js.functions) checkFunctions(js.functions, 0);
 		else console.log("variableColors (getFunctionScope): No functions on index=" + index + " in file.path=" + file.path);
 		
 		return functionScope;
 		
 		function checkFunctions(functions) {
 			
-			console.log("variableColors: getFunctionScope: checkFunctions: " + JSON.stringify(functions, null, 2));
+			//console.log("variableColors: getFunctionScope: checkFunctions: " + JSON.stringify(functions, null, 2));
 			
 			if(!functions) throw new Error(JSON.stringify(js));
+			
+			var variables = {};
+			
 			for (var i=0; i<functions.length; i++) {
+				
 				if(functions[i].start <= index && functions[i].end > index) {
+					// We are inside this function
 					
-					var parameters = functions[i].arguments.split(",").map(function(e){return e.trim();});
+					// Add function name 
+					if( functions[i].name ) {
+						variables[functions[i].name] = {
+							type: "function",
+							keys: {}
+						};
+					}
 					
-					var variables = Object.keys(functions[i].variables);
+					// Add function parameters
+					functions[i].arguments.split(",").map(function(str){return str.trim();}).forEach(function(variable) {
+						variables[variable] = {
+							type: "function parameter",
+							keys: {}
+						}
+					});
 					
-					variables = parameters.concat(variables);
+					// Add local variables
+					for (var variableName in functions[i].variables) {
+						variables[variableName] = functions[i].variables[variableName]
+					}
 					
-					functionScope.push(variables);
+					// Add sub-functions as variables
+					functions[i].subFunctions.forEach(function(subFunction) {
+						if(subFunction.name) {
+							variables[subFunction.name] = {
+								type: "function",
+								keys: {}
+							};
+						}
+					});
 					
 					checkFunctions(functions[i].subFunctions);
-					break; // index cannot be in any other functions on the same level, only subfunctions!
+					// index cannot be in any other functions on the same level, only subfunctions!
+					break;
 				}
 			}
+			
+			if(Object.keys(variables).length != 0) functionScope.push(variables);
 		}
-		
-		
 	}
 	
 })();
