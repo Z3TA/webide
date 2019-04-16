@@ -29,7 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Make color variables prerender also work with members (foo.bar) and gloal variables!
+variables declared inside for() loops
+
+variables daclared after if() statements
 
 Color variables in order to see which variables the editor doesn't recognize.
 

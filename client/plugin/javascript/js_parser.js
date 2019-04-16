@@ -2687,8 +2687,15 @@
 					}
 					else if(word.charAt(0) == "(" && word.charAt(word.length-1) == ")") {
 						// We got parameters for function call/declaration, or for/while/do loops
-						console.log("In parentheses: word=" + word + " lastWord=" + lastWord);
+						// Everything insiide a parentheses is added to the word 
+						console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord);
 						//lastWord = lastWord + word;
+						if(word.indexOf(";") != -1) {
+							// Found variable declaration insode for loop !?
+							findVariables( word.slice(1,word.indexOf(";")), myFunction, subFunctionDepth);
+						}
+						
+						
 						word = "";
 						return;
 					}
@@ -2819,6 +2826,46 @@
 			
 			if(typeof parseError != "undefined") parseError(err);
 			else throw err;
+		}
+		
+		function findVariables(str, myFunction, subFunctionDepth) {
+			str = str.trim();
+			var variableDeclarationWord = str.slice(0, str.indexOf(" "));
+			if( variableDeclarationWord == "var" || variableDeclarationWord == "let" || variableDeclarationWord == "const" ) {
+				str = str.slice(variableDeclarationWord.length);
+			}
+			else variableDeclarationWord = "";
+			
+			var variables = str.split(",");
+			
+			variables = variables.map(function(varStr) {
+				var eqIndex = varStr.indexOf("=");
+				if( eqIndex != -1 ) {
+					var left = varStr.slice(0, eqIndex ).trim();
+					var right = varStr.slice(eqIndex+1).trim();
+				}
+				else {
+					var left = varStr.trim();
+					var right = "";
+				}
+				return {left: left, right: right};
+			});
+			
+			//console.log("findVariables: variables = " + JSON.stringify(variables));
+			
+			variables.forEach(function(variable) {
+				
+				var theVariable = new Variable( getVariableType(variable.right), variable.right );
+				var func = myFunction[subFunctionDepth];
+				
+				if( variableDeclarationWord && func) {
+					func.variables[ variable.left ] = theVariable;
+				}
+				else {
+					globalVariables[ variable.left ] = theVariable;
+				}
+				
+			});
 		}
 		
 	}

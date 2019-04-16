@@ -18,7 +18,7 @@
 	});
 	*/
 	
-	EDITOR.addTest(1, function autocompleteArrayPrototypes(callback) {
+	EDITOR.addTest(function autocompleteArrayPrototypes(callback) {
 		EDITOR.openFile("autocompleteArrayPrototypes.js", 'var arr = []\narr.f', function(err, file) {
 			var index = 18;
 			

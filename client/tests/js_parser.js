@@ -1,4 +1,13 @@
 
+
+EDITOR.addTest(1, function variableDeclarationInsideForLoop(callback) {
+	EDITOR.openFile("variableDeclarationInsideForLoop.js", "for(var index=0; index<10; index++) {}", function(err, file) {
+		if(file.parsed.globalVariables["index"] == undefined) throw new Error("Expect global variable index file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function slashInRegexBracket(callback) {
 	EDITOR.openFile("slashInRegexBracket.js", "foo.replace(/[/][*][^/*]*[*][/]/g), ''); // strip multi-line comments", function(err, file) {
 		
