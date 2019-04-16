@@ -263,11 +263,14 @@ function processWork(work) {
 			
 			// Only remove the challange string!
 			
-			if(zoneData.indexOf(challangeString) == -1) throw new Error("zoneData doesn't contain challangeString=" + challangeString + "\n\nzoneData=" + zoneData);
-			
-			zoneData = zoneData.slice(0, zoneData.indexOf(challangeString)) + zoneData.slice(zoneData.indexOf(challangeString) + challangeString.length);
+			if(zoneData.indexOf(challangeString) == -1) {
+console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n\nzoneData=" + zoneData);
+			}
+			else {
+				zoneData = zoneData.slice(0, zoneData.indexOf(challangeString)) + zoneData.slice(zoneData.indexOf(challangeString) + challangeString.length);
 			log("Removed challangeString=" + challangeString);
 			end -= challangeString.length;
+			}
 			
 			if(zoneData.indexOf(txtEntry) == -1) {
 				// It no longer contains any challange strings.
