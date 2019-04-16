@@ -18,9 +18,21 @@
 	});
 	*/
 	
-	EDITOR.addTest(1, function autocompleteSubProp(callback) {
-		EDITOR.openFile("autocompleteSubProp.js", 'var object = {property: {subproperty: 1}}\nobject.property.s', function(err, file) {
+	EDITOR.addTest(1, function autocompleteArrayPrototypes(callback) {
+		EDITOR.openFile("autocompleteArrayPrototypes.js", 'var arr = []\narr.f', function(err, file) {
+			var index = 18;
 			
+			var atCaret = autoComplete(file, index);
+			
+			UTIL.assert(file.rowText(1), "arr.forEach()");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autocompleteSubProp(callback) {
+		EDITOR.openFile("autocompleteSubProp.js", 'var object = {property: {subproperty: 1}}\nobject.property.s', function(err, file) {
 			var index = 59;
 			
 			var atCaret = autoComplete(file, index);
@@ -29,7 +41,6 @@
 			
 			EDITOR.closeFile(file.path);
 			callback(true);
-			
 		});
 	});
 	

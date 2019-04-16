@@ -16,6 +16,25 @@
 		substring: {type: "Method", arguments: "start, end"}
 	};
 	
+	var arrayPrototype = {
+		length: {type: "Number"}, 
+		// Methods
+		concat: {type: "Method", arguments: "arraysOrValues..."},
+		filter: {type: "Method", arguments: "callback, thisArg"},
+		forEach: {type: "Method", arguments: "callback, thisArg"},
+		indexOf: {type: "Method", arguments: "searchElement, fromIndex"},
+		join: {type: "Method", arguments: "separator"},
+		map: {type: "Method", arguments: "callback"},
+		pop: {type: "Method", arguments: ""},
+		push: {type: "Method", arguments: "elements..."},
+		reduce: {type: "Method", arguments: "callback, initialValue"},
+		shift: {type: "Method", arguments: ""},
+		slice: {type: "Method", arguments: "begin, end"},
+		some: {type: "Method", arguments: "callback, thisArg"},
+		sort: {type: "Method", arguments: "compareFunction"},
+		splice: {type: "Method", arguments: "start, deleteCount, addItems..."},
+		unshift: {type: "Method", arguments: "elements..."}
+	};
 	
 	
 	// todo: Check if we are browser or nodejs or other JS platform
@@ -378,6 +397,9 @@
 					if(variable.type == "String") {
 						searchVariables(stringPrototype, keyName);
 					}
+					else if(variable.type == "Array") {
+						searchVariables(arrayPrototype, keyName);
+					}
 					else if(variable.type == "unknown") { // Variable
 						
 						// Check for functions with that name, then check if the function has a property that match the word
@@ -700,6 +722,9 @@
 					
 					if(variable.type == "String") {
 						theFunction = stringPrototype[functionNameLastPart];
+					}
+					else if(variable.type == "Array") {
+						theFunction = arrayPrototype[functionNameLastPart];
 					}
 					
 				}
