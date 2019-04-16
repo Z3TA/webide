@@ -13,7 +13,25 @@
 	
 	var stringPrototype = {
 		length: {type: "Number"}, 
-		substring: {type: "Method", arguments: "start, end"}
+		// Methods
+		charAt: {type: "Method", arguments: "index"},
+		charCodeAt: {type: "Method", arguments: "index"},
+		concat: {type: "Method", arguments: "strings..."},
+		fromCharCode: {type: "Method", arguments: "charCodes..."},
+		indexOf: {type: "Method", arguments: "searchvalue, start"},
+		lastIndexOf: {type: "Method", arguments: "searchvalue, start"},
+		match: {type: "Method", arguments: "regexp"},
+		replace: {type: "Method", arguments: "searchvalue, newvalue"},
+		search: {type: "Method", arguments: "searchvalue"},
+		slice: {type: "Method", arguments: "start, end"},
+		split: {type: "Method", arguments: "separator, limit"},
+		substr: {type: "Method", arguments: "start, length"},
+		substring: {type: "Method", arguments: "start, end"},
+		toLocaleLowerCase: {type: "Method", arguments: ""},
+		toLocaleUpperCase: {type: "Method", arguments: ""},
+		toLowerCase: {type: "Method", arguments: ""},
+		toUpperCase: {type: "Method", arguments: ""},
+		trim: {type: "Method", arguments: ""}
 	};
 	
 	var arrayPrototype = {
