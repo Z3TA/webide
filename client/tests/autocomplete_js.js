@@ -18,6 +18,19 @@
 	});
 	*/
 	
+	EDITOR.addTest(1, function autocompleteJsBuiltins(callback) {
+		EDITOR.openFile("autocompleteJsBuiltins.js", 'Math.fl', function(err, file) {
+			var index = 7;
+			
+			var atCaret = autoComplete(file, index);
+			
+			UTIL.assert(file.rowText(0), "Math.floor()");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function autocompleteArrayPrototypes(callback) {
 		EDITOR.openFile("autocompleteArrayPrototypes.js", 'var arr = []\narr.fo', function(err, file) {
 			var index = 19;

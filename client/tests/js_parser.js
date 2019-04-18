@@ -1,6 +1,6 @@
 
 
-EDITOR.addTest(1, function variableDeclarationAfterIf(callback) {
+EDITOR.addTest(function variableDeclarationAfterIf(callback) {
 	EDITOR.openFile("variableDeclarationAfterIf.js", "if(1==2) var global1 = 1;\nelse {\nvar global2=2;\nglobal3=3 // no semicolon!\n}\nfunction foo() {\nif(1==2) var local1=11;\nelse {\nvar local2=22;\nglobal4=4\n}\n}\n", function(err, file) {
 		if(file.parsed.globalVariables["global1"] == undefined) throw new Error("Expect global variable global1 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 		if(file.parsed.globalVariables["global2"] == undefined) throw new Error("Expect global variable global2 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));

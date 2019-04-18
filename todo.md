@@ -29,6 +29,13 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Investigate function prototype
+(prototype functions get added as functions in the scope !?)
+
+Ass autocomplete support for prototype.
+Example var d=new Date(); d.getT|
+
+Add more built in JS global properties and methods
 
 Better autocomplete!
 

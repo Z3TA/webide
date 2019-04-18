@@ -54,6 +54,49 @@
 		unshift: {type: "Method", arguments: "elements..."}
 	};
 	
+	var builtIns = {
+		"Math": {
+			keys: {
+				"E": {type: "Number"}, 
+				"LN2": {type: "Number"}, 
+				"LN10": {type: "Number"}, 
+				"LOG2E": {type: "Number"}, 
+				"LOG10E": {type: "Number"}, 
+				"PI": {type: "Number"}, 
+				"SQRT1_2": {type: "Number"}, 
+				"SQRT2": {type: "Number"}, 
+				
+				// Methods
+				"abs": {type: "Method", arguments: "number"},
+				"acos": {type: "Method", arguments: "number"},
+				"acosh": {type: "Method", arguments: "number"},
+				"asin": {type: "Method", arguments: "number"},
+				"asinh": {type: "Method", arguments: "number"},
+				"atan": {type: "Method", arguments: "number"},
+				"atan2": {type: "Method", arguments: "coordinateY, coordinateX"},
+				"atanh": {type: "Method", arguments: "number"},
+				"cbrt": {type: "Method", arguments: "number"},
+				"ceil": {type: "Method", arguments: "number"},
+				"cos": {type: "Method", arguments: "radians"},
+				"cosh": {type: "Method", arguments: "number"},
+				"exp": {type: "Method", arguments: "number"},
+				"floor": {type: "Method", arguments: "numbers..."},
+				"log": {type: "Method", arguments: "number"},
+				"max": {type: "Method", arguments: "numbers..."},
+				"min": {type: "Method", arguments: "numbers..."},
+				"pow": {type: "Method", arguments: "base, exponent"},
+				"random": {type: "Method", arguments: ""},
+				"round": {type: "Method", arguments: "number"},
+				"sin": {type: "Method", arguments: "radians"},
+				"sinh": {type: "Method", arguments: "number"},
+				"sqrt": {type: "Method", arguments: "number"},
+				"tan": {type: "Method", arguments: "radianAngle"},
+				"tanh": {type: "Method", arguments: "number"},
+				"trunc": {type: "Method", arguments: "number"},
+			}
+		}
+	};
+	
 	
 	// todo: Check if we are browser or nodejs or other JS platform
 	var globalContextVariables = {
@@ -256,8 +299,6 @@
 			
 			if(js.functions) findFunctions(js.functions);
 			
-			searchVariables(globalContextVariables, wordToComplete);
-			
 			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete); // Check global variables
 			
 			// Global variables from other files
@@ -280,6 +321,10 @@
 					searchVariables(globalVariables, wordToComplete); // Check global variables
 				}
 			}
+			
+			searchVariables(globalContextVariables, wordToComplete);
+			
+			searchVariables(builtIns, wordToComplete);
 			
 		}
 		
@@ -761,6 +806,26 @@
 				}
 			}
 			
+			if(!theFunction) {
+				// Check builtins
+				console.log("insideFunctionCall: Checking built in items ...");
+				var item = builtIns[property[0]];
+				if(item) {
+					if( item.keys && property.length > 1 ) {
+						item = item.keys[property[1]];
+					}
+					
+					if( item.type=="Method" ) {
+						theFunction = item;
+					}
+					else {
+						console.log("insideFunctionCall: " + property[0] + "." + property[1] + " is not a function");
+					}
+				}
+				else {
+					console.log("insideFunctionCall: No built-in item named " + property[0]);
+				}
+			}
 			
 			if(theFunction) {
 				
