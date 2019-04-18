@@ -1317,7 +1317,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1328,7 +1328,7 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var pointerName = properties[0];
@@ -1337,7 +1337,7 @@
 				if(insideFunctionBody[subFunctionDepth]) {
 					if(Object.hasOwnProperty.call(func.variables, pointerName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[pointerName];
-						console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
+						//console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
 					}
 					else {
 						// We have found a GLOBAL variable inside a function!?
@@ -1345,10 +1345,10 @@
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							variable = globalVariables[leftSide] = new Variable();
-							console.log("Added new global variable " + leftSide);
+							//console.log("Added new global variable " + leftSide);
 						}
 						else {
-							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 						
 					}
@@ -1382,10 +1382,10 @@
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							variable = globalVariables[leftSide] = new Variable();
-							console.log("Added new global variable " + leftSide);
+							//console.log("Added new global variable " + leftSide);
 						}
 						else {
-							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 					}
 					
@@ -1422,7 +1422,7 @@
 					
 			}
 			else {
-				console.log("Nothing to do?");
+				//console.log("Nothing to do?");
 			}
 			
 		}
@@ -1930,7 +1930,7 @@
 				readWords(charIndex);
 				
 				
-				console.log("char=" + char + " word=" + word + " lastWord=" + lastWord + " insideIfStatement=" + insideIfStatement + " ifStatementParenthesesDepth=" + ifStatementParenthesesDepth + " functionName=" + functionName + " insideFunctionDeclaration=" + insideFunctionDeclaration);
+				//console.log("char=" + char + " word=" + word + " lastWord=" + lastWord + " insideIfStatement=" + insideIfStatement + " ifStatementParenthesesDepth=" + ifStatementParenthesesDepth + " functionName=" + functionName + " insideFunctionDeclaration=" + insideFunctionDeclaration);
 				
 				// ### Code block indentation for JavaScript & CSS
 				if(char=="}") {
@@ -1950,7 +1950,7 @@
 						singleStatementContext = 1;
 						insideIfStatement = false;
 						// Find variable assignments inside the if statement !?
-						console.log("end if statement: word=" + word);
+						//console.log("end if statement: word=" + word);
 						word = "";
 						
 						
@@ -2075,7 +2075,7 @@
 						
 						// Figure out the name of the function
 						
-						console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						//console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
 						
@@ -2121,7 +2121,7 @@
 						
 						functionArguments = text.substring(functionArgumentsStart, i);
 						
-						console.log("functionArguments=" + functionArguments + " (because of right parenthesis)");
+						//console.log("functionArguments=" + functionArguments + " (because of right parenthesis)");
 					}
 					else if(insideArrowFunction) endArrowFunction();
 				}
@@ -2132,7 +2132,7 @@
 					
 					if(insideArrowFunction) endArrowFunction(1);
 						
-					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+					//console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
 					insideFunctionArguments = false;
@@ -2150,7 +2150,7 @@
 					
 					if(functionArguments.indexOf(">") != -1) functionArguments = functionArguments.replace(">", "").trim();
 						
-					console.log("functionArguments=" + functionArguments);
+					//console.log("functionArguments=" + functionArguments);
 					
 					//insideFunctionDeclaration = true;
 					functionName = lastVariableName;
@@ -2178,7 +2178,7 @@
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2564,7 +2564,7 @@
 			// Arrow functions without { angel wings } CAN have sub functions =)
 			// Don't bother trying to figure out the subfunctions though, just place them under the function function or global
 			
-			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments + " subFunctionDepth=" + subFunctionDepth + " lastVariableName=" + lastVariableName);
+			//console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments + " subFunctionDepth=" + subFunctionDepth + " lastVariableName=" + lastVariableName);
 			
 			functionName = lastVariableName || functionName;
 			
@@ -2739,7 +2739,7 @@ insideIfStatement = true;
 					else if(word.charAt(0)=="(" && word.charAt(word.length-1)==")") {
 						// We got parameters for function call/declaration, or for/while/do loops
 						// Everything insiide a parentheses is added to the word 
-						console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord);
+						//console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord);
 						//lastWord = lastWord + word;
 						if(word.indexOf(";") != -1) {
 							// Found variable declaration insode for loop !?
@@ -2754,14 +2754,14 @@ insideIfStatement = true;
 						
 						words.push(word);
 						
-						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
 							// Look for foo = bar = baz = 1
 							if(char!="=") {
 								rightSide += word;
-								console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + ")");
+								//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + ")");
 							endPointer();
 							}
 						}
@@ -2787,7 +2787,7 @@ insideIfStatement = true;
 								
 								// We are inside a var declaration!
 								
-								console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideCodeBlock=" + insideCodeBlock + " ");
+								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideCodeBlock=" + insideCodeBlock + " ");
 								
 								
 									// A local variable (inside a function or JSON??)
@@ -2808,7 +2808,7 @@ insideIfStatement = true;
 										
 										if(!Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, rootWord)) {
 											myFunction[subFunctionDepth].variables[word] = new Variable("");
-											console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
+											//console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 										}
 										else {
 											
@@ -2837,7 +2837,7 @@ insideIfStatement = true;
 								
 							}
 							else if(insideFunctionDeclaration) {
-								console.log("Found functon name maybe? word=" + word);
+								//console.log("Found functon name maybe? word=" + word);
 								functionName = word;
 							}
 							
