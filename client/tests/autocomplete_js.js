@@ -19,8 +19,8 @@
 	*/
 	
 	EDITOR.addTest(function autocompleteArrayPrototypes(callback) {
-		EDITOR.openFile("autocompleteArrayPrototypes.js", 'var arr = []\narr.f', function(err, file) {
-			var index = 18;
+		EDITOR.openFile("autocompleteArrayPrototypes.js", 'var arr = []\narr.fo', function(err, file) {
+			var index = 19;
 			
 			var atCaret = autoComplete(file, index);
 			

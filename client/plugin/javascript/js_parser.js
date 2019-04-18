@@ -94,6 +94,8 @@
 	var parseRequestId = 0;
 	var parseWorkerCallbacks = {}; // id: callback-function
 	
+	var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
+	
 	EDITOR.plugin({
 		desc: "Parse JavaScript etc",
 		order: 100,
@@ -192,10 +194,10 @@
 	
 	/* ### end: Helper code for parse worker */
 	
-	if(typeof Worker == "undefined") {
+	if(typeof Worker=="undefined") {
 		console.warn("Web Worker not supported on " + BROWSER);
 	}
-	else if(typeof URL == "undefined") {
+	else if(typeof URL=="undefined") {
 		console.warn("URL object not supported on " + BROWSER);
 	}
 	else {
@@ -240,20 +242,20 @@
 			We could argue that PHP scripts should not include html, or JS, but most php scripts probably does.
 		*/
 		
-		if( file.fileExtension == "" || 
-			file.fileExtension == "js" || 
-		file.fileExtension == "php" || 
-		file.fileExtension == "asp" || 
-		file.fileExtension == "vbs" ||  // Visual Basic Script
-		file.fileExtension == "vb" ||   // Visual Basic
-		file.fileExtension == "json" || 
-		file.fileExtension == "css" || 
-		file.fileExtension == "htm" || 
-		file.fileExtension == "html" || 
-		file.fileExtension == "java") {
+		if( file.fileExtension=="" || 
+			file.fileExtension=="js" || 
+		file.fileExtension=="php" || 
+		file.fileExtension=="asp" || 
+		file.fileExtension=="vbs" ||  // Visual Basic Script
+		file.fileExtension=="vb" ||   // Visual Basic
+		file.fileExtension=="json" || 
+		file.fileExtension=="css" || 
+		file.fileExtension=="htm" || 
+		file.fileExtension=="html" || 
+		file.fileExtension=="java") {
 			return true;
 		}
-		else if(file.fileExtension == "xml" && (file.text.indexOf("<?JS") != -1)) {
+		else if(file.fileExtension=="xml" && (file.text.indexOf("<?JS") != -1)) {
 			return true;
 		}
 		else {
@@ -264,7 +266,7 @@
 	
 	
 	function isWhiteSpace(char) {
-		return char == "" || char == " " || char == "\t" || char == "\r" || char == "\n";
+		return char=="" || char==" " || char=="\t" || char=="\r" || char=="\n";
 	}
 	
 	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
@@ -287,12 +289,12 @@
 			
 			var specialCharacters = "{}<>/\\\"'";
 			
-			if(type == "insert") {
+			if(type=="insert") {
 				lastCharacter = character;
 				character = characters;
 			}
 			
-			if(file.parsed && characters.length == 1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters) == -1)  {
+			if(file.parsed && characters.length==1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters)==-1)  {
 				
 				console.log("no re-parse opt");
 				
@@ -341,7 +343,7 @@
 				}
 				return;
 			}
-			else if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "removeRow")) { // If the file was parsed before
+			else if(file.parsed && (type=="delete" || type=="linebreak" || type=="insert" || type=="text" || type=="deleteTextRange" || type=="removeRow")) { // If the file was parsed before
 				
 				//console.log("type=" + type + " characters=" + characters);
 				
@@ -368,7 +370,7 @@
 					
 					var charactersLength = characters.length;
 					
-					if(type == "delete" || type == "deleteTextRange" || type == "removeRow") {
+					if(type=="delete" || type=="deleteTextRange" || type=="removeRow") {
 						charactersLength = -charactersLength;
 					}
 					
@@ -388,7 +390,7 @@
 						//console.log("Inside " + f.name);
 						
 						// If the function is not the majority of the file
-						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.settings.devMode) && file.text.charAt(f.end + charactersLength) == "}") {
+						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.settings.devMode) && file.text.charAt(f.end + charactersLength)=="}") {
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
@@ -410,10 +412,10 @@
 							// Prevent from searching too far
 							var funcDecText = file.text.substring(gridRowStartIndex, f.start);
 							
-							if(funcDecText.indexOf("function") == -1) {
+							if(funcDecText.indexOf("function")==-1) {
 								// The function declaration is probably above
 								// Seek to the left until we find a line that has function in it 
-								while(parseStartRow > 0 && funcDecText.indexOf("function") == -1) {
+								while(parseStartRow > 0 && funcDecText.indexOf("function")==-1) {
 									parseStartRow--;
 									gridRowStartIndex = file.grid[parseStartRow].startIndex;
 									funcDecText = file.text.substring(gridRowStartIndex, f.start);
@@ -430,7 +432,7 @@
 							
 							// I do not trust reLastIndexOf ...
 							
-							if(parseStart == -1) {
+							if(parseStart==-1) {
 								
 								var arrParseStart = [];
 								
@@ -448,7 +450,7 @@
 								
 								
 								//console.time("hmm"); // These used to be slow
-								//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
+								//if(parseStart==-1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
 								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), funcDecText));
 								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), funcDecText));
 								//console.timeEnd("hmm");
@@ -465,7 +467,7 @@
 								
 							}
 							
-							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + 
+							if(parseStart==-1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + 
 								" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?
@@ -663,7 +665,7 @@
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
 								
-							if(newParse.functions.length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
+							if(newParse.functions.length==0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
 								
 							var ff = newParse.functions[0]; // Ref to the same function in new parse
 							
@@ -881,7 +883,7 @@
 		
 		console.time("parseJavaScript");
 		
-		if(options == undefined) options = {};
+		if(options==undefined) options = {};
 		
 		var parseStart = options.start;
 		var parseEnd = options.end;
@@ -892,17 +894,19 @@
 		var text = file.text;
 		var textLength = text.length;
 		
-		if(baseIndentation == undefined) baseIndentation = 0;
-			if(parseStartRow == undefined) parseStartRow = 0;
+		if(baseIndentation==undefined) baseIndentation = 0;
+		if(parseStartRow==undefined) parseStartRow = 0;
 			
-		if(parseStart == undefined) parseStart = 0;
-			if(parseEnd == undefined) parseEnd = textLength;
+		if(parseStart==undefined) parseStart = 0;
+		if(parseEnd==undefined) parseEnd = textLength;
 			
 		var singleStatementContext = 0;
 		
 		// Optimization to try: Putting all the bools into an int for less memory lookups
 		
 		var originalBaseIndentation = baseIndentation,
+		insideIfStatement = false,
+		ifStatementParenthesesDepth = 0,
 		insideDblQuote = false,
 		insideDblQuoteBeforeLangTag = false,
 		insideSingleQuote = false,
@@ -1031,16 +1035,16 @@
 		if(options.jsMode) xmlMode = false;
 			else {
 			//console.log("file.fileExtension=" + file.fileExtension);
-			if(file.fileExtension == "htm" || 
-				file.fileExtension == "html" || 
-			file.fileExtension == "asp" || 
-			file.fileExtension == "php" || 
-			file.fileExtension == "xml") xmlMode = true; // Start in xml mode
+			if(file.fileExtension=="htm" || 
+				file.fileExtension=="html" || 
+			file.fileExtension=="asp" || 
+			file.fileExtension=="php" || 
+			file.fileExtension=="xml") xmlMode = true; // Start in xml mode
 			
 			var matchHtml = file.text.substr(0,100).trim().match(/(<!DOCTYPE html)|(<html.*>)/i);
 			
 			if(matchHtml) {
-				if(matchHtml.index == 0) {
+				if(matchHtml.index==0) {
 					xmlMode = true;
 					console.log("Set xmlMode=" + xmlMode);
 				}
@@ -1048,7 +1052,7 @@
 		}
 		
 		
-		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
+		if(file.fileExtension=="vbs" || file.fileExtension=="vb") vbScript = true;
 			
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
@@ -1125,7 +1129,7 @@
 			parenthesisStart[codeBlockDepth] = -1;
 			
 			
-			if(codeBlockDepth == 0) error( new Error("codeBlockDepth can not be zero") );
+			if(codeBlockDepth==0) error( new Error("codeBlockDepth can not be zero") );
 				
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
@@ -1177,22 +1181,22 @@
 			
 			var type = "unknown";
 			
-			if(rightSide.charAt(0) == '"' || rightSide.charAt(0) == "'") {
+			if(rightSide.charAt(0)=='"' || rightSide.charAt(0)=="'") {
 				type = "String";
 			}
-			else if(rightSide.charAt(0) == '[') {
+			else if(rightSide.charAt(0)=='[') {
 				type = "Array";
 			}
-			else if(rightSide.charAt(0) == '/') {
+			else if(rightSide.charAt(0)=='/') {
 				type = "RegExp";
 			}
-			else if(rightSide == "true" || rightSide == "false") {
+			else if(rightSide=="true" || rightSide=="false") {
 				type = "Boolean";
 			}
-			else if(rightSide == "this") {
+			else if(rightSide=="this") {
 				type = "this";
 			}
-			else if(rightSide.charAt(0) == "(") {
+			else if(rightSide.charAt(0)=="(") {
 				// Inside a parenthesis, it's either a number, boolean, or function call
 				// foo = bar(baz) 
 				
@@ -1238,7 +1242,7 @@
 			
 			var leftSide = "";
 			
-			if(pointerCharacter == ":") {
+			if(pointerCharacter==":") {
 				
 				/*
 					
@@ -1290,7 +1294,7 @@
 				
 				
 			}
-			else if(pointerCharacter == "=") {
+			else if(pointerCharacter=="=") {
 				// Ex: x = y; (leftside=x)
 				//console.log("What is best? leftSide=" + leftSide + " lastWord=" + lastWord + "");
 				leftSide = lastWord;
@@ -1313,7 +1317,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1324,35 +1328,43 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
-				var variableName = properties[0];
+				var pointerName = properties[0];
 				var startIndex = 1;
 				
 				if(insideFunctionBody[subFunctionDepth]) {
-					if(Object.hasOwnProperty.call(func.variables, variableName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
-						variable = func.variables[variableName];
-						//console.log("Variable= '" + variableName + "' listed in function=" + func.name + " variables! Yey!");
+					if(Object.hasOwnProperty.call(func.variables, pointerName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
+						variable = func.variables[pointerName];
+						console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
 					}
 					else {
 						// We have found a GLOBAL variable inside a function!?
-						// or an if statement: if*(foo) bar* = baz
-						//console.log("varibale='" + variableName + "' does not exist in function=" + func.name + " rightSide=" + rightSide + " (line=" + lineNumber + ")");
+					
+						if(leftSide.match(reValidVariableName)) {
+							// It's a valid variable name, so make it a global variable
+							variable = globalVariables[leftSide] = new Variable();
+							console.log("Added new global variable " + leftSide);
+						}
+						else {
+							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+						}
+						
 					}
 					
 				}
 				else {
 					
 					
-					theFunction = getFunctionWithName(functions,variableName);
+					theFunction = getFunctionWithName(functions,pointerName);
 					// Look for global variables
-					if(Object.hasOwnProperty.call(globalVariables, variableName)) {
-						variable = globalVariables[variableName];
+					if(Object.hasOwnProperty.call(globalVariables, pointerName)) {
+						variable = globalVariables[pointerName];
 					}
 					// Look for function names
 					else if(theFunction) {
-						//console.log("hmm? " + variableName + " is a function!");
+						console.log("hmm? " + pointerName + " is a function!");
 						
 						if(properties.length > 1) {
 							if(!Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
@@ -1366,19 +1378,30 @@
 					else {
 						// We have found an undeclared (no var) global variable?
 						// or arr[foo] = 1, where [foo] is leftSide
-						//console.log("varibale=" + variableName + " does not exist in globalVariables! lastWord=" + lastWord + " word=" + word + "");
+						
+						if(leftSide.match(reValidVariableName)) {
+							// It's a valid variable name, so make it a global variable
+							variable = globalVariables[leftSide] = new Variable();
+							console.log("Added new global variable " + leftSide);
+						}
+						else {
+							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+						}
 					}
 					
 				}
 				
 				if(variable) {
+					
+					variableName = ""; // Reset global variableName because we have found the right side
+					
 					// Traverse the variable pyramid ... Loop through the property chain
 					variable = traverseVariableTree(properties, variable, startIndex);
 					
 					
 					
 					variable.type = getVariableType(rightSide);
-					if(variable.type == "this") {
+					if(variable.type=="this") {
 						if(subFunctionDepth > 0) {
 							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly att the functon, but we want to avoid too much dublication
 						}
@@ -1399,7 +1422,7 @@
 					
 			}
 			else {
-				//console.log("Nothing to do?");
+				console.log("Nothing to do?");
 			}
 			
 		}
@@ -1460,14 +1483,14 @@
 			// We can not have /* after a lineComment, it will do nothing
 			
 			// ### HTML Comments: <!-- -->
-			//if(char == "-" && lastChar == "-" && llChar == "!") console.log("lllChar=" + lllChar + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
-			if(!insideScriptTag && char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
+			//if(char=="-" && lastChar=="-" && llChar=="!") console.log("lllChar=" + lllChar + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
+			if(!insideScriptTag && char=="-" && lastChar=="-" && llChar=="!" && lllChar=="<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
 				xmlMode = xmlModeBeforeTag;
 				commentStart = i-4;
 			}
-			else if(!insideScriptTag && char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
+			else if(!insideScriptTag && char==">" && lastChar=="-" && llChar=="-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
 				insideHTMLComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
@@ -1493,7 +1516,7 @@
 					
 				*/
 				
-				if(char == "/"
+				if(char=="/"
 					&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
 				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag &&
 				!CSS && !insideTemplateLiteral) {
@@ -1501,15 +1524,15 @@
 					regExpStart = i;
 					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
-				else if(insideRegExp && char == "[" && lastChar != "\\") {
+				else if(insideRegExp && char=="[" && lastChar != "\\") {
 					insideRegExpBracket = true;
 					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
-				else if(insideRegExp && char == "]" && (lastChar != "\\" || (lastChar == "\\" && llChar == "\\" ))) {
+				else if(insideRegExp && char=="]" && (lastChar != "\\" || (lastChar=="\\" && llChar=="\\" ))) {
 					insideRegExpBracket = false;
 					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
-				else if(insideRegExp && char == "/" && !insideRegExpBracket && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
+				else if(insideRegExp && char=="/" && !insideRegExpBracket && (lastChar != backSlash || (llChar==backSlash && lastChar==backSlash)) ) {
 					insideRegExp = false;
 					//console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
@@ -1522,20 +1545,20 @@
 				*/
 				
 				// ### Comments: //
-				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS && !insideTemplateLiteral) {
+				if(char=="/" && lastChar=="/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS && !insideTemplateLiteral) {
 					insideLineComment = true;
 					commentStart = i-1;
 					//console.log("insideLineComment!");
 					if(insideArrowFunction) endArrowFunction(1);
 					}
-				else if(char == "\n" && insideLineComment) {
+				else if(char=="\n" && insideLineComment) {
 					insideLineComment = false;
 					comments.push(new Comment(commentStart, i));
 					//console.log("Found line comment: " +  text.substring(commentStart, i))
 				}
 				
 				// ### Comments: /*   */
-				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment 
+				else if(char=="*" && lastChar=="/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment 
 				&& !insideBlockComment && !insideTemplateLiteral && !(insideRegExp && regExpStart != i-1)) {
 					insideBlockComment = true;
 					insideRegExp = false;
@@ -1543,7 +1566,7 @@
 					commentStartIndentation = indentate && file.grid[row].indentation;
 					//console.log("insideBlockComment!");
 				}
-				else if(char == "/" && lastChar == "*" && insideBlockComment) {
+				else if(char=="/" && lastChar=="*" && insideBlockComment) {
 					insideBlockComment = false;
 					comments.push(new Comment(commentStart, i));
 					//console.log("Found block comment: " + text.substring(commentStart, i));
@@ -1560,7 +1583,7 @@
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !insideTemplateLiteral) {
 					if(insideDblQuote) {
 						//console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
-						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash || vbScript)) {				
+						if(lastChar != backSlash || (lastChar==backSlash && llChar==backSlash || vbScript)) {				
 							insideDblQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);
@@ -1585,7 +1608,7 @@
 				// ### Quotes: single
 				else if(!vbScript && char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp && !insideTemplateLiteral) {
 					if(insideSingleQuote) {
-						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
+						if(lastChar != backSlash || (lastChar==backSlash && llChar==backSlash)) {	
 							insideSingleQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							
@@ -1605,20 +1628,20 @@
 				}
 				
 				// ### Single quote is a comment in vbScript
-				else if(vbScript && char == "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
+				else if(vbScript && char=="'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
 					insideLineComment = true;
 					commentStart = i-1;
 				}
-				else if(vbScript && char == "\n" && insideLineComment) {
+				else if(vbScript && char=="\n" && insideLineComment) {
 					insideLineComment = false;
 					comments.push(new Comment(commentStart, i));
 				}
 				
 				
 				// ### Template literals
-				else if(char == "`" && !insideDblQuote && !insideSingleQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+				else if(char=="`" && !insideDblQuote && !insideSingleQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideTemplateLiteral) {
-						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
+						if(lastChar != backSlash || (lastChar==backSlash && llChar==backSlash)) {	
 							insideTemplateLiteral = false;
 							quotes.push(new Quote(quoteStart, i));
 							
@@ -1651,14 +1674,14 @@
 				
 				
 				// ### PHP script tags <?php ?>
-				if(file.fileExtension == "php") {
-					if(pastChar3 == "<" &&  pastChar2 == "?" &&  pastChar1 == "p" &&  pastChar0 == "h" && char == "p") { // <?php
+				if(file.fileExtension=="php") {
+					if(pastChar3=="<" &&  pastChar2=="?" &&  pastChar1=="p" &&  pastChar0=="h" && char=="p") { // <?php
 						PHP = true;
 						language = "PHP";
 						xmlMode = false;
 						insideXmlTag = false;
 					}
-					else if(pastChar0 == "?" && char == ">" && PHP) { // ?>
+					else if(pastChar0=="?" && char==">" && PHP) { // ?>
 						PHP = false;
 						xmlMode = true;
 					}
@@ -1671,8 +1694,8 @@
 					%>
 					
 				*/
-				if(file.fileExtension == "asp" || file.fileExtension == "html" || file.fileExtension == "htm" || file.fileExtension == "inc") {
-					if(pastChar0 == "<" && char == "%") { // <%
+				if(file.fileExtension=="asp" || file.fileExtension=="html" || file.fileExtension=="htm" || file.fileExtension=="inc") {
+					if(pastChar0=="<" && char=="%") { // <%
 						ASP = true;
 						// Is it vbScript?
 						//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
@@ -1694,7 +1717,7 @@
 						
 						//console.log("ASP start here line=" + lineNumber);
 					}
-					else if(pastChar0 == "%" && char == ">" && ASP) { // %>
+					else if(pastChar0=="%" && char==">" && ASP) { // %>
 						ASP = false;
 						vbScript = false;
 						
@@ -1712,13 +1735,13 @@
 				}
 				
 				// ### Server side JS script tag
-				if(file.fileExtension == "xml" || file.fileExtension == "html" || file.fileExtension == "htm") {
-					if(pastChar2 == "<" &&  pastChar1 == "?" &&  pastChar0 == "J" && char == "S") { // <?JS
+				if(file.fileExtension=="xml" || file.fileExtension=="html" || file.fileExtension=="htm") {
+					if(pastChar2=="<" &&  pastChar1=="?" &&  pastChar0=="J" && char=="S") { // <?JS
 						SSJS = true;
 						xmlMode = false;
 						insideXmlTag = false;
 					}
-					else if(pastChar0 == "?" && char == ">" && SSJS) { // ?>
+					else if(pastChar0=="?" && char==">" && SSJS) { // ?>
 						SSJS = false;
 						xmlMode = true;
 					}
@@ -1740,11 +1763,11 @@
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(insideXmlTag && pastChar0 == "<" && char == "/") {
+				if(insideXmlTag && pastChar0=="<" && char=="/") {
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || (insideQuote && !insideXmlTag) )) {
+				else if(char=="<" && !insideParenthesis[codeBlockDepth] && (xmlMode || (insideQuote && !insideXmlTag) )) {
 					insideXmlTag = true;
 					
 					/*console.log("insideXmlTag! col=" + column + 
@@ -1770,7 +1793,7 @@
 					}
 				
 				// Exit out of style
-				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
+				else if(CSS && pastChar5=="<" && pastChar4=="/" && pastChar3=="s" && pastChar2=="t" && pastChar1=="y" && pastChar0=="l" && char=="e") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-6;
@@ -1779,7 +1802,7 @@
 					// CSS=false is set below ... (scroll down)
 				}
 				// Exit out of script
-				else if(insideScriptTag && pastChar6 == "<" && pastChar5 == "/" && pastChar4 == "s" && pastChar3 == "c" && pastChar2 == "r" && pastChar1 == "i" && pastChar0 == "p" && char == "t") {
+				else if(insideScriptTag && pastChar6=="<" && pastChar5=="/" && pastChar4=="s" && pastChar3=="c" && pastChar2=="r" && pastChar1=="i" && pastChar0=="p" && char=="t") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-7;
@@ -1787,7 +1810,7 @@
 					insideRegExp = false;
 				}
 				// Exit out of pre
-				else if(insideScriptTag && pastChar3 == "<" && pastChar2 == "/" && pastChar1 == "p" && pastChar0 == "r" && char == "e") {
+				else if(insideScriptTag && pastChar3=="<" && pastChar2=="/" && pastChar1=="p" && pastChar0=="r" && char=="e") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-4;
@@ -1795,18 +1818,18 @@
 					insideRegExp = false;
 				}
 				// Exit out of textarea
-				else if(insideScriptTag && pastChar8 == "<" && pastChar7 == "/" && pastChar6 == "t" && pastChar5 == "e" && pastChar4 == "x" && pastChar3 == "t" && pastChar2 == "a" && pastChar1 == "r" && pastChar0 == "e" && char == "a") {
+				else if(insideScriptTag && pastChar8=="<" && pastChar7=="/" && pastChar6=="t" && pastChar5=="e" && pastChar4=="x" && pastChar3=="t" && pastChar2=="a" && pastChar1=="r" && pastChar0=="e" && char=="a") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-9;
 					insideXmlTagEnding = true;
 					insideRegExp = false;
 				}
-				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
+				else if(char==" " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
 				}
-				else if(char == ">" && insideXmlTag && (!insideQuote || (xmlTagInsideDblQuote || xmlTagInsideSingleQuote || xmlTagInsideTemplateLiteral)) && !insideParenthesis[codeBlockDepth]) {
-					if(pastChar0 == "/") {
+				else if(char==">" && insideXmlTag && (!insideQuote || (xmlTagInsideDblQuote || xmlTagInsideSingleQuote || xmlTagInsideTemplateLiteral)) && !insideParenthesis[codeBlockDepth]) {
+					if(pastChar0=="/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
 					
@@ -1818,7 +1841,7 @@
 					
 					//console.log("xmlTag=" + xmlTag);
 					
-					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre" ||  xmlTag.toLowerCase() == "textarea") {
+					if(xmlTag.toLowerCase()=="script" || xmlTag.toLowerCase()=="pre" ||  xmlTag.toLowerCase()=="textarea") {
 						
 						//console.log(xmlTag);
 						
@@ -1834,7 +1857,7 @@
 							insideScriptTag = true;
 						}
 					}
-					else if(xmlTag.toLowerCase() == "style" && !insideQuote) {
+					else if(xmlTag.toLowerCase()=="style" && !insideQuote) {
 						
 						if(insideXmlTagEnding) { // Tag end
 							CSS = false;
@@ -1883,7 +1906,7 @@
 			
 			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			
-			if(codeBlockLeft == codeBlockRight) {
+			if(codeBlockLeft==codeBlockRight) {
 				insideCodeBlock = false;
 			} 
 			else {
@@ -1895,10 +1918,10 @@
 				//console.log("char(" + i + ")=" + char + "");
 				
 				/*
-					char == " " || char == "\t" || char == "\n" || 
+					char==" " || char=="\t" || char=="\n" || 
 				*/
 				
-				if(char == "}" || char == ";" || char == "," || char == "{" || char == lastLineBreakCharacter) {
+				if(char=="}" || char==";" || char=="," || char=="{" || char==lastLineBreakCharacter) {
 					variableStart = i+1;
 				}
 				
@@ -1907,19 +1930,38 @@
 				readWords(charIndex);
 				
 				
-				
+				console.log("char=" + char + " word=" + word + " lastWord=" + lastWord + " insideIfStatement=" + insideIfStatement + " ifStatementParenthesesDepth=" + ifStatementParenthesesDepth + " functionName=" + functionName + " insideFunctionDeclaration=" + insideFunctionDeclaration);
 				
 				// ### Code block indentation for JavaScript & CSS
-				if(char == "}") {
+				if(char=="}") {
 					codeBlockR();
 				}
-				else if(char == "{") {
+				else if(char=="{") {
 					codeBlockL();
 					willBeJSON = true; // Maybe :P
 				}
 				
-				
-				if(char == ";") {
+				if(insideIfStatement && char=="(") {
+					ifStatementParenthesesDepth++;
+				}
+				else if(insideIfStatement && char==")") {
+					ifStatementParenthesesDepth--;
+					if(ifStatementParenthesesDepth==0) {
+						singleStatementContext = 1;
+						insideIfStatement = false;
+						// Find variable assignments inside the if statement !?
+						console.log("end if statement: word=" + word);
+						word = "";
+						
+						
+					}
+				}
+				else if(word=="if" && (char==" " || char=="\t" || char=="(" || char=="\n" || char=="\r")) {
+					insideIfStatement = true;
+					if(char=="(") ifStatementParenthesesDepth++;
+					word = "";
+				}
+				else if(char==";") {
 					insideVariableDeclaration[codeBlockDepth] = false;
 					foundVariableInVariableDeclaration = false;
 					variableName = "";
@@ -1927,7 +1969,7 @@
 					if(insideArrowFunction) endArrowFunction(); // Arrow functions without {angel wings} can't have ; inside it
 					}
 				
-				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
+				else if(char=="," && !insideParenthesis[codeBlockDepth]) {
 					
 					//console.log("Found character=, insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " leftSide=" + leftSide + " rightSide=" + rightSide + " word=" + word + " lastWord=" + lastWord + " (line=" + lineNumber + ")");
 					
@@ -1938,7 +1980,7 @@
 					foundVariableInVariableDeclaration = false;
 					
 				}
-				else if(char == "[") {
+				else if(char=="[") {
 					//console.log("array! word=" + word + " lastWord=" + lastWord);
 					
 					insideArray[codeBlockDepth] = lastWord;
@@ -1953,7 +1995,7 @@
 					arrayStartRow = row;
 					
 				}
-				else if(char == "]") {
+				else if(char=="]") {
 					//console.log("End of array=" + insideArray[codeBlockDepth] + " word=" + word + " lastWord=" + lastWord + " leftSide=" + leftSide + " rightSide=" + rightSide + "");
 					
 					lastWord = insideArray[codeBlockDepth];
@@ -1967,7 +2009,7 @@
 					if(indentate && file.grid[row].indentation > 0 && arrayStartRow != row) file.grid[row].indentation--;				
 						
 				}
-				else if(char == "}") {
+				else if(char=="}") {
 					
 					//console.log("} insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " line:" + lineNumber + "");
 					
@@ -2010,11 +2052,11 @@
 					}
 					
 				}
-				else if( (char == "=" || char == ":") && !insideParenthesis[codeBlockDepth]) {
+				else if( (char=="=" || char==":") && !insideParenthesis[codeBlockDepth]) {
 					
 					lastVariableName = variableName;
 					variableName = text.substring(variableStart, i).trim();  // Used to find name of function
-					
+					if(variableName.indexOf("=") != -1) variableName = variableName.slice(0, variableName.indexOf("=")-1);
 					afterPointer[codeBlockDepth] = char;
 					
 					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
@@ -2027,26 +2069,26 @@
 					//console.log("ap leftSide=" + leftSide);
 					
 				}
-				else if(char == "(") {
+				else if(char=="(") {
 					
 					if(insideFunctionDeclaration) {
 						
 						// Figure out the name of the function
 						
-						//console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
 						
 						// insideParenthesis[0]=(functionbar(
 						var match = String(insideParenthesis[codeBlockDepth]).match(/function(.*)\(/);
-						//if( String(insideParenthesis[codeBlockDepth]).replace(/\s/g, "") == "(function(" ) functionName = ""; // prevent anonymous function to get a (the wrong) name
+						//if( String(insideParenthesis[codeBlockDepth]).replace(/\s/g, "")=="(function(" ) functionName = ""; // prevent anonymous function to get a (the wrong) name
 						
 						if(match) {
 							if(match[1]) functionName = match[1];
 								else functionName = "";
 						}
 						else if(variableName != "") functionName = variableName;
-						else if(lastWord == "function") functionName = ""; // Anonymous!
+						else if(lastWord=="function") functionName = ""; // Anonymous!
 						else functionName = (lastWord=="function" ? llWord : lastWord) || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
@@ -2070,7 +2112,7 @@
 					
 				}
 				
-				else if(char == ")") {
+				else if(char==")") {
 					insideParenthesis[codeBlockDepth] = "";
 					word = text.substring(parenthesisStart[codeBlockDepth], i+1);
 					
@@ -2079,12 +2121,12 @@
 						
 						functionArguments = text.substring(functionArgumentsStart, i);
 						
-						//console.log("arguments: " + functionArguments + "");
+						console.log("functionArguments=" + functionArguments + " (because of right parenthesis)");
 					}
 					else if(insideArrowFunction) endArrowFunction();
 				}
 				
-				else if(char == ">" && lastChar == "=") {
+				else if(char==">" && lastChar=="=") {
 					
 					// ## Found Arrow function
 					
@@ -2093,8 +2135,9 @@
 					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
+					insideFunctionArguments = false;
 					functionArguments = lastWord;
-					if(functionArguments.substring(0,1) == "(") {
+					if(functionArguments.substring(0,1)=="(") {
 						functionArguments = functionArguments.substring(1, functionArguments.length-1); // Trim the parentheses
 					}
 					else if(functionArguments === "") {
@@ -2107,7 +2150,9 @@
 					
 					if(functionArguments.indexOf(">") != -1) functionArguments = functionArguments.replace(">", "").trim();
 						
-					insideFunctionDeclaration = true;
+					console.log("functionArguments=" + functionArguments);
+					
+					//insideFunctionDeclaration = true;
 					functionName = lastVariableName;
 					
 					arrowFunctionStart = i;
@@ -2116,11 +2161,11 @@
 					
 				}
 				
-				else if(char == "{") {
+				else if(char=="{") {
 					
-					if(singleStatementContext == 1) singleStatementContext = 0;
+					if(singleStatementContext==1) singleStatementContext = 0;
 						
-					if(indentate && singleStatementContext == 2 && file.grid[row].indentation > 0) {
+					if(indentate && singleStatementContext==2 && file.grid[row].indentation > 0) {
 						file.grid[row].indentation--;
 					}
 					// ### Found function maybe
@@ -2133,7 +2178,7 @@
 						
 						// We have found a new function !
 						
-						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2245,11 +2290,11 @@
 				// ## Parse vbScript
 				// note: If it's ASP and JavaScript is should be all good
 				
-				//console.log("char=" + char.replace("\r", "<R>").replace("\n", "<N>") + " word=" + word + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " LLC=" + (char == lastLineBreakCharacter) + " FLC=" + (char == firstLineBreakCharacter) + " firstLineBreakCharacter=" + firstLineBreakCharacter.replace("\r", "<R>").replace("\n", "<N>") + " insideVariableDeclaration[codeBlockDepth]=" + insideVariableDeclaration[codeBlockDepth]);
+				//console.log("char=" + char.replace("\r", "<R>").replace("\n", "<N>") + " word=" + word + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " LLC=" + (char==lastLineBreakCharacter) + " FLC=" + (char==firstLineBreakCharacter) + " firstLineBreakCharacter=" + firstLineBreakCharacter.replace("\r", "<R>").replace("\n", "<N>") + " insideVariableDeclaration[codeBlockDepth]=" + insideVariableDeclaration[codeBlockDepth]);
 				
 				//char = char.toLowerCase(); // vbScript is not case sensitive!
 				
-				if(!insideDblQuote && (char == " " || char == "\t") && pastChar0.toLowerCase() == "m" && pastChar1.toLowerCase() == "e" && pastChar2.toLowerCase() == "r" && isWhiteSpace(pastChar3)) {
+				if(!insideDblQuote && (char==" " || char=="\t") && pastChar0.toLowerCase()=="m" && pastChar1.toLowerCase()=="e" && pastChar2.toLowerCase()=="r" && isWhiteSpace(pastChar3)) {
 					insideLineComment = true;
 					commentStart = i;
 				}
@@ -2261,16 +2306,16 @@
 					
 					// ### Collect vbScript words
 					
-					if(char == "\r" || char == "\n" || char == "%" || char == " " || char == "\t" || char == ":" || char == ",") {
+					if(char=="\r" || char=="\n" || char=="%" || char==" " || char=="\t" || char==":" || char==",") {
 						
 						// ### vbScript Variable declarations
-						if(insideVariableDeclaration[codeBlockDepth] && (char == firstLineBreakCharacter || char == ":")) {
+						if(insideVariableDeclaration[codeBlockDepth] && (char==firstLineBreakCharacter || char==":")) {
 							variableName = word || lastWord;
 							insideVariableDeclaration[codeBlockDepth] = false;
 							if(variableName) globalVariables[variableName] = new Variable();
 								console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 						}
-						else if(word == "dim") {
+						else if(word=="dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
 							word = "";
 							//console.log("DIM");
@@ -2284,15 +2329,15 @@
 							}
 							
 							// ### IF .. THEN .. ELSE ..
-							else if(word == "if" && lastWord == "end") { // END IF
+							else if(word=="if" && lastWord=="end") { // END IF
 								vb_thisRowIndentation--;
 							}
-							else if(word == "if") {
+							else if(word=="if") {
 								vb_afterIf = true; // Inside single line if maybe!?
 								vb_insideCondition = true;
 								vb_nextRowIndentation = 1; 
 							}
-							else if(word == "then" && vb_afterIf) {
+							else if(word=="then" && vb_afterIf) {
 								vb_afterThen = true; // If a word comes next; it's a single line if-statement
 							}
 							else if(vb_afterThen) {
@@ -2301,51 +2346,51 @@
 								vb_nextRowIndentation = 0; // Cancel out the indentation
 								//console.log("vb_afterThen yo!");
 							}
-							else if(word == "else" && lastWord != "case") {
+							else if(word=="else" && lastWord != "case") {
 								vb_thisRowIndentation--;
 								vb_nextRowIndentation = 1; 
 							}
-							else if(word == "elseif") {
+							else if(word=="elseif") {
 								vb_insideCondition = true;
 								vb_thisRowIndentation--;
 								vb_nextRowIndentation = 1
 							}
 							
 							// ### DO ... LOOP
-							else if(word == "do" && lastWord != "exit") {
+							else if(word=="do" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 								vb_insideCondition = true;
 							}
-							else if(word == "loop") {
+							else if(word=="loop") {
 								vb_thisRowIndentation--;
 								vb_insideCondition = true;
 							}
 							
 							// ### FOR ... NEXT
-							else if(word == "for" && lastWord != "exit") {
+							else if(word=="for" && lastWord != "exit") {
 								//console.log("for: vb_nextRowIndentation=" + vb_nextRowIndentation);
 								vb_nextRowIndentation = 1;
 								vb_insideFor++;
 							}
-							else if(word == "next" && vb_insideFor != 0) {
+							else if(word=="next" && vb_insideFor != 0) {
 								vb_thisRowIndentation--;
 								vb_insideFor--;
 							}
 							
 							// ### CLASS ... END CLASS
-							else if(word == "class" && lastWord == "end") {
+							else if(word=="class" && lastWord=="end") {
 								vb_thisRowIndentation--;
 							}
-							else if(word == "class") {
+							else if(word=="class") {
 								vb_nextRowIndentation = 1;
 							}
 							
 							// ### WHILE ... WEND
-							else if(word == "while") {
+							else if(word=="while") {
 								vb_nextRowIndentation = 1;
 								vb_insideCondition = true;
 							}
-							else if(word == "wend") {
+							else if(word=="wend") {
 								vb_thisRowIndentation--;
 							}
 							
@@ -2355,15 +2400,15 @@
 							*/
 							
 							// ### SELECT CASE ... END SELECT
-							else if(word == "select" && lastWord == "end") {
+							else if(word=="select" && lastWord=="end") {
 								vb_thisRowIndentation--;
 							}
-							else if(word == "case" && lastWord == "select") {
+							else if(word=="case" && lastWord=="select") {
 								vb_nextRowIndentation = 1;
 							}
 							
 							// ### CASE
-							else if(word == "case") {
+							else if(word=="case") {
 								vb_nextRowIndentation = 1;
 								//if(haveCase) vb_thisRowIndentation--;
 								vb_thisRowIndentation--;
@@ -2371,19 +2416,19 @@
 							
 							
 							// ### FUNCTION ... END FUNCTION
-							else if(word == "function" && lastWord == "end") {
+							else if(word=="function" && lastWord=="end") {
 								vb_thisRowIndentation--;
 							}							
-							else if(word == "function" && lastWord != "exit") {
+							else if(word=="function" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
 							
 							
 							// ### SUB ... END SUB
-							else if(word == "sub" && lastWord == "end") {
+							else if(word=="sub" && lastWord=="end") {
 								vb_thisRowIndentation--;
 							}
-							else if(word == "sub" && lastWord != "exit") {
+							else if(word=="sub" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
 							
@@ -2410,10 +2455,10 @@
 				// ## Parse PHP
 				
 				// PHP looks like C/JavaScript, so we can reuse some functons (for now)
-				if(char == "{") {
+				if(char=="{") {
 					codeBlockL();
 				}
-				else if(char == "}") {
+				else if(char=="}") {
 					codeBlockR();
 				}
 				
@@ -2422,35 +2467,35 @@
 			else if(CSS) {
 				// ## Parse CSS
 				
-				if(char == "{") {
+				if(char=="{") {
 					codeBlockL();
 				}
-				else if(char == "}") {
+				else if(char=="}") {
 					codeBlockR();
 				}
 				
 			}
 			
 			
-			if(insideArrowFunction && (char == "\r" || char=="\n")) endArrowFunction();
+			if(insideArrowFunction && (char=="\r" || char=="\n")) endArrowFunction();
 				
 			
 			
 			
-			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
+			if( (char=="\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0=="," || pastChar1=="," || pastChar2==",") ) {
 				// A new line without , exits variable declaration
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
 				variableName = "";
 				
-				//console.log("pastChar0=" + JSON.stringify(pastChar0) + " char=" + UTIL.lbChars(char) + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
+				//console.log("pastChar0=" + JSON.stringify(pastChar0) + " char=" + UTIL.lbChars(char) + " ? " +  (pastChar0=="," || pastChar1=="," || pastChar2==",") );
 				
 				
 				
 			}
 			
 			
-			if(char == lastLineBreakCharacter) {
+			if(char==lastLineBreakCharacter) {
 				// ## Line breaks
 				
 				
@@ -2480,7 +2525,7 @@
 				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
 				if(indentate) file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
 					
-				if(vb_nextRowIndentation == 1) {
+				if(vb_nextRowIndentation==1) {
 					vb_thisRowIndentation++;
 					vb_nextRowIndentation = 0;
 				}
@@ -2491,7 +2536,7 @@
 				row++;
 				column = 0;
 				
-				if(singleStatementContext == 2) singleStatementContext = 0;
+				if(singleStatementContext==2) singleStatementContext = 0;
 					
 				//console.log("i=" + i + " lineNumber=" + lineNumber + " lastWord=" + lastWord + " word=" + word);
 				
@@ -2520,6 +2565,8 @@
 			// Don't bother trying to figure out the subfunctions though, just place them under the function function or global
 			
 			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments + " subFunctionDepth=" + subFunctionDepth + " lastVariableName=" + lastVariableName);
+			
+			functionName = lastVariableName || functionName;
 			
 			if(functionName.indexOf("=") != -1) {
 				functionArguments = functionName.slice(functionName.indexOf("=")+1).trim();
@@ -2614,7 +2661,7 @@
 					insideParenthesis[codeBlockDepth] += char;
 					word = word + char;
 				}
-				if(  insideParenthesis[codeBlockDepth] + char == "(function " || insideParenthesis[codeBlockDepth] == "(function(" ) {
+				if(  insideParenthesis[codeBlockDepth] + char=="(function " || insideParenthesis[codeBlockDepth]=="(function(" ) {
 					//console.log("clousure line=" + lineNumber + "");
 					insideFunctionDeclaration = true;
 					lastWord="";
@@ -2626,14 +2673,14 @@
 				return;
 			}
 			// Letters keeps adding to the word ...
-			else if(char == " " && word == "var") {
+			else if(char==" " && word=="var") {
 				insideVariableDeclaration[codeBlockDepth] = true;
 				lastVariableDeclarationLine = lineNumber;
 				word = "";
 				variableStart = i;
 				return;
 			}
-			else if(char == " " && word == "function") {
+			else if(char==" " && word=="function") {
 				// Detects: function foo() ...
 				insideFunctionDeclaration = true;
 				word = "";
@@ -2641,7 +2688,7 @@
 				lastWord = "function";
 				return;
 			}
-			else if(char == "(" && word == "function") {
+			else if(char=="(" && word=="function") {
 				// Anonymous function
 				//console.log("anon function line=" + lineNumber + "");
 				insideFunctionDeclaration = true;
@@ -2652,13 +2699,13 @@
 				lastWord = "function";
 				return;
 			}
-			else if(char == " " && word == "new") {
+			else if(char==" " && word=="new") {
 				word = "";
 				return;
 			}
-			else if(charIndex == textLength || char == "=" || char == "(" || char == ")" || char == "\t" || char == "\r" || char == "\n" || char == "," || char == ";" || char == "{" || char == "}" || char == ":" || char == "," || char == "[" || char == "]") {
+			else if(charIndex==textLength || char=="=" || char=="(" || char==")" || char=="\t" || char=="\r" || char=="\n" || char=="," || char==";" || char=="{" || char=="}" || char==":" || char=="," || char=="[" || char=="]" || char==">") {
 				
-				// char == " " || char == "+" || char == "-" || char == "/" || char == ">" || char == "<" ||
+				// char==" " || char=="+" || char=="-" || char=="/" || char==">" || char=="<" ||
 				// If we are inside an array, the word is a value!
 				// insideArray[codeBlockDepth] ||
 				
@@ -2667,25 +2714,29 @@
 				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
 				
 				//console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
-				if(singleStatementContext == 1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
+				if(singleStatementContext==1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
 					//console.log("i=" + i + " line=" + lineNumber + " char=" + char + " reset singleStatementContext!");
 					singleStatementContext = 0;
 				}
 				
 				if(word.length > 0 && word != "/") { // Ignore / slash
 					
-					if(word == "if" || word == "else" || word == "new" || word == "while" || word == "for") {
+					if(word=="if" || word=="else" || word=="new" || word=="while" || word=="for") {
+						if(word == "if") {
+insideIfStatement = true;
+							//if(char == "(") ifStatementParenthesesDepth++;
+						}
 						word = "";
 						singleStatementContext = 1;
 						return;
 					}
-					else if(word == "function") {
+					else if(word=="function") {
 						// Detects var foo = function() ...
 						insideFunctionDeclaration = true;
 						word = "";
 						return;
 					}
-					else if(word.charAt(0) == "(" && word.charAt(word.length-1) == ")") {
+					else if(word.charAt(0)=="(" && word.charAt(word.length-1)==")") {
 						// We got parameters for function call/declaration, or for/while/do loops
 						// Everything insiide a parentheses is added to the word 
 						console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord);
@@ -2707,9 +2758,12 @@
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
-							rightSide += word;
-							//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + ")");
+							// Look for foo = bar = baz = 1
+							if(char!="=") {
+								rightSide += word;
+								console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + ")");
 							endPointer();
+							}
 						}
 						else if(insideArray[codeBlockDepth]) {
 							// Got a array value, 
@@ -2729,21 +2783,13 @@
 						}
 						else {
 							
-							if(insideVariableDeclaration[codeBlockDepth]) { //  && foundVariableInVariableDeclaration == false, removed because we couldn't find vars inside a function declared with var f = function
+							if(insideVariableDeclaration[codeBlockDepth]) { //  && foundVariableInVariableDeclaration==false, removed because we couldn't find vars inside a function declared with var f = function
 								
 								// We are inside a var declaration!
 								
-								console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "");
+								console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideCodeBlock=" + insideCodeBlock + " ");
 								
 								
-								if(!insideCodeBlock) {
-									// A global variable is declared:
-									
-									globalVariables[word] = new Variable();
-									//console.log("Added GLOBAL variable=" + word + "");
-									foundVariableInVariableDeclaration = false;
-								}
-								else {
 									// A local variable (inside a function or JSON??)
 									if(insideFunctionBody[subFunctionDepth]) {
 										
@@ -2776,13 +2822,25 @@
 										
 									}
 									else {
-										// Inside a global object notation declaration
+										// Inside a global object notation declaration ?
 										//console.log("Inside a global object notation declaration !??? word=" + word + " (line:" + lineNumber + ")");
-									}
+									
+									// A global variable is declared:
+									
+									globalVariables[word] = new Variable();
+									//console.log("Added GLOBAL variable=" + word + "");
+									foundVariableInVariableDeclaration = false;
 									
 								}
+									
+								
 								
 							}
+							else if(insideFunctionDeclaration) {
+								console.log("Found functon name maybe? word=" + word);
+								functionName = word;
+							}
+							
 							else {
 								//console.log("Inside a JSON declaration? (line=" + lineNumber + ")")
 							}
@@ -2803,8 +2861,8 @@
 				
 				word = word + char;
 				
-				if(word == " ") word = "";
-					if(word == "/") word = ""; // Prevent words after comments having /
+				if(word==" ") word = "";
+				if(word=="/") word = ""; // Prevent words after comments having /
 					
 			}
 			
@@ -2816,7 +2874,7 @@
 		
 		function getFunctionWithName(functions, name) {
 			for(var i=0; i<functions.length; i++) {
-				if(functions[i].name == name) return functions[i];
+				if(functions[i].name==name) return functions[i];
 				}
 			return null;
 		}
@@ -2831,7 +2889,7 @@
 		function findVariables(str, myFunction, subFunctionDepth) {
 			str = str.trim();
 			var variableDeclarationWord = str.slice(0, str.indexOf(" "));
-			if( variableDeclarationWord == "var" || variableDeclarationWord == "let" || variableDeclarationWord == "const" ) {
+			if( variableDeclarationWord=="var" || variableDeclarationWord=="let" || variableDeclarationWord=="const" ) {
 				str = str.slice(variableDeclarationWord.length);
 			}
 			else variableDeclarationWord = "";

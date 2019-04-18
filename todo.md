@@ -29,9 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-variables daclared after if() statements
-
-Color variables in order to see which variables the editor doesn't recognize.
 
 Better autocomplete!
 

@@ -1,6 +1,23 @@
 
 
-EDITOR.addTest(1, function variableDeclarationInsideForLoop(callback) {
+EDITOR.addTest(1, function variableDeclarationAfterIf(callback) {
+	EDITOR.openFile("variableDeclarationAfterIf.js", "if(1==2) var global1 = 1;\nelse {\nvar global2=2;\nglobal3=3 // no semicolon!\n}\nfunction foo() {\nif(1==2) var local1=11;\nelse {\nvar local2=22;\nglobal4=4\n}\n}\n", function(err, file) {
+		if(file.parsed.globalVariables["global1"] == undefined) throw new Error("Expect global variable global1 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["global2"] == undefined) throw new Error("Expect global variable global2 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["global3"] == undefined) throw new Error("Expect global variable global3 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name + " file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		
+		if(file.parsed.functions[0].variables["local1"] == undefined) throw new Error("Expected local variable local1: file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.functions[0].variables["local2"] == undefined) throw new Error("Expected local variable local2: file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.globalVariables["global4"] == undefined) throw new Error("Expect global variable global4 file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(function variableDeclarationInsideForLoop(callback) {
 	EDITOR.openFile("variableDeclarationInsideForLoop.js", "for(var index=0; index<3; index++) {}\nfunction myFunction() {\nfor(i=0; i<3; i++)\nfor(var j=0; j<3; j++)\n}\n", function(err, file) {
 		if(file.parsed.globalVariables["index"] == undefined) throw new Error("Expect global variable index file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 		if(file.parsed.globalVariables["i"] == undefined) throw new Error("Expect global variable i file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
@@ -429,7 +446,7 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 		
 		// There should be no ("button") variable
 		for(var variable in file.parsed.functions[0].variables) {
-			if(variable != "b") throw new Error("Unexpected variable: " + variable + " type=" + file.parsed.functions[0].variables[variable].type);
+			if(!(variable=="b" || variable=="i" ) ) throw new Error("Unexpected variable: " + variable + " type=" + file.parsed.functions[0].variables[variable].type);
 		}
 		
 		
@@ -460,10 +477,10 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	'"dog"\n' +
 	'"fish"\n'
 	');', function(err, file) {
-
+	
 	EDITOR.closeFile(file.path);
 	callback(true);
 	
-});
+	});
 	});
 */
