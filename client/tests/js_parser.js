@@ -1,8 +1,10 @@
 
 
 EDITOR.addTest(1, function variableDeclarationInsideForLoop(callback) {
-	EDITOR.openFile("variableDeclarationInsideForLoop.js", "for(var index=0; index<10; index++) {}", function(err, file) {
+	EDITOR.openFile("variableDeclarationInsideForLoop.js", "for(var index=0; index<3; index++) {}\nfunction myFunction() {\nfor(i=0; i<3; i++)\nfor(var j=0; j<3; j++)\n}\n", function(err, file) {
 		if(file.parsed.globalVariables["index"] == undefined) throw new Error("Expect global variable index file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["i"] == undefined) throw new Error("Expect global variable i file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.functions[0].variables["j"] == undefined) throw new Error("Expected local variable j: file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		EDITOR.closeFile(file.path);
 		callback(true);
 	});
