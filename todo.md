@@ -47,6 +47,8 @@ Writing a guide on how to make a survey
 todo
 ----
 
+Source is a symlink: /usr/bin/unrar -> /etc/alternatives/unrar (shared/mount.js:96:21)
+
 When you auto-complete EDITOR.settings.sty you get EDITOR.style
 
 Sometimes when opening a file and the goto file widget finds less then 10? files,
@@ -2045,6 +2047,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+SQL autocomplete 
 
 Find correct function name for 
 var convertDateToPDFDate = API.__private__.convertDateToPDFDate = function (parmDate) {
