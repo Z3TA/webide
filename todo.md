@@ -2050,10 +2050,6 @@ Polishing (only existing features)
 
 SQL autocomplete 
 
-Find correct function name for 
-var convertDateToPDFDate = API.__private__.convertDateToPDFDate = function (parmDate) {
-
-
 markdown preview (can't use wysiwygEdtiro, so we basically need to reimplement it, but for markdown instead of html)
 
 Add support for git, for example when cloning, detect if it's a git or mercurial repo, then use git if it's a git repo
