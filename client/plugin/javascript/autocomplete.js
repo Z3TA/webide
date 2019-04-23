@@ -54,7 +54,23 @@
 		unshift: {type: "Method", arguments: "elements..."}
 	};
 	
+	var builtInFunctions = [
+		{name: "eval", arguments: "codeString"},
+		{name: "isFinite", arguments: "testValue"},
+		{name: "isNaN", arguments: "value"},
+		{name: "parseFloat", arguments: "value"},
+		{name: "parseInt", arguments: "value, radix"},
+		{name: "decodeURI", arguments: "encodedURI"},
+		{name: "decodeURIComponent", arguments: "encodedURI"},
+		{name: "encodeURI", arguments: "UriString"},
+		{name: "encodeURIComponent", arguments: "UriStringComponent"}
+	];
+	
 	var builtIns = {
+		"Infinity": {type: "Number"},
+		"NaN": {type: "Number"},
+		"undefined": {},
+		"null": {},
 		"Math": {
 			keys: {
 				"E": {type: "Number"}, 
@@ -93,6 +109,16 @@
 				"tan": {type: "Method", arguments: "radianAngle"},
 				"tanh": {type: "Method", arguments: "number"},
 				"trunc": {type: "Method", arguments: "number"},
+			}
+		},
+		"Object": {
+			keys: {
+				"create": {type: "Method", arguments: "prototype, propertiesObject"},
+				"defineProperty": {type: "Method", arguments: "object, propertyOfObject, propertyDescription"},
+				"defineProperties": {type: "Method", arguments: "object, properties"}
+				// todo: Should I also include ES6+ methods !?
+				// "": {type: "Method", arguments: ""},
+				
 			}
 		}
 	};
@@ -325,6 +351,10 @@
 			searchVariables(globalContextVariables, wordToComplete);
 			
 			searchVariables(builtIns, wordToComplete);
+			
+			for(var i=0; i<builtInFunctions.length; i++) {
+				checkFunctionName(builtInFunctions[i].name, wordToComplete);
+			}
 			
 		}
 		
@@ -824,6 +854,18 @@
 				}
 				else {
 					console.log("insideFunctionCall: No built-in item named " + property[0]);
+				}
+			}
+			
+			if(!theFunction) {
+				// Check built in functions
+				console.log("insideFunctionCall: Checking built in functions ...");
+				
+				for(var i=0; i<builtInFunctions.length; i++) {
+					if( builtInFunctions[i].name == property[0] ) {
+						theFunction = builtInFunctions[i];
+						break;
+					}
 				}
 			}
 			
