@@ -168,7 +168,7 @@
 					return false;
 				}
 				else {
-					throw new Error("I dont know what to do with the quote");
+					throw new Error("I dont know what to do with the quote! file.parsed.language=" + file.parsed.language);
 				}
 			}
 			else if(   !xor    && !(quote == singleQuote && insideDbl)) {

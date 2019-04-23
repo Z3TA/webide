@@ -29,6 +29,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Functions can exist in many places:
+* global named functions
+* named functions inside other functions
+* a variable pointing to a function
+* a variable member pointing to a function
+* a function prototype member pointing to a function
+
+But add all functions to either global functions or subfunctions!
+If it's a member, add a new key with type="Method"
+
 Investigate function prototype
 (prototype functions get added as functions in the scope !?)
 

@@ -1144,6 +1144,9 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		}
 		
 		function codeBlockR() {
+			
+			console.log("codeBlockR: lineNumber=" + lineNumber);
+			
 			codeBlockRight++;
 			codeBlockRightRow = row;
 			
@@ -1235,7 +1238,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		}
 		
 		
-		function findLeftSide(pointerCharacter) {
+		function findLeftSide(pointerCharacter, d) {
 			
 			// Figure out the left side (the variable name) of a pointer (= or :)
 			
@@ -1266,7 +1269,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				
 				//leftSide = lastWord;
 				
-				var d = codeBlockDepth;
+				if(d == undefined) d = codeBlockDepth;
 				
 				if(insideArray[d]) {
 					leftSide = insideArray[d] + "." + arrayItemCount[d]; // leftSide=arr.0
@@ -1316,7 +1319,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -2058,7 +2061,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					if(variableName.indexOf("=") != -1) variableName = variableName.slice(0, variableName.indexOf("=")-1);
 					afterPointer[codeBlockDepth] = char;
 					
-					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 					
 					// Figure out the left side (the variable name)
 					
@@ -2177,7 +2180,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2192,6 +2195,13 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						*/
 						//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 						
+						/*
+							Add functions to either functions or function.subFunctions!
+							If it's a member variable pointing to the function,
+							add the whole foo.bar.baz to the function name,
+							and add a new key variable with type="Method
+						*/
+						
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
 						
 						if(insideArrowFunction) newFunc.arrowFunction = true;
@@ -2202,7 +2212,14 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
 							
 						properties = functionName.split(".");
-						
+
+						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
+							console.log("method? leftSide=" + findLeftSide(":", codeBlockDepth-1));
+							// todo: Add the variable!
+functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
+							properties = functionName.split(".");
+							
+						}
 						
 						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
@@ -2234,49 +2251,49 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						}
 						else {
 
-							if(properties.length > 1 && properties[properties.length-2] == "prototype") {
-								// it's a prototype function
-								for(var j=0; j<functions.length; j++) {
-									if(functions[j].name == properties[properties.length-3]) {
-										//newFunc.name = properties[properties.length-1];
-										functions[j].prototype[ properties[properties.length-1] ] = newFunc;
-										myFunction[subFunctionDepth] = functions[j].prototype[ properties[properties.length-1] ];
-										console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
-										break;
-									}
-								}
-								if(i==functions.length) console.warn("Unable to find function " + properties[properties.length-3]);
-								
-							}
-							else {
-								// a global function
-								functionIndex = functions.push(newFunc) - 1;
-								myFunction[subFunctionDepth] = functions[functionIndex];
-								
-								// Remove from global variables
-								if(Object.hasOwnProperty.call(globalVariables, functionName)) {
-									//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+							// a global function
+							functionIndex = functions.push(newFunc) - 1;
+							myFunction[subFunctionDepth] = functions[functionIndex];
+							
+							// Remove from global variables
+							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
+								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
-							}
 							
-							if(properties.length > 1) {
-								theFunction = getFunctionWithName(functions, properties[0]);
-								if(theFunction) {
-									// This is a variable (method) for a function: foo.bar.baz = function()
-									// This is run after variables has been added.
-									// Change the variable type to Method
-									// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
-									if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
-										
-										variable = theFunction.variables[properties[1]];
-										startIndex = 2;
-										variable = traverseVariableTree(properties, variable, startIndex);
-										
-										variable.type = "Method";
-									}
-									
+						}
+						
+						
+if(properties.length > 1 && properties[properties.length-2] == "prototype") {
+							// it's a prototype function
+							for(var j=0; j<functions.length; j++) {
+								if(functions[j].name == properties[properties.length-3]) {
+									//newFunc.name = properties[properties.length-1];
+									functions[j].prototype[ properties[properties.length-1] ] = new Variable("Method");
+									functions[j].prototype[ properties[properties.length-1] ].arguments = newFunc.arguments;
+									console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
+									break;
 								}
+							}
+							if(j==functions.length) console.warn("Unable to find function " + properties[properties.length-3]);
+							
+						}
+						else if(properties.length > 1) {
+							theFunction = getFunctionWithName(functions, properties[0]);
+							if(theFunction) {
+								// This is a variable (method) for a function: foo.bar.baz = function()
+								// This is run after variables has been added.
+								// Change the variable type to Method
+								// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
+								if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
+									
+									variable = theFunction.variables[properties[1]];
+									startIndex = 2;
+									variable = traverseVariableTree(properties, variable, startIndex);
+									
+									variable.type = "Method";
+								}
+								
 							}
 						}
 						
@@ -2989,6 +3006,7 @@ insideIfStatement = true;
 		variable.type = type;
 		variable.value = value;
 		variable.keys = {};
+		variable.arguments = ""; // If it's a method it can have arguments
 		
 		// Only functions Should have a prototype! 
 		
