@@ -1,4 +1,21 @@
 
+EDITOR.addTest(2, function findObjectPropertiesAndMethods(callback) {
+	EDITOR.openFile("findObjectPropertiesAndMethods.js", "var foo = {\nbar: 1,\nbaz: function() {}\n}\n", function(err, file) {
+		if(file.parsed.globalVariables["foo"] == undefined) throw new Error("Expect global variable foo! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["foo"].keys["bar"] == undefined) throw new Error("Expect property bar! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["foo"].keys["baz"] == undefined) throw new Error("Expect method baz! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(1, function findPrototype(callback) {
+	EDITOR.openFile("findPrototype.js", "function Foo() {}\nFoo.prototype.bar = function() {}\n", function(err, file) {
+		if(file.parsed.functions[0].prototype["bar"] == undefined) throw new Error("Expected prototype bar: file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
 
 EDITOR.addTest(function variableDeclarationAfterIf(callback) {
 	EDITOR.openFile("variableDeclarationAfterIf.js", "if(1==2) var global1 = 1;\nelse {\nvar global2=2;\nglobal3=3 // no semicolon!\n}\nfunction foo() {\nif(1==2) var local1=11;\nelse {\nvar local2=22;\nglobal4=4\n}\n}\n", function(err, file) {

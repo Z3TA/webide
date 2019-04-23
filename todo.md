@@ -32,7 +32,7 @@ What I'm working on
 Investigate function prototype
 (prototype functions get added as functions in the scope !?)
 
-Ass autocomplete support for prototype.
+Add autocomplete support for prototype.
 Example var d=new Date(); d.getT|
 
 Add more built in JS global properties and methods
@@ -46,6 +46,8 @@ Writing a guide on how to make a survey
 
 todo
 ----
+Error when recycling guests
+rror: stderr=Another instance of Certbot is already running. (stderr.length=47)
 
 Source is a symlink: /usr/bin/unrar -> /etc/alternatives/unrar (shared/mount.js:96:21)
 
@@ -2048,6 +2050,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+When connecting to a remote server via FTP/SFTP check opened files, compare them with file on disk (the hash) and mark them as saved if it's the same.
+
 SQL autocomplete 
 
 markdown preview (can't use wysiwygEdtiro, so we basically need to reimplement it, but for markdown instead of html)
@@ -3251,6 +3255,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Drag an drop selected text.
+When text is selected, you can hold down left mouse button, then release it where you want the text to be moved
 
 (Standalone?) service: SMS-push: Get SMS messages sent to your API,
 or get SMS messages sent to nr be stored in /sms/(one file for each from-nr.json)

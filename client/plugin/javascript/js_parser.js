@@ -2177,7 +2177,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						
 						// We have found a new function !
 						
-						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2233,16 +2233,32 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 							
 						}
 						else {
-							// a global function
-							functionIndex = functions.push(newFunc) - 1;
-							myFunction[subFunctionDepth] = functions[functionIndex];
-							
-							// Remove from global variables
-							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
-								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+
+							if(properties.length > 1 && properties[properties.length-2] == "prototype") {
+								// it's a prototype function
+								for(var j=0; j<functions.length; j++) {
+									if(functions[j].name == properties[properties.length-3]) {
+										//newFunc.name = properties[properties.length-1];
+										functions[j].prototype[ properties[properties.length-1] ] = newFunc;
+										myFunction[subFunctionDepth] = functions[j].prototype[ properties[properties.length-1] ];
+										console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
+										break;
+									}
+								}
+								if(i==functions.length) console.warn("Unable to find function " + properties[properties.length-3]);
+								
+							}
+							else {
+								// a global function
+								functionIndex = functions.push(newFunc) - 1;
+								myFunction[subFunctionDepth] = functions[functionIndex];
+								
+								// Remove from global variables
+								if(Object.hasOwnProperty.call(globalVariables, functionName)) {
+									//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
-							
+							}
 							
 							if(properties.length > 1) {
 								theFunction = getFunctionWithName(functions, properties[0]);

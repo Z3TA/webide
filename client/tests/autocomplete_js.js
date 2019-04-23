@@ -18,7 +18,7 @@
 	});
 	*/
 	
-	EDITOR.addTest(1, function autocompleteJsBuiltins(callback) {
+	EDITOR.addTest(function autocompleteJsBuiltins(callback) {
 		EDITOR.openFile("autocompleteJsBuiltins.js", 'Math.fl', function(err, file) {
 			var index = 7;
 			
