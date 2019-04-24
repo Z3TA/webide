@@ -2220,7 +2220,7 @@
 							Add functions to either functions or function.subFunctions!
 							If it's a member variable pointing to the function,
 							add the whole foo.bar.baz to the function name,
-							and add a new key variable with type="Method
+							and add a new key variable with method=true
 						*/
 						
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
@@ -2261,14 +2261,11 @@
 							if(properties.length > 1) {
 								if(Object.hasOwnProperty.call(myFunction[subFunctionDepth-1].variables, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
-									// Change the variable type to Method
 									variable = myFunction[subFunctionDepth-1].variables[properties[0]];
 									startIndex = 1;
 									variable = traverseVariableTree(properties, variable, startIndex);
-									
-									variable.type = "Method";
-									
-								}
+									variable.method = true;
+									}
 							}
 							
 						}
@@ -2287,11 +2284,10 @@
 							if(properties.length > 1) {
 								if(Object.hasOwnProperty.call(globalVariables, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
-									// Change the variable type to Method
 									variable = globalVariables[properties[0]];
 									startIndex = 1;
 									variable = traverseVariableTree(properties, variable, startIndex);
-									variable.type = "Method";
+									variable.method = true;
 								}
 							}
 							
@@ -2303,8 +2299,8 @@
 							for(var j=0; j<functions.length; j++) {
 								if(functions[j].name == properties[properties.length-3]) {
 									//newFunc.name = properties[properties.length-1];
-									functions[j].prototype[ properties[properties.length-1] ] = new Variable("Method");
-									//functions[j].prototype[ properties[properties.length-1] ].arguments = newFunc.arguments;
+									functions[j].prototype[ properties[properties.length-1] ] = new Variable();
+									functions[j].prototype[ properties[properties.length-1] ].method = true;
 									console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
 									break;
 								}
@@ -2317,15 +2313,13 @@
 							if(theFunction) {
 								// This is a variable (method) for a function: foo.bar.baz = function()
 								// This is run after variables has been added.
-								// Change the variable type to Method
 								// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
 								if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
 									
 									variable = theFunction.variables[properties[1]];
 									startIndex = 2;
 									variable = traverseVariableTree(properties, variable, startIndex);
-									
-									variable.type = "Method";
+									variable.method = true;;
 								}
 								
 							}
@@ -2659,13 +2653,10 @@
 				if(properties.length > 1) {
 					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
 						// This is a variable (method) for a function: foo.bar.baz = () => {}
-						// Change the variable type to Method
 						variable = myFunction[subFunctionDepth].variables[properties[0]];
 						startIndex = 1;
 						variable = traverseVariableTree(properties, variable, startIndex);
-						
-						variable.type = "Method";
-						
+						variable.method = true;
 					}
 				}
 				
@@ -2687,15 +2678,13 @@
 						if(theFunction) {
 							// This is a variable (method) for a function: foo.bar.baz = function()
 							// This is run after variables has been added.
-							// Change the variable type to Method
 							// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
 							if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
 								
 								variable = theFunction.variables[properties[1]];
 								startIndex = 2;
 								variable = traverseVariableTree(properties, variable, startIndex);
-								
-								variable.type = "Method";
+								variable.method = true;
 							}
 							
 						}
@@ -3009,7 +2998,7 @@
 		func.endRow = -1;
 		func.arrowFunction = false;
 		func.lambda = false;
-		func.prototype = {}; // Variables. (Methods will also be added as a variable here for consistency, it will also exist as a function)
+		func.prototype = {}; // Variables. (Prototype methods will also be added as a variable here for consistency, it will also exist as a function)
 		
 		/*
 			No need for an order property, we can order by start.
@@ -3042,8 +3031,9 @@
 		variable.type = type;
 		variable.value = value;
 		variable.keys = {};
+		variable.method = false;
 		
-		// Variables can be type=Method, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
+		// Variables can be methods, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
 		
 		// Only functions Should have a prototype! 
 		

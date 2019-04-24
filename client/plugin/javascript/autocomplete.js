@@ -37,21 +37,7 @@
 	var arrayPrototype = {
 		length: {type: "Number"}, 
 		// Methods
-		concat: {type: "Method", arguments: "arraysOrValues..."},
-		filter: {type: "Method", arguments: "callback, thisArg"},
-		forEach: {type: "Method", arguments: "callback, thisArg"},
-		indexOf: {type: "Method", arguments: "searchElement, fromIndex"},
-		join: {type: "Method", arguments: "separator"},
-		map: {type: "Method", arguments: "callback"},
-		pop: {type: "Method", arguments: ""},
-		push: {type: "Method", arguments: "elements..."},
-		reduce: {type: "Method", arguments: "callback, initialValue"},
-		shift: {type: "Method", arguments: ""},
-		slice: {type: "Method", arguments: "begin, end"},
-		some: {type: "Method", arguments: "callback, thisArg"},
-		sort: {type: "Method", arguments: "compareFunction"},
-		splice: {type: "Method", arguments: "start, deleteCount, addItems..."},
-		unshift: {type: "Method", arguments: "elements..."}
+		
 	};
 	
 	var builtInFunctions = [
@@ -64,6 +50,30 @@
 		{name: "decodeURIComponent", arguments: "encodedURI"},
 		{name: "encodeURI", arguments: "UriString"},
 		{name: "encodeURIComponent", arguments: "UriStringComponent"},
+		
+		{name: "Array", arguments: "", variables: {prototype:{"length": {type: "Number"}}}},
+		{name: "Array.prototype.concat", arguments: "arraysOrValues..."},
+		{name: "Array.prototype.filter", arguments: "callback, thisArg"},
+		{name: "Array.prototype.forEach", arguments: "callback, thisArg"},
+		{name: "Array.prototype.indexOf", arguments: "searchElement, fromIndex"},
+		{name: "Array.prototype.join", arguments: "separator"},
+		{name: "Array.prototype.map", arguments: "callback"},
+		{name: "Array.prototype.pop", arguments: ""},
+		{name: "Array.prototype.push", arguments: "elements..."},
+		{name: "Array.prototype.reduce", arguments: "callback, initialValue"},
+		{name: "Array.prototype.shift", arguments: ""},
+		{name: "Array.prototype.slice", arguments: "begin, end"},
+		{name: "Array.prototype.some", arguments: "callback, thisArg"},
+		{name: "Array.prototype.sort", arguments: "compareFunction"},
+		{name: "Array.prototype.splice", arguments: "start, deleteCount, addItems..."},
+		{name: "Array.prototype.unshift", arguments: "elements..."},
+		
+		//{name: "Array.prototype.", arguments: ""},
+		
+		{name: "Number.prototype.toFixed", arguments: "digits"},
+		
+		
+		
 		{name: "Date", arguments: "unixTimeDateStringOrYear, monthIndex, day, hours, minutes, seconds, milliseconds"},
 		{name: "Date.prototype.UTC", arguments: ""},
 		{name: "Date.prototype.now", arguments: ""},
@@ -91,41 +101,41 @@
 				"SQRT2": {type: "Number"}, 
 				
 				// Methods
-				"abs": {type: "Method", arguments: "number"},
-				"acos": {type: "Method", arguments: "number"},
-				"acosh": {type: "Method", arguments: "number"},
-				"asin": {type: "Method", arguments: "number"},
-				"asinh": {type: "Method", arguments: "number"},
-				"atan": {type: "Method", arguments: "number"},
-				"atan2": {type: "Method", arguments: "coordinateY, coordinateX"},
-				"atanh": {type: "Method", arguments: "number"},
-				"cbrt": {type: "Method", arguments: "number"},
-				"ceil": {type: "Method", arguments: "number"},
-				"cos": {type: "Method", arguments: "radians"},
-				"cosh": {type: "Method", arguments: "number"},
-				"exp": {type: "Method", arguments: "number"},
-				"floor": {type: "Method", arguments: "numbers..."},
-				"log": {type: "Method", arguments: "number"},
-				"max": {type: "Method", arguments: "numbers..."},
-				"min": {type: "Method", arguments: "numbers..."},
-				"pow": {type: "Method", arguments: "base, exponent"},
-				"random": {type: "Method", arguments: ""},
-				"round": {type: "Method", arguments: "number"},
-				"sin": {type: "Method", arguments: "radians"},
-				"sinh": {type: "Method", arguments: "number"},
-				"sqrt": {type: "Method", arguments: "number"},
-				"tan": {type: "Method", arguments: "radianAngle"},
-				"tanh": {type: "Method", arguments: "number"},
-				"trunc": {type: "Method", arguments: "number"},
+				"abs": {method: true, arguments: "number"},
+				"acos": {method: true, arguments: "number"},
+				"acosh": {method: true, arguments: "number"},
+				"asin": {method: true, arguments: "number"},
+				"asinh": {method: true, arguments: "number"},
+				"atan": {method: true, arguments: "number"},
+				"atan2": {method: true, arguments: "coordinateY, coordinateX"},
+				"atanh": {method: true, arguments: "number"},
+				"cbrt": {method: true, arguments: "number"},
+				"ceil": {method: true, arguments: "number"},
+				"cos": {method: true, arguments: "radians"},
+				"cosh": {method: true, arguments: "number"},
+				"exp": {method: true, arguments: "number"},
+				"floor": {method: true, arguments: "numbers..."},
+				"log": {method: true, arguments: "number"},
+				"max": {method: true, arguments: "numbers..."},
+				"min": {method: true, arguments: "numbers..."},
+				"pow": {method: true, arguments: "base, exponent"},
+				"random": {method: true, arguments: ""},
+				"round": {method: true, arguments: "number"},
+				"sin": {method: true, arguments: "radians"},
+				"sinh": {method: true, arguments: "number"},
+				"sqrt": {method: true, arguments: "number"},
+				"tan": {method: true, arguments: "radianAngle"},
+				"tanh": {method: true, arguments: "number"},
+				"trunc": {method: true, arguments: "number"},
 			}
 		},
 		"Object": {
 			keys: {
-				"create": {type: "Method", arguments: "prototype, propertiesObject"},
-				"defineProperty": {type: "Method", arguments: "object, propertyOfObject, propertyDescription"},
-				"defineProperties": {type: "Method", arguments: "object, properties"}
+				"create": {method: true, arguments: "prototype, propertiesObject"},
+				"defineProperty": {method: true, arguments: "object, propertyOfObject, propertyDescription"},
+				"defineProperties": {method: true, arguments: "object, properties"}
 				// todo: Should I also include ES6+ methods !?
-				// "": {type: "Method", arguments: ""},
+				// "": {method: true, arguments: ""},
 				
 			}
 		}
@@ -137,8 +147,8 @@
 		
 		document: {
 			keys: {
-				getElementById: {type: "Method", arguments: "id"},
-				createElement: {type: "Method", arguments: "tagName"}
+				getElementById: {method: true, arguments: "id"},
+				createElement: {method: true, arguments: "tagName"}
 			}
 		}
 		
@@ -362,6 +372,9 @@
 			
 			for(var i=0; i<builtInFunctions.length; i++) {
 				checkFunctionName(builtInFunctions[i].name, wordToComplete);
+			
+				//if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype) searchVariables(builtInFunctions[i].variables.prototype, wordToComplete);
+				
 			}
 			
 		}
@@ -372,7 +385,7 @@
 		
 		
 		function checkFunctionName(functionName, word) {
-			console.warn("Checking if word=" + word + " mathes function name=" + functionName + "");
+			console.warn("Checking if word=" + word + " matches function name=" + functionName + "");
 			if(functionName.indexOf(".prototype.") != -1) return;
 			//if(typeof functionName != "string") return; // It can be an anonymous function
 			//console.warn(functionName + "(" + typeof functionName + ")");
@@ -497,14 +510,7 @@
 					
 					console.log("variable.type=" + variable.type);
 					
-					// Try built in prototype methods and properties
-					if(variable.type == "String") {
-						searchVariables(stringPrototype, keyName);
-					}
-					else if(variable.type == "Array") {
-						searchVariables(arrayPrototype, keyName);
-					}
-					else if(variable.type == "this") {
+					if(variable.type == "this") {
 						var p = functionName.split(".");
 						
 						searchFunctionThis(p[0], keyName);
@@ -517,16 +523,29 @@
 						for (var i=0; i<builtInFunctions.length; i++) {
 							if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
 								var key = builtInFunctions[i].name.slice(builtInFunctions[i].name.lastIndexOf(".")+1);
-								pushVariable(keyName, {type: "Method"}, key);
+								pushVariable(keyName, {method: true}, key);
 							}
 						}
 						// Check global function prototypes
 						for (var i=0; i<js.functions.length; i++) {
 							if( js.functions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
 								var key = js.functions[i].name.slice(js.functions[i].name.lastIndexOf(".")+1);
-								pushVariable(keyName, {type: "Method"}, key);
+								pushVariable(keyName, {method: true}, key);
 							}
 						}
+						
+						// Check built in Object prototype properties
+						for (var i=0; i<builtInFunctions.length; i++) {
+							if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype) {
+								var keys = Object.keys( builtInFunctions[i].variables.prototype );
+								for(var j=0; j<keys.length; j++) {
+									if( keys[j].indexOf(keyName)==0 ) {
+										pushVariable(keyName, {method: false}, keys[j]);
+									}
+								}
+							}
+						}
+						
 						
 						
 						// Check for functions with that name, then check if the function has a property that match the word
@@ -570,7 +589,7 @@
 			
 			function pushVariable(word, variable, variableName) {
 				
-				console.log("pushVariable: word=" + word + " variableName=" + variableName + " wordToComplete=" + wordToComplete + " variable=" + JSON.stringify(variable, null, 2) );
+				console.warn("pushVariable: word=" + word + " variableName=" + variableName + " wordToComplete=" + wordToComplete + " variable=" + JSON.stringify(variable, null, 2) );
 				
 				var fullName = "";
 				
@@ -585,7 +604,7 @@
 					options.push([fullName + "[]", 1]);
 					
 				}
-				else if(variable.type == "Method") {
+				else if(variable.method) {
 					options.push([fullName + "()", 1]);
 				}
 				else if(variable.hasOwnProperty("keys")) {
@@ -844,11 +863,14 @@
 					
 					var functionNameLastPart = property[property.length-1];
 					
-					if(variable.type == "String") {
-						theFunction = stringPrototype[functionNameLastPart];
-					}
-					else if(variable.type == "Array") {
-						theFunction = arrayPrototype[functionNameLastPart];
+					// Check for function arguments in built in function prototype methods
+					for (var i=0; i<builtInFunctions.length; i++) {
+						console.log("Checking " + builtInFunctions[i].name);
+						if(builtInFunctions[i].name == variable.type + ".prototype." + functionNameLastPart) {
+							console.log("Found function " + builtInFunctions[i].name);
+							theFunction = builtInFunctions[i];
+							break;
+						}
 					}
 					
 				}
@@ -1144,11 +1166,11 @@
 			//if(jsKeywords.indexOf( words[i].word ) continue; // It's a JS keyword
 			
 			if(file.parsed.functions) {
-			// Check current function scope
-			functionScope = getFunctionScope(words[i].index, file);
-			
+				// Check current function scope
+				functionScope = getFunctionScope(words[i].index, file);
+				
 				if(functionScope.length == 0) {
-//console.log("variableColors: No function scope for " + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index);
+					//console.log("variableColors: No function scope for " + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index);
 				}
 				else {
 					//console.log( "variableColors: Checking function scope for word=" + words[i].word + " on line=" + words[i].line + " col=" + words[i].col + " index=" + words[i].index + ": " + JSON.stringify(functionScope, null, 2) )
@@ -1256,7 +1278,7 @@
 		
 		if(js.functions) checkFunctions(js.functions, 0);
 		else {
-//console.log("variableColors (getFunctionScope): No functions on index=" + index + " in file.path=" + file.path);
+			//console.log("variableColors (getFunctionScope): No functions on index=" + index + " in file.path=" + file.path);
 		}
 		return functionScope;
 		

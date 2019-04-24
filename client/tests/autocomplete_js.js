@@ -10,7 +10,7 @@
 	
 	EDITOR.addTest(1, function autocompletePrototypeMethods(callback) {
 		EDITOR.openFile("autocompletePrototypeMethods.js", 'function Person() {}\nPerson.prototype.banana=function() {};\nvar p = new Person();\np.ba\n', function(err, file) {
-			var index = 87;
+			var index = 86;
 			var atCaret = autoComplete(file, index);
 			UTIL.assert(file.rowText(3), "p.banana()");
 			EDITOR.closeFile(file.path);
