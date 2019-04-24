@@ -2280,7 +2280,7 @@
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
-								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+								console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
 							
