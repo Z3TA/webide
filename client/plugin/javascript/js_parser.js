@@ -1359,7 +1359,7 @@
 							// We have found a GLOBAL variable inside a function!?
 							// It's a valid variable name, so make it a global variable
 							// But not if it's a function parameter
-							if(subFunctionDepth==0 || myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
+							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 								variable = globalVariables[leftSide] = new Variable();
 								console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
 							}
@@ -1398,12 +1398,9 @@
 						
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
-							// But not if it's a function parameter!
-							if(subFunctionDepth==0 || myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
-								variable = globalVariables[leftSide] = new Variable();
+							variable = globalVariables[leftSide] = new Variable();
 								console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
 							}
-						}
 						else {
 							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
