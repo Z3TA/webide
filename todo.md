@@ -32,7 +32,9 @@ What I'm working on
 Add autocomplete support for prototype.
 Example var d=new Date(); d.getT|
 
-Add more built in JS global properties and methods
+Autocomplete prototype methods!
+
+Add more built in JS global properties and methods!
 
 Autocomplete inside []
 

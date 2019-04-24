@@ -512,8 +512,15 @@
 					else {
 						
 						// Look for prototype functions with the keyName
-						
 						console.log("keyName=" + keyName);
+						
+						for (var i=0; i<builtInFunctions.length; i++) {
+							if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
+								var key = builtInFunctions[i].name.slice(builtInFunctions[i].name.lastIndexOf(".")+1);
+								pushVariable(keyName, {type: "Method"}, key);
+							}
+						}
+						
 						
 						// Check for functions with that name, then check if the function has a property that match the word
 						
