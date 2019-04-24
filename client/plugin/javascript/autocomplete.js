@@ -1266,7 +1266,7 @@
 					
 					// Add sub-functions as variables
 					functions[i].subFunctions.forEach(function(subFunction) {
-						if(subFunction.name) {
+						if(subFunction.name && !subFunction.lambda) {
 							variables[subFunction.name] = {
 								type: "function",
 								keys: {}

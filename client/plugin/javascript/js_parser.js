@@ -156,7 +156,7 @@
 		}
 		
 		return true;
-}
+	}
 	
 	function messageFromParseWorker(e) {
 		console.log("Recived message from parseWorker ...");
@@ -241,7 +241,7 @@
 		*/
 		
 		if( file.fileExtension=="" || 
-			file.fileExtension=="js" || 
+		file.fileExtension=="js" || 
 		file.fileExtension=="php" || 
 		file.fileExtension=="asp" || 
 		file.fileExtension=="vbs" ||  // Visual Basic Script
@@ -298,7 +298,7 @@
 				
 				var charactersLength = 1;
 				if(type=="delete") charactersLength = -1;
-					var oldParse = file.parsed;
+				var oldParse = file.parsed;
 				// Update functions
 				if(oldParse.functions) updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
 				
@@ -466,7 +466,7 @@
 							}
 							
 							if(parseStart==-1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + 
-								" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
+							" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?
 							
@@ -504,7 +504,7 @@
 									spliceLen++;
 									//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
 									if(spliceStart==-1) spliceStart = i;
-										continue;
+									continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -555,7 +555,7 @@
 									spliceLen++;
 									//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
 									if(spliceStart==-1) spliceStart = i;
-										continue;
+									continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -604,7 +604,7 @@
 									spliceLen++;
 									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
 									if(spliceStart==-1) spliceStart = i;
-										continue;
+									continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -662,15 +662,15 @@
 							
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
-								
+							
 							if(newParse.functions.length==0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
-								
+							
 							var ff = newParse.functions[0]; // Ref to the same function in new parse
 							
 							if(ff.end < 0) {
 								// The parsed function did not get an ending.
 								if(newParse.blockMatch) throw new Error("New parse of function " + ff.name + " did not get an ending! end=" + ff.end);	
-									else {
+								else {
 									// Give it a temporary/virtual ending
 									// Next parse should be a full parse due to the block missmatch (could probably skip the full parse because of block missmatch if we need to optimize)
 									
@@ -709,13 +709,13 @@
 									throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " " + compareObjects(fullParse.comments, oldParse.comments));
 								}
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
-									if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
-									
+								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
+								
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
-									if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
-									
+								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
+								
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
-									
+								
 								
 								// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
 								if(EDITOR.settings.devMode && newParse.blockMatch) {
@@ -785,7 +785,7 @@
 				//console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
 				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
-					
+				
 				if(isBelow) {
 					//console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
 					
@@ -883,7 +883,7 @@
 		
 		if(options==undefined) options = {};
 		
-var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
+		var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
 		var parseStart = options.start;
 		var parseEnd = options.end;
 		var baseIndentation = options.baseIndentation;
@@ -895,10 +895,10 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		
 		if(baseIndentation==undefined) baseIndentation = 0;
 		if(parseStartRow==undefined) parseStartRow = 0;
-			
+		
 		if(parseStart==undefined) parseStart = 0;
 		if(parseEnd==undefined) parseEnd = textLength;
-			
+		
 		var singleStatementContext = 0;
 		
 		// Optimization to try: Putting all the bools into an int for less memory lookups
@@ -906,6 +906,8 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		var originalBaseIndentation = baseIndentation,
 		insideIfStatement = false,
 		ifStatementParenthesesDepth = 0,
+		leftParentheses = [],
+		rightParentheses = [],
 		insideDblQuote = false,
 		insideDblQuoteBeforeLangTag = false,
 		insideSingleQuote = false,
@@ -1032,10 +1034,10 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		
 		
 		if(options.jsMode) xmlMode = false;
-			else {
+		else {
 			//console.log("file.fileExtension=" + file.fileExtension);
 			if(file.fileExtension=="htm" || 
-				file.fileExtension=="html" || 
+			file.fileExtension=="html" || 
 			file.fileExtension=="asp" || 
 			file.fileExtension=="php" || 
 			file.fileExtension=="xml") xmlMode = true; // Start in xml mode
@@ -1052,7 +1054,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		
 		
 		if(file.fileExtension=="vbs" || file.fileExtension=="vb") vbScript = true;
-			
+		
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
 		
@@ -1060,6 +1062,8 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		L[subFunctionDepth] = 1; // { Asume open
 		R[subFunctionDepth] = 0; // }
 		
+		leftParentheses[0]=0;
+		rightParentheses[0]=0;
 		
 		insideVariableDeclaration[0] = false;
 		
@@ -1076,7 +1080,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 		
 		
 		if(insideLineComment) comments.push(new Comment(commentStart, i)); // Find comment on last line
-			
+		
 		
 		console.timeEnd("parseJavaScript");
 		
@@ -1126,10 +1130,11 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 			arrayItemCount[codeBlockDepth] = 0;
 			insideParenthesis[codeBlockDepth] = "";
 			parenthesisStart[codeBlockDepth] = -1;
-			
+			leftParentheses[codeBlockDepth] = 0;
+			rightParentheses[codeBlockDepth] = 0;
 			
 			if(codeBlockDepth==0) error( new Error("codeBlockDepth can not be zero") );
-				
+			
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
 			if(codeBlockDepth > 1) {
@@ -1161,7 +1166,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 			
 			// Never after a pointer after a } unless in an array
 			if(!insideArray[codeBlockDepth]) afterPointer[codeBlockDepth] = false;  
-				
+			
 			
 			
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
@@ -1280,7 +1285,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				
 				while(d>0) {
 					if(afterPointer[d] != ":") break;
-						
+					
 					if(insideArray[d-1]) {
 						leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + leftSide; // leftSide=arr.0.foo
 					}
@@ -1343,13 +1348,13 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					}
 					else {
 						// We have found a GLOBAL variable inside a function!?
-					
+						
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 								variable = globalVariables[leftSide] = new Variable();
 								//console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
-						}
+							}
 						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
@@ -1387,9 +1392,9 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 							// It's a valid variable name, so make it a global variable
 							// But not if it's a function parameter!
 							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
-							variable = globalVariables[leftSide] = new Variable();
+								variable = globalVariables[leftSide] = new Variable();
 								//console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
-						}
+							}
 						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
@@ -1426,7 +1431,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				rightSide = "";
 				
 				if(insideVariableDeclaration[codeBlockDepth]) foundVariableInVariableDeclaration = true;
-					
+				
 			}
 			else {
 				//console.log("Nothing to do?");
@@ -1468,7 +1473,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 			
 			
 			if(char != " " && char != "\t" && char != "\r" && char != "\n") lnw = char; // Last non whitespace character
-				
+			
 			//char = text.charAt(charIndex);
 			char = text[charIndex];
 			
@@ -1524,7 +1529,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				*/
 				
 				if(char=="/"
-					&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
+				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
 				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag &&
 				!CSS && !insideTemplateLiteral) {
 					insideRegExp = true;
@@ -1543,7 +1548,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					insideRegExp = false;
 					//console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
-					}
+				}
 				
 				/*
 					console.log(" i=" + i + " char=" + char + " line=" + lineNumber + " col=" + column + " insideRegExp=" + insideRegExp + " regExpStart=" + regExpStart + 
@@ -1557,7 +1562,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					commentStart = i-1;
 					//console.log("insideLineComment!");
 					if(insideArrowFunction) endArrowFunction(1);
-					}
+				}
 				else if(char=="\n" && insideLineComment) {
 					insideLineComment = false;
 					comments.push(new Comment(commentStart, i));
@@ -1729,7 +1734,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						vbScript = false;
 						
 						if(!insideScriptTag) xmlMode = true;
-							
+						
 						if(insideDblQuoteBeforeLangTag) {
 							insideDblQuote = true;
 							quoteStart = i+1;
@@ -1786,9 +1791,9 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					*/
 					
 					if(insideDblQuote) xmlTagInsideDblQuote = true;
-						if(insideSingleQuote) xmlTagInsideSingleQuote = true;
+					if(insideSingleQuote) xmlTagInsideSingleQuote = true;
 					if(insideTemplateLiteral) xmlTagInsideTemplateLiteral = true;
-						
+					
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
 					xmlTagWordLength = 0;
@@ -1797,7 +1802,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						xmlMode = false; // Why end xmlMode inside tags !?? 
 					}
 					if(insideHTMLComment) error( new Error("WTF") );
-					}
+				}
 				
 				// Exit out of style
 				else if(CSS && pastChar5=="<" && pastChar4=="/" && pastChar3=="s" && pastChar2=="t" && pastChar1=="y" && pastChar0=="l" && char=="e") {
@@ -1841,7 +1846,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					}
 					
 					if(xmlTagWordLength === 0) xmlTagWordLength = i - xmlTagStart;
-						xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
+					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
@@ -1886,7 +1891,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 							// It's a ending tag </tag>
 							openXmlTags--;
 							if(indentate && xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
-							}
+						}
 						else {
 							// It's a tag opening
 							openXmlTags++;
@@ -1974,7 +1979,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					variableName = "";
 					
 					if(insideArrowFunction) endArrowFunction(); // Arrow functions without {angel wings} can't have ; inside it
-					}
+				}
 				
 				else if(char=="," && !insideParenthesis[codeBlockDepth]) {
 					
@@ -2012,9 +2017,9 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					insideArray[codeBlockDepth] = false;
 					
 					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
-						
+					
 					if(indentate && file.grid[row].indentation > 0 && arrayStartRow != row) file.grid[row].indentation--;				
-						
+					
 				}
 				else if(char=="}") {
 					
@@ -2078,6 +2083,8 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				}
 				else if(char=="(") {
 					
+					leftParentheses[codeBlockDepth]++;
+					
 					if(insideFunctionDeclaration) {
 						
 						// Figure out the name of the function
@@ -2092,16 +2099,16 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						
 						if(match) {
 							if(match[1]) functionName = match[1];
-								else functionName = "";
+							else functionName = "";
 						}
 						else if(variableName != "") functionName = variableName;
 						else if(lastWord=="function") functionName = ""; // Anonymous!
 						else functionName = (lastWord=="function" ? llWord : lastWord) || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
-							
+						
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
-							
+						
 						//if(functionName.indexOf("=") != -1) functionName = "";
 						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
@@ -2120,6 +2127,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				}
 				
 				else if(char==")") {
+					rightParentheses[codeBlockDepth]++;
 					insideParenthesis[codeBlockDepth] = "";
 					word = text.substring(parenthesisStart[codeBlockDepth], i+1);
 					
@@ -2138,7 +2146,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					// ## Found Arrow function
 					
 					if(insideArrowFunction) endArrowFunction(1);
-						
+					
 					//console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
@@ -2152,11 +2160,11 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						if(word.indexOf("=>") != -1) {
 							functionArguments = word.substring(0, word.indexOf("=>"));
 							if(functionArguments.indexOf(",") != -1) functionArguments = functionArguments.substring(functionArguments.lastIndexOf(",")+1).trim();
-							}
+						}
 					}
 					
 					if(functionArguments.indexOf(">") != -1) functionArguments = functionArguments.replace(">", "").trim();
-						
+					
 					//console.log("functionArguments=" + functionArguments);
 					
 					//insideFunctionDeclaration = true;
@@ -2171,7 +2179,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 				else if(char=="{") {
 					
 					if(singleStatementContext==1) singleStatementContext = 0;
-						
+					
 					if(indentate && singleStatementContext==2 && file.grid[row].indentation > 0) {
 						file.grid[row].indentation--;
 					}
@@ -2180,12 +2188,12 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					//console.log("{ insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
 					
 					if(insideFunctionBody[subFunctionDepth]) L[subFunctionDepth]++;
-						
+					
 					if((insideFunctionDeclaration) && !insideFunctionArguments) {
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideParenthesis[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + insideParenthesis[codeBlockDepth-1] + " leftParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + leftParentheses[codeBlockDepth-1] + " rightParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + rightParentheses[codeBlockDepth-1]);
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2210,23 +2218,25 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
 						
 						if(insideArrowFunction) newFunc.arrowFunction = true;
-							
+						
+						if(leftParentheses[codeBlockDepth-1] > rightParentheses[codeBlockDepth-1]) newFunc.lambda = true;
+						
 						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
-							
+						
 						properties = functionName.split(".");
-
+						
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
 							console.log("method? leftSide=" + findLeftSide(":", codeBlockDepth-1));
 							// todo: Add the variable!
 							functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
 							newFunc.name = functionName;
-properties = functionName.split(".");
-							}
+							properties = functionName.split(".");
+						}
 						
-						//console.log("subFunctionDepth=" + subFunctionDepth);
+						console.log("subFunctionDepth=" + subFunctionDepth);
 						
 						if(insideFunctionBody[subFunctionDepth]) {
 							//It's a sub-function
@@ -2255,7 +2265,7 @@ properties = functionName.split(".");
 							
 						}
 						else {
-
+							
 							// a global function
 							functionIndex = functions.push(newFunc) - 1;
 							myFunction[subFunctionDepth] = functions[functionIndex];
@@ -2265,7 +2275,7 @@ properties = functionName.split(".");
 								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
-
+							
 							if(properties.length > 1) {
 								if(Object.hasOwnProperty.call(globalVariables, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
@@ -2280,7 +2290,7 @@ properties = functionName.split(".");
 						}
 						
 						
-if(properties.length > 1 && properties[properties.length-2] == "prototype") {
+						if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 							// it's a prototype function
 							for(var j=0; j<functions.length; j++) {
 								if(functions[j].name == properties[properties.length-3]) {
@@ -2361,7 +2371,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 							variableName = word || lastWord;
 							insideVariableDeclaration[codeBlockDepth] = false;
 							if(variableName) globalVariables[variableName] = new Variable();
-								console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
+							console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 						}
 						else if(word=="dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
@@ -2373,7 +2383,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 							if(insideVariableDeclaration[codeBlockDepth]) {
 								variableName = word || lastWord;
 								if(variableName) globalVariables[variableName] = new Variable();
-									//console.log("New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
+								//console.log("New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 							}
 							
 							// ### IF .. THEN .. ELSE ..
@@ -2491,7 +2501,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 					else {
 						
 						if(insideVariableDeclaration[codeBlockDepth]) word += char // Keep case (for auto completion of variable names)
-							else word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
+						else word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
 						
 						//console.log("word++" + char);
 						
@@ -2526,7 +2536,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 			
 			
 			if(insideArrowFunction && (char=="\r" || char=="\n")) endArrowFunction();
-				
+			
 			
 			
 			
@@ -2572,7 +2582,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 				
 				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
 				if(indentate) file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
-					
+				
 				if(vb_nextRowIndentation==1) {
 					vb_thisRowIndentation++;
 					vb_nextRowIndentation = 0;
@@ -2585,7 +2595,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 				column = 0;
 				
 				if(singleStatementContext==2) singleStatementContext = 0;
-					
+				
 				//console.log("i=" + i + " lineNumber=" + lineNumber + " lastWord=" + lastWord + " word=" + word);
 				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
@@ -2597,9 +2607,9 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 					file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
 				}
 				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
-					
+				
 				if(singleStatementContext==1) singleStatementContext++;
-					
+				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
 			}
@@ -2699,7 +2709,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 		function readWords(charIndex) {
 			// Collects the words to find variables
 			
-			//console.log("char=" + char + " word=" + word);
+			//console.log("char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
 			
 			
 			// .substr(start,length)   .substring(start,end)
@@ -2772,7 +2782,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 					
 					if(word=="if" || word=="else" || word=="new" || word=="while" || word=="for") {
 						if(word == "if") {
-insideIfStatement = true;
+							insideIfStatement = true;
 							//if(char == "(") ifStatementParenthesesDepth++;
 						}
 						word = "";
@@ -2811,7 +2821,7 @@ insideIfStatement = true;
 							if(char!="=") {
 								rightSide += word;
 								//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + ")");
-							endPointer();
+								endPointer();
 							}
 						}
 						else if(insideArray[codeBlockDepth]) {
@@ -2839,40 +2849,40 @@ insideIfStatement = true;
 								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideCodeBlock=" + insideCodeBlock + " ");
 								
 								
-									// A local variable (inside a function or JSON??)
-									if(insideFunctionBody[subFunctionDepth]) {
-										
-										// Check if the parent (word) exist in 
-										
-										
-										codeBlockDepthTemp = codeBlockDepth;
-										
-										while(codeBlock[codeBlockDepthTemp].parent) {
-											codeBlockDepthTemp--;
-										}
-										rootWord = codeBlock[codeBlockDepthTemp].word;
-										
-										//console.log("Inside function=" + insideFunctionBody[subFunctionDepth].name + " word=" + word + " rootWord=" + rootWord + "");
-										
-										
-										if(!Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, rootWord)) {
-											myFunction[subFunctionDepth].variables[word] = new Variable("");
-											//console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
-										}
-										else {
-											
-											//console.log("WTF happaned!??");
-											
-											//myFunction[subFunctionDepth].variables[rootWord].type = new Variable("Object");
-										}
-										
-										
-										
-										
+								// A local variable (inside a function or JSON??)
+								if(insideFunctionBody[subFunctionDepth]) {
+									
+									// Check if the parent (word) exist in 
+									
+									
+									codeBlockDepthTemp = codeBlockDepth;
+									
+									while(codeBlock[codeBlockDepthTemp].parent) {
+										codeBlockDepthTemp--;
+									}
+									rootWord = codeBlock[codeBlockDepthTemp].word;
+									
+									//console.log("Inside function=" + insideFunctionBody[subFunctionDepth].name + " word=" + word + " rootWord=" + rootWord + "");
+									
+									
+									if(!Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, rootWord)) {
+										myFunction[subFunctionDepth].variables[word] = new Variable("");
+										//console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 									}
 									else {
-										// Inside a global object notation declaration ?
-										//console.log("Inside a global object notation declaration !??? word=" + word + " (line:" + lineNumber + ")");
+										
+										//console.log("WTF happaned!??");
+										
+										//myFunction[subFunctionDepth].variables[rootWord].type = new Variable("Object");
+									}
+									
+									
+									
+									
+								}
+								else {
+									// Inside a global object notation declaration ?
+									//console.log("Inside a global object notation declaration !??? word=" + word + " (line:" + lineNumber + ")");
 									
 									// A global variable is declared:
 									
@@ -2881,7 +2891,7 @@ insideIfStatement = true;
 									foundVariableInVariableDeclaration = false;
 									
 								}
-									
+								
 								
 								
 							}
@@ -2912,7 +2922,7 @@ insideIfStatement = true;
 				
 				if(word==" ") word = "";
 				if(word=="/") word = ""; // Prevent words after comments having /
-					
+				
 			}
 			
 			//console.log("word=" + word + " lastWord=" + lastWord);
@@ -2924,7 +2934,7 @@ insideIfStatement = true;
 		function getFunctionWithName(functions, name) {
 			for(var i=0; i<functions.length; i++) {
 				if(functions[i].name==name) return functions[i];
-				}
+			}
 			return null;
 		}
 		
@@ -3044,7 +3054,7 @@ insideIfStatement = true;
 		for(var i=0; i<arr1.length && i<arr2.length; i++) {
 			for(var key in arr1[i]) {
 				if(arr1[i][key] != arr2[i][key]) return "Item " + i + ": " + JSON.stringify(arr2[i]);
-				}	
+			}	
 		}
 		return "Same!";
 	}

@@ -1,4 +1,18 @@
 
+
+
+
+EDITOR.addTest(function markLamdaFunctions(callback) {
+	EDITOR.openFile("markLamdaFunctions.js", "(function() {\nfunction notLamnda() {\nfunction subFunction() {\n}\n}\nfoo(function mylamdafunction() {\n});\n})();\n", function(err, file) {
+		if(!file.parsed.functions[0].lambda) throw new Error("Expected first function to be a lambda function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.functions[0].subFunctions[0].lambda) throw new Error("First subfunctions should not be a lamda function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.functions[0].subFunctions[1].lambda) throw new Error("Second subfunctions should be a lamda function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.functions[0].subFunctions[0].subFunctions[0].lambda) throw new Error("Subfunction of first subfunctions should Not be a lamda function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function argumentIsNotGlobalVariable(callback) {
 	EDITOR.openFile("argumentIsNotGlobalVariable.js", "function foo(bar) {\nbar=1;\n}\n", function(err, file) {
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function foo! file.parsed=" + JSON.stringify(file.parsed, null, 2));
