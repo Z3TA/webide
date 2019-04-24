@@ -1,6 +1,6 @@
 
 
-EDITOR.addTest(1, function findThisVariables(callback) {
+EDITOR.addTest(function findThisVariables(callback) {
 	EDITOR.openFile("findThisVariables.js", "function Person(parname) {\nthis.personname=parname;\n}", function(err, file) {
 		if(file.parsed.functions[0].name != "Person") throw new Error("Expected first functions name to be Person! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		if(!file.parsed.functions[0].variables["this"]) throw new Error("Expected function to have a \"this\" variable! file.parsed=" + JSON.stringify(file.parsed, null, 2));

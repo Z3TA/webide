@@ -2,21 +2,15 @@
 	"use strict";
 	
 	
-	EDITOR.addTest(2, function autocompleteThisVariables(callback) {
+	EDITOR.addTest(1, function autocompleteThisVariables(callback) {
 		EDITOR.openFile("autocompleteThisVariables.js", 'function Person(name) {\nthis.name = name;\n}\nvar myPerson = new Person("World");\n\nmyPerson.na\n', function(err, file) {
-			
 			var index = 92;
-			
 			var atCaret = autoComplete(file, index);
-			
-			UTIL.assert(atCaret.word, "name");
-			
+			UTIL.assert(atCaret.word, "myPerson.name");
 			EDITOR.closeFile(file.path);
 			callback(true);
-			
-		});
+			});
 	});
-	
 	
 	EDITOR.addTest(function dontAutocompleteLamdaFunctions(callback) {
 		EDITOR.openFile("dontAutocompleteLamdaFunctions.js", 'foo(function mylamdafunction() {\nmy\n});\nmy', function(err, file) {
