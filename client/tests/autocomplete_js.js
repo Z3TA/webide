@@ -1,8 +1,8 @@
 (function() {
 	"use strict";
 	
-	/*
-	EDITOR.addTest(function autocompleteThisVariables(callback) {
+	
+	EDITOR.addTest(2, function autocompleteThisVariables(callback) {
 		EDITOR.openFile("autocompleteThisVariables.js", 'function Person(name) {\nthis.name = name;\n}\nvar myPerson = new Person("World");\n\nmyPerson.na\n', function(err, file) {
 			
 			var index = 92;
@@ -16,9 +16,9 @@
 			
 		});
 	});
-	*/
 	
-	EDITOR.addTest(1, function dontAutocompleteLamdaFunctions(callback) {
+	
+	EDITOR.addTest(function dontAutocompleteLamdaFunctions(callback) {
 		EDITOR.openFile("dontAutocompleteLamdaFunctions.js", 'foo(function mylamdafunction() {\nmy\n});\nmy', function(err, file) {
 			var index = 42;
 			var atCaret = autoComplete(file, index);

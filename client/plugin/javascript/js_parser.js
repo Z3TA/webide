@@ -1335,7 +1335,7 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var pointerName = properties[0];
@@ -1344,20 +1344,25 @@
 				if(insideFunctionBody[subFunctionDepth]) {
 					if(Object.hasOwnProperty.call(func.variables, pointerName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[pointerName];
-						//console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
+						console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
 					}
 					else {
-						// We have found a GLOBAL variable inside a function!?
 						
-						if(leftSide.match(reValidVariableName)) {
+						if(pointerName=="this") {
+							func.variables["this"] = new Variable("this");
+							variable = func.variables["this"];
+						}
+						else if(leftSide.match(reValidVariableName)) {
+							// We have found a GLOBAL variable inside a function!?
 							// It's a valid variable name, so make it a global variable
+							// But not if it's a function parameter
 							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 								variable = globalVariables[leftSide] = new Variable();
-								//console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+								console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
 							}
 						}
 						else {
-							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 						
 					}
@@ -1393,27 +1398,27 @@
 							// But not if it's a function parameter!
 							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 								variable = globalVariables[leftSide] = new Variable();
-								//console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
+								console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
 							}
 						}
 						else {
-							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 					}
 					
 				}
 				
 				if(variable) {
+					console.log("variable=" + JSON.stringify(variable, null, 2));
 					
 					variableName = ""; // Reset global variableName because we have found the right side
 					
 					// Traverse the variable pyramid ... Loop through the property chain
 					variable = traverseVariableTree(properties, variable, startIndex);
 					
-					
-					
 					variable.type = getVariableType(rightSide);
 					if(variable.type=="this") {
+						console.log("found variable with type=this");
 						if(subFunctionDepth > 0) {
 							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly at the functon, but we want to avoid too much dublication
 						}
@@ -1426,6 +1431,9 @@
 						variable.value = rightSide;
 					}
 					
+				}
+				else {
+					console.log("No variable!");
 				}
 				
 				rightSide = "";

@@ -1,6 +1,14 @@
 
 
-
+EDITOR.addTest(1, function findThisVariables(callback) {
+	EDITOR.openFile("findThisVariables.js", "function Person(parname) {\nthis.personname=parname;\n}", function(err, file) {
+		if(file.parsed.functions[0].name != "Person") throw new Error("Expected first functions name to be Person! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.functions[0].variables["this"]) throw new Error("Expected function to have a \"this\" variable! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.functions[0].variables["this"].keys["personname"]) throw new Error("Expected function to have a \"this\" variable with key personname! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
 
 EDITOR.addTest(function markLamdaFunctions(callback) {
 	EDITOR.openFile("markLamdaFunctions.js", "(function() {\nfunction notLamnda() {\nfunction subFunction() {\n}\n}\nfoo(function mylamdafunction() {\n});\n})();\n", function(err, file) {
