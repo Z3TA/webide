@@ -63,8 +63,15 @@
 		{name: "decodeURI", arguments: "encodedURI"},
 		{name: "decodeURIComponent", arguments: "encodedURI"},
 		{name: "encodeURI", arguments: "UriString"},
-		{name: "encodeURIComponent", arguments: "UriStringComponent"}
-		//{name: "banana.split", arguments: "ice, cream"}
+		{name: "encodeURIComponent", arguments: "UriStringComponent"},
+		{name: "Date", arguments: "unixTimeDateStringOrYear, monthIndex, day, hours, minutes, seconds, milliseconds"},
+		{name: "Date.prototype.UTC", arguments: ""},
+		{name: "Date.prototype.now", arguments: ""},
+		{name: "Date.prototype.parse", arguments: ""},
+		{name: "Date.prototype.getDate", arguments: ""},
+		{name: "Date.prototype.getDay", arguments: ""},
+		{name: "Date.prototype.getFullYear", arguments: ""}
+		//{name: "", arguments: ""},
 	];
 	
 	var builtIns = {
@@ -366,6 +373,7 @@
 		
 		function checkFunctionName(functionName, word) {
 			console.warn("Checking if word=" + word + " mathes function name=" + functionName + "");
+			if(functionName.indexOf(".prototype.") != -1) return;
 			//if(typeof functionName != "string") return; // It can be an anonymous function
 			//console.warn(functionName + "(" + typeof functionName + ")");
 			if(functionName.substr(0, wordLength) == word) {
@@ -496,7 +504,16 @@
 					else if(variable.type == "Array") {
 						searchVariables(arrayPrototype, keyName);
 					}
-					else if(variable.type == "unknown") { // Variable
+					else if(variable.type == "this") {
+						var p = functionName.split(".");
+						
+						searchFunctionThis(p[0], keyName);
+					}
+					else {
+						
+						// Look for prototype functions with the keyName
+						
+						console.log("keyName=" + keyName);
 						
 						// Check for functions with that name, then check if the function has a property that match the word
 						
@@ -508,11 +525,8 @@
 						
 						searchFunctionThis(variable.value, keyName);
 						
-					}
-					else if(variable.type == "this") {
-						var p = functionName.split(".");
 						
-						searchFunctionThis(p[0], keyName);
+						
 					}
 				}
 				
