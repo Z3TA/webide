@@ -18,6 +18,20 @@
 	});
 	*/
 	
+	EDITOR.addTest(1, function dontAutocompleteLamdaFunctions(callback) {
+		EDITOR.openFile("dontAutocompleteLamdaFunctions.js", 'foo(function mylamdafunction() {\nmy\n});\nmy', function(err, file) {
+			var index = 42;
+			var atCaret = autoComplete(file, index);
+			if( file.rowText(3) != "my" ) throw new Error("Should not autocomplete lambda functions unless inside the function!");
+			
+			var index = 37;
+			UTIL.assert(file.rowText(1), "mylamdafunction()");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function autocompleteJsBuiltins(callback) {
 		EDITOR.openFile("autocompleteJsBuiltins.js", 'Math.fl', function(err, file) {
 			var index = 7;

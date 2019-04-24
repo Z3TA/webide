@@ -1,5 +1,14 @@
 
-EDITOR.addTest(1, function findObjectPropertiesAndMethods(callback) {
+EDITOR.addTest(function argumentIsNotGlobalVariable(callback) {
+	EDITOR.openFile("argumentIsNotGlobalVariable.js", "function foo(bar) {\nbar=1;\n}\n", function(err, file) {
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function foo! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.globalVariables["bar"]) throw new Error("Unexpected global variable bar (it's in function parameters) file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(function findObjectPropertiesAndMethods(callback) {
 	EDITOR.openFile("findObjectPropertiesAndMethods.js", "var foo = {\nbar: 1,\nbaz: function() {}\n}\n", function(err, file) {
 		if(file.parsed.functions[0].name != "foo.baz") throw new Error("Expected first function to be named foo.baz: file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 		if(file.parsed.globalVariables["foo"] == undefined) throw new Error("Expected global variable foo! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));

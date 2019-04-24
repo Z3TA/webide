@@ -1346,8 +1346,10 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
-							variable = globalVariables[leftSide] = new Variable();
-							//console.log("Added new global variable " + leftSide);
+							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
+								variable = globalVariables[leftSide] = new Variable();
+								//console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+						}
 						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
@@ -1383,8 +1385,11 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
+							// But not if it's a function parameter!
+							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 							variable = globalVariables[leftSide] = new Variable();
-							//console.log("Added new global variable " + leftSide);
+								//console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
+						}
 						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
@@ -1405,7 +1410,7 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 					variable.type = getVariableType(rightSide);
 					if(variable.type=="this") {
 						if(subFunctionDepth > 0) {
-							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly att the functon, but we want to avoid too much dublication
+							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly at the functon, but we want to avoid too much dublication
 						}
 						else {
 							variable.value = "window"; // "this" is the global scope
@@ -2619,6 +2624,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 			newFunc = new Func(functionName, functionArguments, arrowFunctionStart, lineNumber+parseStartRow);
 			
 			newFunc.arrowFunction = true;
+			newFunc.lambda = true;
 			newFunc.end = indexMinus ? i - indexMinus : i;
 			newFunc.endRow = lineNumber+parseStartRow;
 			
@@ -2984,6 +2990,7 @@ insideIfStatement = true;
 		func.lineNumber = lineNumber;
 		func.endRow = -1;
 		func.arrowFunction = false;
+		func.lambda = false;
 		func.prototype = {}; // Variables. (Methods will also be added as a variable here for consistency, it will also exist as a function)
 		
 		/*
