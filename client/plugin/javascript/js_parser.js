@@ -2216,10 +2216,10 @@ var reValidVariableName = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|ev
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
 							console.log("method? leftSide=" + findLeftSide(":", codeBlockDepth-1));
 							// todo: Add the variable!
-functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
-							properties = functionName.split(".");
-							
-						}
+							functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
+							newFunc.name = functionName;
+properties = functionName.split(".");
+							}
 						
 						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
@@ -2260,6 +2260,17 @@ functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
 								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
+
+							if(properties.length > 1) {
+								if(Object.hasOwnProperty.call(globalVariables, properties[0])) {
+									// This is a variable (method) for a function: foo.bar.baz = function()
+									// Change the variable type to Method
+									variable = globalVariables[properties[0]];
+									startIndex = 1;
+									variable = traverseVariableTree(properties, variable, startIndex);
+									variable.type = "Method";
+								}
+							}
 							
 						}
 						
@@ -2270,7 +2281,7 @@ if(properties.length > 1 && properties[properties.length-2] == "prototype") {
 								if(functions[j].name == properties[properties.length-3]) {
 									//newFunc.name = properties[properties.length-1];
 									functions[j].prototype[ properties[properties.length-1] ] = new Variable("Method");
-									functions[j].prototype[ properties[properties.length-1] ].arguments = newFunc.arguments;
+									//functions[j].prototype[ properties[properties.length-1] ].arguments = newFunc.arguments;
 									console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
 									break;
 								}
@@ -3006,7 +3017,8 @@ insideIfStatement = true;
 		variable.type = type;
 		variable.value = value;
 		variable.keys = {};
-		variable.arguments = ""; // If it's a method it can have arguments
+		
+		// Variables can be type=Method, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
 		
 		// Only functions Should have a prototype! 
 		

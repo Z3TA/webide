@@ -64,6 +64,7 @@
 		{name: "decodeURIComponent", arguments: "encodedURI"},
 		{name: "encodeURI", arguments: "UriString"},
 		{name: "encodeURIComponent", arguments: "UriStringComponent"}
+		//{name: "banana.split", arguments: "ice, cream"}
 	];
 	
 	var builtIns = {
