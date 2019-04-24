@@ -520,6 +520,13 @@
 								pushVariable(keyName, {type: "Method"}, key);
 							}
 						}
+						// Check global function prototypes
+						for (var i=0; i<js.functions.length; i++) {
+							if( js.functions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
+								var key = js.functions[i].name.slice(js.functions[i].name.lastIndexOf(".")+1);
+								pushVariable(keyName, {type: "Method"}, key);
+							}
+						}
 						
 						
 						// Check for functions with that name, then check if the function has a property that match the word

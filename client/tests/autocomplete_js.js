@@ -1,8 +1,24 @@
 (function() {
 	"use strict";
 	
+	/*
+		
+		EDITOR.currentFile.caret.index
+		
+		
+	*/
 	
-	EDITOR.addTest(1, function autocompleteBuiltinObjectPrototype(callback) {
+	EDITOR.addTest(1, function autocompletePrototypeMethods(callback) {
+		EDITOR.openFile("autocompletePrototypeMethods.js", 'function Person() {}\nPerson.prototype.banana=function() {};\nvar p = new Person();\np.ba\n', function(err, file) {
+			var index = 87;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(3), "p.banana()");
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autocompleteBuiltinObjectPrototype(callback) {
 		EDITOR.openFile("autocompleteBuiltinObjectPrototype.js", 'var date = new Date();\ndate.n\n', function(err, file) {
 			var index = 29;
 			var atCaret = autoComplete(file, index);
@@ -11,7 +27,6 @@
 			callback(true);
 		});
 	});
-	
 	
 	EDITOR.addTest(function autocompleteThisVariables(callback) {
 		EDITOR.openFile("autocompleteThisVariables.js", 'function Person(name) {\nthis.name = name;\n}\nvar myPerson = new Person("World");\n\nmyPerson.na\n', function(err, file) {
