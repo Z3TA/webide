@@ -24,8 +24,9 @@
 			var atCaret = autoComplete(file, index);
 			if( file.rowText(3) != "my" ) throw new Error("Should not autocomplete lambda functions unless inside the function!");
 			
-			var index = 37;
-			UTIL.assert(file.rowText(1), "mylamdafunction()");
+			var index = 35;
+			var atCaret = autoComplete(file, index);
+			if( file.rowText(1) != "mylamdafunction()" ) throw new Error("Expected autocompletion of the name of the function we are in!");
 			
 			EDITOR.closeFile(file.path);
 			callback(true);

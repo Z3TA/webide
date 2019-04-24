@@ -365,7 +365,7 @@
 		
 		
 		function checkFunctionName(functionName, word) {
-			console.log("Checking if word=" + word + " mathes function name=" + functionName + "");
+			console.warn("Checking if word=" + word + " mathes function name=" + functionName + "");
 			//if(typeof functionName != "string") return; // It can be an anonymous function
 			//console.warn(functionName + "(" + typeof functionName + ")");
 			if(functionName.substr(0, wordLength) == word) {
@@ -407,6 +407,8 @@
 					
 					console.log("Inside " + func.name);
 					
+					checkFunctionName(func.name, wordToComplete);
+					
 					// Give arguments
 					if(func.arguments.length > 0) {
 						var functionArguments = func.arguments.split(",");
@@ -423,7 +425,7 @@
 					
 					// check names of sub-functions
 					for(var j=0; j<func.subFunctions.length; j++) {
-						if(func.subFunctions[j].name.length > 0) checkFunctionName(func.subFunctions[j].name, wordToComplete);
+						if(func.subFunctions[j].name.length > 0 && !func.subFunctions[j].lambda) checkFunctionName(func.subFunctions[j].name, wordToComplete);
 					}
 					
 					// Search sub-functions (recursive)
@@ -434,7 +436,7 @@
 					console.log("Not inside function=" + func.name);
 				}
 				
-				checkFunctionName(func.name, wordToComplete); // Check parent scope function-names
+				if(!func.lambda) checkFunctionName(func.name, wordToComplete); // Check parent scope function-names
 				
 			}
 		}
