@@ -8,7 +8,17 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function autocompleteObjectPrototype(callback) {
+	EDITOR.addTest(1, function numbersHasNoLengthProperty(callback) {
+		EDITOR.openFile("numbersHasNoLengthProperty.js", 'var nr = 42;\nnr.l\n', function(err, file) {
+			var index = 17;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(1), "nr.l"); // No autocomplete!
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autocompleteObjectPrototype(callback) {
 		EDITOR.openFile("autocompleteObjectPrototype.js", 'var obj = {};\nobj.hasO\n', function(err, file) {
 			var index = 22;
 			var atCaret = autoComplete(file, index);

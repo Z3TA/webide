@@ -579,7 +579,7 @@
 						
 						// Check built in "class" prototype properties
 						for (var i=0; i<builtInFunctions.length; i++) {
-							if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype) {
+							if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype && builtInFunctions[i].name.indexOf(variable.type) == 0) {
 								var keys = Object.keys( builtInFunctions[i].variables.prototype );
 								for(var j=0; j<keys.length; j++) {
 									if( keys[j].indexOf(keyName)==0 ) {
@@ -589,13 +589,6 @@
 							}
 						}
 						
-						// All objects has access to Object.prototype!
-						for (var i=0; i<objectPrototype.length; i++) {
-							if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
-								var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);
-								pushVariable(keyName, {method: true}, key);
-							}
-						}
 						
 						// Check for functions with that name, then check if the function has a property that match the word
 						
@@ -608,6 +601,16 @@
 						searchFunctionThis(variable.value, keyName);
 						
 						
+						// All objects has access to Object.prototype!
+						// But only show these if we have not yet discovered other keys. And not on natives!
+						if(options.length==0 && variable.type != "Number" && variable.type != "String" && variable.type != "Boolean" && variable.type != "null" && variable.type != "undefined") {
+							for (var i=0; i<objectPrototype.length; i++) {
+								if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
+									var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);
+									pushVariable(keyName, {method: true}, key);
+								}
+							}
+						}
 						
 					}
 				}
@@ -951,7 +954,7 @@
 				console.log("insideFunctionCall: Checking built in functions ...");
 				
 				for(var i=0; i<builtInFunctions.length; i++) {
-					if( builtInFunctions[i].name == property[0] ) {
+					if( builtInFunctions[i].name == functionName ) {
 						theFunction = builtInFunctions[i];
 						break;
 					}

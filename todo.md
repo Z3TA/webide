@@ -29,11 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-handle:
-var m = Math;
-m.f
-
-does function argument hints show up for prototype methods !?
 
 Refactoring "built-in" in autocomplete and moving stringPrototype and arrayPrototype into builtInFunctions
 
