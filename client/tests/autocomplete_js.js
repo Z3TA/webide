@@ -8,6 +8,17 @@
 		
 	*/
 	
+	
+	EDITOR.addTest(1, function callbackMagic(callback) {
+		EDITOR.openFile("callbackMagic.js", 'function foo(cb) {\nvar answer = {baz: 1};\ncb(new Error("Hi"), answer);\n}\nfoo(bar);\nfunction bar(a, b) {\nb.b\n}\n', function(err, file) {
+			var index = 107;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(6), "b.baz"); // No autocomplete!
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function numbersHasNoLengthProperty(callback) {
 		EDITOR.openFile("numbersHasNoLengthProperty.js", 'var nr = 42;\nnr.l\n', function(err, file) {
 			var index = 17;

@@ -1,6 +1,6 @@
 
 
-EDITOR.addTest(1, function globalVariablePointingToFunction(callback) {
+EDITOR.addTest(function globalVariablePointingToFunction(callback) {
 	EDITOR.openFile("globalVariablePointingToFunction.js", 'var glob;\n(function() {\nglob = function Glob() {}\n})();\n', function(err, file) {
 		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "glob") throw new Error("Expected glob to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		EDITOR.closeFile(file.path);

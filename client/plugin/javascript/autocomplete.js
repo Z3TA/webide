@@ -456,6 +456,9 @@
 			return a1.substring(0, i);
 		}
 		
+		function figureOutParameterType(fun, parameterIndex) {
+			
+		}
 		
 		function findFunctions(functions, js) {
 			// Find out if we are inside functions, then check those functions for variables and name of sub-functions.
@@ -465,6 +468,8 @@
 			console.log("functionCount=" + Object.keys(functions).length + " charIndex=" + charIndex);
 			
 			var func;
+			
+			var props = wordToComplete.split(".");
 			
 			for(var i=0; i<functions.length; i++) {
 				
@@ -487,6 +492,7 @@
 							// todo: Handle default function argument values
 							// maybe: Search for calls of this function to figure out what Type of variable it is
 							if(functionArguments[a].indexOf(wordToComplete) == 0) options.push(functionArguments[a]);
+							else if(functionArguments[a] == props[0]) figureOutParameterType(func, a);
 						}
 					}
 					
