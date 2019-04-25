@@ -180,6 +180,10 @@
 		},
 	};
 	
+	var objectPrototype = builtInFunctions.filter(function(f) {
+		return (f.name.indexOf("Object.prototype") == 0);
+	});
+	
 	
 	// todo: Check if we are browser or nodejs or other JS platform
 	var globalContextVariables = {
@@ -573,7 +577,7 @@
 							}
 						}
 						
-						// Check built in Object prototype properties
+						// Check built in "class" prototype properties
 						for (var i=0; i<builtInFunctions.length; i++) {
 							if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype) {
 								var keys = Object.keys( builtInFunctions[i].variables.prototype );
@@ -585,7 +589,13 @@
 							}
 						}
 						
-						
+						// All objects has access to Object.prototype!
+						for (var i=0; i<objectPrototype.length; i++) {
+							if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
+								var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);
+								pushVariable(keyName, {method: true}, key);
+							}
+						}
 						
 						// Check for functions with that name, then check if the function has a property that match the word
 						
@@ -908,6 +918,14 @@
 						if(builtInFunctions[i].name == variable.type + ".prototype." + functionNameLastPart) {
 							console.log("Found function " + builtInFunctions[i].name);
 							theFunction = builtInFunctions[i];
+							break;
+						}
+					}
+					
+					// All objects has access to Object.prototype!
+					for (var i=0; i<objectPrototype.length; i++) {
+						if( objectPrototype[i].name == "Object.prototype." + functionNameLastPart ) {
+							theFunction = objectPrototype[i];
 							break;
 						}
 					}

@@ -8,7 +8,17 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function autocompletePrototypeMethods(callback) {
+	EDITOR.addTest(1, function autocompleteObjectPrototype(callback) {
+		EDITOR.openFile("autocompleteObjectPrototype.js", 'var obj = {};\nobj.hasO\n', function(err, file) {
+			var index = 22;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(1), "obj.hasOwnProperty()");
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autocompletePrototypeMethods(callback) {
 		EDITOR.openFile("autocompletePrototypeMethods.js", 'function Person() {}\nPerson.prototype.banana=function() {};\nvar p = new Person();\np.ba\n', function(err, file) {
 			var index = 86;
 			var atCaret = autoComplete(file, index);

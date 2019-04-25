@@ -29,6 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+handle:
+var m = Math;
+m.f
+
 does function argument hints show up for prototype methods !?
 
 Refactoring "built-in" in autocomplete and moving stringPrototype and arrayPrototype into builtInFunctions
@@ -44,6 +48,8 @@ Autocomplete prototype methods!
 Add more built in JS global properties and methods!
 
 Autocomplete inside []
+
+autocomplete inside function calls, for example foo.hasOwnProperty(f|);
 
 Better autocomplete!
 
@@ -1100,6 +1106,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+When I scroll on a web page, then switch to the editor and scroll, it scrolls too much.
 
 bug: Cant open folders that have space in them in file explorer (probably don't work in the rest of the editor either)
 
