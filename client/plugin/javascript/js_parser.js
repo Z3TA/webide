@@ -1119,7 +1119,7 @@
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
 			
-			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
+			console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
 			if(parentCodeBlock.indentation < 0) error(new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation));
 			
@@ -1273,7 +1273,7 @@
 				*/
 				
 				
-				//console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
+				console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
 				
 				//leftSide = lastWord;
 				
@@ -1283,7 +1283,8 @@
 					leftSide = insideArray[d] + "." + arrayItemCount[d]; // leftSide=arr.0
 				}
 				else {
-					leftSide = lastWord; // leftSide=foo
+					if(lastWord.match(reValidVariableName)) leftSide = lastWord;
+					else if(llWord.match(reValidVariableName)) leftSide = llWord;
 				}
 				
 				while(d>0) {
@@ -1293,7 +1294,7 @@
 						leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + leftSide; // leftSide=arr.0.foo
 					}
 					else {
-						leftSide = codeBlock[d].word + "." + leftSide; // leftSide=bar.foo
+						leftSide = codeBlock[d].word + (leftSide ? "." + leftSide : ""); // leftSide=bar.foo
 					}
 					
 					
@@ -1327,7 +1328,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -2201,7 +2202,7 @@
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideParenthesis[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + insideParenthesis[codeBlockDepth-1] + " leftParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + leftParentheses[codeBlockDepth-1] + " rightParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + rightParentheses[codeBlockDepth-1]);
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " afterPointer[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + afterPointer[codeBlockDepth-1] + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideParenthesis[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + insideParenthesis[codeBlockDepth-1] + " leftParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + leftParentheses[codeBlockDepth-1] + " rightParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + rightParentheses[codeBlockDepth-1]);
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2237,9 +2238,11 @@
 						properties = functionName.split(".");
 						
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
-							console.log("method? leftSide=" + findLeftSide(":", codeBlockDepth-1));
-							// todo: Add the variable!
-							functionName = findLeftSide(":", codeBlockDepth-1) + functionName;
+							leftSide = findLeftSide(":", codeBlockDepth-1);
+							console.log("method? leftSide=" + leftSide);
+							// todo: Add the variable!?
+							if(leftSide.charAt(leftSide.length-1) == ".") functionName = leftSide + functionName;
+							else if(leftSide.indexOf(".") != -1) functionName = leftSide;
 							newFunc.name = functionName;
 							properties = functionName.split(".");
 						}
@@ -2810,14 +2813,14 @@
 						
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
 							// Look for foo = bar = baz = 1
-							if(char!="=") {
+							if(char!="=" && lastWord != "function") {
 								rightSide += word;
-								//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + ")");
+								console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + ")");
 								endPointer();
 							}
 						}

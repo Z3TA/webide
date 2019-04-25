@@ -1,4 +1,15 @@
 
+EDITOR.addTest(1, function findFullNameOfNamedFunctionAfterPointer(callback) {
+	EDITOR.openFile("findFullNameOfNamedFunctionAfterPointer.js", "var obj = {\nbanana: function nameoffunction() {}\n}\n", function(err, file) {
+		if(file.parsed.functions[0].name != "obj.banana") throw new Error("Expected function name to be obj.banana! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.globalVariables["obj"]) throw new Error("Expected global variable obj! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.globalVariables["obj"].keys["banana"]) throw new Error("Expected global variable obj to have a banana key! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(!file.parsed.globalVariables["obj"].keys["banana"].method) throw new Error("Expected global variable obj.banana to be a method! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
 
 EDITOR.addTest(function findThisVariables(callback) {
 	EDITOR.openFile("findThisVariables.js", "function Person(parname) {\nthis.personname=parname;\n}", function(err, file) {

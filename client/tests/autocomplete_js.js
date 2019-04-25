@@ -8,7 +8,7 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function numbersHasNoLengthProperty(callback) {
+	EDITOR.addTest(function numbersHasNoLengthProperty(callback) {
 		EDITOR.openFile("numbersHasNoLengthProperty.js", 'var nr = 42;\nnr.l\n', function(err, file) {
 			var index = 17;
 			var atCaret = autoComplete(file, index);

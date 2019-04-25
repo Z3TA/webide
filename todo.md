@@ -46,6 +46,10 @@ Autocomplete inside []
 
 autocomplete inside function calls, for example foo.hasOwnProperty(f|);
 
+Make the parser check what functions return so we can autocomplete for example:
+var foo = bar();
+foo.x|
+
 Better autocomplete!
 
 

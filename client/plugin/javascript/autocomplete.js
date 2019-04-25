@@ -145,11 +145,13 @@
 		
 	];
 	
-	// todo: Check if we are browser or nodejs or other JS platform
+	
 	var browserGlobalFunctions = [
 		{name: "document.getElementById", arguments: "id"},
 		{name: "document.createElement", arguments: "tagName"},
 	];
+	// todo: Check if we are browser or nodejs or other JS platform
+	builtInFunctions = builtInFunctions.concat(browserGlobalFunctions);
 	
 	
 	var builtInVariables = {
