@@ -2130,6 +2130,8 @@
 						
 					}
 					
+					console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
+					
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
 					
@@ -2709,7 +2711,7 @@
 		function readWords(charIndex) {
 			// Collects the words to find variables
 			
-			//console.log("char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
+			console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
 			
 			
 			// .substr(start,length)   .substring(start,end)
@@ -2770,7 +2772,7 @@
 				
 				word = word.trim();
 				
-				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
+				console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
 				
 				//console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
 				if(singleStatementContext==1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
@@ -2798,13 +2800,12 @@
 					else if(word.charAt(0)=="(" && word.charAt(word.length-1)==")") {
 						// We got parameters for function call/declaration, or for/while/do loops
 						// Everything insiide a parentheses is added to the word 
-						//console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord);
+						console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " singleStatementContext=" + singleStatementContext);
 						//lastWord = lastWord + word;
-						if(word.indexOf(";") != -1) {
+						if(singleStatementContext && word.indexOf(";") != -1) {
 							// Found variable declaration insode for loop !?
 							findVariables( word.slice(1,word.indexOf(";")), myFunction, subFunctionDepth);
 						}
-						
 						
 						word = "";
 						return;
@@ -2887,7 +2888,7 @@
 									// A global variable is declared:
 									
 									globalVariables[word] = new Variable();
-									//console.log("Added GLOBAL variable=" + word + "");
+									console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
 									
 								}
@@ -3039,6 +3040,8 @@
 		// Variables can be methods, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
 		
 		// Only functions Should have a prototype! 
+		
+		console.warn("new Variable! type=" + type + " value=" + value);
 		
 	}
 	

@@ -1,5 +1,15 @@
 
-EDITOR.addTest(1, function findFullNameOfNamedFunctionAfterPointer(callback) {
+EDITOR.addTest(1, function globalVariableFalsePositive(callback) {
+	EDITOR.openFile("globalVariableFalsePositive.js", 'html = html.replace(/</g, "&lt;");\nhtml = html.replace(/>/g, "&gt;");\n', function(err, file) {
+		if(!file.parsed.globalVariables["html"]) throw new Error("Expected global variable html! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(Object.keys(file.parsed.globalVariables).length != 1) throw new Error("Expected only one global variable! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(function findFullNameOfNamedFunctionAfterPointer(callback) {
 	EDITOR.openFile("findFullNameOfNamedFunctionAfterPointer.js", "var obj = {\nbanana: function nameoffunction() {}\n}\n", function(err, file) {
 		if(file.parsed.functions[0].name != "obj.banana") throw new Error("Expected function name to be obj.banana! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		if(!file.parsed.globalVariables["obj"]) throw new Error("Expected global variable obj! file.parsed=" + JSON.stringify(file.parsed, null, 2));
