@@ -145,6 +145,11 @@
 		
 	];
 	
+	// todo: Check if we are browser or nodejs or other JS platform
+	var browserGlobalFunctions = [
+		{name: "document.getElementById", arguments: "id"},
+		{name: "document.createElement", arguments: "tagName"},
+	];
 	
 	
 	var builtInVariables = {
@@ -176,7 +181,7 @@
 				"PI": {type: "Number"}, 
 				"SQRT1_2": {type: "Number"}, 
 				"SQRT2": {type: "Number"}, 
-				}
+			}
 		},
 	};
 	
@@ -185,17 +190,6 @@
 	});
 	
 	
-	// todo: Check if we are browser or nodejs or other JS platform
-	var globalContextVariables = {
-		
-		document: {
-			keys: {
-				getElementById: {method: true, arguments: "id"},
-				createElement: {method: true, arguments: "tagName"}
-			}
-		}
-		
-	}
 	
 	var relatedScripts = {}; // path: [array of file paths] 
 	var parsedFiles = {}; // path: parsed-object ref
@@ -386,36 +380,46 @@
 			
 			if(js.functions) findFunctions(js.functions);
 			
-			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete); // Check global variables
+			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete, undefined, js); // Check global variables
 			
 			// Global variables from other files
 			console.log(file.path + " related scripts =" + (relatedScripts[file.path] && relatedScripts[file.path].length));
 			console.log(relatedScripts[file.path]);
 			
 			if(relatedScripts[file.path]) {
-				for (var i=0, script, globalVariables; i<relatedScripts[file.path].length; i++) {
+				for (var i=0, script, globalVariables, functions; i<relatedScripts[file.path].length; i++) {
 					script = relatedScripts[file.path][i]
 					if( !parsedFiles.hasOwnProperty(script) ) {
 						console.warn(script + " has not been parsed!");
 						continue;
 					}
+					
+					functions = parsedFiles[script].functions;
+					if(!functions) {
+						console.warn(script + " does not have a functions member!");
+						continue;
+					}
+					console.log("Search (global) functions (" + functions.length + ") in related script: " + script + " ...");
+					findFunctions(functions, parsedFiles[script]);
+					
 					globalVariables = parsedFiles[script].globalVariables;
 					if(!globalVariables) {
 						console.warn(script + " does not have a globalVariables member!");
 						continue;
 					}
 					console.log("Search global variables (" + Object.keys(globalVariables).length + ") in related script: " + script + " ...");
-					searchVariables(globalVariables, wordToComplete); // Check global variables
+					searchVariables(globalVariables, wordToComplete, undefined, parsedFiles[script]); // Check global variables
+					
+					
 				}
 			}
 			
-			searchVariables(globalContextVariables, wordToComplete);
-			
-			searchVariables(builtInVariables, wordToComplete);
+			// Search builtin's'
+			searchVariables(builtInVariables, wordToComplete, undefined, js);
 			
 			for(var i=0; i<builtInFunctions.length; i++) {
 				checkFunctionName(builtInFunctions[i].name, wordToComplete);
-			
+				
 				//if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype) searchVariables(builtInFunctions[i].variables.prototype, wordToComplete);
 				
 			}
@@ -451,7 +455,7 @@
 		}
 		
 		
-		function findFunctions(functions) {
+		function findFunctions(functions, js) {
 			// Find out if we are inside functions, then check those functions for variables and name of sub-functions.
 			
 			if(!functions) console.warn(typeof functions + " passed to findFunctions");
@@ -485,7 +489,7 @@
 					}
 					
 					
-					searchVariables(func.variables, wordToComplete, func.name); // check variables in this functions
+					searchVariables(func.variables, wordToComplete, func.name, js); // check variables in this functions
 					
 					// check names of sub-functions
 					for(var j=0; j<func.subFunctions.length; j++) {
@@ -505,7 +509,7 @@
 			}
 		}
 		
-		function searchVariables(variables, word, functionName) {
+		function searchVariables(variables, word, functionName, js) {
 			
 			var wordLength = word.length;
 			
@@ -556,7 +560,7 @@
 					if(variable.type == "this") {
 						var p = functionName.split(".");
 						
-						searchFunctionThis(p[0], keyName);
+						searchFunctionThis(p[0], keyName, js);
 					}
 					else {
 						
@@ -598,7 +602,7 @@
 							}
 						}
 						
-						searchFunctionThis(variable.value, keyName);
+						searchFunctionThis(variable.value, keyName, js);
 						
 						
 						// All objects has access to Object.prototype!
@@ -636,7 +640,7 @@
 				}
 			}
 			
-			if(variables.hasOwnProperty("prototype")) searchVariables(variables["prototype"].keys, word);
+			if(variables.hasOwnProperty("prototype")) searchVariables(variables["prototype"].keys, word, undefined, js);
 			
 			
 			function pushVariable(word, variable, variableName) {
@@ -692,7 +696,7 @@
 			
 		}
 		
-		function searchFunctionThis(functionName, keyName) {
+		function searchFunctionThis(functionName, keyName, js) {
 			
 			console.log("searchFunctionThis functionName=" + functionName + " keyName=" + keyName + "");
 			
@@ -730,20 +734,20 @@
 				
 				if(objectCreatorFunction.variables.hasOwnProperty("this")) {
 					// Search that one
-					searchVariables(objectCreatorFunction.variables["this"].keys, keyName);
+					searchVariables(objectCreatorFunction.variables["this"].keys, keyName, undefined, js);
 				}
 				
 				// Check if any of the variables is of type "this"
 				for(var variableName in objectCreatorFunction.variables) {
 					if(objectCreatorFunction.variables[variableName].type == "this") {
 						// Check its keys
-						searchVariables(objectCreatorFunction.variables[variableName].keys, keyName);
+						searchVariables(objectCreatorFunction.variables[variableName].keys, keyName, undefined, js);
 					}
 				}
 				
 				if(objectCreatorFunction.variables.hasOwnProperty("prototype")) {
 					// Search the prototype
-					searchVariables(objectCreatorFunction.variables["prototype"].keys, keyName);
+					searchVariables(objectCreatorFunction.variables["prototype"].keys, keyName, undefined, js);
 				}
 				
 			}
