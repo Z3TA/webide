@@ -470,7 +470,7 @@ function recycleGuestAccounts(callback) {
 						if(err.code != "LOCK") {
 							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
 							// We don't want the editor to fail to start because of those "nuked" accounts
-							log(err.message);
+							log("User account recycling error: " + err.message);
 							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message);
 						}
 						processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
@@ -1122,12 +1122,12 @@ function createGuestUser(id, callback) {
 		var options = {
 			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
 		}
-		console.log("Running in options.cwd=" + options.cwd);
+		console.log("Create " + username + ": Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
 		
 		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
 		var command = scriptPath + " '" + JSON.stringify(commandArg) + "'";
-		console.log("command=" + command);
+		console.log("Create " + username + ": command=" + command);
 		
 		exec(command, options, function adduser(error, stdout, stderr) {
 			CREATE_USER_LOCK = false;
@@ -1137,15 +1137,16 @@ function createGuestUser(id, callback) {
 				return callback(error);
 			}
 			
-			console.log("stderr=" + UTIL.lbChars(stderr));
+			//console.log("Create " + username + ": stdout=" + UTIL.lbChars(stderr));
+			console.log("Create " + username + ": stderr=" + UTIL.lbChars(stderr));
 			
 			stderr = stderr.trim(); // Can be a new line (LF)
 			stdout = stdout.trim();
 			
-			if(stderr) return callback(new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")"));
+			if(stderr) return callback(new Error("Error when creating username=" + username + "! Exec command=" + command + "\nstderr=" + stderr + " (stderr.length=" + stderr.length + ")\nstdout=" + stdout + " (stdout.length=" + stdout.length + ")"));
 			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
 			
-			log("stdout=" + stdout, DEBUG);
+			log("adduser.js stdout=" + stdout, DEBUG);
 			var checkre = /User with username=(.*), password=(.*), uid=(.*), gid=(.*), homeDir=(.*) successfully added!/g;
 			
 			var check = checkre.exec(stdout);

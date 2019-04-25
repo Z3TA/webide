@@ -58,8 +58,6 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 	var args = ["certonly", "--nginx", "--noninteractive", "--agree-tos", "--email", adminEmail, "-d", domain];
 	}
 	
-	//console.log("hg cat args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
-	
 	var certbot = spawn("certbot", args, {shell: false});
 	var stdout = "";
 	var stderr = "";
@@ -73,18 +71,17 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 	});
 	
 	certbot.on('error', function certbotError(err) {
-		console.log("ERROR: stdout=" + stdout);
-		console.log("ERROR: stderr=" + stderr);
+		console.log("certbot error: stdout=" + stdout);
+		console.log("certbot error: stderr=" + stderr);
 		if(callback) callback(err);
 		callback = null;
 	});
 	
 	certbot.on('close', function certbotDone(exitCode) {
-		if(stdout.length < 500) console.log("certbot stdout=" + stdout);
-		else console.log("certbot stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
-		//console.log("certbot stdout=" + stdout);
-		console.log("certbot stderr=" + stderr);
-		console.log("certbot exitCode=" + exitCode);
+		if(stdout.length < 1000) console.log("certbot close: stdout=" + stdout);
+		else console.log("certbot close: stdout=" + stdout.slice(0,1000) + " ... (" + stdout.length + " characters)");
+		console.log("certbot close: stderr=" + stderr);
+		console.log("certbot close: exitCode=" + exitCode);
 		
 		/*
 			
@@ -109,7 +106,7 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 		*/
 		
 		if(exitCode) {
-			var err = new Error(stderr);
+			var err = new Error("certbot failed! stderr=" + stderr);
 			err.code = exitCode;
 			
 			if(stderr.match(/too many failed authorizations recently/)) {
@@ -117,7 +114,8 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 			}
 			
 			if(callback) callback(err);
-			else console.warn("CERTBOT ERROR: " + err.message ? err.message : "Certbot gave no error message. See certbot logs!");
+			else console.log("certbot close: final error: " + err.message ? err.message : "Certbot gave no error message. See certbot logs!");
+			// somehow console.warn ends up in the stderr stream !?
 			
 			callback = null;
 			return;

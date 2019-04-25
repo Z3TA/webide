@@ -49,7 +49,7 @@ Writing a guide on how to make a survey
 todo
 ----
 Error when recycling guests
-rror: stderr=Another instance of Certbot is already running. (stderr.length=47)
+error: stderr=Another instance of Certbot is already running. (stderr.length=47)
 
 Source is a symlink: /usr/bin/unrar -> /etc/alternatives/unrar (shared/mount.js:96:21)
 
