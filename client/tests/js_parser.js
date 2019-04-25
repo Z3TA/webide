@@ -1,5 +1,14 @@
 
-EDITOR.addTest(1, function globalVariableFalsePositive(callback) {
+
+EDITOR.addTest(1, function globalVariablePointingToFunction(callback) {
+	EDITOR.openFile("globalVariablePointingToFunction.js", 'var glob;\n(function() {\nglob = function Glob() {}\n})();\n', function(err, file) {
+		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "glob") throw new Error("Expected glob to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(function globalVariableFalsePositive(callback) {
 	EDITOR.openFile("globalVariableFalsePositive.js", 'html = html.replace(/</g, "&lt;");\nhtml = html.replace(/>/g, "&gt;");\n', function(err, file) {
 		if(!file.parsed.globalVariables["html"]) throw new Error("Expected global variable html! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		if(Object.keys(file.parsed.globalVariables).length != 1) throw new Error("Expected only one global variable! file.parsed=" + JSON.stringify(file.parsed, null, 2));

@@ -29,12 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
-Refactoring "built-in" in autocomplete and moving stringPrototype and arrayPrototype into builtInFunctions
-
-If a variable declared globaly is repointed to a function, make that function global !?
-
-
 Add autocomplete support for prototype.
 Example var d=new Date(); d.getT|
 

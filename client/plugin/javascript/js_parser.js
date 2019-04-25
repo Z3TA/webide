@@ -2251,8 +2251,8 @@
 						
 						console.log("subFunctionDepth=" + subFunctionDepth);
 						
-						if(insideFunctionBody[subFunctionDepth]) {
-							//It's a sub-function
+						if(insideFunctionBody[subFunctionDepth] && !globalVariables[functionName]) { // It can be a global variable pointing to a function!
+							// It's a sub-function. 
 							
 							subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
 							
