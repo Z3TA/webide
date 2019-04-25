@@ -9,37 +9,6 @@
 	
 	"use strict";
 	
-	// Built in JavaScript prototypes for auto completion
-	
-	var stringPrototype = {
-		length: {type: "Number"}, 
-		// Methods
-		charAt: {type: "Method", arguments: "index"},
-		charCodeAt: {type: "Method", arguments: "index"},
-		concat: {type: "Method", arguments: "strings..."},
-		fromCharCode: {type: "Method", arguments: "charCodes..."},
-		indexOf: {type: "Method", arguments: "searchvalue, start"},
-		lastIndexOf: {type: "Method", arguments: "searchvalue, start"},
-		match: {type: "Method", arguments: "regexp"},
-		replace: {type: "Method", arguments: "searchvalue, newvalue"},
-		search: {type: "Method", arguments: "searchvalue"},
-		slice: {type: "Method", arguments: "start, end"},
-		split: {type: "Method", arguments: "separator, limit"},
-		substr: {type: "Method", arguments: "start, length"},
-		substring: {type: "Method", arguments: "start, end"},
-		toLocaleLowerCase: {type: "Method", arguments: ""},
-		toLocaleUpperCase: {type: "Method", arguments: ""},
-		toLowerCase: {type: "Method", arguments: ""},
-		toUpperCase: {type: "Method", arguments: ""},
-		trim: {type: "Method", arguments: ""}
-	};
-	
-	var arrayPrototype = {
-		length: {type: "Number"}, 
-		// Methods
-		
-	};
-	
 	var builtInFunctions = [
 		{name: "eval", arguments: "codeString"},
 		{name: "isFinite", arguments: "testValue"},
@@ -51,44 +20,152 @@
 		{name: "encodeURI", arguments: "UriString"},
 		{name: "encodeURIComponent", arguments: "UriStringComponent"},
 		
+		// ### Array
 		{name: "Array", arguments: "", variables: {prototype:{"length": {type: "Number"}}}},
-		{name: "Array.prototype.concat", arguments: "arraysOrValues..."},
+		{name: "Array.prototype.concat", arguments: "...arraysOrValues"},
 		{name: "Array.prototype.filter", arguments: "callback, thisArg"},
 		{name: "Array.prototype.forEach", arguments: "callback, thisArg"},
 		{name: "Array.prototype.indexOf", arguments: "searchElement, fromIndex"},
 		{name: "Array.prototype.join", arguments: "separator"},
 		{name: "Array.prototype.map", arguments: "callback"},
 		{name: "Array.prototype.pop", arguments: ""},
-		{name: "Array.prototype.push", arguments: "elements..."},
+		{name: "Array.prototype.push", arguments: "...elements"},
 		{name: "Array.prototype.reduce", arguments: "callback, initialValue"},
 		{name: "Array.prototype.shift", arguments: ""},
 		{name: "Array.prototype.slice", arguments: "begin, end"},
 		{name: "Array.prototype.some", arguments: "callback, thisArg"},
 		{name: "Array.prototype.sort", arguments: "compareFunction"},
-		{name: "Array.prototype.splice", arguments: "start, deleteCount, addItems..."},
-		{name: "Array.prototype.unshift", arguments: "elements..."},
+		{name: "Array.prototype.splice", arguments: "start, deleteCount, ...addItems"},
+		{name: "Array.prototype.unshift", arguments: "...elements"},
+		
+		// ### String
+		{name: "String", arguments: "", variables: {prototype:{"length": {type: "Number"}}}},
+		{name: "String.fromCharCode", arguments: "...charCodes"},
+		{name: "String.prototype.charAt", arguments: "index"},
+		{name: "String.prototype.charCodeAt", arguments: "index"},
+		{name: "String.prototype.concat", arguments: "...strings"},
+		{name: "String.prototype.indexOf", arguments: "searchvalue, start"},
+		{name: "String.prototype.lastIndexOf", arguments: "searchvalue, start"},
+		{name: "String.prototype.match", arguments: "regexp"},
+		{name: "String.prototype.replace", arguments: "searchvalue, newvalue"},
+		{name: "String.prototype.search", arguments: "stringOrRegexp"},
+		{name: "String.prototype.slice", arguments: "start, end"},
+		{name: "String.prototype.split", arguments: "separator, limit"},
+		{name: "String.prototype.substr", arguments: "start, length"},
+		{name: "String.prototype.substring", arguments: "start, end"},
+		{name: "String.prototype.toLocaleLowerCase", arguments: ""},
+		{name: "String.prototype.toLocaleUpperCase", arguments: ""},
+		{name: "String.prototype.toLowerCase", arguments: ""},
+		{name: "String.prototype.toUpperCase", arguments: ""},
+		{name: "String.prototype.trim", arguments: ""},
+		
+		// ### Number
+		{name: "Number.isInteger", arguments: "value"},
+		{name: "Number.isNaN", arguments: "value"},
+		{name: "Number.isSafeInteger", arguments: "testValue"},
+		{name: "Number.parseFloat", arguments: "string"},
+		{name: "Number.parseInt", arguments: "string, radix"},
+		{name: "Number.prototype.toExponential", arguments: "fractionDigits"},
+		{name: "Number.prototype.toFixed", arguments: "digits"},
+		{name: "Number.prototype.toLocaleString", arguments: "locales, options"},
+		{name: "Number.prototype.toPrecision", arguments: "precision"},
+		{name: "Number.prototype.toString", arguments: "radix"},
+		{name: "Number.prototype.valueOf", arguments: ""},
+		
 		
 		//{name: "Array.prototype.", arguments: ""},
 		
-		{name: "Number.prototype.toFixed", arguments: "digits"},
-		
-		
-		
+		// ### Date
 		{name: "Date", arguments: "unixTimeDateStringOrYear, monthIndex, day, hours, minutes, seconds, milliseconds"},
 		{name: "Date.prototype.UTC", arguments: ""},
 		{name: "Date.prototype.now", arguments: ""},
 		{name: "Date.prototype.parse", arguments: ""},
 		{name: "Date.prototype.getDate", arguments: ""},
 		{name: "Date.prototype.getDay", arguments: ""},
-		{name: "Date.prototype.getFullYear", arguments: ""}
+		{name: "Date.prototype.getFullYear", arguments: ""},
 		//{name: "", arguments: ""},
+		
+		// ### Math
+		{name: "Math.abs", arguments: "numbers"},
+		{name: "Math.acos", arguments: "number"},
+		{name: "Math.acosh", arguments: "number"},
+		{name: "Math.asin", arguments: "number"},
+		{name: "Math.asinh", arguments: "number"},
+		{name: "Math.atan", arguments: "number"},
+		{name: "Math.atan2", arguments: "coordinateY, coordinateX"},
+		{name: "Math.atanh", arguments: "number"},
+		{name: "Math.cbrt", arguments: "number"},
+		{name: "Math.ceil", arguments: "number"},
+		{name: "Math.cos", arguments: "radians"},
+		{name: "Math.cosh", arguments: "number"},
+		{name: "Math.exp", arguments: "number"},
+		{name: "Math.floor", arguments: "...numbers"},
+		{name: "Math.log", arguments: "number"},
+		{name: "Math.max", arguments: "...numbers"},
+		{name: "Math.min", arguments: "...numbers"},
+		{name: "Math.pow", arguments: "base, exponent"},
+		{name: "Math.random", arguments: ""},
+		{name: "Math.round", arguments: "number"},
+		{name: "Math.sin", arguments: "radians"},
+		{name: "Math.sinh", arguments: "number"},
+		{name: "Math.sqrt", arguments: "number"},
+		{name: "Math.tan", arguments: "radianAngle"},
+		{name: "Math.tanh", arguments: "number"},
+		{name: "Math.trunc", arguments: "number"},
+		
+		// ### Object
+		{name: "Object.assign", arguments: "target, ...sources", es: 2016},
+		{name: "Object.create", arguments: "prototype, propertiesObject"},
+		{name: "Object.defineProperties", arguments: "object, properties"},
+		{name: "Object.defineProperty", arguments: "object, propertyOfObject, propertyDescription"},
+		{name: "Object.entries", arguments: "obj", es: 2016},
+		{name: "Object.freeze", arguments: "obj"},
+		{name: "Object.fromEntries", arguments: "iterable", es: 2019},
+		{name: "Object.getOwnPropertyDescriptor", arguments: "obj, prop"},
+		{name: "Object.getOwnPropertyDescriptors", arguments: "obj", es: 2017},
+		{name: "Object.getOwnPropertyNames", arguments: "obj"},
+		{name: "Object.getOwnPropertySymbols", arguments: "obj", es: 2015},
+		{name: "Object.getPrototypeOf", arguments: "obj"},
+		{name: "Object.is", arguments: "value1, value2", es: 2015},
+		{name: "Object.isExtensible", arguments: "obj"},
+		{name: "Object.isFrozen", arguments: "obj"},
+		{name: "Object.isSealed", arguments: "obj"},
+		{name: "Object.keys", arguments: "obj"},
+		{name: "Object.prototype.hasOwnProperty", arguments: "prop"},
+		{name: "Object.prototype.isPrototypeOf", arguments: "object"},
+		{name: "Object.prototype.propertyIsEnumerable", arguments: "prop"},
+		{name: "Object.prototype.toLocaleString", arguments: ""},
+		{name: "Object.prototype.toString", arguments: ""},
+		{name: "Object.prototype.valueOf", arguments: ""},
+		{name: "Object.prototype.seal", arguments: ""},
+		{name: "Object.prototype.setPrototypeOf", arguments: "obj, prototype"},
+		{name: "Object.prototype.values", arguments: "obj", es: 2017},
+		
+		
+		
 	];
 	
-	var builtIns = {
+	
+	
+	var builtInVariables = {
 		"Infinity": {type: "Number"},
 		"NaN": {type: "Number"},
 		"undefined": {},
 		"null": {},
+		
+		"Number": {
+			keys: {
+				"EPSILON": {type: "Number"},
+				"MAX_SAFE_INTEGER": {type: "Number"},
+				"MAX_VALUE": {type: "Number"},
+				"MIN_SAFE_INTEGER": {type: "Number"},
+				"MIN_VALUE": {type: "Number"},
+				"NEGATIVE_INFINITY": {type: "Number"},
+				"NaN": {type: "Number"},
+				"POSITIVE_INFINITY": {type: "Number"},
+			}
+		},
+		
 		"Math": {
 			keys: {
 				"E": {type: "Number"}, 
@@ -99,46 +176,8 @@
 				"PI": {type: "Number"}, 
 				"SQRT1_2": {type: "Number"}, 
 				"SQRT2": {type: "Number"}, 
-				
-				// Methods
-				"abs": {method: true, arguments: "number"},
-				"acos": {method: true, arguments: "number"},
-				"acosh": {method: true, arguments: "number"},
-				"asin": {method: true, arguments: "number"},
-				"asinh": {method: true, arguments: "number"},
-				"atan": {method: true, arguments: "number"},
-				"atan2": {method: true, arguments: "coordinateY, coordinateX"},
-				"atanh": {method: true, arguments: "number"},
-				"cbrt": {method: true, arguments: "number"},
-				"ceil": {method: true, arguments: "number"},
-				"cos": {method: true, arguments: "radians"},
-				"cosh": {method: true, arguments: "number"},
-				"exp": {method: true, arguments: "number"},
-				"floor": {method: true, arguments: "numbers..."},
-				"log": {method: true, arguments: "number"},
-				"max": {method: true, arguments: "numbers..."},
-				"min": {method: true, arguments: "numbers..."},
-				"pow": {method: true, arguments: "base, exponent"},
-				"random": {method: true, arguments: ""},
-				"round": {method: true, arguments: "number"},
-				"sin": {method: true, arguments: "radians"},
-				"sinh": {method: true, arguments: "number"},
-				"sqrt": {method: true, arguments: "number"},
-				"tan": {method: true, arguments: "radianAngle"},
-				"tanh": {method: true, arguments: "number"},
-				"trunc": {method: true, arguments: "number"},
-			}
+				}
 		},
-		"Object": {
-			keys: {
-				"create": {method: true, arguments: "prototype, propertiesObject"},
-				"defineProperty": {method: true, arguments: "object, propertyOfObject, propertyDescription"},
-				"defineProperties": {method: true, arguments: "object, properties"}
-				// todo: Should I also include ES6+ methods !?
-				// "": {method: true, arguments: ""},
-				
-			}
-		}
 	};
 	
 	
@@ -368,7 +407,7 @@
 			
 			searchVariables(globalContextVariables, wordToComplete);
 			
-			searchVariables(builtIns, wordToComplete);
+			searchVariables(builtInVariables, wordToComplete);
 			
 			for(var i=0; i<builtInFunctions.length; i++) {
 				checkFunctionName(builtInFunctions[i].name, wordToComplete);
@@ -886,27 +925,6 @@
 					if(theFunction) break;
 					
 					// Include the prototype!?
-				}
-			}
-			
-			if(!theFunction) {
-				// Check builtins
-				console.log("insideFunctionCall: Checking built in items ...");
-				var item = builtIns[property[0]];
-				if(item) {
-					if( item.keys && property.length > 1 ) {
-						item = item.keys[property[1]];
-					}
-					
-					if( item.type=="Method" ) {
-						theFunction = item;
-					}
-					else {
-						console.log("insideFunctionCall: " + property[0] + "." + property[1] + " is not a function");
-					}
-				}
-				else {
-					console.log("insideFunctionCall: No built-in item named " + property[0]);
 				}
 			}
 			
