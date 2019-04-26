@@ -484,14 +484,43 @@
 		
 		function figureOutParameterType(fun, autocompleteArgumentIndex, charIndex, js) {
 			
+			console.log("figureOutParameterType: inside fun.name=" + fun.name + " autocompleteArgumentIndex=" + autocompleteArgumentIndex + "");
+			
 			if(js == undefined) throw new Error("Parsed js not in arguments! " + JSON.stringify(arguments));
 			
+			var file = EDITOR.currentFile;
 			var scope = getScope(charIndex, js.functions, js.globalVariables);
 			
-			// Find call sites !?
+			
+			// Find call sites
+			var reCalls = new RegExp(fun.name + "\\s*\\(", "g");
+			var arr;
+			var i=0;
+			var leftP=0;
+			var rightP=0;
+			var char = "";
+			var startIndex = 0;
+			while ((arr = reCalls.exec(file.text)) !== null) {
+				// We can't use regexp to find the arguments, because of the possibility of nested parentheses
+				startIndex = arr.index+arr[0].length;
+				for (i=startIndex, leftP=0, rightP=0; i<file.text.length; i++) {
+					char = file.text.charAt(i);
+					
+					if(char=="(") leftP++;
+					else if(char==")") rightP++;
+					
+					//console.log("i=" + i + " char=" + char + " leftP=" + leftP + " rightP=" + rightP);
+					
+					if(rightP > leftP) {
+						// We reached the end of the arg string
+						analyzeArgString(file.text.slice(startIndex, i));
+						break;
+					}
+				}
+			}
+			
 			
 			// Find places where the function is used as a parameter
-			var file = EDITOR.currentFile;
 			var reInArgument = new RegExp("(\\w+)\\(.*" + fun.name + ".*\\)", "g");
 			
 			var arr;
@@ -547,37 +576,32 @@
 						}
 					}
 				}
+			}
+			
+			function analyzeArgString(argStr) {
+				var argsArr = parseArgumentString(argStr);
 				
-				function analyzeArgString(argStr) {
-					var argsArr = parseArgumentString(argStr);
+				analyzeExpression(argsArr[autocompleteArgumentIndex]);
+			}
+			
+			function analyzeExpression(str) {
+				console.log("analyzeExpression: str=" + str);
+				
+				// Figure out the type of this expression
+				var variable = scope.variables[str];
+				
+				if(variable) {
+					console.log("figureOutParameterType: " + str + " is a variable=" + JSON.stringify(variable));
 					
-					analyzeExpression(argsArr[autocompleteArgumentIndex]);
+					// Replace the variable with our local parameter
+					var localParams =wordToComplete.split(".");
+					var theVariable = {}
+					theVariable[localParams[0]] = variable;
+					
+					//var word = wordToComplete.slice(wordToComplete.indexOf(".")+1);
+					
+					searchVariables(theVariable, wordToComplete, undefined, js);
 				}
-				
-				function analyzeExpression(str) {
-					console.log("analyzeExpression: str=" + str);
-					
-					// Figure out the type of this expression
-					var variable = scope.variables[str];
-					
-					if(variable) {
-						console.log("figureOutParameterType: " + str + " is a variable=" + JSON.stringify(variable));
-						
-						// Replace the variable with our local parameter
-						var localParams =wordToComplete.split(".");
-						var theVariable = {}
-						theVariable[localParams[0]] = variable;
-						
-						//var word = wordToComplete.slice(wordToComplete.indexOf(".")+1);
-						
-						searchVariables(theVariable, wordToComplete, undefined, js);
-					}
-					
-				}
-				
-				
-				// Check the function's variables and variables in the scope to figure out their types'
-				
 				
 			}
 			
