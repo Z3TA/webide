@@ -300,7 +300,9 @@
 				if(type=="delete") charactersLength = -1;
 				var oldParse = file.parsed;
 				// Update functions
+				console.log("functions to update: " + (oldParse.functions && oldParse.functions.length))
 				if(oldParse.functions) updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
+				else console.log("No parsed functions to update! file.parsed=", file.parsed);
 				
 				// Update quotes
 				for(var i=0; i<oldParse.quotes.length; i++) {
@@ -776,13 +778,13 @@
 			var isBelow = false;
 			var isParent = false;
 			
-			for(var i; i<functions.length; i++) {
+			for(var i=0; i<functions.length; i++) {
 				func = functions[i];
 				
 				isBelow = (func.start > oldEnd);
 				isParent = (func.end > oldEnd && func.start < oldEnd);
 				
-				//console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
+				console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
 				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
 				
@@ -795,14 +797,14 @@
 					func.endRow += endRowDiff;
 				}
 				else if(isParent) {
-					//console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
+					console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
 					
 					func.end += charactersLength;
 					func.endRow += endRowDiff;
 				}
 				
 				if(isBelow || isParent) {
-					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
+					console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();

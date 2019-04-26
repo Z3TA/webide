@@ -1,4 +1,22 @@
 
+EDITOR.addTest(1, function noReParseOptShouldUpdateFunctions(callback) {
+	EDITOR.openFile("noReParseOptShouldUpdateFunctions.js", 'function foo() {\naa\n}\n', function(err, file) {
+		if(file.parsed.functions.length != 1) throw new Error("Expected one function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		
+		if(file.parsed.functions[0].end != 20) throw new Error("Expected function to end at index 20 file.parsed.functions[0]=" + JSON.stringify(file.parsed.functions[0], null, 2));
+		
+		file.moveCaret(undefined, 1, 2);
+		//file.moveCaretToEndOfLine();
+		var BACKSPACE = 8;
+		EDITOR.mock("keydown", {charCode: BACKSPACE, target: "canvas"}); // Simulate pressing backspace
+		
+		if(file.parsed.functions[0].end != 19) throw new Error("Expected function to end at index 19 file.parsed.functions[0]=" + JSON.stringify(file.parsed.functions[0], null, 2));
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function globalVariableMemberPointingToFunction(callback) {
 	EDITOR.openFile("globalVariableMemberPointingToFunction.js", 'var foo = {};\n(function() {\nfoo.bar = function() {}\n})();\n', function(err, file) {
 		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "foo.bar") throw new Error("Expected foo.bar to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
