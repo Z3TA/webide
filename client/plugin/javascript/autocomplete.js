@@ -741,6 +741,10 @@
 					
 					console.log("variable.type=" + variable.type);
 					
+					if(variable.type=="unknown") {
+						variable.type=figureOutVariableType(variable.value, charIndex, js);
+					}
+					
 					if(variable.type == "this" && functionName) {
 						var p = functionName.split(".");
 						
@@ -777,17 +781,13 @@
 							}
 						}
 						
-						
 						// Check for functions with that name, then check if the function has a property that match the word
-						
 						if(properties.length > propertyIndex) {
 							for(var i=propertyIndex+1; i<properties.length; i++) {
 								keyName += "." + properties[i];
 							}
 						}
-						
 						searchFunctionThis(variable.value, keyName, js);
-						
 						
 						// All objects has access to Object.prototype!
 						// But only show these if we have not yet discovered other keys. And not on natives!
@@ -938,6 +938,114 @@
 			
 		}
 		
+	}
+	
+	function figureOutVariableType(value, charIndex, js) {
+		console.log("figureOutVariableType: value=" + value);
+		
+		if(value=="" || value==undefined) {
+			console.log("figureOutVariableType: Unable to figure out type from value=" + value);
+return "unknown";
+		}
+		
+		var file = EDITOR.currentFile;
+		var types = [];
+		// Is there a function with that value ?
+		var scope = getScope(charIndex, js.functions, js.globalVariables);
+		
+		var func = scope.functions[value];
+		
+		if(!func) {
+console.log("figureOutVariableType: Unable to find any functions in scope with the name " + value + "");
+return "unknown";
+}
+
+		// What does the function return ?
+		var reRet = /return(.*)/g;
+var fBody = file.text.slice(func.start, func.end);
+		var arr;
+		var count = 0;
+		while ((arr = reRet.exec(fBody)) !== null) {
+			console.log("findFunctionReturnStatement: arr=" + JSON.stringify(arr));
+			analyzeReturnStatement(arr[1]);
+			if(++count > 10) break;
+		}
+		
+		console.log("figureOutVariableType: types.length=" + types.length);
+if(types.length == 0) {
+			
+			return "unknown";
+		}
+		else {
+			// Make sure all types are the same, with the exception of null !?
+			console.log("figureOutVariableType: types=" + JSON.stringify(types));
+			return types[0];
+		}
+
+function analyzeReturnStatement(ret) {
+console.log("analyzeReturnStatement: ret=" + ret);
+			ret = ret.trim();
+			
+			// Remove comment
+			var commentIndex = ret.indexOf("//");
+			if(commentIndex!=-1) ret.slice(0, commentIndex);
+			
+			ret = ret.trim();
+			
+			// Remove semicolon
+			if(ret.charAt(ret.length-1) == ";") ret = ret.slice(0,-1);
+			
+			ret = ret.trim();
+			
+			// Remove parentheses
+			ret = ret.replace(/\(|\)/g, ""); 
+			
+			ret = ret.trim();
+			
+			if(ret=="") types.push("undefined"); // void
+			else if(ret.match(/['"`]/)) types.push("String");
+			else if(ret.indexOf("+")!=-1 || ret.indexOf("-")!=-1 || ret.indexOf("*")!=-1 || ret.indexOf("/")!=-1 || ret.indexOf("%")!=-1) types.push("Number");
+			else if(ret == "true" || ret == "false") types.push("Boolean");
+			else if(ret.indexOf("!!") != -1) types.push("Boolean");
+			else {
+				if(ret.indexOf("[")) {
+					// An array of values
+					// todo: Figure out the type of that value
+				}
+				
+				var props = ret.split(".");
+
+// Changle the scope to the function point ot view
+				var scope = getScope(func.start+1, js.functions, js.globalVariables);
+
+				// Search the scope for variables and functions
+				var variable = scope.variables[props[0]];
+				if(variable) {
+					console.warn("figureOutVariableType: Found variable " + props[0] + "");
+					if(props.length == 1) types.push( variable.type );
+					else {
+						for (var i=1; i<props.length; i++) {
+							variable = variable.keys[props[i]]
+							if(!variable) {
+console.warn("Found variable " + props[0] + " but not the member " + ret);
+								return;
+							}
+						}
+						types.push(variable.type);
+					}
+					return;
+				}
+else {
+					
+					var otherFunction = scope.functions[ret];
+					if(otherFunction) {
+						console.log("figureOutVariableType: The return from " + func.name + " function is another function: " + otherFunction.name + " !");
+						// Make another search from the scope of that function
+						types.push( figureOutVariableType(ret, otherFunction.start+1, js) );
+					}
+				}
+			}
+		}
 	}
 	
 	function isWhiteSpace(char) {
@@ -1129,7 +1237,7 @@
 				*/
 				for(var i=1; i<property.length; i++) {
 					
-					theFunction = getFunctionWithName(js.functions.subFunctions, property[i]);
+					theFunction = getFunctionWithName(theFunction.subFunctions, property[i]);
 					
 					if(theFunction) break;
 					
@@ -1219,15 +1327,6 @@
 			// Insade a function scope
 			foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
 			
-			// Add local varibales for each function
-			for(var i=0; i<foundFunctions.length; i++) {
-				var func = foundFunctions[i];
-				for(var variableName in func.variables) {
-					foundVariables[variableName] = func.variables[variableName];
-					// Deeper nests over-rides globals as intended!
-				}
-			}
-			
 			// "this" is always the latest function
 			// Or is it the first !?!?
 			if(foundFunctions.length > 0) {
@@ -1306,6 +1405,11 @@
 							if(func.subFunctions[j].name.length > 0) foundFunctions.push(func.subFunctions[j]);
 						}
 						
+						// Add variables from the function we are in
+						for(var variableName in func.variables) {
+							foundVariables[variableName] = func.variables[variableName];
+							// Deeper nests over-rides globals as intended!
+						}
 						
 						// Search sub-functions (recursive)
 						searchScope(func.subFunctions);

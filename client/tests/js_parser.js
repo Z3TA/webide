@@ -1,5 +1,5 @@
 
-EDITOR.addTest(1, function noReParseOptShouldUpdateFunctions(callback) {
+EDITOR.addTest(function noReParseOptShouldUpdateFunctions(callback) {
 	EDITOR.openFile("noReParseOptShouldUpdateFunctions.js", 'function foo() {\naa\n}\n', function(err, file) {
 		if(file.parsed.functions.length != 1) throw new Error("Expected one function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		

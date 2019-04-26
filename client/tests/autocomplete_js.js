@@ -8,7 +8,18 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function callbackMagic(callback) {
+	
+	EDITOR.addTest(1, function figureOutTypeFromFunctionReturn(callback) {
+		EDITOR.openFile("figureOutTypeFromFunctionReturn.js", 'function foo() {\nvar arr = [];\nreturn arr;\n}\nvar bar = foo();\nbar.pu\n', function(err, file) {
+			var index = 68;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(5), "bar.push()"); // No autocomplete!
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function callbackMagic(callback) {
 		EDITOR.openFile("callbackMagic.js", 'function foo(cb) {\nvar answer = {baz: 1};\ncb(new Error("Hi"), answer);\n}\nfoo(bar);\nfunction bar(a, b) {\nb.b\n}\n', function(err, file) {
 			var index = 107;
 			var atCaret = autoComplete(file, index);
