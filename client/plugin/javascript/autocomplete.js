@@ -406,7 +406,7 @@
 			
 			//console.warn(JSON.stringify(js.functions, null, 2));
 			
-			if(js.functions) findFunctions(js.functions);
+			if(js.functions) findFunctions(js.functions, js);
 			
 			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete, undefined, js); // Check global variables
 			
@@ -482,23 +482,132 @@
 			return a1.substring(0, i);
 		}
 		
-		function figureOutParameterType(fun, parameterIndex) {
+		function figureOutParameterType(fun, autocompleteArgumentIndex, charIndex, js) {
 			
+			if(js == undefined) throw new Error("Parsed js not in arguments! " + JSON.stringify(arguments));
+			
+			var scope = getScope(charIndex, js.functions, js.globalVariables);
 			
 			// Find call sites !?
 			
 			// Find places where the function is used as a parameter
 			var file = EDITOR.currentFile;
-			var reInArgument = new RegExp("(\\w)\\(.*" + fun.name + ".*\\)");
+			var reInArgument = new RegExp("(\\w+)\\(.*" + fun.name + ".*\\)", "g");
 			
 			var arr;
+			var count = 0;
+			var argumentIndex = -1;
 			while ((arr = reInArgument.exec(file.text)) !== null) {
-				console.log("figureOutParameterType: arr=" + JSON.strinify(arr));
+				argumentIndex = findArgumentIndex(arr[0], fun.name);
+				console.log("figureOutParameterType: arr=" + JSON.stringify(arr) + " argumentIndex=" + argumentIndex);
+				checkFunctionParameters(arr[1], argumentIndex);
+				
+				if(++count > 10) break;
+			}
+			
+			function checkFunctionParameters(fname, parameterIndex) {
+				
+				// Find the function in the scope
+				var f = scope.functions[fname];
+				if(!f) {
+					console.log("figureOutParameterType: checkFunctionParameters: fname=" + fname + " is not in scope: " + JSON.stringify(scope, null, 2));
+					return;
+				}
+				
+				var parameterName = getParameterName(f.arguments, parameterIndex);
+				
+				// Check the function body to get the arguments used when calling the parameter as a function
+				var reCalls = new RegExp(parameterName + "\\s*\\(", "g");
+				var fBody = file.text.slice(f.start, f.end);
+				console.log("checkFunctionParameters: fBody=" + fBody);
+				var arr;
+				var i=0;
+				var leftP=0;
+				var rightP=0;
+				var char = "";
+				var startIndex = 0;
+				while ((arr = reCalls.exec(fBody)) !== null) {
+					// We can't use regexp to find the arguments, because of the possibility of nested parentheses
+					startIndex = arr.index+arr[0].length;
+					
+					console.log("checkFunctionParameters startIndex=" + startIndex + " arr.index=" + arr.index + " arr=" + JSON.stringify(arr));
+					
+					for (i=startIndex, leftP=0, rightP=0; i<fBody.length; i++) {
+						char = fBody.charAt(i);
+						
+						if(char=="(") leftP++;
+						else if(char==")") rightP++;
+						
+						//console.log("i=" + i + " char=" + char + " leftP=" + leftP + " rightP=" + rightP);
+						
+						if(rightP > leftP) {
+							// We reached the end of the arg string
+							analyzeArgString(fBody.slice(startIndex, i));
+							break;
+						}
+					}
+				}
+				
+				function analyzeArgString(argStr) {
+					var argsArr = parseArgumentString(argStr);
+					
+					analyzeExpression(argsArr[autocompleteArgumentIndex]);
+				}
+				
+				function analyzeExpression(str) {
+					console.log("analyzeExpression: str=" + str);
+					
+					// Figure out the type of this expression
+					var variable = scope.variables[str];
+					
+					if(variable) {
+						console.log("figureOutParameterType: " + str + " is a variable=" + JSON.stringify(variable));
+						
+						// Replace the variable with our local parameter
+						var localParams =wordToComplete.split(".");
+						var theVariable = {}
+						theVariable[localParams[0]] = variable;
+						
+						//var word = wordToComplete.slice(wordToComplete.indexOf(".")+1);
+						
+						searchVariables(theVariable, wordToComplete, undefined, js);
+					}
+					
+				}
+				
+				
+				// Check the function's variables and variables in the scope to figure out their types'
+				
 				
 			}
 			
+			function parseArgumentString(argStr) {
+				console.log("parseArgumentString: argStr=" + argStr);
+				var args = argStr.split(",");
+				args = args.map(function(a) {
+					return a.trim();
+				});
+				return args;
+			}
 			
+			function findArgumentIndex(callString, arg) {
+				var args = callString.slice( callString.indexOf("(")+1, callString.lastIndexOf(")") );
+				console.log("findArgumentIndex: args=" + args);
+				var args = args.split(",");
+				args = args.map(function(a) {
+					return a.trim();
+				});
+				return args.indexOf(arg);
+			}
 			
+			function getParameterName(parameterString, parameterIndex) {
+				var parameters = parameterString.split(",");
+				var name = parameters[parameterIndex];
+				var defaultValue = name.indexOf("=");
+				if(defaultValue != -1) name = name.slice(0, defaultValue);
+				
+				return name;
+			}
 			
 		}
 		
@@ -522,7 +631,7 @@
 				if(func.start <= charIndex && func.end >= charIndex) {
 					// Cursor is inside this function!
 					
-					console.log("Inside " + func.name);
+					console.log("Inside " + func.name + " ");
 					
 					checkFunctionName(func.name, wordToComplete);
 					
@@ -533,8 +642,9 @@
 							functionArguments[a] = functionArguments[a].trim(); // Get rid of spaces
 							// todo: Handle default function argument values
 							// maybe: Search for calls of this function to figure out what Type of variable it is
+							console.log("parameter " + a + ": " + functionArguments[a] + " wordToComplete=" + wordToComplete + " props[0]=" + props[0] + " ");
 							if(functionArguments[a].indexOf(wordToComplete) == 0) options.push(functionArguments[a]);
-							else if(functionArguments[a] == props[0]) figureOutParameterType(func, a);
+							else if(functionArguments[a] == props[0]) figureOutParameterType(func, a, charIndex, js);
 						}
 					}
 					
@@ -551,7 +661,7 @@
 					
 				}
 				else {
-					console.log("Not inside function=" + func.name);
+					console.log("charIndex=" + charIndex + " Not between func.start=" + func.start + " and " + func.end + " function=" + func.name);
 				}
 				
 				if(!func.lambda) checkFunctionName(func.name, wordToComplete); // Check parent scope function-names
@@ -607,7 +717,7 @@
 					
 					console.log("variable.type=" + variable.type);
 					
-					if(variable.type == "this") {
+					if(variable.type == "this" && functionName) {
 						var p = functionName.split(".");
 						
 						searchFunctionThis(p[0], keyName, js);
@@ -1101,7 +1211,7 @@
 			}
 		}
 		
-		// Make foundFunctions into an object literal, now when the order doesn't matter
+		// Make foundFunctions into an object literal for convencience, now when the order doesn't matter
 		var foundFunctionsObj = {};
 		for(var i=0, func; i<foundFunctions.length; i++) {
 			func = foundFunctions[i];
@@ -1157,10 +1267,11 @@
 					
 					cursorInside = (func.start <= charIndex && func.end >= charIndex);
 					
+					// All functions from the same scope are available
+					if(func.name.length > 0) foundFunctions.push(func);
+					
+					
 					if( cursorInside) {
-						
-						// Add itself to functions (yes functions can call themselves)
-						if(func.name.length > 0) foundFunctions.push(func); // Don't add anonymous functions
 						
 						console.log("Function Scope name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
 						

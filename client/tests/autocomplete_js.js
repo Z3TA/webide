@@ -8,7 +8,6 @@
 		
 	*/
 	
-	
 	EDITOR.addTest(1, function callbackMagic(callback) {
 		EDITOR.openFile("callbackMagic.js", 'function foo(cb) {\nvar answer = {baz: 1};\ncb(new Error("Hi"), answer);\n}\nfoo(bar);\nfunction bar(a, b) {\nb.b\n}\n', function(err, file) {
 			var index = 107;

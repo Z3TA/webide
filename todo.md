@@ -29,11 +29,15 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+changing the function parameters doesn't seem to update the file.parsed !?
+
 Add more built in JS global properties and methods!
 
 Autocomplete inside []
 
 autocomplete inside function calls, for example foo.hasOwnProperty(f|);
+
+autocomplete when creating for loop: for (var i=0; i<foo|.length; i++) {
 
 Make the parser check what functions return so we can autocomplete for example:
 var foo = bar();
