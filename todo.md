@@ -29,6 +29,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+The editor is now super slow because the js_parser got slower ...
+Will commenting out some console.log's solve it !?
+
+Parsing:
+Object.defineProperty(EDITOR, 'workingDirectory', {
+			get: function getWorkingDirectory() { return workingDirectory; },
+			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
+			enumerable: true
+		});
+
 
 
 Add more built in JS global properties and methods!

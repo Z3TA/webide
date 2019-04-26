@@ -784,7 +784,7 @@
 				isBelow = (func.start > oldEnd);
 				isParent = (func.end > oldEnd && func.start < oldEnd);
 				
-				console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
+				//console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
 				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
 				
@@ -797,14 +797,14 @@
 					func.endRow += endRowDiff;
 				}
 				else if(isParent) {
-					console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
+					//console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
 					
 					func.end += charactersLength;
 					func.endRow += endRowDiff;
 				}
 				
 				if(isBelow || isParent) {
-					console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
+					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
@@ -865,7 +865,7 @@
 				throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
 			}
 			
-			console.log(func.name + " OK");
+			//console.log(func.name + " OK");
 			
 			checkFunctionStartEnd(file, func.subFunctions); // Check subfunctions
 			
@@ -1121,7 +1121,7 @@
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
 			
-			console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
+			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
 			if(parentCodeBlock.indentation < 0) error(new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation));
 			
@@ -1152,7 +1152,7 @@
 		
 		function codeBlockR() {
 			
-			console.log("codeBlockR: lineNumber=" + lineNumber);
+			//console.log("codeBlockR: lineNumber=" + lineNumber);
 			
 			codeBlockRight++;
 			codeBlockRightRow = row;
@@ -1275,7 +1275,7 @@
 				*/
 				
 				
-				console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
+				//console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
 				
 				//leftSide = lastWord;
 				
@@ -1330,7 +1330,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1341,7 +1341,7 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var pointerName = properties[0];
@@ -1350,7 +1350,7 @@
 				if(insideFunctionBody[subFunctionDepth]) {
 					if(Object.hasOwnProperty.call(func.variables, pointerName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[pointerName];
-						console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
+						//console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
 					}
 					else {
 						
@@ -1364,11 +1364,11 @@
 							// But not if it's a function parameter
 							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
 								variable = globalVariables[leftSide] = new Variable();
-								console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+								//console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
 							}
 						}
 						else {
-							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 						
 					}
@@ -1402,17 +1402,17 @@
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							variable = globalVariables[leftSide] = new Variable();
-								console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
+								//console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
 							}
 						else {
-							console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
+							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
 					}
 					
 				}
 				
 				if(variable) {
-					console.log("variable=" + JSON.stringify(variable, null, 2));
+					//console.log("variable=" + JSON.stringify(variable, null, 2));
 					
 					variableName = ""; // Reset global variableName because we have found the right side
 					
@@ -1421,7 +1421,7 @@
 					
 					variable.type = getVariableType(rightSide);
 					if(variable.type=="this") {
-						console.log("found variable with type=this");
+						//console.log("found variable with type=this");
 						if(subFunctionDepth > 0) {
 							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly at the functon, but we want to avoid too much dublication
 						}
@@ -1436,7 +1436,7 @@
 					
 				}
 				else {
-					console.log("No variable!");
+					//console.log("No variable!");
 				}
 				
 				rightSide = "";
@@ -2082,7 +2082,7 @@
 					if(variableName.indexOf("=") != -1) variableName = variableName.slice(0, variableName.indexOf("=")-1);
 					afterPointer[codeBlockDepth] = char;
 					
-					console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 					
 					// Figure out the left side (the variable name)
 					
@@ -2132,7 +2132,7 @@
 						
 					}
 					
-					console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
+					//console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
 					
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
@@ -2206,7 +2206,7 @@
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " afterPointer[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + afterPointer[codeBlockDepth-1] + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideParenthesis[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + insideParenthesis[codeBlockDepth-1] + " leftParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + leftParentheses[codeBlockDepth-1] + " rightParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + rightParentheses[codeBlockDepth-1]);
+						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " afterPointer[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + afterPointer[codeBlockDepth-1] + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideParenthesis[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + insideParenthesis[codeBlockDepth-1] + " leftParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + leftParentheses[codeBlockDepth-1] + " rightParentheses[codeBlockDepth-1=" + (codeBlockDepth-1) + "]=" + rightParentheses[codeBlockDepth-1]);
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2243,7 +2243,7 @@
 						
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
 							leftSide = findLeftSide(":", codeBlockDepth-1);
-							console.log("method? leftSide=" + leftSide);
+							//console.log("method? leftSide=" + leftSide);
 							// todo: Add the variable!?
 							if(leftSide.charAt(leftSide.length-1) == ".") functionName = leftSide + functionName;
 							else if(leftSide.indexOf(".") != -1) functionName = leftSide;
@@ -2251,7 +2251,7 @@
 							properties = functionName.split(".");
 						}
 						
-						console.log("subFunctionDepth=" + subFunctionDepth);
+						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
 						if(insideFunctionBody[subFunctionDepth] && !globalVariables[properties[0]]) { // It can be a global variable pointing to a function!
 							// It's a sub-function. 
@@ -2284,7 +2284,7 @@
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
-								console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
 							
@@ -2308,7 +2308,7 @@
 									//newFunc.name = properties[properties.length-1];
 									functions[j].prototype[ properties[properties.length-1] ] = new Variable();
 									functions[j].prototype[ properties[properties.length-1] ].method = true;
-									console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
+									//console.log("Added " +  properties[properties.length-1] + " to " + properties[properties.length-3] + " prototype");
 									break;
 								}
 							}
@@ -2713,7 +2713,7 @@
 		function readWords(charIndex) {
 			// Collects the words to find variables
 			
-			console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
+			//console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
 			
 			
 			// .substr(start,length)   .substring(start,end)
@@ -2774,7 +2774,7 @@
 				
 				word = word.trim();
 				
-				console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
+				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
 				
 				//console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
 				if(singleStatementContext==1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
@@ -2802,7 +2802,7 @@
 					else if(word.charAt(0)=="(" && word.charAt(word.length-1)==")") {
 						// We got parameters for function call/declaration, or for/while/do loops
 						// Everything insiide a parentheses is added to the word 
-						console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " singleStatementContext=" + singleStatementContext);
+						//console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " singleStatementContext=" + singleStatementContext);
 						//lastWord = lastWord + word;
 						if(singleStatementContext && word.indexOf(";") != -1) {
 							// Found variable declaration insode for loop !?
@@ -2816,14 +2816,14 @@
 						
 						words.push(word);
 						
-						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
 							// Look for foo = bar = baz = 1
 							if(char!="=" && lastWord != "function") {
 								rightSide += word;
-								console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + ")");
+								//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + " char=" + char + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + ")");
 								endPointer();
 							}
 						}
@@ -2890,7 +2890,7 @@
 									// A global variable is declared:
 									
 									globalVariables[word] = new Variable();
-									console.log("Added GLOBAL variable=" + word + "");
+									//console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
 									
 								}
@@ -3043,7 +3043,7 @@
 		
 		// Only functions Should have a prototype! 
 		
-		console.warn("new Variable! type=" + type + " value=" + value);
+		//console.warn("new Variable! type=" + type + " value=" + value);
 		
 	}
 	
