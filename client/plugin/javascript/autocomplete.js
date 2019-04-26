@@ -141,6 +141,9 @@
 		{name: "Object.prototype.setPrototypeOf", arguments: "obj, prototype"},
 		{name: "Object.prototype.values", arguments: "obj", es: 2017},
 		
+		// ### JSON
+		{name: "JSON.parse", arguments: "string, reviver"},
+		{name: "JSON.stringify", arguments: "value, replacer, space"}
 		
 		
 	];
@@ -152,6 +155,29 @@
 	];
 	// todo: Check if we are browser or nodejs or other JS platform
 	builtInFunctions = builtInFunctions.concat(browserGlobalFunctions);
+	
+	var consoleApi = [
+		{name: "console.assert", arguments: "assertion, ...msgOrObjects, ...objOrSubstitutes", es: 2015},
+		{name: "console.clear", arguments: "", es: 2015},
+		{name: "console.count", arguments: "label", es: 2015},
+		{name: "console.countReset", arguments: "label", es: 2015},
+		{name: "console.debug", arguments: "objectOrMessage, ...moreObjectsOrSubsitutes"},
+		{name: "console.dir", arguments: "object"},
+		{name: "console.dirxml", arguments: "object"},
+		{name: "console.error", arguments: "objectOrMessage, ...moreObjectsOrSubsitutes"},
+		{name: "console.group", arguments: "label"},
+		{name: "console.groupCollapsed", arguments: "label"},
+		{name: "console.groupEnd", arguments: ""},
+		{name: "console.info", arguments: "objectOrMessage, ...moreObjectsOrSubsitutes"},
+		{name: "console.log", arguments: "objectOrMessage, ...moreObjectsOrSubsitutes"},
+		{name: "console.table", arguments: "data, columns"},
+		{name: "console.time", arguments: "label"},
+		{name: "console.timeEnd", arguments: "label"},
+		{name: "console.timeLog", arguments: "label"},
+		{name: "console.trace", arguments: ""},
+		{name: "console.warn", arguments: "objectOrMessage, ...moreObjectsOrSubsitutes"}
+	];
+	builtInFunctions = builtInFunctions.concat(consoleApi);
 	
 	
 	var builtInVariables = {
@@ -457,6 +483,22 @@
 		}
 		
 		function figureOutParameterType(fun, parameterIndex) {
+			
+			
+			// Find call sites !?
+			
+			// Find places where the function is used as a parameter
+			var file = EDITOR.currentFile;
+			var reInArgument = new RegExp("(\\w)\\(.*" + fun.name + ".*\\)");
+			
+			var arr;
+			while ((arr = reInArgument.exec(file.text)) !== null) {
+				console.log("figureOutParameterType: arr=" + JSON.strinify(arr));
+				
+			}
+			
+			
+			
 			
 		}
 		
