@@ -1,4 +1,11 @@
 
+EDITOR.addTest(function globalVariableMemberPointingToFunction(callback) {
+	EDITOR.openFile("globalVariableMemberPointingToFunction.js", 'var foo = {};\n(function() {\nfoo.bar = function() {}\n})();\n', function(err, file) {
+		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "foo.bar") throw new Error("Expected foo.bar to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
 
 EDITOR.addTest(function globalVariablePointingToFunction(callback) {
 	EDITOR.openFile("globalVariablePointingToFunction.js", 'var glob;\n(function() {\nglob = function Glob() {}\n})();\n', function(err, file) {
