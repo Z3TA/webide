@@ -922,6 +922,7 @@
 		variableName = "",
 		lastVariableName = "",
 		functionName = "",
+		altFunctionName = "",
 		char = "",
 		functionArgumentsStart = parseStart,
 		functionArguments = "",
@@ -2103,6 +2104,8 @@
 						//console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
+						altFunctionName = lastWord;
+						if(altFunctionName=="function") altFunctionName = "";
 						
 						// insideParenthesis[0]=(functionbar(
 						var match = String(insideParenthesis[codeBlockDepth]).match(/function(.*)\(/);
@@ -2243,10 +2246,18 @@
 						
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
 							leftSide = findLeftSide(":", codeBlockDepth-1);
-							//console.log("method? leftSide=" + leftSide + " rightSide=rightSide lastWord=" + lastWord + " variableName=" + variableName);
+							//console.log("method? leftSide=" + leftSide + " functionName=" + functionName + " altFunctionName=" + altFunctionName + " world=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName);
 							// todo: Add the variable!?
 							if(leftSide.charAt(leftSide.length-1) == ".") functionName = leftSide + functionName;
 							else if(leftSide.indexOf(".") != -1) functionName = leftSide;
+							
+							if(functionName.charAt(0) == ".") {
+// It's an object without a name that has a method pointing to a function !?
+								newFunc.lambda = true;
+								if(altFunctionName) functionName = altFunctionName;
+								else functionName = variableName;
+							}
+							
 							newFunc.name = functionName;
 							properties = functionName.split(".");
 						}

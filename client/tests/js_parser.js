@@ -1,4 +1,17 @@
 
+
+EDITOR.addTest(function namedFunctionInAnonymousObject(callback) {
+	EDITOR.openFile("namedFunctionInAnonymousObject.js", '{\nfoo: function bar() {}\n}\n', function(err, file) {
+		
+		if(file.parsed.functions.length != 1) throw new Error("Expected one function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		
+		if(file.parsed.functions[0].name != "bar") throw new Error("Expected function name to be bar! file.parsed.functions[0]=" + JSON.stringify(file.parsed.functions[0], null, 2));
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function noReParseOptShouldUpdateFunctions(callback) {
 	EDITOR.openFile("noReParseOptShouldUpdateFunctions.js", 'function foo() {\naa\n}\n', function(err, file) {
 		if(file.parsed.functions.length != 1) throw new Error("Expected one function! file.parsed=" + JSON.stringify(file.parsed, null, 2));

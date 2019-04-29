@@ -9,7 +9,7 @@
 	*/
 	
 	
-	EDITOR.addTest(1, function figureOutTypeFromFunctionReturn(callback) {
+	EDITOR.addTest(function figureOutTypeFromFunctionReturn(callback) {
 		EDITOR.openFile("figureOutTypeFromFunctionReturn.js", 'function foo() {\nvar arr = [];\nreturn arr;\n}\nvar bar = foo();\nbar.pu\n', function(err, file) {
 			var index = 68;
 			var atCaret = autoComplete(file, index);
