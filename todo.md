@@ -46,6 +46,9 @@ foo.x|
 
 todo: Only show the Object.prototype for variables with type Object, and make the parser mark {} as Object
 
+After we updated the js_parses it sometimes have issues with global variables while editing and parse-only-function optimization.
+Try putting var infront of things or removing var !?
+
 Better autocomplete!
 
 
