@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+autocomplete todo: The argument hinter can not trigger on autocomplete! Or we wouln't be able to autocomplete variables inside function arguments!
+
 autocomplete todo: Make a list of global functions
 
 when autocompleting, favour variables over functions!

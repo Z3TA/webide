@@ -3486,8 +3486,8 @@ EDITOR.fireEvent("btk");
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		
-		var wordDelimitersLeft = " {}+-/<>\r\n\t!;";
-		var wordDelimitersRight = " {}+-/<>\r\n\t!;()";
+		var wordDelimitersLeft = " {}+-/<>\r\n\t!;()[]=";
+		var wordDelimitersRight =" {}+-/<>\r\n\t!;()[]=.";
 		var char = "";
 		var left1 = file.text.charAt(file.caret.index-1);
 		var left2 = file.text.charAt(file.caret.index-2);
@@ -3495,7 +3495,15 @@ var word = "";
 		var options = []; // Word options
 		var mcl = []; // Move caret left
 		
-		// Go left to get the word
+		/*
+			We want to include whole of document.getElementById("foobar").innerH
+			but only bar in foo(bar)
+			And also foo(x in foo(x
+			
+		*/
+		
+		var leftParentheses = 0;
+		var rightParentheses = 0;
 		var dotInWord = false;
 		for(var i=file.caret.index-1; i>-1; i--) {
 			char = left1;
@@ -3506,10 +3514,18 @@ var word = "";
 			
 			console.log("char=" + char);
 			
-			if(wordDelimitersLeft.indexOf(char) > -1) break; // Exit loop
+			if(char == "(") {
+				leftParentheses++;
+				if(leftParentheses > rightParentheses) {
+					// We are moving left, and have found an unmatched parenthesis
+					break;
+				}
+			}
+			else if(char == ")") rightParentheses++;
+			else if(wordDelimitersLeft.indexOf(char) > -1) break; // Exit loop
 			
 			// don't include if(
-			if(char == "(" && left2 == "i" && left1 == "f") {
+			else if(char == "(" && left2 == "i" && left1 == "f") {
 				console.log("break because of if(");
 				break;
 			}

@@ -1127,6 +1127,10 @@ else {
 				startOfArguments = i;
 				endOfFunctionName = i;
 			}
+			else if(char==")") {
+				// This is after a function call. Ex: foo(bar).baz
+				return false;
+			}
 			else if(isWhiteSpace(char) && endOfFunctionName) { // End of function name
 				
 				startOfFunctionName = i+1;
