@@ -484,7 +484,7 @@
 		
 		function figureOutParameterType(fun, autocompleteArgumentIndex, charIndex, js) {
 			
-			console.log("figureOutParameterType: inside fun.name=" + fun.name + " autocompleteArgumentIndex=" + autocompleteArgumentIndex + "");
+			console.log("figureOutParameterType: inside fun.name=" + fun.name + " autocompleteArgumentIndex=" + autocompleteArgumentIndex + " charIndex=" + charIndex);
 			
 			if(js == undefined) throw new Error("Parsed js not in arguments! " + JSON.stringify(arguments));
 			
@@ -492,7 +492,7 @@
 			var scope = getScope(charIndex, js.functions, js.globalVariables);
 			
 			
-			// Find call sites
+			// Find call sites (in the file)
 			var reCalls = new RegExp(fun.name + "\\s*\\(", "g");
 			var arr;
 			var i=0;
@@ -513,7 +513,7 @@
 					
 					if(rightP > leftP) {
 						// We reached the end of the arg string
-						analyzeArgString(file.text.slice(startIndex, i));
+						analyzeArgString(file.text.slice(startIndex, i), startIndex);
 						break;
 					}
 				}
@@ -559,7 +559,7 @@
 					// We can't use regexp to find the arguments, because of the possibility of nested parentheses
 					startIndex = arr.index+arr[0].length;
 					
-					console.log("checkFunctionParameters startIndex=" + startIndex + " arr.index=" + arr.index + " arr=" + JSON.stringify(arr));
+					console.log("checkFunctionParameters in functionb body: startIndex=" + startIndex + " arr.index=" + arr.index + " arr=" + JSON.stringify(arr));
 					
 					for (i=startIndex, leftP=0, rightP=0; i<fBody.length; i++) {
 						char = fBody.charAt(i);
@@ -571,23 +571,24 @@
 						
 						if(rightP > leftP) {
 							// We reached the end of the arg string
-							analyzeArgString(fBody.slice(startIndex, i));
+							analyzeArgString(fBody.slice(startIndex, i), startIndex+f.start);
 							break;
 						}
 					}
 				}
 			}
 			
-			function analyzeArgString(argStr) {
+			function analyzeArgString(argStr, index) {
 				var argsArr = parseArgumentString(argStr);
 				
-				analyzeExpression(argsArr[autocompleteArgumentIndex]);
+				analyzeExpression(argsArr[autocompleteArgumentIndex], index);
 			}
 			
-			function analyzeExpression(str) {
-				console.log("analyzeExpression: str=" + str);
+			function analyzeExpression(str, index) {
+				console.log("analyzeExpression: str=" + str + " index=" + index);
 				
 				// Figure out the type of this expression
+				var scope = getScope(index, js.functions, js.globalVariables);
 				var variable = scope.variables[str];
 				
 				if(variable) {
@@ -601,6 +602,9 @@
 					//var word = wordToComplete.slice(wordToComplete.indexOf(".")+1);
 					
 					searchVariables(theVariable, wordToComplete, undefined, js);
+				}
+				else {
+					console.log("analyzeExpression: Unable to find variable " + str + " in scope=" + JSON.stringify(scope, null, 2));
 				}
 				
 			}
