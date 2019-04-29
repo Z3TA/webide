@@ -834,12 +834,15 @@
 			// Returns the function, or false
 			var f, s;
 			
+			//console.log("insideFunction: Checking " + functions.length + " functions (parent=" + (parent && parent.name) + ") ...");
+			
 			for(var i=0; i<functions.length; i++) {
 				f = functions[i];
+				//console.log("insideFunction: f.name=" + f.name + " f.arrowFunction=" + f.arrowFunction + " f.start=" + f.start + " caretIndex=" + caretIndex + " f.end=" + f.end + " charactersLength=" + charactersLength + " ");
 				if(!f.arrowFunction && f.start < caretIndex && f.end >= caretIndex) {
 					// Deleted text are now allowed to be larger then the function body
 					if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
-						//console.log("Found function=" + f.name);
+						//console.log("insideFunction: Found function=" + f.name);
 						// Check sub functions
 						return insideFunction(f.subFunctions, caretIndex, f, charactersLength);
 					}
@@ -2274,7 +2277,9 @@
 						
 						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
-						if(insideFunctionBody[subFunctionDepth] && !globalVariables[properties[0]]) { // It can be a global variable pointing to a function!
+						if(globalVariables[properties[0]]) newFunc.global = true; // A global variable pointing to a function!
+						
+						if(insideFunctionBody[subFunctionDepth]) { 
 							// It's a sub-function. 
 							
 							subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
@@ -2300,11 +2305,12 @@
 						else {
 							
 							// a global function
+							newFunc.global = true;
 							functionIndex = functions.push(newFunc) - 1;
 							
 							if(globalVariables[properties[0]]) {
 								// A global variable pointing to a function
-								myFunction[subFunctionDepth+1] = functions[functionIndex];
+								myFunction[subFunctionDepth] = functions[functionIndex];
 								subFunctionDepth++; // Functions within this function's body will be sub-functions
 								
 								L[subFunctionDepth] = 1;
@@ -3039,6 +3045,7 @@
 		func.endRow = -1;
 		func.arrowFunction = false;
 		func.lambda = false;
+		func.global = false;
 		func.prototype = {}; // Variables. (Prototype methods will also be added as a variable here for consistency, it will also exist as a function)
 		
 		/*
