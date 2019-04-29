@@ -8,6 +8,22 @@
 		
 	*/
 	
+	
+	EDITOR.addTest(2, function autoCompleteInsideBracketsAndParentheses(callback) {
+		EDITOR.openFile("autoCompleteInsideBracketsAndParentheses.js", 'var variable = 1;\nfoo[vari]\nbar(vari)\n', function(err, file) {
+			var index = 26;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(1), "foo[variable]");
+			
+			var index = 40;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(2), "bar(variable)");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function autoCompleteDomNodes(callback) {
 		EDITOR.openFile("autoCompleteDomNodes.js", 'var foo = document.getElementById("foo");\nvar bar = document.createElement("div");\nfoo.ap\nbar.removeC\n', function(err, file) {
 			var index = 89;

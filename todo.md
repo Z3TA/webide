@@ -29,18 +29,12 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
-Parsing:
-Object.defineProperty(EDITOR, 'workingDirectory', {
-			get: function getWorkingDirectory() { return workingDirectory; },
-			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
-			enumerable: true
-		});
-
-
 Add more built in JS global properties and methods!
 
-Autocomplete inside []
+Autocomplete inside [] and ()
+vs autocompleting:
+ document.getElementById("foobar").innerH
+(preview in WysiwygEditor)
 
 autocomplete inside function calls, for example foo.hasOwnProperty(f|);
 
