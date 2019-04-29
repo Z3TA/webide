@@ -29,8 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-The editor is now super slow because the js_parser got slower ...
-Will commenting out some console.log's solve it !?
+bug: Variables get added to the "parsed" object in js_parse
+
 
 Parsing:
 Object.defineProperty(EDITOR, 'workingDirectory', {
@@ -64,6 +64,14 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+try combining js files into one huge text-string, then minify it
+
+Server doesn't seem to be able to delete guest users !?
+Removing guest user: guest1 (server.js:544:3))
+But never calls back
+
+
 Error when recycling guests
 error: stderr=Another instance of Certbot is already running. (stderr.length=47)
 

@@ -1016,7 +1016,7 @@
 		foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
-		language = "JS", // Update the language to vbScript, PHP depending on ... ?
+		language = "JS", // Update the language to vbScript, or PHP, depending on ... ?
 		ASP = false,
 		PHP = false,
 		CSS = false,
@@ -1402,8 +1402,8 @@
 						if(leftSide.match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							variable = globalVariables[leftSide] = new Variable();
-								//console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
-							}
+							console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
+						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
 						}
@@ -1606,7 +1606,7 @@
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !insideTemplateLiteral) {
 					if(insideDblQuote) {
 						//console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
-						if(lastChar != backSlash || (lastChar==backSlash && llChar==backSlash || vbScript)) {				
+						if(lastChar != backSlash || (lastChar==backSlash && llChar==backSlash && lllChar!=backSlash || vbScript)) {				
 							insideDblQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);
@@ -2243,7 +2243,7 @@
 						
 						if(afterPointer[codeBlockDepth-1] == ":" && properties.length == 1) {
 							leftSide = findLeftSide(":", codeBlockDepth-1);
-							//console.log("method? leftSide=" + leftSide);
+							//console.log("method? leftSide=" + leftSide + " rightSide=rightSide lastWord=" + lastWord + " variableName=" + variableName);
 							// todo: Add the variable!?
 							if(leftSide.charAt(leftSide.length-1) == ".") functionName = leftSide + functionName;
 							else if(leftSide.indexOf(".") != -1) functionName = leftSide;
@@ -2272,7 +2272,7 @@
 									startIndex = 1;
 									variable = traverseVariableTree(properties, variable, startIndex);
 									variable.method = true;
-									}
+								}
 							}
 							
 						}
@@ -2283,7 +2283,7 @@
 							
 							if(globalVariables[properties[0]]) {
 								// A global variable pointing to a function
-myFunction[subFunctionDepth+1] = functions[functionIndex];
+								myFunction[subFunctionDepth+1] = functions[functionIndex];
 								subFunctionDepth++; // Functions within this function's body will be sub-functions
 								
 								L[subFunctionDepth] = 1;
@@ -2291,7 +2291,7 @@ myFunction[subFunctionDepth+1] = functions[functionIndex];
 							}
 							else {
 								myFunction[subFunctionDepth] = functions[functionIndex];
-}
+							}
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
@@ -2308,9 +2308,9 @@ myFunction[subFunctionDepth+1] = functions[functionIndex];
 									variable.method = true;
 								}
 							}
-
 							
-
+							
+							
 							
 						}
 						
