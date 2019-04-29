@@ -143,9 +143,46 @@
 		
 		// ### JSON
 		{name: "JSON.parse", arguments: "string, reviver"},
-		{name: "JSON.stringify", arguments: "value, replacer, space"}
+		{name: "JSON.stringify", arguments: "value, replacer, space"},
 		
-		
+		// ### Element
+		{name: "Element.prototype.addEventListener", arguments: "event, function, useCapture"},
+		{name: "Element.prototype.appendChild", arguments: "node"},
+		{name: "Element.prototype.blur", arguments: ""},
+		{name: "Element.prototype.click", arguments: ""},
+		{name: "Element.prototype.cloneNode", arguments: "deep"},
+		{name: "Element.prototype.compareDocumentPosition", arguments: "node"},
+		{name: "Element.prototype.contains", arguments: "node"},
+		{name: "Element.prototype.exitFullscreen", arguments: ""},
+		{name: "Element.prototype.focus", arguments: ""},
+		{name: "Element.prototype.getAttribute", arguments: "attributename"},
+		{name: "Element.prototype.getAttributeNode", arguments: "attributename"},
+		{name: "Element.prototype.getBoundingClientRect", arguments: ""},
+		{name: "Element.prototype.getElementsByClassName", arguments: "classname"},
+		{name: "Element.prototype.getElementsByTagName", arguments: "tagname"},
+		{name: "Element.prototype.hasAttribute", arguments: "attributename"},
+		{name: "Element.prototype.hasAttributes", arguments: ""},
+		{name: "Element.prototype.hasChildNodes", arguments: ""},
+		{name: "Element.prototype.insertAdjacentElement", arguments: "position, element"},
+		{name: "Element.prototype.insertAdjacentHTML", arguments: "position, text"},
+		{name: "Element.prototype.insertAdjacentText", arguments: "position, text"},
+		{name: "Element.prototype.insertBefore", arguments: "newnode, existingnode"},
+		{name: "Element.prototype.isDefaultNamespace", arguments: "namespaceURI", domVersion: 3},
+		{name: "Element.prototype.isEqualNode", arguments: "node", domVersion: 3},
+		{name: "Element.prototype.isSameNode", arguments: "node", domVersion: 3},
+		{name: "Element.prototype.normalize", arguments: ""},
+		{name: "Element.prototype.querySelector", arguments: "CSS_selectors"},
+		{name: "Element.prototype.querySelectorAll", arguments: "CSS_selectors"},
+		{name: "Element.prototype.removeAttribute", arguments: "attributename"},
+		{name: "Element.prototype.removeAttributeNode", arguments: "attributenode"},
+		{name: "Element.prototype.removeChild", arguments: "node"},
+		{name: "Element.prototype.removeEventListener", arguments: "event, function, useCapture"},
+		{name: "Element.prototype.replaceChild", arguments: "newnode, oldnode"},
+		{name: "Element.prototype.requestFullscreen", arguments: ""},
+		{name: "Element.prototype.scrollIntoView", arguments: "alignTo"},
+		{name: "Element.prototype.setAttribute", arguments: "attributename, attributevalue"},
+		{name: "Element.prototype.setAttributeNode", arguments: "attributenode"},
+		{name: "Element.prototype.toString", arguments: ""}
 	];
 	
 	
