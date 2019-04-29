@@ -1224,7 +1224,7 @@
 			else if( !isNaN(parseFloat(rightSide)) && isFinite(rightSide) ) {
 				type = "Number";
 			}
-			else if(rightSide.indexOf("createElement") != -1) {
+			else if(rightSide.indexOf("createElement") != -1 || rightSide.indexOf("getElementById") != -1) {
 				type = "Element";
 			}
 			else if(rightSide.charAt(0) == rightSide.charAt(0).toUpperCase()) {

@@ -8,12 +8,26 @@
 		
 	*/
 	
+	EDITOR.addTest(function autoCompleteDomNodes(callback) {
+		EDITOR.openFile("autoCompleteDomNodes.js", 'var foo = document.getElementById("foo");\nvar bar = document.createElement("div");\nfoo.ap\nbar.removeC\n', function(err, file) {
+			var index = 89;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(2), "foo.appendChild()");
+			
+			var index = 112;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(3), "bar.removeChild()");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
 	
 	EDITOR.addTest(function figureOutTypeFromFunctionReturn(callback) {
 		EDITOR.openFile("figureOutTypeFromFunctionReturn.js", 'function foo() {\nvar arr = [];\nreturn arr;\n}\nvar bar = foo();\nbar.pu\n', function(err, file) {
 			var index = 68;
 			var atCaret = autoComplete(file, index);
-			UTIL.assert(file.rowText(5), "bar.push()"); // No autocomplete!
+			UTIL.assert(file.rowText(5), "bar.push()");
 			EDITOR.closeFile(file);
 			callback(true);
 		});
@@ -23,7 +37,7 @@
 		EDITOR.openFile("callbackMagic.js", 'function foo(cb) {\nvar answer = {baz: 1};\ncb(new Error("Hi"), answer);\n}\nfoo(bar);\nfunction bar(a, b) {\nb.b\n}\n', function(err, file) {
 			var index = 107;
 			var atCaret = autoComplete(file, index);
-			UTIL.assert(file.rowText(6), "b.baz"); // No autocomplete!
+			UTIL.assert(file.rowText(6), "b.baz");
 			EDITOR.closeFile(file);
 			callback(true);
 		});
