@@ -267,6 +267,16 @@
 		return char=="" || char==" " || char=="\t" || char=="\r" || char=="\n";
 	}
 	
+	function diffVariables(a, b) {
+		var diff = [];
+		for( var variable in a) {
+			if(!Object.hasOwnProperty.call(b, variable)) {
+				diff.push(variable);
+			}
+		}
+		return JSON.stringify(diff);
+	}
+	
 	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
 		/*
 			### Parse only function optimizer
@@ -687,7 +697,7 @@
 							
 							
 							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
-							// Have to go though all functions (recursive) because we can't asume our named array is sorted
+							// Have to go though all functions (recursive) because they are not necessary in the right order
 							
 							updateThingsFunctions(oldParse.functions, oldEnd, endRowDiff, charactersLength);
 							
@@ -714,7 +724,7 @@
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 								
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
-								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse.globalVariables=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse.globalVariables=" + JSON.stringify(fullParse.globalVariables, null, 2));
+								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " diff=" + diffVariables(oldParse.globalVariables, fullParse.globalVariables) + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse.globalVariables=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse.globalVariables=" + JSON.stringify(fullParse.globalVariables, null, 2));
 								
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
 								
@@ -803,7 +813,7 @@
 					func.endRow += endRowDiff;
 				}
 				
-				if(isBelow || isParent) {
+				if(EDITOR.settings.devMode && (isBelow || isParent)) {
 					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
