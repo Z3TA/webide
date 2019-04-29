@@ -645,7 +645,7 @@
 							
 							// Update or add any global variables
 							for(var varName in newParse.globalVariables) {
-								oldParse[varName] = newParse.globalVariables[varName];
+								oldParse.globalVariables[varName] = newParse.globalVariables[varName];
 							}
 							
 							//console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						

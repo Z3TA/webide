@@ -29,8 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-bug: Variables get added to the "parsed" object in js_parse
-
 
 Parsing:
 Object.defineProperty(EDITOR, 'workingDirectory', {
@@ -38,7 +36,6 @@ Object.defineProperty(EDITOR, 'workingDirectory', {
 			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
 			enumerable: true
 		});
-
 
 
 Add more built in JS global properties and methods!
@@ -64,6 +61,8 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Annoying with orange highlightning of current function in functionlist in Firefox.
 
 try combining js files into one huge text-string, then minify it
 
