@@ -29,12 +29,20 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+autocomplete todo: Make a list of global functions
+
+when autocompleting, favour variables over functions!
+
 Add more built in JS global properties and methods!
 
 Autocomplete inside [] and ()
 vs autocompleting:
  document.getElementById("foobar").innerH
 (preview in WysiwygEditor)
+
+We want to find: document.getElementById("foobar").innerH but also bar in foo(bar)
+
+
 
 autocomplete inside function calls, for example foo.hasOwnProperty(f|);
 

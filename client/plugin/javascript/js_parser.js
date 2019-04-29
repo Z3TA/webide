@@ -2308,17 +2308,7 @@
 							newFunc.global = true;
 							functionIndex = functions.push(newFunc) - 1;
 							
-							if(globalVariables[properties[0]]) {
-								// A global variable pointing to a function
 								myFunction[subFunctionDepth] = functions[functionIndex];
-								subFunctionDepth++; // Functions within this function's body will be sub-functions
-								
-								L[subFunctionDepth] = 1;
-								R[subFunctionDepth] = 0;
-							}
-							else {
-								myFunction[subFunctionDepth] = functions[functionIndex];
-							}
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
