@@ -722,7 +722,7 @@
 					}
 					
 					// Search sub-functions (recursive)
-					findFunctions(func.subFunctions);
+					findFunctions(func.subFunctions, js);
 					
 				}
 				else {
