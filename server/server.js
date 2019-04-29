@@ -558,7 +558,7 @@ function recycleGuestAccounts(callback) {
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
 		
 		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
-		var command = scriptPath + " " + username;
+		var command = scriptPath + " " + username + " -unattended";
 		//console.log("command=" + command);
 		
 		exec(command, options, function removeuser(error, stdout, stderr) {

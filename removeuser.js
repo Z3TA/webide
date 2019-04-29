@@ -16,6 +16,8 @@ var HOME = getArg(["home", "home"]) || DEFAULT.home_dir;
 
 var FORCE = !!getArg(["force", "force"]) || false;
 
+var UNATTENDED = !!getArg(["unattended", "unattended"]) || false;
+
 if(HOME.charAt(HOME.length-1) != "/") throw new Error("Home dir needs to end with a slash: HOME=" + HOME);
 
 var ENCODING = "utf8";
@@ -41,12 +43,15 @@ catch(err) {
 		process.exit();
 	}
 	
+	if(UNATTENDED) startDelete();
+	else {
 	console.log("It's recommended to disable the jzedit service and reboot the server to release any mounted folders.");
 	console.log("Deleting a user while a folder is mounted will result in the mounted folder also getting deleted!");
 	console.log("Press Enter to continue ... Or Ctrl+C to abort");
 	process.stdin.once('data', function () {
 		startDelete();
 	});
+	}
 }
 
 function startDelete() {
@@ -447,4 +452,5 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	fs.writeFileSync(filePath, text, ENCODING);
 	
 }
+
 
