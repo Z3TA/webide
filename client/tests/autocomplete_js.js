@@ -9,7 +9,18 @@
 	*/
 	
 	
-	EDITOR.addTest(2, function autoCompleteInsideBracketsAndParentheses(callback) {
+	EDITOR.addTest(1, function autoCompleteInsideFunctionArguments(callback) {
+		EDITOR.openFile("autoCompleteInsideFunctionArguments.js", 'var banan = 1;\nfoo(ba, )\n', function(err, file) {
+			var index = 21;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(1), "foo(banan, )");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autoCompleteInsideBracketsAndParentheses(callback) {
 		EDITOR.openFile("autoCompleteInsideBracketsAndParentheses.js", 'var variable = 1;\nfoo[vari]\nbar(vari)\n', function(err, file) {
 			var index = 26;
 			var atCaret = autoComplete(file, index);

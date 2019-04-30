@@ -3486,8 +3486,8 @@ EDITOR.fireEvent("btk");
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		
-		var wordDelimitersLeft = " {}+-/<>\r\n\t!;()[]=";
-		var wordDelimitersRight =" {}+-/<>\r\n\t!;()[]=.";
+		var wordDelimitersLeft = " {}+-/<>\r\n\t!;()[]=,";
+		var wordDelimitersRight =" {}+-/<>\r\n\t!;()[]=.,";
 		var char = "";
 		var left1 = file.text.charAt(file.caret.index-1);
 		var left2 = file.text.charAt(file.caret.index-2);

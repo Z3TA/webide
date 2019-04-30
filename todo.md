@@ -37,19 +37,6 @@ when autocompleting, favour variables over functions!
 
 Add more built in JS global properties and methods!
 
-Autocomplete inside [] and ()
-vs autocompleting:
- document.getElementById("foobar").innerH
-(preview in WysiwygEditor)
-
-We want to find: document.getElementById("foobar").innerH but also bar in foo(bar)
-
-
-
-autocomplete inside function calls, for example foo.hasOwnProperty(f|);
-
-autocomplete when creating for loop: for (var i=0; i<foo|.length; i++) {
-
 Make the parser check what functions return so we can autocomplete for example:
 var foo = bar();
 foo.x|

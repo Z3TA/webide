@@ -429,7 +429,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function previewAutocomplete(callback) {
+	EDITOR.addTest(function previewAutocomplete(callback) {
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';
