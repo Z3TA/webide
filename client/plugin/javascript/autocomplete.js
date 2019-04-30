@@ -1,9 +1,10 @@
 (function() {
 	/*
 		
-		Todo: search prototype and include built-in prototypes
+		Autocomplete variable names and functions,
+		and figure out object type in order to autocomplete (prototype) methods and properties.
 		
-		todo: Use JSdoc info to show variable types for function arguments
+		Also gives function argument hints.
 		
 	*/
 	
@@ -495,6 +496,13 @@
 		
 		return options; // disable default action
 		
+		function checkGlobalFunctionNames(functions, wordToComplete) {
+			if(functions == undefined) throw new Error("First parameter functions=" + functions);
+			var globalFunctions = getGlobalFunctions(functions);
+			for (var i=0; i<globalFunctions.length; i++) {
+				checkFunctionName(globalFunctions[i].name, wordToComplete)
+			}
+		}
 		
 		function checkFunctionName(functionName, word) {
 			console.warn("Checking if word=" + word + " matches function name=" + functionName + "");
@@ -687,11 +695,17 @@
 			
 			var props = wordToComplete.split(".");
 			
+			
 			for(var i=0; i<functions.length; i++) {
 				
 				func = functions[i];
 				
 				console.log("checking function=" + func.name + " start=" + func.start + " end=" + func.end + "  ...");
+				
+				if(func.global) {
+					// Check name of global function
+					checkFunctionName(func.name, wordToComplete);
+				}
 				
 				if(func.start <= charIndex && func.end >= charIndex) {
 					// Cursor is inside this function!
@@ -727,6 +741,12 @@
 				}
 				else {
 					console.log("charIndex=" + charIndex + " Not between func.start=" + func.start + " and " + func.end + " function=" + func.name);
+				
+					// We are not inside this function, but we still want to check if it has global functions in it ...
+					console.log(func.name);
+					console.log("subfunctions=" + func.subFunctions.length)
+					checkGlobalFunctionNames(func.subFunctions, wordToComplete);
+					
 				}
 				
 				if(!func.lambda) checkFunctionName(func.name, wordToComplete); // Check parent scope function-names
@@ -803,9 +823,10 @@
 							}
 						}
 						// Check global function prototypes
-						for (var i=0; i<js.functions.length; i++) {
-							if( js.functions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
-								var key = js.functions[i].name.slice(js.functions[i].name.lastIndexOf(".")+1);
+						var globalFunctions = getGlobalFunctions(js.functions);
+						for (var i=0; i<globalFunctions.length; i++) {
+							if( globalFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
+								var key = globalFunctions[i].name.slice(globalFunctions[i].name.lastIndexOf(".")+1);
 								pushVariable(keyName, {method: true}, key);
 							}
 						}
@@ -1342,6 +1363,25 @@ else {
 		return count;
 	}
 	
+	function getGlobalFunctions(functions) {
+		// Returns a list of all global functions
+		//console.log("getGlobalFunctions: functions=" + JSON.stringify(functions, null, 2));
+		var arr = [];
+		findGlobal(functions); 
+		return arr;
+		
+		function findGlobal(f) {
+			//console.log("getGlobalFunctions: findGlobal: f=" + JSON.stringify(f, null, 2));
+			if(f == undefined) throw new Error("f=" + f);
+			// recursevily searches all functions and their subFunction's
+			for (var i=0; i<f.length; i++) {
+				if(f[i].global) arr.push(f[i]);
+				//console.log("recursively searching f[" + i + "].name=" + f[i].name + " f[" + i + "].subFunctions=" + f[i].subFunctions);
+				findGlobal(f[i].subFunctions);
+			}
+		}
+	}
+	
 	function getScope(charIndex, functions, globalVariables) {
 		// Returns all variables and functions available in the current scope (where the character's at)
 		// As a flattened object literal
@@ -1361,15 +1401,11 @@ else {
 		
 		console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
 		
-		if(foundFunctions.length == 0) {
-			// We are in the global scope!
-			// Add the global functions
-			for(var i=0; i<functions.length; i++) {
-				if(functions[i].name.length > 0) foundFunctions.push(functions[i]);
-			}
-		}
-		else {
+		if(foundFunctions.length > 0) {
 			// Insade a function scope
+			
+			// Add global functions first, then overwrite them with the scoped functions
+			foundFunctions = getGlobalFunctions(functions).concat(foundFunctions);
 			foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
 			
 			// "this" is always the latest function
@@ -1377,6 +1413,10 @@ else {
 			if(foundFunctions.length > 0) {
 				thisIs = foundFunctions[foundFunctions.length-1];
 			}
+		}
+		else {
+			// Not inside any function
+			foundFunctions = getGlobalFunctions(functions);
 		}
 		
 		// Make foundFunctions into an object literal for convencience, now when the order doesn't matter
@@ -1648,10 +1688,22 @@ else {
 	}
 	
 	function getFunctionScope(index, file) {
+		// Returns a list of variables in scope (also including functions)
 		var js = file.parsed;
 		
 		var functionScope = [];
 		var functionScopeLevel = [];
+		var globalFunctions = getGlobalFunctions(js.functions);
+		var globalFunctionsAsVariables = {};
+		
+		
+		for (var i=0; i<globalFunctions.length; i++) {
+			globalFunctionsAsVariables[globalFunctions[i].name] = {
+				type: "function",
+				keys: {}
+			};
+		}
+		functionScope.push(globalFunctionsAsVariables);
 		
 		if(js.functions) checkFunctions(js.functions, 0);
 		else {

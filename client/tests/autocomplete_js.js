@@ -9,7 +9,17 @@
 	*/
 	
 	
-	EDITOR.addTest(1, function autoCompleteInsideFunctionArguments(callback) {
+	EDITOR.addTest(function autoCompleteGlobalFunction(callback) {
+		EDITOR.openFile("autoCompleteGlobalFunction.js", 'var globalFunction;\n(function() {\nglobalFunction = function foo() {}\n})();\nglob\n', function(err, file) {
+			var index = 79;
+			var atCaret = autoComplete(file, index);
+			UTIL.assert(file.rowText(4), "globalFunction()"); // Should recognise it as a global function, not just a variable
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function autoCompleteInsideFunctionArguments(callback) {
 		EDITOR.openFile("autoCompleteInsideFunctionArguments.js", 'var banan = 1;\nfoo(ba, )\n', function(err, file) {
 			var index = 21;
 			var atCaret = autoComplete(file, index);
@@ -120,7 +130,7 @@
 			});
 	});
 	
-	EDITOR.addTest(function dontAutocompleteLamdaFunctions(callback) {
+	EDITOR.addTest(1, function dontAutocompleteLamdaFunctions(callback) {
 		EDITOR.openFile("dontAutocompleteLamdaFunctions.js", 'foo(function mylamdafunction() {\nmy\n});\nmy', function(err, file) {
 			var index = 42;
 			var atCaret = autoComplete(file, index);
