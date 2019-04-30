@@ -854,7 +854,7 @@
 						
 						// All objects has access to Object.prototype!
 						// But only show these if we have not yet discovered other keys. And not on natives!
-						if(options.length==0 && variable.type != "Number" && variable.type != "String" && variable.type != "Boolean" && variable.type != "null" && variable.type != "undefined") {
+						if(options.length==0 && (variable.type=="Object" || Object.keys(variable.keys).length > 0 )) {
 							for (var i=0; i<objectPrototype.length; i++) {
 								if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
 									var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);

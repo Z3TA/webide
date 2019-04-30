@@ -1,5 +1,14 @@
 
 
+EDITOR.addTest(function findObjects(callback) {
+	EDITOR.openFile("findObjects.js", 'var foo = {};\nvar bar = {\n// Tralala\n}\n', function(err, file) {
+		if(file.parsed.globalVariables["foo"].type != "Object") throw new Error("Expected type of foo to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["bar"].type != "Object") throw new Error("Expected type of bar to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function namedFunctionInAnonymousObject(callback) {
 	EDITOR.openFile("namedFunctionInAnonymousObject.js", '{\nfoo: function bar() {}\n}\n', function(err, file) {
 		

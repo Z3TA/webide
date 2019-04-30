@@ -1202,6 +1202,8 @@
 				
 			*/
 			
+			console.log("getVariableType: rightSide=" + rightSide);
+			
 			var type = "unknown";
 			
 			if(rightSide.charAt(0)=='"' || rightSide.charAt(0)=="'") {
@@ -1344,7 +1346,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -2744,8 +2746,7 @@
 		function readWords(charIndex) {
 			// Collects the words to find variables
 			
-			//console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth]);
-			
+			//console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 			
 			// .substr(start,length)   .substring(start,end)
 			// problem: if the whole script is encapsulated with a clusure: (function() {
@@ -2946,6 +2947,10 @@
 					
 					
 				}
+				else if(char=="}" && afterPointer[codeBlockDepth-1]=="=" && variableName) {
+					console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " ");
+					globalVariables[ variableName ].type = "Object";
+				}
 				else {
 					//console.log("errm? word=" + word);
 				}
@@ -3075,7 +3080,7 @@
 		
 		// Only functions Should have a prototype! 
 		
-		//console.warn("new Variable! type=" + type + " value=" + value);
+		console.warn("new Variable! type=" + type + " value=" + value);
 		
 	}
 	
@@ -3087,7 +3092,7 @@
 	}
 	
 	function compareObjects(arr1, arr2) {
-		// Asumes each item in the array if an object
+		// Assumes each item in the array is an object
 		var diff = [];
 		for(var i=0; i<arr1.length && i<arr2.length; i++) {
 			for(var key in arr1[i]) {

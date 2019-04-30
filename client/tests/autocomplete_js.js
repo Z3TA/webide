@@ -8,6 +8,18 @@
 		
 	*/
 	
+	EDITOR.addTest(1, function objProptotypeOnlyOnObjects(callback) {
+		EDITOR.openFile("objProptotypeOnlyOnObjects.js", 'var foo = kaka;\nvar bar = {};\nvar baz = {\nkey: 1\n}\nfoo.has\nbar.has\nbaz.has\n', function(err, file) {
+			var atCaret = autoComplete(file, 58);
+			UTIL.assert(file.rowText(5), "foo.has"); // Should not autocomplete because unknown type
+			var atCaret = autoComplete(file, 66);
+			UTIL.assert(file.rowText(6), "bar.hasOwnProperty()"); // Should autocomplete because bar is a {} Object
+			var atCaret = autoComplete(file, 87);
+			UTIL.assert(file.rowText(7), "baz.hasOwnProperty()"); // Should autocomplete because baz is also a {} Object
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
 	
 	EDITOR.addTest(function autoCompleteGlobalFunction(callback) {
 		EDITOR.openFile("autoCompleteGlobalFunction.js", 'var globalFunction;\n(function() {\nglobalFunction = function foo() {}\n})();\nglob\n', function(err, file) {
@@ -130,7 +142,7 @@
 			});
 	});
 	
-	EDITOR.addTest(1, function dontAutocompleteLamdaFunctions(callback) {
+	EDITOR.addTest(function dontAutocompleteLamdaFunctions(callback) {
 		EDITOR.openFile("dontAutocompleteLamdaFunctions.js", 'foo(function mylamdafunction() {\nmy\n});\nmy', function(err, file) {
 			var index = 42;
 			var atCaret = autoComplete(file, index);
