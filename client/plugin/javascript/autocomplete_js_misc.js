@@ -10,6 +10,7 @@
 	function autoCompleteJsMisc(file, word, wordLength, gotOptions) {
 		
 		if(wordLength === 0) return;
+		if(gotOptions > 0) return; // Prefer other options like variables and functions
 		
 		var options = [];
 		

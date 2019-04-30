@@ -272,7 +272,8 @@
 	EDITOR.plugin({
 		desc: "Autocomplete for JavaScript",
 		load: function load() {
-			EDITOR.on("autoComplete", autoCompleteJS);
+			var order = 10; // Run before autoComplete_js_misc.js
+			EDITOR.on("autoComplete", autoCompleteJS, order);
 			EDITOR.on("afterSave", autoCompleteJS_fileSave);
 			EDITOR.on("fileOpen", autoCompleteJS_fileOpen);
 			EDITOR.on("fileParse", autoCompleteJS_fileParse);
