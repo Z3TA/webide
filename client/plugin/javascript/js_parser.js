@@ -2305,7 +2305,7 @@
 						else {
 							
 							// a global function
-							newFunc.global = true;
+							if(!newFunc.lambda) newFunc.global = true;
 							functionIndex = functions.push(newFunc) - 1;
 							
 								myFunction[subFunctionDepth] = functions[functionIndex];
