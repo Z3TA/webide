@@ -818,12 +818,12 @@
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {");
+						alertBox("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {", "parser", "warning");
 					}
 					
 					if(file.text.charAt(func.end) != "}") {
 						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
+						alertBox("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }", "parser", "warning");
 					}
 				}
 			}
