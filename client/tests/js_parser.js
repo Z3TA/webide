@@ -32,7 +32,7 @@ EDITOR.addTest(function noReParseOptShouldUpdateFunctions(callback) {
 
 EDITOR.addTest(function globalVariableMemberPointingToFunction(callback) {
 	EDITOR.openFile("globalVariableMemberPointingToFunction.js", 'var foo = {};\n(function() {\nfoo.bar = function() {}\n})();\n', function(err, file) {
-		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "foo.bar") throw new Error("Expected foo.bar to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.functions[0].subFunctions[0].name != "foo.bar" || !file.parsed.functions[0].subFunctions[0].global) throw new Error("Expected foo.bar to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		EDITOR.closeFile(file.path);
 		callback(true);
 	});
@@ -40,7 +40,7 @@ EDITOR.addTest(function globalVariableMemberPointingToFunction(callback) {
 
 EDITOR.addTest(function globalVariablePointingToFunction(callback) {
 	EDITOR.openFile("globalVariablePointingToFunction.js", 'var glob;\n(function() {\nglob = function Glob() {}\n})();\n', function(err, file) {
-		if(file.parsed.functions.length != 2 || file.parsed.functions[1].name != "glob") throw new Error("Expected glob to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+		if(file.parsed.functions[0].subFunctions[0].name != "glob" || !file.parsed.functions[0].subFunctions[0].global) throw new Error("Expected glob to be a global function! file.parsed=" + JSON.stringify(file.parsed, null, 2));
 		EDITOR.closeFile(file.path);
 		callback(true);
 	});
