@@ -1204,7 +1204,7 @@
 				
 			*/
 			
-			console.log("getVariableType: rightSide=" + rightSide);
+			//console.log("getVariableType: rightSide=" + rightSide);
 			
 			var type = "unknown";
 			
@@ -1348,7 +1348,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1366,6 +1366,9 @@
 				var startIndex = 1;
 				
 				if(insideFunctionBody[subFunctionDepth]) {
+					
+					//console.log("inside function body! pointerName=" + pointerName + " function " + myFunction[subFunctionDepth].name + " parameters=" + myFunction[subFunctionDepth].arguments);
+					
 					if(Object.hasOwnProperty.call(func.variables, pointerName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[pointerName];
 						//console.log("Variable= '" + pointerName + "' listed in function=" + func.name + " variables! Yey!");
@@ -1376,13 +1379,19 @@
 							func.variables["this"] = new Variable("this");
 							variable = func.variables["this"];
 						}
-						else if(leftSide.match(reValidVariableName)) {
+						else if(properties[properties.length-1].match(reValidVariableName)) {
 							// We have found a GLOBAL variable inside a function!?
 							// It's a valid variable name, so make it a global variable
 							// But not if it's a function parameter
-							if(myFunction[subFunctionDepth].arguments.indexOf(leftSide) == -1) { 
-								variable = globalVariables[leftSide] = new Variable();
-								//console.log("Added new global variable " + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+							if(myFunction[subFunctionDepth].arguments.indexOf(properties[0]) == -1) {
+								//console.log("Not listen in parameters: " +  properties[0]);
+								if(!Object.hasOwnProperty.call(globalVariables, properties[0])) {
+									variable = globalVariables[properties[0]] = new Variable();
+									//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+							}
+								else {
+									variable = globalVariables[properties[0]];
+								}
 							}
 						}
 						else {
@@ -1417,10 +1426,10 @@
 						// We have found an undeclared (no var) global variable?
 						// or arr[foo] = 1, where [foo] is leftSide
 						
-						if(leftSide.match(reValidVariableName)) {
+						if(properties[properties.length-1].match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
-							variable = globalVariables[leftSide] = new Variable();
-							console.log("Added new global variable " + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
+							variable = globalVariables[properties[0]] = new Variable();
+							//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
 						}
 						else {
 							//console.log("leftSide=" + leftSide + " does not seem like a valid variable name, and it's not already in global variables.");
@@ -2093,14 +2102,14 @@
 					}
 					
 				}
-				else if( (char=="=" || char==":") && !insideParenthesis[codeBlockDepth]) {
+				else if( ( (char=="=" && lastChar != "=" && text[charIndex+1] != "=") || char==":") && !insideParenthesis[codeBlockDepth]) {
 					
 					lastVariableName = variableName;
 					variableName = text.substring(variableStart, i).trim();  // Used to find name of function
 					if(variableName.indexOf("=") != -1) variableName = variableName.slice(0, variableName.indexOf("=")-1);
 					afterPointer[codeBlockDepth] = char;
 					
-					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					console.log("found a pointer (char" + char + " lastChar=" + lastChar + " next char=" + text[charIndex+1] + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 					
 					// Figure out the left side (the variable name)
 					
@@ -2924,7 +2933,7 @@
 									// A global variable is declared:
 									
 									globalVariables[word] = new Variable();
-									//console.log("Added GLOBAL variable=" + word + "");
+									console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
 									
 								}
@@ -2949,11 +2958,11 @@
 					
 					
 				}
-				else if(char=="}" && afterPointer[codeBlockDepth-1]=="=" && variableName) {
+				else if(char=="}" && afterPointer[codeBlockDepth-1]=="=" && lastWord && lastWord.match(reValidVariableName)) {
 					// Find object notation and mark the variable as type Object
-					console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " ");
+					console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " word=" + word + " lastWord=" + lastWord + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
 					// Find the variable and set the type to Object
-					properties = variableName.split(".");
+					properties = lastWord.split(".");
 					variable = null;
 					if(myFunction[subFunctionDepth]) {
 						if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
@@ -2965,16 +2974,23 @@
 						// If it's not found inside the function, asume it's a global
 						if(Object.hasOwnProperty.call(globalVariables, properties[0])) variable = globalVariables[properties[0]];
 						else {
+							//console.log("Variable " + properties[0] + " doesn't exist in global variables. Creating it!");
 							variable = globalVariables[properties[0]] = new Variable(); // Add it if it doesn't exist
 							
 						}
 					}
 					
+					//console.log("Variable: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ")");
+					
 					if(properties.length>1) {
 						variable = traverseVariableTree(properties, variable, 1);
 					}
 					
+					//console.log("Setting type=Object to " + lastWord + " (" + JSON.stringify(variable) + ")");
 					variable.type = "Object";
+					
+					//console.log("After setting type: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ") globalVariables=" + JSON.stringify(globalVariables, null, 2));
+					
 				}
 				else {
 					//console.log("errm? word=" + word);
@@ -3094,20 +3110,18 @@
 	}
 	
 	function Variable(type, value) {
-		var variable = this;
 		
-		variable.type = type;
-		variable.value = value;
-		variable.keys = {};
-		variable.method = false;
+		this.type = type || "unknown";
+		this.value = value || "";
+		this.keys = {};
+		this.method = false;
 		
 		// Variables can be methods, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
 		
 		// Only functions Should have a prototype! 
 		
-		console.warn("new Variable! type=" + type + " value=" + value);
-		
-	}
+		console.warn("new Variable! type=" + type + " value=" + value + "");
+		}
 	
 	function XmlTag(start, end, wordLength, selfEnding) {
 		this.start = start;

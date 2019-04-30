@@ -29,6 +29,11 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+var kaka = {};
+function foo() {
+kaka.bar = 1;
+}
+
 Unable to autocomplete inside js_parser.js
 if(properties.length == 1) global|
 
