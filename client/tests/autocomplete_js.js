@@ -8,7 +8,8 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function objProptotypeOnlyOnObjects(callback) {
+	
+	EDITOR.addTest(function objProptotypeOnlyOnObjects(callback) {
 		EDITOR.openFile("objProptotypeOnlyOnObjects.js", 'var foo = kaka;\nvar bar = {};\nvar baz = {\nkey: 1\n}\nfoo.has\nbar.has\nbaz.has\n', function(err, file) {
 			var atCaret = autoComplete(file, 58);
 			UTIL.assert(file.rowText(5), "foo.has"); // Should not autocomplete because unknown type

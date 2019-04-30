@@ -29,19 +29,15 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-autocomplete todo: The argument hinter can not trigger on autocomplete! Or we wouln't be able to autocomplete variables inside function arguments!
+Unable to autocomplete inside js_parser.js
+if(properties.length == 1) global|
+
+autocomplete todo: The argument hinter can not trigger on autocomplete!??? Or we wouln't be able to autocomplete variables inside function arguments!
 
 when autocompleting, favour variables over functions!?
 
 Add more built in JS global properties and methods!
 
-Make the parser check what functions return so we can autocomplete for example:
-var foo = bar();
-foo.x|
-
-
-After we updated the js_parses it sometimes have issues with global variables while editing and parse-only-function optimization.
-Try putting var infront of things or removing var !?
 
 Better autocomplete!
 

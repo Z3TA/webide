@@ -816,6 +816,8 @@
 				if(EDITOR.settings.devMode && (isBelow || isParent)) {
 					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
+					// We will get an alert if we add a { inside a function, then add more content before it.
+					// But we should be able to recover from this when there's a full reparse. Or should this trigger a full reparse !?
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
 						alertBox("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {", "parser", "warning");
@@ -2948,8 +2950,31 @@
 					
 				}
 				else if(char=="}" && afterPointer[codeBlockDepth-1]=="=" && variableName) {
+					// Find object notation and mark the variable as type Object
 					console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " ");
-					globalVariables[ variableName ].type = "Object";
+					// Find the variable and set the type to Object
+					properties = variableName.split(".");
+					variable = null;
+					if(myFunction[subFunctionDepth]) {
+						if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
+							variable = myFunction[subFunctionDepth].variables[properties[0]];
+						}
+					}
+					
+					if(!variable) {
+						// If it's not found inside the function, asume it's a global
+						if(Object.hasOwnProperty.call(globalVariables, properties[0])) variable = globalVariables[properties[0]];
+						else {
+							variable = globalVariables[properties[0]] = new Variable(); // Add it if it doesn't exist
+							
+						}
+					}
+					
+					if(properties.length>1) {
+						variable = traverseVariableTree(properties, variable, 1);
+					}
+					
+					variable.type = "Object";
 				}
 				else {
 					//console.log("errm? word=" + word);

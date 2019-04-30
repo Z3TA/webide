@@ -1,9 +1,11 @@
 
 
-EDITOR.addTest(function findObjects(callback) {
-	EDITOR.openFile("findObjects.js", 'var foo = {};\nvar bar = {\n// Tralala\n}\n', function(err, file) {
+EDITOR.addTest(1, function findObjects(callback) {
+	EDITOR.openFile("findObjects.js", 'var foo = {};\nvar bar = {\n// Tralala\n}\nvar baz={};\nbaz.key = {}\n(function() {\nvar local = {};\nglobalVar = {};\n})();\n', function(err, file) {
 		if(file.parsed.globalVariables["foo"].type != "Object") throw new Error("Expected type of foo to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 		if(file.parsed.globalVariables["bar"].type != "Object") throw new Error("Expected type of bar to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.globalVariables["globalVar"].type != "Object") throw new Error("Expected type of globalVar to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+		if(file.parsed.functions[0].variables["local"].type != "Object") throw new Error("Expected type of local variable to be Object! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 		EDITOR.closeFile(file.path);
 		callback(true);
 	});
