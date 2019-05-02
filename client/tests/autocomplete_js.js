@@ -8,7 +8,18 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function figureOutTypeFromBuiltInPrototypeReturn(callback) {
+	EDITOR.addTest(1, function searchFunctionReturnObjectLiteral(callback) {
+		EDITOR.openFile("searchFunctionReturnObjectLiteral.js", 'function foo() {\nreturn {banana: 1, apple: 2}\n}\nvar f = foo();\nf.b\n', function(err, file) {
+			
+			var atCaret = autoComplete(file, 66);
+			UTIL.assert(file.rowText(4), "f.banana");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function figureOutTypeFromBuiltInPrototypeReturn(callback) {
 		EDITOR.openFile("figureOutTypeFromBuiltInPrototypeReturn.js", 'var str = "hello, world";\nvar arr = str.split(", ");\narr.le\n', function(err, file) {
 			
 			var atCaret = autoComplete(file, 59);

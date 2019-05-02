@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Make the parser parse return statements, so it will be more sofisticated then regex parsing
+
 When writing inside a function above an if statement, the parser can't find some of the variables. Example:
 if(properties|
 
@@ -40,7 +42,8 @@ Add more built in JS global properties and methods!
 Making the parser more stable so we can release!
 
 
-
+---
+Get value from an array item
 ---
 Unable to find return type of function that returns an object literal
 return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};

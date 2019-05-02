@@ -807,7 +807,7 @@
 		function searchVariables(variables, word, functionName, js) {
 			var wordLength = word.length;
 			
-			console.log("Searching " + JSON.stringify(variables) + " for: " + word + "");
+			console.log("searchVariables: Searching " + JSON.stringify(variables) + " for: " + word + "");
 			
 			var properties = word.split("."); // If it's JSON
 			
@@ -815,14 +815,14 @@
 				// Traverse the property chain ...
 				if(variables.hasOwnProperty(properties[0])) {
 					
-					console.log("found variable=" + properties[0] + "");
+					console.log("searchVariables: found variable=" + properties[0] + "");
 					
 					var variable = variables[properties[0]];
 					
 					// Traverse the chain ... foo.bar.bas.xx
 					for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
 						if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
-							console.log("Setting new variable:" + properties[propertyIndex]);
+							console.log("searchVariables: Setting new variable:" + properties[propertyIndex]);
 							variable = variable.keys[properties[propertyIndex]];
 						}
 						else {
@@ -830,16 +830,23 @@
 						}
 					}
 					
-					console.log("propertyIndex=" + propertyIndex);
-					
 					var keyName = properties[propertyIndex]; // This is the word we are gonna auto-complete
 					
-					console.log("keyName=" + keyName + "");
+					console.log("searchVariables: propertyIndex=" + propertyIndex + " keyName=" + keyName + "");
+					
+					
+					if( (!variable.hasOwnProperty("keys") || Object.keys(variable.keys).length == 0) && properties[properties.length-1] != "" ) {
+						console.log("searchVariables: Patch variable=" + JSON.stringify(variable, null, 2));
+						patchVariableKeysFromFunctionReturnObjectLiteral(variable, charIndex, js);
+					}
+					else {
+						console.log("searchVariables: Variable " + properties[propertyIndex-1] + " already have " +  Object.keys(variable.keys).length + " keys!");
+					}
 					
 					if(variable.hasOwnProperty("keys")) {
 						// Search for keys
 						for(var key in variable.keys) {
-							console.log(key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
+							console.log("searchVariables: " + key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
 							if(key.substr(0, keyName.length) == keyName) {
 								if(!optionExist(options, key)) {
 									pushVariable(keyName, variable.keys[key], key);
@@ -849,7 +856,7 @@
 						}
 					}
 					
-					console.log("variable.type=" + variable.type);
+					console.log("searchVariables: variable.type=" + variable.type);
 					
 					if(variable.type=="unknown") {
 						variable.type=figureOutVariableType(variable.value, charIndex, js);
@@ -863,7 +870,7 @@
 					else {
 						
 						// Look for prototype functions with the keyName
-						console.log("keyName=" + keyName);
+						console.log("searchVariables: keyName=" + keyName);
 						
 						for (var i=0; i<builtInFunctions.length; i++) {
 							if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
@@ -919,7 +926,6 @@
 				// Check each variable in the list
 				for(var variableName in variables) {
 					
-					console.log()
 					if(variableName.substr(0, wordLength) == word) {
 						
 						var variable = variables[variableName];
@@ -1047,6 +1053,58 @@
 		}
 	}
 	
+	function patchVariableKeysFromFunctionReturnObjectLiteral(variable, charIndex, js) {
+		var value = variable.value;
+		if(value=="" || value==undefined) {
+			console.log("patchVariableKeysFromFunctionReturnObjectLiteral: There's no value!");
+			return;
+		}
+		
+		var func = findFunctionFromValue(value, charIndex, js);
+		
+		if(!func) {
+			console.log("patchVariableKeysFromFunctionReturnObjectLiteral: value=" + value + " does't seem to be a function!");
+			return;
+		}
+		
+		var returns = func.returns;
+		
+		console.log("patchVariableKeysFromFunctionReturnObjectLiteral: " + func.name + " return statements: " + JSON.stringify(func.returns, null, 2));
+		
+		for (var i=0; i<returns.length; i++) {
+			if(returns[i].hasOwnProperty("keys")) {
+				variable.keys = returns[i].keys;
+				console.log("patchVariableKeysFromFunctionReturnObjectLiteral: Patched variable with keys: " + JSON.stringify(returns[i], null, 2));
+				return;
+			}
+		}
+		
+		console.log("patchVariableKeysFromFunctionReturnObjectLiteral: function " + func.name + " does not seem to return any object literals!");
+		return;
+	}
+	
+	
+	function findFunctionFromValue(value, charIndex, js) {
+		var scope = getScope(charIndex, js.functions, js.globalVariables);
+		var func = scope.functions[value];
+		if(func) return func;
+		
+		var props = value.split(".");
+		
+		if(props.length == 1) {
+			console.log("findFunctionFromValue: Unable to find a function with name=" + value + " from scope at charIndex=" + charIndex);
+			return null;
+		}
+		
+		// Also check prototype functions
+		var fName = value.slice(0, value.lastIndexOf(".")) + ".prototype." + props[props.length-1];
+		var func = scope.functions[value];
+		if(func) return func;
+		
+		console.log("findFunctionFromValue: Unable to find a function with name=" + fName + " from scope at charIndex=" + charIndex);
+		return null;
+	}
+	
 	function showWarningAt(index, message) {
 		var file = EDITOR.currentFile;
 		var caret = file.createCaret(index);
@@ -1060,7 +1118,7 @@
 		
 		if(value=="" || value==undefined) {
 			console.log("figureOutVariableType: Unable to figure out type from value=" + value);
-return "unknown";
+			return "unknown";
 		}
 		
 		var file = EDITOR.currentFile;
@@ -1071,7 +1129,9 @@ return "unknown";
 		var func = scope.functions[value];
 		
 		if(!func) {
-console.log("figureOutVariableType: Unable to find any functions in scope with the name " + value + "");
+			console.log("figureOutVariableType: Unable to find any functions in scope with the name " + value + "");
+			
+			// Maybe bar as in foo.bar is a prototype method !?
 			
 			var props = value.split(".");
 			if(props.length == 1) return "unknown";
@@ -1100,6 +1160,7 @@ console.log("figureOutVariableType: Unable to find any functions in scope with t
 					}
 					return builtInFunctions[i].type;
 				}
+				// todo: Also check userland prototype methods!
 			}
 			
 			return "unknown";

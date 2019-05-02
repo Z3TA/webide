@@ -140,7 +140,7 @@
 		
 		console.time("parseRequest" + id);
 		
-		if(parseWorker) {
+		if(parseWorker && callback) {
 			parseWorkerCallbacks[id] = callback;
 			console.log("Posting message to parseWorker ...");
 			parseWorker.postMessage({id: id, file: file, options: options});
@@ -152,7 +152,9 @@
 			}
 			var parseResult = parseJavaScript(file, options);
 			console.timeEnd("parseRequest" + id);
-			callback(parseError, parseResult);
+			
+			if(callback) callback(parseError, parseResult);
+			else return parseResult;
 		}
 		
 		return true;
@@ -964,6 +966,8 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 		subFunctionIndex = -1,
 		theFunction,
 		newFunc,
+		insideReturn = [],
+		returnStatement = null,
 		properties,
 		variable,
 		startIndex = parseStart,
@@ -1354,7 +1358,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1384,6 +1388,14 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 						if(pointerName=="this") {
 							func.variables["this"] = new Variable("this");
 							variable = func.variables["this"];
+						}
+						else if(pointerName=="return") {
+							console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
+							if(returnStatement == null) {
+								returnStatement = new Variable();
+								myFunction[subFunctionDepth].returns.push(returnStatement);
+							}
+							variable = returnStatement;
 						}
 						else if(properties[0].match(reValidVariableName)) {
 							// We have found a GLOBAL variable inside a function!?
@@ -2865,7 +2877,12 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 						
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						
+						if(word=="return") {
+							insideReturn[subFunctionDepth] = true;
+							returnStatement = null;
+						}
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
@@ -3086,9 +3103,10 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 		func.lineNumber = lineNumber;
 		func.endRow = -1;
 		func.arrowFunction = false;
-		func.lambda = false;
-		func.global = false;
+		func.lambda = false; // If it's declared inline, meaning it can only be called by itself'
+		func.global = false;  // If the function is a method to a global variable, and thus callable from global scope 
 		func.prototype = {}; // Variables. (Prototype methods will also be added as a variable here for consistency, it will also exist as a function)
+		func.returns = []; // List of variables, or null's (void)
 		
 		/*
 			No need for an order property, we can order by start.

@@ -5545,10 +5545,11 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 
 		waitingForFileToBeParsed[path].push(callback);
 		
-		if(typeof callback != "function") throw new Error("Third parameter callback needs to be a callback function!");
+		if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
 		
 		for(var i=0, ret=false; i<EDITOR.eventListeners.parse.length; i++) {
-			ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path, parseDone);
+			if(callback) ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path, parseDone); // async
+			else ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path); // sync
 			if(ret) return ret; // Only let one parser parse it
 		}
 		

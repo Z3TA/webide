@@ -1,4 +1,13 @@
 
+EDITOR.addTest(function findReturnedObjectLiteral(callback) {
+	EDITOR.openFile("findReturnedObjectLiteral.js", 'function foo() {\nreturn {banana: 1, apple: 2}\n}\n', function(err, file) {
+		
+		if(!file.parsed.functions[0].returns[0].keys["banana"]) throw new Error("Expected foo to return an object literal with property banana! file.parsed.functions[0]=" + JSON.stringify(file.parsed.functions[0], null, 2));
+		EDITOR.closeFile(file.path);
+		
+		callback(true);
+	});
+});
 
 EDITOR.addTest(function monkeyPatchGlobalVariable(callback) {
 	EDITOR.openFile("monkeyPatchGlobalVariable.js", 'var global = {};\n(function() {\nif(monkey==banana) global.foo = 1\n})();\n', function(err, file) {
