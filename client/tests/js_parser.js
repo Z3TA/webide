@@ -1,7 +1,7 @@
 
 
 EDITOR.addTest(function monkeyPatchGlobalVariable(callback) {
-	EDITOR.openFile("findObjects.js", 'var global = {};\n(function() {\nif(monkey==banana) global.foo = 1\n})();\n', function(err, file) {
+	EDITOR.openFile("monkeyPatchGlobalVariable.js", 'var global = {};\n(function() {\nif(monkey==banana) global.foo = 1\n})();\n', function(err, file) {
 		if(!file.parsed.globalVariables["global"].keys["foo"]) throw new Error("Expected global.foo! file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 		EDITOR.closeFile(file.path);
 		callback(true);
