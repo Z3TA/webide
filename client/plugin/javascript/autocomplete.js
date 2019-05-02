@@ -16,8 +16,8 @@
 		{name: "isNaN", arguments: "value", type: "Boolean"},
 		{name: "parseFloat", arguments: "value", type: "Number"},
 		{name: "parseInt", arguments: "value, radix", type: "Number"},
-		{name: "decodeURI", arguments: "encodedURI", , type: "String"},
-		{name: "decodeURIComponent", arguments: "encodedURI", , type: "String"},
+		{name: "decodeURI", arguments: "encodedURI", type: "String"},
+		{name: "decodeURIComponent", arguments: "encodedURI", type: "String"},
 		{name: "encodeURI", arguments: "UriString", type: "String"},
 		{name: "encodeURIComponent", arguments: "UriStringComponent", type: "String"},
 		

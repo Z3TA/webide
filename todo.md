@@ -42,9 +42,6 @@ Making the parser more stable so we can release!
 
 
 ---
-properties = functionName.split(".");
-properties.len| (should know that properties is an array!
----
 Unable to find return type of function that returns an object literal
 return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
 ---
