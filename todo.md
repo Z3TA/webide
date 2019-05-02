@@ -29,7 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Make the parser parse return statements, so it will be more sofisticated then regex parsing
+"type annotations are just decoration, as they can be inferred."
+
+Make the parser parse return statements, so it can be used in autocomplete.js instead of regex parsing
+in order to trace back a variable via (many) function calls to figure out it's type.
 
 When writing inside a function above an if statement, the parser can't find some of the variables. Example:
 if(properties|

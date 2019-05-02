@@ -1390,7 +1390,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 							variable = func.variables["this"];
 						}
 						else if(pointerName=="return") {
-							console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
+							//console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
 							if(returnStatement == null) {
 								returnStatement = new Variable();
 								myFunction[subFunctionDepth].returns.push(returnStatement);
@@ -1405,7 +1405,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 								//console.log("Not listen in parameters: " +  properties[0]);
 								if(!Object.hasOwnProperty.call(globalVariables, properties[0])) {
 									variable = globalVariables[properties[0]] = new Variable();
-									console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+									//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
 							}
 								else {
 									variable = globalVariables[properties[0]];
@@ -2127,7 +2127,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 					if(variableName.indexOf("=") != -1) variableName = variableName.slice(0, variableName.indexOf("=")-1);
 					afterPointer[codeBlockDepth] = char;
 					
-					console.log("found a pointer (char" + char + " lastChar=" + lastChar + " next char=" + text[charIndex+1] + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					//console.log("found a pointer (char" + char + " lastChar=" + lastChar + " next char=" + text[charIndex+1] + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 					
 					// Figure out the left side (the variable name)
 					
@@ -2877,7 +2877,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 						
 						words.push(word);
 						
-						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(word=="return") {
 							insideReturn[subFunctionDepth] = true;
@@ -2956,7 +2956,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 									// A global variable is declared:
 									
 									globalVariables[word] = new Variable();
-									console.log("Added GLOBAL variable=" + word + "");
+									//console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
 									
 								}
