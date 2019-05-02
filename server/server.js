@@ -2306,7 +2306,10 @@ function checkMounts(options, checkMountsCallback) {
 					checkMountsReadyMaybe();
 					return;
 				}
-				else throw err;
+				else {
+					log("err.code=" + err.code);
+					throw err;
+				}
 			}
 			
 			// Make sure a mysql user exist
