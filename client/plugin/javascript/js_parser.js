@@ -274,6 +274,11 @@
 				diff.push(variable);
 			}
 		}
+		for( var variable in b) {
+			if(!Object.hasOwnProperty.call(a, variable)) {
+				diff.push(variable);
+			}
+		}
 		return JSON.stringify(diff);
 	}
 	
@@ -724,8 +729,9 @@
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 								
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
-								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " diff=" + diffVariables(oldParse.globalVariables, fullParse.globalVariables) + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse.globalVariables=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse.globalVariables=" + JSON.stringify(fullParse.globalVariables, null, 2));
-								
+								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) {
+throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " diff=" + diffVariables(oldParse.globalVariables, fullParse.globalVariables) + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse.globalVariables=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse.globalVariables=" + JSON.stringify(fullParse.globalVariables, null, 2));
+								}
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
 								
 								

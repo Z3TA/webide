@@ -116,4 +116,9 @@ var FAIL = false;
 var PREVENT_DEFAULT = false;
 var ALLOW_DEFAULT = true;
 
+// Error level/types
+var ERROR = 1;
+var WARNING = 2;
+var INFO = 3;
+
 Error.stackTraceLimit = Infinity;

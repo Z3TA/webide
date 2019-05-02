@@ -11,108 +11,147 @@
 	"use strict";
 	
 	var builtInFunctions = [
-		{name: "eval", arguments: "codeString"},
-		{name: "isFinite", arguments: "testValue"},
-		{name: "isNaN", arguments: "value"},
-		{name: "parseFloat", arguments: "value"},
-		{name: "parseInt", arguments: "value, radix"},
-		{name: "decodeURI", arguments: "encodedURI"},
-		{name: "decodeURIComponent", arguments: "encodedURI"},
-		{name: "encodeURI", arguments: "UriString"},
-		{name: "encodeURIComponent", arguments: "UriStringComponent"},
+		{name: "eval", arguments: "codeString", type: ["undefined",  "other"]}, // todo: We can figure out what type is returned by analyzing the avaluated string
+		{name: "isFinite", arguments: "testValue", type: "Boolean"},
+		{name: "isNaN", arguments: "value", type: "Boolean"},
+		{name: "parseFloat", arguments: "value", type: "Number"},
+		{name: "parseInt", arguments: "value, radix", type: "Number"},
+		{name: "decodeURI", arguments: "encodedURI", , type: "String"},
+		{name: "decodeURIComponent", arguments: "encodedURI", , type: "String"},
+		{name: "encodeURI", arguments: "UriString", type: "String"},
+		{name: "encodeURIComponent", arguments: "UriStringComponent", type: "String"},
 		
 		// ### Array
 		{name: "Array", arguments: "", variables: {prototype:{"length": {type: "Number"}}}},
-		{name: "Array.prototype.concat", arguments: "...arraysOrValues"},
-		{name: "Array.prototype.filter", arguments: "callback, thisArg"},
-		{name: "Array.prototype.forEach", arguments: "callback, thisArg"},
-		{name: "Array.prototype.indexOf", arguments: "searchElement, fromIndex"},
-		{name: "Array.prototype.join", arguments: "separator"},
-		{name: "Array.prototype.map", arguments: "callback"},
-		{name: "Array.prototype.pop", arguments: ""},
-		{name: "Array.prototype.push", arguments: "...elements"},
-		{name: "Array.prototype.reduce", arguments: "callback, initialValue"},
-		{name: "Array.prototype.shift", arguments: ""},
-		{name: "Array.prototype.slice", arguments: "begin, end"},
-		{name: "Array.prototype.some", arguments: "callback, thisArg"},
-		{name: "Array.prototype.sort", arguments: "compareFunction"},
-		{name: "Array.prototype.splice", arguments: "start, deleteCount, ...addItems"},
-		{name: "Array.prototype.unshift", arguments: "...elements"},
+		{name: "Array.prototype.concat", arguments: "...arraysOrValues", type: "Array"},
+		{name: "Array.prototype.filter", arguments: "callback, thisArg", type: "Array"},
+		{name: "Array.prototype.forEach", arguments: "callback, thisArg", type: "undefined"},
+		{name: "Array.prototype.indexOf", arguments: "searchElement, fromIndex", type: "Number"},
+		{name: "Array.prototype.join", arguments: "separator", type: "String"},
+		{name: "Array.prototype.map", arguments: "callback", type: "Array"},
+		{name: "Array.prototype.pop", arguments: "", type: ["Object", "other"]}, // todo: Type depends on what's in the array. Could probably figure it out from the declaration or from what is pushed/unshfted to it
+		{name: "Array.prototype.push", arguments: "...elements", type: "Number"},
+		{name: "Array.prototype.reduce", arguments: "callback, initialValue", type: ["Object", "something"]}, // todo: Return type depends on the reduce function. Might be able to figure it out by analyzing the reduce function.
+		{name: "Array.prototype.shift", arguments: "", type: ["Object", "other"]},
+		{name: "Array.prototype.slice", arguments: "begin, end", type: "Array"},
+		{name: "Array.prototype.some", arguments: "callback, thisArg", type: "Boolean"},
+		{name: "Array.prototype.sort", arguments: "compareFunction", type: "Array"}, // todo: Show a warning that sort modifies the array!? Eg. you shouln't assign the return to a new variable
+		{name: "Array.prototype.splice", arguments: "start, deleteCount, ...addItems", type: "Array"},
+		{name: "Array.prototype.unshift", arguments: "...elements", type: "Number"},
 		
 		// ### String
 		{name: "String", arguments: "", variables: {prototype:{"length": {type: "Number"}}}},
-		{name: "String.fromCharCode", arguments: "...charCodes"},
-		{name: "String.prototype.charAt", arguments: "index"},
-		{name: "String.prototype.charCodeAt", arguments: "index"},
-		{name: "String.prototype.concat", arguments: "...strings"},
-		{name: "String.prototype.indexOf", arguments: "searchvalue, start"},
-		{name: "String.prototype.lastIndexOf", arguments: "searchvalue, start"},
-		{name: "String.prototype.match", arguments: "regexp"},
-		{name: "String.prototype.replace", arguments: "searchvalue, newvalue"},
-		{name: "String.prototype.search", arguments: "stringOrRegexp"},
-		{name: "String.prototype.slice", arguments: "start, end"},
-		{name: "String.prototype.split", arguments: "separator, limit"},
-		{name: "String.prototype.substr", arguments: "start, length"},
-		{name: "String.prototype.substring", arguments: "start, end"},
-		{name: "String.prototype.toLocaleLowerCase", arguments: ""},
-		{name: "String.prototype.toLocaleUpperCase", arguments: ""},
-		{name: "String.prototype.toLowerCase", arguments: ""},
-		{name: "String.prototype.toUpperCase", arguments: ""},
-		{name: "String.prototype.trim", arguments: ""},
+		{name: "String.fromCharCode", arguments: "...charCodes", type: "String"},
+		{name: "String.prototype.charAt", arguments: "index", type: "String"},
+		{name: "String.prototype.charCodeAt", arguments: "index", type: "Number"},
+		{name: "String.prototype.concat", arguments: "...strings", type: "String"},
+		{name: "String.prototype.indexOf", arguments: "searchvalue, start", type: "Number"},
+		{name: "String.prototype.lastIndexOf", arguments: "searchvalue, start", type: "Number"},
+		{name: "String.prototype.match", arguments: "regexp", type: ["RegExp", "null"]},
+		{name: "String.prototype.replace", arguments: "searchvalue, newvalue", type: "String"},
+		{name: "String.prototype.search", arguments: "stringOrRegexp", type: "Number"},
+		{name: "String.prototype.slice", arguments: "start, end", type: "String"},
+		{name: "String.prototype.split", arguments: "separator, limit", type: "Array"},
+		{name: "String.prototype.substr", arguments: "start, length", type: "String"},
+		{name: "String.prototype.substring", arguments: "start, end", type: "String"},
+		{name: "String.prototype.toLocaleLowerCase", arguments: "", type: "String"},
+		{name: "String.prototype.toLocaleUpperCase", arguments: "", type: "String"},
+		{name: "String.prototype.toLowerCase", arguments: "", type: "String"},
+		{name: "String.prototype.toUpperCase", arguments: "", type: "String"},
+		{name: "String.prototype.trim", arguments: "", type: "String"},
 		
 		// ### Number
-		{name: "Number.isInteger", arguments: "value"},
-		{name: "Number.isNaN", arguments: "value"},
-		{name: "Number.isSafeInteger", arguments: "testValue"},
-		{name: "Number.parseFloat", arguments: "string"},
-		{name: "Number.parseInt", arguments: "string, radix"},
-		{name: "Number.prototype.toExponential", arguments: "fractionDigits"},
-		{name: "Number.prototype.toFixed", arguments: "digits"},
-		{name: "Number.prototype.toLocaleString", arguments: "locales, options"},
-		{name: "Number.prototype.toPrecision", arguments: "precision"},
-		{name: "Number.prototype.toString", arguments: "radix"},
-		{name: "Number.prototype.valueOf", arguments: ""},
+		{name: "Number.isInteger", arguments: "value", type: "Boolean"},
+		{name: "Number.isNaN", arguments: "value", type: "Boolean"},
+		{name: "Number.isSafeInteger", arguments: "testValue", type: "Boolean"},
+		{name: "Number.parseFloat", arguments: "string", type: "Number"},
+		{name: "Number.parseInt", arguments: "string, radix", type: "Number"},
+		{name: "Number.prototype.toExponential", arguments: "fractionDigits", type: "Number"},
+		{name: "Number.prototype.toFixed", arguments: "digits", type: "Number"},
+		{name: "Number.prototype.toLocaleString", arguments: "locales, options", type: "String"},
+		{name: "Number.prototype.toPrecision", arguments: "precision", type: "Number"},
+		{name: "Number.prototype.toString", arguments: "radix", type: "String"},
+		{name: "Number.prototype.valueOf", arguments: "", type: "Number"},
 		
 		
 		//{name: "Array.prototype.", arguments: ""},
 		
 		// ### Date
-		{name: "Date", arguments: "unixTimeDateStringOrYear, monthIndex, day, hours, minutes, seconds, milliseconds"},
-		{name: "Date.prototype.UTC", arguments: ""},
-		{name: "Date.prototype.now", arguments: ""},
-		{name: "Date.prototype.parse", arguments: ""},
-		{name: "Date.prototype.getDate", arguments: ""},
-		{name: "Date.prototype.getDay", arguments: ""},
-		{name: "Date.prototype.getFullYear", arguments: ""},
-		//{name: "", arguments: ""},
+		{name: "Date", arguments: "unixTimeDateStringOrYear, monthIndex, day, hours, minutes, seconds, milliseconds", type: "Date"},
+		{name: "Date.prototype.UTC", arguments: "", type: "Number"},
+		{name: "Date.prototype.now", arguments: "", type: "Number"},
+		{name: "Date.prototype.parse", arguments: "", type: "Number"},
+		{name: "Date.prototype.getDate", arguments: "", type: "Number"},
+		{name: "Date.prototype.getDay", arguments: "", type: "Number"},
+		{name: "Date.prototype.getFullYear", arguments: "", type: "Number"},
+		{name: "Date.prototype.getHours", arguments: "", type: "Number"},
+		{name: "Date.prototype.getMilliseconds", arguments: "", type: "Number"},
+		{name: "Date.prototype.getMinutes", arguments: "", type: "Number"},
+		{name: "Date.prototype.getMonth", arguments: "", type: "Number"},
+		{name: "Date.prototype.getSeconds", arguments: "", type: "Number"},
+		{name: "Date.prototype.getTime", arguments: "", type: "Number"},
+		{name: "Date.prototype.getTimezoneOffset", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCDate", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCDay", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCFullYear", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCHours", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCMilliseconds", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCMinutes", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCMonth", arguments: "", type: "Number"},
+		{name: "Date.prototype.getUTCSeconds", arguments: "", type: "Number"},
+		{name: "Date.prototype.setDate", arguments: "dayOfMonth", type: "Number"},
+		{name: "Date.prototype.setFullYear", arguments: "yearValue, monthValue, dayValue", type: "Number"},
+		{name: "Date.prototype.setHours", arguments: "hoursValue, minutesValue, secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setMilliseconds", arguments: "millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setMinutes", arguments: "minutesValue, secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setMonth", arguments: "monthValue, dayValue", type: "Number"},
+		{name: "Date.prototype.setSeconds", arguments: "secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setTime", arguments: "millisecondsSinceEpoch", type: "Number"},
+		{name: "Date.prototype.setUTCDate", arguments: "dayValue", type: "Number"},
+		{name: "Date.prototype.setUTCFullYear", arguments: "yearValue, monthValue, dayValue", type: "Number"},
+		{name: "Date.prototype.setUTCHours", arguments: "hoursValue, minutesValue, secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setUTCMilliseconds", arguments: "millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setUTCMinutes", arguments: "minutesValue, secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.setUTCMonth", arguments: "monthValue, dayValue", type: "Number"},
+		{name: "Date.prototype.setUTCSeconds", arguments: "secondsValue, millisecondsValue", type: "Number"},
+		{name: "Date.prototype.toDateString", arguments: "", type: "String"},
+		{name: "Date.prototype.toISOString", arguments: "", type: "String"},
+		{name: "Date.prototype.toJSON", arguments: "", type: "String"},
+		{name: "Date.prototype.toLocaleDateString", arguments: "locales, options", type: "String"},
+		{name: "Date.prototype.toLocaleString", arguments: "locales, options", type: "String"},
+		{name: "Date.prototype.toLocaleTimeString", arguments: "locales, options", type: "String"},
+		{name: "Date.prototype.toString", arguments: "", type: "String"},
+		{name: "Date.prototype.toTimeString", arguments: "", type: "String"},
+		{name: "Date.prototype.toUTCString", arguments: "", type: "String"},
+		{name: "Date.prototype.valueOf", arguments: "", type: "Number"},
 		
 		// ### Math
-		{name: "Math.abs", arguments: "numbers"},
-		{name: "Math.acos", arguments: "number"},
-		{name: "Math.acosh", arguments: "number"},
-		{name: "Math.asin", arguments: "number"},
-		{name: "Math.asinh", arguments: "number"},
-		{name: "Math.atan", arguments: "number"},
-		{name: "Math.atan2", arguments: "coordinateY, coordinateX"},
-		{name: "Math.atanh", arguments: "number"},
-		{name: "Math.cbrt", arguments: "number"},
-		{name: "Math.ceil", arguments: "number"},
-		{name: "Math.cos", arguments: "radians"},
-		{name: "Math.cosh", arguments: "number"},
-		{name: "Math.exp", arguments: "number"},
-		{name: "Math.floor", arguments: "...numbers"},
-		{name: "Math.log", arguments: "number"},
-		{name: "Math.max", arguments: "...numbers"},
-		{name: "Math.min", arguments: "...numbers"},
-		{name: "Math.pow", arguments: "base, exponent"},
-		{name: "Math.random", arguments: ""},
-		{name: "Math.round", arguments: "number"},
-		{name: "Math.sin", arguments: "radians"},
-		{name: "Math.sinh", arguments: "number"},
-		{name: "Math.sqrt", arguments: "number"},
-		{name: "Math.tan", arguments: "radianAngle"},
-		{name: "Math.tanh", arguments: "number"},
-		{name: "Math.trunc", arguments: "number"},
+		{name: "Math.abs", arguments: "numbers", type: "Number"},
+		{name: "Math.acos", arguments: "number", type: "Number"},
+		{name: "Math.acosh", arguments: "number", type: "Number"},
+		{name: "Math.asin", arguments: "number", type: "Number"},
+		{name: "Math.asinh", arguments: "number", type: "Number"},
+		{name: "Math.atan", arguments: "number", type: "Number"},
+		{name: "Math.atan2", arguments: "coordinateY, coordinateX", type: "Number"},
+		{name: "Math.atanh", arguments: "number", type: "Number"},
+		{name: "Math.cbrt", arguments: "number", type: "Number"},
+		{name: "Math.ceil", arguments: "number", type: "Number"},
+		{name: "Math.cos", arguments: "radians", type: "Number"},
+		{name: "Math.cosh", arguments: "number", type: "Number"},
+		{name: "Math.exp", arguments: "number", type: "Number"},
+		{name: "Math.floor", arguments: "...numbers", type: "Number"},
+		{name: "Math.log", arguments: "number", type: "Number"},
+		{name: "Math.max", arguments: "...numbers", type: "Number"},
+		{name: "Math.min", arguments: "...numbers", type: "Number"},
+		{name: "Math.pow", arguments: "base, exponent", type: "Number"},
+		{name: "Math.random", arguments: "", type: "Number"},
+		{name: "Math.round", arguments: "number", type: "Number"},
+		{name: "Math.sin", arguments: "radians", type: "Number"},
+		{name: "Math.sinh", arguments: "number", type: "Number"},
+		{name: "Math.sqrt", arguments: "number", type: "Number"},
+		{name: "Math.tan", arguments: "radianAngle", type: "Number"},
+		{name: "Math.tanh", arguments: "number", type: "Number"},
+		{name: "Math.trunc", arguments: "number", type: "Number"},
 		
 		// ### Object
 		{name: "Object.assign", arguments: "target, ...sources", es: 2016},
@@ -143,53 +182,63 @@
 		{name: "Object.prototype.values", arguments: "obj", es: 2017},
 		
 		// ### JSON
-		{name: "JSON.parse", arguments: "string, reviver"},
-		{name: "JSON.stringify", arguments: "value, replacer, space"},
+		{name: "JSON.parse", arguments: "string, reviver", type: "Object"},
+		{name: "JSON.stringify", arguments: "value, replacer, space", type: "String"},
 		
-		// ### Element
-		{name: "Element.prototype.addEventListener", arguments: "event, function, useCapture"},
-		{name: "Element.prototype.appendChild", arguments: "node"},
-		{name: "Element.prototype.blur", arguments: ""},
-		{name: "Element.prototype.click", arguments: ""},
-		{name: "Element.prototype.cloneNode", arguments: "deep"},
-		{name: "Element.prototype.compareDocumentPosition", arguments: "node"},
-		{name: "Element.prototype.contains", arguments: "node"},
-		{name: "Element.prototype.exitFullscreen", arguments: ""},
-		{name: "Element.prototype.focus", arguments: ""},
-		{name: "Element.prototype.getAttribute", arguments: "attributename"},
-		{name: "Element.prototype.getAttributeNode", arguments: "attributename"},
-		{name: "Element.prototype.getBoundingClientRect", arguments: ""},
-		{name: "Element.prototype.getElementsByClassName", arguments: "classname"},
-		{name: "Element.prototype.getElementsByTagName", arguments: "tagname"},
-		{name: "Element.prototype.hasAttribute", arguments: "attributename"},
-		{name: "Element.prototype.hasAttributes", arguments: ""},
-		{name: "Element.prototype.hasChildNodes", arguments: ""},
-		{name: "Element.prototype.insertAdjacentElement", arguments: "position, element"},
-		{name: "Element.prototype.insertAdjacentHTML", arguments: "position, text"},
-		{name: "Element.prototype.insertAdjacentText", arguments: "position, text"},
-		{name: "Element.prototype.insertBefore", arguments: "newnode, existingnode"},
-		{name: "Element.prototype.isDefaultNamespace", arguments: "namespaceURI", domVersion: 3},
-		{name: "Element.prototype.isEqualNode", arguments: "node", domVersion: 3},
-		{name: "Element.prototype.isSameNode", arguments: "node", domVersion: 3},
-		{name: "Element.prototype.normalize", arguments: ""},
-		{name: "Element.prototype.querySelector", arguments: "CSS_selectors"},
-		{name: "Element.prototype.querySelectorAll", arguments: "CSS_selectors"},
-		{name: "Element.prototype.removeAttribute", arguments: "attributename"},
-		{name: "Element.prototype.removeAttributeNode", arguments: "attributenode"},
-		{name: "Element.prototype.removeChild", arguments: "node"},
-		{name: "Element.prototype.removeEventListener", arguments: "event, function, useCapture"},
-		{name: "Element.prototype.replaceChild", arguments: "newnode, oldnode"},
-		{name: "Element.prototype.requestFullscreen", arguments: ""},
-		{name: "Element.prototype.scrollIntoView", arguments: "alignTo"},
-		{name: "Element.prototype.setAttribute", arguments: "attributename, attributevalue"},
-		{name: "Element.prototype.setAttributeNode", arguments: "attributenode"},
-		{name: "Element.prototype.toString", arguments: ""}
+		// ### Promise
+		{name: "Promise", arguments: "executorFunction", type: "Promise", es: 2015},
+		{name: "Promise.all", arguments: "iterableObjectOrArray", type: "Promise", es: 2015},
+		{name: "Promise.race", arguments: "iterableObjectOrArray", type: "Promise", es: 2015},
+		{name: "Promise.reject", arguments: "reason", type: "Promise", es: 2015},
+		{name: "Promise.resolve", arguments: "value", type: "Promise", es: 2015},
+		{name: "Promise.prototype.catch", arguments: "onRejected", type: "Promise", es: 2015},
+		{name: "Promise.prototype.finally", arguments: "onFinally", type: "Promise", es: 2015},
+		{name: "Promise.prototype.then", arguments: "onFulfilled, onRejected", type: "Promise", es: 2015},
+		
+		// ### Element (Should this be DOM_node !?)
+		{name: "Element.prototype.addEventListener", arguments: "event, function, useCapture", type: "undefined"},
+		{name: "Element.prototype.appendChild", arguments: "node", type: "Element"},
+		{name: "Element.prototype.blur", arguments: "", type: "undefined"},
+		{name: "Element.prototype.click", arguments: "", type: "undefined"},
+		{name: "Element.prototype.cloneNode", arguments: "deep", type: "Element"},
+		{name: "Element.prototype.compareDocumentPosition", arguments: "otherNode", type: "Number"},
+		{name: "Element.prototype.contains", arguments: "node", type: "Boolean"},
+		{name: "Element.prototype.exitFullscreen", arguments: "", type: "undefined"},
+		{name: "Element.prototype.focus", arguments: "", type: "undefined"},
+		{name: "Element.prototype.getAttribute", arguments: "attributename", type: "String"},
+		{name: "Element.prototype.getAttributeNode", arguments: "attributename", type: "String"},
+		{name: "Element.prototype.getBoundingClientRect", arguments: "", type: "Object"},
+		{name: "Element.prototype.getElementsByClassName", arguments: "classname", type: "Array"},
+		{name: "Element.prototype.getElementsByTagName", arguments: "tagname", type: "Array"},
+		{name: "Element.prototype.hasAttribute", arguments: "attributename", type: "Boolean"},
+		{name: "Element.prototype.hasAttributes", arguments: "", type: "Boolean"},
+		{name: "Element.prototype.hasChildNodes", arguments: "", type: "Boolean"},
+		{name: "Element.prototype.insertAdjacentElement", arguments: "position, element", type: ["Element", "null"]},
+		{name: "Element.prototype.insertAdjacentHTML", arguments: "position, text", type: "undefined"},
+		{name: "Element.prototype.insertAdjacentText", arguments: "position, text", type: "undefined"},
+		{name: "Element.prototype.insertBefore", arguments: "newnode, existingnode", type: "Element"},
+		{name: "Element.prototype.isDefaultNamespace", arguments: "namespaceURI", domVersion: 3, type: "Boolean"},
+		{name: "Element.prototype.isEqualNode", arguments: "node", domVersion: 3, type: "Boolean"},
+		{name: "Element.prototype.isSameNode", arguments: "node", domVersion: 3, type: "Boolean"},
+		{name: "Element.prototype.normalize", arguments: "", type: "undefined"},
+		{name: "Element.prototype.querySelector", arguments: "CSS_selectors", type: "Element"},
+		{name: "Element.prototype.querySelectorAll", arguments: "CSS_selectors", type: "Array"},
+		{name: "Element.prototype.removeAttribute", arguments: "attributename", type: "undefined"},
+		{name: "Element.prototype.removeAttributeNode", arguments: "attributenode", type: "undefined"},
+		{name: "Element.prototype.removeChild", arguments: "node", type: "undefined"},
+		{name: "Element.prototype.removeEventListener", arguments: "event, function, useCapture", type: "undefined"},
+		{name: "Element.prototype.replaceChild", arguments: "newnode, oldnode", type: "undefined"},
+		{name: "Element.prototype.requestFullscreen", arguments: "options", type: "Promise"},
+		{name: "Element.prototype.scrollIntoView", arguments: "alignTo", type: "undefined"},
+		{name: "Element.prototype.setAttribute", arguments: "attributename, attributevalue", type: "undefined"},
+		{name: "Element.prototype.setAttributeNode", arguments: "attributenode", type: "undefined"},
+		{name: "Element.prototype.toString", arguments: "", type: "String"}
 	];
 	
 	
 	var browserGlobalFunctions = [
-		{name: "document.getElementById", arguments: "id"},
-		{name: "document.createElement", arguments: "tagName"},
+		{name: "document.getElementById", arguments: "id", type: "Element"},
+		{name: "document.createElement", arguments: "tagName", type: "Element"},
 	];
 	// todo: Check if we are browser or nodejs or other JS platform
 	builtInFunctions = builtInFunctions.concat(browserGlobalFunctions);
@@ -529,7 +578,7 @@
 		}
 		
 		function figureOutParameterType(fun, autocompleteArgumentIndex, charIndex, js) {
-			
+			// Figures out the type of a function parameter
 			console.log("figureOutParameterType: inside fun.name=" + fun.name + " autocompleteArgumentIndex=" + autocompleteArgumentIndex + " charIndex=" + charIndex);
 			
 			if(js == undefined) throw new Error("Parsed js not in arguments! " + JSON.stringify(arguments));
@@ -756,7 +805,6 @@
 		}
 		
 		function searchVariables(variables, word, functionName, js) {
-			
 			var wordLength = word.length;
 			
 			console.log("Searching " + JSON.stringify(variables) + " for: " + word + "");
@@ -944,7 +992,6 @@
 		}
 		
 		function searchFunctionThis(functionName, keyName, js) {
-			
 			console.log("searchFunctionThis functionName=" + functionName + " keyName=" + keyName + "");
 			
 			/*
@@ -996,14 +1043,19 @@
 					// Search the prototype
 					searchVariables(objectCreatorFunction.variables["prototype"].keys, keyName, undefined, js);
 				}
-				
 			}
-			
 		}
-		
+	}
+	
+	function showWarningAt(index, message) {
+		var file = EDITOR.currentFile;
+		var caret = file.createCaret(index);
+		var level = WARNING;
+		EDITOR.addInfo(caret.row, caret.col, message, file, level);
 	}
 	
 	function figureOutVariableType(value, charIndex, js) {
+		// Figure out the variable type from the variable value (which can be the name of another variable, a function-call, or expression)
 		console.log("figureOutVariableType: value=" + value);
 		
 		if(value=="" || value==undefined) {
@@ -1020,12 +1072,42 @@ return "unknown";
 		
 		if(!func) {
 console.log("figureOutVariableType: Unable to find any functions in scope with the name " + value + "");
-return "unknown";
-}
-
+			
+			var props = value.split(".");
+			if(props.length == 1) return "unknown";
+			
+			var variable = scope.variables[props[0]];
+			if(!variable) return "unknown";
+			
+			// Traverse the chain
+			for (var i=1; i<props.length-1; i++) {
+				variable = scope.keys[props[i]];
+			}
+			
+			if(!variable) {
+				console.warn("Unable to find all keys in " + value + " in variable=" + props[0]);
+				return "unknown";
+			}
+			
+			// is foo.bar a prototype method !?
+			var methodName = props[props.length-1];
+			var methodReturnType;
+			for (var i=0; i<builtInFunctions.length; i++) {
+				if(builtInFunctions[i].name == variable.type + ".prototype." + methodName) {
+					if(Array.isArray(builtInFunctions[i].type)) {
+						showWarningAt(charIndex, value + " can be " + builtInFunctions[i].type.join(", "));
+						return builtInFunctions[i].type[0];
+					}
+					return builtInFunctions[i].type;
+				}
+			}
+			
+			return "unknown";
+		}
+		
 		// What does the function return ?
 		var reRet = /return(.*)/g;
-var fBody = file.text.slice(func.start, func.end);
+		var fBody = file.text.slice(func.start, func.end);
 		var arr;
 		var count = 0;
 		while ((arr = reRet.exec(fBody)) !== null) {
@@ -1035,18 +1117,19 @@ var fBody = file.text.slice(func.start, func.end);
 		}
 		
 		console.log("figureOutVariableType: types.length=" + types.length);
-if(types.length == 0) {
+		if(types.length == 0) {
 			
 			return "unknown";
 		}
 		else {
 			// Make sure all types are the same, with the exception of null !?
 			console.log("figureOutVariableType: types=" + JSON.stringify(types));
+			if(types.length > 0) showWarningAt(charIndex, value + " can be " + types.join(", "));
 			return types[0];
 		}
-
-function analyzeReturnStatement(ret) {
-console.log("analyzeReturnStatement: ret=" + ret);
+		
+		function analyzeReturnStatement(ret) {
+			console.log("analyzeReturnStatement: ret=" + ret);
 			ret = ret.trim();
 			
 			// Remove comment

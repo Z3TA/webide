@@ -29,20 +29,25 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-var kaka = {};
-function foo() {
-kaka.bar = 1;
-}
-
-Unable to autocomplete inside js_parser.js
-if(properties.length == 1) global|
+When writing inside a function above an if statement, the parser can't find some of the variables. Example:
+if(properties|
 
 autocomplete todo: The argument hinter can not trigger on autocomplete!??? Or we wouln't be able to autocomplete variables inside function arguments!
 
-when autocompleting, favour variables over functions!?
 
 Add more built in JS global properties and methods!
 
+Making the parser more stable so we can release!
+
+
+
+---
+properties = functionName.split(".");
+properties.len| (should know that properties is an array!
+---
+Unable to find return type of function that returns an object literal
+return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
+---
 
 Better autocomplete!
 
@@ -53,6 +58,8 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Annoying when you scrill in Firefox then go to the editor Chrome and scroll and it will jump much longer then anticipated
 
 Annoying with orange highlightning of current function in functionlist in Firefox.
 
