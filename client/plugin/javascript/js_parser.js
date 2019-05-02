@@ -820,12 +820,12 @@
 					// But we should be able to recover from this when there's a full reparse. Or should this trigger a full reparse !?
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
-						alertBox("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {", "parser", "warning");
+						alertBox("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {  in file.path=" + file.path, "parser", "warning");
 					}
 					
 					if(file.text.charAt(func.end) != "}") {
 						file.debugGrid();
-						alertBox("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }", "parser", "warning");
+						alertBox("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a } in file.path=" + file.path, "parser", "warning");
 					}
 				}
 			}
@@ -1379,7 +1379,7 @@
 							func.variables["this"] = new Variable("this");
 							variable = func.variables["this"];
 						}
-						else if(properties[properties.length-1].match(reValidVariableName)) {
+						else if(properties[0].match(reValidVariableName)) {
 							// We have found a GLOBAL variable inside a function!?
 							// It's a valid variable name, so make it a global variable
 							// But not if it's a function parameter
@@ -1387,7 +1387,7 @@
 								//console.log("Not listen in parameters: " +  properties[0]);
 								if(!Object.hasOwnProperty.call(globalVariables, properties[0])) {
 									variable = globalVariables[properties[0]] = new Variable();
-									//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
+									console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
 							}
 								else {
 									variable = globalVariables[properties[0]];
@@ -1426,7 +1426,7 @@
 						// We have found an undeclared (no var) global variable?
 						// or arr[foo] = 1, where [foo] is leftSide
 						
-						if(properties[properties.length-1].match(reValidVariableName)) {
+						if(properties[0].match(reValidVariableName)) {
 							// It's a valid variable name, so make it a global variable
 							variable = globalVariables[properties[0]] = new Variable();
 							//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " myFunction[subFunctionDepth=" + subFunctionDepth + "]=" + myFunction[subFunctionDepth]);
