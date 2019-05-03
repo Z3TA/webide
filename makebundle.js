@@ -70,7 +70,7 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		content = content.replace(/(["'"])(.*)<style/g, "$1$2<st$1 + $1yle");
 		content = content.replace(/(["'"])(.*)<\/style/g, "$1$2</st$1 + $1yle");
 		
-		content = content.replace(/\/\/ TEST-CODE-START[\s\S]+\/\/ TEST-CODE-END/gm, "");
+		content = remveAllBetween(content, "// TEST-CODE-START", "// TEST-CODE-END");
 		
 			var result = UglifyJS.minify(content, {
 			keep_fnames: true, // prevent errors like: "Please give the event listener function a name!"
@@ -112,6 +112,21 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		
 	}
 	
+function remveAllBetween(text, startStr, endStr) {
+	
+	var start = text.indexOf(startStr);
+	var end = text.indexOf(endStr);
+	
+	while (start != -1 && end != -1) {
+		
+		text = text.slice(0, start) + text.slice(end+endStr.length);
+		
+		start = text.indexOf(startStr);
+		end = text.indexOf(endStr);
+	}
+	
+	return text;
+}
 	
 	
 	//console.log(JSON.stringify(scripts, null, 2));
