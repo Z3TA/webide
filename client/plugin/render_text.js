@@ -13,10 +13,10 @@
 	
 	// Sanity check
 	if(!EDITOR.settings.style.fontSize) {
-		debug.warn("No fontSize defined!");
+		console.warn("No fontSize defined!");
 	}
 	if(!EDITOR.settings.style.font) {
-		debug.warn("No font defined!");
+		console.warn("No font defined!");
 	}
 
 	EDITOR.addRender(textRender, 2100);

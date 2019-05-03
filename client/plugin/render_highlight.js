@@ -9,7 +9,7 @@
 	
 	// Sanity check
 	if(!EDITOR.settings.style.highlightTextBg) {
-		debug.warn("No highlightTextBg style defined!");
+		console.warn("No highlightTextBg style defined!");
 	}
 
 

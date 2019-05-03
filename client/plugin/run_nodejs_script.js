@@ -482,7 +482,7 @@
 					Run a diff to see if there's anything in common !?
 					
 				*/
-				var jsdiff = JsDiff;
+				var jsdiff = window.JsDiff;
 				var diff = jsdiff.diffChars(rowText, inline);
 				diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
 				diff.sort(function(a, b) {

@@ -45,7 +45,7 @@
 			// Errors returned by script.onerror is not normal errors (they have no message property), nor a call stack (at least not in Chrome)
 			if(err) return alertBox( "Problem loading jsPDF dependencies. Make sure the following files exist in client/jsPDF/\n" +  jsPdfDependencies.join("\n") );
 			
-			var pdf = new jsPDF({
+			var pdf = new window.jsPDF({
 				orientation: "portrait",
 				format: "A4",
 				unit: "pt" // For the context2d to work unit need to be in pt

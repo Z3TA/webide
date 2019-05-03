@@ -1829,7 +1829,7 @@ var SockJS = (function(){
 	
 	var postMessage = function (type, data) {
 		if(window.parent !== _window) {
-			parent.postMessage(curr_window_id + type + (data || ''), '*');
+			window.parent.postMessage(curr_window_id + type + (data || ''), '*');
 		} else {
 			utils.log("Can't postMessage, no parent window.", type, data);
 		}
@@ -1855,7 +1855,7 @@ var SockJS = (function(){
 		var facade;
 		curr_window_id = _document.location.hash.slice(1);
 		var onMessage = function(e) {
-			if(e.source !== parent) return;
+			if(e.source !== window.parent) return;
 			if(typeof utils.parent_origin === 'undefined')
 			utils.parent_origin = e.origin;
 			if (e.origin !== utils.parent_origin) return;

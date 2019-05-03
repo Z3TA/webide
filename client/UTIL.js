@@ -8,9 +8,10 @@
 
 "use strict";
 
+// When using UTIL.js on the server side where EDITOR is unavailable
 if(typeof EDITOR == "undefined") {
-	var EDITOR = {
-		workingDirectory: "/",
+	EDITOR = {
+		workingDirectory: (typeof process == "object" && typeof process.cwd == "function") ? process.cwd() : "/",
 		remoteProtocols: ["ftp", "ftps", "sftp"],
 		settings: {
 			defaultLineBreakCharacter: "\n"
@@ -28,19 +29,12 @@ var UTIL = {
 			var delimiter = "/";
 		}
 		else {
-		try {
-			var pathModule = require("path");
-			var delimiter = pathModule.sep;
-		}
-		catch(err) {
-			// Probably running in a browser
 			var delimiter = UTIL.getPathDelimiter(EDITOR.workingDirectory);
-		}
 		}
 		
 		//console.log("delimiter=" + delimiter);
 		//console.log("path=" + path);
-				
+		
 		path = path.replace(/\/+/g, delimiter);
 		path = path.replace(/(:\\)?\\+/g, "$1" + delimiter);
 		
@@ -446,7 +440,7 @@ originalRow.push("");
 			//else editedText += lbEditedText; // or add only one if it already had one
 		}
 		
-		var jsdiff = JsDiff ? JsDiff : require('diff');
+		var jsdiff = window.JsDiff;
 		var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
 		var totalLineBreaks = 0;
 		var removed = [];
@@ -1240,20 +1234,11 @@ namedFunction = false;
 	
 	
 	isFilePath: function isFilePath(filePath) {
-		if(RUNTIME == "browser") {
-			if(linuxPathValidation(filePath)) return true
-			else return false;
-		}
-		else {
-			var fs = require("fs");
-			try {
-				var stat = fs.lstatSync(filePath);
-				return stat.isFile();
-			}
-			catch(err) {
-				return false;
-			}
-		}
+		
+		var pathDelimiter = UTIL.getPathDelimiter();
+		
+		if(pathDelimiter == "/") return linuxPathValidation(filePath);
+		else return windowsPathValidation(filePath);
 		
 		function linuxPathValidation(contPathLinux) {
 			for(var k=0;k<contPathLinux.length;k++){
@@ -1550,19 +1535,6 @@ else {
 		
 	},
 	
-	makePathAbsolute: function makePathAbsolute(path) {
-		if(RUNTIME != "nw.js") throw new Error("makePathAbsolute only available in nw.js!");
-		if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
-			var fspath = require("path");
-			if(!fspath.isAbsolute(path)) {
-				var absolutePath = fspath.resolve(path);
-				console.warn("Making path absolute: " + path + " ==> " + absolutePath);
-				path = absolutePath; // Make the path absolute
-			}
-		}
-		return path;
-	},
-
 	resolvePath: function resolveRelativePath(base, path) {
 		/*
 			Takes a relative path and returns a absolute path

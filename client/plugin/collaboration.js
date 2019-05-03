@@ -826,9 +826,9 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			ev.index -= textLength;
 			if(prev.text.indexOf("\n") != -1) ev.row--;
 		}
-		else if(prev.type == "reload") { // The file was reloaded with new text
+		//else if(prev.type == "reload") { // The file was reloaded with new text
 			// No need to transform, the chnage was over-written
-		}
+		//}
 		
 	}
 	
@@ -861,7 +861,7 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 			if(history[i].cId == userConnectionId) break;
 			history.index++;
 		}
-		console.log("Redo: Moved history index from " + oldIndex + " to " + history.index + " history.length=" + length);
+		console.log("Redo: Moved history index from " + oldIndex + " to " + history.index + " history.length=" + history.length);
 		
 		if(history.index > history.length) throw new Error("history.index=" + history.index + " history.length=" + history.length);
 		

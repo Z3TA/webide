@@ -322,33 +322,6 @@
 		
 	}
 	
-	
-	function findCurrentFunction(functions, charIndex) {
-		
-		for(var func, element, i=0; i<functions.length; i++) {
-			func = functions[i];
-			
-			if(func.start <= charIndex && func.end >= charIndex) {
-				
-				if(func.subFunctions.length > 0) {
-					var result = findCurrentFunction(func.subFunctions, charIndex);
-					if(result != null) {
-						return result; // The subfunction (recursive)
-					}
-					else {
-						return name; // Not inside any subfunction
-					}
-				}
-				else {
-					return name; // Function has no subfunction
-				}
-			}
-		}
-		
-		return null; // Not insde any function
-		
-	}
-	
 	function searchFunctions(str, functions) {
 		/* 
 			Searches the parsed function list and return an array of matched function names.

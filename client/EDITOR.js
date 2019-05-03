@@ -965,15 +965,6 @@ usePseudoClipboard = false;
 		
 		if(text == undefined) {
 			
-			if(RUNTIME=="nw.js") {
-				var absolutePath = UTIL.makePathAbsolute(path);
-				if(absolutePath != path) {
-					removeFromQueue(path);
-					path = absolutePath;
-					EDITOR.openFileQueue.push(path);
-				}
-			}
-			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
@@ -7234,7 +7225,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 			if(err) throw err;
 			
 			EDITOR.on("fileChange", function fileChanged(fileThatChanged, change, text, index, row, col) {
-				if(fileThatChanged == file) parent.postMessage({
+				if(fileThatChanged == file) window.parent.postMessage({
 					fileUpdate: {
 						name: msg.openFile.name,
 						content: file.text
@@ -8602,7 +8593,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 	
 	function dblclick(dblClickEvent) {
 		
-		dblClickEvent = dblClickEvent || windows.event;
+		dblClickEvent = dblClickEvent || window.event;
 		
 		// Mouse position is on the current object (Canvas) 
 		var mouseX = dblClickEvent.offsetX==undefined?dblClickEvent.layerX:dblClickEvent.offsetX;

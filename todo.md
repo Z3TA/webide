@@ -70,6 +70,8 @@ Writing a guide on how to make a survey
 todo
 ----
 
+Test UTIL.textDiff
+
 Test SockJS in iframe
 
 Test File.prototype.removeRow !

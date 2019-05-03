@@ -257,7 +257,7 @@
 			
 			if(rootDir == null) alertBox("No Mercurial repo found in directory=" + directory);
 			else if(resolved && unresolved) showResolveDialog(resolved, unresolved, rootDir);
-			else checkForUnresolved(fileDirectory);
+			else checkForUnresolved(rootDir);
 			
 		});
 	}
