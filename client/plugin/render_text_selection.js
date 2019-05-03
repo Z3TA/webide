@@ -9,7 +9,7 @@
 	
 	// Sanity check
 	if(!EDITOR.settings.style.selectedTextBg) {
-		debug.warn("No selectedTextBg defined!");
+		console.warn("No selectedTextBg defined!");
 	}
 
 

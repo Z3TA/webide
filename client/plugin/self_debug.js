@@ -257,7 +257,7 @@
 				var errorReportFilePath = "bugreport.txt";
 				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
 					
-					if(err) GUI.showDevTools();
+					if(err && typeof GUI != "undefined") GUI.showDevTools(); // nw.js
 					
 					file.moveCaretToEndOfFile(file.caret, function() {
 						file.scrollToCaret(file.caret);

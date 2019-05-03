@@ -13,7 +13,7 @@
 	
 	function badgeMe() {
 		
-		var browser = browser || chrome;
+		var browser = window.browser || window.chrome;
 		browser.browserAction.setBadgeText({text: "99"});
 		
 		return true;

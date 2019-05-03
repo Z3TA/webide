@@ -248,15 +248,16 @@
 		});
 	}
 	
-	function mercurialResolveTool(directory) {
+	function mercurialResolveTool(resolved, unresolved, directory) {
 		// Does the directory has a initated Mercurial repo ?
 		CLIENT.cmd("mercurial.hasRepo", {directory: directory}, function hgstatus(err, resp) {
 			if(err) throw err;
 			
 			var rootDir = resp.directory;
 			
-			if(rootDir == null) console.warn("No Mercurial repo found in directory=" + directory);
-			else showResolveDialog(resolved, unresolved, rootDir);
+			if(rootDir == null) alertBox("No Mercurial repo found in directory=" + directory);
+			else if(resolved && unresolved) showResolveDialog(resolved, unresolved, rootDir);
+			else checkForUnresolved(fileDirectory);
 			
 		});
 	}
@@ -2460,7 +2461,7 @@ var error = err.message;
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
 						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, "Pull", function authorized(username, password, save) {
-							if(username != null) CLIENT.cmd("mercurial.pull", {directory: fileDirectory, user: username, pw: password, save: save}, hgPull);
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: fileDirectory, user: username, pw: password, save: save}, pulledMaybe);
 						});
 						return;
 					}
@@ -2559,7 +2560,7 @@ var error = err.message;
 				
 				var currentRevision = parseInt(summary.parent.slice(0, summary.parent.indexOf(":")));
 				
-				if(isNaN(currentRevision)) throw new Error("resp.summary=" + JSON.stringify(resp.summary));
+				if(isNaN(currentRevision)) throw new Error("summary=" + JSON.stringify(summary));
 				
 				if(summary.update == "(current)") return alertBox("Nothing to update!");
 				

@@ -29,6 +29,14 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Whoa! The Closure compiler did find a lot of errors and issues!
+
+npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --assume_function_wrapper --compilation_level ADVANCED
+
+Bundle size is currently about 212.8 kB can we make it smaller !?
+762.9 kB unzipped. 212.8 kB gziped
+
+
 "type annotations are just decoration, as they can be inferred."
 
 Make the parser parse return statements, so it can be used in autocomplete.js instead of regex parsing
@@ -61,6 +69,16 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Test SockJS in iframe
+
+Test File.prototype.removeRow !
+
+Test encoding_converter.js string decoder when opening a unsaved file ...
+
+Test CSS editing in WysiwygEditor and see if it can find the correct class when clicking in the preview!
+
+Try what happens if you have unresolved... in the SSG widget ...
 
 Annoying when you scrill in Firefox then go to the editor Chrome and scroll and it will jump much longer then anticipated
 

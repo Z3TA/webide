@@ -449,7 +449,7 @@ console.log("reopenFiles!");
 							// Change the state holder item
 							EDITOR.localStorage.removeItem("state_" + path, function(err) {
 								path = file.path;
-								updateLastSate();
+								updateLastState();
 							});
 						});
 					});
@@ -760,7 +760,7 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		//console.log("Saving state for: " + path);
 		
 		if(path.length == 0) {
-			fundBugs(false, function(err, openedFilesString) {
+			findBugs(false, function(err, openedFilesString) {
 				console.warn("Attempted to save state for a file without path!");
 			console.log(new Error("saveState").stack);
 			console.log("EDITOR.files=" + Object.keys(EDITOR.files).join(fileDelimiter));

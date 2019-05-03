@@ -344,9 +344,9 @@
 			
 		}
 		
-		else if(msg.ICP) alertBox("ICP from " + scriptName + ": " + msg.ICP);
+		else if(msg.ICP) alertBox("ICP from " + msg.scriptName + ": " + msg.ICP);
 		
-		else if(msg.error) alertBox(scripName + " error: " + msg.error);
+		else if(msg.error) alertBox(msg.scriptName + " error: " + msg.error);
 		
 		else throw new Error("Unknown message from nodej script: " + JSON.stringify(msg));
 		

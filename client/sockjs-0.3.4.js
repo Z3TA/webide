@@ -27,7 +27,7 @@ var JSON;JSON||(JSON={}),function(){function str(a,b){var c,d,e,f,g=gap,h,i=b[a]
 
 //     [*] Including lib/index.js
 // Public object
-SockJS = (function(){
+var SockJS = (function(){
 	var _document = document;
 	var _window = window;
 	var utils = {};
@@ -681,7 +681,7 @@ SockJS = (function(){
 				utils.unload_del(unload_ref);
 				iframe.parentNode.removeChild(iframe);
 				iframe = doc = null;
-				CollectGarbage();
+				if(typeof CollectGarbage == "function") CollectGarbage();
 			}
 		};
 		var onerror = function(r)  {
@@ -1828,7 +1828,7 @@ SockJS = (function(){
 	var curr_window_id;
 	
 	var postMessage = function (type, data) {
-		if(parent !== _window) {
+		if(window.parent !== _window) {
 			parent.postMessage(curr_window_id + type + (data || ''), '*');
 		} else {
 			utils.log("Can't postMessage, no parent window.", type, data);
@@ -2367,7 +2367,7 @@ SockJS = (function(){
 	
 	return SockJS;
 })();
-if ('_sockjs_onload' in window) setTimeout(_sockjs_onload, 1);
+if ('_sockjs_onload' in window) setTimeout(window._sockjs_onload, 1);
 
 // AMD compliance
 if (typeof define === 'function' && define.amd) {

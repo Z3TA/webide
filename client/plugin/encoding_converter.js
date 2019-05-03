@@ -65,6 +65,34 @@ console.warn("encoding_converter.js currently do not suppor unsaved files!");
 		
 	}
 	
+	function stringToBytes(s) {
+		var b = new Array();
+		var last = s.length;
+		
+		for (var i = 0; i < last; i++) {
+			var d = s.charCodeAt(i);
+			if (d < 128)
+				b[i] = d;
+			else {
+				var c = s.charAt(i);
+				console.warn(c + ' is NOT an ASCII character');
+				b[i] = -1;
+			}
+		}
+		return b;
+	}
+	
+	function dec2Bin(d) {
+		var b = '';
+		
+		for (var i = 0; i < 8; i++) {
+			b = (d%2) + b;
+			d = Math.floor(d/2);
+		}
+		
+		return b;
+	}
+	
 	function decodeBytes(bytes, encoding) {
 		var encodings= {
 			// Windows code page 1252 Western European

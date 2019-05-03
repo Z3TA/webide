@@ -1066,13 +1066,13 @@ console.warn("Unable to get caret position!");
 				var elClassArr = elClass.split(" ");
 				var longStr = nodeName;
 				for (var i=0; i<elClassArr.length; i++) {
-					combos.push(nodeName + "." + className);
-					longStr += "." + className;
+					combos.push(nodeName + "." + elClassArr[i]);
+					longStr += "." + elClassArr[i];
 				}
 				combos.push(longStr);
 			}
 			else {
-				combos.push(nodeName + "." + className);
+				combos.push(nodeName + "." + elClass);
 			}
 			
 			findStyleLocation.push(combos);
@@ -1809,7 +1809,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var win = previewWin.window;
 			
 			if(!doc.documentElement) {
-				throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
+				throw new Error("Failed to get doc.documentElement !");
 			}
 			
 			if(!previewWin) throw new Error("Unable to get preview window!");
@@ -2608,7 +2608,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var removed = html.substr(0, start-1);
 			html = html.substr(start);
 			
-			console.log("Removed " + occurencies(removed, LB) + " line breaks");
+			console.log("Removed " + UTIL.occurrences(removed, LB) + " line breaks");
 		}
 		
 		console.timeEnd("insertLineBreaks");

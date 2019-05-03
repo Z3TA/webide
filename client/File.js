@@ -8,7 +8,7 @@
 
 "use strict";
 
-var File; // File object is global
+//var File; // File object is global
 
 (function() { // Encapsulate so that we do not bleed out to global scope
 	
@@ -1065,7 +1065,7 @@ file.mode = "text";
 		var lastIndex;
 				
 		if(row < (grid.length-1)) {
-			lastIndex= grid[row+1].startIndex - file.lineBreak-length - grid[row+1].indentationCharacters.length - 1;
+			lastIndex= grid[row+1].startIndex - file.lineBreak.length - grid[row+1].indentationCharacters.length - 1;
 		}
 		else {
 			lastIndex= file.text.length-1;
@@ -1843,7 +1843,7 @@ file.mode = "text";
 			
 				if(grid.length == 0) {
 					throw new Error("Grid length should never be zero!");
-					if(file.text !== "") throw new Error("The grid is empty but text=" + UTIL.lbChars(text));
+					if(file.text !== "") throw new Error("The grid is empty but text=" + UTIL.lbChars(file.text));
 					
 					file.grid = file.createGrid();
 				}

@@ -50,7 +50,7 @@ if(RUNTIME != "nw.js") {
 			return UTIL.getDirectoryFromPath(document.location.href);
 		},
 		nextTick: function(cb) {
-			setTimout(cb, 0);
+			setTimeout(cb, 0);
 		},
 		argv: (function getArguments() {
 			var query = window.location.search.substring(1);

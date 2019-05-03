@@ -1951,7 +1951,8 @@
 								var useSettings = "Use settings repo";
 								var cancelSync = "Cancel Sync";
 								
-								confirmBox("Repository in SSG settings do not match with the default repository in hgrc!\nhsettings repo: " + site.repository + "\nhgrc default repo: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
+								confirmBox("Repository in SSG settings do not match with the default repository in hgrc!\nhsettings repo: " + site.repository + 
+								"\nhgrc default repo: " + defaultRepo, [useDefault, useSettings, cancelSync], function(answer) {
 									
 									if(answer == useSettings) {
 										var fullString = repos[0];
@@ -2533,8 +2534,8 @@ whenAllFilesReloaded();
 				if(!fileList[i].hasOwnProperty("path")) throw new Error("fileList item " + i + " does not have a path property!nfileList=" + JSON.stringify(fileList));
 				if(!fileList[i].hasOwnProperty("name")) throw new Error("fileList item " + i + " does not have a name property!nfileList=" + JSON.stringify(fileList));
 				
-				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
-				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
+				if(!fileList[i].path) throw new Error("fileList[" + i + "] Does not have a path property: " + JSON.stringify(fileList[i]));
+				if(!fileList[i].name) throw new Error("fileList[" + i + "] Does not have a name property: " + JSON.stringify(fileList[i]));
 				
 				if(like(site, fileList[i])) return fileList[i].path;
 				

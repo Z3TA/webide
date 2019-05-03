@@ -750,11 +750,6 @@ console.warn("Could not find the search string that was used!");
 		
 	}
 	
-	
-	function filterFileNames(name) {
-		return fileFilterRegExp.test(name);
-	}
-	
 	function findInFilesProgressStatus(status) {
 		console.log("findInFilesProgressStatus: " + JSON.stringify(status));
 		

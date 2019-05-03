@@ -248,6 +248,7 @@
 			EDITOR.bindKey({desc: "Scroll a whole a screen up", fun: vimScrollWholeScreenUp, charCode: B, combo: CTRL, mode: "vimNormal"});
 			EDITOR.bindKey({desc: "Scroll a whole a screen down", fun: vimScrollWholeScreenDown, charCode: F, combo: CTRL, mode: "vimNormal"});
 			
+			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
 				bindTest = true;
 				var ONE = 49;
@@ -257,8 +258,8 @@
 				EDITOR.bindKey({desc: "Vim test 1", fun: vimTest1, charCode: ONE, combo: CTRL+SHIFT, mode: "*"});
 				EDITOR.bindKey({desc: "Vim test 2", fun: vimTest2, charCode: TWO, combo: CTRL+SHIFT, mode: "*"});
 				EDITOR.bindKey({desc: "Vim test 3", fun: vimTest3, charCode: THREE, combo: CTRL+SHIFT, mode: "*"});
-				
-			}
+				}
+			// TEST-CODE-END
 			
 			EDITOR.addRender(showCommandBuffer, 4600);
 			
@@ -279,11 +280,13 @@
 			
 			// todo: unbind them all!
 			
+			// TEST-CODE-START
 			if(bindTest) {
 				EDITOR.unbindKey(vimTest1);
 				EDITOR.unbindKey(vimTest2);
 				EDITOR.unbindKey(vimTest3);
 			}
+			// TEST-CODE-END
 			
 		}
 		});

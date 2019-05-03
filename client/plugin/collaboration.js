@@ -88,13 +88,14 @@
 			
 			menu = EDITOR.addMenuItem("Invite collaborator", invite, 14);
 			
+			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
 				var C = 67;
 				bindTest = true;
 				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: C, combo: CTRL+SHIFT});
 				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: Z, combo: CTRL+SHIFT});
 			}
-			
+			// TEST-CODE-END
 		},
 		unload: function unloadCollaboration() {
 			
@@ -114,10 +115,12 @@
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
 			
+			// TEST-CODE-START
 			if(bindTest) {
 			EDITOR.unbindKey(testCollaboration);
 				EDITOR.unbindKey(testUndoRedo);
 			}
+			// TEST-CODE-END
 			
 			EDITOR.unbindKey(collabRedo);
 			EDITOR.unbindKey(collabUndo);

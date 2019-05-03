@@ -2482,7 +2482,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			}
 		}
 		
-		function showCanvasNodes() {
+		/*
+			function showCanvasNodes() {
 			for(var i=0; i<canvasNodes.length; i++) {
 				// Do not show hidden fileCanvas's
 				if(canvasNodes[i].getAttribute("class") != "fileCanvas") {
@@ -2492,7 +2493,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			}
 			EDITOR.renderNeeded();
 		}
-		
+		*/
 	}
 	
 	EDITOR.on = function(eventName, callback, order) {
@@ -4230,7 +4231,7 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 	EDITOR.rebindKey = function(funName, charCode, combo) {
 		// Rebind the charCode and combo for the function with funName
 		
-		if(isNaN(charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
+		if(isNaN(charCode)) throw new Error("charCode=" + charCode + " needs to be a number!");
 		
 		var f, rebound = false;
 		for(var i=0; i<keyBindings.length; i++) {
@@ -5096,6 +5097,11 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 	}
 	
 	EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
+		if(typeof resolved == "string" && unresolved == undefined && directory == undefined) {
+			directory = resolved;
+			resolved = undefined;
+			unresolved = undefined;
+		}
 		console.log("Calling resolveTool listeners (" + EDITOR.eventListeners.resolveTool.length + ")");
 		for(var i=0, f; i<EDITOR.eventListeners.resolveTool.length; i++) {
 			EDITOR.eventListeners.resolveTool[i].fun(resolved, unresolved, directory);
@@ -5480,7 +5486,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			}
 			
 			if(gotError) {
-				throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+				throw new Error("There was an error in " + fName + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 			}
 			else {
 				
@@ -8180,7 +8186,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		
 		if(preventDefault) {
 			console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
-			if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
+			if(typeof keyUpEvent.preventDefault == "function") keyUpEvent.preventDefault();
 			return false;
 		}
 		else {
@@ -8195,7 +8201,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 	
 	function mouseDown(mouseDownEvent) {
 		
-		mouseDownEvent = mouseDownEvent || windows.event;
+		mouseDownEvent = mouseDownEvent || window.event;
 		
 		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 		// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
@@ -8338,7 +8344,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		
 		lastMouseDownEventType = mouseDownEvent.type;
 		
-		var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
+		var el = EDITOR.lastElementWithFocus || mouseDownEvent.target;
 		// selectionStart etc seem to get lost when the element lose focus, so save it!
 		// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
 		if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
