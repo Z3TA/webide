@@ -29,9 +29,34 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+1. Generate bundle.htm and bundle.js
+./makebundle2.js
+
+2. Run bundle.js though the closure compiler:
+npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --assume_function_wrapper --compilation_level ADVANCED
+
+3. Minify the output from the closure compiler
+npx uglifyjs bundle.js.min -o bundle.js.ugly --toplevel -mc 'pure_funcs="console.log,console.warn,console.time,console.timeEnd"'
+
+4. Insert bundle.js.ugly into bundle.htm
+./replaceStringInFileWithContentOfFile.js '!SCRIPTS_HERE!' client/bundle.htm bundle.js.ugly
+
+5. gzip client/bundle.htm --best --keep
+
+
+result: 599799 unzippe, 184896 zipped
+
+212844-184896=27948 byte saved (ca 13%)
+
+Does it work ? =D
+A function, or an object with the property fun, need to be passed in the second argument! options=[object Object]
+nope :(
+
+
+
 Whoa! The Closure compiler did find a lot of errors and issues!
 
-npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --assume_function_wrapper --compilation_level ADVANCED
+npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --compilation_level ADVANCED
 
 Bundle size is currently about 212.8 kB can we make it smaller !?
 762.9 kB unzipped. 212.8 kB gziped
