@@ -29,38 +29,18 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-1. Generate bundle.htm and bundle.js
-./makebundle2.js
+The more agressive minifying was a disappointement as it only resulted in a 13% decrease in size,
+and most importantly, it did not work as some objects passed to functions need to have specific properties!
 
-2. Run bundle.js though the closure compiler:
-npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --assume_function_wrapper --compilation_level ADVANCED
+The closure compiler did however find a lot of errors (with around 10% false positive).
+It's not worth it to include the closure compiler in the editor itself even though that would be possible.
+But we can add it as a dev dependency and use it to check the code before doing a new release!
 
-3. Minify the output from the closure compiler
-npx uglifyjs bundle.js.min -o bundle.js.ugly --toplevel -mc 'pure_funcs="console.log,console.warn,console.time,console.timeEnd"'
-
-4. Insert bundle.js.ugly into bundle.htm
-./replaceStringInFileWithContentOfFile.js '!SCRIPTS_HERE!' client/bundle.htm bundle.js.ugly
-
-5. gzip client/bundle.htm --best --keep
-
-
-result: 599799 unzippe, 184896 zipped
-
-212844-184896=27948 byte saved (ca 13%)
-
-Does it work ? =D
-A function, or an object with the property fun, need to be passed in the second argument! options=[object Object]
-nope :(
-
-
-
-Whoa! The Closure compiler did find a lot of errors and issues!
+todo: Edit makebundle2.js and make it into "bundleJsForChecking.js"
 
 npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --compilation_level ADVANCED
 
-Bundle size is currently about 212.8 kB can we make it smaller !?
-762.9 kB unzipped. 212.8 kB gziped
-
+---
 
 "type annotations are just decoration, as they can be inferred."
 
@@ -3138,10 +3118,6 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
-
-In order to get the bundle size down even forther, concat ALL JS files,
-then run uglify and allow mangling everything!
----
 
 Text selection lags when selecting over a very long line
 
