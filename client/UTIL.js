@@ -10,7 +10,7 @@
 
 // When using UTIL.js on the server side where EDITOR is unavailable
 if(typeof EDITOR == "undefined") {
-	EDITOR = {
+	var EDITOR = {
 		workingDirectory: (typeof process == "object" && typeof process.cwd == "function") ? process.cwd() : "/",
 		remoteProtocols: ["ftp", "ftps", "sftp"],
 		settings: {
