@@ -29,6 +29,14 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Can no longer autocomplete html elements!
+Write test!
+
+
+---
+
+Writing blog post about the removeRow bug.
+
 ---
 
 Detected a bug in collaboration when sending a edit at the same time,

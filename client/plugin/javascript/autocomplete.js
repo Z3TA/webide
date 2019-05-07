@@ -819,6 +819,10 @@
 					
 					var variable = variables[properties[0]];
 					
+					if(!variable.hasOwnProperty("keys")) {
+						console.log("Variable does not have a keys property: " + properties[0]);
+					}
+					else {
 					// Traverse the chain ... foo.bar.bas.xx
 					for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
 						if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
@@ -919,6 +923,7 @@
 						}
 						
 					}
+				}
 				}
 				
 			}

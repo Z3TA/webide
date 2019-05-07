@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(1, function testRemoveRow2(callback) {
+	EDITOR.addTest(function testRemoveRow2(callback) {
 		EDITOR.openFile("testRemoveRow2.js", '\n\n\n\n', function(err, file) {
 			
 			file.removeRow(2);
@@ -174,7 +174,7 @@
 		});
 		});
 	
-	EDITOR.addTest(2, function testRemoveRow(callback) {
+	EDITOR.addTest(function testRemoveRow(callback) {
 		EDITOR.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {
 			
 			var row = 2;
