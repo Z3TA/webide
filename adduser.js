@@ -75,7 +75,7 @@ var scriptArguments = null;
 var UID, GID;
 
 if(scriptArguments) {
-	console.log("Using JSON parameters!");
+	console.log("Using JSON parameters! " + JSON.stringify(scriptArguments, null, 2));
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
