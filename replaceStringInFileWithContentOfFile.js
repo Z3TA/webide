@@ -1,6 +1,8 @@
 #!/bin/sh
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
+// Used for inserting bundle.js into bundle.htm
+
 var arg = process.argv;
 var string = arg[2];
 var file = arg[3];

@@ -38,20 +38,6 @@ Manually test editing at the same time in collab mode!
 
 ---
 
-
-The more agressive minifying was a disappointement as it only resulted in a 13% decrease in size,
-and most importantly, it did not work as some objects passed to functions need to have specific properties!
-
-The closure compiler did however find a lot of errors (with around 10% false positive).
-It's not worth it to include the closure compiler in the editor itself even though that would be possible.
-But we can add it as a dev dependency and use it to check the code before doing a new release!
-
-todo: Edit makebundle2.js and make it into "bundleJsForChecking.js"
-
-npx google-closure-compiler --js=bundle.js --js_output_file=bundle.js.min --env BROWSER --language_in ECMASCRIPT5_STRICT --compilation_level ADVANCED
-
----
-
 "type annotations are just decoration, as they can be inferred."
 
 Make the parser parse return statements, so it can be used in autocomplete.js instead of regex parsing
