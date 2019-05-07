@@ -92,7 +92,7 @@
 			if(EDITOR.settings.devMode) {
 				var C = 67;
 				bindTest = true;
-				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testCollaboration, charCode: C, combo: CTRL+SHIFT});
+				EDITOR.bindKey({desc: "Run collaboration test suite", fun: testEditAtTheSameTime, charCode: C, combo: CTRL+SHIFT});
 				EDITOR.bindKey({desc: "Run undo/redo test suite", fun: testUndoRedo, charCode: Z, combo: CTRL+SHIFT});
 			}
 			// TEST-CODE-END
@@ -452,7 +452,9 @@ console.warn("Collaboration disabled in " + file.path);
 			console.log("A fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			
 			if(fileChangeEvent == undefined) throw new Error("fileChangeEvent=" + fileChangeEvent);
-			fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
+			
+			// should we ?
+			//fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
 			
 			console.log("B fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			
@@ -463,9 +465,7 @@ console.warn("Collaboration disabled in " + file.path);
 			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
 			
 		}
-		
-		
-		if(saveUndoRedoHistory) {
+		else if(saveUndoRedoHistory) {
 			saveUndoRedoHistoryEvent(fileChangeEvent)
 		}
 		
@@ -555,7 +555,7 @@ console.warn("Collaboration disabled in " + file.path);
 		if(!json.alias) throw new Error("Echo without alias: " + JSON.stringify(json));
 		if(!json.cId == undefined) throw new Error("Echo without cId: " + JSON.stringify(json));
 		
-		if(json.cId == userConnectionId) throw new Error("It should not be possible to get echo's from myself! json.cId=" + json.cId + " userConnectionId=" + userConnectionId);
+		//if(json.cId == userConnectionId) throw new Error("It should not be possible to get echo's from myself! json.cId=" + json.cId + " userConnectionId=" + userConnectionId);
 		
 		if(eventOrderSynced) eventOrder++;
 		
@@ -588,7 +588,7 @@ console.warn("Collaboration disabled in " + file.path);
 			}
 			
 		}
-		else if(json.sync) {
+		else if(json.sync && json.cId != userConnectionId) {
 			
 			// ### Sync file
 			var sync = json.sync;
@@ -670,14 +670,14 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 				for (var previousEvent, i=arr.length-1; i>-1; i--) {
 					previousEvent = arr[i];
 					
-					if(arr[i].cId == userConnectionId) {
+					//if(arr[i].cId == userConnectionId) {
 						// I just sent an event with this order
 						// In my point of view I was first
-						console.log("Change " + i + "/" + arr.length + " of ev.order=" + ev.order + " was made by this client.");
+						//console.warn("Change " + i + "/" + arr.length + " of ev.order=" + ev.order + " was made by this client.");
 						// We need to transform the event with the other event in mind
-						transformBackwards(ev, previousEvent);
-					}
-					else if(arr[i].cId == ev.cId) {
+						//transformBackwards(ev, previousEvent);
+					//}
+					if(arr[i].cId == ev.cId) {
 						throw new Error("User with cId=" + ev.cId + " sent two change events with the same order! " + JSON.stringify(arr[i]) + " vs " + JSON.stringify(ev));
 					}
 					else {
@@ -724,15 +724,15 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			
 			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
 			
-			
+			if(json.cId != userConnectionId) {
 			// ### Apply file change
-			
+				
 			ignoreFileChange = true;
 			redo(file, ev, false);
 			ignoreFileChange = false;
 			
 			if(file == EDITOR.currentFile) EDITOR.renderNeeded();
-			
+			}
 			// Undo-redo
 			saveUndoRedoHistoryEvent(ev);
 			
@@ -1106,6 +1106,7 @@ file.fixCaret();
 	// TEST-CODE-START
 	
 	function testCollaboration(callback) {
+		// This function is sync, but need to be run async because the cleanup is async
 		
 		var ENTER = 13;
 		
@@ -1177,60 +1178,72 @@ file.fixCaret();
 			f({change: "delete", index: 0, text: "0"});
 			if(file.text != "abc\nde\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
-			// Edit at the same time
+			// note: Testing for edit's at the same time need to be async, we'll test edit's ad the same time in another test!
 			file.moveCaret(6);
 			EDITOR.mock("typing", "f");
-			fileChangeOrder = 7; // The next order will be 8 which is same as insert f above.
-			f({change: "insert", index: 6, text: "z"});
+			f({change: "insert", index: 7, text: "z"});
 			if(file.text != "abc\ndefz\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
+			// note: Can't test undo/redo in colaboration mode as it has to be async, we'll do that in another test!
 			
-			// Undo/redo in colaboration mode
-			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert f
-			if(file.text != "abc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
-			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
-			if(file.text != "ab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
-			fileChangeOrder = 10;
-			
-			f({change: "insert", index: 0, text: "å"});
-			if(file.text != "åab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
-			EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert c
-			if(file.text != "åabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
-			fileChangeOrder = 12;
-			
-			f({change: "insert", index: 1, text: "ä"});
-			if(file.text != "åäabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
-			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
-			if(file.text != "åäab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
 			
 			//console.log(JSON.stringify(fileChangeEvents, null, 2));
 			
-			// Clean for next run
-			for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj]; 
-			for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
 			
-			if(typeof callback == "function") {
-				EDITOR.closeFile(file);
-				callback(true);
-			}
-			else {
-				file.write("\n\nCollaboration test suite passed!"); // Write at EOF
-				EDITOR.renderNeeded();
-			}
 			collabMode = false;
+			
+			setTimeout(function cleanup() {
+
+				// Clean for next run
+				for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj];
+				for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
+				
+				if(typeof callback == "function") {
+					EDITOR.closeFile(file);
+					callback(true);
+				}
+				else {
+					file.write("\n\nTests passed!"); // Write at EOF
+					EDITOR.renderNeeded();
+				}
+				
+			}, 100);
 			
 		});
 		
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(testCollaboration);
+	EDITOR.addTest(false, testCollaboration);
+	
+	
+	function testUndoRedoWhileInCollabMode(callback) {
+		
+		// Undo/redo in colaboration mode
+		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert f
+		if(file.text != "abc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		
+		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
+		if(file.text != "ab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		
+		fileChangeOrder = 10;
+		
+		f({change: "insert", index: 0, text: "å"});
+		if(file.text != "åab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		
+		EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert c
+		if(file.text != "åabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		
+		fileChangeOrder = 12;
+		
+		f({change: "insert", index: 1, text: "ä"});
+		if(file.text != "åäabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		
+		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
+		if(file.text != "åäab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+	}
+	
 	
 	function testUndoRedo(callback) {
 		var Z = 90;
@@ -1377,6 +1390,156 @@ file.fixCaret();
 	}
 	
 	EDITOR.addTest(testUndoRedo);
+	
+	function testEditAtTheSameTime(callback) {
+		collabMode = true;
+		
+		var testUserConnectionId = userConnectionId + 1;
+		var testUserAlias = "Other";
+		var testEventOrder = 1;  // Clients send this with each echo
+		var fakeEchoCounter = 1; // Managed by the server, server increments for each echo
+		var testFile;
+		var fileChangeOrder = 0;
+		var myAlias = "Me";
+		
+		/*
+			The server will only send echo's to other client!
+			So we will not get the echo's we generate! ?????????????
+		*/
+		
+		function f(o) {
+			
+			if(o.index == undefined) throw new Error("Must specify index!");
+			if(o.change == undefined) throw new Error("Must specify change!");
+			
+			var caret = testFile.createCaret(o.index);
+			
+			var json = {
+				cId: testUserConnectionId,
+				alias: testUserAlias,
+				eventOrder: ++testEventOrder,
+				echoCounter: ++fakeEchoCounter,
+				fileChange: {
+					filePath: testFile.path,
+					type: o.change,
+					text: o.text || "",
+					index: o.index || caret.index,
+					row: o.row || caret.row,
+					col: o.col || caret.col,
+					order: o.order || ++fileChangeOrder,
+				}
+			}
+			
+			collabHandleEcho(json);
+		}
+		
+		function me(o) {
+			
+			if(o.index == undefined) throw new Error("Must specify index!");
+			if(o.change == undefined) throw new Error("Must specify change!");
+			
+			var caret = testFile.createCaret(o.index);
+			
+			var json = {
+				cId: userConnectionId,
+				alias: myAlias,
+				eventOrder: ++testEventOrder,
+				echoCounter: ++fakeEchoCounter,
+				fileChange: {
+					filePath: testFile.path,
+					type: o.change,
+					text: o.text || "",
+					index: o.index || caret.index,
+					row: o.row || caret.row,
+					col: o.col || caret.col,
+					order: o.order || ++fileChangeOrder,
+				}
+			}
+			
+			collabHandleEcho(json);
+		}
+		
+		EDITOR.openFile("testEditAtTheSameTime.txt", "\n", function (err, file) {
+			if(err) throw err;
+			
+			testFile = file;
+			
+			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			
+			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
+			
+			eventOrder = 1;
+			
+			timeSerial([
+				function() {
+					console.log("timeSerial step 1");
+					// Close any alert boxes that would prevent insert
+					if(EDITOR.openDialogs.length > 0) EDITOR.closeAllDialogs("TESTS");
+					
+			EDITOR.mock("typing", "abc");
+			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+				}, function() {
+					
+					// This test fill fail if we are in collaboration mode already when running the test!
+					fileChangeOrder = 2; // 3 characters typed (abc) fileChangeOrder:0-1-2
+					if(fileChangeEventOrderCounters[file.path] != fileChangeOrder) throw new Error("Unexpeced fileChangeOrder=" + fileChangeOrder + " but got fileChangeEventOrderCounters[" + file.path + "]=" + fileChangeEventOrderCounters[file.path]);
+					
+					EDITOR.mock("typing", "m");
+					
+				}, function() {
+
+					fileChangeOrder = 3;
+					// We should now have recived our own echo
+					var lastChange = fileChangeEvents[file.path][fileChangeOrder][0];
+					
+					if(lastChange.text != "m") throw new Error("Unexpected lastChange=" + JSON.stringify(lastChange));
+					
+					fileChangeOrder = 2; // So that the following will get order=3
+					f({change: "insert", index: 3, text: "g"});
+					
+					// Our own change was first
+					if(file.text != "abcmg\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+					EDITOR.mock("typing", "x"); 
+					// By the time we receive our own echo, we will already have received the following
+					f({change: "insert", index: 5, text: "y"}); 
+					
+					if(file.text != "abcmgyx\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+					
+				}, function() {
+
+					// We have now recieved our own echo. The result should still be the same
+					if(file.text != "abcmgyx\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+					collabMode = false;
+					
+					// Clean for next run
+					for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj];
+					for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
+					
+					if(callback) {
+						EDITOR.closeFile(file);
+						callback(true);
+					}
+				}
+			]);
+		});
+		
+		// When called by key combo, it needs to return either true or false! (prevent default)
+		if(typeof callback != "function") return false;
+	}
+	
+	EDITOR.addTest(false, testEditAtTheSameTime);
+	
+	function timeSerial(func) {
+		// Wait between each step
+		var timeMult = 100;
+		for(var i=0; i<func.length; i++) {
+			setTimeout(func[i], i*timeMult);
+		}
+	}
 	
 	// TEST-CODE-END
 	

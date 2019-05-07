@@ -8,7 +8,7 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function searchFunctionReturnObjectLiteral(callback) {
+	EDITOR.addTest(function searchFunctionReturnObjectLiteral(callback) {
 		EDITOR.openFile("searchFunctionReturnObjectLiteral.js", 'function foo() {\nreturn {banana: 1, apple: 2}\n}\nvar f = foo();\nf.b\n', function(err, file) {
 			
 			var atCaret = autoComplete(file, 66);

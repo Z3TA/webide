@@ -29,6 +29,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Detected a bug in collaboration when sending a edit at the same time,
+the editor asumes the local change was first, resulting in inconsistent file text.
+
+Need to rely on the server's echoCounter to decide what change came first.
+
+Manually test editing at the same time in collab mode!
+
+---
+
+
 The more agressive minifying was a disappointement as it only resulted in a 13% decrease in size,
 and most importantly, it did not work as some objects passed to functions need to have specific properties!
 
@@ -74,6 +84,9 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+The parser has gotten too slow!
+Try pressing Enter in a fairly large file ...
 
 Test UTIL.textDiff
 

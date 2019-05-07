@@ -2124,9 +2124,9 @@ function sockJsConnection(connection) {
 				json.alias = userAlias;
 				
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-					if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {
+					//if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {
 						send({echo: json, id: 0}, USER_CONNECTIONS[userConnectionName].connections[i]);
-					}
+					//}
 				}
 			}
 			else if(command == "invite") {

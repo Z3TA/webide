@@ -4341,12 +4341,14 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		var defaultTestOrder = 1000;
 		var defaultParallel = true;
 		
+		//console.log("addTest: (" + (typeof order) + ", " + (typeof parallel) + ", " + (typeof fun) + ") fun==undefined?" + (fun==undefined));
+		
 		if(typeof order == "function" && parallel == undefined && fun == undefined) {
 			fun = order;
 			order = defaultTestOrder;
 			parallel = defaultParallel;
 		}
-		else if(typeof order == "boolan" && typeof parallel == "function" && fun == undefined) {
+		else if(typeof order == "boolean" && typeof parallel == "function" && fun == undefined) {
 			fun = parallel;
 			parallel = order;
 			order = defaultTestOrder;
@@ -4363,7 +4365,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		if(order == undefined) order = defaultTestOrder;
 		if(parallel == undefined) parallel = defaultParallel;
 		
-		if(fun == undefined) throw new Error("fun not specified!");
+		if(fun == undefined) throw new Error("fun not specified! fun=" + fun + " order=" + order + " parallel=" + parallel);
 		
 		var funName = UTIL.getFunctionName(fun);
 		
@@ -4697,7 +4699,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		}
 		else if(mock == "typing") {
 			var text = options;
-			for (var i=0, uppercase; i<text.length; i++) {
+			for (var i=0; i<text.length; i++) {
 				EDITOR.mock("keypress", { charCode: text.charCodeAt(i), shiftKey: (text.charAt(i).toUpperCase() ==  text.charAt(i)) });
 			}
 		}
@@ -6533,7 +6535,7 @@ name: login.user,
 					}
 				}
 				if(firstTest) {
-					alertBox("Testing: " + firstTest.text);
+					alertBox("Testing: " + firstTest.text, "TESTS");
 					started = 1;
 					asyncInitTest(firstTest);
 					return;
