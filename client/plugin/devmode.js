@@ -115,7 +115,11 @@
 		
 		// Disable console.log
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
-		console.log = console.warn = function() {}; // Perf mode
+		console.log = function() {}; // Perf mode
+		
+		if(!QUERY_STRING.warn) {
+			console.warn = function() {};
+		}
 		
 		// These are also an overhead
 		if(!QUERY_STRING.time) {

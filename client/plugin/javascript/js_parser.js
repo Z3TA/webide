@@ -902,7 +902,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 	
 	function parseJavaScript(file, options) {
 		
-		console.log("parseJavaScript: options=" + JSON.stringify(options));
+		console.warn("parseJavaScript: options=" + JSON.stringify(options));
 		
 		console.time("parseJavaScript");
 		
@@ -1358,7 +1358,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -3144,7 +3144,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 		
 		// Only functions Should have a prototype! 
 		
-		console.warn("new Variable! type=" + type + " value=" + value + "");
+		//console.warn("new Variable! type=" + type + " value=" + value + "");
 		}
 	
 	function XmlTag(start, end, wordLength, selfEnding) {
