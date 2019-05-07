@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+---
+
 Detected a bug in collaboration when sending a edit at the same time,
 the editor asumes the local change was first, resulting in inconsistent file text.
 
@@ -71,14 +73,28 @@ Writing a guide on how to make a survey
 todo
 ----
 
+---
+When showing function argument info, also show from where that info was taken (for debugging)
+Example error:
+
+EDITOR.addTest(function testRemoveRow(callback) {
+EDITOR.openFile("testRemoveRow.js", '\n\n\n\n', function(err, file) {
+file.removeRow(|
+EDITOR.closeFile(file.path);
+callback(true);
+});
+});
+
+gives "callback" as argument hint. Want to know where it got that from!
+
+---
+
 The parser has gotten too slow!
 Try pressing Enter in a fairly large file ...
 
 Test UTIL.textDiff
 
 Test SockJS in iframe
-
-Test File.prototype.removeRow !
 
 Test encoding_converter.js string decoder when opening a unsaved file ...
 

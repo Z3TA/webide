@@ -1065,10 +1065,10 @@ file.mode = "text";
 		var lastIndex;
 				
 		if(row < (grid.length-1)) {
-			lastIndex= grid[row+1].startIndex - file.lineBreak.length - grid[row+1].indentationCharacters.length - 1;
+			lastIndex = grid[row+1].startIndex - grid[row+1].indentationCharacters.length - 1;
 		}
 		else {
-			lastIndex= file.text.length-1;
+			lastIndex = file.text.length-1; // Index of last character in the file
 		}
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"

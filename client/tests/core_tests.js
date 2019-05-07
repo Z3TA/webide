@@ -40,6 +40,20 @@
 		
 	}
 	
+	EDITOR.addTest(1, function testRemoveRow2(callback) {
+		EDITOR.openFile("testRemoveRow2.js", '\n\n\n\n', function(err, file) {
+			
+			file.removeRow(2);
+			
+			if(file.text != "\n\n\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function getPathFromUrl(callback) {
 		
 		var path = UTIL.getPathFromUrl("http://127.0.0.1:8080/?repo=https://github.com/Z3TA/test.git");
@@ -160,7 +174,7 @@
 		});
 		});
 	
-	EDITOR.addTest(function testRemoveRow(callback) {
+	EDITOR.addTest(2, function testRemoveRow(callback) {
 		EDITOR.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {
 			
 			var row = 2;
