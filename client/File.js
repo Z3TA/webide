@@ -103,7 +103,7 @@
 		
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
-			
+			file.mode = "text"; // Again, don't try to parse it
 			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				
 				if(callback) callback(checkGridError || checkCaretError);

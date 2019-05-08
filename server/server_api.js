@@ -548,6 +548,24 @@ API.readLines = function readLines(user, json, callback) {
 	
 	function readRows() {
 		
+		// Fix inconsistent line breaks
+		if(lb == "\n") {
+			text = text.replace(/\r/g, ""); // Just remove all CR
+		}
+		else if(lb == "\r\n") {
+			// Look for lonely LF
+			var lfIndex = -1;
+			while(true) {
+				lfIndex = text.indexOf("\n", lfIndex+1);
+				if(lfIndex == -1) break;
+				if(text.charAt(lfIndex-1) != "\r") {
+					// Remove lonely LF
+					text = text.slice(0, lfIndex) + text.slice(lfIndex+1);
+					--lfIndex;
+				}
+			}
+		}
+		
 		var rows = text.split(lb);
 		
 		totalLines += rows.length;
