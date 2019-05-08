@@ -29,9 +29,11 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Can no longer autocomplete html elements!
-Write test!
-
+Indentation in text mode:
+* Increment when hitting tab in the beginning of a line
+* Increment all selected lines when hitting tab 
+* de-increment all selected lines when hitting shift+tab 
+* When pasting a code snippet trim upto first level of indentation, then use the indentation level where it's pasted
 
 ---
 
@@ -69,6 +71,13 @@ Get value from an array item
 ---
 Unable to find return type of function that returns an object literal
 return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
+---
+
+Function inside self calling function get market as global !?
+when autocomplete from related files
+
+variables inside self calling function also seem to show up when autocompleting from related files ...
+
 ---
 
 Better autocomplete!
