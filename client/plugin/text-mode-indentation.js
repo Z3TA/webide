@@ -57,7 +57,8 @@
 		
 		console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode));
 		
-		if(!file || file.mode!="text") return;
+		if(!file) return;
+		if(file.mode!="text") return;
 		
 		menuItem = EDITOR.addTempMenuItem("Show white space", false, toggleShowWhiteSpace);
 		EDITOR.updateMenuItem(menuItem, SHOW_WHITE_SPACE, "Show white space");
@@ -79,7 +80,8 @@
 	}
 	
 	function renderWhiteSpace(ctx, buffer, file, startRow, containZeroWidthCharacters) {
-		if(!SHOW_WHITE_SPACE || !file || file.mode!="text") return;
+		if(!SHOW_WHITE_SPACE || !file) return;
+		if(file.mode!="text") return;
 		
 		var transparencePercent = 10;
 		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
@@ -135,10 +137,10 @@ else {
 	}
 	
 	
-	
-	
 	function addindentation(file) {
-		if(file.mode!="text" || !file || !EDITOR.input) {
+		if(file == undefined) return ALLOW_DEFAULT;
+		
+		if(file.mode!="text" || !EDITOR.input) {
 			console.log("indentate:addindentation Not indentating! file.mode=" + file.mode + " EDITOR.input=" + EDITOR.input + " file?" + (!!file) + " ");
 			return ALLOW_DEFAULT;
 		}
