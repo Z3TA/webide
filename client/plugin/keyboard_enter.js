@@ -5,6 +5,7 @@
 		desc: "Makes a line break",
 		charCode: 13, 
 		fun: keyboard_enter,
+		order: 100
 	});
 	
 	function keyboard_enter(file) {

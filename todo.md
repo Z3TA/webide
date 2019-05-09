@@ -29,13 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
----
-
-Writing blog post about the removeRow bug.
-
----
-
 Detected a bug in collaboration when sending a edit at the same time,
 the editor asumes the local change was first, resulting in inconsistent file text.
 
@@ -81,6 +74,9 @@ checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
   root|
 });
 
+---
+Unable to autocomplete html tag:
+<i>length|
 ---
 
 Better autocomplete!

@@ -6,15 +6,21 @@
 		* Increment when hitting tab in the beginning of a line
 		* Increment all selected lines when hitting tab
 		* de-increment all selected lines when hitting shift+tab
+		* Create the same level of indentation when pressing Enter
+		* Render white-space characters
 		* When pasting a code snippet trim upto first level of indentation, then use the indentation level where it's pasted
 		
 		
 	*/
 	
+	var SHOW_WHITE_SPACE = false;
 	
 	var TAB = 9;
+	var ENTER = 13;
 	
 	var indentation = {}; // file: \t or space
+	
+	var menuItem;
 	
 	EDITOR.plugin({
 		desc: "Indentate helper in plain text files",
@@ -22,9 +28,12 @@
 			
 			EDITOR.bindKey({desc: "Indentate", fun: indentate, charCode: TAB, combo: 0});
 			EDITOR.bindKey({desc: "de-Indentate", fun: deindentate, charCode: TAB, combo: SHIFT});
+			EDITOR.bindKey({desc: "Add indentation", fun: addindentation, charCode: ENTER, combo: 0});
 			
 			EDITOR.on("fileOpen", detectIndentation);
 			EDITOR.on("fileClose", cleanupIndentation);
+			
+			EDITOR.on("showMenu", showWhiteSpaceMaybe);
 			
 },
 		unload: function unloadTextModeIndentation() {
@@ -35,9 +44,147 @@
 			EDITOR.removeEvent("fileOpen", detectIndentation);
 			EDITOR.removeEvent("fileClose", cleanupIndentation);
 			
-		}
+			EDITOR.removeEvent("showMenu", showWhiteSpaceMaybe);
+			
+			//EDITOR.removeMenuItem(menuItem);
+			
+		},
+		order: 200 // run after keyboard_enter.js
 	});
 
+	function showWhiteSpaceMaybe() {
+		var file = EDITOR.currentFile;
+		
+		console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode));
+		
+		if(!file || file.mode!="text") return;
+		
+		menuItem = EDITOR.addTempMenuItem("Show white space", false, toggleShowWhiteSpace);
+		EDITOR.updateMenuItem(menuItem, SHOW_WHITE_SPACE, "Show white space");
+	}
+	
+	function toggleShowWhiteSpace() {
+		SHOW_WHITE_SPACE = !SHOW_WHITE_SPACE;
+		
+		if(SHOW_WHITE_SPACE) {
+			EDITOR.addRender(renderWhiteSpace, 2050);
+		}
+		else {
+			EDITOR.removeRender(renderWhiteSpace);
+		}
+		
+		EDITOR.hideMenu();
+		
+		EDITOR.renderNeeded();
+	}
+	
+	function renderWhiteSpace(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		if(!SHOW_WHITE_SPACE || !file || file.mode!="text") return;
+		
+		var transparencePercent = 10;
+		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
+		
+		var colStart = 0;
+		var colStop = 0;
+		var left = 0;
+		var top = 0;
+		var bufferRowCol;
+		var char = "";
+		var characters = "";
+		var indentationWidth = 0;
+		
+		for(var row = 0; row < buffer.length; row++) {
+			
+			colStart = Math.max(0, file.startColumn - indentationWidth)
+			colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
+			
+			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
+			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			for(var col = colStart; col < colStop; col++) {
+				bufferRowCol = buffer[row][col];
+				char = bufferRowCol.char;
+				
+				if(char==" ") {
+					characters += "•";
+				}
+				else if(char=="\t") {
+					characters += "→";
+				}
+				else if(char=="\u00A0" || char=="\u2000" || char=="\u2001" || char=="\u2002" || char=="\u2003" || char=="\u2004" || char=="\u2005" || char=="\u2006" || char=="\u2007" || char=="\u2008" || char=="\u2009" || char=="\u200A" || char=="\u200B" || char=="\u202F" || char=="\u205F" || char=="\u3000") {
+					characters += "☺";
+				}
+				else if(characters) {
+					print();
+				}
+else {
+					left += EDITOR.settings.gridWidth;
+				}
+			}
+			
+			if(characters) print();
+			
+		}
+		
+		function print() {
+			ctx.fillText(characters, left, top);
+			left += (characters.length+1) * EDITOR.settings.gridWidth;
+			characters = "";
+		}
+		
+	}
+	
+	
+	
+	
+	function addindentation(file) {
+		if(file.mode!="text" || !file || !EDITOR.input) {
+			console.log("indentate:addindentation Not indentating! file.mode=" + file.mode + " EDITOR.input=" + EDITOR.input + " file?" + (!!file) + " ");
+			return ALLOW_DEFAULT;
+		}
+		
+		var row = file.caret.row;
+		var indentationCurrentRow = getIndentationOn(file, row);
+		var indentationRowAbove = getIndentationOn(file, row-1);
+		var rowAbove = file.grid[row-1];
+		var last = rowAbove && rowAbove.length > 0 ? rowAbove[rowAbove.length-1].char : "";
+		var lastRowEndWithLeftBracket = (last=="{" || last=="[" || last=="(");
+		var shouldHaveIndentation = indentationRowAbove;
+		
+		if(lastRowEndWithLeftBracket) {
+			shouldHaveIndentation = indentationRowAbove + indentation[file];
+		}
+		
+		console.log("indentate:addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
+		
+		if( indentationCurrentRow != shouldHaveIndentation ) {
+			var currentRow = file.grid[row];
+			var caret = file.createCaret(currentRow.startIndex);
+			
+			if(indentationCurrentRow.length > 0) file.deleteTextRange(currentRow.startIndex, currentRow.startIndex + indentationCurrentRow.length - 1);
+			file.insertText(shouldHaveIndentation, caret);
+			file.moveCaretRight(file.caret, shouldHaveIndentation.length);
+			EDITOR.renderNeeded();
+		}
+		
+		return PREVENT_DEFAULT;
+	}
+	
+	function getIndentationOn(file, row) {
+		if(row < 0) return "";
+		
+		var indentation = "";
+		var gridRow = file.grid[row];
+		var char = "";
+		for(var col=0; col<gridRow.length; col++) {
+			char = gridRow[col].char;
+			if( char == " " || char == "\t" ) indentation += char;
+			else break;
+		}
+		return indentation;
+	}
+	
+	
 	function deindentate(file) {
 		return indent(file, true);
 	}
@@ -208,6 +355,23 @@
 	
 	
 	// TEST-CODE-START
+	
+	EDITOR.addTest(1, function addIndentationOnEnter(callback) {
+		EDITOR.openFile("addIndentationOnEnter.txt", '    foo\nbar\n', function(err, file) {
+			
+			file.moveCaretToEndOfLine();
+			
+			EDITOR.mock("keydown", {charCode: ENTER});
+			
+			if(file.text != "    foo\n    \nbar\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			if(file.caret.row != 1) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			if(file.caret.col != 4) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
 	
 	
 	// TEST-CODE-END

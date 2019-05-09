@@ -8,7 +8,7 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function autocompleteHtmlElementAfterDot(callback) {
+	EDITOR.addTest(function autocompleteHtmlElementAfterDot(callback) {
 		EDITOR.openFile("autocompleteHtmlElementAfterDot.htm", '<p>foo NaN.\n', function(err, file) {
 			var atCaret = autoComplete(file, 11);
 			UTIL.assert(file.rowText(0), "<p>foo NaN.</p>");
