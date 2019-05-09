@@ -193,12 +193,12 @@
 		if( countSpaces >= countTabs ) {
 			// How many spaces ?
 			var count4 = UTIL.occurrences(file.text, "\n    ", false);
-			if(count4 > 0 && count4 > countSpaces*.9) indent = "    ";
+			if(count4 > 0 && count4 > countSpaces*.9-1) indent = "    ";
 			else indent = "  ";
 		}
 		
 		indentation[file] = indent;
-		console.log("indentate:detectIndentation indent=" + UTIL.lbChars(indent));
+		console.log("indentate:detectIndentation countSpaces=" + countSpaces + " countTabs=" + countTabs + " count4=" + count4 + " indent=" + UTIL.lbChars(indent));
 		
 	}
 	
