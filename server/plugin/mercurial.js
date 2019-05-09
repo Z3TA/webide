@@ -1605,9 +1605,9 @@ args.push("--follow");
 				catch(err) {
 					return callback(new Error("Unable to parse (" + err.message + ") hg.log stdout=" + stdout));
 				}
-				
-				callback(null, revisions);
-				
+			
+			callback(null, {revisions: revisions, rootDir: rootDir});
+			
 			});
 		});
 }

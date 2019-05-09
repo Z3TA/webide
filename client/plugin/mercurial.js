@@ -1981,9 +1981,11 @@ var error = err.message;
 		butDiffFile.setAttribute("title", "Compare selected file(s) in selected revision with the revison before it.");
 		butDiffFile.onclick = function diffFileClick() {
 			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			// rootDir is not included in filePaths
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
+			
 			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev, files: filePaths}, function hgDiff(err, resp) {
 				
 				if(err) return alertBox(err.message);
@@ -2056,8 +2058,12 @@ var error = err.message;
 		if(filePath) options.file = filePath;
 		
 		// todo: The log can be very long, have it paged (many pages, only show 100? at a time) Most of the time you are only interested in the latest's
-		CLIENT.cmd("mercurial.log", options, function resolveList(err, changes) {
+		CLIENT.cmd("mercurial.log", options, function resolveList(err, resp) {
 			if(err) throw err;
+			
+			var changes = resp.revisions;
+			
+			rootDir = resp.rootDir;
 			
 			//console.log("mercurial.log changes:");
 			//console.log(changes);
@@ -2737,6 +2743,7 @@ if(callback) callback(null, filePath);
 	}
 	
 	function figureOutDirectoryIfUndefined(fileDirectory) {
+		console.log("figureOutDirectoryIfUndefined: fileDirectory=" + fileDirectory + " rootDir=" + rootDir + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 		if(fileDirectory != undefined) return fileDirectory;
 		
 		if(rootDir) fileDirectory = rootDir;

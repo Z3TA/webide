@@ -29,11 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Indentation in text mode:
-* Increment when hitting tab in the beginning of a line
-* Increment all selected lines when hitting tab 
-* de-increment all selected lines when hitting shift+tab 
-* When pasting a code snippet trim upto first level of indentation, then use the indentation level where it's pasted
 
 ---
 
@@ -77,6 +72,14 @@ Function inside self calling function get market as global !?
 when autocomplete from related files
 
 variables inside self calling function also seem to show up when autocompleting from related files ...
+
+---
+
+Doesn't autocomplete function parameters from inlined lambda function:
+
+checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+  root|
+});
 
 ---
 
