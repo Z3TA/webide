@@ -29,12 +29,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Detected a bug in collaboration when sending a edit at the same time,
-the editor asumes the local change was first, resulting in inconsistent file text.
-
-Need to rely on the server's echoCounter to decide what change came first.
-
-Manually test editing at the same time in collab mode!
+Undo in collaboration mode no longer works! Write test!
 
 ---
 

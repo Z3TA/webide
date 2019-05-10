@@ -476,7 +476,7 @@ console.warn("Collaboration disabled in " + file.path);
 		var hole = (arr[0] == null); // Only throw an error if there is an hole in the middle
 		for (var i=0; i<arr.length; i++) {
 			if(arr[i] == null) {
-				if(hole) console.warn("Hole detected: i=" + i + " is " + arr[i] + "\n" + JSON.stringify(arr, null, 2));
+				if(!hole) console.warn("Hole detected: i=" + i + " is " + arr[i] + "\n" + JSON.stringify(arr, null, 2));
 			}
 			else hole = false;
 		}
@@ -681,6 +681,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 						throw new Error("User with cId=" + ev.cId + " sent two change events with the same order! " + JSON.stringify(arr[i]) + " vs " + JSON.stringify(ev));
 					}
 					else {
+						//alertBox("Same time!");
 						// Two different users who are not me, sent an event at the same time
 						// In my point of view, the event we have already recived came first!
 						// We have to transform from the previous event
