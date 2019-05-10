@@ -358,7 +358,7 @@ else {
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function addIndentationOnEnter(callback) {
+	EDITOR.addTest(function addIndentationOnEnter(callback) {
 		EDITOR.openFile("addIndentationOnEnter.txt", '    foo\nbar\n', function(err, file) {
 			
 			file.moveCaretToEndOfLine();

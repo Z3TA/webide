@@ -49,6 +49,7 @@
 	var menu;
 	var bindTest = false;
 	var ignoreFileSave = "";
+	var ignoreUndoRedoEvent = {}; // filePath: [ev.order...]
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -349,7 +350,12 @@ console.warn("Not moving caret because collaboration disabled in " + file.path);
 	}
 	
 	function collabFileOpen(file) {
-		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) {
+fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
+		}
+		if(!ignoreUndoRedoEvent.hasOwnProperty(file.path)) {
+			ignoreUndoRedoEvent[file.path] = [];
+		}
 		
 		if(!collabMode) return true;
 		
@@ -466,7 +472,12 @@ console.warn("Collaboration disabled in " + file.path);
 			
 		}
 		else if(saveUndoRedoHistory) {
-			saveUndoRedoHistoryEvent(fileChangeEvent)
+			saveUndoRedoHistoryEvent(fileChangeEvent);
+		}
+		
+		if(!saveUndoRedoHistory) {
+			// Prevent undo/redo action to be recorded when we get the echo
+			ignoreUndoRedoEvent[file.path].push(fileChangeEvent.order);
 		}
 		
 		return true;
@@ -484,9 +495,9 @@ console.warn("Collaboration disabled in " + file.path);
 	
 	function saveUndoRedoHistoryEvent(ev) {
 		
-		//console.warn("Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
-		
 		var path = ev.filePath;
+		
+		console.warn("saveUndoRedoHistoryEvent: saveUndoRedoHistory=" + saveUndoRedoHistory + " ignoreUndoRedoEvent[path]=" + JSON.stringify(ignoreUndoRedoEvent[path]) + " ev.order=" + ev.order + " Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
 		
 		if(path == undefined) throw new Error("path=" + path + " ev=" + JSON.stringify(ev, null, 2));
 		
@@ -734,8 +745,16 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			
 			if(file == EDITOR.currentFile) EDITOR.renderNeeded();
 			}
+			
 			// Undo-redo
-			saveUndoRedoHistoryEvent(ev);
+			var indexOfIgnoreUndoRedo = ignoreUndoRedoEvent[file.path].indexOf(ev.order);
+			if(indexOfIgnoreUndoRedo == -1 || ev.cId != userConnectionId) {
+				saveUndoRedoHistoryEvent(ev);
+			}
+			
+			if(indexOfIgnoreUndoRedo != -1) {
+				ignoreUndoRedoEvent[file.path].splice(indexOfIgnoreUndoRedo, 1);
+			}
 			
 		}
 		else if(json.select) {
@@ -834,6 +853,11 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 	}
 	
 	function collabRedo(file) {
+		if(!file) return true;
+		if(!EDITOR.input) return true;
+		
+		console.log("collabRedo!");
+		
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
 console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
@@ -897,11 +921,13 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 	}
 	
 	function collabUndo(file) {
+		console.log("collabUndo: file.path=" + (file && file.path) + " EDITOR.input=" + EDITOR.input);
+		
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 			
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
-console.warn(file.path + " has no undo/redo history!");
+			console.warn("collabUndo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
 		}
 		
@@ -910,12 +936,12 @@ console.warn(file.path + " has no undo/redo history!");
 		console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index + " history=" + JSON.stringify(history, null, 2));
 		
 		if(history.length == 0) {
-console.warn("No undo/redo history to undo! history.length=" + history.length + "");
+			console.warn("collabUndo: No undo/redo history to undo! history.length=" + history.length + "");
 			return PREVENT_DEFAULT;
 		}
 		
 		if(history.index < 0) {
-console.warn("undo/redo history index=" + history.index + " has reached the bottom");
+			console.warn("collabUndo: undo/redo history index=" + history.index + " has reached the bottom");
 			return PREVENT_DEFAULT;
 		}
 		
@@ -936,16 +962,16 @@ console.warn("undo/redo history index=" + history.index + " has reached the bott
 			
 			// We have to tranform the change to the correct position
 			// Always transform with change events that came after (both for undo and redo)
-			console.log("Transforming change=" + JSON.stringify(change) + " from history.index=" + history.index);
+			console.log("collabUndo: Transforming change=" + JSON.stringify(change) + " from history.index=" + history.index);
 			//for (var i=history.length-1; i>=history.index; i--) {
 			for (var i=history.index+1; i<history.length; i++) {
-				//console.log("i=" + i + " history.length=" + history.length);
+				//console.log("collabUndo:  i=" + i + " history.length=" + history.length);
 				if(history[i].cId != userConnectionId) {
 transformBackwards(change, history[i]);
-					console.log("Ended up with index=" + change.index + " and row=" + change.row);
+					console.log("collabUndo: Ended up with index=" + change.index + " and row=" + change.row);
 				}
 			}
-			console.log("Transformed change=" + JSON.stringify(change));
+			console.log("collabUndo: Transformed change=" + JSON.stringify(change));
 		}
 		
 		if(change == undefined) throw new Error("change=" + change + " history.index=" + history.index + " history:" + JSON.stringify(history, null, 2));
@@ -958,7 +984,7 @@ transformBackwards(change, history[i]);
 			history.index--;
 		}
 		// If no change was found: history.index=-1
-		console.log("Undo: Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
+		console.log("collabUndo: Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
 		
 		/*
 			Question: Should we ignore the file change event !?
@@ -1220,31 +1246,116 @@ file.fixCaret();
 	
 	
 	function testUndoRedoWhileInCollabMode(callback) {
+		var ENTER = 13;
 		
-		// Undo/redo in colaboration mode
-		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert f
-		if(file.text != "abc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		collabMode = true;
 		
-		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
-		if(file.text != "ab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		var testUserConnectionId = userConnectionId + 1;
+		var testUserAlias = "Test";
+		var testEventOrder = 1;
+		var fakeEchoCounter = 1;
+		var testFile;
+		var fileChangeOrder = 0;
 		
-		fileChangeOrder = 10;
+		function f(o) {
+			
+			if(o.index == undefined) throw new Error("Must specify index!");
+			if(o.change == undefined) throw new Error("Must specify change!");
+			
+			var caret = testFile.createCaret(o.index);
+			
+			var json = {
+				cId: testUserConnectionId,
+				alias: testUserAlias,
+				eventOrder: ++testEventOrder,
+				echoCounter: ++fakeEchoCounter,
+				fileChange: {
+					filePath: testFile.path,
+					type: o.change,
+					text: o.text || "",
+					index: o.index || caret.index,
+					row: o.row || caret.row,
+					col: o.col || caret.col,
+					order: o.order || ++fileChangeOrder,
+				}
+			}
+			
+			collabHandleEcho(json);
+		}
+		
+		EDITOR.openFile("testUndoRedoWhileInCollabMode.txt", "\n", function colaborationTestFileOpened(err, file) {
+			if(err) throw err;
+			
+			testFile = file;
+			
+			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			
+			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
+			
+			eventOrder = 1;
+			
+			timeSerial([
+				function() {
+					
+					EDITOR.mock("typing", "abc");
+					if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+					
+				}, function() { // Wait until we get our own echo
+					
+					// Close any alert boxes that would prevent insert
+					if(EDITOR.openDialogs.length > 0) EDITOR.closeAllDialogs("TESTS");
+					EDITOR.input = true; // Allow input
+					
+					if(!collabMode) throw new Error("collabMode=" + collabMode);
+
+					// Undo/redo in colaboration mode
+					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
+					if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+				}, function() {
+					
+					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert b
+					if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+
+				}, function() {
+					
+					fileChangeOrder = 2; // Will cause next change to get order=3
 		
 		f({change: "insert", index: 0, text: "å"});
-		if(file.text != "åab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		if(file.text != "åa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 		
-		EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert c
-		if(file.text != "åabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+				}, function() {
+					
+		EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert b
+		if(file.text != "åab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 		
-		fileChangeOrder = 12;
-		
+				}, function() {
+					
 		f({change: "insert", index: 1, text: "ä"});
-		if(file.text != "åäabc\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+		if(file.text != "åäab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 		
-		EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
-		if(file.text != "åäab\ndez\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+				}, function() {
+					
+					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert b
+		if(file.text != "åäa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
+					collabMode = false;
+					
+					// Clean for next run
+					for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj];
+					for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
+					
+					if(callback) {
+						EDITOR.closeFile(file);
+						callback(true);
+					}
+					
+			}]);
+			
+		});
 	}
-	
+	EDITOR.addTest(1, false, testUndoRedoWhileInCollabMode);
 	
 	function testUndoRedo(callback) {
 		var Z = 90;
@@ -1389,7 +1500,6 @@ file.fixCaret();
 		
 		if(typeof callback != "function") return false;
 	}
-	
 	EDITOR.addTest(testUndoRedo);
 	
 	function testEditAtTheSameTime(callback) {
@@ -1477,9 +1587,9 @@ file.fixCaret();
 					// Close any alert boxes that would prevent insert
 					if(EDITOR.openDialogs.length > 0) EDITOR.closeAllDialogs("TESTS");
 					
-			EDITOR.mock("typing", "abc");
-			if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-			
+					EDITOR.mock("typing", "abc");
+					if(file.text != "abc\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
 				}, function() {
 					
 					// This test fill fail if we are in collaboration mode already when running the test!
@@ -1489,7 +1599,7 @@ file.fixCaret();
 					EDITOR.mock("typing", "m");
 					
 				}, function() {
-
+					
 					fileChangeOrder = 3;
 					// We should now have recived our own echo
 					var lastChange = fileChangeEvents[file.path][fileChangeOrder][0];
@@ -1510,7 +1620,7 @@ file.fixCaret();
 					
 					
 				}, function() {
-
+					
 					// We have now recieved our own echo. The result should still be the same
 					if(file.text != "abcmgyx\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 					
@@ -1535,14 +1645,30 @@ file.fixCaret();
 	EDITOR.addTest(false, testEditAtTheSameTime);
 	
 	function timeSerial(func) {
+		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");
+		 
+		var timers = [];
 		// Wait between each step
 		var timeMult = 100;
+		
+		var timer;
 		for(var i=0; i<func.length; i++) {
-			setTimeout(func[i], i*timeMult);
+			timer = setTimeout(function(f) {
+				try {
+					f();
+				}
+				catch(err) {
+					for(var j=0; j<timers.length; j++) clearTimeout(timers[j]); // Stop future events
+					throw err;
+				}
+				
+			}, i*timeMult, func[i]);
+			timers.push(timer);
 		}
 	}
 	
 	// TEST-CODE-END
+	
 	
 	
 })();

@@ -29,7 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Undo in collaboration mode no longer works! Write test!
+
+Only show white-space character in front and after, not inside text
 
 ---
 
@@ -83,6 +84,8 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Writing if(foo[| will cause the js_parser to breath fire
 
 ---
 When showing function argument info, also show from where that info was taken (for debugging)
