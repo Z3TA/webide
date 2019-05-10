@@ -83,7 +83,7 @@
 		if(!SHOW_WHITE_SPACE || !file) return;
 		if(file.mode!="text") return;
 		
-		var transparencePercent = 10;
+		var transparencePercent = 20;
 		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
 		
 		var colStart = 0;
@@ -94,6 +94,10 @@
 		var char = "";
 		var characters = "";
 		var indentationWidth = 0;
+		var gotCharacter = false; // Only show white space characters on the edges
+		var caretRow = file.caret.row - startRow;
+		var caretCol = file.caret.col;
+		
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -102,6 +106,8 @@
 			
 			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			gotCharacter = false;
 			
 			for(var col = colStart; col < colStop; col++) {
 				bufferRowCol = buffer[row][col];
@@ -117,21 +123,32 @@
 					characters += "☺";
 				}
 				else if(characters) {
-					print();
+					if(!gotCharacter) {
+print();
+						left += (characters.length+1) * EDITOR.settings.gridWidth;
+						characters = "";
+					}
+					else {
+						left += (characters.length+1) * EDITOR.settings.gridWidth;
+						characters = "";
+					}
 				}
 else {
 					left += EDITOR.settings.gridWidth;
+					gotCharacter = true;
 				}
 			}
 			
-			if(characters) print();
+			//console.log("renderWhiteSpace: row=" + row + " caretRow=" + caretRow + " col=" + col + " caretCol=" + caretCol);
 			
+			// don't show white space next to the caret while typing
+			if(characters && !(caretRow == row && caretCol == col && characters.length == 1)) print();
+			characters = "";
 		}
 		
 		function print() {
+			//console.log("renderWhiteSpace: print " + characters.length);
 			ctx.fillText(characters, left, top);
-			left += (characters.length+1) * EDITOR.settings.gridWidth;
-			characters = "";
 		}
 		
 	}
