@@ -1355,7 +1355,7 @@ file.fixCaret();
 			
 		});
 	}
-	EDITOR.addTest(1, false, testUndoRedoWhileInCollabMode);
+	EDITOR.addTest(false, testUndoRedoWhileInCollabMode);
 	
 	function testUndoRedo(callback) {
 		var Z = 90;

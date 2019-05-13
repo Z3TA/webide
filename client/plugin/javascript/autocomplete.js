@@ -847,10 +847,23 @@
 						console.log("searchVariables: Variable " + properties[propertyIndex-1] + " already have " +  Object.keys(variable.keys).length + " keys!");
 					}
 					
-					if(variable.hasOwnProperty("keys")) {
+						// Traverse the chain again ... foo.bar.bas.xx
+						for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
+							if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
+								variable = variable.keys[properties[propertyIndex]];
+								console.log("searchVariables: Setting new variable:" + properties[propertyIndex]);
+							}
+							else {
+								break;
+							}
+						}
+						keyName = properties[properties.length-1]; // This is the word we are gonna auto-complete
+						if(keyName == undefined) throw new Error("keyName=" + keyName + " properties=" + JSON.stringify(properties) + " propertyIndex=" + propertyIndex);
+						
+						if(variable.hasOwnProperty("keys") && keyName) {
 						// Search for keys
 						for(var key in variable.keys) {
-							console.log("searchVariables: " + key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
+							console.log("searchVariables: Check if key " + key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
 							if(key.substr(0, keyName.length) == keyName) {
 								if(!optionExist(options, key)) {
 									pushVariable(keyName, variable.keys[key], key);
@@ -874,9 +887,10 @@
 					else {
 						
 						// Look for prototype functions with the keyName
-						console.log("searchVariables: keyName=" + keyName);
+							console.log("searchVariables: keyName=" + keyName + " properties=" + JSON.stringify(properties) + "");
 						
 						for (var i=0; i<builtInFunctions.length; i++) {
+								console.log("searchVariables: look for " + variable.type + ".prototype." + keyName);
 							if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
 								var key = builtInFunctions[i].name.slice(builtInFunctions[i].name.lastIndexOf(".")+1);
 								pushVariable(keyName, {method: true}, key);
@@ -1003,7 +1017,7 @@
 		}
 		
 		function searchFunctionThis(functionName, keyName, js) {
-			console.log("searchFunctionThis functionName=" + functionName + " keyName=" + keyName + "");
+			console.warn("searchFunctionThis: functionName=" + functionName + " keyName=" + keyName + "");
 			
 			/*
 				
@@ -1035,7 +1049,7 @@
 			function analyze(objectCreatorFunction) {
 				// Look for variables named "this" or variables with type "this"
 				
-				console.log("Analyzing " + objectCreatorFunction.name);
+				console.log("searchFunctionThis: Analyzing " + objectCreatorFunction.name);
 				
 				if(objectCreatorFunction.variables.hasOwnProperty("this")) {
 					// Search that one
@@ -1059,6 +1073,9 @@
 	}
 	
 	function patchVariableKeysFromFunctionReturnObjectLiteral(variable, charIndex, js) {
+		console.warn("patchVariableKeysFromFunctionReturnObjectLiteral: variable=" + JSON.stringify(variable, null, 2));
+		
+		
 		var value = variable.value;
 		if(value=="" || value==undefined) {
 			console.log("patchVariableKeysFromFunctionReturnObjectLiteral: There's no value!");
@@ -1076,10 +1093,20 @@
 		
 		console.log("patchVariableKeysFromFunctionReturnObjectLiteral: " + func.name + " return statements: " + JSON.stringify(func.returns, null, 2));
 		
+		var type;
 		for (var i=0; i<returns.length; i++) {
 			if(returns[i].hasOwnProperty("keys")) {
-				variable.keys = returns[i].keys;
-				console.log("patchVariableKeysFromFunctionReturnObjectLiteral: Patched variable with keys: " + JSON.stringify(returns[i], null, 2));
+				for(var key in returns[i].keys) {
+					type = returns[i].keys[key].type;
+					console.log("patchVariableKeysFromFunctionReturnObjectLiteral: Found key=" + key + " type=" + type);
+					variable.keys[key] = returns[i].keys[key];
+					if(type == "unknown") {
+						variable.keys[key].type = figureOutVariableType( returns[i].keys[key].value, func.end, js, variable.keys[key]);
+					}
+				}
+				
+				//variable.keys = returns[i].keys;
+				console.log("patchVariableKeysFromFunctionReturnObjectLiteral: Patched variable with keys: " + JSON.stringify(variable.keys, null, 2));
 				return;
 			}
 		}
@@ -1118,9 +1145,9 @@
 		EDITOR.addInfo(caret.row, caret.col, message, file, level);
 	}
 	
-	function figureOutVariableType(value, charIndex, js) {
+	function figureOutVariableType(value, charIndex, js, addKeysToVariable) {
 		// Figure out the variable type from the variable value (which can be the name of another variable, a function-call, or expression)
-		console.log("figureOutVariableType: value=" + value);
+		console.warn("figureOutVariableType: value=" + value);
 		
 		if(value=="" || value==undefined) {
 			console.log("figureOutVariableType: Unable to figure out type from value=" + value);
@@ -1140,10 +1167,21 @@
 			// Maybe bar as in foo.bar is a prototype method !?
 			
 			var props = value.split(".");
-			if(props.length == 1) return "unknown";
+			if(props.length == 1) {
+				var variable = scope.variables[value];
+				console.log("figureOutVariableType: " + value + " is a variable type=" + variable.type);
+				if(addKeysToVariable) addKeysToVariable.keys = variable.keys;
+				return variable.type;
+			}
 			
 			var variable = scope.variables[props[0]];
-			if(!variable) return "unknown";
+			if(!variable) {
+				console.log("figureOutVariableType: " + props[0] + " is not a variable!");
+				return "unknown";
+			}
+			else {
+				console.log("figureOutVariableType: " + props[0] + " is a variable! type=" +variable.type);
+			}
 			
 			// Traverse the chain
 			for (var i=1; i<props.length-1; i++) {
@@ -1151,7 +1189,7 @@
 			}
 			
 			if(!variable) {
-				console.warn("Unable to find all keys in " + value + " in variable=" + props[0]);
+				console.warn("figureOutVariableType: Unable to find all keys in " + value + " in variable=" + props[0]);
 				return "unknown";
 			}
 			
@@ -1169,7 +1207,7 @@
 				// todo: Also check userland prototype methods!
 			}
 			
-			return "unknown";
+			return "unknown"
 		}
 		
 		// What does the function return ?
@@ -1554,7 +1592,7 @@ else {
 		
 		var foundFunctions = functionsScope(functions, charIndex);
 		
-		console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
+		//console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
 		
 		if(foundFunctions.length > 0) {
 			// Insade a function scope
@@ -1581,7 +1619,7 @@ else {
 			foundFunctionsObj[func.name] = func;
 		}
 		
-		console.log("foundFunctionsObj=" + JSON.stringify(foundFunctionsObj, null, 2));
+		//console.log("foundFunctionsObj=" + JSON.stringify(foundFunctionsObj, null, 2));
 		
 		return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
 		

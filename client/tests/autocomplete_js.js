@@ -8,6 +8,29 @@
 		
 	*/
 	
+	
+	EDITOR.addTest(1, function findReturnedObjectMembers(callback) {
+		EDITOR.openFile("findReturnedObjectMembers.js", 'function f() {\nvar arr = [];\nvar obj = {};\nobj.color="red";\narr.push("banana");\nreturn {bananas: arr, apple: obj};\n}\nvar obj = f();\nobj.a', function(err, file) {
+			var atCaret = autoComplete(file, 137);
+			UTIL.assert(file.rowText(8), "obj.apple.");
+			
+			file.write("c");
+			file.moveCaretToEndOfLine();
+			var atCaret = autoComplete(file, 141);
+			UTIL.assert(file.rowText(8), "obj.apple.color");
+			
+			// Make sure it can find the right method once patched
+			file.write(".le");
+			file.moveCaretToEndOfLine();
+			var atCaret = autoComplete(file, 148);
+			UTIL.assert(file.rowText(8), "obj.apple.color.length");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+	
+	
 	EDITOR.addTest(function autocompleteHtmlElementAfterDot(callback) {
 		EDITOR.openFile("autocompleteHtmlElementAfterDot.htm", '<p>foo NaN.\n', function(err, file) {
 			var atCaret = autoComplete(file, 11);

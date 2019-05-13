@@ -29,10 +29,14 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-"type annotations are just decoration, as they can be inferred."
+problem to find the right key when autocompleting again after variable has been patched
 
-Make the parser parse return statements, so returns can be used in autocomplete.js instead of regex parsing
-in order to trace back a variable via (many) function calls to figure out it's type.
+find return type of function that returns an object literal
+return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
+
+---
+
+"type annotations are just decoration, as they can be inferred."
 
 When writing inside a function above an if statement, the parser can't find some of the variables. Example:
 if(properties|
@@ -47,9 +51,6 @@ Making the parser more stable so we can release!
 
 ---
 Get value from an array item
----
-Unable to find return type of function that returns an object literal
-return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
 ---
 
 Function inside self calling function get market as global !?
