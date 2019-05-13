@@ -1111,6 +1111,7 @@
 	}
 	
 	function showWarningAt(index, message) {
+		console.warn("showWarningAt: index=" + index + " message=" + message);
 		var file = EDITOR.currentFile;
 		var caret = file.createCaret(index);
 		var level = WARNING;
@@ -1172,14 +1173,9 @@
 		}
 		
 		// What does the function return ?
-		var reRet = /return(.*)/g;
-		var fBody = file.text.slice(func.start, func.end);
-		var arr;
-		var count = 0;
-		while ((arr = reRet.exec(fBody)) !== null) {
-			console.log("findFunctionReturnStatement: arr=" + JSON.stringify(arr));
-			analyzeReturnStatement(arr[1]);
-			if(++count > 10) break;
+		console.log("figureOutVariableType: func.returns.length=" + func.returns.length);
+		for(var i=0; i<func.returns.length; i++) {
+			analyzeReturnStatement(func.returns[i]);
 		}
 		
 		console.log("figureOutVariableType: types.length=" + types.length);
@@ -1190,12 +1186,21 @@
 		else {
 			// Make sure all types are the same, with the exception of null !?
 			console.log("figureOutVariableType: types=" + JSON.stringify(types));
-			if(types.length > 0) showWarningAt(charIndex, value + " can be " + types.join(", "));
+			if(types.length > 1) {
+showWarningAt(charIndex, value + " can be " + types.join(", "));
+			}
 			return types[0];
 		}
 		
 		function analyzeReturnStatement(ret) {
 			console.log("analyzeReturnStatement: ret=" + ret);
+			
+			if(typeof ret != "string") {
+				// Assume instanceof Variable
+				types.push( ret.type );
+				return;
+			}
+			
 			ret = ret.trim();
 			
 			// Remove comment
@@ -1214,7 +1219,7 @@
 			
 			ret = ret.trim();
 			
-			if(ret=="") types.push("undefined"); // void
+			if(ret=="void") types.push("undefined");
 			else if(ret.match(/['"`]/)) types.push("String");
 			else if(ret.indexOf("+")!=-1 || ret.indexOf("-")!=-1 || ret.indexOf("*")!=-1 || ret.indexOf("/")!=-1 || ret.indexOf("%")!=-1) types.push("Number");
 			else if(ret == "true" || ret == "false") types.push("Boolean");
