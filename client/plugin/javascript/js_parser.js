@@ -967,6 +967,8 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 		theFunction,
 		newFunc,
 		insideReturn = [],
+		returnStart = 0,
+		insideReturnStatement = false,
 		returnStatement = null,
 		properties,
 		variable,
@@ -1160,6 +1162,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 			parenthesisStart[codeBlockDepth] = -1;
 			leftParentheses[codeBlockDepth] = 0;
 			rightParentheses[codeBlockDepth] = 0;
+			insideReturn[codeBlockDepth] = false;
 			
 			if(codeBlockDepth==0) error( new Error("codeBlockDepth can not be zero") );
 			
@@ -1356,9 +1359,10 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 			
 			var variable;
 			var func = myFunction[subFunctionDepth];
+			
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1369,7 +1373,7 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var pointerName = properties[0];
@@ -1389,8 +1393,8 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 							func.variables["this"] = new Variable("this");
 							variable = func.variables["this"];
 						}
-						else if(pointerName=="return") {
-							//console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
+						else if(insideReturnStatement) {
+							console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
 							if(returnStatement == null) {
 								returnStatement = new Variable();
 								myFunction[subFunctionDepth].returns.push(returnStatement);
@@ -2823,6 +2827,22 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 				lastWord = "function";
 				return;
 			}
+			else if(char==" " && insideFunctionBody[subFunctionDepth] && word=="return") {
+				console.log("Start of return statement? lineNumber=" + lineNumber + " column=" + column);
+				insideReturn[codeBlockDepth] = true;
+				returnStart = i+1;
+				insideReturnStatement = true;
+				returnStatement = null;
+				word = "";
+				return;
+			}
+			else if( insideReturn[codeBlockDepth] && (char=="\r" || char=="\n") && !(lnw=="+" || lnw=="-" || lnw=="*" || lnw=="/" || lnw=="%" || lnw=="|" || lnw=="&" || lnw=="{" || lnw=="[") ) {
+				console.log("End of return statement? lineNumber=" + lineNumber + " column=" + column);
+				myFunction[subFunctionDepth].returns.push(text.slice(returnStart, i));
+				insideReturn[codeBlockDepth] = false;
+				insideReturnStatement = true;
+				returnStatement = null;
+			}
 			else if(char==" " && word=="new") {
 				word = "";
 				return;
@@ -2877,11 +2897,12 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 						
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						
 						
 						if(word=="return") {
-							insideReturn[subFunctionDepth] = true;
-							returnStatement = null;
+							console.log("return undefined?");
+							myFunction[subFunctionDepth].returns.push("void");
 						}
 						
 						if(afterPointer[codeBlockDepth]) {
