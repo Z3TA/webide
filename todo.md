@@ -48,7 +48,10 @@ Add more built in JS global properties and methods!
 
 Making the parser more stable so we can release!
 
-
+---
+Unable to autocomplete parameter from lamda function:
+confirmBox("Do you want to apply " + fileName + "  configuration?", [yes, overload, no], function(answer) {
+if(ans
 ---
 Get value from an array item
 ---
@@ -83,6 +86,9 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+write docs for jzedit_config.js plugin!
+
 
 text mode indentation show space in chars-in-margin
 
