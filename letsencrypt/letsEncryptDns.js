@@ -21,7 +21,10 @@
 	
 	
 	How to test on the cloudIDE server (replace path to jzedit):
-	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	certbot certonly --staging --dry-run --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	
+	Remove --staging --dry-run for running in production.
+	And don't forget to delete /etc/letsencrypt/live/domain.tld/ or certbot will create domain.tld-0001/
 	
 	Delete a cert:
 	certbot delete
