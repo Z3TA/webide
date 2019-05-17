@@ -144,6 +144,7 @@ function workQueue() {
 	if(IN_PROGRESS) {
 		log("Work in progress, waiting ... queue=" + QUEUE.length + "");
 		setTimeout(workQueue, 1000);
+		return;
 	}
 	
 	// Sort so that "before" will be precessed first, then so that the oldest will be processed first
