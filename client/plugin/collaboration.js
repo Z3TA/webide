@@ -757,7 +757,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			}
 			
 		}
-		else if(json.select) {
+		else if(json.select && json.cId != userConnectionId) {
 			// ### Selected text
 			
 			var selectEvent = json.select;
@@ -774,7 +774,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			file.highLightTextRange(selectEvent.start, selectEvent.end);
 			EDITOR.renderNeeded();
 		}
-		else if(json.moveCaret) {
+		else if(json.moveCaret && json.cId != userConnectionId) {
 			// ### Someone moved their caret
 			if( !carets.hasOwnProperty(json.moveCaret.filePath) ) carets[json.moveCaret.filePath] = {};
 			
@@ -782,7 +782,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			
 			EDITOR.renderNeeded();
 		}
-		else if(json.fileSaved) {
+		else if(json.fileSaved && json.cId != userConnectionId) {
 			// ### File saved
 			var file = EDITOR.files[json.fileSaved.path];
 			if(file) {
