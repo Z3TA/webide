@@ -53,6 +53,9 @@ Making the parser more stable so we can release!
 Get value from an array item
 ---
 
+Add global event handlers to HTML Elements for autoc-ompletion
+https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick
+
 Function inside self calling function get market as global !?
 when autocomplete from related files
 
@@ -80,6 +83,9 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+text mode indentation show space in chars-in-margin
+
 
 Writing if(foo[| will cause the js_parser to breath fire
 
@@ -1169,6 +1175,11 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+When previewing a static web site, and reloading the css, then changing the body, the page is refreshed without *any* css!
+When previewing a static web site, and .css file is a seperate file, the css is not updated upon save!
+
+Hangs when uploading big zip file.
 
 When I scroll on a web page, then switch to the editor and scroll, it scrolls too much.
 
