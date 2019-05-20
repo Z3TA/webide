@@ -36,6 +36,10 @@ return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs}
 
 ---
 
+Weird results when autocompleting in the middle of a word ...
+
+---
+
 "type annotations are just decoration, as they can be inferred."
 
 When writing inside a function above an if statement, the parser can't find some of the variables. Example:
