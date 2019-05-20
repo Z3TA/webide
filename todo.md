@@ -91,6 +91,8 @@ Writing a guide on how to make a survey
 todo
 ----
 
+Try installing: https://expressjs.com/en/starter/generator.html
+
 write docs for jzedit_config.js plugin!
 
 
