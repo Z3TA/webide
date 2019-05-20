@@ -1169,9 +1169,11 @@
 			var props = value.split(".");
 			if(props.length == 1) {
 				var variable = scope.variables[value];
+				if(variable) {
 				console.log("figureOutVariableType: " + value + " is a variable type=" + variable.type);
 				if(addKeysToVariable) addKeysToVariable.keys = variable.keys;
 				return variable.type;
+			}
 			}
 			
 			var variable = scope.variables[props[0]];
