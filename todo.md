@@ -29,6 +29,15 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+After making a new release, but due to the service worker, the client is not updated ...
+Error: It should not be possible to get echo's from myself! json.cId=1 userConnectionId=1
+
+possible to force load new version !?
+
+why is not the user asked to update !??!?!?!?!?!?!?!?!??!?!?!?!?
+
+---
+
 problem to find the right key when autocompleting again after variable has been patched
 
 find return type of function that returns an object literal

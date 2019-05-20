@@ -350,7 +350,7 @@ function unixTimeStamp(date) {
 function fillGuestPool(id, callback) {
 	/*
 		Increase the guest pool ...
-		If id is specified, and guest#id exist, thet guest user will be added to the guest pool
+		If id is specified, and guest#id exist, that guest user will be added to the guest pool
 		Otherwise if id is undefined or the guest#id user does not exist, a *new* user is created and added to the guest pool
 	*/ 
 	
@@ -364,7 +364,8 @@ function fillGuestPool(id, callback) {
 		createGuestUser(undefined, guestUserCreatedMaybe);
 	}
 	else if(typeof id == "number") {
-		readEtcPasswd("guest" + id, function(err, passwd) {
+		var username = "guest" + id;
+		readEtcPasswd(username, function(err, passwd) {
 			if(err) {
 				if(err.code == "USER_NOT_FOUND") {
 					createGuestUser(id, guestUserCreatedMaybe);
@@ -372,8 +373,20 @@ function fillGuestPool(id, callback) {
 				else throw err;
 			}
 			else {
+				// Check if home dir exist before adding the user to the guest pool
+				var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
+				module_fs.stat(homeDir, function dir(err, homeDirStat) {
+					if(err && err.code == "ENOENT") {
+						var error = new Error("homeDir=" + homeDir + " does not exist!");
+						if(callback) return callback(error);
+						else log(error.message, NOTICE);
+					}
+else if(err) throw err;
+					else {
 				console.warn("Existing user " + passwd.username + " will be added to the guest pool!..");
 				guestUserCreatedMaybe(null, passwd);
+					}
+				});
 			}
 		});
 	}
