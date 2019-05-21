@@ -493,6 +493,9 @@ function recycleGuestAccounts(callback) {
 			}
 			else if(err) throw err;
 			else {
+				// Sometimes the home dir doesn't exist! wtf!?
+				console.log("id=" + id + " homeDir=" + homeDir + " homeDirStat=" + JSON.stringify(homeDirStat));
+				
 				var lastLoginFile = UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]);
 				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
@@ -515,7 +518,7 @@ function recycleGuestAccounts(callback) {
 							var skeletonDirLastModified = unixTimeStamp(skeletonDirStat.mtime);
 							var daysSinceSkeleton = Math.floor( ( currentTime - skeletonDirLastModified ) / (60 * 60 * 24) );
 							
-							console.log("homeDirLastModified=" + homeDirLastModified + " skeletonDirLastModified=" + skeletonDirLastModified + " currentTime=" + currentTime + " LAST_RELEASE_TIME=" + LAST_RELEASE_TIME);
+							console.log("id=" + id + " homeDirLastModified=" + homeDirLastModified + " skeletonDirLastModified=" + skeletonDirLastModified + " currentTime=" + currentTime + " LAST_RELEASE_TIME=" + LAST_RELEASE_TIME);
 							
 							if(homeDirLastModified - skeletonDirLastModified > 0 && daysSinceLastChanged < 5) {
 								// Home dir is fresh
@@ -523,7 +526,7 @@ function recycleGuestAccounts(callback) {
 								processedGuestId(id, "Are going to be added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
 							}
 							else {
-								console.log("Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "");
+								console.log("id=" + id + ": Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "");
 								resetGuest(id);
 							}
 						});
@@ -533,6 +536,7 @@ function recycleGuestAccounts(callback) {
 					}
 					else if(err) throw err;
 					else {
+						console.log("id=" + id + " lastLoginFile=" + lastLoginFile + " data=" + data);
 						var lastLogin = parseInt(data);
 						var timeDiff = currentTime - lastLogin; // In seconds
 						var daysSinceLastLogin = Math.floor(timeDiff / (60 * 60 * 24));
