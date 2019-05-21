@@ -388,8 +388,9 @@ if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 function fuseUmount(path, ignoreErrors) {
 	// The fuse file system is used for mounting Google Drive ...
 	var child_process = require("child_process");
+	var command = "fusermount -u " + path + "";
 	try {
-		child_process.execSync("fusermount -u " + path + ""); // .toString(ENCODING)
+		child_process.execSync(command); // .toString(ENCODING)
 	}
 	catch(err) {
 		if(!ignoreErrors) {
@@ -397,6 +398,7 @@ function fuseUmount(path, ignoreErrors) {
 			if( err.message.indexOf("fusermount: failed to unmount " + path + ": not mounted") == -1
 			&& err.message.indexOf("fusermount: failed to unmount " + path + ": mountpoint not found") == -1
 			&& err.message.indexOf("fusermount: bad mount point " + path + ": No such file or directory") == -1
+			&& err.message.indexOf("fusermount: failed to unmount " + path + ": Invalid argument") == -1 // folder exist, but is not a mountpoint!?
 			&& err.message.indexOf("fusermount: failed to unmount " + path + ": No such file or directory") == -1 ) {
 				
 				if(err.message.indexOf("failed to unmount " + path + ": Device or resource busy") != -1) {
@@ -423,6 +425,7 @@ function fuseUmount(path, ignoreErrors) {
 				else {
 					throw err;
 					// stderr message are already shown in the shell, no need to repeat them
+					// command is also show in the shell
 				}
 			}
 			

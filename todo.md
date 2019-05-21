@@ -29,6 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
+Testing to make new release to webide to see if we get chaos again ...
+
 Server are trying to delete/recycle unexisting users ... no idea why ...
 
 ---
