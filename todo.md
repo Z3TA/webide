@@ -30,22 +30,7 @@ What I'm working on
 -------------------
 
 
-Testing to make new release to webide to see if we get chaos again ...
-
-Server are trying to delete/recycle unexisting users ... no idea why ...
-
 ---
-
-After making a new release, but due to the service worker, the client is not updated ...
-Error: It should not be possible to get echo's from myself! json.cId=1 userConnectionId=1
-
-possible to force load new version !?
-
-why is not the user asked to update !??!?!?!?!?!?!?!?!??!?!?!?!?
-Bacause I scp:ed server.js so the version did not get patched by the release script!
-
----
-
 problem to find the right key when autocompleting again after variable has been patched
 
 find return type of function that returns an object literal
