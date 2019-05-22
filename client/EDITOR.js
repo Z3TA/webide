@@ -6093,8 +6093,16 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 	
 	// Disable annoying menus
 	window.addEventListener("contextmenu", function(contextMenuEvent) {
+		
 		contextMenuEvent = contextMenuEvent || window.event;
+		
+		var target = contextMenuEvent.target;
+		var tag = target.tagName;
+		
+		if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
+		
 		contextMenuEvent.preventDefault();
+		console.log("contextmenu prevented! tag=" + tag);
 		return false;
 	}, false);
 	
@@ -8348,6 +8356,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		EDITOR.interact("mouseDown", mouseDownEvent);
 		
 		if(preventDefault) {
+			console.log("mouseDown:Preventing default!");
 			mouseDownEvent.preventDefault(); // To prevent the annoying menus
 			mouseDownEvent.stopPropagation();
 			return false;
@@ -8447,6 +8456,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		EDITOR.interact("mouseUp", mouseUpEvent);
 		
 		if(preventDefault) {
+			console.log("mouseUp: Preventing default!");
 			if(typeof mouseUpEvent.preventDefault == "function") mouseUpEvent.preventDefault();
 			if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
 			return false;
