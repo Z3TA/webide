@@ -29,7 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
+loading spinner for file explorer ...
+hide it when first item loads
 
 
 Priority: coding on a mobile phone

@@ -67,6 +67,39 @@ body {
 */
 
 
+.spinner {
+	display: inline-block;
+	position: relative;
+	margin: auto;
+	width: 64px;
+	height: 64px;
+}
+.spinner:after {
+	content: " ";
+	display: block;
+	border-radius: 50%;
+	width: 0;
+	height: 0;
+	margin: 6px;
+	box-sizing: border-box;
+	border: 26px solid #fff;
+	border-color: #5188f3 transparent #32155c transparent;
+	animation: spinner 1.2s infinite;
+}
+@keyframes spinner {
+	0% {
+		transform: rotate(0);
+		animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+	}
+	50% {
+		transform: rotate(900deg);
+		animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	}
+	100% {
+		transform: rotate(1800deg);
+	}
+}
+
 
 /* ############### DASHBOARD ############# */
 
@@ -1166,6 +1199,11 @@ ul.resolveList li {
 	margin-bottom: 2px;
 	outline: 0;
 	color: #6e6e6e;
+}
+
+.fileExplorer.loaderSpinner {
+	text-align: center;
+	background-color: red;
 }
 
 .fileExplorer.header {

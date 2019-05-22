@@ -29,6 +29,7 @@
 	var lastPathExplored = "";
 	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
 	var hideButton;
+	var loadingSpinner;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -78,13 +79,21 @@
 			});
 		*/
 		
+
+		loadingSpinner = document.createElement("div");
+		loadingSpinner.setAttribute("class", "spinner fileExplorer loaderSpinner");
+		
 		fileExplorerHeader.appendChild(fsSelect);
 		fileExplorerWrap.appendChild(fileExplorerHeader);
 		
+		fileExplorerWrap.appendChild(loadingSpinner);
+
 		fileExplorerWrap.appendChild(fileExplorerFolders);
 		rightColumn.appendChild(fileExplorerWrap);
 		
 		//exploreDir(EDITOR.workingDirectory);
+		
+
 		
 		toggleFileExplorer(visible);
 		
@@ -167,6 +176,8 @@ EDITOR.changeWorkingDir(directory);
 			console.log("pathToExplore=" + pathToExplore + " lastPathExplored=" + lastPathExplored + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 			
 			exploreDir(pathToExplore);
+			
+			loadingSpinner.style.display="block";
 			
 			fileExplorerWrap.style.display="block";
 			
@@ -277,6 +288,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 				if(index < folders.length) lookUpPath(folders, index, parent);
 				else scrollDownToDir(fullPath);
 				
+				if(index>2) loadingSpinner.style.display="none"; // Hide the spinner when some objects have loaded
+				
 			});
 		}
 		
@@ -287,6 +300,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			//while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
 			
 			//console.log("targetPath=" + targetPath);
+			
+			loadingSpinner.style.display="none";
 			
 			var totalHeight = 0;
 			var measuredElements = 0;
@@ -407,6 +422,7 @@ else throw err;
 			
 			EDITOR.resizeNeeded();
 			//EDITOR.resize();
+			
 			
 			if(callback) callback(dirFound);
 		});

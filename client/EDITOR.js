@@ -6153,6 +6153,7 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		bootstrap();
 		
 		canvas = document.getElementById("canvas");
+		canvas.style.display="block";
 		
 		canvas.onpaste = function() {alert("paste canvas");};
 		
