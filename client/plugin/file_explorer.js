@@ -153,7 +153,11 @@ EDITOR.changeWorkingDir(directory);
 		EDITOR.updateMenuItem(menuItem, visible, "File explorer");
 		
 		if(visible) {
-			if(lastPathExplored.indexOf(EDITOR.workingDirectory) == 0) {
+			
+			if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
+				var pathToExplore = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			}
+			else if(lastPathExplored.indexOf(EDITOR.workingDirectory) == 0) {
 				var pathToExplore = lastPathExplored;
 			}
 			else {
