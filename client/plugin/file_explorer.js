@@ -16,6 +16,7 @@
 	
 	var fileExplorerFolders;
 	var fileExplorerWrap;
+	var fileExplorerHeader;
 	var leftColumn, rightColumn;	
 	var visible = false;
 	var menuItem;
@@ -61,6 +62,9 @@
 		fileExplorerWrap.setAttribute("class", "wrap fileExplorer");
 		fileExplorerWrap.setAttribute("id", "fileExplorer");
 		
+		fileExplorerHeader = document.createElement("div");
+		fileExplorerHeader.setAttribute("class", "fileExplorer header");
+		
 		fileExplorerFolders = document.createElement("div");
 		fileExplorerFolders.setAttribute("id", "fileExplorerFolders");
 		
@@ -74,7 +78,9 @@
 			});
 		*/
 		
-		fileExplorerWrap.appendChild(fsSelect);
+		fileExplorerHeader.appendChild(fsSelect);
+		fileExplorerWrap.appendChild(fileExplorerHeader);
+		
 		fileExplorerWrap.appendChild(fileExplorerFolders);
 		rightColumn.appendChild(fileExplorerWrap);
 		
@@ -170,12 +176,14 @@ EDITOR.changeWorkingDir(directory);
 EDITOR.fullScreenWidget(fileExplorerWrap);
 				if(!hideButton) {
 					hideButton = document.createElement("button");
+					hideButton.setAttribute("class", "fileExplorer hide");
+
 					hideButton.onclick = function hideFileExplorer() {
 						toggleFileExplorer(false);
 					};
 					hideButton.innerText = "Hide file explorer";
 
-					fileExplorerWrap.insertBefore(hideButton, fileExplorerWrap.firstChild);
+					fileExplorerHeader.insertBefore(hideButton, fileExplorerHeader.firstChild);
 				}
 			}
 			else console.log("fileExplorerWidth=" + fileExplorerWidth + " windowWidth=" + windowWidth + " window.innerWidth=" + window.innerWidth + " pixelRatio=" + pixelRatio);

@@ -30,6 +30,17 @@ What I'm working on
 -------------------
 
 
+
+
+Priority: coding on a mobile phone
+
+---
+
+With the parse only function optimizer,
+variable assignemnts without var infront adds to global function,
+when the variable actually belong to the scope of the parent function!
+So when doing parse-only-function optimization, we have to check each global variable to see if it's declared in parent functions, before adding it to global scope!
+
 ---
 problem to find the right key when autocompleting again after variable has been patched
 
