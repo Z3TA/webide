@@ -1114,7 +1114,7 @@ ul.resolveList li {
 	box-sizing: border-box;
 	border-left: 2px solid #e8e8e8;
 	/* Can not have padding, or the canvas will fall down */
-	}
+}
 .fileExplorer ul {
 	background-color: #fff; /* #e8e8e8 */
 	color: black;
