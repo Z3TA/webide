@@ -112,6 +112,8 @@
 	var customAltKeys = [];
 	var MY_NAME = "virtual_keyboard2";
 	var oldCanvasHeight = 0; // Optimization: Don't resize and re-render if the size is the same as before
+	var disabledByUser = false;
+	var nativeKeyboardCatcher;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -261,6 +263,8 @@ return false;
 		else if(!ACTIVE && oldState) {
 			oldCanvasHeight = canvasHeight;
 			wrapper.style.display="none";
+			
+			disabledByUser = true;
 		}
 		
 		if(oldState != ACTIVE) {
@@ -1307,7 +1311,12 @@ fun: function space(click) {
 	function keyboardPushbuttonUp(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
 		if(mouseUpEvent.type == "touchend") {
+			
+			//if(EDITOR.touchScreen && disabledByUser) return bringNativeKeyboard();
+			return bringNativeKeyboard();
+			
 			toggleVirtualKeyboard2(true);
+			
 			if(EDITOR.currentFile) {
 				// Wait for the resize, then scroll to the caret (where you clicked)
 				setTimeout(function() {
@@ -1318,16 +1327,23 @@ fun: function space(click) {
 		
 		return true;
 		
-		if(mouseY > 50) return true;
-		
-		var file = EDITOR.currentFile;
-		if(!file)  return true;
-		
-		// Is it faster to click on the file canvas ? It's no difference.
-		EDITOR.mock("keypress", {charCode: 65});
-		
-		return false;
 	}
+	
+	function bringNativeKeyboard() {
+
+		if(!nativeKeyboardCatcher) {
+			nativeKeyboardCatcher = document.createElement("input");
+			var body = document.getElementById("body");
+			body.appendChild(nativeKeyboardCatcher);
+		}
+		
+		// Trigger native keyboard
+		nativeKeyboardCatcher.focus();
+		nativeKeyboardCatcher.click();
+		
+		return true;
+	}
+	
 	
 	
 	// TEST-CODE-START
