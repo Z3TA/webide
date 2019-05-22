@@ -18,6 +18,7 @@
 	var rightColumn;
 	var menu;
 	var alwaysShowFunctionList = true;
+	var forcedSingleRow = false;
 	
 	EDITOR.plugin({
 		desc: "Show list of JS functions in left column",
@@ -79,8 +80,43 @@
 		
 	}
 	
+	function mobileFubarDetected() {
+		/*
+			Some mobile browser does not allow multi row select box.
+			Meaning there will be unneccesary empty space
+			So place the function list where it doesn't take up space
+			
+		*/
+		
+		var leftColumn = document.getElementById("leftColumn");
+		
+		//if(!leftColumn) return;
+		
+		if(functionListWrap && functionListWrap.parentNode == leftColumn) {
+leftColumn.removeChild(functionListWrap);
+		}
+		else {
+			console.log("mobileFubarDetected: functionListWrap not in leftColumn!");
+		}
+		
+		if(functionListSelect && functionListSelect.parentNode == functionListWrap) {
+			functionListWrap.removeChild(functionListSelect);
+		}
+		else {
+			console.log("mobileFubarDetected: functionListSelect not in functionListWrap!");
+		}
+		
+		var header = document.getElementById("header");
+		header.appendChild(functionListSelect);
+		functionListSelect.setAttribute("class", "functionList floatingInHeader");
+		functionListSelect.setAttribute("size", "1");
+		
+		functionListSelect.removeAttribute("multiple");
+		
+	}
+	
 	function unload() {
-		leftColumn.removeChild(functionListWrap);
+		if(functionListWrap && functionListWrap.parentNode == leftColumn) leftColumn.removeChild(functionListWrap);
 		
 		// todo: Also remove events
 	}
@@ -429,7 +465,7 @@ console.warn("Now showing function list because alwaysShowFunctionList=" + alway
 		
 		functionListWrap = document.getElementById("functionListWrap");
 		
-		if(!functionListWrap) {
+		if(!functionListWrap && !forcedSingleRow) {
 console.warn("functionListWrap not available!");
 		return;
 		}
@@ -516,6 +552,14 @@ console.warn("functionListWrap not available!");
 		
 		
 		EDITOR.resizeNeeded();
+		
+		var height = functionListSelect.offsetHeight;
+		console.log("functionListSelect.offsetHeight=" + functionListSelect.offsetHeight);
+		
+		if(domModel.length > 1 && height <= 16) {
+			forcedSingleRow = true;
+			mobileFubarDetected();
+		}
 		
 		console.timeEnd("buildFunctionList");
 		

@@ -786,8 +786,37 @@ select.functionList {
 	overflow-x: hidden!important;
 }
 
+select.functionList.floatingInHeader {
+	with: auto;
+	max-width: 50%;
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	
+	z-index: 0; /* So that it does not cover something else */
+	position: absolute;
+	right: 40px;
+	top: 0px;
+	height: 32px;
+	width: 32px;
+	margin: 4px;
+	
+	background-color: #dcdcdc;
+	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='32px'><text x='3' y='20' fill='black' font-size='18'>ƒ</text></svg>");
+}
 
-
+select.functionList.floatingInHeader::before {
+	display: block;
+	content: "foo foo foo";
+	background-color: yellow;
+	color: red;
+	font-weight: bold;
+	
+	z-index: 0; /* So that it does not cover something else */
+	position: absolute;
+	right: 100px;
+	top: 0px;
+}
 
 
 
