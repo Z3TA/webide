@@ -3569,7 +3569,15 @@ file.mode = "text";
 		
 		var indentationWidth = file.grid[caret.row].indentation * EDITOR.settings.tabSpace;
 		var columnEnd = EDITOR.view.endingColumn - indentationWidth;
-		var columnStart = file.startColumn; // Intentional: Omitting indentation here
+		var columnStart = file.startColumn - indentationWidth; // Intentional: Omitting indentation here. WHY!??? Why did we use to omit indentation ? Why was it intentional !?
+		
+		console.log("indentationWidth=" + indentationWidth + " startColumn=" + startColumn + " columnStart=" + columnStart + " caret.col=" + caret.col + " columnEnd=" + columnEnd + "");
+		
+		/*
+			
+			Note: caret.col does not take indentation into account. But startColumn does!
+			
+		*/
 		
 		if(caret.col > columnEnd) {
 			// Caret is after the visible space
@@ -3585,7 +3593,8 @@ file.mode = "text";
 			startColumn -= delta;
 		}
 		
-		//console.log("delta=" + delta);
+		console.log("startColumn=" + startColumn + " columnStart=" + columnStart + " columnEnd=" + columnEnd + " delta=" + delta);
+		
 		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		

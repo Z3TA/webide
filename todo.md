@@ -29,8 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-loading spinner for file explorer ...
-hide it when first item loads
+auto scroll when there are a lot of indentation:
+extreme example 20 tabs. cant see the code on mobile.
+
+
 
 
 Priority: coding on a mobile phone
@@ -143,6 +145,13 @@ Test encoding_converter.js string decoder when opening a unsaved file ...
 Test CSS editing in WysiwygEditor and see if it can find the correct class when clicking in the preview!
 
 Try what happens if you have unresolved... in the SSG widget ...
+
+Testing on Mac(book pro)
+
+Update the cloud editor install script!
+
+Check if hg exist before starting mercurial plugin.
+Chick if mysql exist before starting sqldb plugin.
 
 Annoying when you scrill in Firefox then go to the editor Chrome and scroll and it will jump much longer then anticipated
 
@@ -580,10 +589,17 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 What I'm thinking
 -----------------
 
+How do you test the cloud editor inside the cloud editor !?
+
+---
+
 Thinking about docker support ... Able to run docker apps ?
 Some teams use docker so that all developers will have the same environment
 If you however run the editor as a cloud editor, all users will already have the same environment
-If you use docker and other tools, it's probably best to run the editor in  VPS or locally.
+If you use docker and other tools, it's probably best to run the editor in a VPS or locally.
+
+Most common use-case for docker is to spin up a bunch of containers, for example database server
+I don't think you actually develop inside a docker conainer!?
 
 ---
 
@@ -3534,61 +3550,20 @@ All users on the server will see the chat!? Or only admins !?
 Or only those invited to the session !?
 ---
 
-colaboration mode:
-
-When two users are logged in with the same username/pw:
-The client that last moved the caret can edit the document !? All others can only read.
-("The document is locked, move or place the caret to unlock it. For collaborate editing you must have different accounts and invite the other party.")
-
-Problem: The same user goes to work on another computer. When he goes back to his old computer, he wants to get the new updates!
-Solution: When a user comes back online. Check if the last saved state (text) is the same as the text on the disk. If not; tell the user!
-
-When a user has invited another user:
-Both users can edit the document at the same time! (using list/sequence CRDT): https://gotocon.com/dl/goto-berlin-2016/slides/MartinKleppmann_ConflictResolutionForEventualConsistency.pdf
-
-(Right click and select; "share with collaborators" to let invited parties to edit the document at the same time)
-
-When a document is shared, the text is shared and the document reopened in colaboration mode ?
-All documents is always in colaboration mode, even though there is no colaborators !?
-
-When a document that has colaborators is saved, both the original "text" and the grid is saved: eg: file.htm + file.htm.jz (containing the grid in JSON)
-When opening a document, the editor will check for the same document but with .jz and load that as the grid.
-
-A history of all edits need to be saved !!! ? But can be deleted when all colaborators have recived them.
-
-
-What if user goes offline ? (the train goues though a tunnel): When the user comes back online, his changes are synced. 
-What if the user close his computer while offline ? 
-
-The server needs to keep track on who has recived what messages.
-The server needs to keep a log of all edits. Example: Johan: insert "a" with id 4Johan at after id 4Pelle
-
-When the user comes back online, his edits get sent to the server and he get sent the edits made by collaborators.
-The server keeps track on what he has missed.
-
-todo: We need a better undo/rodo!
-
-What if a user deletes an entire row and another user edits that row !? 
-
-
-Have a different data structure for colaboration editing !?
-
-
-
-Several users should be able to edit the document at the same time!!
-
-keycombo buttons to the virtual keyboard!??
-
-tombstones
-
----
-
 Dashboard:
 Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
 ssg: List documents, and how many visitors that thave viewed them
 Fast buttons for edit a document, create a new document/post in SSG.
 button: create new web site
 
+dashboard - show different projects, time spent, total users, traffic, revenue
+
+examples to choose from. 
+
+Start new project
+
+Publish app button
+Able to buy domain name or use existing one.
 
 CSS "function" list
 
