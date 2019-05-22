@@ -93,7 +93,7 @@ Mac OS X
 1. Download and install nodejs from https://nodejs.org/
 (It should come with a packet manager called npm.)
 
-2. Open a terminal: Function-key + Space, and type `terminal`
+2. Open a terminal: cmd + Space, and type `terminal`
 
 3. Navigate to the folder this file is located in via the terminal: `cd path/to/jzedit`
 
