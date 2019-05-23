@@ -29,7 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
+native keyboard hides and then shows which makes the screen jump.
+make it not hide if it's already open!
 
 Priority: coding on a mobile phone
 
