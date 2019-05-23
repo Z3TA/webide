@@ -1963,6 +1963,7 @@ text = file;
 			
 			var friendlyString = [
 				"Right click or long-touch to show the menu!",
+				"(or click the menu button in top-right corner)",
 				"Upload files and folders by draging them here"
 			];
 			
@@ -7527,6 +7528,9 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		var funReturn = true;
 		
 		console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		
+		// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
+		if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
 		
 		// Firefox and Safari go here before calling copy/paste/cut events
 		// Without this copy/paste will not work in Safari! Why !? 
