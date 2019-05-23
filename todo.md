@@ -29,8 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Allow typing using the native keyboard on mobile devices
-keyboard catcher need to be handled by EDITOR.js to get the keyup/keydown events!!??
 
 
 Priority: coding on a mobile phone

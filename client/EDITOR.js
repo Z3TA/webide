@@ -261,6 +261,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var dashboardVisible = false;
 	
+	var keyboardCatcherLastInserted = "";
+	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
 	var nativeCopy = false;
@@ -6068,7 +6070,6 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
 	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
 	
-	
 	/*
 		Add your own key listeners with EDITOR.on("eventName", callbackFunction);
 		Your function should return false to prevent default action.
@@ -6298,6 +6299,15 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 			
 		}, false);
 		
+		// Allow native keyboard on mobiles
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		if(keyboardCatcher) {
+			// Some android devices can't listen for keypressed, so we have to use keydown or keyup'
+			keyboardCatcher.addEventListener("keyup",keyboardCatcherKey,false);  // captures
+			moveCursorToEnd(keyboardCatcher);
+		}
+		
+		
 		var body = document.getElementById('body');
 		
 		// Attatch CLIENT listeners before plugins and start events load
@@ -6445,6 +6455,17 @@ name: login.user,
 		
 		windowLoaded = true;
 		
+	}
+	
+	function moveCursorToEnd(el) {
+		if (typeof el.selectionStart == "number") {
+			el.selectionStart = el.selectionEnd = el.value.length;
+		} else if (typeof el.createTextRange != "undefined") {
+			el.focus();
+			var range = el.createTextRange();
+			range.collapse(false);
+			range.select();
+		}
 	}
 	
 	EDITOR.animationFrame = 0;
@@ -7764,6 +7785,80 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		}
 	
 	}
+	
+	function keyboardCatcherKey(keyEvent) {
+		keyEvent = keyEvent || window.event;
+		
+		var charCode = keyEvent.charCode; // Deprected, non-standard.  Unicode value of the character key that was pressed
+		var keyCode = keyEvent.keyCode; //  Deprecated. A system and implementation dependent numerical code identifying the unmodified value of the pressed key
+		var key = keyEvent.key; // value of the key pressed by the user, taking into consideration the state of modifier keys such as Shift as well as the keyboard locale and layout. 
+		var code = keyEvent.code; // physical positions on the input device
+		var which = keyEvent.which; //  Deprecated. numeric keyCode of the key pressed, or the character code
+		
+		var shiftKey = keyEvent.shiftKey; // if the shift key was pressed 
+		
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		var inputValue = keyboardCatcher.value;
+		
+		console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
+		
+		/*
+			Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
+			So we have to check what was entered into the input box
+		*/
+		
+		if(inputValue.length > 1) {
+			inputValue = inputValue.slice(1); // Remove the "padding"
+			
+			if(inputValue.length == 1) {
+				// Mock a keypress
+				var keyPress = {
+charCode: inputValue.charCodeAt(0),
+keyCode: keyCode,
+which: which,
+shiftKey: keyEvent.shiftKey,
+					ctrlKey: keyEvent.ctrlKey,
+					metaKey: keyEvent.metaKey,
+					altKey: keyEvent.altKey
+}
+keyPressed(keyPress);
+			}
+			else {
+				
+				// When pressing space, some keyboards inserts the last words+space
+				/*
+					if(inputValue == (keyboardCatcherLastInserted + " ")) {
+					inputValue = " ";
+					}
+					else {
+					console.log("inputValue=*" + inputValue + "* keyboardCatcherLastInserted=*" + keyboardCatcherLastInserted + "*");
+					}
+				*/
+				
+				// Insert the text
+				var file = EDITOR.currentFile;
+				if(file) {
+					file.insertText(inputValue);
+				}
+			}
+			
+			keyboardCatcher.value = "x";
+			// Add padding so that the keyboard not insist on big letters
+			
+			// This will prevent the last word being appended again when pressing space
+			keyboardCatcher.blur();
+			keyboardCatcher.focus();
+			moveCursorToEnd(keyboardCatcher);
+			
+			//setTimeout(function() {keyboardCatcher.value = "";}, 1500);
+			
+			keyboardCatcherLastInserted = inputValue;
+			
+		}
+		
+		return true;
+	}
+	
 	
 	function keyIsDown(keyDownEvent) {
 		/*

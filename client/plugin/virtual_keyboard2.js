@@ -259,6 +259,7 @@ return false;
 		
 		if(ACTIVE && !oldState) {
 			wrapper.style.display="block";
+			disabledByUser = false;
 		}
 		else if(!ACTIVE && oldState) {
 			oldCanvasHeight = canvasHeight;
@@ -1312,8 +1313,8 @@ fun: function space(click) {
 		
 		if(mouseUpEvent.type == "touchend") {
 			
-			//if(EDITOR.touchScreen && disabledByUser) return bringNativeKeyboard();
-			return bringNativeKeyboard();
+			if(EDITOR.touchScreen && disabledByUser) return bringNativeKeyboard();
+			//return bringNativeKeyboard();
 			
 			toggleVirtualKeyboard2(true);
 			
@@ -1330,16 +1331,15 @@ fun: function space(click) {
 	}
 	
 	function bringNativeKeyboard() {
-
-		if(!nativeKeyboardCatcher) {
-			nativeKeyboardCatcher = document.createElement("input");
-			var body = document.getElementById("body");
-			body.appendChild(nativeKeyboardCatcher);
-		}
+		
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
 		
 		// Trigger native keyboard
-		nativeKeyboardCatcher.focus();
-		nativeKeyboardCatcher.click();
+		keyboardCatcher.focus();
+		keyboardCatcher.click();
+		
+		// Input should go to current file
+		EDITOR.input = true;
 		
 		return true;
 	}

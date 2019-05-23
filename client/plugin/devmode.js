@@ -198,7 +198,7 @@ console.time = console.timeEnd = function() {};
 			// Get the parameters
 			var str = "";
 			for (var i=0; i<arguments.length; i++) {
-				if(arguments[i].toString) str += arguments[i].toString() + "\n";
+				if(arguments[i] && typeof arguments[i].toString == "function") str += arguments[i].toString() + "\n";
 				else str += arguments[i] + "\n";
 			}
 			

@@ -1477,6 +1477,11 @@ div.group {
 		height: 21px;
 		border-radius: 0px 0px 0px 10px;
 }
+	
+	select.functionList.floatingInHeader {
+		height: 21px;
+	}
+	
 }
 
 @media (max-width: 1315px) {
