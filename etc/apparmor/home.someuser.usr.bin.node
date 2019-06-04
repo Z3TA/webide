@@ -107,6 +107,7 @@
     %HOME%%USERNAME%/bin/** ix,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/** ix,
     %HOME%%USERNAME%/usr/share/npm/bin/** ix,
+    %HOME%%USERNAME%/usr/lib/gcc/** ix,
     
   }
 

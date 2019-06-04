@@ -695,6 +695,9 @@ API.stop_nodejs = function stop_nodejs(user, json, callback) {
 
 API.install_nodejs_module = function install_nodejs_module(user, json, callback) {
 	
+	if(json.name == undefined) return callback(new Error("Need name of module!"));
+	if(json.filePath == undefined) return callback(new Error("Need filePath for where it should be installed!"));
+	
 	var moduleName = json.name;
 	var filePath = user.translatePath(json.filePath);
 	if(filePath instanceof Error) return callback(filePath);

@@ -159,7 +159,15 @@ umount("/home/" + username + "/usr/bin/ssh");
 umount("/home/" + username + "/usr/bin/ssh-keygen");
 umount("/home/" + username + "/usr/bin/unrar");
 umount("/home/" + username + "/usr/bin/unzip");
-
+	umount("/home/" + username + "/usr/bin/make");
+	umount("/home/" + username + "/usr/bin/printf");
+	umount("/home/" + username + "/usr/bin/g++");
+	umount("/home/" + username + "/usr/bin/as");
+	umount("/home/" + username + "/usr/bin/cc");
+	umount("/home/" + username + "/usr/bin/touch");
+	umount("/home/" + username + "/usr/bin/ld");
+	
+	umount("/home/" + username + "/usr/include");
 	umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
 	umount("/home/" + username + "/usr/share");
@@ -186,7 +194,10 @@ umount("/home/" + username + "/bin/rm");
 umount("/home/" + username + "/bin/rmdir");
 umount("/home/" + username + "/bin/sh");
 umount("/home/" + username + "/bin/tar");
-
+	umount("/home/" + username + "/bin/sed");
+	umount("/home/" + username + "/bin/grep");
+	umount("/home/" + username + "/bin/cp");
+	
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 

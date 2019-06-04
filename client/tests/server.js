@@ -1,6 +1,30 @@
 (function() {
 	"use strict";
 	
+	EDITOR.addTest(1, function installNodejsModule(callback) {
+
+		var testFolder = "/testInstallNodejsModule/";
+		var moduleName = "iconv";
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			CLIENT.cmd("install_nodejs_module", {name: moduleName, filePath: testFolder}, function(err, resp) {
+				if(err) throw err;
+				
+				if(resp.name != moduleName) throw new Error("Unexpected module name=" + resp.name);
+				
+				// Cleaup
+				CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
+					if(err) throw err
+					
+					EDITOR.closeFile("/testInstallNodejsModule/.stdout");
+					
+					callback(true);
+				});
+			});
+		});
+	});
+	
+	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
 		var testFolder = "/testReadFromDiskUniqueName/";
@@ -16,9 +40,9 @@
 			if(err) throw err;
 			
 			var json = {path: path, returnBuffer: false, encoding: "utf8"};
-		
-		CLIENT.cmd("readFromDisk", json, function(err, json) {
-			if(err) throw err
+			
+			CLIENT.cmd("readFromDisk", json, function(err, json) {
+				if(err) throw err
 			else {
 					if(json.path.indexOf(testFile) == -1) throw new Error("path=" + path);
 					if(json.data != testText) throw new Error("json.data=" + json.data + " is not testText=" + testText);

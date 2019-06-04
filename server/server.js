@@ -2475,6 +2475,16 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
 				foldersToMount++;module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/make", homeDir + "usr/bin/make", folderMounted); // Needed by some npm modules to install
+				foldersToMount++;module_mount("/usr/bin/printf", homeDir + "usr/bin/printf", folderMounted); // Needed by some make scripts
+				foldersToMount++;module_mount("/usr/bin/g++", homeDir + "usr/bin/g++", folderMounted); // Needed by some make scripts
+				foldersToMount++;module_mount("/usr/bin/as", homeDir + "usr/bin/as", folderMounted); // Needed by g++
+				foldersToMount++;module_mount("/usr/bin/cc", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
+				foldersToMount++;module_mount("/usr/bin/touch", homeDir + "usr/bin/touch", folderMounted); // Needed by make scripts
+				foldersToMount++;module_mount("/usr/bin/ld", homeDir + "usr/bin/ld", folderMounted); // Needed by make scripts
+				
+				
+				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
 				
 				foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
 				
@@ -2487,8 +2497,11 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
 				foldersToMount++;module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
 				foldersToMount++;module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
-				
 				foldersToMount++;module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
+				foldersToMount++;module_mount("/bin/sed", homeDir + "bin/sed", folderMounted); // Needed by make scripts
+				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
+				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
+				
 			}
 			
 			// ALSO UPDATE removeuser.js !!!

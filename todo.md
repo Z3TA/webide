@@ -29,10 +29,15 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+The default test repo should have some cool examples!
+
+
 native keyboard hides and then shows which makes the screen jump.
 make it not hide if it's already open!
 
 Priority: coding on a mobile phone
+
+Regression: Function parameter hinting no longer works!
 
 ---
 
@@ -103,6 +108,9 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+When connecting to SSH server, file explorer should go into the sftp folder!
+
 
 Try installing: https://expressjs.com/en/starter/generator.html
 
