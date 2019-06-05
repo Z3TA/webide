@@ -145,11 +145,11 @@ gapi.auth2.getAuthInstance().signOut();
 EDITOR.changeWorkingDir(directory);
 		
 		}
-		toggleFileExplorer(true);
+		toggleFileExplorer(true, directory);
 		return true; 
 	}
 	
-	function toggleFileExplorer(toState) {
+	function toggleFileExplorer(toState, dirToExplore) {
 		
 		EDITOR.hideMenu();
 		
@@ -163,7 +163,10 @@ EDITOR.changeWorkingDir(directory);
 		
 		if(visible) {
 			
-			if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
+			if(typeof dirToExplore == "string") {
+				var pathToExplore = dirToExplore;
+			}
+			else if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
 				var pathToExplore = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 			}
 			else if(lastPathExplored.indexOf(EDITOR.workingDirectory) == 0) {

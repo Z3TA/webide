@@ -29,11 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
-When opening a SSH connection, or cloning a repo, the file explorer opens the wrong dir!
-
-
 Check if this works on webdide: https://github.com/nickyvanurk/3d-multiplayer-browser-shooter.git
+problems with js_parser!
+
 
 The default test repo should have some cool examples!
 
