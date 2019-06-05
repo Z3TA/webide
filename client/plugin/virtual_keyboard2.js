@@ -103,16 +103,18 @@
 	var verticalLayout = [];
 	var horizontalLayout = [];
 	var totalRows = 3;
-	var ACTIVE = false;
 	var menuItem;
 	// Each key can have 3 alternative functions, depending if alt1, alt2 or both alt1 and alt2 is active
 	var ALT1 = false;
 	var ALT2 = false;
 	var clickTimer;
 	var customAltKeys = [];
-	var MY_NAME = "virtual_keyboard2";
+	var builtinName = "Builtin";
+	var nativeName = "Native";
 	var oldCanvasHeight = 0; // Optimization: Don't resize and re-render if the size is the same as before
-	var disabledByUser = false;
+	var useNative = false; // is native keyboard activated
+	var useBuiltin = false; // is built-in keyboard activated
+	var lastUsedKeyboard = "builtin"; // builtin or native
 	var nativeKeyboardCatcher;
 	
 	canvas.onmousedown = canvasMouseDown;
@@ -120,23 +122,26 @@
 	canvas.ontouchstart = canvasMouseDown;
 	canvas.ontouchend = canvasMouseUp;
 	
+	var labelShowBuiltin = "Virtual Keyboard";
+	var labelShowNative = "Native keyboard";
+	
 	
 	EDITOR.plugin({
 		desc: "Testing canvas based virtual keyboard",
 		load: function loadVirtualKeyboard() {
 			
 			// Wait for touch events before showing the virtual keyboard
-			EDITOR.addEvent( "mouseClick", {dir: "down", fun: keyboardPushbuttonDown, targetClass:"fileCanvas", order: 1000} );
-			EDITOR.addEvent( "mouseClick", {dir: "up", fun: keyboardPushbuttonUp, targetClass:"fileCanvas", order: 1000} );
+			EDITOR.addEvent( "mouseClick", {dir: "down", fun: vrkeyboardMouseDown, targetClass:"fileCanvas", order: 1000} );
+			EDITOR.addEvent( "mouseClick", {dir: "up", fun: vrkeyboardMouseUp, targetClass:"fileCanvas", order: 1000} );
 			
 			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
-			EDITOR.on("hideVirtualKeyboard", hideVirtualKeyboard2);
-			EDITOR.on("showVirtualKeyboard", showVirtualKeyboard2);
+			EDITOR.on("hideVirtualKeyboard", hideMyVirtualKeyboards);
+			EDITOR.on("showVirtualKeyboard", showMyVirtualKeyboards);
 			
 			addButtons();
 			
-			menuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard2, 26);
+			menuItem = EDITOR.addMenuItem(labelShowBuiltin, toggleBetweenKeyboards, 26);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
@@ -149,17 +154,18 @@
 		},
 		unload: function unloadVirtualKeyboard() {
 			
-			EDITOR.removeEvent("mouseClick", keyboardPushbuttonDown);
-			EDITOR.removeEvent("mouseClick", keyboardPushbuttonUp);
+			EDITOR.removeEvent("mouseClick", vrkeyboardMouseDown);
+			EDITOR.removeEvent("mouseClick", vrkeyboardMouseUp);
 			
 			EDITOR.removeEvent("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.removeEvent("afterResize", resizeVirtualKeyboard);
-			EDITOR.removeEvent("hideVirtualKeyboard", hideVirtualKeyboard2);
-			EDITOR.removeEvent("showVirtualKeyboard", showVirtualKeyboard2);
+			EDITOR.removeEvent("hideVirtualKeyboard", hideMyVirtualKeyboards);
+			EDITOR.removeEvent("showVirtualKeyboard", showMyVirtualKeyboards);
 			
 			EDITOR.removeEvent("registerAltKey", updateAltKey);
 			
-			toggleVirtualKeyboard2(false);
+			hideBuiltinKeyboard();
+			hideNativeKeyboard();
 			
 			EDITOR.removeMenuItem(menuItem);
 			
@@ -169,30 +175,116 @@
 		}
 	});
 	
-	function hideVirtualKeyboard2(keyboards) {
-		if( keyboards.length==0 || keyboards.indexOf(MY_NAME) != -1 ) {
-			if(ACTIVE) {
-				toggleVirtualKeyboard2(false);
-				return [MY_NAME];
-			}
+	function toggleBetweenKeyboards() {
+		console.log("toggleBetweenKeyboards: useNative=" + useNative + " useBuiltin=" + useBuiltin);
+		
+		EDITOR.hideMenu();
+		
+		if(useNative) {
+			// Don't show any
+			hideNativeKeyboard();
+			EDITOR.updateMenuItem(menuItem, false, labelShowBuiltin);
+		}
+		else if(useBuiltin) {
+			// Show native
+			hideBuiltinKeyboard();
+			showNativeKeyboard();
+		}
+		else if(!useNative && !useBuiltin) {
+			// Show built-in
+			showBuiltinKeyboard();
 		}
 		else {
-			console.log("keyboards=" + JSON.stringify(keyboards) + " ACTIVE=" + ACTIVE);
+			throw new Error("This should never happen! useNative=" + useNative + " useBuiltin=" + useBuiltin);
 		}
-		return [];
 	}
 	
-	function showVirtualKeyboard2(keyboards) {
-		if( keyboards.length==0 || keyboards.indexOf(MY_NAME) != -1 ) {
-			if(!ACTIVE) {
-				toggleVirtualKeyboard2(true);
-				return [MY_NAME];
-			}
+	function toggleToNative() {
+		if(useBuiltin) hideBuiltinKeyboard();
+		
+		showNativeKeyboard();
+	}
+	
+	function showBuiltinKeyboard() {
+		if(useBuiltin) {
+			console.log("Builtin already active!");
+			return;
 		}
-		else {
-			console.log("keyboards=" + JSON.stringify(keyboards));
+		
+		var wrapper = document.getElementById("virtualKeyboard2");
+		wrapper.style.display="block";
+		
+		EDITOR.resizeNeeded();
+		
+		EDITOR.updateMenuItem(menuItem, true, labelShowNative);
+		
+		useBuiltin = true;
+		
+		if(EDITOR.currentFile) {
+			// Wait for the resize, then scroll to the caret
+			setTimeout(function() {
+				EDITOR.currentFile.scrollToCaret();
+			}, 500);
 		}
-		return [];
+	}
+	
+	function hideBuiltinKeyboard() {
+		var wrapper = document.getElementById("virtualKeyboard2");
+		oldCanvasHeight = canvasHeight;
+		wrapper.style.display="none";
+		EDITOR.resizeNeeded();
+		useBuiltin = false;
+	}
+	
+	function showNativeKeyboard() {
+		if(!useNative) EDITOR.updateMenuItem(menuItem, true, labelShowNative);
+		
+		// Always trigger native, even if already in use
+		
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		
+		// Trigger native keyboard
+		keyboardCatcher.focus();
+		keyboardCatcher.click();
+		
+		// Input should go to current file
+		EDITOR.input = true;
+		
+		useNative = true;
+	}
+	
+	function hideNativeKeyboard() {
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		keyboardCatcher.blur();
+		
+		useNative = false;
+	}
+	
+	function hideMyVirtualKeyboards(keyboards) {
+		var wasActive = [];
+		
+		if(useBuiltin) {
+			wasActive.push(builtinName);
+			hideBuiltinKeyboard();
+			lastUsedKeyboard = "builtin";
+		}
+		
+		if(useNative) {
+			wasActive.push(nativeName);
+			hideNativeKeyboard();
+			lastUsedKeyboard = "native";
+		}
+		
+		return wasActive;
+	}
+	
+	function showMyVirtualKeyboards(keyboards) {
+		if(!Array.isArray(keyboards)) throw new Error("keyboards need to be an array of keyboard names (" + nativeName + ", " + builtinName + ")");
+		
+		if(keyboards.indexOf(nativeName)) showNativeKeyboard();
+		if(keyboards.indexOf(builtinName)) showBuiltinKeyboard();
+		
+		return keyboards;
 	}
 	
 	function removeAltKey(fun) {
@@ -243,51 +335,13 @@ return false;
 		return false;
 	}
 	
-	function toggleVirtualKeyboard2(state) {
-		EDITOR.hideMenu();
-		
-		var oldState = ACTIVE;
-		
-		if(typeof state == "boolean") {
-			ACTIVE = state;
-		}
-		else ACTIVE = !ACTIVE;
-		
-		console.log("toggleVirtualKeyboard2: oldState=" + oldState + " newState=" + ACTIVE);
-		
-		var wrapper = document.getElementById("virtualKeyboard2");
-		
-		if(ACTIVE && !oldState) {
-			wrapper.style.display="block";
-			disabledByUser = false;
-		}
-		else if(!ACTIVE && oldState) {
-			oldCanvasHeight = canvasHeight;
-			wrapper.style.display="none";
-			
-			disabledByUser = true;
-		}
-		
-		if(oldState != ACTIVE) {
-			EDITOR.resizeNeeded();
-			EDITOR.updateMenuItem(menuItem, ACTIVE);
-		}
-		
-		console.log("Virtual keyboard visible ? " + ACTIVE);
-		
-		return ACTIVE;
-	}
-	
-	
-	
-	
 	function virtualKeyboardClaimHeight(file, windowWidth, windowHeight) {
 		
 		/*
 			Claim the height needed
 		*/
 		
-		if(!ACTIVE) return;
+		if(!useBuiltin) return;
 		
 		buttons = verticalLayout;
 		
@@ -343,7 +397,7 @@ return false;
 	
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
 		
-		if(!ACTIVE) return;
+		if(!useBuiltin) return;
 		
 		if(canvasHeight == oldCanvasHeight) return;
 		
@@ -1171,12 +1225,14 @@ fun: function space(click) {
 		
 		add("Compl", {
 			fun: function autocomplete(click) {
-				if(ALT2) toggleVirtualKeyboard2(false);
+				if(ALT1) toggleToNative();
+				else if(ALT2) hideBuiltinKeyboard();
 				else fireKey(EDITOR.settings.autoCompleteKey, "keydown");
 			},
 			charCode: EDITOR.settings.autoCompleteKey,
 			width: 1.3,
 			textSize: 0.7,
+			alt1: "Native",
 			alt2: "Done"
 		});
 		
@@ -1303,20 +1359,21 @@ fun: function space(click) {
 	}
 	
 	
-	function keyboardPushbuttonDown (mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
-	
-		
-		return true;
+	function vrkeyboardMouseDown (mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
+		return ALLOW_DEFAULT;
 	}
 	
-	function keyboardPushbuttonUp(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
-		
+	function vrkeyboardMouseUp(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		if(mouseUpEvent.type == "touchend") {
 			
-			if(EDITOR.touchScreen && disabledByUser) return bringNativeKeyboard();
-			//return bringNativeKeyboard();
-			
-			toggleVirtualKeyboard2(true);
+			if(useBuiltin) showBuiltinKeyboard();
+			else if(useNative) showNativeKeyboard();
+			else {
+				// Always show a keyboard after touch!
+				if(lastUsedKeyboard == "builtin") showBuiltinKeyboard();
+				else if(lastUsedKeyboard == "native") showNativeKeyboard();
+				else throw new Error("Unknown lastUsedKeyboard=" + lastUsedKeyboard);
+			}
 			
 			if(EDITOR.currentFile) {
 				// Wait for the resize, then scroll to the caret (where you clicked)
@@ -1326,23 +1383,9 @@ fun: function space(click) {
 			}
 		}
 		
-		return true;
-		
+		return ALLOW_DEFAULT;
 	}
 	
-	function bringNativeKeyboard() {
-		
-		var keyboardCatcher = document.getElementById("keyboardCatcher");
-		
-		// Trigger native keyboard
-		keyboardCatcher.focus();
-		keyboardCatcher.click();
-		
-		// Input should go to current file
-		EDITOR.input = true;
-		
-		return true;
-	}
 	
 	
 	
