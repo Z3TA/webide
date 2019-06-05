@@ -29,11 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
-
-
-Can't rename a folder on SFTP!
-
 When opening a SSH connection, or cloning a repo, the file explorer opens the wrong dir!
 
 
@@ -1243,6 +1238,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+Can't rename a folder on SFTP! (test uncommented in tests/server.js)
 
 When previewing a static web site, and reloading the css, then changing the body, the page is refreshed without *any* css!
 When previewing a static web site, and .css file is a seperate file, the css is not updated upon save!

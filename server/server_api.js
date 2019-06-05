@@ -1234,7 +1234,59 @@ API.move = function move(user, json, callback) {
 	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
 	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
 	
-	API.readFromDisk(user, {path: oldPath, returnBuffer: true}, function fileRead(err, read) {
+	// Figure out if it's a directory or a file
+	var lastChar = oldPath.charAt(oldPath.length-1);
+	if(lastChar == "/" || lastChar == "\\") {
+		// It's a directory!'
+		// Figure out protocol
+		var url = require("url");
+		var parse = url.parse(oldPath);
+		var dest = url.parse(oldPath);
+
+if(parse.protocol && parse.hostname != dest.hostname) {
+return callback(new Error("Moving folders between servers not yet implemented!"));
+}
+
+		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+				var c = user.remoteConnections[parse.hostname].client;
+				c.rename(parse.pathname, dest.pathname, function renamedFileOnFtp(err) {
+					callback(err);
+});
+			}
+			else {
+				callback(new Error("Failed to move: " + oldPath + "\nNo connection open to FTP on " + parse.hostname + " !"));
+			}
+		}
+		else if(parse.protocol == "sftp:") {
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+				var c = user.remoteConnections[parse.hostname].client;
+				console.log("Attempting to rename folder " + parse.pathname + " to " + dest.pathname + " on " + parse.hostname + " ...")
+				c.rename(parse.pathname, dest.pathname, function renamedFileOnSftp(err) {
+					callback(err);
+				});
+			}
+			else {
+				callback(new Error("Failed to move: " + oldPath + "\nNo connection open to SFTP on " + parse.hostname + " !"));
+			}
+		}
+		else {
+			// It's a local folder
+			var fs = require("fs");
+			fs.rename(oldPath, newPath, function(err) {
+				if(err) {
+					if(err.code == "EISDIR") {
+						err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
+						err.code = "EISDIR";
+					}
+				}
+				callback(err, {oldPath: oldPath, newPath: newPath});
+			});
+		}
+	}
+	else {
+		// Assume it's a file'
+		API.readFromDisk(user, {path: oldPath, returnBuffer: true}, function fileRead(err, read) {
 		if(err) return callback(err);
 		
 		if(!Buffer.isBuffer(read.data)) throw new Error("readFromDisk did not give a Buffer! typeof read.data=" + typeof read.data);
@@ -1248,39 +1300,7 @@ API.move = function move(user, json, callback) {
 			});
 		});
 	});
-	
-	/*
-		var fs = require("fs");
-		fs.rename(oldPath, newPath, function(err) {
-		
-		if(err) {
-		if(err.code == "EISDIR") {
-		err = new Error("Make sure " + newPath + " is not already a directory! " + err.message);
-		err.code = "EISDIR";
-		}
-		else if(err.code == "EXDEV") {
-		console.log(err.message + " ... Trying copy ...");
-		
-		// Most likely a gcsf error: EXDEV: cross-device link not permitted, rename '/googleDrive/hello.js' -> '/wwwpub/hello.js'
-		
-		return API.copyFile(user, {from: oldPath, to: newPath}, function afterCopy(err, copy) {
-		if(err) {
-		var error = new Error("Failed to move (EXDEV), and also failed to copy (" + err.code + "): " + err.message);
-		error.code = err.code;
-		return callback(error);
-		}
-		else callback(null, {oldPath: oldPath, newPath: copy.to});
-		});
-		}
-		}
-		
-		callback(err, {oldPath: oldPath, newPath: newPath});
-		
-		// EDITOR.move fires move event
-		
-		});
-	*/
-	
+	}
 }
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {

@@ -1,9 +1,71 @@
 (function() {
 	"use strict";
 	
-	EDITOR.addTest(1, function installNodejsModule(callback) {
-
-		var testFolder = "/testInstallNodejsModule/";
+	/*
+		
+		
+		EDITOR.addTest(1, true, function createAndRenameSftpFolder(callback) {
+		var protocol = "sftp";
+		var serverAddress = "ben.100m.se";
+		var testFolder = protocol + "://" + serverAddress + "/uploads/testRenameFolder/";
+		var renameTo =   protocol + "://" + serverAddress + "/uploads/renameFolderTo/";
+		var connJson = {protocol: protocol, serverAddress: serverAddress,  user: "sftptest", passw: "12345"};
+		
+		CLIENT.cmd("connect", connJson, function(err, json) {
+		if(err) throw err;
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+		if(err) throw err;
+		
+		EDITOR.move(testFolder, renameTo, function fileRenamed(err, newPath) {
+		if(err) throw err;
+		
+		if(newPath != renameTo) throw new Error("Expected renameTo=" + renameTo + " == newPath=" + newPath);
+		
+		// Cleaup
+		CLIENT.cmd("deleteDirectory", {directory: renameTo, recursive: false}, function(err, json) {
+		if(err) throw err
+		
+		CLIENT.cmd("disconnect", connJson, function(err, json) {
+		if(err) throw err;
+		
+		setTimeout(function() {
+		var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+		if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+		}, 1000);
+		
+		callback(true);
+		});
+		});
+		});
+		});
+		});
+		});
+	*/
+	
+	EDITOR.addTest(function renameFolder(callback) {
+		var testFolder = "/tryToRenameMe/";
+		var renameTo = "/renameFolderTo/"
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			
+			EDITOR.move(testFolder, renameTo, function fileRenamed(err, newPath) {
+				if(err) throw err;
+				
+				if(newPath != renameTo) throw new Error("Expected renameTo=" + renameTo + " == newPath=" + newPath);
+				
+				// Cleaup
+				CLIENT.cmd("deleteDirectory", {directory: renameTo, recursive: false}, function(err, json) {
+					if(err) throw err
+					
+					callback(true);
+				});
+			});
+		});
+	});
+	
+	EDITOR.addTest(function installNodejsModule(callback) {
+var testFolder = "/testInstallNodejsModule/";
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
@@ -23,7 +85,6 @@
 			});
 		});
 	});
-	
 	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
