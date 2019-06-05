@@ -112,6 +112,7 @@
 	var builtinName = "Builtin";
 	var nativeName = "Native";
 	var oldCanvasHeight = 0; // Optimization: Don't resize and re-render if the size is the same as before
+	var oldCanvasWidth = 0;
 	var useNative = false; // is native keyboard activated
 	var useBuiltin = false; // is built-in keyboard activated
 	var lastUsedKeyboard = "builtin"; // builtin or native
@@ -229,8 +230,8 @@
 	}
 	
 	function hideBuiltinKeyboard() {
+		console.log("Hiding builtin virtual keyboard!");
 		var wrapper = document.getElementById("virtualKeyboard2");
-		oldCanvasHeight = canvasHeight;
 		wrapper.style.display="none";
 		EDITOR.resizeNeeded();
 		useBuiltin = false;
@@ -338,7 +339,8 @@ return false;
 	function virtualKeyboardClaimHeight(file, windowWidth, windowHeight) {
 		
 		/*
-			Claim the height needed
+			Called before resize.
+			Claim the height needed!
 		*/
 		
 		if(!useBuiltin) return;
@@ -396,10 +398,14 @@ return false;
 	}
 	
 	function resizeVirtualKeyboard(file, windowWidth, windowHeight) {
+		// Called after a resize event
 		
 		if(!useBuiltin) return;
 		
-		if(canvasHeight == oldCanvasHeight) return;
+		if(canvasHeight == oldCanvasHeight && canvasWidth == oldCanvasWidth) {
+			console.log("resizeVirtualKeyboard: No need to re-render! canvasHeight=" + canvasHeight + " oldCanvasHeight=" + oldCanvasHeight + " canvasWidth=" + canvasWidth + " oldCanvasWidth=" + oldCanvasWidth);
+			return;
+		}
 		
 		// debug
 		var wrapper = document.getElementById("virtualKeyboard2");
@@ -420,6 +426,9 @@ return false;
 		canvas.style.height=canvasHeight + "px";
 		
 		renderVirtualKeyboard();
+		
+		oldCanvasHeight = canvasHeight;
+		oldCanvasWidth = canvasWidth;
 		
 		// debug
 		var wrapperAfter = wrapper.offsetWidth + "x" + wrapper.offsetHeight;

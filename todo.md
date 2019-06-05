@@ -29,6 +29,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
 When opening a SSH connection, or cloning a repo, the file explorer opens the wrong dir!
 
 
