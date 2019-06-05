@@ -1242,7 +1242,7 @@ file.fixCaret();
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(false, testCollaboration);
+	EDITOR.addTest(4, false, testCollaboration);
 	
 	
 	function testUndoRedoWhileInCollabMode(callback) {
@@ -1642,7 +1642,7 @@ file.fixCaret();
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(false, testEditAtTheSameTime);
+	EDITOR.addTest(5, false, testEditAtTheSameTime);
 	
 	function timeSerial(func) {
 		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");

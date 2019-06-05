@@ -29,6 +29,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
+
+
+Can't rename a folder on SFTP!
+
+When opening a SSH connection, or cloning a repo, the file explorer opens the wrong dir!
+
+
+Check if this works on webdide: https://github.com/nickyvanurk/3d-multiplayer-browser-shooter.git
+
 The default test repo should have some cool examples!
 
 
@@ -108,6 +118,17 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+
+---
+Indent open parentheses, for example in function calls
+foo(
+  arg1,
+  arg2,
+  arg3);
+
+---
+  
 
 When connecting to SSH server, file explorer should go into the sftp folder!
 
