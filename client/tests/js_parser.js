@@ -1,4 +1,16 @@
 
+EDITOR.addTest(1, function dontPanicWhenReturningVoid(callback) {
+	EDITOR.openFile("dontPanicWhenReturningVoid.js", '{\nreturn;\n}\n', function(err, file) {
+		
+		// bug: Will throw an error: Cannot read property 'returns' of undefined
+		// Only when returning void, outside of a function.
+		
+		EDITOR.closeFile(file.path);
+		
+		callback(true);
+	});
+});
+
 EDITOR.addTest(function findReturnedObjectLiteral(callback) {
 	EDITOR.openFile("findReturnedObjectLiteral.js", 'function foo() {\nreturn {banana: 1, apple: 2}\n}\n', function(err, file) {
 		

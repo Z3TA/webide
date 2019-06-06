@@ -2902,7 +2902,9 @@ throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVaria
 						
 						if(word=="return") {
 							console.log("return undefined?");
+							if(myFunction[subFunctionDepth]) {
 							myFunction[subFunctionDepth].returns.push("void");
+							}
 						}
 						
 						if(afterPointer[codeBlockDepth]) {
