@@ -113,6 +113,10 @@ Writing a guide on how to make a survey
 todo
 ----
 
+When disconnected from the internet, and you click on something, like opening a file via file explorer, nothing happens.
+Also when toggling the file explorer it takes like 10 seconds until you see the spinner ...
+... Sync FS to client !? Ignore folders in .gitignore and .hgignore and mounted dirs.
+
 
 ---
 Indent open parentheses, for example in function calls
