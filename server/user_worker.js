@@ -1132,25 +1132,20 @@ function npm(arg, extraOptions, callback) {
 	// Nope: Fork also executes the shebang!? or does it!? todo: find out!
 	var npmProcess =  require('child_process').fork(npmPath, arg, npmOptions);
 	
-	/*
-		var progressCounter = 0;
-		var progressMax = 30;
-		user.send({npmProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
-		
-		var progressInterval = setInterval(function() {
-		progressCounter++;
-		progressMax++;
-		user.send({npmProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
-		}, 500); // Fake progress
-	*/
+	var fakeProgressInterval = setInterval(fakeProgress, 500);
 	
 	npmProcess.stdout.on('data', function npmProcessStdout(data) {
 		stdout += data;
 		
+		var incrementProgress = 1;
+		var incrementProgressMax = 0;
+		
+		if(data.toString().match(/make:/)) incrementProgressMax += 15;
+		
+		user.send({progress: [incrementProgress, incrementProgressMax]});
+		
 		console.log("npm stdout data=" + data);
 		
-		//progressCounter++;
-		//user.send({npmProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
 	});
 	
 	npmProcess.stderr.on('data', function npmProcessStderr(data) {
@@ -1244,7 +1239,13 @@ function npm(arg, extraOptions, callback) {
 	npmProcess.on('close', function npmProcessClose(exitCode) {
 		console.log("npm " + arg[0] + " exitCode=" + exitCode + " stdout=" + UTIL.shortString(stdout) + "stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
 		if(callback) callback(npmError, stdout, stderr);
+		
+		clearInterval(fakeProgressInterval);
 	});
+	
+	function fakeProgress() {
+		user.send({progress: [1]});
+	}
 	
 }
 
@@ -1313,6 +1314,9 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	var rootFolder;
 	
+	user.send({progress: [0, 0]}); // Reset progress
+	user.send({progress: [0, 3]});
+	
 	findRootFolder(directory);
 	
 	
@@ -1320,6 +1324,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		console.log("installDependencies: directory=" + directory);
 		
 		if(!directory) return askForDebugPort();
+		
+		user.send({progress: [1]});
 		
 		fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
 			if(err) {
@@ -1339,9 +1345,12 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					return askForDebugPort();
 				}
 				
+				// Estimate progress
+				user.send({progress: [1, Object.keys(packageObj.dependencies).length*2]});
+				
 				// package.json was found. Lets make sure dependencies exist
 				var execFile = require('child_process').execFile;
-				var arg = ["install"];
+				var arg = ["install", "--no-progress", "--no-audit"];
 				npm(arg, {cwd: directory}, function (err, stdout, stderr) {
 					
 					console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
@@ -1354,6 +1363,16 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 						stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 						stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
 						stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
+						
+						// Move non errors to stdout
+						cleanStdErr([
+							/^\[BABEL\] Note:.*/,
+							/^npm WARN.*/,
+							/.*SKIPPING OPTIONAL DEPENDENCY.*/,
+							/^WARN.*/
+						]);
+						
+						stderr = stderr.replace(/^npm/, "").trim();
 						
 						if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 					}
@@ -1370,6 +1389,16 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					
 					packageJsonExist = true;
 					askForDebugPort();
+					
+					function cleanStdErr(regs) {
+						var match;
+						for (var i=0; i<regs.length; i++) {
+							while(match = stderr.match(regs[i])) {;
+								stdout += match[0] + "\n";
+								stderr = stderr.replace(match[0], "").trim();
+							}
+						}
+					}
 					
 				});
 				
@@ -1405,7 +1434,9 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			else {
 				var folders = UTIL.getFolders(directory);
 				
-				if(folders.length > 1)findRootFolder(folders[folders.length-2]);
+				if(folders.length > 1) {
+					findRootFolder(folders[folders.length-2]);
+				}
 				else installDependencies();
 			}
 		});
@@ -1423,7 +1454,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				if(!inspectorPort) throw new Error("Did not get a tcp port from the parent process! port=" + port);
 				
 				runIt();
-				});
+			});
 		}
 		else runIt()
 	}
@@ -1431,6 +1462,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	function runIt() {
 		
 		console.log(user.name + " starting NodeJS script: filePath=" + filePath);
+		
+		user.send({progress: [1]});
 		
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var nodeScript;
@@ -1475,9 +1508,9 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			if(USE_CHROOT) {
 				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
-			var fs = require("fs");
-			var sockWatcher = fs.watch('/sock/', sockEvent);
-			var createdSockets = [];
+				var fs = require("fs");
+				var sockWatcher = fs.watch('/sock/', sockEvent);
+				var createdSockets = [];
 			}
 			
 			nodeScript = child_process.fork(scriptFilePath, nodeScriptArgs, nodeScriptOptions);
@@ -1493,7 +1526,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			// note: The worker process will not close/exit (unless there's an error) if it has to listen for messages from parent
 			
 			user.runningNodeJsScripts[filePath] = {childProcess: nodeScript, isDebugger: debugit, sockWatcher: sockWatcher, createdSockets: createdSockets};
+			
+			user.send({progress: []}); // Finish
+			
 			callback(null, {filePath: filePath});
+			
 			
 			function sockEvent(eventType, filename) {
 				// filename is just the file name, not the whole path!
@@ -1554,7 +1591,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log(user.name + ":" + filePath + ":stdout: " + UTIL.lbChars(text) + "");
 			
 			user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
-			}
+		}
 		
 		function nodejsScriptStderr(data) {
 			

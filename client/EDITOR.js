@@ -6356,6 +6356,44 @@ name: login.user,
 			EDITOR.user = null;
 		});
 		
+		
+		var progressValue = 0;
+		var progressMax = 1;
+		CLIENT.on("progress", function(increment) {
+			var progress = document.getElementById("progress");
+			
+			if(!Array.isArray(increment)) {
+				console.warn("Not an array: progress: " + JSON.stringify(increment));
+			};
+			
+			if(progressValue == 0 && increment.length > 0) {
+				// First progress event, show the progress bar
+				progress.style.display="block";
+			}
+			
+			if(increment[0]) progressValue += increment[0];
+			if(increment[1]) progressMax += increment[1];
+			
+			if(increment[0] == 0 && increment[1] == 0) {
+				// Reset
+				progressValue = 0;
+				progressMax = 1;
+			}
+			
+			if(increment.length == 0) {
+				// Finish
+				progress.style.display="none";
+				progressValue = 0;
+				progressMax = 1;
+			}
+			
+			progress.max = progressMax;
+			progress.value = progressValue;
+			
+			console.log("progress: value=" + progressValue + " max=" + progressMax);
+			
+		});
+		
 		//console.log("main function loaded");
 		
 		/*		

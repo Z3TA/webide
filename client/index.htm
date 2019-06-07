@@ -283,9 +283,15 @@
 	</div>
 	
 	<div id="footer" class="footer"></div>
+	
 	<!-- Safari's web inspector causes the footer to get zero height! -->
 	
 	<div id="virtualKeyboard2"><!--Put virtual keyboard here --></div>
+
+	<progress id="progress" class="progressbar" style="width: 100%; display: none;" value="0" max="1" />
+	<!-- progress bar need to be placed below virtual keyboard or the virtual keyboard will not show! -->
+	
+	
 </div>
 
 <textarea style="width: 100px; position: absolute; left: -200px; top: -200px;" id="clipboardcatcher"></textarea>

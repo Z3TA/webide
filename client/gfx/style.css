@@ -1360,6 +1360,13 @@ width: 100%;
 	padding: 0;
 }
 
+/* Editor built-in progress-bar */
+.progressbar {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+}
 
 div.group {
 	display: inline-block;

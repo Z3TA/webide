@@ -20,18 +20,26 @@ Try any of the example files in the /nodejs/ folder.</p>
 <p>Press <kbd>F4</kbd> to stop the script.</p>
 
 
-<h2>Use Unix sockets (named pipes) instead of ports!</h2>
+<h3>Try via the terminal if you get errors</h3>
+
+<p>Right click and select "Terminal". In the terminal emulator type <b>npm install</b> 
+and then <b>node nameofapp.js</b> (or <b>npm start</b>).</p>
+
+
+
+<h2>Replace port-nr with /sock/somename!</h2>
 
 <p>The cloud editor communicates with the Internet via unix sockets.<br>
 So instead of using for example port 80, use /sock/nameofsocket.<br>
 Eg. replace <i>server.listen(80)</i> with <i>server.listen("/sock/nameofsocket")</i></p>
 
-<p>All HTTP (and websocket) request going to
+<p>All HTTP (and websocket) requests going to
 https://nameofsocket.username.webide.se
 will be proxied to your /sock/nameofsocket unix socket!</p>
 
 <p>If you get <i>Error: EADDRINUSE /sock/nameofsocket</i> simply delete the file.<br>
-The editor will automatically delete sockets files when the script exit.</p>
+The editor will automatically delete sockets files when the script exit,
+and also set process.env.PORT to the name of the project folder.</p>
 
 
 
