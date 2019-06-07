@@ -1311,57 +1311,105 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	var fs = require("fs");
 	
-	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
-		if(err) {
-			if(err.code == "ENOENT") {
-				packageJsonExist = false;
-				return askForDebugPort();
+	var rootFolder;
+	
+	findRootFolder(directory);
+	
+	
+	function installDependencies(directory) {
+		console.log("installDependencies: directory=" + directory);
+		
+		if(!directory) return askForDebugPort();
+		
+		fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
+			if(err) {
+				if(err.code == "ENOENT") {
+					packageJsonExist = false;
+					return askForDebugPort();
+				}
+				else return callback(err);
 			}
-			else return callback(err);
-		}
-		else {
-			
-			try {
-				var packageObj = JSON.parse(packageTxt);
-			}
-			catch(parseError) {
-				packageJsonExist = false;
-				return askForDebugPort();
-			}
-			
-			// package.json was found. Lets make sure dependencies exist
-			var execFile = require('child_process').execFile;
-			var arg = ["install"];
-			npm(arg, {cwd: directory}, function (err, stdout, stderr) {
+			else {
 				
-				console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
-				
-				if(err) return callback(new Error("Failed to install dependencies: " + err.message));
-				
-				if(stderr) {
-					
-					stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
-					stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
-					stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
-					stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
-					
-					if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
+				try {
+					var packageObj = JSON.parse(packageTxt);
+				}
+				catch(parseError) {
+					packageJsonExist = false;
+					return askForDebugPort();
 				}
 				
-				stdout = stdout.replace(/up to date in [0-9.]*s/, "").trim();
+				// package.json was found. Lets make sure dependencies exist
+				var execFile = require('child_process').execFile;
+				var arg = ["install"];
+				npm(arg, {cwd: directory}, function (err, stdout, stderr) {
+					
+					console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+					
+					if(err) return callback(new Error("Failed to install dependencies: " + err.message));
+					
+					if(stderr) {
+						
+						stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
+						stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
+						stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
+						stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
+						
+						if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
+					}
+					
+					stdout = stdout.replace(/up to date in [0-9.]*s/, "").trim();
+					stdout = stdout.replace(/found 0 vulnerabilities/, "").trim();
+					stdout = stdout.replace(/audited (.*) (package|packages) in (.*)/, "").trim();
+					
+					
+					if(stdout) {
+						stdout += "\n"; // Re-add the new line after running trim()
+						user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
+					}
+					
+					packageJsonExist = true;
+					askForDebugPort();
+					
+				});
 				
-				if(stdout) {
-					stdout += "\n"; // Re-add the new line after running trim()
-					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
-				}
-				
-				packageJsonExist = true;
-				askForDebugPort();
-				
-			});
+			}
+		});
+		
+	}
+	
+	function findRootFolder(directory) {
+		console.log("findRootFolder: directory=" + directory);
+		/*
+			Check for package.json or .hg or .git
+		*/
+		
+		var fs = require("fs");
+		fs.readdir(directory, function readdir(err, folderItems) {
+			if(err) return callback(err);
 			
-		}
-	});
+			// folderItems is name of files and folders
+			for (var i=0; i<folderItems.length; i++) {
+				if(folderItems[i] == "package.json") {
+					packageJsonExist = true;
+					rootFolder = directory;
+				}
+				else if(folderItems[i] == ".hg" || folderItems[i] == ".git") {
+					rootFolder = directory;
+				}
+			}
+			
+			if(rootFolder) {
+				installDependencies(rootFolder);
+			}
+			else {
+				var folders = UTIL.getFolders(directory);
+				
+				if(folders.length > 1)findRootFolder(folders[folders.length-2]);
+				else installDependencies();
+			}
+		});
+	}
 	
 	function askForDebugPort() {
 		if(debugit) {
@@ -1410,6 +1458,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			var inspectStr = "--inspect-brk=" + inspectorPort;
 			if(nodeScriptOptions.execArgv) nodeScriptOptions.execArgv.unshift(inspectStr);
 			else nodeScriptOptions.execArgv = [inspectStr];
+		}
+		
+		if(rootFolder && USE_CHROOT) {
+			nodeScriptOptions.env.PORT = "/sock/" + UTIL.getFolderName(rootFolder);
 		}
 		
 		start();

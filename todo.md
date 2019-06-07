@@ -29,10 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Check if this works on webdide: https://github.com/nickyvanurk/3d-multiplayer-browser-shooter.git
-problems with js_parser!
-
-
 The default test repo should have some cool examples!
 
 
