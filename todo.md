@@ -29,25 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-should probably not install npm modules *every time* a script is run
-
-loading bar when running a nodejs script !?
-
-cannot run "npm run" get spawn EACCESS error!
-
-npm can't spawn /usr/bin/node !????? problem with /dev/null !?
-Jun  7 12:54:08 webide kernel: [  226.988018] audit: type=1400 audit(1559904848.868:1047): apparmor="DENIED" operation="create" profile="/home/johan/usr/bin/node" pid=14041 comm="npm" family="netlink" sock_type="raw" protocol=0 requested_mask="create" denied_mask="create"
-Jun  7 12:54:08 webide kernel: [  226.993677] audit: type=1400 audit(1559904848.872:1048): apparmor="DENIED" operation="create" profile="/home/johan/usr/bin/node" pid=14041 comm="npm" family="netlink" sock_type="raw" protocol=0 requested_mask="create" denied_mask="create"
-Jun  7 12:54:49 webide kernel: [  267.459965] kauditd_printk_skb: 23 callbacks suppressed
-Jun  7 12:54:49 webide kernel: [  267.459967] audit: type=1400 audit(1559904889.341:1072): apparmor="DENIED" operation="file_inherit" profile="/home/johan/usr/bin/node" name="/dev/urandom" pid=31904 comm="node" requested_mask="r" denied_mask="r" fsuid=998 ouid=0
-Jun  7 12:54:49 webide kernel: [  267.563355] audit: type=1400 audit(1559904889.441:1073): apparmor="DENIED" operation="create" profile="/home/johan/usr/bin/node" pid=31904 comm="npm" family="netlink" sock_type="raw" protocol=0 requested_mask="create" denied_mask="create"
-Jun  7 12:54:53 webide kernel: [  271.329941] audit: type=1400 audit(1559904893.209:1074): apparmor="DENIED" operation="create" profile="/home/johan/usr/bin/node" pid=31904 comm="npm" family="netlink" sock_type="raw" protocol=0 requested_mask="create" denied_mask="create"
-Jun  7 12:55:27 webide kernel: [  305.190276] audit: type=1400 audit(1559904927.069:1075): apparmor="DENIED" operation="file_inherit" profile="/home/johan/bin/bash" name="/dev/urandom" pid=32517 comm="bash" requested_mask="r" denied_mask="r" fsuid=998 ouid=0
-Jun  7 12:55:31 webide kernel: [  309.604614] audit: type=1400 audit(1559904931.486:1076): apparmor="DENIED" operation="file_inherit" info="Failed name lookup - disconnected path" error=-13 profile="/home/johan/usr/lib/node_modules/npm/bin/npm-cli.js" name="apparmor/.null" pid=32661 comm="npm" requested_mask="wr" denied_mask="wr" fsuid=998 ouid=0
-Jun  7 12:55:31 webide kernel: [  309.910460] audit: type=1400 audit(1559904931.790:1077): apparmor="DENIED" operation="open" profile="/home/johan/usr/lib/node_modules/npm/bin/npm-cli.js" name="/home/johan/dev/null" pid=32681 comm="npm" requested_mask="w" denied_mask="w" fsuid=998 ouid=0
-Jun  7 12:57:29 webide kernel: [  427.966287] audit: type=1400 audit(1559905049.851:1078): apparmor="DENIED" operation="file_inherit" info="Failed name lookup - disconnected path" error=-13 profile="/home/johan/usr/bin/node" name="apparmor/.null" pid=1323 comm="node" requested_mask="wr" denied_mask="wr" fsuid=998 ouid=0
-Jun  7 12:59:05 webide kernel: [  523.604922] audit: type=1400 audit(1559905145.488:1079): apparmor="DENIED" operation="file_inherit" info="Failed name lookup - disconnected path" error=-13 profile="/home/johan/usr/lib/node_modules/npm/bin/npm-cli.js" name="apparmor/.null" pid=2312 comm="npm" requested_mask="wr" denied_mask="wr" fsuid=998 ouid=0
-Jun  7 12:59:05 webide kernel: [  523.810236] audit: type=1400 audit(1559905145.692:1080): apparmor="DENIED" operation="open" profile="/home/johan/usr/lib/node_modules/npm/bin/npm-cli.js" name="/home/johan/dev/null" pid=2323 comm="npm" requested_mask="w" denied_mask="w" fsuid=998 ouid=0
 
 
 Find cool node.js multiplayer games and stuff, and see if it works in the cloud ide.

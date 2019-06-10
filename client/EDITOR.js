@@ -6369,6 +6369,7 @@ name: login.user,
 			if(progressValue == 0 && increment.length > 0) {
 				// First progress event, show the progress bar
 				progress.style.display="block";
+				EDITOR.resizeNeeded();
 			}
 			
 			if(increment[0]) progressValue += increment[0];
@@ -6383,6 +6384,7 @@ name: login.user,
 			if(increment.length == 0) {
 				// Finish
 				progress.style.display="none";
+				EDITOR.resizeNeeded();
 				progressValue = 0;
 				progressMax = 1;
 			}
