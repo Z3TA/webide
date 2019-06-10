@@ -1080,9 +1080,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			
 			if(stderr) {
 				
-				stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
-				stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
-				stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
+				[stderr, stdout] = filterNpm(stderr, stdout);
 				
 				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
 			}
@@ -1095,6 +1093,38 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			
 		});
 	}
+}
+
+function filterNpm(stderr, stdout) {
+	// Move non critical errors to stdout
+	
+	stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
+	stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
+	stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
+	stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
+	
+	// Move non errors to stdout
+	cleanStdErr([
+		/^\[BABEL\] Note:.*/,
+		/^npm WARN.*/,
+		/.*SKIPPING OPTIONAL DEPENDENCY.*/,
+		/^WARN.*/
+	]);
+	
+	stderr = stderr.replace(/^npm/, "").trim();
+	
+	return [stderr, stdout];
+	
+	function cleanStdErr(regs) {
+		var match;
+		for (var i=0; i<regs.length; i++) {
+			while(match = stderr.match(regs[i])) {;
+				stdout += match[0] + "\n";
+				stderr = stderr.replace(match[0], "").trim();
+			}
+		}
+	}
+	
 }
 
 function npm(arg, extraOptions, callback) {
@@ -1364,20 +1394,8 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 							
 							if(stderr) {
 								
-								stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
-								stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
-								stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
-								stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
+								[stderr, stdout] = filterNpm(stderr, stdout);
 								
-								// Move non errors to stdout
-								cleanStdErr([
-									/^\[BABEL\] Note:.*/,
-									/^npm WARN.*/,
-									/.*SKIPPING OPTIONAL DEPENDENCY.*/,
-									/^WARN.*/
-								]);
-								
-								stderr = stderr.replace(/^npm/, "").trim();
 								
 								if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 							}
@@ -1395,15 +1413,6 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 							packageJsonExist = true;
 							askForDebugPort();
 							
-							function cleanStdErr(regs) {
-								var match;
-								for (var i=0; i<regs.length; i++) {
-									while(match = stderr.match(regs[i])) {;
-										stdout += match[0] + "\n";
-										stderr = stderr.replace(match[0], "").trim();
-									}
-								}
-							}
 						});
 					}
 				});
