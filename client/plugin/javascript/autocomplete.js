@@ -195,7 +195,56 @@
 		{name: "Promise.prototype.finally", arguments: "onFinally", type: "Promise", es: 2015},
 		{name: "Promise.prototype.then", arguments: "onFulfilled, onRejected", type: "Promise", es: 2015},
 		
+
 		// ### Element (Should this be DOM_node !?)
+		{name: "Element",  variables: { prototype: {
+					"accessKey": {type: "String"},
+					"attributes": {type: "Array"},
+					"childNodes": {type: "Array"},
+					"children": {type: "Array"},
+					"classList": {type: "Array"},
+					"clientHeight": {type: "Number"},
+					"clientLeft": {type: "Number"},
+					"clientTop": {type: "Number"},
+					"contentEditable": {type: "Boolean"},
+					"dir": {type: "String"},
+					"firstChild": {type: "Element"},
+					"firstElementChild": {type: "Element"},
+					"id": {type: "String"},
+					"innerHTML": {type: "String"},
+					"innerText": {type: "String"},
+					"isContentEditable": {type: "Boolean"},
+					"lang": {type: "String"},
+					"lastChild": {type: "Element"},
+					"lastElementChild": {type: "Element"},
+					"namespaceURI": {type: "String"},
+					"nextSibling": {type: "Element"},
+					"nextElementSibling": {type: "Element"},
+					"nodeName": {type: "String"},
+					"nodeType": {type: "String"},
+					"nodeValue": {type: "String"},
+					"offsetHeight": {type: "Number"},
+					"offsetWidth": {type: "Number"},
+					"offsetLeft": {type: "Number"},
+					"offsetParent": {type: "Element"},
+					"offsetTop": {type: "Number"},
+					"ownerDocument": {type: "Element"},
+					"parentNode": {type: "Element"},
+					"parentElement": {type: "Element"},
+					"previousSibling": {type: "Element"},
+					"previousElementSibling": {type: "Element"},
+					"scrollHeight": {type: "Number"},
+					"scrollLeft": {type: "Number"},
+					"scrollTop": {type: "Number"},
+					"scrollWidth": {type: "Number"},
+					"style": {type: "String"},
+					"tabIndex": {type: "Number"},
+					"tagName": {type: "String"},
+					"textContent": {type: "String"},
+					"title": {type: "String"}
+				}
+}
+},
 		{name: "Element.prototype.addEventListener", arguments: "event, function, useCapture", type: "undefined"},
 		{name: "Element.prototype.appendChild", arguments: "node", type: "Element"},
 		{name: "Element.prototype.blur", arguments: "", type: "undefined"},
@@ -1153,6 +1202,8 @@
 			console.log("figureOutVariableType: Unable to figure out type from value=" + value);
 			return "unknown";
 		}
+		
+		if(value == "document.createEelement") return "Element";
 		
 		var file = EDITOR.currentFile;
 		var types = [];

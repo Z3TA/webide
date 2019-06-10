@@ -8,6 +8,15 @@
 		
 	*/
 	
+	EDITOR.addTest(1, function createElementReturnsDomElement(callback) {
+		EDITOR.openFile("createElementReturnsDomElement.js", 'var foo = document.createEelement("div");\nfoo.innerT', function(err, file) {
+			var atCaret = autoComplete(file, 52);
+			UTIL.assert(file.rowText(1), "foo.innerText");
+			
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
 	
 	EDITOR.addTest(function findReturnedObjectMembers(callback) {
 		EDITOR.openFile("findReturnedObjectMembers.js", 'function f() {\nvar arr = [];\nvar obj = {};\nobj.color="red";\narr.push("banana");\nreturn {bananas: arr, apple: obj};\n}\nvar obj = f();\nobj.a', function(err, file) {
