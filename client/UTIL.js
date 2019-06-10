@@ -189,14 +189,16 @@ var UTIL = {
 		
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
-		if(lastChar != "/" && lastChar != "\\") {
+		var protocolIndex = fullPath.indexOf("://");
+		
+		if(lastChar != "/" && lastChar != "\\" && protocolIndex == -1) {
 			//console.warn("getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
 			// Check if the path contains a file, and remove it
 			//console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
 			var delimiter = UTIL.getPathDelimiter(fullPath);
 			var filePart = fullPath.substr(fullPath.lastIndexOf(delimiter));
 			
-			//console.log("filePart=" + filePart + " delimiter=" + delimiter);
+			console.log("filePart=" + filePart + " delimiter=" + delimiter);
 			
 			if(filePart.indexOf(".") != -1) {
 				fullPath = fullPath.substr(0, fullPath.lastIndexOf(delimiter)+1); // Remove the file part
@@ -204,10 +206,7 @@ var UTIL = {
 				if(fullPath == "/") return ["/"];
 			}
 			//else console.warn("Assuming " + filePart + " is a directory!");
-			
-		}
-		
-		var protocolIndex = fullPath.indexOf("://");
+			}
 		
 		if(protocolIndex != -1) {
 			// It's probably an URL ...
@@ -222,16 +221,21 @@ var UTIL = {
 				console.warn("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!"); // eg C:\\
 			}
 			
+			console.log("path=" + path);
+			
 			var path = fullPath.substr(protocol.length + 3); // Remote protocol part and the ://
-			var hostname = path.substr(0, path.indexOf("/")); // Also include port nr if specified (hostname:port)
+			var hostname = path.substr(0, path.indexOf("/") != -1 ? path.indexOf("/") : path.length); // Also include port nr if specified (hostname:port)
 			
 			if(hostname.length == 0) throw new Error("URL has no hostname! fullPath=" + fullPath);
 			
 			path = path.substr(hostname.length); // Remove hostname part
 			
-			if(path.substr(0,1) != "/") throw new Error("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);
+			console.log("hostname=" + hostname + " path=" + path);
 			
-			path = path.substr(1); // Remove first slash
+			if(path.substr(0,1) != "/") {
+console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);
+			}
+			else path = path.substr(1); // Remove first slash
 			
 			if(path.substr(path.length-1) == "/") path = path.substr(0, path.length-1); // Remove ending slash if one exist
 			

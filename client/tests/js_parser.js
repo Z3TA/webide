@@ -1,5 +1,5 @@
 
-EDITOR.addTest(1, function dontPanicWhenReturningVoid(callback) {
+EDITOR.addTest(function dontPanicWhenReturningVoid(callback) {
 	EDITOR.openFile("dontPanicWhenReturningVoid.js", '{\nreturn;\n}\n', function(err, file) {
 		
 		// bug: Will throw an error: Cannot read property 'returns' of undefined

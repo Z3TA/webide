@@ -40,6 +40,16 @@
 		
 	}
 	
+	EDITOR.addTest(1, function getFoldersNoPath(callback) {
+		
+		var folders = UTIL.getFolders("sftp://foo.bar");
+		
+		if(!folders[0] == "/") throw new Error("Unexpected: " + JSON.stringify(folders));
+		
+		callback(true);
+		
+	});
+	
 	EDITOR.addTest(function testRemoveRow2(callback) {
 		EDITOR.openFile("testRemoveRow2.js", '\n\n\n\n', function(err, file) {
 			
@@ -118,7 +128,7 @@
 			/*
 				The solution to this bug was to have the File constructor remove any tabs at the beginning
 				or end of the file.
-				*/
+			*/
 			
 			EDITOR.closeFile(file.path);
 			
@@ -138,9 +148,9 @@
 		if(folderPaths.length != 1) throw new Error("Only expected one item in folderPaths=" + JSON.stringify(folderPaths));
 		if(folderPaths[0] != "/") throw new Error("Expected first element to be a slash in folderPaths=" + JSON.stringify(folderPaths));
 		
-			return callback(true);
-			
-		});
+		return callback(true);
+		
+	});
 	
 	EDITOR.addTest(function UTIL_getLocation(callback) {
 		
@@ -152,7 +162,7 @@
 		if(loc.host != "hostname.com") throw new Error("loc=" + JSON.stringify(loc, null, 2));
 		
 		return callback(true);
-	
+		
 	});
 	
 	
@@ -167,12 +177,12 @@
 			// I first thought the bug was in File.createCaret(), but it was actually in File.insertLineBreak() !
 			
 			// The sanity checks will throw if there's something wrong!
-
+			
 			EDITOR.closeFile(file.path);
 			
 			callback(true);
 		});
-		});
+	});
 	
 	EDITOR.addTest(function testRemoveRow(callback) {
 		EDITOR.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {
@@ -682,9 +692,9 @@
 			
 			EDITOR.saveFile(file, file.path, function fileSaved(err) {
 				
-			if(file.grid[6].indentationCharacters == "") throw new Error("Expected a tab (indentation character) on line 7");
-			
-			EDITOR.closeFile(file.path);
+				if(file.grid[6].indentationCharacters == "") throw new Error("Expected a tab (indentation character) on line 7");
+				
+				EDITOR.closeFile(file.path);
 				EDITOR.deleteFile(file.path);
 				
 			});
@@ -1649,7 +1659,7 @@
 	
 	EDITOR.addTest(function testParseJavaScriptError(callback) {
 		
-			// Firefox browser running on Linux (Ubuntu)
+		// Firefox browser running on Linux (Ubuntu)
 		var s = UTIL.parseErrorMessage("hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24\nconsoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4\n@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1");
 		if(s.fun != "oleLog") throw new Error("s.fun=" + s.fun + " s=" + JSON.stringify(s, null, 2));
 		if(s.col != 24) throw new Error("s.col=" + s.col + " s=" + JSON.stringify(s, null, 2));
@@ -1709,7 +1719,7 @@
 			bug: You will get an error if you type in a big file, then switch to another file that has less rows
 		*/
 		EDITOR.openFile("smallFile.txt", '1\n2\n3\n', function(err, smallFile) {
-if(err) throw err;
+			if(err) throw err;
 			EDITOR.openFile("bigFile.txt", '1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n', function(err, bigFile) {
 				if(err) throw err;
 				
@@ -1790,18 +1800,18 @@ if(err) throw err;
 		EDITOR.createPath(testFolder, function(err) {
 			if(err) throw err;
 			
-		// Run the tests with different chunk sizes
-		run(tests, 1024, function(err) {
-			if(err) throw err;
-			run(tests, 3, function(err) {
+			// Run the tests with different chunk sizes
+			run(tests, 1024, function(err) {
 				if(err) throw err;
-				run(tests, 12, function(err) {
+				run(tests, 3, function(err) {
 					if(err) throw err;
+					run(tests, 12, function(err) {
+						if(err) throw err;
 						
 						cleanup();
 					});
+				});
 			});
-		});
 		});
 		
 		function cleanup() {
@@ -1829,39 +1839,39 @@ if(err) throw err;
 				test();
 			});
 			
-		function test() {
-			if(tests.length == 0) {
-				CLIENT.cmd("deleteFile", {filePath: filePath}, function(err) {
-					if(err && err.code != "ENOENT") throw err;
+			function test() {
+				if(tests.length == 0) {
+					CLIENT.cmd("deleteFile", {filePath: filePath}, function(err) {
+						if(err && err.code != "ENOENT") throw err;
 						callback(null);
-				});
-				return;
-			}
-			var item = tests.shift();
-			var options = {path: filePath, chunkSize: chunkSize, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
-			CLIENT.cmd("writeLines", options, function(err) {
-				if(err) throw err;
-
-				CLIENT.cmd("readFromDisk", {path: filePath}, function(err, read) {
+					});
+					return;
+				}
+				var item = tests.shift();
+				var options = {path: filePath, chunkSize: chunkSize, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
+				CLIENT.cmd("writeLines", options, function(err) {
 					if(err) throw err;
 					
-					if(read.data != item.result) {
-						console.log("Added: " + item.add);
-						console.log("start=" + item.start + " end=" + item.end);
-						console.log("Expected file content: " + UTIL.lbChars(item.result));
-						console.log("Actual file content: " + UTIL.lbChars(read.data));
-						EDITOR.openFile(filePath, function(err) {
-							if(err) throw err;
-							
+					CLIENT.cmd("readFromDisk", {path: filePath}, function(err, read) {
+						if(err) throw err;
+						
+						if(read.data != item.result) {
+							console.log("Added: " + item.add);
+							console.log("start=" + item.start + " end=" + item.end);
+							console.log("Expected file content: " + UTIL.lbChars(item.result));
+							console.log("Actual file content: " + UTIL.lbChars(read.data));
+							EDITOR.openFile(filePath, function(err) {
+								if(err) throw err;
+								
 								throw new Error("Unexpected file content after writeLines operation! See " + filePath + " and console.logs for more details. chunkSize=" + chunkSize);
-						}); 
-					}
-					else test(); // Run next test
+							}); 
+						}
+						else test(); // Run next test
+						
+					});
 					
 				});
-				
-			});
-		}
+			}
 		}
 	});
 	
@@ -1884,7 +1894,7 @@ if(err) throw err;
 					
 					var insertedText = " test edit on l2k";
 					file.insertText(insertedText);
-
+					
 					console.log("Saving " + testFile + " ...");
 					EDITOR.saveFile(file, function(err) {
 						if(err) throw err;
@@ -1990,7 +2000,7 @@ if(err) throw err;
 											if(err) throw err;
 											
 											callback(true);
-										
+											
 											setTimeout(function() {
 												var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
 												if(dialogCodes.indexOf("BIG_FILE") != -1) EDITOR.closeAllDialogs("BIG_FILE");
@@ -2021,7 +2031,7 @@ if(err) throw err;
 	});
 	
 	EDITOR.addTest(500, false, function closeDialogWithCode(callback) {
-
+		
 		if(EDITOR.openDialogs.length > 0) throw new Error("Can not run test closeDialogWithCode while there are open dialogs!");
 		
 		alertBox("This dialog should be kept open", "OTHER_CODE");
