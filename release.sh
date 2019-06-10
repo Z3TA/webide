@@ -100,10 +100,13 @@ rm temp/release/linux/.hgignore
 rm temp/release/linux/getCommitId.js
 rm temp/release/linux/jz.xcf
 rm temp/release/linux/makebundle.js
+rm temp/release/linux/makebundle2.js
 rm temp/release/linux/changeset.js
 rm temp/release/linux/semver.js
 #rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm
+rm temp/release/linux/replaceStringInFileWithContentOfFile.js
+
 
 echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'liberationMono.css' ! -name 'LiberationMono-Regular.ttf' ! -name 'LiberationMono-Bold.ttf' ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
