@@ -52,6 +52,7 @@
 			CLIENT.removeEvent("terminal", terminalMessage);
 			
 			EDITOR.removeEvent("afterResize", resizeTerminals);
+			EDITOR.removeEvent("keyPressed", terminalKeyPressed);
 			EDITOR.removeEvent("keyDown", terminalKeyDown);
 			EDITOR.removeEvent("fileClose", terminalCloseFile);
 			EDITOR.removeEvent("paste", terminalPaste);
@@ -186,6 +187,12 @@
 		EDITOR.hideMenu();
 		
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		
+		if(cwd.indexOf("://") != -1) {
+			if(EDITOR.user && EDITOR.user.home) cwd = EDITOR.user.home;
+			else cwd = "/";
+		}
+		
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
 		var terminalId = 1;
