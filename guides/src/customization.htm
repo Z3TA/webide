@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<body>
+
+<h2>Editor customization</h2>
+	
+<p>You can customize your experience by writing JavaScript or CSS that will be applied when the editor loads.<br>
+Right click and then left click on "Editor customization". Or create a new file and name it "jzedit_js_overload.js" or "jzedit_css_overload.css".<br>
+When saved, you will be asked to save the content locally, meaning it will be stored in your browser local storage.</p>
+
+<p>If the editor runs locally on your machine, or you want to customize for all users, edit client/settings_overload.js</p>
+
+
+
+<h3>Change font</h3>
+<textarea rows="7" style="width: 100%">
+//UTIL.loadCSS("https://url-to-font-");
+EDITOR.settings.style.font = "Fira Code";
+EDITOR.settings.style.fontSize = 15;
+EDITOR.settings.gridHeight = 23;
+EDITOR.settings.gridWidth = 9;
+EDITOR.settings.style.highlightMatchFont = "bold 15px Fira Code";
+</textarea>
+
+
+<h3>Change background colors</h3>
+<textarea rows="5" style="width: 100%">
+EDITOR.settings.style.bgColor = "#2b2c27";
+EDITOR.settings.style.currentLineColor = "#404036";
+EDITOR.settings.style.selectedTextBg = "#3e4765";
+EDITOR.settings.style.highlightTextBg = "#3e5a3d";
+</textarea>
+
+<h3>Change text colors</h3>
+<textarea rows="7" style="width: 100%">
+// Text colors need to be in rgb() format!)
+EDITOR.settings.style.textColor = "rgb(235, 235, 229)";
+EDITOR.settings.style.commentColor = "rgb(162, 228, 64)";
+EDITOR.settings.style.quoteColor = "rgb(228, 228, 183)";
+EDITOR.settings.style.xmlTagColor = "rgb(200, 241, 250)";
+EDITOR.settings.style.lineNumberColor = "rgb(114, 114, 114)";
+</textarea>
+
+
+<h3>Disable plugins</h3>
+<textarea rows="2" style="width: 100%">
+EDITOR.disablePlugin("Plugin description");
+</textarea>
+
+
+
+</body>
+</html>

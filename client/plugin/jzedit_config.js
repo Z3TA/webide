@@ -8,6 +8,8 @@
 	var nameOfJS = "jzedit_js_overload.js";
 	var nameOfCSS = "jzedit_css_overload.css"
 	
+	var menuItem;
+	
 	EDITOR.plugin({
 		desc: "Editor configuration and customization via JS and CSS overloading",
 		load: load,
@@ -27,11 +29,33 @@
 		
 		EDITOR.on("afterSave", configurationMaybe);
 		
+		menuItem = EDITOR.addMenuItem("Editor customization", showLocalCustomization, 20);
+		
+		var root = (EDITOR.user && EDITOR.user.homeDir) || "/";
+		
 		var jsCode = getJS();
-		if(jsCode) overloadJs(jsCode)
+		if(jsCode) overloadJs(jsCode);
+		/*
+			else {
+			EDITOR.readFromDisk( UTIL.joinPaths(root,nameOfJS), function(err, jsCode) {
+			if(!err && jsCode) {
+			overloadJs(jsCode);
+			}
+			});
+			}
+		*/
 		
 		var cssCode = getCSS();
 		if(cssCode) overloadCss(cssCode);
+		/*
+			else {
+			EDITOR.readFromDisk( UTIL.joinPaths(root,nameOfCSS), function(err, cssCode) {
+			if(!err && cssCode) {
+			overloadCss(cssCode);
+			}
+			});
+			}
+		*/
 		
 	}
 	
@@ -41,10 +65,10 @@
 		console.warn("configurationMaybe: fileName=" + fileName);
 		
 		if(fileName == nameOfJS || fileName == nameOfCSS) {
-			var yes = "Save it"
-			var overload = "Save and reload editor"
+			var yes = "Yes";
+			var overload = "Yes, and restart!";
 			var no = "Not now";
-			confirmBox("Do you want to apply " + fileName + "  configuration?", [yes, overload, no], function(answer) {
+			confirmBox("Save the content of " + fileName + " locally and run it when the editor loads !?", [yes, overload, no], function(answer) {
 				if(answer==overload || answer==yes) {
 					if(fileName==nameOfJS) saveJS(file.text);
 					else if(fileName==nameOfCSS) saveCSS(file.text);
@@ -92,6 +116,30 @@
 		}
 	}
 	
+	function showLocalCustomization() {
+		var jsCode = getJS();
+		var cssCode = getCSS();
+		
+		if(!jsCode) {
+			jsCode = '/*\nThis code will execute every time you start the editor!\n*/\n\n';
+		}
+		
+		if(!cssCode) {
+			cssCode = '/*\nThese CSS rules will be applied when you start the editor!\n*/';
+		}
+		
+		EDITOR.openFile(nameOfJS, jsCode, function(err, file) {
+			if(err) throw err;
+			
+		});
+		
+		EDITOR.openFile(nameOfCSS, cssCode, function(err, file) {
+			if(err) throw err;
+			
+		});
+		
+		EDITOR.hideMenu();
+	}
 	
 	function getJS() {
 		return window.localStorage.getItem(nameOfJS);

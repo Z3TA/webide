@@ -29,11 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Prio documentation !?
 
 
-Find cool node.js multiplayer games and stuff, and see if it works in the cloud ide.
-
-The default test repo should have some cool examples!
 
 
 native keyboard hides and then shows which makes the screen jump.
