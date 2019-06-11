@@ -620,7 +620,7 @@ var encoding = "utf8";
 	var lb = UTIL.determineLineBreakCharacters(content);
 	
 	if(content.slice(content.length-lb.length) != lb) {
-		console.warn("content.length=" + content.length + " did not end with a " + UTIL.lbChars(lb) + " line break!");
+		console.log("writeLines: content.length=" + content.length + " did not end with a " + UTIL.lbChars(lb) + " line break!");
 	}
 	else if(content.indexOf(lb) != -1) {
 		content = content.slice(0, -lb.length); // Remove the ending lb
@@ -633,7 +633,7 @@ var encoding = "utf8";
 	
 	var chunkSize = json.chunkSize; // Useful when testing
 	
-	console.log("writeLines: start=" + start + " end=" + end + " overwrite=" + overwrite + " path=" + path + " lb=" + UTIL.lbChars(lb) + " content.length=" + content.length + "  ");
+	//console.log("writeLines: start=" + start + " end=" + end + " overwrite=" + overwrite + " path=" + path + " lb=" + UTIL.lbChars(lb) + " content.length=" + content.length + "  ");
 	
 	if(!UTIL.isLocalPath(path)) return writeLinesCallback(new Error("writeLines currently only supports local files!"));
 	if(overwrite && !end) return writeLinesCallback(new Error("end line need to be specified if overwriting!"));
@@ -661,7 +661,7 @@ var encoding = "utf8";
 	original.on('readable', function() {
 		// The 'readable' event is emitted when there is data available to be read from the stream
 		// note: It will be called many times!
-		console.log("Read stream now readable!");
+		//console.log("writeLines: original:readable: Read stream now readable!");
 		//if(originalReadable) console.warn("read stream readable called twice!");
 		originalReadable = true;
 		if(tmpReady && !hasStarted) begin();
@@ -670,7 +670,7 @@ var encoding = "utf8";
 });
 	original.on("end", function() {
 		// The 'end' event is emitted when there is no more data to be consumed from the stream.
-		console.log("Read stream ended! textHead.length=" + textHead.length + " text.length=" + text.length + " isWriting=" + isWriting);
+		//console.log("writeLines: original:end: Read stream ended! textHead.length=" + textHead.length + " text.length=" + text.length + " isWriting=" + isWriting);
 		
 		doneReading = true;
 
@@ -678,44 +678,44 @@ var encoding = "utf8";
 		read();
 	});
 	original.on("error", function(err) {
-		console.log("Read stream error: " + err.message);
+		console.log("writeLines: original:error: " + err.message);
 		finished = true;
 		writeLinesCallback(new Error("Problem with read stream: " + err.message));
 	});
 	original.on("close", function() {
 		// The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed. The event indicates that no more events will be emitted, and no further computation will occur.
-		console.log("Read stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
-		if(originalClosed) console.warn("read stream close called twice!");
+		console.log("writeLines: original:close: doneReading=" + doneReading + " contentWritten=" + contentWritten);
+		if(originalClosed) console.warn("writeLines: original:close: read stream close called twice!");
 		originalClosed = true;
 		if(tmpClosed && !finished) finish();
-		else console.log("Waiting for write stream to close");
+		else console.log("writeLines: original:close: Waiting for write stream to close ...");
 	});
 	
 	var writeOptions = {};
 	if(chunkSize) writeOptions.highWaterMark = chunkSize;
-	console.log("Creating write stream tmpPath=" + tmpPath + " writeOptions=" + JSON.stringify(writeOptions));
+	console.log("writeLines: Creating write stream tmpPath=" + tmpPath + " writeOptions=" + JSON.stringify(writeOptions));
 	var tmp = fs.createWriteStream(tmpPath, writeOptions);
 	var tmpReady = false;
 	tmp.on('ready', function() {
 		// Emitted when the fs.WriteStream is ready to be used.
-		console.log("write stream ready!");
-		if(tmpReady) console.warn("write stream ready called twice!");
+		console.log("writeLines: write stream ready!");
+		if(tmpReady) console.warn("writeLines: write stream ready called twice!");
 		tmpReady = true;
 		if(originalReadable && !hasStarted) begin();
-		else if(!hasStarted) console.log("Waiting for read stream readable ...");
+		else if(!hasStarted) console.log("writeLines: Waiting for read stream readable ...");
 	});
 	tmp.on("error", function(rtt) {
-		console.log("tmp stream error: " + err.message);
+		console.log("writeLines: tmp stream error: " + err.message);
 		finished = true;
 		writeLinesCallback(new Error("Problem with write stream: " + err.message));
 	});
 	tmp.on("close", function() {
 		// Emitted when the WriteStream's underlying file descriptor has been closed.
-		console.log("tmp stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
-		if(tmpClosed) console.warn("write stream close called twice!");
+		console.log("writeLines: tmp stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
+		if(tmpClosed) console.warn("writeLines: write stream close called twice!");
 		tmpClosed = true;
 		if(originalClosed && !finished) finish();
-		else console.log("Waiting for read stream to close");
+		else console.log("writeLines: Waiting for read stream to close");
 	});
 	
 	function finish() {
@@ -753,10 +753,10 @@ var encoding = "utf8";
 	
 	function read() {
 		
-		console.log("read: textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
+		//console.log("writeLines: read: textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
 		
 		if(isWriting) {
-console.log("Waiting for write to be done ...");
+			console.log("writeLines: read: Waiting for write to be done ...");
 			return;
 		}
 		
@@ -770,20 +770,20 @@ console.log("Waiting for write to be done ...");
 		var chunk = original.read();
 		
 		if(chunk == null) {
-			console.log("chunk=" + chunk + " text.length=" + text.length + " textHead.length=" + textHead.length + " doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+			//console.log("writeLines: read: chunk=" + chunk + " text.length=" + text.length + " textHead.length=" + textHead.length + " doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+			
 			// This has a probability to happen *before* the read stream end event!
 			
 			if(!doneReading) {
-				//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
 				readWhenReady = true;
-				console.log("Waiting for readable ... doneReading=" + doneReading);
+				//console.log("writeLines: read: Waiting for readable ... doneReading=" + doneReading);
 				return;
 			}
 			
 			if(text.length == 0 && contentWritten && !isWriting) {
-				console.log("Ending write stream because there's nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
+				console.log("writeLines: read: Ending write stream because there's nothing more to write! doneReading=" + doneReading + " contentWritten=" + contentWritten + " isWriting=" + isWriting);
 				tmp.end(function() {
-					console.log("Write stream ended! isWriting=" + isWriting);
+					console.log("writeLines: read: Write stream ended! isWriting=" + isWriting);
 				});
 				return;
 			}
@@ -792,13 +792,13 @@ console.log("Waiting for write to be done ...");
 		// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 		text += decoder.write(chunk);
 		}
-		console.log("text=" + UTIL.lbChars(UTIL.shortString(text)));
+		console.log("writeLines: read: text=" + UTIL.lbChars(UTIL.shortString(text)));
 		
 		// Don't remove any line breaks here! Doing so might concatenate two rows!
 		
 		if(!doneReading) {
 			if(text.indexOf(lb) == -1) {
-			console.log("Text does not contain a line break. Continue reading ...");
+				console.log("writeLines: read: Text does not contain a line break. Continue reading ...");
 			read();
 			return;
 		}
@@ -806,8 +806,8 @@ console.log("Waiting for write to be done ...");
 			if(text.slice(text.length-lb.length) != lb) {
 				textHead = text.slice(text.lastIndexOf(lb)+lb.length); // Will be the start of the text at next read
 				text = text.slice(0, text.lastIndexOf(lb)); // Set the text to everything up until but not including the last line break
-			console.log("textHead.length=" + textHead.length + " text.length=" + text.length);
-				console.log("Sliced textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
+				console.log("writeLines: read: textHead.length=" + textHead.length + " text.length=" + text.length);
+				console.log("writeLines: read: Sliced textHead=" + UTIL.lbChars(UTIL.shortString(textHead)) + " text=" + UTIL.lbChars(UTIL.shortString(text)) + " ");
 		}
 			else {
 			text = text.slice(0, -lb.length); // Remove the ending lb
@@ -825,16 +825,16 @@ console.log("Waiting for write to be done ...");
 		
 		processRows(rows, read);
 		
-		console.log("line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + (chunk && chunk.length) + " bytes from " + path);
+		//console.log("writeLines: read: line=" + line + " doneReading=" + doneReading + " rows.length=" + rows.length + " Read " + (chunk && chunk.length) + " bytes from " + path);
 		
 	}
 	
 	function processRows(rows, callback) {
 		//console.log("rows=" + JSON.stringify(rows));
 		
-		console.log("Line " + line + ": " + rows[0]);
+		console.log("writeLines: processRows: Line " + line + ": " + rows[0]);
 		
-		console.log("totalRowsRead=" + totalRowsRead);
+		console.log("writeLines: processRows: totalRowsRead=" + totalRowsRead);
 		
 		totalRowsRead += rows.length;
 		
@@ -861,7 +861,7 @@ console.log("Waiting for write to be done ...");
 		
 		var tailLength = rows.length - tailIndex + 1;
 		
-		console.log("rows.length=" + rows.length + " line=" + line + " start=" + start + " headIndex=" + headIndex + " headLength=" + headLength +
+		console.log("writeLines: processRows: rows.length=" + rows.length + " line=" + line + " start=" + start + " headIndex=" + headIndex + " headLength=" + headLength +
 		" end=" + end + " tailIndex=" + tailIndex + " tailLength=" + tailLength + "");
 		
 		line += rows.length;
@@ -872,11 +872,11 @@ console.log("Waiting for write to be done ...");
 		
 		var head = rows.splice(headIndex, headLength);
 		
-		console.log(" head.length=" + head.length + " tail.length=" + tail.length + " rows.length=" + rows.length + " overwrite=" + overwrite + "");
+		console.log("writeLines: processRows: head.length=" + head.length + " tail.length=" + tail.length + " rows.length=" + rows.length + " overwrite=" + overwrite + "");
 		
-		//console.log("head=" + JSON.stringify(head));
-		//console.log("tail=" + JSON.stringify(tail));
-		//console.log("rows=" + JSON.stringify(rows));
+		//console.log("writeLines: processRows: head=" + JSON.stringify(head));
+		//console.log("writeLines: processRows: tail=" + JSON.stringify(tail));
+		//console.log("writeLines: processRows: rows=" + JSON.stringify(rows));
 		
 		//if(tail.length == 0 && rows.length > 0 && !overwrite) tail = rows;
 		
@@ -898,18 +898,18 @@ console.log("Waiting for write to be done ...");
 	}
 	
 	function write(rows, callback) {
-		if(isWriting) console.warn("Write in progress!");
+		if(isWriting) console.warn("writeLines: write: Write in progress!");
 		
-		console.log("  Writing rows.length=" + rows.length + " : 0=" + rows[0]);
+		//console.log("writeLines: write: rows.length=" + rows.length + " : 0=" + rows[0]);
 		
 		isWriting = true;
 		var row = 0;
 		var rowsToWrite = rows.length;
 		
-		//console.log(" write: " + JSON.stringify(rows));
+		//console.log("writeLines: write: " + JSON.stringify(rows));
 		
 		if(rows.length == 0) {
-			console.warn("Zero rows!");
+			//console.warn("writeLines: write: Zero rows!");
 			return done();
 		}
 		
@@ -917,7 +917,7 @@ console.log("Waiting for write to be done ...");
 		
 		function done() {
 			isWriting = false;
-			console.log("Last row of " + rowsToWrite + " rows written. totalRowsWritten=" + totalRowsWritten);
+			//console.log("writeLines: write:done: Last row of " + rowsToWrite + " rows written. totalRowsWritten=" + totalRowsWritten);
 			callback();
 		}
 		
@@ -945,7 +945,7 @@ console.log("Waiting for write to be done ...");
 			if (row < rows.length) {
 				// had to stop early!
 				// write some more once it drains
-				console.log("Waiting for drain ...");
+				console.log("writeLines: writeRow: Waiting for drain ...");
 				tmp.once('drain', writeRow);
 			}
 		}
@@ -1558,7 +1558,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	var hostname = parse.hostname;
 	var pathname = parse.pathname;
 	
-	console.log("listFiles: protocol=" + protocol + " pathToFolder=" + pathToFolder);
+	//console.log("listFiles: protocol=" + protocol + " pathToFolder=" + pathToFolder);
 	
 	if(protocol == "ftp:" || protocol == "ftps:") {
 		// ### List files using FTP protocol

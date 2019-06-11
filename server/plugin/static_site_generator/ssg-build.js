@@ -67,7 +67,7 @@
 
 "use strict";
 
-console.time("total time")
+console.time("SSG: total time")
 
 /*
 if(require.main === module) {
@@ -149,44 +149,44 @@ var main = {
 		
 		if(typeof SEND_MESSAGE != "function") throw new Error("onMessage needs to be a function! typeof onMessage = " + (typeof this.onMessage));
 		
-	console.time("walk");
+	console.time("SSG: walk");
 	findFiles(BASEPATH, ROOT, function() {
-		console.timeEnd("walk");
+			console.timeEnd("SSG: walk");
 		
 		//log(JSON.stringify(ROOT, null, 2));
 		
 		//process.exit();
 		
 		log("\nCompiling files ...");
-		console.time("compile");
+			console.time("SSG: compile");
 		compile(ROOT);
-		console.timeEnd("compile");
+			console.timeEnd("SSG: compile");
 		
 		log("\nEvaluating ...");
-		console.time("evaulute");
+			console.time("SSG: evaulute");
 		evaluate(ROOT);
-		console.timeEnd("evaulute");
+			console.timeEnd("SSG: evaulute");
 		
 		//log("MEDIAFILES=" + MEDIAFILES);
 		
 		log("\nBuilding ...");
-		console.time("build");
+			console.time("SSG: build");
 		
 		build(ROOT, PUBFOLDER, function() {
 			
-			console.timeEnd("build");
+				console.timeEnd("SSG: build");
 			
 			log("\nCopying media files ...")
-			console.time("copy");
+				console.time("SSG: build: copy");
 			copyOtherFiles(function(fileCount) {
-				console.timeEnd("copy");
+					console.timeEnd("SSG: build: copy");
 				log("Copied " + fileCount + " files!");
 				
 				// Static preview server (preview.js)
 				
 				// FTP upload is separate script! (deploy.js)
 				
-				console.timeEnd("total time");
+				console.timeEnd("SSG: total time");
 					if(MAIN_CALLBACK) MAIN_CALLBACK(null);
 				
 			});
@@ -520,14 +520,14 @@ function compile(baseTree) {
 			
 			
 			document.require = function(moduleName) {
-				console.log("Requring moduleName=" + moduleName);
+				console.log("SSG: compileFile: document.require: Requring moduleName=" + moduleName);
 				var nodeModulesPathOriginal = process.env.NODE_PATH;
 				//process.env.NODE_PATH = NODE_MODULES_PATH;
 				try {
 					var m = require(NODE_MODULES_PATH + moduleName);
 				}
 				catch(err) {
-					console.log("Requring moduleName=" + moduleName + " failed! err=" + err.message + " NODE_MODULES_PATH=" + NODE_MODULES_PATH);
+					console.log("SSG: compileFile: document.require: Requring moduleName=" + moduleName + " failed! err=" + err.message + " NODE_MODULES_PATH=" + NODE_MODULES_PATH);
 				}
 				//process.env.NODE_PATH = nodeModulesPathOriginal;
 				return m;
@@ -1473,7 +1473,7 @@ function contentOfHtmlTag(text, tag, nr) {
 	} while (insideXmp && tagEnd != -1);
 	
 	if(tagEnd == -1) {
-		console.warn("Could not find tag ending for tag: " + tag + "");
+		console.warn("SSG: contentOfHtmlTag: Could not find tag ending for tag: " + tag + "");
 		return "";
 	}
 	
@@ -1790,7 +1790,7 @@ function parseEvalError(doc, scriptCount, err) {
 	var upUntil = str.substr(0, startIndex);
 	var lines = occurrences(upUntil, "\n");
 	
-	console.log("line=" + line + " lines=" + lines);
+	console.log("SSG: parseEvalError: line=" + line + " lines=" + lines);
 	
 	line += lines + 2;
 	
@@ -1903,7 +1903,7 @@ function getStack(scriptName, lineNr) {
 	
 	if(lineNr >= stack.length) lineNr = stack.length-1;
 	
-	console.log("stack: " + stack);
+	console.log("SSG: getStack: stack: " + stack);
 	
 	/*
 	var re = new RegExp(scriptName + ":(\\d+):(\\d+)");
@@ -1936,7 +1936,7 @@ function getStack(scriptName, lineNr) {
 
 
 if (require.main === module) {
-	console.log('Static Site Generator spawned.');
+	//console.log('SSG: spawned!');
 	
 	// These paths needs to be absolute!
 	main.basePath = mustBePath(process.argv[2], "."); // Path to files that should be processed
@@ -1963,15 +1963,15 @@ if (require.main === module) {
 			});
 		}
 		else if(o.type == "debug") {
-			if(debug) console.log("debug: " + o.msg);
+			if(debug) console.log("SSG: debug: " + o.msg);
 		}
 		else if(o.type == "console") {
 			// Messages from scrips
-			console.log(o.scriptName + " : " + o.location + " : " + o.msg);
+			console.log("SSG: console: " + o.scriptName + " : " + o.location + " : " + o.msg);
 		}
 		else if(o.type == "error") {
 			console.log("Static Site Generator error!");
-			if(o.msg) console.log(o.msg);
+			if(o.msg) console.log("SSG: error: " + o.msg);
 			process.exit(1);
 		}
 		else throw new Error("Unexpected: ", o);
@@ -1981,7 +1981,7 @@ if (require.main === module) {
 	
 }
 else {
-	console.log('Static Site Generator required as a module');
+	//console.log('SSG: Required as a module');
 	module.exports = main;
 }
 

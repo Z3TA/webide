@@ -93,7 +93,7 @@ var abort = false;
 
 		// Give a warning if we are mounting a symlink
 		module_fs.readlink(sourcePath, function(err, linkString) {
-			if(!err) console.warn("Source is a symlink: " + sourcePath + " -> " + linkString);
+			if(!err) console.log("Source is a symlink: " + sourcePath + " -> " + linkString);
 		});
 		
 		if( !UTIL.isDirectory(sourcePath) && sourcePath.indexOf("bin") != -1 ) {

@@ -192,20 +192,20 @@ var UTIL = {
 		var protocolIndex = fullPath.indexOf("://");
 		
 		if(lastChar != "/" && lastChar != "\\" && protocolIndex == -1) {
-			//console.warn("getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
+			//console.warn("getFolders: getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
 			// Check if the path contains a file, and remove it
-			//console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
+			//console.log("getFolders: lastChar=" + lastChar + " fullPath=" + fullPath);
 			var delimiter = UTIL.getPathDelimiter(fullPath);
 			var filePart = fullPath.substr(fullPath.lastIndexOf(delimiter));
 			
-			console.log("filePart=" + filePart + " delimiter=" + delimiter);
+			//console.log("getFolders: : filePart=" + filePart + " delimiter=" + delimiter);
 			
 			if(filePart.indexOf(".") != -1) {
 				fullPath = fullPath.substr(0, fullPath.lastIndexOf(delimiter)+1); // Remove the file part
-				console.log("fullPath=" + fullPath +" (after removing file part)");
+				//console.log("getFolders: fullPath=" + fullPath +" (after removing file part)");
 				if(fullPath == "/") return ["/"];
 			}
-			//else console.warn("Assuming " + filePart + " is a directory!");
+			//else console.warn("getFolders: Assuming " + filePart + " is a directory!");
 			}
 		
 		if(protocolIndex != -1) {
@@ -1546,18 +1546,18 @@ else {
 			/foo/ + ../bar = /bar
 		*/
 		
-		console.log("resolvePath: base=" + base + " path=" + path);
+		//console.log("resolvePath: base=" + base + " path=" + path);
 		
 		if(base.indexOf("://") != -1) {
-			console.log("Probably an url: base=" + base);
+			//console.log("resolvePath: Probably an url: base=" + base);
 			var loc = UTIL.getLocation(base);
 			var url = base.slice(0, base.lastIndexOf(loc.pathname));
 			base = loc.pathname;
-			console.log("new base=" + base + " url=" + url);
+			//console.log("resolvePath: new base=" + base + " url=" + url);
 			
 			// Sanity check
 			if(url.indexOf("://") == -1) { 
-				console.warn("url lost it's protocol!");
+				console.warn("resolvePath: url lost it's protocol!");
 				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname);
 			}
 			if(url.slice(-1) == "/") {
@@ -1580,7 +1580,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		while(base.indexOf(delimiter+delimiter) != -1) base = base.replace(delimiter+delimiter, delimiter);
 		while(path.indexOf(delimiter+delimiter) != -1) path = path.replace(delimiter+delimiter, delimiter);
 		
-		console.log("resolvePath: base=" + base + " path=" + path + " (after removing dublicate delimiters)");
+		//console.log("resolvePath: base=" + base + " path=" + path + " (after removing dublicate delimiters)");
 		
 		if(delimiter == "/") {
 			// Unix paths should always start with a delimiter!
@@ -1590,7 +1590,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		// Base should always end with a delimiter!
 		if(base.slice(-1) != delimiter) base = base + delimiter;
 		
-		console.log("base=" + base);
+		//console.log("resolvePath: base=" + base);
 		
 		var folders = base.split(delimiter);
 		
@@ -1604,24 +1604,24 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		if(folders.length > 0) var firstFolder = UTIL.trailingSlash(folders[0]);
 		else var firstFolder = delimiter;
 		
-		console.log("folders=" + folders);
+		//console.log("resolvePath: folders=" + folders);
 		
 		if(path.charAt(0) == delimiter) {
 			// ex: /foo/bar
 			// resolve to root!
-			console.log("path=" + path + " is absolute!");
+			//console.log("resolvePath: path=" + path + " is absolute!");
 			if(url) return url + path;
 			else return path;
 		}
 		else if(path.charAt(0) != ".") {
 			// ex: foo/bar
-			console.log("path=" + path + " is relative-absolute!");
+			//console.log("resolvePath: path=" + path + " is relative-absolute!");
 			if(url) return url + UTIL.trailingSlash(base) + path;
 			else return base + path;
 		}
 		else if(path.charAt(0) == "." && path.charAt(1) == delimiter) {
 			// ex: ./foo
-			console.log("path=" + path + " is relative DOT absolute!");
+			//console.log("resolvePath: path=" + path + " is relative DOT absolute!");
 			path = path.slice(2); // Remove starting ./
 			if(url) return url + base + path;
 			else return base + path;
@@ -1629,24 +1629,24 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		while(path.slice(0,3) == ".." + delimiter) {
 			var popped = folders.pop();
-			console.log("popped " + popped);
+			//console.log("resolvePath: popped " + popped);
 			path = path.slice(3);
 		}
 		
 		base = folders.join(delimiter);
 		if(base.length > 1) {
-			console.log("concatenating base");
+			//console.log("resolvePath:  concatenating base");
 			if(delimiter == "/") var absolutePath = delimiter + base + delimiter + path;
 			else var absolutePath = base + delimiter + path;
 		}
 		else {
-			console.log("base is emty");
+			//console.log("resolvePath: base is emty");
 			
 			if(delimiter == "/") var absolutePath = delimiter + path;
 			else var absolutePath = firstFolder + path;
 		}
 		
-		console.log("absolutePath=" + absolutePath);
+		//console.log("resolvePath: absolutePath=" + absolutePath);
 		
 		if(url) return url + absolutePath
 		else return absolutePath;
@@ -2074,6 +2074,8 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		if(limit == undefined) limit = 512;
 		
 		var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject;
+		
+		str = str.replace(/"password":"[^"]*"/g, '"password":"***"');
 		
 		if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
 		

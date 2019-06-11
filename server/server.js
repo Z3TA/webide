@@ -418,10 +418,10 @@ else if(err) throw err;
 
 function readEtcPasswd(username, readEtcPasswdCallback) {
 	if(username == undefined) throw new Error("username=" + username);
-	console.log("Check for username=" + username + " in /etc/passwd ...");
+	//console.log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...");
 	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
 		if(err) {
-			console.warn("Unable to read /etc/passwd !");
+			console.warn("readEtcPasswd: Unable to read /etc/passwd !");
 			return readEtcPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
 		}
 		else {
@@ -438,7 +438,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				var pShell = row[6];
 				
 				if(pName == username) {
-					console.log("Found username=" + username + " in /etc/passwd");
+					console.log("readEtcPasswd: Found username=" + username + " in /etc/passwd");
 					
 					readEtcPasswdCallback(null, {
 						username: username,
@@ -452,7 +452,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				}
 			}
 			
-			console.log("Did not find username=" + username + " in /etc/passwd");
+			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd");
 			
 			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
 			error.code = "USER_NOT_FOUND";
@@ -1246,7 +1246,9 @@ function broadcast(myIp) {
 		});
 		
 		broadcastClient.on('message', function (message, rinfo) {
-			console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+			if(rinfo && rinfo.address != myIp) {
+				console.log('broadcastClient: message: address=' + rinfo.address + ' port=' + rinfo.port +' message=' + message);
+			}
 			
 			var lookForServerMessage = "Where can I find a jzedit server?"
 			
@@ -1267,7 +1269,7 @@ function broadcast(myIp) {
 	function advertise(broadcastAddress) {
 		var message = new Buffer(serverAdvertiseMessage);
 		broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
-			console.log("Sent '" + message + "'");
+			//console.log("advertise: Sent '" + message + "'");
 		});
 	}
 	
@@ -1336,13 +1338,9 @@ function sockJsConnection(connection) {
 	connection.write('{"editorVersion": ' + EDITOR_VERSION + '}');
 	
 	function sockJsMessage(message) {
-		
-		if(message.length > 300) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
-		else log(IP + " => " + message);
-		
+		log(UTIL.shortString(IP + " => " + message));
 		handleUserMessage(message);
-		
-	}
+		}
 	
 	function sockJsClose() {
 		
@@ -1769,7 +1767,7 @@ function sockJsConnection(connection) {
 								}, 3000);
 							*/
 							
-							console.log("userConnectionId=" + userConnectionId);
+							//console.log("userConnectionId=" + userConnectionId);
 							
 							// Respond to the client that the login was successful
 							var userInfo = {
@@ -2090,7 +2088,7 @@ function sockJsConnection(connection) {
 							}
 							
 							function workerCloseHandler(code, signal) {
-								console.log(userConnectionName + " worker close: code=" + code + " signal=" + signal);
+								//console.log(userConnectionName + " worker close: code=" + code + " signal=" + signal);
 								
 								var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
 								
@@ -2237,7 +2235,7 @@ function checkMounts(options, checkMountsCallback) {
 		return checkMountsCallback(null);
 	}
 	
-	console.log("Checking mounts for username=" + username + " ...");
+	//console.log("Checking mounts for username=" + username + " ...");
 	console.time("check " + username + " mounts");
 	
 	var apparmorProfiles = [
@@ -2267,7 +2265,7 @@ function checkMounts(options, checkMountsCallback) {
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
 		
-		console.log("User rights OK for username=" + username);
+		//console.log("User rights OK for username=" + username);
 		
 		/*
 			// Check if cacerts need to be updated
@@ -2653,7 +2651,7 @@ function checkMounts(options, checkMountsCallback) {
 		var toChown = 0;
 		var toStat = 0;
 		
-		console.log("Checking user rights for username=" + username + " ...");
+		//console.log("Checking user rights for username=" + username + " ...");
 		console.time("Check " + username + " user rights");
 		module_fs.stat(HOME_DIR + username, function (err, stats) {
 			if(err) throw err;
@@ -2816,7 +2814,7 @@ function checkMounts(options, checkMountsCallback) {
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
-		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
+		//console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
 		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
@@ -3571,7 +3569,6 @@ function createUserWorker(name, uid, gid, homeDir) {
 		console.log(name + " worker error: err.message=" + err.message);
 	});
 	
-	// Update between node4 and node8: It no longer calls exit, only close
 	worker.on("exit", function workerExit(code, signal) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 	});

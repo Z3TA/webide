@@ -47,9 +47,9 @@ var DEBUG = 7;
 var USER_PROD_FOLDER = "/.prod/";
 
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
-log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
-log("process.env.uid=" + process.env.uid, 7);
-log("process.env=" + JSON.stringify(process.env));
+//log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
+//log("process.env.uid=" + process.env.uid, 7);
+//log("process.env=" + JSON.stringify(process.env));
 
 
 if(USE_CHROOT) {
@@ -133,7 +133,7 @@ else log("Unable to get process uid!", 4);
 */
 var newmask = parseInt("0002", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 var oldmask = process.umask(newmask);
-log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
+//log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 
 // Changed umask from 22 to 77
 
@@ -157,7 +157,7 @@ if(USE_CHROOT) user.chrooted = true;
 
 user.identify = function identify(info) {
 	
-	console.log("info: ", JSON.stringify(info));
+	//console.log("user.identify: info=" + JSON.stringify(info));
 	
 	user.id = info.id;
 	user.name = info.name;
@@ -165,7 +165,7 @@ user.identify = function identify(info) {
 	user.defaultWorkingDirectory = info.homeDir;
 	user.homeDir = info.homeDir;
 	
-	console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
+	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
 	var path = require("path");
 	
@@ -173,19 +173,19 @@ user.identify = function identify(info) {
 		user.rootPath = path.resolve(user.rootPath);
 		user.rootPath = UTIL.trailingSlash(user.rootPath);
 		user.defaultWorkingDirectory = "/";
-		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user.rootPath=" + user.rootPath + ")");
+		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user.rootPath=" + user.rootPath + ")");
 	}
 	else if(!user.defaultWorkingDirectory) {
 		var editorDir = path.resolve("./../");
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
-		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
+		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
 	}
 	
 	if(USE_CHROOT) {
 		user.rootPath = null;
 		user.defaultWorkingDirectory = "/";
 		user.homeDir = "/";
-		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + ")");
+		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + ")");
 	}
 	
 	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);
@@ -379,7 +379,7 @@ user.loadStorage = function loadStorage(callback) {
 	
 	var filesRead = 0;
 	
-	console.log("Reading storage files for user=" + user.name + " in directory: " + user.storageDir);
+	//console.log("Reading storage files for user=" + user.name + " in directory: " + user.storageDir);
 	
 	if(!user.storageDir.match(/\/|\\$/)) throw new Error("Does not end with a slash: user.storageDir=" + user.storageDir);
 	
@@ -433,7 +433,7 @@ user.loadStorage = function loadStorage(callback) {
 			
 			var itemName = decodeURIComponent(fileItemName);
 			
-			console.log("Loading item=" + itemName);
+			//console.log("Loading item=" + itemName);
 			fs.readFile(user.storageDir + fileItemName, "utf8", function readStorageFileItem(err, data) {
 				if(err) {
 					if(err.code == "EACCES") {
@@ -447,7 +447,7 @@ user.loadStorage = function loadStorage(callback) {
 				
 				filesRead++;
 				
-				console.log("Done loading item=" + itemName + " (" + filesRead + " or " + files.length + ")");
+				//console.log("Done loading item=" + itemName + " (" + filesRead + " or " + files.length + ")");
 				
 				if(filesRead == files.length) callback(null, user.storage);
 				

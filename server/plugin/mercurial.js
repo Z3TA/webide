@@ -273,9 +273,9 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 MERCURIAL.status = function hgstatus(user, json, callback) {
 	// show changed files in the working directory
 	
-	if(process.getuid) console.log("I am uid=" + process.getuid());
+	var directory = json.directory;
 	
-	var directory =json.directory;
+	//if(process.getuid) console.log("MERCURIAL.status: directory=" + directory + " uid=" + process.getuid());
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(typeof directory != "string") throw new Error("directory=" + directory + " (" + typeof directory + ") needs to be a string!");
@@ -287,12 +287,12 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	var execFile = require('child_process').execFile;
 	
-	console.log("hg.status checkDir: directory=" + directory);
+	//console.log("hg.status checkDir: directory=" + directory);
 	
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
-		console.log("hg.status checkDir answer: rootDir=" + rootDir);
+		//console.log("hg.status checkDir answer: rootDir=" + rootDir);
 		
 		if(err) return callback(err);
 		
@@ -306,9 +306,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
-				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + 
-			" rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + 
-			" env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
+				//console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
 				
 				if(err) return callback(err);
 				else if(stderr) return callback(stderr);
