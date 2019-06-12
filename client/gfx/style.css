@@ -1482,8 +1482,9 @@ div.group {
 	
 	.topRightMenuButton {
 		height: 21px;
-		border-radius: 0px 0px 0px 10px;
-}
+		width: 21px;
+		font-size: 17px;
+	}
 	
 	select.functionList.floatingInHeader {
 		height: 21px;
