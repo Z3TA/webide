@@ -188,10 +188,11 @@
 		
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 		
-		if(cwd.indexOf("://") != -1) {
+		if(cwd && cwd.indexOf("://") != -1) {
 			if(EDITOR.user && EDITOR.user.home) cwd = EDITOR.user.home;
-			else cwd = "/";
 		}
+		
+		if(!cwd) cwd = "/";
 		
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
