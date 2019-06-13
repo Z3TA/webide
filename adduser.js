@@ -431,7 +431,8 @@ function adduser() {
 	}
 	catch (err) {
 			console.log(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
-	}
+			NO_CERT = true;
+		}
 	
 		if(!NO_CERT) {
 		// Register SSL certificate for user web page
