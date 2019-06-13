@@ -55,7 +55,7 @@ body {
 	margin: 0px;
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
-	font-family: Arial;
+	font-family: Arial, Helvetica, sans-serif;
 	-webkit-transform: scale(1.00); /* Prevents the browser from "accidently" zooming out when switching orientation */
 }
 
@@ -1480,19 +1480,25 @@ div.group {
 	}
 	
 	ul#tabList li.tabFolderItem.single {
-		padding-top: 8px;
+		padding-top: 6px; /* 8px */
+		padding-bottom: 1px;
 		
 	}
 	
 	ul#tabList li.tabFileItem {
 		font-size: 10px;
-		
-}
+		}
+	
+	ul#tabList button.closeFileTab {
+		margin-top: -3px;
+		margin-left: -16px;
+	}
 	
 	.topRightMenuButton {
-		height: 21px;
+		height: 22px;
 		width: 21px;
-		font-size: 17px;
+		font-size: 15px;
+		font-family: Arial, Helvetica, sans-serif;
 	}
 	
 	select.functionList.floatingInHeader {
