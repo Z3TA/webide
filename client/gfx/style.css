@@ -1000,7 +1000,7 @@ div.gotoFile li:hover {
 	box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
 }
 
-.menu li:hover {
+.menu li.item:hover {
 	color: white;
 	color: black;
 	/*text-shadow: 0 1px rgba(0, 0, 0, 0.3);*/
@@ -1054,11 +1054,20 @@ div.gotoFile li:hover {
 	margin-top: 4px;
 	}
 
-.menu li:hover .key {
+.menu li.item:hover .key {
 	color: #1460AA;
 	}
 
+.menu li ul {
+	margin: 0;
+	padding: 0;
+}
 
+.menu li.temp {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
 
 
 /* ### Dialogs */

@@ -2677,6 +2677,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		var menu = document.getElementById("canvasContextmenu");
 		
 		var li = document.createElement("li");
+		li.setAttribute("class", "item");
 		
 		var bullet = document.createElement("span");
 		bullet.setAttribute("class", "bullet inactive");
@@ -2782,6 +2783,7 @@ console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.i
 		var tempItems = document.getElementById("canvasContextmenuTemp");
 		
 		var li = document.createElement("li");
+		li.setAttribute("class", "item");
 		
 		var bullet = document.createElement("span");
 		bullet.setAttribute("class", "bullet inactive");
