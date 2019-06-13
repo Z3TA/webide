@@ -91,7 +91,7 @@ If the test is inlined put the following comment before the test(s):
 And the following code after the tests
 // TEST-CODE-END
 
-If the tests are in seperate file(s), place them in the client/tests/ folder and,
+If the tests are in seperate file(s), place them in the client/tests/ folder and
 add them to index.htm somwhere between <!-- BEGIN TESTS --> and <!-- END TESTS -->
 
 
