@@ -1132,7 +1132,7 @@ function createGuestUser(id, callback) {
 			username: username,
 			password: password,
 			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
-			noCert: false
+			noCert: true
 		};
 		
 		
