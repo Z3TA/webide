@@ -649,6 +649,8 @@ ul#tabList li.tabFileItem {
 	position : relative;
 	line-height: 14px;
 	max-width : 200px;
+	
+	-webkit-tap-highlight-color: transparent; /* disable annoying blue box on mobiles */
 }
 
 ul#tabList li.tabFileItem.active {
