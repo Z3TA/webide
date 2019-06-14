@@ -11,11 +11,20 @@ div.header {
 	background-color: #343436;
 }
 
+
+
 .topRightMenuButton {
 	background: none;
 	color: #dcdddd;
-	
+	}
+
+select.functionList.floatingInHeader {
+	background: none;
+	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='32px'><text x='3' y='20' fill='DarkGray' font-size='18'>ƒ</text></svg>");
+	color: #dcdddd;
 }
+
+
 
 div.footer {
 	background: none;
