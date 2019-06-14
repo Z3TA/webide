@@ -19,12 +19,12 @@
 	check: https://transparencyreport.google.com/https/certificates?cert_search_auth=&cert_search_cert=&cert_search=include_expired:true;include_subdomains:true;domain:johan.webide.se&lu=cert_search
 	
 	
-	
 	How to test on the cloudIDE server (replace path to jzedit):
-	certbot certonly --staging --dry-run --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Remove --staging --dry-run for running in production.
 	And don't forget to delete /etc/letsencrypt/live/domain.tld/ or certbot will create domain.tld-0001/
+	
 	
 	Delete a cert:
 	certbot delete
@@ -54,8 +54,16 @@
 	Problem 4: When Certbot wants to register many domains, it first sends all stage=before, 
 	meaning we will have many TXT entries for the same domain!
 	
-	Solution: Check if there's already a value, then replace it
-	---------------------------------------------------------------------------------------------------
+	Solution1: Check if there's already a value, then replace it 
+	(doesn't work because certbot expects the first value)
+	
+	Solution2: Put the second request on wait until we get a stage=after for the old value
+	(also doesn't work because Certbot wont make a challange before it gets an OK from both stage=before!)
+	
+	Solution3: Add the second TXT record, but don't send an OK right away, and make Certbot wait when it sends a stage=after for the first record
+	
+	
+	
 	
 	
 	Check bind9 for zone file errors:
@@ -87,6 +95,12 @@ var TLDS;
 var HTTP_PORT;
 var HTTP_IP;
 var SECRET;
+
+var WAIT_ON_AFTER = "";
+var LAST_VALUE = "";
+var LAST_STAGE = "";
+var LAST_NAME = "";
+
 
 var CONFIG_FILE = "./letsEncryptDns.conf.json";
 MODULE_FS.readFile(CONFIG_FILE, function readDomains(err, data) {
@@ -150,15 +164,42 @@ function workQueue() {
 		return;
 	}
 	
-	// Sort so that "before" will be precessed first, then so that the oldest will be processed first
+	
+	// Note: Because we use pop(), the work that should be processed first should be to the right
 	QUEUE.sort(function sortQueue(a, b) {
+		// Prio stage=after for last processed value
+		//if(LAST_VALUE == a.value) return 1; // B, A
+		//else if(LAST_VALUE == b.value) return -1; // A, B
+		
+		// before should come first
 		if(a.stage == "before" && b.stage == "after") return 1; // B , A
 		else if(b.stage == "before" && a.stage == "after") return -1; // A , B
+		
+		// first in come first
 		else if(a.date < b.date) return 1; // B , A
 		else if(b.date < a.date) return -1; // A , B
+		
 		else return 0;
 	});
+	
 	var work = QUEUE.pop();
+	
+	if(work.stage == "before" && LAST_STAGE == "before" && LAST_NAME == work.name) {
+		// Certbot is being silly
+		log("Certbot is being silly for wanting us to add another record when we just added one! work.stage=" + work.stage + " LAST_STAGE=" + LAST_STAGE + " work.name=" + work.name + " LAST_NAME=" + LAST_NAME);
+		
+		LAST_STAGE = ""; // So we wont trigger this again
+		
+		// Tell certbot we are done, even though we are not
+		//if(work.resp) {
+		//log("Sending OK response for stage=" + work.stage + " value=" + work.value + " even though it has not been processed.");
+		//work.resp.end("OK");
+		//work.resp = null;
+		//}
+		
+		// In the hopes that certbot wont make the challange for the next key before it gets an OK on stage=after for last key
+		WAIT_ON_AFTER = LAST_VALUE;
+	}
 	
 	if(!work) {
 		log("No more work to do! QUEUE.length=" + QUEUE.length);
@@ -175,12 +216,16 @@ function processWork(work) {
 	var resp = work.resp;
 	
 	if(IN_PROGRESS) {
-		resp.end("We can only process one request at a time. Please try again later!");
+		if(resp) resp.end("We can only process one request at a time. Please try again later!");
+log("Ending work=" + JSON.stringify(work) + " because IN_PROGRESS=" + IN_PROGRESS);
 		return;
 	}
 	
 	PROGRESS_COUNTER++;
-	IN_PROGRESS = true;
+	IN_PROGRESS = value;
+	LAST_VALUE = value;
+	LAST_STAGE = stage;
+	LAST_NAME = name;
 	
 	log("Processing: stage=" + stage + " name=" + name + " value=" + value);
 	
@@ -188,7 +233,11 @@ function processWork(work) {
 	
 	var tld = domainParts[domainParts.length-2] + "." +  domainParts[domainParts.length-1];
 	
-	if(TLDS.indexOf(tld) == -1) return resp.end("Unknown TLD: " + tld);
+	if(TLDS.indexOf(tld) == -1) {
+		if(resp) resp.end("Unknown TLD: " + tld);
+		log("Ending work=" + JSON.stringify(work) + " Unknown tld=" + tld);
+		return;
+	}
 	
 	var subname =  domainParts[domainParts.length-3];
 	
@@ -206,7 +255,7 @@ function processWork(work) {
 	var zoneFile = "/etc/bind/zones/db." + tld;
 	MODULE_FS.readFile(zoneFile, "utf8", function readZoneFile(err, zoneData) {
 		if(err) {
-			resp.end("Error: Problem reading zone file: " + zoneFile);
+			if(resp) resp.end("Error: Problem reading zone file: " + zoneFile);
 			log(err.message);
 			IN_PROGRESS = false;
 			return;
@@ -227,7 +276,7 @@ function processWork(work) {
 			var matchAAAA = zoneData.match(/[@*]\s+IN\s+\d*?\s+AAAA\s+([0-9a-f:]*)/i);
 			
 			if(!matchA) {
-				resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
+				if(resp) resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
 				console.error("Error: Unable match A record in " + zoneFile);
 			}
 			
@@ -253,13 +302,13 @@ function processWork(work) {
 		if(stage == "after") {
 			// Clean up
 			if(start == -1) {
-				resp.end("Error: Cannot find start padding for " + subname + " in zone file: " + zoneFile);
+				if(resp) resp.end("Error: Cannot find start padding for " + subname + " in zone file: " + zoneFile);
 				console.error("Error: Unable to find string '" + paddingStart + "' in " + zoneFile);
 				IN_PROGRESS = false;
 				return;
 			}
 			if(end == paddingEnd.length-1) {
-				resp.end("Error: Cannot find end padding for " + subname + " in zone file: " + zoneFile);
+				if(resp) resp.end("Error: Cannot find end padding for " + subname + " in zone file: " + zoneFile);
 				console.error("Error: Unable to find string '" + paddingEnd + "' in " + zoneFile);
 				IN_PROGRESS = false;
 				return;
@@ -295,14 +344,15 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 				zoneData += paddingEnd;
 			}
 			else {
-				// A Letsencrypt TXT challange record already exist.
+				// Padding already exist for a Letsencrypt challange!
 				
 				var txtEntryIndex = zoneData.indexOf(txtEntry);
 				if(txtEntryIndex != -1) {
-					var endOfExistingTxtEntry = zoneData.indexOf("\n", txtEntryIndex);
-					if(endOfExistingTxtEntry == -1) throw new Error("Unable to find new line after " + txtEntry + " in " + zoneFile);
-					log("Removing existing TXT entry for " + name + " !");
-					zoneData = zoneData.slice(0, txtEntryIndex) + zoneData.slice(endOfExistingTxtEntry+1);
+					//var endOfExistingTxtEntry = zoneData.indexOf("\n", txtEntryIndex);
+					//if(endOfExistingTxtEntry == -1) throw new Error("Unable to find new line after " + txtEntry + " in " + zoneFile);
+					//log("Removing existing TXT entry for " + name + " !");
+					//zoneData = zoneData.slice(0, txtEntryIndex) + zoneData.slice(endOfExistingTxtEntry+1);
+					log("A TXT record for " + name + " already exist!");
 				}
 				else log("No TXT record exist for " + name + "");
 				
@@ -312,6 +362,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 				zoneData = zoneData.slice(0, start + paddingStart.length) + challangeString + zoneData.slice(start + paddingStart.length);
 			}
 		}
+		
 		/*
 			Increment serial
 			The serial needs to be on it's own line And commented!
@@ -332,7 +383,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 		var matchSerial = zoneData.match(reSerial);
 		
 		if(matchSerial == null) {
-			resp.end("Error: Cannot match serial number in zone file: " + zoneFile);
+			if(resp) resp.end("Error: Cannot match serial number in zone file: " + zoneFile);
 			console.error("Error: Unable to find " + reSerial + " in " + zoneFile);
 			IN_PROGRESS = false;
 			return;
@@ -340,7 +391,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 		
 		var serialNr = parseInt(matchSerial[2]);
 		if(isNaN(serialNr)) {
-			resp.end("Error: Problems finding serial number in zone file: " + zoneFile);
+			if(resp) resp.end("Error: Problems finding serial number in zone file: " + zoneFile);
 			console.error("Error: matchSerial=" + JSON.stringify(matchSerial) + ". unable to find serial number in " + zoneFile);
 			IN_PROGRESS = false;
 			return;
@@ -351,7 +402,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 		
 		MODULE_FS.writeFile(zoneFile, zoneData, function writeZoneFile(err) {
 			if(err) {
-				resp.end("Problem writing to zone file: " + zoneFile);
+				if(resp) resp.end("Problem writing to zone file: " + zoneFile);
 				log(err.message);
 				IN_PROGRESS = false;
 				return;
@@ -363,7 +414,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 			// Reload bind9/named
 			MODULE_CHILD_PROCESS.exec("service bind9 reload", function reloadNS(error, stdout, stderr) {
 				if(error || stderr) {
-					resp.end("Error: Failed to reload name servers");
+						if(resp) resp.end("Error: Failed to reload name servers");
 					console.error(error || stderr);
 					IN_PROGRESS = false;
 					return;
@@ -505,13 +556,28 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 					function sendResp(noWait) {
 						// Only wait on the last request
 						if(stage == "before" && QUEUE.length == 0 && !noWait) {
+							log("Waiting before sending OK because stage=" + stage + " QUEUE.length=" + QUEUE.length + " noWait=" + noWait + " value=" + value);
 							setTimeout(function wait() {
-								resp.end("OK");
-								//IN_PROGRESS = false;
+								if(resp) {
+									log("Sending OK response for stage=" + stage + " value=" + value);
+									resp.end("OK");
+								}
 							}, 5000);
 						}
+						else if(stage == "after" && WAIT_ON_AFTER == value) {
+							log("Waiting before sending OK because stage=" + stage + " WAIT_ON_AFTER=" + WAIT_ON_AFTER + " value=" + value);
+							setTimeout(function wait() {
+								if(resp) {
+									log("Sending OK response for stage=" + stage + " value=" + value);
+									resp.end("OK");
+								}
+							}, 10000);
+						}
 						else {
-							resp.end("OK");
+							if(resp) {
+								log("Sending OK response for stage=" + stage + " value=" + value);
+								resp.end("OK");
+							}
 						}
 						
 						IN_PROGRESS = false;
