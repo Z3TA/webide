@@ -482,7 +482,9 @@ console.warn("functionListWrap not available!");
 			functionListSelect.setAttribute("multiple", "multiple");
 			
 			functionListSelect.onchange = function(e) {
-				EDITOR.currentFile.scrollToLine(this.value);
+				var line = functionListSelect.options[functionListSelect.selectedIndex].value;
+				if(isNaN(line)) throw new Error("line=" + line + " options=" + JSON.stringify(functionListSelect.options) + " selectedIndex=" + functionListSelect.selectedIndex);
+				EDITOR.currentFile.scrollToLine(line);
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
