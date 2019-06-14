@@ -79,11 +79,10 @@ eachUser(HOME, function(user) {
 	chownrDirSync(UTIL.joinPaths([user.homeDir, ".prod/"]), user.uid, user.gid);
 		
 		// Make sure www-data has access to wwwpub folder
+		try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, ".wwwpub/"])); } catch(err) { console.log(err.message); }
 	run("chmod 2755 " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
 	run("chown -R " + user.name + ":www-data " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
 		
-	
-	
 	
 	}, function allUsersFound() {
 
