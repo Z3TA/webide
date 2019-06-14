@@ -69,7 +69,12 @@
 		touchDownX = x;
 		touchDownY = y;
 		
-		
+		// Save current scroll position (other plugins can scroll too!)
+		var file = EDITOR.currentFile;
+		if(file) {
+			startRow = file.startRow;
+			startColumn = file.startColumn;
+		}
 		
 		// We are competing with select text, so always return false to prevent selecting text while scrolling
 		return false;
