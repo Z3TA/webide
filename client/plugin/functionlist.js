@@ -558,9 +558,12 @@ console.warn("functionListWrap not available!");
 		var height = functionListSelect.offsetHeight;
 		console.log("functionListSelect.offsetHeight=" + functionListSelect.offsetHeight);
 		
-		if(domModel.length > 1 && height <= 16) {
+		if(domModel.length > 1 && height <= 18) {
 			forcedSingleRow = true;
 			mobileFubarDetected();
+		}
+		else {
+			//alertBox("Not moving function-list! domModel.length=" + domModel.length + " height=" + height);
 		}
 		
 		console.timeEnd("buildFunctionList");
