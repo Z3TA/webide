@@ -60,10 +60,6 @@
 		EDITOR.settings.caret.color = "#ffffff";
 		
 		
-		
-		
-		
-		
 		// Load CSS
 		var head  = document.getElementsByTagName('head')[0];
 		cssLink  = document.createElement('link');
@@ -84,7 +80,7 @@
 	function unloadDarkTheme() {
 		
 		var head  = document.getElementsByTagName('head')[0];
-		head.removeChild(cssLink);
+		if(cssLink) head.removeChild(cssLink);
 		
 		//refreshCss();
 	}
