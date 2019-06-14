@@ -71,6 +71,7 @@
 		
 		fsSelect = document.createElement("select");
 		fsSelect.setAttribute("id", "fsSelect");
+		fsSelect.setAttribute("class", "select");
 		fsSelect.onchange = changeFs;
 		
 		/*

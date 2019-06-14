@@ -46,8 +46,8 @@
 		// 
 		
 		// Backgrounds
-		EDITOR.settings.style.bgColor = "#2b2c27";
-		EDITOR.settings.style.currentLineColor = "#404036";
+		EDITOR.settings.style.bgColor = "rgb(41, 42, 48)";
+		EDITOR.settings.style.currentLineColor = "rgb(47, 50, 57)";
 		EDITOR.settings.style.selectedTextBg = "#3e4765";
 		EDITOR.settings.style.highlightTextBg = "#3e5a3d";
 		

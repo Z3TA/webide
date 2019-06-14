@@ -1003,7 +1003,6 @@ div.gotoFile li:hover {
 }
 
 .menu li.item:hover {
-	color: white;
 	color: black;
 	/*text-shadow: 0 1px rgba(0, 0, 0, 0.3);*/
 	background: #5a70b0;

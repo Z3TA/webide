@@ -1,40 +1,70 @@
 
 body {
+	font-family: Helvetica, Arial, sans-serif;
+	background-color: rgba(0, 1, 3, .84);
+	color: rgb(255,255,255);
 	
 }
 
-.centerColumn {
-	/* hack to get rid of line between the content and the footer */
-	margin-bottom: -4px;
+div.header {
+	background: none;
+	background-color: #343436;
 }
 
-.header {
-	background: linear-gradient(to right, #2b2c27, #404036, #2c2727);
+.topRightMenuButton {
+	background: none;
+	color: #dcdddd;
+	
 }
 
-.footer {
+div.footer {
+	background: none;
 	border-top: 1px solid #171b17;
-	background: linear-gradient(#282728, #555555);
-	box-shadow: inset 0px 4px 10px #302f30;
+	background-color: transparent;
+	box-shadow: none;
+	border: 0px solid transparent;
+	color: rgb(245, 247, 251);
 }
 
 .columns div {
 	/*border: 1px solid red; */
-	background: #2b2c27;
+	background: none;
+	background-color: transparent;
 }
 
+
+div.leftColumn {
+	background: none;
+	background-color: rgb(48, 50, 53);
+	color: rgb(223, 224, 224);
+}
+
+div.centerColumn {
+}
+
+
+div.rightColumn {
+	background: none;
+	background-color: rgb(48, 50, 53);
+	background-color: transparent;
+	background-color: rgb(48, 50, 53);
+	color: rgb(223, 224, 224);
+}
+
+
 ul#tabList li.tabFolderItem {
+	background:none;
+	background-color: rgb(53, 53, 55);
 	color: #d2cdcd;
-	box-shadow: 0px 1px 2px #0e0e0e, inset 0px 1px 1px #2a2929;
-	background: linear-gradient(#2f342f 1%, #30342d 99%);
-	border-bottom: 1px solid #2a2929;
+	box-shadow: none;
+	border-bottom: 0;
 	border-top: 1px solid #2a2929;
 }
 
 ul#tabList li.tabFolderItem.active {
 	color: #d2cdcd;
-	border-bottom: 1px solid #2b2c27; /* same color as canvas */
-	background: linear-gradient(#2f342f 1%, #30342d 99%);
+	border-bottom: 0; /* same color as canvas */
+	background: none;
 	border-top: 1px solid #2a2929;
 }
 
@@ -44,30 +74,33 @@ ul#tabList li.tabFileItem {
 }
 
 ul#tabList li.tabFileItem.active {
-	background: #2b2c27;
+	background: rgb(41, 42, 48);
 	color: #f2f2f2;
 }
 
 
 select, select.functionList {
+	padding-left: 2px;
+	padding-top: 2px;
 	color: #ebebe5;
-	background-color: #2b2c27;
-	
+	background: none;
+	background-color: transparent;
 }
 
-option:checked {
-	color: red; 
-	background-color: blue;
-	background: "pink";
+
+
+.fileExplorer.header {
+	background-color: transparent;
 }
 
 .fileExplorer {
 	border-left: 2px solid #2a2929;
+	border: 0px solid transparent;
 }
 
-
 .fileExplorer ul {
-	background-color: #2b2c27;
+	background: none;
+	background-color: transparent;
 	color: rgb(235, 235, 229);
 }
 
@@ -76,7 +109,7 @@ option:checked {
 }
 
 .tree li:last-child:before {
-	background: #2b2c27; /* same as body background */
+	background: transparent; /* same as body background */
 }
 
 
@@ -88,12 +121,107 @@ option:checked {
 }
 
 ::-webkit-scrollbar-track {
-	background: #2b2c27;
+	background: none;
+	background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
 	background: #30342d;
+	background: rgba(80,80,90, .9);
 }
 
 
+.menu {
+	background-color: rgb(51, 50, 54);
+	color: #ffffff;
+	border: 1px ridge #505355;
+	border-color: #505355;
+	background-image: none;
+	box-shadow: 0 1px 10px #121214;
+	border-radius: 6px;
+	padding-top: 4px;
+}
+
+
+.menu li {
+	background-color: transparent;
+	margin-right: -4px;
+	margin-left: -2px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.menu li .text {
+	color: #ffffff;
+}
+
+.menu li.item:hover .key {
+	color: #ffffff;
+}
+
+.menu li.item:hover {
+	background-color: #2d5eca;
+}
+
+.menu li.sep {
+	border-top: 2px solid #55565b;
+	box-shadow: none;
+	margin-right: -4px;
+	margin-left: -2px;
+}
+
+input[type=text], input[type=password], select.select {
+	background: none;
+	background-color: rgb(30, 30, 30);
+	border: 1px solid rgb(83, 83, 83);
+	border-radius: 4px;
+	box-shadow: none;
+	color: rgb(221, 221, 221);
+}
+
+select.select {
+	border-radius: 0px;
+	background-color: rgb(40, 40, 50);
+}
+
+input[type=button]:hover, button.button:hover, input[type=submit]:hover {
+	box-shadow: none;
+}
+
+input[type=button], button.button, input[type=submit] {
+	background: none;
+	border: 0;
+	box-shadow: none;
+}
+
+
+.dialog {
+	background: none;
+	background-image: none;
+	background-color: rgba(51, 50, 54, .95);
+	color: #ffffff;
+	
+	border: 1px ridge rgb(61, 59, 63);
+	
+	
+	border-radius: 5px;
+	
+}
+
+.dialog button {
+	background: none;
+	background-color: rgb(101, 102, 104);
+color: rgb(223, 223, 223);
+	border: 0;
+	border-top: 1px solid rgb(118, 120, 121);
+	border-left: 1px solid rgb(64, 66, 67);
+	border-right: 1px solid rgb(64, 66, 67);
+	border-bottom: 1px solid rgb(44, 45, 48);
+	border-radius: 4px;
+	box-shadow: none;
+	padding: 2px;
+	
+}
 
