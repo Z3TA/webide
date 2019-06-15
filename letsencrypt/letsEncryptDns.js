@@ -538,8 +538,9 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 														}
 													}
 													
-													if(!correctValue) throw new Error("Neither the local server has the correct value!");
-													
+													//if(!correctValue) throw new Error("Neither the local server has the correct value!");
+													if(!correctValue) log("Neither the local server has the correct value!");
+												
 												});
 												
 											}
