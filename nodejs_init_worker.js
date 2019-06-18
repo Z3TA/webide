@@ -52,6 +52,8 @@ var UTC = false; // If set to true, use GMT+0 on time stamps
 var NODE_MAILER = require('nodemailer');
 var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
+var TLD = DEFAULT.domain;
+
 if(!PATH) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
 if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
 if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
@@ -468,6 +470,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		env: {
 			prod: true, // Tell scripts we are in "production"
 			myName: USERNAME,
+			tld: TLD,
 			PATH: "/usr/bin:/bin:/.npm-packages/bin", // Able to find "executables"
 			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where global packages are
 		},

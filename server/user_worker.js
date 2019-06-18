@@ -32,6 +32,7 @@ var getArg = require("../shared/getArg.js");
 var module_Websocket = require("ws");
 
 var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
+var TLD = DEFAULT.domain;
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
@@ -1494,6 +1495,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			env: {
 				myName: user.name,
 				dev: true,
+				tld: TLD,
 				PATH: "/usr/bin:/bin"
 			},
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr

@@ -29,6 +29,12 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Developing a RSS reader app on webide.se
+Fixing issues in the editor while I'm working.
+
+
+dark theme should have button style (same as dialog buttons)
+
 native keyboard hides and then shows which makes the screen jump.
 make it not hide if it's already open!
 
@@ -105,6 +111,10 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+Able to autocomplete from requred object in Node.js
+
+---
 
 When disconnected from the internet, and you click on something, like opening a file via file explorer, nothing happens.
 Also when toggling the file explorer it takes like 10 seconds until you see the spinner ...
