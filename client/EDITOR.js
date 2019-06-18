@@ -5758,7 +5758,7 @@ EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in opti
 			var indentationCharacters = file.grid[row].indentationCharacters.length;
 			var col = colno - indentationCharacters;
 			
-			file.scrollToLine(lineno);
+			if(level == 1) file.scrollToLine(lineno); // Only scroll there if it's an error
 			
 			EDITOR.addInfo(row, col, message, file, level);
 			
