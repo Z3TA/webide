@@ -29,12 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Annoying when you hit save and it scrolls away!
-
-If an inline error is shown, don't scroll to inline console.log!
-Actually don't scroll on console.logs either, unless that is the only console log!
-Wait to scroll in order to see if there are errors,
-or prefer console logs that are already in view!
 
 Sometimes the inlined console.log show up in the wrong place!
 
