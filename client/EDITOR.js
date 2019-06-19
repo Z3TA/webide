@@ -1945,7 +1945,7 @@ text = file;
 			ctx.fillStyle = EDITOR.settings.style.textColor;
 			
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			ctx.textBaseline = "top";
+			ctx.textBaseline = "middle";
 			
 			/*
 				
@@ -2076,13 +2076,13 @@ text = file;
 		
 		var file = EDITOR.currentFile;
 		
-		var top = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight;
+		var middle = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 		var left = EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth;
 		
 		ctx.fillStyle = textColor;
 		
 		//ctx.fillStyle = "rgb(0,0,0)";
-		ctx.fillText(character, left, top);
+		ctx.fillText(character, left, middle);
 		
 	}
 	
@@ -2372,7 +2372,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			// Font is only set *once* (when resizing) because it's very expensive
 			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
 			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			EDITOR.canvasContext.textBaseline = "top";
+			EDITOR.canvasContext.textBaseline = "middle";
 			
 			// Squeeze the margin on really small screens
 			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
@@ -6246,7 +6246,7 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		
 		// Set the font only once for performance
 		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "top";
+		ctx.textBaseline = "middle";
 		
 		EDITOR.canvas = canvas;
 		EDITOR.canvasContext = ctx;
@@ -7605,14 +7605,14 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 			
 			//process.nextTick(function() {
 			// Test optimization
-			var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+			var middle = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 			var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 			//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 			ctx.fillStyle = "rgb(0,0,0)";
-			ctx.fillText(benchmarkCharacter, left, top);
+			ctx.fillText(benchmarkCharacter, left, middle);
 			tempTest++;
 			return;
-			//ctx.fillText(character, 0, 0);
+			//ctx.fillText(character, 0, Math.floor(EDITOR.settings.gridHeight/2));
 			// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
 			//});
 			

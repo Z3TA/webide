@@ -47,7 +47,7 @@
 		//console.time("transparentMarginCharacters");
 		
 		var left = 0,
-			top = 0,
+		middle = 0,
 			indentation = 0,
 			char = "",
 			indentationWidth = 0,
@@ -57,13 +57,13 @@
 
 		//ctx.strokeStyle="rgba(0,255,0,0.5)";
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		//ctx.textBaseline = "top";
+		
 		
 		ctx.beginPath(); // Reset all the paths!
 		
 		for(var row = 0; row < buffer.length; row++) {
 
-			top = EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight;
+			middle = EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 
 			indentation = buffer[row].indentation;
 			indentationWidth = indentation * EDITOR.settings.tabSpace;
@@ -115,7 +115,7 @@
 				
 				//console.log("ctx.fillStyle=" + ctx.fillStyle + " hmm=" + UTIL.makeColorTransparent(box.color));
 				
-				ctx.fillText(char, left, top);
+				ctx.fillText(char, left, middle);
 			}
 		}
 		

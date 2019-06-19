@@ -2783,7 +2783,8 @@ firstTimeVim = false;
 		
 		if(text.length == 0) return;
 		
-		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
+		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin;
+		var middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 		var measuredText = ctx.measureText(text)
 		var textWidth = measuredText.width;
 		var textHeight = measuredText.height || EDITOR.settings.gridHeight;
@@ -2801,7 +2802,7 @@ firstTimeVim = false;
 		
 		// Print the text
 		ctx.fillStyle = EDITOR.settings.style.textColor;
-		ctx.fillText(text, left, top);
+		ctx.fillText(text, left, middle);
 		
 		// Don't show the caret if it's at the end of the buffer
 		if(vimCommandBuffer.length == commandCaretPosition) return;

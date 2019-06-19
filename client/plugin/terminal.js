@@ -86,13 +86,13 @@
 		var row = caret.row;
 		var col = caret.col;
 		
-		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
+		var middle = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight) + Math.floor(EDITOR.settings.gridHeight/2);
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
 		ctx.fillStyle = fillStyle;
-		ctx.fillText(symbol, left, top);
+		ctx.fillText(symbol, left, middle);
 	}
 	
 	function terminalMouseClick(mouseX, mouseY, caret, mouseDirection, button) {

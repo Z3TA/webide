@@ -89,7 +89,7 @@
 		var colStart = 0;
 		var colStop = 0;
 		var left = 0;
-		var top = 0;
+		var middle = 0;
 		var bufferRowCol;
 		var char = "";
 		var characters = "";
@@ -104,7 +104,7 @@
 			colStart = Math.max(0, file.startColumn - indentationWidth)
 			colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
 			
-			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
+			middle = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
 			gotCharacter = false;
@@ -148,7 +148,7 @@ else {
 		
 		function print() {
 			//console.log("renderWhiteSpace: print " + characters.length);
-			ctx.fillText(characters, left, top);
+			ctx.fillText(characters, left, middle);
 		}
 		
 	}

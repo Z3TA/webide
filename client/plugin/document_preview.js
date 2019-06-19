@@ -300,7 +300,7 @@
 
 		var previewEndRow = Math.min(grid.length, startRow+maxRows),
 			indentation = 0,
-			top = 0,
+		middle = 0,
 			topMargin = 0 - previewStartRow * EDITOR.settings.gridHeight / minification,
 			left = 0,
 			char = "",
@@ -329,7 +329,7 @@
 			
 			maxColumns = Math.max(maxColumns, grid[row].length);
 			
-			top = row * EDITOR.settings.gridHeight / minification + topMargin;
+			middle = (row * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2)) / minification + topMargin;
 			
 			//console.log("top=" + top);
 			
@@ -343,7 +343,7 @@
 								
 					context.fillStyle = grid[row][col].color;// for fillText rgb 
 						
-					context.fillText(char, left, top);
+					context.fillText(char, left, middle);
 					
 				}
 

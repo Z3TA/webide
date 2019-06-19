@@ -148,7 +148,7 @@
 			ctx.fillStyle = EDITOR.settings.style.textColor;
 			
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			ctx.textBaseline = "top";
+			ctx.textBaseline = "middle";
 			
 			
 			// We don't have to add a first page, or it would be blank

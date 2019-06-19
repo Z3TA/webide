@@ -36,7 +36,7 @@
 				cacheCtx = cacheCanvas.getContext('2d');
 			}
 			
-			cacheCtx.textBaseline = "top";
+			cacheCtx.textBaseline = "middle";
 			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
@@ -120,7 +120,7 @@
 			
 			
 		
-			cacheCtx.textBaseline = "top";
+			cacheCtx.textBaseline = "middle";
 			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
 			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
@@ -129,16 +129,16 @@
 			//console.log("Line " + line);
 			if(lineNr > lastLine) {
 					lastLine = lineNr;
-					cacheCtx.fillText(lineNr, leftMargin, EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight);
+					cacheCtx.fillText(lineNr, leftMargin, EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2));
 				}
 			}
 			
 			// START DEBUG CODE
 			if(debug) {
-				cacheCtx.fillText(screenStartRow, 10, 0) ;
+				cacheCtx.fillText(screenStartRow, 10,  Math.floor(EDITOR.settings.gridHeight/2)) ;
 			cacheCtx.font=EDITOR.settings.style.fontSize/2 + "px " + EDITOR.settings.style.font;
 			var tmp = 0;
-			for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=EDITOR.settings.gridHeight) cacheCtx.fillText(++tmp, 20, i) ;
+			for (var i=EDITOR.settings.topMargin; i<cacheCanvasHeight; i+=Math.floor(EDITOR.settings.gridHeight * 1.5)) cacheCtx.fillText(++tmp, 20, i) ;
 			}
 			// END DEBUG CODE
 			

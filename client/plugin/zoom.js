@@ -265,13 +265,14 @@
 				var startRow = file.startRow;
 				var left = EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 				var top = EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight;
+				var middle = top + Math.round(EDITOR.settings.gridHeight/2);
 				var bgColor = "blue"; // EDITOR.settings.style.commentColor
 				var textColor = "yellow" // EDITOR.settings.style.textColor
 				
 				// ### Set font (size)
 				var fontSize = Math.max(10, 22 - size * 2.5);
 				ctx.font= fontSize + "px " + EDITOR.settings.style.font;
-				//ctx.textBaseline = "bottom"; // top
+				
 				
 				// ### Measure text
 				
@@ -285,7 +286,7 @@
 				
 				// # Paint text
 				ctx.fillStyle = textColor;
-				ctx.fillText(text, left, top);
+				ctx.fillText(text, left, middle);
 				ctx.stroke();
 				
 				

@@ -29,6 +29,12 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+annoying lines from tall characters when typing between text
+
+
+Annoying when you accidentally navigate away from the preview,
+seems to be no way to get back (back button doesn't work)
+
 
 Sometimes the inlined console.log show up in the wrong place!
 
@@ -36,8 +42,6 @@ Sometimes the inlined console.log show up in the wrong place!
 Developing a RSS reader app on webide.se
 Fixing issues in the editor while I'm working.
 
-
-dark theme should have button style (same as dialog buttons)
 
 native keyboard hides and then shows which makes the screen jump.
 make it not hide if it's already open!
@@ -621,6 +625,15 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Full page menu !?
+
+(feature discovery)
+
+Because most people evaluate the IDE by staring at it for 3 seconds,
+we need add some on screen bling bling blong that advertises the editor's features
+
+---
 
 How do you test the cloud editor inside the cloud editor !?
 
@@ -1250,6 +1263,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+Sometimes when opening a file (goto file) it keeps searching the hdd, even though you have opened the file.
 
 Can't rename a folder on SFTP! (test uncommented in tests/server.js)
 

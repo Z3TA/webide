@@ -33,6 +33,7 @@
 		
 		var left = 0,
 			top = 0,
+		middle = 0,
 			indentation = 0,
 			indentationWidth = 0,
 			bufferRowCol,
@@ -45,7 +46,7 @@
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
 		// Setting the font takes 1-2ms! Don't do it at every render!
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "top";
+		
 		ctx.fillStyle = oldStyle;
 		
 		ctx.beginPath(); // Reset all the paths!
@@ -71,7 +72,7 @@
 			//console.log("indentation=" + indentation);
 			
 			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
-			
+			middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 			
 			//ctx.fillText(indentation, 15, top);
 			
@@ -94,7 +95,7 @@
 					
 					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters) {
 						
-						ctx.fillText(characters, left, top);
+						ctx.fillText(characters, left, middle);
 						
 						left += characters.length * EDITOR.settings.gridWidth;
 						
@@ -106,11 +107,11 @@
 					characters += bufferRowCol.char;
 					
 					
-					//ctx.fillText(String.fromCharCode(bufferRowCol.char.charCodeAt(0)), left, top);
+					//ctx.fillText(String.fromCharCode(bufferRowCol.char.charCodeAt(0)), left, middle);
 					
 					//console.log(bufferRowCol.char.charCodeAt(0));
 					
-					//ctx.fillText(String.fromCharCode(229), left, top);
+					//ctx.fillText(String.fromCharCode(229), left, middle);
 					
 					// You need to save as UTF8 for åäö character to work
 					
@@ -159,7 +160,7 @@
 			
 			if(characters != "") {
 				
-				ctx.fillText(characters, left, top);
+				ctx.fillText(characters, left, middle);
 				
 				characters = "";
 			}

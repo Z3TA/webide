@@ -163,8 +163,8 @@
 			ctx.fillStyle=EDITOR.settings.style.highlightMissMatchFontColor;
 			}
 			
-			ctx.fillText(lP, firstLocation.x, firstLocation.y);
-				ctx.fillText(rP, secondLocation.x, secondLocation.y);
+			ctx.fillText(lP, firstLocation.x, firstLocation.y + Math.floor(EDITOR.settings.gridHeight/2));
+			ctx.fillText(rP, secondLocation.x, secondLocation.y + Math.floor(EDITOR.settings.gridHeight/2));
 			
 			// Reset font
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;

@@ -104,12 +104,6 @@
 			drawBubble(ctx, x, y, textWidth + textPadding*2 + countTextWidth, textHeight + textPadding*2, radius, comment.lvl);
 
 			// Draw the text
-			/*
-			ctx.fillStyle=EDITOR.settings.style.textColor;
-			for(var j=0; j<comment.text.length;j++) {
-				ctx.fillText(comment.text[j], x + textPadding, y + textPadding + j * gridHeight);
-			}
-			*/
 			
 			if(comment.lvl == 1) {
 				ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
@@ -121,7 +115,7 @@
 			
 			if(comment.count > 1) {
 				ctx.fillStyle="rgba(0,0,0, .7)";
-				ctx.fillText(comment.count, x + textPadding + iconPadding, y + textPadding);
+				ctx.fillText(comment.count, x + textPadding + iconPadding, y + textPadding + Math.floor(EDITOR.settings.gridHeight/2));
 				}
 			
 			for(var j=0; j<comment.text.length;j++) {
