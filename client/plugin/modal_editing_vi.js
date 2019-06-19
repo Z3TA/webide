@@ -2645,30 +2645,13 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 	}
 	
 	function beep(volume, frequency, type, duration) {
-		
 		// What I imagine the beep sound like
 		if(volume == undefined) volume = 0.15;
 		if(frequency == undefined) frequency = 100;
 		if(type == undefined) type = "square";
 		if(duration == undefined) duration = 120;
 		
-		var audio = window.AudioContext || window.webkitAudioContext
-		var audioCtx = new audio;
-		var oscillator = audioCtx.createOscillator();
-		var gainNode = audioCtx.createGain();
-		
-		oscillator.connect(gainNode);
-		gainNode.connect(audioCtx.destination);
-		
-		gainNode.gain.value = volume;
-		oscillator.frequency.value = frequency;
-		oscillator.type = type;
-		
-		oscillator.start();
-		oscillator.stop(audioCtx.currentTime + duration/1000)
-		
-		//setTimeout(function() {oscillator.stop();},duration);
-		
+		EDITOR.beep(volume, frequency, type, duration);
 	}
 	
 	function clearCommandBuffer() {
