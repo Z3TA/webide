@@ -29,9 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-annoying lines from tall characters when typing between text
-
-
 Annoying when you accidentally navigate away from the preview,
 seems to be no way to get back (back button doesn't work)
 
