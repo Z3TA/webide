@@ -27,7 +27,9 @@
 		
 		detectColorScheme();
 		
-		var themeFromCss = window.getComputedStyle(document.documentElement).getPropertyValue('content').replace(/"/g, '');
+		var themeDetector = document.getElementById("themeDetector");
+		
+		var themeFromCss = window.getComputedStyle(themeDetector).getPropertyValue('content').replace(/"/g, '');
 		console.log("dark_theme: themeFromCss=" + themeFromCss);
 		if( themeFromCss == "dark") setDarkTheme();
 		

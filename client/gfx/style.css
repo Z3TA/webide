@@ -47,8 +47,6 @@ html {
 	/* Try to prevent click delay on mobile browsers */
 	-ms-touch-action: manipulation;
 	touch-action: manipulation;
-	
-	content: "default";
 	}
 
 body {
@@ -1572,13 +1570,22 @@ div.group {
 		}
 	}
 
+
+
+/* Detect OS theme */
+
+#themeDetector {
+	display: none;
+	content: "default";
+}
+
 @media (prefers-color-scheme: light) {
-	html {
+	#themeDetector {
 		content: "light";
 	}
 }
 @media (prefers-color-scheme: dark) {
-	html {
+	#themeDetector {
 		content: "dark";
 	}
 }
