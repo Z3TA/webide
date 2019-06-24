@@ -649,7 +649,11 @@ Testing in Opera Mobile
 ========================
 
 Download Opera Classic Mobile Emulator: https://www.opera.com/developer/mobile-emulator
-Download Opera Browser version 12 (we need the debugger)
+
+
+Download Opera Browser version 12 (we need the debugger, aka. Opera Dragonfly)
+https://get.geo.opera.com/pub/opera/linux/1216/
+
 
 Goto any web page in Opera 12 - right click and select "Inspect Element". This will start the debugger
 
