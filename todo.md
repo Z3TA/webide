@@ -29,6 +29,15 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+All editor features should be reachable via the window menu, OR the virtual keyboard!
+(window menu is hidden when in mobile/small screen)
+
+Some features can be advertised by putting an icon in the discoveryBar
+
+Some features can be added to the context menu, preferably those that has something todo with where you click, or the file you click on.
+Commonly used functionality can also be reached via the ctx meny. (as well as via the window menu)
+
+
 Top menu for feature discovery !?
 
 

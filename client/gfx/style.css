@@ -941,6 +941,38 @@ div.gotoFile li:hover {
 
 
 
+/* ### Window menu */
+
+.windowMenu {
+	position: absolute;
+	border: 1px solid red;
+	height: 40px;
+	overflow: visible;
+	z-index: 5;
+}
+
+.windowMenu ul li {
+	border: 1px solid blue;
+	display: inline-block;
+}
+
+.windowMenu li ul {
+	display: none;
+	margin: 0;
+	position: absolute;
+}
+.windowMenu li:hover>ul {
+	display: block;
+	z-index: 5;
+}
+
+.windowMenu li:hover>ul {
+	display: block;
+	z-index: 5;
+}
+
+
+
 
 
 /* ### Stying for the context menus */
@@ -991,7 +1023,7 @@ div.gotoFile li:hover {
 	padding-right: 5px;
 	text-decoration: none;
 	border: 1px solid transparent;
-	}
+}
 
 .menu li.sep {
 	margin-top: 4px;

@@ -2634,17 +2634,27 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		},
 		update: function updateDiscoveryItem() {
 			
-		}
+		},
+		show: function showDiscoveryBar() {
+		},
+		hide: function hideDiscoveryBar() {
+		},
+		isVisible: true
 	}
 	
 	EDITOR.windowMenu = {
-		add: function addWindowMenuItem(where, whenClicked) {
+		add: function addWindowMenuItem(htmlText, where, whenClicked) {
 			
 		},
 		remove: function removeWindowMenuItem() {
 		},
 		update: function updateWindowMenuItem(item) {
-		}
+		},
+		show: function showWindowMenu() {
+		},
+		hide: function hideWindowMenu() {
+		},
+		isVisible: true
 	}
 	
 	EDITOR.ctxMenu = {
@@ -2657,9 +2667,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			else if(typeof position == "function" && callback == undefined) {
 				callback = position;
 				position = undefined;
-			}
-			else if(Array.isArray(position)) {
-				
 			}
 			
 			if(typeof htmlText != "string") throw new Error("EDITOR.ctxMenu.add: First argument htmlText need to be a (HTML) string!");
