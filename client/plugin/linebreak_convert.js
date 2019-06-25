@@ -12,12 +12,12 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.addMenuItem("Convert line-breaks", convertLinebreaks, 7);
+		menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
 		
 	}
 	
 	function unload() {
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 	}
 	
 	function convertLinebreaks() {
@@ -56,7 +56,7 @@
 			
 		}
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 	}
 	

@@ -25,7 +25,7 @@
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
 			
-			menuItem = EDITOR.addMenuItem("Terminal", startTerminalFromMenu, 16);
+			menuItem = EDITOR.ctxMenu.add("Terminal", startTerminalFromMenu, 16);
 			
 			CLIENT.on("terminal", terminalMessage);
 			
@@ -47,7 +47,7 @@
 		},
 		unload: function unloadTerminal() {
 			
-			EDITOR.removeMenuItem(menuItem);
+			EDITOR.ctxMenu.remove(menuItem);
 			
 			CLIENT.removeEvent("terminal", terminalMessage);
 			
@@ -184,7 +184,7 @@
 	
 	function startTerminal(startTerminalCallback) {
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 		

@@ -209,7 +209,7 @@
 	EDITOR.plugin({
 		desc: "Modal editing using vim key bindings",
 		load: function loadVim() {
-			//vimMenuItem = EDITOR.addMenuItem("Vim/modal mode", toggleVim);
+			//vimMenuItem = EDITOR.ctxMenu.add("Vim/modal mode", toggleVim);
 			
 			EDITOR.on("keyPressed", vimKeyPress);
 			
@@ -269,7 +269,7 @@
 			
 		},
 		unload: function unloadVim() {
-			if(vimMenuItem) EDITOR.removeMenuItem(vimMenuItem);
+			if(vimMenuItem) EDITOR.ctxMenu.remove(vimMenuItem);
 			
 			EDITOR.removeEvent("keyPressed", vimKeyPress);
 			EDITOR.removeRender(showCommandBuffer);
@@ -2702,14 +2702,14 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			VIM_ACTIVE = false;
 			
 			EDITOR.setMode("default");
-			if(vimMenuItem) EDITOR.updateMenuItem(vimMenuItem, false);
+			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, false);
 			
 		}
 		else {
 			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
 			
-			if(vimMenuItem) EDITOR.updateMenuItem(vimMenuItem, true);
+			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, true);
 			
 			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
 			
@@ -2722,7 +2722,7 @@ firstTimeVim = false;
 			}
 		}
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		return false;
 	}

@@ -80,7 +80,7 @@
 		progressBarWidget.show();
 		progressBarWidget.hide();
 		
-		repoCloneMenuItem = EDITOR.addMenuItem("Clone a repository ...", showCloneDialog, 12);
+		repoCloneMenuItem = EDITOR.ctxMenu.add("Clone a repository ...", showCloneDialog, 12);
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
@@ -100,7 +100,7 @@
 		
 		EDITOR.removeEvent("showMenu", showScmMenuItemsMaybe);
 		
-		EDITOR.removeMenuItem(repoCloneMenuItem);
+		EDITOR.ctxMenu.remove(repoCloneMenuItem);
 		
 		CLIENT.removeEvent("mercurialProgress", mercurialProgressStatus);
 		
@@ -195,40 +195,40 @@
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
 				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
-					repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
+					repoCommitMenuItem = EDITOR.ctxMenu.addTemp("Commit", false, showCommitDialog);
 				}
 				
 				var versionControlString = "Version Control ...";
-				var versionControlMenuItem = EDITOR.addTempMenuItem(versionControlString, false, showVersionControlWidget);
-				if(versionControlWidget.visible) EDITOR.updateMenuItem(versionControlMenuItem, true, versionControlString, hideVersionControlWidget);
-				else EDITOR.updateMenuItem(versionControlMenuItem, false, versionControlString, showVersionControlWidget);
+				var versionControlMenuItem = EDITOR.ctxMenu.addTemp(versionControlString, false, showVersionControlWidget);
+				if(versionControlWidget.visible) EDITOR.ctxMenu.update(versionControlMenuItem, true, versionControlString, hideVersionControlWidget);
+				else EDITOR.ctxMenu.update(versionControlMenuItem, false, versionControlString, showVersionControlWidget);
 				
 				
 				/*
 					
 				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
-					EDITOR.addTempMenuItem("Push", false, function() {
-						EDITOR.hideMenu();
+					EDITOR.ctxMenu.addTemp("Push", false, function() {
+						EDITOR.ctxMenu.hide();
 						mercurialPush(status.rootDir);
 					});
 				}
 				
 				if(QUERY_STRING.pull) {
-				EDITOR.addTempMenuItem("Pull (update+merge)", false, function() {
-					EDITOR.hideMenu();
+					EDITOR.ctxMenu.addTemp("Pull (update+merge)", false, function() {
+					EDITOR.ctxMenu.hide();
 					mercurialDance(file);
 				});
 				}
 				
 				var showAnnotationsString = "Show commit messages";
-				var annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, false, annotateOn);
-				if(doAnnotate) EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
-				else EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
+					var annotateMenuItem = EDITOR.ctxMenu.addTemp(showAnnotationsString, false, annotateOn);
+				if(doAnnotate) EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
+				else EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
 				
 				var showHistoryString = "Version history";
-				var historyMenyItem = EDITOR.addTempMenuItem(showHistoryString, true, showVersionHistory);
-				if(versionHistoryVisible) EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
-				else EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
+					var historyMenyItem = EDITOR.ctxMenu.addTemp(showHistoryString, true, showVersionHistory);
+				if(versionHistoryVisible) EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
+				else EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
 				*/
 				
 				}
@@ -1363,7 +1363,7 @@ var error = err.message;
 	
 	
 	function showCloneDialog() {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		return repoCloneDialog.show();
 	}
 	
@@ -1449,7 +1449,7 @@ var error = err.message;
 		
 		EDITOR.on("moveCaret", showAnnotations);
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 	}
 	
 	function showAnnotations(file, caret) {
@@ -1640,7 +1640,7 @@ var error = err.message;
 		
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 		if(annotationWidget) {
@@ -1662,7 +1662,7 @@ var error = err.message;
 		
 		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		repoCommitDialog.show();
 		
 		// Reset these values
@@ -1824,7 +1824,7 @@ var error = err.message;
 	
 	function showVersionHistory(file) {
 		versionHistoryVisible = true;
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		versionHistoryWidget.show();
 		
@@ -1845,7 +1845,7 @@ var error = err.message;
 		console.log("Hiding version history!");
 		
 		versionHistoryVisible = false;
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		return versionHistoryWidget.hide();
 	}
 	
@@ -2437,12 +2437,12 @@ var error = err.message;
 	}
 	
 	function showVersionControlWidget() {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		versionControlWidget.show();
 	}
 	
 	function hideVersionControlWidget() {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		versionControlWidget.hide();
 	}
 	

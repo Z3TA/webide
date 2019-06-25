@@ -75,9 +75,9 @@
 		CLIENT.on("fileFound", gotoFileFileFound);
 		CLIENT.on("pathGlob", gotoFilePathGlob);
 		
-		menuItem = EDITOR.addMenuItem('Open/search file', show_gotoFileInput, 4);
+		menuItem = EDITOR.ctxMenu.add('Open/search file', show_gotoFileInput, 4);
 		
-		//menu = EDITOR.addMenuItem('Open file from <i title="computer/phone/usb">device</i>', openFile);
+		//menu = EDITOR.ctxMenu.add('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		
 	}
 	
@@ -99,7 +99,7 @@
 		
 		 
 		
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 		
 		hide_gotoFileInput();
 	}
@@ -107,7 +107,7 @@
 	
 	function openFile() {
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		console.log("Opening file ...");
 		
@@ -607,7 +607,7 @@ console.warn("gotoList not available!");
 	
 	function show_gotoFileInput(file, combo) {
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		
 		

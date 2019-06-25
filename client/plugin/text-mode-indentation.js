@@ -46,7 +46,7 @@
 			
 			EDITOR.removeEvent("showMenu", showWhiteSpaceMaybe);
 			
-			//EDITOR.removeMenuItem(menuItem);
+			//EDITOR.ctxMenu.remove(menuItem);
 			
 		},
 		order: 200 // run after keyboard_enter.js
@@ -60,8 +60,8 @@
 		if(!file) return;
 		if(file.mode!="text") return;
 		
-		menuItem = EDITOR.addTempMenuItem("Show white space", false, toggleShowWhiteSpace);
-		EDITOR.updateMenuItem(menuItem, SHOW_WHITE_SPACE, "Show white space");
+		menuItem = EDITOR.ctxMenu.addTemp("Show white space", false, toggleShowWhiteSpace);
+		EDITOR.ctxMenu.update(menuItem, SHOW_WHITE_SPACE, "Show white space");
 	}
 	
 	function toggleShowWhiteSpace() {
@@ -74,7 +74,7 @@
 			EDITOR.removeRender(renderWhiteSpace);
 		}
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		EDITOR.renderNeeded();
 	}

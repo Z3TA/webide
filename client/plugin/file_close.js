@@ -20,7 +20,7 @@
 		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
 		EDITOR.bindKey({desc: "Close the editor", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
-		menuItem = EDITOR.addMenuItem("Close file", closeFile, 3);
+		menuItem = EDITOR.ctxMenu.add("Close file", closeFile, 3);
 		
 	}
 	
@@ -29,7 +29,7 @@
 		EDITOR.unbindKey(closeFile);
 		EDITOR.unbindKey(closeEditor);
 		
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 	}
 	
 	function closeEditor(file, combo) {

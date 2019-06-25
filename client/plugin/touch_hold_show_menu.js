@@ -73,7 +73,7 @@
 		clearTimeout(touchTooLongTimer);
 		
 		if(showTheMenu) {
-EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
+EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
 			showTheMenu = false;
 		}
 		

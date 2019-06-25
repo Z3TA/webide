@@ -17,7 +17,7 @@ var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
-var menuVisibleOnce = false;
+var ctxMenuVisibleOnce = false;
 var menuIsFullScreen = false;
 var usePseudoClipboard = undefined;
 var lastBufferStartRow = -1; // 
@@ -317,8 +317,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	if(isNaN(EDITOR.startedCounter)) EDITOR.startedCounter = 0;
 	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
 	
-	// Don't show the firendly message on how to show the menu if the menu is disabled
-	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("menu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) menuVisibleOnce = true;
+	// Don't show the firendly message on how to show the context menu if the menu is disabled
+	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("ctxMenu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) ctxMenuVisibleOnce = true;
 	
 	var lastMouseDownEventType = "";
 	
@@ -1821,7 +1821,7 @@ text = file;
 		
 		//console.warn("rendering ...");
 		
-		if(EDITOR.currentFile && menuVisibleOnce) {
+		if(EDITOR.currentFile && ctxMenuVisibleOnce) {
 			
 			//console.log("render file=" + EDITOR.currentFile.path);
 			
@@ -2624,385 +2624,408 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 	
-	EDITOR.updateMenuItem = function(menuElement, active, htmlText, callback) {
-		
-		if(menuElement == undefined) throw new Error("menuElement=" + menuElement + " !");
-		
-		var li = menuElement;
-		
-		var child = li.childNodes;
-		var bullet = child[0];
-		var text = child[1];
-		var keyComboEl = child[2];
-		
-		if(active) bullet.setAttribute("class", "bullet active");
-		else bullet.setAttribute("class", "bullet inactive");
-		
-		if(htmlText) {
-			text.innerHTML = htmlText;
-		}
-		
-		if(callback) {
-			var keyCombo = EDITOR.getKeyFor(callback);
-			if(keyCombo) keyComboEl.innerText = keyCombo;
-			else keyComboEl.innerText = "";
+	// Add feature icons for discovery
+	EDITOR.discoveryBar = {
+		add: function addDiscoveryItem() {
 			
-			li.onclick = function(clickEvent) {
+		},
+		remove: function removeDiscoveryItem() {
+			
+		},
+		update: function updateDiscoveryItem() {
+			
+		}
+	}
+	
+	EDITOR.windowMenu = {
+		add: function addWindowMenuItem(where, whenClicked) {
+			
+		},
+		remove: function removeWindowMenuItem() {
+		},
+		update: function updateWindowMenuItem(item) {
+		}
+	}
+	
+	EDITOR.ctxMenu = {
+		add: function addCtxMenuItem(htmlText, position, callback) {
+			if(typeof position == "function" && typeof callback == "number") {
+				var posTemp = callback;
+				callback = position;
+				position = posTemp;
+			}
+			else if(typeof position == "function" && callback == undefined) {
+				callback = position;
+				position = undefined;
+			}
+			else if(Array.isArray(position)) {
+				
+			}
+			
+			if(typeof htmlText != "string") throw new Error("EDITOR.ctxMenu.add: First argument htmlText need to be a (HTML) string!");
+			
+			
+			var menu = document.getElementById("canvasContextmenu");
+			
+			var li = document.createElement("li");
+			li.setAttribute("class", "item");
+			
+			var bullet = document.createElement("span");
+			bullet.setAttribute("class", "bullet inactive");
+			
+			li.appendChild(bullet);
+			
+			var menuText = document.createElement("span");
+			menuText.setAttribute("class", "text");
+			menuText.innerHTML = htmlText;
+			
+			li.appendChild(menuText);
+			
+			var keyCombo = EDITOR.getKeyFor(callback);
+			var keyComboEl = document.createElement("span");
+			keyComboEl.setAttribute("class", "key");
+			if(keyCombo) keyComboEl.innerText = keyCombo;
+			li.appendChild(keyComboEl);
+			
+			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
+			
+			if(callback) li.onclick = function(clickEvent) {
 				// Give the same function parameters as key bound events
 				var file = EDITOR.currentFile;
 				var combo = getCombo(clickEvent);
 				var character = null;
 				var charCode = 0;
 				var direction = "down";
-				callback(file, combo, character, charCode, direction);
+				callback(file, combo, character, charCode, direction, clickEvent);
 			}
-		}
-		
-	}
-	
-	EDITOR.addMenuItem = function(htmlText, position, callback) {
-		if(typeof position == "function" && typeof callback == "number") {
-			var posTemp = callback;
-			callback = position;
-			position = posTemp;
-		}
-		else if(typeof position == "function" && callback == undefined) {
-			callback = position;
-			position = undefined;
-		}
-		
-		if(typeof htmlText != "string") throw new Error("EDITOR.addMenuItem: First argument htmlText need to be a (HTML) string!");
-		
-		
-		var menu = document.getElementById("canvasContextmenu");
-		
-		var li = document.createElement("li");
-		li.setAttribute("class", "item");
-		
-		var bullet = document.createElement("span");
-		bullet.setAttribute("class", "bullet inactive");
-		
-		li.appendChild(bullet);
-		
-		var menuText = document.createElement("span");
-		menuText.setAttribute("class", "text");
-		menuText.innerHTML = htmlText;
-		
-		li.appendChild(menuText);
-		
-		var keyCombo = EDITOR.getKeyFor(callback);
-		var keyComboEl = document.createElement("span");
-		keyComboEl.setAttribute("class", "key");
-		if(keyCombo) keyComboEl.innerText = keyCombo;
-		li.appendChild(keyComboEl);
-		
-		console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
-		
-		if(callback) li.onclick = function(clickEvent) {
-			// Give the same function parameters as key bound events
-			var file = EDITOR.currentFile;
-			var combo = getCombo(clickEvent);
-			var character = null;
-			var charCode = 0;
-			var direction = "down";
-			callback(file, combo, character, charCode, direction, clickEvent);
-		}
-		
-		if(position) {
-			li.setAttribute("position", position);
-			//menu.insertBefore(li, menu.children[position]);
-		}
-		else {
-			li.setAttribute("position", "10");
-			//menu.insertBefore(li, menu.children[position]);
-		}
-		
-			menu.appendChild(li);
-		
-		// Re-order the menu items
-		var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
-		items.sort(function(a,b) {
-			var pA = parseInt(a.getAttribute("position"));
-			var pB = parseInt(b.getAttribute("position"));
 			
-			if(pA > pB) return 1;
-			else if(pB > pA) return -1;
-			else return 0;
-			
-		});
-		items.forEach(function (li) {
-			menu.appendChild(li);
-		});
-		
-		// Don't forget to call EDITOR.hideMenu() after the item has been clicked!
-		
-		return li;
-	}
-	
-	EDITOR.removeMenuItem = function(menuElement) {
-		
-		if(!menuElement) throw new Error("EDITOR.removeMenuItem was called with no function parameters! menuElement=" + menuElement);
-		if(!menuElement.tagName) throw new Error("EDITOR.removeMenuItem argument menuElement is not a HTML node!");
-		
-		var menu = document.getElementById("canvasContextmenu");
-		
-		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
-		
-		if(menuElement.parentNode == undefined) {
-console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
-		return;
-		}
-		
-		if(menuElement.parentNode == menu) menu.removeChild(menuElement);
-		else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
-		
-		return positionIndex; // So another node can be inserted at this position
-		
-		function getItemPosition(child) {
-			var i = 0;
-			while( (child = child.previousSibling) != null ) i++;
-			return i;
-		}
-		
-	}
-	
-	EDITOR.addTempMenuItem = function(htmlText, addSeparator, callback) {
-		/*
-			These items are removed when the menu is hidden
-		*/
-		
-		if(typeof addSeparator == "function" && callback == undefined) {
-			callback = addSeparator;
-			addSeparator = true;
-		}
-		
-		if(addSeparator == undefined) addSeparator = true;
-		
-		
-		//var menu = document.getElementById("canvasContextmenu");
-		var tempItems = document.getElementById("canvasContextmenuTemp");
-		
-		var li = document.createElement("li");
-		li.setAttribute("class", "item");
-		
-		var bullet = document.createElement("span");
-		bullet.setAttribute("class", "bullet inactive");
-		
-		li.appendChild(bullet);
-		
-		var menuText = document.createElement("span");
-		menuText.setAttribute("class", "text");
-		menuText.innerHTML = htmlText;
-		
-		li.appendChild(menuText);
-		
-		var keyCombo = EDITOR.getKeyFor(callback);
-		var keyComboEl = document.createElement("span");
-		keyComboEl.setAttribute("class", "key");
-		if(keyCombo) keyComboEl.innerText = keyCombo;
-		li.appendChild(keyComboEl);
-		
-		var separator =  document.createElement("li");
-		separator.setAttribute("class", "sep");
-		
-		if(callback) li.onclick = function(clickEvent) {
-			// Give the same function parameters as key bound events
-			var file = EDITOR.currentFile;
-			var combo = getCombo(clickEvent);
-			var character = null;
-			var charCode = 0;
-			var direction = "down";
-			callback(file, combo, character, charCode, direction, clickEvent);
-		}
-		
-		tempItems.appendChild(li);
-		
-		// Add many: accept array?
-		
-		if(addSeparator) tempItems.appendChild(separator);
-		
-		//tempItems.insertBefore(menuElement, tempItems.firstChild);
-		
-		if(!menuIsFullScreen) {
-			// Resize the menu
-			var menu = document.getElementById("canvasContextmenu");
-			var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
-			var offsetWidth = parseInt(menu.offsetWidth);
-			var itemHeight = parseInt(li.offsetHeight);
-			var posY = parseInt(menu.style.top);
-			
-			console.log("itemHeight=" + itemHeight);
-			
-			if(posY > (EDITOR.height - offsetHeight)) {
-				posY = EDITOR.height - offsetHeight;
-				menu.style.top = posY + "px";
-			}
-		}
-		
-		return li;
-		
-	}
-	
-	
-	EDITOR.hideMenu = function() {
-		
-		console.log(UTIL.getStack("Hide menu"));
-		
-		var menu = document.getElementById("canvasContextmenu");
-		
-		if(menu.style.visibility == "hidden") {
-			console.warn("Menu already hidden. No need to hide it!");
-			return;
-		}
-		
-		recoverFromFullScreenMenu(menu);
-		
-		// We can't use .display="none" or it will not be possible to measure the size of the menu!
-		menu.style.visibility = "hidden";
-		//.style.display="none";
-		//menu.style.height = "1px";
-		
-		// Move it elsewhere so we don't see the ghost border in Android browser
-		menu.style.top = -1000 + "px";
-		menu.style.left = -1000 + "px";
-		
-		// Clear temorary menu items
-		var tempItems = document.getElementById("canvasContextmenuTemp");
-		while(tempItems.firstChild){
-			tempItems.removeChild(tempItems.firstChild);
-		}
-		
-		if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
-		
-	}
-	
-	EDITOR.showMenu = function(posX, posY, clickEvent) {
-		
-		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1) return new Error("Menu is disabled by query string!");;
-		
-		if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
-		if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
-		
-		clearSelection();
-		if(menuVisibleOnce == false) EDITOR.renderNeeded();
-		menuVisibleOnce = true;
-		var menu = document.getElementById("canvasContextmenu");
-		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
-		var menuDownABit = 10;
-		
-		//recoverFromFullScreenMenu(menu);
-		
-		var touchX = EDITOR.mouseX;
-		var touchY = EDITOR.mouseY;
-		
-		if(posX === touchX || posX === undefined) posX = touchX + notUpOnMenu;
-		
-		if(posY === undefined) posY = touchY + menuDownABit;
-		
-		for(var i=0, f; i<EDITOR.eventListeners.showMenu.length; i++) {
-			EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
-		}
-		
-		
-		// Make sure it fits on the screen!!
-		/*
-			setTimeout(function() { // Wait for div content to load
-			
-			}, 100); 
-		*/
-		var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
-		var offsetWidth = parseInt(menu.offsetWidth);
-		
-		//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
-		
-		console.log("menu: offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
-		
-		/*
-			When long touching the menu comes up underneath and a menu click is triggered!
-			So bring in the menu outside of the touch, and then correct the position
-		*/
-		
-		var orgX = posX;
-		var orgY = posY;
-		
-		
-		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
-		if((posX+offsetWidth) > EDITOR.width) posX = EDITOR.width - offsetWidth;
-		
-		if(posX <= EDITOR.mouseX) {
-			// Place the menu on the left side
-			posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
-		}
-		
-		if(posX < 0) posX = 0;
-		if(posY < 0) posY = 0;
-		
-		var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
-		
-		if(EDITOR.touchDown && belowTouch) {
-			
-			console.log("EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX + 
-			" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight + 
-			" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + 
-			" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
-			
-			menu.style.top = orgY + "px";
-			menu.style.left = orgX + "px";
-			
-			var interval = setInterval(waitForTouchUp, 50);
-			var timeout = setTimeout(giveUp, 1500);
-		}
-		else {
-			menu.style.top = posY + "px";
-			menu.style.left = posX + "px";
-			
-			fullScreenMenuMaybe();
-		}
-		
-		menu.style.visibility = "visible";
-		//menu.style.display="block";
-		
-		//menu.style.height = "100%";
-		
-		function waitForTouchUp() {
-			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
-			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
-			clearSelection();
-			
-			//var offsetHeight = parseInt(menu.offsetHeight);
-			//if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
-			
-			if(!EDITOR.touchDown) {
-				console.log("There where no touch down!");
-				giveUp();
-				fullScreenMenuMaybe();
+			if(position) {
+				li.setAttribute("position", position);
+				//menu.insertBefore(li, menu.children[position]);
 			}
 			else {
-				console.log("There was a touch down!");
-				//menu.style.top = posY + "px";
-				//menu.style.left = posX + "px";
+				li.setAttribute("position", "10");
+				//menu.insertBefore(li, menu.children[position]);
 			}
-		}
-		
-		function giveUp() {
-			clearInterval(interval);
-			clearTimeout(timeout);
-		}
-		
-		function fullScreenMenuMaybe() {
-			var offsetHeight = parseInt(menu.offsetHeight);
-			console.log("fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
-			if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
-				// Hide everything besides the menu
-				fullScreenMenu(menu);
+			
+			menu.appendChild(li);
+			
+			// Re-order the menu items
+			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
+			items.sort(function(a,b) {
+				var pA = parseInt(a.getAttribute("position"));
+				var pB = parseInt(b.getAttribute("position"));
+				
+				if(pA > pB) return 1;
+				else if(pB > pA) return -1;
+				else return 0;
+				
+			});
+			items.forEach(function (li) {
+				menu.appendChild(li);
+			});
+			
+			// Don't forget to call EDITOR.ctxMenu.hide() after the item has been clicked!
+			
+			return li;
+		},
+		remove: function removeCtxMenuItem(menuElement) {
+			
+			if(!menuElement) throw new Error("EDITOR.ctxMenu.remove was called with no function parameters! menuElement=" + menuElement);
+			if(!menuElement.tagName) throw new Error("EDITOR.ctxMenu.remove argument menuElement is not a HTML node!");
+			
+			var menu = document.getElementById("canvasContextmenu");
+			
+			var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
+			
+			if(menuElement.parentNode == undefined) {
+				console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
+				return;
+			}
+			
+			if(menuElement.parentNode == menu) menu.removeChild(menuElement);
+			else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
+			
+			return positionIndex; // So another node can be inserted at this position
+			
+			function getItemPosition(child) {
+				var i = 0;
+				while( (child = child.previousSibling) != null ) i++;
+				return i;
+			}
+			
+		},
+		update: function updateCtxMenuItem(menuElement, active, htmlText, callback) {
+			
+			if(menuElement == undefined) throw new Error("menuElement=" + menuElement + " !");
+			
+			var li = menuElement;
+			
+			var child = li.childNodes;
+			var bullet = child[0];
+			var text = child[1];
+			var keyComboEl = child[2];
+			
+			if(active) bullet.setAttribute("class", "bullet active");
+			else bullet.setAttribute("class", "bullet inactive");
+			
+			if(htmlText) {
+				text.innerHTML = htmlText;
+			}
+			
+			if(callback) {
+				var keyCombo = EDITOR.getKeyFor(callback);
+				if(keyCombo) keyComboEl.innerText = keyCombo;
+				else keyComboEl.innerText = "";
+				
+				li.onclick = function(clickEvent) {
+					// Give the same function parameters as key bound events
+					var file = EDITOR.currentFile;
+					var combo = getCombo(clickEvent);
+					var character = null;
+					var charCode = 0;
+					var direction = "down";
+					callback(file, combo, character, charCode, direction);
+				}
+			}
+			
+		},
+		addTemp: function addTempCtxMenuItem(htmlText, addSeparator, callback) {
+			/*
+				These items are removed when the menu is hidden
+			*/
+			
+			if(typeof addSeparator == "function" && callback == undefined) {
+				callback = addSeparator;
+				addSeparator = true;
+			}
+			
+			if(addSeparator == undefined) addSeparator = true;
+			
+			
+			//var menu = document.getElementById("canvasContextmenu");
+			var tempItems = document.getElementById("canvasContextmenuTemp");
+			
+			var li = document.createElement("li");
+			li.setAttribute("class", "item");
+			
+			var bullet = document.createElement("span");
+			bullet.setAttribute("class", "bullet inactive");
+			
+			li.appendChild(bullet);
+			
+			var menuText = document.createElement("span");
+			menuText.setAttribute("class", "text");
+			menuText.innerHTML = htmlText;
+			
+			li.appendChild(menuText);
+			
+			var keyCombo = EDITOR.getKeyFor(callback);
+			var keyComboEl = document.createElement("span");
+			keyComboEl.setAttribute("class", "key");
+			if(keyCombo) keyComboEl.innerText = keyCombo;
+			li.appendChild(keyComboEl);
+			
+			var separator =  document.createElement("li");
+			separator.setAttribute("class", "sep");
+			
+			if(callback) li.onclick = function(clickEvent) {
+				// Give the same function parameters as key bound events
+				var file = EDITOR.currentFile;
+				var combo = getCombo(clickEvent);
+				var character = null;
+				var charCode = 0;
+				var direction = "down";
+				callback(file, combo, character, charCode, direction, clickEvent);
+			}
+			
+			tempItems.appendChild(li);
+			
+			// Add many: accept array?
+			
+			if(addSeparator) tempItems.appendChild(separator);
+			
+			//tempItems.insertBefore(menuElement, tempItems.firstChild);
+			
+			if(!menuIsFullScreen) {
+				// Resize the menu
+				var menu = document.getElementById("canvasContextmenu");
+				var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
+				var offsetWidth = parseInt(menu.offsetWidth);
+				var itemHeight = parseInt(li.offsetHeight);
+				var posY = parseInt(menu.style.top);
+				
+				console.log("itemHeight=" + itemHeight);
+				
+				if(posY > (EDITOR.height - offsetHeight)) {
+					posY = EDITOR.height - offsetHeight;
+					menu.style.top = posY + "px";
+				}
+			}
+			
+			return li;
+			
+		},
+		hide: function hideCtxMenu() {
+			
+			console.log(UTIL.getStack("Hide menu"));
+			
+			var menu = document.getElementById("canvasContextmenu");
+			
+			if(menu.style.visibility == "hidden") {
+				console.warn("Menu already hidden. No need to hide it!");
+				return;
+			}
+			
+			recoverFromFullScreenMenu(menu);
+			
+			// We can't use .display="none" or it will not be possible to measure the size of the menu!
+			menu.style.visibility = "hidden";
+			//.style.display="none";
+			//menu.style.height = "1px";
+			
+			// Move it elsewhere so we don't see the ghost border in Android browser
+			menu.style.top = -1000 + "px";
+			menu.style.left = -1000 + "px";
+			
+			// Clear temorary menu items
+			var tempItems = document.getElementById("canvasContextmenuTemp");
+			while(tempItems.firstChild){
+				tempItems.removeChild(tempItems.firstChild);
+			}
+			
+			if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
+			
+		},
+		show: function showCtxMenu(posX, posY, clickEvent) {
+			
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
+			
+			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
+			
+			clearSelection();
+			if(ctxMenuVisibleOnce == false) EDITOR.renderNeeded();
+			ctxMenuVisibleOnce = true;
+			var menu = document.getElementById("canvasContextmenu");
+			var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
+			var menuDownABit = 10;
+			
+			//recoverFromFullScreenMenu(menu);
+			
+			var touchX = EDITOR.mouseX;
+			var touchY = EDITOR.mouseY;
+			
+			if(posX === touchX || posX === undefined) posX = touchX + notUpOnMenu;
+			
+			if(posY === undefined) posY = touchY + menuDownABit;
+			
+			for(var i=0, f; i<EDITOR.eventListeners.showMenu.length; i++) {
+				EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
+			}
+			
+			
+			// Make sure it fits on the screen!!
+			/*
+				setTimeout(function() { // Wait for div content to load
+				
+				}, 100);
+			*/
+			var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
+			var offsetWidth = parseInt(menu.offsetWidth);
+			
+			//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
+			
+			console.log("menu: offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
+			
+			/*
+				When long touching the menu comes up underneath and a menu click is triggered!
+				So bring in the menu outside of the touch, and then correct the position
+			*/
+			
+			var orgX = posX;
+			var orgY = posY;
+			
+			
+			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+			if((posX+offsetWidth) > EDITOR.width) posX = EDITOR.width - offsetWidth;
+			
+			if(posX <= EDITOR.mouseX) {
+				// Place the menu on the left side
+				posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
+			}
+			
+			if(posX < 0) posX = 0;
+			if(posY < 0) posY = 0;
+			
+			var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
+			
+			if(EDITOR.touchDown && belowTouch) {
+				
+				console.log("EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX +
+				" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight +
+				" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height +
+				" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
+				
+				menu.style.top = orgY + "px";
+				menu.style.left = orgX + "px";
+				
+				var interval = setInterval(waitForTouchUp, 50);
+				var timeout = setTimeout(giveUp, 1500);
 			}
 			else {
 				menu.style.top = posY + "px";
 				menu.style.left = posX + "px";
+				
+				fullScreenMenuMaybe();
 			}
+			
+			menu.style.visibility = "visible";
+			//menu.style.display="block";
+			
+			//menu.style.height = "100%";
+			
+			function waitForTouchUp() {
+				if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+				if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
+				clearSelection();
+				
+				//var offsetHeight = parseInt(menu.offsetHeight);
+				//if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+				
+				if(!EDITOR.touchDown) {
+					console.log("There where no touch down!");
+					giveUp();
+					fullScreenMenuMaybe();
+				}
+				else {
+					console.log("There was a touch down!");
+					//menu.style.top = posY + "px";
+					//menu.style.left = posX + "px";
+				}
+			}
+			
+			function giveUp() {
+				clearInterval(interval);
+				clearTimeout(timeout);
+			}
+			
+			function fullScreenMenuMaybe() {
+				var offsetHeight = parseInt(menu.offsetHeight);
+				console.log("fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
+				if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
+					// Hide everything besides the menu
+					fullScreenMenu(menu);
+				}
+				else {
+					menu.style.top = posY + "px";
+					menu.style.left = posX + "px";
+				}
+			}
+			
 		}
-		
 	}
+	
 	
 	EDITOR.addInfo = function(row, col, textString, file, lvl) {
 		// Will display a talk bubble (plugin/render_info.js)
@@ -6823,7 +6846,7 @@ testResults.push("All " + finished + " tests passed!")
 			else fun(speechResult, file);
 		}
 		
-		if(captured) EDITOR.hideMenu();
+		if(captured) EDITOR.ctxMenu.hide();
 		
 		
 		if(!captured && EDITOR.lastElementWithFocus && (
@@ -6938,7 +6961,7 @@ testResults.push("All " + finished + " tests passed!")
 		console.log("fileDrop: fileDropEvent:");
 		console.log(fileDropEvent);
 		
-		menuVisibleOnce = true; // Show the dropped content
+		ctxMenuVisibleOnce = true; // Show the dropped content
 		
 		var text = fileDropEvent.dataTransfer.getData('Text');
 		
@@ -8168,8 +8191,8 @@ keyPressed(keyPress);
 		lastKeyDown = charCode;
 		
 		// In case the user has no mouse, pressing Enter should hide the "Right click to show the menu" message
-		if(!menuVisibleOnce && charCode == 13) {
-			menuVisibleOnce = true;
+		if(!ctxMenuVisibleOnce && charCode == 13) {
+			ctxMenuVisibleOnce = true;
 			
 			// Can not give editor input or prevent default as that would prevent form submit by pressing Enter.
 			//EDITOR.input = true;
@@ -8384,7 +8407,7 @@ keyPressed(keyPress);
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
 			// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
-			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.hideMenu();
+			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.ctxMenu.hide();
 			
 			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
@@ -8421,7 +8444,7 @@ keyPressed(keyPress);
 				
 				EDITOR.input = false;
 				
-				EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
+				EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
 				
 			}
 			
@@ -9042,8 +9065,8 @@ keyPressed(keyPress);
 		
 		menuIsFullScreen = true;
 		
-		EDITOR.addTempMenuItem("Hide menu", function() {
-			EDITOR.hideMenu();
+		EDITOR.ctxMenu.addTemp("Hide menu", function() {
+			EDITOR.ctxMenu.hide();
 		});
 		
 	}

@@ -14,7 +14,7 @@
 			// todo: Only load if running as a cloud service!
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
-			menuItem = EDITOR.addMenuItem("Database manager", showDbManager, 20);
+			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
 			
 			EDITOR.on("fileOpen", sqlFileMaybe);
 			
@@ -24,7 +24,7 @@
 },
 		unload: function unloadSqldb() {
 			
-			EDITOR.removeMenuItem(menuItem);
+			EDITOR.ctxMenu.remove(menuItem);
 			
 			if(dbManagerWidget) dbManagerWidget.unload();
 			
@@ -44,17 +44,17 @@
 	}
 	
 	function showDbManager() {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		//if(dbManagerWidget.visible) return hideDbManager();
 		
 		dbManagerWidget.show();
-		EDITOR.updateMenuItem(menuItem, true);
+		EDITOR.ctxMenu.update(menuItem, true);
 	}
 	
 	function hideDbManager() {
 		dbManagerWidget.hide();
-		EDITOR.updateMenuItem(menuItem, false);
+		EDITOR.ctxMenu.update(menuItem, false);
 		
 		return ALLOW_DEFAULT;
 	}

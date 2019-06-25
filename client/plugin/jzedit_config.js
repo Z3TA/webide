@@ -29,7 +29,7 @@
 		
 		EDITOR.on("afterSave", configurationMaybe);
 		
-		menuItem = EDITOR.addMenuItem("Editor customization", showLocalCustomization, 20);
+		menuItem = EDITOR.ctxMenu.add("Editor customization", showLocalCustomization, 20);
 		
 		var root = (EDITOR.user && EDITOR.user.homeDir) || "/";
 		
@@ -138,7 +138,7 @@
 			
 		});
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 	}
 	
 	function getJS() {

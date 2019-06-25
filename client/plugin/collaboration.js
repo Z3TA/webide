@@ -87,7 +87,7 @@
 			EDITOR.registerAltKey({char: "ABC", label: "undo", alt: 1, fun: collabUndo}); 
 			EDITOR.registerAltKey({char: "ABC", label: "redo", alt: 2, fun: collabRedo});
 			
-			menu = EDITOR.addMenuItem("Invite collaborator", invite, 14);
+			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
 			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
@@ -147,7 +147,7 @@
 	}
 	
 	function invite(file, combo, character, charCode, direction, clickEvent) {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		CLIENT.cmd("invite", {}, function(err, login) {
 			

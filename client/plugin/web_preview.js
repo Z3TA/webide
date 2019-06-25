@@ -8,12 +8,12 @@
 	EDITOR.plugin({
 		desc: "Preview HTML files",
 		load: function loadWebPreview() {
-			//menuItem = EDITOR.addMenuItem("Preview HTML", webPreview);
+			//menuItem = EDITOR.ctxMenu.add("Preview HTML", webPreview);
 			EDITOR.on("showMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
 		},
 		unload: function unloadWebPreview() {
-			//EDITOR.removeMenuItem(menuItem);
+			//EDITOR.ctxMenu.remove(menuItem);
 			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("previewTool", webPreviewTool); 
 			}
@@ -26,7 +26,7 @@
 		if(!file) return true;
 		if(!file.path.match(/html?$/i)) return true;
 		
-		menuItem = EDITOR.addTempMenuItem("Web Preview", webPreview);
+		menuItem = EDITOR.ctxMenu.addTemp("Web Preview", webPreview);
 		
 	}
 	
@@ -42,7 +42,7 @@ console.warn("Unable to run preview: No file open!");
 		EDITOR.previewTool(file, clickEvent);
 		
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		
 		

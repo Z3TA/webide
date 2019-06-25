@@ -21,17 +21,17 @@ console.warn("Disabling Google Drive integration when running locally");
 EDITOR.plugin({
 	desc: "Mount Google Drive",
 	load: function() {
-			menuItem = EDITOR.addMenuItem(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
+			menuItem = EDITOR.ctxMenu.add(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
 
 },
 	unload: function() {
-EDITOR.removeMenuItem(menuItem);
+EDITOR.ctxMenu.remove(menuItem);
 }
 });
 
 function googleDriveInit() {
 		// Hide the menu right away so the user don't think it's "locked"
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		// Should we show a loading bar !?
 		
@@ -77,8 +77,8 @@ if(err) return alertBox(err.message);
 		// Assume it was successfully mounted
 		EDITOR.fileExplorer("/googleDrive/");
 		
-		EDITOR.updateMenuItem(menuItem, true, GD_MENU_CONNECTED, umountGoogleDrive);
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.update(menuItem, true, GD_MENU_CONNECTED, umountGoogleDrive);
+		EDITOR.ctxMenu.hide();
 	}
 	
 function umountGoogleDrive() {
@@ -89,8 +89,8 @@ function umountGoogleDrive() {
 			
 			// Even if we got an error, the folder has likely umount'ed
 			
-			EDITOR.updateMenuItem(menuItem, false, GD_MENU_NOT_CONNECTED, googleDriveInit);
-			EDITOR.hideMenu();
+			EDITOR.ctxMenu.update(menuItem, false, GD_MENU_NOT_CONNECTED, googleDriveInit);
+			EDITOR.ctxMenu.hide();
 			
 			// Tell file explorer to close /googleDrive folder !?
 			EDITOR.fireEvent("move", ["/googleDrive/", "/dev/null"]);

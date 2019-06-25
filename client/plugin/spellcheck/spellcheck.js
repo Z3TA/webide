@@ -61,7 +61,7 @@
 	
 	function loadSpellchecker() {
 		
-		menuItem = EDITOR.addMenuItem("Spellcheck ", toggleSpellCheck, 10);
+		menuItem = EDITOR.ctxMenu.add("Spellcheck ", toggleSpellCheck, 10);
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		
@@ -85,7 +85,7 @@
 	
 	function unloadSpellchecker() {
 		disable();
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 	}
 	
 	function toggleSpellCheck() {
@@ -96,12 +96,12 @@
 		
 		console.log("Change status to enabled=" + enabled);
 		
-		EDITOR.updateMenuItem(menuItem, enabled, "Spellcheck");
+		EDITOR.ctxMenu.update(menuItem, enabled, "Spellcheck");
 		
 		if(enabled) enable();
 		else disable();
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 	}
 	
 	function enable() {
@@ -196,7 +196,7 @@
 			}
 			
 			if(suggestion) {
-				EDITOR.addTempMenuItem(suggestion, replaceWord);
+				EDITOR.ctxMenu.addTemp(suggestion, replaceWord);
 			}
 			/*
 				else {
@@ -205,7 +205,7 @@
 			*/
 			
 			function replaceWord() {
-				EDITOR.hideMenu();
+				EDITOR.ctxMenu.hide();
 				
 				console.log("replacing " + word + " for " + suggestion);
 				

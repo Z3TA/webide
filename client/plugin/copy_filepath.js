@@ -7,7 +7,7 @@
 		desc: 'Adds "Copy file path" to the context menu',
 		load: function load() {
 			
-			menuItem = EDITOR.addMenuItem("Copy file path", function copyFilePath() {
+			menuItem = EDITOR.ctxMenu.add("Copy file path", function copyFilePath() {
 				
 				// Puts the current file path into the clipboard
 				
@@ -41,14 +41,14 @@
 					alertBox("No file open!");
 				}
 				
-				EDITOR.hideMenu();
+				EDITOR.ctxMenu.hide();
 				
 				
 			}, 5);
 			
 		},
 		unload: function unload() {
-			EDITOR.removeMenuItem(menuItem);
+			EDITOR.ctxMenu.remove(menuItem);
 			}
 		});
 	

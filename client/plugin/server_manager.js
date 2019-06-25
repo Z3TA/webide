@@ -77,7 +77,7 @@
 			EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
 			EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 			
-			menuItem = EDITOR.addMenuItem(menuString, showServerManger, 15);
+			menuItem = EDITOR.ctxMenu.add(menuString, showServerManger, 15);
 			
 		});
 		
@@ -91,7 +91,7 @@
 		EDITOR.unbindKey(hideServerManger);
 		EDITOR.unbindKey(serverManagerEnter);
 		
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 		
 		if(serverManager) {
 			var footer = document.getElementById("footer");
@@ -235,7 +235,7 @@
 		
 		function disconnectConnection() {
 			// Close the connection
-			EDITOR.updateMenuItem(menuItem, false, menuString);
+			EDITOR.ctxMenu.update(menuItem, false, menuString);
 			
 			if(EDITOR.connections.hasOwnProperty(selectedConnection.host)) {
 				
@@ -537,7 +537,7 @@
 		
 		console.log("Show server manager");
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		// Steal focus from the file
 		EDITOR.input = false;
@@ -594,7 +594,7 @@
 				//alertBox("Connected to " + protocol + " on " + hostName + "!");
 				EDITOR.fileExplorer(protocol.toLowerCase() + "://" + hostName);
 				hideServerManger();
-				EDITOR.updateMenuItem(menuItem, true, menuString);
+				EDITOR.ctxMenu.update(menuItem, true, menuString);
 }
 }
 		

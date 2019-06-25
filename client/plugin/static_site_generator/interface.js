@@ -229,7 +229,7 @@
 		
 		//build();
 		
-		menuItem = EDITOR.addMenuItem("Static site generator", showSSG, 11);
+		menuItem = EDITOR.ctxMenu.add("Static site generator", showSSG, 11);
 		
 		EDITOR.on("fileShow", fileShow);
 		
@@ -261,7 +261,7 @@
 		
 		EDITOR.removeEvent("storageReady", getSites);
 		
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 		
 		SSG_cleanup(); // closePreview();
 		
@@ -1403,7 +1403,7 @@
 		
 		console.log("Showing the static site generator -interface")
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		EDITOR.input = false; // Steal focus from the file
 		

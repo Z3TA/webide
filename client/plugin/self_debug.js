@@ -57,7 +57,7 @@
 		
 		if(file.name.indexOf("bugreport") != -1) {
 			var addSeparator = true;
-			var tmpMenuItem = EDITOR.addTempMenuItem("Send bug report", addSeparator, function sendBugReportWithoutAsking() {
+			var tmpMenuItem = EDITOR.ctxMenu.addTemp("Send bug report", addSeparator, function sendBugReportWithoutAsking() {
 				sendBugReport(false);
 			});
 		}
@@ -66,7 +66,7 @@
 	function sendBugReport(askFirst) {
 		if(typeof askFirst != "boolean") askFirst = true; 
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		var file = EDITOR.currentFile;
 		

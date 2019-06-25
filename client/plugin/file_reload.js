@@ -12,12 +12,12 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.addMenuItem("Relode from disk", reloadFile, 6);
+		menuItem = EDITOR.ctxMenu.add("Relode from disk", reloadFile, 6);
 		
 	}
 	
 	function unload() {
-		EDITOR.removeMenuItem(menuItem);
+		EDITOR.ctxMenu.remove(menuItem);
 	}
 	
 	function reloadFile() {
@@ -42,7 +42,7 @@ if(!file) return true;
 		}
 		else reload();
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		function reload() {
 			

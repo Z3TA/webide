@@ -14,18 +14,18 @@
 		desc: "Open file in new window",
 		load: function loadFloatingWindow() {
 			
-			menu = EDITOR.addMenuItem("Open in new window", openInNewWindow, 4);
+			menu = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
 			
 		},
 		unload: function unloadFloatingWindow() {
-			EDITOR.removeMenuItem(menu);
+			EDITOR.ctxMenu.remove(menu);
 		},
 	});
 	
 	
 	function openInNewWindow(file) {
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		var browserWindowOptions = {
 			url: "/?disable=collaboration_notice,reopen_files,trmb,file_tabs",

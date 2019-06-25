@@ -235,7 +235,7 @@ for(var i=0; i<list.length; i++) {
 	
 	
 	function switchToFile(path) {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		if(!EDITOR.files.hasOwnProperty(path)) {
 			throw new Error("Trying to swith to a file that is not open! path=" + path);
 			return;

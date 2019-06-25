@@ -39,7 +39,7 @@
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools, 21); // Built in Chromium dev tools
+			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.ctxMenu.add("Show dev tools", showDevTools, 21); // Built in Chromium dev tools
 			
 			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			
@@ -70,10 +70,10 @@
 		},
 		unload: function unloadDevMode() {
 			
-			EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-			if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
+			EDITOR.ctxMenu.remove(toggleDevmodeMenuItem);
+			if(runTestsMenuItem) EDITOR.ctxMenu.remove(runTestsMenuItem);
 			
-			if(showDevToolsMenuItem) EDITOR.removeMenuItem(showDevToolsMenuItem);
+			if(showDevToolsMenuItem) EDITOR.ctxMenu.remove(showDevToolsMenuItem);
 			
 			EDITOR.unbindKey(reloadEditor);
 			EDITOR.unbindKey(toggleDevMode);
@@ -108,10 +108,10 @@
 		
 		EDITOR.unbindKey(runOneTest);
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode, 20);
-		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Editor debugmode");
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.ctxMenu.add("Editor debugmode", toggleDevMode, 20);
+		EDITOR.ctxMenu.update(toggleDevmodeMenuItem, false, "Editor debugmode");
 		
-		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
+		if(runTestsMenuItem) EDITOR.ctxMenu.remove(runTestsMenuItem);
 		
 		// Disable console.log
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
@@ -156,10 +156,10 @@ console.time = console.timeEnd = function() {};
 		
 		// todo: How can I show the menu item further down !? So it does not annoy end users
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode, 18);
-		EDITOR.updateMenuItem(toggleDevmodeMenuItem, true, "Editor debugmode");
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.ctxMenu.add("Editor debugmode", toggleDevMode, 18);
+		EDITOR.ctxMenu.update(toggleDevmodeMenuItem, true, "Editor debugmode");
 		
-		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests, 19);
+		runTestsMenuItem = EDITOR.ctxMenu.add("Run tests", runTests, 19);
 		
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
@@ -231,7 +231,7 @@ console.time = console.timeEnd = function() {};
 			disableDevMode();
 			console.log("devMode disabled");
 		}
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		return false;
 		
@@ -241,7 +241,7 @@ console.time = console.timeEnd = function() {};
 		if(RUNTIME=="nw.js") {
 			require('nw.gui').Window.get().showDevTools();
 		}
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 	}
 	
@@ -265,7 +265,7 @@ console.time = console.timeEnd = function() {};
 	}
 	
 	function runTests() {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		EDITOR.runTests(); // Runs all tests
 		}

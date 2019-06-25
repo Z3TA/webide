@@ -45,7 +45,7 @@
 		EDITOR.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
 		// Add items to the canvas context meny
-		menu = EDITOR.addMenuItem("Save as ...", saveAs, 2);
+		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
 		
 		EDITOR.on("showMenu", showSaveOption);
 		
@@ -60,7 +60,7 @@
 		EDITOR.unbindKey(hideSaveDialog);
 		EDITOR.unbindKey(enter);
 		
-		EDITOR.removeMenuItem(menu);
+		EDITOR.ctxMenu.remove(menu);
 		
 		EDITOR.removeEvent("showMenu", showSaveOption);
 		
@@ -464,7 +464,7 @@ console.warn("The save was canceled: " + err.message);
 		
 		if(!file) throw new Error("No file open!?");
 		
-		EDITOR.hideMenu(); // This will bring focus to the editor input
+		EDITOR.ctxMenu.hide(); // This will bring focus to the editor input
 		
 		showSaveDialog();
 		
@@ -494,7 +494,7 @@ console.warn("The save was canceled: " + err.message);
 	
 	function saveCurrentFile(file, combo, character, charCode, direction) {
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		if(file.savedAs === false || combo.sum == CTRL + SHIFT) {
 			saveAs();
@@ -512,7 +512,7 @@ console.warn("The save was canceled: " + err.message);
 		if(file.isSaved) return true;
 		if(!file.savedAs) return true;
 		
-		EDITOR.addTempMenuItem("Save file", saveCurrentFile);
+		EDITOR.ctxMenu.addTemp("Save file", saveCurrentFile);
 		
 	}
 	

@@ -142,7 +142,7 @@
 			
 			addButtons();
 			
-			menuItem = EDITOR.addMenuItem(labelShowBuiltin, toggleBetweenKeyboards, 26);
+			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
@@ -168,7 +168,7 @@
 			hideBuiltinKeyboard();
 			hideNativeKeyboard();
 			
-			EDITOR.removeMenuItem(menuItem);
+			EDITOR.ctxMenu.remove(menuItem);
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.removeChild(canvas);
@@ -179,12 +179,12 @@
 	function toggleBetweenKeyboards() {
 		console.log("toggleBetweenKeyboards: useNative=" + useNative + " useBuiltin=" + useBuiltin);
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		if(useNative) {
 			// Don't show any
 			hideNativeKeyboard();
-			EDITOR.updateMenuItem(menuItem, false, labelShowBuiltin);
+			EDITOR.ctxMenu.update(menuItem, false, labelShowBuiltin);
 		}
 		else if(useBuiltin) {
 			// Show native
@@ -217,7 +217,7 @@
 		
 		EDITOR.resizeNeeded();
 		
-		EDITOR.updateMenuItem(menuItem, true, labelShowNative);
+		EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
 		
 		useBuiltin = true;
 		
@@ -238,7 +238,7 @@
 	}
 	
 	function showNativeKeyboard() {
-		if(!useNative) EDITOR.updateMenuItem(menuItem, true, labelShowNative);
+		if(!useNative) EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
 		
 		// Always trigger native, even if already in use
 		

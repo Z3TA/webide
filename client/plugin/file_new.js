@@ -15,14 +15,14 @@
 			// Bind to ctrl + N
 			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: keyboardNewFile});
 			
-			menuItem = EDITOR.addMenuItem("New file", keyboardNewFile, 1);
+			menuItem = EDITOR.ctxMenu.add("New file", keyboardNewFile, 1);
 			
 			//newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
 			
 		},
 		unload: function unload() {
-			EDITOR.removeMenuItem(menuItem);
+			EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.unbindKey(keyboardNewFile);
 			
@@ -33,7 +33,7 @@
 	});
 	
 	function keyboardNewFile(file, combo, character, charCode, direction) {
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		createNewFile("new file", "");
 		return false;
 	}

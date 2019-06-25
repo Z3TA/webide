@@ -22,8 +22,8 @@ load: function loadTopRightMenuButton() {
 			button.setAttribute("class", "topRightMenuButton"); // For styling
 
 			button.onclick = function(clickEvent) {
-EDITOR.hideMenu();
-EDITOR.showMenu(undefined, undefined, clickEvent);
+EDITOR.ctxMenu.hide();
+EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
 };
 			
 			var header = document.getElementById("header");

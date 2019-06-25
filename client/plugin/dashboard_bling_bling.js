@@ -15,7 +15,7 @@
 		desc: "Add some bling bling to the dashboard",
 		load: function loadDashboardBlingBling() {
 			
-			toggleDashboardMenuItem = EDITOR.addMenuItem("Dashboard", toggleDashboard);
+			toggleDashboardMenuItem = EDITOR.ctxMenu.add("Dashboard", toggleDashboard);
 			
 			var key_Esc = 27;
 			EDITOR.bindKey({desc: "Hide dashboard", charCode: key_Esc, combo: 0, fun: blingBlingHideDashboard});
@@ -25,7 +25,7 @@
 		},
 		unload: function unloadDashboardBlingBling() {
 			
-			EDITOR.removeMenuItem(toggleDashboardMenuItem);
+			EDITOR.ctxMenu.remove(toggleDashboardMenuItem);
 			
 			EDITOR.unbindKey(blingBlingHideDashboard);
 			
@@ -44,7 +44,7 @@
 		else {
 			EDITOR.dashboard.show();
 		}
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 	}
 			
 })();

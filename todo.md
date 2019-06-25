@@ -29,6 +29,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Top menu for feature discovery !?
+
+
+Also move the function list to the top right corner if it covers 50% of the screen or more.
+
+Native keyboard delete button doesn't work on Opera Mobile.
+
+Fix native keyboard hiding between typing.
+
+
 Annoying when you accidentally navigate away from the preview,
 seems to be no way to get back (back button doesn't work)
 
@@ -116,6 +126,9 @@ Writing a guide on how to make a survey
 
 todo
 ----
+
+When searching-replace in file, automatically reload open files,
+and ask about unsaved files.
 
 Autocomplete CSS rules like "text-align"
 

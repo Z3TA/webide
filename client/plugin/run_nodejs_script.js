@@ -94,9 +94,9 @@
 		
 		var addSeparator = true;
 		
-		var scriptMenuItem = EDITOR.addTempMenuItem("Run nodejs script", addSeparator, runNodeJsScript);
-		if(scriptIsRunning) EDITOR.updateMenuItem(scriptMenuItem, scriptIsRunning, "Stop nodej script", stopNodeJsScript);
-		else EDITOR.updateMenuItem(scriptMenuItem, scriptIsRunning, "Run nodejs script", runNodeJsScript);
+		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Run nodejs script", addSeparator, runNodeJsScript);
+		if(scriptIsRunning) EDITOR.ctxMenu.update(scriptMenuItem, scriptIsRunning, "Stop nodej script", stopNodeJsScript);
+		else EDITOR.ctxMenu.update(scriptMenuItem, scriptIsRunning, "Run nodejs script", runNodeJsScript);
 		
 	}
 	
@@ -591,7 +591,7 @@
 		
 		var filePath = EDITOR.currentFile.path;
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
@@ -615,7 +615,7 @@
 	function runNodeJsScript() {
 		var file = EDITOR.currentFile;
 		
-		EDITOR.hideMenu();
+		EDITOR.ctxMenu.hide();
 		
 		if(!file) return alertBox("No file open!");
 		

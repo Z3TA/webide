@@ -61,11 +61,11 @@
 					alwaysShowFunctionList = false;
 				}
 				
-				if(!menu) menu = EDITOR.addMenuItem("Show function list", 20, function showFunctionListAgain() {
+				if(!menu) menu = EDITOR.ctxMenu.add("Show function list", 20, function showFunctionListAgain() {
 					alwaysShowFunctionList = true;
 					showFunctionList();
-					EDITOR.hideMenu();
-					EDITOR.removeMenuItem(menu);
+					EDITOR.ctxMenu.hide();
+					EDITOR.ctxMenu.remove(menu);
 				});
 				
 				hideFunctionList();
