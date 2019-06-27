@@ -2642,8 +2642,134 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		isVisible: true
 	}
 	
+	
+	function DropdownMenu() {
+		var menu = this;
+		menu.ul = document.createElement("ul");
+		menu.items = {};
+		
+		var windowMenu = document.getElementById("windowMenu");
+		windowMenu.appendChild(menu.ul); // All menus goes into the windowMenu div (no nested lists!)
+	}
+	DropdownMenu.prototype.addItem = function addItem(label, whenClicked) {
+		var menu = this;
+		if(menu.items.hasOwnProperty(label)) throw new Error("Menu already have an item with label=" + label);
+		var item = menu.items[label] = new DropdownMenuItem(label, whenClicked);
+		menu.ul.appendChild(item.li);
+		return item;
+	}
+	DropdownMenu.prototype.show = function show() {
+		this.ul.setAttribute("class", "");
+	}
+	DropdownMenu.prototype.hide = function hide() {
+		//this.ul.style.display = "none";
+		this.ul.setAttribute("class", "hidden");
+	}
+	
+	
+	function DropdownMenuItem(label, whenClicked) {
+		var item = this;
+		
+		item.li = document.createElement("li");
+		item.text = document.createElement("span");
+		item.text.setAttribute("class", "text");
+		item.text.innerText = label;
+		item.li.appendChild(item.text);
+		
+		item.li.onclick = whenClicked; // Should be visible when hoever, but it doesn'ẗ work!! why?'
+		
+		item.subMenu = null;
+	}
+	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
+		var item = this;
+		
+		item.subMenu = new DropdownMenu();
+		item.li.setAttribute("class", "hasSubmenu");
+		
+		if(!item.li.onclick) {
+item.li.onclick = showSubmenu;
+			item.li.setAttribute("class", "hasSubmenu needClick");
+		}
+		else {
+			item.li.addEventListener("mouseover", showSubmenu);
+		}
+		
+		item.subMenu.hide();
+		
+		item.subMenu.ul.addEventListener("mouseout", hide);
+		item.subMenu.ul.addEventListener("mouseover", cancelHide);
+		
+		
+		return item.subMenu;
+		
+		
+		function hide(ev) {
+			var ev = ev || event;
+			
+			// Dont hide if the mouseout was on a child element
+			var el = ev.toElement || ev.relatedTarget;
+			if (el && el.parentNode == this || el == this) return;
+			el = el && el.parentNode;
+			if (el && el.parentNode == this || el == this) return;
+			el = el && el.parentNode;
+			if (el && el.parentNode == this || el == this) return;
+			
+			item.hideTimeout = setTimeout(function() {
+				item.subMenu.hide();
+			}, 500);
+			
+		}
+		
+		function cancelHide() {
+			clearTimeout(item.hideTimeout);
+		}
+		
+		function showSubmenu() {
+			item.subMenu.show();
+		}
+		
+	}
+	
+	
+	var dropdownMenuRoot;
 	EDITOR.windowMenu = {
-		add: function addWindowMenuItem(htmlText, where, whenClicked) {
+		add: function addWindowMenuItem(label, where, whenClicked) {
+			
+			if(!dropdownMenuRoot) {
+				var windowMenu = document.getElementById("windowMenu");
+				if(!windowMenu) {
+					// Wait for HTML to load
+					setTimeout(function() {
+						addWindowMenuItem(label, where, whenClicked);
+					}, 300);
+					return;
+				}
+				
+				dropdownMenuRoot = new DropdownMenu();
+				dropdownMenuRoot.ul.setAttribute("class", "horizontal");
+				
+				
+			}
+			
+			if(!Array.isArray(where)) throw new Error("Where to put the mnu item? Second argument (where) needs to be an array!");
+			
+			var menu = dropdownMenuRoot;
+			var item;
+			for(var i=0; i<where.length; i++) {
+				item = menu.items[ where[i] ];
+				
+				if(!item) {
+					item = menu.addItem(where[i]);
+				}
+				
+				menu = item.subMenu;
+				if(!menu) {
+					menu = item.addSubmenu();
+				}
+			}
+			
+			item = menu.addItem(label, whenClicked);
+			return item;
 			
 		},
 		remove: function removeWindowMenuItem() {
@@ -2656,6 +2782,29 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		},
 		isVisible: true
 	}
+	
+	// TEST-CODE-START
+	
+	EDITOR.windowMenu.add("Submenu A1", ["Menugroup A"]);
+	EDITOR.windowMenu.add("Submenu A2", ["Menugroup A"]);
+	EDITOR.windowMenu.add("Submenu A3", ["Menugroup A"], function() {alertBox("menu click");});
+	EDITOR.windowMenu.add("Submenu A3-1", ["Menugroup A", "Submenu A3"]);
+	EDITOR.windowMenu.add("Submenu A3-2", ["Menugroup A", "Submenu A3"]);
+	
+	EDITOR.windowMenu.add("Submenu B1", ["Menugroup B"]);
+	EDITOR.windowMenu.add("Submenu B2", ["Menugroup B"]);
+	EDITOR.windowMenu.add("Submenu B3", ["Menugroup B"], function() {alertBox("menu click");});
+	EDITOR.windowMenu.add("Submenu B3-1", ["Menugroup B", "Submenu B3"]);
+	EDITOR.windowMenu.add("Submenu B3-2", ["Menugroup B", "Submenu B3"]);
+	
+	EDITOR.windowMenu.add("Submenu C1", ["Menugroup C"]);
+	EDITOR.windowMenu.add("Submenu C2", ["Menugroup C"]);
+	EDITOR.windowMenu.add("Submenu C3", ["Menugroup C"], function() {alertBox("menu click");});
+	EDITOR.windowMenu.add("Submenu C3-1", ["Menugroup C", "Submenu C3"]);
+	EDITOR.windowMenu.add("Submenu C3-2", ["Menugroup C", "Submenu C3"]);
+	
+	// TEST-CODE-END
+	
 	
 	EDITOR.ctxMenu = {
 		add: function addCtxMenuItem(htmlText, position, callback) {

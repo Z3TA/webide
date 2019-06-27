@@ -943,34 +943,95 @@ div.gotoFile li:hover {
 
 /* ### Window menu */
 
+.windowMenuHeight {
+	/* needed to reserve height */
+	height: 36px;
+	background-color: #f4f2f2;
+	border-bottom: 1px solid #cac7c4;
+	margin-bottom: 5px;
+}
+
 .windowMenu {
-	position: absolute;
-	border: 1px solid red;
-	height: 40px;
 	overflow: visible;
 	z-index: 5;
+	position: absolute; /* needed so that children can display can be on top of other elements */
+}
+
+.windowMenu ul {
+	margin: 0;
+	padding: 0;
+	border: 1px solid #cac7c4;
+	min-width: 100%;
+	display: block;
+	top: 0px;
+}
+
+.windowMenu .hidden {
+	display: none;
+}
+
+.windowMenu span {
+	/* text-padding here! */
+	padding: 5px;
+	
+	line-height: 25px;
+	
+	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
+	font-weight: normal;
+	text-shadow: none;
+	font-size: 13px;
+	color: black;
+}
+
+
+.windowMenu ul.horizontal li {
+display: inline-block;
 }
 
 .windowMenu ul li {
-	border: 1px solid blue;
-	display: inline-block;
+	background-color: #f4f2f2;
+	
+	padding: 0;
+	margin: 0;
+}
+.windowMenu ul li:hover {
+	background-color: #ececec;
 }
 
 .windowMenu li ul {
-	display: none;
-	margin: 0;
+	display: block;
+	
+	border: none;
+	border: 1px solid green;
+}
+
+.windowMenu li ul li {
+	display: block;
+}
+
+.windowMenu li ul li ul {
+	display: block;
 	position: absolute;
-}
-.windowMenu li:hover>ul {
-	display: block;
-	z-index: 5;
-}
-
-.windowMenu li:hover>ul {
-	display: block;
-	z-index: 5;
+	margin-top: -25px;
+	margin-left: 150px; /* show menu on right side */
+	
+	border: 1px solid #cac7c4;
+	
 }
 
+.windowMenu .hasSubmenu:before {
+	content: "▼ ";
+	color: #c0c0c0;
+}
+
+.windowMenu .hasSubmenu .hasSubmenu:after {
+	content: " ►";
+	color: #c0c0c0;
+}
+.windowMenu .hasSubmenu .hasSubmenu:before {
+	content: "";
+	
+}
 
 
 
