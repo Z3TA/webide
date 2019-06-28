@@ -2663,6 +2663,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
 		menu.ul = document.createElement("ul");
+		menu.ul.setAttribute("class", "pullout" + menu.pullout);
 		
 		var hideTimer;
 		menu.ul.addEventListener("mouseout", hideMaybe);
@@ -2771,9 +2772,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		console.log("rect=" + JSON.stringify(rect));
 		
+		var borderWidth = 1;
+		
 		if(menu.pullout == "bottom") {
 			menu.ul.style.top = (rect.top + rect.height) + "px";
-			menu.ul.style.left=rect.left + "px";
+			menu.ul.style.left=rect.left-borderWidth + "px";
 		}
 		else if(menu.pullout == "right") {
 			menu.ul.style.top = (rect.top) + "px";

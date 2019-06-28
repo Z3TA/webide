@@ -945,7 +945,8 @@ div.gotoFile li:hover {
 
 .windowMenuHeight {
 	/* needed to reserve height */
-	height: 36px;
+	height: 30px;
+	border-bottom: 0px solid blue;
 }
 
 .windowMenu {
@@ -958,14 +959,17 @@ div.gotoFile li:hover {
 	margin: 0;
 	padding: 0;
 	border: 1px solid #cac7c4;
+	border-top: none;
+	
+	
+	font-size: 0; /* get rid of annoying spacing */
 }
-
 
 .windowMenu span {
 	/* text-padding here! */
 	padding: 5px;
 	
-	line-height: 25px;
+	line-height: 30px;
 	
 	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
 	font-weight: normal;
@@ -983,19 +987,12 @@ div.gotoFile li:hover {
 	background-color: #ececec;
 }
 
-.windowMenu li ul {
-	border: 1px solid green;
+.windowMenu .pulloutright {
+	border: 1px solid #cac7c4;
 }
 
-
-.windowMenu li ul li ul {
-	display: block;
-	position: absolute;
-	margin-top: -25px;
-	margin-left: 150px; /* show menu on right side */
-	
-	border: 1px solid #cac7c4;
-	
+.windowMenu .pulloutbottom {
+	border-top: none;
 }
 
 .windowMenu .pulloutIcon {
