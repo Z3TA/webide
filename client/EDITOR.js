@@ -2658,6 +2658,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		menu.pullout = options.pullout || (menu.parentMenu && menu.parentMenu.parentMenu ? "right" : "bottom");
 		
 		menu.active = false; // If the mouse is on the menu
+		menu.activated = false; // true if the menu have been engaged
 		
 		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
@@ -2695,6 +2696,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			menu.active = false;
 			
+			
 			// A timer to check if it's still not active (could have moved onto a child element which makes it active again)
 			clearTimeout(hideTimer);
 			hideTimer = setTimeout(function() {
@@ -2702,11 +2704,21 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				if(menu.active) return;
 				
 				// Don't hide if any of the sub menus are active!
-				var oneSubMenuActive = false;
+				var oneChildActive = false;
+				var oneParentActive = false;
 				
 				check(menu.items);
 				
-				if(!oneSubMenuActive) menu.hide(true);
+				var parent = menu;
+				while(parent.parentMenu) {
+					if(parent.active) {
+						oneParentActive = true;
+						break;
+					}
+					parent = parent.parentMenu;
+				}
+				
+				if(!oneChildActive) menu.hide(true, !oneParentActive);
 				
 				function check(items) {
 					
@@ -2716,7 +2728,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 						
 						if(subMenu) {
 							if(subMenu.active) {
-oneSubMenuActive = true;
+								oneChildActive = true;
 								console.log("DropdownMenu:hideMaybe:check: item=" + item + " subMenu.active=" + subMenu.active);
 								return;
 							}
@@ -2773,31 +2785,41 @@ oneSubMenuActive = true;
 		menu.ul.style.minWidth = rect.width + "px";
 		
 	}
-	DropdownMenu.prototype.hide = function hide(hideChildren) {
+	DropdownMenu.prototype.hide = function hide(hideChildren, hideParents) {
 		var menu = this;
 		
-		
-		// Also hide parents
-		if(menu.parentMenu) menu.parentMenu.hide(false);
+		if(hideParents) {
+			if(menu.parentMenu) menu.parentMenu.hide(false, hideParents);
+		}
 		
 		if(hideChildren) {
-			// Also hide sub menus
 			var subMenu;
 			for(var item in menu.items) {
 				subMenu = menu.items[item].subMenu;
 				
 				if(subMenu) {
-					subMenu.hide(true);
+					subMenu.hide(true, hideParents);
 				}
 			}
 		}
 		
-		if(menu.parentMenu === null) return; // Never hide the stem
+		if(menu.parentMenu === null) {
+			menu.activated = false;
+			return; // Never hide the stem
+		}
 		
-		//console.warn("DropdownMenu:hide:!");
+		console.warn("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
 		
 		this.ul.style.display = "none";
 		//menu.ul.setAttribute("class", "hidden");
+	}
+	DropdownMenu.prototype.hideSiblings = function hide(stay) {
+		var menu = this;
+		
+		for(var item in menu.items) {
+			if(menu.items[item].subMenu && menu.items[item].subMenu != stay) menu.items[item].subMenu.hide(true, false);
+		}
+		
 	}
 	
 	
@@ -2869,11 +2891,18 @@ oneSubMenuActive = true;
 		function showSubmenu() {
 			var rect = item.li.getBoundingClientRect();
 			
+			if(stemParent) stemParent.activated = true;
+			
 			item.subMenu.show(rect);
 		}
 		
 		function showSubmenuMaybe() {
-			if(stemParent && stemParent.active) showSubmenu();
+			if(stemParent && stemParent.activated) {
+				
+				item.parentMenu.hideSiblings(item.subMenu);
+				showSubmenu();
+			}
+			
 		}
 		
 	}
