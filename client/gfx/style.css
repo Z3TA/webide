@@ -961,14 +961,8 @@ div.gotoFile li:hover {
 	margin: 0;
 	padding: 0;
 	border: 1px solid #cac7c4;
-	min-width: 100%;
-	display: block;
-	top: 0px;
 }
 
-.windowMenu .hidden {
-	display: none;
-}
 
 .windowMenu span {
 	/* text-padding here! */
@@ -983,14 +977,8 @@ div.gotoFile li:hover {
 	color: black;
 }
 
-
-.windowMenu ul.horizontal li {
-display: inline-block;
-}
-
 .windowMenu ul li {
 	background-color: #f4f2f2;
-	
 	padding: 0;
 	margin: 0;
 }
@@ -999,15 +987,9 @@ display: inline-block;
 }
 
 .windowMenu li ul {
-	display: block;
-	
-	border: none;
 	border: 1px solid green;
 }
 
-.windowMenu li ul li {
-	display: block;
-}
 
 .windowMenu li ul li ul {
 	display: block;
@@ -1019,19 +1001,13 @@ display: inline-block;
 	
 }
 
-.windowMenu .hasSubmenu:before {
-	content: "▼ ";
+.windowMenu .pulloutIcon {
 	color: #c0c0c0;
+	font-size: 10px;
+	float: right;
+	line-height: 25px;
 }
 
-.windowMenu .hasSubmenu .hasSubmenu:after {
-	content: " ►";
-	color: #c0c0c0;
-}
-.windowMenu .hasSubmenu .hasSubmenu:before {
-	content: "";
-	
-}
 
 
 

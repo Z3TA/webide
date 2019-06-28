@@ -2643,32 +2643,177 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	}
 	
 	
-	function DropdownMenu() {
+	function DropdownMenu(options) {
+		if(typeof options == "undefined") options = {};
+		
 		var menu = this;
-		menu.ul = document.createElement("ul");
+		
 		menu.items = {};
+		
+		menu.orientation = options.orientation || "vertical";
+		
+		if(options.parentMenu === undefined) throw new Error("No parentMeny specified in options=" + JSON.stringify(options));
+		menu.parentMenu = options.parentMenu;
+		
+		menu.pullout = options.pullout || (menu.parentMenu && menu.parentMenu.parentMenu ? "right" : "bottom");
+		
+		menu.active = false; // If the mouse is on the menu
+		
+		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
+		
+		menu.ul = document.createElement("ul");
+		
+		var hideTimer;
+		menu.ul.addEventListener("mouseout", hideMaybe);
+		
+		menu.ul.addEventListener("mouseover", stillActive);
 		
 		var windowMenu = document.getElementById("windowMenu");
 		windowMenu.appendChild(menu.ul); // All menus goes into the windowMenu div (no nested lists!)
+		
+		function stillActive(mouseEvent) {
+			if(!mouseEvent) mouseEvent = event;
+			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
+			
+			console.log("DropdownMenu:stillActive: ul=", menu.ul, " movedto=", element);
+			menu.active = true;
+		}
+		
+		function hideMaybe(mouseEvent) {
+			if(!mouseEvent) mouseEvent = event;
+			
+			/*
+				Problem 1: We can't have nested lists or the CSS would be too complicated
+				Problem 2: mouseout triggers when mouse enters a child element!
+				Solution: Mark the menu as active when mouseover! (as mouseover will re-trigger when entering child elements)
+				
+				
+			*/
+			
+			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
+			console.log("DropdownMenu:hideMaybe: ul=", menu.ul, " movedto=", element);
+			
+			menu.active = false;
+			
+			// A timer to check if it's still not active (could have moved onto a child element which makes it active again)
+			clearTimeout(hideTimer);
+			hideTimer = setTimeout(function() {
+				
+				if(menu.active) return;
+				
+				// Don't hide if any of the sub menus are active!
+				var oneSubMenuActive = false;
+				
+				check(menu.items);
+				
+				if(!oneSubMenuActive) menu.hide(true);
+				
+				function check(items) {
+					
+					var subMenu;
+					for(var item in items) {
+						subMenu = items[item].subMenu;
+						
+						if(subMenu) {
+							if(subMenu.active) {
+oneSubMenuActive = true;
+								console.log("DropdownMenu:hideMaybe:check: item=" + item + " subMenu.active=" + subMenu.active);
+								return;
+							}
+							check(subMenu.items);
+						}
+					}
+				}
+				
+			}, 300);
+		}
+		
 	}
 	DropdownMenu.prototype.addItem = function addItem(label, whenClicked) {
 		var menu = this;
+		
 		if(menu.items.hasOwnProperty(label)) throw new Error("Menu already have an item with label=" + label);
-		var item = menu.items[label] = new DropdownMenuItem(label, whenClicked);
+		
+		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu});
 		menu.ul.appendChild(item.li);
+		
+		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
+		
+		if(menu.orientation == "vertical") {
+			item.li.style.display="block";
+		}
+		else if(menu.orientation == "horizontal") {
+			item.li.style.display="inline-block";
+		}
+		else throw new Error("Unknown orientation=" + menu.orientation);
+		
 		return item;
 	}
-	DropdownMenu.prototype.show = function show() {
-		this.ul.setAttribute("class", "");
+	DropdownMenu.prototype.show = function show(rect) {
+		var menu = this;
+		
+		if(rect == undefined) throw new Error("Must specify a BoundingClientRect (of the parent element) as first argument!")
+		
+		this.ul.style.display = "block";
+		//menu.ul.setAttribute("class", "");
+		
+		console.log("rect=" + JSON.stringify(rect));
+		
+		if(menu.pullout == "bottom") {
+			menu.ul.style.top = (rect.top + rect.height) + "px";
+			menu.ul.style.left=rect.left + "px";
+		}
+		else if(menu.pullout == "right") {
+			menu.ul.style.top = (rect.top) + "px";
+			menu.ul.style.left = (rect.left + rect.width) + "px";
+		}
+		else throw new Error("Unknown value for menu.pullout=" + menu.pullout);
+		
+		menu.ul.style.position="absolute";
+		menu.ul.style.minWidth = rect.width + "px";
+		
 	}
-	DropdownMenu.prototype.hide = function hide() {
-		//this.ul.style.display = "none";
-		this.ul.setAttribute("class", "hidden");
+	DropdownMenu.prototype.hide = function hide(hideChildren) {
+		var menu = this;
+		
+		
+		// Also hide parents
+		if(menu.parentMenu) menu.parentMenu.hide(false);
+		
+		if(hideChildren) {
+			// Also hide sub menus
+			var subMenu;
+			for(var item in menu.items) {
+				subMenu = menu.items[item].subMenu;
+				
+				if(subMenu) {
+					subMenu.hide(true);
+				}
+			}
+		}
+		
+		if(menu.parentMenu === null) return; // Never hide the stem
+		
+		//console.warn("DropdownMenu:hide:!");
+		
+		this.ul.style.display = "none";
+		//menu.ul.setAttribute("class", "hidden");
 	}
 	
 	
-	function DropdownMenuItem(label, whenClicked) {
+	function DropdownMenuItem(options) {
+		
+		if(typeof options != "object") throw new Error("Expected an object: options=" + options);
+		
 		var item = this;
+		
+		if(options.parentMenu === undefined) throw new Error("No parentMenu specified in options=" + JSON.stringify(options));
+		item.parentMenu = options.parentMenu;
+		
+		var label = options.label;
+		if(!label) throw new Error("No label specified in options=" + JSON.stringify(options));
+		
+		var whenClicked = options.whenClicked;
 		
 		item.li = document.createElement("li");
 		item.text = document.createElement("span");
@@ -2683,49 +2828,52 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
 		var item = this;
 		
-		item.subMenu = new DropdownMenu();
+		var pulloutIcon = document.createElement("div");
+		if(item.parentMenu && item.parentMenu.parentMenu) {
+			var pullout = "right";
+			pulloutIcon.innerText = "►";
+		}
+		else {
+			var pullout = "bottom";
+			pulloutIcon.innerText = "▼";
+		}
+		pulloutIcon.setAttribute("class", "pulloutIcon " + pullout);
+		item.li.appendChild(pulloutIcon);
+		
+		if(!item.parentMenu) throw new Error("item.parentMenu=" + item.parentMenu);
+		
+		var stemParent = item.parentMenu;
+		while(stemParent.parentMenu) {
+			stemParent = stemParent.parentMenu;
+		}
+		
+		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
 		item.li.setAttribute("class", "hasSubmenu");
 		
 		if(!item.li.onclick) {
-item.li.onclick = showSubmenu;
+			item.li.onclick = showSubmenu;
+			item.li.addEventListener("mouseover", showSubmenuMaybe);
 			item.li.setAttribute("class", "hasSubmenu needClick");
 		}
 		else {
 			item.li.addEventListener("mouseover", showSubmenu);
 		}
 		
-		item.subMenu.hide();
+		item.subMenu.hide(false);
 		
-		item.subMenu.ul.addEventListener("mouseout", hide);
-		item.subMenu.ul.addEventListener("mouseover", cancelHide);
-		
+		console.log("DropdownMenuItem:addSubmenu: pullout=" + pullout + " item.parentMenu=" + item.parentMenu + " item.parentMenu.parentMenu=" + (item.parentMenu && item.parentMenu.parentMenu));
 		
 		return item.subMenu;
 		
 		
-		function hide(ev) {
-			var ev = ev || event;
-			
-			// Dont hide if the mouseout was on a child element
-			var el = ev.toElement || ev.relatedTarget;
-			if (el && el.parentNode == this || el == this) return;
-			el = el && el.parentNode;
-			if (el && el.parentNode == this || el == this) return;
-			el = el && el.parentNode;
-			if (el && el.parentNode == this || el == this) return;
-			
-			item.hideTimeout = setTimeout(function() {
-				item.subMenu.hide();
-			}, 500);
-			
-		}
-		
-		function cancelHide() {
-			clearTimeout(item.hideTimeout);
-		}
-		
 		function showSubmenu() {
-			item.subMenu.show();
+			var rect = item.li.getBoundingClientRect();
+			
+			item.subMenu.show(rect);
+		}
+		
+		function showSubmenuMaybe() {
+			if(stemParent && stemParent.active) showSubmenu();
 		}
 		
 	}
@@ -2745,10 +2893,7 @@ item.li.onclick = showSubmenu;
 					return;
 				}
 				
-				dropdownMenuRoot = new DropdownMenu();
-				dropdownMenuRoot.ul.setAttribute("class", "horizontal");
-				
-				
+				dropdownMenuRoot = new DropdownMenu({orientation: "horizontal", parentMenu: null});
 			}
 			
 			if(!Array.isArray(where)) throw new Error("Where to put the mnu item? Second argument (where) needs to be an array!");
@@ -2779,6 +2924,11 @@ item.li.onclick = showSubmenu;
 		show: function showWindowMenu() {
 		},
 		hide: function hideWindowMenu() {
+			var windowMenu = document.getElementById("windowMenu");
+			windowMenu.style.display="none";
+			
+			var windowMenuHeight = document.getElementById("windowMenuHeight");
+			windowMenuHeight.style.display="none";
 		},
 		isVisible: true
 	}
@@ -8531,6 +8681,8 @@ keyPressed(keyPress);
 		if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
 		
 		EDITOR.touchDown = true;
+		
+		//if(dropdownMenuRoot && !dropdownMenuRoot.active) dropdownMenuRoot.hide(true);
 		
 		//console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
 		

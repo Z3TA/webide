@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
+
 All editor features should be reachable via the window menu, OR the virtual keyboard!
 (window menu is hidden when in mobile/small screen)
 
@@ -39,6 +41,9 @@ Commonly used functionality can also be reached via the ctx meny. (as well as vi
 
 
 Top menu for feature discovery !?
+
+
+todo: Function list doesn't scroll down to the active function, which is annoying when you have to manually scroll when navigating.
 
 
 Also move the function list to the top right corner if it covers 50% of the screen or more.
