@@ -970,14 +970,6 @@ div.gotoFile li:hover {
 	padding: 0;
 }
 
-.windowMenu .item {
-	height: 27px;
-	margin: 0;
-	padding: 0;
-	
-}
-
-
 .windowMenu .bullet {
 	color: #45b73b;
 	font-weight: bold;
@@ -987,11 +979,17 @@ div.gotoFile li:hover {
 	font-size: 20px;
 	margin: 0;
 	padding: 0;
-	padding-left: 1em;
+	padding-left: 0.5em;
+	
 }
 
 .windowMenu .bullet.inactive:before {
 	content:"\2003";
+}
+
+.windowMenu .bullet.active {
+	
+	padding-right: 0.5em;
 }
 
 .windowMenu .bullet.active:before {
@@ -1040,9 +1038,11 @@ div.gotoFile li:hover {
 	border: 0px solid green;
 	padding: 0;
 	margin: 0;
+	height: 27px;
 }
 .windowMenu .item:hover {
 	background-color: #ececec;
+	background-color: #fff;
 }
 
 .windowMenu .pulloutright {

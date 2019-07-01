@@ -1,23 +1,42 @@
 (function() {
 	"use strict";
 	
-	if(!QUERY_STRING.explodingCharacters) return; // Flag
+	var activated = !!QUERY_STRING.explodingCharacters;
+	var windowMenuExplodingCharacters;
 	
-	console.log("animate_delete_letter ...");
 	
 	EDITOR.plugin({
 		desc: "Show animation when deleting letters",
 		load: function() {
 			
-			EDITOR.on("fileChange", animate_delete_letter);
+			windowMenuExplodingCharacters = EDITOR.windowMenu.add("Exploding characters", ["View", "Effects", 2], toggleExplodingCharacters);
+			
+			if(activated) activateExplodingCharacters();
 			
 		},
 		unload: function() {
 			
-			EDITOR.removeEvent("fileChange", animate_delete_letter);
+			deactivateExplodingCharacters();
 			
 		}
 	});
+	
+	function toggleExplodingCharacters() {
+		if(activated) deactivateExplodingCharacters();
+		else activateExplodingCharacters();
+	}
+	
+	function activateExplodingCharacters() {
+		EDITOR.on("fileChange", animate_delete_letter);
+		windowMenuExplodingCharacters.activate();
+		activated = true;
+	}
+	
+	function deactivateExplodingCharacters() {
+		EDITOR.removeEvent("fileChange", animate_delete_letter);
+		windowMenuExplodingCharacters.deactivate();
+		activated = false;
+	}
 	
 	function animate_delete_letter(file, type, characters, caretIndex, row, col) {
 		
@@ -72,7 +91,7 @@
 		
 		setTimeout(function() {
 			EDITOR.removeAnimation(animationFunction);
-			//EDITOR.renderNeeded();
+			EDITOR.renderNeeded();
 		}, 100);
 		
 	}

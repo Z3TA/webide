@@ -6781,6 +6781,8 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
+		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
+		
 		window.onbeforeunload = confirmExit;
 		
 		if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;

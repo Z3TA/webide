@@ -30,6 +30,7 @@
 	var editable = false;
 	
 	var menuItem;
+	var windowMenuSSG;
 	
 	var previewBaseUrl;
 	
@@ -228,8 +229,18 @@
 		
 		
 		//build();
+		var SSG_label = "Static site generator";
+		menuItem = EDITOR.ctxMenu.add(SSG_label, showSSG, 11);
 		
-		menuItem = EDITOR.ctxMenu.add("Static site generator", showSSG, 11);
+		windowMenuSSG = EDITOR.windowMenu.add(SSG_label, ["Tools", 4], showSSG);
+		/*
+			EDITOR.windowMenu.add("New Page", ["Tools", SSG_label], newPage);
+			EDITOR.windowMenu.add("Preview", ["Tools", SSG_label], previewSSG);
+			EDITOR.windowMenu.add("WYSIWYG", ["Tools", SSG_label], wysiwygSSG);
+			EDITOR.windowMenu.add("Sync with Repo", ["Tools", SSG_label], syncSSG);
+			EDITOR.windowMenu.add("Publish", ["Tools", SSG_label], publishSSG);
+			EDITOR.windowMenu.add("Settings/new", ["Tools", SSG_label], editSiteSettings);
+		*/
 		
 		EDITOR.on("fileShow", fileShow);
 		
@@ -262,6 +273,7 @@
 		EDITOR.removeEvent("storageReady", getSites);
 		
 		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(windowMenuSSG);
 		
 		SSG_cleanup(); // closePreview();
 		
@@ -768,10 +780,12 @@
 	
 	function editSiteSettings() {
 		
-		//if(!selectedSite) throw new Error("No selected site");
+		//if(!selectedSite) return alertBox("No selected site");
+		
+		showSSG();
 		
 		editView.style.display="block";
-		controlView.style.display="none"; // Hide this div
+		if(controlView) controlView.style.display="none"; // Hide this div
 		
 		EDITOR.resizeNeeded();
 	}
@@ -1477,6 +1491,10 @@
 	
 	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
 		
+		if(site == undefined) {
+site = selectedSite;
+		}
+		
 		if(!site) throw new Error("site=" + site);
 		
 		console.log('Previewing site.name="' + site.name + '". edit=' + edit);
@@ -1813,8 +1831,9 @@
 	}
 	
 	
-	function syncSSG() {
-		if(selectedSite) syncRepository(selectedSite);
+	function syncSSG(site) {
+		if(site == undefined) site = selectedSite;
+		if(site) syncRepository(selectedSite);
 		else {
 			showSSG();
 			alertBox("Select site to sync!");
@@ -1822,8 +1841,9 @@
 		return false;
 	}
 	
-	function publishSSG() {
-		if(selectedSite) publishSite(selectedSite);
+	function publishSSG(site) {
+		if(site == undefined) site = selectedSite;
+		if(site) publishSite(selectedSite);
 		else {
 			showSSG();
 			alertBox("Select site to publish!");
@@ -2355,6 +2375,8 @@ whenAllFilesReloaded();
 	}
 	
 	function newPage(site) {
+		
+		if(site == undefined) site = selectdSite;
 		
 		if(!site.template) return alertBox("No template file for new file/page specified! Edit settings and set a path for template file.");
 		

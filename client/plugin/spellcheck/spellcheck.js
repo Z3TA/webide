@@ -44,6 +44,7 @@
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
 	var menuItem;
 	var enabled = false;
+	var windowMenuSpellcheck;
 	
 	// Don't spell-check these:
 	var htmlTags = ["tspan", "rect", "svg", "defs", "a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
@@ -62,6 +63,7 @@
 	function loadSpellchecker() {
 		
 		menuItem = EDITOR.ctxMenu.add("Spellcheck ", toggleSpellCheck, 10);
+		windowMenuSpellcheck = EDITOR.windowMenu.add("Spellcheck", ["Tools", 2], toggleSpellCheck);
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		
@@ -86,6 +88,7 @@
 	function unloadSpellchecker() {
 		disable();
 		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(windowMenuSpellcheck);
 	}
 	
 	function toggleSpellCheck() {
@@ -97,6 +100,8 @@
 		console.log("Change status to enabled=" + enabled);
 		
 		EDITOR.ctxMenu.update(menuItem, enabled, "Spellcheck");
+		EDITOR.windowMenu.update(windowMenuSpellcheck, {active: enabled});
+		
 		
 		if(enabled) enable();
 		else disable();

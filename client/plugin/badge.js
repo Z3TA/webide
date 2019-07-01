@@ -14,7 +14,8 @@
 	function badgeMe() {
 		
 		var browser = window.browser || window.chrome;
-		browser.browserAction.setBadgeText({text: "99"});
+		if(browser && browser.browserAction && typeof browser.browserAction.setBadgeText == "function") browser.browserAction.setBadgeText({text: "99"});
+		else alertBox("badge text not supported by your browser (" + BROWSER + ")");
 		
 		return true;
 	}
