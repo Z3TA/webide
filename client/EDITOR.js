@@ -2759,7 +2759,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 	}
-	DropdownMenu.prototype.addItem = function addItem(label, key, whenClicked) {
+	DropdownMenu.prototype.addItem = function addItem(label, key, whenClicked, order) {
 		if(typeof key == "function" && whenClicked == undefined) {
 			whenClicked = key;
 			key = undefined;
@@ -2769,11 +2769,12 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		if(menu.items.hasOwnProperty(label)) throw new Error("Menu already have an item with label=" + label);
 		
-		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu, key: key, orientation: menu.orientation});
+		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu, key: key, orientation: menu.orientation, order: order});
 		
 		if(menu.orientation == "vertical") {
 			// Each item is a table-row
 			menu.itemWrapper.appendChild(item.domElement);
+			item.domNode = item.domElement;
 		}
 		else if(menu.orientation == "horizontal") {
 			// Each item is it's own table
@@ -2781,14 +2782,42 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			var cell = document.createElement("td");
 			cell.appendChild(item.domElement);
 			menu.itemWrapper.appendChild(cell);
+			item.domNode = cell;
 		}
 		else throw new Error("Unknown orientation=" + menu.orientation);
 		
 		
+		// Re-order items
+		var order = [];
+		for(var l in menu.items) {
+			order.push(l);
+		}
+		order.sort(function(a, b) {
+			if(a.order < b.order) return -1;
+			else if(a.order > b.order) return 1;
+			else return 0;
+		});
+		
+		for(var i=0; i<order.length; i++) {
+			menu.itemWrapper.appendChild(item.domNode);
+		}
 		
 		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
 		
 		return item;
+	}
+	DropdownMenu.prototype.removeItem = function removeItem(item) {
+		var menu = this;
+		
+		for(var label in menu.items) {
+			if(menu.items[label] == item) {
+				
+				menu.itemWrapper.removeChild(item.domNode);
+				
+				return SUCCESS;
+			}
+		}
+		return FAIL;
 	}
 	DropdownMenu.prototype.show = function show(parentItemRect) {
 		var menu = this;
@@ -2896,6 +2925,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		var whenClicked = options.whenClicked;
 		
+		item.order = options.order || 100;
+		
 		if(options.orientation == "vertical") {
 			// Each item is a table row
 			item.domElement = document.createElement("tr");
@@ -2914,39 +2945,54 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		item.domElement.setAttribute("class", "item");
 		
+		item.bullet = document.createElement("td");
+		item.bullet.setAttribute("class", "bullet");
+		item.wrapper.appendChild(item.bullet);
+		
 		item.text = document.createElement("td");
 		item.text.setAttribute("class", "label");
-		
 		item.text.innerText = label;
 		item.wrapper.appendChild(item.text);
 		
+		item.key = document.createElement("td");
 		if(options.key) {
-			item.key = document.createElement("td");
-			item.key.setAttribute("class", "key");
-			item.key.setAttribute("colspan", "2");
 			item.key.innerText = options.key;
-			item.wrapper.appendChild(item.key);
+			item.key.setAttribute("class", "key");
 		}
+		else {
+			item.key.setAttribute("class", "key empty");
+		}
+		item.wrapper.appendChild(item.key);
+		
+		item.pulloutIcon = document.createElement("td");
+		item.pulloutIcon.setAttribute("class", "pulloutIcon");
+		item.wrapper.appendChild(item.pulloutIcon);
 		
 		item.domElement.onclick = whenClicked;
 		
 		item.subMenu = null;
 	}
+	DropdownMenuItem.prototype.activate = function activate() {
+		this.bullet.setAttribute("class", "bullet active");
+	}
+	DropdownMenuItem.prototype.deactivate = function deactivate() {
+		this.bullet.setAttribute("class", "bullet inactive");
+	}
+	DropdownMenuItem.prototype.setLabel = function setLabel(label) {
+		this.label.innerText = label;
+	}
 	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
 		var item = this;
 		
-		var pulloutIcon = document.createElement("td");
 		if(item.parentMenu && item.parentMenu.parentMenu) {
 			var pullout = "right";
-			pulloutIcon.innerText = "►";
+			item.pulloutIcon.innerText = "►";
 		}
 		else {
 			var pullout = "bottom";
-			pulloutIcon.innerText = "▼";
+			item.pulloutIcon.innerText = "▼";
 		}
-		pulloutIcon.setAttribute("class", "pulloutIcon " + pullout);
-		item.wrapper.appendChild(pulloutIcon);
-		if(item.key) item.key.setAttribute("colspan", "1");
+		item.pulloutIcon.setAttribute("class", "pulloutIcon " + pullout);
 		
 		if(!item.parentMenu) throw new Error("item.parentMenu=" + item.parentMenu);
 		
@@ -2997,6 +3043,14 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	var dropdownMenuRoot;
 	EDITOR.windowMenu = {
 		add: function addWindowMenuItem(label, where, whenClicked) {
+			/*
+				Example:
+				
+				where = ["File", "Save", 1]
+				
+				
+			*/
+			
 			
 			if(!dropdownMenuRoot) {
 				var windowMenu = document.getElementById("windowMenu");
@@ -3009,9 +3063,19 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				}
 				
 				dropdownMenuRoot = new DropdownMenu({orientation: "horizontal", parentMenu: null});
+				
+				// Add top level menu entries to control the order
+				dropdownMenuRoot.addItem("Editor");
+				dropdownMenuRoot.addItem("File");
+				
 			}
 			
+			if(typeof label != "string") throw new Error("label=" + label + " need to be a string!");
 			if(!Array.isArray(where)) throw new Error("Where to put the mnu item? Second argument (where) needs to be an array!");
+			if(typeof whenClicked != "function") throw new Error("whenClicked=" + whenClicked + " need to be a function!");
+			
+			var order = 100;
+			if( UTIL.isNumeric(where[where.length-1]) ) order = where.pop();
 			
 			var menu = dropdownMenuRoot;
 			var item;
@@ -3028,17 +3092,47 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				}
 			}
 			
-			var key = "Ctrl+Alt+Shift+M";
+			var keyCombo = EDITOR.getKeyFor(whenClicked);
 			
-			item = menu.addItem(label, key, whenClicked);
+			
+			var action = function menuItemClick(clickEvent) {
+				var file = EDITOR.currentFile;
+				var combo = getCombo(clickEvent);
+				var character = null;
+				var charCode = 0;
+				var direction = "down";
+				whenClicked(file, combo, character, charCode, direction, clickEvent);
+			}
+			
+			item = menu.addItem(label, keyCombo, whenClicked, order);
 			return item;
 			
 		},
-		remove: function removeWindowMenuItem() {
+		remove: function removeWindowMenuItem(menuItem) {
+			
+			menuItem.parentMenu.removeItem(menuItem);
+			
 		},
-		update: function updateWindowMenuItem(item) {
+		update: function updateWindowMenuItem(menuItem, options) {
+			
+			if(!menuItem instanceof DropdownMenuItem) throw new Error("menuItem is not a dropdown menu item: ", menuItem);
+			
+			if(options.active === true) menuItem.activate();
+			else if(options.active === false) menuItem.deactivate();
+			
+			if(options.label) menuItem.setLabel(options.label);
+			
+			if(options.action) menuItem.setAction(options.action);
+			
 		},
 		show: function showWindowMenu() {
+			var windowMenu = document.getElementById("windowMenu");
+			windowMenu.style.display="block";
+			
+			var windowMenuHeight = document.getElementById("windowMenuHeight");
+			windowMenuHeight.style.display="block";
+			
+			EDITOR.windowMenu.isVisible = true;
 		},
 		hide: function hideWindowMenu() {
 			var windowMenu = document.getElementById("windowMenu");
@@ -3046,29 +3140,14 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			var windowMenuHeight = document.getElementById("windowMenuHeight");
 			windowMenuHeight.style.display="none";
+			
+			EDITOR.windowMenu.isVisible = false;
 		},
 		isVisible: true
 	}
 	
 	// TEST-CODE-START
 	
-	EDITOR.windowMenu.add("Submenu A1 a", ["Menugroup A"]);
-	EDITOR.windowMenu.add("Submenu A2 ab", ["Menugroup A"]);
-	EDITOR.windowMenu.add("Submenu A3 abc", ["Menugroup A"], function() {alertBox("menu click");});
-	EDITOR.windowMenu.add("Submenu A3-1", ["Menugroup A", "Submenu A3"]);
-	EDITOR.windowMenu.add("Submenu A3-2", ["Menugroup A", "Submenu A3"]);
-	
-	EDITOR.windowMenu.add("Submenu B1", ["Menugroup B"]);
-	EDITOR.windowMenu.add("Submenu B2", ["Menugroup B"]);
-	EDITOR.windowMenu.add("Submenu B3", ["Menugroup B"], function() {alertBox("menu click");});
-	EDITOR.windowMenu.add("Submenu B3-1", ["Menugroup B", "Submenu B3"]);
-	EDITOR.windowMenu.add("Submenu B3-2", ["Menugroup B", "Submenu B3"]);
-	
-	EDITOR.windowMenu.add("Submenu C1", ["Menugroup C"]);
-	EDITOR.windowMenu.add("Submenu C2", ["Menugroup C"]);
-	EDITOR.windowMenu.add("Submenu C3", ["Menugroup C"], function() {alertBox("menu click");});
-	EDITOR.windowMenu.add("Submenu C3-1", ["Menugroup C", "Submenu C3"]);
-	EDITOR.windowMenu.add("Submenu C3-2", ["Menugroup C", "Submenu C3"]);
 	
 	// TEST-CODE-END
 	

@@ -3,6 +3,8 @@
 	"use strict";
 	
 	var menuItem;
+	var windowMenuClose;
+	var windowMenuQuit;
 	
 	EDITOR.plugin({
 		desc: 'Adds "Close file" and "Close the editor" key combos and a "Close file" context menu item',
@@ -22,6 +24,8 @@
 		
 		menuItem = EDITOR.ctxMenu.add("Close file", closeFile, 3);
 		
+		windowMenuClose = EDITOR.windowMenu.add("Close", ["File", 3], closeFile);
+		windowMenuQuit = EDITOR.windowMenu.add("Quit", ["Editor", 10], closeEditor);
 	}
 	
 	function closeFileKeyComboUnload() {
@@ -30,6 +34,8 @@
 		EDITOR.unbindKey(closeEditor);
 		
 		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(windowMenuClose);
+		EDITOR.windowMenu.remove(windowMenuQuit);
 	}
 	
 	function closeEditor(file, combo) {

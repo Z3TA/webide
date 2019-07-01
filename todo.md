@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+todo: Go though all plugins and any keybinding and add a window menu entry, *and* also a virtual keyboard alt shortcut 
+
 todo: When there is not enough space to pull out a sub window menu to the right, place it on the left side!
 
 All editor features should be reachable via the window menu, OR the virtual keyboard!

@@ -12,6 +12,7 @@
 	var menu;
 	var folderPicker;
 	var suggestedFolderButtons = {};
+	var windowMenuSave, windowMenuSaveAs;
 	
 	var mimeMap = {
 		css: "text/css",
@@ -47,6 +48,9 @@
 		// Add items to the canvas context meny
 		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
 		
+		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveCurrentFile);
+		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", ["File", 2], saveAs);
+		
 		EDITOR.on("showMenu", showSaveOption);
 		
 		EDITOR.registerAltKey({char: "s", alt:2, label: "save", fun: saveCurrentFile});
@@ -61,6 +65,9 @@
 		EDITOR.unbindKey(enter);
 		
 		EDITOR.ctxMenu.remove(menu);
+		
+		EDITOR.windowMenu.remove(windowMenuSave);
+		EDITOR.windowMenu.remove(windowMenuSaveAs);
 		
 		EDITOR.removeEvent("showMenu", showSaveOption);
 		

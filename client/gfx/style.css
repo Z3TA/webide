@@ -977,13 +977,34 @@ div.gotoFile li:hover {
 	
 }
 
+
+.windowMenu .bullet {
+	color: #45b73b;
+	font-weight: bold;
+	text-shadow: 0px 0px 0px black;
+	width: 15px;
+	text-align: center;
+	font-size: 20px;
+	margin: 0;
+	padding: 0;
+	padding-left: 1em;
+}
+
+.windowMenu .bullet.inactive:before {
+	content:"\2003";
+}
+
+.windowMenu .bullet.active:before {
+	content:"\2022";
+}
+
 .windowMenu .label {
 	border: 0px solid blue;
 	
-	padding-left: 1em;
+	
 	padding-right: 1em;
 	
-	/* avoid line breaks inside label */
+	/* avoid line breaks */
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
@@ -999,6 +1020,15 @@ div.gotoFile li:hover {
 	
 	padding-left: 1em;
 	padding-right: 1em;
+	
+	/* avoid line breaks */
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.windowMenu .key.empty {
+	padding: 0;
 }
 
 .windowMenu .item:hover .key {
