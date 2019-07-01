@@ -29,6 +29,16 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	askInterval = setInterval(ask, 10000);
 	
 	var installed = false;
+	var windowMenuAdd2HS;
+	
+	
+	
+	
+	function addToHomeScreen() {
+		if(deferredPrompt) deferredPrompt.prompt();
+		else alertBox("You need to interact with the editor before your browser will let you add it to your home screen!");
+	}
+	
 	
 	function appinstalled(evt) {
 		console.log('A2HS: Got appinstalled event!');
@@ -37,6 +47,8 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 console.warn("A2HS: Already got appinstalled event!");
 		return;
 		}
+		
+		EDITOR.windowMenu.remove(windowMenuAdd2HS);
 		
 		var yes = "OK, I will click on the JZ icon";
 		var no = "No, I'll keep using this"
@@ -56,6 +68,8 @@ console.warn("A2HS: Already got appinstalled event!");
 		evt.preventDefault();
 		// Stash the event so it can be triggered later.
 		deferredPrompt = evt;
+		
+		windowMenuAdd2HS = EDITOR.windowMenu.add("Add to home screen", ["Editor", 10], addToHomeScreen);
 	}
 	
 	function ask() {
