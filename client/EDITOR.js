@@ -2662,22 +2662,37 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
-		menu.ul = document.createElement("ul");
-		menu.ul.setAttribute("class", "pullout" + menu.pullout);
+		if(menu.orientation == "vertical") {
+			// Each item is a table-row
+			menu.domElement = document.createElement("table");
+			menu.domElement.setAttribute("border", "2");
+			menu.itemWrapper = menu.domElement;
+		}
+		else if(menu.orientation == "horizontal") {
+			// Each item is it's own table
+			menu.domElement = document.createElement("table");
+			menu.itemWrapper = document.createElement("tr");
+			menu.domElement.appendChild(menu.itemWrapper);
+		}
+		else throw new Error("Unknown orientation=" + menu.orientation);
+		
+		
+		
+		menu.domElement.setAttribute("class", "menu pullout" + menu.pullout);
 		
 		var hideTimer;
-		menu.ul.addEventListener("mouseout", hideMaybe);
+		menu.domElement.addEventListener("mouseout", hideMaybe);
 		
-		menu.ul.addEventListener("mouseover", stillActive);
+		menu.domElement.addEventListener("mouseover", stillActive);
 		
 		var windowMenu = document.getElementById("windowMenu");
-		windowMenu.appendChild(menu.ul); // All menus goes into the windowMenu div (no nested lists!)
+		windowMenu.appendChild(menu.domElement); // All menus goes into the windowMenu div (no nested lists!)
 		
 		function stillActive(mouseEvent) {
 			if(!mouseEvent) mouseEvent = event;
 			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
 			
-			console.log("DropdownMenu:stillActive: ul=", menu.ul, " movedto=", element);
+			console.log("DropdownMenu:stillActive: ul=", menu.domElement, " movedto=", element);
 			menu.active = true;
 		}
 		
@@ -2693,7 +2708,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			*/
 			
 			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
-			console.log("DropdownMenu:hideMaybe: ul=", menu.ul, " movedto=", element);
+			console.log("DropdownMenu:hideMaybe: ul=", menu.domElement, " movedto=", element);
 			
 			menu.active = false;
 			
@@ -2742,50 +2757,89 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 	}
-	DropdownMenu.prototype.addItem = function addItem(label, whenClicked) {
+	DropdownMenu.prototype.addItem = function addItem(label, key, whenClicked) {
+		if(typeof key == "function" && whenClicked == undefined) {
+			whenClicked = key;
+			key = undefined;
+		}
+		
 		var menu = this;
 		
 		if(menu.items.hasOwnProperty(label)) throw new Error("Menu already have an item with label=" + label);
 		
-		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu});
-		menu.ul.appendChild(item.li);
-		
-		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
+		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu, key: key, orientation: menu.orientation});
 		
 		if(menu.orientation == "vertical") {
-			item.li.style.display="block";
+			// Each item is a table-row
+			menu.itemWrapper.appendChild(item.domElement);
 		}
 		else if(menu.orientation == "horizontal") {
-			item.li.style.display="inline-block";
+			// Each item is it's own table
+			// Create imentiereate cell
+			var cell = document.createElement("td");
+			cell.appendChild(item.domElement);
+			menu.itemWrapper.appendChild(cell);
 		}
 		else throw new Error("Unknown orientation=" + menu.orientation);
 		
+		
+		
+		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
+		
 		return item;
 	}
-	DropdownMenu.prototype.show = function show(rect) {
+	DropdownMenu.prototype.show = function show(parentItemRect) {
 		var menu = this;
 		
-		if(rect == undefined) throw new Error("Must specify a BoundingClientRect (of the parent element) as first argument!")
+		if(parentItemRect == undefined) throw new Error("Must specify a BoundingClientRect (of the parent element) as first argument!")
 		
-		this.ul.style.display = "block";
-		//menu.ul.setAttribute("class", "");
 		
-		console.log("rect=" + JSON.stringify(rect));
+		menu.domElement.style.display = ""; // Reset to default
+		
+		
+		console.log("parentItemRect=" + JSON.stringify(parentItemRect));
 		
 		var borderWidth = 1;
+		var menuTop = 0;
+		var menuLeft = 0;
+		var menuWidth = parentItemRect.width;
+		
 		
 		if(menu.pullout == "bottom") {
-			menu.ul.style.top = (rect.top + rect.height) + "px";
-			menu.ul.style.left=rect.left-borderWidth + "px";
+			menuTop = parentItemRect.top + parentItemRect.height;
+			menuLeft = parentItemRect.left - borderWidth;
 		}
 		else if(menu.pullout == "right") {
-			menu.ul.style.top = (rect.top) + "px";
-			menu.ul.style.left = (rect.left + rect.width) + "px";
+			menuTop = parentItemRect.top;
+			menuLeft = parentItemRect.left + parentItemRect.width;
 		}
 		else throw new Error("Unknown value for menu.pullout=" + menu.pullout);
 		
-		menu.ul.style.position="absolute";
-		menu.ul.style.minWidth = rect.width + "px";
+		
+		// Does it fit on the right side ?
+		var menuRect = menu.domElement.getBoundingClientRect();
+		console.log("menuRect=" + JSON.stringify(menuRect));
+		var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+		
+		if(windowWidth) {
+			if( (menuLeft + menuWidth) > windowWidth) {
+				console.log("Pullout " + menu.pullout + " menu doesn't fit on the right side! windowWidth=" + windowWidth + " menuLeft=" + menuLeft + " menuWidth=" + menuWidth);
+				
+				if( (parentItemRect.left - menuWidth) >= 0) {
+					// It fits on the left side. Place it on left side
+					menuLeft = parentItemRect.left - menuWidth - borderWidth*2;
+				}
+				else {
+					console.warn("Pullout " + menu.pullout + " menu doesn't fit on the left side either! parentItemRect.left=" + parentItemRect.left + " menuWidth=" + menuWidth + " (" + (parentItemRect.left - menuWidth) + ") ");
+				}
+			}
+		}
+		
+		menu.domElement.style.position="absolute";
+		menu.domElement.style.minWidth = menuWidth + "px";
+		menu.domElement.style.top = menuTop + "px";
+		menu.domElement.style.left = menuLeft + "px";
+		
 		
 	}
 	DropdownMenu.prototype.hide = function hide(hideChildren, hideParents) {
@@ -2813,8 +2867,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		console.warn("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
 		
-		this.ul.style.display = "none";
-		//menu.ul.setAttribute("class", "hidden");
+		menu.domElement.style.display = "none";
+		//menu.domElement.setAttribute("class", "hidden");
 	}
 	DropdownMenu.prototype.hideSiblings = function hide(stay) {
 		var menu = this;
@@ -2840,20 +2894,41 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		var whenClicked = options.whenClicked;
 		
-		item.li = document.createElement("li");
-		item.text = document.createElement("span");
-		item.text.setAttribute("class", "text");
-		item.text.innerText = label;
-		item.li.appendChild(item.text);
+		if(options.orientation == "vertical") {
+			// Each item is a table row
+			item.domElement = document.createElement("tr");
+			item.wrapper = item.domElement;
+		}
+		else if(options.orientation == "horizontal") {
+			// Each item is it's own table
+			item.domElement = document.createElement("table");
+			item.wrapper = document.createElement("tr");
+			item.domElement.appendChild(item.wrapper);
+		}
+		else throw new Error("Unknown orientation=" + options.orientation);
 		
-		item.li.onclick = whenClicked; // Should be visible when hoever, but it doesn'ẗ work!! why?'
+		item.domElement.setAttribute("class", "item");
+		
+		item.text = document.createElement("td");
+		item.text.setAttribute("class", "label");
+		item.text.innerText = label;
+		item.wrapper.appendChild(item.text);
+		
+		if(options.key) {
+			var key = document.createElement("td");
+			key.setAttribute("class", "key");
+			key.innerText = options.key;
+			item.wrapper.appendChild(key);
+		}
+		
+		item.domElement.onclick = whenClicked;
 		
 		item.subMenu = null;
 	}
 	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
 		var item = this;
 		
-		var pulloutIcon = document.createElement("div");
+		var pulloutIcon = document.createElement("td");
 		if(item.parentMenu && item.parentMenu.parentMenu) {
 			var pullout = "right";
 			pulloutIcon.innerText = "►";
@@ -2863,7 +2938,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			pulloutIcon.innerText = "▼";
 		}
 		pulloutIcon.setAttribute("class", "pulloutIcon " + pullout);
-		item.li.appendChild(pulloutIcon);
+		item.wrapper.appendChild(pulloutIcon);
 		
 		if(!item.parentMenu) throw new Error("item.parentMenu=" + item.parentMenu);
 		
@@ -2873,15 +2948,15 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
-		item.li.setAttribute("class", "hasSubmenu");
+		item.domElement.setAttribute("class", "hasSubmenu");
 		
-		if(!item.li.onclick) {
-			item.li.onclick = showSubmenu;
-			item.li.addEventListener("mouseover", showSubmenuMaybe);
-			item.li.setAttribute("class", "hasSubmenu needClick");
+		if(!item.domElement.onclick) {
+			item.domElement.onclick = showSubmenu;
+			item.domElement.addEventListener("mouseover", showSubmenuMaybe);
+			item.domElement.setAttribute("class", "hasSubmenu needClick");
 		}
 		else {
-			item.li.addEventListener("mouseover", showSubmenu);
+			item.domElement.addEventListener("mouseover", showSubmenu);
 		}
 		
 		item.subMenu.hide(false);
@@ -2892,7 +2967,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		
 		function showSubmenu() {
-			var rect = item.li.getBoundingClientRect();
+			var rect = item.domElement.getBoundingClientRect();
 			
 			if(stemParent) stemParent.activated = true;
 			
@@ -2945,7 +3020,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				}
 			}
 			
-			item = menu.addItem(label, whenClicked);
+			var key = "Ctrl+Alt+Shift+M";
+			
+			item = menu.addItem(label, key, whenClicked);
 			return item;
 			
 		},
@@ -2967,9 +3044,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	// TEST-CODE-START
 	
-	EDITOR.windowMenu.add("Submenu A1", ["Menugroup A"]);
-	EDITOR.windowMenu.add("Submenu A2", ["Menugroup A"]);
-	EDITOR.windowMenu.add("Submenu A3", ["Menugroup A"], function() {alertBox("menu click");});
+	EDITOR.windowMenu.add("Submenu A1 a", ["Menugroup A"]);
+	EDITOR.windowMenu.add("Submenu A2 ab", ["Menugroup A"]);
+	EDITOR.windowMenu.add("Submenu A3 abc", ["Menugroup A"], function() {alertBox("menu click");});
 	EDITOR.windowMenu.add("Submenu A3-1", ["Menugroup A", "Submenu A3"]);
 	EDITOR.windowMenu.add("Submenu A3-2", ["Menugroup A", "Submenu A3"]);
 	
