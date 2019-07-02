@@ -40,7 +40,21 @@
 	
 	function closeEditor(file, combo) {
 		console.log("Closing the editor ...");
-		process.exit(1);
+		if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
+		
+		self.close();
+		
+		window.close();
+		
+		// Firefox hack
+		window.open('','_parent','');
+		window.close();
+		
+		if(typeof browser == "object" && browser.tabs && typeof browser.tabs.remove == "function") browser.tabs.remove();
+		
+		
+		alertBox("Manually close the window to exit");
+		
 		return false;
 	}
 	
