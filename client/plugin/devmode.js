@@ -13,6 +13,7 @@
 	
 	var runTestsMenuItem;
 	
+	var winMenuReloadEditor, winMenuToggleDevMode;
 	
 	/*
 		This has some core functionality, but it will most likely be the plugin that manage devMode
@@ -35,6 +36,9 @@
 			
 			// Switch devMode on or off by hitting Ctrl + Alt + D
 			EDITOR.bindKey({desc: "DevMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
+			
+			winMenuReloadEditor = EDITOR.windowMenu.add("Restart", ["Editor", 5], reloadEditor);
+			winMenuToggleDevMode = EDITOR.windowMenu.add("Developer mode", ["Editor", 5], toggleDevMode);
 			
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
@@ -80,6 +84,9 @@
 			EDITOR.unbindKey(testErrorHandler);
 			
 			EDITOR.unbindKey(runOneTest);
+			
+			EDITOR.windowMenu.remove(winMenuReloadEditor);
+			EDITOR.windowMenu.remove(winMenuToggleDevMode);
 			
 			console.log = consoleLogOriginal;
 			console.time = consoleTimeOriginal;
@@ -144,6 +151,8 @@ console.time = console.timeEnd = function() {};
 			}
 		}
 		
+		winMenuToggleDevMode.deactivate();
+		
 		if(!noAlert) alertBox("devMode OFF!");
 	}
 	
@@ -176,6 +185,8 @@ console.time = console.timeEnd = function() {};
 				console.log("Problem sending message to service worker: " + err.message);
 			}
 		}
+		
+		winMenuToggleDevMode.activate();
 		
 		if(EDITOR.settings.devMode == false || devModeManuallOffOnce) alertBox("Editor devMode active! EDITOR.version=" + EDITOR.version);
 	}

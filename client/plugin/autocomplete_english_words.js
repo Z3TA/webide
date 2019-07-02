@@ -3,6 +3,8 @@
 
 	/*
 		
+		!DO:NOT:BUNDLE!
+		
 		This wasn't very useful because almost any word can be completed with another word,
 		so you end up typing the whole word anyway!
 		

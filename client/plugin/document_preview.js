@@ -1,7 +1,9 @@
 (function() {
 	/*
 		
-		Creates a preview/"scrollbar".
+		!DO:NOT:BUNDLE!
+		
+		Creates a document preview/"scrollbar".
 	
 		Place this file below everything that loads in the left column! So those will hide before calculating the width of this.
 		
@@ -9,7 +11,7 @@
 	
 	"use strict";
 	
-	if(EDITOR.settings.enableDocumentPreview === false) return; 
+	if(EDITOR.settings.enableDocumentPreview === false && !QUERY_STRING["documentPreview"]) return; 
 	
 	var minification = 3; // 3
 	var originalRightMargin = EDITOR.view.rightMargin;
@@ -23,6 +25,7 @@
 	var lastX = 0;
 	var maxColumns = 0;
 	var loadOrder = 200; // Set high if you want it to load last, or low if you want it to load first
+	var winMenuDocumentPreview;
 	
 	//window.addEventListener("load", documentLoad, false);
 	
@@ -38,12 +41,12 @@
 		EDITOR.on("fileHide", hideDocumentPreviewDiv);
 		EDITOR.on("fileShow", showDocumentPreviewDiv);
 
-		EDITOR.addRender(renderPreview, 3000);
+		EDITOR.addRender(renderPreview, 3200);
 
 		EDITOR.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});
 		EDITOR.addEvent("mouseClick", {fun: mouseClick, targetClass:"documentPreviewCanvas", button: 0});
 		
-		// Hmm, why should I scroll using the right mouse button instead of the left buton!?
+		//winMenuDocumentPreview = EDITOR.windowMenu.add("View", ["Preview/scrollbar", 10], wut?);
 		
 	}
 	

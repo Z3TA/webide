@@ -1,6 +1,14 @@
 (function() {
 	"use strict";
 	
+	/*
+		!DO:NOT:BUNDLE!
+		
+		todo: Implement chromium debug api!?
+		
+		
+	*/
+	
 	var noVncWindow;
 	
 	EDITOR.plugin({

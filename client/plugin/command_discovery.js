@@ -1,5 +1,7 @@
 /*
 	
+	!DO:NOT:BUNDLE!
+	
 	Work in progres ...
 	
 	command discovery:

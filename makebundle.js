@@ -64,6 +64,8 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		fs.readFile(script.src, "utf8", function readScript(err, content) {
 			if(err) throw err;
 			
+		if(content.indexOf("!DO:NOT:BUNDLE!") == -1) {
+			
 			content = content.replace(/<\/script>/g, "<\\/script>");
 		content = content.replace(/<\/style>/g, "<\\/style>");
 		
@@ -98,7 +100,8 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 			//bundle = bundle.replace(script.tag, function(){return '<script><!--\n' + content + '\n--></script>\n'});
 			
 			//bundle = bundle.replace(script.tag, '\n<!-- ' + script.src + ' --><script>console.log("' + script.src + '");</script>\n');
-			
+		}
+		
 		if(++counter == (scripts.length + stylesheets.length)) done();
 			
 		});

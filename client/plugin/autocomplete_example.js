@@ -1,3 +1,4 @@
+// !DO:NOT:BUNDLE!
 (function() { // An anonymous function that runs itself, so all variables are local (and not clutter global scope)
 	
 	"use strict";

@@ -1,4 +1,7 @@
 /*
+	
+	!DO:NOT:BUNDLE!
+	
 	The dashboard is currently not priotized, but it's a planned feature.
 	
 	A dashboard is not very useful, adding some some bling bling might however help sell the editor.

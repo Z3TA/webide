@@ -3,6 +3,8 @@
 	
 	/*
 	
+		!DO:NOT:BUNDLE!
+		
 		Idea: Connect it to a bug tracker and show live updates of how many bugs there are
 	
 	*/
