@@ -30,6 +30,7 @@
 	var extractableFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
 	var hideButton;
 	var loadingSpinner;
+	var winMenuFileExplorer;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -55,6 +56,8 @@
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
 		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorer, 9);
+		
+		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 2], toggleFileExplorer);
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
@@ -107,6 +110,8 @@
 		rightColumn.removeChild(fileExplorerWrap);
 		
 		EDITOR.ctxMenu.remove(menuItem);
+		
+		EDITOR.windowMenu.remove(winMenuFileExplorer);
 		
 		EDITOR.unbindKey(toggleFileExplorer);
 		
@@ -207,6 +212,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			}
 			else console.log("fileExplorerWidth=" + fileExplorerWidth + " windowWidth=" + windowWidth + " window.innerWidth=" + window.innerWidth + " pixelRatio=" + pixelRatio);
 			
+			winMenuFileExplorer.activate();
+			
 		}
 		else {
 			
@@ -215,6 +222,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			EDITOR.exitFullScreenWidget(fileExplorerWrap);
 			
 			EDITOR.resizeNeeded();
+			
+			winMenuFileExplorer.deactivate();
 			
 		}
 		return false;

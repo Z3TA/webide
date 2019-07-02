@@ -3,6 +3,7 @@
 	"use strict";
 	
 	var menuItem;
+	var winMenuReloadFromDisk;
 	
 	EDITOR.plugin({
 		desc: "Adds option to reload the file from disk in the context menu",
@@ -13,11 +14,12 @@
 	function load() {
 		
 		menuItem = EDITOR.ctxMenu.add("Relode from disk", reloadFile, 6);
-		
+		winMenuReloadFromDisk = EDITOR.windowMenu.add("Reload from disk", ["File", 6], reloadFile);
 	}
 	
 	function unload() {
 		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
 	}
 	
 	function reloadFile() {

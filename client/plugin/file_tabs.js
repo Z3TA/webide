@@ -17,8 +17,9 @@
 	
 	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) return;
 	
-	EDITOR.on("start", file_tabs);
+	var winMenuLastTab, winMenuMoveTabLeft, winMenuMoveTabRight, winMenuTabLeft, winMenuTabRight;
 	
+	EDITOR.on("start", file_tabs);
 	
 	function file_tabs() {
 		
@@ -44,7 +45,11 @@
 		EDITOR.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
 		EDITOR.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
 		
-		
+		winMenuLastTab = EDITOR.windowMenu.add("Switch to last active file", ["Window", 2], switchTab);
+		winMenuMoveTabLeft = EDITOR.windowMenu.add("Move tab left", ["Window", 2], orderTabLeft);
+		winMenuMoveTabRight = EDITOR.windowMenu.add("Move tab right", ["Window", 2], switchTabRight);
+		winMenuTabLeft = EDITOR.windowMenu.add("Switch to left tab", ["Window", 2], switchTabLeft);
+		winMenuTabRight = EDITOR.windowMenu.add("Switch to right tab", ["Window", 2], switchTabRight);
 		
 		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		

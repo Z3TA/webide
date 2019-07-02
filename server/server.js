@@ -3792,7 +3792,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
 		var chromiumBrowserArgs = [
 			//"--chrome", // No idea what --chrome flag does ...
-			"--user-data-dir=" + HOME_DIR + username + "/.chromium/", // Does the dir need to exist ?
+			"--user-data-dir=" + HOME_DIR + username + "/.chromium/", // Chromium will create the folder if it doesn't exist!
 			"--kiosk", // Full screen
 			url,
 			"--incognito", // Don't save cache or history
