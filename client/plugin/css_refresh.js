@@ -5,6 +5,8 @@
 	
 */
 
+	var winMenuCSS_refresh;
+	
 	EDITOR.plugin({
 		desc: "Enables refreshing the CSS",
 		load: load,
@@ -14,10 +16,15 @@
 	function load() {
 		var F6 = 117;
 		EDITOR.bindKey({desc: "Refresh CSS", charCode: F6, fun: refreshCss, combo: 0});
+		
+		winMenuCSS_refresh = EDITOR.windowMenu.add("Refresh CSS/theme", ["Editor", 7], refreshCss);
+		
 		}
 	
 	function unload() {
 		EDITOR.unbindKey(refreshCss);
+	
+		EDITOR.windowMenu.remove(winMenuCSS_refresh);
 	}
 	
 	function refreshCss() {
@@ -29,6 +36,7 @@
 			}
 		}
 		//alertBox("CSS refreshed");
+		
 		return false;
 	}
 	

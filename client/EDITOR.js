@@ -2680,7 +2680,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		else throw new Error("Unknown orientation=" + menu.orientation);
 		
 		
-		menu.domElement.setAttribute("class", "menu pullout" + menu.pullout);
+		menu.domElement.setAttribute("class", "menu " + menu.orientation + " pullout" + menu.pullout);
 		
 		var hideTimer;
 		menu.domElement.addEventListener("mouseout", hideMaybe);
@@ -2981,6 +2981,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	DropdownMenuItem.prototype.setLabel = function setLabel(label) {
 		this.label.innerText = label;
 	}
+	DropdownMenuItem.prototype.hide = function setLabel() {
+		this.parentMenu.hide(true, true);
+	}
 	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
 		var item = this;
 		
@@ -3104,7 +3107,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				whenClicked(file, combo, character, charCode, direction, clickEvent);
 			}
 			
-			item = menu.addItem(label, keyCombo, whenClicked, order);
+			item = menu.addItem(label, keyCombo, action, order);
 			return item;
 			
 		},

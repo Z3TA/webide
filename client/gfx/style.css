@@ -966,6 +966,8 @@ div.gotoFile li:hover {
 	border: 1px solid #cac7c4;
 	background-color: #f4f2f2;
 	
+	border-radius: 0;
+	
 	margin: 0;
 	padding: 0;
 }

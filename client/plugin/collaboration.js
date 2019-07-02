@@ -50,6 +50,7 @@
 	var bindTest = false;
 	var ignoreFileSave = "";
 	var ignoreUndoRedoEvent = {}; // filePath: [ev.order...]
+	var winMenuUndo, winMenuRedo, winMenuInvite;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -89,6 +90,10 @@
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
+			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndo);
+			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedo);
+			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
+			
 			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
 				var C = 67;
@@ -115,6 +120,11 @@
 			CLIENT.removeEvent("clientJoin", collabJoin);
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
+			
+			EDITOR.ctxMenu.remove(menu);
+			EDITOR.windowMenu.remove(winMenuUndo);
+			EDITOR.windowMenu.remove(winMenuRedo);
+			EDITOR.windowMenu.remove(winMenuInvite);
 			
 			// TEST-CODE-START
 			if(bindTest) {
@@ -854,7 +864,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 	
 	function collabRedo(file) {
 		if(!file) return true;
-		if(!EDITOR.input) return true;
+		//if(!EDITOR.input) return true; // why?
 		
 		console.log("collabRedo!");
 		
@@ -924,7 +934,7 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 		console.log("collabUndo: file.path=" + (file && file.path) + " EDITOR.input=" + EDITOR.input);
 		
 		if(!file) return true;
-		if(!EDITOR.input) return true;
+		//if(!EDITOR.input) return true; // Why explicitly check for EDITOR.input !? Does not work if undo via window menu
 			
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
 			console.warn("collabUndo: " + file.path + " has no undo/redo history!");

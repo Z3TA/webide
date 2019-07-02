@@ -17,6 +17,8 @@
 	
 	var cssLink;
 	
+	var winMenuDarkTheme;
+	
 	EDITOR.plugin({
 		desc: "Detect and change to dark theme",
 		load: loadDarkTheme,
@@ -33,8 +35,23 @@
 		console.log("dark_theme: themeFromCss=" + themeFromCss);
 		if( themeFromCss == "dark") setDarkTheme();
 		
-		if(QUERY_STRING["darkTheme"]) setDarkTheme(); // use ?darkTheme=true to force the darke theme
+		if(QUERY_STRING["darkTheme"]) {
+setDarkTheme(); // use ?darkTheme=true to force the darke theme
+		}
 		
+		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", 10], toggleDarkTheme);
+		
+		if(themeLoaded) winMenuDarkTheme.activate();
+		
+	}
+	
+	function toggleDarkTheme() {
+		if(themeLoaded) {
+			alertBox("Reload the editor to reset the theme");
+		}
+		else {
+			setDarkTheme();
+		}
 	}
 	
 	function setDarkTheme() {

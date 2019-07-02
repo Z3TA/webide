@@ -143,6 +143,15 @@ Writing a guide on how to make a survey
 todo
 ----
 
+What is the state of the VNC plugin, start chromium with debugger port, because chromeboocks can't start chrome with debugger port, 
+but did we ever get to implement the chromium debugger protocol !?!?!? (it also works in Node.JS so it would be nice to have)
+
+Make video guides! What you can not explain with worths you might be able to explain with pictures
+
+Regression: Zoom background
+
+
+
 When searching-replace in file, automatically reload open files,
 and ask about unsaved files.
 
