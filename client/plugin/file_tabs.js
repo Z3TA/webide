@@ -33,7 +33,7 @@
 		winMenuToggleFileTabs = EDITOR.windowMenu.add("File tabs", ["View", 8], toggleFileTabs);
 		
 		if(!fileTabsActive) return;
-		 winMenuToggleFileTabs.activate();
+		winMenuToggleFileTabs.activate();
 		
 		console.log("Loading file_tabs ...");
 		
@@ -78,11 +78,14 @@
 		
 		if(tabList && tabList.parentNode == header) header.removeChild(tabList);
 		fileTabsActive = false;
+		
+		winMenuToggleFileTabs.deactivate();
 	}
 	
 	function showFileTabs() {
 		buildTabs();
 		fileTabsActive = true;
+		winMenuToggleFileTabs.activate();
 	}
 	
 	function switchTabLeft() {

@@ -19,6 +19,8 @@
 	var key_J = 74;
 	var RE_SUB;
 	
+	var winMenuGotoLine;
+	
 	//window.addEventListener("load", goto_init, false);
 
 	function gotoLine_load() {
@@ -63,6 +65,8 @@
 			grammar: ["(goto|go to|jump to) line|jump to|jump) <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
+		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["File", 11], show_gotoInput);
+		
 		}
 	
 	function gotoLine_unload() {
@@ -73,6 +77,9 @@
 		EDITOR.unbindKey(hide_gotoLineInput);
 		
 		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
+		
+		EDITOR.windowMenu.remove(winMenuGotoLine);
+		
 	}
 	
 	function gotoLineVoice(text, file, match) {
@@ -156,6 +163,8 @@ file.gotoLine(line);
 	function show_gotoInput(file, combo) {
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
+		winMenuGotoLine.hide();
+		
 		if(!gotoInputIsVisible) {
 			
 			console.log("gotoDiv=" + gotoDiv);

@@ -29,6 +29,7 @@
 	var lastTypedText = "";
 	var menuItem;
 	var folderPicker;
+	var winMenuGotoFile;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -79,6 +80,8 @@
 		
 		//menu = EDITOR.ctxMenu.add('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		
+		winMenuGotoFile = EDITOR.windowMenu.add("Open/search file", ["File", 12], show_gotoFileInput);
+		
 	}
 	
 	function gotoFile_unload() {
@@ -97,9 +100,9 @@
 		CLIENT.removeEvent("fileFound", gotoFileFileFound);
 		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
 		
-		 
+		 EDITOR.ctxMenu.remove(menuItem);
 		
-		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(winMenuGotoFile);
 		
 		hide_gotoFileInput();
 	}
@@ -609,7 +612,7 @@ console.warn("gotoList not available!");
 		
 		EDITOR.ctxMenu.hide();
 		
-		
+		winMenuGotoFile.hide();
 		
 		if(file) {
 			currentDir = UTIL.getDirectoryFromPath(file.path);

@@ -18,18 +18,36 @@ console.warn("Disabling Google Drive integration when running locally");
 	return;
 	}
 	
+	var connected = false;
+	var winMenuGoogleDrive;
+	
 EDITOR.plugin({
 	desc: "Mount Google Drive",
 	load: function() {
 			menuItem = EDITOR.ctxMenu.add(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
 
+			winMenuGoogleDrive = EDITOR.windowMenu.add("Google Drive", ["Connect", 2], toggleGoogleDrive);
+			
 },
 	unload: function() {
 EDITOR.ctxMenu.remove(menuItem);
+			
+			EDITOR.windowMenu.remove(winMenuGoogleDrive);
+			
 }
 });
 
-function googleDriveInit() {
+	function toggleGoogleDrive() {
+		if(connected) {
+			umountGoogleDrive();
+		}
+		else {
+			googleDriveInit();
+		}
+		winMenuGoogleDrive.hide();
+	}
+	
+	function googleDriveInit() {
 		// Hide the menu right away so the user don't think it's "locked"
 		EDITOR.ctxMenu.hide();
 		
@@ -79,10 +97,16 @@ if(err) return alertBox(err.message);
 		
 		EDITOR.ctxMenu.update(menuItem, true, GD_MENU_CONNECTED, umountGoogleDrive);
 		EDITOR.ctxMenu.hide();
+		
+		connected = true;
+		
+		winMenuGoogleDrive.activate();
+		
 	}
 	
 function umountGoogleDrive() {
 		console.log("Logging out and unmounting Google Drive ...");
+		
 	CLIENT.cmd("googleDrive", {umount: true}, function(err) {
 			if(err) console.warn(err.message);
 			else console.log("Successfully logged out and unmounted from Google Drive !");
@@ -100,6 +124,10 @@ function umountGoogleDrive() {
 			}
 			
 	});
+		
+		connected = false;
+		
+		winMenuGoogleDrive.deactivate();
 }
 
 

@@ -143,6 +143,8 @@ Writing a guide on how to make a survey
 todo
 ----
 
+Throw an error if a menu item is added with the same order as another item
+
 What is the state of the VNC plugin, start chromium with debugger port, because chromeboocks can't start chrome with debugger port, 
 but did we ever get to implement the chromium debugger protocol !?!?!? (it also works in Node.JS so it would be nice to have)
 

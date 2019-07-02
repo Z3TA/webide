@@ -7,6 +7,8 @@
 	var KEY_H = 72;
 	var KEY_ESC = 27;
 	
+	var winMenuGotoCharacter;
+	
 	EDITOR.plugin({
 		desc: "Go to character",
 		load: loadGoToCharacter,
@@ -14,18 +16,19 @@
 	});
 	
 	function loadGoToCharacter() {
-		
 		EDITOR.bindKey({desc: "Goto character ...", charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
 		EDITOR.bindKey({desc: "Hide the goto-character GUI", charCode: KEY_ESC, fun: hideGotoCharWidget});
 		
+		winMenuGotoCharacter = EDITOR.windowMenu.add("Goto character", ["File", 12], showGotoCharWidget);
 	}
 	
 	function unloadGoToCharacter() {
-		
 		EDITOR.unbindKey(showGotoCharWidget);
 		EDITOR.unbindKey(hideGotoCharWidget);
 		
 		gotoCharDialog.unload();
+		
+		EDITOR.windowMenu.remove(winMenuGotoCharacter);
 	}
 	
 	function buildGotoCharDialog(widget) {
@@ -115,6 +118,8 @@
 	function showGotoCharWidget() {
 		gotoCharDialog.show();
 		
+		winMenuGotoCharacter.hide();
+		
 		inputGoto.focus();   // Add focus to the input
 		inputGoto.select();  // Select all
 		
@@ -122,6 +127,8 @@
 	}
 	
 	function hideGotoCharWidget() {
+		winMenuGotoCharacter.deactivate();
+		
 		return gotoCharDialog.hide();
 	}
 	
