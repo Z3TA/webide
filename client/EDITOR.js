@@ -2790,16 +2790,19 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		// Re-order items
 		var order = [];
 		for(var l in menu.items) {
-			order.push(l);
+			order.push(menu.items[l]);
 		}
 		order.sort(function(a, b) {
 			if(a.order < b.order) return -1;
 			else if(a.order > b.order) return 1;
 			else return 0;
 		});
-		
+		var lastOrder = -1;
 		for(var i=0; i<order.length; i++) {
-			menu.itemWrapper.appendChild(item.domNode);
+			if(order[i].order == lastOrder) {
+				console.warn("Item " + order[i].lable + " has same order=" + order[i].order + " as " + order[i-1]);
+			}
+			menu.itemWrapper.appendChild(order[i].domNode);
 		}
 		
 		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
