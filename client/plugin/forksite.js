@@ -1,12 +1,16 @@
 (function() {
 	"use strict";
 	
+	var winMenuForkWebsite;
+	
 EDITOR.plugin({
 		desc: "Fork a web site",
 		load: function() {
 
 			// Wait until logged in
 			CLIENT.on("loginSuccess", forkSiteAfterLoggedIn);
+			
+			winMenuForkWebsite = EDITOR.windowMenu.add("Fork website", ["Tools", 10], forkWebsite);
 			
 		},
 		unload: function() {
@@ -16,6 +20,14 @@ EDITOR.plugin({
 		},
 	});
 
+	function forkWebsite() {
+		winMenuForkWebsite.hide();
+		var defaultValue = "https://";
+		promptBox("URL of website to copy: ", false, defaultValue, 0, function(url) {
+			if(url) forkSite(url)
+		});
+	}
+	
 	function forkSiteAfterLoggedIn(json) {
 		if(QUERY_STRING.fork) {
 			forkSite(QUERY_STRING.fork);

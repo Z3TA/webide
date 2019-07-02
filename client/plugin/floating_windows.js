@@ -9,16 +9,18 @@
 	"use strict";
 	
 	var menu;
+	var windowMenuNewWindow;
 	
 	EDITOR.plugin({
 		desc: "Open file in new window",
 		load: function loadFloatingWindow() {
 			
 			menu = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
-			
+			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", ["File", 9], openInNewWindow);
 		},
 		unload: function unloadFloatingWindow() {
 			EDITOR.ctxMenu.remove(menu);
+			EDITOR.windowMenu.remove(windowMenuNewWindow);
 		},
 	});
 	

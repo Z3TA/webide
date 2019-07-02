@@ -7,6 +7,8 @@
 		
 		Switch between last viewed file using Ctrl+T
 		
+		todo: Clean up global variables
+		
 	*/
 	
 	"use strict";
@@ -15,13 +17,23 @@
 	
 	//if(QUERY_STRING["embed"]) return;
 	
-	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) return;
+	var fileTabsActive = true;
 	
-	var winMenuLastTab, winMenuMoveTabLeft, winMenuMoveTabRight, winMenuTabLeft, winMenuTabRight;
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) {
+		var fileTabsActive = false;
+	}
+	
+	
+	var winMenuLastTab, winMenuMoveTabLeft, winMenuMoveTabRight, winMenuTabLeft, winMenuTabRight, winMenuToggleFileTabs;
 	
 	EDITOR.on("start", file_tabs);
 	
 	function file_tabs() {
+		
+		winMenuToggleFileTabs = EDITOR.windowMenu.add("File tabs", ["View", 8], toggleFileTabs);
+		
+		if(!fileTabsActive) return;
+		 winMenuToggleFileTabs.activate();
 		
 		console.log("Loading file_tabs ...");
 		
@@ -55,6 +67,24 @@
 		
 	}
 	
+	function toggleFileTabs() {
+		if(fileTabsActive) hideFileTabs();
+		else showFileTabs();
+	}
+	
+	function hideFileTabs() {
+		var header = document.getElementById("header");
+		var tabList = document.getElementById("tabList");
+		
+		if(tabList && tabList.parentNode == header) header.removeChild(tabList);
+		fileTabsActive = false;
+	}
+	
+	function showFileTabs() {
+		buildTabs();
+		fileTabsActive = true;
+	}
+	
 	function switchTabLeft() {
 		var list = EDITOR.sortFileList(); // Array sorted by file.order
 		list.sort(sortListByFolder);
@@ -73,10 +103,10 @@
 	function switchTabRight() {
 		var list = EDITOR.sortFileList(); // Array sorted by file.order
 		/*
-for(var i=0; i<list.length; i++) {
+			for(var i=0; i<list.length; i++) {
 			console.log(i + ": " + list[i].path);
 			}
-		console.log("efter");
+			console.log("efter");
 		*/
 		list.sort(sortListByFolder);
 		if(EDITOR.currentFile.order == (list.length-1)) {
@@ -125,17 +155,17 @@ for(var i=0; i<list.length; i++) {
 		
 		EDITOR.currentFile.order-=1.5;
 		/*
-		var currentFileFolder = getFolder(EDITOR.currentFile.path)
-		var folder;
-		if(currentFileFolder) {
+			var currentFileFolder = getFolder(EDITOR.currentFile.path)
+			var folder;
+			if(currentFileFolder) {
 			for(var filePath in EDITOR.files) {
-				folder = getFolder(filePath);
-				if(folder && folder == currentFileFolder) EDITOR.files[filePath].order--;
+			folder = getFolder(filePath);
+			if(folder && folder == currentFileFolder) EDITOR.files[filePath].order--;
 			}
-		}
-		else {
+			}
+			else {
 			EDITOR.currentFile.order--;
-		}
+			}
 		*/
 		buildTabs(); // sorts again
 		
@@ -148,17 +178,17 @@ for(var i=0; i<list.length; i++) {
 		
 		EDITOR.currentFile.order+=1.5;
 		/*
-		var currentFileFolder = getFolder(EDITOR.currentFile.path)
-		var folder;
-		if(currentFileFolder) {
+			var currentFileFolder = getFolder(EDITOR.currentFile.path)
+			var folder;
+			if(currentFileFolder) {
 			for(var filePath in EDITOR.files) {
-				folder = getFolder(filePath);
-				if(folder && folder == currentFileFolder) EDITOR.files[filePath].order++;
+			folder = getFolder(filePath);
+			if(folder && folder == currentFileFolder) EDITOR.files[filePath].order++;
 			}
-		}
-		else {
+			}
+			else {
 			EDITOR.currentFile.order++;
-		}
+			}
 		*/
 		buildTabs(); // sorts again
 		
@@ -177,7 +207,7 @@ for(var i=0; i<list.length; i++) {
 		
 		return false;
 		
-		}
+	}
 	
 	function tabFileChange(file, change, text, index, row, col) {
 		
@@ -210,7 +240,7 @@ for(var i=0; i<list.length; i++) {
 		var closeFileButton = document.getElementById("close_" + file.path);
 		
 		closeFileButton.setAttribute("class", "closeFileTab");
-
+		
 		return true;
 	}
 	
@@ -251,17 +281,17 @@ for(var i=0; i<list.length; i++) {
 		EDITOR.showFile(EDITOR.files[path]);
 		
 		/*
-		buildTabs();
-		
-		EDITOR.resizeNeeded();
-		EDITOR.renderNeeded();
-*/
+			buildTabs();
+			
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
+		*/
 		console.log("Switched file to: " + path);
-
+		
 		
 	}
 	
-
+	
 	function buildTabs(excludeFile) {
 		
 		console.log(UTIL.getStack("Building tabs ..."));
@@ -271,7 +301,7 @@ for(var i=0; i<list.length; i++) {
 		if(tabList !== null) {
 			// Empty the list
 			while(tabList.firstChild ) {
-			  tabList.removeChild( tabList.firstChild );
+				tabList.removeChild( tabList.firstChild );
 			}
 		}
 		
@@ -293,7 +323,7 @@ for(var i=0; i<list.length; i++) {
 			console.log("file_tab_" + i + "=" + fileList[i].path);
 			openTab(fileList[i].path);
 		}
-
+		
 	}
 	
 	
@@ -314,9 +344,9 @@ for(var i=0; i<list.length; i++) {
 		var tabFolderItem;
 		var active = EDITOR.currentFile ? (EDITOR.currentFile.path==path) : false;
 		
-	
+		
 		console.log("path=" + path + " active=" + active);
-
+		
 		
 		if(!tabList) createTabList();
 		
@@ -328,7 +358,7 @@ for(var i=0; i<list.length; i++) {
 		tabFileItem.setAttribute("title", path);
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
-
+		
 		if(EDITOR.files[path].isSaved == false) {
 			showUnsavedStatus(tabFileItem)
 		}
@@ -358,7 +388,7 @@ for(var i=0; i<list.length; i++) {
 		else {
 			folderName = fileName;
 		}
-			
+		
 		folderList = document.getElementById("tab_folder_list_" + folderName);
 		tabFolderItem = document.getElementById("tab_folder_" + folderName);
 		
@@ -388,19 +418,19 @@ for(var i=0; i<list.length; i++) {
 		else {
 			tabFolderItem.setAttribute("class", "tabFolderItem" + single);
 			tabFileItem.setAttribute("class", "tabFileItem");
-
+			
 		}
 		
 		/*
 			If one childtab is active, the parent (tabFileItem) should also be active!
 		*/
 		var childNodes = folderList.childNodes;
-
-        for(var i=0; i<childNodes.length; i++) {
-            if(childNodes[i].getAttribute("class").indexOf("active") > -1) {
+		
+		for(var i=0; i<childNodes.length; i++) {
+			if(childNodes[i].getAttribute("class").indexOf("active") > -1) {
 				tabFolderItem.setAttribute("class", "tabFolderItem active" + single);
 			}
-        }
+		}
 		
 		
 		
@@ -437,11 +467,11 @@ for(var i=0; i<list.length; i++) {
 				
 				//closeFileButton.setAttribute("class", "blink closeFileTab ");
 				closeFileButton.setAttribute("class", "closeFileTab blink");
-
+				
 				var yes = "Ignore changes";
 				var no = "Don't close!"
 				confirmBox("The file is not saved. Are you sure you want to close it !?\n(Ctrl click to close without saving)", [yes, no], function(answer) {
-				
+					
 					if(answer == yes) {
 						EDITOR.closeFile(path);
 					}
@@ -450,11 +480,11 @@ for(var i=0; i<list.length; i++) {
 				});
 				
 				//alertBox("File not saved.\nCtrl click to close without saving.");
-					console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
-					
-					closeFileButton.blur();
-					
-				}
+				console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
+				
+				closeFileButton.blur();
+				
+			}
 			else {
 				EDITOR.closeFile(path);
 			}
@@ -471,7 +501,7 @@ for(var i=0; i<list.length; i++) {
 			tabList = document.createElement("ul");
 			tabList.setAttribute("id", "tabList");
 			tabList.setAttribute("class", "tabList");
-
+			
 			tabList.setAttribute("class", "noselect"); // Disable text selecting
 			
 			
@@ -495,7 +525,7 @@ for(var i=0; i<list.length; i++) {
 		
 		var testFiles = ["dirA/File0", "dirA/File1", "dirB/File2", "dirB/File3", "dirB/File4"];
 		
-			// Open test files
+		// Open test files
 		EDITOR.openFile(testFiles[0], 'File0', function(err, file) {
 			EDITOR.openFile(testFiles[1], 'File1', function(err, file) {
 				EDITOR.openFile(testFiles[2], 'File2', function(err, file) {
@@ -548,9 +578,9 @@ for(var i=0; i<list.length; i++) {
 								// Close test files
 								for(var path in EDITOR.files) {
 									EDITOR.closeFile(path);
-							}
-							
-							callback(true);
+								}
+								
+								callback(true);
 							}
 							
 						});
@@ -558,7 +588,7 @@ for(var i=0; i<list.length; i++) {
 				});
 			});
 		});
-		}); 
+	}); 
 	
 	// TEST-CODE-END
 	

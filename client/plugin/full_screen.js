@@ -6,16 +6,37 @@
 		
 	*/
 	
-	var keyF11 = 122;
+	var winMenuFullScreen;
+	
+	EDITOR.plugin({
+		desc: "Full screen",
+		load: function loadFullScreen() {
+
+			var keyF11 = 122;
+			
+			EDITOR.bindKey({desc: "Toggle full screen mode", charCode: keyF11, fun: toggleTullScreen});
+			
+			winMenuFullScreen = EDITOR.windowMenu.add("Full screen", ["Window", 1], toggleTullScreen);
+			
+			
+		},
+		unload: function unloadFullScreen() {
+
+			EDITOR.unbindKey(toggleTullScreen);
+			
+			EDITOR.windowMenu.remove(winMenuFullScreen);
+		},
+	});
 	
 	
-	EDITOR.bindKey({desc: "Toggle full screen mode", charCode: keyF11, fun: toggleTullScreen});
 	
 	function toggleTullScreen() {
 		
 		if(RUNTIME == "nw.js") { 
 			var GUI = require('nw.gui').Window.get();
 			GUI.toggleKioskMode();
+			
+			winMenuFullScreen.toggle();
 			}
 		else {
 			// Asume browser
@@ -28,6 +49,9 @@
 				} else if (document.documentElement.webkitRequestFullScreen) {
 					document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
 				}
+				
+				winMenuFullScreen.activate();
+				
 			} else {
 				if (document.cancelFullScreen) {
 					document.cancelFullScreen();
@@ -36,6 +60,9 @@
 				} else if (document.webkitCancelFullScreen) {
 					document.webkitCancelFullScreen();
 				}
+				
+				winMenuFullScreen.deactivate();
+				
 			}
 		}
 		

@@ -12,6 +12,7 @@
 	var searchVisible = false;
 	var lastSearchStrLength = 0;
 	var lastSearchDirection = "right"; // right|left
+	var winMenuFindReplace;
 	
 	EDITOR.plugin({
 		desc: "Find and Replace",
@@ -39,6 +40,8 @@
 		
 		EDITOR.registerAltKey({char: "f", alt:2, label: "find", fun: findReplace});
 		
+		winMenuFindReplace = EDITOR.windowMenu.add("Find/replace", ["File", 7], findReplace);
+		
 		// Point variables to the document object model
 		findReplaceDiv = document.getElementById("findReplace");
 		inputFind = document.getElementById("inputFind");
@@ -65,6 +68,9 @@
 		EDITOR.removeEvent("moveCaret", resetLastSearchStrLength);
 		
 		EDITOR.unregisterAltKey(findReplace);
+		
+		EDITOR.windowMenu.remove(winMenuFindReplace);
+		
 		
 		// Cleanup
 		hide_search();

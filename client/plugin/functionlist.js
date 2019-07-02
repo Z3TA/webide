@@ -19,6 +19,8 @@
 	var menu;
 	var alwaysShowFunctionList = true;
 	var forcedSingleRow = false;
+	var functionListActive = true;
+	var winMenuToggleFunctionlist;
 	
 	EDITOR.plugin({
 		desc: "Show list of JS functions in left column",
@@ -42,6 +44,9 @@
 		EDITOR.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
 		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
+		
+		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 4], toggleFunctionList);
+		if(functionListActive) winMenuToggleFunctionlist.activate();
 		
 		functionListWrap = document.createElement("div");
 		
@@ -80,6 +85,19 @@
 		
 	}
 	
+	function unload() {
+		if(functionListWrap && functionListWrap.parentNode == leftColumn) leftColumn.removeChild(functionListWrap);
+		
+		EDITOR.removeEvent("fileParse", updateFunctionList);
+		EDITOR.removeEvent("fileHide", hideFunctionList);
+		EDITOR.removeEvent("fileClose", hideFunctionList);
+		EDITOR.removeEvent("fileShow", loadFunctionList);
+		EDITOR.removeEvent("moveCaret", highlightCurrentFunction);
+		EDITOR.removeEvent("keyDown", searchFunctionList);
+		
+		EDITOR.windowMenu.remove(winMenuToggleFunctionlist);
+	}
+	
 	function mobileFubarDetected() {
 		/*
 			Some mobile browser does not allow multi row select box.
@@ -113,12 +131,6 @@ leftColumn.removeChild(functionListWrap);
 		
 		functionListSelect.removeAttribute("multiple");
 		
-	}
-	
-	function unload() {
-		if(functionListWrap && functionListWrap.parentNode == leftColumn) leftColumn.removeChild(functionListWrap);
-		
-		// todo: Also remove events
 	}
 	
 	function leftOrRight() {
@@ -427,16 +439,29 @@ leftColumn.removeChild(functionListWrap);
 			if(functionListWrap.style.display != "none") {
 				functionListWrap.style.display="none";
 				EDITOR.resizeNeeded();
+				
+				functionListActive = false;
+				winMenuToggleFunctionlist.deactivate();
+				
 				console.log("Functionlist is now hidden");
 				console.log(UTIL.getStack("why hide function list?"));
 			}
 		}
 	}
 	
+	function toggleFunctionList() {
+		if(functionListActive) {
+			hideFunctionList();
+		}
+		else {
+			showFunctionList();
+		}
+	}
+	
 	function showFunctionList(file) {
 		
 		if(!alwaysShowFunctionList) {
-console.warn("Now showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
+			console.warn("Not showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
 		return;
 		}
 		
@@ -444,7 +469,12 @@ console.warn("Now showing function list because alwaysShowFunctionList=" + alway
 			
 			if(functionListWrap.style.display != "block") { // bugfix: editor resized at every key stroke because of fileParse event
 				functionListWrap.style.display="block";
+				
+				functionListActive = true;
+				winMenuToggleFunctionlist.activate();
+				
 				EDITOR.resizeNeeded();
+				
 				console.log("Functionlist is now visible");
 			}
 			else {

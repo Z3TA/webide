@@ -2948,6 +2948,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		item.domElement.setAttribute("class", "item");
 		
+		item.activated = false;
+		
 		item.bullet = document.createElement("td");
 		item.bullet.setAttribute("class", "bullet");
 		item.wrapper.appendChild(item.bullet);
@@ -2977,15 +2979,23 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	}
 	DropdownMenuItem.prototype.activate = function activate() {
 		this.bullet.setAttribute("class", "bullet active");
+		this.activated = true;
 	}
 	DropdownMenuItem.prototype.deactivate = function deactivate() {
 		this.bullet.setAttribute("class", "bullet inactive");
+		this.activated = false;
 	}
 	DropdownMenuItem.prototype.setLabel = function setLabel(label) {
 		this.label.innerText = label;
 	}
 	DropdownMenuItem.prototype.hide = function setLabel() {
 		this.parentMenu.hide(true, true);
+	}
+	DropdownMenuItem.prototype.toggle = function setLabel() {
+		if(this.activated) this.deactivate();
+		else this.activate();
+		
+		return this.activated;
 	}
 	DropdownMenuItem.prototype.addSubmenu = function addSubmenu() {
 		var item = this;
@@ -3148,6 +3158,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			windowMenuHeight.style.display="none";
 			
 			EDITOR.windowMenu.isVisible = false;
+		},
+		click: function clickWindowMenu(where, onlyifactive) {
+			// todo: able to automate clicks on menu
 		},
 		isVisible: true
 	}

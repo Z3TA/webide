@@ -22,6 +22,7 @@
 	var filesMatched = {};
 	var lastRowNr = -1;
 	var progressBar;
+	var winMenuFindInFiles;
 	
 	EDITOR.on("start", function find_in_files_main() {
 		
@@ -33,6 +34,10 @@
 		EDITOR.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
 		
 		EDITOR.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
+		
+		winMenuFindInFiles = EDITOR.windowMenu.add("Find in files", ["File", 8], findInFiles);
+		
+		EDITOR.registerAltKey({char: "f", alt:1, label: "Find in files", fun: findInFiles});
 		
 		
 		// Point variables to the document object model
@@ -327,6 +332,8 @@ console.warn("Could not find the search string that was used!");
 			
 			EDITOR.input = false; // Remove focus from the file
 			
+		winMenuFindInFiles.hide();
+		
 			return false; // Prevent default (browser) action
 	}
 	
