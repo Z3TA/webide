@@ -19,6 +19,7 @@
 	
 	function unload() {
 		EDITOR.removeEvent("afterSave", configurationMaybe);
+		EDITOR.unregisterAltKey(showLocalCustomization);
 	}
 	
 	function load() {
@@ -30,6 +31,9 @@
 		EDITOR.on("afterSave", configurationMaybe);
 		
 		menuItem = EDITOR.ctxMenu.add("Editor customization", showLocalCustomization, 20);
+		
+		
+		EDITOR.registerAltKey({char: "Compl", alt:3, label: "Editor customization", fun: showLocalCustomization});
 		
 		var root = (EDITOR.user && EDITOR.user.homeDir) || "/";
 		

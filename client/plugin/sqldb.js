@@ -21,6 +21,8 @@
 			var char_Esc = 27;
 			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
 			
+			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
+			
 },
 		unload: function unloadSqldb() {
 			
@@ -31,6 +33,8 @@
 			EDITOR.removeEvent("fileOpen", sqlFileMaybe);
 			
 			EDITOR.unbindKey(hideDbManager);
+			
+			EDITOR.unregisterAltKey(showDbManager);
 			
 		}
 	});

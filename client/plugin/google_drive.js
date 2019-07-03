@@ -28,12 +28,15 @@ EDITOR.plugin({
 
 			winMenuGoogleDrive = EDITOR.windowMenu.add("Google Drive", ["Connect", 2], toggleGoogleDrive);
 			
+			EDITOR.registerAltKey({char: "&", alt:3, label: "Google Drive", fun: toggleGoogleDrive});
+			
 },
 	unload: function() {
 EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.windowMenu.remove(winMenuGoogleDrive);
 			
+			EDITOR.unregisterAltKey(toggleGoogleDrive);
 }
 });
 

@@ -6834,6 +6834,12 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 			}
 		});
 		
+		EDITOR.registerAltKey({char: "c", alt:1, label: "Commit", fun:
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.commitTool(file);
+			}
+		});
+		
 		
 		window.onbeforeunload = confirmExit;
 		

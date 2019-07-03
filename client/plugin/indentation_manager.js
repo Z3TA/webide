@@ -16,6 +16,8 @@
 			
 			EDITOR.on("fileShow", showIndentationConvention);
 			
+			EDITOR.registerAltKey({char: "Enter", alt:3, label: "Change indentation", fun: showIndentationManager});
+			
 			//showIndentationManager();
 			
 		},
@@ -26,6 +28,8 @@
 			EDITOR.unbindKey(hideIndentationManager);
 			
 			EDITOR.removeEvent("fileShow", showIndentationConvention);
+			
+			EDITOR.unregisterAltKey(showIndentationManager);
 			
 			if(indentationManager) {
 				var footer = document.getElementById("footer");

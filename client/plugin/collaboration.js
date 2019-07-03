@@ -87,6 +87,7 @@
 			
 			EDITOR.registerAltKey({char: "ABC", label: "undo", alt: 1, fun: collabUndo}); 
 			EDITOR.registerAltKey({char: "ABC", label: "redo", alt: 2, fun: collabRedo});
+			EDITOR.registerAltKey({char: "(", label: "Invite collaborator", alt: 3, fun: invite});
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
@@ -138,6 +139,7 @@
 			
 			EDITOR.unregisterAltKey(collabUndo);
 			EDITOR.unregisterAltKey(collabRedo);
+			EDITOR.unregisterAltKey(invite);
 			
 		},
 		order: 100

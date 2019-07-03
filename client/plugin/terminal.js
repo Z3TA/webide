@@ -43,6 +43,7 @@
 			
 			EDITOR.registerAltKey({char: "=", alt:1, label: "Ctrl", fun: ctrlKey});
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
+			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
 		},
 		unload: function unloadTerminal() {

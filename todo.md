@@ -29,20 +29,30 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+spellcheck regression! It no longer works!
+
+Addin everything that is in the context menu to the virtual keyboard alt keys! So they get dedicated buttons (commit, etc)
+
 Thinking about License again.
 Maybe people disregard the software because it's cheep (free) !?
 
 
 todo: Go though all plugins and any keybinding and add a window menu entry, *and* also a virtual keyboard alt shortcut if it's common
 
-todo: Add everything that is in the context menu to the virtual keyboard alt keys!
+todo: Hide window menu via View - Hide window menu
+
+todo: Hide window meny when you click somewhere. It doesn't auto-hide on iOS.
 
 todo: When there is not enough space to pull out a sub window menu to the right, place it on the left side!
+
+todo: Remove stuff from context meny once they are both on window menu, virtual keyboard (and discovery bar?)
 
 All editor features should be reachable via the window menu, OR the virtual keyboard!
 (window menu is hidden when in mobile/small screen)
 
-Some features can be advertised by putting an icon in the discoveryBar
+Some features can be advertised by putting an icon in the discoveryBar: 
+Clone Repo, Virsion control, database manager, VNC?, Print2PDF, Static site Generator, open in new window
+spellcheck, invite collaborator, FTP/SFTP, Terminal, Save
 
 Some features can be added to the context menu, preferably those that has something todo with where you click, or the file you click on.
 Commonly used functionality can also be reached via the ctx meny. (as well as via the window menu)

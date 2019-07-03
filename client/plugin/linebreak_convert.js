@@ -14,10 +14,13 @@
 		
 		menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
 		
+		EDITOR.registerAltKey({char: "back", alt:3, label: "Convert line-breaks", fun: convertLinebreaks});
+		
 	}
 	
 	function unload() {
 		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.unregisterAltKey(convertLinebreaks);
 	}
 	
 	function convertLinebreaks() {

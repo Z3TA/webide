@@ -84,6 +84,7 @@
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
+		EDITOR.registerAltKey({char: ",", alt:1, label: "version control", fun: showVersionControlWidget});
 	}
 	
 	function unloadMercurial() {
@@ -105,6 +106,8 @@
 		CLIENT.removeEvent("mercurialProgress", mercurialProgressStatus);
 		
 		CLIENT.removeEvent("loginSuccess", cloneRepoMaybe);
+		
+		EDITOR.unregisterAltKey(showVersionControlWidget);
 		
 		hideMercurialWidgets();
 		
@@ -235,7 +238,14 @@
 		});
 		}
 	
-	function mercurialCommitTool(directory) {
+	function mercurialCommitTool(directoryOrFile) {
+		
+		if(directoryOrFile instanceof File) directoryOrFile = directoryOrFile.path;
+		
+		if(directoryOrFile == undefined) var directory = UTIL.getDirectoryFromPath(EDITOR.currentFile && EDITOR.currentFile.path);
+		else if(!UTIL.isDirectory(directoryOrFile)) var directory = UTIL.getDirectoryFromPath(directoryOrFile);
+		else var directory = directoryOrFile;
+		
 		// Does the directory has a initated Mercurial repo ?
 		CLIENT.cmd("mercurial.hasRepo", {directory: directory}, function hgstatus(err, resp) {
 			if(err) throw err;

@@ -256,6 +256,8 @@
 		
 		CLIENT.on("ssgProgressStatus", ssgProgressStatus);
 		
+		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
+		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 	}

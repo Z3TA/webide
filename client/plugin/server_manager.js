@@ -79,6 +79,8 @@
 			
 			menuItem = EDITOR.ctxMenu.add(menuString, showServerManger, 15);
 			
+			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
+			
 		});
 		
 		
@@ -92,6 +94,8 @@
 		EDITOR.unbindKey(serverManagerEnter);
 		
 		EDITOR.ctxMenu.remove(menuItem);
+		
+		EDITOR.unregisterAltKey(showServerManger);
 		
 		if(serverManager) {
 			var footer = document.getElementById("footer");

@@ -67,6 +67,8 @@
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		
+		EDITOR.registerAltKey({char: "0", alt:2, label: "Spellcheck", fun: toggleSpellCheck});
+		
 	}
 	
 	function loadDictionaries(login) {
@@ -89,6 +91,7 @@
 		disable();
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(windowMenuSpellcheck);
+		EDITOR.unregisterAltKey(toggleSpellCheck);
 	}
 	
 	function toggleSpellCheck() {
