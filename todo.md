@@ -29,7 +29,13 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-todo: Go though all plugins and any keybinding and add a window menu entry, *and* also a virtual keyboard alt shortcut 
+Thinking about License again.
+Maybe people disregard the software because it's cheep (free) !?
+
+
+todo: Go though all plugins and any keybinding and add a window menu entry, *and* also a virtual keyboard alt shortcut if it's common
+
+todo: Add everything that is in the context menu to the virtual keyboard alt keys!
 
 todo: When there is not enough space to pull out a sub window menu to the right, place it on the left side!
 

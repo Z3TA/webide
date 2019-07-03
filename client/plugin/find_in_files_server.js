@@ -37,7 +37,7 @@
 		
 		winMenuFindInFiles = EDITOR.windowMenu.add("Find in files", ["File", 8], findInFiles);
 		
-		EDITOR.registerAltKey({char: "f", alt:1, label: "Find in files", fun: findInFiles});
+		EDITOR.registerAltKey({char: "f", alt:2, label: "Find in files", fun: findInFiles});
 		
 		
 		// Point variables to the document object model

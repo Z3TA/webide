@@ -3,6 +3,7 @@
 "use strict";
 
 	var helpWindow;
+	var winMenuHelp;
 	
 EDITOR.plugin({
 		desc: "Help files",
@@ -16,10 +17,14 @@ function loadHelp() {
 		
 		EDITOR.bindKey({desc: "Show help files", fun: showHelp, charCode: keyF1, combo: 0});
 		
+		winMenuHelp = EDITOR.windowMenu.add("Documentation", ["Editor", 12], showHelp);
+		
 }
 
 function unloadHelp() {
 		EDITOR.unbindKey(showHelp);
+		
+		EDITOR.windowMenu.remove(winMenuHelp);
 		
 		if(helpWindow) helpWindow.close();
 }

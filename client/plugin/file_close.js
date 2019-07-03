@@ -26,6 +26,9 @@
 		
 		windowMenuClose = EDITOR.windowMenu.add("Close", ["File", 3], closeFile);
 		windowMenuQuit = EDITOR.windowMenu.add("Quit", ["Editor", 10], closeEditor);
+		
+		EDITOR.registerAltKey({char: "x", alt:2, label: "Close file", fun: closeFile});
+		
 	}
 	
 	function closeFileKeyComboUnload() {
@@ -36,6 +39,9 @@
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(windowMenuClose);
 		EDITOR.windowMenu.remove(windowMenuQuit);
+		
+		EDITOR.unregisterAltKey(closeFile);
+		
 	}
 	
 	function closeEditor(file, combo) {

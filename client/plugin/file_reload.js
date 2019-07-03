@@ -15,11 +15,15 @@
 		
 		menuItem = EDITOR.ctxMenu.add("Relode from disk", reloadFile, 6);
 		winMenuReloadFromDisk = EDITOR.windowMenu.add("Reload from disk", ["File", 6], reloadFile);
+		
+		EDITOR.registerAltKey({char: "back", alt:3, label: "Reload file", fun: reloadFile});
+		
 	}
 	
 	function unload() {
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
+		EDITOR.unregisterAltKey(reloadFile);
 	}
 	
 	function reloadFile() {
@@ -27,7 +31,7 @@
 		
 if(!file) return true;
 
-		if(!file.saved) {
+		if(file.changed) {
 			
 			var yes = "Yes, discard changes";
 			var no = "NO"

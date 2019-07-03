@@ -25,11 +25,11 @@
 		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
+		EDITOR.on("runScript", runNodeJsScriptMaybe);
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
 		CLIENT.on("nodejsDebug", nodejsDebugMsg);
-		
 		
 	}
 	
@@ -43,6 +43,35 @@
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
 		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
 		
+	}
+	
+	function runNodeJsScriptMaybe(file, combo) {
+		var ext = UTIL.getFileExtension(file.path);
+		
+		if(ext == "js" || ext == "stdout") {
+			runNodeJsScript();
+			return HANDLED;
+		}
+		
+		return PASS;
+	}
+	
+	function stopNodeJsScriptMaybe(file, combo) {
+		var filePath = file.path;
+		var ext = UTIL.getFileExtension(filePath);
+		
+		if(ext == "js" || ext == "stdout") {
+			if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
+			
+			var scriptIsRunning = (runningScripts.indexOf(filePath) != -1);
+			
+			if(scriptIsRunning) {
+				stopNodeJsScript();
+				return HANDLED;
+			}
+		}
+		
+		return PASS;
 	}
 	
 	function updateRunMsg(login) {

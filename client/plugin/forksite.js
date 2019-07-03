@@ -10,7 +10,7 @@ EDITOR.plugin({
 			// Wait until logged in
 			CLIENT.on("loginSuccess", forkSiteAfterLoggedIn);
 			
-			winMenuForkWebsite = EDITOR.windowMenu.add("Fork website", ["Tools", 10], forkWebsite);
+			winMenuForkWebsite = EDITOR.windowMenu.add("Download a website", ["Tools", 10], forkWebsite);
 			
 		},
 		unload: function() {

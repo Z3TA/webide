@@ -115,6 +115,8 @@ var SUCCESS = true;
 var FAIL = false;
 var PREVENT_DEFAULT = false;
 var ALLOW_DEFAULT = true;
+var HANDLED = true;
+var PASS = false;
 
 // Error level/types
 var ERROR = 1;

@@ -19,6 +19,8 @@
 			menuItem = EDITOR.ctxMenu.add("New file", keyboardNewFile, 1);
 			winMenuNewFile = EDITOR.windowMenu.add("New file", ["File", 2], keyboardNewFile);
 			
+			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: keyboardNewFile});
+			
 			//newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
 		},
@@ -27,6 +29,8 @@
 			EDITOR.windowMenu.remove(winMenuNewFile);
 			
 			EDITOR.unbindKey(keyboardNewFile);
+			
+			EDITOR.unregisterAltKey(keyboardNewFile);
 			
 			//EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			

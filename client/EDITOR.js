@@ -180,7 +180,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	registerAltKey: [], // Virtual keyboards can choose to update alternate keys so you can for example save file via Alt + S etc. Kinda like key-bindings but for virtual keyboards
 	unregisterAltKey: [],
 	hideVirtualKeyboard: [], // Virtual keyboards need to listen to this and hide itself when their name is called
-	showVirtualKeyboard: []
+	showVirtualKeyboard: [],
+	runScript: [], // Plugins can register as program runners
+	stopScript: []
 };
 
 EDITOR.renderFunctions = [];
@@ -5797,29 +5799,40 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		}
 	}
 	
-	EDITOR.previewTool = function previewTool(file, ev) {
-		
-		if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
-		
-		if(! file instanceof File) throw new Error("First argument file need to be a File object!");
-		
-		// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
-		console.log("ev.constructor.name=" + ev.constructor.name);
-		if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
-		
-		
-		console.log("Calling previewTool listeners (" + EDITOR.eventListeners.previewTool.length + ")");
-		
-		var ret = false;
-		
-		var combo = getCombo(ev);
-		
-		for(var i=0, f; i<EDITOR.eventListeners.previewTool.length; i++) {
-			ret = EDITOR.eventListeners.previewTool[i].fun(file, combo);
-			if(ret === true) break; // Only open one tool
+	EDITOR.previewTool = tool("previewTool", false);
+	
+	EDITOR.runScript = tool("runScript", false);
+	
+	EDITOR.stopScript = tool("stopScript", false);
+	
+	function tool(eventListenerName) {
+		return function(file, ev) {
+			if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
+			
+			if(! file instanceof File) throw new Error("First argument file need to be a File object!");
+			
+			// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
+			console.log("ev.constructor.name=" + ev.constructor.name);
+			if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
+			
+			var eventListener = EDITOR.eventListeners[eventListenerName];
+			
+			if(!eventListener) throw new Error("Unknown event listener: " + eventListenerName);
+			
+			console.log("Calling eventListener=" + eventListenerName + " (" + eventListener.length + ")");
+			
+			var ret = false;
+			
+			var combo = getCombo(ev);
+			
+			for(var i=0, f; i<eventListener.length; i++) {
+				ret = eventListener[i].fun(file, combo);
+				if(ret === true) return true; // Only run once
+				else if(ret !== false) console.warn("Function " + UTIL.getFunctionName(eventListener[i].fun) + " did not return true or false!");;
+			}
+			
+			alertBox("No " + eventListenerName + " (" + eventListener.length + " tools) handled the request!", 404, "warning");
 		}
-		
-		return ret;
 	}
 	
 	EDITOR.fileExplorer = function fileExplorerTool(directory) {
@@ -6801,6 +6814,26 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
 		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
+		
+		
+		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.previewTool(file, someEvent);
+			}
+		});
+		
+		EDITOR.registerAltKey({char: "Enter", alt:1, label: "Run script", fun:
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.runScript(file, someEvent);
+			}
+		});
+		
+		EDITOR.registerAltKey({char: "Enter", alt:2, label: "Stop script", fun:
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.stopScript(file, someEvent);
+			}
+		});
+		
 		
 		window.onbeforeunload = confirmExit;
 		
@@ -8586,7 +8619,7 @@ keyPressed(keyPress);
 						
 						if(!EDITOR.currentFile) console.warn("No file open!");
 						
-						funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "down", targetElementClass);
+						funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
 						
 						//console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 						
@@ -8838,6 +8871,7 @@ keyPressed(keyPress);
 		*/
 		
 		// Check key bindings
+		var targetElementClass = keyUpEvent.target.className;
 		for(var i=0, binding; i<keyBindings.length; i++) {
 			
 			binding = keyBindings[i];
@@ -8846,7 +8880,7 @@ keyPressed(keyPress);
 				
 				console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 				
-				funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up");
+				funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up", targetElementClass, keyUpEvent);
 				
 				// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
 				

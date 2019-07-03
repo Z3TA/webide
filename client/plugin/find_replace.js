@@ -38,7 +38,7 @@
 			fun: findInFile
 		});
 		
-		EDITOR.registerAltKey({char: "f", alt:2, label: "find", fun: findReplace});
+		EDITOR.registerAltKey({char: "f", alt:1, label: "find", fun: findReplace});
 		
 		winMenuFindReplace = EDITOR.windowMenu.add("Find/replace", ["File", 7], findReplace);
 		

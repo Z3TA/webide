@@ -67,6 +67,8 @@
 		
 		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["File", 11], show_gotoInput);
 		
+		EDITOR.registerAltKey({char: "g", alt:1, label: "goto line", fun: show_gotoInput});
+		
 		}
 	
 	function gotoLine_unload() {
@@ -79,6 +81,8 @@
 		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
 		
 		EDITOR.windowMenu.remove(winMenuGotoLine);
+		
+		EDITOR.unregisterAltKey(show_gotoInput);
 		
 	}
 	

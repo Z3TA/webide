@@ -59,6 +59,9 @@
 		
 		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 2], toggleFileExplorer);
 		
+		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorer});
+		
+		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
 		
@@ -112,6 +115,8 @@
 		EDITOR.ctxMenu.remove(menuItem);
 		
 		EDITOR.windowMenu.remove(winMenuFileExplorer);
+		
+		EDITOR.unregisterAltKey(toggleFileExplorer);
 		
 		EDITOR.unbindKey(toggleFileExplorer);
 		

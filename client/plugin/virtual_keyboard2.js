@@ -708,14 +708,14 @@ return false;
 			//console.log("click.x=" + click.x + " click.y=" + click.y + " button.x=" + buttonLocations[i].x + " button.y=" + buttonLocations[i].y + " buttonWidth=" + buttonWidth + " buttonHeight=" + buttonHeight + " ");
 			
 			if( click.x > (buttonLocations[i].x - buttonWidth * buttonLocations[i].width / 2)  &&  click.x < (buttonLocations[i].x + buttonWidth * buttonLocations[i].width / 2) && 
-			click.y > (buttonLocations[i].y - buttonHeight/2)  &&  click.y < (buttonLocations[i].y + buttonHeight/2) ) return clickButton(buttonLocations[i].id);
+			click.y > (buttonLocations[i].y - buttonHeight/2)  &&  click.y < (buttonLocations[i].y + buttonHeight/2) ) return clickButton(buttonLocations[i].id, mouseUpEvent);
 		}
 		
 		return true;
 	}
 	
 	
-	function clickButton(id) {
+	function clickButton(id, someEvent) {
 		
 		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
 		//file.putCharacter("X");
@@ -738,7 +738,16 @@ return false;
 			}
 		}
 		
-		if(customFunction) customFunction(EDITOR.currentFile, {shift: false, alt: false, ctrl: false, sum: 0});
+		if(customFunction) {
+			// Send same parameters as keyBindings! (file, combo, character, charCode, direction, targetElementClass, keyDownEvent)
+			var file = EDITOR.currentFile;
+			var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+			var character = button.char;
+			var charCode = CAPS ? button.charCodeCaps : button.charCode;
+			var direction = "down";
+			var targetElementClass = someEvent.target.className;
+			customFunction(file, combo, character, charCode, direction, targetElementClass, someEvent);
+		}
 		else button.fun(); // Need to be button.fun so that the function will get the proper this
 		
 		
@@ -1416,7 +1425,7 @@ fun: function space(click) {
 		
 		if(!id) throw new Error("Unable to find button " + letter + " buttons.length=" + (buttons && buttons.length));
 		
-		clickButton(id);
+		clickButton(id, event);
 		
 	}
 	

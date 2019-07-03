@@ -9,6 +9,8 @@
 		
 		todo: Clean up global variables
 		
+		todo: Make into a plugin
+		
 	*/
 	
 	"use strict";
@@ -62,6 +64,8 @@
 		winMenuMoveTabRight = EDITOR.windowMenu.add("Move tab right", ["Window", 2], switchTabRight);
 		winMenuTabLeft = EDITOR.windowMenu.add("Switch to left tab", ["Window", 2], switchTabLeft);
 		winMenuTabRight = EDITOR.windowMenu.add("Switch to right tab", ["Window", 2], switchTabRight);
+		
+		EDITOR.registerAltKey({char: "space", alt:1, label: "Previous file/tab", fun: switchTab});
 		
 		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
