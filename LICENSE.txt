@@ -1,16 +1,34 @@
-MIT License
+Copyright (c) 2015-2019 Johan Zetterberg
 
-Copyright (c) 2019 Johan Zetterberg
+This copyright notice must be included in all copies of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The authors/copyright-holder reserve the right to sell and distribute the software!
+You are however allowed to make private copies, modify, and host multiple instances.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+
+* Forbidden to Sell this software
+* Forbidden to Sell this software as a service
+* Allowed to charge for user access
+
+* Forbidden to Publish or Distribute
+* Allowed to host the cloud IDE
+
+* Allowed to make changes to the software
+* Forbidden to Publish changes/derivative work
+* Allowed to host a modified cloud IDE
+
+* Allowed to publish stand-alone plugins
+* Forbidden to obfuscate the source code
+
+* Forbidden to make a public "fork" of this software
+* Allowed to make private copies
+
+* Forbidden to sub-license
+* Allowed to offer user access as part of another service
+
+* Forbidden to add a copyright notice anywhere in this software
+* Forbidden to change this copyright notice
+
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
