@@ -6,10 +6,8 @@
 	*/
 	"use strict";
 	
-	var pluginDescription = "Spellcheck";
-	
 	EDITOR.plugin({
-		desc: pluginDescription,
+		desc:  "Spellcheck",
 		load: loadSpellchecker,
 		unload: unloadSpellchecker,
 	});
@@ -77,7 +75,7 @@
 			
 			if( (typeof dictsLoaded == "number" && dictsLoaded == 0) || (err && err.code == "MODULE_MISSING")) {
 				console.warn("All dictionaries failed to load. Unloading the spellcheker plugin");
-				EDITOR.disablePlugin(pluginDescription);
+				EDITOR.disablePlugin("Spellcheck");
 			}
 			else if(err) {
 				// Other (unexpected) error
@@ -132,9 +130,14 @@
 		EDITOR.on("mouseClick", showSpellSuggestion);
 		
 		showProgressBar();
+		
+		enabled = true;
+		
 	}
 	
 	function disable() {
+		enabled = false;
+		
 		EDITOR.removeEvent("fileChange", runSpellCheck);
 		EDITOR.removeEvent("fileOpen", spellCheckFile);
 		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
@@ -151,12 +154,16 @@
 		}
 		
 		hideProgressBar();
-		// Make sure the progress bar doesn't show again when the requests in flight comes in
+		
+		wordsInQueue = 0;
 		totalRequests = wordsInQueue;
 		totalResponses = 0;
 		
-		waitlist.length = 0;
+		progressBar.max = 1;
+		progressBar.value = 0;
 		
+		waitlist = []; // Throw away the last waitList
+
 		EDITOR.renderNeeded();
 	}
 	
@@ -240,7 +247,7 @@
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
-		console.log("runSpellCheck change=" + change);
+		console.log("runSpellCheck file.path=" + file.path + " change=" + change);
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
@@ -420,6 +427,8 @@
 	}
 	
 	function spellCheck(file, word, row, col) {
+		if(!enabled) return;
+		
 		/*
 			Check if a word is spelled correctly or not. This is a very slow async function.
 			
@@ -461,6 +470,8 @@
 			else {
 				wordsInQueue++;
 			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
+					if(!enabled) return;
+					
 					totalResponses++;
 					
 					progressBar.max = totalRequests;
@@ -472,8 +483,6 @@
 					else {
 						showProgressBar();
 					}
-					
-					if(!enabled) return;
 				
 				if(err) {
 					alertBox("Failed to spellcheck word=" + word + " Error: " + err.message);
