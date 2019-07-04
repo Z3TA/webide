@@ -1,6 +1,8 @@
 (function() {
 /*
 
+		!DO:NOT:BUNDLE!
+		
 Support for KaiOS
 
 Simulator:

@@ -47,6 +47,8 @@
 	var progressBar;
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
+	var winMenuMercurial, winMenuCommit, winMenuDiffRevision;
+	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
 		into: "/repo/test/",
@@ -69,6 +71,10 @@
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		EDITOR.bindKey({desc: "Source control: Commit", fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
 		EDITOR.bindKey({desc: "Source control: Compare working directory with parent revision", fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
+		
+		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], showVersionControlWidget);
+		winMenuCommit = EDITOR.windowMenu.add("Commit", ["Edit", 5], showCommitDialog);
+		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["Edit", 6], diffWorkingDirectory);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -108,6 +114,10 @@
 		CLIENT.removeEvent("loginSuccess", cloneRepoMaybe);
 		
 		EDITOR.unregisterAltKey(showVersionControlWidget);
+		
+		EDITOR.windowMenu.remove(winMenuMercurial);
+		EDITOR.windowMenu.remove(winMenuCommit);
+		EDITOR.windowMenu.remove(winMenuDiffRevision);
 		
 		hideMercurialWidgets();
 		

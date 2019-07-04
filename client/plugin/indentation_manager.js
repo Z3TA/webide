@@ -4,6 +4,7 @@
 	var menuItem;
 	var indentationManager;
 	var fromWhat;
+	var winMenuIndentation;
 	
 	EDITOR.plugin({
 		desc: "Set the indentation convention and fix all indentation errors",
@@ -18,6 +19,8 @@
 			
 			EDITOR.registerAltKey({char: "Enter", alt:3, label: "Change indentation", fun: showIndentationManager});
 			
+			winMenuIndentation = EDITOR.windowMenu.add("Manage indentation", ["File", 15], showIndentationManager);
+			
 			//showIndentationManager();
 			
 		},
@@ -30,6 +33,8 @@
 			EDITOR.removeEvent("fileShow", showIndentationConvention);
 			
 			EDITOR.unregisterAltKey(showIndentationManager);
+			
+			EDITOR.windowMenu.remove(winMenuIndentation);
 			
 			if(indentationManager) {
 				var footer = document.getElementById("footer");
@@ -48,6 +53,7 @@
 		indentationManager.style.display = "block";
 		
 		EDITOR.ctxMenu.hide();
+		winMenuIndentation.hide();
 		EDITOR.resizeNeeded();
 	}
 	

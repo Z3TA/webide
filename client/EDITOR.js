@@ -2761,7 +2761,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 	}
-	DropdownMenu.prototype.addItem = function addItem(label, key, whenClicked, order) {
+	DropdownMenu.prototype.addItem = function addItem(label, key, whenClicked, order, separator) {
 		if(typeof key == "function" && whenClicked == undefined) {
 			whenClicked = key;
 			key = undefined;
@@ -2771,7 +2771,15 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		if(menu.items.hasOwnProperty(label)) throw new Error("Menu already have an item with label=" + label);
 		
-		var item = menu.items[label] = new DropdownMenuItem({label: label, whenClicked: whenClicked, parentMenu: menu, key: key, orientation: menu.orientation, order: order});
+		var item = menu.items[label] = new DropdownMenuItem({
+			label: label, 
+			whenClicked: whenClicked, 
+			parentMenu: menu, 
+			key: key, 
+			orientation: menu.orientation, 
+			order: order, 
+			separator: separator
+		});
 		
 		if(menu.orientation == "vertical") {
 			// Each item is a table-row
@@ -2780,9 +2788,10 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		else if(menu.orientation == "horizontal") {
 			// Each item is it's own table
-			// Create imentiereate cell
+			// Create cell to put the table in
 			var cell = document.createElement("td");
 			cell.appendChild(item.domElement);
+			
 			menu.itemWrapper.appendChild(cell);
 			item.domNode = cell;
 		}
@@ -2949,7 +2958,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		else throw new Error("Unknown orientation=" + options.orientation);
 		
-		item.domElement.setAttribute("class", "item");
+		item.separator = options.separator || false;
+		
+		item.domElement.setAttribute("class", "item" + (item.separator ? " separator" : ""));
 		
 		item.activated = false;
 		
@@ -3021,12 +3032,12 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
-		item.domElement.setAttribute("class", "item hasSubmenu");
+		item.domElement.setAttribute("class", "item hasSubmenu" + (item.separator ? " separator" : ""));
 		
 		if(!item.domElement.onclick) {
 			item.domElement.onclick = showSubmenu;
 			item.domElement.addEventListener("mouseover", showSubmenuMaybe);
-			item.domElement.setAttribute("class", "item hasSubmenu needClick");
+			item.domElement.setAttribute("class", "item hasSubmenu needClick" + (item.separator ? " separator" : ""));
 		}
 		else {
 			item.domElement.addEventListener("mouseover", showSubmenu);
@@ -3061,7 +3072,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	var dropdownMenuRoot;
 	EDITOR.windowMenu = {
-		add: function addWindowMenuItem(label, where, whenClicked) {
+		add: function addWindowMenuItem(label, where, whenClicked, separator) {
 			/*
 				Example:
 				
@@ -3123,7 +3134,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				whenClicked(file, combo, character, charCode, direction, clickEvent);
 			}
 			
-			item = menu.addItem(label, keyCombo, action, order);
+			item = menu.addItem(label, keyCombo, action, order, separator);
 			return item;
 			
 		},

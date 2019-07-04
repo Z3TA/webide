@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	var winMenuLorem;
+	
 	EDITOR.plugin({
 		desc: "Lorem ipsum generator",
 		load: loadLoremIpsum,
@@ -10,10 +12,12 @@
 	function loadLoremIpsum() {
 		// Bind to ctrl + L
 		EDITOR.bindKey({desc: "Insert lorem ipsum", charCode: 76, combo: CTRL, fun: lorem});
+		winMenuLorem = EDITOR.windowMenu.add("Lorem ipsum", ["Tools", 20], lorem);
 	}
 	
 	function unloadLoremIpsum() {
 		EDITOR.unbindKey(lorem);
+		EDITOR.windowMenu.remove(winMenuLorem);
 	}
 	
 	function lorem(file, combo, character, charCode, keyDirection) {

@@ -10,6 +10,10 @@
 	EDITOR.bindKey({desc: "Scroll up", charCode: 38, combo: ALT, fun: up});
 	EDITOR.bindKey({desc: "Scroll down", charCode: 40, combo: ALT, fun: down});
 
+	EDITOR.windowMenu.add("Scroll right", ["Navigate", 20], right, true);
+	EDITOR.windowMenu.add("Scroll left", ["Navigate", 20], left);
+	EDITOR.windowMenu.add("Scroll up", ["Navigate", 20], up);
+	EDITOR.windowMenu.add("Scroll down", ["Navigate", 20], down);
 	
 	function right(file) {
 		

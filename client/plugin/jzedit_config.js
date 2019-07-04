@@ -9,6 +9,7 @@
 	var nameOfCSS = "jzedit_css_overload.css"
 	
 	var menuItem;
+	var winMenuEditorCustomization;
 	
 	EDITOR.plugin({
 		desc: "Editor configuration and customization via JS and CSS overloading",
@@ -20,6 +21,7 @@
 	function unload() {
 		EDITOR.removeEvent("afterSave", configurationMaybe);
 		EDITOR.unregisterAltKey(showLocalCustomization);
+		EDITOR.windowMenu.remove(winMenuEditorCustomization);
 	}
 	
 	function load() {
@@ -32,6 +34,7 @@
 		
 		menuItem = EDITOR.ctxMenu.add("Editor customization", showLocalCustomization, 20);
 		
+		winMenuEditorCustomization = EDITOR.windowMenu.add("Customization scripts", ["Editor", 16], showLocalCustomization);
 		
 		EDITOR.registerAltKey({char: "Compl", alt:3, label: "Editor customization", fun: showLocalCustomization});
 		
@@ -143,6 +146,7 @@
 		});
 		
 		EDITOR.ctxMenu.hide();
+		winMenuEditorCustomization.hide();
 	}
 	
 	function getJS() {

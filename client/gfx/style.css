@@ -1064,6 +1064,10 @@ div.gotoFile li:hover {
 }
 
 
+.windowMenu .separator td {
+	border-top: 1px dotted #cac7c4;
+}
+
 
 
 /* ### Stying for the context menus */
