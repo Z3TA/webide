@@ -2818,6 +2818,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			if(menu.items[label] == item) {
 				
 				menu.itemWrapper.removeChild(item.domNode);
+				delete menu.items[label];
 				
 				return SUCCESS;
 			}

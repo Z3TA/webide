@@ -12,6 +12,8 @@
 	
 	//alert("hotload");
 	
+	var winMenuHotReload;
+	
 	EDITOR.plugin({
 		desc: "Allows hot reloading of plugins",
 		load: loadHotloader,
@@ -25,12 +27,15 @@
 		
 		EDITOR.bindKey({desc: "Hot-Reload current plugin script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
+		winMenuHotReload = EDITOR.windowMenu.add("Reload current plugin", ["Editor", 10], reloadCurrentScript);
+		
 	}
 	
 	
 	function unloadHotloader() {
 		//alert("unload");
 		EDITOR.unbindKey(reloadCurrentScript);
+		EDITOR.windowMenu.remove(winMenuHotReload);
 	}
 
 	function reloadCurrentScript() {

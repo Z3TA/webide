@@ -299,15 +299,15 @@
 
 				customAltKeys.splice(i, 1);
 				
-				delete verticalLayout[i]["alt" + altNr];
+				delete verticalLayout[id]["alt" + altNr];
 				
-				console.log("Removed alternate key for " + UTIL.getFunctionName(fun) + " from " + verticalLayout[i].char + " !");
+				console.log("Removed registeredAltKeys for " + UTIL.getFunctionName(fun) + " from " + verticalLayout[i].char + " !");
 				
 				return;
 			}
 		}
 		
-		console.log("No match for " + UTIL.getFunctionName(fun) + " in customAltKeys!");
+		console.warn("No match for " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
 	}
 	
 	function updateAltKey(key) {
