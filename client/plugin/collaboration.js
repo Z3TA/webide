@@ -866,7 +866,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 	
 	function collabRedo(file) {
 		if(!file) return true;
-		//if(!EDITOR.input) return true; // why?
+		if(!EDITOR.input) return true; // why? Because we might be in a DOM input element!
 		
 		console.log("collabRedo!");
 		

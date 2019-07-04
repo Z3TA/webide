@@ -6,6 +6,7 @@
 	var selectedDb = "information_schema";
 	var queryFileId = 0;
 	var selectMysqlDb; // Select element
+	var winMenuDbManager;
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -15,6 +16,8 @@
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
+			
+			winMenuDbManager = EDITOR.windowMenu.add("Database manager", ["Tools", 2], showDbManager);
 			
 			EDITOR.on("fileOpen", sqlFileMaybe);
 			
@@ -27,6 +30,8 @@
 		unload: function unloadSqldb() {
 			
 			EDITOR.ctxMenu.remove(menuItem);
+			
+			EDITOR.windowMenu.remove(winMenuDbManager);
 			
 			if(dbManagerWidget) dbManagerWidget.unload();
 			
@@ -49,6 +54,7 @@
 	
 	function showDbManager() {
 		EDITOR.ctxMenu.hide();
+		winMenuDbManager.hide();
 		
 		//if(dbManagerWidget.visible) return hideDbManager();
 		

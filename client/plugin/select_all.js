@@ -10,6 +10,8 @@
 		fun: selectAll
 	});
 	
+	EDITOR.windowMenu.add("Select all", ["Select", 2], selectAll);
+	
 	function selectAll(file, combo, character, charCode, keyPushDirection) {
 		
 		console.log("Ctrl + A = SELECT ALL");

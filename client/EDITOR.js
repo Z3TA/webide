@@ -3131,6 +3131,10 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				var character = null;
 				var charCode = 0;
 				var direction = "down";
+				
+				EDITOR.input = true; // Some commands require the editor canvas to be in focus
+				// Assume that operations shoud be done in the editor, and not not DOM elements
+				
 				whenClicked(file, combo, character, charCode, direction, clickEvent);
 			}
 			

@@ -44,6 +44,8 @@
 	
 	var menuString = "FTP/SFTP ...";
 	
+	var winMenuServerManager;
+	
 	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
 		load: load,
@@ -79,6 +81,8 @@
 			
 			menuItem = EDITOR.ctxMenu.add(menuString, showServerManger, 15);
 			
+			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", ["Remote FS", 3], showServerManger);
+			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			
 		});
@@ -96,6 +100,8 @@
 		EDITOR.ctxMenu.remove(menuItem);
 		
 		EDITOR.unregisterAltKey(showServerManger);
+		
+		EDITOR.windowMenu.remove(winMenuServerManager);
 		
 		if(serverManager) {
 			var footer = document.getElementById("footer");
@@ -542,6 +548,7 @@
 		console.log("Show server manager");
 		
 		EDITOR.ctxMenu.hide();
+		winMenuServerManager.hide();
 		
 		// Steal focus from the file
 		EDITOR.input = false;

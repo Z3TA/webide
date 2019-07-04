@@ -11,15 +11,15 @@
 		or use Firefox.
 		
 		Problem: Sometimes when many SpeechSynthesisUtterance is created in short time, it stops working!
-		Solution:
+		Solution: ?
+		
 		
 	*/
 	"use strict";
 	
-	if(!QUERY_STRING["voice"]) {
-		console.warn("Voice aid not enabled because no voice in query-string!");
-		return;
-	}
+	var active = false;
+	
+	if(QUERY_STRING["voice"]) active = true;
 	
 	if (!('speechSynthesis' in window)) {
 		console.warn("Speech Synthesis not possible in your browser!");
@@ -32,6 +32,7 @@
 	var lastFile = EDITOR.currentFile;
 	var aboutToSayTimer;
 	var sayingTimer;
+	var winMenuSpeech;
 	
 	EDITOR.plugin({
 		desc: "Speech Synthesis",
@@ -43,17 +44,41 @@
 			
 			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
 			
-			EDITOR.on("moveCaret", speakMoveCaret);
+			winMenuSpeech = EDITOR.windowMenu.add("Speech Synthesis", ["Tools", 15], toggleSpeechAssistant);
+			
+			if(active) activateSpeechAssistant();
 			
 		},
 		unload: function unloadVoicePlugin() {
 			
 			EDITOR.unbindKey(test);
 			
-			EDITOR.removeEvent("moveCaret", speakMoveCaret);
+			EDITOR.windowMenu.remove(winMenuSpeech);
 			
+			disableSpeechAssistant();
 		}
 	});
+	
+	function toggleSpeechAssistant() {
+		if(active) disableSpeechAssistant();
+		else activateSpeechAssistant();
+	}
+	
+	function activateSpeechAssistant() {
+		EDITOR.on("moveCaret", speakMoveCaret);
+		
+		speak("Speech assist activated!");
+		
+		winMenuSpeech.activate();
+		active = true;
+	}
+	
+	function disableSpeechAssistant() {
+		EDITOR.removeEvent("moveCaret", speakMoveCaret);
+		
+		winMenuSpeech.deactivate();
+		active = false;
+	}
 	
 	function changeFile() {
 		var file = UTIL.getFilenameFromPath();
@@ -108,6 +133,7 @@
 				else if(char == "#") add("hashtag");
 				else if(char == "\n") ; // Don't say anything'
 				else if(char == ";") add("semi-colon");
+				else if(char == ":") add("colon");
 				else throw new Error("Unknown character: char=" + UTIL.lbChars(char) + " (" + char.charCodeAt(0) + ")");
 			}
 		else if(charToTheLeft.match(/\W/) || caret.col == 0) {
@@ -205,6 +231,10 @@
 			
 			msg.onend = function(e) {
 				console.log('Finished speak in ' + e.elapsedTime + ' seconds.');
+			};
+			
+			msg.onerror = function(event) {
+				console.log(event.error);
 			};
 			
 			window.speechSynthesis.speak(msg);

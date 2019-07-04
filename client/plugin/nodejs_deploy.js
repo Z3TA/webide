@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	var winMenuProdDeploy, winMenuProdRestart, winMenuProdStop, winMenuProdRemove;
+	
 	EDITOR.plugin({
 		desc: "Allows deoploying Node.JS scripts",
 		load: function loadNodeJsDeploy() {
@@ -14,9 +16,19 @@
 			
 			EDITOR.bindKey({desc: "Remove the nodejs project the currently open file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
 			
+			winMenuProdDeploy = EDITOR.windowMenu.add("Deploy to production", ["Node.JS", 5], nodejsDeploy, "top");
+			winMenuProdRestart = EDITOR.windowMenu.add("Restart production", ["Node.JS", 5], nodejsProdRestart);
+			winMenuProdStop= EDITOR.windowMenu.add("Stop production", ["Node.JS", 5], nodejsProdStop);
+			winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
+			
 		},
 		unload: function unloadNodeJsDeploy() {
 			EDITOR.unbindKey(nodejsDeploy);
+			
+			EDITOR.windowMenu.remove(winMenuProdDeploy);
+			EDITOR.windowMenu.remove(winMenuProdRestart);
+			EDITOR.windowMenu.remove(winMenuProdStop);
+			EDITOR.windowMenu.remove(winMenuProdRemove);
 		},
 	});
 	

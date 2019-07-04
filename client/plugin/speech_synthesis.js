@@ -1,6 +1,10 @@
 (function() {
 	"use strict";
 	
+	/*
+		Deprecated ? in favor for voice.js
+	*/
+	
 	EDITOR.plugin({
 		desc: "Will speak whats on the line",
 		load: load,

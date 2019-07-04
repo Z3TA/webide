@@ -14,6 +14,7 @@
 	var ESC = String.fromCharCode(27);
 	
 	var menuItem;
+	var winMenuTerminal;
 	var terminalFiles = [];
 	var reTerm = new RegExp(termPrefix + "(\\d+)");
 	var oldCols = 0;
@@ -26,6 +27,8 @@
 		load: function loadTerminal() {
 			
 			menuItem = EDITOR.ctxMenu.add("Terminal", startTerminalFromMenu, 16);
+			
+			winMenuTerminal = EDITOR.windowMenu.add("Terminal emulator", ["Tools", 10], startTerminalFromMenu);
 			
 			CLIENT.on("terminal", terminalMessage);
 			
@@ -49,6 +52,8 @@
 		unload: function unloadTerminal() {
 			
 			EDITOR.ctxMenu.remove(menuItem);
+			
+			EDITOR.windowMenu.remove(winMenuTerminal);
 			
 			CLIENT.removeEvent("terminal", terminalMessage);
 			
@@ -186,6 +191,7 @@
 	function startTerminal(startTerminalCallback) {
 		
 		EDITOR.ctxMenu.hide();
+		winMenuTerminal.hide();
 		
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 		

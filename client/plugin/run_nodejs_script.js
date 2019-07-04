@@ -11,6 +11,8 @@
 	"(Which gives you inline console log's and Error message.)\n" + 
 	"If there however are problems, try running the script from the Terminal instead.\n";
 	
+	var winMenuStartScript, winMenuStopScript;
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -24,6 +26,9 @@
 		EDITOR.bindKey({desc: "Runs the current (nodejs) file", fun: runNodeJsScript, charCode: keyF2, combo: 0});
 		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
+		winMenuStartScript = EDITOR.windowMenu.add("Run script", ["Node.JS", 2], runNodeJsScript);
+		winMenuStopScript = EDITOR.windowMenu.add("Stop script", ["Node.JS", 2], stopNodeJsScript);
+		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
 		
@@ -36,6 +41,9 @@
 	function unloadNodeJS() {
 		EDITOR.unbindKey(runNodeJsScript);
 		EDITOR.unbindKey(stopNodeJsScript);
+		
+		EDITOR.windowMenu.remove(winMenuStartScript);
+		EDITOR.windowMenu.remove(winMenuStopScript);
 		
 		EDITOR.removeEvent("showMenu", showRunNodejsScriptMenuItem);
 		

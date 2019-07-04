@@ -28,7 +28,7 @@
 	EDITOR.plugin({
 		desc: "Choose file path for saving files",
 		load: loadFileSaver,
-		unload: unloadFileSaver,
+		unload: unloadFileSaver
 	});
 	
 	function loadFileSaver() {

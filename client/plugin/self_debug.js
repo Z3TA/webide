@@ -25,6 +25,8 @@
 	//EDITOR.on("interaction", selfDebugInteraction);
 	//EDITOR.on("fileChange", selfDebugFileChange);
 	
+	var winMenuBugreport;
+	
 	window.onerror = windowError;
 	
 	EDITOR.plugin({
@@ -38,6 +40,8 @@
 		var key_S = 83;
 		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 		
+		winMenuBugreport = EDITOR.windowMenu.add("Send bug report", ["Editor", 8], sendBugReport);
+		
 		EDITOR.on("error", windowError);
 		EDITOR.on("showMenu", showSendBugReportMenuItem);
 		
@@ -48,6 +52,8 @@
 		
 		EDITOR.removeEvent("error", windowError);
 		EDITOR.removeEvent("showMenu", showSendBugReportMenuItem);
+	
+		EDITOR.windowMenu.remove(winMenuBugreport);
 	}
 	
 	function showSendBugReportMenuItem() {
@@ -67,22 +73,28 @@
 		if(typeof askFirst != "boolean") askFirst = true; 
 		
 		EDITOR.ctxMenu.hide();
+		winMenuBugreport.hide();
 		
 		var file = EDITOR.currentFile;
 		
-		if(file) {
-			if(file.name.indexOf("bugreport") != -1) {
-				if(askFirst) {
+		if(!file) {
+			alertBox("Open a file that you want to send as a bug report");
+			return true;
+		}
+		
+		if(file.name.indexOf("bugreport") == -1) askFirst = true;
+		
+		if(askFirst) {
 					var yes = "Send bug report";
 				var no = "Cancel";
 				confirmBox("Send this file as bug report?\n" + file.path, [yes, no], function (answer) {
 				if(answer == yes) sendit();
 });
 				}
-				else sendit();
-			}
-			return false;
+				else {
+sendit();
 		}
+		
 		return true;
 		
 		function sendit() {

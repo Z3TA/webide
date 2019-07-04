@@ -26,7 +26,7 @@ EDITOR.plugin({
 	load: function() {
 			menuItem = EDITOR.ctxMenu.add(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
 
-			winMenuGoogleDrive = EDITOR.windowMenu.add("Google Drive", ["Connect", 2], toggleGoogleDrive);
+			winMenuGoogleDrive = EDITOR.windowMenu.add("Google Drive", ["Remote FS", 2], toggleGoogleDrive);
 			
 			EDITOR.registerAltKey({char: "&", alt:3, label: "Google Drive", fun: toggleGoogleDrive});
 			

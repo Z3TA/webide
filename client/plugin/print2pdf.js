@@ -25,6 +25,8 @@
 		"../jsPDF/src/modules/ttfsupport.js"
 	];
 	
+	var winMenuPrint;
+	
 	EDITOR.plugin({
 		desc: "Print to PDF",
 		load: function() {
@@ -33,6 +35,8 @@
 			
 			EDITOR.registerAltKey({char: ")", alt:3, label: "Print", fun: print2pdf});
 			
+			winMenuPrint = EDITOR.windowMenu.add("Print to PDF", ["Tools", 6], print2pdf);
+			
 		},
 		unload: function() {
 			
@@ -40,6 +44,7 @@
 			
 			EDITOR.unregisterAltKey(print2pdf);
 			
+			EDITOR.windowMenu.remove(winMenuPrint);
 		}
 	});
 	

@@ -1,5 +1,7 @@
 (function() {
 	
+	// !DO:NOT:BUNDLE!
+	
 // This file can be deleted
 
 //EDITOR.on("start", mock);

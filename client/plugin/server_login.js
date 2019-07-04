@@ -11,6 +11,8 @@
 	var loggingIn = false;
 	var loginButton;
 	
+	var winMenuLogin;
+	
 	// Page speed score hack
 	if(navigator.userAgent.indexOf("Speed Insights") != -1) return; // Don't connect to server or show login screen
 	
@@ -41,6 +43,8 @@
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
 		menuItem = EDITOR.ctxMenu.add("Switch user", showLoginDialog, 13);
+		
+		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", ["Editor", 2], showLoginDialog);
 		
 		var server = undefined;
 		if(EDITOR.localStorage) {
@@ -80,6 +84,8 @@
 		CLIENT.removeEvent("saveLogin", saveLogin);
 		
 		EDITOR.unbindKey(hideLoginDialog);
+		
+		EDITOR.windowMenu.remove(winMenuLogin);
 		
 		if(menuItem) EDITOR.ctxMenu.remove(menuItem);
 	}
@@ -251,6 +257,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			return true;
 		}
 		EDITOR.ctxMenu.hide();
+		winMenuLogin.hide();
 		console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
 	}

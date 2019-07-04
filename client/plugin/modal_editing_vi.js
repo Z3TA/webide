@@ -200,6 +200,8 @@
 		normalMap[str]  = originalNormalMap[str];
 	}
 	
+	var winMenuVim;
+	
 	EDITOR.on("start", function addVimNormalMode() {
 		EDITOR.addMode("vimNormal");
 		EDITOR.addMode("vimInsert");
@@ -220,6 +222,8 @@
 			
 			// If more modes are added we want to move the toggle modes out
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: M, combo: CTRL, mode: "*"});
+			
+			winMenuVim = EDITOR.windowMenu.add("Vim command mode", ["Editor", 12], toggleVim);
 			
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
@@ -277,6 +281,8 @@
 			EDITOR.unbindKey(toggleVim);
 			EDITOR.unbindKey(escapeFromInsert);
 			EDITOR.unbindKey(vimRedo);
+			
+			EDITOR.windowMenu.remove(winMenuVim);
 			
 			// todo: unbind them all!
 			
@@ -2704,12 +2710,16 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			EDITOR.setMode("default");
 			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, false);
 			
+			winMenuVim.deactivate();
+			
 		}
 		else {
 			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
 			
 			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, true);
+			
+			winMenuVim.activate();
 			
 			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
 			
@@ -2723,6 +2733,7 @@ firstTimeVim = false;
 		}
 		
 		EDITOR.ctxMenu.hide();
+		winMenuVim.hide();
 		
 		return false;
 	}

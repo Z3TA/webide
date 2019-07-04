@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	// !DO:NOT:BUNDLE!
+	
 	EDITOR.plugin({
 		desc: "Launch noVNC",
 		load: function() {
