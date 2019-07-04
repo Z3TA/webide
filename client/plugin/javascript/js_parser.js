@@ -660,10 +660,12 @@
 								oldParse.xmlTags.sort(sortyByStart);
 							}
 							
-							// Update or add any global variables
-							for(var varName in newParse.globalVariables) {
-								oldParse.globalVariables[varName] = newParse.globalVariables[varName];
-							}
+							// Update existing global variables
+							// note: Because we only parsed one function, the parser will think all undeclared variables are global. Which is not the case
+							// actually: Don't bother updating global variables when we only parsed one function
+							//for(var varName in newParse.globalVariables) {
+							//if(oldParse.globalVariables.hasOwnProperty(varName)) oldParse.globalVariables[varName] = newParse.globalVariables[varName];
+							//}
 							
 							//console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
 							
@@ -704,7 +706,7 @@
 							
 							
 							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
-							// Have to go though all functions (recursive) because they are not necessary in the right order
+							// Have to go though *all* functions (recursive) because they are not necessary in the right order
 							
 							updateThingsFunctions(oldParse.functions, oldEnd, endRowDiff, charactersLength);
 							
