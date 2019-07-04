@@ -3178,7 +3178,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			EDITOR.windowMenu.isVisible = false;
 		},
 		hide: function hideWindowMenu() {
-			dropdownMenuRoot.hide();
+			dropdownMenuRoot.hide(true);
 		},
 		click: function clickWindowMenu(where, onlyifactive) {
 			// todo: able to automate clicks on menu
