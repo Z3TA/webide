@@ -2958,9 +2958,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		else throw new Error("Unknown orientation=" + options.orientation);
 		
-		item.separator = options.separator || false;
+		item.separator = options.separator ? " separator" + options.separator : ""; // top or bottom
 		
-		item.domElement.setAttribute("class", "item" + (item.separator ? " separator" : ""));
+		item.domElement.setAttribute("class", "item" + item.separator);
 		
 		item.activated = false;
 		
@@ -3032,12 +3032,12 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
-		item.domElement.setAttribute("class", "item hasSubmenu" + (item.separator ? " separator" : ""));
+		item.domElement.setAttribute("class", "item hasSubmenu" + item.separator);
 		
 		if(!item.domElement.onclick) {
 			item.domElement.onclick = showSubmenu;
 			item.domElement.addEventListener("mouseover", showSubmenuMaybe);
-			item.domElement.setAttribute("class", "item hasSubmenu needClick" + (item.separator ? " separator" : ""));
+			item.domElement.setAttribute("class", "item hasSubmenu needClick" + item.separator);
 		}
 		else {
 			item.domElement.addEventListener("mouseover", showSubmenu);

@@ -14,10 +14,11 @@
 	
 	EDITOR.windowMenu.add("Page up", ["Navigate", 10], pageUp);
 	EDITOR.windowMenu.add("Page down", ["Navigate", 10], pageDown);
-	EDITOR.windowMenu.add("End of file", ["Navigate", 10], end);
+	
+	EDITOR.windowMenu.add("End of File", ["Navigate", 10], end, "top");
 	EDITOR.windowMenu.add("Beginning of file", ["Navigate", 10], home);
 	EDITOR.windowMenu.add("End of line", ["Navigate", 10], endOfLine);
-	EDITOR.windowMenu.add("Beginning of line", ["Navigate", 10], startOfLine);
+	EDITOR.windowMenu.add("Beginning of line", ["Navigate", 10], startOfLine, "bottom");
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {
 		// Move the cursor one page up
