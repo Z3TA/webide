@@ -982,7 +982,6 @@ div.gotoFile li:hover {
 	margin: 0;
 	padding: 0;
 	padding-left: 0.5em;
-	
 }
 
 .windowMenu .bullet.inactive:before {
@@ -990,7 +989,6 @@ div.gotoFile li:hover {
 }
 
 .windowMenu .bullet.active {
-	
 	padding-right: 0.5em;
 }
 
@@ -1589,12 +1587,12 @@ div.group {
 		font-size: 10px;
 	}
 	
-	.menu {
+	.canvasContextmenu {
 		max-height: 100%;
 		max-width: 75%;
 		overflow-y: scroll;
 	}
-	.menu li {
+	.canvasContextmenu li {
 		font-size: 10px;
 		padding: 5px 10px 5px 7px;
 		}
@@ -1645,6 +1643,14 @@ div.group {
 }
 
 @media (max-width: 600px) {
+	
+	.windowMenu .label {
+		padding-right: 0.5em;
+	}
+	.windowMenu .bullet {
+		padding: 0;
+	}
+	
 	
 	.dialog {
 		box-shadow: inset 0px 4px 10px #888888;

@@ -3159,7 +3159,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			if(options.action) menuItem.setAction(options.action);
 			
 		},
-		show: function showWindowMenu() {
+		enable: function disableWindowMenu() {
 			var windowMenu = document.getElementById("windowMenu");
 			windowMenu.style.display="block";
 			
@@ -3168,7 +3168,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			EDITOR.windowMenu.isVisible = true;
 		},
-		hide: function hideWindowMenu() {
+		disable: function enableWindowMenu() {
 			var windowMenu = document.getElementById("windowMenu");
 			windowMenu.style.display="none";
 			
@@ -3176,6 +3176,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			windowMenuHeight.style.display="none";
 			
 			EDITOR.windowMenu.isVisible = false;
+		},
+		hide: function hideWindowMenu() {
+			dropdownMenuRoot.hide();
 		},
 		click: function clickWindowMenu(where, onlyifactive) {
 			// todo: able to automate clicks on menu
@@ -6846,7 +6849,7 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
 		
 		EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", fun: EDITOR.ctxMenu.show, combo: 0});
-		
+		EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
 		
 		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
 			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
@@ -9004,6 +9007,8 @@ keyPressed(keyPress);
 		//console.log("mouseDown on target.className=" + target.className);
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
+			
+			EDITOR.windowMenu.hide();
 			
 			// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
 			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.ctxMenu.hide();
