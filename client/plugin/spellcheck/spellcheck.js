@@ -426,7 +426,7 @@
 		}
 	}
 	
-	function spellCheck(file, word, row, col) {
+	function spellCheck(file, word, row, col, fromQueue) {
 		if(!enabled) return;
 		
 		/*
@@ -453,22 +453,33 @@
 			if(word.match(regexIgnore[i])) return;
 		}
 		
+		
 		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || UTIL.isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
 			//doSomething(file.path, true, word, row, col); // It's spelled correct
 		}
 		else if(cache.hasOwnProperty(word)) {
 			if(cache[word] == false) spellingError(file.path, word, row, col);
+			if(fromQueue) totalResponses++;
 		}
 		else {
-			totalRequests++;
-			progressBar.max = totalRequests;
-			progressBar.value = totalResponses;
+			
+			totalRequests++; // Include words in queue
+			
+			/*
+				Because of the maxConcurrency, the progress bar is not that useful.
+				So make the progress bar include words that are in queue.
+				
+				problem: Once the word in the queue is processed, it might have been cached! 
+				solution: Add a fromQueue flag, and increment responses even when the word is cached.
+				
+			*/
 			
 			if(wordsInQueue >= maxConcurrency) {
-				waitlist.push([file, word, row, col]);
+				waitlist.push([file, word, row, col, true]);
 			}
 			else {
 				wordsInQueue++;
+				
 			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
 					if(!enabled) return;
 					
@@ -519,6 +530,10 @@
 				});
 			}
 		}
+		
+		progressBar.max = totalRequests;
+		progressBar.value = totalResponses;
+		
 		//console.timeEnd("spell-check " + word);
 	}
 	
