@@ -3438,6 +3438,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		},
 		show: function showCtxMenu(posX, posY, clickEvent) {
 			
+			if(typeof posX != "number") posX = undefined;
+			if(typeof posY != "number") posY = undefined;
+			
+			console.log("Showing context menu!");
+			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
 			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
@@ -3524,7 +3529,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			//menu.style.height = "100%";
 			
+			console.log("menu.style.visibility=" + menu.style.visibility);
+			
+			return true;
+			
+			
 			function waitForTouchUp() {
+				console.log("waitForTouchUp:");
 				if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 				if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 				clearSelection();
@@ -3550,13 +3561,16 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			}
 			
 			function fullScreenMenuMaybe() {
+				
 				var offsetHeight = parseInt(menu.offsetHeight);
 				console.log("fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
 				if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
 					// Hide everything besides the menu
+					console.log("Entering full screen menu ...");
 					fullScreenMenu(menu);
 				}
 				else {
+					console.log("No need to enter full screen menu");
 					menu.style.top = posY + "px";
 					menu.style.left = posX + "px";
 				}
@@ -6831,12 +6845,16 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		
 		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
 		
+		EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", fun: EDITOR.ctxMenu.show, combo: 0});
+		
 		
 		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
 			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 				EDITOR.previewTool(file, someEvent);
 			}
 		});
+		
+		EDITOR.windowMenu.add("Live/preview", ["Tools", 1], EDITOR.previewTool);
 		
 		EDITOR.registerAltKey({char: "Enter", alt:1, label: "Run script", fun:
 			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
@@ -9630,6 +9648,8 @@ keyPressed(keyPress);
 	
 	function fullScreenMenu(menu) {
 		// The menu will cover the whole screen
+		
+		console.log("fullScreenMenu:");
 		
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "none";

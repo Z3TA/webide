@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 
+	var winMenuWrap;
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Word wrap text to fit inside line length limit",
@@ -14,10 +16,13 @@
 			combo: CTRL,
 			fun: wordWrap
 		});
+		
+		winMenuWrap = EDITOR.windowMenu.add("Wrap paragraph", ["Edit", 5], wordWrap);
 	}
 	
 	function unload() {
 		EDITOR.unbindKey(wordWrap);
+		EDITOR.windowMenu.remove(winMenuWrap);
 	}
 
 	function wordWrap(file) {

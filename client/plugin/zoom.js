@@ -15,6 +15,7 @@
 	var charCodeZ = 90;
 	var scrollStep = 5;
 	var loadOrder = 1500; // Should load after the renders
+	var winMenuZoom;
 	
 	EDITOR.on("start", zoomInit, loadOrder);
 	
@@ -35,6 +36,8 @@
 
 		EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch}); 
 		
+		winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 2], zoomSwitch);
+		
 	}
 	
 	function zoomSwitch(file, combo, character, charCode, direction) {
@@ -44,6 +47,8 @@
 	}
 	
 	function zoom(file, combo, character, charCode, direction) {
+		
+		winMenuZoom.activate();
 		
 		console.log("zooming!");
 		EDITOR.settings.gridHeight = EDITOR.settings.gridHeight / 6;
@@ -117,6 +122,8 @@
 			
 			EDITOR.renderNeeded();
 		}
+		
+		winMenuZoom.deactivate();
 	}
 	
 	function makeCaretCenter(file) {

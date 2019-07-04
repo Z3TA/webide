@@ -10,7 +10,7 @@
 		fun: selectAll
 	});
 	
-	EDITOR.windowMenu.add("Select all", ["Select", 2], selectAll);
+	EDITOR.windowMenu.add("Select All text", ["File", 6], selectAll);
 	
 	function selectAll(file, combo, character, charCode, keyPushDirection) {
 		
