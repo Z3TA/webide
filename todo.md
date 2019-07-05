@@ -29,46 +29,40 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-When reading the file tabs, focus gets to the window menu ... 
-File tabs should have more focus !?
-
-spellcheck regression! It no longer works!
-
-Addin everything that is in the context menu to the virtual keyboard alt keys! So they get dedicated buttons (commit, etc)
-
-Thinking about License again.
-Maybe people disregard the software because it's cheep (free) !?
+prio: Sell the editor in less then 5 seconds. Improve the UX.
+Using dashboard widgets, discovery bar. Polish first time user experience.
 
 
-todo: Go though all plugins and any keybinding and add a window menu entry, *and* also a virtual keyboard alt shortcut if it's common
+Dashboard and discovery bar!
 
-todo: Hide window menu via View - Hide window menu
 
-todo: Hide window meny when you click somewhere. It doesn't auto-hide on iOS.
 
-todo: When there is not enough space to pull out a sub window menu to the right, place it on the left side!
+todo
+----
 
-todo: Remove stuff from context meny once they are both on window menu, virtual keyboard (and discovery bar?)
+Hide window menu via View - Hide window menu
 
-All editor features should be reachable via the window menu, OR the virtual keyboard!
-(window menu is hidden when in mobile/small screen)
+Toggle dashboard in View window menu
+
+When there is not enough space to pull out a sub window menu to the right, place it on the left side!
+
+Remove stuff from context menu once they are both on window menu, virtual keyboard (and discovery bar?)
+
+(hide window menu when in mobile/small screen ???)
 
 Some features can be advertised by putting an icon in the discoveryBar: 
 Clone Repo, Virsion control, database manager, VNC?, Print2PDF, Static site Generator, open in new window
 spellcheck, invite collaborator, FTP/SFTP, Terminal, Save
 
 Some features can be added to the context menu, preferably those that has something todo with where you click, or the file you click on.
-Commonly used functionality can also be reached via the ctx meny. (as well as via the window menu)
+... commonly used functionality can also be reached via the ctx meny. (as well as via the window menu)
 
 
-Top menu for feature discovery !?
+todo: Also move the function list to the top right corner if it covers 50% of the screen or more.
 
+todo: Native keyboard delete button doesn't work on Opera Mobile.
 
-Also move the function list to the top right corner if it covers 50% of the screen or more.
-
-Native keyboard delete button doesn't work on Opera Mobile.
-
-Fix native keyboard hiding between typing.
+todo: Fix native keyboard hiding between typing.
 
 
 Annoying when you accidentally navigate away from the preview,
@@ -155,9 +149,6 @@ Better autocomplete!
 Writing a guide on how to make a survey
 
 
-
-todo
-----
 
 Throw an error if a menu item is added with the same order as another item
 

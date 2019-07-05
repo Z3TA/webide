@@ -135,17 +135,14 @@ leftColumn.removeChild(functionListWrap);
 		
 		functionListSelect.removeAttribute("multiple");
 		
-		winMenuFunctionList = EDITOR.windowMenu.add("Function-list", [], triggerSelectElement);
+		winMenuFunctionList = EDITOR.windowMenu.add("Function-list", [], functionListMenuItemClicked);
 		EDITOR.windowMenu.add("test", [], function test() {});
 		
 		winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
 		winMenuFunctionList.text.appendChild(functionListSelect);
 		
-		function triggerSelectElement() {
-			//functionListSelect.click();
-			//functionListSelect.focus();
-			//winMenuFunctionList.domElement = functionListSelect;
-			
+		function functionListMenuItemClicked() {
+			EDITOR.windowMenu.hide();
 		}
 		
 	}

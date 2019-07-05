@@ -281,6 +281,8 @@
 	
 	function switchToFile(path) {
 		EDITOR.ctxMenu.hide();
+		EDITOR.dashboard.hide(); // Hide dashboard when switching to a file
+		
 		if(!EDITOR.files.hasOwnProperty(path)) {
 			throw new Error("Trying to swith to a file that is not open! path=" + path);
 			return;

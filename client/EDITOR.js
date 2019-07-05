@@ -1102,8 +1102,6 @@ usePseudoClipboard = false;
 				
 				removeFromQueue(path);
 				
-				EDITOR.dashboard.hide(); // Hide dashboard when opening a file
-				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
 				
@@ -1801,6 +1799,7 @@ text = file;
 			return;
 		}
 		
+		
 		if(screenStartRow == undefined) screenStartRow = 0; 
 		// Used for only rendering some rows for optimization. 
 		// Default is to render all rows, so screenStartRow = 0
@@ -1823,7 +1822,14 @@ text = file;
 		
 		//console.warn("rendering ...");
 		
-		if(EDITOR.currentFile && ctxMenuVisibleOnce) {
+		if(!file) {
+			EDITOR.dashboard.show();
+			EDITOR.shouldRender = false;
+			return;
+		}
+		
+		// if(EDITOR.currentFile && ctxMenuVisibleOnce) {
+		if(EDITOR.currentFile) {
 			
 			//console.log("render file=" + EDITOR.currentFile.path);
 			
@@ -1938,6 +1944,7 @@ text = file;
 			console.timeEnd("render");
 			
 		}
+		
 		else {
 			// Show some useful info for new users ...
 			
@@ -1964,8 +1971,7 @@ text = file;
 			*/
 			
 			var friendlyString = [
-				"Right click or long-touch to show the menu!",
-				"(or click the menu button in top-right corner)",
+				"Press Ctrl+O top open a file",
 				"Upload files and folders by draging them here"
 			];
 			
@@ -1995,6 +2001,7 @@ text = file;
 			
 			//console.log("No file open");
 		}
+		
 		
 		//console.log("rendering finish");
 	}
@@ -4443,6 +4450,8 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 			EDITOR.setFileOpenPath(UTIL.getDirectoryFromPath(file.path));
 		}
 		
+		
+		
 		EDITOR.input = focus;
 		
 		
@@ -4450,6 +4459,8 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 		for(var i=0; i<EDITOR.eventListeners.fileShow.length; i++) {
 			EDITOR.eventListeners.fileShow[i].fun(file); // Call function
 		}
+		
+		
 		
 		EDITOR.resizeNeeded(); // Update the view
 		EDITOR.renderNeeded();

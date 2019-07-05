@@ -41,28 +41,21 @@
 	function keyboardNewFile(file, combo, character, charCode, direction) {
 		EDITOR.ctxMenu.hide();
 		winMenuNewFile.hide();
+		EDITOR.dashboard.hide();
+		
 		createNewFile("new file", "");
 		return false;
 	}
 	
 	function createNewFile(path, content) {
-		
 		if(path == undefined) path = "new file";
 		if(content == undefined) content = "";
-		
-		
 		
 		EDITOR.openFile(path, content, function(err, file) {
 			// Mark the file as NOT saved, because its a NEW file
 			file.isSaved = false;
 			file.savedAs = false;
 		});
-				
-		EDITOR.renderNeeded();
-		EDITOR.resizeNeeded();
-		
-		
-		
 	}
 	
 	function createNewFileDashboardWidget() {
