@@ -3098,6 +3098,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				// Add top level menu entries to control the order
 				dropdownMenuRoot.addItem("Editor");
 				dropdownMenuRoot.addItem("File");
+				dropdownMenuRoot.addItem("Edit");
+				dropdownMenuRoot.addItem("View");
+				dropdownMenuRoot.addItem("Navigate");
+				dropdownMenuRoot.addItem("Tools");
+				dropdownMenuRoot.addItem("Node.JS");
+				dropdownMenuRoot.addItem("Remote FS");
+				
 				
 			}
 			
