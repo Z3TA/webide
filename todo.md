@@ -61,9 +61,6 @@ Commonly used functionality can also be reached via the ctx meny. (as well as vi
 Top menu for feature discovery !?
 
 
-todo: Function list doesn't scroll down to the active function, which is annoying when you have to manually scroll when navigating.
-
-
 Also move the function list to the top right corner if it covers 50% of the screen or more.
 
 Native keyboard delete button doesn't work on Opera Mobile.

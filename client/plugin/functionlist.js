@@ -188,18 +188,71 @@ leftColumn.removeChild(functionListWrap);
 	function highlightCurrentFunction(file, caret) {
 		// Selects the option for the function the file care is currently in
 		
+		var center = undefined;
+		
+		if(file == undefined) {
+			file = EDITOR.currentFile;
+			caret = EDITOR.currentFile.caret;
+			center = true;
+		}
+		
 		var parent = {};
+		var scrollTo;
 		for(var i=0; i<domModel.length; i++) {
 			if(domModel[i].option && domModel[i].start <= caret.index && domModel[i].end >= caret.index) {
 				domModel[i].option.selected = true;
 				
 				// Make sure parent is deselected
 				if(parent.option) parent.option.selected = false;
+				
+				scrollTo = domModel[i].option;
 			}
 			else if(domModel[i].option) {
 				domModel[i].option.selected = false;
 			}
 			parent = domModel[i];
+		}
+		
+		if(scrollTo) {
+			var rect = scrollTo.getBoundingClientRect();
+			var wrapRect = functionListWrap.getBoundingClientRect();
+			var height = wrapRect.height;
+			var scrollTop = functionListWrap.scrollTop;
+			var wrapperStart = wrapRect.top;
+			console.log("highlightCurrentFunction: wrapRect=" + JSON.stringify(wrapRect) + " scrollTo.parentElement.scrollTop=" + scrollTo.parentElement.scrollTop + " scrollTo.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.scrollTop + " scrollTo.parentElement.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.parentElement.scrollTop + " functionListSelect.scrollTop=" + functionListSelect.scrollTop + " functionListWrap.scrollTop=" + functionListWrap.scrollTop + " rect=" + JSON.stringify(rect));
+			
+			var alignToTop = true;
+			var alignToBottom = false;
+			
+			// For some reason we cannot scroll right away ... scrollTimer = setTimeout
+			
+			// Note: rect seem to not include the scrolled amount!! (top/left will be negative)
+			// But it *does* include the position of the wrapper!
+			// eg. top left is absolute window position!!
+			
+			// note: When using behavior: "smooth" it doesn't always scroll!
+			
+			// If function list has not been scrolled, center it on the current function
+			if(scrollTop == 0 || center === true) {
+				console.log("highlightCurrentFunction: Centering");
+				scrollTo.scrollIntoView({block: "center"});
+			}
+			// Only scroll if needed
+			// Is it above the current view?
+			else if (rect.top < wrapperStart) {
+				console.log("highlightCurrentFunction: Aligning TOP because rect.top=" + rect.top + " is less then wrapperStart=" + wrapperStart);
+				scrollTo.scrollIntoView(alignToTop);
+			}
+			// Is it below the current view?
+			else if (rect.bottom > (height + wrapperStart)) {
+				console.log("highlightCurrentFunction: Aligning BOTTOM because rect.bottom=" + rect.bottom + " is more then height=" + height + " plus wrapperStart=" + wrapperStart);
+				scrollTo.scrollIntoView(alignToBottom);
+				//scrollTo.scrollIntoView({block: "end"});
+			}
+			// Else: don't scroll!
+			else {
+				console.log("highlightCurrentFunction: Not scrolling! rect.bottom=" + rect.bottom + " rect.top=" + rect.top + " height=" + height + " wrapperStart=" + wrapperStart);
+			}
 		}
 		
 		return true;
@@ -418,6 +471,9 @@ leftColumn.removeChild(functionListWrap);
 				domModel = makeDomModel(file.parsed.functions);
 				
 				buildFunctionList(domModel);
+				
+				setTimeout(highlightCurrentFunction, 10); // Does not scroll unless we set it in the future ...
+				
 			}
 			else {
 				console.log("Hiding the function list because there are no functions parsed for file.path=" + file.path);
