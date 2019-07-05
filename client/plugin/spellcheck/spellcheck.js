@@ -127,7 +127,8 @@
 		
 		EDITOR.on("fileChange", runSpellCheck);
 		EDITOR.on("fileOpen", spellCheckFile);
-		EDITOR.on("mouseClick", showSpellSuggestion);
+		
+		EDITOR.on("showMenu", showSpellSuggestion);
 		
 		showProgressBar();
 		
@@ -140,7 +141,9 @@
 		
 		EDITOR.removeEvent("fileChange", runSpellCheck);
 		EDITOR.removeEvent("fileOpen", spellCheckFile);
-		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
+		EDITOR.removeEvent("showMenu", showSpellSuggestion);
+		
+		
 		
 		// clear text decorations
 		for(var filePath in EDITOR.files) clearFile(EDITOR.files[filePath])
@@ -187,16 +190,14 @@
 		runSpellCheck(file);
 	}
 	
-	function showSpellSuggestion(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo) {
-		if(mouseDirection != "up" || button != 2) return true; // Only add suggestion on up, and right
+	function showSpellSuggestion() {
 		
 		var file = EDITOR.currentFile;
+		var caret = file.caret;
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
 		}
-		
-		// todo: Use file.wordAtCaret instead!
 		
 		return true;
 		

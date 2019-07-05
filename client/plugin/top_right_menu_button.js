@@ -11,14 +11,19 @@
 	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("trmb") != -1) return;
 	
 var button;
+var winMenu;
 
 EDITOR.plugin({
 desc: "Adds a menu button in the top right corner",
 load: function loadTopRightMenuButton() {
 
+			winMenu = EDITOR.windowMenu.add("Context menu", [], showContextMenu)
+			
+			return;
+			
 			button = document.createElement("button");
 			button.innerText = "☰";
-			button.setAttribute("title", "menu");
+			button.setAttribute("title", "Activate Context menu");
 			button.setAttribute("class", "topRightMenuButton"); // For styling
 
 			button.onclick = function(clickEvent) {
@@ -32,10 +37,17 @@ EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
 },
 unload: function unloadTopRightMenuButton() {
 
+			EDITOR.windowMenu.remove(winMenu);
+			
 			if(button) button.parentElement.removeChild(button);
 			
 		}
 });
-
+	
+	function showContextMenu(file, combo, character, charCode, direction, clickEvent) {
+		EDITOR.ctxMenu.hide();
+		EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
+	}
+	
 })();
 

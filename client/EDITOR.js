@@ -2659,6 +2659,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		menu.pullout = options.pullout || (menu.parentMenu && menu.parentMenu.parentMenu ? "right" : "bottom");
 		
+		
 		menu.active = false; // If the mouse is on the menu
 		menu.activated = false; // true if the menu have been engaged
 		
@@ -2682,7 +2683,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		else throw new Error("Unknown orientation=" + menu.orientation);
 		
 		
-		menu.domElement.setAttribute("class", "menu " + menu.orientation + " pullout" + menu.pullout);
+		menu.domElement.setAttribute("class", "menu " + menu.orientation + " pullout" + menu.pullout + (menu.parentMenu ? " branch" : " root"));
 		
 		var hideTimer;
 		menu.domElement.addEventListener("mouseout", hideMaybe);

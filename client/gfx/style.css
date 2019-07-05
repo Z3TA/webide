@@ -536,9 +536,9 @@ td input[type=text] {
 	position: absolute;
 	right: 0px;
 	top: 0px;
-	height: 32px;
+	height: 26px;
 	width: 32px;
-	margin: 4px;
+	margin: 3px;
 	text-transform: uppercase;
 	font-size: 20px;
 	
@@ -945,8 +945,9 @@ div.gotoFile li:hover {
 
 .windowMenuHeight {
 	/* needed to reserve height */
-	height: 30px;
+	height: 28px;
 	border-bottom: 0px solid blue;
+	
 }
 
 .windowMenu {
@@ -961,14 +962,40 @@ div.gotoFile li:hover {
 
 .windowMenu .menu {
 	z-index: 5;
-	
-	border: 1px solid #cac7c4;
-	background-color: #f4f2f2;
-	
 	border-radius: 0;
-	
 	margin: 0;
 	padding: 0;
+	
+	color: #6b6b6b;
+}
+
+.windowMenu .branch {
+	background-color: rgb(235, 236, 239);
+	border: 1px solid #cac7c4;
+	color: #000000;
+}
+
+.windowMenu .pulloutright {
+}
+
+.windowMenu .pulloutbottom {
+}
+
+.windowMenu .root {
+	background-color: transparent;
+	border: 0px solid red;
+}
+
+.windowMenu .item {
+	border: 0px solid green;
+	padding: 0;
+	margin: 0;
+	height: 27px;
+}
+.windowMenu .item:hover {
+	background-color: #ffffff;
+	color: #000000;
+	
 }
 
 .windowMenu .bullet {
@@ -1030,26 +1057,6 @@ div.gotoFile li:hover {
 
 .windowMenu .item:hover .key {
 	color: #1460AA;
-}
-
-
-.windowMenu .item {
-	border: 0px solid green;
-	padding: 0;
-	margin: 0;
-	height: 27px;
-}
-.windowMenu .item:hover {
-	background-color: #ececec;
-	background-color: #fff;
-}
-
-.windowMenu .pulloutright {
-	border: 1px solid #cac7c4;
-}
-
-.windowMenu .pulloutbottom {
-	border-top: none;
 }
 
 .windowMenu .pulloutIcon {

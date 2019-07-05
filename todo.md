@@ -29,6 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+When reading the file tabs, focus gets to the window menu ... 
+File tabs should have more focus !?
+
 spellcheck regression! It no longer works!
 
 Addin everything that is in the context menu to the virtual keyboard alt keys! So they get dedicated buttons (commit, etc)
