@@ -2915,6 +2915,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		console.warn("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
 		
 		menu.domElement.style.display = "none";
+		menu.domElement.blur(); // Reset hover effect on touch screens
+		
 		//menu.domElement.setAttribute("class", "hidden");
 	}
 	DropdownMenu.prototype.hideSiblings = function hide(stay) {

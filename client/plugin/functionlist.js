@@ -21,6 +21,7 @@
 	var forcedSingleRow = false;
 	var functionListActive = true;
 	var winMenuToggleFunctionlist;
+	var winMenuFunctionList;
 	
 	EDITOR.plugin({
 		desc: "Show list of JS functions in left column",
@@ -96,6 +97,8 @@
 		EDITOR.removeEvent("keyDown", searchFunctionList);
 		
 		EDITOR.windowMenu.remove(winMenuToggleFunctionlist);
+		
+		if(winMenuFunctionList) EDITOR.windowMenu.remove(winMenuFunctionList);
 	}
 	
 	function mobileFubarDetected() {
@@ -126,10 +129,24 @@ leftColumn.removeChild(functionListWrap);
 		
 		var header = document.getElementById("header");
 		header.appendChild(functionListSelect);
-		functionListSelect.setAttribute("class", "functionList floatingInHeader");
+		//functionListSelect.setAttribute("class", "functionList floatingInHeader");
+		functionListSelect.setAttribute("class", "functionListInMenu");
 		functionListSelect.setAttribute("size", "1");
 		
 		functionListSelect.removeAttribute("multiple");
+		
+		winMenuFunctionList = EDITOR.windowMenu.add("Function-list", [], triggerSelectElement);
+		EDITOR.windowMenu.add("test", [], function test() {});
+		
+		winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
+		winMenuFunctionList.text.appendChild(functionListSelect);
+		
+		function triggerSelectElement() {
+			//functionListSelect.click();
+			//functionListSelect.focus();
+			//winMenuFunctionList.domElement = functionListSelect;
+			
+		}
 		
 	}
 	
@@ -187,6 +204,8 @@ leftColumn.removeChild(functionListWrap);
 	
 	function highlightCurrentFunction(file, caret) {
 		// Selects the option for the function the file care is currently in
+		
+		if(!functionListWrap) return true; // Some mobile browser doesn't support the function list, and the select element is moved
 		
 		var center = undefined;
 		

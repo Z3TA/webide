@@ -819,6 +819,28 @@ select.functionList.floatingInHeader::before {
 	top: 0px;
 }
 
+select.functionListInMenu {
+	
+	
+	color: black;
+	outline: 0;
+	width: 100%;
+	padding-right: 28px; /* pushes the option text away */
+	
+	overflow-x: hidden!important;
+	max-width: 48px; /* too wide and the option text will start to show */
+	
+	background-color: transparent;
+	
+	/* Set height in the image below! */
+	
+	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='32px'><text x='3' y='20' fill='black' font-size='15'>ƒ</text></svg>");
+	background-repeat: no-repeat;
+	background-position: center;
+	
+}
+
+
 
 
 /* ############### Search box ############### */
@@ -1651,7 +1673,8 @@ div.group {
 @media (max-width: 600px) {
 	
 	.windowMenu .label {
-		padding-right: 0.5em;
+		padding-left: 0.5em;
+		padding-right: 0;
 	}
 	.windowMenu .bullet {
 		padding: 0;

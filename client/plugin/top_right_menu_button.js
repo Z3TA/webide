@@ -17,7 +17,8 @@ EDITOR.plugin({
 desc: "Adds a menu button in the top right corner",
 load: function loadTopRightMenuButton() {
 
-			winMenu = EDITOR.windowMenu.add("Context menu", [], showContextMenu)
+			winMenu = EDITOR.windowMenu.add("☰", [], showContextMenu)
+			
 			
 			return;
 			
