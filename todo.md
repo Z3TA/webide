@@ -29,6 +29,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
 prio: Sell the editor in less then 5 seconds. Improve the UX.
 Using dashboard widgets, discovery bar. Polish first time user experience.
 
@@ -64,6 +65,10 @@ todo: Native keyboard delete button doesn't work on Opera Mobile.
 
 todo: Fix native keyboard hiding between typing.
 
+
+When when the entire page consist of one or more level of indentation,
+automatically scroll right when the content doesn't fit on the screen!
+(also scroll back left ...)
 
 Annoying when you accidentally navigate away from the preview,
 seems to be no way to get back (back button doesn't work)

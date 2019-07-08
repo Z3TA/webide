@@ -182,7 +182,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	hideVirtualKeyboard: [], // Virtual keyboards need to listen to this and hide itself when their name is called
 	showVirtualKeyboard: [],
 	runScript: [], // Plugins can register as program runners
-	stopScript: []
+	stopScript: [],
+	showDashboard: [], // Useful for example starting and stopping timers, refresh content etc
+	hideDashboard: []
 };
 
 EDITOR.renderFunctions = [];
@@ -2510,7 +2512,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			lowest order nr will execute first!
 		*/
 		
-		if(typeof callback !== "function") throw new Error("The second argument needs to be a function! Did you mean EDITOR.addEvent ?");
+		if(typeof callback !== "function") throw new Error("Ssecond argument: callback - needs to be a function! Did you mean EDITOR.addEvent ?");
 		
 		return EDITOR.addEvent(eventName, {fun: callback, order: order});
 	}
@@ -5789,6 +5791,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "none";
 			EDITOR.dashboard.isVisible = false;
+			EDITOR.fireEvent("hideDashboard");
 			return true;
 		},
 		show: function showDashboard() {
@@ -5796,6 +5799,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "block";
 			EDITOR.dashboard.isVisible = true;
+			EDITOR.fireEvent("showDashboard");
 			return true;
 		},
 		isVisible: false
