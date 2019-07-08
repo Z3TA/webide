@@ -58,7 +58,8 @@ EDITOR.plugin({
 		loc.appendChild(country);
 		timeWidget.appendChild(loc);
 		
-		if (navigator.geolocation) {
+		/*
+			if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(function successFunction(position) {
 				var lat = position.coords.latitude;
 				var long = position.coords.longitude;
@@ -72,6 +73,7 @@ EDITOR.plugin({
 			city.innerText = "Stockholm";
 			country.innerText = "Sweden";
 		}
+		*/
 		
 		var clock = document.createElement("div");
 		clock.setAttribute("class", "clock");
