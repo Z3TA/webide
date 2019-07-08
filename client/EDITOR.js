@@ -3094,9 +3094,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				
 				where = ["File", "Save", 1]
 				
+				separator = top or bottom
 				
 			*/
 			
+			if(separator !== undefined) {
+				if(separator != "top" && separator != "bottom") throw new Error("Fourth argument separator=" + separator + " should be either top or bottom!")
+			}
 			
 			if(!dropdownMenuRoot) {
 				var windowMenu = document.getElementById("windowMenu");

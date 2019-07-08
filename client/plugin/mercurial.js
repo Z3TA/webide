@@ -47,7 +47,7 @@
 	var progressBar;
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
-	var winMenuMercurial, winMenuCommit, winMenuDiffRevision;
+	var winMenuMercurial, winMenuCommit, winMenuDiffRevision, winMenuAnnotations;
 	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
@@ -75,6 +75,7 @@
 		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], showVersionControlWidget);
 		winMenuCommit = EDITOR.windowMenu.add("Commit", ["Edit", 5], showCommitDialog);
 		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["Edit", 6], diffWorkingDirectory);
+		winMenuAnnotations = EDITOR.windowMenu.add("Annotations", ["View", 11], toggleAnotations);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -1455,11 +1456,18 @@ var error = err.message;
 		}
 	}
 	
+	function toggleAnotations() {
+		if(doAnnotate) annotateOff();
+		else annotateOn();
+	}
+	
 	function annotateOn() {
 		
 		if(doAnnotate) return;
 		
 		doAnnotate = true;
+		
+		winMenuAnnotations.activate();
 		
 		var file = EDITOR.currentFile;
 		
@@ -1490,7 +1498,7 @@ var error = err.message;
 			CLIENT.cmd("mercurial.annotate", {file: filePath}, function updateAnnotation(err, resp) {
 				
 				if(err) {
-					alertBox(err.message);
+					alertBox("Unable to show annotations for " + filePath + "\n" + err.message);
 					annotations[file.path] = null;
 				}
 				else {
@@ -1661,6 +1669,8 @@ var error = err.message;
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		
 		EDITOR.ctxMenu.hide();
+		
+		winMenuAnnotations.deactivate();
 		
 		var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 		if(annotationWidget) {
