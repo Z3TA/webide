@@ -974,7 +974,7 @@ updateCommitFileSelect();
 			if(err) {
 				if(callback) callback(err);
 				else {
-					alertBox(err.message);
+					alertBox("Unable to get status!\n" + err.message);
 					hideMercurialWidgets();
 				}
 			}
@@ -1385,6 +1385,7 @@ var error = err.message;
 	
 	function showCloneDialog() {
 		EDITOR.ctxMenu.hide();
+		winMenuCommit.hide();
 		return repoCloneDialog.show();
 	}
 	
@@ -1687,8 +1688,8 @@ var error = err.message;
 	
 	function showCommitDialog(directory) {
 		
-		console.log("heyho");
-		console.log(directory);
+		//console.log("heyho");
+		//console.log(directory);
 		
 		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);
 		
