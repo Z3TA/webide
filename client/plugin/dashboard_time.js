@@ -48,7 +48,7 @@ EDITOR.plugin({
 		timeWidget.setAttribute("class", "timeWidget dashboardWidget");
 		
 		var  loc = document.createElement("div");
-		loc.setAttribute("class", "location");
+		loc.setAttribute("class", "location description");
 		var city = document.createElement("span");
 		city.setAttribute("class", "city");
 		var country = document.createElement("span");
@@ -94,6 +94,7 @@ EDITOR.plugin({
 		timeWidget.appendChild(formattedDate);
 		
 		var hr = document.createElement("hr");
+		hr.setAttribute("class", "space");
 		timeWidget.appendChild(hr);
 		
 		var timeZone = document.createElement("div");

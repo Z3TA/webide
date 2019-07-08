@@ -21,7 +21,7 @@
 			
 			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: keyboardNewFile});
 			
-			//newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
+			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
 		},
 		unload: function unload() {
@@ -64,6 +64,7 @@
 		newFileWidget.setAttribute("class", "dashboardWidget newfile");
 		
 		var span = document.createElement("span");
+		span.setAttribute("class", "description");
 		var text = document.createTextNode("Create new file:");
 		span.appendChild(text);
 		
@@ -82,7 +83,7 @@
 		jsFile.appendChild(document.createTextNode("JavaScript"));
 		jsFile.onclick = function(clickEvent) {
 			createNewFile("file.js", '/*\n\n\*/\n\n"use strict";\n\n');
-			EDITOR.hideDashboard();
+			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(jsFile);
 		
@@ -99,7 +100,7 @@
 		htmlButton.appendChild(document.createTextNode("HTML"));
 		htmlButton.onclick = function(clickEvent) {
 			createNewFile("file.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
-			EDITOR.hideDashboard();
+			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(htmlButton);
 		
@@ -115,7 +116,7 @@
 		anyFile.appendChild(document.createTextNode("Other"));
 		anyFile.onclick = function(clickEvent) {
 			createNewFile("new file", "");
-			EDITOR.hideDashboard();
+			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(anyFile);
 		
