@@ -1,8 +1,6 @@
 (function() {
 	"use strict";
 	
-	// !DO:NOT:BUNDLE!
-	
 	var pageViewsStat;
 	
 	EDITOR.plugin({

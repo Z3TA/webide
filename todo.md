@@ -29,6 +29,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+CPU load in dashboard
 
 prio: Sell the editor in less then 5 seconds. Improve the UX.
 Using dashboard widgets, discovery bar. Polish first time user experience.
@@ -125,6 +126,11 @@ confirmBox("Do you want to apply " + fileName + "  configuration?", [yes, overlo
 if(ans
 ---
 Get value from an array item
+---
+
+Able to do a basic Angular example using Live/web preview. Reload instead of overloading the body!
+
+
 ---
 
 Add global event handlers to HTML Elements for autoc-ompletion

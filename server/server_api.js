@@ -3285,6 +3285,10 @@ API.ping = function ping(user, json, callback) {
 	callback(null, json);
 }
 
+API.cpu = function cpu(user, json, callback) {
+	var os = require('os');
+	callback(null, os.cpus());
+}
 
 function runFtpQueue() {
 	
