@@ -1297,10 +1297,11 @@ usePseudoClipboard = false;
 				if(!doNotSwitchFile) { // double negative => true
 					// The file we are closing is the current file, and we are "allowed" to swith 
 					if(EDITOR.lastFileShowed) switchTo = EDITOR.lastFileShowed;
-					else {
+					
+					if(!switchTo || switchTo == file) {
 						// No other file has been shown before
 						for (var filePath in EDITOR.files) {
-							if(filePath != path) {
+							if(EDITOR.files[filePath] != file && filePath != path) {
 								switchTo = EDITOR.files[filePath];
 								break;
 							}
@@ -1318,6 +1319,7 @@ usePseudoClipboard = false;
 			
 			if(switchTo) {
 				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
+				if(switchTo == file) throw new Error("Trying to switch to the file being closed!");
 				EDITOR.showFile(switchTo, true, true);
 			}
 			
@@ -1822,12 +1824,6 @@ text = file;
 		
 		//console.warn("rendering ...");
 		
-		if(!file) {
-			EDITOR.dashboard.show();
-			EDITOR.shouldRender = false;
-			return;
-		}
-		
 		// if(EDITOR.currentFile && ctxMenuVisibleOnce) {
 		if(EDITOR.currentFile) {
 			
@@ -1944,8 +1940,18 @@ text = file;
 			console.timeEnd("render");
 			
 		}
-		
 		else {
+			
+			setTimeout(function showDashboardMaybe() {
+				if(!EDITOR.currentFile) {
+					EDITOR.dashboard.show();
+					EDITOR.shouldRender = false;
+				}
+			}, 200);
+			
+			return;
+			
+			
 			// Show some useful info for new users ...
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
@@ -5782,6 +5788,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			return true;
 		},
 		show: function showDashboard() {
+			console.warn("Showing the dashboard!");
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "block";
 			EDITOR.dashboard.isVisible = true;
@@ -6649,7 +6656,7 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 	
 	
 	window.addEventListener("load", main, false);
-	window.addEventListener("resize", function(resizeEvent) {
+	window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
 		console.warn("EVENT RESIZE!");
 		EDITOR.resizeNeeded();
 		EDITOR.renderNeeded();
