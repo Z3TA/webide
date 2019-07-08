@@ -27,7 +27,9 @@
 	});
 	
 	function startCpuTimer() {
-		setInterval(cpuWidget.update, UPDATE_TIME);
+		
+		if(updateInterval) clearInterval(updateInterval);
+		updateInterval = setInterval(cpuWidget.update, UPDATE_TIME);
 		
 		return true;
 	}
@@ -81,6 +83,9 @@
 		function update() {
 			
 			CLIENT.cmd("cpu", function(err, cpus) {
+				
+				if(err) return;
+				
 				console.log(JSON.stringify(cpus, null, 2));
 				
 				// Times are the cummulated number of milliseconds (from boot) the CPU has spent in that mode. (One second has 1000 milli-seconds)
@@ -102,11 +107,14 @@
 				
 				currentLoad.innerText = strLoad + "%";
 				
-				if(total != last) currentLoad.classList.remove('fade');
-				setTimeout(function() {
+				/*
+					if(total != last) currentLoad.classList.remove('fade');
+					setTimeout(function() {
 					currentLoad.classList.add('fade');
 					
-				}, 500);
+					}, 500);
+				*/
+				
 				
 				for(var i=0; i<graphs.length; i++) {
 					graphs[i].style.height = Math.round(lastSamples[i] / 10) + "px";

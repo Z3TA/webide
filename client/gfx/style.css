@@ -255,7 +255,7 @@ body {
 	background-color: #858585;
 	
 	display: inline-block;
-	transition: height 1s;
+	/*transition: height 1s;*/
 }
 
 .dashboardWidget.cpuWidget .graph .item0 {
@@ -291,12 +291,13 @@ body {
 	top: 35px;
 	left: 0px;
 	z-index: 6;
-	font-size: 3em;
-	color: #353535;
+	font-size: 2em;
+	/*color: #353535;*/
 	text-align: right;
 	border: 0px solid green;
 	width: 140px;
-	transition: all 500ms ease-in-out;
+	/* transition taks a lot of cpu time!? */
+	/*transition: all 500ms ease-in-out;*/
 }
 
 .dashboardWidget.cpuWidget .currentLoad.fade {
