@@ -21,6 +21,7 @@
 	var indentation = {}; // file: \t or space
 	
 	var menuItem;
+	var winMenuShowIndentation;
 	
 	EDITOR.plugin({
 		desc: "Indentate helper in plain text files",
@@ -34,6 +35,10 @@
 			EDITOR.on("fileClose", cleanupIndentation);
 			
 			EDITOR.on("showMenu", showWhiteSpaceMaybe);
+			
+			winMenuShowIndentation = EDITOR.windowMenu.add("White-space", ["View", 12], toggleShowWhiteSpace);
+			
+			if(QUERY_STRING["whiteSpace"]) toggleShowWhiteSpace();
 			
 },
 		unload: function unloadTextModeIndentation() {
@@ -69,9 +74,11 @@
 		
 		if(SHOW_WHITE_SPACE) {
 			EDITOR.addRender(renderWhiteSpace, 2050);
+			winMenuShowIndentation.activate();
 		}
 		else {
 			EDITOR.removeRender(renderWhiteSpace);
+			winMenuShowIndentation.deactivate();
 		}
 		
 		EDITOR.ctxMenu.hide();
@@ -79,9 +86,82 @@
 		EDITOR.renderNeeded();
 	}
 	
+	function renderWhiteSpaceInCode(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		var transparencePercent = 20;
+		//ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
+		ctx.fillStyle = "red";
+		
+		var colStart = 0;
+		var colStop = 0;
+		var left = 0;
+		var middle = 0;
+		var bufferRowCol;
+		var char = "";
+		var characters = "";
+		var indentationWidth = 0;
+		var gotCharacter = false; // Only show white space characters on the edges
+		var caretRow = file.caret.row - startRow;
+		var caretCol = file.caret.col;
+		
+		
+		for(var row = 0; row < buffer.length; row++) {
+			
+			indentationWidth = buffer[row].indentation * EDITOR.settings.tabSpace;
+			
+			colStart = Math.max(0, file.startColumn - indentationWidth)
+			colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
+			
+			middle = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
+			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			gotCharacter = false;
+			
+			for(var col = colStart; col < colStop; col++) {
+				bufferRowCol = buffer[row][col];
+				char = bufferRowCol.char;
+				
+				if(char==" ") {
+					characters += "•";
+				}
+				else if(char=="\t") {
+					characters += "→";
+				}
+				else if(char=="\u00A0" || char=="\u2000" || char=="\u2001" || char=="\u2002" || char=="\u2003" || char=="\u2004" || char=="\u2005" || char=="\u2006" || char=="\u2007" || char=="\u2008" || char=="\u2009" || char=="\u200A" || char=="\u200B" || char=="\u202F" || char=="\u205F" || char=="\u3000") {
+					characters += "☺";
+				}
+				else if(characters) {
+					if(!gotCharacter) {
+						print();
+						left += (characters.length+1) * EDITOR.settings.gridWidth;
+						characters = "";
+					}
+					else {
+						left += (characters.length+1) * EDITOR.settings.gridWidth;
+						characters = "";
+					}
+				}
+				else {
+					left += EDITOR.settings.gridWidth;
+					gotCharacter = true;
+				}
+			}
+			
+			//console.log("renderWhiteSpace: row=" + row + " caretRow=" + caretRow + " col=" + col + " caretCol=" + caretCol);
+			
+			// don't show white space next to the caret while typing
+			if(characters && !(caretRow == row && caretCol == col && characters.length == 1)) print();
+			characters = "";
+		}
+		
+		function print() {
+			//console.log("renderWhiteSpace: print " + characters.length);
+			ctx.fillText(characters, left, middle);
+		}
+	}
+	
 	function renderWhiteSpace(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		if(!SHOW_WHITE_SPACE || !file) return;
-		if(file.mode!="text") return;
+		if(file.mode!="text") return renderWhiteSpaceInCode(ctx, buffer, file, startRow, containZeroWidthCharacters);
 		
 		var transparencePercent = 20;
 		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
