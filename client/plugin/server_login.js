@@ -507,6 +507,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					else {
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
 						saveLogin({user: user.value, pw: pw.value});
+						EDITOR.dashboard.stayHidden = false;
 					}
 				});
 				

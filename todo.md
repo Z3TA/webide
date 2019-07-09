@@ -29,9 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Add stuff to the dashboard for discovery!
 
-prio: Sell the editor in less then 5 seconds. Improve the UX.
-Using dashboard widgets, discovery bar. Polish first time user experience.
+
+prio:  Polish first time user experience. Sell the editor in less then 5 seconds.
 
 
 Dashboard and discovery bar!
