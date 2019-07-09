@@ -27,6 +27,11 @@
 	
 	function loadDarkTheme() {
 		
+		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", "Theme", 2], toggleDarkTheme);
+		
+		if(QUERY_STRING["theme"] && QUERY_STRING["theme"] != "dark") return;
+		
+		
 		detectColorScheme();
 		
 		var themeDetector = document.getElementById("themeDetector");
@@ -35,15 +40,12 @@
 		console.log("dark_theme: themeFromCss=" + themeFromCss);
 		if( themeFromCss == "dark") setDarkTheme();
 		
-		if(QUERY_STRING["darkTheme"]) {
+		if(QUERY_STRING["theme"] == "dark") {
 setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		}
 		
-		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", "Theme", 2], toggleDarkTheme);
-		
 		if(themeLoaded) winMenuDarkTheme.activate();
-		
-	}
+		}
 	
 	function toggleDarkTheme() {
 		if(themeLoaded) {
