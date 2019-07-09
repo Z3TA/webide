@@ -3022,7 +3022,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		this.activated = false;
 	}
 	DropdownMenuItem.prototype.setLabel = function setLabel(label) {
-		this.label.innerText = label;
+		this.text.innerText = label;
 	}
 	DropdownMenuItem.prototype.hide = function setLabel() {
 		this.parentMenu.hide(true, true);

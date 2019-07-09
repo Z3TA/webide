@@ -123,9 +123,13 @@
 	canvas.ontouchstart = canvasMouseDown;
 	canvas.ontouchend = canvasMouseUp;
 	
+	canvas.style.position = "relative";
+	canvas.style.zIndex = 100;
+	
 	var labelShowBuiltin = "Virtual Keyboard";
 	var labelShowNative = "Native keyboard";
 	
+	var winMenuKeyboard;
 	
 	EDITOR.plugin({
 		desc: "Testing canvas based virtual keyboard",
@@ -140,9 +144,12 @@
 			EDITOR.on("hideVirtualKeyboard", hideMyVirtualKeyboards);
 			EDITOR.on("showVirtualKeyboard", showMyVirtualKeyboards);
 			
+			EDITOR.on("fileOpen", showVirtualKeyboardMaybe);
+			
 			addButtons();
 			
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
+			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, ["View", 10], toggleBetweenKeyboards);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
@@ -150,8 +157,6 @@
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
 			wrapper.appendChild(canvas);
-			
-			
 		},
 		unload: function unloadVirtualKeyboard() {
 			
@@ -163,6 +168,8 @@
 			EDITOR.removeEvent("hideVirtualKeyboard", hideMyVirtualKeyboards);
 			EDITOR.removeEvent("showVirtualKeyboard", showMyVirtualKeyboards);
 			
+			EDITOR.removeEvent("fileOpen", showVirtualKeyboardMaybe);
+			
 			EDITOR.removeEvent("registerAltKey", updateAltKey);
 			
 			hideBuiltinKeyboard();
@@ -170,11 +177,19 @@
 			
 			EDITOR.ctxMenu.remove(menuItem);
 			
+			EDITOR.windowMenu.remove(winMenuKeyboard);
+			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.removeChild(canvas);
 			
 		}
 	});
+	
+	function showVirtualKeyboardMaybe() {
+		if(EDITOR.touchScreen) {
+			showBuiltinKeyboard();
+		}
+	}
 	
 	function toggleBetweenKeyboards() {
 		console.log("toggleBetweenKeyboards: useNative=" + useNative + " useBuiltin=" + useBuiltin);
@@ -185,6 +200,7 @@
 			// Don't show any
 			hideNativeKeyboard();
 			EDITOR.ctxMenu.update(menuItem, false, labelShowBuiltin);
+			EDITOR.windowMenu.update(winMenuKeyboard, {active: false, label: labelShowBuiltin});
 		}
 		else if(useBuiltin) {
 			// Show native
@@ -218,6 +234,7 @@
 		EDITOR.resizeNeeded();
 		
 		EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
+		EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowNative});
 		
 		useBuiltin = true;
 		
@@ -238,8 +255,10 @@
 	}
 	
 	function showNativeKeyboard() {
-		if(!useNative) EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
-		
+		if(!useNative) {
+EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
+			EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowNative});
+		}
 		// Always trigger native, even if already in use
 		
 		var keyboardCatcher = document.getElementById("keyboardCatcher");
