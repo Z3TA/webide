@@ -25,8 +25,9 @@
 		var fileTabsActive = false;
 	}
 	
-	
 	var winMenuLastTab, winMenuMoveTabLeft, winMenuMoveTabRight, winMenuTabLeft, winMenuTabRight, winMenuToggleFileTabs;
+	
+	var hiddenBecauseEmty = false;
 	
 	EDITOR.on("start", file_tabs);
 	
@@ -67,12 +68,23 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:1, label: "Previous file/tab", fun: switchTab});
 		
-		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
+		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen width etc.
+		
+		setTimeout(function hideIfEmpty() {
+			if(Object.keys(EDITOR.files).length == 0) {
+				console.log("Hiding file tabs because no files are open!");
+				hiddenBecauseEmty = true;
+				hideFileTabs();
+			}
+		}, 1000);
 		
 	}
 	
 	function toggleFileTabs() {
-		if(fileTabsActive) hideFileTabs();
+		if(fileTabsActive) {
+			hiddenBecauseEmty = false;
+			hideFileTabs();
+		}
 		else showFileTabs();
 	}
 	
@@ -220,13 +232,14 @@
 	}
 	
 	function tabFileChange(file, change, text, index, row, col) {
+		if(hiddenBecauseEmty) return showFileTabs();
+		if(!fileTabsActive) return;
 		
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
 		if(!el) throw new Error("Unable to find tab for file.path=" + file.path); // Possible due to tab being closed
 		
 		showUnsavedStatus(el);
-		
 	}
 	
 	function showUnsavedStatus(el) {
@@ -235,6 +248,9 @@
 	}
 	
 	function tabFileSave(file) {
+		if(hiddenBecauseEmty) return showFileTabs();
+		if(!fileTabsActive) return;
+		
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
 		if(!el) {
@@ -256,26 +272,27 @@
 	
 	
 	function tabFileOpen(file) {
+		if(hiddenBecauseEmty) return showFileTabs();
+		if(!fileTabsActive) return;
 		
 		buildTabs();
-		
-		// Switch to the file we just loaded
-		//switchToFile(file.path);
-	}
+		}
 	
 	function tabFileShow(file) {
+		if(hiddenBecauseEmty) return showFileTabs();
+		if(!fileTabsActive) return;
+		
 		buildTabs();
 	}
 	
 	function closeFile_tabs(file) {
-		
-		console.log("closing " + file.path);
+		if(hiddenBecauseEmty) return showFileTabs();
+		if(!fileTabsActive) return;
 		
 		buildTabs(file);
 		
 		EDITOR.renderNeeded();
 		EDITOR.resizeNeeded();
-		
 	}
 	
 	

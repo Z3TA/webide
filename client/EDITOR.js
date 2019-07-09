@@ -5801,10 +5801,22 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		show: function showDashboard() {
 			console.warn("Showing the dashboard!");
 			var dashboard = document.getElementById("dashboard");
+			
 			dashboard.style.display = "block";
 			EDITOR.dashboard.isVisible = true;
 			EDITOR.fireEvent("showDashboard");
+			
+			setTimeout(placeDashboard , 1000);
+			
 			return true;
+			
+			function placeDashboard() {
+				// Place it just below the header
+				var header = document.getElementById("header");
+				var headerRect = header.getBoundingClientRect();
+				
+				dashboard.style.top = (headerRect.bottom - 1) + "px";
+			}
 		},
 		isVisible: false
 	}
