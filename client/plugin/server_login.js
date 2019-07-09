@@ -459,7 +459,9 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		}
 		
 		
-		function connectToServer() {
+		function connectToServer(e) {
+			
+			if(typeof e.preventDefault == "function") e.preventDefault();
 			
 			// ## Manually logging in via login form
 			
@@ -475,7 +477,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					CLIENT.disconnect();
 					connectToServer();
 				}
-				else if(EDITOR.user.name != user.value) identify();
+				else if(!EDITOR.user || EDITOR.user.name != user.value) identify();
 				else alertBox("Already logged in as user=" + EDITOR.user.name + " on \n" + CLIENT.url);
 			}
 			else {
