@@ -39,7 +39,7 @@
 setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		}
 		
-		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", 10], toggleDarkTheme);
+		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", "Theme", 2], toggleDarkTheme);
 		
 		if(themeLoaded) winMenuDarkTheme.activate();
 		

@@ -46,7 +46,7 @@
 		
 		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
 		
-		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 4], toggleFunctionList);
+		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 9], toggleFunctionList);
 		if(functionListActive) winMenuToggleFunctionlist.activate();
 		
 		functionListWrap = document.createElement("div");

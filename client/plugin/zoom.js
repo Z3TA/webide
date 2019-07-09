@@ -36,7 +36,7 @@
 
 		EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch}); 
 		
-		winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 2], zoomSwitch);
+		winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 3], zoomSwitch);
 		
 	}
 	

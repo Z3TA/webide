@@ -73,9 +73,9 @@
 		EDITOR.bindKey({desc: "Source control: Compare working directory with parent revision", fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
 		
 		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], showVersionControlWidget);
-		winMenuCommit = EDITOR.windowMenu.add("Commit", ["Edit", 5], showCommitDialog);
-		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["Edit", 6], diffWorkingDirectory);
-		winMenuAnnotations = EDITOR.windowMenu.add("Annotations", ["View", 11], toggleAnotations);
+		winMenuCommit = EDITOR.windowMenu.add("Commit", ["SCM", 5], showCommitDialog);
+		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["SCM", 6], diffWorkingDirectory);
+		winMenuAnnotations = EDITOR.windowMenu.add("Show annotations", ["SCM", 11], toggleAnotations);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
