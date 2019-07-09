@@ -2880,19 +2880,23 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		// Does it fit on the right side ?
 		var menuRect = menu.domElement.getBoundingClientRect();
-		console.log("menuRect=" + JSON.stringify(menuRect));
+		menuWidth = Math.max(menuWidth, menuRect.width);
 		var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		
 		if(windowWidth) {
+			console.log("menuLeft=" + menuLeft + " menuWidth=" + menuWidth + " windowWidth=" + windowWidth + " menuRect=" + JSON.stringify(menuRect));
 			if( (menuLeft + menuWidth) > windowWidth) {
 				console.log("Pullout " + menu.pullout + " menu doesn't fit on the right side! windowWidth=" + windowWidth + " menuLeft=" + menuLeft + " menuWidth=" + menuWidth);
 				
 				if( (parentItemRect.left - menuWidth) >= 0) {
 					// It fits on the left side. Place it on left side
-					menuLeft = parentItemRect.left - menuWidth - borderWidth*2;
+					//menuLeft = parentItemRect.left - menuWidth - borderWidth*2;
+					menuLeft = windowWidth - menuWidth + 1;
 				}
 				else {
 					console.warn("Pullout " + menu.pullout + " menu doesn't fit on the left side either! parentItemRect.left=" + parentItemRect.left + " menuWidth=" + menuWidth + " (" + (parentItemRect.left - menuWidth) + ") ");
+					// Place it below parent
+					menuLeft = windowWidth - menuWidth + 1;
+					menuTop = parentItemRect.bottom;
 				}
 			}
 		}
