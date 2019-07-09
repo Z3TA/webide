@@ -29,7 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-CPU load in dashboard
 
 prio: Sell the editor in less then 5 seconds. Improve the UX.
 Using dashboard widgets, discovery bar. Polish first time user experience.
