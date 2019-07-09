@@ -119,7 +119,6 @@ body {
 }
 
 .dashboard span {
-	color: #a8a8a8;
 	text-shadow: none;
 	font-family: Arial, Helvetica, sans-serif;
 }
@@ -129,20 +128,18 @@ body {
 	border: 1px solid #e7e7e7;
 	margin: 10px;
 	padding: 10px;
-	color: #a8a8a8;
+	color: #868686;
 	text-shadow: none;
 	}
 
-.dashboardWidget span.value {
+.dashboardWidget .value {
 	font-family: Arial, Helvetica, sans-serif;
-	color: #989898;
 	font-size: 1.1em;
 	font-weight: 600;
 	}
 
 .dashboardWidget .description {
 	text-transform: uppercase;
-	color: #a8a8a8;
 	font-size: 0.75em;
 }
 
@@ -150,10 +147,9 @@ body {
 	border-bottom: 1px solid #e6e6e6;
 	}
 
-.dashboardWidget div.total {
+.dashboardWidget .big {
 	margin-top: 0.2em;
 	font-size: 6.5em;
-	color: #353535;
 	text-shadow: -1px 0 #585858, 0 1px #585858, 1px 0 #585858, 0 -1px #585858;
 }
 
@@ -162,7 +158,7 @@ body {
 	}
 
 
-.dashboardWidget span.posetive {
+.dashboardWidget .posetive {
 	color: #709933;
 }
 
@@ -170,10 +166,10 @@ body {
 	font-size: 1em;
 }
 
+
 .dashboardWidget.newfile {
 	padding-top: 0;
 	padding-bottom: 0;
-	border: 1px solid #e5e5e5;
 }
 
 .dashboardWidget.newfile span {
@@ -181,31 +177,42 @@ body {
 	vertical-align: middle;
 	}
 
-.dashboardWidget.newfile button {
+.dashboardWidget button {
 	margin: 0;
 	padding: 0.5em;
-	height: 3em;
+	height: 2.5em;
 	min-width: 9em;
 	font-weight: 600;
-	color: #797979;
 	text-transform: uppercase;
 	
-	background-color: white;
-	background: linear-gradient(top, #eeeeee 0%, #ffffff 100%);
+	background-color: #ffffff;
+	border: 1px ridge #f6f6f6;
+	margin: 5px;
+	
 	vertical-align: middle;
 	text-decoration: underline;
 	cursor: pointer;
 	}
+.dashboardWidget button:hover {
+	background-color: #f6f6f6;
+}
 
-.dashboardWidget.newfile button img {
+.dashboardWidget button img {
 	vertical-align: middle;
 	margin-right: 4px;
 	}
 
 
+.dashboardWidget .strong {
+	color: #323232;
+}
+
+.dashboardWidget .weak {
+	color: #a6a6a6;
+}
+
 .dashboardWidget .time {
 	font-size: 5em;
-	color: #353535;
 }
 
 .dashboardWidget .ampm {
@@ -219,7 +226,6 @@ body {
 
 .dashboardWidget .formattedDate {
 	font-size: 2em;
-	color: #353535;
 	font-weight: bold;
 }
 
@@ -296,7 +302,6 @@ body {
 	left: 0px;
 	z-index: 6;
 	font-size: 2em;
-	/*color: #353535;*/
 	text-align: right;
 	border: 0px solid green;
 	width: 100px;
@@ -306,7 +311,6 @@ body {
 	position: absolute;
 	top: 70px;
 	font-size: 1em;
-	color: #909090;
 	z-index: 6;
 }
 
@@ -522,7 +526,7 @@ li ul {
 	margin-left: 1em;
 }
 
-label, span, p, legend {
+.footer label, .footer span, .footer p, .footer legend {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
 	font-weight: normal;

@@ -69,22 +69,25 @@ div.rightColumn {
 ul#tabList li.tabFolderItem {
 	background:none;
 	background-color: rgb(53, 53, 55);
+	background-color: #25262b;
+	
 	color: #d2cdcd;
 	box-shadow: none;
-	border-bottom: 0;
+	border-bottom: 1px solid #3c3c40;
 	border-top: 1px solid #2a2929;
 }
 
 ul#tabList li.tabFolderItem.active {
 	color: #d2cdcd;
 	border-bottom: 0; /* same color as canvas */
-	background: none;
+	background: #292930;
 	border-top: 1px solid #2a2929;
 }
 
 ul#tabList li.tabFileItem {
 	background: #262827;
-	background: linear-gradient(#373737 1%, #322f2f 99%);
+	
+	
 }
 
 ul#tabList li.tabFileItem.active {
@@ -350,4 +353,64 @@ a:visited {
 }
 
 
+.dashboard {
+	background-color: #1e1f22;
+	border-top: 1px solid #060707;
+}
+
+
+.dashboardWidget {
+	background-color: #2d2d30;
+	border: 1px solid #060707;
+	color: #bbbbbb;
+}
+
+.dashboardWidget .strong {
+	color: #e3e3e3;
+}
+
+.dashboardWidget .weak {
+	color: #bbbbbb;
+}
+
+.dashboardWidget button {
+	color: #e3e3e3;
+	background-color: #343538;
+	border: 1px ridge #343538;
+}
+.dashboardWidget button:hover {
+	background-color: #67676a;
+}
+
+.dashboardWidget hr {
+	border-bottom: 1px solid #3c3c40;
+}
+
+.dashboardWidget.smallGraph .graph .item0 {
+	background-color: #3e3e42;
+}
+.dashboardWidget.smallGraph .graph .item1 {
+	background-color: #49494d;
+}
+.dashboardWidget.smallGraph .graph .item2 {
+	background-color: #5a5a5f;
+}
+.dashboardWidget.smallGraph .graph .item3 {
+	background-color: #636369;
+}
+.dashboardWidget.smallGraph .graph .item4 {
+	background-color: #6c6c73;
+}
+.dashboardWidget.smallGraph .graph .item5 {
+	background-color: #77777e;
+}
+.dashboardWidget.smallGraph .graph .item6 {
+	background-color: #83838a;
+}
+.dashboardWidget.smallGraph .graph .item7 {
+	background-color: #8b8b93;
+}
+.dashboardWidget.smallGraph .graph .item8 {
+	background-color: #95959d;
+}
 

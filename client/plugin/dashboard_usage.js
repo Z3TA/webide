@@ -57,7 +57,7 @@
 		widget.appendChild(caption);
 		
 		var currentLoad = document.createElement("div");
-		currentLoad.setAttribute("class", "current");
+		currentLoad.setAttribute("class", "current strong");
 		widget.appendChild(currentLoad);
 		
 		var graph = document.createElement("div");
@@ -92,7 +92,7 @@
 				
 				if(err) return;
 				
-				console.log(JSON.stringify(cpus, null, 2));
+				//console.log(JSON.stringify(cpus, null, 2));
 				
 				// Times are the cummulated number of milliseconds (from boot) the CPU has spent in that mode. (One second has 1000 milli-seconds)
 				
@@ -151,11 +151,11 @@
 		widget.appendChild(caption);
 		
 		var memoryUsage = document.createElement("div");
-		memoryUsage.setAttribute("class", "current");
+		memoryUsage.setAttribute("class", "current strong");
 		widget.appendChild(memoryUsage);
 		
 		var memoryAbout = document.createElement("div");
-		memoryAbout.setAttribute("class", "currentsmall");
+		memoryAbout.setAttribute("class", "currentsmall weak");
 		widget.appendChild(memoryAbout);
 		
 		var graph = document.createElement("div");
@@ -186,13 +186,13 @@
 				
 				if(err) return;
 				
-				console.log(JSON.stringify(memory, null, 2));
+				//console.log(JSON.stringify(memory, null, 2));
 				
 				var unit = "MB";
 				var division = memory.free.toString().length-1;
 				if(division < 1) division = 1;
 				
-				console.log("memory: division=" + division);
+				//console.log("memory: division=" + division);
 				
 				if(division >= 9) {
 					unit = "GB";
@@ -211,7 +211,7 @@
 					division = 1;
 				}
 				
-				console.log("memory: unit=" + unit + " division=" + division);
+				//console.log("memory: unit=" + unit + " division=" + division);
 				
 				var total = Math.round(memory.total/division * 10)|0;
 				var free = Math.round(memory.free/division * 10)|0;
@@ -220,19 +220,20 @@
 				free = free / 10;
 				
 				var totalStr = total.toString();
-				var freelStr = total.toString();
+				var freeStr = free.toString();
 				
 				if(totalStr.indexOf(".") == -1) totalStr += ".0";
-				if(freelStr.indexOf(".") == -1) freelStr += ".0";
+				if(freeStr.indexOf(".") == -1) freeStr += ".0";
 				
-				//memoryAbout.innerText = totalStr + unit + " total, " + freelStr + unit + " free";
-				memoryAbout.innerText = freelStr + unit + " free";
+				//memoryAbout.innerText = totalStr + unit + " total, " + freeStr + unit + " free";
+				memoryAbout.innerText = freeStr + unit + " free";
 				
-				var usage = Math.round(memory.free / memory.total * 1000) | 0;
+				var usage = Math.round( (memory.total-memory.free) / memory.total * 1000) | 0;
 				
-				var strUsage = (usage/10).toString();
+				//var strUsage = (usage/10).toString();
+				var strUsage = Math.round(usage/10).toString();
 				if(strUsage.indexOf("100") == 0) strUsage = "100";
-				else if(strUsage.indexOf(".") == -1) strUsage += ".0";
+				//else if(strUsage.indexOf(".") == -1) strUsage += ".0";
 				
 				memoryUsage.innerText = strUsage + "%";
 				

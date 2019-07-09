@@ -80,11 +80,11 @@ EDITOR.plugin({
 		timeWidget.appendChild(clock);
 		
 		var time = document.createElement("span");
-		time.setAttribute("class", "time");
+		time.setAttribute("class", "time strong");
 		clock.appendChild(time);
 		
 		var ampm = document.createElement("span");
-		ampm.setAttribute("class", "ampm");
+		ampm.setAttribute("class", "ampm weak");
 		clock.appendChild(ampm);
 		
 		var weekDay = document.createElement("div");
@@ -92,7 +92,7 @@ EDITOR.plugin({
 		timeWidget.appendChild(weekDay);
 		
 		var formattedDate = document.createElement("div");
-		formattedDate.setAttribute("class", "formattedDate");
+		formattedDate.setAttribute("class", "formattedDate strong");
 		timeWidget.appendChild(formattedDate);
 		
 		var hr = document.createElement("hr");

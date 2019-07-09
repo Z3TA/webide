@@ -25,10 +25,10 @@
 		description.appendChild(document.createTextNode("Total page views last 30 days"));
 		
 		pageViewStat.appendChild(description);
-		pageViewStat.appendChild(document.createElement("hr"));
+		//pageViewStat.appendChild(document.createElement("hr"));
 		
 		var total = document.createElement("div");
-		total.setAttribute("class", "total value");
+		total.setAttribute("class", "total value big strong");
 		total.innerText = (1337).toLocaleString();
 		
 		pageViewStat.appendChild(total);
@@ -39,7 +39,7 @@
 		previousDiv.appendChild(document.createTextNode("Previous: "));
 		
 		var previous = document.createElement("span");
-		previous.setAttribute("class", "value");
+		previous.setAttribute("class", "value strong");
 		previous.innerText = (1320).toLocaleString();;
 		
 		previousDiv.appendChild(previous);
