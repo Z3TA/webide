@@ -258,6 +258,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		}
 		EDITOR.ctxMenu.hide();
 		winMenuLogin.hide();
+		EDITOR.dashboard.hide(true);
 		console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
 	}

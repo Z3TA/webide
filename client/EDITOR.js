@@ -1945,13 +1945,11 @@ text = file;
 		else {
 			
 			setTimeout(function showDashboardMaybe() {
-				if(!EDITOR.currentFile) {
+				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden) {
 					EDITOR.dashboard.show();
 					EDITOR.shouldRender = false;
 				}
 			}, 200);
-			
-			return;
 			
 			
 			// Show some useful info for new users ...
@@ -1979,8 +1977,11 @@ text = file;
 			*/
 			
 			var friendlyString = [
-				"Press Ctrl+O top open a file",
-				"Upload files and folders by draging them here"
+				"Right-click (or long press)",
+				" to show context menu.",
+				"",
+				"Upload files and folders",
+				" by draging them here."
 			];
 			
 			if(friendlyString.length > 0) {
@@ -5791,15 +5792,20 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			}
 			return removedNode;
 		},
-		hide: function hideDashboard() {
+		hide: function hideDashboard(stayHidden) {
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "none";
 			EDITOR.dashboard.isVisible = false;
 			EDITOR.fireEvent("hideDashboard");
+			
+			if(stayHidden) EDITOR.dashboard.stayHidden = true;
+			
 			return true;
 		},
 		show: function showDashboard() {
-			console.warn("Showing the dashboard!");
+			
+			console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+			
 			var dashboard = document.getElementById("dashboard");
 			
 			dashboard.style.display = "block";
@@ -5818,7 +5824,8 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				dashboard.style.top = (headerRect.bottom - 1) + "px";
 			}
 		},
-		isVisible: false
+		isVisible: false,
+		stayHidden: false
 	}
 	
 	EDITOR.openFileTool = function fileOpenTool(options, filePath) {

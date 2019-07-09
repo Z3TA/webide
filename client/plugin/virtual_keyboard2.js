@@ -231,8 +231,6 @@
 		var wrapper = document.getElementById("virtualKeyboard2");
 		wrapper.style.display="block";
 		
-		EDITOR.resizeNeeded();
-		
 		EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
 		EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowNative});
 		
@@ -244,6 +242,8 @@
 				EDITOR.currentFile.scrollToCaret();
 			}, 500);
 		}
+		
+		EDITOR.resizeNeeded();
 	}
 	
 	function hideBuiltinKeyboard() {
