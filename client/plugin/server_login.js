@@ -417,6 +417,8 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		
 		if(EDITOR.localStorage) {
 			EDITOR.localStorage.getItem(["editorServerUrl","editorServerUser", "editorServerPw"], function(err, obj) {
+				if(err) return;
+				
 				urlValue = obj.editorServerUrl;
 				userValue = obj.editorServerUser;
 				pwValue = obj.editorServerPw;
@@ -504,6 +506,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					}
 					else {
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
+						saveLogin({user: user.value, pw: pw.value});
 					}
 				});
 				
