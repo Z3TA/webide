@@ -27,6 +27,7 @@ winMenuHide.activate();
 	
 	function showWindowMenu() {
 		EDITOR.windowMenu.enable();
+		EDITOR.ctxMenu.hide();
 		EDITOR.ctxMenu.remove(ctxWinMenuShow);
 		ctxWinMenuShow = undefined;
 	}

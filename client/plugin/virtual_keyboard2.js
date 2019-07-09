@@ -124,7 +124,7 @@
 	canvas.ontouchend = canvasMouseUp;
 	
 	canvas.style.position = "relative";
-	canvas.style.zIndex = 100;
+	canvas.style.zIndex = 5; // Above the dashboard, but below the context menu
 	
 	var labelShowBuiltin = "Virtual Keyboard";
 	var labelShowNative = "Native keyboard";
