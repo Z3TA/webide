@@ -484,7 +484,9 @@
 			
 			console.log("Closing tab for path=" + path);
 			
-			console.log("saved?" + EDITOR.files[path].isSaved);
+			if(!EDITOR.files[path]) return;
+			
+			console.log("saved?" + (EDITOR.files[path].isSaved));
 			console.log("e.ctrlKey?" + e.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);
 			console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));

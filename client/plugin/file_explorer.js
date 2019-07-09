@@ -173,6 +173,7 @@ EDITOR.changeWorkingDir(directory);
 		EDITOR.ctxMenu.update(menuItem, visible, "File explorer");
 		
 		if(visible) {
+			EDITOR.dashboard.hide(true);
 			
 			if(typeof dirToExplore == "string") {
 				var pathToExplore = dirToExplore;

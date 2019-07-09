@@ -9063,7 +9063,7 @@ keyPressed(keyPress);
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
-		//console.log("mouseDown on target.className=" + target.className);
+		console.log("mouseDown on target.className=" + target.className);
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
@@ -9117,6 +9117,23 @@ keyPressed(keyPress);
 			console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
 			EDITOR.input = false;
 			
+			if(targetIsDashboard(target)) {
+				if(button == leftMouseButton) {
+					EDITOR.ctxMenu.hide();
+				}
+				else {
+					EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+				}
+			}
+			
+		}
+		
+		function targetIsDashboard(targetElement) {
+			while(targetElement.parentElement) {
+				if(targetElement.className == "dashboard") return true;
+				targetElement = targetElement.parentElement
+			}
+			return false;
 		}
 		
 		if(target.className == "fileCanvas") {
