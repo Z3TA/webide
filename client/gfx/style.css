@@ -127,8 +127,8 @@ body {
 .dashboardWidget {
 	background-color: #ffffff;
 	border: 1px solid #e7e7e7;
-	margin: 0.5em;
-	padding: 0.5em;
+	margin: 10px;
+	padding: 10px;
 	color: #a8a8a8;
 	text-shadow: none;
 	}
@@ -202,6 +202,7 @@ body {
 	margin-right: 4px;
 	}
 
+
 .dashboardWidget .time {
 	font-size: 5em;
 	color: #353535;
@@ -227,17 +228,19 @@ body {
 	margin-bottom: 0.7em;
 }
 
-.dashboardWidget.cpuWidget {
+.dashboardWidget.smallGraph {
 	position: relative;
 	width: 242px;
+	max-width: calc(50% - 42px);
+	float: left;
 }
 
-.dashboardWidget.cpuWidget .graph {
+.dashboardWidget.smallGraph .graph {
 	position: relative;
 	height: 100px;
 }
 
-.dashboardWidget.cpuWidget .graph .itemwrap {
+.dashboardWidget.smallGraph .graph .itemwrap {
 	position: relative;
 	
 	height: 100px;
@@ -247,7 +250,7 @@ body {
 	margin-right: 4px;
 }
 
-.dashboardWidget.cpuWidget .graph .item {
+.dashboardWidget.smallGraph .graph .item {
 	position: absolute;
 	bottom: 0px;
 	
@@ -255,38 +258,39 @@ body {
 	background-color: #858585;
 	
 	display: inline-block;
-	/*transition: height 1s;*/
+	/*transition: height 1s*/;
+	/* transition uses an extra 5% cpu time! */
 }
 
-.dashboardWidget.cpuWidget .graph .item0 {
+.dashboardWidget.smallGraph .graph .item0 {
 	background-color: #f2f2f2;
 }
-.dashboardWidget.cpuWidget .graph .item1 {
+.dashboardWidget.smallGraph .graph .item1 {
 	background-color: #efefef;
 }
-.dashboardWidget.cpuWidget .graph .item2 {
+.dashboardWidget.smallGraph .graph .item2 {
 	background-color: #ededed;
 }
-.dashboardWidget.cpuWidget .graph .item3 {
+.dashboardWidget.smallGraph .graph .item3 {
 	background-color: #e8e8e8;
 }
-.dashboardWidget.cpuWidget .graph .item4 {
+.dashboardWidget.smallGraph .graph .item4 {
 	background-color: #e7e7e7;
 }
-.dashboardWidget.cpuWidget .graph .item5 {
+.dashboardWidget.smallGraph .graph .item5 {
 	background-color: #f2f2f2;
 }
-.dashboardWidget.cpuWidget .graph .item6 {
+.dashboardWidget.smallGraph .graph .item6 {
 	background-color: #d9d9d9;
 }
-.dashboardWidget.cpuWidget .graph .item7 {
+.dashboardWidget.smallGraph .graph .item7 {
 	background-color: #d2d2d2;
 }
-.dashboardWidget.cpuWidget .graph .item8 {
+.dashboardWidget.smallGraph .graph .item8 {
 	background-color: #b8b8b8;
 }
 
-.dashboardWidget.cpuWidget .currentLoad {
+.dashboardWidget.smallGraph .current {
 	position: absolute;
 	top: 35px;
 	left: 0px;
@@ -295,13 +299,15 @@ body {
 	/*color: #353535;*/
 	text-align: right;
 	border: 0px solid green;
-	width: 140px;
-	/* transition taks a lot of cpu time!? */
-	/*transition: all 500ms ease-in-out;*/
+	width: 100px;
 }
 
-.dashboardWidget.cpuWidget .currentLoad.fade {
-	
+.dashboardWidget.smallGraph .currentsmall {
+	position: absolute;
+	top: 70px;
+	font-size: 1em;
+	color: #909090;
+	z-index: 6;
 }
 
 

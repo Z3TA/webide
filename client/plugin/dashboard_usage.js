@@ -2,39 +2,45 @@
 	"use strict";
 
 	var cpuWidget;
+	var memoryWidget
 	var updateInterval;
-	var UPDATE_TIME = 1000;
+	var UPDATE_TIME = 2000;
 	
 	EDITOR.plugin({
-		desc: "Show CPU usage on the dashboard",
-		load: function loadTimeWidget() {
+		desc: "Show system CPU and memory usage on the dashboard",
+		load: function loadCpuAndMemoryWidget() {
 			
 			cpuWidget = createCpuWidget();
+			memoryWidget = createMemoryWidget();
 			
-			EDITOR.on("showDashboard", startCpuTimer);
-			EDITOR.on("hideDashboard", stopCpuTimer);
+			EDITOR.on("showDashboard", startCpuAndMemoryTimer);
+			EDITOR.on("hideDashboard", stopCpuAndMemoryTimer);
 			
 			EDITOR.dashboard.addWidget(cpuWidget.domElement);
+			EDITOR.dashboard.addWidget(memoryWidget.domElement);
 			
 		},
-		unload: function unloadTimeWidget() {
+		unload: function unloadCpuAndMemoryWidget() {
 			
 			EDITOR.dashboard.removeWidget(cpuWidget.domElement);
 			
-			EDITOR.removeEvent("showDashboard", startCpuTimer);
-			EDITOR.removeEvent("hideDashboard", stopCpuTimer);
+			EDITOR.removeEvent("showDashboard", startCpuAndMemoryTimer);
+			EDITOR.removeEvent("hideDashboard", stopCpuAndMemoryTimer);
 		}
 	});
 	
-	function startCpuTimer() {
+	function startCpuAndMemoryTimer() {
 		
 		if(updateInterval) clearInterval(updateInterval);
-		updateInterval = setInterval(cpuWidget.update, UPDATE_TIME);
+		updateInterval = setInterval(function updateCpuAndMemoryUsage() {
+			cpuWidget.update();
+			memoryWidget.update();
+		}, UPDATE_TIME);
 		
 		return true;
 	}
 	
-	function stopCpuTimer() {
+	function stopCpuAndMemoryTimer() {
 		if(updateInterval) clearInterval(updateInterval);
 		
 		return true;
@@ -43,15 +49,15 @@
 	function createCpuWidget() {
 		
 		var widget = document.createElement("div");
-		widget.setAttribute("class", "cpuWidget dashboardWidget");
+		widget.setAttribute("class", "smallGraph dashboardWidget");
 		
 		var caption = document.createElement("div");
 		caption.setAttribute("class", "description");
-		caption.innerText = "CPU Load";
+		caption.innerText = "System CPU Load";
 		widget.appendChild(caption);
 		
 		var currentLoad = document.createElement("div");
-		currentLoad.setAttribute("class", "currentLoad");
+		currentLoad.setAttribute("class", "current");
 		widget.appendChild(currentLoad);
 		
 		var graph = document.createElement("div");
@@ -99,7 +105,7 @@
 				if(!last) last = total;
 				
 				var delta = total - last;
-				var load = Math.round(delta / 10 / cpus.length) | 0; // Avarage across all CPU's'
+				var load = Math.round(delta * 100 / UPDATE_TIME / cpus.length) | 0; // Avarage across all CPU's'
 				
 				var strLoad = (load/10).toString();
 				if(strLoad.indexOf("100") == 0) strLoad = "100";
@@ -134,6 +140,115 @@
 		
 	}
 	
+	function createMemoryWidget() {
+		
+		var widget = document.createElement("div");
+		widget.setAttribute("class", "smallGraph dashboardWidget");
+		
+		var caption = document.createElement("div");
+		caption.setAttribute("class", "description");
+		caption.innerText = "System memory usage";
+		widget.appendChild(caption);
+		
+		var memoryUsage = document.createElement("div");
+		memoryUsage.setAttribute("class", "current");
+		widget.appendChild(memoryUsage);
+		
+		var memoryAbout = document.createElement("div");
+		memoryAbout.setAttribute("class", "currentsmall");
+		widget.appendChild(memoryAbout);
+		
+		var graph = document.createElement("div");
+		graph.setAttribute("class", "graph");
+		
+		var memorySamples = [0,0,0,0,0,0,0,0,0,0];
+		var graphs = [];
+		
+		var graphWrap;
+		for(var i=0; i<memorySamples.length; i++) {
+			graphWrap = document.createElement("div");
+			graphWrap.setAttribute("class", "itemwrap");
+			
+			graphs[i] = document.createElement("div");
+			graphs[i].setAttribute("class", "item item" + i);
+			graphs[i].style.height = Math.round(memorySamples[i] / 10) + "px";
+			
+			graphWrap.appendChild(graphs[i]);
+			
+			graph.appendChild(graphWrap);
+		}
+		
+		widget.appendChild(graph);
+		
+		function update() {
+			
+			CLIENT.cmd("memory", function(err, memory) {
+				
+				if(err) return;
+				
+				console.log(JSON.stringify(memory, null, 2));
+				
+				var unit = "MB";
+				var division = memory.free.toString().length-1;
+				if(division < 1) division = 1;
+				
+				console.log("memory: division=" + division);
+				
+				if(division >= 9) {
+					unit = "GB";
+					division = 1024*1024*1024;
+				}
+				else if(division >= 6) {
+					unit = "MB";
+					division = 1024*1024;
+				}
+				else if(division >= 3) {
+					unit = "K";
+					division = 1024;
+				}
+				else {
+					unit = "";
+					division = 1;
+				}
+				
+				console.log("memory: unit=" + unit + " division=" + division);
+				
+				var total = Math.round(memory.total/division * 10)|0;
+				var free = Math.round(memory.free/division * 10)|0;
+				
+				total = total / 10;
+				free = free / 10;
+				
+				var totalStr = total.toString();
+				var freelStr = total.toString();
+				
+				if(totalStr.indexOf(".") == -1) totalStr += ".0";
+				if(freelStr.indexOf(".") == -1) freelStr += ".0";
+				
+				//memoryAbout.innerText = totalStr + unit + " total, " + freelStr + unit + " free";
+				memoryAbout.innerText = freelStr + unit + " free";
+				
+				var usage = Math.round(memory.free / memory.total * 1000) | 0;
+				
+				var strUsage = (usage/10).toString();
+				if(strUsage.indexOf("100") == 0) strUsage = "100";
+				else if(strUsage.indexOf(".") == -1) strUsage += ".0";
+				
+				memoryUsage.innerText = strUsage + "%";
+				
+				for(var i=0; i<graphs.length; i++) {
+					graphs[i].style.height = Math.round(memorySamples[i] / 10) + "px";
+				}
+				
+				memorySamples.shift();
+				memorySamples.push(usage);
+				
+			});
+			
+		}
+		
+		return {domElement: widget, update: update};
+	}
 	
 	function sumReducer(accumulator, currentValue) {
 		if(accumulator == undefined) accumulator = 0;

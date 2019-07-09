@@ -3290,6 +3290,12 @@ API.cpu = function cpu(user, json, callback) {
 	callback(null, os.cpus());
 }
 
+API.memory = function memory(user, json, callback) {
+	var os = require('os');
+	
+	callback(null, {total: os.totalmem(), free: os.freemem()});
+}
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");
