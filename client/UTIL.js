@@ -555,6 +555,7 @@ originalRow.push("");
 
 
 	lbChars: function lbChars(txt) {
+		if(typeof txt != "string") throw new Error("First argument to lbChars needs to be a string! txt=" + txt + " is not a string!");
 		// Shows white space. Useful for debugging
 		txt = txt.replace(/\r/g, "CR");
 		txt = txt.replace(/\n/g, "LF");
