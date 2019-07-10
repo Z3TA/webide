@@ -1949,7 +1949,7 @@ text = file;
 					EDITOR.dashboard.show();
 					EDITOR.shouldRender = false;
 				}
-			}, 200);
+			}, 1000);
 			
 			
 			// Show some useful info for new users ...
@@ -2431,6 +2431,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			
 		}
+		
+		if(EDITOR.dashboard.isVisible) EDITOR.dashboard.show(); // Make sure it is placed below the header
 		
 		//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
@@ -5809,10 +5811,12 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			var dashboard = document.getElementById("dashboard");
 			
 			dashboard.style.display = "block";
-			EDITOR.dashboard.isVisible = true;
-			EDITOR.fireEvent("showDashboard");
 			
-			setTimeout(placeDashboard , 1000);
+			if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
+			
+			EDITOR.dashboard.isVisible = true;
+			
+			setTimeout(placeDashboard , 500);
 			
 			return true;
 			
