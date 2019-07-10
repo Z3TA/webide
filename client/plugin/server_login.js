@@ -205,6 +205,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					}
 					else {
 						hideLoginDialog();
+						EDITOR.dashboard.stayHidden = false;
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 						
 						if( userValue.match(/^guest\d+$/) && pwValue != "guest") {
@@ -246,7 +247,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 	}
 	
 	function showLoginDialog(options) {
-		console.log("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
+		console.warn("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
 		
 		if(QUERY_STRING["skiplogin"]) {
 			console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
