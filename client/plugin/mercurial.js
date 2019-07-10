@@ -47,7 +47,7 @@
 	var progressBar;
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
-	var winMenuMercurial, winMenuCommit, winMenuDiffRevision, winMenuAnnotations;
+	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations;
 	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
@@ -72,7 +72,8 @@
 		EDITOR.bindKey({desc: "Source control: Commit", fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
 		EDITOR.bindKey({desc: "Source control: Compare working directory with parent revision", fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
 		
-		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], showVersionControlWidget);
+		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], toggleVersionControlWidget);
+		winMenuMercurial2 = EDITOR.windowMenu.add("Show command bar", ["SCM", 1], toggleVersionControlWidget);
 		winMenuCommit = EDITOR.windowMenu.add("Commit", ["SCM", 5], showCommitDialog);
 		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["SCM", 6], diffWorkingDirectory);
 		winMenuAnnotations = EDITOR.windowMenu.add("Show annotations", ["SCM", 11], toggleAnotations);
@@ -117,8 +118,10 @@
 		EDITOR.unregisterAltKey(showVersionControlWidget);
 		
 		EDITOR.windowMenu.remove(winMenuMercurial);
+		EDITOR.windowMenu.remove(winMenuMercurial2);
 		EDITOR.windowMenu.remove(winMenuCommit);
 		EDITOR.windowMenu.remove(winMenuDiffRevision);
+		EDITOR.windowMenu.remove(winMenuAnnotations);
 		
 		hideMercurialWidgets();
 		
@@ -2467,14 +2470,24 @@ var error = err.message;
 		return div;
 	}
 	
+	function toggleVersionControlWidget() {
+		winMenuMercurial.hide();
+		if(versionControlWidget && versionControlWidget.visible) hideVersionControlWidget();
+		else showVersionControlWidget();
+	}
+	
 	function showVersionControlWidget() {
 		EDITOR.ctxMenu.hide();
 		versionControlWidget.show();
+		winMenuMercurial.activate();
+		winMenuMercurial2.activate();
 	}
 	
 	function hideVersionControlWidget() {
 		EDITOR.ctxMenu.hide();
 		versionControlWidget.hide();
+		winMenuMercurial.deactivate();
+		winMenuMercurial2.deactivate();
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {
