@@ -32,7 +32,7 @@
 			
 			EDITOR.unregisterAltKey(keyboardNewFile);
 			
-			//EDITOR.dashboard.removeWidget(newFileDashboardWidget);
+			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
 		},
 		order: 10
@@ -65,7 +65,7 @@
 		
 		var span = document.createElement("span");
 		span.setAttribute("class", "description");
-		var text = document.createTextNode("Create new file:");
+		var text = document.createTextNode("Create new:");
 		span.appendChild(text);
 		
 		newFileWidget.appendChild(span);
@@ -80,9 +80,9 @@
 		jsImg.setAttribute("height", "16");
 		jsFile.appendChild(jsImg);
 		
-		jsFile.appendChild(document.createTextNode("JavaScript"));
+		jsFile.appendChild(document.createTextNode("Node.JS script (JavaScript file)"));
 		jsFile.onclick = function(clickEvent) {
-			createNewFile("file.js", '/*\n\n\*/\n\n"use strict";\n\n');
+			createNewFile("main.js", '/*\n\n\*/\n\nconsole.log("hello world!");\n\n');
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(jsFile);
@@ -97,12 +97,28 @@
 		htmlImg.setAttribute("height", "16");
 		htmlButton.appendChild(htmlImg);
 		
-		htmlButton.appendChild(document.createTextNode("HTML"));
+		htmlButton.appendChild(document.createTextNode("Static web document (HTML file)"));
 		htmlButton.onclick = function(clickEvent) {
-			createNewFile("file.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
+			createNewFile("index.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(htmlButton);
+		
+		
+		var cssButton = document.createElement("button");
+		cssButton.setAttribute("class", "newfile html");
+		var cssImg = document.createElement("img");
+		cssImg.setAttribute("src", "gfx/icon/css.svg");
+		cssImg.setAttribute("width", "16");
+		cssImg.setAttribute("height", "16");
+		cssButton.appendChild(cssImg);
+		cssButton.appendChild(document.createTextNode("Stylesheet (CSS file)"));
+		cssButton.onclick = function(clickEvent) {
+			createNewFile("stylesheet.css", '\nbody {\ncolor: black;\nbackground: white;\n}\n\n');
+			EDITOR.dashboard.hide();
+		};
+		newFileWidget.appendChild(cssButton);
+		
 		
 		var anyFile = document.createElement("button");
 		anyFile.setAttribute("class", "newfile anyfile");
@@ -113,7 +129,7 @@
 		docImg.setAttribute("height", "16");
 		anyFile.appendChild(docImg);
 		
-		anyFile.appendChild(document.createTextNode("Other"));
+		anyFile.appendChild(document.createTextNode("Plain text file"));
 		anyFile.onclick = function(clickEvent) {
 			createNewFile("new file", "");
 			EDITOR.dashboard.hide();
