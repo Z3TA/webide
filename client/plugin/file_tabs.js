@@ -301,7 +301,7 @@
 		EDITOR.dashboard.hide(); // Hide dashboard when switching to a file
 		
 		if(!EDITOR.files.hasOwnProperty(path)) {
-			console.warn("Trying to swith to a file that is not open! path=" + path);
+			console.warn("Trying to swith to a file that is not open! path=" + path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			return;
 		}
 		
@@ -342,9 +342,6 @@
 			var removed = fileList.splice(fileList.indexOf(excludeFile), 1);
 			
 			console.log("Excluded removed.path=" + removed.path);
-		}
-		else {
-			console.log("No file will be excluded!");
 		}
 		
 		// Create tabs
