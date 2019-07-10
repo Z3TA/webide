@@ -100,8 +100,8 @@
 		EDITOR.resizeNeeded();
 	}
 	
-	function showFileTabs() {
-		buildTabs();
+	function showFileTabs(excludeFile) {
+		buildTabs(excludeFile);
 		fileTabsActive = true;
 		winMenuToggleFileTabs.activate();
 		EDITOR.resizeNeeded();
@@ -286,7 +286,7 @@
 	}
 	
 	function closeFile_tabs(file) {
-		if(hiddenBecauseEmty) return showFileTabs();
+		if(hiddenBecauseEmty) return showFileTabs(file);
 		if(!fileTabsActive) return;
 		
 		buildTabs(file);
@@ -305,7 +305,7 @@
 			return;
 		}
 		
-		console.log("Swithing to " + path);
+		console.warn("Swithing to " + path);
 		
 		EDITOR.showFile(EDITOR.files[path]);
 		
@@ -322,9 +322,6 @@
 	
 	
 	function buildTabs(excludeFile) {
-		
-		console.log(UTIL.getStack("Building tabs ..."));
-		
 		var tabList = document.getElementById("tabList");
 		
 		if(tabList !== null) {
@@ -335,6 +332,8 @@
 		}
 		
 		var fileList = EDITOR.sortFileList(); // An array of files sorted by file.order
+		
+		console.warn("buildTabs: excludeFile=" + excludeFile + " fileList=" + JSON.stringify(fileList.map(function(f) {return f.path})));
 		
 		if(excludeFile) {
 			if(fileList.indexOf(excludeFile) == -1) throw new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path);
@@ -481,7 +480,7 @@
 			
 			console.log("Closing tab for path=" + path);
 			
-			if(!EDITOR.files[path]) return;
+			if(!EDITOR.files[path]) throw new Error("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			
 			console.log("saved?" + (EDITOR.files[path].isSaved));
 			console.log("e.ctrlKey?" + e.ctrlKey);
@@ -522,7 +521,13 @@
 		}
 		
 		function clickTab() {
-			switchToFile(path);
+			/*
+				Issue: When closing a file via the close file button, the event bubbles down to a click on the file tab ...
+				Solution: Don't switch to a closed file
+			*/
+			
+			if(EDITOR.files.hasOwnProperty(path)) switchToFile(path);
+			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Objject.keys(EDITOR.files)));
 		}
 		
 		function createTabList() {
