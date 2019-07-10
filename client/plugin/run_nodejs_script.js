@@ -660,6 +660,8 @@
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
+		if(filePath == file.path && !file.savedAs) return alertBox("Save the file before running it!");
+		
 		var json = {filePath: filePath, debug: true};
 		
 		// Check if the file requires arguments
