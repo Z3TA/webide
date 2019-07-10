@@ -95,6 +95,7 @@
 		htmlImg.setAttribute("src", "gfx/icon/html.svg");
 		htmlImg.setAttribute("width", "16");
 		htmlImg.setAttribute("height", "16");
+		
 		htmlButton.appendChild(htmlImg);
 		
 		htmlButton.appendChild(document.createTextNode("Static web document (HTML file)"));
@@ -129,7 +130,7 @@
 		docImg.setAttribute("height", "16");
 		anyFile.appendChild(docImg);
 		
-		anyFile.appendChild(document.createTextNode("Plain text file"));
+		anyFile.appendChild(document.createTextNode("Plain text (misc. file)"));
 		anyFile.onclick = function(clickEvent) {
 			createNewFile("new file", "");
 			EDITOR.dashboard.hide();
