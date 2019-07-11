@@ -28,13 +28,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 
 What I'm working on
 -------------------
+
 prio:  Polish first time user experience.
 
-Dashboard is not visible on first view, because the cpu dashboard widget triggers a login screen, which hides the dashboard ...
-Almost all "reviewers" get past the login screen though, either creating an account, or logging in as guest!
-
-After loggin in as guest, the dashboard is shown again!
-We don't want "reviewers" to get stuck there! We need to show something interesting on the screen!
+We don't want "reviewers" to get stuck! We need to show something interesting on the screen!
 Something that makes them want to try out the editor ...
 
 * Tutorials and examples!?

@@ -13,7 +13,7 @@
 		load: function loadDashboardBlingBling() {
 			
 			var key_Esc = 27;
-			EDITOR.bindKey({desc: "Hide dashboard", charCode: key_Esc, combo: 0, fun: blingBlingHideDashboard});
+			//EDITOR.bindKey({desc: "Hide dashboard", charCode: key_Esc, combo: 0, fun: blingBlingHideDashboard});
 			
 			winMenuDashboard = EDITOR.windowMenu.add("Dashboard", ["View", 10], toggleDashboard);
 			
@@ -27,7 +27,7 @@
 			
 			EDITOR.windowMenu.remove(winMenuDashboard);
 			
-			EDITOR.unbindKey(blingBlingHideDashboard);
+			//EDITOR.unbindKey(blingBlingHideDashboard);
 			
 			EDITOR.removeEvent("showDashboard", dashboardVisible);
 			EDITOR.removeEvent("hideDashboard", dashboardHidden);
