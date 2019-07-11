@@ -2406,6 +2406,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
 		
+			var dashboard = document.getElementById("dashboard");
+			dashboard.style.width = EDITOR.view.canvasWidth + "px";
+			dashboard.style.height = EDITOR.view.canvasHeight + "px";
+			
+			
 			// Need to re-render after resizing the canvas!
 			console.log("re-render after resizing the canvas!");
 			EDITOR.shouldRender = true;
@@ -2431,8 +2436,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			
 		}
-		
-		if(EDITOR.dashboard.isVisible) EDITOR.dashboard.show(); // Make sure it is placed below the header
 		
 		//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
@@ -5796,7 +5799,10 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		},
 		hide: function hideDashboard(stayHidden) {
 			var dashboard = document.getElementById("dashboard");
+			
 			dashboard.style.display = "none";
+			canvas.style.display = "block";
+			
 			EDITOR.dashboard.isVisible = false;
 			EDITOR.fireEvent("hideDashboard");
 			
@@ -5810,6 +5816,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			
 			var dashboard = document.getElementById("dashboard");
 			
+			canvas.style.display = "none";
 			dashboard.style.display = "block";
 			
 			if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");

@@ -103,19 +103,14 @@ body {
 
 .dashboard {
 	font-family: Arial, Helvetica, sans-serif;
-	position: absolute;
-	top: 69px;
-	left: 0px;
 	display: none;
-	background-color: #e9e9e9;
+	
 	/*background-color: rgba(215,215,215, .6);*/
 	text-shadow: none;
-	z-index: 3;
+	
 	border-top: 1px solid #d5d5d5;
-	width: 100%;
 	
-	/* don't set height=100% ! it causes the div to position at top:0 ! (covering menu and file tabs) */
-	
+	overflow-y: scroll;
 }
 
 .dashboard span {
@@ -124,11 +119,12 @@ body {
 }
 
 .dashboardWidget {
-	background-color: #ffffff;
+	background: #ffffff;
 	border: 1px solid #e7e7e7;
 	margin: 10px;
 	padding: 10px;
 	color: #868686;
+	
 	text-shadow: none;
 	}
 
@@ -336,16 +332,10 @@ canvas {
 	cursor: text;
 }
 
-
 .columns {
-	/* background-color: yellow; */
-	}
-
-.columns div {
 	/*border: 1px solid red; */
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
-	background-color: blue;
-	}
+}
 
 .leftColumn {
 	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
@@ -359,7 +349,6 @@ canvas {
 
 .centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
 	overflow:hidden;
-	background-color: red; /* background will only show when there is little text, or flash a little when reloading the page */
 	vertical-align: top;
 	float: left;
 	overflow: auto!important;
@@ -1756,11 +1745,6 @@ div.group {
 	select.functionList.floatingInHeader {
 		height: 21px;
 	}
-	
-	.dashboard {
-		top: 56px;
- }
-	
 }
 
 @media (max-width: 1315px) {

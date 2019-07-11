@@ -205,7 +205,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					}
 					else {
 						hideLoginDialog();
-						EDITOR.dashboard.stayHidden = false;
+						
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 						
 						if( userValue.match(/^guest\d+$/) && pwValue != "guest") {
@@ -259,7 +259,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		}
 		EDITOR.ctxMenu.hide();
 		winMenuLogin.hide();
-		EDITOR.dashboard.hide(true);
+		
 		console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
 	}
@@ -508,7 +508,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					else {
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
 						saveLogin({user: user.value, pw: pw.value});
-						EDITOR.dashboard.stayHidden = false;
+						
 					}
 				});
 				
