@@ -38,7 +38,7 @@ Something that makes them want to try out the editor ...
 * Templates !?
 * VNC desktop ? :P
 * Whats new (new editor features)
-* SSG (creare new blog post) ?
+* SSG (create new blog post) ?
 * Database stats
 
 

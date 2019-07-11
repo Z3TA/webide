@@ -1139,7 +1139,6 @@ div.gotoFile li:hover {
 .windowMenu .label {
 	border: 0px solid blue;
 	
-	
 	padding-right: 1em;
 	
 	/* avoid line breaks */
@@ -1758,12 +1757,10 @@ div.group {
 	
 	.windowMenu .label {
 		padding-left: 0.5em;
-		padding-right: 0;
 	}
 	.windowMenu .bullet {
 		padding: 0;
 	}
-	
 	
 	.dialog {
 		box-shadow: inset 0px 4px 10px #888888;
@@ -1805,6 +1802,33 @@ div.group {
 	
 	input[type=button], button.button, input[type=submit] {
 		min-width: 80px;
+	}
+	
+	.windowMenu .root .label {
+		max-width: 40px;
+		
+		padding: 2px;
+	}
+	
+	.windowMenu .root .key {
+		display: none;
+		width: 0;
+		margin: 0;
+		padding: 0;
+	}
+	
+	.windowMenu .root .pulloutIcon {
+		display: none;
+		width: 0;
+		margin: 0;
+		padding: 0;
+	}
+	
+	.windowMenu .root .bullet {
+		display: none;
+		width: 0;
+		margin: 0;
+		padding: 0;
 	}
 	
 }
