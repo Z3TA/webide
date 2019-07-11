@@ -1,6 +1,6 @@
 (function() {
 	"use strict";
-
+	
 	var cpuWidget;
 	var memoryWidget
 	var updateInterval;

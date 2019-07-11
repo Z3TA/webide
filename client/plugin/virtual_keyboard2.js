@@ -719,6 +719,8 @@ return false;
 		mouseUpEvent.preventDefault();
 		mouseUpEvent.stopPropagation();
 		
+		//return clickButton(buttonLocations[0].id, mouseUpEvent);
+		
 		var click = getMouseLocation(mouseUpEvent);
 		
 		// Locations are sorted in X axis
@@ -742,6 +744,8 @@ return false;
 		
 		var button = buttons[id];
 		var customFunction;
+		
+		//return button.fun();
 		
 		var altNr = 0;
 		
