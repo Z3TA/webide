@@ -714,10 +714,14 @@ return false;
 		return false;
 	}
 	
+	//var COL = 0;
 	function canvasMouseUp(mouseUpEvent) {
 		
 		mouseUpEvent.preventDefault();
 		mouseUpEvent.stopPropagation();
+		
+		//if(COL > 20) COL = 0;
+		//return EDITOR.renderColumn(0, COL++, "G");
 		
 		//return clickButton(buttonLocations[0].id, mouseUpEvent);
 		
