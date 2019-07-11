@@ -711,7 +711,7 @@ ul#tabList ul.folderFileList {
 
 /* Able to click all the way up */
 ul#tabList .single ul.folderFileList li.tabFileItem {
-	line-height: 40px;
+	line-height: 50px;
 	margin-top: -10px;
 }
 
