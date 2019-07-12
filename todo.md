@@ -29,6 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+regression: Menu resizes again after a child element is added in file-tab
+
+run/fix tests!
+
 prio:  Polish first time user experience.
 
 We don't want "reviewers" to get stuck! We need to show something interesting on the screen!
