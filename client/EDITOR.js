@@ -1753,6 +1753,9 @@ text = file;
 	
 	EDITOR.resizeNeeded = function() {
 		// Tell the editor that it needs to resize
+		
+		//console.warn(UTIL.getStack("EDITOR.resizeNeeded!"));
+		
 		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
 			console.log(UTIL.getStack("resizeNeeded"));
@@ -2178,6 +2181,8 @@ text = file;
 console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
 		return;
 		}
+		
+		//console.warn(UTIL.getStack("EDITOR.resize!"));
 		
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		

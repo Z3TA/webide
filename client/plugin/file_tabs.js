@@ -68,8 +68,6 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:1, label: "Previous file/tab", fun: switchTab});
 		
-		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen width etc.
-		
 		setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {
 				console.log("Hiding file tabs because no files are open!");
@@ -101,6 +99,10 @@
 	}
 	
 	function showFileTabs(excludeFile) {
+		//console.warn("showFileTabs: hiddenBecauseEmty=" + hiddenBecauseEmty);
+		
+		hiddenBecauseEmty = false;
+		
 		buildTabs(excludeFile);
 		fileTabsActive = true;
 		winMenuToggleFileTabs.activate();
@@ -232,6 +234,8 @@
 	}
 	
 	function tabFileChange(file, change, text, index, row, col) {
+		//console.warn("tabFileChange: hiddenBecauseEmty=" + hiddenBecauseEmty);
+		
 		if(hiddenBecauseEmty) return showFileTabs();
 		if(!fileTabsActive) return;
 		
