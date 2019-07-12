@@ -7953,10 +7953,16 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 					var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
 					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
 					
-					EDITOR.saveToDisk(tmpPath, content, function fileSavedMaybe(err) {
+					EDITOR.checkPath(tmpPath, "Do not upload", function(err, fullPath) {
+						if(err) {
+							if(err.code != "CANCEL") alertBox(err.message);
+							return;
+						}
+						EDITOR.saveToDisk(fullPath, content, function fileSavedMaybe(err) {
 						if(err) throw err;
 						
-						EDITOR.openFile(tmpPath);
+							EDITOR.openFile(fullPath);
+					});
 					});
 				}
 				else EDITOR.openFile(filePath, content);
