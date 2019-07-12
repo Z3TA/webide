@@ -739,13 +739,8 @@ return false;
 		return true;
 	}
 	
-	
+	var COL = 0;
 	function clickButton(id, someEvent) {
-		
-		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, "X", EDITOR.settings.style.textColor);
-		//file.putCharacter("X");
-		//EDITOR.renderRow();
-		
 		var button = buttons[id];
 		var customFunction;
 		
@@ -839,14 +834,16 @@ return false;
 		
 		console.log("el: id=" + el.id + " node=" + el.nodeName + " type=" + el.type);
 		
+		
+		
 		// If a input or textarea element had focus, send it the character!
 		if(el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")) {
-			
-			var key = String.fromCharCode(charCode);
 			
 			insertAtCaret(el, key);
 			
 			el.focus();
+			
+			var key = String.fromCharCode(charCode);
 			
 			// Fire events
 			var ev = {
@@ -877,9 +874,13 @@ return false;
 			EDITOR.input = true;
 			
 		}
-		
+		// I tried to optimize response time (it's very slow on Nokia N9) but while the first character displays fast, the next is slow due to the cpu being busy ...
+		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, key, EDITOR.settings.style.textColor);
+		//setTimeout(defaultAction, 0); // Needed in order to make the canvas update!
+		//function defaultAction() {
 		var doDefaultAction = EDITOR.mock( eventType, { charCode: KeyCode || charCode } );
 		console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
+		//}
 		
 		function addProps(from, to) {
 			for(var name in from) to[name] = from[name];

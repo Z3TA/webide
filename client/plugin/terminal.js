@@ -6,6 +6,9 @@
 	Problem: The terminal's shell have it's own key-bindings which overlaps the editor's key bindings! Example Ctrl+C to copy, is used to exit a program in bash shell.
 	Solution 1: Use Alt for Ctrl and Shift+Alt for Alt !?  (AltGr doesn't seem to work)
 	
+	
+	todo: color codes need to be in rgb format!! (chars in margin)
+	
 */
 (function() {
 	"use strict";
@@ -21,7 +24,8 @@
 	var oldRows = 0;
 	var altKeyPressed = false;
 	var ctrlKeyPressed = false;
-
+	var terminalActive = false;
+	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
@@ -32,11 +36,9 @@
 			
 			CLIENT.on("terminal", terminalMessage);
 			
+			EDITOR.on("fileShow", terminalFileShow);
 			EDITOR.on("afterResize", resizeTerminals);
-			EDITOR.on("keyPressed", terminalKeyPressed);
-			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 			EDITOR.on("fileClose", terminalCloseFile);
-			EDITOR.on("paste", terminalPaste);
 			EDITOR.on("mouseClick", terminalMouseClick);
 			EDITOR.on("exit", exitAllTerminals);
 			
@@ -56,21 +58,50 @@
 			EDITOR.windowMenu.remove(winMenuTerminal);
 			
 			CLIENT.removeEvent("terminal", terminalMessage);
+			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 			
 			EDITOR.removeEvent("afterResize", resizeTerminals);
-			EDITOR.removeEvent("keyPressed", terminalKeyPressed);
-			EDITOR.removeEvent("keyDown", terminalKeyDown);
 			EDITOR.removeEvent("fileClose", terminalCloseFile);
-			EDITOR.removeEvent("paste", terminalPaste);
-			
-			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
-			CLIENT.removeEvent("terminal", terminalMessage);
 			EDITOR.removeEvent("exit", exitAllTerminals);
 			
 			EDITOR.unregisterAltKey(altKey);
 			EDITOR.unregisterAltKey(ctrlKey);
+			
+			if(terminalActive) removeTerminalEvents();
+			
 		}
 	});
+	
+	function terminalFileShow(file) {
+		var isTerminal = terminalFiles.indexOf(file) != -1;
+		
+		if(isTerminal) {
+			if(!terminalActive) addTerminalEvents();
+		}
+		else {
+			if(terminalActive) removeTerminalEvents();
+		}
+	}
+	
+	function addTerminalEvents() {
+		console.warn("addTerminalEvents");
+		
+		EDITOR.on("keyPressed", terminalKeyPressed);
+		EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
+		EDITOR.on("paste", terminalPaste);
+		
+		terminalActive = true;
+	}
+	
+	function removeTerminalEvents() {
+		console.warn("removeTerminalEvents");
+		
+		EDITOR.removeEvent("keyPressed", terminalKeyPressed);
+		EDITOR.removeEvent("keyDown", terminalKeyDown);
+		EDITOR.removeEvent("paste", terminalPaste);
+		
+		terminalActive = false;
+	}
 	
 	function altKey(file) {
 		altKeyPressed = true;
@@ -225,6 +256,7 @@
 				else if(startTerminalCallback) startTerminalCallback(err);
 				else return alertBox(err.message);
 			}
+			
 			// We might get terminal data before we get the open callback!
 			openTerminalFile(terminalName, startTerminalCallback);
 			});
@@ -290,6 +322,9 @@
 			file.noCollaboration = true;
 			
 			terminalFiles.push(file);
+			
+			if(!terminalActive) addTerminalEvents();
+			
 			file.write(file.path + " session started " + (new Date()) + "\n");
 			file.writeLine("Use Alt key instead of Ctrl to send control characters! And Alt+Shift instead of Alt (to send Esc+character)");
 			file.writeLineBreak();

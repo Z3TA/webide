@@ -213,8 +213,6 @@
 		load: function loadVim() {
 			//vimMenuItem = EDITOR.ctxMenu.add("Vim/modal mode", toggleVim);
 			
-			EDITOR.on("keyPressed", vimKeyPress);
-			
 			EDITOR.on("fileOpen", vimFileOpen);
 			EDITOR.on("fileClose", vimFileClose);
 			EDITOR.on("fileShow", vimFileShow);
@@ -275,7 +273,6 @@
 		unload: function unloadVim() {
 			if(vimMenuItem) EDITOR.ctxMenu.remove(vimMenuItem);
 			
-			EDITOR.removeEvent("keyPressed", vimKeyPress);
 			EDITOR.removeRender(showCommandBuffer);
 			
 			EDITOR.unbindKey(toggleVim);
@@ -2708,6 +2705,9 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			VIM_ACTIVE = false;
 			
 			EDITOR.setMode("default");
+			
+			EDITOR.removeEvent("keyPressed", vimKeyPress);
+			
 			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, false);
 			
 			winMenuVim.deactivate();
@@ -2716,6 +2716,8 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 		else {
 			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
+			
+			EDITOR.on("keyPressed", vimKeyPress);
 			
 			if(vimMenuItem) EDITOR.ctxMenu.update(vimMenuItem, true);
 			

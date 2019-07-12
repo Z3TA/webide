@@ -2,17 +2,44 @@
 	
 	"use strict";
 	
+	var active = false;
+	
 	EDITOR.plugin({
 		desc: "Auto close multi line comments",
 		load: function loadAutocloseComment() {
-			EDITOR.on("keyPressed", autocloseComment);
+			
+			EDITOR.on("fileShow", activateAutocloseComment);
+			
 		},
 		unload: function unloadAutocloseComment() {
-			EDITOR.removeEvent("keyPressed", autocloseComment);
+			EDITOR.removeEvent("fileShow", activateAutocloseComment);
+		
+			if(active) deactivate();
 		}
 	});
 	
+	function activateAutocloseComment(file) {
+		if(UTIL.getFileExtension(file.path) == "js") {
+			if(!active) activate();
+		}
+		else {
+			if(active) deactivate();
+		}
+	}
+	
+	function activate() {
+		EDITOR.on("keyPressed", autocloseComment);
+		active = true;
+	}
+	
+	function deactivate() {
+		EDITOR.removeEvent("keyPressed", autocloseComment);
+		active = false;
+	}
+	
 	function autocloseComment(file, character, combo) {
+		console.log("autocloseComment: character=" + character);
+		
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		if(UTIL.getFileExtension(file.path) != "js") return true;
