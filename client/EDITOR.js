@@ -1948,7 +1948,7 @@ text = file;
 		else {
 			
 			setTimeout(function showDashboardMaybe() {
-				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden) {
+				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden && EDITOR.user) {
 					EDITOR.dashboard.show();
 					EDITOR.shouldRender = false;
 				}
