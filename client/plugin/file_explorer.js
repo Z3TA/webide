@@ -259,7 +259,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 		else if(CLIENT.url) {
 			// Use the hostname of the server we are connected to
 			var loc = UTIL.getLocation(CLIENT.url);
-			var localName = EDITOR.user.name + "@" + loc.host;
+			var localName = (EDITOR.user ? EDITOR.user.name : "") + "@" + loc.host;
 		}
 		else {
 			// Use the hostname
@@ -429,7 +429,14 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					if(callback) callback(dirFound);
 return;
 				}
-else throw err;
+				else if(err.code == "LOGIN_NEEDED") {
+					alertBox("You need to identify (login) to the server in order to see files.");
+					return;
+				}
+				else {
+					console.log("err.code=" + err.code);
+					throw err;
+				}
 			}
 			
 			listItems.sort(sortByNameAndType);
@@ -481,7 +488,7 @@ else throw err;
 				li.ondragover = dragOverItem;
 				
 				icon.setAttribute("src", "gfx/icon/folder.svg");
-				
+				icon.setAttribute("alt", "Folder");
 				
 				li.addEventListener("click", function(e) {
 					openOrCloseFolder(li);
@@ -509,6 +516,7 @@ else throw err;
 				if(iconName == "htm") iconName = "html";
 				
 				icon.setAttribute("src", "gfx/icon/" + iconName + ".svg");
+				icon.setAttribute("alt", iconName);
 				
 				if(EDITOR.parseFileExtensionAsCode.indexOf(filetype.toLowerCase()) == -1) {
 					icon.setAttribute("style", "opacity: 0.5;");

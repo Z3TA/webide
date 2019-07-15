@@ -78,6 +78,7 @@
 		jsImg.setAttribute("src", "gfx/icon/js.svg");
 		jsImg.setAttribute("width", "16");
 		jsImg.setAttribute("height", "16");
+		jsImg.setAttribute("alt", "JS");
 		jsFile.appendChild(jsImg);
 		
 		jsFile.appendChild(document.createTextNode("Node.JS script (JavaScript)"));
@@ -95,6 +96,7 @@
 		htmlImg.setAttribute("src", "gfx/icon/html.svg");
 		htmlImg.setAttribute("width", "16");
 		htmlImg.setAttribute("height", "16");
+		htmlImg.setAttribute("alt", "HTML");
 		
 		htmlButton.appendChild(htmlImg);
 		
@@ -112,6 +114,7 @@
 		cssImg.setAttribute("src", "gfx/icon/css.svg");
 		cssImg.setAttribute("width", "16");
 		cssImg.setAttribute("height", "16");
+		cssImg.setAttribute("alt", "CSS");
 		cssButton.appendChild(cssImg);
 		cssButton.appendChild(document.createTextNode("Stylesheet (CSS)"));
 		cssButton.onclick = function(clickEvent) {
@@ -128,6 +131,7 @@
 		docImg.setAttribute("src", "gfx/icon/doc.svg");
 		docImg.setAttribute("width", "16");
 		docImg.setAttribute("height", "16");
+		docImg.setAttribute("alt", "txt");
 		anyFile.appendChild(docImg);
 		
 		anyFile.appendChild(document.createTextNode("Plain text (misc.)"));
