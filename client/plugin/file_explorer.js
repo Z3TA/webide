@@ -823,6 +823,8 @@ return;
 		var filePath = item.getAttribute("path");
 		EDITOR.openFile(filePath);
 		
+		EDITOR.dashboard.hide();
+		
 		if(hideButton) toggleFileExplorer(false);
 	}
 	

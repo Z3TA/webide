@@ -848,6 +848,8 @@ console.warn("gotoList not available!");
 						return;
 					}
 					
+					EDITOR.dashboard.hide();
+					
 					//console.log("Going to line " + lineNr);
 					EDITOR.renderNeeded();
 					
