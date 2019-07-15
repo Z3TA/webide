@@ -700,7 +700,11 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 What I'm thinking
 -----------------
 
-Full page menu !?
+---
+
+Different projects ? Node.JS, Web app, QuickJS, Gnome JS !?
+
+---
 
 (feature discovery)
 

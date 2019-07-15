@@ -1269,6 +1269,8 @@ file.fixCaret();
 		var testFile;
 		var fileChangeOrder = 0;
 		
+		EDITOR.dashboard.hide();
+		
 		function f(o) {
 			
 			if(o.index == undefined) throw new Error("Must specify index!");

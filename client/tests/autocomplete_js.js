@@ -8,7 +8,7 @@
 		
 	*/
 	
-	EDITOR.addTest(1, function createElementReturnsDomElement(callback) {
+	EDITOR.addTest(function createElementReturnsDomElement(callback) {
 		EDITOR.openFile("createElementReturnsDomElement.js", 'var foo = document.createEelement("div");\nfoo.innerT', function(err, file) {
 			var atCaret = autoComplete(file, 52);
 			UTIL.assert(file.rowText(1), "foo.innerText");

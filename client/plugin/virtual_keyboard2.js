@@ -839,11 +839,11 @@ return false;
 		// If a input or textarea element had focus, send it the character!
 		if(el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")) {
 			
+			var key = String.fromCharCode(charCode);
+			
 			insertAtCaret(el, key);
 			
 			el.focus();
-			
-			var key = String.fromCharCode(charCode);
 			
 			// Fire events
 			var ev = {
@@ -893,6 +893,8 @@ return false;
 			The caret is lost when the element is blurred, eg when you push a button on the virtual keyboard.
 			Solution: Save the caret position every time the element blurs
 		*/
+		
+		if(text == undefined) throw new Error("text=" + text + " t=", t);
 		
 		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop")) || 0;
 		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;

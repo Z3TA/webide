@@ -272,7 +272,7 @@
 		
 	});
 	
-	EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
+	EDITOR.addTest(1, true, function wysiwygNoExtraLineBreaks(callback) {
 		/*
 			We want the compiled bodytag html and file body html to be the same after the "dance"
 			(it only dance in WYSIWYG mode)
@@ -429,7 +429,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function previewAutocomplete(callback) {
+	EDITOR.addTest(false, function previewAutocomplete(callback) {
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';

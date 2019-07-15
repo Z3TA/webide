@@ -7228,6 +7228,8 @@ name: login.user,
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
+		EDITOR.dashboard.hide(true);
+		
 		var maxParallel = 5; // Running too many tests at once will cause timeout issues
 		var abortOnError = false;
 		
@@ -7435,6 +7437,8 @@ console.warn("testInfo: allDone() already called!");
 				
 				EDITOR.runningTests = false;
 				allDone = true;
+				
+				EDITOR.dashboard.stayHidden = false;
 				
 				if(fails === 0) {
 					//EDITOR.closeAllDialogs();

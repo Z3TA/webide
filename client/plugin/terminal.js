@@ -86,6 +86,11 @@
 	function addTerminalEvents() {
 		console.warn("addTerminalEvents");
 		
+		if(terminalActive === true) {
+console.warn("Terminal events already active!");
+			return;
+		}
+		
 		EDITOR.on("keyPressed", terminalKeyPressed);
 		EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 		EDITOR.on("paste", terminalPaste);
@@ -1451,6 +1456,7 @@ file.insertLineBreak();
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			terminalFiles.push(file);
+			terminalFileShow(file)
 			
 			var testFile = "testOpenFileFromTerminal"
 			var filesOpened = 0;

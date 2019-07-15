@@ -208,6 +208,8 @@ leftColumn.removeChild(functionListWrap);
 		
 		if(file == undefined) {
 			file = EDITOR.currentFile;
+			if(!file) return;
+			
 			caret = EDITOR.currentFile.caret;
 			center = true;
 		}
