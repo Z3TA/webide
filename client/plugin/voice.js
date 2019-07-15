@@ -134,10 +134,15 @@
 				else if(char == "\n") ; // Don't say anything'
 				else if(char == ";") add("semi-colon");
 				else if(char == ":") add("colon");
-				else throw new Error("Unknown character: char=" + UTIL.lbChars(char) + " (" + char.charCodeAt(0) + ")");
+				else {
+					// Todo: Add all emojis !?
+					add("charcode" + char.charCodeAt(0));
+					console.warn("Unknown character: char=" + UTIL.lbChars(char) + " (" + char.charCodeAt(0) + ")");
+					//throw new Error("Unknown character: char=" + UTIL.lbChars(char) + " (" + char.charCodeAt(0) + ")");
+				}
 			}
-		else if(charToTheLeft.match(/\W/) || caret.col == 0) {
-			console.log("get word caret.index=" + caret.index + " char=" + char + " ...");
+			else if(charToTheLeft.match(/\W/) || caret.col == 0) {
+				console.log("get word caret.index=" + caret.index + " char=" + char + " ...");
 			var word = "";
 			for (var i=caret.index, char; i<file.text.length; i++) {
 				char = file.text.charAt(i)
@@ -152,7 +157,7 @@
 		}
 			else add(char);
 			
-			if(caret.eol && file.grid[caret.row].length > 0) add("End of line");
+			if(caret.eol && file.grid[caret.row].length > 0) add("End of line " + (caret.row + 1));
 			if(caret.eof) add("End of file!");
 		
 			lastRow = caret.row;
