@@ -357,7 +357,6 @@ canvas {
 	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
 	float: right;
 	border: 0px solid red;
-	background-color: orange;
 	vertical-align: top;
 }
 
