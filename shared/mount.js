@@ -223,13 +223,13 @@ console.log("Folder exist: " + sourcePath);
 				*/
 				
 				if(!sourcePath) {
-					console.log("targetParentStats.dev=" + targetParentStats.dev + " != targetStats.dev=" + targetStats.dev + ". Assuming the folder has already been mounted!");
+					console.log("targetParentStats.dev=" + targetParentStats.dev + " targetStats.dev=" + targetStats.dev + "");
 					if(targetParentStats.dev != targetStats.dev) {
 						return mountDone(null); // Already mounted!
 					}
 				}
 				else {
-					console.log("sourceStats.dev=" + sourceStats.dev + " != targetStats.dev=" + targetStats.dev + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "  ");
+					console.log("sourceStats.dev=" + sourceStats.dev + " targetStats.dev=" + targetStats.dev + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "  ");
 					if(sourceStats.ino == targetStats.ino) {
 						//console.timeEnd("mounting " + targetPath);
 						return mountDone(null); // Already mounted!
