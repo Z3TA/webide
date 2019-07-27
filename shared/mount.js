@@ -113,7 +113,7 @@ var abort = false;
 		
 		sourceStats = stats;
 		
-//console.log("Folder exist: " + sourcePath);
+console.log("Folder exist: " + sourcePath);
 
 		statTarget();
 });
@@ -175,7 +175,7 @@ var abort = false;
 			}
 			else {
 				
-				//console.log("Target exist: " + targetPath);
+				console.log("Target exist: " + targetPath);
 				/*
 					
 					Problem: If no source is given, how to determen if target is already mounted or not !?
@@ -223,12 +223,13 @@ var abort = false;
 				*/
 				
 				if(!sourcePath) {
+					console.log("targetParentStats.dev=" + targetParentStats.dev + " != targetStats.dev=" + targetStats.dev + ". Assuming the folder has already been mounted!");
 					if(targetParentStats.dev != targetStats.dev) {
-						//console.log("targetParentStats.dev=" + targetParentStats.dev + " != targetStats.dev=" + targetStats.dev + ". Assuming the folder has already been mounted!");
 						return mountDone(null); // Already mounted!
 					}
 				}
 				else {
+					console.log("sourceStats.dev=" + sourceStats.dev + " != targetStats.dev=" + targetStats.dev + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "  ");
 					if(sourceStats.ino == targetStats.ino) {
 						//console.timeEnd("mounting " + targetPath);
 						return mountDone(null); // Already mounted!
