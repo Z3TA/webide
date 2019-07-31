@@ -35,6 +35,8 @@
 	Problem 6: Service worker thinks it has a new version ... It updated itself, but not the cache!
 	Solution 6: Have it fetch version.txt and refresh the cache if it's lower
 	
+	Question: Will the service worker fetch version.txt from it's cache or from the server !?
+	
 	self.registration.unregister() !?
 	
 */
@@ -165,21 +167,21 @@ function updateCache(latestVersionMaybe) {
 		
 		if(highestVersion >= latestVersionMaybe) {
 			console.log("serviceWorker has highestVersion=" + highestVersion + " in cache. Check to make sure ...");
-			
+			// Hmm, will this fetch from the server or the cache !?!?!?
 			return fetch('version.txt').then(function(response) {
-				var version = parseInt(response);
-				if(version < highestVersion) {
-					console.log("serviceWorker refreshing cacheVersion=" + cacheVersion + " because version.txt=" + version + " is older then highestVersion=" + highestVersion);
-					return refreshCache(cacheVersion);
-				}
-				else {
-					// We are updated
-					VERSION = highestVersion;
-					return false;
-				}
-			})
-			.then(function(myJson) {
-				console.log(JSON.stringify(myJson));
+				return response.text().then(function(text) {
+					var version = parseInt(text);
+					
+					if(version < highestVersion) {
+						console.log("serviceWorker refreshing cacheVersion=" + cacheVersion + " because version.txt=" + version + " is older then highestVersion=" + highestVersion);
+						return refreshCache(cacheVersion);
+					}
+					else {
+						console.log("serviceWorker seems to have latest cache: version=" + version + " highestVersion=" + highestVersion);
+						VERSION = highestVersion;
+						return false;
+					}
+				});
 			});
 		}
 		else {
@@ -219,6 +221,8 @@ function updateCache(latestVersionMaybe) {
 				// insteading of having it wait before refreshing - hoping the serviceWorker has updated the cache
 				return notifyClientUpdate(highestVersion, latestVersionMaybe);
 				
+			}).catch(function(err) {
+				console.warn("serviceWorker failed to fetch one or more files. Totally useless error message: " + err.message);
 			});
 		});
 	}
@@ -229,9 +233,9 @@ function updateCache(latestVersionMaybe) {
 function deleteAllCachesExcept(currentCacheVersion) {
 	// Delete old caches
 	console.log("serviceWorker deleteAllCachesExcept: currentCacheVersion=" + currentCacheVersion);
-		return caches.keys().then(function(keys) {
-			return Promise.all(keys.map(function(key) {
-				if(key != currentCacheVersion) {
+	return caches.keys().then(function(keys) {
+		return Promise.all(keys.map(function(key) {
+			if(key != currentCacheVersion) {
 				console.log("serviceWorker deleteAllCachesExcept: Deleting old cache: " + key);
 					return caches.delete(key);
 				}

@@ -29,6 +29,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Update loop, stuck on old version because the service worker thinks it has the latest version in cache.
+
+
 regression: Menu resizes again after a child element is added in file-tab
 
 run/fix tests!

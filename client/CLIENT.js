@@ -240,7 +240,7 @@ callbackWaitList[id] = callback;
 		loggedIn = json;
 	});
 	
-	CLIENT.on("editorVersion", function(version) {
+	CLIENT.on("editorVersion", function updateServiceWorkerCacheMaybe(version) {
 		
 		var newVersion = parseInt(version);
 		var oldVersion = EDITOR.version;
