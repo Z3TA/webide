@@ -32,6 +32,9 @@
 	Problem 5: The service worker will update the cache using the *old* version of the service worker (old version of this script)
 	So if there's something wrong with the service worker, the cache will not be updated until next editor release!
 	
+	Problem 6: Service worker thinks it has a new version ... It updated itself, but not the cache!
+	Solution 6: Have it fetch version.txt and refresh the cache if it's lower
+	
 	self.registration.unregister() !?
 	
 */
@@ -100,12 +103,13 @@ var CACHE_FILES = [
 	'/global.js',
 	'/sockjs-0.3.4.js',
 	'/signup/signup.js',
-	'/gfx/jz64.png'
+	'/gfx/jz64.png',
 	
 	
 	// Cache VNC
 	
 	// Cache other
+	"version.txt"
 	
 ]
 
@@ -130,6 +134,7 @@ function updateCache(latestVersionMaybe) {
 	console.log("serviceWorker updateCache: latestVersionMaybe=" + latestVersionMaybe);
 	
 	var latestVersion = latestVersionMaybe;
+	var cacheVersion = "jzedit_v" + latestVersionMaybe;
 	
 	return caches.keys().then(function(keys) {
 		
@@ -159,16 +164,33 @@ function updateCache(latestVersionMaybe) {
 		if(typeof highestVersion != "number") throw new Error("highestVersion=" + highestVersion + " is not a number!");
 		
 		if(highestVersion >= latestVersionMaybe) {
-			console.log("serviceWorker highestVersion=" + highestVersion + ". No need to update cache.");
-			VERSION = highestVersion;
-			return false;
+			console.log("serviceWorker has highestVersion=" + highestVersion + " in cache. Check to make sure ...");
+			
+			return fetch('version.txt').then(function(response) {
+				var version = parseInt(response);
+				if(version < highestVersion) {
+					console.log("serviceWorker refreshing cacheVersion=" + cacheVersion + " because version.txt=" + version + " is older then highestVersion=" + highestVersion);
+					return refreshCache(cacheVersion);
+				}
+				else {
+					// We are updated
+					VERSION = highestVersion;
+					return false;
+				}
+			})
+			.then(function(myJson) {
+				console.log(JSON.stringify(myJson));
+			});
 		}
-		
+		else {
 		VERSION = latestVersionMaybe;
 		
-		var cacheVersion = "jzedit_v" + latestVersionMaybe;
 		console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " because it's newer then highestVersion=" + highestVersion + "");
-		
+			return refreshCache(cacheVersion);
+		}
+	});
+	
+	function refreshCache(cacheVersion) {
 		// Delete all caches before filling the new cache to prevent the new cache being filled from the old cache
 		return caches.keys().then(function(keys) {
 			return Promise.all(keys.map(function(key) {
@@ -193,17 +215,19 @@ function updateCache(latestVersionMaybe) {
 			}).then(function() {
 				console.log("serviceWorker successfully filled the cache for " + cacheVersion + "");
 				
-// It would be optimal if we could tell the client to refresh,
+				// It would be optimal if we could tell the client to refresh,
 				// insteading of having it wait before refreshing - hoping the serviceWorker has updated the cache
 				return notifyClientUpdate(highestVersion, latestVersionMaybe);
-
+				
 			});
 		});
-	});
 	}
-	
-	function deleteAllCachesExcept(currentCacheVersion) {
-		// Delete old caches
+}
+
+
+
+function deleteAllCachesExcept(currentCacheVersion) {
+	// Delete old caches
 	console.log("serviceWorker deleteAllCachesExcept: currentCacheVersion=" + currentCacheVersion);
 		return caches.keys().then(function(keys) {
 			return Promise.all(keys.map(function(key) {

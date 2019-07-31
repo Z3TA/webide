@@ -15,10 +15,10 @@ else
 fi
 
 
-# Get the current version (generates version.inc)
+# Get the current version (generates version.txt)
 node changeset.js
 #commit=$(nodejs getCommitId.js)
-commit=$(cat version.inc)
+commit=$(cat version.txt)
 semver=$(cat SEMVER)
 version=1
 beta=_alpha
@@ -53,9 +53,9 @@ sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/lin
 # The manifest.webapp version probably doesn't matter, but update it just in case, it seems it assume semver
 sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/client/manifest.webapp
 
-echo "Copy over version.inc"
-# version.inc can for example be used by other programs to get the jzedit commmit id (version)
-cp version.inc temp/release/linux/
+echo "Copy over version.txt"
+# version.txt can for example be used by other programs to get the jzedit commmit id (version)
+cp version.txt temp/release/linux/
 
 
 echo "Set devMode and toolbar to false"
@@ -209,7 +209,7 @@ cd ../../
 #rm -rf temp/release/$name-v$version$beta-$commit-server
 
 echo "Remove files no longer needed"
-rm version.inc
+rm version.txt
 
 
 if [[ "$@" =~ "-publish" ]]

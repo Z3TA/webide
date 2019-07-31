@@ -21,7 +21,7 @@ var child = exec('hg log -l 1', function(error, stdout, stderr) {
 	//console.log(output);
 	
 	var fs = require("fs");
-	var path = "version.inc";
+	var path = "version.txt";
 	var encoding = "utf8";
 	
 	fs.writeFile(path, output, function(err) {
