@@ -36,6 +36,10 @@
 	Solution 6: Have it fetch version.txt and refresh the cache if it's lower
 	
 	Question: Will the service worker fetch version.txt from it's cache or from the server !?
+	Answer: The server worker's fetch will always download from the server, not from the service-worker-cache!
+	
+	Problem 7: Service worker fetch directly from the server, and there seem to be no way to retrive a file from the cache from within the service-worker
+	Solution 7: fetch version.txt outside the service worker in order to get it from the service-worker cache. Then send a FORCE cache reload request to the service worker!
 	
 	self.registration.unregister() !?
 	
@@ -53,6 +57,8 @@ if(VERSION === 0) {
 	// VERSION variable not populated means we are in development mode!
 	DEV_MODE = true;
 }
+
+DEV_MODE = false;
 
 console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + DEV_MODE + " started ...");
 
@@ -116,27 +122,46 @@ var CACHE_FILES = [
 ]
 
 
+setInterval(test, 3000);
+
+function test() {
+	// Figure out if the service worker fetches from the cache or from the server
+	return fetch('version.txt').then(function(response) {
+		return response.text().then(function(text) {
+			console.log("serviceWorker fetch version.txt=" + text);
+		});
+	});
+}
+
+
 self.addEventListener('message', function(msg) {
 	console.log("serviceWorker (VERSION=" + VERSION + " DEV_MODE=" + DEV_MODE + ") Received Message: ", msg.data);
 	var matchVersion = msg.data.match(/editorVersion=(\d+)/);
+	var matchForce = msg.data.match(/forceRefresh=(\d+)/);
 	if(msg.data == "devModeOff") {
 		DEV_MODE = false;
 	}
 	else if(msg.data == "devModeOn") {
-		DEV_MODE = true;
+		//DEV_MODE = true;
 	}
 	else if(matchVersion) {
 		var editorVersion = parseInt(matchVersion[1]);
 		updateCache(editorVersion);
 	}
+	else if(matchForce) {
+		var editorVersion = parseInt(matchForce[1]);
+		updateCache(editorVersion, true);
+	}
 });
 
 
-function updateCache(latestVersionMaybe) {
+function updateCache(latestVersionMaybe, forceRefresh) {
 	console.log("serviceWorker updateCache: latestVersionMaybe=" + latestVersionMaybe);
 	
 	var latestVersion = latestVersionMaybe;
 	var cacheVersion = "jzedit_v" + latestVersionMaybe;
+	
+	if(forceRefresh) return refreshCache(cacheVersion);
 	
 	return caches.keys().then(function(keys) {
 		
@@ -168,6 +193,7 @@ function updateCache(latestVersionMaybe) {
 		if(highestVersion >= latestVersionMaybe) {
 			console.log("serviceWorker has highestVersion=" + highestVersion + " in cache. Check to make sure ...");
 			// Hmm, will this fetch from the server or the cache !?!?!?
+			from the server, damnit!
 			return fetch('version.txt').then(function(response) {
 				return response.text().then(function(text) {
 					var version = parseInt(text);
