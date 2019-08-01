@@ -55,7 +55,6 @@ sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/lin
 
 echo "Copy over version.txt"
 # version.txt can for example be used by other programs to get the jzedit commmit id (version)
-cp version.txt temp/release/linux/
 cp version.txt temp/release/linux/client/
 
 

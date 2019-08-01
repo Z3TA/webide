@@ -250,22 +250,22 @@ callbackWaitList[id] = callback;
 		// Always tell the service worker what version the server is on, so it can update the cache if needed
 		var serviceWorkerError = true;
 		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-			console.log("Telling the serviceWorker about server version=" + newVersion);
+			console.log("editorVersion: Telling the serviceWorker about server version=" + newVersion);
 			serviceWorkerError = false;
 			try {
 				navigator.serviceWorker.controller.postMessage("editorVersion=" + newVersion);
 			}
 			catch(err) {
 				serviceWorkerError = true;
-				console.warn("Failed to post message to server worker: " + err.message);
+				console.warn("editorVersion: Failed to post message to server worker: " + err.message);
 			}
 		}
 		else {
-console.log("serviceWorker not supported on BROWSER=" + BROWSER);
+			console.log("seditorVersion: erviceWorker not supported on BROWSER=" + BROWSER);
 		}
 		
 		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
-			console.warn("Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
+			console.warn("editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
 			return;
 		}
 		else if(newVersion != oldVersion && lastUsedserver && lastUsedserver.url.indexOf(window.location.hostname) == -1) {
@@ -273,20 +273,40 @@ console.log("serviceWorker not supported on BROWSER=" + BROWSER);
 		}
 		else if(newVersion > oldVersion) {
 			// Wait until serviceWorker has updated the cache ...
-			if(serviceWorkerError) console.warn("Unable to talk to service worker! No point refreshing.");
+			if(serviceWorkerError) console.warn("editorVersion: Unable to talk to service worker! No point refreshing.");
 			else setTimeout(refresh, 10000); // The wait must be enough to make sure the service worker has refreshed the cache!
 		}
 		
 		function refresh() {
-			var ok = "Reload now!";
-			var cancel = "Update another time"
-			confirmBox("The editor has been updated from version=" + oldVersion + " to " + newVersion + "\nReload to get the new version.", [cancel, ok], function(answer) {
-				if(answer == ok) {
-					EDITOR.reload();
+			
+			// First check to make sure the chache has actually updated!
+			UTIL.httpGet("version.txt", function(err, str) {
+				if(err) {
+					alertBox(err.message, err.code, "error");
+					return;
+				}
+				
+				var version = parseInt(str);
+				
+				console.log("editorVersion: server=" + newVersion + " version.txt=" + version);
+				
+				if(version < newVersion && !serviceWorkerError) {
+					console.warn("editorVersion: Force refresh the cache!");
+					navigator.serviceWorker.controller.postMessage("forceRefresh=" + newVersion);
+					setTimeout(refresh, 20000);
+				}
+				else {
+					console.log("editorVersion: We now have the new version=" + version + " in the cache, same as newVersion=" + newVersion);
+					var ok = "Reload now!";
+					var cancel = "Update another time"
+					confirmBox("The editor has been updated from version=" + oldVersion + " to " + newVersion + "\nReload to get the new version.", [cancel, ok], function(answer) {
+						if(answer == ok) {
+							EDITOR.reload();
+						}
+					});
 				}
 			});
 		}
-		
 	});
 	
 	function connSend(msg, callback) {

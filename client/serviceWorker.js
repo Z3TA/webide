@@ -50,7 +50,7 @@
 //throw new Error("serviceWorker test error");
 // A throw error in the service worker will get caught in the Promise to register the service worker. See register_service_worker.js
 
-var DEV_MODE = false;
+var DEV_MODE = false; // Default is false
 var VERSION = 0; // The id of the cache version. Updated by the release script. And also by the editor-client. 
 
 if(VERSION === 0) {
@@ -58,14 +58,12 @@ if(VERSION === 0) {
 	DEV_MODE = true;
 }
 
-DEV_MODE = false;
-
 console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + DEV_MODE + " started ...");
 
 
 var CACHE_FILES = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
-	// Asume the bundle is loaded, and don't cache each induvidual .js files!
+	// Assume the bundle is loaded, and don't cache each induvidual .js files!
 	
 	'/gfx/style.css',
 	
@@ -121,19 +119,6 @@ var CACHE_FILES = [
 	
 ]
 
-
-setInterval(test, 3000);
-
-function test() {
-	// Figure out if the service worker fetches from the cache or from the server
-	return fetch('version.txt').then(function(response) {
-		return response.text().then(function(text) {
-			console.log("serviceWorker fetch version.txt=" + text);
-		});
-	});
-}
-
-
 self.addEventListener('message', function(msg) {
 	console.log("serviceWorker (VERSION=" + VERSION + " DEV_MODE=" + DEV_MODE + ") Received Message: ", msg.data);
 	var matchVersion = msg.data.match(/editorVersion=(\d+)/);
@@ -142,7 +127,7 @@ self.addEventListener('message', function(msg) {
 		DEV_MODE = false;
 	}
 	else if(msg.data == "devModeOn") {
-		//DEV_MODE = true;
+		DEV_MODE = true;
 	}
 	else if(matchVersion) {
 		var editorVersion = parseInt(matchVersion[1]);
@@ -191,24 +176,10 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 		if(typeof highestVersion != "number") throw new Error("highestVersion=" + highestVersion + " is not a number!");
 		
 		if(highestVersion >= latestVersionMaybe) {
-			console.log("serviceWorker has highestVersion=" + highestVersion + " in cache. Check to make sure ...");
-			// Hmm, will this fetch from the server or the cache !?!?!?
-			from the server, damnit!
-			return fetch('version.txt').then(function(response) {
-				return response.text().then(function(text) {
-					var version = parseInt(text);
-					
-					if(version < highestVersion) {
-						console.log("serviceWorker refreshing cacheVersion=" + cacheVersion + " because version.txt=" + version + " is older then highestVersion=" + highestVersion);
-						return refreshCache(cacheVersion);
-					}
-					else {
-						console.log("serviceWorker seems to have latest cache: version=" + version + " highestVersion=" + highestVersion);
-						VERSION = highestVersion;
-						return false;
-					}
-				});
-			});
+			console.log("serviceWorker has highestVersion=" + highestVersion + " in cache. No need to update!");
+			VERSION = highestVersion;
+			// We can not double check by fetching version.txt from here, because service worker always fetch from the server, not the cache.
+			return false;
 		}
 		else {
 		VERSION = latestVersionMaybe;
