@@ -29,8 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-run/fix tests!
-
 prio:  Polish first time user experience.
 
 We don't want "reviewers" to get stuck! We need to show something interesting on the screen!
@@ -44,6 +42,9 @@ Something that makes them want to try out the editor ...
 * Database stats
 
 
+docker integration !?
+
+kaiOS support !?
 
 
 Add stuff to the dashboard for discovery!?

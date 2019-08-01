@@ -5,6 +5,7 @@
 	"launch_path": "/index.htm",
 	"icons": {
 		"64": "/gfx/jz64.png",
+		"128": "/gfx/jz128.png",
 		"192": "/gfx/jz192.png",
   "512": "/gfx/jz512.png"
 	},
