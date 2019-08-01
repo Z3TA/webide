@@ -1,4 +1,4 @@
-// Gets the latest changeset ID from Merurial and save it as version.inc
+// Gets the latest changeset ID from Merurial and save it as version.txt
 
 var exec = require('child_process').exec;
 var child = exec('hg log -l 1', function(error, stdout, stderr) {

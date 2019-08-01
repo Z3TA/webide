@@ -17,7 +17,6 @@ fi
 
 # Get the current version (generates version.txt)
 node changeset.js
-#commit=$(nodejs getCommitId.js)
 commit=$(cat version.txt)
 semver=$(cat SEMVER)
 version=1
@@ -97,7 +96,6 @@ rm temp/release/linux/release.sh
 rm temp/release/linux/todo.md
 rm temp/release/linux/testfile.txt
 rm temp/release/linux/.hgignore
-rm temp/release/linux/getCommitId.js
 rm temp/release/linux/jz.xcf
 rm temp/release/linux/makebundle.js
 rm temp/release/linux/makebundle2.js
