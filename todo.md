@@ -29,6 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+release!
+
+Test in Opera Mini
+
 Separate insert and navigation modes for T9 kaios feature phones.
 
 prio:  Polish first time user experience.
