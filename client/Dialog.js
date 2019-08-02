@@ -8,6 +8,10 @@
 
 "use strict";
 
+var DIALOG_Z_INDEX = 256;
+
+alertBox("hi");
+
 function Dialog(msg, options) {
 	var dialog = this;
 	
@@ -60,7 +64,7 @@ function Dialog(msg, options) {
 	var div = dialog.div;
 	
 	div.setAttribute("class", "dialog");
-	div.setAttribute("style", "position: absolute; top: 50px; left: 50px");
+	div.setAttribute("style", "position: absolute; top: 50px; left: 50px, z-index: " + (--DIALOG_Z_INDEX));
 	
 	div.addEventListener("click", focusDefaultElement, false);
 	
@@ -70,7 +74,7 @@ function Dialog(msg, options) {
 	
 	dialog.openedDate = new Date();
 	
-	if(EDITOR && EDITOR.openDialogs) EDITOR.openDialogs.push(dialog);
+	if(typeof EDITOR != "undefined" && EDITOR.openDialogs) EDITOR.openDialogs.push(dialog);
 	
 	if(img) {
 		//alert(icon);
@@ -104,10 +108,11 @@ function Dialog(msg, options) {
 	div.style.top = Math.round(windowHeight / 2 - divHeight/2 - sligtlyUp) + "px";
 	div.style.left = Math.round(windowWidth / 2 - divWidth/2) + "px";
 	
-	
-	// Give the focus to the box
-	dialog.editorHadInputFocus = EDITOR.input;
+	if(typeof EDITOR != "undefined") {
+		// Give the focus to the box
+		dialog.editorHadInputFocus = EDITOR.input;
 	EDITOR.input = false;
+	}
 	
 	// Give the program time to add buttons etc to the dialog
 	// Also avoid accidently closing the dialog (while typing spaces)
@@ -128,7 +133,7 @@ function Dialog(msg, options) {
 			}
 		}
 		
-		EDITOR.input = false;
+		if(typeof EDITOR != "undefined") EDITOR.input = false;
 	}
 }
 Dialog.prototype.isOpen = function(someEvent, callback) {
@@ -140,7 +145,14 @@ Dialog.prototype.close = function(someEvent, callback) {
 	
 	console.log("Dialog.prototype.close ...");
 	
+	if(typeof EDITOR != "undefined") {
 	EDITOR.openDialogs.splice(EDITOR.openDialogs.indexOf(dialog), 1);
+	
+		if(EDITOR.openDialogs.length==0) {
+			// Reset z-index
+			DIALOG_Z_INDEX = 256;
+		}
+	}
 	
 	if(dialog.div.parentElement) dialog.div.parentElement.removeChild(dialog.div);
 	else console.warn("Parent element does not exist for div=", dialog.div);
@@ -182,10 +194,14 @@ else {
 			Isse2: Copy/paste using virtual keyboard !? 
 		*/
 		
+		
 		setTimeout(function() {
-			console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
+			
+			if(typeof EDITOR != "undefined") {
+				console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
 			EDITOR.input = true;
 			EDITOR.canvas.focus();
+			}
 			
 			if(callback) callback();
 			
@@ -222,7 +238,7 @@ function alertBox(msg, code, icon, recursionCount) {
 	button.appendChild(document.createTextNode("OK"));
 	
 	button.addEventListener("click", function(clickEvent) {
-		console.log("alertBox button click: EDITOR.input=" + EDITOR.input + "");
+		console.log("alertBox button click: EDITOR.input=" + ((typeof EDITOR != "undefined") && EDITOR.input) + "");
 		dialog.close(clickEvent);
 	}, false);
 	
@@ -398,7 +414,7 @@ dialogDelay = defaultValue;
 	dialog.div.appendChild(ok);
 	
 	if(dialogDelay === 0) {
-	EDITOR.input = false;
+		if(typeof EDITOR != "undefined") EDITOR.input = false;
 		input.focus();
 	
 	}
