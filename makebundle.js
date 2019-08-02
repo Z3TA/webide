@@ -101,20 +101,24 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 			
 			//bundle = bundle.replace(script.tag, '\n<!-- ' + script.src + ' --><script>console.log("' + script.src + '");</script>\n');
 		}
+		else {
+			// Remove the script
+			bundle = bundle.replace(script.tag, "");
+		}
 		
 		if(++counter == (scripts.length + stylesheets.length)) done();
-			
-		});
-	}
-	
-	function done() {
-		var fs = require("fs");
-		fs.writeFileSync("client/bundle.htm", bundle, "utf8");
 		
-		console.log(counter + " files concatenated into bundle.htm");
-		
-	}
+	});
+}
+
+function done() {
+	var fs = require("fs");
+	fs.writeFileSync("client/bundle.htm", bundle, "utf8");
 	
+	console.log(counter + " files concatenated into bundle.htm");
+	
+}
+
 function remveAllBetween(text, startStr, endStr) {
 	
 	var start = text.indexOf(startStr);
@@ -130,6 +134,6 @@ function remveAllBetween(text, startStr, endStr) {
 	
 	return text;
 }
-	
-	
-	//console.log(JSON.stringify(scripts, null, 2));
+
+
+//console.log(JSON.stringify(scripts, null, 2));
