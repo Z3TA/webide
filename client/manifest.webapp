@@ -3,6 +3,7 @@
  "name": "JZedit",
 	"description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
 	"launch_path": "/index.htm",
+	"fullscreen": "true",
 	"icons": {
 		"64": "/gfx/jz64.png",
 		"128": "/gfx/jz128.png",

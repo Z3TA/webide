@@ -266,6 +266,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 		var txt = options[i];
 		var button = document.createElement("button");
 		button.setAttribute("class", "confirm");
+		button.setAttribute("tabindex", i);
 		
 		// The last button will be the default (get focus)
 		if(i == (options.length -1)) button.setAttribute("focus", "true");

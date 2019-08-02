@@ -3275,14 +3275,30 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 			
-			if(callback) li.onclick = function(clickEvent) {
-				// Give the same function parameters as key bound events
-				var file = EDITOR.currentFile;
-				var combo = getCombo(clickEvent);
+			if(callback) {
 				var character = null;
 				var charCode = 0;
 				var direction = "down";
+li.onclick = function(clickEvent) {
+				// Give the same function parameters as key bound events
+				var file = EDITOR.currentFile;
+				var combo = getCombo(clickEvent);
 				callback(file, combo, character, charCode, direction, clickEvent);
+			}
+				li.addEventListener("keyup", function(keyEvent) {
+					// Number 13 is the "Enter" key on the keyboard
+					if (keyEvent.keyCode === 13) {
+						// Cancel the default action, if needed
+						keyEvent.preventDefault();
+						
+						var file = EDITOR.currentFile;
+						var combo = getCombo(keyEvent);
+						callback(file, combo, character, charCode, direction, keyEvent);
+						
+						EDITOR.ctxMenu.hide()
+					}
+				});
+				
 			}
 			
 			if(position) {
@@ -3293,6 +3309,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				li.setAttribute("position", "10");
 				//menu.insertBefore(li, menu.children[position]);
 			}
+			
+			// tabindex is needed in order for tab navigating to work (in Chrome)
+			li.setAttribute("tabindex", (position || 10));
 			
 			menu.appendChild(li);
 			
@@ -3577,6 +3596,15 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			//menu.style.height = "100%";
 			
 			console.log("menu.style.visibility=" + menu.style.visibility);
+			
+			console.log("menu.childNodes=", menu.childNodes);
+			console.log("menu.children=", menu.children);
+			
+			console.log("menu=", menu);
+			console.log(menu.childNodes[0]);
+			
+			// First element[0] is the temp-holder
+			menu.children[1].focus();
 			
 			return true;
 			
@@ -6298,7 +6326,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
 		console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
 		var returns = [];
-		for (var j=0, ret; j<EDITOR.eventListeners.hideVirtualKeyboard.length; j++) {
+		for (var j=0, ret; j<EDITOR.eventListeners.showVirtualKeyboard.length; j++) {
 			ret = EDITOR.eventListeners.showVirtualKeyboard[j].fun(keyboards);
 			// Should return an array of virtual keyboards that was turned on.
 			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected a list of keyboard names! (list can be empty)");

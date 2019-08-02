@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Separate insert and navigation modes for T9 kaios feature phones.
+
 prio:  Polish first time user experience.
 
 We don't want "reviewers" to get stuck! We need to show something interesting on the screen!

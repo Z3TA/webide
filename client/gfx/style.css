@@ -1255,6 +1255,11 @@ div.gotoFile li:hover {
 	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
 }
 
+.canvasContextmenu li.item:focus {
+	background: #b5d4ff;
+	outline: none;
+}
+
 .canvasContextmenu li .bullet {
 	display: inline-block;
 	vertical-align: middle;
@@ -1365,6 +1370,11 @@ div.gotoFile li:hover {
 	padding: 4px;
 	margin: 4px;
 	font-size: 12px;
+}
+
+.dialog button:focus {
+	font-weight: bold;
+	
 }
 
 .dialog button.alert {
@@ -1829,6 +1839,8 @@ div.group {
 		padding: 0;
 	}
 	
+	.dialog .message {
+		min-width: 80px;
 }
 
 

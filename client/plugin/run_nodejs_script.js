@@ -654,7 +654,10 @@
 		
 		EDITOR.ctxMenu.hide();
 		
-		if(!file) return alertBox("No file open!");
+		if(!file) {
+alertBox("No file open!");
+			return ALLOW_DEFAULT;
+		}
 		
 		var filePath = file.path;
 		
@@ -677,7 +680,7 @@
 		}
 		else start(json);
 		
-		return false;
+		return PREVENT_DEFAULT;
 		
 		function start(json) {
 			var stdOutFile = filePath + ".stdout";

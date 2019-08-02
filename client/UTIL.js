@@ -2270,7 +2270,8 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		throw new Error("Unable to get charCode from keyEvent=", keyEvent);
 		
 		function fromString(str) {
-			if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
+			if(str == "SoftRight") return 9; // Tab
+			else if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
 			else if(str.length != 1) throw new Error("UTIL.charCode: str=" + str + " length=" + str.length);
 			else return str.charCodeAt(0);
 		}
