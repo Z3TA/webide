@@ -10,8 +10,6 @@
 
 var DIALOG_Z_INDEX = 256;
 
-alertBox("hi");
-
 function Dialog(msg, options) {
 	var dialog = this;
 	
