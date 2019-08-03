@@ -50,15 +50,43 @@ console.warn("Unable to run preview: No file open!");
 	
 	function webPreviewTool(file) {
 		
-		if(!file.path.match(/html?$/i)) return false;
+		if(!isHTML(file)) return false;
+		
+		if(!file.path.match(/html?$/i)) {
+			var fileExt = UTIL.getFileExtension(file.path);
+			var nameSugg = UTIL.getDirectoryFromPath(file.path) + UTIL.getFileNameWithoutExtension(file.path) + ".htm";
+			promptBox("Can not preview a HTML file unless the file extension is .htm or .html. Rename " + UTIL.getFilenameFromPath(file.path) + " ?<br><br>New path: ", false, nameSugg, function(newPath) {
+				if(newPath) {
+					var filePath = file.path
+					file = null; // Don't linger on the old ref, the renamed file will get a new file object!
+					EDITOR.move(filePath, newPath, function fileRenamed(err, newPath) {
+						if(err) return alertBox(err.message);
+						var file = EDITOR.files[newPath];
+						openPreviewWindow(file);
+					});
+				}
+			});
+			return false;
+		}
 		
 		openPreviewWindow(file);
 		
 		return true;
 	}
 	
+	function isHTML(file) {
+		if(file.path.match(/html?$/i)) return true;
+		else if(file.text.match(/<!DOCTYPE html>/i)) return true;
+		else if(file.text.match(/<html>/i)) return true;
+		else if(file.text.match(/<script>/i)) return true;
+		
+		else return false;
+	}
+	
 	
 	function openPreviewWindow(file) {
+		
+		console.log("openPreviewWindow: file.path=" + file.path);
 		
 		// Need to start in a shallow folder if there are ../ relative paths
 		var backCount = 0;
