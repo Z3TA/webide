@@ -23,6 +23,9 @@ winMenuHide.activate();
 		EDITOR.windowMenu.disable();
 		
 		ctxWinMenuShow = EDITOR.ctxMenu.add("Show window menu", showWindowMenu, 20);
+		
+		alertBox('To show the window menu again: <b>Right click</b> (or long touch) to bring up the context menu ,and click <i>"Show window menu</i>"');
+		
 	}
 	
 	function showWindowMenu() {
