@@ -29,6 +29,10 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+todo: Auto-complete JS variables and classes(functions) as JSX tags
+
+todo: Discovery bar!
+
 release!
 
 Test in Opera Mini
