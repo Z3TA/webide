@@ -6160,7 +6160,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		}
 	}
 	
-	EDITOR.reload = function reload() {
+	EDITOR.reload = function reload(url) {
 		console.warn("Reloading the editor ...");
 		// Call exit listeners before reloading
 		EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
@@ -6205,7 +6205,8 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				console.log("Reloading! RUNTIME=" + RUNTIME);
 				
 				window.onbeforeunload = null;
-				location.reload();
+				if(url) window.location=url;
+				else location.reload();
 				
 				// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
 				

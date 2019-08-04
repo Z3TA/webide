@@ -29,7 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-todo: Auto-complete JS variables and classes(functions) as JSX tags
+todo: Auto-complete JS Functions as JSX tags with function parameters as props!
+todo: Add more HTML elements to autocomplete_html.js plugin
 
 todo: Discovery bar!
 

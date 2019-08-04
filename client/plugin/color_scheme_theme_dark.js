@@ -48,12 +48,25 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		}
 	
 	function toggleDarkTheme() {
+		
 		if(themeLoaded) {
-			alertBox("Reload the editor to reset the theme");
+			var loadTheme = "light";
 		}
 		else {
-			setDarkTheme();
+			var loadTheme = "dark";
 		}
+		
+		var yes = "Yes, reload!";
+		var no = "No, dont reload";
+		confirmBox("Reload the editor to change theme ?", [yes, no], function (answer) {
+			if(answer == yes) {
+				
+				EDITOR.reload("?theme=" + loadTheme);
+				
+			}
+		});
+		
+		
 	}
 	
 	function setDarkTheme() {
