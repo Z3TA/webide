@@ -1052,10 +1052,11 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
-																			JSX = false,
+		JSX = true,
 		jsxMaybe = false,
 		jsxIndentLevel = 0,
 		jsxOpenElements = [];
+		
 		
 		// -----
 		
@@ -1981,62 +1982,60 @@
 				
 				// ### JSX ###
 																										if(JSX) {
+					
 																											if(jsxMaybe && pastChar0=="<" && char=="/") {
 																												insideXmlTagEnding = true;
 																											}
-																											if(!insideXmlTag && char == "<") {
-																												jsxMaybe = true;
-																												// Reuse variable from xml because we are lazy
-																												xmlTagStart = i;
-																												xmlTagWordLength = 0;
-																											}
-																											/*
-																												
-																												hmm ... if(x<y && a>b) ...
-																												
-																											*/
-																											else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
+					// Prevent if(x<y && a>b) ...
+					else if(!insideXmlTag && char == "<" && (text[charIndex+1]==="/" || lastChar.match(/\s|>|\(/)) ) {
+						jsxMaybe = true;
+						// Reuse variable from xml because we are lazy
+						xmlTagStart = i;
+						xmlTagWordLength = 0;
+					}
+					else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
-																											else if(jsxMaybe && char == ">") {
-																												
-																												if(lastChar === "/") xmlTagSelfEnding = true;
-																												else xmlTagSelfEnding = false;
-																												
-																												if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
-																												
-																												xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
-																												
-																												jsxMaybe = false;
-																												
-																												console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
-																												
-																												if(!xmlTagSelfEnding) {
-																													word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), i); // Reuse variable because we are lazy
-																													
-																													console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-																													
-																													if(insideXmlTagEnding) {
-																														console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-																														
-																														if(jsxOpenElements.indexOf(word) != -1) {
-																															jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
-																															jsxIndentLevel--;
-																															vb_thisRowIndentation--; // Variable reuse
-																															
-																														}
-																													}
-																													else {
-																														// Tag opening
-																														jsxOpenElements.push(word);
-																														jsxIndentLevel++;
-																														vb_nextRowIndentation=1; // Variable reuse
-																														console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-																													}
-																												}
-																												
-																												insideXmlTagEnding = false;
-																											}
+					else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
+						
+						if(lastChar === "/") xmlTagSelfEnding = true;
+						else xmlTagSelfEnding = false;
+						
+						if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
+						
+						xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
+						
+						jsxMaybe = false;
+						
+						console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
+						
+						if(!xmlTagSelfEnding) {
+							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), i); // Reuse variable because we are lazy
+							
+							console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+							
+							if(insideXmlTagEnding) {
+								console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+								
+								if(jsxOpenElements.indexOf(word) != -1) {
+									jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
+									
+									if(vb_nextRowIndentation) vb_nextRowIndentation = 0;
+									else vb_thisRowIndentation--; // Variable reuse
+									
+								}
+							}
+							else {
+								// Tag opening
+								jsxOpenElements.push(word);
+								
+								vb_nextRowIndentation=1; // Variable reuse
+								console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+							}
+						}
+						
+						insideXmlTagEnding = false;
+					}
 																											
 																										}
 			}
@@ -2250,7 +2249,7 @@
 						
 					}
 					
-					//console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
+					console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
 					
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
@@ -3180,6 +3179,19 @@
 		
 	}
 	
+	function getLastWord(str) {
+		str = str.trim();
+		
+		var i = Math.max(
+		str.lastIndexOf("\n"),
+		str.lastIndexOf("\t"),
+		str.lastIndexOf(" "),
+		str.lastIndexOf("\r")
+		);
+		
+		if(i == -1) return str;
+		else return str.slice(i+1);
+	}
 	
 	function Func(name, args, start, lineNumber) {
 		var func = this;

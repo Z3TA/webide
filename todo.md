@@ -34,6 +34,8 @@ idea: Make window menu and file tabs inline-block in order to not waste screen s
 todo: Auto-complete JS Functions as JSX tags with function parameters as props!
 todo: Add more HTML elements to autocomplete_html.js plugin
 
+todo: Autocomplete closing of JSX xml tags
+
 todo: Discovery bar!
 
 release!
