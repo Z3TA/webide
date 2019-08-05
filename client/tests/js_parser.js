@@ -615,8 +615,22 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
+		EDITOR.addTest(1, function JSX(callback) {
 
-
+		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n\\n', function(err, file) {
+				
+				UTIL.assert(file.parsed.xmlTags.length, 2);
+				
+				UTIL.assert(file.grid[1].indentation, 1);
+				
+				
+				EDITOR.closeFile(file.path);
+				callback(true);
+				
+			});
+			
+		});
+		
 /*
 	
 	### parentheses Indenting

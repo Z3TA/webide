@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+idea: Make window menu and file tabs inline-block in order to not waste screen space !? eg. file tabs right side of window menu.
+
 todo: Auto-complete JS Functions as JSX tags with function parameters as props!
 todo: Add more HTML elements to autocomplete_html.js plugin
 

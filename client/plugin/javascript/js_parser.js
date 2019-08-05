@@ -1052,6 +1052,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
+																			JSX = false,
 		jsxMaybe = false,
 		jsxIndentLevel = 0,
 		jsxOpenElements = [];
@@ -1979,64 +1980,65 @@
 				
 				
 				// ### JSX ###
-				if(jsxMaybe && pastChar0=="<" && char=="/") {
-					insideXmlTagEnding = true;
-				}
-				if(!insideXmlTag && char == "<") {
-					jsxMaybe = true;
-					// Reuse variable from xml because we are lazy
-					xmlTagStart = i;
-					xmlTagWordLength = 0;
-				}
-				/*
-					
-					hmm ... if(x<y && a>b) ...
-					
-				*/
-				else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
-					xmlTagWordLength = i-xmlTagStart;
-				}
-				else if(jsxMaybe && char == ">") {
-					
-					if(lastChar === "/") xmlTagSelfEnding = true;
-					else xmlTagSelfEnding = false;
-					
-					if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
-					
-					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
-					
-					jsxMaybe = false;
-					
-					console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
-					
-					if(!xmlTagSelfEnding) {
-						word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), i); // Reuse variable because we are lazy
-						
-						console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-						
-						if(insideXmlTagEnding) {
-							console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-							
-							if(jsxOpenElements.indexOf(word) != -1) {
-								jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
-								jsxIndentLevel--;
-								vb_thisRowIndentation--; // Variable reuse
-								
-							}
-						}
-						else {
-							// Tag opening
-							jsxOpenElements.push(word);
-							jsxIndentLevel++;
-							vb_nextRowIndentation=1; // Variable reuse
-							console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-						}
-					}
-					
-					insideXmlTagEnding = false;
-				}
-				
-				
+																										if(JSX) {
+																											if(jsxMaybe && pastChar0=="<" && char=="/") {
+																												insideXmlTagEnding = true;
+																											}
+																											if(!insideXmlTag && char == "<") {
+																												jsxMaybe = true;
+																												// Reuse variable from xml because we are lazy
+																												xmlTagStart = i;
+																												xmlTagWordLength = 0;
+																											}
+																											/*
+																												
+																												hmm ... if(x<y && a>b) ...
+																												
+																											*/
+																											else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
+																												xmlTagWordLength = i-xmlTagStart;
+																											}
+																											else if(jsxMaybe && char == ">") {
+																												
+																												if(lastChar === "/") xmlTagSelfEnding = true;
+																												else xmlTagSelfEnding = false;
+																												
+																												if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
+																												
+																												xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
+																												
+																												jsxMaybe = false;
+																												
+																												console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
+																												
+																												if(!xmlTagSelfEnding) {
+																													word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), i); // Reuse variable because we are lazy
+																													
+																													console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+																													
+																													if(insideXmlTagEnding) {
+																														console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+																														
+																														if(jsxOpenElements.indexOf(word) != -1) {
+																															jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
+																															jsxIndentLevel--;
+																															vb_thisRowIndentation--; // Variable reuse
+																															
+																														}
+																													}
+																													else {
+																														// Tag opening
+																														jsxOpenElements.push(word);
+																														jsxIndentLevel++;
+																														vb_nextRowIndentation=1; // Variable reuse
+																														console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+																													}
+																												}
+																												
+																												insideXmlTagEnding = false;
+																											}
+																											
+																										}
 			}
 			
 			
