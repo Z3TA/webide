@@ -29,6 +29,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+todo: JSX bug with many script tags
+
 todo: Discovery bar!
 
 todo: Try React tutorial to feel pain
@@ -38,7 +40,7 @@ todo: save parameters from arrow functions!
 
 idea: Make window menu and file tabs inline-block in order to not waste screen space !? eg. file tabs right side of window menu.
 
-
+todo: Fix markdown topics in Zoom! (text base)
 
 release!
 

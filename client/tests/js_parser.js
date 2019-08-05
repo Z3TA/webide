@@ -615,9 +615,9 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
-		EDITOR.addTest(1, function JSX(callback) {
+EDITOR.addTest(function JSX1(callback) {
 
-		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
+		EDITOR.openFile("jsx1.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
 				
 		UTIL.assert(file.parsed.xmlTags.length, 4);
 				
@@ -632,6 +632,21 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 			});
 			
 		});
+
+EDITOR.addTest(1, function JSX2(callback) {
+	EDITOR.openFile("jsx2.htm", '<!DOCTYPE html>\n<script></script>\n<script></script>\n<script></script>\n', function(err, file) {
+		
+		UTIL.assert(file.parsed.xmlTags.length, 7);
+		
+		UTIL.assert(file.grid[1].indentation, 0);
+		UTIL.assert(file.grid[2].indentation, 0);
+		UTIL.assert(file.grid[3].indentation, 0);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 
 		
 /*

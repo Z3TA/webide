@@ -2654,7 +2654,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	// Add feature icons for discovery
 	EDITOR.discoveryBar = {
-		add: function addDiscoveryItem() {
+		add: function addDiscoveryItem(icon, whenClicked) {
 			
 		},
 		remove: function removeDiscoveryItem() {

@@ -1991,7 +1991,7 @@
 					/ JZ
 					
 				*/ 
-																										if(JSX) {
+						if(JSX && !xmlMode) {
 					
 																											if(jsxMaybe && pastChar0=="<" && char=="/") {
 																												insideXmlTagEnding = true;
@@ -2006,7 +2006,7 @@
 					else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
-					else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
+							else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
 						
 						if(lastChar === "/") xmlTagSelfEnding = true;
 						else xmlTagSelfEnding = false;
@@ -2017,7 +2017,7 @@
 						
 						jsxMaybe = false;
 						
-						console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
+								console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode);
 						
 						if(!xmlTagSelfEnding) {
 							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
@@ -2052,7 +2052,7 @@
 			
 			
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
+			console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			
 			if(codeBlockLeft==codeBlockRight) {
 				insideCodeBlock = false;
