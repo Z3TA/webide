@@ -2,14 +2,14 @@
 
 	EDITOR.plugin({
 		desc: "Autocomplete JSX components",
-		load: function loadAutocompleteHTML() {
+		load: function loadAutocompleteJSX() {
 			
 			var order = 150; // After autocomplete_js.js
 			
 			EDITOR.on("autoComplete", autoCompleteJSX, order);
 			
 		},
-		unload: function unloadAutocompleteHTML() {
+		unload: function unloadAutocompleteJSX() {
 			
 			EDITOR.removeEvent("autoComplete", autoCompleteJSX);
 			
@@ -25,37 +25,60 @@
 		
 		console.log("autoCompleteJSX: word=" + word + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
 		
-		if(!tagStart && !tagEnd) return;
-		
 		var options = [];
 		var optionsToRemove = [];
 		
-		var scope = UTIL.scope(file.caret.index, file.parsed.functions, file.parsed.globalVariables);
-		
-		console.log(scope);
-		
-		
-		var complStr = "";
-		var foundComplIndex = -1;
-		
-		for(var fName in scope.functions) {
-			if(fName.slice(0,wordLength) == word) {
-				console.log("autoCompleteJSX: " + fName.slice(0,wordLength) + " == " + word + " => " + fName);
-				
-				optionsToRemove.push(fName + "()");
-				
-				if(tagEnd) options.push(fName + ">");
-				else {
+		if(tagStart || tagEnd) {
+			
+			var scope = UTIL.scope(file.caret.index, file.parsed.functions, file.parsed.globalVariables);
+			
+			console.log(scope);
+			
+			
+			var complStr = "";
+			var foundComplIndex = -1;
+			
+			for(var fName in scope.functions) {
+				if(fName.slice(0,wordLength) == word) {
+					console.log("autoCompleteJSX: " + fName.slice(0,wordLength) + " == " + word + " => " + fName);
 					
-					complStr = fName;
-					if(scope.functions[fName].arguments.length > 0) {
-						complStr += props(scope.functions[fName].arguments);
+					optionsToRemove.push(fName + "()");
+					
+					if(tagEnd) options.push(fName + ">");
+					else {
+						
+						complStr = fName;
+						if(scope.functions[fName].arguments.length > 0) {
+							complStr += props(scope.functions[fName].arguments);
+						}
+						complStr += " />";
+						
+						options.push(complStr);
 					}
-					complStr += " />";
-					
-					options.push(complStr);
 				}
 			}
+		}
+		
+		if(options.length == 0 && gotOptions == 0) {
+			// Close last opened tag
+			
+			var charIndex = file.caret.index;
+			var lastOpenXmlTag = UTIL.findLastOpenXmlTag(file, charIndex);
+			
+			
+			
+			if(lastOpenXmlTag.length == 0) return;
+			if(lastOpenXmlTag == "<") return;
+			
+			console.log("autoCompleteJSX: lastOpenXmlTag=" + lastOpenXmlTag);
+			
+			if(lastOpenXmlTag.match(/script/i) && word.length > 0) return; // Avoid adding </script> when inside a script element
+			
+			options.push(word + "</" + lastOpenXmlTag + ">");
+			
+		}
+		else {
+			console.log("autoCompleteJSX: options=" + JSON.stringify(options) + " gotOptions=" + gotOptions);
 		}
 		
 		if(options.length > 0) return {add: options, remove: optionsToRemove};

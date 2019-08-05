@@ -2441,6 +2441,59 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 				}
 			}
 		}
+	},
+	
+	findLastOpenXmlTag: function findLastOpenXmlTag(file, charIndex) {
+		// Use parsed data
+		
+		console.log("findLastOpenXmlTag: charIndex=" + charIndex + " file.path=" + file.path);
+		
+		if(!file.parsed) {
+			console.warn("findLastOpenXmlTag: File not parsed: " + file.path);
+			return "";
+		}
+		
+		var tags = file.parsed.xmlTags;
+		
+		if(!tags) {
+			console.warn("findLastOpenXmlTag: No xml tags found in " + file.path);
+			return "";
+		}
+		
+		var text = file.text;
+		
+		var openTags = [];
+		var tag = "";
+		var slashPos = -1;
+		var j = 0;
+		for (var i=0; i<tags.length; i++) {
+			
+			if(tags[i].start >= charIndex) break;
+			
+			tag = text.substr(tags[i].start, tags[i].wordLength);
+			slashPos = tag.indexOf("/");
+			if(slashPos != -1) {
+				// Ending tag
+				tag = tag.substr(slashPos+1); // Remove the slash
+				console.log("findLastOpenXmlTag: Ending tag: *" + tag + "*");
+				var index = openTags.lastIndexOf(tag);
+				if(index != -1) openTags.splice(index, 1);
+			}
+			else if(!tags[i].selfEnding) {
+				tag = tag.substr(1); // Remove the left arrow
+				
+				if(tag != "br") {
+					console.log("findLastOpenXmlTag: Opening tag: *" + tag + "*");
+					openTags.push(tag);
+				}
+			}
+			
+		}
+		
+		if(openTags.length > 0) {
+			return openTags[openTags.length-1];
+		}
+		else return "";
 	}
 	
 	

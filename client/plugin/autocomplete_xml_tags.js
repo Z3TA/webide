@@ -20,8 +20,7 @@
 		}
 		
 		// Because high order, there's proabbly nothing else to complete. Maybe we want to close last opened xml tag!?
-		//var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
-		var lastOpenXmlTag = findLastOpenXmlTag2(file, charIndex);
+		var lastOpenXmlTag = UTIL.findLastOpenXmlTag(file, charIndex);
 		
 		if(lastOpenXmlTag.length == 0) return;
 		if(lastOpenXmlTag == "<") return;
@@ -47,84 +46,6 @@
 			if(quotes[i].start > i) return false
 			else if(quotes[i].end > i && quotes[i].start < i) return true;
 		}
-	}
-	
-	function findLastOpenXmlTag2(file, charIndex) {
-		// Use parsed data
-		
-		if(!file.parsed) return "";
-		
-		var tags = file.parsed.xmlTags;
-		
-		if(!tags) return "";
-		
-		var text = file.text;
-		
-		var openTags = [];
-		var tag = "";
-		var slashPos = -1;
-		var j = 0;
-		for (var i=0; i<tags.length; i++) {
-			
-			if(tags[i].start >= charIndex) break;
-			
-			tag = text.substr(tags[i].start, tags[i].wordLength);
-			slashPos = tag.indexOf("/");
-			if(slashPos != -1) {
-				// Ending tag
-				tag = tag.substr(slashPos+1); // Remove the slash
-				console.log("Ending tag: *" + tag + "*");
-				var index = openTags.lastIndexOf(tag);
-				if(index != -1) openTags.splice(index, 1);
-			}
-			else if(!tags[i].selfEnding) {
-				tag = tag.substr(1); // Remove the left arrow
-				
-				if(tag != "br") {
-					console.log("Opening tag: *" + tag + "*");
-					openTags.push(tag);
-}
-			}
-			
-		}
-		
-		if(openTags.length > 0) {
-			return openTags[openTags.length-1];
-		}
-		else return "";
-}
-	
-	
-	function findLastOpenXmlTag(text, charIndex) {
-		var textUpUntilChar = text.substr(0, charIndex);
-		// PS: lastIndexOf searches backwards!
-		var lastXmlTagClose = textUpUntilChar.lastIndexOf("</");
-		
-		if(lastXmlTagClose != -1) textUpUntilChar = textUpUntilChar.substring(lastXmlTagClose+2, lastXmlTagClose.length);
-		
-		var lastOpenXmlTagStart = textUpUntilChar.lastIndexOf("<");
-		
-		// todo: support nested tags like <div><span><b>x</b> ... close span
-		
-		var xmlTagName = "";
-		
-		if(lastOpenXmlTagStart != -1) {
-			// We have an open xml tag ... What is it?
-			var xmlTagBody = textUpUntilChar.substring(lastOpenXmlTagStart, charIndex);
-			var firstSpace = xmlTagBody.indexOf(" ");
-			var firstRightTag = xmlTagBody.indexOf(">");
-			var end = 0;
-			if(firstSpace > -1 && firstSpace < firstRightTag) {
-				end = firstSpace;
-			}
-			else {
-				end = firstRightTag;
-			}
-			xmlTagName = xmlTagBody.substring( 1, end );
-			
-		}
-		
-		return xmlTagName;
 	}
 	
 })();
