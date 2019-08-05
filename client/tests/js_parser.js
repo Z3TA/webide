@@ -615,9 +615,9 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
-		EDITOR.addTest(function JSX(callback) {
+		EDITOR.addTest(1, function JSX(callback) {
 
-		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}', function(err, file) {
+		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
 				
 		UTIL.assert(file.parsed.xmlTags.length, 4);
 				

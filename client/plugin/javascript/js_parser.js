@@ -2006,7 +2006,7 @@
 					else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
-					else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/ ]/)) : true)) {
+					else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
 						
 						if(lastChar === "/") xmlTagSelfEnding = true;
 						else xmlTagSelfEnding = false;
