@@ -1980,7 +1980,17 @@
 				}
 				
 				
-				// ### JSX ###
+				/*
+					### JSX ###
+					
+					JSX is a popular preprocessor language that 
+					converts XML-like structure to nested document.createEelement.
+					
+					I do not think the complexity of a transpiler is forth it,
+					as you can be much more expressive using document.createElement and use functions for abstractions.
+					/ JZ
+					
+				*/ 
 																										if(JSX) {
 					
 																											if(jsxMaybe && pastChar0=="<" && char=="/") {

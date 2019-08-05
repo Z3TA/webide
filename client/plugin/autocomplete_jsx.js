@@ -41,6 +41,9 @@
 		for(var fName in scope.functions) {
 			if(fName.slice(0,wordLength) == word) {
 				console.log("autoCompleteJSX: " + fName.slice(0,wordLength) + " == " + word + " => " + fName);
+				
+				optionsToRemove.push(fName + "()");
+				
 				if(tagEnd) options.push(fName + ">");
 				else {
 					
@@ -49,8 +52,6 @@
 						complStr += props(scope.functions[fName].arguments);
 					}
 					complStr += " />";
-					
-					optionsToRemove.push(fName + "()");
 					
 					options.push(complStr);
 				}
