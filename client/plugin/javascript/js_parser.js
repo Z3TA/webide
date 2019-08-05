@@ -2010,7 +2010,7 @@
 						console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding);
 						
 						if(!xmlTagSelfEnding) {
-							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), i); // Reuse variable because we are lazy
+							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
 							
 							console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 							

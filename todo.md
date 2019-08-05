@@ -31,8 +31,10 @@ What I'm working on
 
 idea: Make window menu and file tabs inline-block in order to not waste screen space !? eg. file tabs right side of window menu.
 
-todo: Auto-complete JS Functions as JSX tags with function parameters as props!
 todo: Add more HTML elements to autocomplete_html.js plugin
+
+todo: Support const
+todo: save parameters from arrow functions!
 
 todo: Autocomplete closing of JSX xml tags
 

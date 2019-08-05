@@ -617,12 +617,14 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 
 		EDITOR.addTest(1, function JSX(callback) {
 
-		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n\\n', function(err, file) {
+		EDITOR.openFile("jsx.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}', function(err, file) {
 				
-				UTIL.assert(file.parsed.xmlTags.length, 2);
+		UTIL.assert(file.parsed.xmlTags.length, 4);
 				
 				UTIL.assert(file.grid[1].indentation, 1);
 				
+		UTIL.assert(file.grid[4].indentation, 1);
+		
 				
 				EDITOR.closeFile(file.path);
 				callback(true);

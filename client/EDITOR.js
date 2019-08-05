@@ -4201,7 +4201,7 @@ var word = "";
 		var wordLength = word.length;
 		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
-		var ret, fun, addWord, addMcl, functionArguments;
+		var ret, fun, addWord, addMcl, functionArguments, removeOptions = [];
 		
 		console.log("Calling autoComplete listeners (" + EDITOR.eventListeners.autoComplete.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.autoComplete.length; i++) {
@@ -4212,6 +4212,11 @@ var word = "";
 			console.log("function " + UTIL.getFunctionName(fun) + " returned: " + JSON.stringify(ret));
 			
 			if(ret) {
+				if(!Array.isArray(ret) && typeof ret == "object") {
+					if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
+					ret = ret.add;
+				}
+				
 				if(Array.isArray(ret)) {
 					for(var j=0; j<ret.length; j++) {
 						if(Array.isArray(ret[j])) {
@@ -4236,7 +4241,7 @@ var word = "";
 					}
 				}
 				else {
-					throw new Error(UTIL.getFunctionName(fun) + " did not return an array");
+					throw new Error(UTIL.getFunctionName(fun) + " did not return an array! It returned " + (typeof ret));
 				}
 			}
 		}
@@ -4247,6 +4252,15 @@ var word = "";
 		}
 		
 		console.log("options:" + JSON.stringify(options, null, 2));
+		
+		var removeIndex = -1;
+		for(var i=0; i<removeOptions.length; i++) {
+			removeIndex = options.indexOf(removeOptions[i]);
+			while(removeIndex != -1) {
+				options.splice(removeIndex, 1);
+				removeIndex = options.indexOf(removeOptions[i]);
+			}
+		}
 		
 		if(options.length > 1) {
 			

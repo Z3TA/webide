@@ -2299,6 +2299,148 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 				str = str + "\n" + " ".repeat(" ", (level-1)*2) + "}";
 			}
 		}
+	},
+	
+	scope: function getScope(charIndex, functions, globalVariables) {
+		// Returns all variables and functions available in the current scope (where the character's at)
+		// As a flattened object literal
+		
+		var foundVariables = {};
+		var thisIs;
+		
+		// Add global variables to the scope
+		if(globalVariables) {
+			for(var variableName in globalVariables) {
+				foundVariables[variableName] = globalVariables[variableName];
+			}
+		}
+		
+		var foundFunctions = functionsScope(functions, charIndex);
+		
+		//console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
+		
+		if(foundFunctions.length > 0) {
+			// Insade a function scope
+			
+			// Add global functions first, then overwrite them with the scoped functions
+			foundFunctions = getGlobalFunctions(functions).concat(foundFunctions);
+			foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
+			
+			// "this" is always the latest function
+			// Or is it the first !?!?
+			if(foundFunctions.length > 0) {
+				thisIs = foundFunctions[foundFunctions.length-1];
+			}
+		}
+		else {
+			// Not inside any function
+			foundFunctions = getGlobalFunctions(functions);
+		}
+		
+		// Make foundFunctions into an object literal for convencience, now when the order doesn't matter
+		var foundFunctionsObj = {};
+		for(var i=0, func; i<foundFunctions.length; i++) {
+			func = foundFunctions[i];
+			foundFunctionsObj[func.name] = func;
+		}
+		
+		//console.log("foundFunctionsObj=" + JSON.stringify(foundFunctionsObj, null, 2));
+		
+		return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
+		
+		
+		function overWriteDublicates(foundFunctions) {
+			// Overwrite (remove) global functions with local functions if they have the same name
+			var functionIndex = {};
+			for(var i=0, fName; i<foundFunctions.length; i++) {
+				fName = foundFunctions[i].name;
+				if(functionIndex.hasOwnProperty(fName)) {
+					foundFunctions.splice(functionIndex[fName], 1);
+					
+					// Run again becase the array changed size
+					return overWriteDublicates(foundFunctions);
+				}
+				else {
+					functionIndex[fName] = i;
+				}
+			}
+			
+			// All dublicates have been removed!
+			return foundFunctions;
+		}
+		
+		function functionsScope(functions, charIndex) {
+			// Returns an array of all functions available (to be called) in the lexical scope (where caret's at)
+			
+			var foundFunctions = [];
+			
+			searchScope(functions, true); // Recursive finds all functions and push to foundFunctions
+			
+			return foundFunctions;
+			/*
+				foundFunctions.sort(function(a, b) {
+				// Sort by position in the code (line number) ascending
+				return a.start - b.start;
+				});
+			*/
+			
+			function searchScope(functions) {
+				for(var i=0, func, cursorInside; i<functions.length; i++) {
+					
+					func = functions[i];
+					
+					console.log("Look: name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
+					
+					cursorInside = (func.start <= charIndex && func.end >= charIndex);
+					
+					// All functions from the same scope are available
+					if(func.name.length > 0) foundFunctions.push(func);
+					
+					
+					if( cursorInside) {
+						
+						console.log("Function Scope name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
+						
+						
+						// Local subfunctions can be called from here!
+						for(var j=0; j<func.subFunctions.length; j++) {
+							console.log("local: " + func.subFunctions[j].name);
+							if(func.subFunctions[j].name.length > 0) foundFunctions.push(func.subFunctions[j]);
+						}
+						
+						// Add variables from the function we are in
+						for(var variableName in func.variables) {
+							foundVariables[variableName] = func.variables[variableName];
+							// Deeper nests over-rides globals as intended!
+						}
+						
+						// Search sub-functions (recursive)
+						searchScope(func.subFunctions);
+						
+					}
+					
+				}
+			}
+		}
+		
+		function getGlobalFunctions(functions) {
+			// Returns a list of all global functions
+			//console.log("getGlobalFunctions: functions=" + JSON.stringify(functions, null, 2));
+			var arr = [];
+			findGlobal(functions);
+			return arr;
+			
+			function findGlobal(f) {
+				//console.log("getGlobalFunctions: findGlobal: f=" + JSON.stringify(f, null, 2));
+				if(f == undefined) throw new Error("f=" + f);
+				// recursevily searches all functions and their subFunction's
+				for (var i=0; i<f.length; i++) {
+					if(f[i].global) arr.push(f[i]);
+					//console.log("recursively searching f[" + i + "].name=" + f[i].name + " f[" + i + "].subFunctions=" + f[i].subFunctions);
+					findGlobal(f[i].subFunctions);
+				}
+			}
+		}
 	}
 	
 	
