@@ -26,6 +26,8 @@
 			
 			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
 			
+			EDITOR.discoveryBar.add("gfx/database.svg", showDbManager); // Icon created by: https://www.flaticon.com/authors/phatplus
+			
 },
 		unload: function unloadSqldb() {
 			
@@ -271,7 +273,7 @@ option.setAttribute("selected", "selected");
 			}
 		}
 		
-		var fileName = "db-queries" + queryFileId;
+		var fileName = "db-query_" + queryFileId;
 		
 		var file = EDITOR.files[fileName];
 		

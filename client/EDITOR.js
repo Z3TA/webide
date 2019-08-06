@@ -267,6 +267,9 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var keyboardCatcherLastInserted = "";
 	
+	var discoveryBar = document.createElement("div");
+	discoveryBar.setAttribute("class", "discoveryBar");
+	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
 	var nativeCopy = false;
@@ -2656,6 +2659,16 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	EDITOR.discoveryBar = {
 		add: function addDiscoveryItem(icon, whenClicked) {
 			
+			var img = document.createElement("img");
+			img.src = icon;
+			img.onclick = whenClicked;
+			img.width = 64;
+			img.height = 64;
+			
+			discoveryBar.appendChild(img);
+			
+			EDITOR.discoveryBar.show();
+			
 		},
 		remove: function removeDiscoveryItem() {
 			
@@ -2664,6 +2677,38 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 		},
 		show: function showDiscoveryBar() {
+			if(!discoveryBar.parentElement) {
+				var editorWidth = window.innerWidth || parseInt(canvas.width);
+				var editorHeight = window.innerHeight || parseInt(canvas.height);
+				if(editorWidth > editorHeight) {
+					// Right or left side
+					var parent = document.getElementById("rightColumn"); // rightColumn, leftColumn
+				}
+				else {
+					// At the top
+					var parent = document.getElementById("header");
+					var tabList = document.getElementById("tabList");
+					
+					if(tabList) setHeight();
+					else setTimeout(setHeight, 1000);
+					
+				}
+				
+				parent.appendChild(discoveryBar);
+				EDITOR.resizeNeeded();
+			}
+			
+			function setHeight() {
+				var tabList = document.getElementById("tabList");
+				if(tabList) {
+					var tabListHeight = tabList.clientHeight || tabList.offsetHeight;
+					discoveryBar.style.height = tabListHeight + "px";
+					
+					EDITOR.resizeNeeded();
+				}
+				console.log("discoveryBar: editorWidth=" + editorWidth + " editorHeight=" + editorHeight + " tabListHeight=" + tabListHeight + " ");
+			}
+			
 		},
 		hide: function hideDiscoveryBar() {
 		},

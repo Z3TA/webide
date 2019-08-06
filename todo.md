@@ -29,12 +29,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Move remoteFS window menu to a submenu under Editor
-
-Fix function list on mobile error and test menu entry
-
-todo: Full menu (function-list) doesn't show on mobile
-
 
 todo: Discovery bar!
 
