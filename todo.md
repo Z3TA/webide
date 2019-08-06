@@ -7,6 +7,11 @@ Commit messages should explain WHY you did the change, we can already see what y
 
 Note to myself
 --------------
+
+NEVER run hg up on working folder. Instead copy the whole folder and make the hg up.
+hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
+
+
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
 
