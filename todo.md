@@ -36,6 +36,8 @@ What I'm working on
 
 todo: Able to hide discovery bar
 
+Able to disable the discovery bar (open in new window/floating_windows.js)
+
 todo: Discovery bar!
 
 todo: Try React tutorial to feel pain
