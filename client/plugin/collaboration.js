@@ -98,7 +98,7 @@
 			var discoveryItem = document.createElement("img");
 			discoveryItem.src = "gfx/User.svg"; // Icon created by: https://iconscout.com/contributors/ibm-design
 			discoveryItem.title = "Invite collaborator";
-			discoveryItem.onclick = invite;
+			discoveryItem.onclick = inviteFromDiscoveryBar;
 			EDITOR.discoveryBar.add(discoveryItem);
 			
 			
@@ -165,7 +165,11 @@
 		return true;
 	}
 	
-	function invite(file, combo, character, charCode, direction, clickEvent) {
+	function inviteFromDiscoveryBar() {
+		invite(EDITOR.currentFile);
+	}
+	
+	function invite(file) {
 		EDITOR.ctxMenu.hide();
 		
 		CLIENT.cmd("invite", {}, function(err, login) {

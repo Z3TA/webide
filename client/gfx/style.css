@@ -1660,12 +1660,13 @@ div.group {
 }
 
 
-/* ### Discovery bar */
+/* 
+### Discovery bar 
+Assuming it's placed in the left column
+*/
 
 .discoveryBar {
 	display: inline-block;
-	float: right;
-	background-color: green;
 }
 
 .discoveryBar .discoveryItem img {
@@ -1673,11 +1674,25 @@ div.group {
 	height: 100%;
 }
 
+.header .discoveryBar {
+	border: 0px solid pink;
+float: right;
+}
+
+.header .discoveryBar .discoveryItem {
+	display: inline-block; /* side by side */
+	border: 0px solid red;
+	margin: 0;
+	margin-left: 4px;
+	max-width: 32px;
+	height: 10%;
+}
+
 .header .discoveryBar .discoveryItem img {
-	margin-top: 10%;
-	margin-bottom: 10%;
-	width: 80%;
-	height: 80%;
+	height: 70%;
+	width: 70%;
+margin: 0;
+padding: 0;
 }
 
 .discoveryBar .discoveryItem {
@@ -1700,18 +1715,13 @@ div.group {
 	cursor: pointer;
 }
 
-.rightColumn .discoveryBar .discoveryItem {
+.leftColumn .discoveryBar .discoveryItem {
 	display: block;
 	max-width: 100%;
-	margin-top: 20px;
+	margin: 10px;
+margin-top: 20px;
 }
 
-.header .discoveryBar .discoveryItem {
-	display: inline-block; /* side by side */
-	border: 0px solid red;
-	margin: 0;
-	margin-left: 4px;
-}
 
 
 

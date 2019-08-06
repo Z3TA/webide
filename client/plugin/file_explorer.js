@@ -193,8 +193,8 @@ EDITOR.changeWorkingDir(directory);
 			
 			loadingSpinner.style.display="block";
 			
-			fileExplorerWrap.style.display="block";
-			
+			fileExplorerWrap.style.display="inline-block";
+			//fileExplorerWrap.style.width="auto";
 			
 			var fileExplorerWidth = fileExplorerWrap.offsetWidth;
 			var canvasWidth = EDITOR.view.canvasWidth;
@@ -223,6 +223,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 		else {
 			
 			fileExplorerWrap.style.display="none";
+			//fileExplorerWrap.style.width="0px";
 			
 			EDITOR.exitFullScreenWidget(fileExplorerWrap);
 			

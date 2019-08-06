@@ -268,7 +268,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	var keyboardCatcherLastInserted = "";
 	
 	var discoveryBar = document.createElement("div");
-	discoveryBar.setAttribute("class", "discoveryBar");
+	discoveryBar.setAttribute("id", "discoveryBar");
+	discoveryBar.setAttribute("class", "discoveryBar wrap");
 	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
@@ -2255,7 +2256,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
-		
 		if(QUERY_STRING["debug"]) {
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -2326,7 +2326,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe 
-		// (wrappes should have css: overflow: auto!important;)
+		// (wrappers should have css: overflow: auto!important;)
 		
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
 		//console.log("leftColumnPadding=" + leftColumnPadding);
@@ -2335,11 +2335,14 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		for (var i = 0; i < leftWrappers.length; i++) {
 			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth) 
 			// We always need to set with or the canvas will drop down below
-			leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			
+			leftWrappers[i].style.width = leftWrappers[i].offsetWidth + "px";
+			//leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		var rightWrappers = rightColumn.getElementsByClassName("wrap");
 		for (var i = 0; i < rightWrappers.length; i++) {
-			rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			rightWrappers[i].style.width = rightWrappers[i].offsetWidth + "px";
+			//rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		
 		// Restore scrolling of the wrappers
@@ -2684,8 +2687,17 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				var editorWidth = window.innerWidth || parseInt(canvas.width);
 				var editorHeight = window.innerHeight || parseInt(canvas.height);
 				if(editorWidth > editorHeight) {
-					// Right or left side
-					var parent = document.getElementById("rightColumn"); // rightColumn, leftColumn
+					/*
+						Right or left side ?
+						
+						If we place it on the right side we need to run discoveryBar.parentElement.appendChild(discoveryBar)
+						in order to make it the last item - every time something is added to the right column.
+						
+						But if we place it on the left side, additional widgets will be placed right of it =)
+						
+					*/
+					
+					var parent = document.getElementById("leftColumn"); // rightColumn, leftColumn
 				}
 				else {
 					// At the top

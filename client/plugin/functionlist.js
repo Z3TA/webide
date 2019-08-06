@@ -541,8 +541,8 @@ leftColumn.removeChild(functionListWrap);
 		
 		if(functionListWrap) {
 			
-			if(functionListWrap.style.display != "block") { // bugfix: editor resized at every key stroke because of fileParse event
-				functionListWrap.style.display="block";
+			if(functionListWrap.style.display != "inline-block") { // bugfix: editor resized at every key stroke because of fileParse event
+				functionListWrap.style.display="inline-block";
 				
 				functionListActive = true;
 				winMenuToggleFunctionlist.activate();

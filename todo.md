@@ -34,6 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Can we have the discovery bar next to the file explorer instead of above/under it !?
 
 todo: Discovery bar!
 
