@@ -317,9 +317,11 @@
 				if(type=="delete") charactersLength = -1;
 				var oldParse = file.parsed;
 				// Update functions
-				console.log("functions to update: " + (oldParse.functions && oldParse.functions.length))
+				//console.log("functions to update: " + (oldParse.functions && oldParse.functions.length))
 				if(oldParse.functions) updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
-				else console.log("No parsed functions to update! file.parsed=", file.parsed);
+				//else {
+//console.log("No parsed functions to update! file.parsed=", file.parsed);
+				//}
 				
 				// Update quotes
 				for(var i=0; i<oldParse.quotes.length; i++) {
@@ -350,10 +352,10 @@
 						oldParse.xmlTags[i].end += charactersLength;
 					}
 					else if(oldParse.xmlTags[i].end >= caretIndex) {
-						console.log("between " + JSON.stringify(oldParse.xmlTags[i]) + " caretIndex=" + caretIndex + " charactersLength=" + charactersLength + " characters=" + UTIL.lbChars(characters) );
+						//console.log("between " + JSON.stringify(oldParse.xmlTags[i]) + " caretIndex=" + caretIndex + " charactersLength=" + charactersLength + " characters=" + UTIL.lbChars(characters) );
 						oldParse.xmlTags[i].end += charactersLength;
 						if( (oldParse.xmlTags[i].start + oldParse.xmlTags[i].wordLength + 1) > caretIndex && characters!=" ") {
-							console.log("update wordLength!");
+							//console.log("update wordLength!");
 							oldParse.xmlTags[i].wordLength += charactersLength;
 						}
 					}
@@ -1052,9 +1054,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
-		JSX = true,
 		jsxMaybe = false,
-		jsxIndentLevel = 0,
 		jsxOpenElements = [];
 		
 		
@@ -1381,7 +1381,7 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var pointerName = properties[0];
@@ -1402,7 +1402,7 @@
 							variable = func.variables["this"];
 						}
 						else if(insideReturnStatement) {
-							console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
+							//console.log("Return statement ? leftSide=" + leftSide + " rightSide=" + rightSide);
 							if(returnStatement == null) {
 								returnStatement = new Variable();
 								myFunction[subFunctionDepth].returns.push(returnStatement);
@@ -1441,7 +1441,7 @@
 					}
 					// Look for function names
 					else if(theFunction) {
-						console.log("hmm? " + pointerName + " is a function!");
+						//console.log("hmm? " + pointerName + " is a function!");
 						
 						if(properties.length > 1) {
 							if(!Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
@@ -1567,7 +1567,8 @@
 			if(!insideScriptTag && char=="-" && lastChar=="-" && llChar=="!" && lllChar=="<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
-				xmlMode = xmlModeBeforeTag;
+						xmlMode = xmlModeBeforeTag;
+						jsxMaybe = false;
 				commentStart = i-4;
 			}
 			else if(!insideScriptTag && char==">" && lastChar=="-" && llChar=="-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
@@ -1918,7 +1919,7 @@
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
-					//console.log("xmlTag=" + xmlTag);
+							//console.log("Reset xmlMode=" + xmlMode + " xmlTag=" + xmlTag);
 					
 					if(xmlTag.toLowerCase()=="script" || xmlTag.toLowerCase()=="pre" ||  xmlTag.toLowerCase()=="textarea") {
 						
@@ -1991,9 +1992,9 @@
 					/ JZ
 					
 				*/ 
-						if(JSX && !xmlMode) {
+						//if(JSX && !xmlMode) {
 					
-																											if(jsxMaybe && pastChar0=="<" && char=="/") {
+																											else if(jsxMaybe && pastChar0=="<" && char=="/") {
 																												insideXmlTagEnding = true;
 																											}
 					// Prevent if(x<y && a>b) ...
@@ -2017,15 +2018,15 @@
 						
 						jsxMaybe = false;
 						
-								console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode);
+							//console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode + " insideScriptTag=" + insideScriptTag);
 						
 						if(!xmlTagSelfEnding) {
 							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
 							
-							console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+								//console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " insideXmlTag=" + insideXmlTag + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 							
 							if(insideXmlTagEnding) {
-								console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+								//console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 								
 								if(jsxOpenElements.indexOf(word) != -1) {
 									jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
@@ -2040,19 +2041,19 @@
 								jsxOpenElements.push(word);
 								
 								vb_nextRowIndentation=1; // Variable reuse
-								console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+								//console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 							}
 						}
 						
 						insideXmlTagEnding = false;
 					}
 																											
-																										}
-			}
+																										//}
+			} // end: Not inside comment
 			
 			
 			
-			console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			
 			if(codeBlockLeft==codeBlockRight) {
 				insideCodeBlock = false;
@@ -2259,7 +2260,7 @@
 						
 					}
 					
-					console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
+					//console.log("insideParenthesis! char=" + char + " word=" + word + " llWord=" + llWord);
 					
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
@@ -2507,9 +2508,10 @@
 					insideLineComment = true;
 					commentStart = i;
 				}
-				// else console.log("char=" + char + " pastChar0=" + pastChar0 + " pastChar1=" + pastChar1 + " pastChar2=" + pastChar2 + " pastChar3=" + pastChar3);					
-				
-				
+				// else {
+						//console.log("char=" + char + " pastChar0=" + pastChar0 + " pastChar1=" + pastChar1 + " pastChar2=" + pastChar2 + " pastChar3=" + pastChar3);					
+				//}
+						
 				
 				if(!insideDblQuote && !insideLineComment) {
 					
@@ -2522,7 +2524,7 @@
 							variableName = word || lastWord;
 							insideVariableDeclaration[codeBlockDepth] = false;
 							if(variableName) globalVariables[variableName] = new Variable();
-							console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
+							//console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 						}
 						else if(word=="dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
@@ -2904,7 +2906,7 @@
 				return;
 			}
 			else if(char==" " && insideFunctionBody[subFunctionDepth] && word=="return") {
-				console.log("Start of return statement? lineNumber=" + lineNumber + " column=" + column);
+				//console.log("Start of return statement? lineNumber=" + lineNumber + " column=" + column);
 				insideReturn[codeBlockDepth] = true;
 				returnStart = i+1;
 				insideReturnStatement = true;
@@ -2913,7 +2915,7 @@
 				return;
 			}
 			else if( insideReturn[codeBlockDepth] && (char=="\r" || char=="\n") && !(lnw=="+" || lnw=="-" || lnw=="*" || lnw=="/" || lnw=="%" || lnw=="|" || lnw=="&" || lnw=="{" || lnw=="[") ) {
-				console.log("End of return statement? lineNumber=" + lineNumber + " column=" + column);
+				//console.log("End of return statement? lineNumber=" + lineNumber + " column=" + column);
 				myFunction[subFunctionDepth].returns.push(text.slice(returnStart, i));
 				insideReturn[codeBlockDepth] = false;
 				insideReturnStatement = true;
@@ -2973,11 +2975,11 @@
 						
 						words.push(word);
 						
-						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						
 						if(word=="return") {
-							console.log("return undefined?");
+							//console.log("return undefined?");
 							if(myFunction[subFunctionDepth]) {
 							myFunction[subFunctionDepth].returns.push("void");
 							}
@@ -3082,7 +3084,7 @@
 				}
 				else if(char=="}" && afterPointer[codeBlockDepth-1]=="=" && lastWord && lastWord.match(reValidVariableName)) {
 					// Find object notation and mark the variable as type Object
-					console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " word=" + word + " lastWord=" + lastWord + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
+					//console.log("Object? lineNumber=" + lineNumber + " variableName=" + variableName + " word=" + word + " lastWord=" + lastWord + " insideParenthesis[codeBlockDepth=" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
 					// Find the variable and set the type to Object
 					properties = lastWord.split(".");
 					variable = null;
