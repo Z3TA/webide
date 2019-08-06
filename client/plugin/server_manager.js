@@ -81,7 +81,7 @@
 			
 			menuItem = EDITOR.ctxMenu.add(menuString, showServerManger, 15);
 			
-			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", ["Remote FS", 3], showServerManger);
+			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", ["Editor", "Remote FS", 1], showServerManger);
 			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			

@@ -3139,7 +3139,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				dropdownMenuRoot.addItem("Navigate");
 				dropdownMenuRoot.addItem("Tools");
 				dropdownMenuRoot.addItem("Node.JS");
-				dropdownMenuRoot.addItem("Remote FS");
 				
 				
 			}

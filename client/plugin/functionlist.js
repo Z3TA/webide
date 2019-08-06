@@ -135,8 +135,8 @@ leftColumn.removeChild(functionListWrap);
 		
 		functionListSelect.removeAttribute("multiple");
 		
-		winMenuFunctionList = EDITOR.windowMenu.add("Function-list", [], functionListMenuItemClicked);
-		EDITOR.windowMenu.add("test", [], function test() {});
+		winMenuFunctionList = EDITOR.windowMenu.add("Functions", [], functionListMenuItemClicked);
+		//EDITOR.windowMenu.add("test", [], function test() {});
 		
 		winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
 		winMenuFunctionList.text.appendChild(functionListSelect);

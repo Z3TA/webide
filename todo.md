@@ -29,6 +29,13 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Move remoteFS window menu to a submenu under Editor
+
+Fix function list on mobile error and test menu entry
+
+todo: Full menu (function-list) doesn't show on mobile
+
+
 todo: Discovery bar!
 
 todo: Try React tutorial to feel pain
@@ -39,9 +46,6 @@ todo: parse ES6 imports and Node.js require for auto-comletion
 
 idea: Make window menu and file tabs inline-block in order to not waste screen space !? eg. file tabs right side of window menu.
 
-todo: Fix markdown topics in Zoom! (text base)
-
-release!
 
 Test in Opera Mini
 
