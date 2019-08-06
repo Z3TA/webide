@@ -21,6 +21,14 @@
 			winMenuProdStop= EDITOR.windowMenu.add("Stop production", ["Node.JS", 5], nodejsProdStop);
 			winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
 			
+			/*
+				var discoveryItem = document.createElement("img");
+				discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+				discoveryItem.title = "Node.JS Deploy"
+				discoveryItem.onclick = nodejsDeploy;
+				EDITOR.discoveryBar.add(discoveryItem);
+			*/
+			
 		},
 		unload: function unloadNodeJsDeploy() {
 			EDITOR.unbindKey(nodejsDeploy);

@@ -258,6 +258,12 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
 		
+		var discoveryItem = document.createElement("img");
+		discoveryItem.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+		discoveryItem.title = "Static site generator"
+		discoveryItem.onclick = showSSG;
+		EDITOR.discoveryBar.add(discoveryItem);
+		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 	}

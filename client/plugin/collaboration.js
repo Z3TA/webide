@@ -95,6 +95,13 @@
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			
+			var discoveryItem = document.createElement("img");
+			discoveryItem.src = "gfx/User.svg"; // Icon created by: https://iconscout.com/contributors/ibm-design
+			discoveryItem.title = "Invite collaborator";
+			discoveryItem.onclick = invite;
+			EDITOR.discoveryBar.add(discoveryItem);
+			
+			
 			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
 				var C = 67;

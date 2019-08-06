@@ -2657,15 +2657,19 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	// Add feature icons for discovery
 	EDITOR.discoveryBar = {
-		add: function addDiscoveryItem(icon, whenClicked) {
+		add: function addDiscoveryItem(element, order) {
 			
-			var img = document.createElement("img");
-			img.src = icon;
-			img.onclick = whenClicked;
-			img.width = 64;
-			img.height = 64;
+			return;
 			
-			discoveryBar.appendChild(img);
+			if(order == undefined) order = 99;
+			
+			var wrap = document.createElement("div");
+			wrap.setAttribute("class", "discoveryItem");
+			wrap.setAttribute("tabIndex", order);
+			
+			wrap.appendChild(element);
+			
+			discoveryBar.appendChild(wrap);
 			
 			EDITOR.discoveryBar.show();
 			

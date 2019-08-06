@@ -50,6 +50,12 @@
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
+			var discoveryItem = document.createElement("img");
+			discoveryItem.src = "gfx/Terminal.svg"; // Icon created by: https://iconscout.com/contributors/ibm-design
+			discoveryItem.title = "Terminal emulator"
+			discoveryItem.onclick = startTerminalFromMenu;
+			EDITOR.discoveryBar.add(discoveryItem);
+			
 		},
 		unload: function unloadTerminal() {
 			

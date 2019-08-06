@@ -26,7 +26,11 @@
 			
 			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
 			
-			EDITOR.discoveryBar.add("gfx/database.svg", showDbManager); // Icon created by: https://www.flaticon.com/authors/phatplus
+			var discoveryItem = document.createElement("img");
+			discoveryItem.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryItem.title = "SQL Database"
+			discoveryItem.onclick = showDbManager;
+			EDITOR.discoveryBar.add(discoveryItem);
 			
 },
 		unload: function unloadSqldb() {

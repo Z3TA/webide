@@ -1660,33 +1660,58 @@ div.group {
 }
 
 
-
 /* ### Discovery bar */
 
 .discoveryBar {
-display: inline-block;
+	display: inline-block;
 	float: right;
+	background-color: green;
 }
 
-.discoveryBar img {
-	margin: 10px;
-width: 40px;
-height: 40px;
-	max-height: 50%;
+.discoveryBar .discoveryItem img {
+	width: 100%;
+	height: 100%;
+}
 
+.header .discoveryBar .discoveryItem img {
+	margin-top: 10%;
+	margin-bottom: 10%;
+	width: 80%;
+	height: 80%;
+}
 
-filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 3.5+ */
+.discoveryBar .discoveryItem {
+	bacgkround-color: blue;
+	margin: 0px;
+	width: 40px;
+	height: 40px;
+	max-height: 90%;
+	max-width: 90%;
+	overflow: hidden;
+	
+	filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 3.5+ */
 	filter: gray; /* IE6-9 */
 	-webkit-filter: grayscale(100%); /* Chrome 19+ & Safari 6+ */
 }
 
-.discoveryBar img:hover {
-filter: none;
+.discoveryBar .discoveryItem:hover {
+	filter: none;
 	-webkit-filter: grayscale(0%);
-cursor: pointer;
+	cursor: pointer;
 }
 
+.rightColumn .discoveryBar .discoveryItem {
+	display: block;
+	max-width: 100%;
+	margin-top: 20px;
+}
 
+.header .discoveryBar .discoveryItem {
+	display: inline-block; /* side by side */
+	border: 0px solid red;
+	margin: 0;
+	margin-left: 4px;
+}
 
 
 
