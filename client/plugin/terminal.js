@@ -51,10 +51,10 @@
 			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
 			var discoveryItem = document.createElement("img");
-			discoveryItem.src = "gfx/Terminal.svg"; // Icon created by: https://iconscout.com/contributors/ibm-design
+			discoveryItem.src = "gfx/board.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Terminal emulator"
 			discoveryItem.onclick = startTerminalFromMenu;
-			EDITOR.discoveryBar.add(discoveryItem);
+			EDITOR.discoveryBar.add(discoveryItem, 7);
 			
 		},
 		unload: function unloadTerminal() {

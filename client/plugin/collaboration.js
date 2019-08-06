@@ -96,10 +96,10 @@
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			
 			var discoveryItem = document.createElement("img");
-			discoveryItem.src = "gfx/User.svg"; // Icon created by: https://iconscout.com/contributors/ibm-design
+			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Invite collaborator";
 			discoveryItem.onclick = inviteFromDiscoveryBar;
-			EDITOR.discoveryBar.add(discoveryItem);
+			EDITOR.discoveryBar.add(discoveryItem, 9);
 			
 			
 			// TEST-CODE-START

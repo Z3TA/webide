@@ -38,6 +38,8 @@
 	
 	var askToOpenSourceFileIfOpenedPreviewFile = true;
 	
+	var discoveryBarImage;
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -258,11 +260,11 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
 		
-		var discoveryItem = document.createElement("img");
-		discoveryItem.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryItem.title = "Static site generator"
-		discoveryItem.onclick = showSSG;
-		EDITOR.discoveryBar.add(discoveryItem);
+		discoveryBarImage = document.createElement("img");
+		discoveryBarImage.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+		discoveryBarImage.title = "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")"
+		discoveryBarImage.onclick = toggleSSG;
+		EDITOR.discoveryBar.add(discoveryBarImage, 4);
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
@@ -1433,6 +1435,8 @@
 		
 		manager.style.display = "block";
 		
+		discoveryBarImage.setAttribute("class", "active");
+		
 		EDITOR.resizeNeeded();
 		
 		return false;
@@ -1456,7 +1460,18 @@
 			}
 		}
 		
+		discoveryBarImage.setAttribute("class", "");
+		
 		return false;
+	}
+	
+	function toggleSSG() {
+		if(!manager || manager.style.display == "none") {
+			showSSG();
+		}
+		else {
+			hideSSG();
+		}
 	}
 	
 	function ssgPreviewTool(file, combo) {

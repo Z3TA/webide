@@ -7,6 +7,7 @@
 	var queryFileId = 0;
 	var selectMysqlDb; // Select element
 	var winMenuDbManager;
+	var discoveryBarImg;
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -26,11 +27,11 @@
 			
 			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
 			
-			var discoveryItem = document.createElement("img");
-			discoveryItem.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "SQL Database"
-			discoveryItem.onclick = showDbManager;
-			EDITOR.discoveryBar.add(discoveryItem);
+			discoveryBarImg = document.createElement("img");
+			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryBarImg.title = "SQL Database"
+			discoveryBarImg.onclick = toggleDbManager;
+			EDITOR.discoveryBar.add(discoveryBarImg, 10);
 			
 },
 		unload: function unloadSqldb() {
@@ -61,7 +62,7 @@
 	function showDbManager() {
 		EDITOR.ctxMenu.hide();
 		winMenuDbManager.hide();
-		
+		discoveryBarImg.setAttribute("class", "active");
 		//if(dbManagerWidget.visible) return hideDbManager();
 		
 		dbManagerWidget.show();
@@ -71,8 +72,18 @@
 	function hideDbManager() {
 		dbManagerWidget.hide();
 		EDITOR.ctxMenu.update(menuItem, false);
+		discoveryBarImg.setAttribute("class", "");
 		
 		return ALLOW_DEFAULT;
+	}
+	
+	function toggleDbManager() {
+		if(dbManagerWidget && dbManagerWidget.visible) {
+			hideDbManager();
+		}
+		else {
+			showDbManager();
+		}
 	}
 	
 	function buildDbManager() {

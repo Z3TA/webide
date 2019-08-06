@@ -11,6 +11,13 @@
 			//menuItem = EDITOR.ctxMenu.add("Preview HTML", webPreview);
 			EDITOR.on("showMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
+			
+			var discoveryItem = document.createElement("img");
+			discoveryItem.src = "gfx/multimedia.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryItem.title = "Live Preview"
+			discoveryItem.onclick = webPreviewFromDiscovery;
+			EDITOR.discoveryBar.add(discoveryItem, 8);
+			
 		},
 		unload: function unloadWebPreview() {
 			//EDITOR.ctxMenu.remove(menuItem);
@@ -18,6 +25,10 @@
 			EDITOR.removeEvent("previewTool", webPreviewTool); 
 			}
 		});
+	
+	function webPreviewFromDiscovery(clickEvent) {
+		webPreview(EDITOR.currentFile, undefined, undefined, undefined, undefined, clickEvent);
+	}
 	
 	function maybeShowPreviewInMenu() {
 		

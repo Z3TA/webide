@@ -34,7 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Can we have the discovery bar next to the file explorer instead of above/under it !?
+todo: Able to hide discovery bar
 
 todo: Discovery bar!
 
@@ -46,8 +46,11 @@ todo: parse ES6 imports and Node.js require for auto-comletion
 
 idea: Make window menu and file tabs inline-block in order to not waste screen space !? eg. file tabs right side of window menu.
 
+bug: Autocomplete seem to find hidden functions, for example toggleVim
 
 Test in Opera Mini
+
+todo: Don't auto-select item in context-menu if user is moving the mouse!
 
 Separate insert and navigation modes for T9 kaios feature phones.
 

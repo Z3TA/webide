@@ -2663,17 +2663,33 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	// Add feature icons for discovery
 	EDITOR.discoveryBar = {
-		add: function addDiscoveryItem(element, order) {
+		add: function addDiscoveryItem(element, position) {
 			
-			if(order == undefined) order = 99;
+			if(position == undefined) position = 99;
 			
 			var wrap = document.createElement("div");
 			wrap.setAttribute("class", "discoveryItem");
-			wrap.setAttribute("tabIndex", order);
+			wrap.setAttribute("position", position);
 			
 			wrap.appendChild(element);
 			
 			discoveryBar.appendChild(wrap);
+			
+			
+			// Re-order
+			var items = Array.prototype.slice.call( discoveryBar.children, 0 ); // Make psuedu-array into a real array
+			items.sort(function(a,b) {
+				var pA = parseInt(a.getAttribute("position"));
+				var pB = parseInt(b.getAttribute("position"));
+				
+				if(pA > pB) return 1;
+				else if(pB > pA) return -1;
+				else return 0;
+			});
+			items.forEach(function (el) {
+				discoveryBar.appendChild(el);
+			});
+			
 			
 			EDITOR.discoveryBar.show();
 			

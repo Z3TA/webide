@@ -31,6 +31,7 @@
 	var hideButton;
 	var loadingSpinner;
 	var winMenuFileExplorer;
+	var discoveryBarImage;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -100,7 +101,11 @@
 		
 		//exploreDir(EDITOR.workingDirectory);
 		
-
+		discoveryBarImage = document.createElement("img");
+		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+		discoveryBarImage.title = "File explorer (" + EDITOR.getKeyFor(toggleFileExplorer) + ")"
+		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
+		EDITOR.discoveryBar.add(discoveryBarImage, 1);
 		
 		toggleFileExplorer(visible);
 		
@@ -126,6 +131,10 @@
 		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
 gapi.auth2.getAuthInstance().signOut();
 		}
+	}
+	
+	function toggleFileExplorerFromDiscoveryBar() {
+		toggleFileExplorer();
 	}
 	
 	function updateSigninStatus(isSignedIn) {
@@ -219,6 +228,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			
 			winMenuFileExplorer.activate();
 			
+			discoveryBarImage.setAttribute("class", "active");
+			
 		}
 		else {
 			
@@ -230,6 +241,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			EDITOR.resizeNeeded();
 			
 			winMenuFileExplorer.deactivate();
+			
+			discoveryBarImage.setAttribute("class", "");
 			
 		}
 		return false;

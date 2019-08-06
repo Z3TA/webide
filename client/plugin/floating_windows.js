@@ -17,6 +17,13 @@
 			
 			menu = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
 			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", ["File", 9], openInNewWindow);
+			
+			var discoveryItem = document.createElement("img");
+			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryItem.title = "Open new window";
+			discoveryItem.onclick = openWindowFromMenu;
+			EDITOR.discoveryBar.add(discoveryItem, 12);
+			
 		},
 		unload: function unloadFloatingWindow() {
 			EDITOR.ctxMenu.remove(menu);
@@ -24,6 +31,9 @@
 		},
 	});
 	
+	function openWindowFromMenu() {
+		openInNewWindow(EDITOR.currentFile);
+	}
 	
 	function openInNewWindow(file) {
 		

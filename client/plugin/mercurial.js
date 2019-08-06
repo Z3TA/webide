@@ -49,6 +49,8 @@
 	
 	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations;
 	
+	var discoveryBarImg;
+	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
 		into: "/repo/test/",
@@ -93,6 +95,13 @@
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
 		EDITOR.registerAltKey({char: ",", alt:1, label: "version control", fun: showVersionControlWidget});
+		
+		discoveryBarImg = document.createElement("img");
+		discoveryBarImg.src = "gfx/share.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+		discoveryBarImg.title = "Version control"
+		discoveryBarImg.onclick = toggleVersionControlWidget;
+		EDITOR.discoveryBar.add(discoveryBarImg, 5);
+		
 	}
 	
 	function unloadMercurial() {
@@ -2481,6 +2490,7 @@ var error = err.message;
 		versionControlWidget.show();
 		winMenuMercurial.activate();
 		winMenuMercurial2.activate();
+				discoveryBarImg.setAttribute("class", "active");
 	}
 	
 	function hideVersionControlWidget() {
@@ -2488,6 +2498,7 @@ var error = err.message;
 		versionControlWidget.hide();
 		winMenuMercurial.deactivate();
 		winMenuMercurial2.deactivate();
+				discoveryBarImg.setAttribute("class", "");
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {

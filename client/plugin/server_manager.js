@@ -46,6 +46,8 @@
 	
 	var winMenuServerManager;
 	
+	var discoveryBarImage;
+	
 	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
 		load: load,
@@ -85,6 +87,13 @@
 			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			
+			
+			discoveryBarImage = document.createElement("img");
+			discoveryBarImage.src = "gfx/cloud.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryBarImage.title = "FTP/SFT (" + EDITOR.getKeyFor(showServerManger) + ")";
+			discoveryBarImage.onclick = toggleShowServerManger;
+			EDITOR.discoveryBar.add(discoveryBarImage, 6);
+			
 		});
 		
 		
@@ -109,6 +118,15 @@
 			EDITOR.resizeNeeded();
 		}
 		
+	}
+	
+	function toggleShowServerManger() {
+		if(!serverManager || serverManager.style.display == "none") {
+			showServerManger();
+		}
+		else {
+			hideServerManger();
+		}
 	}
 	
 	function serverManagerEnter() {
@@ -561,6 +579,8 @@
 		
 		EDITOR.resizeNeeded();
 		
+		discoveryBarImage.setAttribute("class", "active");
+		
 		return false;
 		
 	}
@@ -572,6 +592,9 @@
 		}
 		
 		if(serverManager) serverManager.style.display = "none";
+		
+		discoveryBarImage.setAttribute("class", "");
+		
 		EDITOR.resizeNeeded();
 		
 		return false;
