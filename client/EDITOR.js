@@ -3188,8 +3188,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		},
 		remove: function removeWindowMenuItem(menuItem) {
 			
+if(menuItem.parentMenu) {
 			menuItem.parentMenu.removeItem(menuItem);
-			
+			}
+			else {
+				console.warn("Unable to remove menu item: ", menuItem);
+			}
+
 		},
 		update: function updateWindowMenuItem(menuItem, options) {
 			

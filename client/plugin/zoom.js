@@ -17,28 +17,46 @@
 	var loadOrder = 1500; // Should load after the renders
 	var winMenuZoom;
 	
-	EDITOR.on("start", zoomInit, loadOrder);
 	
-	function zoomInit() {
-		o_gridHeight = EDITOR.settings.gridHeight;
-		o_gridWidth = EDITOR.settings.gridWidth;
-		o_fontSize = EDITOR.settings.style.fontSize;
-		o_font = EDITOR.settings.style.font;
-		o_scrollSpeedMultiplier = EDITOR.settings.scrollSpeedMultiplier;
-		
-		EDITOR.bindKey({desc: "Toggle zoom", charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
-		
-		EDITOR.bindKey({desc: "Scroll And move the caret up", charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
-		
-		EDITOR.bindKey({desc: "Scroll And move the caret down", charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
-		
-		EDITOR.addRender(showMarkdownHeadings, 3000);
-
-		EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch}); 
-		
-		winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 3], zoomSwitch);
-		
-	}
+	EDITOR.plugin({
+		desc: "Zoom in and highlight markdown headings",
+		load: function zoomInit() {
+			
+			o_gridHeight = EDITOR.settings.gridHeight;
+			o_gridWidth = EDITOR.settings.gridWidth;
+			o_fontSize = EDITOR.settings.style.fontSize;
+			o_font = EDITOR.settings.style.font;
+			o_scrollSpeedMultiplier = EDITOR.settings.scrollSpeedMultiplier;
+			
+			EDITOR.bindKey({desc: "Toggle zoom", charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
+			
+			EDITOR.bindKey({desc: "Scroll And move the caret up", charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
+			
+			EDITOR.bindKey({desc: "Scroll And move the caret down", charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
+			
+			EDITOR.addRender(showMarkdownHeadings, 3000);
+			
+			EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch});
+			
+			winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 3], zoomSwitch);
+			
+			
+		},
+		unload: function unloadZoom() {
+			
+			EDITOR.unbindKey(zoomSwitch);
+			EDITOR.unbindKey(scrollUp);
+			EDITOR.unbindKey(scrollDown);
+			
+			EDITOR.removeRender(showMarkdownHeadings);
+			
+			EDITOR.unregisterAltKey(zoomSwitch);
+			
+			EDITOR.windowMenu.remove(winMenuZoom);
+			
+		},
+		order: loadOrder
+	});
 	
 	function zoomSwitch(file, combo, character, charCode, direction) {
 		if(zoomedIn) zoomReset(file, combo, character, charCode, direction)
@@ -272,7 +290,6 @@
 				var startRow = file.startRow;
 				var left = EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 				var top = EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight;
-				var middle = top + Math.round(EDITOR.settings.gridHeight/2);
 				var bgColor = "blue"; // EDITOR.settings.style.commentColor
 				var textColor = "yellow" // EDITOR.settings.style.textColor
 				
@@ -280,11 +297,12 @@
 				var fontSize = Math.max(10, 22 - size * 2.5);
 				ctx.font= fontSize + "px " + EDITOR.settings.style.font;
 				
-				
 				// ### Measure text
 				
 				var width = ctx.measureText(text).width;
 				var height = fontSize;
+				var middle = top + Math.round(height/2);
+				
 				
 				// ### Clear background
 				ctx.fillStyle = bgColor;
