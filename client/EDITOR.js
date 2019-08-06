@@ -2251,6 +2251,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		var headerFooterHeight = headerHeight + footerHeight + virtualKeyboardHeight;
 		var leftColumnWidth = parseInt(leftColumn.offsetWidth);
 		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
+		var rightColumnHeight = parseInt(rightColumn.offsetHeight);
 		var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
 		var contentWidth = windowWidth - leftRightColumnWidth;
 		var contentHeight = windowHeight - headerFooterHeight;
@@ -2337,11 +2338,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			// We always need to set with or the canvas will drop down below
 			
 			leftWrappers[i].style.width = leftWrappers[i].offsetWidth + "px";
+			leftWrappers[i].style.height = contentHeight + "px";
 			//leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		var rightWrappers = rightColumn.getElementsByClassName("wrap");
 		for (var i = 0; i < rightWrappers.length; i++) {
 			rightWrappers[i].style.width = rightWrappers[i].offsetWidth + "px";
+			//rightWrappers[i].style.height = rightColumnHeight + "px";
 			//rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		
