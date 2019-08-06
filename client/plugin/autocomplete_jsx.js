@@ -59,7 +59,7 @@
 			}
 		}
 		
-		if(options.length == 0 && gotOptions == 0) {
+		if(options.length == 0 && gotOptions == 0 && word.length == 0) {
 			// Close last opened tag
 			
 			var charIndex = file.caret.index;
