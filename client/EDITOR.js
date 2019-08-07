@@ -270,6 +270,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	
+	var showDisoveryBarWindowMenuItem;
+	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
 	var nativeCopy = false;
@@ -2698,8 +2700,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			discoveryBar.removeChild(wrap);
 		},
 		show: function showDiscoveryBar() {
+			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
-			discoveryBar.style.display = "";
 			if(!discoveryBar.parentElement) {
 				var editorWidth = window.innerWidth || parseInt(canvas.width);
 				var editorHeight = window.innerHeight || parseInt(canvas.height);
@@ -2734,6 +2736,20 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				EDITOR.resizeNeeded();
 			}
 			
+			discoveryBar.style.display = "inline-block";
+			
+			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
+			else {
+				console.log("discoveryBar: No showDisoveryBarWindowMenuItem? ", showDisoveryBarWindowMenuItem);
+				setTimeout(function() {
+					if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
+				}, 1000);
+				
+			}
+			
+			EDITOR.discoveryBar.isVisible = true;
+			EDITOR.resizeNeeded();
+			
 			function setHeight() {
 				var tabList = document.getElementById("tabList");
 				if(tabList) {
@@ -2747,11 +2763,25 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 		},
 		hide: function hideDiscoveryBar() {
+			console.log("discoveryBar:hide: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			discoveryBar.style.display = "none";
+			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.deactivate();
+			EDITOR.discoveryBar.isVisible = false;
 			EDITOR.resizeNeeded();
+		},
+		toggle: function toggleDiscoveryBar() {
+			console.log("discoveryBar:toggle: discoveryBar.style.display=" + discoveryBar.style.display);
+			if(discoveryBar.style.display == "none") {
+				EDITOR.discoveryBar.show();
+			}
+			else {
+				EDITOR.discoveryBar.hide();
+			}
 		},
 		isVisible: true
 	}
+	
+	
 	
 	function DropdownMenu(options) {
 		if(typeof options == "undefined") options = {};
@@ -3315,6 +3345,7 @@ if(menuItem.parentMenu) {
 		},
 		isVisible: true
 	}
+	
 	
 	// TEST-CODE-START
 	
@@ -7333,6 +7364,8 @@ name: login.user,
 			}
 		*/
 		
+	showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 16], EDITOR.discoveryBar.toggle);
+	
 		windowLoaded = true;
 		
 	}
@@ -9786,7 +9819,7 @@ keyPressed(keyPress);
 		//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
 		data += '<foreignObject width="100%" height="100%">';
 		// Font must be web safe font! Seems to ignore our style.css ...
-		data += '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
+	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial; background: ' + EDITOR.settings.style.currentLineColor + '; color: ' + EDITOR.settings.style.textColor + '">';
 		data += html;
 		data += '</div>';
 		data += '</foreignObject>';
