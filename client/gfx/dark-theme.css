@@ -448,6 +448,9 @@ a:visited {
 	
 }
 
+.header .discoveryBar .discoveryItem img {
+	filter: hue-rotate(20deg) brightness(1) contrast(1) saturate(20%);
+}
 
 .discoveryBar .discoveryItem:hover img, .discoveryBar .discoveryItem img.active {
 	
