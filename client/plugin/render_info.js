@@ -27,7 +27,6 @@
 	
 
 	function infoRender(ctx, buffer, file) {
-		
 		var x = 0;
 		var y = 0;
 		var textPadding = 5;
@@ -60,7 +59,6 @@
 		//console.log("infoRender: comments.length=" + comments.length);
 		
 		for(var i=0; i<comments.length; i++) {
-			
 			comment = comments[i];
 			
 			if(comment.file != EDITOR.currentFile) continue;
@@ -121,27 +119,26 @@
 			for(var j=0; j<comment.text.length;j++) {
 				ctx.drawImage(comment.text[j], x + textPadding + iconPadding + countTextWidth + countTextPadding, y + textPadding + j * fontHeight);
 			}
-			
-			
 		}
-		
-		
 	}
 	
 	function drawBubble(ctx, x, y, w, h, radius, lvl) {
+		
+		// Color in the text-image is always black!
 		
 		if(lvl == 1) {
 			ctx.fillStyle="rgb(255, 236, 236)";
 			ctx.strokeStyle="rgba(255,180,180, 0.8)";
 			ctx.lineWidth="2";
+			w += 20; // Due to the icon
 		}
 		else if(lvl == 2) {
-			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
+			ctx.fillStyle="rgb(255, 255, 230)";
 ctx.strokeStyle="rgba(255,255,0, 0.5)";
 			ctx.lineWidth="1";
 		}
 		else {
-			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
+			ctx.fillStyle="rgb(255, 255, 230)";
 ctx.strokeStyle="rgba(0,0,0, 0.5)";
 			ctx.lineWidth="1";
 		}

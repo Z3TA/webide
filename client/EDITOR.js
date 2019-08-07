@@ -9819,12 +9819,15 @@ keyPressed(keyPress);
 		//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
 		data += '<foreignObject width="100%" height="100%">';
 		// Font must be web safe font! Seems to ignore our style.css ...
-	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial; background: ' + EDITOR.settings.style.currentLineColor + '; color: ' + EDITOR.settings.style.textColor + '">';
-		data += html;
+	// color is always black! background is transparent.
+	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
+	data += html;
 		data += '</div>';
 		data += '</foreignObject>';
 		data += '</svg>';
 		
+	// 
+	
 		console.log("Creating SVG image: data=" + data);
 		
 		var img = new Image();
