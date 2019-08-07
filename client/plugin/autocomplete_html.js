@@ -124,7 +124,7 @@
 		
 		var charBeforeWord = file.text.charAt(file.caret.index-wordLength-1);
 		
-		if(charBeforeWord == "!" && "DOCTYPE".slice(0, wordLength) == word) {
+		if(word.length > 0 && charBeforeWord == "!" && "DOCTYPE".slice(0, wordLength) == word) {
 			return [
 				['DOCTYPE html>\n<html lang="en">\n<head>\n<title></title>\n</head>\n<body>\n\n</body>\n</html>\n', 42]
 			];
@@ -135,7 +135,7 @@
 		var tagStart = charBeforeWord == "<";
 		var tagEnd = charBeforeWord == "/";
 		
-		console.log("autoCompleteHtml: word=" + word + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
+		console.log("autoCompleteHtml: word=" + word + " hmm=" + "DOCTYPE".slice(0, wordLength) + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
 		
 		
 		if(!tagStart && !tagEnd) return;
