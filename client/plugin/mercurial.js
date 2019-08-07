@@ -2472,7 +2472,7 @@ var error = err.message;
 		cancel.appendChild(document.createTextNode("Cancel version control"));
 		cancel.setAttribute("class", "button");
 		cancel.onclick = function() {
-			widget.hide();
+					hideVersionControlWidget();
 		}
 		div.appendChild(cancel);
 		
