@@ -2706,6 +2706,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			discoveryBar.removeChild(wrap);
 		},
 		show: function showDiscoveryBar() {
+			if(!EDITOR.discoveryBar.enabled) {
+				console.warn("Discovery bar not enabled!");
+				return;
+			}
+			
 			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
 			if(!discoveryBar.parentElement) {
@@ -2784,7 +2789,12 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				EDITOR.discoveryBar.hide();
 			}
 		},
-		isVisible: true
+		disable: function disableDiscoveryBar() {
+			EDITOR.discoveryBar.hide();
+			EDITOR.discoveryBar.enabled = false;
+		},
+		isVisible: true,
+		enabled: true
 	}
 	
 	
