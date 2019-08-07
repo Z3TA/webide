@@ -416,13 +416,17 @@ a:visited {
 
 
 .discoveryBar .discoveryItem img {
+	
 	-webkit-filter: hue-rotate(20deg);
 	filter: hue-rotate(-10deg) brightness(.4) contrast(.2);
 	opacity: .7;
+	
 }
 
 
 .discoveryBar .discoveryItem:hover img, .discoveryBar .discoveryItem img.active {
-	-webkit-filter: hue-rotate(260deg);
-	filter: hue-rotate(260deg);
+	
+	-webkit-filter: hue-rotate(20deg);
+	filter: hue-rotate(10deg) brightness(1.2) contrast(.1);
+	
 }
