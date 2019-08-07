@@ -450,3 +450,34 @@ a:visited {
 	filter: hue-rotate(10deg) brightness(1.2) contrast(.1);
 	
 }
+
+
+/* Color of table scrollbar (color *behind* table) */
+div.tableHolder {
+	background-color: transparent;
+}
+
+
+.footer table.data tr:nth-child(even) {background: rgb(41, 42, 48); color: #e4e4e5;}
+.footer table.data tr:nth-child(odd) {background: rgb(41, 42, 48);  color: #e4e4e5;}
+
+.footer table.data tr.selected {
+	background-color: rgb(47, 50, 57);
+}
+
+.footer table.data td {
+	border: 0;
+	
+	
+}
+
+.footer table.data th {
+	background: #3b3b45;
+	border: none;
+	color: #aaaaaf;
+}
+
+.footer table.data select {
+	background: rgb(41, 42, 48);
+	color: rgb(226, 226, 226);
+}
