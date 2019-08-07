@@ -96,8 +96,8 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		
 		
 		// Experimenting
-		EDITOR.settings.style.textColor = "rgb(255, 245, 249)"; // 
-		
+		//EDITOR.settings.style.textColor = "rgb(221, 164, 99)"; // 
+		//EDITOR.settings.style.bgColor = "rgb(11, 12, 18)";
 		
 		// Load CSS
 		var head  = document.getElementsByTagName('head')[0];
