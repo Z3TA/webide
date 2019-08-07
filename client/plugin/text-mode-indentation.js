@@ -36,7 +36,7 @@
 			
 			EDITOR.on("showMenu", showWhiteSpaceMaybe);
 			
-			winMenuShowIndentation = EDITOR.windowMenu.add("Show White-space", ["Edit", 12], toggleShowWhiteSpace);
+			winMenuShowIndentation = EDITOR.windowMenu.add("Show White-space", ["View", 12], toggleShowWhiteSpace);
 			
 			if(QUERY_STRING["whiteSpace"]) toggleShowWhiteSpace();
 			
