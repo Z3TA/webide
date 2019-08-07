@@ -3692,6 +3692,10 @@ li.onclick = function(clickEvent) {
 			// First element[0] is the temp-holder
 			menu.children[1].focus();
 			
+			menu.onmouseover = function() {
+				menu.children[1].blur(); // Don't focus child elements if we have a mouse'
+			}
+			
 			return true;
 			
 			
@@ -7052,8 +7056,15 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 		
 		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
 		
-		EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", fun: EDITOR.ctxMenu.show, combo: 0});
-		EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
+	EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
+		fun: function showContextMenu() {
+			EDITOR.input = false;
+			EDITOR.ctxMenu.show();
+			return PREVENT_DEFAULT;
+		}
+	});
+	
+	EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
 		
 		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
 			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {

@@ -262,12 +262,17 @@ select, select.functionList {
 	padding-right: 8px;
 }
 
+
 .canvasContextmenu li .text {
 	color: #ffffff;
 }
 
 .canvasContextmenu li.item:hover .key {
 	color: #ffffff;
+}
+
+.canvasContextmenu li.item:focus {
+	background-color: #2d5eca;
 }
 
 .canvasContextmenu li.item:hover {

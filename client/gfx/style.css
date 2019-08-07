@@ -1254,9 +1254,12 @@ div.gotoFile li:hover {
 .canvasContextmenu li.item:hover {
 	color: black;
 	/*text-shadow: 0 1px rgba(0, 0, 0, 0.3);*/
+	
 	background: #5a70b0;
 	background-color: #b5d4ff;
+	
 	border-color: #5a70b0 #495d98 #42558a;
+	
 	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
 }
 
