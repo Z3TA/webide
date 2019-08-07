@@ -2188,13 +2188,19 @@ text = file;
 console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
 		return;
 		}
-		
+
 		//console.warn(UTIL.getStack("EDITOR.resize!"));
 		
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
 		
+		if(oldFullScreenWidget) {
+			// There is a widget covering the whole screen!
+			console.warn("Not resizing because oldFullScreenWidget=", oldFullScreenWidget);
+			return;
+		}
+
 		
 		
 		console.time("resize");
@@ -6677,7 +6683,8 @@ console.warn("Element already in full screen: ", widgetElement);
 		EDITOR.scrollingEnabled = true;
 	
 		oldFullScreenWidget = widgetElement;
-	}
+	
+}
 	
 	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
 		
