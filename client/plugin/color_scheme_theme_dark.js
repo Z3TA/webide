@@ -22,7 +22,8 @@
 	EDITOR.plugin({
 		desc: "Detect and change to dark theme",
 		load: loadDarkTheme,
-		unload: unloadDarkTheme
+		unload: unloadDarkTheme,
+		order: 1 // Load as early as possible 
 	});
 	
 	function loadDarkTheme() {
@@ -74,9 +75,9 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 			console.log("dark_theme: Dark theme already loaded!");
 			return;
 		}
+		
 		console.log("dark_theme: Set dark theme! ...");
 		
-		// 
 		
 		// Backgrounds
 		EDITOR.settings.style.bgColor = "rgb(41, 42, 48)";
@@ -92,6 +93,10 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		EDITOR.settings.style.lineNumberColor = "rgb(114, 114, 114)";
 		
 		EDITOR.settings.caret.color = "#ffffff";
+		
+		
+		// Experimenting
+		EDITOR.settings.style.textColor = "rgb(255, 245, 249)"; // 
 		
 		
 		// Load CSS

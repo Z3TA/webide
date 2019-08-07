@@ -40,6 +40,8 @@ Able to disable the discovery bar (open in new window/floating_windows.js)
 
 todo: Discovery bar!
 
+bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
+
 todo: Try React tutorial to feel pain
 
 todo: Support const
