@@ -269,7 +269,6 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
-	discoveryBar.setAttribute("class", "discoveryBar wrap");
 	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
@@ -326,7 +325,9 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
 	
 	// Don't show the firendly message on how to show the context menu if the menu is disabled
-	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("ctxMenu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) ctxMenuVisibleOnce = true;
+	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("ctxMenu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) {
+ctxMenuVisibleOnce = true;
+	}
 	
 	var lastMouseDownEventType = "";
 	
@@ -2675,7 +2676,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 			discoveryBar.appendChild(wrap);
 			
-			
 			// Re-order
 			var items = Array.prototype.slice.call( discoveryBar.children, 0 ); // Make psuedu-array into a real array
 			items.sort(function(a,b) {
@@ -2690,18 +2690,16 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				discoveryBar.appendChild(el);
 			});
 			
-			
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) return new Error("Discovery bar is disabled by query string!");
 			EDITOR.discoveryBar.show();
 			
 		},
-		remove: function removeDiscoveryItem() {
-			
-		},
-		update: function updateDiscoveryItem() {
-			
+		remove: function removeDiscoveryItem(element) {
+			discoveryBar.removeChild(wrap);
 		},
 		show: function showDiscoveryBar() {
 			
+			discoveryBar.style.display = "";
 			if(!discoveryBar.parentElement) {
 				var editorWidth = window.innerWidth || parseInt(canvas.width);
 				var editorHeight = window.innerHeight || parseInt(canvas.height);
@@ -2716,12 +2714,16 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 						
 					*/
 					
+					discoveryBar.setAttribute("class", "discoveryBar wrap");
+					
 					var parent = document.getElementById("leftColumn"); // rightColumn, leftColumn
 				}
 				else {
 					// At the top
 					var parent = document.getElementById("header");
 					var tabList = document.getElementById("tabList");
+					
+					discoveryBar.setAttribute("class", "discoveryBar");
 					
 					if(tabList) setHeight();
 					else setTimeout(setHeight, 1000);
@@ -2745,11 +2747,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 		},
 		hide: function hideDiscoveryBar() {
-			
+			discoveryBar.style.display = "none";
+			EDITOR.resizeNeeded();
 		},
 		isVisible: true
 	}
-	
 	
 	function DropdownMenu(options) {
 		if(typeof options == "undefined") options = {};

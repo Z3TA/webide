@@ -1677,8 +1677,8 @@ Assuming it's placed in the left column
 .discoveryBar .discoveryItem img {
 filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 3.5+ */
 	filter: gray; /* IE6-9 */
-	-webkit-filter: grayscale(100%); /* Chrome 19+ & Safari 6+ */
-
+	-webkit-filter: grayscale(80%); /* Chrome 19+ & Safari 6+ */
+	opacity: .6;
 	width: 100%;
 	height: 100%;
 }
@@ -1686,23 +1686,24 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 .header .discoveryBar {
 	border: 0px solid pink;
 float: right;
+margin-left: 5px;
 }
 
 .header .discoveryBar .discoveryItem {
 	display: inline-block; /* side by side */
 	border: 0px solid red;
 	margin: 0;
-	margin-left: 4px;
 	
 	max-width: 32px;
-	height: 10%;
 }
 
 .header .discoveryBar .discoveryItem img {
 
 	height: 70%;
 	width: 70%;
-margin: 0;
+	margin: 15%;
+	margin-top: 27%;
+	margin-bottom: 3%
 padding: 0;
 }
 
@@ -1720,6 +1721,7 @@ padding: 0;
 	filter: none;
 	-webkit-filter: grayscale(0%);
 	cursor: pointer;
+	opacity: 1;
 }
 
 .leftColumn .discoveryBar .discoveryItem {
@@ -1878,6 +1880,20 @@ margin-top: 20px;
 		font-size: 12px;
 	}
 	
+	.header .discoveryBar .discoveryItem {
+		max-width: 22px;
+	}
+	
+	.leftColumn .discoveryBar {
+		margin-top: 5px;
+	}
+	
+	.leftColumn .discoveryBar .discoveryItem {
+		max-width: 22px;
+		border: 0px solid orange;
+		margin: 0;
+		margin-left: 7px;
+	}
 
 }
 
@@ -1896,7 +1912,6 @@ max-width: 40px;
 		text-overflow:clip; /* gets rid of the ... ellipsis */
 
 		padding: 4px;
-color: red;
 	}
 	
 	.windowMenu .root .key {
@@ -1923,7 +1938,17 @@ color: red;
 	.dialog .message {
 		min-width: 80px;
 }
-
+	
+	.header .discoveryBar {
+		/* make it show on separate row */
+		float: none; 
+		border: 0px solid green;
+	}
+	
+	.header .discoveryBar .discoveryItem {
+		max-width: 10%; /* 100% devided by number of items  */
+	}
+}
 
 /* Make mobile browsers NOT zoom */
 @media screen and (-webkit-min-device-pixel-ratio:0) {

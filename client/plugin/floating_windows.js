@@ -40,9 +40,11 @@
 		EDITOR.ctxMenu.hide();
 		
 		var browserWindowOptions = {
-			url: "/?disable=collaboration_notice,reopen_files,trmb,file_tabs",
+			url: "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar",
 			waitUntilLoaded: true
 		};
+		
+		if(QUERY_STRING["theme"]) browserWindowOptions.url += "&theme=" + QUERY_STRING["theme"];
 		
 		var thisEditor = window.EDITOR;
 		
