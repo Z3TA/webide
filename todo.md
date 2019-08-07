@@ -34,7 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-colors for EDITOR.addInfo different levels
+release!
 
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
