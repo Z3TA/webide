@@ -34,7 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-reopen-files not working!? when reloading!?
+reopen-files not working!? when reloading!? reopenFiles is never called! CLIENT: firing 
 
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
 

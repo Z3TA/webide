@@ -12,7 +12,7 @@ var CLIENT = {}; // Client object is global
 	
 	"use strict";
 	
-	console.log("Hello from CLIENT.js");
+	console.log("CLIENT: Hello from CLIENT.js");
 	
 	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
 	var idCounter = 0;
@@ -38,27 +38,27 @@ var CLIENT = {}; // Client object is global
 		
 		if(!protocol) throw new Error("Unable to get protocol from window.location.href=" + window.location.href);
 
-		console.log("protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
+		console.log("CLIENT: protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
 		var defaultURL = loc.protocol + "://" + loc.host + "/jzedit"; // loc.host includes port!
 		
 		if(protocol.toLowerCase() == "file") {
 			defaultURL = "http://localhost:8099/jzedit";
 			
-			if(RUNTIME == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
+			if(RUNTIME == "browser") console.warn("CLIENT: It's recommended to access the editor via a HTTP server!");
 		}
 		else if(protocol.toLowerCase() == "chrome-extension") {
 			// We are running as *the* chromeos app !?
 			defaultURL = "https://webide.se/jzedit";
 		}
 		
-		console.log("defaultURL=" + defaultURL);
+		console.log("CLIENT: defaultURL=" + defaultURL);
 		
 		if(server == undefined) server = {url: defaultURL};
 		
 		var url = server.url || defaultURL; // 'http://' + host + ':' + port + pathName + apiUrl
 		
-		console.log("Connecting to jzedit server: url=" + url);
+		console.log("CLIENT: Connecting to jzedit server: url=" + url);
 		//connection = new SockJS(apiUrl);
 		
 		var sockJsReservedQuirk = '';
@@ -66,13 +66,13 @@ var CLIENT = {}; // Client object is global
 		
 		connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
 		connection.onopen = function serverConnected() {
-			console.log("connected to server=" + JSON.stringify(server));
+			console.log("CLIENT: connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			CLIENT.url = url;
 			
 			lastUsedserver = server;
 			
-			console.log("connection.onopen: connection.readyState=" + connection.readyState);
+			console.log("CLIENT: connection.onopen: connection.readyState=" + connection.readyState);
 			// readyState when using xhr !? Wait for readyState !?
 			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
@@ -80,7 +80,7 @@ var CLIENT = {}; // Client object is global
 			
 			CLIENT.fireEvent("connectionConnected");
 			
-			console.log("Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
+			console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
 			reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 			
 		}
@@ -89,7 +89,7 @@ var CLIENT = {}; // Client object is global
 		
 		
 		connection.onclose = function serverDisconnected() {
-			console.log("connection closed");
+			console.log("CLIENT: connection closed");
 			CLIENT.connected = false;
 			CLIENT.url = null;
 			
@@ -107,20 +107,20 @@ var CLIENT = {}; // Client object is global
 			reconnectTimeout = setTimeout(function reconnect() {
 				if(CLIENT.connected) return;
 				
-				console.log("Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
+				console.log("CLIENT: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
 				CLIENT.connect(server);
 				
 			}, reconnectTimeoutTime);
 			
 			reconnectTimeoutTime += 1000;
-			console.log("Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
+			console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
 			
 		}
 		
 	}
 	
 	CLIENT.disconnect = function disconnect() {
-		console.log("Disconnecting from editor server url=" + CLIENT.url);
+		console.log("CLIENT: Disconnecting from editor server url=" + CLIENT.url);
 		connection.close();
 		CLIENT.connected = false;
 	}
@@ -141,14 +141,17 @@ var CLIENT = {}; // Client object is global
 		var string = id + GS + req;
 		
 		// console.warn so we get a stack trace and can find out where the request was made while debugging
-		if(req != "log") console.warn("CLIENT.cmd id=" + id + " req=" + req);
-		
+		if(req != "log") {
+			console.warn("CLIENT: CLIENT.cmd id=" + id + " req=" + req);
+		}
 		if(json) {
 			try {
 				string += GS + JSON.stringify(json);
 			}
 			catch(err) {
-				if(req != "log") console.log(json);
+				if(req != "log") {
+					console.log("CLIENT: ", json);
+				}
 				throw new Error("Unable to stringify json=" + json);
 			}
 		}
@@ -161,12 +164,15 @@ callbackWaitList[id] = callback;
 		else if(req != "stdout" && req != "log" && req != "echo") { // Known commands that doesn't call back
 			// This error will be thrown if the server callbacks with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
-			console.warn("No callback defined in req=" + req);
+			console.warn("CLIENT: No callback defined in req=" + req);
 		}
 		
 		connSend(string, function sendMessageToServer(err) {
 			if(err) {
-				if(req != "log") console.log("connSend error: "+ err);
+				if(req != "log") {
+console.log("CLIENT: connSend error: "+ err);
+				}
+				
 				if(callbackWaitList.hasOwnProperty(id)) {
 					callbackWaitList[id](err);
 					delete callbackWaitList[id];
@@ -178,7 +184,7 @@ callbackWaitList[id] = callback;
 	
 	CLIENT.on = function addEventListener(ev, cb) {
 		if(!eventListeners.hasOwnProperty(ev)) {
-			console.warn("Adding new event to event listeners: " + ev);
+			console.warn("CLIENT: Creating new event (listener): " + ev);
 			eventListeners[ev] = [];
 		}
 		
@@ -186,21 +192,33 @@ callbackWaitList[id] = callback;
 		
 		eventListeners[ev].push(cb);
 		
-		if(ev == "loginSuccess" && loggedIn) cb(loggedIn);
+		console.warn("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev);
+		
+		if(ev == "loginSuccess" && loggedIn) {
+			console.log("CLIENT: Firing cb=" + UTIL.getFunctionName(cb) + " right away because already logged in!");
+			cb(loggedIn);
+		}
 		
 	}
 	
 	CLIENT.fireEvent = function fireEvent(ev, data) {
 		
-		console.log("firing client event '" + ev + "' data=" + data);
+		console.log("CLIENT: firing client event '" + ev + "' data=" + data);
 		
-		if(!eventListeners.hasOwnProperty(ev)) console.warn("No registered event listener for ev=" + ev)
+		if(!eventListeners.hasOwnProperty(ev)) {
+console.warn("CLIENT: No registered event listener for ev=" + ev)
+		}
 		else {
 			// Call all event listeners
 			
-			if(eventListeners[ev].length == 0) console.warn("No event listeners for event=" + ev);
+			if(eventListeners[ev].length == 0) {
+console.warn("CLIENT: No event listeners for event=" + ev);
+			}
 			
-			for(var i=0; i<eventListeners[ev].length; i++) eventListeners[ev][i](data);
+			for(var i=0; i<eventListeners[ev].length; i++) {
+				console.log("CLIENT: firing " + ev + " event listener: " + UTIL.getFunctionName(eventListeners[ev][i]))
+				eventListeners[ev][i](data);
+			}
 			
 		}
 	}
@@ -209,7 +227,7 @@ callbackWaitList[id] = callback;
 	CLIENT.removeEvent = function(eventName, fun) {
 		
 		if(!eventListeners.hasOwnProperty(eventName)) {
-			console.warn("Unknown event: eventName=" + eventName);
+			console.warn("CLIENT: Unknown event: eventName=" + eventName);
 			return;
 		}
 		
@@ -229,12 +247,14 @@ callbackWaitList[id] = callback;
 				}
 			}
 		}
-		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
+		console.log("CLIENT: Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 
 	CLIENT.mock = serverMessage; // When you want to manually fire server messages
 	
-	CLIENT.on("loginSuccess", function(json) {
+	CLIENT.on("loginSuccess", function clientSaveConnectionId(json) {
+		console.log("CLIENT: loginSuccess: json=" + JSON.stringify(json));
+		
 		if(json.cId == undefined) throw new Error("Did not get cId from loginSuccess event!");
 		CLIENT.connectionId = json.cId;
 		loggedIn = json;
@@ -250,22 +270,22 @@ callbackWaitList[id] = callback;
 		// Always tell the service worker what version the server is on, so it can update the cache if needed
 		var serviceWorkerError = true;
 		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-			console.log("editorVersion: Telling the serviceWorker about server version=" + newVersion);
+			console.log("CLIENT: editorVersion: Telling the serviceWorker about server version=" + newVersion);
 			serviceWorkerError = false;
 			try {
 				navigator.serviceWorker.controller.postMessage("editorVersion=" + newVersion);
 			}
 			catch(err) {
 				serviceWorkerError = true;
-				console.warn("editorVersion: Failed to post message to server worker: " + err.message);
+				console.warn("CLIENT: editorVersion: Failed to post message to server worker: " + err.message);
 			}
 		}
 		else {
-			console.log("seditorVersion: erviceWorker not supported on BROWSER=" + BROWSER);
+			console.log("CLIENT: seditorVersion: erviceWorker not supported on BROWSER=" + BROWSER);
 		}
 		
 		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
-			console.warn("editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
+			console.warn("CLIENT: editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
 			return;
 		}
 		else if(newVersion != oldVersion && lastUsedserver && lastUsedserver.url.indexOf(window.location.hostname) == -1) {
@@ -273,7 +293,9 @@ callbackWaitList[id] = callback;
 		}
 		else if(newVersion > oldVersion) {
 			// Wait until serviceWorker has updated the cache ...
-			if(serviceWorkerError) console.warn("editorVersion: Unable to talk to service worker! No point refreshing.");
+			if(serviceWorkerError) {
+console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point refreshing.");
+			}
 			else setTimeout(refresh, 10000); // The wait must be enough to make sure the service worker has refreshed the cache!
 		}
 		
@@ -288,15 +310,15 @@ callbackWaitList[id] = callback;
 				
 				var version = parseInt(str);
 				
-				console.log("editorVersion: server=" + newVersion + " version.txt=" + version);
+				console.log("CLIENT: editorVersion: server=" + newVersion + " version.txt=" + version);
 				
 				if(version < newVersion && !serviceWorkerError) {
-					console.warn("editorVersion: Force refresh the cache!");
+					console.warn("CLIENT: editorVersion: Force refresh the cache!");
 					navigator.serviceWorker.controller.postMessage("forceRefresh=" + newVersion);
 					setTimeout(refresh, 20000);
 				}
 				else {
-					console.log("editorVersion: We now have the new version=" + version + " in the cache, same as newVersion=" + newVersion);
+					console.log("CLIENT: editorVersion: We now have the new version=" + version + " in the cache, same as newVersion=" + newVersion);
 					var ok = "Reload now!";
 					var cancel = "Update another time"
 					confirmBox("The editor has been updated from version=" + oldVersion + " to " + newVersion + "\nReload to get the new version.", [cancel, ok], function(answer) {
@@ -313,13 +335,13 @@ callbackWaitList[id] = callback;
 		var websockOpen = 1;
 		
 		if(connection.readyState==websockOpen) {
-			console.log("Sending: " + UTIL.shortString(msg) + " to server ...");
+			console.log("CLIENT: Sending: " + UTIL.shortString(msg) + " to server ...");
 			
 			connection.send(msg);
 			if(callback) callback(null);
 		}
 		else {
-			console.log("connection.readyState=" + connection.readyState);
+			console.log("CLIENT: connection.readyState=" + connection.readyState);
 			if(callback) {
 				var err = new Error("Not connected to jzedit server");
 				err.code = "CONNECTION_CLOSED";
@@ -331,25 +353,25 @@ callbackWaitList[id] = callback;
 		}
 	
 	function checkEditor() {
-		console.log("Wait for editor to load and then attach events for afk");
+		console.log("CLIENT: Wait for editor to load and then attach events for afk");
 		if(typeof EDITOR != "undefined" && typeof EDITOR.on == "function") {
-			console.log("Editor loaded. Attaching afk and btk events!");
+			console.log("CLIENT: Editor loaded. Attaching afk and btk events!");
 			clearInterval(checkEditorInterval);
 			
 			EDITOR.on("afk", function increaseReconnectTime() {
 				if(!CLIENT.connected) {
 reconnectTimeoutTime += 10000;
-					console.log("Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
+					console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
 				}
 				return true;
 			});
 			
 			EDITOR.on("btk", function tryReconnectAndUpdateReconnectTime() {
-				console.log("Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because btk");
+				console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because btk");
 				reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 				if(!CLIENT.connected) {
 					clearTimeout(reconnectTimeout);
-					console.log("Attempting connect after btk");
+					console.log("CLIENT: Attempting connect after btk");
 					CLIENT.connect(lastUsedserver);
 				}
 				return true;
@@ -361,12 +383,14 @@ reconnectTimeoutTime += 10000;
 		
 		var msg = sockJsEvent.data;
 		
-		console.log("Server: " + UTIL.shortString(msg));
-		//console.log( "Server: " + msg );
+		console.log("CLIENT: Server: " + UTIL.shortString(msg));
+		//console.log( "CLIENT: Server: " + msg );
 		
 		CLIENT.connected = true;
 		
-		if(msg.length == 0) console.warn("Recieved emty messsage from server");
+		if(msg.length == 0) {
+			console.warn("CLIENT: Recieved emty messsage from server");
+		}
 		else {
 			try {
 				var json = JSON.parse(msg)
@@ -376,7 +400,9 @@ reconnectTimeoutTime += 10000;
 				return;
 			}
 			
-			if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
+			if(json.error) {
+				console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
+			}
 			
 			if(json.resp) {
 				var resp = json.resp;
@@ -386,14 +412,14 @@ reconnectTimeoutTime += 10000;
 					if(eventListeners.hasOwnProperty(method)) {
 						CLIENT.fireEvent(method, resp[method]);
 					}
-					//else console.log("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
+					//else console.log("CLIENT: No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
 				}
 			}
 			
 			if(json.id) {
 				if(callbackWaitList.hasOwnProperty(json.id)) {
 					
-					console.log("Got server response for id=" + json.id);
+					console.log("CLIENT: Got server response for id=" + json.id);
 					
 					var err = null;
 					
@@ -422,7 +448,7 @@ reconnectTimeoutTime += 10000;
 				}
 			}
 			else if(json.msg) {
-				console.warn(json.msg);
+				console.warn("CLIENT: " + json.msg);
 				alertBox(json.msg, json.code || "SERVER_MSG");
 			}
 			else if(!json.resp) {
@@ -441,6 +467,6 @@ reconnectTimeoutTime += 10000;
 	}
 	
 	
-	console.log("End of CLIENT.js");
+	console.log("CLIENT: End of CLIENT.js");
 	
 })();

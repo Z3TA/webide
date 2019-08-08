@@ -7246,7 +7246,7 @@ name: login.user,
 		
 		var progressValue = 0;
 		var progressMax = 1;
-		CLIENT.on("progress", function(increment) {
+		CLIENT.on("progress", function handleProgress(increment) {
 			var progress = document.getElementById("progress");
 			
 			if(!Array.isArray(increment)) {
