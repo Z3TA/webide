@@ -34,11 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-only show deploy icon in discovery bar if init worker is running!
-
-only show invite collaborator in discovery bar if ... ?
-
-reopen-files not working!?
+reopen-files not working!? when reloading!?
 
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
 

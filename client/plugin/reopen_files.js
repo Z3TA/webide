@@ -18,11 +18,11 @@
 	*/
 
 	if(QUERY_STRING["embed"]) {
-console.warn("Reopen-files disabled by embed in query string");
+		console.warn("reopenFiles: Reopen-files disabled by embed in query string");
 		return;
 	}
 	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("reopen_files") != -1) {
-console.warn("Reopen-files disabled by disable containing reopen_files in query string");
+		console.warn("reopenFiles: Reopen-files disabled by disable containing reopen_files in query string");
 	return;
 	}
 	
@@ -49,8 +49,11 @@ console.warn("Reopen-files disabled by disable containing reopen_files in query 
 		order: 2000, // Load after the parser and other stuff that has fileOpen event listener
 		load: function loadReopenFilesPlugin() {
 			
+			console.log("reopenFiles: Loading reopenFiles plugin ...");
+			
 			reopenFilesCalled = false;
 			allFilesOpenedAlreadyCalled = false;
+			
 			
 			CLIENT.on("loginSuccess", reopenFiles);
 			/*
@@ -95,7 +98,7 @@ console.warn("Reopen-files disabled by disable containing reopen_files in query 
 
 	
 	function reopenFiles() {
-console.log("reopenFiles!");
+		console.log("reopenFiles: Opening files ...");
 		
 		if(reopenFilesCalled) {
 			// Happens when you get disconnected, and storageReady is called.
@@ -139,7 +142,7 @@ console.log("reopenFiles!");
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
-			console.log("Started saveStateIntervalTimer");
+			console.log("reopenFiles: Started saveStateIntervalTimer");
 			saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
 			
 			// Catch bugs
@@ -175,16 +178,16 @@ console.log("reopenFiles!");
 			findBugs(false, function(err, openedFilesString) {
 				if(err) throw err;
 				files = openedFilesString.split(fileDelimiter);
-				console.log("files=" + JSON.stringify(files));
+				console.log("reopenFiles: files=" + JSON.stringify(files));
 				
 				if(openedFilesString.length > 0) { // openedFilesString is a string with path's separated by fileDelimiter
-					console.log("Opening " + files.length + " files ...");
+					console.log("reopenFiles:Opening " + files.length + " files ...");
 					
 					// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
 					for(var i=0; i<files.length; i++) {
 						// Problem: The editor might already have the file open, and we are here because of a server reconnect
 						if(!EDITOR.files.hasOwnProperty(files[i])) {
-							console.log("gonna open files[" + i + "]=" + files[i]);
+							console.log("reopenFiles: gonna open files[" + i + "]=" + files[i]);
 							openFile(files[i], fileInListOpened);
 						}
 					}
@@ -203,12 +206,14 @@ console.log("reopenFiles!");
 					// File did not exist, and the user did not want to load the last state. 
 					// It has also been removed from openedFiles storage
 				}
-				else console.warn(err.message);
+				else {
+					console.warn("reopenFiles: " + err.message);
+				}
 				
 				return compareAndDone();
 				}
 			
-			console.log("we now have it open: file.path=" + file.path);
+			console.log("reopenFiles: We now have it open: file.path=" + file.path);
 			
 			if(wasCurrent) setCurrent = file.path;
 			
@@ -225,9 +230,9 @@ console.log("reopenFiles!");
 						allFilesOpened();
 					}
 					else {
-						console.log("editorFiles=" + editorFiles);
-						console.log("openedFilesString=" + openedFilesString);
-						console.warn("editorFiles and openedFilesString does not match!");
+						console.log("reopenFiles: editorFiles=" + editorFiles);
+						console.log("reopenFiles: openedFilesString=" + openedFilesString);
+						console.warn("reopenFiles: editorFiles and openedFilesString does not match!");
 					}
 				});
 			}
@@ -238,11 +243,11 @@ console.log("reopenFiles!");
 			allFilesOpenedNeverCalled = false;
 			
 			
-			console.log("All files from last lession opened!");
+			console.log("reopenFiles: All files from last lession opened!");
 			
 			findBugs(true); // true == also check if the list match EDITOR.files
 			
-			console.log("setCurrent=" + setCurrent);
+			console.log("reopenFiles: setCurrent=" + setCurrent);
 			
 			
 			if(setCurrent) {
@@ -279,21 +284,21 @@ console.log("reopenFiles!");
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				console.log("Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {
 					notFound = true;
 					//}
-					console.warn(getFileSizeError.message);
+					console.warn("reopenFiles: " + getFileSizeError.message);
 				}
 				
 				loadState(path, function(err, state) {
 					lastFileState = state;
 					if(err) throw err;
 					if(lastFileState) {
-						console.log("loadLastState=" + loadLastState);
-						console.log("lastFileState.isSaved=" + lastFileState.isSaved);
+						console.log("reopenFiles: loadLastState=" + loadLastState);
+						console.log("reopenFiles: lastFileState.isSaved=" + lastFileState.isSaved);
 						
 						if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 							// Only ask if we actually have the last state, otherwise just ignore that it's gone.
@@ -338,7 +343,7 @@ console.log("reopenFiles!");
 				
 				function open() {
 					
-					console.log("open file path=" + path);
+					console.log("reopenFiles: open file path=" + path);
 					
 					if(lastFileState) {
 					
@@ -346,13 +351,13 @@ console.log("reopenFiles!");
 						
 						if( loadLastState || lastFileState.isSaved === false ) {
 							// Open from temp
-							console.warn("Loading last saved state for file path=" + path);
+							console.warn("reopenFiles: Loading last saved state for file path=" + path);
 							content = lastFileState.text;
 							
 							if(typeof content != "string") {
 								var contentError = new Error("lastFileState.text=" + lastFileState.text + " lastFileState.path=" + lastFileState.path + ". " + path + " will not be reopened!");
-								console.warn(contentError.message);
-								console.log(lastFileState);
+								console.warn("reopenFiles: " + contentError.message);
+								console.log("reopenFiles: lastFileState=", lastFileState);
 								removeFromOpenedFiles(path, function(err) {
 									if(err) throw err;
 									callback(contentError, path, false);
@@ -361,7 +366,7 @@ console.log("reopenFiles!");
 							}
 							}
 						else if(notFound) {
-							console.log("The file (" + path + ") was not found and the user didn't want to load last state");
+							console.log("reopenFiles: The file (" + path + ") was not found and the user didn't want to load last state");
 							// Do not open it! Remove from openedFiles
 							
 							removeFromOpenedFiles(path, function(err) {
@@ -377,7 +382,7 @@ console.log("reopenFiles!");
 							CLIENT.cmd("hash", {path: path}, function gotHash(err, hash) {
 								
 								if(hash != lastFileState.hash) {
-									console.warn("The file on disk has changed! hash=" + hash + " lastFileState.hash=" + lastFileState.hash);
+									console.warn("reopenFiles: The file on disk has changed! hash=" + hash + " lastFileState.hash=" + lastFileState.hash);
 									lastFileState.isSaved = false;
 									content = lastFileState.text;
 								}
@@ -390,7 +395,7 @@ console.log("reopenFiles!");
 						}
 						
 					}
-					console.log("Reopening file path=" + path +" typeof content=" + typeof content);
+					console.log("reopenFiles: Reopening file path=" + path +" typeof content=" + typeof content);
 					
 					EDITOR.openFile(path, content, fileReopened); 
 				}
@@ -406,16 +411,21 @@ console.log("reopenFiles!");
 				if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path);
 				}
 				
-				console.log("Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
+				console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
 				
-				if(openFileError) console.log("fileReopened openFileError.path=" + openFileError.path);
-				if(file) console.log("fileReopened file.path=" + file.path);
+				if(openFileError) {
+console.log("reopenFiles: fileReopened openFileError.path=" + openFileError.path);
+				}
+				
+				if(file) {
+console.log("reopenFiles: fileReopened file.path=" + file.path);
+				}
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
 				if(openFileError) {
 					console.error(openFileError.message);
-					console.log(openFileError.stack);
+					console.log("reopenFiles: ", openFileError.stack);
 					alertBox("Unable to reopen file:\n" + path + "\nError: " + openFileError.message);
 					
 					// Remove from opened files
@@ -457,10 +467,10 @@ console.log("reopenFiles!");
 				else updateLastState();
 				
 				function updateLastState() {
-					console.log("updateLastState path=" + path);
+					console.log("reopenFiles: updateLastState path=" + path);
 					setLastState();
 					
-					//console.log("file.partStartRow=" + file.partStartRow + " content=" + content);
+					//console.log("reopenFiles: file.partStartRow=" + file.partStartRow + " content=" + content);
 					
 					if(file.partStartRow > 0 && content == undefined) {
 						/*
@@ -499,7 +509,7 @@ console.log("reopenFiles!");
 						
 						if(lastFileState.caret !== undefined) {
 							// Set the caret as it was
-							console.log("Placing caret in file.path=" + file.path);
+							console.log("reopenFiles: Placing caret in file.path=" + file.path);
 							// There can be errors, for example if the file has been changed by another program
 							try {
 								//file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
@@ -508,11 +518,11 @@ console.log("reopenFiles!");
 								//file.caret = file.createCaret(undefined, lastFileState.caret.row, lastFileState.caret.col);
 							}
 							catch(e) {
-								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
+								console.warn("reopenFiles: Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
 							}
 						}
 						
-						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+						console.log("reopenFiles: Loaded old state for " + path + " file.startRow=" + file.startRow);
 						
 					}
 					else {
@@ -547,7 +557,7 @@ console.log("reopenFiles!");
 		if(array.indexOf(add) == -1) throw new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'");
 		if(text.indexOf(add) == -1) throw new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'");
 		
-		console.log("Added to string: " + add);
+		console.log("reopenFiles: Added to string: " + add);
 		
 		return text;
 	}
@@ -561,14 +571,14 @@ console.log("reopenFiles!");
 			if(err) throw err;
 			if(openedFilesString == null) openedFilesString = "";
 			if(openedFilesString.split(fileDelimiter).indexOf(file.path) != -1) {
-				console.warn("File already in EDITOR.localStorage: " + file.path);
+				console.warn("reopenFiles: File already in EDITOR.localStorage: " + file.path);
 			}
 			else {
-				console.log(UTIL.getStack("Adding file to openedFiles path='" + file.path + "'"));
+				console.log(UTIL.getStack("reopenFiles: Adding file to openedFiles path='" + file.path + "'"));
 				
-				console.log("List before=" + openedFilesString);
+				console.log("reopenFiles: List before=" + openedFilesString);
 				openedFilesString = addToStringList(openedFilesString, file.path, fileDelimiter)
-				console.log("List after=" + openedFilesString);
+				console.log("reopenFiles: List after=" + openedFilesString);
 				
 				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 					if(err) throw err;
@@ -629,7 +639,7 @@ console.log("reopenFiles!");
 		
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!!)
 		
-		console.log("Removed from string: " + remove);
+		console.log("reopenFiles: Removed from string: " + remove);
 		
 		return text;
 	}
@@ -640,7 +650,7 @@ console.log("reopenFiles!");
 		// Called when the editor close a file
 		if(filePath instanceof File) filePath = filePath.path;
 		
-		console.log(UTIL.getStack("Removing file from openedFiles path='" + filePath + "'"));
+		console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) {
@@ -648,9 +658,9 @@ console.log("reopenFiles!");
 				else throw err;
 			}
 			
-			console.log("List before=" + openedFilesString);
+			console.log("reopenFiles: List before=" + openedFilesString);
 			openedFilesString = removeFromStringList(openedFilesString, filePath, fileDelimiter);
-			console.log("List after=" + openedFilesString);
+			console.log("reopenFiles: List after=" + openedFilesString);
 			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 				if(err) {
 					if(callback) return callback(err);
@@ -668,7 +678,7 @@ console.log("reopenFiles!");
 							if(callback) return callback(err);
 							else throw err;
 						}
-						console.log("File removed from opened files: path=" + filePath);
+						console.log("reopenFiles: File removed from opened files: path=" + filePath);
 						if(callback) callback(null);
 					});
 				});
@@ -677,13 +687,13 @@ console.log("reopenFiles!");
 	}
 	
 	function stopSavingState() {
-		console.log("Stopping saveStateIntervalTimer because afk!");
+		console.log("reopenFiles: Stopping saveStateIntervalTimer because afk!");
 		clearInterval(saveStateIntervalTimer);
 		return true;
 	}
 	
 	function continueSavingState() {
-		console.log("Starting saveStateIntervalTimer because back to keyboard!");
+		console.log("reopenFiles: Starting saveStateIntervalTimer because back to keyboard!");
 		saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
 		return true;
 	}
@@ -703,14 +713,14 @@ console.log("reopenFiles!");
 	
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
-		//console.log("saveStateOfOpenFiles!");
+		//console.log("reopenFiles: saveStateOfOpenFiles!");
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(openedFilesString == null || openedFilesString == "") {
-				console.warn("No open files!?");
+				console.warn("reopenFiles: No open files!?");
 				if(callback) callback(null);
 				return;
 			}
@@ -727,9 +737,9 @@ console.log("reopenFiles!");
 					
 					// note: "".split(fileDelimiter).length == 1 !! (an empty string gives one item in the array)
 					if(openedFilesString != "") {
-						//console.log("openFiles.length=" + openFiles.length);
+						//console.log("reopenFiles: openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
-							//console.log("Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
+							//console.log("reopenFiles: Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
 							saveSate(openFiles[i], stateSaved);
 						}
 					}
@@ -737,11 +747,11 @@ console.log("reopenFiles!");
 					
 					function stateSaved(err, path) {
 						if(err) {
-console.warn("Problem saving state for path=" + path + ": " + err.message);
+							console.warn("reopenFiles: Problem saving state for path=" + path + ": " + err.message);
 							errors.push(err.message);
 						}
 						if(++statesSaved == openFiles.length) {
-							//console.log("Done saving state!");
+							//console.log("reopenFiles: Done saving state!");
 							if(!callback) return;
 							
 							if(errors.length > 0) callback(new Error(errors.join("\n")));
@@ -757,14 +767,14 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		//console.log("Saving state for: " + path);
+		//console.log("reopenFiles: Saving state for: " + path);
 		
 		if(path.length == 0) {
 			findBugs(false, function(err, openedFilesString) {
-				console.warn("Attempted to save state for a file without path!");
-			console.log(new Error("saveState").stack);
-			console.log("EDITOR.files=" + Object.keys(EDITOR.files).join(fileDelimiter));
-				console.log("openedFilesString=" + openedFilesString);
+				console.warn("reopenFiles: Attempted to save state for a file without path!");
+				console.log(new Error("reopenFiles: saveState").stack);
+				console.log("reopenFiles: EDITOR.files=" + Object.keys(EDITOR.files).join(fileDelimiter));
+				console.log("reopenFiles: openedFilesString=" + openedFilesString);
 				callback(err, path);
 			});
 			return;
@@ -776,7 +786,7 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 		
 		if(!file) {
 			// Possible reasons: it was renamed!? It should have been removed first!
-			//console.warn("File not in EDITOR.files, was it renamed? open: " + file);
+			//console.warn("reopenFiles: File not in EDITOR.files, was it renamed? open: " + file);
 			//return;
 			var err = new Error("File='" + path + "' not open! EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + "");
 			
@@ -817,7 +827,7 @@ console.warn("Problem saving state for path=" + path + ": " + err.message);
 			state.text = file.text;
 		}
 		else {
-			console.warn("Not saving state for " + file.path + " because it has " + file.text.length + " (over " + (sizeLimit-1) + ") characters");
+			console.warn("reopenFiles: Not saving state for " + file.path + " because it has " + file.text.length + " (over " + (sizeLimit-1) + ") characters");
 		}
 		
 		// Hash the state so that we do not spam the server !?
@@ -894,12 +904,12 @@ if(text == null) text = "";
 	function loadState(path, callback) {
 		if(typeof path != "string") throw new Error("Expected path=" + path + " to be a string!");
 		if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a function!");
-		console.log("Loading state for path=" + path + " ...");
+		console.log("reopenFiles: Loading state for path=" + path + " ...");
 		EDITOR.localStorage.getItem("state_" + path, function (err, state) {
 			if(err) throw err;
-			console.log("Got state for path=" + path + " :", state);
+			console.log("reopenFiles: Got state for path=" + path + " :", state);
 			if(state === null) {
-				console.log("No saved state available for " + path);
+				console.log("reopenFiles: No saved state available for " + path);
 				return callback(null, undefined);
 			}
 			else {
@@ -931,7 +941,7 @@ if(text == null) text = "";
 			for(var i=0; i<array.length; i++) {
 				for(var j=i+1; j<array.length; j++) {
 					if(array[i] == array[j]) {
-						console.warn("Removed dublicate: " + array[i]);
+						console.warn("reopenFiles: Removed dublicate: " + array[i]);
 						array.splice(i, 1); // Remove the item
 						return checkAndRemove(); // Check the array again
 					}
@@ -946,12 +956,14 @@ if(text == null) text = "";
 		
 		for(var i=0; i<copyOfEditorFiles.length; i++) {
 			if(!EDITOR.files.hasOwnProperty(copyOfEditorFiles[i])) {
-				console.log("Removed from EDITOR.files:" + copyOfEditorFiles[i]);
+				console.log("reopenFiles: Removed from EDITOR.files:" + copyOfEditorFiles[i]);
 			}
 		}
 		
 		for(var path in EDITOR.files) {
-			if(copyOfEditorFiles.indexOf(path) == -1) console.log("Added to EDITOR.files:" + path);
+			if(copyOfEditorFiles.indexOf(path) == -1) {
+console.log("reopenFiles: Added to EDITOR.files:" + path);
+			}
 		}
 		
 		copyOfEditorFiles = Object.keys(EDITOR.files);
