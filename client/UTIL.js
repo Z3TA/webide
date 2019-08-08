@@ -107,7 +107,7 @@ var UTIL = {
 		var delimiter = UTIL.getPathDelimiter(path);
 		
 		if(path.charAt(path.length) != delimiter) {
-			console.warn("The last character is not a delimiter=" + delimiter + " path=" + path);
+			console.warn("The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path=" + path);
 			path = path.substring(0, path.lastIndexOf(delimiter));
 		}
 		
@@ -177,7 +177,7 @@ var UTIL = {
 			
 		*/
 		
-		if(typeof fullPath != "string") throw new Error("fullPath=" + fullPath + " (" + typeof fullPath + ") needs to be a string!\n" + JSON.stringify(fullPath));
+		if(typeof fullPath != "string") throw new Error("fullPath=" + fullPath + " (" + typeof fullPath + ") needs to be a string!");
 		
 		if(includeHostInfo == undefined) includeHostInfo = true;
 		

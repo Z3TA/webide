@@ -34,6 +34,20 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+only show deploy icon in discovery bar if init worker is running!
+
+only show invite collaborator in discovery bar if ... ?
+
+reopen-files not working!?
+
+When no files are opened, and discovery bar in header, the discovery bar height is set too high!
+
+Do not show colab, db, deploy discovery icons when running with -nochroot
+
+
+Also run Node.js script via the preview icon
+
+
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
 todo: Try React tutorial to feel pain
@@ -719,6 +733,8 @@ Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
 
 What I'm thinking
 -----------------
+
+Implement split screen ? Or is "open in new window" enough !?
 
 ---
 

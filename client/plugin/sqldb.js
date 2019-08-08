@@ -8,12 +8,28 @@
 	var selectMysqlDb; // Select element
 	var winMenuDbManager;
 	var discoveryBarImg;
+	var pluginActivated = false;
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
 		load: function loadSqldb() {
 			
-			// todo: Only load if running as a cloud service!
+			// Only load if db service is available!
+			if(CLIENT.connectionId) checkDbService();
+			else CLIENT.on("loginSuccess", checkDbServiceOnceLoggedIn);
+			
+			function checkDbServiceOnceLoggedIn() {
+				CLIENT.removeEvent("loginSuccess", checkDbServiceOnceLoggedIn);
+				checkDbService();
+			}
+			
+			function checkDbService() {
+				CLIENT.cmd("mysql.query", {database: selectedDb, query: "SELECT 1+1"}, function(err, resp) {
+					if(err) {
+						console.log("loadSqldb: No database service available!? " + err.message);
+}
+else {
+						console.log("loadSqldb: query resp:", resp);
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
@@ -32,9 +48,15 @@
 			discoveryBarImg.title = "SQL Database"
 			discoveryBarImg.onclick = toggleDbManager;
 			EDITOR.discoveryBar.add(discoveryBarImg, 10);
-			
-},
+						
+						pluginActivated = true;
+			}
+				});
+			}
+		},
 		unload: function unloadSqldb() {
+			
+			if(!pluginActivated) return;
 			
 			EDITOR.ctxMenu.remove(menuItem);
 			

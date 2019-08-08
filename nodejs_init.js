@@ -134,7 +134,16 @@ function sigint() {
 }
 
 function httpRequest(request, response) {
+	
 	log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress));
+	
+	var arr = request.url.split("?");
+	if(arr[0] == "/ping") {
+		response.writeHead(200);
+		response.end("Pong " + arr[1] + "\n");
+		return;
+	}
+	else console.log(arr);
 	
 	var auth = getAuth(request.headers["authorization"]);
 	var username = auth.username;

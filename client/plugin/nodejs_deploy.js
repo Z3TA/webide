@@ -2,35 +2,66 @@
 	"use strict";
 	
 	var winMenuProdDeploy, winMenuProdRestart, winMenuProdStop, winMenuProdRemove;
+	var activated = false;
 	
 	EDITOR.plugin({
 		desc: "Allows deoploying Node.JS scripts",
 		load: function loadNodeJsDeploy() {
-			var keyF1 = 112;
-			var keyF3 = 114;
-			EDITOR.bindKey({desc: "Deoploy the nodejs project the currently open file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
 			
-			EDITOR.bindKey({desc: "(Re)Start the in-production nodejs project the currently open file belongs to", fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
+			// Make sure init service is running before activating the plugin
+			if(CLIENT.connectionId) checkInitService();
+			else CLIENT.on("loginSuccess", checkInitServiceOnceLoggedIn);
 			
-			EDITOR.bindKey({desc: "Stop the in-production nodejs project the currently open file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+			function checkInitServiceOnceLoggedIn() {
+				CLIENT.removeEvent("loginSuccess", checkInitServiceOnceLoggedIn);
+				checkInitService();
+			}
 			
-			EDITOR.bindKey({desc: "Remove the nodejs project the currently open file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
+			function checkInitService() {
+				CLIENT.cmd("nodejs_init_ping", {}, function(err, resp) {
+					if(err) {
+						console.warn("loadNodeJsDeploy: Init serivice problem: " + err.message);
+						return;
+					}
+					
+					if(!resp.online) {
+						console.warn("loadNodeJsDeploy: Init serivice not online! " + resp.message);
+					}
+					else {
+						
+						var keyF1 = 112;
+						var keyF3 = 114;
+						EDITOR.bindKey({desc: "Deoploy the nodejs project the currently open file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
+						
+						EDITOR.bindKey({desc: "(Re)Start the in-production nodejs project the currently open file belongs to", fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
+						
+						EDITOR.bindKey({desc: "Stop the in-production nodejs project the currently open file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+						
+						EDITOR.bindKey({desc: "Remove the nodejs project the currently open file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
+						
+						winMenuProdDeploy = EDITOR.windowMenu.add("Deploy to production", ["Node.JS", 5], nodejsDeploy, "top");
+						winMenuProdRestart = EDITOR.windowMenu.add("Restart production", ["Node.JS", 5], nodejsProdRestart);
+						winMenuProdStop= EDITOR.windowMenu.add("Stop production", ["Node.JS", 5], nodejsProdStop);
+						winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
+						
+						var discoveryItem = document.createElement("img");
+						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+						discoveryItem.title = "Node.JS Deploy (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
+						discoveryItem.onclick = nodejsDeployFromDiscoveryBar;
+						EDITOR.discoveryBar.add(discoveryItem, 11);
+						
+						activated = true;
+					}
+				});
+			}
 			
-			winMenuProdDeploy = EDITOR.windowMenu.add("Deploy to production", ["Node.JS", 5], nodejsDeploy, "top");
-			winMenuProdRestart = EDITOR.windowMenu.add("Restart production", ["Node.JS", 5], nodejsProdRestart);
-			winMenuProdStop= EDITOR.windowMenu.add("Stop production", ["Node.JS", 5], nodejsProdStop);
-			winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
-			
-			
-			var discoveryItem = document.createElement("img");
-				discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Node.JS Deploy (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
-				discoveryItem.onclick = nodejsDeploy;
-				EDITOR.discoveryBar.add(discoveryItem, 11);
 			
 			
 		},
 		unload: function unloadNodeJsDeploy() {
+			
+			if(!activated) return;
+			
 			EDITOR.unbindKey(nodejsDeploy);
 			
 			EDITOR.windowMenu.remove(winMenuProdDeploy);
@@ -40,12 +71,16 @@
 		},
 	});
 	
+	function nodejsDeployFromDiscoveryBar() {
+		nodejsDeploy(EDITOR.currentFile);
+	}
+	
 	function nodejsProdStop(currentFile) {
 		
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) alertBox(err.message);
 			else promptBox("Enter password to stop " + pj.name + " in production:", true, undefined, 0, function(pw) {
-			if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
+				if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
 				if(err) alertBox(err.message);
 					else alertBox(pj.name + " stopped!");
 				});
@@ -124,7 +159,7 @@
 	}
 	
 	
-	function nodejsDeploy(currentFile, combo, character, charCode, buttonPushDirection, targetElementClass) {
+	function nodejsDeploy(currentFile) {
 		
 		// Figure out what folder (project) the user wants to deploy ...
 		

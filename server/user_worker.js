@@ -828,6 +828,26 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 		});
 	}
 
+API.nodejs_init_ping = function nodejs_init_ping(user, json, callback) {
+	// Check if the init server is alive
+	
+	var rnd = "";
+	for (var i=0; i<6; i++) {
+		rnd += Math.floor(Math.random() * 10).toString();
+	}
+	
+	nodejs_init_action(rnd, "/ping", "", function(err, resp) {
+		if(err) callback(null, {online: false, message: err.message, code: err.code});
+		else {
+			console.log(resp);
+			var online = false;
+			if(resp.text.indexOf("Pong " + rnd) == 0) {
+				online = true;
+			}
+			callback(null, {online: online, message: resp.text, code: 200})
+		}
+	});
+}
 
 // ## Special API's (that has to use parentRequest)...
 
@@ -948,20 +968,22 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 	if(callback == undefined) throw new Error("callback=" + callback);
 	
 	var http = require("http");
-	httpGet({
+	var options = {
 		auth: user.name + ":" + pw,
 		hostname: "127.0.0.1",
 		port: nodejsDeamonManagerPort,
 		path: prodFolder + "?" + action
-	}, function nodejsInitActionCommand(err, resp) {
-		
+	};
+	log("Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
+	httpGet(options, function nodejsInitActionCommand(err, resp) {
 		if(err) {
-			return callback(new Error("Failed to " + action + " " + prodFolder + "\n" + err.message));
+			var error = new Error("Failed to " + action + " " + prodFolder + "\n" + err.message)
+			err.code = err.code;
+			return callback(error);
 		}
 		else {
-			return callback(null, {prodFolder: prodFolder});
+			return callback(null, {prodFolder: prodFolder, text: resp});
 		}
-		
 	});
 }
 
