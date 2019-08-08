@@ -394,7 +394,6 @@ canvas {
 	white-space: nowrap;
 }
 
-
 /* ###### Standard settings ####### (Place high so they can be over-written by custom styling)*/
 
 fieldset {
@@ -1688,23 +1687,25 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	border: 0px solid pink;
 float: right;
 margin-left: 5px;
+	max-height: 34px; /* In case no file tab is open (this is the standard height of file tabs) */
 }
 
 .header .discoveryBar .discoveryItem {
 	display: inline-block; /* side by side */
 	border: 0px solid red;
 	margin: 0;
-	
+	max-height: 30px;
 	max-width: 32px;
 }
+
 
 .header .discoveryBar .discoveryItem img {
 
 	height: 70%;
 	width: 70%;
 	margin: 15%;
-	margin-top: 27%;
-	margin-bottom: 3%
+	margin-top: 20%;
+	margin-bottom: 10%
 padding: 0;
 }
 
