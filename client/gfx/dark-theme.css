@@ -40,15 +40,6 @@ div.footer {
 	background-color: transparent;
 }
 
-
-
-.columns div {
-	/*border: 1px solid red; */
-	background: none;
-	background-color: transparent;
-}
-
-
 div.leftColumn {
 	background: none;
 	background-color: rgb(48, 50, 53);
@@ -382,9 +373,7 @@ a:visited {
 
 .dashboard {
 	background-color: #1e1f22;
-	border-top: 1px solid #060707;
 }
-
 
 .dashboardWidget {
 	background-color: #2d2d30;
