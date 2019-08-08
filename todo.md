@@ -34,8 +34,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-release!
-
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
 todo: Try React tutorial to feel pain
@@ -47,6 +45,8 @@ todo: parse ES6 imports and Node.js require for auto-comletion
 bug: Autocomplete seem to find hidden functions, for example toggleVim
 
 Test in Opera Mini
+
+todo: Move out function argument hinter into it's own plugin
 
 Separate insert and navigation modes for T9 kaios feature phones.
 

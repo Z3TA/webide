@@ -292,7 +292,7 @@ installing jzeditr on a remote computer (it also need to have nodejs installed!)
 ```
 wget https://www.webtigerteam.com/jzedit/download/jzeditr
 chmod +x jzeditr
-sudo mv jzedit r/usr/local/bin
+sudo mv jzeditr /usr/local/bin
 ```
 
 You might also have to configure the firewall to allow incoming connections to your developler machine.
