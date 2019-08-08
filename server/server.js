@@ -1548,6 +1548,15 @@ function sockJsConnection(connection) {
 					
 					var nonHashedPw = password;
 					
+					var invitations = INVITATIONS[username];
+					if(invitations) {
+						for (var i=0; i<invitations.length; i++) {
+							if(invitations[i] == nonHashedPw) {
+								return idSuccess();
+							}
+						}
+					}
+					
 					if(!NO_PW_HASH && !PASSWORD) {
 						
 						password = module_pwHash(password);
@@ -1639,16 +1648,6 @@ function sockJsConnection(connection) {
 					}
 					
 					function checkPw() {
-						
-						var invitations = INVITATIONS[username];
-						
-						if(invitations) {
-							for (var i=0; i<invitations.length; i++) {
-								if(invitations[i] == nonHashedPw) {
-									return idSuccess();
-								}
-							}
-						}
 						
 						var passwordFile = UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]);
 						module_fs.readFile(passwordFile, "utf8", function readPw(err, pwstringFromFile) {
