@@ -289,6 +289,14 @@ input[type=text], input[type=password], select.select {
 	color: rgb(221, 221, 221);
 }
 
+textarea {
+	background-color: rgb(30, 30, 30);
+	border: 1px solid rgb(83, 83, 83);
+	border-radius: 4px;
+	box-shadow: none;
+	color: rgb(221, 221, 221);
+}
+
 select.select {
 	border-radius: 0px;
 	background-color: rgb(40, 40, 50);
@@ -480,5 +488,11 @@ div.tableHolder {
 	color: rgb(226, 226, 226);
 }
 
-
+.mercurialAnnotationWidget {
+	font-family: font-family: "Courier New", Courier, monospace;
+	font-size: 13px;
+	background-color:none;
+	color: white;
+	border: none;
+}
 
