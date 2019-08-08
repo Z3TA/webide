@@ -271,7 +271,10 @@ How to update
 If you installed using npm: 
 `npm update -g jzedit`
 
-
+The service worker might have cached and old version of the editor client,
+so if anything looks weird, try reloading the page.
+If it still looks weird, hit Ctrl+Shift+I in to start your browser's developer tools,
+then find the Application tab, click on service worker, then force the service worker to (un)register/update.
 
 
 Reporting bugs
@@ -295,7 +298,7 @@ chmod +x jzeditr
 sudo mv jzeditr /usr/local/bin
 ```
 
-You might also have to configure the firewall to allow incoming connections to your developler machine.
+You might also have to configure the firewall to allow incoming connections to your developer machine.
 And also allow the remote computer to connect to your developer machine.
 
 
