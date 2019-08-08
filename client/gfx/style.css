@@ -108,8 +108,6 @@ body {
 	/*background-color: rgba(215,215,215, .6);*/
 	text-shadow: none;
 	
-	border-top: 1px solid #d5d5d5;
-	
 	overflow-y: scroll;
 }
 
