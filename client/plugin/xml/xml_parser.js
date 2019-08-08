@@ -34,12 +34,16 @@
 			
 			if(file.text.length < 200) {
 				// Check every time
-				isXmlFile[file] = isXML(file);
+				isXmlFile[file.path] = isXML(file);
+			}
+			else if(!isXmlFile.hasOwnProperty(file.path)) {
+				// Only check once if file is a XML file
+				isXmlFile[file.path] = isXML(file);
 			}
 			
-			if(isXmlFile[file]) {
+			if(isXmlFile[file.path] === true) {
 				var xml = parseXML(file);
-				file.haveParsed(xml);
+				file.haveParsed( xml );
 			}
 		}
 		
@@ -370,11 +374,15 @@
 		
 		if(file.fileExtension == "xml" ||
 		file.fileExtension == "svg") {
+				console.log("isXML: " + file.path + " is XML because file.fileExtension=" + file.fileExtension);
 			return true;
 		}
 		
-		if(file.text.match(/^<\?xml.*\?>$ /i) != null) return true;
-		
+		if(file.text.match(/^<\?xml.*\?>$ /i) != null) {
+				console.log("isXML: " + file.path + " is XML because <xml in content!");
+				return true;
+			}
+			
 		return false;
 	}
 	
