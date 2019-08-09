@@ -1,8 +1,5 @@
 (function() {
 	/*
-		
-		!DO:NOT:BUNDLE!
-		
 		Support for KaiOS
 		
 		Simulator:
@@ -43,6 +40,26 @@
 		
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
+		
+		/*
+			Try to "install" the web app 
+			https://developer.mozilla.org/en-US/docs/Archive/Marketplace/API/DOMApplicationsRegistry/install
+		*/
+		if(typeof window.navigator == "object" && typeof window.navigator.mozApps == "object" && typeof window.navigator.mozApps.install == "function") {
+			console.log("KaiOS: : Attempting install ...");
+			var manifestUrl = "./manifest.webapp";
+			var request = window.navigator.mozApps.install(manifestUrl);
+			request.onsuccess = function () {
+				// Save the App object that is returned
+				var appRecord = this.result;
+				alertBox('Installation successful!');
+			};
+			request.onerror = function () {
+				// Display the error information from the DOMError object
+				alertBox('Install failed, error: ' + this.error.name);
+			};
+		}
+		
 	}
 	
 	function unloadKaiOsSupport() {}
