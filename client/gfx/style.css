@@ -866,7 +866,7 @@ ul#tabList li.tabFileItem.active button.closeFileTab {
 
 .functionListWrap {
 background-color: white;
-	background-image: linear-gradient(#ffffff, #eceef2);
+	
 }
 
 select.functionList {
@@ -1891,10 +1891,10 @@ margin-top: 20px;
 	}
 	
 	.leftColumn .discoveryBar .discoveryItem {
-		max-width: 22px;
+		max-width: 20px;
 		border: 0px solid orange;
-		margin: 0;
-		margin-left: 7px;
+		margin: 4px;
+		margin-left: 2px;
 	}
 
 }

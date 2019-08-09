@@ -47,7 +47,7 @@
 	var progressBar;
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
-	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations;
+	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations, winMenuClone;
 	
 	var discoveryBarImg;
 	
@@ -79,6 +79,7 @@
 		winMenuCommit = EDITOR.windowMenu.add("Commit", ["SCM", 5], showCommitDialog);
 		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["SCM", 6], diffWorkingDirectory);
 		winMenuAnnotations = EDITOR.windowMenu.add("Show annotations", ["SCM", 11], toggleAnotations);
+		winMenuClone = EDITOR.windowMenu.add("Clone a repository", ["SCM", 15], showCloneDialog);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -131,6 +132,7 @@
 		EDITOR.windowMenu.remove(winMenuCommit);
 		EDITOR.windowMenu.remove(winMenuDiffRevision);
 		EDITOR.windowMenu.remove(winMenuAnnotations);
+		EDITOR.windowMenu.remove(winMenuClone);
 		
 		hideMercurialWidgets();
 		
@@ -1398,10 +1400,12 @@ var error = err.message;
 	function showCloneDialog() {
 		EDITOR.ctxMenu.hide();
 		winMenuCommit.hide();
+		winMenuClone.activate();
 		return repoCloneDialog.show();
 	}
 	
 	function hideCloneDialog() {
+		winMenuClone.deactivate();
 		return repoCloneDialog.hide();
 	}
 	
