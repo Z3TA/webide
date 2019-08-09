@@ -181,20 +181,31 @@
 			
 		}
 		else {
-			webFontLoading = "DejaVuSansMono";
-			UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
-			EDITOR.settings.style.font = "DejaVuSansMono";
-			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
-			EDITOR.settings.style.fontSize = 13;
-			EDITOR.settings.gridHeight = 22;
-			EDITOR.settings.gridWidth = 7.83;
-		
-			if(browser == "Firefox") {
-				// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
+			
+			try {
+UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+				webFontLoading = "DejaVuSansMono";
+			}
+			catch(err) {
+				if(err) {
+					debug("Failed to load font: " + err.message);
+				}
+			}
+			
+			if(webFontLoading == "DejaVuSansMono") {
+				EDITOR.settings.style.font = "DejaVuSansMono";
+				EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
+				EDITOR.settings.style.fontSize = 13;
+				EDITOR.settings.gridHeight = 22;
+				EDITOR.settings.gridWidth = 7.83;
+				
+				if(browser == "Firefox") {
+					// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
 				EDITOR.settings.gridWidth = 8;
 				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 			}
 			}
+		}
 		
 		
 		
@@ -210,8 +221,8 @@
 		// We better use a web safe font in the browser
 		
 		
-			// This looks big and nice in Firefox on Ubuntu 18
-			EDITOR.settings.style.font = "Courier New, Courier, monospace";
+		// This looks big and nice in Firefox on Ubuntu 18
+		EDITOR.settings.style.font = "Courier New, Courier, monospace";
 		EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New, Courier, monospace";
 		EDITOR.settings.style.fontSize = 15;
 		EDITOR.settings.gridHeight = 23;

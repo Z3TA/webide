@@ -34,11 +34,30 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+bug: Some event-listeners like to remove themselves from the event-listeners while the event-listeners are called,
+altering the length of the event-listeners array, making it skip some events!!!
+
+
+
+CLIENT: firing loginSuccess event listener: reopenFiles
+
+CLIENT: Adding new cb=reopenFiles
+CLIENT: Firing client event 'login
+
+loginSuccess event is called after reopenFiles have been added to loginSuccess
+
 reopen-files not working!? when reloading!? reopenFiles is never called! CLIENT: firing 
+
+
 
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
 
 Do not show colab, db, deploy discovery icons when running with -nochroot
+
+
+
+implement: <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+chore: classList is supported by Opera mobile, so update all code that changes style, or changes class, to use element.classList add/toggle
 
 
 Also run Node.js script via the preview icon
@@ -90,6 +109,26 @@ Dashboard and discovery bar!
 
 todo
 ----
+
+
+---
+
+Better mobile experience:
+
+when screen is small when virtual keyboard is compact;
+increase keyboard letter size.
+And increase contrast of window menu and disvovery icons.
+
+
+idea: long press to type big letter.
+
+hide window menu after saving or you think it didn't save.
+
+able to turn off keyboard sound. 
+
+----
+
+
 
 Hide window menu via View - Hide window menu
 
@@ -3356,6 +3395,12 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+---
+
+Don't load window menu or discovery bar until logged in in order to get a higher Lighthouse audit...
+
+---
 
 Text selection lags when selecting over a very long line
 

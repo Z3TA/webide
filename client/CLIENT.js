@@ -190,26 +190,29 @@ console.log("CLIENT: connSend error: "+ err);
 		
 		if(eventListeners[ev].indexOf(cb) != -1) throw new Error("Event listener already registered for ev=" + ev + " and cb=" + cb);
 		
-		eventListeners[ev].push(cb);
+		console.warn("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev + " (length=" + eventListeners[ev].length + " loggedIn=" + loggedIn + ")");
 		
-		console.warn("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev);
+		eventListeners[ev].push(cb);
 		
 		if(ev == "loginSuccess" && loggedIn) {
 			console.log("CLIENT: Firing cb=" + UTIL.getFunctionName(cb) + " right away because already logged in!");
 			cb(loggedIn);
 		}
 		
+		
 	}
 	
 	CLIENT.fireEvent = function fireEvent(ev, data) {
 		
-		console.log("CLIENT: firing client event '" + ev + "' data=" + data);
+		console.log("CLIENT: firing client event '" + ev + "' data=" + data + "");
 		
 		if(!eventListeners.hasOwnProperty(ev)) {
 console.warn("CLIENT: No registered event listener for ev=" + ev)
 		}
 		else {
 			// Call all event listeners
+			
+			console.log("CLIENT: Calling listeners: ", eventListeners[ev].map(function(f) {return UTIL.getFunctionName(f)}));
 			
 			if(eventListeners[ev].length == 0) {
 console.warn("CLIENT: No event listeners for event=" + ev);
@@ -240,6 +243,7 @@ console.warn("CLIENT: No event listeners for event=" + ev);
 		function removeThem() {
 			for(var i=0; i<events.length; i++) {
 				if(events[i] == fun) {
+					console.log("CLIENT: Removing fun=" + UTIL.getFunctionName(fun) + " from eventName=" + eventName);
 					events.splice(i, 1);
 					found++;
 					removeThem();
