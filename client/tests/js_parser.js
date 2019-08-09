@@ -647,6 +647,20 @@ EDITOR.addTest(function JSX2(callback) {
 	});
 });
 
+EDITOR.addTest(1, function JSX3(callback) {
+	EDITOR.openFile("jsx3.js", '{\nif(a.order < b.order) {\nreturn -1;\n}\nelse if(a.order > b.order) {\nreturn 1;\n}\nvar data = \'<svg xmlns="http://www.w3.org/2000/svg" width="\' + width + \'" height="\' + height + \'">\';\n//foo\n}\n', function(err, file) {
+		
+		UTIL.assert(file.parsed.xmlTags.length, 1);
+		
+		UTIL.assert(file.grid[8].indentation, 1);
+		UTIL.assert(file.grid[9].indentation, 0);
+		UTIL.assert(file.grid[10].indentation, 0);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 
 		
 /*

@@ -1363,7 +1363,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function scriptTagInHtmlMode(callback) {
+	EDITOR.addTest(function scriptTagInHtmlMode(callback) {
 		EDITOR.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(err, file) {
 			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
