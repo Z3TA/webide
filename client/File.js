@@ -12,6 +12,7 @@
 
 (function() { // Encapsulate so that we do not bleed out to global scope
 	
+	function funMap(f){return f.fun}
 	
 	// Note: No var infront. Expose File object to global scope!
 	File = function File(text, path, fileIndex, bigFile, callback) { 
@@ -3435,12 +3436,13 @@ file.mode = "text";
 		
 		// Optimization note: console.time adds around 1ms, so for 6 eventListeners it adds 6ms!
 		//console.time("fileChange eventListeners");
-		for(var i=0; i<EDITOR.eventListeners.fileChange.length; i++) {
-			file.isCallingChangeEventListeners = EDITOR.eventListeners.fileChange[i].fun;
-			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
-			//console.time("fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "");
-			EDITOR.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
-			//console.timeEnd("fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "");
+		var f = EDITOR.eventListeners.fileChange.map(funMap);
+		for(var i=0; i<f.length; i++) {
+			file.isCallingChangeEventListeners = f[i];
+			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(f[i]) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			//console.time("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
+			f[i](file, change, text, index, row, col);
+			//console.timeEnd("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
 		}
 		//console.timeEnd("fileChange eventListeners");
 		file.isCallingChangeEventListeners = undefined;
@@ -3723,8 +3725,9 @@ file.mode = "text";
 		
 		file.parsed = parseData; // After the file has been parsed, "file.parsed" property should hold the parsed data
 		
-		for(var i=0; i<EDITOR.eventListeners.fileParse.length; i++) {
-			EDITOR.eventListeners.fileParse[i].fun(file); // Call function
+		var f = EDITOR.eventListeners.fileParse.map(funMap);
+		for(var i=0; i<f.length; i++) {
+			f[i](file); // Call function
 		}
 		
 	}

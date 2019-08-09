@@ -134,6 +134,7 @@ EDITOR.pseudoClipboard = "";
 EDITOR.registeredAltKeys = []; // Alt keys for the virtual keyboard(s)
 EDITOR.isScrolling = false; // Render optimization for scrolling
 
+// When iterating over the event listeners, first copy the array in case one of the event listeners remove itself from the list! var f = EDITOR.eventListeners[ev]
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
 	btk: [], // Back to keyboard
@@ -309,6 +310,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 		}
 	}
 	
+	function funMap(f){return f.fun}
 	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
@@ -387,10 +389,11 @@ ctxMenuVisibleOnce = true;
 		
 		workingDirectory = UTIL.trailingSlash(workingDir);
 		
-		console.log("Calling changeWorkingDir listeners (" + EDITOR.eventListeners.changeWorkingDir.length + ") workingDirectory=" + workingDirectory);
-		for(var i=0; i<EDITOR.eventListeners.changeWorkingDir.length; i++) {
-			//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.changeWorkingDir[i].fun));
-			EDITOR.eventListeners.changeWorkingDir[i].fun(workingDirectory); // Call function
+		var f = EDITOR.eventListeners.changeWorkingDir.map(funMap);
+		console.log("Calling changeWorkingDir listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+		for(var i=0; f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](workingDirectory); // Call function
 		}
 		
 		return workingDirectory;
@@ -1091,10 +1094,11 @@ usePseudoClipboard = false;
 					if(!EDITOR.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
-				console.log("Calling fileOpen listeners (" + EDITOR.eventListeners.fileOpen.length + ") path=" + path);
-				for(var i=0; i<EDITOR.eventListeners.fileOpen.length; i++) {
-					//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.fileOpen[i].fun));
-					EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
+				var f = EDITOR.eventListeners.fileOpen.map(funMap);
+				console.log("Calling fileOpen listeners (" + f.length + ") path=" + path);
+				for(var i=0; i<f.length; i++) {
+					//console.log("function " + UTIL.getFunctionName(f[i]));
+					f[i](file); // Call function
 				}
 				
 				console.log("state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
@@ -1271,9 +1275,10 @@ usePseudoClipboard = false;
 			var file = EDITOR.files[path];
 			
 			// Call listeners (before we switch to another file, and before we delete the file content)
-			console.log("Calling fileClose listeners (" + EDITOR.eventListeners.fileClose.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.fileClose.length; i++) {
-				EDITOR.eventListeners.fileClose[i].fun(file); // Call function
+			var f = EDITOR.eventListeners.fileClose.map(funMap);
+			console.log("Calling fileClose listeners (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
+				f[i](file); // Call function
 			}
 			
 			EDITOR.removeAllInfo(file);
@@ -1707,11 +1712,11 @@ text = file;
 		
 		if(text == undefined) throw new Error("text=" + text);
 		
-		console.log("Calling sanitize listeners (" + EDITOR.eventListeners.sanitize.length + ") ...");
-		for(var i=0, fun; i<EDITOR.eventListeners.sanitize.length; i++) {
-			fun = EDITOR.eventListeners.sanitize[i].fun;
-			text = fun(file, text);
-			if(typeof text != "string") throw new Error("sanitize listener: " + UTIL.getFunctionName(fun) + " returned: (" + (typeof text) + ") \n" + text);
+		var f = EDITOR.eventListeners.sanitize.map(funMap);
+		console.log("Calling sanitize listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			text = f[i](file, text);
+			if(typeof text != "string") throw new Error("sanitize listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof text) + ") \n" + text);
 		}
 		
 		return text;
@@ -2211,9 +2216,10 @@ console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize);
 		var windowWidth = parseInt(window.innerWidth);
 		
 		// Resize listeners (before)
-		console.log("Calling beforeResize listeners (" + EDITOR.eventListeners.beforeResize.length + ") ...");
-		for(var i=0; i<EDITOR.eventListeners.beforeResize.length; i++) {
-			EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile, windowWidth, windowHeight);
+		var f = EDITOR.eventListeners.beforeResize.map(funMap);
+		console.log("Calling beforeResize listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
 		
 		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
@@ -2464,9 +2470,10 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		// Resize listeners (after)
-		console.log("Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
-		for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
-			EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile, windowWidth, windowHeight);
+		var f = EDITOR.eventListeners.afterResize.map(funMap);
+		console.log("Calling afterResize listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
 		
 		// Show the canvas nodes again
@@ -3663,8 +3670,9 @@ li.onclick = function(clickEvent) {
 			
 			if(posY === undefined) posY = touchY + menuDownABit;
 			
-			for(var i=0, f; i<EDITOR.eventListeners.showMenu.length; i++) {
-				EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
+			var f = EDITOR.eventListeners.showMenu.map(funMap);
+			for(var i=0, f; i<f.length; i++) {
+				f[i](EDITOR.currentFile, posX, posY, clickEvent);
 			}
 			
 			
@@ -3958,10 +3966,11 @@ console.warn("Too many info messages added to row=" + row + " and col=" + col);
 		
 		console.log("EDITOR.error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		
-		if(EDITOR.eventListeners.error.length > 0) {
-			console.log("Calling error listeners (" + EDITOR.eventListeners.error.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.error.length; i++) {
-				EDITOR.eventListeners.error[i].fun(message, source, lineno, colno, error); // Call function
+		var f = EDITOR.eventListeners.error.map(funMap);
+		if(f.length > 0) {
+			console.log("Calling error listeners (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
+				f[i](message, source, lineno, colno, error); // Call function
 			}
 		}
 		
@@ -4011,10 +4020,11 @@ EDITOR.fireEvent("btk");
 		
 		EDITOR.lastTimeInteraction = new Date();
 		
-		if(EDITOR.eventListeners.interaction.length > 0) {
-			console.log("Calling interaction listeners (" + EDITOR.eventListeners.interaction.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.interaction.length; i++) {
-				EDITOR.eventListeners.interaction[i].fun(EDITOR.currentFile, interaction, options); // Call function
+		var f = EDITOR.eventListeners.interaction.map(funMap);
+		if(f.length > 0) {
+			console.log("Calling interaction listeners (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
+				f[i](EDITOR.currentFile, interaction, options); // Call function
 			}
 		}
 		
@@ -4047,12 +4057,12 @@ EDITOR.fireEvent("btk");
 		}
 		
 		var waitingForEventListenerCallbacks = 0;
-			var eventListeners = EDITOR.eventListeners[eventName];
 		var returns = {};
 		var waitingForFunction = [];
 		
-			//console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
-		for(var i=0; i<eventListeners.length; i++) runFunc(eventListeners[i].fun);
+		var f = EDITOR.eventListeners[eventName].map(funMap);
+		//console.log("Calling " + eventName + " listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) runFunc(f[i]);
 		
 		if(waitingForEventListenerCallbacks == 0) allDone();
 		else if(waitingForEventListenerCallbacks < 0) throw new Error("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
@@ -4338,15 +4348,15 @@ var word = "";
 		var wordLength = word.length;
 		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
-		var ret, fun, addWord, addMcl, functionArguments, removeOptions = [];
+		var ret, addWord, addMcl, functionArguments, removeOptions = [];
 		
-		console.log("Calling autoComplete listeners (" + EDITOR.eventListeners.autoComplete.length + ") ...");
-		for(var i=0; i<EDITOR.eventListeners.autoComplete.length; i++) {
+		var f = EDITOR.eventListeners.autoComplete.map(funMap);
+		console.log("Calling autoComplete listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
 			
-			fun = EDITOR.eventListeners.autoComplete[i].fun;
-			ret = fun(file, word, wordLength, options.length);
+			ret = f[i](file, word, wordLength, options.length);
 			
-			console.log("function " + UTIL.getFunctionName(fun) + " returned: " + JSON.stringify(ret));
+			console.log("function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
 			if(ret) {
 				if(!Array.isArray(ret) && typeof ret == "object") {
@@ -4369,7 +4379,7 @@ var word = "";
 						console.log("addWord=" + addWord + " addMcl=" + addMcl);
 						
 						if(word.length > 0 && addWord.indexOf(word) != 0) {
-							console.warn("Function " + UTIL.getFunctionName(fun) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
+							console.warn("Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
 						}
 						if(options.indexOf(addWord) == -1) {
 							options.push(addWord);
@@ -4378,7 +4388,7 @@ var word = "";
 					}
 				}
 				else {
-					throw new Error(UTIL.getFunctionName(fun) + " did not return an array! It returned " + (typeof ret));
+					throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
 				}
 			}
 		}
@@ -4619,10 +4629,10 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 		
 		if(EDITOR.currentFile) {
 			// Hide current file
-			
-			console.log("Calling fileHide listeners (" + EDITOR.eventListeners.fileHide.length + ") EDITOR.currentFile.path=" + EDITOR.currentFile.path);
-			for(var i=0; i<EDITOR.eventListeners.fileHide.length; i++) {
-				EDITOR.eventListeners.fileHide[i].fun(EDITOR.currentFile); // Call function
+			var f = EDITOR.eventListeners.fileHide.map(funMap);
+			console.log("Calling fileHide listeners (" + f.length + ") EDITOR.currentFile.path=" + EDITOR.currentFile.path);
+			for(var i=0; i<f.length; i++) {
+				f[i](EDITOR.currentFile); // Call function
 			}
 			
 			if(EDITOR.currentFile) EDITOR.lastFileShowed = EDITOR.currentFile
@@ -4660,10 +4670,10 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 		
 		EDITOR.input = focus;
 		
-		
-		console.log("Calling fileShow listeners (" + EDITOR.eventListeners.fileShow.length + ") file.path=" + file.path);
-		for(var i=0; i<EDITOR.eventListeners.fileShow.length; i++) {
-			EDITOR.eventListeners.fileShow[i].fun(file); // Call function
+		var f = EDITOR.eventListeners.fileShow.map(funMap);
+		console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);
+		for(var i=0; i<f.length; i++) {
+			f[i](file); // Call function
 		}
 		
 		
@@ -5890,431 +5900,961 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			return window.open(url, windowId, "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
 		}
 		
+	} // End of EDITOR.createWindow (JSX screwed with the indentation!)
+
+
+// Tools for handling repositories (Mercurial, Git, etc)
+EDITOR.commitTool = function commitTool(directory) {
+	var f = EDITOR.eventListeners.commitTool.map(funMap);
+		console.log("Calling commitTool listeners (" + f.length + ")");
+	for(var i=0; i<f.length; i++) {
+		f[i](directory);
 	}
-	
-	// Tools for handling repositories (Mercurial, Git, etc)
-	EDITOR.commitTool = function commitTool(directory) {
-		console.log("Calling commitTool listeners (" + EDITOR.eventListeners.commitTool.length + ")");
-		for(var i=0, f; i<EDITOR.eventListeners.commitTool.length; i++) {
-			EDITOR.eventListeners.commitTool[i].fun(directory);
-		}
+}
+
+EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
+	if(typeof resolved == "string" && unresolved == undefined && directory == undefined) {
+		directory = resolved;
+		resolved = undefined;
+		unresolved = undefined;
 	}
-	
-	EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
-		if(typeof resolved == "string" && unresolved == undefined && directory == undefined) {
-			directory = resolved;
-			resolved = undefined;
-			unresolved = undefined;
-		}
-		console.log("Calling resolveTool listeners (" + EDITOR.eventListeners.resolveTool.length + ")");
-		for(var i=0, f; i<EDITOR.eventListeners.resolveTool.length; i++) {
-			EDITOR.eventListeners.resolveTool[i].fun(resolved, unresolved, directory);
-		}
-	}
-	
-	EDITOR.mergeTool = function mergeTool(directory) {
-		console.log("Calling mergeTool listeners (" + EDITOR.eventListeners.mergeTool.length + ")");
-		for(var i=0, f; i<EDITOR.eventListeners.mergeTool.length; i++) {
-			EDITOR.eventListeners.mergeTool[i].fun(directory);
-		}
-	}
-	
-	EDITOR.runTests = function runTests(onlyOne, allInSync) {
 		
-		if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/" && !onlyOne) {
- return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
+		var f = EDITOR.eventListeners.resolveTool.map(funMap);
+		console.log("Calling resolveTool listeners (" + f.length + ")");
+		for(var i=0; i<f.length; i++) {
+			f[i](resolved, unresolved, directory);
+	}
+}
+
+EDITOR.mergeTool = function mergeTool(directory) {
+		var f = EDITOR.eventListeners.mergeTool.map(funMap);
+		console.log("Calling mergeTool listeners (" +f.length + ")");
+		for(var i=0, f; i<f.length; i++) {
+			f[i](directory);
+	}
+}
+
+EDITOR.runTests = function runTests(onlyOne, allInSync) {
+	
+	if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/" && !onlyOne) {
+		return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
 		(Working directory (" + EDITOR.workingDirectory + ") needs to be / (root))");
+	}
+	
+	if(!onlyOne) EDITOR.changeWorkingDir("/");
+	
+	runTests_5616458984153156(onlyOne, allInSync);
+	return true;
+}
+
+EDITOR.deleteFile = function(filePath, callback) {
+	
+	console.log("Deleting filePath=" + filePath);
+	
+	var json = {filePath: filePath};
+	
+	CLIENT.cmd("deleteFile", json, function(err, json) {
+		if(err) {
+			if(callback) callback(err);
+			else throw err;
+		}
+		else {
+			if(callback) callback(err, json.filePath);
+		}
+	});
+}
+
+
+EDITOR.dashboard = {
+	addWidget: function(el) {
+		
+		if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
+		
+		var dashboard = document.getElementById("dashboard");
+		console.log(dashboard);
+		try {
+			var child = dashboard.appendChild(el);
+		}
+		catch(err) {
+			console.log("addDashboardWidget: el:");
+			console.log(el);
+			throw err;
 		}
 		
-		if(!onlyOne) EDITOR.changeWorkingDir("/");
+		return child;
+	},
+	removeWidget: function(el) {
+		var dashboard = document.getElementById("dashboard");
 		
-		runTests_5616458984153156(onlyOne, allInSync);
+		try {
+			var removedNode = dashboard.removeChild(el);
+		}
+		catch(err) {
+			console.log("removeDashboardWidget: el:");
+			console.log(el);
+			throw err;
+		}
+		return removedNode;
+	},
+	hide: function hideDashboard(stayHidden) {
+		var dashboard = document.getElementById("dashboard");
+		
+		dashboard.style.display = "none";
+		canvas.style.display = "block";
+		
+		EDITOR.dashboard.isVisible = false;
+		EDITOR.fireEvent("hideDashboard");
+		
+		if(stayHidden) EDITOR.dashboard.stayHidden = true;
+		
 		return true;
+	},
+	show: function showDashboard() {
+		
+		console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+		
+		var dashboard = document.getElementById("dashboard");
+		
+		canvas.style.display = "none";
+		dashboard.style.display = "block";
+		
+		if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
+		
+		EDITOR.dashboard.isVisible = true;
+		
+		setTimeout(placeDashboard , 500);
+		
+		return true;
+		
+		function placeDashboard() {
+			// Place it just below the header
+			var header = document.getElementById("header");
+			var headerRect = header.getBoundingClientRect();
+			
+			dashboard.style.top = (headerRect.bottom - 1) + "px";
+		}
+	},
+	isVisible: false,
+	stayHidden: false
+}
+
+EDITOR.openFileTool = function fileOpenTool(options, filePath) {
+		var f = EDITOR.eventListeners.openFileTool.map(funMap);
+		console.log("Calling openFileTool listeners (" + f.length + ")");
+	
+	var ret = false;
+	
+		for(var i=0; i<f.length; i++) {
+			ret = f[i](options, filePath);
+		if(ret === true) break; // Only open one tool
 	}
 	
-	EDITOR.deleteFile = function(filePath, callback) {
-		
-		console.log("Deleting filePath=" + filePath);
-		
-		var json = {filePath: filePath};
-		
-		CLIENT.cmd("deleteFile", json, function(err, json) {
-			if(err) {
-				if(callback) callback(err);
-				else throw err;
-			}
-			else {
-				if(callback) callback(err, json.filePath);
-			}
-		});
+	return ret;
+}
+
+EDITOR.pathPickerTool = function pathPicker(options, callback) {
+	// Show a tool for picking a file path, which will callback with the chosen path
+	
+	console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
+	
+	if(typeof options == "function") {
+		callback = options;
+		options = undefined;
 	}
 	
+	if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
 	
-	EDITOR.dashboard = {
-		addWidget: function(el) {
-			
-			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
-			
-			var dashboard = document.getElementById("dashboard");
-			console.log(dashboard);
-			try {
-				var child = dashboard.appendChild(el);
-			}
-			catch(err) {
-				console.log("addDashboardWidget: el:");
-				console.log(el);
-				throw err;
-			}
-			
-			return child;
-		},
-		removeWidget: function(el) {
-			var dashboard = document.getElementById("dashboard");
-			
-			try {
-				var removedNode = dashboard.removeChild(el);
-			}
-			catch(err) {
-				console.log("removeDashboardWidget: el:");
-				console.log(el);
-				throw err;
-			}
-			return removedNode;
-		},
-		hide: function hideDashboard(stayHidden) {
-			var dashboard = document.getElementById("dashboard");
-			
-			dashboard.style.display = "none";
-			canvas.style.display = "block";
-			
-			EDITOR.dashboard.isVisible = false;
-			EDITOR.fireEvent("hideDashboard");
-			
-			if(stayHidden) EDITOR.dashboard.stayHidden = true;
-			
-			return true;
-		},
-		show: function showDashboard() {
-			
-			console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
-			
-			var dashboard = document.getElementById("dashboard");
-			
-			canvas.style.display = "none";
-			dashboard.style.display = "block";
-			
-			if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
-			
-			EDITOR.dashboard.isVisible = true;
-			
-			setTimeout(placeDashboard , 500);
-			
-			return true;
-			
-			function placeDashboard() {
-				// Place it just below the header
-				var header = document.getElementById("header");
-				var headerRect = header.getBoundingClientRect();
-				
-				dashboard.style.top = (headerRect.bottom - 1) + "px";
-			}
-		},
-		isVisible: false,
-		stayHidden: false
+	if(typeof options == "string") options = {defaultPath: options};
+	
+		var f = EDITOR.eventListeners.pathPickerTool.map(funMap);
+		console.log("Calling pathPickerTool listeners (" + f.length + ") ");
+	
+	var ret = false;
+	
+		for(var i=0, f; i<f.length; i++) {
+			ret = f[i](options, gotPath);
+		if(ret === true) return true; // Only open one tool, hope it will call back!
 	}
 	
-	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
-		console.log("Calling openFileTool listeners (" + EDITOR.eventListeners.openFileTool.length + ")");
+	// If no path picker wanted to handle it: Use the stone-age path picker
+	var defaultPath = options && options.defaultPath;
+	var instruction = (options && options.instruction) || "Choose a file path:";
+	promptBox(instruction, false, defaultPath, function(path) {
+		if(!path) {
+			var error = new Error("Aborted when picking path");
+			error.code = "CANCEL";
+			return gotPath(error);
+		}
+		else return gotPath(null, path);
+	});
+	
+	return true; // True as in "we found a path picker"
+	
+	function gotPath(err, path) {
+		if(err) return callback(err);
+		
+		console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
+		
+		// EDITOR.checkPath will call EDITOR.pathPickerTool
+		// So it's safest to not call it from here to prevent and endless loop
+		// You can instead call EDITOR.checkPath directly to get a path
+		
+		return callback(null, path);
+	}
+}
+
+EDITOR.previewTool = tool("previewTool", false);
+
+EDITOR.runScript = tool("runScript", false);
+
+EDITOR.stopScript = tool("stopScript", false);
+
+function tool(eventListenerName) {
+	return function(file, ev) {
+		if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
+		
+		if(! file instanceof File) throw new Error("First argument file need to be a File object!");
+		
+		// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
+		console.log("ev.constructor.name=" + ev.constructor.name);
+		if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
+		
+		
+			if(!EDITOR.eventListeners.hasOwnProperty(eventListenerName)) throw new Error("Unknown event listener: " + eventListenerName);
+		
+			var f = EDITOR.eventListeners[eventListenerName].map(funMap);
+			console.log("Calling eventListener=" + eventListenerName + " (" + f.length + ")");
 		
 		var ret = false;
 		
-		for(var i=0, f; i<EDITOR.eventListeners.openFileTool.length; i++) {
-			ret = EDITOR.eventListeners.openFileTool[i].fun(options, filePath);
-			if(ret === true) break; // Only open one tool
+		var combo = getCombo(ev);
+		
+			for(var i=0; i<f.length; i++) {
+				ret = f[i](file, combo);
+			if(ret === true) return true; // Only run once
+				else if(ret !== false) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
 		}
 		
-		return ret;
+			alertBox("No " + eventListenerName + " (" + f.length + " tools) handled the request!", 404, "warning");
+	}
+}
+
+EDITOR.fileExplorer = function fileExplorerTool(directory) {
+		var f = EDITOR.eventListeners.fileExplorer.map(funMap);
+		console.log("Calling fileExplorer listeners (" +f.length + ") to explore directory=" + directory);
+	
+	var ret = false;
+	
+		for(var i=0; i<f.length; i++) {
+			ret = f[i](directory);
+		if(ret === true) break; // Only open one tool
 	}
 	
-	EDITOR.pathPickerTool = function pathPicker(options, callback) {
-		// Show a tool for picking a file path, which will callback with the chosen path
-		
-		console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
-		
-		if(typeof options == "function") {
-			callback = options;
-			options = undefined;
-		}
-		
-		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
-		
-		if(typeof options == "string") options = {defaultPath: options};
-		
-		console.log("Calling pathPickerTool listeners (" + EDITOR.eventListeners.pathPickerTool.length + ") ");
-		
-		var ret = false;
-		
-		for(var i=0, f; i<EDITOR.eventListeners.pathPickerTool.length; i++) {
-			ret = EDITOR.eventListeners.pathPickerTool[i].fun(options, gotPath);
-			if(ret === true) return true; // Only open one tool, hope it will call back!
-		}
-		
-		// If no path picker wanted to handle it: Use the stone-age path picker
-		var defaultPath = options && options.defaultPath;
-		var instruction = (options && options.instruction) || "Choose a file path:";
-		promptBox(instruction, false, defaultPath, function(path) {
-			if(!path) {
-				var error = new Error("Aborted when picking path");
-				error.code = "CANCEL";
-				return gotPath(error);
-			}
-			else return gotPath(null, path);
-		});
-		
-		return true; // True as in "we found a path picker"
+	return ret;
+}
+
+EDITOR.move = function renameFile(oldPath, newPath, callback) {
+	// Also used for renaming files and folders!
 	
-		function gotPath(err, path) {
-			if(err) return callback(err);
-			
-			console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
-			
-			// EDITOR.checkPath will call EDITOR.pathPickerTool
-			// So it's safest to not call it from here to prevent and endless loop
-			// You can instead call EDITOR.checkPath directly to get a path
-			
-			return callback(null, path);
-		}
-	}
+	console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
 	
-	EDITOR.previewTool = tool("previewTool", false);
+	if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
 	
-	EDITOR.runScript = tool("runScript", false);
+	if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
 	
-	EDITOR.stopScript = tool("stopScript", false);
+	if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
 	
-	function tool(eventListenerName) {
-		return function(file, ev) {
-			if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
+	//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
+	
+	CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
+		if(err) return callback(err);
+		
+		if(EDITOR.files.hasOwnProperty(oldPath)) {
+			// File is opened in the editor!
+			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
-			if(! file instanceof File) throw new Error("First argument file need to be a File object!");
+			var file = EDITOR.files[oldPath];
 			
-			// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
-			console.log("ev.constructor.name=" + ev.constructor.name);
-			if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
-			
-			var eventListener = EDITOR.eventListeners[eventListenerName];
-			
-			if(!eventListener) throw new Error("Unknown event listener: " + eventListenerName);
-			
-			console.log("Calling eventListener=" + eventListenerName + " (" + eventListener.length + ")");
-			
-			var ret = false;
-			
-			var combo = getCombo(ev);
-			
-			for(var i=0, f; i<eventListener.length; i++) {
-				ret = eventListener[i].fun(file, combo);
-				if(ret === true) return true; // Only run once
-				else if(ret !== false) console.warn("Function " + UTIL.getFunctionName(eventListener[i].fun) + " did not return true or false!");;
+			// Save the text, do not count on the garbage collector the be "slow"
+			var text = file.text; 
+			var state = {
+				isSaved: file.isSaved,
+				changed: file.changed,
+				savedAs: file.savedAs
 			}
 			
-			alertBox("No " + eventListenerName + " (" + eventListener.length + " tools) handled the request!", 404, "warning");
-		}
-	}
-	
-	EDITOR.fileExplorer = function fileExplorerTool(directory) {
-		console.log("Calling fileExplorer listeners (" + EDITOR.eventListeners.fileExplorer.length + ") to explore directory=" + directory);
-		
-		var ret = false;
-		
-		for(var i=0, f; i<EDITOR.eventListeners.fileExplorer.length; i++) {
-			ret = EDITOR.eventListeners.fileExplorer[i].fun(directory);
-			if(ret === true) break; // Only open one tool
-		}
-		
-		return ret;
-	}
-	
-	EDITOR.move = function renameFile(oldPath, newPath, callback) {
-		// Also used for renaming files and folders!
-		
-		console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
-		
-		if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
-		
-		if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
-		
-		if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
-		
-		//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
-		
-		CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
-			if(err) return callback(err);
-			
-			if(EDITOR.files.hasOwnProperty(oldPath)) {
-				// File is opened in the editor!
-				// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
+			var doNotSwitchFile = true;
+			EDITOR.closeFile(file.path, doNotSwitchFile);
+			EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
 				
-				var file = EDITOR.files[oldPath];
+				if(openFileErr) throw openFileErr;
 				
-				// Save the text, do not count on the garbage collector the be "slow"
-				var text = file.text; 
-				var state = {
-					isSaved: file.isSaved,
-					changed: file.changed,
-					savedAs: file.savedAs
-				}
+				callback(null, newFile.path);
 				
-				var doNotSwitchFile = true;
-				EDITOR.closeFile(file.path, doNotSwitchFile);
-				EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
-					
-					if(openFileErr) throw openFileErr;
-					
-					callback(null, newFile.path);
-					
-					EDITOR.fireEvent("move", [oldPath, newPath]);
-					
-				});
-			}
-			else callback(null, newPath);
-			
-		});
-		
-	}
-	
-	EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCalled) {
-		/*
-			Generic function for calling event listeners.
-			Each event listener gets file and callback as parameters
-			And must return true(ish) or call the callback function, or the event-listener is considered failed
-			
-			allListenersCalled will be called with an array of errors as the first parameter
-		*/
-		
-		var waitingFor = [];
-		var eventFunsCalled = 0;
-		var errors = [];
-		var returns = [];
-		var alreadyTooLate = false;
-		var eventListeners = EDITOR.eventListeners[ev];
-		var uniqueFunctionNames = [];
-		var returnedOrCalledBack = [];
-		var stackTrace = {};
-		
-		for(var i=0; i<eventListeners.length; i++) {
-			callListener(eventListeners[i].fun);
-		}
-		
-		if(waitingFor.length > 0) {
-			var maxWait = 15;
-			var waitCounter = 0;
-			var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
-		}
-		
-		function callListener(fun) {
-			var fName = UTIL.getFunctionName(fun);
-			
-			if(!fName) throw new Error("A " + ev + " event listener function has no name!");
-			if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
-			uniqueFunctionNames.push(fName);
-			
-			waitingFor.push(fName);
-			console.log("Calling " + ev + " eventListener: " + fName);
-			var ret = fun(file, evCallback);
-			eventFunsCalled++;
-			console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
-			if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
-			
-			
-			
-			function evCallback(err, ret) {
-				console.log("Got " + ev + " event callback from " + fName + " err=" + err);
-				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
-				returnedOrCalledBack.push(fName);
+				EDITOR.fireEvent("move", [oldPath, newPath]);
 				
-				stackTrace[fName] = UTIL.getStack("callback");
-				
-				if(err) errors.push(err);
-				returns[fName] = ret;
-				
-				var index = waitingFor.indexOf(fName);
-				if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
-				" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
-				
-				waitingFor.splice(index, 1);
-				if(waitingFor.length == 0 && returnedOrCalledBack.length == eventListeners.length && !alreadyTooLate) {
-					if(checkInterval) clearInterval(checkInterval);
-					allListenersCalled(errors, returns);
-				}
-				return;
-			}
-		}
-		
-		function checkIfReturnedOrCalledCallback() {
-			console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
-			
-			if(++waitCounter >= maxWait) {
-				clearInterval(checkInterval);
-				errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
-				"And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
-				alreadyTooLate = true;
-				allListenersCalled(errors);
-			}
-			
-		}
-		
-	}
-	
-	EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
-		
-		if(typeof dontAsk == "function" && callback == undefined) {
-			callback = dontAsk;
-			dontAsk = undefined;
-		}
-		
-		if(dontAsk == undefined) dontAsk = false;
-		
-		var host = window.location.hostname;
-		var protocol = window.location.protocol;
-		
-		var loc = UTIL.getLocation(src);
-		
-		if(host == loc.host) dontAsk = true;
-		
-		if(src.slice(0,1) == "/" || src.slice(0, 3) == "../") dontAsk = true;
-		
-		if(!dontAsk) {
-			var yes = "Yes, I trust " + loc.host;
-			var no = "No";
-			confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
-				if(answer == yes) load();
-				else callback(new Error("User declined loading the script!"));
 			});
 		}
-		else load();
+		else callback(null, newPath);
 		
-		function load() {
-			var script = document.createElement('script');
-			script.onload = function () {
-				callback(null);
-				callback = null;
-			};
-			script.onerror  = function (err) {
-				callback(err || new Error("Unable to load " + src));
-				callback = null;
-			};
+	});
+	
+}
+
+EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCalled) {
+	/*
+		Generic function for calling event listeners.
+		Each event listener gets file and callback as parameters
+		And must return true(ish) or call the callback function, or the event-listener is considered failed
+		
+		allListenersCalled will be called with an array of errors as the first parameter
+	*/
+	
+	var waitingFor = [];
+	var eventFunsCalled = 0;
+	var errors = [];
+	var returns = [];
+	var alreadyTooLate = false;
+		var uniqueFunctionNames = [];
+	var returnedOrCalledBack = [];
+	var stackTrace = {};
+	
+		var f = EDITOR.eventListeners[ev].map(funMap);
+		
+		for(var i=0; i<f.length; i++) {
+			callListener(f[i]);
+	}
+	
+	if(waitingFor.length > 0) {
+		var maxWait = 15;
+		var waitCounter = 0;
+		var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
+	}
+	
+	function callListener(fun) {
+		var fName = UTIL.getFunctionName(fun);
+		
+		if(!fName) throw new Error("A " + ev + " event listener function has no name!");
+		if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
+		uniqueFunctionNames.push(fName);
+		
+		waitingFor.push(fName);
+		console.log("Calling " + ev + " eventListener: " + fName);
+		var ret = fun(file, evCallback);
+		eventFunsCalled++;
+		console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
+		if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
+		
+		
+		
+		function evCallback(err, ret) {
+			console.log("Got " + ev + " event callback from " + fName + " err=" + err);
+			if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
+			returnedOrCalledBack.push(fName);
 			
-			script.src = src;
+			stackTrace[fName] = UTIL.getStack("callback");
 			
-			document.head.appendChild(script);
+			if(err) errors.push(err);
+			returns[fName] = ret;
+			
+			var index = waitingFor.indexOf(fName);
+			if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
+			" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+			
+			waitingFor.splice(index, 1);
+				if(waitingFor.length == 0 && returnedOrCalledBack.length == f.length && !alreadyTooLate) {
+				if(checkInterval) clearInterval(checkInterval);
+				allListenersCalled(errors, returns);
+			}
+			return;
 		}
 	}
 	
-	EDITOR.reload = function reload(url) {
-		console.warn("Reloading the editor ...");
-		// Call exit listeners before reloading
-		EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
+	function checkIfReturnedOrCalledCallback() {
+		console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
+		
+		if(++waitCounter >= maxWait) {
+			clearInterval(checkInterval);
+			errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
+			"And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
+			alreadyTooLate = true;
+			allListenersCalled(errors);
+		}
+		
+	}
+	
+}
+
+EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
+	
+	if(typeof dontAsk == "function" && callback == undefined) {
+		callback = dontAsk;
+		dontAsk = undefined;
+	}
+	
+	if(dontAsk == undefined) dontAsk = false;
+	
+	var host = window.location.hostname;
+	var protocol = window.location.protocol;
+	
+	var loc = UTIL.getLocation(src);
+	
+	if(host == loc.host) dontAsk = true;
+	
+	if(src.slice(0,1) == "/" || src.slice(0, 3) == "../") dontAsk = true;
+	
+	if(!dontAsk) {
+		var yes = "Yes, I trust " + loc.host;
+		var no = "No";
+		confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
+			if(answer == yes) load();
+			else callback(new Error("User declined loading the script!"));
+		});
+	}
+	else load();
+	
+	function load() {
+		var script = document.createElement('script');
+		script.onload = function () {
+			callback(null);
+			callback = null;
+		};
+		script.onerror  = function (err) {
+			callback(err || new Error("Unable to load " + src));
+			callback = null;
+		};
+		
+		script.src = src;
+		
+		document.head.appendChild(script);
+	}
+}
+
+EDITOR.reload = function reload(url) {
+	console.warn("Reloading the editor ...");
+	// Call exit listeners before reloading
+	EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
+		if(err) throw err;
+		
+		var gotError = false;
+		
+		for(var fName in returns) {
+			console.log(fName + " returned " + returns[fName]);
+			if(returns[fName] === false || returns[fName] instanceof Error) {
+				gotError = true;
+				break;
+			}
+		}
+		
+		if(gotError) {
+			throw new Error("There was an error in " + fName + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+		}
+		else {
+			
+			// Unload all plugins
+			for(var i=0; i<EDITOR.plugins.length; i++) {
+				console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+				EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
+			}
+			
+			// Close all open windows
+			for(var win in EDITOR.openedWindows) {
+				try{EDITOR.openWindows[win].close();}
+				catch(err) {};
+			}
+			
+			/*
+				for(var file in EDITOR.files) {
+				delete EDITOR.files[file];
+				}
+			*/
+			
+			//document.location = "about:blank";
+			//document.location = "file:///" + require("dirname") + "/client/index.htm";
+			
+			console.log("Reloading! RUNTIME=" + RUNTIME);
+			
+			window.onbeforeunload = null;
+			if(url) window.location=url;
+			else location.reload();
+			
+			// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+			
+		}
+	});
+}
+
+var waitingForFileToBeParsed = {};
+EDITOR.parse = function parse(fileOrString, lang, path, callback) {
+	/*
+		Useful for when you want to parse a file, but not open it. Returns:
+		{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
+	*/
+	
+	if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
+	
+	if(callback == undefined && typeof lang == "function") {
+		callback = lang;
+		lang = undefined;
+	}
+	else if(callback == undefined && typeof path == "function") {
+		callback = path;
+		path = undefined;
+	}
+	
+	if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
+	
+	if(path == undefined) path = UTIL.hash(fileOrString);
+	
+	// Prevent race conditions
+	var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
+	
+	if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
+	
+	waitingForFileToBeParsed[path].push(callback);
+	
+	if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
+	
+		var f = EDITOR.eventListeners.parse.map(funMap);
+		for(var i=0, ret=false; i<f.length; i++) {
+			if(callback) ret = f[i](fileOrString, lang, path, parseDone); // async
+			else ret = f[i](fileOrString, lang, path); // sync
+		if(ret) return ret; // Only let one parser parse it
+	}
+	
+	function parseDone(err, parseResult) {
+		for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
+			waitingForFileToBeParsed[path][i](err, parseResult);
+		}
+		delete waitingForFileToBeParsed[path];
+	}
+}
+
+EDITOR.registerAltKey = function registerAltKey(options) {
+	// Alternate keys for virtual keyboard
+	
+	if(typeof options != "object") throw new Error("First argument need to be an option object!");
+	if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
+	if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
+	if(typeof options.label != "string") throw new Error("The option object need to have a label string!");
+	if(typeof options.alt != "number" && typeof options.alt != "undefined") throw new Error("The alt option need to be a number!");
+	
+	if(options.alt == undefined) options.alt = 1; // One button can have many alternatives
+	
+	var key;
+	for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+		key = EDITOR.registeredAltKeys[i];
+		if(key.char==options.char && key.alt == options.alt) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char + " on alt=" + options.alt);
+	}
+	
+	EDITOR.registeredAltKeys.push(options);
+	
+	var reg = false;
+	var regSuccess = false;
+		var f = EDITOR.eventListeners.registerAltKey.map(funMap);
+		for (var j=0; j<f.length; j++) {
+			reg = f[j](options);
+		if(reg==true) regSuccess = true;
+	}
+	// Note: The keybard plugin might not yet have loaded!
+	//if(!regSuccess) throw new Error(UTIL.getFunctionName(options.fun) + " did not register for char=" + options.char + " on alt=" + options.alt + " on any of the keyboards!");
+	
+}
+
+EDITOR.unregisterAltKey = function unregisterAltKey(fun) {
+	if(typeof fun != "function") throw new Error("The first argument needs to be a function!");
+	
+	var key;
+	for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+		key = EDITOR.registeredAltKeys[i];
+		if(key.fun == fun) {
+			EDITOR.registeredAltKeys.splice(i, 1);
+			notifyListeners();
+			return;
+		}
+	}
+	
+	console.warn("Did not find " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
+	
+	function notifyListeners() {
+			var f = EDITOR.eventListeners.unregisterAltKey.map(funMap);
+			for (var j=0; j<f.length; j++) {
+				f[j](fun);
+		}
+	}
+}
+
+EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
+	if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+	var returns = [];
+		var f = EDITOR.eventListeners.hideVirtualKeyboard.map(funMap);
+		for (var j=0, ret; j<f.length; j++) {
+			ret = f[j](keyboards);
+		// Should return an array of virtual keyboards hidden, or false
+		if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected an array of keyboard names!");
+		returns.concat(ret);
+	}
+	return returns;
+}
+
+EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
+	if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+	console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
+	var returns = [];
+		var f = EDITOR.eventListeners.showVirtualKeyboard.map(funMap);
+		for (var j=0, ret; j<f; j++) {
+			ret = f[j](keyboards);
+		// Should return an array of virtual keyboards that was turned on.
+		if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected a list of keyboard names! (list can be empty)");
+		returns.concat(ret);
+	}
+	return returns;
+}
+
+EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
+	// Finds a currently opened file from the stack trace, and shows the message on the line from the stack trace
+	
+	console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(options));
+	
+	if(options.message) {
+		var message = options.message;
+	}
+	else if(options.error) {
+		var message = options.error.message;
+	}
+	else if(options.errorEvent) {
+		if(!options.errorEvent.error) {
+			console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
+			return FAIL;
+		}
+		var message = options.errorEvent.error.message;
+	}
+	
+	if(options.stackTrace) {
+		var errorStack = options.stackTrace;
+	}
+	else if(options.error) {
+		var errorStack = options.error.stack;
+	}
+	else if(options.errorEvent) {
+		var errorStack = options.errorEvent.error.stack;
+		
+		if(!errorStack) {
+			console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
+			//Firefox browser wont give access to the error event, because it's in another window !?
+			
+			console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
+			// It seems we can still extract some data out of it! ...
+			
+			errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
+		}
+		
+	}
+	else {
+		var errorStack = UTIL.getStack(message);
+	}
+	
+	if(!errorStack) {
+		EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
+		return FAIL;
+	}
+	
+	var stackLines = UTIL.parseStackTrace(errorStack);
+	
+	if(!stackLines) {
+		console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
+		//alertBox(message || errorStack, "ERROR_PARSING", "error");
+		return FAIL;
+	}
+	
+	if(stackLines && !message && stackLines.message) message = stackLines.message;
+	
+	if(!message) {
+		EDITOR.error(  new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) )  );
+		return FAIL;
+	}
+	
+	if(options.url) {
+		var urlPath = UTIL.getDirectoryFromPath(options.url);
+	}
+	
+	if(options.path) {
+		var folder = UTIL.getDirectoryFromPath(options.path);
+	}
+	
+	if(options.level) {
+		var level = options.level;
+	}
+	else {
+		var level = 3; // 1=Err 2=Warn 3=Info
+	}
+	
+	var sourcePath = "";
+	stackLoop: for (var i=0; i<stackLines.length; i++) {
+		for(var filePath in EDITOR.files) {
+			
+			if(urlPath && folder) sourcePath = stackLines[i].source.replace(urlPath, folder);
+			else if(urlPath) sourcePath = stackLines[i].source.replace(urlPath, "");
+			else sourcePath = UTIL.getPathFromUrl(stackLines[i].source);
+			
+			if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
+			
+			console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
+			if(filePath.indexOf(sourcePath) != -1) {
+				var fileExt = UTIL.getFileExtension(filePath);
+				if(fileExt == "stdout") {
+					console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
+					continue;
+				}
+				
+				console.log("showMessageFromStackTrace: sourcePath in filePath: yes!");
+				var file = EDITOR.files[filePath];
+				var lineno = stackLines[i].lineno;
+				var colno = stackLines[i].colno;
+				break stackLoop;
+			}
+			else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
+		}
+	}
+	
+	if(file && lineno) {
+		var row = lineno - 1;
+		var gridRow = file.grid[row];
+		if(!gridRow) { // Sanity check
+			EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
+			return FAIL;
+		}
+		var indentationCharacters = file.grid[row].indentationCharacters.length;
+		var col = colno - indentationCharacters;
+		
+		if(level == 1) file.scrollToLine(lineno); // Only scroll there if it's an error
+		
+		EDITOR.addInfo(row, col, message, file, level);
+		
+		if(EDITOR.currentFile != file) EDITOR.showFile(file);
+		
+		return SUCCESS;
+		
+	}
+	else console.warn("showMessageFromStackTrace: Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+	
+	return FAIL;
+}
+
+EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
+	var pubKeyPath = ".ssh/id_rsa.pub";
+	
+	var homeDir = (EDITOR.user && EDITOR.user.home) || UTIL.homeDir(EDITOR.workingDirectory);
+	if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
+	
+	EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+	
+	function gotPubKeyMaybe(err, path, pubkey, hash) {
+		if(err) {
+			var yes = "Yes";
+			var no = "No";
+			confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
+				if(answer == yes) {
+					CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
+						if(err) return callback(err);
+						console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
+						EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+					});
+				}
+				else {
+					callback(err);
+				}
+			});
+		}
+		else {
+			callback(null, pubkey);
+		}
+	}
+}
+
+
+var fullScreenWidgetParent;
+var oldFullScreenWidget;
+EDITOR.fullScreenWidget = function fullScreen(widgetElement) {
+	
+	if(oldFullScreenWidget) {
+		// There can only be one element in full screen mode
+		if(oldFullScreenWidget == widgetElement) {
+			console.warn("Element already in full screen: ", widgetElement);
+			return;
+		}
+		
+		EDITOR.exitFullScreenWidget(oldFullScreenWidget, fullScreenWidgetParent);
+	}
+	
+	fullScreenWidgetParent = widgetElement.parentElement;
+	
+	var body = document.getElementById('body');
+	
+	if(fullScreenWidgetParent != body) {
+		// Move the widget from it's current position in the DOM,
+		// And place it directly under the body element
+		fullScreenWidgetParent.removeChild(widgetElement);
+		body.appendChild(widgetElement);
+	}
+	
+	// Hide everything besides the widget
+	var wireframe = document.getElementById("wireframe");
+	wireframe.style.display = "none";
+	
+	// Give the widget free roam over the entire screen
+	widgetElement.style.position="relative";
+	widgetElement.style.top = "0px";
+	widgetElement.style.left = "0px";
+	widgetElement.style.border="0px solid red";
+	widgetElement.style.width="100%";
+	widgetElement.style.maxWidth="100%";
+	widgetElement.style.height="100%";
+	widgetElement.style.maxHeight="100%"; // This is that magically allows scrolling on the wrapper
+	
+	
+	// Enable scrolling on the editor window
+	EDITOR.scrollingEnabled = true;
+	
+	oldFullScreenWidget = widgetElement;
+	
+}
+
+EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
+	
+	if(widgetElement != oldFullScreenWidget) {
+		console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
+		return;
+	}
+	
+	var wireframe = document.getElementById("wireframe");
+	wireframe.style.display = "block";
+	
+	widgetElement.style.position="";
+	widgetElement.style.top = "";
+	widgetElement.style.left = "";
+	widgetElement.style.border="";
+	widgetElement.style.width="";
+	widgetElement.style.maxWidth="";
+	widgetElement.style.height="";
+	widgetElement.style.maxHeight="";
+	
+	
+	EDITOR.scrollingEnabled = false;
+	
+	if(!oldParent) oldParent = fullScreenWidgetParent;
+	// Move the widget back to where it was
+	var body = document.getElementById('body');
+	body.removeChild(widgetElement);
+	oldParent.appendChild(widgetElement);
+	
+	oldFullScreenWidget = null;
+	fullScreenWidgetParent = null;
+	
+	EDITOR.resizeNeeded();
+}
+
+EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
+
+EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
+	
+	if(!dialogCode) throw new Error("No dialogCode given to closeAllDialogs! Use MISC to close all unspecified dialog, or close dialog specificly! Closing the wrong dialog(s) can be very confusing.");
+	
+	var closedCount = 0;
+	
+	console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
+	for (var i=0; i<EDITOR.openDialogs.length; i++) {
+		
+		if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) {
+			console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
+			continue;
+		}
+		console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+		closedCount++;
+		EDITOR.openDialogs[i].close();
+		
+		if(i == EDITOR.openDialogs.length) break;
+		else i--; // Check all dialogs (don't skip one if one is closed)
+	}
+	
+	if(closedCount == 0) {
+		var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + ":" + UTIL.shortString(dialog.div.innerText, 50) });
+		throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
+	}
+}
+
+
+CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
+	
+	var connectedFiles = filesOnServer();
+	
+	if(connectedFiles.length > 0) {
+		if(confirm("Close all opened files on " + serverAddress + " ?")) {
+			
+			connectedFiles.forEach(function(path) {
+				EDITOR.closeFile(path);
+			});
+			
+		}
+	}
+	
+	delete EDITOR.connections[serverAddress]; // Remove the connection
+	
+	
+	function filesOnServer() {
+		// Returns an array of currently opened files connected to this server
+		var list = [];
+		for(var path in EDITOR.files) {
+			console.log("path=" + path);
+			if(protocol == "ftp") { // protocol is always lower case!
+				if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
+			}
+			else if(protocol == "ssh") {
+				if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
+			}
+		}
+		
+		return list;
+	}
+	
+});
+
+function removeFrom(list, fun) {
+	// Removes an object from an array of objects
+	for(var i=0; i<list.length; i++) {
+		if(list[i] == fun) {
+			console.log("removeFrom: list length before: " + list.length);
+			list.splice(i, 1);
+			console.log("removeFrom: list length after: " + list.length);
+			removeFrom(list, fun); // Remove dublicates
+			return true;
+		}
+	}
+	return false; // Function not found in list
+}
+
+if(RUNTIME == "nw.js") {
+	// Handle window close
+	// Load native UI library
+	var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
+	
+	// Get the current window
+	var win = gui.Window.get();
+	win.on('close', function() {
+		//var editor = this;
+		
+		//EDITOR.hide(); // Pretend to be closed already
+		
+		var ret = true;
+		var name = "";
+		
+		console.log("Closing the editor ...");
+		
+		if(!EDITOR.storage.ready()) {
+			console.warn("EDITOR.storage not ready!");
+		}
+		
+		EDITOR.fireEvent("exit", [], function(err, returns) {
 			if(err) throw err;
 			
 			var gotError = false;
@@ -6328,782 +6868,270 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 			}
 			
 			if(gotError) {
-				throw new Error("There was an error in " + fName + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+				this.show();
+				throw new Error("Something went wrong when closing the editor!");
 			}
 			else {
-				
-				// Unload all plugins
-				for(var i=0; i<EDITOR.plugins.length; i++) {
-					console.log("unloading plugin: " + EDITOR.plugins[i].desc);
-					EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
-				}
-				
-				// Close all open windows
-				for(var win in EDITOR.openedWindows) {
-					try{EDITOR.openWindows[win].close();}
-					catch(err) {};
-				}
-				
-				/*
-					for(var file in EDITOR.files) {
-					delete EDITOR.files[file];
-					}
-				*/
-				
-				//document.location = "about:blank";
-				//document.location = "file:///" + require("dirname") + "/client/index.htm";
-				
-				console.log("Reloading! RUNTIME=" + RUNTIME);
-				
-				window.onbeforeunload = null;
-				if(url) window.location=url;
-				else location.reload();
-				
-				// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-				
+				win.close(true);
 			}
+			
 		});
-	}
-	
-	var waitingForFileToBeParsed = {};
-	EDITOR.parse = function parse(fileOrString, lang, path, callback) {
-		/*
-			Useful for when you want to parse a file, but not open it. Returns:
-			{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
-		*/
-		
-		if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
-		
-		if(callback == undefined && typeof lang == "function") {
-			callback = lang;
-			lang = undefined;
-		}
-		else if(callback == undefined && typeof path == "function") {
-			callback = path;
-			path = undefined;
-		}
-		
-		if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
-		
-		if(path == undefined) path = UTIL.hash(fileOrString);
-		
-		// Prevent race conditions
-		var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
-		
-		if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
-
-		waitingForFileToBeParsed[path].push(callback);
-		
-		if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
-		
-		for(var i=0, ret=false; i<EDITOR.eventListeners.parse.length; i++) {
-			if(callback) ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path, parseDone); // async
-			else ret = EDITOR.eventListeners.parse[i].fun(fileOrString, lang, path); // sync
-			if(ret) return ret; // Only let one parser parse it
-		}
-		
-		function parseDone(err, parseResult) {
-			for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
-				waitingForFileToBeParsed[path][i](err, parseResult);
-			}
-			delete waitingForFileToBeParsed[path];
-		}
-	}
-	
-	EDITOR.registerAltKey = function registerAltKey(options) {
-		// Alternate keys for virtual keyboard
-		
-		if(typeof options != "object") throw new Error("First argument need to be an option object!");
-		if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
-		if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
-		if(typeof options.label != "string") throw new Error("The option object need to have a label string!");
-		if(typeof options.alt != "number" && typeof options.alt != "undefined") throw new Error("The alt option need to be a number!");
-		
-		if(options.alt == undefined) options.alt = 1; // One button can have many alternatives
-		
-		var key;
-		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
-			key = EDITOR.registeredAltKeys[i];
-			if(key.char==options.char && key.alt == options.alt) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char + " on alt=" + options.alt);
-		}
-		
-		EDITOR.registeredAltKeys.push(options);
-		
-		var reg = false;
-		var regSuccess = false;
-		for (var j=0; j<EDITOR.eventListeners.registerAltKey.length; j++) {
-			reg = EDITOR.eventListeners.registerAltKey[j].fun(options);
-			if(reg==true) regSuccess = true;
-		}
-		// Note: The keybard plugin might not yet have loaded!
-		//if(!regSuccess) throw new Error(UTIL.getFunctionName(options.fun) + " did not register for char=" + options.char + " on alt=" + options.alt + " on any of the keyboards!");
-		
-	}
-	
-	EDITOR.unregisterAltKey = function unregisterAltKey(fun) {
-		if(typeof fun != "function") throw new Error("The first argument needs to be a function!");
-		
-		var key;
-		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
-			key = EDITOR.registeredAltKeys[i];
-			if(key.fun == fun) {
-				EDITOR.registeredAltKeys.splice(i, 1);
-				notifyListeners();
-				return;
-			}
-		}
-		
-		console.warn("Did not find " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
-		
-		function notifyListeners() {
-			for (var j=0; j<EDITOR.eventListeners.unregisterAltKey.length; j++) {
-				EDITOR.eventListeners.unregisterAltKey[j].fun(fun);
-			}
-		}
-	}
-	
-	EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
-		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
-		var returns = [];
-		for (var j=0, ret; j<EDITOR.eventListeners.hideVirtualKeyboard.length; j++) {
-			ret = EDITOR.eventListeners.hideVirtualKeyboard[j].fun(keyboards);
-			// Should return an array of virtual keyboards hidden, or false
-			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected an array of keyboard names!");
-			returns.concat(ret);
-		}
-		return returns;
-	}
-	
-	EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
-		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
-		console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
-		var returns = [];
-		for (var j=0, ret; j<EDITOR.eventListeners.showVirtualKeyboard.length; j++) {
-			ret = EDITOR.eventListeners.showVirtualKeyboard[j].fun(keyboards);
-			// Should return an array of virtual keyboards that was turned on.
-			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected a list of keyboard names! (list can be empty)");
-			returns.concat(ret);
-		}
-		return returns;
-	}
-	
-	EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
-		// Finds a currently opened file from the stack trace, and shows the message on the line from the stack trace
-		
-		console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(options));
-		
-		if(options.message) {
-			var message = options.message;
-		}
-		else if(options.error) {
-			var message = options.error.message;
-		}
-		else if(options.errorEvent) {
-			if(!options.errorEvent.error) {
-				console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
-				return FAIL;
-			}
-			var message = options.errorEvent.error.message;
-		}
-		
-		if(options.stackTrace) {
-			var errorStack = options.stackTrace;
-		}
-		else if(options.error) {
-			var errorStack = options.error.stack;
-		}
-		else if(options.errorEvent) {
-			var errorStack = options.errorEvent.error.stack;
-			
-			if(!errorStack) {
-				console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
-				//Firefox browser wont give access to the error event, because it's in another window !?
-				
-				console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
-				// It seems we can still extract some data out of it! ...
-				
-				errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
-			}
-			
-		}
-		else {
-			var errorStack = UTIL.getStack(message);
-		}
-		
-		if(!errorStack) {
-EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
-			return FAIL;
-		}
-		
-		var stackLines = UTIL.parseStackTrace(errorStack);
-		
-		if(!stackLines) {
-			console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
-			//alertBox(message || errorStack, "ERROR_PARSING", "error");
-			return FAIL;
-		}
-		
-		if(stackLines && !message && stackLines.message) message = stackLines.message;
-		
-		if(!message) {
-			EDITOR.error(  new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) )  );
-			return FAIL;
-		}
-		
-		if(options.url) {
-			var urlPath = UTIL.getDirectoryFromPath(options.url);
-		}
-		
-		if(options.path) {
-			var folder = UTIL.getDirectoryFromPath(options.path);
-		}
-		
-		if(options.level) {
-			var level = options.level;
-		}
-		else {
-			var level = 3; // 1=Err 2=Warn 3=Info
-		}
-		
-		var sourcePath = "";
-		stackLoop: for (var i=0; i<stackLines.length; i++) {
-			for(var filePath in EDITOR.files) {
-				
-				if(urlPath && folder) sourcePath = stackLines[i].source.replace(urlPath, folder);
-				else if(urlPath) sourcePath = stackLines[i].source.replace(urlPath, "");
-				else sourcePath = UTIL.getPathFromUrl(stackLines[i].source);
-				
-				if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
-				
-				console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
-				if(filePath.indexOf(sourcePath) != -1) {
-					var fileExt = UTIL.getFileExtension(filePath);
-					if(fileExt == "stdout") {
-						console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
-						continue;
-					}
-					
-					console.log("showMessageFromStackTrace: sourcePath in filePath: yes!");
-					var file = EDITOR.files[filePath];
-					var lineno = stackLines[i].lineno;
-					var colno = stackLines[i].colno;
-					break stackLoop;
-				}
-				else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
-			}
-		}
-		
-		if(file && lineno) {
-			var row = lineno - 1;
-			var gridRow = file.grid[row];
-			if(!gridRow) { // Sanity check
-				EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
-				return FAIL;
-			}
-			var indentationCharacters = file.grid[row].indentationCharacters.length;
-			var col = colno - indentationCharacters;
-			
-			if(level == 1) file.scrollToLine(lineno); // Only scroll there if it's an error
-			
-			EDITOR.addInfo(row, col, message, file, level);
-			
-			if(EDITOR.currentFile != file) EDITOR.showFile(file);
-			
-			return SUCCESS;
-			
-		}
-		else console.warn("showMessageFromStackTrace: Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
-		
-		return FAIL;
-	}
-	
-	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
-		var pubKeyPath = ".ssh/id_rsa.pub";
-		
-		var homeDir = (EDITOR.user && EDITOR.user.home) || UTIL.homeDir(EDITOR.workingDirectory);
-		if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
-		
-		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
-		
-		function gotPubKeyMaybe(err, path, pubkey, hash) {
-			if(err) {
-				var yes = "Yes";
-				var no = "No";
-				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
-					if(answer == yes) {
-						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
-							if(err) return callback(err);
-							console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
-							EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
-						});
-					}
-					else {
-						callback(err);
-					}
-				});
-			}
-			else {
-				callback(null, pubkey);
-			}
-		}
-	}
-	
-	
-	var fullScreenWidgetParent;
-	var oldFullScreenWidget;
-	EDITOR.fullScreenWidget = function fullScreen(widgetElement) {
-		
-		if(oldFullScreenWidget) {
-			// There can only be one element in full screen mode
-			if(oldFullScreenWidget == widgetElement) {
-console.warn("Element already in full screen: ", widgetElement);
-			return;
-			}
-			
-			EDITOR.exitFullScreenWidget(oldFullScreenWidget, fullScreenWidgetParent);
-		}
-		
-		fullScreenWidgetParent = widgetElement.parentElement;
-		
-		var body = document.getElementById('body');
-		
-		if(fullScreenWidgetParent != body) {
-			// Move the widget from it's current position in the DOM,
-			// And place it directly under the body element
-			fullScreenWidgetParent.removeChild(widgetElement);
-			body.appendChild(widgetElement);
-		}
-		
-		// Hide everything besides the widget
-		var wireframe = document.getElementById("wireframe");
-		wireframe.style.display = "none";
-		
-		// Give the widget free roam over the entire screen
-		widgetElement.style.position="relative";
-		widgetElement.style.top = "0px";
-		widgetElement.style.left = "0px";
-		widgetElement.style.border="0px solid red";
-		widgetElement.style.width="100%";
-		widgetElement.style.maxWidth="100%";
-		widgetElement.style.height="100%";
-		widgetElement.style.maxHeight="100%"; // This is that magically allows scrolling on the wrapper
-		
-		
-		// Enable scrolling on the editor window
-		EDITOR.scrollingEnabled = true;
-	
-		oldFullScreenWidget = widgetElement;
-	
-}
-	
-	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
-		
-		if(widgetElement != oldFullScreenWidget) {
-console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
-		return;
-		}
-		
-		var wireframe = document.getElementById("wireframe");
-		wireframe.style.display = "block";
-		
-		widgetElement.style.position="";
-		widgetElement.style.top = "";
-		widgetElement.style.left = "";
-		widgetElement.style.border="";
-		widgetElement.style.width="";
-		widgetElement.style.maxWidth="";
-		widgetElement.style.height="";
-		widgetElement.style.maxHeight="";
-		
-		
-		EDITOR.scrollingEnabled = false;
-		
-		if(!oldParent) oldParent = fullScreenWidgetParent;
-		// Move the widget back to where it was
-		var body = document.getElementById('body');
-		body.removeChild(widgetElement);
-		oldParent.appendChild(widgetElement);
-		
-		oldFullScreenWidget = null;
-		fullScreenWidgetParent = null;
-		
-		EDITOR.resizeNeeded();
-	}
-	
-	EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
-	
-	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
-		
-		if(!dialogCode) throw new Error("No dialogCode given to closeAllDialogs! Use MISC to close all unspecified dialog, or close dialog specificly! Closing the wrong dialog(s) can be very confusing.");
-		
-		var closedCount = 0;
-		
-		console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
-		for (var i=0; i<EDITOR.openDialogs.length; i++) {
-			
-			if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) {
-				console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
-				continue;
-			}
-			console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
-			closedCount++;
-			EDITOR.openDialogs[i].close();
-
-			if(i == EDITOR.openDialogs.length) break;
-			else i--; // Check all dialogs (don't skip one if one is closed)
-		}
-		
-		if(closedCount == 0) {
-			var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + ":" + UTIL.shortString(dialog.div.innerText, 50) });
-			throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
-		}
-	}
-	
-	
-	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
-		
-		var connectedFiles = filesOnServer();
-		
-		if(connectedFiles.length > 0) {
-			if(confirm("Close all opened files on " + serverAddress + " ?")) {
-				
-				connectedFiles.forEach(function(path) {
-					EDITOR.closeFile(path);
-				});
-				
-			}
-		}
-		
-		delete EDITOR.connections[serverAddress]; // Remove the connection
-		
-		
-		function filesOnServer() {
-			// Returns an array of currently opened files connected to this server
-			var list = [];
-			for(var path in EDITOR.files) {
-				console.log("path=" + path);
-				if(protocol == "ftp") { // protocol is always lower case!
-					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
-				}
-				else if(protocol == "ssh") {
-					if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
-				}
-			}
-			
-			return list;
-		}
-		
 	});
 	
-	function removeFrom(list, fun) {
-		// Removes an object from an array of objects
-		for(var i=0; i<list.length; i++) {
-			if(list[i] == fun) {
-				console.log("removeFrom: list length before: " + list.length);
-				list.splice(i, 1);
-				console.log("removeFrom: list length after: " + list.length);
-				removeFrom(list, fun); // Remove dublicates
-				return true;
-			}
-		}
-		return false; // Function not found in list
+	// Use event listeners for these so that they also fire when "reloading" the editor
+	EDITOR.eventListeners.exit.push({
+			fun: function exitKioskMode() {
+			var GUI = require('nw.gui').Window.get();
+			GUI.leaveKioskMode();
+			return true;
 	}
-	
-	if(RUNTIME == "nw.js") {
-		// Handle window close
-		// Load native UI library
-		var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
-		
-		// Get the current window
-		var win = gui.Window.get();
-		win.on('close', function() {
-			//var editor = this;
-			
-			//EDITOR.hide(); // Pretend to be closed already
-			
-			var ret = true;
-			var name = "";
-			
-			console.log("Closing the editor ...");
-			
-			if(!EDITOR.storage.ready()) {
-				console.warn("EDITOR.storage not ready!");
-			}
-			
-			EDITOR.fireEvent("exit", [], function(err, returns) {
-				if(err) throw err;
-				
-				var gotError = false;
-				
-				for(var fName in returns) {
-					console.log(fName + " returned " + returns[fName]);
-					if(returns[fName] === false || returns[fName] instanceof Error) {
-						gotError = true;
-						break;
-					}
-				}
-				
-				if(gotError) {
-					this.show();
-					throw new Error("Something went wrong when closing the editor!");
-				}
-				else {
-					win.close(true);
-				}
-				
-			});
 		});
-		
-		// Use event listeners for these so that they also fire when "reloading" the editor
-		EDITOR.eventListeners.exit.push({fun: function exitKioskMode() {
-				var GUI = require('nw.gui').Window.get();
-				GUI.leaveKioskMode();
-				return true;
-		}});
-		
-		EDITOR.eventListeners.exit.push({fun: function closeOpenConnections() {
-				
-				for(var serverAddress in EDITOR.connections) CLIENT.cmd("disconnect", {serverAddress: serverAddress});
-				
-				return true;			
-		}});
-		
+	
+	EDITOR.eventListeners.exit.push({
+			fun: function closeOpenConnections() {
+			
+			for(var serverAddress in EDITOR.connections) CLIENT.cmd("disconnect", {serverAddress: serverAddress});
+			
+			return true;			
 	}
+		});
 	
-	// More Event listeners ...
+}
+
+// More Event listeners ...
+
+/*
+	window.addEventListener("drop", fileDrop, false);
+	window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
+	window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
+	window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
+	window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
+*/
+
+window.addEventListener("dblclick", dblclick);
+
+
+window.addEventListener("load", main, false);
+window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
+	console.warn("EVENT RESIZE!");
+	EDITOR.resizeNeeded();
+	EDITOR.renderNeeded();
+	
+	EDITOR.interact("resize", resizeEvent);
+	
+}, false);
+
+/*
+	
+	The third argumentin addEventListener is a Boolean value 
+	that specifies whether the event should be executed in the capturing or in the bubbling phase.
+	true = capturing phase: start with the top (window)
+	false = bubbling phase: start with the inner-most element 
+	
+*/
+
+
+/*
+	Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
+	Your function should return false to prevent default action.
+*/
+window.addEventListener("mousewheel",scrollWheel,false);
+window.addEventListener("DOMMouseScroll",scrollWheel,false);
+
+
+/*
+	Add your own key listeners via EDITOR.bindKey()
+	Your function should return false to prevent default action.
+*/
+window.addEventListener("keydown",keyIsDown,false);  // captures 
+window.addEventListener("keyup",keyIsUp,false);      // keyBindings
+window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
+
+/*
+	Add your own key listeners with EDITOR.on("eventName", callbackFunction);
+	Your function should return false to prevent default action.
+*/
+
+
+// Capture mobile events
+window.addEventListener("touchstart", mouseDown, false);
+window.addEventListener("touchend", mouseUp, false);
+window.addEventListener("touchmove", mouseMove, false);
+
+
+//window.addEventListener("touchcancel", mouseUp, false);
+//window.addEventListener("touchleave", mouseUp, false);
+
+window.addEventListener("click", mouseclick, false);
+window.addEventListener("mousedown", mouseDown, false);
+window.addEventListener("mouseup", mouseUp, false);
+
+window.addEventListener("mousemove", mouseMove, false);
+
+
+// Disable annoying menus
+window.addEventListener("contextmenu", function(contextMenuEvent) {
+	
+	contextMenuEvent = contextMenuEvent || window.event;
+	
+	var target = contextMenuEvent.target;
+	var tag = target.tagName;
+	
+	if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
+	
+	contextMenuEvent.preventDefault();
+	console.log("contextmenu prevented! tag=" + tag);
+	return false;
+}, false);
+
+
+// Modern browsers. Note: 3rd argument is required for Firefox <= 6
+if (window.addEventListener) {
+	window.addEventListener('paste', paste, false);
+}
+// IE <= 8
+else {
+	window.attachEvent('onpaste', paste);
+}
+
+window.onpaste = function() {alert("paste window");};
+
+window.addEventListener('copy', copy);
+//window.addEventListener('paste', paste);
+window.addEventListener('cut', cut);
+
+window.addEventListener("message", onMessage, false);
+
+
+// Fix annoying scrolling on Mobile
+window.addEventListener("scroll", preventMotion, false);
+//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
+
+
+
+function preventMotion(event) {
+	if(EDITOR.scrollingEnabled) return true;
+	//return true;
+	event.preventDefault();
+	event.stopPropagation();
+	window.scrollTo(0, 0);
+	console.log("Prevented scroll!");
+}
+
+// End: Annoying scrolling fix
+
+
+function main() {
+	
+	console.log("Starting the editor ...");
+	
+	window.name = "editor"; // For focus access
+	
+	//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
+	
+	EDITOR.on("moveCaret", function clearInfoBubblesWhenCaretIsMoved(file, caret) {
+		// Clear info messages in this file
+		EDITOR.removeAllInfo(file);
+		
+		return true;
+	});
+	
+	bootstrap();
+	
+	canvas = document.getElementById("canvas");
+	canvas.style.display="block";
+	
+	canvas.onpaste = function() {alert("paste canvas");};
+	
+	// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
+	// Also make sure there are no drop or dragover events on window, document or parent elements!
 	
 	/*
-		window.addEventListener("drop", fileDrop, false);
-		window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
-		window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
-		window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
-		window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
+		canvas.addEventListener("drop", function(e) {
+		e.preventDefault();
+		console.log(e.target.className + " drop");
+		
+		console.log(e.dataTransfer.files[0]);
+		console.log(e.dataTransfer.files[0].name);
+		console.log(e.dataTransfer.files[0].size + " bytes");
+		
+		return false;
+		}, false);
+		
+		canvas.addEventListener("dragdrop", function(e) {
+		e.preventDefault();
+		console.log(e.target.className + " dragdrop");
+		return false;
+		}, false);
+		
+		canvas.addEventListener("dragenter", function(e) {
+		e.preventDefault();
+		console.log(e.target.className + " dragenter");
+		e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+		console.log(e);
+		
+		return false;
+		}, false);
+		
+		canvas.addEventListener("dragleave", function(e) {
+		e.preventDefault();
+		console.log(e.target.className + " dragleave");
+		
+		return false;
+		}, false);
+		
+		
+		
+		document.addEventListener("dragstart", function(event) {
+		
+		console.log(e.target.className + " dragstart");
+		
+		// The dataTransfer.setData() method sets the data type and the value of the dragged data
+		event.dataTransfer.setData("Text", event.target.id);
+		
+		// Output some text when starting to drag the p element
+		document.getElementById("demo").innerHTML = "Started to drag the p element.";
+		
+		// Change the opacity of the draggable element
+		event.target.style.opacity = "0.4";
+		});
 	*/
 	
-	window.addEventListener("dblclick", dblclick);
-	
-	
-	window.addEventListener("load", main, false);
-	window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
-		console.warn("EVENT RESIZE!");
-		EDITOR.resizeNeeded();
-		EDITOR.renderNeeded();
+	canvas.addEventListener("dragover", function(dragOverEvent) {
+		dragOverEvent.preventDefault();
+		console.log(dragOverEvent.target.className + " dragover");
 		
-		EDITOR.interact("resize", resizeEvent);
-		
-	}, false);
-	
-	/*
-		
-		The third argumentin addEventListener is a Boolean value 
-		that specifies whether the event should be executed in the capturing or in the bubbling phase.
-		true = capturing phase: start with the top (window)
-		false = bubbling phase: start with the inner-most element 
-		
-	*/
-	
-	
-	/*
-		Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
-		Your function should return false to prevent default action.
-	*/
-	window.addEventListener("mousewheel",scrollWheel,false);
-	window.addEventListener("DOMMouseScroll",scrollWheel,false);
-	
-	
-	/*
-		Add your own key listeners via EDITOR.bindKey()
-		Your function should return false to prevent default action.
-	*/
-	window.addEventListener("keydown",keyIsDown,false);  // captures 
-	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
-	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
-	
-	/*
-		Add your own key listeners with EDITOR.on("eventName", callbackFunction);
-		Your function should return false to prevent default action.
-	*/
-	
-	
-	// Capture mobile events
-	window.addEventListener("touchstart", mouseDown, false);
-	window.addEventListener("touchend", mouseUp, false);
-	window.addEventListener("touchmove", mouseMove, false);
-	
-	
-	//window.addEventListener("touchcancel", mouseUp, false);
-	//window.addEventListener("touchleave", mouseUp, false);
-	
-	window.addEventListener("click", mouseclick, false);
-	window.addEventListener("mousedown", mouseDown, false);
-	window.addEventListener("mouseup", mouseUp, false);
-	
-	window.addEventListener("mousemove", mouseMove, false);
-	
-	
-	// Disable annoying menus
-	window.addEventListener("contextmenu", function(contextMenuEvent) {
-		
-		contextMenuEvent = contextMenuEvent || window.event;
-		
-		var target = contextMenuEvent.target;
-		var tag = target.tagName;
-		
-		if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
-		
-		contextMenuEvent.preventDefault();
-		console.log("contextmenu prevented! tag=" + tag);
+		//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
 		return false;
 	}, false);
 	
+	canvas.ondrop = fileDrop;
 	
-	// Modern browsers. Note: 3rd argument is required for Firefox <= 6
-	if (window.addEventListener) {
-		window.addEventListener('paste', paste, false);
+	if(EDITOR.settings.sub_pixel_antialias == false) {
+		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, antialias: false});
+		//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 	}
-	// IE <= 8
 	else {
-		window.attachEvent('onpaste', paste);
+		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 	}
 	
-	window.onpaste = function() {alert("paste window");};
-	
-	window.addEventListener('copy', copy);
-	//window.addEventListener('paste', paste);
-	window.addEventListener('cut', cut);
-	
-	window.addEventListener("message", onMessage, false);
+	ctx.imageSmoothingEnabled = false; // Do not "smooth" the image, keep it sharp!
 	
 	
-	// Fix annoying scrolling on Mobile
-	window.addEventListener("scroll", preventMotion, false);
-	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
+	// Set the font only once for performance
+	ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+	ctx.textBaseline = "middle";
 	
+	EDITOR.canvas = canvas;
+	EDITOR.canvasContext = ctx;
 	
+	EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 	
-	function preventMotion(event) {
-		if(EDITOR.scrollingEnabled) return true;
-		//return true;
-		event.preventDefault();
-		event.stopPropagation();
-		window.scrollTo(0, 0);
-		console.log("Prevented scroll!");
-	}
+	EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+	//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 	
-	// End: Annoying scrolling fix
+	EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
 	
-	
-	function main() {
-		
-		console.log("Starting the editor ...");
-		
-		window.name = "editor"; // For focus access
-		
-		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
-		
-		EDITOR.on("moveCaret", function clearInfoBubblesWhenCaretIsMoved(file, caret) {
-			// Clear info messages in this file
-			EDITOR.removeAllInfo(file);
-			
-			return true;
-			});
-		
-		bootstrap();
-		
-		canvas = document.getElementById("canvas");
-		canvas.style.display="block";
-		
-		canvas.onpaste = function() {alert("paste canvas");};
-		
-		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
-		// Also make sure there are no drop or dragover events on window, document or parent elements!
-		
-		/*
-			canvas.addEventListener("drop", function(e) {
-			e.preventDefault();
-			console.log(e.target.className + " drop");
-			
-			console.log(e.dataTransfer.files[0]);
-			console.log(e.dataTransfer.files[0].name);
-			console.log(e.dataTransfer.files[0].size + " bytes");
-			
-			return false;
-			}, false);
-			
-			canvas.addEventListener("dragdrop", function(e) {
-			e.preventDefault();
-			console.log(e.target.className + " dragdrop");
-			return false;
-			}, false);
-			
-			canvas.addEventListener("dragenter", function(e) {
-			e.preventDefault();
-			console.log(e.target.className + " dragenter");
-			e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
-			console.log(e);
-			
-			return false;
-			}, false);
-			
-			canvas.addEventListener("dragleave", function(e) {
-			e.preventDefault();
-			console.log(e.target.className + " dragleave");
-			
-			return false;
-			}, false);
-			
-			
-			
-			document.addEventListener("dragstart", function(event) {
-			
-			console.log(e.target.className + " dragstart");
-			
-			// The dataTransfer.setData() method sets the data type and the value of the dragged data
-			event.dataTransfer.setData("Text", event.target.id);
-			
-			// Output some text when starting to drag the p element
-			document.getElementById("demo").innerHTML = "Started to drag the p element.";
-			
-			// Change the opacity of the draggable element
-			event.target.style.opacity = "0.4";
-			});
-		*/
-		
-		canvas.addEventListener("dragover", function(dragOverEvent) {
-			dragOverEvent.preventDefault();
-			console.log(dragOverEvent.target.className + " dragover");
-			
-			//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
-			return false;
-		}, false);
-		
-		canvas.ondrop = fileDrop;
-		
-		if(EDITOR.settings.sub_pixel_antialias == false) {
-			ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, antialias: false});
-			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
-		}
-		else {
-			ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
-		}
-		
-		ctx.imageSmoothingEnabled = false; // Do not "smooth" the image, keep it sharp!
-		
-		
-		// Set the font only once for performance
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "middle";
-		
-		EDITOR.canvas = canvas;
-		EDITOR.canvasContext = ctx;
-		
-		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
-		
-		EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
-		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
-		
-		EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
-		
 	EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
 		fun: function showContextMenu() {
 			EDITOR.input = false;
@@ -7113,338 +7141,339 @@ console.warn("Widget was not the last widget to be put in full screen! oldFullSc
 	});
 	
 	EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
+	
+	EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
+		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+			EDITOR.previewTool(file, someEvent);
+		}
+	});
+	
+	EDITOR.windowMenu.add("Live/preview", ["Tools", 1], EDITOR.previewTool);
+	
+	EDITOR.registerAltKey({char: "Enter", alt:1, label: "Run script", fun:
+		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+			EDITOR.runScript(file, someEvent);
+		}
+	});
+	
+	EDITOR.registerAltKey({char: "Enter", alt:2, label: "Stop script", fun:
+		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+			EDITOR.stopScript(file, someEvent);
+		}
+	});
+	
+	EDITOR.registerAltKey({char: "c", alt:1, label: "Commit", fun:
+		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+			EDITOR.commitTool(file);
+		}
+	});
+	
+	
+	window.onbeforeunload = confirmExit;
+	
+	if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
+	
+	
+	// Handle file save dialog
+	var fileSaveAs = document.getElementById("fileSaveAs");
+	if(fileSaveAs) {
+		fileSaveAs.addEventListener('change', chooseSaveAsPath, false);
+	}
+	else {
+		console.warn("No fileSaveAs dialog!");
+	}
+	
+	// Handle file open dialog
+	fileOpenHtmlElement = document.getElementById("fileInput");
+	fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
+	
+	// Handle directory dialog
+	directoryDialogHtmlElement = document.getElementById("directoryInput");
+	directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
 		
-		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
-			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-				EDITOR.previewTool(file, someEvent);
-			}
+		console.log("Directory selected ...");
+		
+		if(directoryDialogCallback == undefined) {
+			throw new Error("There is no listener for the open directory dialog!");
+		}
+		
+		var file = changeEvent.target.files[0];
+		if (!file) {
+			throw new Error("No file selected from the open-file dialog.");
+			return;
+		}
+		
+		var fileName = file.name;
+		var filePath = file.path;
+		
+		console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
+		directoryDialogCallback(filePath);
+		directoryDialogCallback = undefined;
+		
+		directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
+		
+		
+	}, false);
+	
+	// Allow native keyboard on mobiles
+	var keyboardCatcher = document.getElementById("keyboardCatcher");
+	if(keyboardCatcher) {
+		// Some android devices can't listen for keypressed, so we have to use keydown or keyup'
+		keyboardCatcher.addEventListener("keyup",keyboardCatcherKey,false);  // captures
+		moveCursorToEnd(keyboardCatcher);
+	}
+	
+	
+	var body = document.getElementById('body');
+	
+	// Attatch CLIENT listeners before plugins and start events load
+	CLIENT.on("loginSuccess", function loggedInToServer(login) {
+		EDITOR.user = {
+			name: login.user,
+			home: login.homeDir
+		};
+		
+		if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
+		
+		EDITOR.installDirectory = login.installDirectory || "/";
+		//alertBox(JSON.stringify(login));
+		
+		console.log("Logged in as user: " + EDITOR.user.name);
+		
+		// Use servers working directory
+		CLIENT.cmd("workingDirectory", null, function(err, json) {
+			if(err) throw err;
+			else setWorkingDirectory(json.path);
 		});
 		
-		EDITOR.windowMenu.add("Live/preview", ["Tools", 1], EDITOR.previewTool);
-		
-		EDITOR.registerAltKey({char: "Enter", alt:1, label: "Run script", fun:
-			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-				EDITOR.runScript(file, someEvent);
+		// ### Populate EDITOR.storage (_serverStorage)
+		CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
+			if(err) throw err;
+			
+			if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
+			
+			if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
+			
+			_serverStorage = json.storage;
+			
+			// Many plugins depend on the storage being available ...
+			// They need to be refactored to start on EDITOR.on("storageReady" ... !!
+			// Treat EDITOR.storage as window.localStorage! Eg. It's all strings so you jave to JSON.parse !
+			
+				var f = EDITOR.eventListeners.storageReady.map(funMap);
+				for(var i=0; i<f.length; i++) {
+					f[i](_serverStorage);
 			}
 		});
+	});
+	
+	CLIENT.on("connectionLost", function() {
+		EDITOR.user = null;
+	});
+	
+	
+	var progressValue = 0;
+	var progressMax = 1;
+	CLIENT.on("progress", function handleProgress(increment) {
+		var progress = document.getElementById("progress");
 		
-		EDITOR.registerAltKey({char: "Enter", alt:2, label: "Stop script", fun:
-			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-				EDITOR.stopScript(file, someEvent);
-			}
-		});
+		if(!Array.isArray(increment)) {
+			console.warn("Not an array: progress: " + JSON.stringify(increment));
+		};
 		
-		EDITOR.registerAltKey({char: "c", alt:1, label: "Commit", fun:
-			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-				EDITOR.commitTool(file);
-			}
-		});
+		if(progressValue == 0 && increment.length > 0) {
+			// First progress event, show the progress bar
+			progress.style.display="block";
+			EDITOR.resizeNeeded();
+		}
 		
+		if(increment[0]) progressValue += increment[0];
+		if(increment[1]) progressMax += increment[1];
 		
-		window.onbeforeunload = confirmExit;
+		if(increment[0] == 0 && increment[1] == 0) {
+			// Reset
+			progressValue = 0;
+			progressMax = 1;
+		}
 		
-		if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
+		if(increment.length == 0) {
+			// Finish
+			progress.style.display="none";
+			EDITOR.resizeNeeded();
+			progressValue = 0;
+			progressMax = 1;
+		}
 		
+		progress.max = progressMax;
+		progress.value = progressValue;
 		
-		// Handle file save dialog
-		var fileSaveAs = document.getElementById("fileSaveAs");
-		if(fileSaveAs) {
-			fileSaveAs.addEventListener('change', chooseSaveAsPath, false);
+		console.log("progress: value=" + progressValue + " max=" + progressMax);
+		
+	});
+	
+	//console.log("main function loaded");
+	
+	/*		
+		// Sort and load the start events
+		// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
+		// The order of things should not matter!
+		// Some event listeners has high or low prio though ...
+		// Ex: some plugins only want to parse the file if no other parser have yet parsed it
+		// or some autocomplete functions only want to run if no other autocompletion has been found.
+	*/
+	
+	EDITOR.eventListeners.start.sort(function(a, b) {
+		if(a.order < b.order) {
+			return -1;
+		}
+		else if(a.order > b.order) {
+			return 1;
 		}
 		else {
-			console.warn("No fileSaveAs dialog!");
+			return 0;
 		}
-		
-		// Handle file open dialog
-		fileOpenHtmlElement = document.getElementById("fileInput");
-		fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
-		
-		// Handle directory dialog
-		directoryDialogHtmlElement = document.getElementById("directoryInput");
-		directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
-			
-			console.log("Directory selected ...");
-			
-			if(directoryDialogCallback == undefined) {
-				throw new Error("There is no listener for the open directory dialog!");
-			}
-			
-			var file = changeEvent.target.files[0];
-			if (!file) {
-				throw new Error("No file selected from the open-file dialog.");
-				return;
-			}
-			
-			var fileName = file.name;
-			var filePath = file.path;
-			
-			console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
-			directoryDialogCallback(filePath);
-			directoryDialogCallback = undefined;
-			
-			directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
-			
-			
-		}, false);
-		
-		// Allow native keyboard on mobiles
-		var keyboardCatcher = document.getElementById("keyboardCatcher");
-		if(keyboardCatcher) {
-			// Some android devices can't listen for keypressed, so we have to use keydown or keyup'
-			keyboardCatcher.addEventListener("keyup",keyboardCatcherKey,false);  // captures
-			moveCursorToEnd(keyboardCatcher);
+	});
+	
+	//for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+	//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
+	//}
+	
+	console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+		var f = EDITOR.eventListeners.start.map(funMap);
+		for(var i=0; i<f.length; i++) {
+			f[i](); // Call function
+	}
+	calledStartListeners = true;
+	
+	// Sort and load plugins
+	EDITOR.plugins.sort(function(a, b) {
+		if(a.order < b.order) {
+			return -1;
 		}
-		
-		
-		var body = document.getElementById('body');
-		
-		// Attatch CLIENT listeners before plugins and start events load
-		CLIENT.on("loginSuccess", function loggedInToServer(login) {
-			EDITOR.user = {
-name: login.user,
-				home: login.homeDir
-			};
-			
-			if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
-			
-			EDITOR.installDirectory = login.installDirectory || "/";
-			//alertBox(JSON.stringify(login));
-			
-			console.log("Logged in as user: " + EDITOR.user.name);
-			
-			// Use servers working directory
-			CLIENT.cmd("workingDirectory", null, function(err, json) {
-				if(err) throw err;
-				else setWorkingDirectory(json.path);
-			});
-			
-			// ### Populate EDITOR.storage (_serverStorage)
-			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
-				if(err) throw err;
-				
-				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
-				
-				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
-				
-				_serverStorage = json.storage;
-				
-				// Many plugins depend on the storage being available ...
-				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
-				// Treat EDITOR.storage as window.localStorage! Eg. It's all strings so you jave to JSON.parse !
-				
-				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
-					fun = EDITOR.eventListeners.storageReady[i].fun;
-					fun(_serverStorage);
-				}
-			});
-		});
-		
-		CLIENT.on("connectionLost", function() {
-			EDITOR.user = null;
-		});
-		
-		
-		var progressValue = 0;
-		var progressMax = 1;
-		CLIENT.on("progress", function handleProgress(increment) {
-			var progress = document.getElementById("progress");
-			
-			if(!Array.isArray(increment)) {
-				console.warn("Not an array: progress: " + JSON.stringify(increment));
-			};
-			
-			if(progressValue == 0 && increment.length > 0) {
-				// First progress event, show the progress bar
-				progress.style.display="block";
-				EDITOR.resizeNeeded();
-			}
-			
-			if(increment[0]) progressValue += increment[0];
-			if(increment[1]) progressMax += increment[1];
-			
-			if(increment[0] == 0 && increment[1] == 0) {
-				// Reset
-				progressValue = 0;
-				progressMax = 1;
-			}
-			
-			if(increment.length == 0) {
-				// Finish
-				progress.style.display="none";
-				EDITOR.resizeNeeded();
-				progressValue = 0;
-				progressMax = 1;
-			}
-			
-			progress.max = progressMax;
-			progress.value = progressValue;
-			
-			console.log("progress: value=" + progressValue + " max=" + progressMax);
-			
-		});
-		
-		//console.log("main function loaded");
-		
-		/*		
-			// Sort and load the start events
-			// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
-			// The order of things should not matter!
-			// Some event listeners has high or low prio though ...
-			// Ex: some plugins only want to parse the file if no other parser have yet parsed it
-			// or some autocomplete functions only want to run if no other autocompletion has been found.
-		*/
-		
-		EDITOR.eventListeners.start.sort(function(a, b) {
-			if(a.order < b.order) {
-				return -1;
-			}
-			else if(a.order > b.order) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		
-		//for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
-		//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
-		//}
-		
-		console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
-		for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
-			EDITOR.eventListeners.start[i].fun(); // Call function
+		else if(a.order > b.order) {
+			return 1;
 		}
-		calledStartListeners = true;
-		
-		// Sort and load plugins
-		EDITOR.plugins.sort(function(a, b) {
-			if(a.order < b.order) {
-				return -1;
-			}
-			else if(a.order > b.order) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		
-		//console.log("plugins: ");
-		//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
-		
-		console.log("Loading plugins (length=" + EDITOR.eventListeners.start.length + ")");
-		for(var i=0; i<EDITOR.plugins.length; i++) {
-			console.log("plugin: " + EDITOR.plugins[i].desc);
+		else {
+			return 0;
+		}
+	});
+	
+	//console.log("plugins: ");
+	//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
+	
+		var pluginLoaders = EDITOR.plugins.map(function(p) {return p.load});
+		console.log("Loading plugins (length=" + pluginLoaders.length + ")");
+		for(var i=0; i<pluginLoaders.length; i++) {
 			
-			if(EDITOR.settings.devMode) {
-				EDITOR.plugins[i].load(EDITOR);
-			}
-			else {
-				// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
+		if(EDITOR.settings.devMode) {
+				pluginLoaders[i](EDITOR);
+		}
+		else {
+			// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
 			try {
-				EDITOR.plugins[i].load(EDITOR); // Call function (and pass global objects!?)
+					pluginLoaders[i](EDITOR); // Call function (and pass global objects!?)
 			}
 			catch(err) {
 				console.error(err.message);
 				console.log(err.stack);
-				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"</i>\nError: ' + err.message);
-			}
+					alertBox('Failed to (fully) run:\n<i>"' + UTIL.getFunctionName(pluginLoaders[i]) + '"</i>\nError: ' + err.message);
 			}
 		}
+	}
+	
+	
+	console.log("Setting mainLoopInterval because first load!");
+	mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
+	
+	// note to self: Just temorary, dont forget to remove:
+	//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
+	
+	/*
+		// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
+		//setTimeout(display, 500);
+		//display();
 		
 		
-		console.log("Setting mainLoopInterval because first load!");
-		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
+		// Prevent the void from ruling the earth the first 500ms
+		EDITOR.resizeNeeded();
+		EDITOR.resize();
+		EDITOR.renderNeeded();
+		EDITOR.render();
 		
-		// note to self: Just temorary, dont forget to remove:
-		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
 		
-		/*
-			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
-			//setTimeout(display, 500);
-			//display();
-			
-			
-			// Prevent the void from ruling the earth the first 500ms
-			EDITOR.resizeNeeded();
-			EDITOR.resize();
-			EDITOR.renderNeeded();
-			EDITOR.render();
-			
-			
-			function display() {
-			
-			EDITOR.resizeNeeded();
-			EDITOR.resize(); // Will also force a render
-			
-			
-			}
-		*/
+		function display() {
 		
+		EDITOR.resizeNeeded();
+		EDITOR.resize(); // Will also force a render
+		
+		
+		}
+	*/
+	
 	showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 16], EDITOR.discoveryBar.toggle);
 	
-		windowLoaded = true;
-		
-	}
+	windowLoaded = true;
 	
-	function moveCursorToEnd(el) {
-		if (typeof el.selectionStart == "number") {
-			el.selectionStart = el.selectionEnd = el.value.length;
-		} else if (typeof el.createTextRange != "undefined") {
-			el.focus();
-			var range = el.createTextRange();
-			range.collapse(false);
-			range.select();
+}
+
+function moveCursorToEnd(el) {
+	if (typeof el.selectionStart == "number") {
+		el.selectionStart = el.selectionEnd = el.value.length;
+	} else if (typeof el.createTextRange != "undefined") {
+		el.focus();
+		var range = el.createTextRange();
+		range.collapse(false);
+		range.select();
+	}
+}
+
+EDITOR.animationFrame = 0;
+var isAnimating = false;
+function animate() {
+	
+	runAnimations(++EDITOR.animationFrame);
+	
+	// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
+	if(EDITOR.animationFunctions.length > 0) {
+		isAnimating = true;
+		window.requestAnimationFrame(animate);
+	}
+	else isAnimating = false;
+}
+
+function runAnimations(animationFrame) {
+	for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
+}
+
+function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
+	
+	EDITOR.dashboard.hide(true);
+	
+	var maxParallel = 5; // Running too many tests at once will cause timeout issues
+	var abortOnError = false;
+	
+	if(onlyOne) testFirstTest = true;
+	
+	/*
+		Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
+		Then run the tests there. And open any bad files here for debugging!?
+		
+	*/
+	
+	// Prepare for tests ...
+	
+	// Sort the tests by parallel and order
+	EDITOR.tests.sort(function sortTests(a, b) {
+		if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
+		else if(b.parallel && !a.parallel) return -1;
+		else if(a.parallel == b.parallel) {
+			if(a.order > b.order) return 1;
+			if(b.order > a.order) return -1;
+			else return 0;
 		}
-	}
+	});
 	
-	EDITOR.animationFrame = 0;
-	var isAnimating = false;
-	function animate() {
-		
-		runAnimations(++EDITOR.animationFrame);
-		
-		// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
-		if(EDITOR.animationFunctions.length > 0) {
-			isAnimating = true;
-			window.requestAnimationFrame(animate);
-		}
-		else isAnimating = false;
-	}
-	
-	function runAnimations(animationFrame) {
-		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
-	}
-	
-	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
-		
-		EDITOR.dashboard.hide(true);
-		
-		var maxParallel = 5; // Running too many tests at once will cause timeout issues
-		var abortOnError = false;
-		
-		if(onlyOne) testFirstTest = true;
-		
-		/*
-			Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
-			Then run the tests there. And open any bad files here for debugging!?
-			
-		*/
-		
-		// Prepare for tests ...
-		
-		// Sort the tests by parallel and order
-		EDITOR.tests.sort(function sortTests(a, b) {
-			if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
-			else if(b.parallel && !a.parallel) return -1;
-			else if(a.parallel == b.parallel) {
-				if(a.order > b.order) return 1;
-				if(b.order > a.order) return -1;
-				else return 0;
-			}
-		});
-		
-		if(!onlyOne) {
+	if(!onlyOne) {
 		// Close all files
 		for(var path in EDITOR.files) {
 			if(EDITOR.files[path].saved) EDITOR.closeFile(path)
@@ -7453,1046 +7482,1050 @@ name: login.user,
 				return;
 			}
 		}
+	}
+	
+	// Create some test files ...
+	/*
+		var filesToOpen = 2;
+		var filesOpened = 0;
+		for(var i=0; i<filesToOpen; i++) {
+		EDITOR.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
+		if(++filesOpened == filesToOpen) doTheTests();
+		});
+		}
+	*/
+	
+	EDITOR.runningTests = true;
+	
+	doTheTests();
+	
+	
+	function doTheTests() {
+		var fails = 0;
+		var result;
+		var testResults = [];
+		var finished = 0;
+		var started = 0;
+		var testsCompleted = []; // Prevent same test to make several callbacks
+		var allDone = false; // Prevent calling allTestsDone twice
+		var testsToRun = testFirstTest ? 1 : EDITOR.tests.length;
+		//var testsToRun = 5;
+		var waitingForSync = false;
+		var currentRunningTest;
+		var currentlyInParallel = 0;
+		var stillRunning = []; 
+		var aborted = false;
+		var firstTestOrder = 10000;
+		var firstTest;
+		
+		if(testsToRun == 1) {
+			for (var i=0; i<EDITOR.tests.length; i++) {
+				if(EDITOR.tests[i].order < firstTestOrder) {
+					firstTestOrder = EDITOR.tests[i].order;
+					firstTest = EDITOR.tests[i];
+				}
+			}
+			if(firstTest) {
+				alertBox("Testing: " + firstTest.text, "TESTS");
+				started = 1;
+				asyncInitTest(firstTest);
+				return;
+			}
+			throw new Error("testInfo: Could not find a test with id=1");
+		}
+		else {
+			console.log("testInfo: Running " + testsToRun + " tests ...");
+			
+			//console.log(EDITOR.tests);
+			
+			testLoop();
 		}
 		
-		// Create some test files ...
-		/*
-			var filesToOpen = 2;
-			var filesOpened = 0;
-			for(var i=0; i<filesToOpen; i++) {
-			EDITOR.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
-			if(++filesOpened == filesToOpen) doTheTests();
-			});
-			}
-		*/
-		
-		EDITOR.runningTests = true;
-		
-		doTheTests();
-		
-		
-		function doTheTests() {
-			var fails = 0;
-			var result;
-			var testResults = [];
-			var finished = 0;
-			var started = 0;
-			var testsCompleted = []; // Prevent same test to make several callbacks
-			var allDone = false; // Prevent calling allTestsDone twice
-			var testsToRun = testFirstTest ? 1 : EDITOR.tests.length;
-			//var testsToRun = 5;
-			var waitingForSync = false;
-			var currentRunningTest;
-			var currentlyInParallel = 0;
-			var stillRunning = []; 
-			var aborted = false;
-			var firstTestOrder = 10000;
-			var firstTest;
-
-			if(testsToRun == 1) {
-				for (var i=0; i<EDITOR.tests.length; i++) {
-					if(EDITOR.tests[i].order < firstTestOrder) {
-						firstTestOrder = EDITOR.tests[i].order;
-						firstTest = EDITOR.tests[i];
-					}
-				}
-				if(firstTest) {
-					alertBox("Testing: " + firstTest.text, "TESTS");
-					started = 1;
-					asyncInitTest(firstTest);
-					return;
-				}
-				throw new Error("testInfo: Could not find a test with id=1");
-			}
-			else {
-				console.log("testInfo: Running " + testsToRun + " tests ...");
-				
-				//console.log(EDITOR.tests);
-				
-				testLoop();
-			}
-			
-			function testLoop() {
-				if(waitingForSync) {
-console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+		function testLoop() {
+			if(waitingForSync) {
+				console.log("testInfo: Waiting for " + currentRunningTest + " ...");
 				return;
-				}
-				
-				if(finished == testsToRun) return allTestsDone();
-				
-				if(aborted) {
-console.log("testLoop: Tests aborted!");
+			}
+			
+			if(finished == testsToRun) return allTestsDone();
+			
+			if(aborted) {
+				console.log("testLoop: Tests aborted!");
 				return;
-				}
-				
-				console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
-				
-				for(var i=started; i<testsToRun && (started-finished)<maxParallel; i++) {
-					started++;// This counter here to prevent any sync test to finish all tests
-					
-					if(EDITOR.tests[i].parallel && !allInSync) {
-asyncInitTest(EDITOR.tests[i]);
-					}
-					else {
-						waitingForSync = true;
-						runTest(EDITOR.tests[i]);
-						break;
-					}
-				}
-				
-				if( (testsToRun / finished) < 1.1 ) {
-					// 90% of tests are done, show those that are still not finished
-					
-					console.log("testInfo: Not finished: " + stillRunning.join(", "));
-					
-				}
 			}
 			
-			function asyncInitTest(test) {
-				setTimeout(function runTestAsync() { // Make all tests async
-					runTest(test);
-				}, 0);
-			}
+			console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
 			
-			function runTest(test) {
-				if(aborted) {
-console.log("runTest: Tests aborted!");
-				return;
-				}
+			for(var i=started; i<testsToRun && (started-finished)<maxParallel; i++) {
+				started++;// This counter here to prevent any sync test to finish all tests
 				
-				currentRunningTest = test.text;
-				
-				console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync + " started=" + started + " testsToRun=" + testsToRun + " finished=" + finished + " currentlyInParallel=" + currentlyInParallel);
-				
-				if(!test.parallel && currentlyInParallel > 0) {
-					throw new Error("No other test is allowed to be running while a non-parallel test is about to run! waitingForSync=" + waitingForSync + " currentlyInParallel=" + currentlyInParallel + " test.text=" + test.text);
-				}
-				
-				currentlyInParallel++;
-				
-				stillRunning.push(test.text);
-				
-				try{
-					test.fun(testResult);
-				}
-				catch(err) {
-					finished++;
-					currentlyInParallel--;
-					testFail(test.text, err.message + "\n" + err.stack);
-				}
-				
-				testLoop();
-				
-				
-				function testResult(result) {
-					currentlyInParallel--;
-					
-					console.log("testInfo: Testresult: " + test.text + " result:" + (result ? "SUCCESS" : "FAIL!"));
-					
-					if(testsCompleted.indexOf(test.text) != -1) {
-						throw new Error("Test called callback more then once, or there's two tests with the same name: " + test.text);
-						return;
-					}
-					
-					testsCompleted.push(test.text);
-					
-					finished++;
-					
-					stillRunning.splice(stillRunning.indexOf(test.text), 1);
-					
-					console.log("testInfo: finished=" + finished + " started=" + started + " testsToRun=" + testsToRun + " currentlyInParallel=" + currentlyInParallel + " waitingForSync=" + waitingForSync);
-					
-					if(result !== true) testFail(test.text, result);
-					
-					if(waitingForSync) {
-						console.log("testInfo: " + currentRunningTest + " completed. Continuing test loop ...");
-waitingForSync = false;
-					}
-					
-					if(finished == testsToRun) allTestsDone();
-					
-					testLoop();
-					
-				}
-			}
-			
-			function allTestsDone() {
-				
-				if(allDone) {
-console.warn("testInfo: allDone() already called!");
-				return;
-				}
-				
-				console.warn("testInfo: All tests done!");
-				
-				EDITOR.runningTests = false;
-				allDone = true;
-				
-				EDITOR.dashboard.stayHidden = false;
-				
-				if(fails === 0) {
-					//EDITOR.closeAllDialogs();
-testResults.push("All " + finished + " tests passed!")
-				}
-				else testResults.push(fails + " of " + finished + " test failed:");
-				
-				EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
-					//file.parse = false;
-					//file.mode = "text";
-				});
-				
-				testFirstTest = false; // Run only the first test the first time, and all tests after that.
-			}
-			
-			function testFail(description, result) {
-				if(abortOnError) aborted = true;
-				
-				fails++;
-				testResults.push("");
-				testResults.push(description);
-				if(result.message) {
-					// It returned an error
-					//console.log(result.message);
-					testResults.push(result.stack);
+				if(EDITOR.tests[i].parallel && !allInSync) {
+					asyncInitTest(EDITOR.tests[i]);
 				}
 				else {
-					testResults.push(result);
+					waitingForSync = true;
+					runTest(EDITOR.tests[i]);
+					break;
 				}
-
-				alertBox("Tests aborted due to failing test: " + description + ": " + (result.message ? result.message : result));
+			}
+			
+			if( (testsToRun / finished) < 1.1 ) {
+				// 90% of tests are done, show those that are still not finished
+				
+				console.log("testInfo: Not finished: " + stillRunning.join(", "));
 				
 			}
 		}
 		
-		return false;
+		function asyncInitTest(test) {
+			setTimeout(function runTestAsync() { // Make all tests async
+				runTest(test);
+			}, 0);
+		}
 		
-	}
-	
-	function speechRecognitionResult(speechRecognitionEvent) {
-		/*
-			You need to be on localhost or httpS or you will get access error
-			
-			JSpeech Grammar Format:https://www.w3.org/TR/jsgf/
-			
-			
-		*/
-		
-		// The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
-		// The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
-		// It has a getter so it can be accessed like an array
-		// The [last] returns the SpeechRecognitionResult at the last position.
-		// Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
-		// These also have getters so they can be accessed like arrays.
-		// The [0] returns the SpeechRecognitionAlternative at position 0.
-		// We then return the transcript property of the SpeechRecognitionAlternative object
-		
-		if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
-		
-		var last = speechRecognitionEvent.results.length - 1;
-		var speechResult = speechRecognitionEvent.results[last][0].transcript;
-		//var speechResult = speechRecognitionEvent.results[0][0].transcript;
-		
-		console.log ("speechResult=" + speechResult);
-		
-		var file = EDITOR.currentFile;
-		
-		console.log("Calling voiceCommand listeners (" + EDITOR.eventListeners.voiceCommand.length + ")");
-		for(var i=0, fun, re, match, captured; i<EDITOR.eventListeners.voiceCommand.length; i++) {
-			fun = EDITOR.eventListeners.voiceCommand[i].fun;
-			re = EDITOR.eventListeners.voiceCommand[i].re;
-			if(re) {
-				match = speechResult.match(re);
-				if(match) {
-					captured = fun(speechResult, file, match);
-					if(captured != true && captured != false) throw new Error(UTIL.getFunctionName(fun) 
-					+ ' did not return true or false (' + captured + ') to indicate if it "captured" the voice command.');
-					if(captured === true) {
-						break;
-					}
-				}
+		function runTest(test) {
+			if(aborted) {
+				console.log("runTest: Tests aborted!");
+				return;
 			}
-			else fun(speechResult, file);
-		}
-		
-		if(captured) EDITOR.ctxMenu.hide();
-		
-		
-		if(!captured && EDITOR.lastElementWithFocus && (
-			( EDITOR.lastElementWithFocus.nodeName == "INPUT" &&
-		(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
-		) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
 			
-			insertAtCaret(EDITOR.lastElementWithFocus, speechResult);
+			currentRunningTest = test.text;
 			
-			//EDITOR.lastElementWithFocus.focus();
-		}
-		else if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
-		
-		
-		console.log(speechRecognitionEvent);
-	}
-	
-	function insertAtCaret(txtarea, text) {
-		// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
-		//var txtarea = document.getElementById(areaId);
-		var scrollPos = txtarea.scrollTop;
-		var caretPos = txtarea.selectionStart;
-		
-		var front = (txtarea.value).substring(0, caretPos);
-		var back = (txtarea.value).substring(txtarea.selectionEnd, txtarea.value.length);
-		txtarea.value = front + text + back;
-		caretPos = caretPos + text.length;
-		txtarea.selectionStart = caretPos;
-		txtarea.selectionEnd = caretPos;
-		txtarea.focus();
-		txtarea.scrollTop = scrollPos;
-	}
-	
-	function readSingleFile(fileOpenDialogEvent) {
-		
-		console.log("Reading single file ...");
-		
-		if(EDITOR.fileOpenCallback == undefined) {
-			throw new Error("There is no listener for the open file dialog!");
-		}
-		
-		var file = fileOpenDialogEvent.target.files[0];
-		if (!file) {
-			throw new Error("No file selected from the open-file dialog.");
-			return;
-		}
-		
-		var fileName = file.name;
-		var filePath = file.path;
-		var fileContent = undefined;
-		
-		if(RUNTIME == "browser") {
+			console.log("testInfo: Running test:" + test.text + " test.parallel=" + test.parallel + " waitingForSync=" + waitingForSync + " started=" + started + " testsToRun=" + testsToRun + " finished=" + finished + " currentlyInParallel=" + currentlyInParallel);
 			
-			filePath = fileName; // filePath is undefined in the browser
+			if(!test.parallel && currentlyInParallel > 0) {
+				throw new Error("No other test is allowed to be running while a non-parallel test is about to run! waitingForSync=" + waitingForSync + " currentlyInParallel=" + currentlyInParallel + " test.text=" + test.text);
+			}
 			
-			// Read the file
-			var reader = new FileReader();
+			currentlyInParallel++;
 			
-			reader.onload = function(readerOnloadEvent) {
-				fileContent = readerOnloadEvent.target.result;
-				callCallback();
-			};
-			reader.readAsText(file);
+			stillRunning.push(test.text);
 			
-		}
-		else {
-			callCallback();
-		}
-		
-		function callCallback() {
-			console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
-			EDITOR.fileOpenCallback(filePath, fileContent);
-			EDITOR.fileOpenCallback = undefined;
+			try{
+				test.fun(testResult);
+			}
+			catch(err) {
+				finished++;
+				currentlyInParallel--;
+				testFail(test.text, err.message + "\n" + err.stack);
+			}
 			
-			fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
-		}
-	}
-	
-	
-	function chooseSaveAsPath(saveAsDialogEvent) {
-		var file = saveAsDialogEvent.target.files[0];
-		
-		if(EDITOR.filesaveAsCallback == undefined) {
-			throw new Error("There is no listener for the save file dialog!");
-		}
-		
-		if (!file) {
-			console.warn("No file selected!");
-			EDITOR.filesaveAsCallback(undefined);
-			return;
-		}
-		
-		var fileName = file.name;
-		var filePath = file.path;
-		
-		EDITOR.filesaveAsCallback(filePath);
-		
-		EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
-	}
-	
-	function fadeInCaretAnimation() {
-		var c = UTIL.parseColor(EDITOR.settings.caret.color);
-		var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.005)";
-		if(EDITOR.currentFile) {
-			EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
-		}
-	}
-	
-	function fileDrop(fileDropEvent) {
-		fileDropEvent.preventDefault();
-		
-		console.log("fileDrop: fileDropEvent:");
-		console.log(fileDropEvent);
-		
-		ctxMenuVisibleOnce = true; // Show the dropped content
-		
-		var text = fileDropEvent.dataTransfer.getData('Text');
-		
-		if(text) {
-			console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
+			testLoop();
 			
-			if(text.length < 512) {
-				var url = UTIL.getLocation(text);
-				if(url.protocol == "smb" && url.host && url.pathname) {
-					/*
-						User tried to drag a file from a samba share into the editor ...
-						smb://z-mainframe/www/z%C3%A4ta.com/index.htm
-						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
-						
-						currect: 
-						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
-						/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com/sv/blog/byta_disk_zfs.htm 
-						
-						
-						
-					*/
-					var path = "/run/user/1000/gvfs/smb-share:server=" + url.host + ",share=" + decodeURI(url.pathname.slice(1));
-					path = path.trim(); // Remove CRLF
-					EDITOR.openFile(path);
+			
+			function testResult(result) {
+				currentlyInParallel--;
+				
+				console.log("testInfo: Testresult: " + test.text + " result:" + (result ? "SUCCESS" : "FAIL!"));
+				
+				if(testsCompleted.indexOf(test.text) != -1) {
+					throw new Error("Test called callback more then once, or there's two tests with the same name: " + test.text);
 					return;
 				}
+				
+				testsCompleted.push(test.text);
+				
+				finished++;
+				
+				stillRunning.splice(stillRunning.indexOf(test.text), 1);
+				
+				console.log("testInfo: finished=" + finished + " started=" + started + " testsToRun=" + testsToRun + " currentlyInParallel=" + currentlyInParallel + " waitingForSync=" + waitingForSync);
+				
+				if(result !== true) testFail(test.text, result);
+				
+				if(waitingForSync) {
+					console.log("testInfo: " + currentRunningTest + " completed. Continuing test loop ...");
+					waitingForSync = false;
+				}
+				
+				if(finished == testsToRun) allTestsDone();
+				
+				testLoop();
+				
+			}
+		}
+		
+		function allTestsDone() {
+			
+			if(allDone) {
+				console.warn("testInfo: allDone() already called!");
+				return;
 			}
 			
-			if(EDITOR.currentFile) {
-				// Drop the text into the current file
-				
-				// Get row and col
-				var mouseX = fileDropEvent.offsetX;
-				var mouseY = fileDropEvent.offsetY;
-				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-				
-				text = EDITOR.sanitizeText(EDITOR.currentFile, text);
-				
-				EDITOR.currentFile.insertText(text, caret);
-				
+			console.warn("testInfo: All tests done!");
+			
+			EDITOR.runningTests = false;
+			allDone = true;
+			
+			EDITOR.dashboard.stayHidden = false;
+			
+			if(fails === 0) {
+				//EDITOR.closeAllDialogs();
+				testResults.push("All " + finished + " tests passed!")
+			}
+			else testResults.push(fails + " of " + finished + " test failed:");
+			
+			EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
+				//file.parse = false;
+				//file.mode = "text";
+			});
+			
+			testFirstTest = false; // Run only the first test the first time, and all tests after that.
+		}
+		
+		function testFail(description, result) {
+			if(abortOnError) aborted = true;
+			
+			fails++;
+			testResults.push("");
+			testResults.push(description);
+			if(result.message) {
+				// It returned an error
+				//console.log(result.message);
+				testResults.push(result.stack);
 			}
 			else {
-				// Create a new file with the dropped text
-				EDITOR.openFile(undefined, text); 
-				
+				testResults.push(result);
 			}
-			return;
-		}
-		
-		if(fileDropEvent.dataTransfer.files.length == 0) {
-return alertBox("The dropped object doesn't seem to be a file!");
-		}
-		
-		console.log("fileDrop: fileDropEvent.dataTransfer:");
-		console.log( fileDropEvent.dataTransfer );
-		
-		var items = fileDropEvent.dataTransfer.items;
-		var files = fileDropEvent.dataTransfer.files;
-		
-		console.log("items.length=" + items.length + " files.length=" + files.length);
-		
-		var filesToSave = 0;
-		var filesSaved = 0;
-		var lastPath; // The last path if many files where saved
-		var uploadErrors = []; // List of errors during the upload
-		var fileToOpen; // Open this file (if specified) when all files have been uploaded
-		var foldersToRead = 0;
-		var foldersRead = 0;
-		var done = false;
-		
-		if(items && items.length > 1) {
-			console.log("fileDrop: Dropped " + items.length + " items ...");
-			var progressBar = document.createElement("progress");
-			progressBar.max = items.length;
-			progressBar.value = 0;
-			var footer = document.getElementById("footer");
-			footer.appendChild(progressBar);
-			EDITOR.resizeNeeded(); // To show the progress bar
 			
-			for (var i=0; i<items.length; i++) {
-				// webkitGetAsEntry is where the magic happens
-				var item = items[i].webkitGetAsEntry();
-				if (item) {
-					traverseFileTree(item);
+			alertBox("Tests aborted due to failing test: " + description + ": " + (result.message ? result.message : result));
+			
+		}
+	}
+	
+	return false;
+	
+}
+
+function speechRecognitionResult(speechRecognitionEvent) {
+	/*
+		You need to be on localhost or httpS or you will get access error
+		
+		JSpeech Grammar Format:https://www.w3.org/TR/jsgf/
+		
+		
+	*/
+	
+	// The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+	// The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+	// It has a getter so it can be accessed like an array
+	// The [last] returns the SpeechRecognitionResult at the last position.
+	// Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+	// These also have getters so they can be accessed like arrays.
+	// The [0] returns the SpeechRecognitionAlternative at position 0.
+	// We then return the transcript property of the SpeechRecognitionAlternative object
+	
+	if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
+	
+	var last = speechRecognitionEvent.results.length - 1;
+	var speechResult = speechRecognitionEvent.results[last][0].transcript;
+	//var speechResult = speechRecognitionEvent.results[0][0].transcript;
+	
+	console.log ("speechResult=" + speechResult);
+	
+	var file = EDITOR.currentFile;
+	
+		// Need to copy list in case of one listener removing itself 
+		var voiceListeners = EDITOR.eventListeners.voiceCommand.map(function(voiceListener) {  return {re: voiceListener.re, fun: voiceListener.fun}  });
+		console.log("Calling voiceCommand listeners (" + f.length + ")");
+		for(var i=0, re, match, captured; i<voiceListeners.length; i++) {
+			re = voiceListeners[i].re;
+		if(re) {
+			match = speechResult.match(re);
+			if(match) {
+					captured = voiceListeners[i].fun(speechResult, file, match);
+					if(captured != true && captured != false) throw new Error(UTIL.getFunctionName(voiceListeners[i].fun) 
+				+ ' did not return true or false (' + captured + ') to indicate if it "captured" the voice command.');
+				if(captured === true) {
+					break;
 				}
 			}
-			return;
+		}
+			else voiceListeners[i].fun(speechResult, file);
+		}
+	
+	if(captured) EDITOR.ctxMenu.hide();
+	
+	
+	if(!captured && EDITOR.lastElementWithFocus && (
+	( EDITOR.lastElementWithFocus.nodeName == "INPUT" &&
+	(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
+	) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
+		
+		insertAtCaret(EDITOR.lastElementWithFocus, speechResult);
+		
+		//EDITOR.lastElementWithFocus.focus();
+	}
+	else if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
+	
+	
+	console.log(speechRecognitionEvent);
+}
+
+function insertAtCaret(txtarea, text) {
+	// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+	//var txtarea = document.getElementById(areaId);
+	var scrollPos = txtarea.scrollTop;
+	var caretPos = txtarea.selectionStart;
+	
+	var front = (txtarea.value).substring(0, caretPos);
+	var back = (txtarea.value).substring(txtarea.selectionEnd, txtarea.value.length);
+	txtarea.value = front + text + back;
+	caretPos = caretPos + text.length;
+	txtarea.selectionStart = caretPos;
+	txtarea.selectionEnd = caretPos;
+	txtarea.focus();
+	txtarea.scrollTop = scrollPos;
+}
+
+function readSingleFile(fileOpenDialogEvent) {
+	
+	console.log("Reading single file ...");
+	
+	if(EDITOR.fileOpenCallback == undefined) {
+		throw new Error("There is no listener for the open file dialog!");
+	}
+	
+	var file = fileOpenDialogEvent.target.files[0];
+	if (!file) {
+		throw new Error("No file selected from the open-file dialog.");
+		return;
+	}
+	
+	var fileName = file.name;
+	var filePath = file.path;
+	var fileContent = undefined;
+	
+	if(RUNTIME == "browser") {
+		
+		filePath = fileName; // filePath is undefined in the browser
+		
+		// Read the file
+		var reader = new FileReader();
+		
+		reader.onload = function(readerOnloadEvent) {
+			fileContent = readerOnloadEvent.target.result;
+			callCallback();
+		};
+		reader.readAsText(file);
+		
+	}
+	else {
+		callCallback();
+	}
+	
+	function callCallback() {
+		console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
+		EDITOR.fileOpenCallback(filePath, fileContent);
+		EDITOR.fileOpenCallback = undefined;
+		
+		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
+	}
+}
+
+
+function chooseSaveAsPath(saveAsDialogEvent) {
+	var file = saveAsDialogEvent.target.files[0];
+	
+	if(EDITOR.filesaveAsCallback == undefined) {
+		throw new Error("There is no listener for the save file dialog!");
+	}
+	
+	if (!file) {
+		console.warn("No file selected!");
+		EDITOR.filesaveAsCallback(undefined);
+		return;
+	}
+	
+	var fileName = file.name;
+	var filePath = file.path;
+	
+	EDITOR.filesaveAsCallback(filePath);
+	
+	EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
+}
+
+function fadeInCaretAnimation() {
+	var c = UTIL.parseColor(EDITOR.settings.caret.color);
+	var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.005)";
+	if(EDITOR.currentFile) {
+		EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
+	}
+}
+
+function fileDrop(fileDropEvent) {
+	fileDropEvent.preventDefault();
+	
+	console.log("fileDrop: fileDropEvent:");
+	console.log(fileDropEvent);
+	
+	ctxMenuVisibleOnce = true; // Show the dropped content
+	
+	var text = fileDropEvent.dataTransfer.getData('Text');
+	
+	if(text) {
+		console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
+		
+		if(text.length < 512) {
+			var url = UTIL.getLocation(text);
+			if(url.protocol == "smb" && url.host && url.pathname) {
+				/*
+					User tried to drag a file from a samba share into the editor ...
+					smb://z-mainframe/www/z%C3%A4ta.com/index.htm
+					/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
+					
+					currect: 
+					/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com
+					/run/user/1000/gvfs/smb-share:server=z-mainframe,share=www/zäta.com/sv/blog/byta_disk_zfs.htm 
+					
+					
+					
+				*/
+				var path = "/run/user/1000/gvfs/smb-share:server=" + url.host + ",share=" + decodeURI(url.pathname.slice(1));
+				path = path.trim(); // Remove CRLF
+				EDITOR.openFile(path);
+				return;
+			}
+		}
+		
+		if(EDITOR.currentFile) {
+			// Drop the text into the current file
+			
+			// Get row and col
+			var mouseX = fileDropEvent.offsetX;
+			var mouseY = fileDropEvent.offsetY;
+			var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+			
+			text = EDITOR.sanitizeText(EDITOR.currentFile, text);
+			
+			EDITOR.currentFile.insertText(text, caret);
+			
 		}
 		else {
-			// ### Handle single file
-			console.log("fileDrop: Dropped Single file !?");
+			// Create a new file with the dropped text
+			EDITOR.openFile(undefined, text); 
 			
-			// todo: What if you drop a single folder ?
-			
+		}
+		return;
+	}
+	
+	if(fileDropEvent.dataTransfer.files.length == 0) {
+		return alertBox("The dropped object doesn't seem to be a file!");
+	}
+	
+	console.log("fileDrop: fileDropEvent.dataTransfer:");
+	console.log( fileDropEvent.dataTransfer );
+	
+	var items = fileDropEvent.dataTransfer.items;
+	var files = fileDropEvent.dataTransfer.files;
+	
+	console.log("items.length=" + items.length + " files.length=" + files.length);
+	
+	var filesToSave = 0;
+	var filesSaved = 0;
+	var lastPath; // The last path if many files where saved
+	var uploadErrors = []; // List of errors during the upload
+	var fileToOpen; // Open this file (if specified) when all files have been uploaded
+	var foldersToRead = 0;
+	var foldersRead = 0;
+	var done = false;
+	
+	if(items && items.length > 1) {
+		console.log("fileDrop: Dropped " + items.length + " items ...");
+		var progressBar = document.createElement("progress");
+		progressBar.max = items.length;
+		progressBar.value = 0;
+		var footer = document.getElementById("footer");
+		footer.appendChild(progressBar);
+		EDITOR.resizeNeeded(); // To show the progress bar
+		
+		for (var i=0; i<items.length; i++) {
+			// webkitGetAsEntry is where the magic happens
+			var item = items[i].webkitGetAsEntry();
+			if (item) {
+				traverseFileTree(item);
+			}
+		}
+		return;
+	}
+	else {
+		// ### Handle single file
+		console.log("fileDrop: Dropped Single file !?");
+		
+		// todo: What if you drop a single folder ?
+		
 		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
-			if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = "/upload/" + filePath;
-			
+		if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = "/upload/" + filePath;
+		
 		var fileType = file.type;
 		
 		// The default action is to open the file in the editor.
 		// But if the editor don't support the file, ask plugins what to do with it ...
 		var handled = false;
-			if(!supported(fileType)) {
+		if(!supported(fileType)) {
 			
-				console.log("fileDrop: File is not supported. Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
-			for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
-				h = EDITOR.eventListeners.fileDrop[i].fun(file);
+				var f = EDITOR.eventListeners.fileDrop.map(funMap);
+				console.log("fileDrop: File is not supported. Calling fileDrop listeners (" +f.length + ")");
+				for(var i=0, h=false; i<f.length; i++) {
+					h = f[i](file);
 				if(h) handled = true;
 			}
 			
 			if(!handled) {
-promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
-				if(path) {
-					EDITOR.checkPath(path, function(err, path) {
-						if(err && err.code != "CANCEL") return alertBox(err.message);
-						else if(!err) saveFile(file, path, false, function(err, path) {
-							if(err) alertBox(err.message);
-							else alertBox("The file has been saved: " + path);
+				promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
+					if(path) {
+						EDITOR.checkPath(path, function(err, path) {
+							if(err && err.code != "CANCEL") return alertBox(err.message);
+							else if(!err) saveFile(file, path, false, function(err, path) {
+								if(err) alertBox(err.message);
+								else alertBox("The file has been saved: " + path);
+							});
 						});
-					});
-				}
+					}
+				});
+			}
+		}
+		else {
+			console.log("fileDrop: File is supported! fileType=" + fileType);
+			readFile();
+		}
+		EDITOR.interact("fileDrop", fileDropEvent);
+	}
+	
+	return false;
+	
+	
+	function traverseFileTree(item, path) {
+		console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
+		path = path || "/upload/";
+		if (item.isFile) {
+			// Get file
+			filesToSave++;
+			
+			item.file(function(file) {
+				var filePath = path + file.name;
+				console.log("fileDrop:item.file: filePath=", filePath);
+				if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
+				saveFile(file, path + file.name, true, fileSaved);
 			});
-				}
-			}
-			else {
-				console.log("fileDrop: File is supported! fileType=" + fileType);
-				readFile();
-			}
-			EDITOR.interact("fileDrop", fileDropEvent);
-		}
-		
-		return false;
-		
-		
-		function traverseFileTree(item, path) {
-			console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
-			path = path || "/upload/";
-			if (item.isFile) {
-				// Get file
-				filesToSave++;
-				
-				item.file(function(file) {
-					var filePath = path + file.name;
-					console.log("fileDrop:item.file: filePath=", filePath);
-					if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
-					saveFile(file, path + file.name, true, fileSaved);
-				});
-			} else if (item.isDirectory) {
-				// Get folder contents
-				var dirReader = item.createReader();
-				foldersToRead++;
-				dirReader.readEntries(function(entries) {
-					foldersRead++;
-					progressBar.value = filesSaved+foldersRead;
-					for (var i=0; i<entries.length; i++) {
-						traverseFileTree(entries[i], path + item.name + "/");
-					}
-					console.log("fileDrop: dirReader.readEntries: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
-					if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
-				});
-			}
-			progressBar.max = Math.max(progressBar.max, filesToSave+foldersToRead);
-			
-			function fileSaved(err, path) {
-				if(err) {
-					console.error(err);
-					uploadErrors.push(err);
-				}
-				filesSaved++;
+		} else if (item.isDirectory) {
+			// Get folder contents
+			var dirReader = item.createReader();
+			foldersToRead++;
+			dirReader.readEntries(function(entries) {
+				foldersRead++;
 				progressBar.value = filesSaved+foldersRead;
-				if(path) lastPath = path;
-				console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
+				for (var i=0; i<entries.length; i++) {
+					traverseFileTree(entries[i], path + item.name + "/");
+				}
+				console.log("fileDrop: dirReader.readEntries: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
 				if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
+			});
+		}
+		progressBar.max = Math.max(progressBar.max, filesToSave+foldersToRead);
+		
+		function fileSaved(err, path) {
+			if(err) {
+				console.error(err);
+				uploadErrors.push(err);
 			}
+			filesSaved++;
+			progressBar.value = filesSaved+foldersRead;
+			if(path) lastPath = path;
+			console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
+			if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
+		}
+		
+		function uploadComplete() {
+			console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 			
-			function uploadComplete() {
-				console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
-				
-				if(done) {
-console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+			if(done) {
+				console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
 				return;
-				}
-				
-				done = true;
-				
-				if(lastPath == undefined) {
-					var failMsg = "Upload failed!";
-					for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
-					return alertBox(failMsg);
-				}
-				var folder = UTIL.getDirectoryFromPath(lastPath);
-				var folders = UTIL.getFolders(folder);
-				var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
-				
-				console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
-				
-				footer.removeChild(progressBar);
-				
-				if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
-				else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
-				
-				if(fileToOpen) {
-					var fileExtension = UTIL.getFileExtension(fileToOpen);
-					console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
-					// Open right away if it's a supported file
-					if(EDITOR.parseFileExtensionAsCode.indexOf(fileExtension) != -1 || EDITOR.plainTextFileExtensions.indexOf(fileExtension) != -1) {
-						EDITOR.openFile(fileToOpen);
-					}
-					else {
-						var yes = "Yes";
-						var no = "No";
-						confirmBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
-							if(answer == yes) EDITOR.openFile(fileToOpen);
-						});
-					}
-				}
-				
-				EDITOR.resizeNeeded(); // To get rid of progress bar
-				
-			}
-		}
-		
-		function saveFile(file, filePath, createPath, callback) {
-			
-			if(typeof createPath == "function" && callback == undefined) {
-				callback = createPath;
-				createPath = false;
 			}
 			
-			/*
-				if(typeof filePath == "function" && callback == undefined) {
-				callback = filePath;
-				filePath = file.path;
-				createPath = false;
+			done = true;
+			
+			if(lastPath == undefined) {
+				var failMsg = "Upload failed!";
+				for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
+				return alertBox(failMsg);
+			}
+			var folder = UTIL.getDirectoryFromPath(lastPath);
+			var folders = UTIL.getFolders(folder);
+			var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
+			
+			console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
+			
+			footer.removeChild(progressBar);
+			
+			if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
+			else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
+			
+			if(fileToOpen) {
+				var fileExtension = UTIL.getFileExtension(fileToOpen);
+				console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
+				// Open right away if it's a supported file
+				if(EDITOR.parseFileExtensionAsCode.indexOf(fileExtension) != -1 || EDITOR.plainTextFileExtensions.indexOf(fileExtension) != -1) {
+					EDITOR.openFile(fileToOpen);
 				}
-			*/
-			
-			if(typeof filePath != "string") throw new Error("filePath=" + filePath + " (" + typeof filePath + ") needs to be a string!");
-			if(typeof createPath != "boolean") throw new Error("createPath=" + createPath + " (" + typeof createPath + ") needs to be a boolean!");
-			
-			var reader = new FileReader();
-			reader.onload = function (readerEvent) {
-				var data = readerEvent.target.result;
-				
-				console.log("data:");
-				console.log(data);
-				
-				// Specifying encoding:base64 will magically convert to binary! 
-				// We do have to remove the data:image/png metadata though!
-				data = data.replace("data:" + file.type + ";base64,", "");
-				// Some browsers (Firefox) does not populate file.type
-				data = data.replace("data:application/octet-stream;base64,", "");
-				
-				if(createPath) {
-					var folder = UTIL.getDirectoryFromPath(filePath);
-					EDITOR.createPath(folder, function(err) {
-						if(err) {
-							if(callback) return callback(err);
-							else throw(err);
-						}
-						saveToDisk();
+				else {
+					var yes = "Yes";
+					var no = "No";
+					confirmBox("Do you want to open " + fileToOpen + " ?", [yes, no], function(answer) {
+						if(answer == yes) EDITOR.openFile(fileToOpen);
 					});
 				}
-				else saveToDisk();
-				
-				function saveToDisk() {
-					EDITOR.saveToDisk(filePath, data, false, "base64", callback);
-				}
-			};
-			reader.readAsDataURL(file); // For binary files (will be base64 encoded)
+			}
+			
+			EDITOR.resizeNeeded(); // To get rid of progress bar
+			
+		}
+	}
+	
+	function saveFile(file, filePath, createPath, callback) {
+		
+		if(typeof createPath == "function" && callback == undefined) {
+			callback = createPath;
+			createPath = false;
 		}
 		
-		function notSupported(fileType) {
-			return fileType && // Some files will have fileType=="" (most of them we want to open)
-			fileType.indexOf("text") == -1 && 
-			fileType.indexOf("javascript") == -1 && 
-			fileType.indexOf("xml") == -1 && 
-			fileType.indexOf("json") == -1;
-		}
+		/*
+			if(typeof filePath == "function" && callback == undefined) {
+			callback = filePath;
+			filePath = file.path;
+			createPath = false;
+			}
+		*/
 		
-		function supported(fileType) {
-			// Return true if the file is supported by the editor. Or false if it's not supported.
-			// Example: fileType=text/plain
-			if(fileType == "") return true;
-			if(fileType.indexOf("text") == 0) return true;
-			if( fileType.match(/application\/(javascript|ecmascript|xml|json|text)/) ) return true;
-			
-			console.log("Not supported: fileType=" + fileType);
-			return false;
-		}
+		if(typeof filePath != "string") throw new Error("filePath=" + filePath + " (" + typeof filePath + ") needs to be a string!");
+		if(typeof createPath != "boolean") throw new Error("createPath=" + createPath + " (" + typeof createPath + ") needs to be a boolean!");
 		
-		function readFile() {
+		var reader = new FileReader();
+		reader.onload = function (readerEvent) {
+			var data = readerEvent.target.result;
 			
-			var reader = new FileReader();
+			console.log("data:");
+			console.log(data);
 			
-			reader.onload = function (readerEvent) {
-				console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
-				var content = readerEvent.target.result;
-				
-				// Check for weird characters
-				var weird = 0;
-				var total = Math.min(content.length, 100);
-				for (var i=0, charCode=0; i<total; i++) {
-					charCode = content.charCodeAt(i);
-					console.log("content " + i + " = " + charCode);
-					if(charCode < 30 || charCode > 56000) weird++;
-				}
-				
-				if(weird/total > 0.1) {
-					var createPath = true;
-					saveFile(file, filePath, createPath, function(err, filePath) {
-						if(err) return alertBox(err.message);
-						
-						alertBox("Weird characters found, so the file was saved: " + filePath);
-					});
-				}
-				else if(content.length > EDITOR.settings.bigFileSize) {
-					var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
-					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
+			// Specifying encoding:base64 will magically convert to binary! 
+			// We do have to remove the data:image/png metadata though!
+			data = data.replace("data:" + file.type + ";base64,", "");
+			// Some browsers (Firefox) does not populate file.type
+			data = data.replace("data:application/octet-stream;base64,", "");
+			
+			if(createPath) {
+				var folder = UTIL.getDirectoryFromPath(filePath);
+				EDITOR.createPath(folder, function(err) {
+					if(err) {
+						if(callback) return callback(err);
+						else throw(err);
+					}
+					saveToDisk();
+				});
+			}
+			else saveToDisk();
+			
+			function saveToDisk() {
+				EDITOR.saveToDisk(filePath, data, false, "base64", callback);
+			}
+		};
+		reader.readAsDataURL(file); // For binary files (will be base64 encoded)
+	}
+	
+	function notSupported(fileType) {
+		return fileType && // Some files will have fileType=="" (most of them we want to open)
+		fileType.indexOf("text") == -1 && 
+		fileType.indexOf("javascript") == -1 && 
+		fileType.indexOf("xml") == -1 && 
+		fileType.indexOf("json") == -1;
+	}
+	
+	function supported(fileType) {
+		// Return true if the file is supported by the editor. Or false if it's not supported.
+		// Example: fileType=text/plain
+		if(fileType == "") return true;
+		if(fileType.indexOf("text") == 0) return true;
+		if( fileType.match(/application\/(javascript|ecmascript|xml|json|text)/) ) return true;
+		
+		console.log("Not supported: fileType=" + fileType);
+		return false;
+	}
+	
+	function readFile() {
+		
+		var reader = new FileReader();
+		
+		reader.onload = function (readerEvent) {
+			console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
+			var content = readerEvent.target.result;
+			
+			// Check for weird characters
+			var weird = 0;
+			var total = Math.min(content.length, 100);
+			for (var i=0, charCode=0; i<total; i++) {
+				charCode = content.charCodeAt(i);
+				console.log("content " + i + " = " + charCode);
+				if(charCode < 30 || charCode > 56000) weird++;
+			}
+			
+			if(weird/total > 0.1) {
+				var createPath = true;
+				saveFile(file, filePath, createPath, function(err, filePath) {
+					if(err) return alertBox(err.message);
 					
-					EDITOR.checkPath(tmpPath, "Do not upload", function(err, fullPath) {
-						if(err) {
-							if(err.code != "CANCEL") alertBox(err.message);
-							return;
-						}
-						EDITOR.saveToDisk(fullPath, content, function fileSavedMaybe(err) {
+					alertBox("Weird characters found, so the file was saved: " + filePath);
+				});
+			}
+			else if(content.length > EDITOR.settings.bigFileSize) {
+				var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
+				console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
+				
+				EDITOR.checkPath(tmpPath, "Do not upload", function(err, fullPath) {
+					if(err) {
+						if(err.code != "CANCEL") alertBox(err.message);
+						return;
+					}
+					EDITOR.saveToDisk(fullPath, content, function fileSavedMaybe(err) {
 						if(err) throw err;
 						
-							EDITOR.openFile(fullPath);
+						EDITOR.openFile(fullPath);
 					});
-					});
-				}
-				else EDITOR.openFile(filePath, content);
-				
-			};
-			console.log("fileDrop: readFile: file:");
-			console.log(file);
+				});
+			}
+			else EDITOR.openFile(filePath, content);
 			
-			//reader.readAsDataURL(file); // For binary files (will be base64 encoded)
-			var readText = reader.readAsText(file);
-			console.log("fileDrop: readText=" + readText); // Does it give a success indication (so I know if I should use readAsText or readAsDataURL)
-			
-			/*
-				for (var i = 0; i < e.dataTransfer.files.length; ++i) {
-				console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
-				UTIL.objInfo(e.dataTransfer.files[i]);
-				}
-			*/
-		}
+		};
+		console.log("fileDrop: readFile: file:");
+		console.log(file);
 		
+		//reader.readAsDataURL(file); // For binary files (will be base64 encoded)
+		var readText = reader.readAsText(file);
+		console.log("fileDrop: readText=" + readText); // Does it give a success indication (so I know if I should use readAsText or readAsDataURL)
+		
+		/*
+			for (var i = 0; i < e.dataTransfer.files.length; ++i) {
+			console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
+			UTIL.objInfo(e.dataTransfer.files[i]);
+			}
+		*/
 	}
 	
+}
+
+
+
+function onMessage(windowMessageEvent) {
+	// For (example) recieving message from a page that has the editor embeded
+	var origin = windowMessageEvent.origin
+	var msg = windowMessageEvent.data;
 	
+	console.log("Window message from: origin=" + origin);
 	
-	function onMessage(windowMessageEvent) {
-		// For (example) recieving message from a page that has the editor embeded
-		var origin = windowMessageEvent.origin
-		var msg = windowMessageEvent.data;
+	if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content, function fileOpened(err, file) {
+		if(err) throw err;
 		
-		console.log("Window message from: origin=" + origin);
-		
-		if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content, function fileOpened(err, file) {
-			if(err) throw err;
-			
-			EDITOR.on("fileChange", function fileChanged(fileThatChanged, change, text, index, row, col) {
-				if(fileThatChanged == file) window.parent.postMessage({
-					fileUpdate: {
-						name: msg.openFile.name,
-						content: file.text
-					}
-				}, origin ? origin : "*");
-			});
-			
+		EDITOR.on("fileChange", function fileChanged(fileThatChanged, change, text, index, row, col) {
+			if(fileThatChanged == file) window.parent.postMessage({
+				fileUpdate: {
+					name: msg.openFile.name,
+					content: file.text
+				}
+			}, origin ? origin : "*");
 		});
-		else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true)
-		else {
-			console.warn("jzedit does not recognise msg=" + msg);
-			//throw new Error("Unable to handle message: " + msg);
-		}
+		
+	});
+	else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true)
+	else {
+		console.warn("jzedit does not recognise msg=" + msg);
+		//throw new Error("Unable to handle message: " + msg);
+	}
+}
+
+function copy(copyEvent) {
+	
+	console.log("copyEvent EDITOR.input=" + EDITOR.input + 
+	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
+	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent +
+	" EDITOR.input=" + EDITOR.input);
+	
+	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+		// Give focus back to the editor/canvas
+		EDITOR.input = true;
+		canvas.focus();
+		giveBackFocusAfterClipboardEvent = false;
 	}
 	
-	function copy(copyEvent) {
+	if(EDITOR.input) {
 		
-		console.log("copyEvent EDITOR.input=" + EDITOR.input + 
-		" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-		" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent +
-		" EDITOR.input=" + EDITOR.input);
+		var textToPutOnClipboard = "";
 		
-		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
-			// Give focus back to the editor/canvas
-			EDITOR.input = true;
-			canvas.focus();
-			giveBackFocusAfterClipboardEvent = false;
+		if(EDITOR.currentFile) {
+			textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
 		}
 		
-		if(EDITOR.input) {
-			
-			var textToPutOnClipboard = "";
-			
-			if(EDITOR.currentFile) {
-				textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
-			}
-			
-			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
-			
-			if (BROWSER.indexOf("MSIE") == 0) {
-				window.clipboardData.setData('Text', textToPutOnClipboard);    
-			} else {
-				copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
-			}
-			copyEvent.preventDefault();
-			
+		if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
+		
+		if (BROWSER.indexOf("MSIE") == 0) {
+			window.clipboardData.setData('Text', textToPutOnClipboard);    
+		} else {
+			copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
 		}
-		// else: Do the default action (enable copying outside the canvas)
-		
-		//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
-		
-		EDITOR.interact("copy", copyEvent);
-		
-		EDITOR.pseudoClipboard = textToPutOnClipboard;
-		
-		return textToPutOnClipboard;
+		copyEvent.preventDefault();
 		
 	}
+	// else: Do the default action (enable copying outside the canvas)
 	
-	function cut(cutEvent) {
+	//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
+	
+	EDITOR.interact("copy", copyEvent);
+	
+	EDITOR.pseudoClipboard = textToPutOnClipboard;
+	
+	return textToPutOnClipboard;
+	
+}
+
+function cut(cutEvent) {
+	
+	console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+	
+	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+		// Give focus back to the editor/canvas
+		EDITOR.input = true;
+		canvas.focus();
+		giveBackFocusAfterClipboardEvent = false;
+	}
+	
+	if(EDITOR.input) {
 		
-		console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+		var textToPutOnClipboard = "";
 		
-		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
-			// Give focus back to the editor/canvas
-			EDITOR.input = true;
-			canvas.focus();
-			giveBackFocusAfterClipboardEvent = false;
+		if(EDITOR.currentFile) {
+			textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+			
+			// Delete the selected text
+			EDITOR.currentFile.deleteSelection();
 		}
 		
-		if(EDITOR.input) {
-			
-			var textToPutOnClipboard = "";
-			
-			if(EDITOR.currentFile) {
-				textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+		if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
+		
+		if (BROWSER.indexOf("MSIE") == 0) {
+			window.clipboardData.setData('Text', textToPutOnClipboard);    
+		} else {
+			cutEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
+		}
+		cutEvent.preventDefault();
+	}
+	
+	// else: Do the default action (enable cutting outside the canvas)
+	
+	EDITOR.interact("cut", cutEvent);
+}
+
+
+function paste(pasteEvent) {
+	
+	console.log("pasteEvent EDITOR.input=" + EDITOR.input + 
+	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
+	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+	
+	//var text = pasteEvent.clipboardData.getData('text');
+	var ret;
+	var textChanged = false;
+	
+	if (window.clipboardData && window.clipboardData.getData) { // IE
+		var text = window.clipboardData.getData('Text');
+	} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
+		var text = pasteEvent.clipboardData.getData('text/plain');
+	}
+	else {
+		alertBox("Unable to get platform/OS clipboard data!");
+	}
+	
+	var file = EDITOR.currentFile;
+	
+	if(text && text.length > EDITOR.settings.bigFileSize) {
+		var yes = "Save the file";
+		var no = "Never mind";
+		
+		confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. " + 
+		"Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
+			if(answer == yes) {
 				
-				// Delete the selected text
-				EDITOR.currentFile.deleteSelection();
-			}
-			
-			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
-			
-			if (BROWSER.indexOf("MSIE") == 0) {
-				window.clipboardData.setData('Text', textToPutOnClipboard);    
-			} else {
-				cutEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
-			}
-			cutEvent.preventDefault();
-		}
-		
-		// else: Do the default action (enable cutting outside the canvas)
-		
-		EDITOR.interact("cut", cutEvent);
-	}
-	
-	
-	function paste(pasteEvent) {
-		
-		console.log("pasteEvent EDITOR.input=" + EDITOR.input + 
-		" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-		" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
-		
-		//var text = pasteEvent.clipboardData.getData('text');
-		var ret;
-		var textChanged = false;
-		
-		if (window.clipboardData && window.clipboardData.getData) { // IE
-			var text = window.clipboardData.getData('Text');
-		} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
-			var text = pasteEvent.clipboardData.getData('text/plain');
-		}
-		else {
-			alertBox("Unable to get platform/OS clipboard data!");
-		}
-		
-		var file = EDITOR.currentFile;
-		
-		if(text && text.length > EDITOR.settings.bigFileSize) {
-			var yes = "Save the file";
-			var no = "Never mind";
-			
-			confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. " + 
-			"Do you want to save the file after pasting the data ?", [yes, no], function(answer) {
-				if(answer == yes) {
-					
-					if(file.isBig) {
-						// First save the current buffer
-						EDITOR.saveFile(file, function fileSaved(err, path) {
-							if(err) return alertBox("Failed to save " + path + ":\n" + err.message, "PASTE", "error");
-							// Then save the pasted data
-							CLIENT.cmd("writeLines", {start: file.partStartRow+file.caret.row+1, path: file.path, content: text}, function linesWritten(err) {
-								if(err) return alertBox("Failed to save pasted data! " + err.message);
-								// Then reload the file buffer
-								var lineNr = file.partStartRow+file.caret.row+1;
-								var startRow = file.partStartRow;
-								file.loadFilePart(startRow, function(err) {
-									if(err) return alertBox("Failed to load startRow=" + startRow + " ! " + err.message);
-									file.gotoLine(lineNr, function(err) {
-										if(err) return alertBox("Failed to go to lineNr=" + lineNr + " ! " + err.message);
-										
-									});
+				if(file.isBig) {
+					// First save the current buffer
+					EDITOR.saveFile(file, function fileSaved(err, path) {
+						if(err) return alertBox("Failed to save " + path + ":\n" + err.message, "PASTE", "error");
+						// Then save the pasted data
+						CLIENT.cmd("writeLines", {start: file.partStartRow+file.caret.row+1, path: file.path, content: text}, function linesWritten(err) {
+							if(err) return alertBox("Failed to save pasted data! " + err.message);
+							// Then reload the file buffer
+							var lineNr = file.partStartRow+file.caret.row+1;
+							var startRow = file.partStartRow;
+							file.loadFilePart(startRow, function(err) {
+								if(err) return alertBox("Failed to load startRow=" + startRow + " ! " + err.message);
+								file.gotoLine(lineNr, function(err) {
+									if(err) return alertBox("Failed to go to lineNr=" + lineNr + " ! " + err.message);
+									
 								});
 							});
 						});
-					}
-					else {
-						// Normal file
-						if(!file.savedAs) {
-							EDITOR.checkPath(file.path, function(err, path) {
-								if(err) return alertBox("Unable to save " + file.path + ".\nIt does not have a proper path!", "PASTE", "error");
-								else saveToDisk(path);
-							});
-						}
-						else saveToDisk(file.path)
-					}
-				}
-				
-				function saveToDisk(filePath) {
-					console.log("Saving file content with the pasted data as " + filePath + " ...");
-					var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
-					EDITOR.saveToDisk(filePath, combinedText, function saveToDiskComplete(err, path, hash) {
-						if(err) return alertBox("Unable to save the file! " + err.message, "FILE", "error");
-						
-						EDITOR.closeFile(file.path, true);
-						EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
-							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "FILE", "warning");
-						});
-						
 					});
 				}
-				
-			});
-			
-			return;
-		}
-		
-		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
-			// Give focus back to the editor/canvas
-			EDITOR.input = true;
-			canvas.focus();
-			giveBackFocusAfterClipboardEvent = false;
-		}
-		
-		//console.log("PASTE: " + UTIL.lbChars(text));
-		
-		if(EDITOR.input && EDITOR.currentFile) {
-			
-			pasteEvent.preventDefault();
-			
-			console.log("Calling paste listeners on paste event (" + EDITOR.eventListeners.paste.length + ") ...");
-			for(var i=0, fun; i<EDITOR.eventListeners.paste.length; i++) {
-				
-				fun = EDITOR.eventListeners.paste[i].fun;
-				
-				ret = fun(EDITOR.currentFile, text, pasteEvent);
-				
-				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned: (" + (typeof ret) + ") \n" + ret);
-				
-				if(typeof ret == "string") {
-					if(textChanged) {
-						throw new Error("Another listener has already changed the pasted text!");
+				else {
+					// Normal file
+					if(!file.savedAs) {
+						EDITOR.checkPath(file.path, function(err, path) {
+							if(err) return alertBox("Unable to save " + file.path + ".\nIt does not have a proper path!", "PASTE", "error");
+							else saveToDisk(path);
+						});
 					}
-					text = ret;
-					textChanged = true;
-				}
-				else if(ret === false) {
-					return; // So plugins can cancel the default behaviour (inserting the text)
+					else saveToDisk(file.path)
 				}
 			}
 			
-			// Insert text at caret position
-			if(EDITOR.currentFile) {
-				var file = EDITOR.currentFile;
-				
-				text = EDITOR.sanitizeText(file, text);
-				
-				// If there is a text selection. Delete the selection first!
-				file.deleteSelection();
-				
-				file.insertText(text);
-				
-				//file.fixCaret();
+			function saveToDisk(filePath) {
+				console.log("Saving file content with the pasted data as " + filePath + " ...");
+				var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
+				EDITOR.saveToDisk(filePath, combinedText, function saveToDiskComplete(err, path, hash) {
+					if(err) return alertBox("Unable to save the file! " + err.message, "FILE", "error");
+					
+					EDITOR.closeFile(file.path, true);
+					EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
+						if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "FILE", "warning");
+					});
+					
+				});
 			}
-		}
-		else {
-			console.log("paste: EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
-		}
+			
+		});
 		
-		// else: Do the default action (enable pasting outside the canvas)
-		
-		EDITOR.interact("paste", pasteEvent);
-		
+		return;
 	}
 	
+	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+		// Give focus back to the editor/canvas
+		EDITOR.input = true;
+		canvas.focus();
+		giveBackFocusAfterClipboardEvent = false;
+	}
 	
+	//console.log("PASTE: " + UTIL.lbChars(text));
 	
-	
-	/*
-		function updateCaretGridPosition(caret, file) {
-		var gridPosition = file.getGridPositionFromIndex(caret.index);
+	if(EDITOR.input && EDITOR.currentFile) {
 		
-		caret.row = gridPosition.row;
-		caret.col = gridPosition.col;
+		pasteEvent.preventDefault();
 		
-		console.log("caret: " + JSON.stringify(caret));
-		
-		if(caret.index == file.text.length) {
-		console.log("caret at EOF");
-		}
-		else {
-		console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
-		}
-		
-		}
-	*/
-	
-	
-	function keyPressed(keyPressEvent) {
-		keyPressEvent = keyPressEvent || window.event; 
-		
-		var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
-		var character = String.fromCharCode(charCode);
-		var combo = getCombo(keyPressEvent);
-		var file = EDITOR.currentFile;
-		var preventDefault = false;
-		var funReturn = true;
-		
-		console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
-		
-		// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
-		if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
-		
-		// Firefox and Safari go here before calling copy/paste/cut events
-		// Without this copy/paste will not work in Safari! Why !? 
-		if(nativeCopy || nativePaste || nativeCut) {
-			console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
-			nativeCopy = false;
-			nativePaste = false;
-			nativeCut = false;
-			return;
-		}
-		
-		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
-		for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {
-			funReturn = EDITOR.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
+			var f = EDITOR.eventListeners.paste.map(funMap);
+			console.log("Calling paste listeners on paste event (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
 			
-			if(funReturn !== true && funReturn !== false) {
-				throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + 
-				" did not return true or false!");
+				ret = f[i](EDITOR.currentFile, text, pasteEvent);
+			
+				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
+			
+			if(typeof ret == "string") {
+				if(textChanged) {
+					throw new Error("Another listener has already changed the pasted text!");
+				}
+				text = ret;
+				textChanged = true;
 			}
+			else if(ret === false) {
+				return; // So plugins can cancel the default behaviour (inserting the text)
+			}
+		}
+		
+		// Insert text at caret position
+		if(EDITOR.currentFile) {
+			var file = EDITOR.currentFile;
 			
-			if(funReturn === false && !preventDefault) {
-				preventDefault = true;
-				if(file && EDITOR.input) console.log(UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+			text = EDITOR.sanitizeText(file, text);
+			
+			// If there is a text selection. Delete the selection first!
+			file.deleteSelection();
+			
+			file.insertText(text);
+			
+			//file.fixCaret();
+		}
+	}
+	else {
+		console.log("paste: EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
+	}
+	
+	// else: Do the default action (enable pasting outside the canvas)
+	
+	EDITOR.interact("paste", pasteEvent);
+	
+}
+
+
+
+
+/*
+	function updateCaretGridPosition(caret, file) {
+	var gridPosition = file.getGridPositionFromIndex(caret.index);
+	
+	caret.row = gridPosition.row;
+	caret.col = gridPosition.col;
+	
+	console.log("caret: " + JSON.stringify(caret));
+	
+	if(caret.index == file.text.length) {
+	console.log("caret at EOF");
+	}
+	else {
+	console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
+	}
+	
+	}
+*/
+
+
+function keyPressed(keyPressEvent) {
+	keyPressEvent = keyPressEvent || window.event; 
+	
+	var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
+	var character = String.fromCharCode(charCode);
+	var combo = getCombo(keyPressEvent);
+	var file = EDITOR.currentFile;
+	var preventDefault = false;
+	var funReturn = true;
+	
+	console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+	
+	// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
+	if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
+	
+	// Firefox and Safari go here before calling copy/paste/cut events
+	// Without this copy/paste will not work in Safari! Why !? 
+	if(nativeCopy || nativePaste || nativeCut) {
+		console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
+		nativeCopy = false;
+		nativePaste = false;
+		nativeCut = false;
+		return;
+	}
+	
+		var f = EDITOR.eventListeners.keyPressed.map(funMap);
+		console.log("Calling keyPressed listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			funReturn = f[i](file, character, combo); // Call function
+		
+		if(funReturn !== true && funReturn !== false) {
+				throw new Error("keyPressed event listener: " + UTIL.getFunctionName(f[i]) + 
+			" did not return true or false!");
+		}
+		
+		if(funReturn === false && !preventDefault) {
+			preventDefault = true;
+				if(file && EDITOR.input) {
+console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+				}
 			}
 		}
 		
@@ -8537,10 +8570,10 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:
 			
-				file.putCharacter(character);
+			file.putCharacter(character);
 			
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
-				//EDITOR.renderNeeded();
+			//EDITOR.renderNeeded();
 			EDITOR.renderRow();
 			if(EDITOR.touchScreen || !EDITOR.settings.caretAnimation) EDITOR.renderCaret(file.caret);
 			
@@ -8548,7 +8581,7 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 			
 			if(!EDITOR.touchScreen && EDITOR.settings.caretAnimation) { // Hiding caret is annoying when typing using the virtual keyboard
 				
-				// First remove any old ones so they do not stop before the caret is fully filled
+			// First remove any old ones so they do not stop before the caret is fully filled
 			clearTimeout(renderCaretTimer);
 			EDITOR.removeAnimation(fadeInCaretAnimation);
 			
@@ -8588,1263 +8621,1268 @@ console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare 
 					document.getElementById('canvas').style.cursor = 'text';
 				}, 3000);
 			}
-			}
 		}
-		
-		EDITOR.interact("keyPressed", keyPressEvent);
-		
-		// Prevent Firefox's quick search (/ slash)
-		if(EDITOR.input && charCode == 47) preventDefault = true;
-		
-		// Prevent Firefox's quick find (' single quote)
-		if(EDITOR.input && charCode == 39) preventDefault = true;
-		
-		// Prevent scrolling down when hitting space in Firefox
-		if(EDITOR.input && charCode == 32) preventDefault = true;
-		
-		if(preventDefault) {
-			console.log("keyPressed: Preventing default browser action!");
-			if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
-			return false;
-		}
-		else return true;
 	}
 	
-	function resizeAndRender(afterResize) {
-		
-		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling);
-		
-		// Only do the resize or render if it's actually needed
-		if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
-		
-		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
-		if(EDITOR.shouldRender) {
-			
-			if(EDITOR.isScrolling) console.time("Scrolling optimization");
-			
-			var file = EDITOR.currentFile;
-			var fileStartRow = file ? file.startRow : 0;
-			var fileEndRow = fileStartRow + EDITOR.view.visibleRows; // Don't use Math.max or the bottom will not be cleared!
-			var screenStartRow = 0;
-			var lastFileStartRow = lastBufferStartRow;
-			var tmpLastBufferStartRow = 0;
-			
-			/*
-				
-				Optimization for when scrolling (on mobile)
-				Copying from one canvas to another seem to be too slow for it to be worth it !?
-				The EDITOR.render() function has a lot of over-head, we should try to avoid it!
-				
-				Scrolling optimization: 1.5 - 1.7 ms including render 1 - 1.4ms
-				Full render: 1.8 - 2.5 ms
-				
-				The render optimizations does feel a little snappier on a slow mobile
-
-				I also tried using a cache canvas but it was too complicated and didn't feel much faster.
-
-				This function sometimes give DOMException INDEX_SIZE_ERR on opera mobile! Why?
-				
-			*/
-			
-			// The canvas is reset after a resize, so we need to make a full render!
-			
-			if(EDITOR.isScrolling && file && !afterResize && 1 == 1) {
-				
-				// Only render what is not already rendered.
-				
-				tmpLastBufferStartRow = fileStartRow;
-				
-				var rowDiff = lastFileStartRow - fileStartRow;
-				var scrollDirection = rowDiff > 0 ? 1 : -1;
-				
-				if(rowDiff == 0) {
-					EDITOR.shouldRender = false;
-					return;
-				}
-				
-				if(scrollDirection == 1) {
-					// Move image down
-					var dy = Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
-					var sy = EDITOR.settings.topMargin;
-					var sHeight = EDITOR.view.canvasHeight - dy;
-					
-					// Render above
-					fileEndRow = fileStartRow + Math.abs(rowDiff)-1;
-					}
-				else {
-					// Move image up
-					var dy = EDITOR.settings.topMargin;
-					var sy =  Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;;
-					var sHeight = EDITOR.view.canvasHeight - sy;
-					
-					// The last line can be cut in half, so don't use the last line!
-					
-					// Render the missing rows
-					screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff) - 1;
-					fileStartRow = fileEndRow - Math.abs(rowDiff) - 1;
-					}
-				
-				var dx = 0;
-				var sx = 0;
-				var sWidth = EDITOR.view.canvasWidth;
-				var dWidth = sWidth;
-				var dHeight = sHeight;
-				
-				console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
-				
-				try {
-				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
-				}
-				catch(err) {
-					var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
-					throw error;
-				}
-				
-				//EDITOR.shouldRender = false;
-				//return;
-			}
-			
-			if(EDITOR.shouldRender) {
-				console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
-				
-			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
-				}
-			
-			if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
-			
-			if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
-		}
-		
-		
-		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
-		
-		// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
-		
-		if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
-			afk = true;
-			EDITOR.fireEvent("afk");
-			// Try do do as little as possible to save power
-			clearInterval(mainLoopInterval);
-		}
+	EDITOR.interact("keyPressed", keyPressEvent);
 	
+	// Prevent Firefox's quick search (/ slash)
+	if(EDITOR.input && charCode == 47) preventDefault = true;
+	
+	// Prevent Firefox's quick find (' single quote)
+	if(EDITOR.input && charCode == 39) preventDefault = true;
+	
+	// Prevent scrolling down when hitting space in Firefox
+	if(EDITOR.input && charCode == 32) preventDefault = true;
+	
+	if(preventDefault) {
+		console.log("keyPressed: Preventing default browser action!");
+		if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
+		return false;
 	}
-	
-	function keyboardCatcherKey(keyEvent) {
-		keyEvent = keyEvent || window.event;
-		
-		var charCode = keyEvent.charCode; // Deprected, non-standard.  Unicode value of the character key that was pressed
-		var keyCode = keyEvent.keyCode; //  Deprecated. A system and implementation dependent numerical code identifying the unmodified value of the pressed key
-		var key = keyEvent.key; // value of the key pressed by the user, taking into consideration the state of modifier keys such as Shift as well as the keyboard locale and layout. 
-		var code = keyEvent.code; // physical positions on the input device
-		var which = keyEvent.which; //  Deprecated. numeric keyCode of the key pressed, or the character code
-		
-		var shiftKey = keyEvent.shiftKey; // if the shift key was pressed 
-		
-		var keyboardCatcher = document.getElementById("keyboardCatcher");
-		var inputValue = keyboardCatcher.value;
-		
-		console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
-		
-		/*
-			Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
-			So we have to check what was entered into the input box
-		*/
-		
-		if(inputValue.length > 1) {
-			inputValue = inputValue.slice(1); // Remove the "padding"
-			
-			if(inputValue.length == 1) {
-				// Mock a keypress
-				var keyPress = {
-charCode: inputValue.charCodeAt(0),
-keyCode: keyCode,
-which: which,
-shiftKey: keyEvent.shiftKey,
-					ctrlKey: keyEvent.ctrlKey,
-					metaKey: keyEvent.metaKey,
-					altKey: keyEvent.altKey
+	else return true;
 }
-keyPressed(keyPress);
+
+function resizeAndRender(afterResize) {
+	
+	//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling);
+	
+	// Only do the resize or render if it's actually needed
+	if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
+	
+	//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
+	if(EDITOR.shouldRender) {
+		
+		if(EDITOR.isScrolling) console.time("Scrolling optimization");
+		
+		var file = EDITOR.currentFile;
+		var fileStartRow = file ? file.startRow : 0;
+		var fileEndRow = fileStartRow + EDITOR.view.visibleRows; // Don't use Math.max or the bottom will not be cleared!
+		var screenStartRow = 0;
+		var lastFileStartRow = lastBufferStartRow;
+		var tmpLastBufferStartRow = 0;
+		
+		/*
+			
+			Optimization for when scrolling (on mobile)
+			Copying from one canvas to another seem to be too slow for it to be worth it !?
+			The EDITOR.render() function has a lot of over-head, we should try to avoid it!
+			
+			Scrolling optimization: 1.5 - 1.7 ms including render 1 - 1.4ms
+			Full render: 1.8 - 2.5 ms
+			
+			The render optimizations does feel a little snappier on a slow mobile
+			
+			I also tried using a cache canvas but it was too complicated and didn't feel much faster.
+			
+			This function sometimes give DOMException INDEX_SIZE_ERR on opera mobile! Why?
+			
+		*/
+		
+		// The canvas is reset after a resize, so we need to make a full render!
+		
+		if(EDITOR.isScrolling && file && !afterResize && 1 == 1) {
+			
+			// Only render what is not already rendered.
+			
+			tmpLastBufferStartRow = fileStartRow;
+			
+			var rowDiff = lastFileStartRow - fileStartRow;
+			var scrollDirection = rowDiff > 0 ? 1 : -1;
+			
+			if(rowDiff == 0) {
+				EDITOR.shouldRender = false;
+				return;
+			}
+			
+			if(scrollDirection == 1) {
+				// Move image down
+				var dy = Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
+				var sy = EDITOR.settings.topMargin;
+				var sHeight = EDITOR.view.canvasHeight - dy;
+				
+				// Render above
+				fileEndRow = fileStartRow + Math.abs(rowDiff)-1;
 			}
 			else {
+				// Move image up
+				var dy = EDITOR.settings.topMargin;
+				var sy =  Math.abs(rowDiff) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;;
+				var sHeight = EDITOR.view.canvasHeight - sy;
 				
-				// When pressing space, some keyboards inserts the last words+space
-				/*
-					if(inputValue == (keyboardCatcherLastInserted + " ")) {
-					inputValue = " ";
-					}
-					else {
-					console.log("inputValue=*" + inputValue + "* keyboardCatcherLastInserted=*" + keyboardCatcherLastInserted + "*");
-					}
-				*/
+				// The last line can be cut in half, so don't use the last line!
 				
-				// Insert the text
-				var file = EDITOR.currentFile;
-				if(file) {
-					file.insertText(inputValue);
-				}
+				// Render the missing rows
+				screenStartRow = EDITOR.view.visibleRows - Math.abs(rowDiff) - 1;
+				fileStartRow = fileEndRow - Math.abs(rowDiff) - 1;
 			}
 			
-			keyboardCatcher.value = "x";
-			// Add padding so that the keyboard not insist on big letters
+			var dx = 0;
+			var sx = 0;
+			var sWidth = EDITOR.view.canvasWidth;
+			var dWidth = sWidth;
+			var dHeight = sHeight;
 			
-			// This will prevent the last word being appended again when pressing space
-			keyboardCatcher.blur();
-			keyboardCatcher.focus();
-			moveCursorToEnd(keyboardCatcher);
+			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
-			//setTimeout(function() {keyboardCatcher.value = "";}, 1500);
+			try {
+				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+			}
+			catch(err) {
+				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
+				throw error;
+			}
 			
-			keyboardCatcherLastInserted = inputValue;
-			
+			//EDITOR.shouldRender = false;
+			//return;
 		}
 		
-		return true;
+		if(EDITOR.shouldRender) {
+			console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
+			
+			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
+		}
+		
+		if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
+		
+		if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
 	}
 	
 	
-	function keyIsDown(keyDownEvent) {
-		/*
-			
-			note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
-			
-		*/
-		keyDownEvent = keyDownEvent || window.event;
+	//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
+	
+	// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
+	
+	if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
+		afk = true;
+		EDITOR.fireEvent("afk");
+		// Try do do as little as possible to save power
+		clearInterval(mainLoopInterval);
+	}
+	
+}
+
+function keyboardCatcherKey(keyEvent) {
+	keyEvent = keyEvent || window.event;
+	
+	var charCode = keyEvent.charCode; // Deprected, non-standard.  Unicode value of the character key that was pressed
+	var keyCode = keyEvent.keyCode; //  Deprecated. A system and implementation dependent numerical code identifying the unmodified value of the pressed key
+	var key = keyEvent.key; // value of the key pressed by the user, taking into consideration the state of modifier keys such as Shift as well as the keyboard locale and layout. 
+	var code = keyEvent.code; // physical positions on the input device
+	var which = keyEvent.which; //  Deprecated. numeric keyCode of the key pressed, or the character code
+	
+	var shiftKey = keyEvent.shiftKey; // if the shift key was pressed 
+	
+	var keyboardCatcher = document.getElementById("keyboardCatcher");
+	var inputValue = keyboardCatcher.value;
+	
+	console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
+	
+	/*
+		Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
+		So we have to check what was entered into the input box
+	*/
+	
+	if(inputValue.length > 1) {
+		inputValue = inputValue.slice(1); // Remove the "padding"
 		
-		//keyDownEvent.preventDefault();
-		
-		var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
-		var character = String.fromCharCode(charCode);
-		var combo = getCombo(keyDownEvent);
-		var key = keyDownEvent.key || null; // Null so that it will not be the same as undefined
-		var preventDefault = false;
-		var funReturn;
-		var captured = false;
-		var charCodeShift = 16;
-		var charCodeCtrl = 17;
-		var charCodeAlt = 18;
-		var gotError;
-		var targetElementClass = keyDownEvent.target.className;
-		
-		/*
-			var backspaceCharCode = 8;
-			if(charCode == backspaceCharCode) {
-			tempTest--;
-			
-			var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
-			//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-			var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-			ctx.fillStyle = EDITOR.settings.style.bgColor;
-			//ctx.fillStyle = "rgba(255,0,0, 0.5)";
-			ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
-			return;
-			
+		if(inputValue.length == 1) {
+			// Mock a keypress
+			var keyPress = {
+				charCode: inputValue.charCodeAt(0),
+				keyCode: keyCode,
+				which: which,
+				shiftKey: keyEvent.shiftKey,
+				ctrlKey: keyEvent.ctrlKey,
+				metaKey: keyEvent.metaKey,
+				altKey: keyEvent.altKey
 			}
-		*/
-		
-		console.log("keyDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
-		
-		// Mac command key ?
-		if(charCode == charCodeCtrl) {
-			console.log("recognition start! (keyDown Ctrl)");
-			if(recognition) {
-				try {
-					recognition.start();
-				}
-				catch(err) {
-					console.warn(err.message);
-				}
-			}
-		}
-		//else console.log("recognition: Not ctrl! charCode=" + charCode);
-		
-		
-		
-		// Prevent unsupported combo error ? 
-		// But what if we want a binding of *just* ALT!?
-		// Can't have that or it will mess all native combos. You need to bind to shift|alt|ctrl PLUS something else
-		// Shift <> stopped working
-		
-		if(charCode == charCodeCtrl) return true; // Ctrl
-		if(charCode == charCodeAlt) return true; // ALT
-		
-		if(combo.alt && combo.shift) {
-			console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
-		}
-		
-		// Be aware of OS/shell specific key bindings! If there for example is a Gnome shell keybinding for Ctrl+Alt+Arrow (switiching workspace) the editor wont capture it! (the arrow key)
-		
-		
-		// PS. Alt Gr = Ctrl+Alt
-		// AltGr is the same as hitting Ctrl+ Alt
-		
-		// You probably want to use bindKey instead of eventListeners.keyDown!
-		//console.log("Calling keyDown listeners (" + EDITOR.eventListeners.keyDown.length + ") ...");
-		for(var i=0; i<EDITOR.eventListeners.keyDown.length; i++) {
-			funReturn = EDITOR.eventListeners.keyDown[i].fun(EDITOR.currentFile, character, combo, keyDownEvent); // Call function
-			
-			if(funReturn === false) {
-				preventDefault = true;
-				console.log("keyIsDown: Default browser action prevented by keyDown listener " + UTIL.getFunctionName(EDITOR.eventListeners.keyDown[i].fun) + "!");
-			}
-		}
-		
-		if(!preventDefault) {
-			// Check key bindings
-			var capturedBy = [];
-			console.log("combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
-			for(var i=0, binding; i<keyBindings.length; i++) {
-				
-				binding = keyBindings[i];
-				
-				/*
-					console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
-					" char=" + (binding.char == character || binding.charCode == charCode) +
-					" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
-					" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
-					" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
-				*/
-				
-				if( (binding.char === character || binding.charCode === charCode || binding.key === key) && // === so that undefined doesn't match null
-				(binding.combo == combo.sum || binding.combo === undefined) && 
-				(binding.dir == "down" || binding.dir === undefined) && // down is the default direction
-				(binding.mode == EDITOR.mode || binding.mode == "*") ) {
-					
-					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
-						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
-					}
-					else {
-						
-						console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
-						
-						if(captured) {
-							console.warn("Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : " +
-							" charCode=" + charCode + 
-							" character=" + character + 
-							" key=" + key + 
-							" combo=" + JSON.stringify(combo) + 
-							" binding.char=" + binding.char + 
-							" binding.charCode=" + binding.charCode + 
-							" binding.combo=" + binding.combo + 
-							" binding.dir=" + binding.dir + 
-							" binding.mode=" + binding.mode + 
-							" binding.fun=" + UTIL.getFunctionName(binding.fun)
-							);
-						}
-						
-						captured = true;
-						capturedBy.push(binding.fun);
-						
-						if(!EDITOR.currentFile) console.warn("No file open!");
-						
-						funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
-						
-						//console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
-						
-						if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
-							preventDefault = true;
-							console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
-						}
-						else if(funReturn !== true) {
-							throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
-							like typing in input boxes, tabbing between elements, etc. function called: " + UTIL.getFunctionName(binding.fun));
-						}
-					}
-				}
-				else {
-					//console.log("NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
-				}
-			}
-		}
-		
-		// Throwing the actual error here doesn't give a call stack! meh ... Need to see the console.warning to see the call stack
-		//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
-		// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
-		
-		if(EDITOR.currentFile) {
-			EDITOR.currentFile.checkGrid();
-			EDITOR.currentFile.checkCaret();
-		}
-		
-		EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: keyDownEvent.shiftKey, altKey: keyDownEvent.altKey, ctrlKey: keyDownEvent.ctrlKey});
-		
-		var leftWindowKey = 91; // Command key on Mac
-		var rightWindowKey = 92;
-		
-		var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
-		var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
-		
-		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " BROWSER=" + BROWSER + " MAC=" + MAC);
-		
-		if((combo.sum > 0 || metaCmdKey) && !captured) {
-			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
-			
-			if( (combo.ctrl || metaCmdKey) && character == "C") {
-				console.log("Native command: copy !? MAC=" + MAC);
-				
-				if(MAC) nativeCopy = true;
-				
-				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
-					giveBackFocusAfterClipboardEvent = true;
-					
-					var clipboardcatcher = document.getElementById("clipboardcatcher");
-					clipboardcatcher.focus();
-					
-					var textToPutOnClipboard = "";
-					
-					if(EDITOR.currentFile) {
-						textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
-					}
-					
-					clipboardcatcher.value = textToPutOnClipboard;
-					clipboardcatcher.select();
-					
-					//preventDefault = true;
-				}
-			}
-			else if( (combo.ctrl || metaCmdKey) && character == "V") {
-				console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
-				
-				if(MAC) nativePaste = true;
-				
-				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
-					giveBackFocusAfterClipboardEvent = true;
-					
-					// Problem: If alertBox button was clicked, it takes 500ms to get focus back to canvas. 
-					// But if we paste before that, input will be false.
-					
-					var clipboardcatcher = document.getElementById("clipboardcatcher");
-					clipboardcatcher.focus();
-					
-					//preventDefault = true;
-				}
-			}
-			else if( (combo.ctrl || metaCmdKey) && character == "X") {
-				console.log("Native command: cut !?");
-				
-				if(MAC) nativeCut = true;
-				
-				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
-					giveBackFocusAfterClipboardEvent = true;
-					
-					var clipboardcatcher = document.getElementById("clipboardcatcher");
-					clipboardcatcher.focus();
-					
-					var textToPutOnClipboard = "";
-					
-					if(EDITOR.currentFile) {
-						textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
-						
-						// Delete the selected text
-						//EDITOR.currentFile.deleteSelection();
-					}
-					
-					clipboardcatcher.value = textToPutOnClipboard;
-					clipboardcatcher.select();
-					
-					//preventDefault = true;
-					
-				}
-			}
-			else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
-			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
-			else if(combo.alt) {} // Wait for ALT+key combo!
-			else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
-			else if(windowKey) {console.log("Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
-			else if(metaCmdKey) {console.log("meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
-			//else if(combo.shift) {} // Wait for Shift+key combo!
-			//&&//&&//
-			else {
-				throw Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode);
-				
-				preventDefault = true;
-			}
-			
-		}
-		
-		lastKeyDown = charCode;
-		
-		// In case the user has no mouse, pressing Enter should hide the "Right click to show the menu" message
-		if(!ctxMenuVisibleOnce && charCode == 13) {
-			ctxMenuVisibleOnce = true;
-			
-			// Can not give editor input or prevent default as that would prevent form submit by pressing Enter.
-			//EDITOR.input = true;
-			//preventDefault = true;
-			EDITOR.renderNeeded();
-		}
-		
-		if(preventDefault) {
-			//alert("Preventing default browser action!");
-			console.log("keyIsDown: Preventing default browser action!");
-			
-			if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
-			if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
-			if(typeof keyDownEvent.preventDefault == "function") keyDownEvent.preventDefault();
-			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
-			
-			return false;
+			keyPressed(keyPress);
 		}
 		else {
-			//console.log("Executing default browser/OS action ...");
 			
-			return true;
+			// When pressing space, some keyboards inserts the last words+space
+			/*
+				if(inputValue == (keyboardCatcherLastInserted + " ")) {
+				inputValue = " ";
+				}
+				else {
+				console.log("inputValue=*" + inputValue + "* keyboardCatcherLastInserted=*" + keyboardCatcherLastInserted + "*");
+				}
+			*/
+			
+			// Insert the text
+			var file = EDITOR.currentFile;
+			if(file) {
+				file.insertText(inputValue);
+			}
 		}
 		
+		keyboardCatcher.value = "x";
+		// Add padding so that the keyboard not insist on big letters
+		
+		// This will prevent the last word being appended again when pressing space
+		keyboardCatcher.blur();
+		keyboardCatcher.focus();
+		moveCursorToEnd(keyboardCatcher);
+		
+		//setTimeout(function() {keyboardCatcher.value = "";}, 1500);
+		
+		keyboardCatcherLastInserted = inputValue;
 		
 	}
 	
-	function getCombo(eventObject) {
+	return true;
+}
+
+
+function keyIsDown(keyDownEvent) {
+	/*
 		
-		var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+		note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
 		
-		if(eventObject.shiftKey) {
-			combo.shift = true;
-			combo.sum += SHIFT;
+	*/
+	keyDownEvent = keyDownEvent || window.event;
+	
+	//keyDownEvent.preventDefault();
+	
+	var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
+	var character = String.fromCharCode(charCode);
+	var combo = getCombo(keyDownEvent);
+	var key = keyDownEvent.key || null; // Null so that it will not be the same as undefined
+	var preventDefault = false;
+	var funReturn;
+	var captured = false;
+	var charCodeShift = 16;
+	var charCodeCtrl = 17;
+	var charCodeAlt = 18;
+	var gotError;
+	var targetElementClass = keyDownEvent.target.className;
+	
+	/*
+		var backspaceCharCode = 8;
+		if(charCode == backspaceCharCode) {
+		tempTest--;
+		
+		var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+		//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+		var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+		ctx.fillStyle = EDITOR.settings.style.bgColor;
+		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
+		ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+		return;
+		
 		}
-		
-		if(eventObject.altKey) {
-			combo.alt = true;
-			combo.sum  += ALT;
+	*/
+	
+	console.log("keyDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+	
+	// Mac command key ?
+	if(charCode == charCodeCtrl) {
+		console.log("recognition start! (keyDown Ctrl)");
+		if(recognition) {
+			try {
+				recognition.start();
+			}
+			catch(err) {
+				console.warn(err.message);
+			}
 		}
-		
-		if(eventObject.ctrlKey) {
-			combo.ctrl = true;
-			combo.sum  += CTRL;
-		}
-		
-		return combo;
+	}
+	//else console.log("recognition: Not ctrl! charCode=" + charCode);
+	
+	
+	
+	// Prevent unsupported combo error ? 
+	// But what if we want a binding of *just* ALT!?
+	// Can't have that or it will mess all native combos. You need to bind to shift|alt|ctrl PLUS something else
+	// Shift <> stopped working
+	
+	if(charCode == charCodeCtrl) return true; // Ctrl
+	if(charCode == charCodeAlt) return true; // ALT
+	
+	if(combo.alt && combo.shift) {
+		console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
 	}
 	
-	function keyIsUp(keyUpEvent) {
+	// Be aware of OS/shell specific key bindings! If there for example is a Gnome shell keybinding for Ctrl+Alt+Arrow (switiching workspace) the editor wont capture it! (the arrow key)
+	
+	
+	// PS. Alt Gr = Ctrl+Alt
+	// AltGr is the same as hitting Ctrl+ Alt
+	
+	// You probably want to use bindKey instead of eventListeners.keyDown!
+	var f = EDITOR.eventListeners.keyDown.map(funMap);
+	//console.log("Calling keyDown listeners (" + f.length + ") ...");
+	for(var i=0; i<f.length; i++) {
+		funReturn = f[i](EDITOR.currentFile, character, combo, keyDownEvent); // Call function
 		
-		keyUpEvent = keyUpEvent || window.event; 
-		
-		//keyUpEvent.preventDefault();
-		
-		if(keyUpEvent.type=="keyup") EDITOR.hasKeyboard = true;
-		
-		var charCode = keyUpEvent.charCode || keyUpEvent.keyCode;
-		var character = String.fromCharCode(charCode);
-		var combo = getCombo(keyUpEvent);
-		var funReturn;
-		var preventDefault = false;
-		
-		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
-		
-		/*
-			
-			if(EDITOR.currentFile) {
-			// Handle the special tidle key: Puts a ~ ^ or " over a character
-			// Is it only the swedish keyboard layout that does this!?
-			// OMG! This might become very messy
-			var spaceKey = 32;
-			if(charCode == spaceKey) {
-			//console.log("tildeActive=" + tildeActive);
-			//console.log("tildeAltActive=" + tildeAltActive);
-			//console.log("tildeShiftActive=" + tildeShiftActive);
-			
-			if(tildeActive) {
-			// Put two dots over the letter
-			
-			}
-			else if(tildeAltActive) {
-			EDITOR.currentFile.putCharacter("~");
-			EDITOR.renderNeeded();
-			}
-			else if(tildeShiftActive) {
-			EDITOR.currentFile.putCharacter("^");
-			EDITOR.renderNeeded();
-			}
-			}
-			}
-			
-			
-			// Handle the tilde key: Puts a ~ ^ or " over a character
-			var altGr = 225;
-			var shiftKey = 16;
-			var tildeKey = 221;
-			
-			if(charCode == tildeKey) {
-			if(lastKeyDown == shiftKey) {
-			tildeShiftActive = true;
-			}
-			else if(lastKeyDown == altGr) {
-			tildeAltActive = true;
-			}
-			else {
-			tildeActive = true;
-			}
-			}
-			else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
-			tildeActive = false;
-			tildeShiftActive = false;
-			tildeAltActive = false;
-			}
-			//console.log("a tildeActive=" + tildeActive);
-			//console.log("a tildeAltActive=" + tildeAltActive);
-			//console.log("a tildeShiftActive=" + tildeShiftActive);
-			
-			
-		*/
-		
+		if(funReturn === false) {
+			preventDefault = true;
+			console.log("keyIsDown: Default browser action prevented by keyDown listener " + UTIL.getFunctionName(f[i]) + "!");
+		}
+	}
+	
+	if(!preventDefault) {
 		// Check key bindings
-		var targetElementClass = keyUpEvent.target.className;
+		var capturedBy = [];
+		var f = [];
+		console.log("combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
 		for(var i=0, binding; i<keyBindings.length; i++) {
 			
 			binding = keyBindings[i];
 			
-			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
-				
-				console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
-				
-				funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up", targetElementClass, keyUpEvent);
-				
-				// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
-				
-				if(funReturn === false) {
-					preventDefault = true;
-					console.log("Default action will be prevented!");
-				}
-				else if(funReturn !== true) {
-					throw new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action.");
-				}
-				
-			}
+			/*
+				console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
+				" char=" + (binding.char == character || binding.charCode == charCode) +
+				" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
+				" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
+				" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
+			*/
 			
-		}
-		
-		var charCodeCtrl = 17;
-		if(charCode == charCodeCtrl) {
-			console.log("recognition stop! (keyUp Ctrl)");
-			if(recognition) {
-				recognition.stop();
-			}
-		}
-		//else console.log("recognition: Not ctrl! charCode=" + charCode);
-		
-		EDITOR.interact("keyUp", keyUpEvent);
-		
-		if(preventDefault) {
-			console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
-			if(typeof keyUpEvent.preventDefault == "function") keyUpEvent.preventDefault();
-			return false;
-		}
-		else {
-			console.log("keyIsUp: Default browser action allowed ... key=" + keyUpEvent.key + "");
-			return true;
-		}
-	}
-	
-	function isInputElement(el) {
-		return el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA");
-	}
-	
-	function mouseDown(mouseDownEvent) {
-		
-		mouseDownEvent = mouseDownEvent || window.event;
-		
-		EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
-		// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
-		
-		if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
-		
-		EDITOR.touchDown = true;
-		
-		//if(dropdownMenuRoot && !dropdownMenuRoot.active) dropdownMenuRoot.hide(true);
-		
-		//console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
-		
-		window.focus(); // Enable capturing key events if we are in an iframe
-		
-		var mouse = getMousePosition(mouseDownEvent);
-		var mouseX = mouse.x;
-		var mouseY = mouse.y;
-		
-		var caret;
-		var button = mouseDownEvent.button;
-		var click;
-		var target = mouseDownEvent.target;
-		var mouseDirection = "down";
-		var preventDefault = false;
-		var keyboardCombo = getCombo(mouseDownEvent);
-		var funReturn;
-		
-		//UTIL.objInfo(target);
-		var leftMouseButton = 0;
-		var rightMouseButton = 2;
-		var maybeCenterMouseButton = 1;
-		
-		if(button == undefined) button = leftMouseButton; // For like touch events
-		
-		var menu = document.getElementById("canvasContextmenu");
-		
-		console.log("mouseDown on target.className=" + target.className);
-		
-		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
-			
-			EDITOR.windowMenu.hide();
-			
-			// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
-			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.ctxMenu.hide();
-			
-			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-			
-			
-			if(EDITOR.currentFile && (button == leftMouseButton)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
-				// Give focus
-				EDITOR.input = true;
+			if( (binding.char === character || binding.charCode === charCode || binding.key === key) && // === so that undefined doesn't match null
+			(binding.combo == combo.sum || binding.combo === undefined) && 
+			(binding.dir == "down" || binding.dir === undefined) && // down is the default direction
+			(binding.mode == EDITOR.mode || binding.mode == "*") ) {
 				
-				// Remove focus from everything else
-				if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-				else console.log("mouseDown: Unable to blur active element!:");
-				
-				canvas.focus();
-				
-				// Delete selection outside of the canvas
-				window.getSelection().removeAllRanges();
-				
-				/*
-					Try to steal focus from any textboxes like find/replace.
-					
-					Meh, why doesn't this work!!!?
-					
-					
-					document.body.focus(); // EDITOR.currentFile.canvas
-					
-					document.getElementById("leftColumn").focus();
-					
-					console.log("REFOCUS!");
-				*/
-			}
-			else if(button !== leftMouseButton) {
-				
-				// No current file. Or not the left button.
-				
-				EDITOR.input = false;
-				
-				EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
-				
-			}
-			
-		}
-		else{
-			
-			console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
-			EDITOR.input = false;
-			
-			if(targetIsDashboard(target)) {
-				if(button == leftMouseButton) {
-					EDITOR.ctxMenu.hide();
+				if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
+					throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
 				}
 				else {
-					EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+					
+					f.push(binding.fun);
+					
 				}
+			}
+			else {
+				//console.log("NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
+			}
+		}
+		
+		// call them
+		for(var i=0; i<f.length; i++) {
+			console.log("keyDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
+			
+			if(captured) {
+				console.warn("Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
+			}
+			
+			captured = true;
+			capturedBy.push(f[i]);
+			
+			if(!EDITOR.currentFile) console.warn("No file open!");
+			
+			funReturn = f[i](EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
+			
+			//console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
+			
+			if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
+				preventDefault = true;
+				console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
+			}
+			else if(funReturn !== true) {
+				throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
+				like typing in input boxes, tabbing between elements, etc. function called: " + UTIL.getFunctionName(binding.fun));
+			}
+		}
+		
+	}
+	
+	// Throwing the actual error here doesn't give a call stack! meh ... Need to see the console.warning to see the call stack
+	//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
+	// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
+	
+	if(EDITOR.currentFile) {
+		EDITOR.currentFile.checkGrid();
+		EDITOR.currentFile.checkCaret();
+	}
+	
+	EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: keyDownEvent.shiftKey, altKey: keyDownEvent.altKey, ctrlKey: keyDownEvent.ctrlKey});
+	
+	var leftWindowKey = 91; // Command key on Mac
+	var rightWindowKey = 92;
+	
+	var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
+	var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
+	
+	console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " BROWSER=" + BROWSER + " MAC=" + MAC);
+	
+	if((combo.sum > 0 || metaCmdKey) && !captured) {
+		// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
+		
+		if( (combo.ctrl || metaCmdKey) && character == "C") {
+			console.log("Native command: copy !? MAC=" + MAC);
+			
+			if(MAC) nativeCopy = true;
+			
+			if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+				giveBackFocusAfterClipboardEvent = true;
+				
+				var clipboardcatcher = document.getElementById("clipboardcatcher");
+				clipboardcatcher.focus();
+				
+				var textToPutOnClipboard = "";
+				
+				if(EDITOR.currentFile) {
+					textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+				}
+				
+				clipboardcatcher.value = textToPutOnClipboard;
+				clipboardcatcher.select();
+				
+				//preventDefault = true;
+			}
+		}
+		else if( (combo.ctrl || metaCmdKey) && character == "V") {
+			console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+			
+			if(MAC) nativePaste = true;
+			
+			if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+				giveBackFocusAfterClipboardEvent = true;
+				
+				// Problem: If alertBox button was clicked, it takes 500ms to get focus back to canvas. 
+				// But if we paste before that, input will be false.
+				
+				var clipboardcatcher = document.getElementById("clipboardcatcher");
+				clipboardcatcher.focus();
+				
+				//preventDefault = true;
+			}
+		}
+		else if( (combo.ctrl || metaCmdKey) && character == "X") {
+			console.log("Native command: cut !?");
+			
+			if(MAC) nativeCut = true;
+			
+			if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+				giveBackFocusAfterClipboardEvent = true;
+				
+				var clipboardcatcher = document.getElementById("clipboardcatcher");
+				clipboardcatcher.focus();
+				
+				var textToPutOnClipboard = "";
+				
+				if(EDITOR.currentFile) {
+					textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+					
+					// Delete the selected text
+					//EDITOR.currentFile.deleteSelection();
+				}
+				
+				clipboardcatcher.value = textToPutOnClipboard;
+				clipboardcatcher.select();
+				
+				//preventDefault = true;
+				
+			}
+		}
+		else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
+		else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
+		else if(combo.alt) {} // Wait for ALT+key combo!
+		else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
+		else if(windowKey) {console.log("Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
+		else if(metaCmdKey) {console.log("meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
+		//else if(combo.shift) {} // Wait for Shift+key combo!
+		//&&//&&//
+		else {
+			throw Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode);
+			
+			preventDefault = true;
+		}
+		
+	}
+	
+	lastKeyDown = charCode;
+	
+	// In case the user has no mouse, pressing Enter should hide the "Right click to show the menu" message
+	if(!ctxMenuVisibleOnce && charCode == 13) {
+		ctxMenuVisibleOnce = true;
+		
+		// Can not give editor input or prevent default as that would prevent form submit by pressing Enter.
+		//EDITOR.input = true;
+		//preventDefault = true;
+		EDITOR.renderNeeded();
+	}
+	
+	if(preventDefault) {
+		//alert("Preventing default browser action!");
+		console.log("keyIsDown: Preventing default browser action!");
+		
+		if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
+		if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
+		if(typeof keyDownEvent.preventDefault == "function") keyDownEvent.preventDefault();
+		if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+		
+		return false;
+	}
+	else {
+		//console.log("Executing default browser/OS action ...");
+		
+		return true;
+	}
+	
+	
+}
+
+function getCombo(eventObject) {
+	
+	var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+	
+	if(eventObject.shiftKey) {
+		combo.shift = true;
+		combo.sum += SHIFT;
+	}
+	
+	if(eventObject.altKey) {
+		combo.alt = true;
+		combo.sum  += ALT;
+	}
+	
+	if(eventObject.ctrlKey) {
+		combo.ctrl = true;
+		combo.sum  += CTRL;
+	}
+	
+	return combo;
+}
+
+function keyIsUp(keyUpEvent) {
+	
+	keyUpEvent = keyUpEvent || window.event; 
+	
+	//keyUpEvent.preventDefault();
+	
+	if(keyUpEvent.type=="keyup") EDITOR.hasKeyboard = true;
+	
+	var charCode = keyUpEvent.charCode || keyUpEvent.keyCode;
+	var character = String.fromCharCode(charCode);
+	var combo = getCombo(keyUpEvent);
+	var funReturn;
+	var preventDefault = false;
+	
+	console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
+	
+	/*
+		
+		if(EDITOR.currentFile) {
+		// Handle the special tidle key: Puts a ~ ^ or " over a character
+		// Is it only the swedish keyboard layout that does this!?
+		// OMG! This might become very messy
+		var spaceKey = 32;
+		if(charCode == spaceKey) {
+		//console.log("tildeActive=" + tildeActive);
+		//console.log("tildeAltActive=" + tildeAltActive);
+		//console.log("tildeShiftActive=" + tildeShiftActive);
+		
+		if(tildeActive) {
+		// Put two dots over the letter
+		
+		}
+		else if(tildeAltActive) {
+		EDITOR.currentFile.putCharacter("~");
+		EDITOR.renderNeeded();
+		}
+		else if(tildeShiftActive) {
+		EDITOR.currentFile.putCharacter("^");
+		EDITOR.renderNeeded();
+		}
+		}
+		}
+		
+		
+		// Handle the tilde key: Puts a ~ ^ or " over a character
+		var altGr = 225;
+		var shiftKey = 16;
+		var tildeKey = 221;
+		
+		if(charCode == tildeKey) {
+		if(lastKeyDown == shiftKey) {
+		tildeShiftActive = true;
+		}
+		else if(lastKeyDown == altGr) {
+		tildeAltActive = true;
+		}
+		else {
+		tildeActive = true;
+		}
+		}
+		else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
+		tildeActive = false;
+		tildeShiftActive = false;
+		tildeAltActive = false;
+		}
+		//console.log("a tildeActive=" + tildeActive);
+		//console.log("a tildeAltActive=" + tildeAltActive);
+		//console.log("a tildeShiftActive=" + tildeShiftActive);
+		
+		
+	*/
+	
+	// Check key bindings
+	var targetElementClass = keyUpEvent.target.className;
+	for(var i=0, binding; i<keyBindings.length; i++) {
+		
+		binding = keyBindings[i];
+		
+		if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+			
+			console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
+			
+			funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up", targetElementClass, keyUpEvent);
+			
+			// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
+			
+			if(funReturn === false) {
+				preventDefault = true;
+				console.log("Default action will be prevented!");
+			}
+			else if(funReturn !== true) {
+				throw new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action.");
 			}
 			
 		}
 		
-		function targetIsDashboard(targetElement) {
-			while(targetElement.parentElement) {
-				if(targetElement.className == "dashboard") return true;
-				targetElement = targetElement.parentElement
+	}
+	
+	var charCodeCtrl = 17;
+	if(charCode == charCodeCtrl) {
+		console.log("recognition stop! (keyUp Ctrl)");
+		if(recognition) {
+			recognition.stop();
+		}
+	}
+	//else console.log("recognition: Not ctrl! charCode=" + charCode);
+	
+	EDITOR.interact("keyUp", keyUpEvent);
+	
+	if(preventDefault) {
+		console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
+		if(typeof keyUpEvent.preventDefault == "function") keyUpEvent.preventDefault();
+		return false;
+	}
+	else {
+		console.log("keyIsUp: Default browser action allowed ... key=" + keyUpEvent.key + "");
+		return true;
+	}
+}
+
+function isInputElement(el) {
+	return el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA");
+}
+
+function mouseDown(mouseDownEvent) {
+	
+	mouseDownEvent = mouseDownEvent || window.event;
+	
+	EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
+	// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
+	
+	if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
+	
+	EDITOR.touchDown = true;
+	
+	//if(dropdownMenuRoot && !dropdownMenuRoot.active) dropdownMenuRoot.hide(true);
+	
+	//console.log("Changed EDITOR.lastElementWithFocus to id=" + EDITOR.lastElementWithFocus.id + " class=" + EDITOR.lastElementWithFocus.class);
+	
+	window.focus(); // Enable capturing key events if we are in an iframe
+	
+	var mouse = getMousePosition(mouseDownEvent);
+	var mouseX = mouse.x;
+	var mouseY = mouse.y;
+	
+	var caret;
+	var button = mouseDownEvent.button;
+	var click;
+	var target = mouseDownEvent.target;
+	var mouseDirection = "down";
+	var preventDefault = false;
+	var keyboardCombo = getCombo(mouseDownEvent);
+		
+	
+	//UTIL.objInfo(target);
+	var leftMouseButton = 0;
+	var rightMouseButton = 2;
+	var maybeCenterMouseButton = 1;
+	
+	if(button == undefined) button = leftMouseButton; // For like touch events
+	
+	var menu = document.getElementById("canvasContextmenu");
+	
+	console.log("mouseDown on target.className=" + target.className);
+	
+	if(target.className == "fileCanvas" || target.className == "content centerColumn") {
+		
+		EDITOR.windowMenu.hide();
+		
+		// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
+		if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.ctxMenu.hide();
+		
+		caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+		
+		
+		if(EDITOR.currentFile && (button == leftMouseButton)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			// Give focus
+			EDITOR.input = true;
+			
+			// Remove focus from everything else
+			if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+			else console.log("mouseDown: Unable to blur active element!:");
+			
+			canvas.focus();
+			
+			// Delete selection outside of the canvas
+			window.getSelection().removeAllRanges();
+			
+			/*
+				Try to steal focus from any textboxes like find/replace.
+				
+				Meh, why doesn't this work!!!?
+				
+				
+				document.body.focus(); // EDITOR.currentFile.canvas
+				
+				document.getElementById("leftColumn").focus();
+				
+				console.log("REFOCUS!");
+			*/
+		}
+		else if(button !== leftMouseButton) {
+			
+			// No current file. Or not the left button.
+			
+			EDITOR.input = false;
+			
+			EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+			
+		}
+		
+	}
+	else{
+		
+		console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
+		EDITOR.input = false;
+		
+		if(targetIsDashboard(target)) {
+			if(button == leftMouseButton) {
+				EDITOR.ctxMenu.hide();
 			}
-			return false;
+			else {
+				EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+			}
 		}
 		
-		if(target.className == "fileCanvas") {
-			// Prevent whatever nasty thing the browser wants to do
-			// like zooming out etc.
-			mouseDownEvent.preventDefault();
+	}
+	
+	function targetIsDashboard(targetElement) {
+		while(targetElement.parentElement) {
+			if(targetElement.className == "dashboard") return true;
+			targetElement = targetElement.parentElement
 		}
-		
-		console.log("mouseDown:  caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
-		console.log(mouseDownEvent);
-		
-		console.log("mouseDown: Calling mouseClick (down) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		return false;
+	}
+	
+	if(target.className == "fileCanvas") {
+		// Prevent whatever nasty thing the browser wants to do
+		// like zooming out etc.
+		mouseDownEvent.preventDefault();
+	}
+	
+	console.log("mouseDown:  caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
+	console.log(mouseDownEvent);
+	
+		var f = [];
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
+		
+		click = EDITOR.eventListeners.mouseClick[i];
+		
+		if((click.dir == "down" || click.dir == undefined) && 
+		(click.button == button || click.button == undefined) && 
+		(click.targetClass == target.className || click.targetClass == undefined) && 
+		(click.combo == keyboardCombo.sum || click.combo === undefined) &&
+		(click.targetTag == target.tagName || click.targetTag == undefined)
+		) {
+				f.push(click.fun);
+		}
+	}
+		
+		var funReturn;
+		console.log("mouseDown: Calling mouseClick (down) listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			// Note that caret is a temporary position caret (not the current file.caret)!
 			
-			click = EDITOR.eventListeners.mouseClick[i];
+			funReturn = f[i](mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
 			
-			if((click.dir == "down" || click.dir == undefined) && 
-			(click.button == button || click.button == undefined) && 
-			(click.targetClass == target.className || click.targetClass == undefined) && 
-			(click.combo == keyboardCombo.sum || click.combo === undefined) &&
-			(click.targetTag == target.tagName || click.targetTag == undefined)
-			) {
-				
-				// Note that caret is a temporary position caret (not the current file.caret)!
-				
-				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
-				
-				console.log("mouseDown: mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseDown returned " + funReturn);
-				
-				if(funReturn === false) {
-					preventDefault = true;
-					console.log("mouseDown: " + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
-					break;
-				}
-				else if(funReturn !== true) {
-					throw new Error(UTIL.getFunctionName(click.fun) + " did not return true or false!");
-				}
-				
+			console.log("mouseDown: mouseClick event " + UTIL.getFunctionName(f[i]) + " for mouseDown returned " + funReturn);
+			
+			if(funReturn === false) {
+				preventDefault = true;
+				console.log("mouseDown: " + UTIL.getFunctionName(f[i]) + " prevented other mouseClick actions!");
+				break;
+			}
+			else if(funReturn !== true) {
+				throw new Error(UTIL.getFunctionName(f[i]) + " did not return true or false!");
 			}
 		}
 		
 		if(mouseDownEvent.type == "touchstart" && recognition) {
-			// Dont start recording right away, because Android makes a very annoying sound when the recordning starts.
-			setTimeout(function stillDownMaybe() {
-				if(!EDITOR.touchDown) return;
-				try {
+		// Dont start recording right away, because Android makes a very annoying sound when the recordning starts.
+		setTimeout(function stillDownMaybe() {
+			if(!EDITOR.touchDown) return;
+			try {
 				recognition.start();
 			}
 			catch(err) {
-					console.warn("mouseDown: speach recognition error: " + err.message);
+				console.warn("mouseDown: speach recognition error: " + err.message);
 			}
-			}, 400);
-		}
+		}, 400);
+	}
+	
+	lastMouseDownEventType = mouseDownEvent.type;
+	
+	var el = EDITOR.lastElementWithFocus || mouseDownEvent.target;
+	// selectionStart etc seem to get lost when the element lose focus, so save it!
+	// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
+	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
+	if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
+	if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
+	
+	EDITOR.interact("mouseDown", mouseDownEvent);
+	
+	if(preventDefault) {
+		console.log("mouseDown:Preventing default!");
+		mouseDownEvent.preventDefault(); // To prevent the annoying menus
+		mouseDownEvent.stopPropagation();
+		return false;
+	}
+	
+	//return true;
+	
+}
+
+
+function mouseUp(mouseUpEvent) {
+	console.time("mouseUp");
+	
+	mouseUpEvent = mouseUpEvent || window.event;
+	
+	EDITOR.touchDown = false;
+	
+	// Mouse position is on the current object (Canvas)
+	var mouse = getMousePosition(mouseUpEvent);
+	var mouseX = mouse.x;
+	var mouseY = mouse.y;
+	
+	var caret;
+	var button = mouseUpEvent.button;
+	var click;
+	var target = mouseUpEvent.target;
+	var keyboardCombo = getCombo(mouseUpEvent);
+	var mouseDirection = "up";
+	
+	if(button == undefined) button = 0; // For like touch events
+	
+	console.log("Mouse up on class " + target.className + "!");
+	console.log(mouseUpEvent);
+	
+	if(target.className == "fileCanvas") {
 		
-		lastMouseDownEventType = mouseDownEvent.type;
-		
-		var el = EDITOR.lastElementWithFocus || mouseDownEvent.target;
-		// selectionStart etc seem to get lost when the element lose focus, so save it!
-		// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
-		if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
-		if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
-		if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
-		
-		EDITOR.interact("mouseDown", mouseDownEvent);
-		
-		if(preventDefault) {
-			console.log("mouseDown:Preventing default!");
-			mouseDownEvent.preventDefault(); // To prevent the annoying menus
-			mouseDownEvent.stopPropagation();
-			return false;
-		}
-		
-		//return true;
+		// Only get a caret if the click is on the canvas 
+		caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 		
 	}
 	
+	if(target.className == "fileCanvas") {
+		// Prevent whatever nasty thing the browser wants to do
+		// like zooming out etc.
+		mouseUpEvent.preventDefault();
+	}
 	
-	function mouseUp(mouseUpEvent) {
-		console.time("mouseUp");
+	console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+	console.time("mouseClick listeners");
+	var funReturn = true;
+	var preventDefault = false;
+		var f = [];
+	for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
+		click = EDITOR.eventListeners.mouseClick[i];
 		
-		mouseUpEvent = mouseUpEvent || window.event;
-		
-		EDITOR.touchDown = false;
-		
-		// Mouse position is on the current object (Canvas)
-		var mouse = getMousePosition(mouseUpEvent);
-		var mouseX = mouse.x;
-		var mouseY = mouse.y;
-		
-		var caret;
-		var button = mouseUpEvent.button;
-		var click;
-		var target = mouseUpEvent.target;
-		var keyboardCombo = getCombo(mouseUpEvent);
-		var mouseDirection = "up";
-		
-		if(button == undefined) button = 0; // For like touch events
-		
-		console.log("Mouse up on class " + target.className + "!");
-		console.log(mouseUpEvent);
-		
-		if(target.className == "fileCanvas") {
-			
-			// Only get a caret if the click is on the canvas 
-			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-			
+		// Make sure to define click.dir (to prevent double action)!
+		if((click.dir == "up" || click.dir == undefined) && 
+		(click.button == button || click.button == undefined) && 
+		(click.targetClass == target.className || click.targetClass == undefined) && 
+		(click.combo == keyboardCombo.sum || click.combo == undefined) && 
+		(click.targetTag == target.tagName || click.targetTag == undefined)
+		) {
+				f.push(click.fun);
 		}
+	}
 		
-		if(target.className == "fileCanvas") {
-			// Prevent whatever nasty thing the browser wants to do
-			// like zooming out etc.
-			mouseUpEvent.preventDefault();
-		}
-		
-		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
-		console.time("mouseClick listeners");
-		var funReturn = true;
-		var preventDefault = false;
-		
-		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
-			click = EDITOR.eventListeners.mouseClick[i];
+		var fName;
+		for(var i=0; i<f.length; i++) {
+			fName = UTIL.getFunctionName(f[i])
+			console.time(fName);
+			funReturn = f[i](mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
+			console.timeEnd(fName);
 			
-			// Make sure to define click.dir (to prevent double action)!
-			if((click.dir == "up" || click.dir == undefined) && 
-			(click.button == button || click.button == undefined) && 
-			(click.targetClass == target.className || click.targetClass == undefined) && 
-			(click.combo == keyboardCombo.sum || click.combo == undefined) && 
-			(click.targetTag == target.tagName || click.targetTag == undefined)
-			) {
-				
-				var fName = UTIL.getFunctionName(click.fun)
-				console.time(fName);
-				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
-				console.timeEnd(fName);
-				
-				console.log("mouseClick event " + UTIL.getFunctionName(click.fun) + " for mouseUp returned " + funReturn);
-				
-				if(funReturn === false) {
-					preventDefault = true;
-					console.log("" + UTIL.getFunctionName(click.fun) + " prevented other mouseClick actions!");
-					break;
-				}
-				else if(funReturn !== true) {
-					throw new Error(UTIL.getFunctionName(click.fun) + " did not return true or false!");
-				}
-				
+			console.log("mouseClick event " + fName + " for mouseUp returned " + funReturn);
+			
+			if(funReturn === false) {
+				preventDefault = true;
+				console.log("" + fName + " prevented other mouseClick actions!");
+				break;
+			}
+			else if(funReturn !== true) {
+				throw new Error(fName + " did not return true or false!");
 			}
 		}
+		
 		console.timeEnd("mouseClick listeners");
-		console.timeEnd("mouseUp");
-		
-		//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
-		
-		if(mouseUpEvent.type == "touchstart" && recognition) {
-			recognition.stop();
-		}
-		
-		var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
-		// selectionStart etc seem to get lost when the element lose focus, so save it!
-		if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
-		if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
-		if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
-		
-		EDITOR.interact("mouseUp", mouseUpEvent);
-		
-		if(preventDefault) {
-			console.log("mouseUp: Preventing default!");
-			if(typeof mouseUpEvent.preventDefault == "function") mouseUpEvent.preventDefault();
-			if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
-			return false;
-		}
-		}
+	console.timeEnd("mouseUp");
 	
-	function getMousePosition(mouseEvent) {
-		
-		// Mouse position is on the current element (most likely Canvas) 
-		
-		// We might get an error if running in an iframe: Error: Permission denied to access property "offsetX"
-		try {
-			var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
+	//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
+	
+	if(mouseUpEvent.type == "touchstart" && recognition) {
+		recognition.stop();
+	}
+	
+	var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
+	// selectionStart etc seem to get lost when the element lose focus, so save it!
+	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
+	if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
+	if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
+	
+	EDITOR.interact("mouseUp", mouseUpEvent);
+	
+	if(preventDefault) {
+		console.log("mouseUp: Preventing default!");
+		if(typeof mouseUpEvent.preventDefault == "function") mouseUpEvent.preventDefault();
+		if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
+		return false;
+	}
+}
+
+function getMousePosition(mouseEvent) {
+	
+	// Mouse position is on the current element (most likely Canvas) 
+	
+	// We might get an error if running in an iframe: Error: Permission denied to access property "offsetX"
+	try {
+		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
-		}
-		catch(err) {
-			console.warn(err.message);
-		}
+	}
+	catch(err) {
+		console.warn(err.message);
+	}
+	
+	//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
+	
+	if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
+		EDITOR.canvasMouseX = mouseX;
+		EDITOR.canvasMouseY = mouseY;
+	}
+	
+	/*
+		if(e.page) console.log("mouseEvent.page.x=" + mouseEvent.page.x);
+		if(mouseEvent.changedTouches) console.log("mouseEvent.changedTouches[" + (mouseEvent.changedTouches.length-1) + "]=" + mouseEvent.changedTouches[e.changedTouches.length-1].pageX);
+		console.log("mouseEvent.x=" + e.x);
+		console.log("mouseEvent.offsetX=" + e.offsetX);
+		console.log("mouseEvent.layerX=" + e.layerX);
+	*/
+	
+	if(UTIL.isNumeric(mouseEvent.clientX) && UTIL.isNumeric(mouseEvent.clientY)) {
+		// clientX and clientY is always on the window/veiwport!
+		EDITOR.mouseX = parseInt(mouseEvent.clientX);
+		EDITOR.mouseY = parseInt(mouseEvent.clientY);
+	}
+	
+	var badLocation = mouseX == undefined || mouseY == undefined || mouseX <= 0 || mouseY <= 0;
+	
+	if(mouseEvent.changedTouches && badLocation) {
 		
-		//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
+		mouseX = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageX); // pageX
+		mouseY = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageY);
 		
-		if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
+		// The editor doesn't allow scrolling, so pageX is thus the same as clientX !
+		
+		// Touch events only have pageX which is the whole page. We only want the position on the canvas !?
+		if(mouseEvent.target == canvas) {
+			var rect = canvas.getBoundingClientRect();
+			//console.log(rect.top, rect.right, rect.bottom, rect.left);
+			mouseX = mouseX - rect.left;
+			mouseY = mouseY - rect.top;
+			
 			EDITOR.canvasMouseX = mouseX;
 			EDITOR.canvasMouseY = mouseY;
-		}
-		
-		/*
-			if(e.page) console.log("mouseEvent.page.x=" + mouseEvent.page.x);
-			if(mouseEvent.changedTouches) console.log("mouseEvent.changedTouches[" + (mouseEvent.changedTouches.length-1) + "]=" + mouseEvent.changedTouches[e.changedTouches.length-1].pageX);
-			console.log("mouseEvent.x=" + e.x);
-			console.log("mouseEvent.offsetX=" + e.offsetX);
-			console.log("mouseEvent.layerX=" + e.layerX);
-		*/
-		
-		if(UTIL.isNumeric(mouseEvent.clientX) && UTIL.isNumeric(mouseEvent.clientY)) {
-			// clientX and clientY is always on the window/veiwport!
-			EDITOR.mouseX = parseInt(mouseEvent.clientX);
-			EDITOR.mouseY = parseInt(mouseEvent.clientY);
-		}
-		
-		var badLocation = mouseX == undefined || mouseY == undefined || mouseX <= 0 || mouseY <= 0;
-		
-		if(mouseEvent.changedTouches && badLocation) {
 			
-			mouseX = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageX); // pageX
-			mouseY = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageY);
-			
-			// The editor doesn't allow scrolling, so pageX is thus the same as clientX !
-			
-			// Touch events only have pageX which is the whole page. We only want the position on the canvas !?
-			if(mouseEvent.target == canvas) {
-				var rect = canvas.getBoundingClientRect();
-				//console.log(rect.top, rect.right, rect.bottom, rect.left);
-				mouseX = mouseX - rect.left;
-				mouseY = mouseY - rect.top;
-				
-				EDITOR.canvasMouseX = mouseX;
-				EDITOR.canvasMouseY = mouseY;
-				
-			}
-			else {
-				EDITOR.mouseX = mouseX;
-				EDITOR.mouseY = mouseY;
-			}
-			
-		}
-		
-		if(mouseX == undefined && mouseY == undefined) {
-			if(mouseEvent.target == canvas) {
-				mouseX = EDITOR.canvasMouseX;
-				mouseY = EDITOR.canvasMouseY;
-			}
-			else {
-				mouseX = EDITOR.mouseX;
-				mouseY = EDITOR.mouseY;
-			}
-			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
-		}
-		
-		//console.log("mouseX=" + mouseX);
-		//console.log("mouseY=" + mouseY);
-		
-		if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
-			throw new Error("Mouse position is unknown!");
 		}
 		else {
-			return {x: mouseX, y: mouseY};
+			EDITOR.mouseX = mouseX;
+			EDITOR.mouseY = mouseY;
 		}
 		
 	}
 	
-	function mouseMove(mouseMoveEvent) {
-		
-		mouseMoveEvent = mouseMoveEvent || window.event;
-		
-		//console.log(mouseMoveEvent);
-		
-		//mouseMoveEvent.preventDefault();
-		
-		var mouse = getMousePosition(mouseMoveEvent); // Sets EDITOR.mouseX&Y and EDITOR.canvasMouseX&Y
-		var mouseX = mouse.x;
-		var mouseY = mouse.y;
-		var target = mouseMoveEvent.target;
-		
-		
-		//console.log("mouseY=" + mouseY);
-		
-		if(EDITOR.eventListeners.mouseMove.length > 0) {
-			//console.log("Calling mouseMove listeners (" + EDITOR.eventListeners.mouseMove.length + ") ...");
-			for(var i=0, fun; i<EDITOR.eventListeners.mouseMove.length; i++) {
-				fun = EDITOR.eventListeners.mouseMove[i].fun;
-				
-				//console.log(UTIL.getFunctionName(fun));
-				
-				fun(mouseX, mouseY, target, mouseMoveEvent); // Call it
-				
-			}
+	if(mouseX == undefined && mouseY == undefined) {
+		if(mouseEvent.target == canvas) {
+			mouseX = EDITOR.canvasMouseX;
+			mouseY = EDITOR.canvasMouseY;
 		}
-		
-		//console.log("EDITOR.input=" + EDITOR.input);
-		
-		EDITOR.interact("mouseMove", mouseMoveEvent);
-		
-		// Canvas not available on IE before mouse move
-		if(typeof EDITOR.canvas != "undefined" && typeof EDITOR.canvas.style != "undefined") {
-			EDITOR.canvas.style.cursor = 'text';
+		else {
+			mouseX = EDITOR.mouseX;
+			mouseY = EDITOR.mouseY;
 		}
-		
-		//return false;
-		
+		console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
 	}
 	
-	function mouseclick(mouseClickEvent) {
-		/*
-			Check for the EDITOR.shouldRender flag and render if true
-			
-			For events that are not bound to mouseUp or mouseDown
-		*/
-		console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
-		
-		EDITOR.interact("mouseClick", mouseClickEvent);
-		
-		return true;
-		
+	//console.log("mouseX=" + mouseX);
+	//console.log("mouseY=" + mouseY);
+	
+	if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
+		throw new Error("Mouse position is unknown!");
+	}
+	else {
+		return {x: mouseX, y: mouseY};
 	}
 	
+}
+
+function mouseMove(mouseMoveEvent) {
 	
-	function dblclick(dblClickEvent) {
+	mouseMoveEvent = mouseMoveEvent || window.event;
+	
+	//console.log(mouseMoveEvent);
+	
+	//mouseMoveEvent.preventDefault();
+	
+	var mouse = getMousePosition(mouseMoveEvent); // Sets EDITOR.mouseX&Y and EDITOR.canvasMouseX&Y
+	var mouseX = mouse.x;
+	var mouseY = mouse.y;
+	var target = mouseMoveEvent.target;
+	
+	
+	//console.log("mouseY=" + mouseY);
+	
+		var f = EDITOR.eventListeners.mouseMove.map(funMap);
+		if(f.length > 0) {
+			//console.log("Calling mouseMove listeners (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
+			f[i](mouseX, mouseY, target, mouseMoveEvent); // Call it
+		}
+	}
+	
+	//console.log("EDITOR.input=" + EDITOR.input);
+	
+	EDITOR.interact("mouseMove", mouseMoveEvent);
+	
+	// Canvas not available on IE before mouse move
+	if(typeof EDITOR.canvas != "undefined" && typeof EDITOR.canvas.style != "undefined") {
+		EDITOR.canvas.style.cursor = 'text';
+	}
+	
+	//return false;
+	
+}
+
+function mouseclick(mouseClickEvent) {
+	/*
+		Check for the EDITOR.shouldRender flag and render if true
 		
-		dblClickEvent = dblClickEvent || window.event;
+		For events that are not bound to mouseUp or mouseDown
+	*/
+	console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
+	
+	EDITOR.interact("mouseClick", mouseClickEvent);
+	
+	return true;
+	
+}
+
+
+function dblclick(dblClickEvent) {
+	
+	dblClickEvent = dblClickEvent || window.event;
+	
+	// Mouse position is on the current object (Canvas) 
+	var mouseX = dblClickEvent.offsetX==undefined?dblClickEvent.layerX:dblClickEvent.offsetX;
+	var mouseY = dblClickEvent.offsetY==undefined?dblClickEvent.layerY:dblClickEvent.offsetY;
+	var caret;
+	var button = dblClickEvent.button;
+	var click;
+	var target = dblClickEvent.target;
+	var preventDefault = false;
+	var keyboardCombo = getCombo(dblClickEvent);
+	var funReturn;
+	
+	if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 		
-		// Mouse position is on the current object (Canvas) 
-		var mouseX = dblClickEvent.offsetX==undefined?dblClickEvent.layerX:dblClickEvent.offsetX;
-		var mouseY = dblClickEvent.offsetY==undefined?dblClickEvent.layerY:dblClickEvent.offsetY;
-		var caret;
-		var button = dblClickEvent.button;
-		var click;
-		var target = dblClickEvent.target;
-		var preventDefault = false;
-		var keyboardCombo = getCombo(dblClickEvent);
-		var funReturn;
+		caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 		
-		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
+		if(EDITOR.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 			
-			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+			// Remove focus from everything else
+			document.activeElement.blur();
 			
-			if(EDITOR.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
-				
-				// Remove focus from everything else
-				document.activeElement.blur();
-				
-				// Give focus
-				EDITOR.input = true;
-				canvas.focus();
-				
-				// Delete selection outside of the canvas
-				window.getSelection().removeAllRanges();
-				
-			}
+			// Give focus
+			EDITOR.input = true;
+			canvas.focus();
+			
+			// Delete selection outside of the canvas
+			window.getSelection().removeAllRanges();
 			
 		}
-		else{
-			if(EDITOR.currentFile) {
-				// Remove focus
-				EDITOR.input = false;
-			}
-		}
 		
+	}
+	else{
+		if(EDITOR.currentFile) {
+			// Remove focus
+			EDITOR.input = false;
+		}
+	}
+	
 		console.log("dblclick: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
-		
-		
-		console.log("Calling dblclick listeners (" + EDITOR.eventListeners.dblclick.length + ") ...");
+	
+		var f = [];
 		for(var i=0, binding; i<EDITOR.eventListeners.dblclick.length; i++) {
+		
+		click = EDITOR.eventListeners.dblclick[i];
+		
+		if((click.button == button || click.button == undefined) && 
+		(click.targetClass == target.className || click.targetClass == undefined) && 
+		(click.combo == keyboardCombo.sum || click.combo === undefined) &&
+		(click.targetTag == target.tagName || click.targetTag == undefined)
+		) {
+			f.push(click.fun);
+		}
+	}
+		
+		console.log("Calling dblclick listeners (" + f.length + ") ...");
+		for(var i=0; i<f.length; i++) {
+			//console.log("Calling " + UTIL.getFunctionName(f[i]) + " ...");
 			
-			click = EDITOR.eventListeners.dblclick[i];
+			// Note that caret is a temporary position caret (not the current file.caret)!
 			
-			if((click.button == button || click.button == undefined) && 
-			(click.targetClass == target.className || click.targetClass == undefined) && 
-			(click.combo == keyboardCombo.sum || click.combo === undefined) &&
-			(click.targetTag == target.tagName || click.targetTag == undefined)
-			) {
-				
-				//console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
-				
-				// Note that caret is a temporary position caret (not the current file.caret)!
-				
-				funReturn = click.fun(mouseX, mouseY, caret, button, target, keyboardCombo); // Call it
-				
-				if(funReturn === false) {
-					preventDefault = true;
-				}
-				
-				
+			funReturn = f[i](mouseX, mouseY, caret, button, target, keyboardCombo); // Call it
+			
+			if(funReturn === false) {
+				preventDefault = true;
 			}
 		}
 		
-		EDITOR.interact("dblclick", dblClickEvent);
 		
-		if(preventDefault) {
-			dblClickEvent.preventDefault(); // To prevent the annoying menus
-			return false;
-		}
-		
+	EDITOR.interact("dblclick", dblClickEvent);
+	
+	if(preventDefault) {
+		dblClickEvent.preventDefault(); // To prevent the annoying menus
+		return false;
 	}
 	
+}
+
+
+
+
+function scrollWheel(scrollWheelEvent) {
 	
+	scrollWheelEvent = scrollWheelEvent || window.event;
 	
+	console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
 	
-	function scrollWheel(scrollWheelEvent) {
-		
-		scrollWheelEvent = scrollWheelEvent || window.event;
-		
-		console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
-		
-		//console.log("wheelDelta=" + scrollWheelEvent.wheelDelta + " wheelDeltaY=" + scrollWheelEvent.wheelDeltaY + " deltaY=" + scrollWheelEvent.deltaY + " detail=" + scrollWheelEvent.detail );
-		
-		var delta = scrollWheelEvent.wheelDelta || -scrollWheelEvent.detail;
-		var target = scrollWheelEvent.target;
-		var tagName = target.tagName;
-		var combo = getCombo(scrollWheelEvent);
-		var dir = delta > 0 ? -1 : 1;
-		var steps = Math.abs(delta);
-		
-		console.log("Scrolling on " + tagName);
-		
-		if(tagName == "CANVAS") {
-			console.log("Calling mouseScroll listeners (" + EDITOR.eventListeners.mouseScroll.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.mouseScroll.length; i++) {
-				EDITOR.eventListeners.mouseScroll[i].fun(dir, steps, combo, scrollWheelEvent);
-			}
-		}
-		
-		EDITOR.interact("mouseScroll", scrollWheelEvent);
-		
-		return true;
-	}
+	//console.log("wheelDelta=" + scrollWheelEvent.wheelDelta + " wheelDeltaY=" + scrollWheelEvent.wheelDeltaY + " deltaY=" + scrollWheelEvent.deltaY + " detail=" + scrollWheelEvent.detail );
 	
+	var delta = scrollWheelEvent.wheelDelta || -scrollWheelEvent.detail;
+	var target = scrollWheelEvent.target;
+	var tagName = target.tagName;
+	var combo = getCombo(scrollWheelEvent);
+	var dir = delta > 0 ? -1 : 1;
+	var steps = Math.abs(delta);
 	
-	function getFile(url, callback) {
-		
-		console.log("Opening url:" + url);
-		
-		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.onreadystatechange = processRequest;
-		xmlHttp.open( "GET", url, true );
-		xmlHttp.send( null );
-		
-		function processRequest() {
-			if (xmlHttp.readyState == 4) {
-				
-				//console.log("xmlHttp.status=" + xmlHttp.status);
-				
-				if(xmlHttp.status == 200) {
-					
-					console.log("File loaded.");
-					
-					callback(null, xmlHttp.responseText, url);
-					
-				}
-				else {
-					callback(new Error("Error when opening url=" + url + "\nxmlHttp.status=" + xmlHttp.status + "\nxmlHttp.responseText=" + xmlHttp.responseText));
-				}
-				
-			}
+	console.log("Scrolling on " + tagName);
+	
+	if(tagName == "CANVAS") {
+			var f = EDITOR.eventListeners.mouseScroll.map(funMap);
+			console.log("Calling mouseScroll listeners (" + f.length + ") ...");
+			for(var i=0; i<f.length; i++) {
+				f[i](dir, steps, combo, scrollWheelEvent);
 		}
 	}
 	
+	EDITOR.interact("mouseScroll", scrollWheelEvent);
 	
-	function htmlToImage(html, callback) {
-		
-		if(!callback) throw new Error("No callback function in htmlToImage");
-		
-		html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
-		
-		/*
-			var data = '<svg xmlns="http://www.w3.org/2000/svg">' +
-			'<foreignObject width="100%" height="100%">' +
-			'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
-			'<em>I</em> like ' + 
-			'<span style="color:white; text-shadow:0 0 2px blue;">' +
-			'cheese</span>' +
-			'</div>' +
-			'</foreignObject>' +
-			'</svg>';
+	return true;
+}
+
+
+function getFile(url, callback) {
+	
+	console.log("Opening url:" + url);
+	
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onreadystatechange = processRequest;
+	xmlHttp.open( "GET", url, true );
+	xmlHttp.send( null );
+	
+	function processRequest() {
+		if (xmlHttp.readyState == 4) {
 			
-		*/
+			//console.log("xmlHttp.status=" + xmlHttp.status);
+			
+			if(xmlHttp.status == 200) {
+				
+				console.log("File loaded.");
+				
+				callback(null, xmlHttp.responseText, url);
+				
+			}
+			else {
+				callback(new Error("Error when opening url=" + url + "\nxmlHttp.status=" + xmlHttp.status + "\nxmlHttp.responseText=" + xmlHttp.responseText));
+			}
+			
+		}
+	}
+}
+
+
+function htmlToImage(html, callback) {
+	
+	if(!callback) throw new Error("No callback function in htmlToImage");
+	
+	html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
+	
+	/*
+		var data = '<svg xmlns="http://www.w3.org/2000/svg">' +
+		'<foreignObject width="100%" height="100%">' +
+		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
+		'<em>I</em> like ' + 
+		'<span style="color:white; text-shadow:0 0 2px blue;">' +
+		'cheese</span>' +
+		'</div>' +
+		'</foreignObject>' +
+		'</svg>';
 		
-		// The svg seems to need a width and height beforehand, or it will use a default width of 100px
-		var width = EDITOR.settings.gridWidth * html.length;
-		var height = EDITOR.settings.gridHeight;
-		
-		//  width="' + width + '" height="' + height + '"
-		
-		//console.log("width=" + width);
-		
-		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
+	*/
+	
+	// The svg seems to need a width and height beforehand, or it will use a default width of 100px
+	var width = EDITOR.settings.gridWidth * html.length;
+	var height = EDITOR.settings.gridHeight;
+	
+	//  width="' + width + '" height="' + height + '"
+	
+	//console.log("width=" + width);
+	
+	var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
 		//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
 		data += '<foreignObject width="100%" height="100%">';
 		// Font must be web safe font! Seems to ignore our style.css ...
-	// color is always black! background is transparent.
-	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
-	data += html;
+		// color is always black! background is transparent.
+		data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
+		data += html;
 		data += '</div>';
 		data += '</foreignObject>';
 		data += '</svg>';
 		
-	// 
-	
+		// 
+		
 		console.log("Creating SVG image: data=" + data);
 		
 		var img = new Image();
@@ -9868,6 +9906,7 @@ keyPressed(keyPress);
 		}
 		
 	}
+	
 	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
@@ -9909,7 +9948,7 @@ keyPressed(keyPress);
 	function fullScreen() {
 		alertBox("Attempting to go into full-screen ...")
 		if (
-		document.fullscreenEnabled || 
+			document.fullscreenEnabled || 
 		document.webkitFullscreenEnabled || 
 		document.mozFullScreenEnabled ||
 		document.msFullscreenEnabled
@@ -9986,6 +10025,6 @@ keyPressed(keyPress);
 		EDITOR.scrollingEnabled = false;
 		menuIsFullScreen = false;
 		EDITOR.resizeNeeded();
-		}
+	}
 	
 })();

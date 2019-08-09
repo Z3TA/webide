@@ -34,25 +34,22 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-bug: Some event-listeners like to remove themselves from the event-listeners while the event-listeners are called,
-altering the length of the event-listeners array, making it skip some events!!!
+JSX bug:
 
-
-
-CLIENT: firing loginSuccess event listener: reopenFiles
-
-CLIENT: Adding new cb=reopenFiles
-CLIENT: Firing client event 'login
-
-loginSuccess event is called after reopenFiles have been added to loginSuccess
-
-reopen-files not working!? when reloading!? reopenFiles is never called! CLIENT: firing 
-
-
+var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
+	//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
+	data += '<foreignObject width="100%" height="100%">';
+	// Font must be web safe font! Seems to ignore our style.css ...
+	// color is always black! background is transparent.
+	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
+	data += html;
+	data += '</div>';
+	data += '</foreignObject>';
+	data += '</svg>';
+	
+	
 
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
-
-Do not show colab, db, deploy discovery icons when running with -nochroot
 
 
 

@@ -1054,6 +1054,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
+		JSX = false,
 		jsxMaybe = false,
 		jsxOpenElements = [];
 		
@@ -1994,20 +1995,20 @@
 				*/ 
 						//if(JSX && !xmlMode) {
 					
-																											else if(jsxMaybe && pastChar0=="<" && char=="/") {
+						else if(JSX && jsxMaybe && pastChar0=="<" && char=="/") {
 																												insideXmlTagEnding = true;
 																											}
 					// Prevent if(x<y && a>b) ...
-					else if(!insideXmlTag && char == "<" && (text[charIndex+1]==="/" || lastChar.match(/\s|>|\(/)) ) {
+						else if(JSX && !insideXmlTag && char == "<" && (text[charIndex+1]==="/" || lastChar.match(/\s|>|\(/)) ) {
 						jsxMaybe = true;
 						// Reuse variable from xml because we are lazy
 						xmlTagStart = i;
 						xmlTagWordLength = 0;
 					}
-					else if(jsxMaybe && xmlTagWordLength===0 && char === " ") {
+						else if(JSX && jsxMaybe && xmlTagWordLength===0 && char === " ") {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
-							else if(jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
+						else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
 						
 						if(lastChar === "/") xmlTagSelfEnding = true;
 						else xmlTagSelfEnding = false;

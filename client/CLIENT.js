@@ -212,15 +212,17 @@ console.warn("CLIENT: No registered event listener for ev=" + ev)
 		else {
 			// Call all event listeners
 			
-			console.log("CLIENT: Calling listeners: ", eventListeners[ev].map(function(f) {return UTIL.getFunctionName(f)}));
+			var f = eventListeners[ev].slice(0);
 			
 			if(eventListeners[ev].length == 0) {
-console.warn("CLIENT: No event listeners for event=" + ev);
+				console.warn("CLIENT: No event listeners for event=" + ev);
 			}
 			
-			for(var i=0; i<eventListeners[ev].length; i++) {
-				console.log("CLIENT: firing " + ev + " event listener: " + UTIL.getFunctionName(eventListeners[ev][i]))
-				eventListeners[ev][i](data);
+			console.log("CLIENT: Calling listeners: ", f.map(function(f) {return UTIL.getFunctionName(f)}));
+			
+			for(var i=0; i<f.length; i++) {
+				console.log("CLIENT: firing " + ev + " event listener: " + UTIL.getFunctionName(f[i]))
+				f[i](data);
 			}
 			
 		}
