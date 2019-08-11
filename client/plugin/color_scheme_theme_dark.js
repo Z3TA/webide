@@ -46,6 +46,13 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		}
 		
 		if(themeLoaded) winMenuDarkTheme.activate();
+		
+		window.addEventListener("devicelight", function (event) {
+			// Read out the lux value
+			var lux = event.value;
+			console.log("dark_theme: lux=" + lux);
+			// Ask to change to dark theme if it's dark !?
+		});
 		}
 	
 	function toggleDarkTheme() {
@@ -107,6 +114,8 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		cssLink.href = '/gfx/dark-theme.css';
 		cssLink.media = 'all';
 		head.appendChild(cssLink);
+		
+		// todo: Remove current Box colors (to prevent black text)
 		
 		
 		EDITOR.renderNeeded();
