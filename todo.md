@@ -34,16 +34,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-When no files are opened, and discovery bar in header, the discovery bar height is set too high!
-
-
-implement: <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
-chore: classList is supported by Opera mobile, so update all code that changes style, or changes class, to use element.classList add/toggle
-
-
-Also run Node.js script via the preview icon
-
-
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
 todo: Try React tutorial to feel pain

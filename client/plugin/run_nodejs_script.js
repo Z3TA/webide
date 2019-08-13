@@ -36,6 +36,8 @@
 		CLIENT.on("loginSuccess", updateRunMsg);
 		CLIENT.on("nodejsDebug", nodejsDebugMsg);
 		
+		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
+		
 	}
 	
 	function unloadNodeJS() {
@@ -51,6 +53,8 @@
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
 		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
 		
+		EDITOR.removeEvent("runScript", runNodeJsScriptMaybe);
+		EDITOR.removeEvent("previewTool", runNodeJsScriptMaybe);
 	}
 	
 	function runNodeJsScriptMaybe(file, combo) {
