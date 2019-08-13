@@ -126,7 +126,7 @@
 		
 		if(word.length > 0 && charBeforeWord == "!" && "DOCTYPE".slice(0, wordLength) == word) {
 			return [
-				['DOCTYPE html>\n<html lang="en">\n<head>\n<title></title>\n</head>\n<body>\n\n</body>\n</html>\n', 42]
+				['DOCTYPE html>\n<html lang="en">\n<head>\n<title></title>\n</head>\n<body>\n\n</body>\n</html>\n', 41]
 			];
 		}
 		
