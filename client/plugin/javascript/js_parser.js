@@ -1676,6 +1676,7 @@
 							if(insideXmlTag && xmlTagInsideDblQuote && text.charAt(charIndex+1) != '"') {
 								insideXmlTag = false;
 								xmlTagInsideDblQuote = false;
+								jsxMaybe = false;
 							}
 							return;
 						}

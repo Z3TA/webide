@@ -572,7 +572,7 @@
 	});
 	
 	
-	EDITOR.addTest(1, function closingXmlTag(callback) {
+	EDITOR.addTest(3, function closingXmlTag(callback) {
 		EDITOR.openFile("closingXmlTag.js", "html += '<body';\nhtml += '>';\n", function(err, file) {
 			// problem: The color for xml tags spilled over to the next line
 			//console.log("file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2));
