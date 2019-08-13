@@ -2705,7 +2705,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				discoveryBar.appendChild(el);
 			});
 			
-			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) return new Error("Discovery bar is disabled by query string!");
+			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) return new Error("Discovery bar is disabled by query string!");
+			
 			EDITOR.discoveryBar.show();
 			
 		},
@@ -3368,7 +3369,6 @@ if(menuItem.parentMenu) {
 		},
 		isVisible: true
 	}
-	
 	
 	// TEST-CODE-START
 	
@@ -7028,6 +7028,9 @@ function main() {
 	
 	console.log("Starting the editor ...");
 	
+		//if(QUERY_STRING["embed"]) EDITOR.windowMenu.disable();
+		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("windowMenu") != -1) EDITOR.windowMenu.disable();
+		
 	window.name = "editor"; // For focus access
 	
 	//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
@@ -8217,7 +8220,6 @@ function fileDrop(fileDropEvent) {
 	}
 	
 }
-
 
 
 function onMessage(windowMessageEvent) {
