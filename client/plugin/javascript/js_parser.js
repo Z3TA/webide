@@ -1694,12 +1694,6 @@
 							insideSingleQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							
-							// Leave xml tag if it was opened inside the quote
-							if(insideXmlTag && xmlTagInsideSingleQuote) {
-								insideXmlTag = false;
-								xmlTagInsideSingleQuote = false;
-								return;
-							}
 						}
 					}
 					else {
@@ -1999,13 +1993,13 @@
 																												insideXmlTagEnding = true;
 																											}
 					// Prevent if(x<y && a>b) ...
-						else if(JSX && !insideXmlTag && char == "<" && (text[charIndex+1]==="/" || lastChar.match(/\s|>|\(/)) ) {
-						jsxMaybe = true;
-						// Reuse variable from xml because we are lazy
-						xmlTagStart = i;
-						xmlTagWordLength = 0;
-					}
-						else if(JSX && jsxMaybe && xmlTagWordLength===0 && char === " ") {
+				else if( JSX && !insideXmlTag && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
+					jsxMaybe = true;
+					// Reuse variable from xml because we are lazy
+					xmlTagStart = i;
+					xmlTagWordLength = 0;
+				}
+				else if(JSX && jsxMaybe && xmlTagWordLength===0 && char === " ") {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
 						else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
@@ -2054,7 +2048,7 @@
 			
 			
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp + " jsxMaybe=" + jsxMaybe);
 			
 			if(codeBlockLeft==codeBlockRight) {
 				insideCodeBlock = false;
@@ -2760,7 +2754,8 @@
 					if(!file.grid[row]) error( new Error("Grid row=" + row + " does not exist!") );
 					file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
 				}
-				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
+				
+				if(insideXmlTag && !insideQuote) insideXmlTag = false;
 				
 				if(singleStatementContext==1) singleStatementContext++;
 				

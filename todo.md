@@ -37,7 +37,7 @@ What I'm working on
 
 regression: When selecting from EOL then extending the selction by holding shift and using the mouse, the last character will pop
 
-JSX bug:
+JSX bug: (from EDITOR.js, mouse_select.js has the same issue)
 
 var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
 	//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
@@ -50,6 +50,8 @@ var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height
 	data += '</foreignObject>';
 	data += '</svg>';
 	
+	
+	todo: should we find this xml tag !? "<div class=" + class + "></div>"
 	
 
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
