@@ -34,6 +34,9 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
+regression: When selecting from EOL then extending the selction by holding shift and using the mouse, the last character will pop
+
 JSX bug:
 
 var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';

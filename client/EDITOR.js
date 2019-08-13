@@ -3639,6 +3639,9 @@ li.onclick = function(clickEvent) {
 				tempItems.removeChild(tempItems.firstChild);
 			}
 			
+			// Blur selected item
+			if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+			
 			if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
 			
 		},
