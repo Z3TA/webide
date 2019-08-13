@@ -96,7 +96,7 @@ if(!EDITOR.currentFile || !caret) return true;
 				console.log("sel startIndex=" + startIndex);
 				endIndex = caret.index;
 				oldCaretEol = file.caret.eol;
-				makeSelection(file, caret);
+				makeSelection(file, caret, false);
 				file.caret = caret;
 				
 			}
@@ -370,7 +370,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			if(rightCaretEol == false && pop) {
 				// Do not select the last character (the caret is on)
 				
-				console.log("POPPING!");
+				console.warn("POPPING! rightCaretEol=" + rightCaretEol + " pop=" + pop);
 				
 				textRange.pop();
 			}
@@ -602,5 +602,40 @@ if(!EDITOR.currentFile || !caret) return true;
 			}
 		
 	}
+	
+	
+	// TEST-CODE-START
+	
+	EDITOR.addTest(1, function noPoppingWhenSelecting(callback) {
+		EDITOR.openFile("noPoppingWhenSelecting.txt", 'abcdef\n', function(err, file) {
+			file.moveCaretToEndOfLine();
+			
+			var caret = file.createCaret(3);
+			var button = 2;
+			var target = EDITOR.canvas;
+			var keyboardCombo = {sum: SHIFT};
+			
+			// Select "def"
+			mouseSelect(100, 110, caret, "down", button, target, keyboardCombo, {type: "mousedown"});
+			mouseSelect(100, 110, caret, "up", button, target, keyboardCombo, {type: "mouseup"});
+			
+			if(file.selected.length != 3) throw new Error('Expected "def" to be selected! file.selected.length=' + file.selected.length);
+			
+			
+			var caret = file.createCaret(0);
+			// Select "abc"
+			mouseSelect(80, 110, caret, "down", button, target, keyboardCombo, {type: "mousedown"});
+			mouseSelect(80, 110, caret, "up", button, target, keyboardCombo, {type: "mouseup"});
+			
+			// Bug: The last character f is dropped
+			
+			if(file.selected.length != 6) throw new Error("Expected all characters to be selected! file.selected.length=" + file.selected.length);
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	// TEST-CODE-END
 
 })();

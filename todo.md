@@ -34,28 +34,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-
-regression: When selecting from EOL then extending the selction by holding shift and using the mouse, the last character will pop
-
-JSX bug: (from EDITOR.js, mouse_select.js has the same issue)
-
-var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
-	//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
-	data += '<foreignObject width="100%" height="100%">';
-	// Font must be web safe font! Seems to ignore our style.css ...
-	// color is always black! background is transparent.
-	data = data + '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
-	data += html;
-	data += '</div>';
-	data += '</foreignObject>';
-	data += '</svg>';
-	
-	
-	todo: should we find this xml tag !? "<div class=" + class + "></div>"
-	
-
 When no files are opened, and discovery bar in header, the discovery bar height is set too high!
-
 
 
 implement: <meta http-equiv="Content-Security-Policy" content="default-src 'self'">

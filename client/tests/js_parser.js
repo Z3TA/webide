@@ -661,7 +661,7 @@ EDITOR.addTest(2, function JSX3(callback) {
 	});
 });
 
-EDITOR.addTest(1, function JSX4(callback) {
+EDITOR.addTest(function JSX4(callback) {
 	EDITOR.openFile("jsx3.js", '{\nwhile(a <b) {\n}\nvar n = [ ".", "<", ">", ";"];\n// hmm\n}\n', function(err, file) {
 		
 		UTIL.assert(file.parsed.xmlTags.length, 0);
