@@ -263,8 +263,6 @@
 			canvas.setAttribute("id", "documentPreviewCanvas");
 			canvas.setAttribute("class", "documentPreviewCanvas");
 
-			canvas.setAttribute("style", "background-color: red");
-			
 			context = canvas.getContext("2d"); // , {alpha: false});
 			
 			documentPreviewDiv.appendChild(canvas);

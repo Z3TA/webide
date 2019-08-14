@@ -477,8 +477,11 @@ return;
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
-			icon.setAttribute("onerror", "this.src='gfx/icon/doc.svg'");
 			icon.setAttribute("draggable", "false");
+			
+			icon.onerror = function() {
+				icon.src = 'gfx/icon/doc.svg';
+			}
 			
 			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			if(item.type == "d") type = "folder";
@@ -533,7 +536,7 @@ return;
 				icon.setAttribute("alt", iconName);
 				
 				if(EDITOR.parseFileExtensionAsCode.indexOf(filetype.toLowerCase()) == -1) {
-					icon.setAttribute("style", "opacity: 0.5;");
+					icon.style.opacity = 0.5;
 				}
 				
 				//icon.setAttribute("width", "22");

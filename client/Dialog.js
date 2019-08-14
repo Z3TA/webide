@@ -62,7 +62,7 @@ function Dialog(msg, options) {
 	var div = dialog.div;
 	
 	div.setAttribute("class", "dialog");
-	div.setAttribute("style", "position: absolute; top: 50px; left: 50px, z-index: " + (--DIALOG_Z_INDEX));
+	div.style.zIndex = (--DIALOG_Z_INDEX);
 	
 	div.addEventListener("click", focusDefaultElement, false);
 	

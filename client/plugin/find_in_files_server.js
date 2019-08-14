@@ -402,7 +402,6 @@ console.warn("Could not find the search string that was used!");
 		
 		progressBar = document.createElement("progress");
 		progressBar.setAttribute("class", "progress findFiles");
-		progressBar.setAttribute("style", "display: none; width: 100%");
 		progressBar.setAttribute("value", "0");
 		progressBar.setAttribute("max", "1");
 		

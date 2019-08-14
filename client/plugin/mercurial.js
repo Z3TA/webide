@@ -1903,8 +1903,12 @@ var error = err.message;
 		div.setAttribute("class", "versionHistory");
 		
 		var historyTableHolder = document.createElement("div");
-		historyTableHolder.setAttribute("style", "height: " + Math.round(EDITOR.height/2.5) + "px; overflow-y: scroll;");
-		historyTableHolder.setAttribute("class", "tableHolder");
+				historyTableHolder.setAttribute("class", "tableHolder");
+				
+				historyTableHolder.style.height = Math.round(EDITOR.height/2.5) + "px";
+				historyTableHolder.style.overflowY = "scroll";
+				
+				
 		
 		var historyTable = document.createElement("table");
 		historyTable.setAttribute("class", "versionHistory data");
@@ -1933,8 +1937,7 @@ var error = err.message;
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
-		//th.setAttribute("style", "min-width: 35%");
-		th.innerText = "Message";
+				th.innerText = "Message";
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");

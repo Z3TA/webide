@@ -231,10 +231,9 @@
 		
 		buttonDisconnect = document.createElement("input");
 		buttonDisconnect.setAttribute("type", "button");
-		buttonDisconnect.setAttribute("class", "button");
+		buttonDisconnect.setAttribute("class", "button removed");
 		buttonDisconnect.setAttribute("id", "buttonCancel");
 		buttonDisconnect.setAttribute("value", "Disconnect");
-		buttonDisconnect.setAttribute("style", "dislay: none");
 		buttonDisconnect.addEventListener("click", disconnectConnection, false);
 		connectionView.appendChild(buttonDisconnect)
 		
@@ -274,7 +273,8 @@
 			}
 			else console.warn("Not connected to " + selectedConnection.host);
 			
-			buttonDisconnect.style.display="none"; // Hide the disconnect button
+			// Hide the disconnect button
+			buttonDisconnect.classList.add("removed");
 			
 			//EDITOR.resizeNeeded();
 		}
@@ -603,7 +603,9 @@
 	
 	function connectToConnection() {
 		connect(selectedConnection.protocol, selectedConnection.host, selectedConnection.user, inputPw.value, selectedConnection.key);
-		buttonDisconnect.style.display="inline"; // Show the disconnect button
+		
+		// Show the disconnect button
+		buttonDisconnect.classList.remove("removed");
 		
 		EDITOR.resizeNeeded();
 	}

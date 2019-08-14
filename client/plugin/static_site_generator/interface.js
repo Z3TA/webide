@@ -632,7 +632,6 @@
 		
 		progressBar = document.createElement("progress");
 		progressBar.setAttribute("class", "progress ssg");
-		progressBar.setAttribute("style", "display: none;");
 		progressBar.setAttribute("value", "0");
 		progressBar.setAttribute("max", "1");
 		controlView.appendChild(progressBar);

@@ -35,8 +35,6 @@ What I'm working on
 -------------------
 
 Trying to remove 'unsafe-inline' from Content-Security-Policy.
-Getting problems in old Opera Mobile browser:
-* Canvas height
 
 
 
@@ -44,7 +42,7 @@ Getting problems in old Opera Mobile browser:
 
 
 
-bug-fix: Don't undo when the editor don't have focus!!
+todo: Able to move function-list to menu (and/or automatically when the screen is too small)
 
 design regression? When the left most file tab folder is open, the discovery bar get a white line above it.
 
