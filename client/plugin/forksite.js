@@ -12,6 +12,14 @@ EDITOR.plugin({
 			
 			winMenuForkWebsite = EDITOR.windowMenu.add("Download a website", ["Tools", 10], forkWebsite);
 			
+			if(typeof navigator == "object" && typeof navigator.registerProtocolHandler == "function") {
+				var self = window.location.protocol + window.location.hostname + "/?fork=%s";
+				
+				// Possible to have links like <a href="web+edit:https://www.tutorials.com/example/">Open in editor</a>
+				// todo: Add to documentation!
+				navigator.registerProtocolHandler("web+edit", self, "Web IDE (editor for HTML, JavaScript, CSS");
+			}
+			
 		},
 		unload: function() {
 			
