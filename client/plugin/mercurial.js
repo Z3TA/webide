@@ -172,7 +172,6 @@
 	function buildProgressBarWidget(widget) {
 		progressBar = document.createElement("progress");
 		progressBar.setAttribute("class", "progress mercurial");
-		progressBar.setAttribute("style", "width: 100%");
 		progressBar.setAttribute("value", "0");
 		progressBar.setAttribute("max", "1");
 		

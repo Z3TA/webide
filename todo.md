@@ -34,9 +34,23 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Trying to remove 'unsafe-inline' from Content-Security-Policy.
+Getting problems in old Opera Mobile browser:
+* Canvas height
+
+
+
+
+
+
+
+bug-fix: Don't undo when the editor don't have focus!!
+
 design regression? When the left most file tab folder is open, the discovery bar get a white line above it.
 
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
+
+todo: Autocomplete false-positive: el.classList.has should not give hasAttribute.
 
 todo: Try React tutorial to feel pain
 
@@ -484,8 +498,8 @@ remove default port from host if specified! eg remove 21 from "host:21"
 
 Tutorials!
 
-
-
+todo: Able to revert back to a previous client version by activating old cache via service Worker
+Useful for example when a update breaks something. (which it does time to time as I'm lazy and don't manually test all browsers)
 
 ---
 

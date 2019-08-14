@@ -7,8 +7,13 @@
 	
 	
 	<!-- Block third party scripts -->
-	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' 'unsafe-eval'; img-src data: 'self'; connect-src wss: ws: 'self'">  
+	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval'; img-src data: 'self'; connect-src wss: ws: 'self'; object-src 'none'">
+	<!-- 
+	Do I need 'unsafe-inline' ?  
+	Maybe: Some older browsers need to have a CSS style in the style attribute in order to be able to change it dynamicly via JavaScript.
+	eg. in order to el.style.top="100px" you need style="position: absolute; top: 0"
 	
+	-->
 	
 	
 	<!-- BEGIN NOCACHE -->
@@ -304,37 +309,37 @@
 		<div id="columns" class="columns">
 			<div id="leftColumn" class="leftColumn"></div>
 			<div id="content" class="content centerColumn">
-				<canvas id="canvas" class="fileCanvas" style="display: none"></canvas>
-			<div id="dashboard" class="dashboard" style="display: none">
-				<div style="clear: both"></div>
+			<canvas id="canvas" class="fileCanvas"></canvas>
+			<div id="dashboard" class="dashboard">
+				<div class="clear"></div>
 			</div>
-			</div>
-			<div id="rightColumn" class="rightColumn"></div>
+		</div>
+		<div id="rightColumn" class="rightColumn"></div>
 	</div>
 	<div id="footer" class="footer"></div>
-		
-		<!-- Safari's web inspector causes the footer to get zero height! -->
-		
-		<div id="virtualKeyboard2"><!--Put virtual keyboard here --></div>
-		
-		<progress id="progress" class="progressbar" style="width: 100%; display: none;" value="0" max="1"></progress>
-		<!-- progress bar need to be placed below virtual keyboard or the virtual keyboard will not show! -->
-		
-	</div>
+	
+	<!-- Safari's web inspector causes the footer to get zero height! -->
+	
+	<div id="virtualKeyboard2"><!--Put virtual keyboard here --></div>
+	
+	<progress id="progress" class="progressbar" value="0" max="1"></progress>
+	<!-- progress bar need to be placed below virtual keyboard or the virtual keyboard will not show! -->
+	
+</div>
 
 
-<textarea style="width: 100px; position: absolute; left: -200px; top: -200px;" id="clipboardcatcher"></textarea>
+<textarea id="clipboardcatcher"></textarea>
 
 <!-- Allow mobile users to type using their onboard/virtual keyboard -->
-<input type="text" id="keyboardCatcher" class="keyboardCatcher" value="x" style="width: 100px; position: absolute; left: -200px; top: -200px; /*left:0px; top: 0px; z-index: 2*/" />
+<input type="text" id="keyboardCatcher" class="keyboardCatcher" value="x" />
 
-<input style="display:none;" id="fileInput" type="file" />
+<input id="fileInput" type="file" />
 
-<input style="display:none;" id="fileSaveAs" type="file" nwsaveas /> <!-- Used for both save and saveAs -->
+<input id="fileSaveAs" type="file" nwsaveas /> <!-- Used for both save and saveAs -->
 
-<input style="display:none;" id="directoryInput" type="file" nwdirectory /> <!--- Used for selecting a directory -->
+<input id="directoryInput" type="file" nwdirectory /> <!--- Used for selecting a directory -->
 
-<ul id="canvasContextmenu" class="canvasContextmenu" style="display: block; position: absolute;">
+<ul id="canvasContextmenu" class="canvasContextmenu">
 	<li id="tempHolder" class="temp"><ul id="canvasContextmenuTemp"></ul></li>
 	<!--<li>First item</li>
 	<li class="sep">Separator</li>

@@ -3617,7 +3617,7 @@ li.onclick = function(clickEvent) {
 			
 			var menu = document.getElementById("canvasContextmenu");
 			
-			if(menu.style.visibility == "hidden") {
+			if(!menu.classList.contains("visible")) {
 				console.warn("Menu already hidden. No need to hide it!");
 				return;
 			}
@@ -3625,9 +3625,8 @@ li.onclick = function(clickEvent) {
 			recoverFromFullScreenMenu(menu);
 			
 			// We can't use .display="none" or it will not be possible to measure the size of the menu!
-			menu.style.visibility = "hidden";
-			//.style.display="none";
-			//menu.style.height = "1px";
+			menu.classList.remove("visible");
+			
 			
 			// Move it elsewhere so we don't see the ghost border in Android browser
 			menu.style.top = -1000 + "px";
@@ -3734,8 +3733,8 @@ li.onclick = function(clickEvent) {
 				fullScreenMenuMaybe();
 			}
 			
-			menu.style.visibility = "visible";
-			//menu.style.display="block";
+			menu.classList.add("visible");
+			
 			
 			//menu.style.height = "100%";
 			

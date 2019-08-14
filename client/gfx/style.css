@@ -102,8 +102,9 @@ body {
 /* ############### DASHBOARD ############# */
 
 .dashboard {
-	font-family: Arial, Helvetica, sans-serif;
 	display: none;
+	
+	font-family: Arial, Helvetica, sans-serif;
 	
 	/*background-color: rgba(215,215,215, .6);*/
 	text-shadow: none;
@@ -309,6 +310,12 @@ body {
 }
 
 
+
+.clear {
+	clear: both;
+}
+
+
 /* ############################ */
 
 
@@ -327,6 +334,7 @@ canvas {
 
 /* Only the file canvas should have the fileCanvas class! */
 .fileCanvas { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
+	display: none;
 	cursor: text;
 }
 
@@ -865,8 +873,8 @@ ul#tabList li.tabFileItem.active button.closeFileTab {
 /* ############### Function List ############### */
 
 .functionListWrap {
+	display: none;
 background-color: white;
-	
 }
 
 select.functionList {
@@ -1193,9 +1201,10 @@ div.gotoFile li:hover {
 /* ### Stying for the context menus */
 
 .canvasContextmenu {
+	/* We can't use .display="none" or it will not be possible to measure the size of the menu! */
 	display: block;
-	visibility: hidden;
 	position: absolute;
+	visibility: hidden;
 	top: 100px;
 	left: 100px;
 	z-index: 10;
@@ -1223,8 +1232,11 @@ div.gotoFile li:hover {
 	min-width: 150px;
 	overflow-x: hidden;
 	overflow-y: auto;
-	
 	}
+
+.canvasContextmenu.visible {
+	visibility: visible;
+}
 
 .canvasContextmenu li {
 	background-color: #f6f6f6;
@@ -1629,12 +1641,40 @@ width: 100%;
 	padding: 0;
 }
 
+#clipboardcatcher {
+	width: 100px; 
+	position: absolute; 
+	left: -200px; 
+	top: -200px;
+}
+
+#keyboardCatcher {
+	width: 100px; 
+	position: absolute; 
+	left: -200px; 
+	top: -200px; 
+	/*left:0px; top: 0px; z-index: 2*/
+}
+
+#fileInput {
+	display:none;
+}
+
+#fileSaveAs {
+	display:none;
+}
+
+#directoryInput {
+	display:none;
+}
+
 /* Editor built-in progress-bar */
 .progressbar {
+	display: none;
+	width: 100%; 
 	position: absolute;
 	bottom: 0px;
 	left: 0px;
-	width: 100%;
 }
 
 div.group {

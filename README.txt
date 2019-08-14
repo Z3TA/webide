@@ -652,6 +652,7 @@ Testing in Opera Mobile
 ========================
 
 Download Opera Classic Mobile Emulator: https://www.opera.com/developer/mobile-emulator
+Mac: brew cask install opera-mobile-emulator
 
 
 Download Opera Browser version 12 (we need the debugger, aka. Opera Dragonfly)
