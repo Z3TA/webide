@@ -30,7 +30,7 @@
     "iconv-lite": "https://github.com/Z3TA/iconv-lite/tarball/master",
     "jschardet": "^1.6.0",
     "mammoth": "^1.4.7",
-    "marked": "^0.6.2",
+    "marked": "^0.7.0",
     "ncp": "^2.0.0",
     "sockjs": "^0.3.4",
     "ssh2": "^0.8.4",
@@ -50,7 +50,8 @@
     "url": "http://hg.webtigerteam.com/repo/jzedit/"
   },
   "devDependencies": {
-    "uglify-js": "^3.3.28"
+    "uglify-js": "^3.3.28",
+    "uglifycss": "0.0.29"
   },
   "scripts": {
     "start": "node ./start.js -local",

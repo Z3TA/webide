@@ -37,6 +37,18 @@ What I'm working on
 Need to be able to recover when I accidently nuke the editor, eg. service worker have cached a nuked client,
 and thus wont update.
 
+pagespeed when CSS is not inlined: (93)
+First Contentful Paint 2.6 s
+irst Meaningful Paint 2.8 s
+First CPU Idle 2.8 s
+Max Potential First Input Delay 230 ms
+Time to Interactive 2.8 s
+Speed Index 2.6 s
+
+
+
+832547 Aug 14 21:59 client/bundle.htm (without minifying css)
+818183 Aug 14 22:36 client/bundle.htm (with minified css, ca 2% saved) 
 
 todo: Investigate why makebundle.js doesn't bundle style.css WHICH IT SHOULD NOT DO (bug makes the program correct)
 

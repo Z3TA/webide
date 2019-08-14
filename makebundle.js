@@ -28,11 +28,9 @@ while ((arr = reScripts.exec(bundle)) !== null) {
 	scripts.push({tag: arr[0], src: "client/" + arr[1]})
 }
 
-	// Don't inline stylesheets because resources are gfx/ relative
-	
 // Find stylesheets
-// <link rel="stylesheet" type="text/css" href="gfx/style.css">
-var reStylesheets = /<link.*stylesheet.*href="(.*)">/g;
+	// <link rel="stylesheet" type="text/css" href="gfx/style.css">
+	var reStylesheets = /<link.*stylesheet.*href="(.*)" *?\/?>/g;
 var stylesheets = [];
 var arr;
 while ((arr = reStylesheets.exec(bundle)) !== null) {
@@ -44,14 +42,17 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 	stylesheets.forEach(inlineStylesheet);
 	
 	function inlineStylesheet(stylesheet) {
+		var uglifycss = require('uglifycss');
 		var fs = require("fs");
 	fs.readFile(stylesheet.href, "utf8", function readStylesheet(err, content) {
 			if(err) throw err;
 			
 		console.log(stylesheet.tag);
 			
+			var uglified = uglifycss.processString(content);
+			
 			// Any $ dollar sign will do weird stuff in JavaScript's string replace, here's a workaround:
-			bundle = bundle.replace(stylesheet.tag, function(){return '<style>\n' + content + '\n</style>\n'});
+			bundle = bundle.replace(stylesheet.tag, function(){return '<style>\n' + uglified + '\n</style>\n'});
 			
 		// Do we have to wrap style code in <!-- --> html comments !?
 		
