@@ -120,6 +120,7 @@ else {
 		
 		selectMysqlDb = document.createElement("select");
 		selectMysqlDb.setAttribute("id", "selectMysqlDb");
+		selectMysqlDb.setAttribute("class", "select");
 		selectMysqlDb.onchange = changeDb;
 		holder.appendChild(selectMysqlDb);
 		
