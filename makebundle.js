@@ -128,7 +128,7 @@ collapseWhitespace: true,
 			minifyJS: {
 				keep_fnames: true, // prevent errors like: "Please give the event listener function a name!"
 				compress:{
-					pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
+				pure_funcs: [ 'console.log', 'console.warn', 'console.time', 'console.timeEnd' ] // Removed if the function's return value aren't used
 				},
 			toplevel: false
 			},
