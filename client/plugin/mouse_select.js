@@ -3,6 +3,8 @@
 	/*
 		Allows selecting text using the mouse.
 		
+		Warning: Dragons! (please write a new test every time you change something)
+		
 	*/
 	
 	"use strict";
@@ -14,8 +16,7 @@
 		distSelfSelect = EDITOR.settings.gridWidth / 3,
 		oldCaret,
 		oldCaretEol = false,
-		rightCaretEol = false,
-		lastUp = new Date(),
+	lastUp = new Date(),
 		dblClickTime = 350,
 		lastCaretIndex = 0,
 		lastDown,
@@ -75,7 +76,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			
 			file.removeHighlights();
 			
-		console.log("mouseSelect: direction=" + direction + " lastDirection=" + lastDirection + " keyboardCombo.sum=" + keyboardCombo.sum);
+		console.log("mouseSelect: direction=" + direction + " lastDirection=" + lastDirection + " keyboardCombo.sum=" + keyboardCombo.sum + " oldCaretEol=" + oldCaretEol + " file.caret=" + JSON.stringify(file.caret) + " file.selected.length=" + file.selected.length);
 			
 			if(direction == "down") {
 				startSelecting(file, caret);
@@ -91,12 +92,18 @@ if(!EDITOR.currentFile || !caret) return true;
 					startIndex = file.caret.index;
 				} else {
 					// Use old startIndex
+				var deslected = true;
 					file.deselect();
 					}
 			console.log("mouseSelect: sel startIndex=" + startIndex);
 				endIndex = caret.index;
 			
-			// Do not update oldCaretEol because we might be doing a continus selection!? (using shift)
+			// Do not update oldCaretEol if we are making a continus selection (using shift)
+			if(file.selected.length == 0 && !deslected) {
+				console.log("mouseSelect: Updating oldCaretEol=" + oldCaretEol + " to file.caret.eol=" + file.caret.eol + " because file.selected.length=" + file.selected.length + " and deslected=" + deslected);
+				oldCaretEol = file.caret.eol;
+			}
+			
 			
 			makeSelection(file, caret);
 				file.caret = caret;
@@ -109,7 +116,7 @@ if(!EDITOR.currentFile || !caret) return true;
 				oldMouseX = mouseX;
 				oldMouseY = mouseY;
 				startIndex = caret.index;
-				oldCaretEol = caret.eol;
+				oldCaretEol = file.caret.eol || caret.eol;
 				oldCaret = caret;
 
 				file.deselect();
@@ -350,7 +357,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			if(start > end) {
 				console.log("makeSelection: Selected from the right to the left. Switch the cursors! oldCaretEol=" + oldCaretEol);
 				
-				rightCaretEol = oldCaretEol;
+				var rightCaretEol = oldCaretEol;
 				
 				var startIndexOriginal = start;
 				start = end;
@@ -358,7 +365,7 @@ if(!EDITOR.currentFile || !caret) return true;
 				
 			}
 			else {
-				rightCaretEol = caret.eol;
+				var rightCaretEol = caret.eol;
 			}
 			
 			if(start == lastSelectionStart && end == lastSelectionEnd) {
@@ -644,9 +651,19 @@ if(!EDITOR.currentFile || !caret) return true;
 		});
 	});
 	
+	
 	EDITOR.addTest(1, function noPoppingWhenShiftSelectingLeftFromEol(callback) {
 		EDITOR.openFile("noPoppingWhenShiftSelectingLeftFromEol.txt", 'abcdef\n', function(err, file) {
-			file.moveCaretToEndOfLine();
+			file.moveCaret(undefined, 0, 6);
+			
+			if(!file.caret.eol) throw new Error("Expected file caret to be at end of line!");
+			
+			file.deselect(); // Deselect all
+			
+			/*
+				note: This also catches the bug where you click in the middle of the text,
+				then use keyboard to walk to eof. Then shift click in the middle (bug: it pops the last character from the selection)
+			*/
 			
 			var caret = file.createCaret(3);
 			var button = 2;
