@@ -655,7 +655,12 @@ console.warn("functionListWrap not available!");
 		functionListSelect.setAttribute("size", domModel.length);		
 		
 		
-		
+		if(EDITOR.width < 500) {
+			// Move the function-list to the menu
+			forcedSingleRow = true;
+			mobileFubarDetected();
+		}
+		else {
 		EDITOR.resizeNeeded();
 		
 		var height = functionListSelect.offsetHeight;
@@ -667,6 +672,7 @@ console.warn("functionListWrap not available!");
 		}
 		else {
 			//alertBox("Not moving function-list! domModel.length=" + domModel.length + " height=" + height);
+		}
 		}
 		
 		console.timeEnd("buildFunctionList");
