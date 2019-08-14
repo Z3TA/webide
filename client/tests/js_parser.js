@@ -674,7 +674,17 @@ EDITOR.addTest(function JSX4(callback) {
 	});
 });
 
-
+		EDITOR.addTest(1, function JSX5(callback) {
+			EDITOR.openFile("jsx5.js", 'var reScripts = /<script.*src="(.*)"><\/script>/g;\n// meh\n', function(err, file) {
+					
+					UTIL.assert(file.parsed.xmlTags.length, 0);
+					
+					UTIL.assert(file.grid[0].indentation, 0);
+					
+					EDITOR.closeFile(file.path);
+					callback(true);
+				});
+		});
 		
 /*
 	

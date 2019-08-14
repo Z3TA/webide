@@ -28,6 +28,8 @@ while ((arr = reScripts.exec(bundle)) !== null) {
 	scripts.push({tag: arr[0], src: "client/" + arr[1]})
 }
 
+	// Don't inline stylesheets because resources are gfx/ relative
+	
 // Find stylesheets
 // <link rel="stylesheet" type="text/css" href="gfx/style.css">
 var reStylesheets = /<link.*stylesheet.*href="(.*)">/g;

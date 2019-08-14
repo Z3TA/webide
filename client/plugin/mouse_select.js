@@ -652,7 +652,7 @@ if(!EDITOR.currentFile || !caret) return true;
 	});
 	
 	
-	EDITOR.addTest(1, function noPoppingWhenShiftSelectingLeftFromEol(callback) {
+	EDITOR.addTest(function noPoppingWhenShiftSelectingLeftFromEol(callback) {
 		EDITOR.openFile("noPoppingWhenShiftSelectingLeftFromEol.txt", 'abcdef\n', function(err, file) {
 			file.moveCaret(undefined, 0, 6);
 			

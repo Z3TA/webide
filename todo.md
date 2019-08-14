@@ -34,6 +34,21 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Need to be able to recover when I accidently nuke the editor, eg. service worker have cached a nuked client,
+and thus wont update.
+
+
+todo: Investigate why makebundle.js doesn't bundle style.css WHICH IT SHOULD NOT DO (bug makes the program correct)
+
+
+JSX bug: 
+var reScripts = /<script.*src="(.*)"><\/script>/g;
+// meh
+
+
+serviceWorker failed to fetch one or more files. Totally useless error message: highestVersion is not defined
+
+
 Got a cloudflare cert error when testing in Opera Mobile classic. WTF!?!!? 
 The cert seem to have expired yeasterday.
 Is there spyware on the Opera mobile classic !?
