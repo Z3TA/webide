@@ -65,7 +65,18 @@ var CACHE_FILES = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
 	// Assume the bundle is loaded, and don't cache each induvidual .js files!
 	
-	'/gfx/style.css',
+	//'/gfx/style.css',
+	// style.css' should be inlined in bundle.htm
+	
+	// Discovery bar icons (todo: minify)
+	'gfx/treaty.svg',
+	'gfx/data.svg',
+	'gfx/cloud.svg',
+	'gfx/website.svg',
+	'gfx/share.svg',
+	'gfx/multimedia.svg',
+	'gfx/board.svg',
+	'gfx/new-window.svg',
 	
 	// Cache font
 	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
@@ -84,13 +95,18 @@ var CACHE_FILES = [
 	'/gfx/icon/html.svg',
 	'/gfx/icon/js.svg',
 	
-	// Logos for A2HS and other stuff
-	'/gfx/jz64.png',
-	'/gfx/jz192.png',
-	'/gfx/jz512.png',
 	
-	'/manifest.webmanifest', // Loaded at every page load, needed for A2HS
+	'/manifest.webmanifest', // Loaded at every page load, needed for "att to home screen" (A2HS)
 	
+	/*
+		Google page speed complains about too many files being downloaded,
+		so skip documentation etc (users rarely look at them anyway)
+		
+		// Logos for A2HS and other stuff
+		'/gfx/jz64.png',
+		'/gfx/jz192.png',
+		'/gfx/jz512.png',
+		
 	// About documentation etc
 	'/about/about.htm',
 	'/gfx/doc.css',
@@ -105,11 +121,8 @@ var CACHE_FILES = [
 	
 	// Signup
 	'/signup/signup.htm',
-	'/UTIL.js',
-	'/global.js',
-	'/sockjs-0.3.4.js',
-	'/signup/signup.js',
-	'/gfx/jz64.png',
+		'/signup/signup.js',
+	*/
 	
 	
 	// Cache VNC
