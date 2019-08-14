@@ -36,24 +36,14 @@ What I'm working on
 
 Got a cloudflare cert error when testing in Opera Mobile classic. WTF!?!!? 
 The cert seem to have expired yeasterday.
-Is cloudflare doing some XXI spying !?
+Is there spyware on the Opera mobile classic !?
 
 
-
-
-Trying to remove 'unsafe-inline' and 'unsafe-eval' from Content-Security-Policy.
-
-
-
-
+bug: When show white space is on. I see red dots while typing which is annoying! 
 
 bug: When priting to PDF and the screen size is very small, the text get cut on the PDF
 
-
-
 design regression? When the left most file tab folder is open, the discovery bar get a white line above it.
-
-bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
 todo: Autocomplete false-positive: el.classList.has should not give hasAttribute.
 
