@@ -34,6 +34,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+design regression? When the left most file tab folder is open, the discovery bar get a white line above it.
+
 bug: Text in dark theme sometimes becomes black. Probably because text Box() is created before dark theme have loaded, using the color from the light theme
 
 todo: Try React tutorial to feel pain
