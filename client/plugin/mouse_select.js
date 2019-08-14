@@ -51,10 +51,10 @@
 	
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
 		
-		//console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
+		//console.log("mouseSelect: mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
 		
 		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
-		console.log(" llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
+		console.log("mouseSelect: llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
 		
 		if(llEvType=="touchend" && lastEvType=="mousedown" && ev.type=="mouseup") return true; // Prevent "double" click when doing touch
 		
@@ -75,7 +75,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			
 			file.removeHighlights();
 			
-			console.log("direction=" + direction + " lastDirection=" + lastDirection + "");
+		console.log("mouseSelect: direction=" + direction + " lastDirection=" + lastDirection + " keyboardCombo.sum=" + keyboardCombo.sum);
 			
 			if(direction == "down") {
 				startSelecting(file, caret);
@@ -93,10 +93,12 @@ if(!EDITOR.currentFile || !caret) return true;
 					// Use old startIndex
 					file.deselect();
 					}
-				console.log("sel startIndex=" + startIndex);
+			console.log("mouseSelect: sel startIndex=" + startIndex);
 				endIndex = caret.index;
-				oldCaretEol = file.caret.eol;
-				makeSelection(file, caret, false);
+			
+			// Do not update oldCaretEol because we might be doing a continus selection!? (using shift)
+			
+			makeSelection(file, caret);
 				file.caret = caret;
 				
 			}
@@ -126,15 +128,16 @@ if(!EDITOR.currentFile || !caret) return true;
 			}
 			else if(direction == "up" && lastDirection == "down" && keyboardCombo.sum == 0) {
 					
-				// ## Select text ...
+			// ## Select text ...
+			console.log("mouseSelect: Selecting text ...");
 				endSelecting();
 				
 				endIndex = caret.index;
 				
-				console.log("startIndex=" + startIndex + " endIndex=" + endIndex);
+			console.log("mouseSelect: startIndex=" + startIndex + " endIndex=" + endIndex);
 				
 				var diff = (new Date()) - lastUp; // milliseconds
-				console.log("diff=" + diff);
+			console.log("mouseSelect: diff=" + diff);
 				
 				
 				if(diff < dblClickTime) { //  && lastCaretIndex == caret.index
@@ -144,14 +147,14 @@ if(!EDITOR.currentFile || !caret) return true;
 					clicksAfterEachOther = 0;
 				}
 				
-				console.log("diff=" + diff + 
+			console.log("mouseSelect: diff=" + diff + 
 				" dblClickTime=" + dblClickTime + 
 				" clicksAfterEachOther=" + clicksAfterEachOther + 
 				" lastCaretIndex=" + lastCaretIndex + 
 				" caret.index=" + caret.index);
 				
 				if(clicksAfterEachOther == 3) {
-					console.log("Quad click!");
+				console.log("mouseSelect: Quad click!");
 					// Select the whole paragraph: Look for double line-breaks + also match {}
 					
 					var textRange = findParagraph(file, caret.index);
@@ -169,7 +172,7 @@ if(!EDITOR.currentFile || !caret) return true;
 					
 				}
 				else if(clicksAfterEachOther == 2) {
-					console.log("Tripple click!");
+				console.log("mouseSelect: Tripple click!");
 					
 					selectWholeLine();
 					
@@ -181,7 +184,7 @@ if(!EDITOR.currentFile || !caret) return true;
 					
 				}
 				else if(clicksAfterEachOther == 1) {
-					console.log("It's a double click!");
+				console.log("mouseSelect: It's a double click!");
 					
 					// When you double click in the margin, the whole line should be selected
 					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < EDITOR.settings.leftMargin * 0.85) {
@@ -200,7 +203,7 @@ if(!EDITOR.currentFile || !caret) return true;
 							// ### Find more occurencie(s) of the select text and highlight it.
 							file.highlightText(range.word);
 							
-							console.log("range.word=" + range.word);
+						console.log("mouseSelect: range.word=" + range.word);
 							
 							// Place caret at the end of the selection (to prevent the last character from popping)
 							file.moveCaretToIndex(endIndex, caret);
@@ -345,7 +348,7 @@ if(!EDITOR.currentFile || !caret) return true;
 		if(start != end) {
 			
 			if(start > end) {
-				// Selected from the right to the left. Switch the cursors.
+				console.log("makeSelection: Selected from the right to the left. Switch the cursors! oldCaretEol=" + oldCaretEol);
 				
 				rightCaretEol = oldCaretEol;
 				
@@ -359,10 +362,10 @@ if(!EDITOR.currentFile || !caret) return true;
 			}
 			
 			if(start == lastSelectionStart && end == lastSelectionEnd) {
-				console.warn("Selecting the same selection again!");
+				console.warn("makeSelection: Selecting the same selection again!");
 			}
 			
-			console.log("Making selection from " + start + " to " + end + "")
+			console.log("makeSelection: Making selection from " + start + " to " + end + "")
 			
 			// Select the text
 			var textRange = file.createTextRange(start, end);
@@ -370,7 +373,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			if(rightCaretEol == false && pop) {
 				// Do not select the last character (the caret is on)
 				
-				console.warn("POPPING! rightCaretEol=" + rightCaretEol + " pop=" + pop);
+				console.warn("makeSelection: POPPING! rightCaretEol=" + rightCaretEol + " pop=" + pop);
 				
 				textRange.pop();
 			}
@@ -382,7 +385,7 @@ if(!EDITOR.currentFile || !caret) return true;
 			lastSelectionStart = start;
 			lastSelectionEnd = end;
 			
-			console.log("Select text!");
+			console.log("makeSelection: Select text!");
 			EDITOR.renderNeeded();
 
 		}
@@ -606,8 +609,43 @@ if(!EDITOR.currentFile || !caret) return true;
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function noPoppingWhenSelecting(callback) {
-		EDITOR.openFile("noPoppingWhenSelecting.txt", 'abcdef\n', function(err, file) {
+	EDITOR.addTest(2, function popWhenShiftSelectingRight(callback) {
+		EDITOR.openFile("popWhenShiftSelectingRight.txt", 'abcdef\n', function(err, file) {
+			
+			// Note: Mouse selection is done by mouseMove! (continous selection while the mouse is moving)
+			// So we have to use SHIFT to select
+			var keyboardCombo = {sum: SHIFT};
+			var button = 2;
+			var target = EDITOR.canvas;
+			var mouseX = 100; // Doesn't matter when using SHIFT
+			var mouseY = 100; // Doesn't matter when using SHIFT
+			
+			
+			// Select "bc"
+			file.moveCaret(1);
+			var caret = file.createCaret(3);
+			mouseSelect(mouseX, mouseY, caret, "down", button, target, keyboardCombo, {type: "mousedown"});
+			mouseSelect(mouseX, mouseY, caret, "up", button, target, keyboardCombo, {type: "mouseup"});
+			
+			if(file.selected.length != 2) throw new Error('Expected "bc" to be selected! file.selected.length=' + file.selected.length);
+			
+			// Also select "de"
+			file.moveCaret(1);
+			var caret = file.createCaret(5);
+			mouseSelect(mouseX, mouseY, caret, "down", button, target, keyboardCombo, {type: "mousedown"});
+			mouseSelect(mouseX, mouseY, caret, "up", button, target, keyboardCombo, {type: "mouseup"});
+			
+			// Bug: "f" gets added to the selection
+			
+			if(file.selected.length != 4) throw new Error('Expected "bcde" to be selected! file.selected.length=' + file.selected.length);
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(1, function noPoppingWhenShiftSelectingLeftFromEol(callback) {
+		EDITOR.openFile("noPoppingWhenShiftSelectingLeftFromEol.txt", 'abcdef\n', function(err, file) {
 			file.moveCaretToEndOfLine();
 			
 			var caret = file.createCaret(3);
