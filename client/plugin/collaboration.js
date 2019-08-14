@@ -91,8 +91,8 @@
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
-			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndo);
-			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedo);
+			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu);
+			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			
 			var discoveryItem = document.createElement("img");
@@ -875,6 +875,12 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 		
 	}
 	
+	function collabRedoViaMenu() {
+		EDITOR.input = true;
+		collabRedo(EDITOR.currentFile);
+		EDITOR.input = false;
+	}
+	
 	function collabRedo(file) {
 		if(!file) return true;
 		if(!EDITOR.input) return true; // why? Because we might be in a DOM input element!
@@ -943,11 +949,20 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 		return PREVENT_DEFAULT;
 	}
 	
+	
+	function collabUndoViaMenu() {
+		EDITOR.input = true;
+		collabUndo(EDITOR.currentFile);
+		EDITOR.input = false;
+	}
+	
 	function collabUndo(file) {
 		console.log("collabUndo: file.path=" + (file && file.path) + " EDITOR.input=" + EDITOR.input);
 		
 		if(!file) return true;
-		//if(!EDITOR.input) return true; // Why explicitly check for EDITOR.input !? Does not work if undo via window menu
+		// Why explicitly check for EDITOR.input !? Does not work if undo via window menu
+		// Answer: To prevent undo when undoing something inside a <input> element!!
+		if(!EDITOR.input) return true; 
 			
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
 			console.warn("collabUndo: " + file.path + " has no undo/redo history!");
