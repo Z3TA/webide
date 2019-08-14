@@ -17,6 +17,7 @@ EDITOR.plugin({
 				
 				// Possible to have links like <a href="web+edit:https://www.tutorials.com/example/">Open in editor</a>
 				// todo: Add to documentation!
+				// note: This triggers a security alert in Chrome!
 				navigator.registerProtocolHandler("web+edit", self, "Web IDE (editor for HTML, JavaScript, CSS");
 			}
 			
