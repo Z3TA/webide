@@ -30,11 +30,20 @@
 
 
 		var name = "xMatcher" + xMatcher.length;
-		var customRender = function(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
+		var customRender = function (ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow);
 		}
-		var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
-
+		
+var func = customRender;
+		// Try to avoid eval or new Function
+		try {
+			Object.defineProperty(func, "name", { value: name }); // Give function an unique name
+		}
+		catch(err) {
+			console.error(err);
+			var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
+		}
+		
 		xMatcher.push(func);
 
 		EDITOR.addRender(func, 2200 + xMatcher.length - 1);

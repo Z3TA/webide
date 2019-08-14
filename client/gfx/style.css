@@ -1136,7 +1136,7 @@ div.gotoFile li:hover {
 }
 
 .windowMenu .bullet.inactive:before {
-	content:"\2003";
+	content: '\2003';
 }
 
 .windowMenu .bullet.active {
@@ -1144,7 +1144,7 @@ div.gotoFile li:hover {
 }
 
 .windowMenu .bullet.active:before {
-	content:"\2022";
+	content: '\2022';
 }
 
 .windowMenu .label {

@@ -90,6 +90,7 @@
 	}
 	
 	function overloadJs(jsCode) {
+		// todo: Load the script as is instead !?
 		try {
 			eval(jsCode);
 		}

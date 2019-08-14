@@ -2314,8 +2314,16 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		var customAction = function(file, type, characters, caretIndex, row, col) {
 			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
 		}
-		var func = new Function("action" + name, "return function " + name + "(file, type, characters, caretIndex, row, col){ action" + name + "(file, type, characters, caretIndex, row, col) };")(customAction);
-		
+			
+			var func = customAction;
+			try {
+				Object.defineProperty(func, "name", { value: name }); // Give function an unique name
+			}
+			catch(err) {
+				console.error(err);
+				var func = new Function("action" + name, "return function " + name + "(file, type, characters, caretIndex, row, col){ action" + name + "(file, type, characters, caretIndex, row, col) };")(customAction);
+			}
+			
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		
 		EDITOR.on("fileChange", func);
@@ -2332,9 +2340,17 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		var customAction = function(file, saveCallback) {
 			wysiwygEditor.anyFileSaved(file, saveCallback);
 		}
+			
+			var func = customAction;
+			try {
+				Object.defineProperty(func, "name", { value: name }); // Give function an unique name
+			}
+			catch(err) {
+				console.error(err);
 		var func = new Function("action" + name, "return function " + name + "(file, saveCallback){ return action" + name + "(file, saveCallback) };")(customAction);
-		
-		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterSave", wysiwygEditor.afterFileSaveEventListener);
+			}
+			
+			if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterSave", wysiwygEditor.afterFileSaveEventListener);
 		
 		EDITOR.on("afterSave", func);
 		
@@ -2349,9 +2365,17 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		var customAction = function(file, word, wordLength, gotOptions) {
 			return wysiwygEditor.autoComplete(file, word, wordLength, gotOptions);
 		}
-		var func = new Function("action" + name, "return function " + name + "(file, word, wordLength, gotOptions){ return action" + name + "(file, word, wordLength, gotOptions) };")(customAction);
-		
-		if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
+			
+			var func = customAction;
+			try {
+				Object.defineProperty(func, "name", { value: name }); // Give function an unique name
+			}
+			catch(err) {
+				console.error(err);
+				var func = new Function("action" + name, "return function " + name + "(file, word, wordLength, gotOptions){ return action" + name + "(file, word, wordLength, gotOptions) };")(customAction);
+			}
+			
+			if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
 		
 		var order = 1;
 		EDITOR.on("autoComplete", func, order);

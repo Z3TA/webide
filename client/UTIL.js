@@ -2155,16 +2155,6 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		return hash;
 	},
 	
-	es6Support: function es6Support() {
-		try {
-			new Function("(a = 0) => a");
-			return true;
-		}
-		catch (err) {
-			return false;
-		}
-	},
-	
 	homeDir: function extractHomeDir(path) {
 		// Extract's the home dir from a path
 		// Returns / if no home dir is found

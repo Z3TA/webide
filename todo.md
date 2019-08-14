@@ -34,15 +34,22 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Trying to remove 'unsafe-inline' from Content-Security-Policy.
+Got a cloudflare cert error when testing in Opera Mobile classic. WTF!?!!? 
+The cert seem to have expired yeasterday.
+Is cloudflare doing some XXI spying !?
+
+
+
+
+Trying to remove 'unsafe-inline' and 'unsafe-eval' from Content-Security-Policy.
 
 
 
 
 
+bug: When priting to PDF and the screen size is very small, the text get cut on the PDF
 
 
-todo: Able to move function-list to menu (and/or automatically when the screen is too small)
 
 design regression? When the left most file tab folder is open, the discovery bar get a white line above it.
 

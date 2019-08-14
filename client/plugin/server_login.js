@@ -464,7 +464,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		
 		function connectToServer(e) {
 			
-			if(typeof e.preventDefault == "function") e.preventDefault();
+			if(typeof e == "object" && typeof e.preventDefault == "function") e.preventDefault();
 			
 			// ## Manually logging in via login form
 			

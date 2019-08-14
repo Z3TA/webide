@@ -3189,7 +3189,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		else {
 			var pullout = "bottom";
-			item.pulloutIcon.innerText = "▼";
+			item.pulloutIcon.innerText = "▼"; // todo: These arrows doesn't work in old browsers. Dunno how to detect and replace !?'
 		}
 		item.pulloutIcon.setAttribute("class", "pulloutIcon " + pullout);
 		
