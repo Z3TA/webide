@@ -7,11 +7,15 @@
 	
 	
 	<!-- Block third party scripts -->
-	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-eval'; img-src data: 'self'; connect-src wss: ws: 'self'; object-src 'none'">
+	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' ; img-src data: 'self'; connect-src wss: ws: 'self' http: https: ; object-src 'none'">
 	<!-- 
 	Do I need 'unsafe-inline' ?  
 	Maybe: Some older browsers need to have a CSS style in the style attribute in order to be able to change it dynamicly via JavaScript.
 	eg. in order to el.style.top="100px" you need style="position: absolute; top: 0"
+	But they probably don't support Content-Security-Policy either. So we could probably fall-back to "unsafe" behaviour if needed!?
+	
+	Do I need 'unsafe-eval' ? Not when I'm allowed to load <script> files dynamicly.
+	
 	
 	-->
 	
