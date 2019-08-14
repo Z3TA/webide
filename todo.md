@@ -45,12 +45,7 @@ Max Potential First Input Delay 230 ms
 Time to Interactive 2.8 s
 Speed Index 2.6 s
 
-
-
-832547 Aug 14 21:59 client/bundle.htm (without minifying css)
-818183 Aug 14 22:36 client/bundle.htm (with minified css, ca 2% saved) 
-
-todo: Investigate why makebundle.js doesn't bundle style.css WHICH IT SHOULD NOT DO (bug makes the program correct)
+What is the result with the new bundle?
 
 
 JSX bug: 

@@ -116,7 +116,31 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 
 function done() {
 	var fs = require("fs");
-	fs.writeFileSync("client/bundle.htm", bundle, "utf8");
+		
+		// Finally minify the HTML
+		console.log("Minifying final bundle ...");
+		var minify = require('html-minifier').minify;
+		var result = minify(bundle, {
+			removeComments: true,
+collapseWhitespace: true,
+			
+			minifyCSS: true,
+			minifyJS: {
+				keep_fnames: true, // prevent errors like: "Please give the event listener function a name!"
+				compress:{
+					pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
+				},
+			toplevel: false
+			},
+			
+			removeEmptyAttributes: true,
+			removeRedundantAttributes: true,
+			removeScriptTypeAttributes: true,
+			removeStyleLinkTypeAttributes: true
+			
+		});
+		
+		fs.writeFileSync("client/bundle.htm", result, "utf8");
 	
 	console.log(counter + " files concatenated into bundle.htm");
 	

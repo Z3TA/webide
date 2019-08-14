@@ -50,8 +50,9 @@
     "url": "http://hg.webtigerteam.com/repo/jzedit/"
   },
   "devDependencies": {
+    "html-minifier": "^4.0.0",
     "uglify-js": "^3.3.28",
-    "uglifycss": "0.0.29"
+    "uglifycss": "^0.0.29"
   },
   "scripts": {
     "start": "node ./start.js -local",

@@ -36,7 +36,7 @@ while ((arr = reScripts.exec(bundle)) !== null) {
 
 // Find stylesheets
 // <link rel="stylesheet" type="text/css" href="gfx/style.css">
-var reStylesheets = /<link.*stylesheet.*href="(.*)">/g;
+var reStylesheets = /<link.*stylesheet.*href="(.*)" *?\/?>/g;
 var stylesheets = [];
 var arr;
 while ((arr = reStylesheets.exec(bundle)) !== null) {
@@ -107,30 +107,68 @@ var scriptCounter = 0;
 		scriptSource += scripts[i].content + "\n\n";
 	}
 	
-	/*
-		console.log("Minifying ...");
+	var fs = require("fs");
+	
+	fs.writeFileSync("bundle.js", scriptSource, "utf8"); // Use Google closure compiler or other static checker to check this file
+	
+	if(1==1) {
+		console.log("Minifying JavaScript ...");
 		var UglifyJS = require("uglify-js");
 		var result = UglifyJS.minify(scriptSource, {
-		keep_fnames: false, // true prevent errors like: "Please give the event listener function a name!"
+			keep_fnames: true, // true prevent errors like: "Please give the event listener function a name!"
 		compress:{
-		pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
+		pure_funcs: [ 'console.log', 'console.warn' ], // Removed if the function's return value aren't used
+				passes: 2
 		},
-		toplevel: true // if set to true it will also rename global variables
+			toplevel: true, // if set to true it will also rename global variables
+			mangle: {
+				toplevel: true,
+				properties: false,
+				keep_fnames: true
+			}
 		});
+		
 		if (result.error) {
 		throw result.error;
 		}
-		var minifiedJs = result.code;
-		console.log(minifiedJs);
-	*/
+		scriptSource = result.code;
+	}
 	
+	// Append all the scripts to the bundle
 	// Any $ dollar sign will do weird stuff in JavaScript's string replace, here's a workaround:
-	//bundle = bundle.replace("!SCRIPTS_HERE!", function(){return '<script><!--\n' + minifiedJs + '\n--></script>\n'});
+	bundle = bundle.replace("!SCRIPTS_HERE!", function(){return '<script type="application/javascript">\n\n' + scriptSource + '\n</script>\n'});
 	
-		var fs = require("fs");
+	
+	if(1==1) {
+		console.log("Minify the bundle ...");
+		var minify = require('html-minifier').minify;
+		var result = minify(bundle, {
+			removeComments: true,
+			collapseWhitespace: true,
+			
+			minifyCSS: true,
+			minifyJS: {
+				keep_fnames: true, // prevent errors like: "Please give the event listener function a name!"
+				compress:{
+					pure_funcs: [ 'console.log', 'console.warn' ] // Removed if the function's return value aren't used
+				},
+				toplevel: true
+			},
+			
+			//processScripts: ["application/javascript"],
+			removeEmptyAttributes: true,
+			removeRedundantAttributes: true,
+			removeScriptTypeAttributes: true,
+			removeStyleLinkTypeAttributes: true
+			
+		});
+		fs.writeFileSync("client/bundle.htm", result, "utf8");
+	}
+	else {
 		fs.writeFileSync("client/bundle.htm", bundle, "utf8");
-		
-	fs.writeFileSync("bundle.js", scriptSource, "utf8");
+	}
+	
+	
 	
 		console.log(counter + " files concatenated into bundle.htm");
 		
