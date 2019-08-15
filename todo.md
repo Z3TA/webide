@@ -34,8 +34,23 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Looking into T9 Predictive text and supporting KaiOS phones.
+Eg typing 2667659*564 console.log 
+And also have auto complete (with snippets)
+
+Besides text input, another main problem with developing on a phone is 
+looking up documentation and API's, for example, what code is needed to create a TCP server in Node.JS !?
+With a PC and big screen it's much easier to multi-task and switch back and forth between editor and documentation,
+and copy pasting from stack overflow :P
+
+Should there be a built in feature that searches Node.JS docks, Stack overflow and MDN !? =)
+
+
 Need to be able to recover when I accidently nuke the editor, eg. service worker have cached a nuked client,
 and thus wont update.
+
+
+Timer 'highlightMatch ()' does not exist (after making console.time and console.timeEnd "pure" functions)
 
 pagespeed when CSS is not inlined: (93)
 First Contentful Paint 2.6 s
