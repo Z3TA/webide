@@ -4,6 +4,7 @@
 
 		navigator.share will only work on websites with httpS and not HTTP !!
 		
+		problem: Files get renamed to share1253283535.htm
 
 */
 
@@ -13,25 +14,25 @@ EDITOR.plugin({
 desc: "Allow sharing stuff with other apps",
 		load:function loadShare() {
 
-			windowMenu = EDITOR.windowMenu.add("Share", ["Edit", 10], shareSomething);
+			if(typeof navigator.share == "undefined") {
+				console.warn("navigator.share not available on your browser/device (" + BROWSER + ")");
+				return;
+			}
+			
+			windowMenu = EDITOR.windowMenu.add("Send/Share", ["File", 15], shareSomething);
 
 			console.log("typeof navigator.share=" + typeof navigator.share);
 
 },
 		unload: function unloadShare() {
 
-EDITOR.windowMenu.remove(windowMenu);
+			if(windowMenu) EDITOR.windowMenu.remove(windowMenu);
 			
 }
 });
 	
 	
 	function shareSomething() {
-		
-		if(typeof navigator.share == "undefined") {
-			alertBox("navigator.share not available on your browser/device (" + BROWSER + ")");
-			return;
-		}
 		
 		if(typeof BrowserFile != "undefined") {
 			 
