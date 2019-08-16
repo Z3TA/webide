@@ -134,6 +134,8 @@ var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
 
 var HTTP_SERVER;
 
+var USE_HTTPS = !!(getArg(["ssl", "https"]) || false); // Only use for local development! Run a HTTPS proxy in production (nginx) because Node.JS is too slow!
+
 // Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
 var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 
@@ -167,6 +169,7 @@ var module_letsencrypt = require("../shared/letsencrypt.js");
 var module_os = require("os");
 var module_sockJs = require("sockjs");
 var module_http = require("http");
+var module_https = require("https");
 var module_dns = require("dns");
 var module_dgram = require("dgram");
 var module_pwHash = require("./pwHash.js");
@@ -721,7 +724,16 @@ function main() {
 		var wsServer = module_sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
 		
-		HTTP_SERVER = module_http.createServer(handleHttpRequest);
+		if(USE_HTTPS) {
+			var httpsOptions = {
+				cert: module_fs.readFileSync("fullchain.pem"),
+				key: module_fs.readFileSync("privkey.pem")
+			};
+			HTTP_SERVER = module_https.createServer(httpsOptions, handleHttpRequest);
+		}
+		else {
+			HTTP_SERVER = module_http.createServer(handleHttpRequest);
+		}
 		
 		HTTP_SERVER.on("error", function(err) {
 			console.log("err.code=" + err.code);
@@ -738,8 +750,12 @@ function main() {
 		else log("Not a IPv4 address");
 		
 		
-		HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
-		
+		if(USE_HTTPS) {
+			HTTP_SERVER.listen(443, HTTP_IP);
+		}
+		else {
+			HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
+		}
 		
 		wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
 		

@@ -34,6 +34,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+OMGF File is now a standard, and we use that as a global variable ...
+
 
 Investigating web share
 holy shit!: https://paul.kinlan.me/file-web-share-target/

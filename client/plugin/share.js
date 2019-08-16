@@ -2,7 +2,8 @@
 
 /*
 
-navigator.canShare && navigator.canShare
+		navigator.share will only work on websites with httpS and not HTTP !!
+		
 
 */
 
@@ -27,32 +28,66 @@ EDITOR.windowMenu.remove(windowMenu);
 	
 	function shareSomething() {
 		
-		var filesArray = [
-			//???
-		];
+		if(typeof navigator.share == "undefined") {
+			alertBox("navigator.share not available on your browser/device (" + BROWSER + ")");
+			return;
+		}
 		
+		if(typeof BrowserFile != "undefined") {
+			 
+			var file = EDITOR.currentFile;
+			
+			var fileBits = [file.text];
+			var fileName = UTIL.getFilenameFromPath(file.path);
+			var options = {type: "text/plain"};
+			
+			var filesArray = [
+				new BrowserFile(fileBits, fileName, options)
+			];
+		}
+		else {
+			alertBox("Unable to create a file object!");
+		}
+		
+
 		if (navigator.canShare && navigator.canShare( { files: filesArray } )) {
 			navigator.share({
 				files: filesArray,
-				title: 'Vacation Pictures',
-				text: 'Barb\nHere are the pictures from our vacation.\n\nJoe',
+				title: fileName,
+				name: fileName,
+				text: 'File shared from ' + document.location.hostname,
 			})
 			.then(shareSuccessful)
 			.catch(shareError);
 		} else {
-			alertBox("Your device/browser doesn't support sharing files.");
+			
+			// Try sharing the file as text
+			navigator.share({
+				title: fileName,
+				text: file.text,
+			})
+			.then(shareSuccessful)
+			.catch(shareError);
+			
 		}
 		
 		
 		function shareSuccessful() {
-			console.log('Share was successful.')
+			console.log('Share was successful.');
+			windowMenu.hide();
 		}
 		
 		function shareError(err) {
 			console.error(err);
+			
+			var CANCEL = 20;
+			
+			if(err.code != CANCEL) {
+				alertBox("Problems sharing fileName=" + fileName + " Error: " + err.message + " (code=" + err.code + ")");
+			}
 		}
 		
 	}
-
-
+	
+	
 })();
