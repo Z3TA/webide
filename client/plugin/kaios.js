@@ -44,10 +44,27 @@
 		/*
 			Try to "install" the web app 
 			https://developer.mozilla.org/en-US/docs/Archive/Marketplace/API/DOMApplicationsRegistry/install
+			
+			Test trigger. Run in FirefoxOS simulator debugger:
+			window.open("http://192.168.0.3/index.htm");
+			
 		*/
 		if(typeof window.navigator == "object" && typeof window.navigator.mozApps == "object" && typeof window.navigator.mozApps.install == "function") {
 			console.log("KaiOS: : Attempting install ...");
-			var manifestUrl = "./manifest.webapp";
+			
+			/*
+				Install failed, error: INVALID_URL
+				I tried: 
+				./manifest.webapp
+				manifest.webapp
+				/manifest.webapp
+				
+				Got it working with: (but got another error: Install failed, error: REINSTALL_FORBIDDEN)
+				http://192.168.0.3/manifest.webapp
+				
+			*/
+			
+			var manifestUrl = document.location.protocol + "//" + document.location.host + "/manifest.webapp";
 			var request = window.navigator.mozApps.install(manifestUrl);
 			request.onsuccess = function () {
 				// Save the App object that is returned
@@ -56,7 +73,7 @@
 			};
 			request.onerror = function () {
 				// Display the error information from the DOMError object
-				alertBox('Install failed, error: ' + this.error.name);
+				alertBox('Install failed, error: ' + this.error.name + " manifestUrl=" + manifestUrl);
 			};
 		}
 		

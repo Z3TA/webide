@@ -34,6 +34,26 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+
+Testing install dialog:
+EDITOR.createWindow({url: "http://192.168.0.3/index.htm"}, function(err, win) {console.log(err, win);;  setTimeout(function() {console.log(win.location.href)}, 1000);   });
+
+window.open("http://192.168.0.3/index.htm");
+
+ win.document.location="http://192.168.0.3/dummy.htm"
+
+
+Question: Should I invest in the KaiOS market (1.1% worldwide) or should I just concentrate on PWA's !?
+
+Can FirefoxOS open a new window !?
+EDITOR.createWindow({url: "dummy.htm"}, function(err, win) {console.log(err, win); win.document.location.href="dummy.htm";});
+
+[Exception... "The URI is malformed"  nsresult: "0x804b000a (NS_ERROR_MALFORMED_URI)"  location: "JS frame :: debugger eval code :: <TOP_LEVEL> :: line 1"  data: no]
+
+EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); ;}); // Get black page
+EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); win.document.location="dummy.htm";}); // malformed error
+EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); win.document.location="http://192.168.0.3/dummy.htm";});
+
 Looking into T9 Predictive text and supporting KaiOS phones.
 Eg typing 2667659*564 console.log 
 And also have auto complete (with snippets)

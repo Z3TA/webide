@@ -1,6 +1,9 @@
 (function() {
 
 	/*
+		
+		!DO:NOT:BUNDLE!
+		
 		This module makes it faster to type using a numeric keyboard
 		1 = weird symbol
 		2 = ABC
@@ -18,6 +21,14 @@
 		Typing hello world: 43556096753
 		
 		
+		todo: In service worker, when the dictionary is requested, add it to the cache! (so it can be used offline)
+		
+		Depending where in the code we are editing, the editor can figure out what we want.
+		Only use english words when declaring variables or inside quotes or comments
+		Figure out when to look for variables
+		
+		
+		Put the dictionary searcher in a web worker.
 		
 	*/
 	

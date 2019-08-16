@@ -12,6 +12,7 @@ EDITOR.plugin({
 			
 			winMenuForkWebsite = EDITOR.windowMenu.add("Download a website", ["Tools", 10], forkWebsite);
 			
+			if(1==2) { // This will cause a security confirmation box, (which can be confused with install request), and thus not worth it.
 			if(typeof navigator == "object" && typeof navigator.registerProtocolHandler == "function") {
 				var self = window.location.protocol + window.location.hostname + "/?fork=%s";
 				
@@ -25,6 +26,7 @@ EDITOR.plugin({
 				catch(err) {
 					console.error(err);
 				}
+			}
 			}
 			
 		},
