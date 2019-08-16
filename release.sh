@@ -104,6 +104,9 @@ rm temp/release/linux/semver.js
 #rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm
 rm temp/release/linux/replaceStringInFileWithContentOfFile.js
+rm temp/release/linux/server/privkey.pem
+rm temp/release/linux/server/fullchain.pem
+
 
 # Remember to remove below line if we ever need the dictionary
 rm temp/release/linux/client/count_1w.txt

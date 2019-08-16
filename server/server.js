@@ -725,6 +725,7 @@ function main() {
 		wsServer.on("connection", sockJsConnection);
 		
 		if(USE_HTTPS) {
+			// Note: You should never share your private key(s)!
 			var httpsOptions = {
 				cert: module_fs.readFileSync("fullchain.pem"),
 				key: module_fs.readFileSync("privkey.pem")
