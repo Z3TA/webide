@@ -8,6 +8,9 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
+Bug in start.js, when restarting, it wont start the server!
+
+
 NEVER run hg up on working folder. Instead copy the whole folder and make the hg up.
 hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
 
@@ -33,6 +36,16 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 
 What I'm working on
 -------------------
+
+
+
+
+
+Setting Postfix Support for Maildir-style Mailboxes: https://help.ubuntu.com/community/PostfixBasicSetupHowto
+Add support for reading and sending e-mail. Each user gets an user@webide.se e-mail address !?
+
+File - New from Template - > invoice, e-mail, invitation, ....
+
 
 OMGF File is now a standard, and we use that as a global variable ...
 

@@ -20,6 +20,24 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	return;
 	}
 	
+	var loc = window.location.href;
+	var localhost = false;
+	if( loc.match(/127\.0\.\d{1,3}\.\d{1,3}/) ) localhost = true;
+	if( loc.match(/10\.\d{1,3}\.\d{1,3}\.\d{1,3}/) ) localhost = true;
+	if( loc.match(/176\.16\.\d{1,3}\.\d{1,3}/) ) localhost = true;
+	if( loc.match(/192\.168\.\d{1,3}\.\d{1,3}/) ) localhost = true;
+	if( loc.match(/3\.webide\.se/) ) localhost = true;
+	if( loc.match(/localhost\.webide\.se/) ) localhost = true;
+	
+	if(localhost) {
+		
+		console.warn("A2HS: Not asking to install because we are running on localhost!");
+		return;
+		
+		// Chrome added a huge white top bar when launching from desktop and http: (no SSL)
+		// Instead start the editor using ./start.js
+	}
+	
 	var deferredPrompt;
 	
 	window.addEventListener('beforeinstallprompt', beforeinstallprompt);
