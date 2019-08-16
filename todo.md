@@ -35,28 +35,38 @@ What I'm working on
 -------------------
 
 
-Testing install dialog:
-EDITOR.createWindow({url: "http://192.168.0.3/index.htm"}, function(err, win) {console.log(err, win);;  setTimeout(function() {console.log(win.location.href)}, 1000);   });
+Investigating web share
+holy shit!: https://paul.kinlan.me/file-web-share-target/
 
-window.open("http://192.168.0.3/index.htm");
 
- win.document.location="http://192.168.0.3/dummy.htm"
+
+Investigating Kordova, and ionic
+
+React Native has a lot of puff peces. eg. articles about "everyone swithcing from Kordova to React native",
+But the React Native ecosystem seem unstainable. Lots of investors, but no way to make money and weak tech.
+
+What's the problem with PWA's !?
+
+
+
+Idea: T9-swipe on touchscreens.
+When clicking you get the numbers 0-9, when swiping it predicts words.
+Due to only 9 + 0 possible position, it should be easy to figure out swipe direction ...
+so you should be able to type fast using minimal thumb movement.
+Should probably be able to "swipe" in the air with a dot on your finger,
+and the video camera detects the "swiping".
+
 
 
 Question: Should I invest in the KaiOS market (1.1% worldwide) or should I just concentrate on PWA's !?
 
-Can FirefoxOS open a new window !?
-EDITOR.createWindow({url: "dummy.htm"}, function(err, win) {console.log(err, win); win.document.location.href="dummy.htm";});
+In the european market the cheapest KaiOS phone is $70-80. And they got very bad reviews.
+Probably better off with a low end Android. I would guess KaiOS market in Europe is just a few hundred devices!?
+KaiOS however claim 2-3 millions in Africa and India. 
 
-[Exception... "The URI is malformed"  nsresult: "0x804b000a (NS_ERROR_MALFORMED_URI)"  location: "JS frame :: debugger eval code :: <TOP_LEVEL> :: line 1"  data: no]
+Accordning to https://gs.statcounter.com/os-market-share/mobile/worldwide
+KaiOS has 1.1% wordwide market share, nothing in Africa!! and nothing in south america! and only 2% in Asia, with 4-5% in india.
 
-EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); ;}); // Get black page
-EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); win.document.location="dummy.htm";}); // malformed error
-EDITOR.createWindow({url: "http://192.168.0.3/dummy.htm"}, function(err, win) {console.log(err, win); win.document.location="http://192.168.0.3/dummy.htm";});
-
-Looking into T9 Predictive text and supporting KaiOS phones.
-Eg typing 2667659*564 console.log 
-And also have auto complete (with snippets)
 
 Besides text input, another main problem with developing on a phone is 
 looking up documentation and API's, for example, what code is needed to create a TCP server in Node.JS !?
