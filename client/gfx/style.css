@@ -1156,6 +1156,7 @@ div.gotoFile li:hover {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
+	overflow-x:-webkit-marquee;
 	
 }
 
