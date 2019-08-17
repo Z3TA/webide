@@ -60,7 +60,8 @@ Investigating Kordova, and ionic
 React Native has a lot of puff peces. eg. articles about "everyone swithcing from Kordova to React native",
 But the React Native ecosystem seem unstainable. Lots of investors, but no way to make money and weak tech.
 
-What's the problem with PWA's !?
+What's the problem with PWA's !? PWA's is the shit! PWA's it is! 
+Google is pushing a lot of capabilites to the web. Hopefully making PWA's first class citizens on Android.
 
 
 
