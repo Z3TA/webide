@@ -42,9 +42,9 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
-		menuItem = EDITOR.ctxMenu.add("Switch user", showLoginDialog, 13);
+		menuItem = EDITOR.ctxMenu.add("Switch user", loginDialogFromMenu, 13);
 		
-		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", ["Editor", 2], showLoginDialog);
+		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", ["Editor", 2], loginDialogFromMenu);
 		
 		var server = undefined;
 		if(EDITOR.localStorage) {
@@ -68,6 +68,12 @@
 		
 		function connectedToServer(err) {
 		}
+	}
+	
+	function loginDialogFromMenu() {
+		showLoginDialog();
+		winMenuLogin.hide();
+		EDITOR.ctxMenu.hide();
 	}
 	
 	function unloadServerLogin() {
@@ -257,8 +263,6 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
 			return true;
 		}
-		EDITOR.ctxMenu.hide();
-		if(winMenuLogin) winMenuLogin.hide();
 		
 		console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
