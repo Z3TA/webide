@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+	<title>Order received</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+
+<h1>Order received</h1>
+
+<p>We will now setup and and install a server, this might take a few hours.<br>
+If you have any questions, requests or need help,
+send an e-mail to editor@webtigerteam.com.</p>
+
+<p>It's recomended to use a domain/host name for the cloud IDE,
+which allows each user to get their own namespace, for example: username.yourdomain.com<br>
+The domain name need to be pointed to the following name servers:</p>
+
+<ul>
+	<li>ns1.zetafiles.org</li>
+	<li>ns4.zetafiles.org</li>
+	<li>ns5.zetafiles.org</li>
+</ul>
+
+<form action="https://www.webtigerteam.com/mailform.nodejs" method="post">
+	
+	<p><label for="domain">Domain name:</label> <input id="domain" type="text" name="domain" size="20" placeholder="myide.com" />
+	(The address/URL for your cloud IDE)</p>
+	
+	<p><label for="message">Message (write additional info here)</label><br>
+	<textarea name="meddelande" id="message" rows="4" cols="50"></textarea></p>
+	
+	<input type="hidden" name="tacksida" value="https://www.webtigerteam.com/editor/message_sent.htm">
+	
+	<input type="submit" value="Send info" />
+	
+</form>
+
+</body>
+
+</html>

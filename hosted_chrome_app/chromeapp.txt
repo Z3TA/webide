@@ -43,6 +43,8 @@ manifest.json
 name can be max 45 characters
 description max 132 characters
 
+manifest_version: 2 (do not touch)
+version: Need to be incremented
 
 Hosted app:
 

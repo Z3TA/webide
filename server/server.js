@@ -1273,6 +1273,15 @@ function broadcast(myIp) {
 			
 		});
 		
+		broadcastClient.on('error', function (err) {
+			console.error(err);
+			
+			log(err.message, WARN);
+			
+			// Clear intervals!?
+			
+		});
+		
 		broadcastClient.bind(broadcastPort);
 	}
 	

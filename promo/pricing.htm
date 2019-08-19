@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+	<head>
+	<title>Pricing</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+
+<body>
+
+<h2>Early access</h2>
+
+<p>$79 one time payment</p>
+
+<!-- Load Stripe.js on your website. -->
+<script src="https://js.stripe.com/v3"></script>
+
+<!-- Create a button that your customers click to complete their purchase. Customize the styling to suit your branding. -->
+<button style="background-color:#6772E5;color:#FFF;padding:8px 12px;border:0;border-radius:4px;font-size:1em"
+id="checkout-button-sku_FEemCgnqv20qA5" role="link">Buy now</button>
+
+<div id="error-message"></div>
+
+<script>
+	var stripe = Stripe('pk_live_UrvqW1keKIMmpfnwSTytBO1000lTMr2Tp2');
+	
+	var checkoutButton = document.getElementById('checkout-button-sku_FEemCgnqv20qA5');
+	checkoutButton.addEventListener('click', function () {
+		// When the customer clicks on the button, redirect
+		// them to Checkout.
+		stripe.redirectToCheckout({
+			items: [{sku: 'sku_FEemCgnqv20qA5', quantity: 1}],
+			
+			// Do not rely on the redirect to the successUrl for fulfilling
+			// purchases, customers may not always reach the success_url after
+			// a successful payment.
+			// Instead use one of the strategies described in
+			// https://stripe.com/docs/payments/checkout/fulfillment
+			successUrl: 'https://webtigerteam.com/editor/success.htm',
+			cancelUrl: 'https://webtigerteam.com/editor/cancel.htm',
+		})
+		.then(function (result) {
+			if (result.error) {
+				// If `redirectToCheckout` fails due to a browser or network
+				// error, display the localized error message to your customer.
+				var displayError = document.getElementById('error-message');
+				displayError.textContent = result.error.message;
+			}
+		});
+	});
+</script>
+
+
+<p>As an early adoptor you will get access to the source control repository for the latest changes and easy upgrades.</p>
+
+
+<hr>
+
+<h2>Hosted Cloud IDE</h2>
+
+<p>$15 per vCPU /month.</p>
+
+<p><label for="users">vCPU's:</label> <input id="users" type="text" type="number" name="users" size="2" value="8" /> <!--(how many people will use the editor)--></p>
+
+<p><input id="tos" type="checkbox" name="tos" value="agree" /> <label for="tos">I agree to the <a href="tos.htm">Terms of service</a></label></p>
+
+<!-- Create a button that your customers click to complete their purchase. Customize the styling to suit your branding. -->
+<button style="background-color:#6772E5;color:#FFF;padding:8px 12px;border:0;border-radius:4px;font-size:1em"
+id="checkout-button-2" role="link">Order hosted service</button>
+
+
+
+<script>
+	
+	var subscribeButton = document.getElementById('checkout-button-2');
+	subscribeButton.addEventListener('click', function () {
+		// When the customer clicks on the button, redirect
+		// them to Checkout.
+		
+		var tos = document.getElementById("tos");
+		if(!tos.checked) return alert("You must agree to the terms of service");
+		
+		var users = parseInt(document.getElementById("users").value);
+		if(isNaN(users)) users = 1;
+		
+		stripe.redirectToCheckout({
+			items: [{plan: '2', quantity: users}],
+			
+			// Do not rely on the redirect to the successUrl for fulfilling
+			// purchases, customers may not always reach the success_url after
+			// a successful payment.
+			// Instead use one of the strategies described in
+			// https://stripe.com/docs/payments/checkout/fulfillment
+			successUrl: 'https://webtigerteam.com/editor/managed.htm',
+			cancelUrl: 'https://webtigerteam.com/editor/cancel.htm',
+		})
+		.then(function (result) {
+			if (result.error) {
+				// If `redirectToCheckout` fails due to a browser or network
+				// error, display the localized error message to your customer.
+				var displayError = document.getElementById('error-message');
+				displayError.textContent = result.error.message;
+			}
+		});
+	});
+</script>
+
+<p>You get an always on, dedicated, managed, bare metal server, with full root permission!<br>
+Including the hosted IDE, and unlimited users. Specify more vCPU's to get a more powerful server.</p>
+
+</body>
+</html>

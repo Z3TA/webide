@@ -1991,7 +1991,7 @@ max-width: 40px;
 	
 	.header .discoveryBar {
 		/* make it show on separate row */
-		float: none; 
+		float: none;
 		border: 0px solid green;
 	}
 	

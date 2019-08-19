@@ -87,7 +87,8 @@ rm -rf temp/release/linux/hosted_chrome_app/
 rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/client/plugin/jswordwrap/
 rm -rf temp/release/linux/guide/
-rm -rf temp/release/linux/jzedit.app/
+rm -rf temp/release/linux/promo/
+
 
 rm temp/release/linux/make_test_file.js
 rm temp/release/linux/charStats.js

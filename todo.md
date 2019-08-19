@@ -37,8 +37,24 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Make a small promo tile for the chrome web store 440x280 - 30px due to chrome title bar
+
+Market the editor as an IDE to make progressive web apps
 
 
+do not include node_js examples or html examples!!! Instead add templates.
+Examples has to look shiny! Wow I can do this in this IDE!? eg. Make a progressive web app.
+
+Able to deploy a static web site/app.
+
+Editor -> Templates (and from dashboard, with description) -> Progressive web app (static), Blog, eCommerse, Product landing page, photo gallery
+(clone from a repo, do not include templates)
+
+
+Make most of the features work "offline"!????
+- Sync FS to localStorage
+- In preview, if offline, send the folder content to the service worker
+EDITOR.serve use servicve worker if offline.
 
 
 Setting Postfix Support for Maildir-style Mailboxes: https://help.ubuntu.com/community/PostfixBasicSetupHowto
