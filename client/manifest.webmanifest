@@ -1,12 +1,12 @@
 {
   "lang": "en",
-  "name": "JZedit Cloud editor/IDE",
-  "short_name": "JZedit",
+  "name": "PWA web editor/IDE",
+  "short_name": "webide.se",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
   "theme_color": "#4c4944",
-  "description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
+  "description": "Editor/IDE for creating progressive web apps, and web sites.",
   "icons": [
 {
     "src": "/gfx/jz64.png",
@@ -41,9 +41,5 @@
         }
       ]
     }
-  },
-  "related_applications": [{
-    "platform": "web",
-    "url": "https://webide.se/"
-  }]  
+  }
 }

@@ -249,6 +249,7 @@
 		file.fileExtension=="vbs" ||  // Visual Basic Script
 		file.fileExtension=="vb" ||   // Visual Basic
 		file.fileExtension=="json" || 
+		file.fileExtension=="webmanifest" || 
 		file.fileExtension=="css" || 
 		file.fileExtension=="htm" || 
 		file.fileExtension=="html" || 
