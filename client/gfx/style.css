@@ -1849,6 +1849,7 @@ margin-top: 20px;
 		padding: 5px 10px 5px 7px;
 		}
 	
+	
 	ul#tabList li.tabFileItem {
 		margin-top: 3px;
 		padding-top: 1px;
@@ -1862,7 +1863,7 @@ margin-top: 20px;
 	ul#tabList li.tabFolderItem.single {
 		padding-top: 2px; /* 8px */
 		padding-bottom: 1px;
-		
+		min-height: 25px; /* same heigh when grouped */
 	}
 	
 	ul#tabList li.tabFileItem {
@@ -1874,11 +1875,35 @@ margin-top: 20px;
 		margin-left: -16px;
 	}
 	
+	ul#tabList .single ul.folderFileList li.tabFileItem {
+		line-height: 56px;
+	}
+	
 	select.functionList.floatingInHeader {
 		height: 21px;
 	}
-
+	
+	
+	.header .discoveryBar {
+		max-height: 27px;
+	}
+	
+	.header .discoveryBar .discoveryItem {
+	}
+	
+	.header .discoveryBar .discoveryItem img {
+		height: 18px;
+	}
+	
+	
+	
+	
 }
+
+
+
+
+
 
 @media (max-width: 1315px) {
 	div.group, .repoCommit .group.buttons {
