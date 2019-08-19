@@ -2711,6 +2711,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			
 		},
 		remove: function removeDiscoveryItem(element) {
+			var wrap = element.parentNode;
 			discoveryBar.removeChild(wrap);
 		},
 		show: function showDiscoveryBar() {
