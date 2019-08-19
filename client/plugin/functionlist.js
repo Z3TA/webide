@@ -98,6 +98,7 @@
 		EDITOR.windowMenu.remove(winMenuToggleFunctionlist);
 		
 		if(winMenuFunctionList) EDITOR.windowMenu.remove(winMenuFunctionList);
+		
 	}
 	
 	function mobileFubarDetected() {
@@ -134,10 +135,13 @@ leftColumn.removeChild(functionListWrap);
 		
 		functionListSelect.removeAttribute("multiple");
 		
+		if(!winMenuFunctionList) {
 		winMenuFunctionList = EDITOR.windowMenu.add("Functions", [], functionListMenuItemClicked);
 		//EDITOR.windowMenu.add("test", [], function test() {});
 		
-		winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
+		}
+		
+		if(winMenuFunctionList.text.firstChild) winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
 		winMenuFunctionList.text.appendChild(functionListSelect);
 		
 		function functionListMenuItemClicked() {
