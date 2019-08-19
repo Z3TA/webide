@@ -375,6 +375,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		loginButton.setAttribute("type", "submit");
 		loginButton.setAttribute("class", "button");
 		loginButton.setAttribute("value", "Login");
+		//loginButton.onclick = form.submit();
 		form.appendChild(loginButton);
 		
 		
@@ -502,6 +503,12 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			function identify() {
 				loggingIn = true;
 				if(loginButton) loginButton.disabled = true;
+				// Issue: if server restarts or have an issue, login-button will be stuck as disabled
+				// So just in case:
+				setTimeout(function() {
+					if(loginButton) loginButton.disabled = false;
+				}, 5000);
+				
 				CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedIn(err, resp) {
 					loggingIn = false;
 					if(loginButton) loginButton.disabled = false;
