@@ -49,6 +49,7 @@
 		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 9], toggleFunctionList);
 		if(functionListActive) winMenuToggleFunctionlist.activate();
 		
+		
 		functionListWrap = document.createElement("div");
 		
 		functionListWrap.setAttribute("id", "functionListWrap");
@@ -77,6 +78,7 @@
 			});
 		}
 		
+		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
 		
@@ -84,6 +86,9 @@
 		
 		
 	}
+	
+	
+	
 	
 	function unload() {
 		if(functionListWrap && functionListWrap.parentNode == leftColumn) leftColumn.removeChild(functionListWrap);
@@ -130,7 +135,10 @@ leftColumn.removeChild(functionListWrap);
 		var header = document.getElementById("header");
 		header.appendChild(functionListSelect);
 		//functionListSelect.setAttribute("class", "functionList floatingInHeader");
-		functionListSelect.setAttribute("class", "functionListInMenu");
+		
+		functionListSelect.classList.add("functionListInMenu");
+		//functionListSelect.setAttribute("class", "functionListInMenu");
+		
 		functionListSelect.setAttribute("size", "1");
 		
 		functionListSelect.removeAttribute("multiple");
@@ -570,8 +578,6 @@ leftColumn.removeChild(functionListWrap);
 		
 		console.time("buildFunctionList");
 		
-		functionListWrap = document.getElementById("functionListWrap");
-		
 		if(!functionListWrap && !forcedSingleRow) {
 console.warn("functionListWrap not available!");
 		return;
@@ -665,10 +671,21 @@ console.warn("functionListWrap not available!");
 			mobileFubarDetected();
 		}
 		else {
+			
+			//console.log("functionListSelect.parentNode=", functionListSelect.parentNode);
+			if(functionListSelect.parentNode != functionListWrap) {
+				
+				if(functionListWrap.parentNode != leftColumn) leftColumn.appendChild(functionListWrap);
+				
+				functionListWrap.appendChild(functionListSelect);
+				functionListSelect.classList.remove("functionListInMenu");
+				
+			}
+			
 		EDITOR.resizeNeeded();
 		
 		var height = functionListSelect.offsetHeight;
-		console.log("functionListSelect.offsetHeight=" + functionListSelect.offsetHeight);
+			//console.log("functionListSelect.offsetHeight=" + functionListSelect.offsetHeight + " functionListSelect.offsetWidth=" + functionListSelect.offsetWidth);
 		
 		if(domModel.length > 1 && height <= 18) {
 			forcedSingleRow = true;
@@ -676,6 +693,8 @@ console.warn("functionListWrap not available!");
 		}
 		else {
 			//alertBox("Not moving function-list! domModel.length=" + domModel.length + " height=" + height);
+				
+				forcedSingleRow = false;
 		}
 		}
 		
