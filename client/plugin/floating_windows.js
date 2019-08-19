@@ -8,15 +8,16 @@
 (function() {
 	"use strict";
 	
-	var menu;
-	var windowMenuNewWindow;
+	var ctxMenuNewWindow;
+	var windowMenuNewWindow, windowMenuSplitScreen;
 	
 	EDITOR.plugin({
 		desc: "Open file in new window",
 		load: function loadFloatingWindow() {
 			
-			menu = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
+			ctxMenuNewWindow = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
 			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", ["File", 9], openInNewWindow);
+			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 9], splitScreen);
 			
 			var discoveryItem = document.createElement("img");
 			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
@@ -26,8 +27,10 @@
 			
 		},
 		unload: function unloadFloatingWindow() {
-			EDITOR.ctxMenu.remove(menu);
+			EDITOR.ctxMenu.remove(ctxMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuNewWindow);
+			EDITOR.windowMenu.remove(windowMenuSplitScreen);
+			EDITOR.discoveryBar.remove(discoveryItem);
 		},
 	});
 	
@@ -35,9 +38,52 @@
 		openInNewWindow(EDITOR.currentFile);
 	}
 	
-	function openInNewWindow(file) {
+	function splitScreen() {
+		
+		// todo: Test with multiple screens, and windows managers (such as i3)
+		
+		var browserWindowWidth = window.outerWidth;
+		var browserWindowHeight = window.outerHeight;
+		var browserWindowPositionX = window.screenX || window.screenLeft;
+		var browserWindowPositionY = window.screenY || window.screenTop;
+		
+		var screenWidth = screen.width;
+		var screenHeight = screen.height;
+		
+		var editorCodeWindow = window;
+		
+		var width1 = Math.floor(browserWindowWidth / 2);
+		var width2 = width1*2 == browserWindowWidth ? width1 : width1+1;
+		
+		var height = browserWindowHeight;
+		
+		console.log("splitScreen: browserWindowWidth=" + browserWindowWidth + " browserWindowHeight=" + browserWindowHeight);
+		console.log("splitScreen: screenWidth=" + screenWidth + " screenHeight=" + screenHeight);
+		console.log("splitScreen: browserWindowPositionX=" + browserWindowPositionX + " browserWindowPositionY=" + browserWindowPositionY);
+		console.log("splitScreen: width1=" + width1 + " width2=" + width2 + " height=" + height);
+		
+		//editorCodeWindow.moveTo(0, 0);
+		
+		editorCodeWindow.resizeTo(width1, height);
+		EDITOR.resizeNeeded();
+		
+		// Can't resize if in full window !?
+		
+		openInNewWindow(EDITOR.currentFile, function windowOpened(err, win) {
+			win.moveTo(browserWindowPositionX+width1, browserWindowPositionY);
+			win.resizeTo(width2, height);
+			
+			windowMenuSplitScreen.hide();
+		}); 
+		
+		// canvas freezes when the other window is closed !?
+		
+	}
+	
+	function openInNewWindow(file, callback) {
 		
 		EDITOR.ctxMenu.hide();
+		windowMenuNewWindow.hide();
 		
 		var browserWindowOptions = {
 			url: "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar",
@@ -90,6 +136,8 @@
 						return undefined; // Will not warn about unsaved changes
 					}
 				}, 1000);
+				
+				if(typeof callback == "function") callback(null, browserWindow);
 				
 				function checkIfClosed() {
 					if(!browserWindow || browserWindow.closed) {
