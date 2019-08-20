@@ -3143,7 +3143,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		item.text.innerText = label;
 		item.wrapper.appendChild(item.text);
 		
-		if(EDITOR.settings.devMode) item.text.innerText = item.order + ": " + label;
+		if(QUERY_STRING["menuOrder"]) item.text.innerText = item.order + ": " + label;
 		
 		item.key = document.createElement("td");
 		if(options.key) {
