@@ -33,7 +33,7 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Creating a PWA example
+PWA example
 
 
 ---
