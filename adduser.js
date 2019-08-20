@@ -369,15 +369,15 @@ function adduser() {
 	
 		// Replace %USERNAME% %HOMEDIR% and %DOMAIN%
 		updateFile(homeDir + ".jzeditStorage/cmsjz_sites");
-		updateFile(homeDir + "website_example/source/rss_en.xml");
+		updateFile(homeDir + "static_site_generator_blog_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
-		updateFile(homeDir + "wwwpub/html_examples.htm");
+		
 		
 	// add wwwpub
 		var wwwgid = getGroupId("www-data");
 	//fs.mkdirSync(homeDir + "wwwpub");
-	fs.writeFileSync(homeDir + "wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
+		fs.writeFileSync(homeDir + "wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING);
 		chownrDirSync(homeDir + "wwwpub", uid, wwwgid);
 	// Make wwwpub public, and set the group-id bit so that all new files get the www-data group
 		chmodrSync(homeDir + "wwwpub", "2755");

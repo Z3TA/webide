@@ -6,8 +6,8 @@
 <description>My personal homepage and blog</description>
 
 <!-- CHANGE THESE LINKS TO YOUR OWN URL's (AND ALSO BELOW)-->
-<link>http://%USERNAME%.%DOMAIN%/</link>
-<atom:link href="http://%USERNAME%.%DOMAIN%/rss_en.xml" rel="self" type="application/rss+xml" />
+<link>http://%USERNAME%.%DOMAIN%/blog/</link>
+<atom:link href="http://%USERNAME%.%DOMAIN%/blog/rss_en.xml" rel="self" type="application/rss+xml" />
 
 		<?JS
 		
@@ -22,7 +22,7 @@ blogEntries.forEach(function (blog) {
 	document.write('\t\t\t<title>' + blog.title + '</title>\n');
 	document.write('\t\t\t<description>' + blog.lead.replace(/<[^>]*>/g, " ") + '</description>\n');
 	// NEED TO CHANGE URL HERE TOO:
-	document.write('\t\t\t<guid>http://%USERNAME%.%DOMAIN%' + blog.url + '</guid>\n');
+	document.write('\t\t\t<guid>http://%USERNAME%.%DOMAIN%/blog' + blog.url + '</guid>\n');
 	document.write('\t\t\t<pubDate>' + moment(blog.created).format("ddd, D MMM YYYY HH:mm:ss ZZ") + '</pubDate>\n');
 	
 	document.write('\t\t</item>\n');
