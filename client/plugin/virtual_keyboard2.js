@@ -163,6 +163,12 @@
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
 			wrapper.appendChild(canvas);
+			
+			setTimeout(function() {
+				var input = EDITOR.input
+				//alertBox("input=" + input);
+			}, 3000);
+			
 		},
 		unload: function unloadVirtualKeyboard() {
 			
@@ -258,6 +264,15 @@
 		
 		EDITOR.ctxMenu.update(menuItem, false, labelShowBuiltin);
 		EDITOR.windowMenu.update(winMenuKeyboard, {active: false, label: labelShowBuiltin});
+		
+		winMenuPhysical.hide();
+		
+		// If the key presses are not captured; Android will do weird annoying stuff.
+		EDITOR.input = true;
+		setTimeout(function() {
+			EDITOR.input = true;
+		}, 2000);
+		
 	}
 	
 	function showVirtualKeyboardMaybe() {
