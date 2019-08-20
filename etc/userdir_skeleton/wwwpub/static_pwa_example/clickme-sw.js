@@ -1,5 +1,3 @@
-
-
 self.addEventListener('activate', function serviceWorkerActivate(event) {
 	console.log("serviceWorker got activate event!");
 	
@@ -27,11 +25,6 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 			console.log("serviceWorker Serving from server: " + event.request.url);
 			
 			return fetch(event.request).then(function(response) {
-				
-				caches.open('v1').then(function(cache) {
-					cache.put(event.request, response.clone());
-				});
-				
 				return response;
 			});
 			

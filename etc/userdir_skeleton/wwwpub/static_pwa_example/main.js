@@ -1,5 +1,37 @@
 window.onload = main;
 
+var pwaInstallPrompt;
+window.onbeforeinstallprompt = saveInstallPrompt;
+
+
+function saveInstallPrompt(installPrompt) {
+	pwaInstallPrompt = installPrompt;
+}
+
+
+function showPwaInstallPrompt() {
+	if(!pwaInstallPrompt) {
+		console.log("We have not yet got a pwa install prompt from the browser");
+		return;
+	}
+	
+	pwaInstallPrompt.prompt();
+	// Wait for the user to respond to the prompt
+	pwaInstallPrompt.userChoice.then(userDid);
+	
+	function userDid(choiceResult) {
+		if (choiceResult.outcome === 'accepted') {
+			console.log('User accepted the A2HS prompt');
+		} else {
+			console.log('User dismissed the A2HS prompt');
+		}
+		pwaInstallPrompt = null;
+	}
+	
+}
+
+
+
 function main() {
 	
 	document.body.removeChild(document.body.firstChild); // Clear the body
@@ -38,6 +70,9 @@ function createMagicButton() {
 		else {
 			button.innerText = "Button has been clicked " + clickCounter + " times!";
 		}
+		
+		// Only ask the user to install if he/she has clicked 3 times
+		if(clickCounter == 3) showPwaInstallPrompt();
 	}
 	
 }
