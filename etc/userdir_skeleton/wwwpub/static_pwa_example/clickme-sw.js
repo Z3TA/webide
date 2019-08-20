@@ -3,9 +3,11 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 	
 	event.waitUntil(caches.open('v1').then(function(cache) {
 		return cache.addAll([
-			'./index.htm',
+			'./',
 			'./style.css',
 			'./main.js',
+			'./manifest.webmanifest',
+			'./icon_192.png'
 		]);
 	}));
 	
