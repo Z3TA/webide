@@ -1523,7 +1523,14 @@ fun: function space(click) {
 					EDITOR.currentFile.scrollToCaret();
 				}, 500);
 			}
+			
+			// This function is only called when clicking on the file canvas
+			
+			// It seems the andorid physical keyboard wont enter characters after tabbing away and back ...
+			// Can't seem to do anything about it :(
+			
 		}
+		
 		
 		return ALLOW_DEFAULT;
 	}
