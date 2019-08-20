@@ -1,0 +1,27 @@
+html, body {
+	position:relative;
+	margin: 0;
+	height: 100%;
+}
+
+div.wrap {
+	position: relative;
+	height: 100%;
+}
+
+button.magicButton {
+	
+	/* Blace the button in the middle */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	
+	font-size: 2em;
+	
+}
+
+
+
+
+

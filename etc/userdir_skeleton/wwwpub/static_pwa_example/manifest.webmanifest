@@ -1,0 +1,22 @@
+{
+	"lang": "en",
+	"name": "Hello world static PWA example",
+	"short_name": "Hello world",
+	"start_url": ".",
+	"display": "standalone",
+	"background_color": "#fff",
+	"theme_color": "#4c4944",
+	"description": "This is a very basic Hello world progressive web app. There is a button, and it wants to be clicked.",
+	"icons": [
+		{
+			"src": "icon_192.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+{
+			"src": "icon_512.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		}
+	]
+}
