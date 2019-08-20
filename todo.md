@@ -8,12 +8,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
-Bug in start.js, when restarting, it wont start the server!
-
-
 NEVER run hg up on working folder. Instead copy the whole folder and make the hg up.
 hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
-
 
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
@@ -36,6 +32,44 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 
 What I'm working on
 -------------------
+
+Creating a PWA example
+
+
+---
+
+Solve a problem you care about
+
+Love your users
+
+analytics ... Measure what user do ...
+
+Where will the first users come from ?
+
+prio: get users to use the product
+
+
+
+when screen is small when virtual keyboard is compact;
+increase keyboard letter size.
+And increase contrast of window menu and disvovery icons.
+
+
+idea: long press to type big letter.
+
+hide window menu after saving or you think it didn't save.
+
+able to turn off keyboard sound. 
+
+
+issues with mobile in horizontal mode:
+virtual keyb too big 
+
+annoying when ctx menu comes up when selecting text using stylus 
+
+
+
+Can't click on login button!
 
 Implementing split screen
 
@@ -105,12 +139,21 @@ Accordning to https://gs.statcounter.com/os-market-share/mobile/worldwide
 KaiOS has 1.1% wordwide market share, nothing in Africa!! and nothing in south america! and only 2% in Asia, with 4-5% in india.
 
 
+---
 Besides text input, another main problem with developing on a phone is 
 looking up documentation and API's, for example, what code is needed to create a TCP server in Node.JS !?
 With a PC and big screen it's much easier to multi-task and switch back and forth between editor and documentation,
 and copy pasting from stack overflow :P
 
 Should there be a built in feature that searches Node.JS docks, Stack overflow and MDN !? =)
+
+assistant!
+when working with a nodejs module show the readme file for that module
+
+show mdn for javascript objects
+
+search stack overflow 
+---
 
 
 Need to be able to recover when I accidently nuke the editor, eg. service worker have cached a nuked client,
@@ -200,6 +243,14 @@ todo
 ---
 
 Better mobile experience:
+
+allow moving the cursor and selecting text by swiping
+anywhere, not just exactly ontop as you can not see
+bec finger is in the way. 
+
+when placing caret using touch screen show a helper bar that lets you cut copy paste and move cursor/selection
+left/right 
+
 
 when screen is small when virtual keyboard is compact;
 increase keyboard letter size.
@@ -1498,6 +1549,12 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+issue: Sometimes unable to find files when using open file ...
+I search for a file I know exist, but can't find it using regexp, need to search name verbatim,
+example: top_right_menu_button couln't be found using .*menu.*
+
+Bug in start.js, when restarting, it wont start the server!
 
 Sometimes when opening a file (goto file) it keeps searching the hdd, even though you have opened the file.
 
