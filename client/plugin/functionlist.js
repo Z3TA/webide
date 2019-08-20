@@ -46,7 +46,7 @@
 		
 		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
 		
-		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 9], toggleFunctionList);
+		winMenuToggleFunctionlist = EDITOR.windowMenu.add("Function list", ["View", 80], toggleFunctionList);
 		if(functionListActive) winMenuToggleFunctionlist.activate();
 		
 		
@@ -144,7 +144,7 @@ leftColumn.removeChild(functionListWrap);
 		functionListSelect.removeAttribute("multiple");
 		
 		if(!winMenuFunctionList) {
-		winMenuFunctionList = EDITOR.windowMenu.add("Functions", [], functionListMenuItemClicked);
+		winMenuFunctionList = EDITOR.windowMenu.add("Functions", [10], functionListMenuItemClicked);
 		//EDITOR.windowMenu.add("test", [], function test() {});
 		
 		}

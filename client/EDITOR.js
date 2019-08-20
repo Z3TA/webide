@@ -3143,6 +3143,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		item.text.innerText = label;
 		item.wrapper.appendChild(item.text);
 		
+		if(EDITOR.settings.devMode) item.text.innerText = item.order + ": " + label;
+		
 		item.key = document.createElement("td");
 		if(options.key) {
 			item.key.innerText = options.key;
@@ -3269,13 +3271,13 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				dropdownMenuRoot = new DropdownMenu({orientation: "horizontal", parentMenu: null});
 				
 				// Add top level menu entries to control the order
-				dropdownMenuRoot.addItem("Editor");
-				dropdownMenuRoot.addItem("File");
-				dropdownMenuRoot.addItem("Edit");
-				dropdownMenuRoot.addItem("View");
-				dropdownMenuRoot.addItem("Navigate");
-				dropdownMenuRoot.addItem("Tools");
-				dropdownMenuRoot.addItem("Node.JS");
+				dropdownMenuRoot.addItem("Editor", undefined, undefined, 1);
+				dropdownMenuRoot.addItem("File", undefined, undefined, 2);
+				dropdownMenuRoot.addItem("Edit", undefined, undefined, 3);
+				dropdownMenuRoot.addItem("View", undefined, undefined, 4);
+				dropdownMenuRoot.addItem("Navigate", undefined, undefined, 5);
+				dropdownMenuRoot.addItem("Tools", undefined, undefined, 6);
+				dropdownMenuRoot.addItem("Node.JS", undefined, undefined, 7);
 				
 				
 			}
@@ -3284,8 +3286,10 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			if(!Array.isArray(where)) throw new Error("Where to put the mnu item? Second argument (where) needs to be an array!");
 			if(typeof whenClicked != "function") throw new Error("whenClicked=" + whenClicked + " need to be a function!");
 			
-			var order = 100;
+			var order = 1000;
+			var parentOrder = 1000;
 			if( UTIL.isNumeric(where[where.length-1]) ) order = where.pop();
+			if( UTIL.isNumeric(where[where.length-1]) ) parentOrder = where.pop();
 			
 			var menu = dropdownMenuRoot;
 			var item;
@@ -3293,7 +3297,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				item = menu.items[ where[i] ];
 				
 				if(!item) {
-					item = menu.addItem(where[i]);
+					item = menu.addItem(where[i], undefined, undefined, parentOrder);
 				}
 				
 				menu = item.subMenu;
@@ -7416,7 +7420,7 @@ function main() {
 		}
 	*/
 	
-	showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 16], EDITOR.discoveryBar.toggle);
+		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 130], EDITOR.discoveryBar.toggle);
 	
 	windowLoaded = true;
 	

@@ -151,7 +151,7 @@
 			addButtons();
 			
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
-			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, ["View", 10], toggleBetweenKeyboards);
+			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, ["View", 120], toggleBetweenKeyboards);
 			
 			winMenuVirtual = EDITOR.windowMenu.add("Virtual", ["Editor", "Keyboard/input"], menuPickVirtual);
 			winMenuOnScreen = EDITOR.windowMenu.add("Native onscreen", ["Editor", "Keyboard/input"], menuPickOnScreen);

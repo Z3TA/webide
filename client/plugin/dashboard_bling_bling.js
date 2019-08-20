@@ -15,7 +15,7 @@
 			var key_Esc = 27;
 			//EDITOR.bindKey({desc: "Hide dashboard", charCode: key_Esc, combo: 0, fun: blingBlingHideDashboard});
 			
-			winMenuDashboard = EDITOR.windowMenu.add("Dashboard", ["View", 10], toggleDashboard);
+			winMenuDashboard = EDITOR.windowMenu.add("Dashboard", ["View", 110], toggleDashboard);
 			
 			EDITOR.on("showDashboard", dashboardVisible);
 			EDITOR.on("hideDashboard", dashboardHidden);

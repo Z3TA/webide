@@ -10,6 +10,7 @@
 	
 	var ctxMenuNewWindow;
 	var windowMenuNewWindow, windowMenuSplitScreen;
+	var discoveryItem;
 	
 	EDITOR.plugin({
 		desc: "Open file in new window",
@@ -17,9 +18,9 @@
 			
 			ctxMenuNewWindow = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
 			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", ["File", 9], openInNewWindow);
-			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 9], splitScreen);
+			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 50], splitScreen);
 			
-			var discoveryItem = document.createElement("img");
+			discoveryItem = document.createElement("img");
 			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Open new window";
 			discoveryItem.onclick = openWindowFromMenu;

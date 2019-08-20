@@ -9,7 +9,7 @@ EDITOR.plugin({
 desc: "Increase text size",
 load: function loadBiggerText() {
 
-			winMenuBiggerText = EDITOR.windowMenu.add("Big text", ["View", 15], toggleBigText);
+			winMenuBiggerText = EDITOR.windowMenu.add("Big text", ["View", 100], toggleBigText);
 			
 			originalFontSize = EDITOR.settings.style.fontSize;
 			originalGridHeight = EDITOR.settings.gridHeight;

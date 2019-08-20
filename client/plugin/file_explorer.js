@@ -58,7 +58,7 @@
 		
 		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorer, 9);
 		
-		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 8], toggleFileExplorer);
+		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorer);
 		
 		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorer});
 		

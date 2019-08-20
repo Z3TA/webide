@@ -8,7 +8,7 @@ var winMenuHide;
 		desc: "Hide the window menu",
 		load: function loadHideWindowMenu() {
 
-			winMenuHide = EDITOR.windowMenu.add("Window menu", ["View", 13], hideWindowMenu);
+			winMenuHide = EDITOR.windowMenu.add("Window menu", ["View", 140], hideWindowMenu);
 winMenuHide.activate();
 
 },
