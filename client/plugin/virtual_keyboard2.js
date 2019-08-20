@@ -115,8 +115,10 @@
 	var oldCanvasWidth = 0;
 	var useNative = false; // is native keyboard activated
 	var useBuiltin = false; // is built-in keyboard activated
-	var lastUsedKeyboard = "builtin"; // builtin or native
+	var usePhysical = false;
+	var lastUsedKeyboard = "builtin"; // builtin, native or physical
 	var nativeKeyboardCatcher;
+	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -151,6 +153,10 @@
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
 			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, ["View", 10], toggleBetweenKeyboards);
 			
+			winMenuVirtual = EDITOR.windowMenu.add("Virtual", ["Editor", "Keyboard/input"], menuPickVirtual);
+			winMenuOnScreen = EDITOR.windowMenu.add("Native onscreen", ["Editor", "Keyboard/input"], menuPickOnScreen);
+			winMenuPhysical = EDITOR.windowMenu.add("Physical keyboard", ["Editor", "Keyboard/input"], menuPickPhysical);
+			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
 			
@@ -178,6 +184,9 @@
 			EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.windowMenu.remove(winMenuKeyboard);
+			EDITOR.windowMenu.remove(winMenuVirtual);
+			EDITOR.windowMenu.remove(winMenuOnScreen);
+			EDITOR.windowMenu.remove(winMenuPhysical);
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.removeChild(canvas);
@@ -185,8 +194,74 @@
 		}
 	});
 	
+	function menuPickVirtual() {
+		if(useBuiltin) {
+			// It's already active, so deactivate it
+			hideBuiltinKeyboard();
+			lastUsedKeyboard = "builtin";
+			winMenuVirtual.deactivate();
+			return;
+		}
+		
+		useNative = false;
+		//useBuiltin = true;
+		usePhysical = false;
+		lastUsedKeyboard = "builtin"; // builtin, native or physical
+		
+		winMenuVirtual.activate();
+		winMenuOnScreen.deactivate();
+		winMenuPhysical.deactivate();
+		
+		EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
+		EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowNative});
+		
+		hideNativeKeyboard();
+		showBuiltinKeyboard(); // Will set useBuiltin to true
+	}
+	
+	function menuPickOnScreen() {
+		if(useNative) {
+			// It's already active, so deactivate it
+			hideNativeKeyboard();
+			lastUsedKeyboard = "native";
+			winMenuOnScreen.deactivate();
+			return;
+		}
+		//useNative = true;
+		useBuiltin = false;
+		usePhysical = false;
+		lastUsedKeyboard = "native"; // builtin, native or physical
+		
+		winMenuVirtual.deactivate();
+		winMenuOnScreen.activate();
+		winMenuPhysical.deactivate();
+		
+		EDITOR.ctxMenu.update(menuItem, true, labelShowBuiltin);
+		EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowBuiltin});
+		
+		hideBuiltinKeyboard();
+		showNativeKeyboard(); // Will set useNative to true
+	}
+	
+	function menuPickPhysical() {
+		useNative = false;
+		useBuiltin = false;
+		usePhysical = true;
+		lastUsedKeyboard = "physical"; // builtin, native or physical
+		
+		winMenuVirtual.deactivate();
+		winMenuOnScreen.deactivate();
+		winMenuPhysical.activate();
+		
+		hideNativeKeyboard();
+		hideBuiltinKeyboard();
+		
+		EDITOR.ctxMenu.update(menuItem, false, labelShowBuiltin);
+		EDITOR.windowMenu.update(winMenuKeyboard, {active: false, label: labelShowBuiltin});
+	}
+	
 	function showVirtualKeyboardMaybe() {
-		if(EDITOR.touchScreen) {
+		if(EDITOR.touchScreen && !usePhysical) {
 			showBuiltinKeyboard();
 		}
 	}
@@ -206,10 +281,14 @@
 			// Show native
 			hideBuiltinKeyboard();
 			showNativeKeyboard();
+			usePhysical = false;
+			winMenuPhysical.deactivate();
 		}
 		else if(!useNative && !useBuiltin) {
 			// Show built-in
 			showBuiltinKeyboard();
+			usePhysical = false;
+			winMenuPhysical.deactivate();
 		}
 		else {
 			throw new Error("This should never happen! useNative=" + useNative + " useBuiltin=" + useBuiltin);
@@ -1416,14 +1495,14 @@ fun: function space(click) {
 			
 			if(useBuiltin) showBuiltinKeyboard();
 			else if(useNative) showNativeKeyboard();
-			else {
+			else if(!usePhysical) {
 				// Always show a keyboard after touch!
 				if(lastUsedKeyboard == "builtin") showBuiltinKeyboard();
 				else if(lastUsedKeyboard == "native") showNativeKeyboard();
 				else throw new Error("Unknown lastUsedKeyboard=" + lastUsedKeyboard);
 			}
 			
-			if(EDITOR.currentFile) {
+			if(EDITOR.currentFile && !usePhysical) {
 				// Wait for the resize, then scroll to the caret (where you clicked)
 				setTimeout(function() {
 					EDITOR.currentFile.scrollToCaret();
