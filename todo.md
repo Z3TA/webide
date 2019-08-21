@@ -33,7 +33,11 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-PWA example
+
+
+release
+
+PWA example with push notifications
 
 
 ---
@@ -171,6 +175,14 @@ Time to Interactive 2.8 s
 Speed Index 2.6 s
 
 What is the result with the new bundle?
+Score 90 (lower! WTF)
+
+First Contentful Paint 2.0 s
+Speed Index 4.1 s
+Time to Interactive 3.4 s
+First Meaningful Paint 2.3 s
+First CPU Idle 3.2 s
+Max Potential First Input Delay 620 ms
 
 
 JSX bug: 
@@ -1549,6 +1561,8 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+autocomplete: can't find insideRegExp variable in js_parser.js
 
 issue: Sometimes unable to find files when using open file ...
 I search for a file I know exist, but can't find it using regexp, need to search name verbatim,

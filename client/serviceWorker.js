@@ -69,14 +69,14 @@ var CACHE_FILES = [
 	// style.css' should be inlined in bundle.htm
 	
 	// Discovery bar icons
-	'gfx/treaty.svg',
-	'gfx/data.svg',
-	'gfx/cloud.svg',
-	'gfx/website.svg',
-	'gfx/share.svg',
-	'gfx/multimedia.svg',
-	'gfx/board.svg',
-	'gfx/new-window.svg',
+	'/gfx/treaty.svg',
+	'/gfx/data.svg',
+	'/gfx/cloud.svg',
+	'/gfx/website.svg',
+	'/gfx/share.svg',
+	'/gfx/multimedia.svg',
+	'/gfx/board.svg',
+	'/gfx/new-window.svg',
 	
 	// Cache font
 	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
