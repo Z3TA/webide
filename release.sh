@@ -50,7 +50,7 @@ sed -i -e "s/var LAST_RELEASE_TIME = 0;/var LAST_RELEASE_TIME = $(date +%s);/g" 
 sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/package.json
 
 # The manifest.webapp version probably doesn't matter, but update it just in case, it seems it assume semver
-sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/client/manifest.webapp
+#sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/client/manifest.webapp
 
 echo "Copy over version.txt"
 # version.txt can for example be used by other programs to get the jzedit commmit id (version)
