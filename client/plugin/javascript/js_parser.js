@@ -2855,7 +2855,7 @@
 		function readWords(charIndex) {
 			// Collects the words to find variables
 			
-			//console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+			console.log("readWords: char=" + char + " word=" + word + " leftParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + leftParentheses[codeBlockDepth] + " rightParentheses[codeBlockDepth=" + codeBlockDepth + "]=" + rightParentheses[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 			
 			// .substr(start,length)   .substring(start,end)
 			// problem: if the whole script is encapsulated with a clusure: (function() {
@@ -2877,14 +2877,15 @@
 				return;
 			}
 			// Letters keeps adding to the word ...
-			else if(char==" " && word=="var") {
+			else if(char==" " && (word=="var" || word=="const" || word=="let")) {
+				// todo: Add variable list to each block, and have file.parsed.blocks[]
 				insideVariableDeclaration[codeBlockDepth] = true;
 				lastVariableDeclarationLine = lineNumber;
 				word = "";
 				variableStart = i;
 				return;
 			}
-			else if(char==" " && word=="function") {
+			else if(char==" " && (word=="function" || word == "async function")) {
 				// Detects: function foo() ...
 				insideFunctionDeclaration = true;
 				word = "";
@@ -2950,8 +2951,9 @@
 						singleStatementContext = 1;
 						return;
 					}
-					else if(word=="function") {
+					else if(word=="function" || word == "async function") {
 						// Detects var foo = function() ...
+						console.log(word + " detected!");
 						insideFunctionDeclaration = true;
 						word = "";
 						return;

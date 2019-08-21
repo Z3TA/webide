@@ -686,7 +686,7 @@ EDITOR.addTest(2, function JSX5(callback) {
 				});
 		});
 			
-			EDITOR.addTest(1, function JSX6(callback) {
+EDITOR.addTest(function JSX6(callback) {
 				EDITOR.openFile("jsx6.js", '(\' <   \'>\')\n(\' <b   "> \')\n(\' <\/script>\')\n', function(err, file) {
 						
 						UTIL.assert(file.grid[0].indentation, 0);
@@ -699,6 +699,27 @@ EDITOR.addTest(2, function JSX5(callback) {
 					});
 				});
 		
+EDITOR.addTest(function constVar(callback) {
+	EDITOR.openFile("constVar.js", 'const foo = 1;\nlet bar = 2;\n', function(err, file) {
+		
+		if(!file.parsed.globalVariables.hasOwnProperty("foo")) throw new Error("Did not find variable foo declared with const! file.parsed.globalVariables=", file.parsed.globalVariables);
+		if(!file.parsed.globalVariables.hasOwnProperty("bar")) throw new Error("Did not find variable bar declared with let! file.parsed.globalVariables=", file.parsed.globalVariables);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+EDITOR.addTest(1, function asyncFunction(callback) {
+	EDITOR.openFile("asyncFunction.js", 'async function foo() {\n}\n', function(err, file) {
+		
+		if(file.parsed.functions.length != 1 || file.parsed.functions[0].name != "foo") throw new Error("Expected function foo! file.parsed=", file.parsed);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
 /*
 	
 	### parentheses Indenting
