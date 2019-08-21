@@ -380,7 +380,9 @@ function fillGuestPool(id, callback) {
 				var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 				module_fs.stat(homeDir, function dir(err, homeDirStat) {
 					if(err && err.code == "ENOENT") {
+						// The user exist in /etc/passwd but has no home dir ...
 						var error = new Error("homeDir=" + homeDir + " does not exist!");
+						error.code = "NO_HOME_DIR";
 						if(callback) return callback(error);
 						else log(error.message, NOTICE);
 					}
@@ -479,17 +481,34 @@ function recycleGuestAccounts(callback) {
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 		module_fs.stat(homeDir, function dir(err, homeDirStat) {
 			if(err && err.code == "ENOENT") {
-				console.log(homeDir + " doesn't exist! Attempting to re-create guest" + id + " ...");
-				// If the home dir doesn't exist usually mean there is a gap in the GUEST_COUNTER series, so try filling that gap
+				console.log(homeDir + " doesn't exist!");
+				/*
+					No home dir probably means the user does not exist.
+					But it can also mean that the user exist in /etc/passwd but has no home dir!
+					We want to re-create that user in order to fill the gap in GUEST_COUNTER
+					
+					(If the GUEST_COUNTER is very hight we do not want to fill the system with hundrends of zombie accounts ...
+					We don't have to worry though, as only one new account can be created at a time.)
+					
+				*/
 				fillGuestPool(id, function guestPoolFilledMaybe(err) {
 					if(err) {
-						if(err.code != "LOCK") {
+						log("User account recycling error: " + err.message);
+						
+						if(err.code == "NO_HOME_DIR") {
 							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
-							// We don't want the editor to fail to start because of those "nuked" accounts
-							log("User account recycling error: " + err.message);
-							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message);
+							// Try to delete the "nuked" guest account
+							resetGuest(id); // resetGuest will call processedGuestId
 						}
-						processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
+						else if(err.code == "LOCK") {
+							// Another guest account is already being created. We can only create one account at a time.
+							processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
+						}
+						else {
+							// We got an unknown error ... We however don't want the server to restart, or it would go into a restart loop
+							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message + "\n\n" + err.stack);
+processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
+						}
 					}
 					else processedGuestId(id, "Added to guest pool");
 				});
@@ -564,12 +583,6 @@ function recycleGuestAccounts(callback) {
 		log("Removing guest user: " + username);
 		
 		var exec = module_child_process.exec;
-		
-		// Pass the arguments as JSON in case some hacker use a very clever password
-		var commandArg = {
-			username: username,
-			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
-		};
 		
 		var options = {
 			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
