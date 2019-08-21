@@ -1055,7 +1055,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
-		JSX = false,
+		JSX = options.jsx || true,
 		jsxMaybe = false,
 		jsxOpenElements = [];
 		
@@ -1990,12 +1990,12 @@
 					
 				*/ 
 						//if(JSX && !xmlMode) {
-					
-						else if(JSX && jsxMaybe && pastChar0=="<" && char=="/") {
+				
+				else if(JSX && jsxMaybe && pastChar0=="<" && char=="/") {
 																												insideXmlTagEnding = true;
 																											}
-					// Prevent if(x<y && a>b) ...
-				else if( JSX && !insideXmlTag && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
+					// note: Need to prevent if(x<y && a>b) ...
+				else if( JSX && !insideXmlTag && !insideRegExp && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
 					jsxMaybe = true;
 					// Reuse variable from xml because we are lazy
 					xmlTagStart = i;

@@ -615,13 +615,13 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
-EDITOR.addTest(2, function JSX1(callback) {
+EDITOR.addTest(1, function JSX1(callback) {
 
 		EDITOR.openFile("jsx1.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
 				
-		UTIL.assert(file.parsed.xmlTags.length, 4);
-				
-				UTIL.assert(file.grid[1].indentation, 1);
+		if(file.parsed.xmlTags.length != 4) throw new Error("Expected 3 XML tags! file.parsed.xmlTags.length=" + file.parsed.xmlTags.length);
+		
+		UTIL.assert(file.grid[1].indentation, 1);
 				
 		UTIL.assert(file.grid[4].indentation, 1);
 		
@@ -674,7 +674,7 @@ EDITOR.addTest(function JSX4(callback) {
 	});
 });
 
-		EDITOR.addTest(1, function JSX5(callback) {
+EDITOR.addTest(2, function JSX5(callback) {
 			EDITOR.openFile("jsx5.js", 'var reScripts = /<script.*src="(.*)"><\/script>/g;\n// meh\n', function(err, file) {
 					
 					UTIL.assert(file.parsed.xmlTags.length, 0);
