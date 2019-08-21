@@ -68,7 +68,7 @@ var CACHE_FILES = [
 	//'/gfx/style.css',
 	// style.css' should be inlined in bundle.htm
 	
-	// Discovery bar icons (todo: minify)
+	// Discovery bar icons
 	'gfx/treaty.svg',
 	'gfx/data.svg',
 	'gfx/cloud.svg',
@@ -96,7 +96,8 @@ var CACHE_FILES = [
 	'/gfx/icon/js.svg',
 	
 	
-	'/manifest.webmanifest', // Loaded at every page load, needed for "att to home screen" (A2HS)
+	'/manifest.webmanifest', // Loaded at every page load, needed for "add to home screen" (A2HS)
+	'/gfx/jz192.png', // Chrome also downloads this icon on every page load
 	
 	/*
 		Google page speed complains about too many files being downloaded,
