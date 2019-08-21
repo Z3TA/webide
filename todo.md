@@ -33,8 +33,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Make editor support async/await and const !
-
 
 PWA example with push notifications
 
