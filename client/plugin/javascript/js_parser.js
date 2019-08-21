@@ -1995,7 +1995,7 @@
 																												insideXmlTagEnding = true;
 																											}
 					// note: Need to prevent if(x<y && a>b) ...
-				else if( JSX && !insideXmlTag && !insideRegExp && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
+				else if( JSX && !insideXmlTag && !insideRegExp && !insideQuote && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
 					jsxMaybe = true;
 					// Reuse variable from xml because we are lazy
 					xmlTagStart = i;

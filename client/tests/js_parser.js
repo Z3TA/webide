@@ -615,7 +615,7 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
-EDITOR.addTest(1, function JSX1(callback) {
+EDITOR.addTest(2, function JSX1(callback) {
 
 		EDITOR.openFile("jsx1.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
 				
@@ -685,6 +685,19 @@ EDITOR.addTest(2, function JSX5(callback) {
 					callback(true);
 				});
 		});
+			
+			EDITOR.addTest(1, function JSX6(callback) {
+				EDITOR.openFile("jsx6.js", '(\' <   \'>\')\n(\' <b   "> \')\n(\' <\/script>\')\n', function(err, file) {
+						
+						UTIL.assert(file.grid[0].indentation, 0);
+						UTIL.assert(file.grid[1].indentation, 0);
+						UTIL.assert(file.grid[2].indentation, 0);
+						UTIL.assert(file.grid[3].indentation, 0);
+						
+						EDITOR.closeFile(file.path);
+						callback(true);
+					});
+				});
 		
 /*
 	
