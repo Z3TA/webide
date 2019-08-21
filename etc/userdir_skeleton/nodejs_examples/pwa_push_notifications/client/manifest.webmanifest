@@ -1,0 +1,22 @@
+{
+"lang": "en",
+	"name": "PWA with Notifications and Push",
+	"short_name": "PushNoti",
+"start_url": ".",
+"display": "standalone",
+"background_color": "#fff",
+"theme_color": "#4c4944",
+	"description": "This is a example of a progressive web app that handles push and can show notifications.",
+"icons": [
+{
+"src": "icon_192.png",
+"type": "image/png",
+"sizes": "192x192"
+},
+{
+"src": "icon_512.png",
+"type": "image/png",
+"sizes": "512x512"
+}
+]
+}

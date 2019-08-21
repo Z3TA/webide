@@ -33,9 +33,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Make editor support async/await and const !
 
-
-release
 
 PWA example with push notifications
 
@@ -107,8 +106,11 @@ Make most of the features work "offline"!????
 EDITOR.serve use servicve worker if offline.
 
 
+
 Setting Postfix Support for Maildir-style Mailboxes: https://help.ubuntu.com/community/PostfixBasicSetupHowto
 Add support for reading and sending e-mail. Each user gets an user@webide.se e-mail address !?
+Use Haraka !? https://github.com/haraka/Haraka/
+
 
 File - New from Template - > invoice, e-mail, invitation, ....
 
