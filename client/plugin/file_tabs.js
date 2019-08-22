@@ -93,7 +93,7 @@
 		if(tabList && tabList.parentNode == header) header.removeChild(tabList);
 		fileTabsActive = false;
 		
-		winMenuToggleFileTabs.deactivate();
+		if(winMenuToggleFileTabs) winMenuToggleFileTabs.deactivate();
 		
 		EDITOR.resizeNeeded();
 	}
@@ -105,7 +105,7 @@
 		
 		buildTabs(excludeFile);
 		fileTabsActive = true;
-		winMenuToggleFileTabs.activate();
+		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
 		EDITOR.resizeNeeded();
 	}
 	

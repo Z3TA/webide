@@ -37,9 +37,12 @@
 		detectColorScheme();
 		
 		var themeDetector = document.getElementById("themeDetector");
-		
+		if(themeDetector) {
 		var themeFromCss = window.getComputedStyle(themeDetector).getPropertyValue('content').replace(/"/g, '');
+		}
+		
 		console.log("dark_theme: themeFromCss=" + themeFromCss);
+		
 		if( themeFromCss == "dark") setDarkTheme();
 		
 		if(QUERY_STRING["theme"] == "dark") {
