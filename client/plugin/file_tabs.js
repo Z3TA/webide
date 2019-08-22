@@ -36,7 +36,7 @@
 		winMenuToggleFileTabs = EDITOR.windowMenu.add("File tabs", ["View", 90], toggleFileTabs);
 		
 		if(!fileTabsActive) return;
-		winMenuToggleFileTabs.activate();
+		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
 		
 		console.log("Loading file_tabs ...");
 		
