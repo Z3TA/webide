@@ -3367,7 +3367,7 @@ if(menuItem.parentMenu) {
 			EDITOR.windowMenu.isVisible = false;
 		},
 		hide: function hideWindowMenu() {
-			dropdownMenuRoot.hide(true);
+			if(dropdownMenuRoot) dropdownMenuRoot.hide(true);
 		},
 		click: function clickWindowMenu(where, onlyifactive) {
 			// todo: able to automate clicks on menu
