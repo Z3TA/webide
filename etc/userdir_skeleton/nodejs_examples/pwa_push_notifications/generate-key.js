@@ -1,3 +1,11 @@
+#!/bin/sh
+':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
+
+var crypto = require("crypto");
+
+var keys = generateNewKeys();
+
+console.log(keys);
 
 
 function base64UrlToUint8Array(base64UrlData) {

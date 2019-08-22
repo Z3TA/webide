@@ -33,6 +33,8 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+regression: When I'm selecting from right to left I often accidentally also select the character right of where I started!
+But *sometimes* it does the right thing! And some times it selects an additional character to the right!!! OMFG
 
 PWA example with push notifications
 

@@ -1,0 +1,30 @@
+
+.info:first-child {
+	border-top: 1px solid black;
+}
+
+.info {
+	padding: 1em;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+	font-size: 1em;
+}
+
+.info.error {
+	background-color: red;
+	color: white;
+	font-weight: bold;
+}
+
+.info.warning {
+	background-color: yellow;
+	color: black;
+}
+
+.info.success {
+	background-color: green;
+	color: white;
+	font-weight: bold;
+}
+
