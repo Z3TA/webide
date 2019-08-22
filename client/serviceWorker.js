@@ -133,6 +133,7 @@ var CACHE_FILES = [
 	
 ]
 
+var haveRecivedMessage = false;
 self.addEventListener('message', function(msg) {
 	console.log("serviceWorker (VERSION=" + VERSION + " DEV_MODE=" + DEV_MODE + ") Received Message: ", msg.data);
 	var matchVersion = msg.data.match(/editorVersion=(\d+)/);
@@ -151,7 +152,11 @@ self.addEventListener('message', function(msg) {
 		var editorVersion = parseInt(matchForce[1]);
 		updateCache(editorVersion, true);
 	}
+	
+	haveRecivedMessage = true;
+	
 });
+
 
 
 function updateCache(latestVersionMaybe, forceRefresh) {

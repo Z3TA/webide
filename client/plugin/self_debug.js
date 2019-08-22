@@ -282,7 +282,22 @@ sendit();
 			if(document && document.body && document.body.contains(death)) document.body.removeChild(death);
 			
 			if(answer == yes) {
-				if(RUNTIME == "browser") document.location = document.location.href;
+				if(RUNTIME == "browser") {
+
+					if ('serviceWorker' in navigator) {
+						navigator.serviceWorker.getRegistrations().then(function(registrations) {
+							
+							for(var registration in registrations) {
+								registrations[registration].unregister()
+							}
+							
+						}).catch(function(err) {
+							console.warn("Failed to unregister service workers: " + err.message)
+						});
+					}
+					
+					document.location = document.location.href;
+				}
 				else if(RUNTIME=="nw.js") process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
