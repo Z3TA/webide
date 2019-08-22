@@ -3323,6 +3323,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			}
 			
 			item = menu.addItem(label, keyCombo, action, order, separator);
+			
+			if(item == undefined) throw new Error("Failed to add item!? menu=", menu, " label=", label, " ");
+			
 			return item;
 			
 		},
