@@ -710,7 +710,7 @@ EDITOR.addTest(function constVar(callback) {
 	});
 });
 
-EDITOR.addTest(1, function asyncFunction(callback) {
+EDITOR.addTest(function asyncFunction(callback) {
 	EDITOR.openFile("asyncFunction.js", 'async function foo() {\n}\n', function(err, file) {
 		
 		if(file.parsed.functions.length != 1 || file.parsed.functions[0].name != "foo") throw new Error("Expected function foo! file.parsed=", file.parsed);
