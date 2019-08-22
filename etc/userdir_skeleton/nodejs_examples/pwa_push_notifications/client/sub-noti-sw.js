@@ -1,13 +1,20 @@
+
+var NAME_OF_CACHE = "cacheName-v1";
+
 self.addEventListener('push', function(event) {
-	console.log('serviceWorker Push Received.');
-	console.log(`serviceWorker Push had this data: "${event.data.text()}"`);
+	console.log("serviceWorker Push Received.");
 	
-	const title = 'Push Codelab';
-	const options = {
-		body: 'Yay it works.',
-		icon: 'images/icon.png',
-		badge: 'images/badge.png'
+	var text = event.data.text();
+	
+	console.log("serviceWorker Push had this text: " + text);
+	
+	var title = "Notification title";
+	var options = {
+		body: "This is the notification body. Text recived: " + text,
+		icon: "icon_192.png", // Icon might be displayed next to the body
+		badge: "icon_192.png.png" // Badge might show up as a tiny icon (on Android it shows up in the notifications bar)
 	};
+	// There are a lot of options, see more: https://developers.google.com/web/fundamentals/push-notifications/display-a-notification
 	
 	event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -41,7 +48,7 @@ console.log("serviceWorker got activate event!");
 		});
 	*/
 	
-event.waitUntil(caches.open('v1').then(function(cache) {
+	event.waitUntil(caches.open(NAME_OF_CACHE).then(function(cache) {
 return cache.addAll([
 './',
 './style.css',
@@ -60,7 +67,13 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 console.log("serviceWorker fetch url=" + event.request.url + "");
 
 // Use cache only when offline to make sure user see new updates
-
+	/*
+		
+		event.respondWith(f) wants a promise that returns a response! It then returns void
+		
+	*/
+	
+	
 event.respondWith(caches.match(event.request).then(function(response) {
 if (response && !navigator.onLine) {
 console.log("serviceWorker Serving from cache: " + event.request.url);
@@ -70,7 +83,13 @@ else {
 console.log("serviceWorker Serving from server: " + event.request.url);
 
 return fetch(event.request).then(function(response) {
-return response;
+
+				// Update the cache
+				caches.open(NAME_OF_CACHE).then(function(cache) {
+					cache.put(event.request, response);
+				});
+				return response.clone();
+				// return response;
 });
 
 }

@@ -18,4 +18,5 @@ server/GUEST_COUNTER
 server/server.log
 package-lock.json
 bundle.js
+etc/userdir_skeleton/nodejs_examples/pwa_push_notifications/keys.dat
 

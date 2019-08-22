@@ -2,10 +2,12 @@ window.onload = main;
 
 function main() {
 	
-	while(document.body.firstChild) document.body.removeChild(document.body.firstChild); // Clear the body
+	 // Clear the body
+	while(document.body.firstChild) document.body.removeChild(document.body.firstChild);
 	
+	// Create the user interface and add it to the body
 	var app = createAppComponent();
-	document.body.appendChild(app);  // Add our app structure to the document body
+	document.body.appendChild(app);
 	
 	app.info("App started!");
 	
@@ -48,15 +50,27 @@ function main() {
 		else {
 			app.info("Asking for push subscription ...");
 			askForPushSubScription(swRegistration, function(err, pushSubcription) {
-				if(err) return app.info("Unable to get push subscription: " + err.message);
+				if(err) return app.info("Unable to get push subscription: " + err.message, "error");
 				
 				if(pushSubcription) {
 gotPushSubscription(pushSubcription);
 				}
 				else {
-					app.info("Did not find push subscription! Subscribing for push ...");
-					subscribeToPush(swRegistration, function(err, pushSubcription) {
-						if(err) return app.info("Unable to subscribe to push: " + err.message);
+					app.info("We had no push subscription! Subscribing for push ...");
+					
+					
+					
+					// Generate key: https://web-push-codelab.glitch.me/
+					var applicationServerPublicKey = "BLMBbMVHVumgQO1YeY1g3hzq_rZZcMzBU8UqnT-7QwLXtDKx26UNvMWWNguFoIik4zPnRiESBos60OsL4TWrUwA";
+					var applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+					
+					var pushSubscriptionOptions = {
+						userVisibleOnly: true,
+						applicationServerKey: applicationServerKey
+					};
+					
+					subscribeToPush(swRegistration, pushSubscriptionOptions, function(err, pushSubcription) {
+						if(err) return app.info("Unable to subscribe to push: " + err.message, "error");
 						
 						if(!pushSubcription) return app.info("Did not get a push subscription!", "error");
 						
@@ -76,74 +90,79 @@ gotPushSubscription(pushSubcription);
 		console.log('Push subscription endpoint URL: ', pushSubcription.endpoint);
 		
 		app.info("Got push subscription: " +JSON.stringify(pushSubcription), "success");
+		
+		sendToServer("pushSubscription", pushSubcription, function(err, resp) {
+			if(err) app.info("Cannot send subscription to server! " + err.message, "error");
+			
+		})
+		
+		
 	}
-	
 }
 
 function askForPushSubScription(swRegistration, cb) {
-	/*
-		
-		note: The service worker also need to subscribe!
-		
-	*/
+	if(swRegistration == undefined) throw new Error("swRegistration=" + swRegistration)
 	
-	// Generate key: https://web-push-codelab.glitch.me/
-	var applicationServerPublicKey = "BLMBbMVHVumgQO1YeY1g3hzq_rZZcMzBU8UqnT-7QwLXtDKx26UNvMWWNguFoIik4zPnRiESBos60OsL4TWrUwA";
-	var applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
-	var pushSubscriptionOptions = {
-		userVisibleOnly: true,
-		applicationServerKey: applicationServerKey
-	};
+	var getPushSubscription = relieve(swRegistration.pushManager.getSubscription, swRegistration.pushManager);
 	
-	if(swRegistration == undefined) throw new Error("First argument swRegistration=" + swRegistration)
-	
-	var getPushSubscription = depromisify(swRegistration.pushManager.getSubscription, swRegistration.pushManager);
-	
-	getPushSubscription(function(err, pushSubcription) {
-		if(err) cb(err);
-		else cb(null, pushSubcription);
-	});
+	getPushSubscription(cb);
 }
 
-function subscribeToPush(swRegistration) {
-	// Generate key: https://web-push-codelab.glitch.me/
-	var applicationServerPublicKey = "BLMBbMVHVumgQO1YeY1g3hzq_rZZcMzBU8UqnT-7QwLXtDKx26UNvMWWNguFoIik4zPnRiESBos60OsL4TWrUwA";
-	var applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
-	
-	var pushSubscriptionOptions = {
-		userVisibleOnly: true,
-		applicationServerKey: applicationServerKey
-	};
-	
-	var subscribe = depromisify(swRegistration.pushManager.subscribe, swRegistration.pushManager);
-	
+function subscribeToPush(swRegistration, pushSubscriptionOptions, cb) {
+	var subscribe = relieve(swRegistration.pushManager.subscribe, swRegistration.pushManager);
 	subscribe(pushSubscriptionOptions, cb);
 }
 
+function sendToServer(type, obj, cb) {
+var options = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(obj)
+	}
+	
+	var send = relieve(fetch);
+	send('/api/' + type, options, function(err, resp) {
+		if(err) return cb(err);
+		
+		var getText = relieve(response.text, response);
+		getText(function(err, text) {
+			if(err) throw new Error("Unable to get text! " + err.message);
+			
+			if (response.status == 200) {
+				cb(null, text);
+			}
+			else {
+				cb(new Error(text));
+			}
+		});
+	});
+}
 
 function registerServiceWorker(swScript, swOptions, cb) {
 	if(typeof navigator.serviceWorker == undefined) {
 		return cb(new Error("Browser do not support service worker!"));
 	}
 	
-	var reg = depromisify(navigator.serviceWorker.register, navigator.serviceWorker);
+	var reg = relieve(navigator.serviceWorker.register, navigator.serviceWorker);
 	reg(swScript, swOptions, cb);
 }
-
 
 function askForNotificationPermission(cb) {
 	if(typeof Notification == "undefined") {
 		return cb(new Error("Browser does not support notifications!"))
 	}
 	
-	if(Notification.permission == "granted") return cb(null, "granted");
+	if(Notification.permission == "granted") {
+		// Notifications are already granted
+		return cb(null, "granted");
+	}
 	
 	Notification.requestPermission(function(status) {
 		cb(null, status);
 	});
 }
-
-
 
 function createAppComponent() {
 	
@@ -159,8 +178,6 @@ function createAppComponent() {
 	app.appendChild(info);
 	
 	/*
-		
-		
 		var subButton = document.createElement("button");
 		subButton.innerText = "Subscribe to notifications";
 		subButton.onclick = subscribeToNotifications;
@@ -177,21 +194,6 @@ function createAppComponent() {
 		
 		info.appendChild(msg);
 	}
-	
-	/*
-		Object.defineProperty(app, "info", {
-		get: function() {
-		return info.innerText;
-		},
-		set: function(str, isErrorMessage) {
-		info.innerText = str;
-		
-		if(isErrorMessage) info.classList.add("error");
-		else if(info.classList.contains("error")) info.classList.remove("error");
-		
-		}
-		});
-	*/
 	
 	return app;
 }
@@ -211,16 +213,17 @@ function urlB64ToUint8Array(base64String) {
 	return outputArray;
 }
 
-function depromisify(promFunc, thisObject) {
+function relieve(promFunc, thisObject) {
 	/*
 		Make it possible to call a function that returns a Promise with callback convention.
+		eg. relieve the function from the promise :P
 		
-		Functions that make use of the "this" keyword will need the thisObject set explicityly,
-		For example foo.bar the thisObject should be foo: depromisify(foo.bar, foo)
+		Functions that make use of the "this" keyword will need the thisObject set explicitly.
+		For foo.bar.baz the thisObject should probably be foo.bar Example: relieve(foo.bar.baz, foo.bar)
 	*/
 	
 	if(typeof promFunc != "function") {
-		throw new Error("First parameter in depromisify (" + (typeof promFunc) + ") need to be a function!")
+		throw new Error("First parameter in relieve (" + (typeof promFunc) + ") need to be a function!")
 	}
 	
 	return function callbackConvention() {
@@ -231,7 +234,7 @@ function depromisify(promFunc, thisObject) {
 		
 		if(typeof cb != "function") {
 			var fName = promFunc.name || functionName(promFunc);
-			console.warn("No callback given when calling depromised " + fName + "! args=", args);
+			console.warn("No callback given when calling relieved " + fName + "! args=", args);
 			cb = undefined;
 		}
 		
@@ -244,7 +247,7 @@ function depromisify(promFunc, thisObject) {
 		}
 		else {
 			var fName = promFunc.name || functionName(promFunc);
-			var error = new Error("Expected " + fName + " to return a promise, but it returned (" + (typeof promiseMaybe) + "): ", promiseMaybe);
+			var error = new Error("Expected " + fName + " to return a Promise, but it returned (" + (typeof promiseMaybe) + "): ", promiseMaybe);
 			if(cb) cb(error);
 			else throw error;
 		}
