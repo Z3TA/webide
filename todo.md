@@ -35,6 +35,14 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
+Reordering the order of the discovery bar :P
+(Preview/run need to be placed higher up)
+
+
+Download some files and cache them offline, 
+make use of hash to make sure nothing is over-written when syncing back to server.
+
+
 Need to have a progress bar when cloning a repo!
 And disable the clone button so user don't press it repeatably
 
