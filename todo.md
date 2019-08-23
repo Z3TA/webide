@@ -38,6 +38,7 @@ What I'm working on
 Need to have a progress bar when cloning a repo!
 And disable the clone button so user don't press it repeatably
 
+todo: The run button should be higher up in the discovery bar!
 
 todo: When clicking "terminal" in the discovery bar and the dashboard is open, hide the dashboard in order to see the terminal!
 
@@ -46,6 +47,8 @@ PWA example with push notifications
 
 
 todo: Release in order to fix FTP size issue when opening files.
+
+todo: Able to recive e-mails =)
 
 ---
 
