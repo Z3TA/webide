@@ -993,9 +993,9 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 			
 			c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
 				
-					if(err) throw err;
-					
-					console.log("Reading file from FTP ...");
+				if(err) return callback(err);
+				
+				console.log("Reading file from FTP ...");
 					
 					console.log(fileReadStream);
 					

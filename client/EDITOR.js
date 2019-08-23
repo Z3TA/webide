@@ -988,7 +988,12 @@ usePseudoClipboard = false;
 			EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
-					fileOpenError(err);
+					// Some FTP servers have issues getting the file size, 
+					// and we don't want the file to fail open just because of that!
+					console.warn("Unable to get file size from disk: " + err.message);
+					EDITOR.readFromDisk(path, load);
+					
+					//fileOpenError(err);
 				}
 				else {
 					
@@ -1028,7 +1033,7 @@ usePseudoClipboard = false;
 		
 		function load(err, path, text, hash, notFromDisk, tooBig) {
 			
-			if(err) return callCallbacks(err);
+			if(err) return fileOpenError(err);
 			
 			console.log("Loading file to editor: " + path);
 			
