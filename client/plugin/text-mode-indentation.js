@@ -294,6 +294,7 @@ else {
 	
 	function indent(file, shift) {
 		if(!file) return ALLOW_DEFAULT;;
+		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
 		console.log("indentate: shift=" + shift);
 		
