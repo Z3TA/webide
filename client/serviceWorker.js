@@ -77,6 +77,8 @@ var CACHE_FILES = [
 	'/gfx/multimedia.svg',
 	'/gfx/board.svg',
 	'/gfx/new-window.svg',
+	'/gfx/database.svg',
+	'/gfx/upload.svg',
 	
 	// Cache font
 	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
