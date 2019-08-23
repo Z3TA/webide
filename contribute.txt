@@ -98,8 +98,8 @@ add them to index.htm somwhere between <!-- BEGIN TESTS --> and <!-- END TESTS -
 Documentation
 -------------
 If you are a developer, you should look up what methods do by reading_the_source_code. 😄
-Feel free to comment your code with reasons, as to why you choose to implement it that way.
-And why it's useful. And add notes about performance optimizations.
+Feel free to comment your code with reasons, as to why you choose to implement it that way,
+and why it's useful, and notes about performance optimizations.
 Do not write what the code does in the comments, the code should be self explainable,
 except for large public methods - where you should have a brief description of what it does.
 
