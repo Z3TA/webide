@@ -84,12 +84,15 @@ console.log("serviceWorker Serving from server: " + event.request.url);
 
 return fetch(event.request).then(function(response) {
 
-				// Update the cache
-				caches.open(NAME_OF_CACHE).then(function(cache) {
-					cache.put(event.request, response);
-				});
-				return response.clone();
-				// return response;
+				if(event.request.method == "GET") {
+					// Update the cache
+					caches.open(NAME_OF_CACHE).then(function(cache) {
+						cache.put(event.request, response);
+					});
+					return response.clone();
+				}
+				else return response;
+				
 });
 
 }

@@ -56,26 +56,31 @@ function main() {
 gotPushSubscription(pushSubcription);
 				}
 				else {
-					app.info("We had no push subscription! Subscribing for push ...");
+					app.info("We had no push subscription!");
 					
-					
-					
-					// Generate key: https://web-push-codelab.glitch.me/
-					var applicationServerPublicKey = "BLMBbMVHVumgQO1YeY1g3hzq_rZZcMzBU8UqnT-7QwLXtDKx26UNvMWWNguFoIik4zPnRiESBos60OsL4TWrUwA";
-					var applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
-					
-					var pushSubscriptionOptions = {
-						userVisibleOnly: true,
-						applicationServerKey: applicationServerKey
-					};
-					
-					subscribeToPush(swRegistration, pushSubscriptionOptions, function(err, pushSubcription) {
-						if(err) return app.info("Unable to subscribe to push: " + err.message, "error");
+					app.info("Ask server for the public key ...");
+					sendToServer("publicKeyPlease", function(err, resp) {
+						if(err) return app.info("Unable to get public key from server: " + err.message);
 						
-						if(!pushSubcription) return app.info("Did not get a push subscription!", "error");
+						var applicationServerPublicKey = resp.publicKey;
+						var applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
 						
-						gotPushSubscription(pushSubcription);
+						app.info("Got public key from server: " + applicationServerPublicKey);
 						
+						var pushSubscriptionOptions = {
+							userVisibleOnly: true,
+							applicationServerKey: applicationServerKey
+						};
+						
+						app.info("Subscribing for push ...");
+						subscribeToPush(swRegistration, pushSubscriptionOptions, function(err, pushSubcription) {
+							if(err) return app.info("Unable to subscribe to push: " + err.message, "error");
+							
+							if(!pushSubcription) return app.info("Did not get a push subscription!", "error");
+							
+							gotPushSubscription(pushSubcription);
+							
+						});
 					});
 				}
 			});
@@ -91,7 +96,7 @@ gotPushSubscription(pushSubcription);
 		
 		app.info("Got push subscription: " +JSON.stringify(pushSubcription), "success");
 		
-		sendToServer("pushSubscription", pushSubcription, function(err, resp) {
+		sendToServer("pushSubscription", {subscription: pushSubcription}, function(err, resp) {
 			if(err) app.info("Cannot send subscription to server! " + err.message, "error");
 			
 		})
@@ -113,28 +118,61 @@ function subscribeToPush(swRegistration, pushSubscriptionOptions, cb) {
 	subscribe(pushSubscriptionOptions, cb);
 }
 
-function sendToServer(type, obj, cb) {
-var options = {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(obj)
+function sendToServer(apiPath, obj, sendToServerCallback) {
+	
+	if(sendToServerCallback == undefined && typeof obj == "function") {
+		sendToServerCallback = obj;
+		obj = undefined;
+	}
+	
+	if(typeof sendToServerCallback != "undefined" && typeof sendToServerCallback != "function") {
+		throw new Error("sendToServerCallback=" + JSON.stringify(sendToServerCallback) + " is not a callback function!");
+	}
+	
+	if(typeof obj == "object") {
+		var options = {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(obj)
+		}
+	}
+	else {
+		var options = {
+			method: "GET"
+		}
 	}
 	
 	var send = relieve(fetch);
-	send('/api/' + type, options, function(err, resp) {
-		if(err) return cb(err);
+	send('/api/' + apiPath, options, function(err, resp) {
+		if(err) {
+			if(sendToServerCallback) sendToServerCallback(err);
+			else console.error(err);
+			return;
+		}
 		
-		var getText = relieve(response.text, response);
+		var getText = relieve(resp.text, resp);
 		getText(function(err, text) {
 			if(err) throw new Error("Unable to get text! " + err.message);
 			
-			if (response.status == 200) {
-				cb(null, text);
+			if (resp.status == 200) {
+				
+				try{
+					var obj = JSON.parse(text);
+				}
+				catch(err) {
+					var error = new Error("Unable to parse text=" + text + " Err:" + err.message)
+					if(sendToServerCallback) sendToServerCallback(error);
+					else console.error(error);
+					return;
+				}
+				
+				if(sendToServerCallback) sendToServerCallback(null, obj);
 			}
 			else {
-				cb(new Error(text));
+				if(sendToServerCallback) sendToServerCallback(new Error(text));
+				else console.error(text);
 			}
 		});
 	});
@@ -256,10 +294,12 @@ function relieve(promFunc, thisObject) {
 			var resp = Array.prototype.slice.call(arguments);
 			resp.unshift(null);
 			if(cb) cb.apply(null, resp);
+			else console.log(resp);
 		}
 		
 		function fail(err) {
 			if(cb) cb(err);
+			else console.error(err);
 		}
 	}
 	

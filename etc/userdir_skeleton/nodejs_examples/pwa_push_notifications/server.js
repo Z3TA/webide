@@ -1,9 +1,4 @@
 
-var privateKey = "wlnoFHclwcqe3Vs3sG26gPqlu5TbBG0qWijycwrxFck";
-
-
-var module_webpush = require('web-push');
-
 function main() {
 
 	var express = require('express');
@@ -14,56 +9,74 @@ function main() {
 	httpServer.use(bodyParser.json());
 	httpServer.use('/', express.static('client'));
 	
+	
+	var server;
+	var sendPush;
 	getKeys(function(err, keys) {
 
-		var server = startServer(httpServer, serverRunning);
+		server = startServer(httpServer, serverRunning);
+		sendPush = makeSendPush(keys);
+		
+		var publicKey = keys.publicKey;
+		
+		httpServer.get("/api/publicKeyPlease", function(req, res) {
+			console.log("Got public key request from client ...");
+			res.status(200).send({publicKey: publicKey});
+		});
 		
 });
-	
-	
 	
 	function serverRunning(err, url) {
 		if(err) throw err;
 		
 		console.log("PWA push notifications example server listening on " + url);
-		
-	}
+		}
 	
 	
-	httpServer.post('/api/send-push-msg', (req, res) => {
-		const options = {
-			vapidDetails: {
-				subject: 'https://developers.google.com/web/fundamentals/',
-				publicKey: req.body.applicationKeys.public,
-				privateKey: req.body.applicationKeys.private
-			},
-			// 1 hour in seconds.
-			TTL: 60 * 60
-		};
+	httpServer.post("/api/pushSubscription", function(req, res) {
 		
-		module_webpush.sendNotification(req.body.subscription, req.body.data, options).then(() => {
-			res.status(200).send({success: true});
-		}).catch((err) => {
-			if (err.statusCode) {
-				res.status(err.statusCode).send(err.body);
-			} else {
-				res.status(400).send(err.message);
-			}
-		});
+		var pushSubscription = req.body.subscription;
+		
+		console.log("Got push subscription from client: " + JSON.stringify(pushSubscription));
+		
+		res.status(200).send({success: true});
+		
+		sendPush("Server got push subscription!", pushSubscription);
+		
 	});
-	
-	
-	
-	
-	
 }
 
-
-
-
-
+function makeSendPush(keys) {
+	return function sendPush(msg, pushSubscription, cb) {
+		var options = {
+			vapidDetails: {
+				// Put your e-mail, or URL to contact page in subject. More info: https://tools.ietf.org/html/draft-thomson-webpush-vapid-02
+				subject: 'mailto: ' + process.env.myName + "@" + process.env.tld, 
+				
+				publicKey: keys.publicKey,
+				privateKey: keys.privateKey
+			},
+			TTL: 60 * 60 // 1 hour in seconds.
+		};
+		
+		var webpush = require('web-push');
+		webpush.sendNotification(pushSubscription, msg, options).then(success).catch(fail);
+		
+		function success() {
+			console.log("Push sent: " + msg);
+			if(cb) cb(null);
+		}
+		
+		function fail(err) {
+			console.log("Failed to send push msg=" + msg + "Error: " + err.message);
+			if(cb) cb(err);
+		}
+	}
+}
 
 function getKeys(cb) {
+	// Will call back with {publicKey, privateKey}
+	
 	var keys;
 	var fs = require("fs");
 	var fileName = "keys.dat";
@@ -86,7 +99,8 @@ function getKeys(cb) {
 	
 	function generate() {
 		console.log("Generating new keys!");
-		keys = module_webpush.generateVAPIDKeys();
+		var ebpush = require('web-push');
+		keys = webpush.generateVAPIDKeys();
 		var data = JSON.stringify(keys);
 		fs.writeFile(fileName, data, function(err) {
 			if(err) throw err;
@@ -94,12 +108,11 @@ function getKeys(cb) {
 		});
 		
 	}
-	
 }
 
 function startServer(httpServer, cb) {
 	if(process.env.myName) {
-		var appName = "PushNoti";
+		var appName = "PushNoti".toLowerCase();
 		var unixSocket = "/sock/" + appName;
 	}
 	else {
