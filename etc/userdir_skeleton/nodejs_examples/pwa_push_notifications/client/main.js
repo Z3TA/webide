@@ -141,7 +141,7 @@ var options = {
 }
 
 function registerServiceWorker(swScript, swOptions, cb) {
-	if(typeof navigator.serviceWorker == undefined) {
+	if(typeof navigator.serviceWorker == "undefined") {
 		return cb(new Error("Browser do not support service worker!"));
 	}
 	
