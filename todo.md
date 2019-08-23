@@ -50,6 +50,8 @@ todo: Release in order to fix FTP size issue when opening files.
 
 todo: Able to recive e-mails =)
 
+issue: Pull and update button in SCM complains about multiple heads! even though the other head is supposed to be hidden!
+
 ---
 
 todo: Show some love for editing files on FTP workflow ...
