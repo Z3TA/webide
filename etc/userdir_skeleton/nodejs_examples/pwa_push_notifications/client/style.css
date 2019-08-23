@@ -1,4 +1,9 @@
 
+.infoWrap {
+	max-height: 50%;
+	overflow-y: scroll;
+}
+
 .info:first-child {
 	border-top: 1px solid black;
 }
