@@ -3,7 +3,7 @@
 
 var winMenuBiggerText;
 	var bigTextActive = false;
-	var originalFontSize, originalGridHeight, originalGridWidth;
+	var originalFontSize, originalGridHeight, originalGridWidth, originalLeftMargin, originalTabSpace;
 	
 EDITOR.plugin({
 desc: "Increase text size",
@@ -14,6 +14,8 @@ load: function loadBiggerText() {
 			originalFontSize = EDITOR.settings.style.fontSize;
 			originalGridHeight = EDITOR.settings.gridHeight;
 			originalGridWidth = EDITOR.settings.gridWidth;
+			originalLeftMargin = EDITOR.settings.leftMargin;
+			originalTabSpace = EDITOR.settings.tabSpace;
 			
 		},
 unload: function unloadBiggerText() {
@@ -35,6 +37,8 @@ unload: function unloadBiggerText() {
 			EDITOR.settings.style.fontSize = EDITOR.settings.style.fontSize / 2;
 			EDITOR.settings.gridHeight = EDITOR.settings.gridHeight / 2;
 			EDITOR.settings.gridWidth = EDITOR.settings.gridWidth / 2;
+			EDITOR.settings.leftMargin = originalLeftMargin;
+			EDITOR.settings.tabSpace = EDITOR.settings.tabSpace * 2;
 			
 			if(matchHighlightFontSize) {
 				EDITOR.settings.style.highlightMatchFont = EDITOR.settings.style.highlightMatchFont.replace(pxStr, size*2);
@@ -50,6 +54,8 @@ unload: function unloadBiggerText() {
 			EDITOR.settings.style.fontSize = EDITOR.settings.style.fontSize * 2;
 			EDITOR.settings.gridHeight = EDITOR.settings.gridHeight * 2;
 			EDITOR.settings.gridWidth = EDITOR.settings.gridWidth * 2;
+			EDITOR.settings.leftMargin = Math.floor( (EDITOR.currentFile ? Math.log(EDITOR.currentFile.grid.length) * Math.LOG10E : 3) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2);
+			EDITOR.settings.tabSpace = EDITOR.settings.tabSpace / 2;
 			
 			if(matchHighlightFontSize) {
 				EDITOR.settings.style.highlightMatchFont = EDITOR.settings.style.highlightMatchFont.replace(pxStr, size/2);
