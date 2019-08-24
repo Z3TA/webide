@@ -1920,6 +1920,18 @@ margin-top: 20px;
 	border: 0px solid yellow;
 	max-width: none; /* one long row */
 }
+	
+	.leftColumn .discoveryBar {
+		margin-top: 5px;
+	}
+	
+	.leftColumn .discoveryBar .discoveryItem {
+		max-width: 30px;
+		border: 0px solid orange;
+		margin: 7px;
+		margin-top: 10px;
+	}
+	
 }
 
 @media (max-width: 600px) {
