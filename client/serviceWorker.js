@@ -404,6 +404,9 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 function versionNrFromKey(key) {
 	var prefix = "jzedit_v";
 	var nr = key.replace(prefix, "");
-	if(key == nr) throw new Error("Not a cache key=" + key);
+	if(key == nr) {
+		console.warn("Not a cache key=" + key);
+		return -1;
+	}
 	return parseInt(nr);
 }
