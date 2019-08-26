@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	
+	<title>Bookmarklet: Turn any textarea into a code editor!</title>
+	
+	
+</head>
+<body>
+
+<h1>Bookmarklet</h1>
+
+<p>Drag the link below to your bookmark bar:</p>
+
+<!--
+
+http://192.168.0.3/embed.js
+https://webide.se/embed.js
+-->
+
+<a href="javascript:(function(){var s=document.createElement('script');s.setAttribute('id', 'jzedit_bookmarklet');s.setAttribute('src','https://webide.se/embed.js');document.body.appendChild(s);})()">Code editor</a>
+
+<p>When the link is clicked, the textarea on the page is turned into a code editor.</p>
+
+<p>Example:</p>
+
+<textarea name="foo" cols="60" rows="10"></textarea>
+
+</body>
+</html>

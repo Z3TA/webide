@@ -1,4 +1,4 @@
-<DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
 <head>
 	
@@ -48,8 +48,8 @@ The script will also disable a bunch of plugins to make the editor feel more lig
 <p>Then inser the editable text as a textarea.</p>
 
 <textarea rows="2" cols="80" onload="this.innerText='foo';">
-<textarea class="editor" rows="20" cols="80" name="code.js">alert("Hello World");&lt;/textarea>
-</textarea>
+	<textarea class="editor" rows="20" cols="80" name="code.js"&gt;alert("Hello World");&lt;/textarea>
+	</textarea>
 
 <p>The script will automatically update the content of the textarea when you edit the file in the editor!<br>
 You can access the text by accessing the textarea value, for example:</p>
@@ -100,7 +100,6 @@ window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 <textarea>
 iframe.contentWindow.postMessage({"disablePlugin": "Plugin description"}, "*");
 </textarea>
-
 
 
 </body>

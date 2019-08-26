@@ -34,21 +34,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-Download some files and cache them offline, 
-make use of hash to make sure nothing is over-written when syncing back to server.
 
 
 PWA example with push notifications
 
 
-todo: Offline support (read/write cache). Sync files while online, store the hash from when it was uploaded from the server,
-if navigator.online write to server, if offline write to fileCache.
-When back online, check if the uploadHash is the same as the server, then send it to the server.
-If it has changed on the server, but not modified on the client => update the client,
-if it has been changed both on the server and the client, show dialog with diff options.
-Default storage is only 5MB so we need to be clever about what we store!
-Find scripts and stylesheets in html files, and cache those
-Find require in .js files and cache those.
 
 
 todo: Make a web extension example
@@ -985,6 +975,17 @@ Forgot why we are using Nodesource ... answer: Because it was the most easy way 
 
 Check if the editor works on different keyboard layouts!
 Maybe refactor: Use KeyboardEvent.key  instead of charCode and keyCode
+
+---
+
+todo: Offline support (read/write cache). Sync files while online, store the hash from when it was uploaded from the server,
+if navigator.online write to server, if offline write to fileCache.
+When back online, check if the uploadHash is the same as the server, then send it to the server.
+If it has changed on the server, but not modified on the client => update the client,
+if it has been changed both on the server and the client, show dialog with diff options.
+Default storage is only 5MB so we need to be clever about what we store!
+Find scripts and stylesheets in html files, and cache those
+Find require in .js files and cache those.
 
 
 

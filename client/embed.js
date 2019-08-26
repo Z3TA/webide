@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 
-	console.log("Hello from embed.js");
+	console.log("Hello from embed.js on " + document.location.hostname);
 	
 /*
 	How to embed the editor in a web site:
@@ -35,46 +35,56 @@
 		"Adds option to reload the file from disk in the context menu"
 	];
 	
-window.addEventListener("load", function windowLoaded() {
+	var bookMarklet = document.getElementById("jzedit_bookmarklet");
+	console.log("bookMarklet ? " + !!bookMarklet);
+	if(bookMarklet) windowLoaded();
+	else window.addEventListener("load", windowLoaded);
 	
+	function windowLoaded() {
 		
-		var defaultEditorWidth = "800"; 
-	var defaultEditorHeight = "500"
+		var defaultEditorWidth = "800";
+		var defaultEditorHeight = "500"
 		// (tip: Add .editor with min-width, max-width etc to your CSS file)
 		
-	var taEl = document.getElementsByTagName("textarea");
-	
-	console.log("Found " + taEl.length + " textarea elements.");
-	
-	for (var i=0; i<taEl.length; i++) {
-		console.log("Checking textarea " + i + " ...");
-		if(taEl[i].getAttribute("class")) {
-			if(taEl[i].getAttribute("class").indexOf("editor") != -1) {
-				replaceTextAreaWithEditor(taEl[i]);
-				console.log("Done replacing textarea " + i + " with editor.");
-				console.log("i=" + i + " taEl.length=" + taEl.length);
-				continue;
-			}
-			else console.log("textarea " + i + " does not have editor in it's class attribute");
-			}
-		else console.log("textarea " + i + " does not have a class attribute");
-	}
-	
-	function replaceTextAreaWithEditor(ta) {
+		var taEl = document.getElementsByTagName("textarea");
 		
+		if(taEl.length == 0) {
+			console.log("Did not find any textarea elements! taEl.length=" + taEl.length);
+		}
+		else if(bookMarklet) {
+			replaceTextAreaWithEditor(taEl[0]);
+		}
+		else {
+			for (var i=0; i<taEl.length; i++) {
+				console.log("Checking textarea " + i + " ...");
+				if(taEl[i].getAttribute("class")) {
+					if(taEl[i].getAttribute("class").indexOf("editor") != -1) {
+						replaceTextAreaWithEditor(taEl[i]);
+						console.log("Done replacing textarea " + i + " with editor.");
+						console.log("i=" + i + " taEl.length=" + taEl.length);
+						continue;
+					}
+					else console.log("textarea " + i + " does not have editor in it's class attribute");
+				}
+				else console.log("textarea " + i + " does not have a class attribute");
+			}
+		}
+		
+		function replaceTextAreaWithEditor(ta) {
+			
 			var fileName = ta.name || "file" + (++noNameCounter);
-		var fileContent = ta.value || "";
-		//var style = window.getComputedStyle(ta);
-		var offsetWidth = parseInt(ta.offsetWidth);
-		var offsetHeight = parseInt(ta.offsetHeight);
-		var editorWidth = offsetWidth || defaultEditorWidth;
-		var editorHeight = offsetHeight || defaultEditorHeight;
+			var fileContent = ta.value || "";
+			//var style = window.getComputedStyle(ta);
+			var offsetWidth = parseInt(ta.offsetWidth);
+			var offsetHeight = parseInt(ta.offsetHeight);
+			var editorWidth = offsetWidth || defaultEditorWidth;
+			var editorHeight = offsetHeight || defaultEditorHeight;
 			var editorLocation = getEditorLocation();
-			var editorQuery = "?embed=true&disable=menu,file_tabs";
+			var editorQuery = "?embed=true&disable=menu,file_tabs&dev=false";
 			var query = ta.getAttribute("query");
 			
 			if(query) editor += "&" + query;
-		
+			
 			var counter = 0;
 			var fileNameOriginal = fileName;
 			while(editorsOpen.hasOwnProperty(fileName)) {
@@ -82,54 +92,54 @@ window.addEventListener("load", function windowLoaded() {
 				
 				if(fileNameOriginal.indexOf(".") == -1) fileName = fileNameOriginal + (++counter);
 				else fileName = fileNameOriginal.substring(0, fileNameOriginal.indexOf(".")) + " (" + (++counter) + ")" + fileNameOriginal.substr(fileName.indexOf("."));
-				}
+			}
 			
 			editorsOpen[fileName] = ta;
 			
 			// The values below is what you would expect to be the browsers default values, meaning no rows and cols attributes are set
-		if(ta.rows <= 2 || ta.cols <= 20) {
-			editorWidth = defaultEditorWidth;
-			editorHeight = defaultEditorHeight;
-		}
-		
-		console.log("Replacing textarea " + ta.name + " with editor ...");
-		
-		console.log("editorWidth=" + editorWidth + " editorHeight=" + editorHeight + " ta.cols=" + ta.cols + " ta.rows=" + ta.rows + " offsetWidth=" + offsetWidth + " offsetHeight=" + offsetHeight);
-		
-	var iframe = document.createElement("iframe");
-	iframe.setAttribute("width", editorWidth);
-	iframe.setAttribute("height", editorHeight);
+			if(ta.rows <= 2 || ta.cols <= 20) {
+				editorWidth = defaultEditorWidth;
+				editorHeight = defaultEditorHeight;
+			}
+			
+			console.log("Replacing textarea " + ta.name + " with editor ...");
+			
+			console.log("editorWidth=" + editorWidth + " editorHeight=" + editorHeight + " ta.cols=" + ta.cols + " ta.rows=" + ta.rows + " offsetWidth=" + offsetWidth + " offsetHeight=" + offsetHeight);
+			
+			var iframe = document.createElement("iframe");
+			iframe.setAttribute("width", editorWidth);
+			iframe.setAttribute("height", editorHeight);
 			iframe.setAttribute("class", "editor JZedit");
 			iframe.setAttribute("frameborder", "0");
 			
-		ta.parentNode.insertBefore(iframe, ta);
-		
-		
-		// Hide the textarea instead of removing it
-		ta.style.display = "none";
-		//ta.parentNode.removeChild(ta);
-		
-		
-		iframe.addEventListener("load", function iframeLoaded() {
-			//var editor = this.contentWindow.document.window.EDITOR;
-			// We cant access the editor object unless the editor is run with the same protocol hostname and port!
+			ta.parentNode.insertBefore(iframe, ta);
 			
-					this.contentWindow.postMessage({
-						"openFile": {
-							name: fileName,
-							content: fileContent
-						}
-					}, "*");
-					
+			
+			// Hide the textarea instead of removing it
+			ta.style.display = "none";
+			//ta.parentNode.removeChild(ta);
+			
+			
+			iframe.addEventListener("load", function iframeLoaded() {
+				//var editor = this.contentWindow.document.window.EDITOR;
+				// We cant access the editor object unless the editor is run with the same protocol hostname and port!
+				
+				this.contentWindow.postMessage({
+					"openFile": {
+						name: fileName,
+						content: fileContent
+					}
+				}, "*");
+				
 				for (var i=0; i<disablePlugins.length; i++) {
 					this.contentWindow.postMessage({"disablePlugin": disablePlugins[i]}, "*");
 				}
 				
-				});
+			});
 			iframe.src = editorLocation + editorQuery;
 		}
-	
-});
+		
+	}
 
 window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 	console.log("Window message from origin=" + windowMessageEvent.origin);
