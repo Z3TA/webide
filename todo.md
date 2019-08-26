@@ -64,10 +64,6 @@ Be able to download folder as backup
 
 ---
 
-todo: Edit the text "Welcome to webide.se!" alertBox, because that's what Google Index.
-
----
-
 Should the editor listen for push notifications? Recive PM !? Pull requests !?
 Probably not because that would be annoying.
 
