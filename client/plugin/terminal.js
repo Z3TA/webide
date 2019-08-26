@@ -221,6 +221,7 @@ console.warn("Terminal events already active!");
 	}
 	
 	function startTerminalFromMenu(file, combo, character, charCode, direction) {
+		EDITOR.dashboard.hide();
 		startTerminal();
 	}
 	
