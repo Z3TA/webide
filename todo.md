@@ -35,10 +35,6 @@ Use bitbucket instead of Github because the hg-git issues. So we can use Mercuri
 What I'm working on
 -------------------
 
-Reordering the order of the discovery bar :P
-(Preview/run need to be placed higher up)
-
-
 Download some files and cache them offline, 
 make use of hash to make sure nothing is over-written when syncing back to server.
 
@@ -53,8 +49,25 @@ todo: When clicking "terminal" in the discovery bar and the dashboard is open, h
 PWA example with push notifications
 
 
+todo: Offline support (read/write cache). Sync files while online, store the hash from when it was uploaded from the server,
+if navigator.online write to server, if offline write to fileCache.
+When back online, check if the uploadHash is the same as the server, then send it to the server.
+If it has changed on the server, but not modified on the client => update the client,
+if it has been changed both on the server and the client, show dialog with diff options.
+Default storage is only 5MB so we need to be clever about what we store!
+Find scripts and stylesheets in html files, and cache those
+Find require in .js files and cache those.
 
-todo: Release in order to fix FTP size issue when opening files.
+
+todo: Make a web extension example
+
+
+todo: Live stream (read-only-collab), => Let other people see what you write, live!
+you do not share your enviroment, only a folder, watchers need to have their own account,
+and cannot write, but the original owner, can appoint someone else to write,
+
+
+
 
 todo: Able to recive e-mails =)
 
@@ -343,7 +356,7 @@ able to turn off keyboard sound.
 
 ----
 
-
+When doing source control operations in Terminal, like chaning branch, also refresh files currently in the editor!
 
 Hide window menu via View - Hide window menu
 

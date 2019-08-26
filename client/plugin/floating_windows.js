@@ -24,7 +24,7 @@
 			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Open new window";
 			discoveryItem.onclick = openWindowFromMenu;
-			EDITOR.discoveryBar.add(discoveryItem, 12);
+			EDITOR.discoveryBar.add(discoveryItem, 100);
 			
 		},
 		unload: function unloadFloatingWindow() {

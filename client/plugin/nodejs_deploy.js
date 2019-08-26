@@ -48,7 +48,7 @@
 						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 						discoveryItem.title = "Node.JS Deploy (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
 						discoveryItem.onclick = nodejsDeployFromDiscoveryBar;
-						EDITOR.discoveryBar.add(discoveryItem, 11);
+						EDITOR.discoveryBar.add(discoveryItem, 90);
 						
 						activated = true;
 					}

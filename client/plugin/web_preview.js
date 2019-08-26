@@ -16,7 +16,7 @@
 			discoveryItem.src = "gfx/multimedia.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Live Preview"
 			discoveryItem.onclick = webPreviewFromDiscovery;
-			EDITOR.discoveryBar.add(discoveryItem, 8);
+			EDITOR.discoveryBar.add(discoveryItem, 30);
 			
 		},
 		unload: function unloadWebPreview() {

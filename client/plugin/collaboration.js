@@ -99,7 +99,7 @@
 			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Invite collaborator";
 			discoveryItem.onclick = inviteFromDiscoveryBar;
-			EDITOR.discoveryBar.add(discoveryItem, 9);
+			EDITOR.discoveryBar.add(discoveryItem, 70);
 			
 			
 			// TEST-CODE-START

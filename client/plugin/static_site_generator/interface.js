@@ -264,7 +264,7 @@
 		discoveryBarImage.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImage.title = "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")"
 		discoveryBarImage.onclick = toggleSSG;
-		EDITOR.discoveryBar.add(discoveryBarImage, 4);
+		EDITOR.discoveryBar.add(discoveryBarImage, 60);
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		

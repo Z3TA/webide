@@ -2692,6 +2692,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			wrap.setAttribute("class", "discoveryItem");
 			wrap.setAttribute("position", position);
 			
+			if(QUERY_STRING["menuOrder"]) wrap.innerText = position;
+			
 			wrap.appendChild(element);
 			
 			discoveryBar.appendChild(wrap);

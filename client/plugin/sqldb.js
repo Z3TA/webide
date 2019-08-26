@@ -47,7 +47,7 @@ else {
 			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryBarImg.title = "SQL Database"
 			discoveryBarImg.onclick = toggleDbManager;
-			EDITOR.discoveryBar.add(discoveryBarImg, 10);
+						EDITOR.discoveryBar.add(discoveryBarImg, 80);
 						
 						pluginActivated = true;
 			}

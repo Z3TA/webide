@@ -92,7 +92,7 @@
 			discoveryBarImage.src = "gfx/cloud.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryBarImage.title = "FTP/SFT (" + EDITOR.getKeyFor(showServerManger) + ")";
 			discoveryBarImage.onclick = toggleShowServerManger;
-			EDITOR.discoveryBar.add(discoveryBarImage, 6);
+			EDITOR.discoveryBar.add(discoveryBarImage, 40);
 			
 		});
 		
