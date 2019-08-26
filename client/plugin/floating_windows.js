@@ -57,22 +57,30 @@
 		var width2 = width1*2 == browserWindowWidth ? width1 : width1+1;
 		
 		var height = browserWindowHeight;
+		var browserChromeHeight = 30;
 		
-		console.log("splitScreen: browserWindowWidth=" + browserWindowWidth + " browserWindowHeight=" + browserWindowHeight);
+		var isAtMaxWidth = screen.availWidth - window.innerWidth === 0; // Seems we can't resize a window that is maximized'
+		
+		console.log("splitScreen: browserWindowWidth=" + browserWindowWidth + " browserWindowHeight=" + browserWindowHeight + " isAtMaxWidth=" + isAtMaxWidth);
 		console.log("splitScreen: screenWidth=" + screenWidth + " screenHeight=" + screenHeight);
 		console.log("splitScreen: browserWindowPositionX=" + browserWindowPositionX + " browserWindowPositionY=" + browserWindowPositionY);
 		console.log("splitScreen: width1=" + width1 + " width2=" + width2 + " height=" + height);
 		
 		//editorCodeWindow.moveTo(0, 0);
-		
 		editorCodeWindow.resizeTo(width1, height);
 		EDITOR.resizeNeeded();
 		
-		// Can't resize if in full window !?
+		var options = {
+			top: browserWindowPositionY-browserChromeHeight,
+			left: browserWindowPositionX+width1,
+			width: width2,
+			height: height
+		}
 		
-		openInNewWindow(EDITOR.currentFile, function windowOpened(err, win) {
-			win.moveTo(browserWindowPositionX+width1, browserWindowPositionY);
-			win.resizeTo(width2, height);
+		openInNewWindow(EDITOR.currentFile, options, function windowOpened(err, win) {
+			
+			//win.resizeTo(width2, height);
+			//win.moveTo(options.left, options.top);
 			
 			windowMenuSplitScreen.hide();
 		}); 
@@ -81,15 +89,18 @@
 		
 	}
 	
-	function openInNewWindow(file, callback) {
+	function openInNewWindow(file, browserWindowOptions, callback) {
+		
+		if(typeof browserWindowOptions == "function" && callback == undefined) {
+			callback = browserWindowOptions;
+			browserWindowOptions = {};
+		}
 		
 		EDITOR.ctxMenu.hide();
 		windowMenuNewWindow.hide();
 		
-		var browserWindowOptions = {
-			url: "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar",
-			waitUntilLoaded: true
-		};
+		if(!browserWindowOptions.url) browserWindowOptions.url = "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar";
+		if(!browserWindowOptions.waitUntilLoaded) browserWindowOptions.waitUntilLoaded = true;
 		
 		if(QUERY_STRING["theme"]) browserWindowOptions.url += "&theme=" + QUERY_STRING["theme"];
 		
