@@ -134,6 +134,8 @@
 		EDITOR.windowMenu.remove(winMenuAnnotations);
 		EDITOR.windowMenu.remove(winMenuClone);
 		
+		EDITOR.discoveryBar.remove(discoveryBarImg);
+		
 		hideMercurialWidgets();
 		
 	}
@@ -1238,13 +1240,19 @@ if(matchRepoName && matchRepoName[1]) {
 		
 		
 		// ### Clone button
-		var cloneButton = document.createElement("input");
+		var cloneButton = document.createElement("button");
 		cloneButton.setAttribute("type", "submit");
 		cloneButton.setAttribute("class", "button");
 		cloneButton.setAttribute("value", "Clone repository");
+		cloneButton.innerText = "Clone repository";
 		//cloneButton.onclick = cloneRepo;
 		form.appendChild(cloneButton);
 		
+		var spinner = document.createElement("div");
+		spinner.classList.add("loader");
+		spinner.classList.add("hidden");
+		cloneButton.appendChild(spinner);
+		cloneButton.insertBefore(spinner, cloneButton.firstChild);
 		
 		// ### Save password checkbox
 		var savePassword = document.createElement("input");
@@ -1349,6 +1357,9 @@ if(matchRepoName && matchRepoName[1]) {
 			
 			function doClone() {
 				
+				spinner.classList.remove("hidden");
+				cloneButton.disabled = true;
+				
 				var command = "mercurial.clone";
 				
 				var commandOptions = {
@@ -1360,6 +1371,10 @@ if(matchRepoName && matchRepoName[1]) {
 				}
 				
 				CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
+					
+					spinner.classList.add("hidden");
+					cloneButton.disabled = false;
+					
 					if(err) {
 var error = err.message;
 						
@@ -1369,6 +1384,7 @@ var error = err.message;
 						}
 						
 						alertBox(error);
+						
 					}
 					else {
 						// Show the files in file explorer

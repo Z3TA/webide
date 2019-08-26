@@ -29,7 +29,6 @@ Android browser will not run the script if it contains a default keyword such as
 
 Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
 
-Use bitbucket instead of Github because the hg-git issues. So we can use Mercurial directly
 
 
 What I'm working on
@@ -38,9 +37,6 @@ What I'm working on
 Download some files and cache them offline, 
 make use of hash to make sure nothing is over-written when syncing back to server.
 
-
-Need to have a progress bar when cloning a repo!
-And disable the clone button so user don't press it repeatably
 
 PWA example with push notifications
 
@@ -63,6 +59,8 @@ you do not share your enviroment, only a folder, watchers need to have their own
 and cannot write, but the original owner, can appoint someone else to write,
 
 
+Because of issues with hggit when cloning from Github, and that Bitbucket is removing Mercurial support ...
+Auto detect Github/Bitbucket/git then clone using Git, and then convert the Git repo to Mercurial.
 
 
 todo: Able to recive e-mails =)
