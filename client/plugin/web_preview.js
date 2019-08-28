@@ -3,12 +3,12 @@
 	
 	"use strict";
 	
-	var menuItem;
+	var winMenuWysiwygHtml;
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
 		load: function loadWebPreview() {
-			//menuItem = EDITOR.ctxMenu.add("Preview HTML", webPreview);
+			
 			EDITOR.on("showMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
 			
@@ -18,13 +18,27 @@
 			discoveryItem.onclick = webPreviewFromDiscovery;
 			EDITOR.discoveryBar.add(discoveryItem, 30);
 			
+			winMenuWysiwygHtml = EDITOR.windowMenu.add("What you see is what you get", ["Edit", 120], startHtmlWysiwyg);
+			
+			if(QUERY_STRING["wysiwyg"]) {
+				CLIENT.on("loginSuccess", function(loggedIn) {
+					// Need to wait for the reopen-files plugin ...
+					setTimeout(function() {
+						editFile(QUERY_STRING["wysiwyg"]);
+					}, 500);
+					
+				});
+			}
 		},
 		unload: function unloadWebPreview() {
-			//EDITOR.ctxMenu.remove(menuItem);
+			
 			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("previewTool", webPreviewTool); 
-			}
-		});
+			
+			EDITOR.windowMenu.remove(winMenuWysiwygHtml);
+		},
+		order: 2100 // Run after reopen_files to prevent warning of file already being opened
+	});
 	
 	function webPreviewFromDiscovery(clickEvent) {
 		webPreview(EDITOR.currentFile, undefined, undefined, undefined, undefined, clickEvent);
@@ -45,7 +59,7 @@
 		
 		var file = EDITOR.currentFile;
 		if(!file) {
-console.warn("Unable to run preview: No file open!");
+			console.warn("Unable to run preview: No file open!");
 			return;
 		}
 		
@@ -55,8 +69,50 @@ console.warn("Unable to run preview: No file open!");
 		
 		EDITOR.ctxMenu.hide();
 		
+	}
+	
+	function startHtmlWysiwyg(file) {
+		if(!(file instanceof File)) file = EDITOR.currentFile;
 		
+		if(file == undefined) {
+			alertBox("No file open!");
+			return;
+		}
 		
+		openPreviewWindow(file, true);
+	}
+	
+	function editFile(filePath) {
+		filePath = UTIL.sanitize(filePath);
+		
+		if(filePath == "/") filePath = "/wwwpub/index.htm";
+		
+		EDITOR.openFile(filePath, function(err, file) {
+			if(err) {
+				alertBox("Unable to edit " + filePath + " " + err.message);
+				return;
+			}
+			
+			if(file.changed || !file.isSaved) {
+				
+				var save = "Save it now";
+				var discard = "Discard unsaved changes"
+				var cancel = "No, cancel!";
+				
+				confirmBox("Save " + file.path + " before editing in WYSIWYG mode?", [save, discard, cancel], function(answer) {
+					if(answer == discard) openPreviewWindow(file, true);
+					else if(answer == save) {
+						EDITOR.saveFile(file, function fileSaved(err, path) {
+							if(err) alertBox(err.message);
+							else openPreviewWindow(file, true);
+						});
+					}
+				})
+				
+			}
+			else openPreviewWindow(file, true);
+			
+		});
 	}
 	
 	function webPreviewTool(file) {
@@ -90,12 +146,11 @@ console.warn("Unable to run preview: No file open!");
 		else if(file.text.match(/<!DOCTYPE html>/i)) return true;
 		else if(file.text.match(/<html>/i)) return true;
 		else if(file.text.match(/<script>/i)) return true;
-		
 		else return false;
 	}
 	
 	
-	function openPreviewWindow(file) {
+	function openPreviewWindow(file, wysiwyg) {
 		
 		console.log("openPreviewWindow: file.path=" + file.path);
 		
@@ -148,16 +203,16 @@ console.warn("Unable to run preview: No file open!");
 			
 			var wEditor = new WysiwygEditor({
 				sourceFile: file,
-				onlyPreview: true,
-					url: url,
-					});
-					
-					wEditor.onClose = function() {
-					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
+				onlyPreview: !!!wysiwyg,
+				url: url,
+			});
+			
+			wEditor.onClose = function() {
+				CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
 					if(err) console.warn(err.message);
-					});
-					}
-				
+				});
+			}
+			
 			
 		});
 	}

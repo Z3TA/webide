@@ -1631,6 +1631,10 @@ if(path != file.path) reOpen(file.path, path);
 		
 		// Only works with text files !
 		
+		if(path instanceof File) {
+			throw new Error("Did you mean to use EDITOR.saveFile ? EDITOR.saveToDisk is a lower level method for saving data to disk.");
+		}
+		
 		if(typeof path != "string") throw new Error("path=" + path + " is not a string!");
 		if(typeof text != "string") throw new Error("text=" + text + " is not a string!");
 		

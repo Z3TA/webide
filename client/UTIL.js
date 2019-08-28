@@ -2484,6 +2484,15 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			return openTags[openTags.length-1];
 		}
 		else return "";
+	},
+	
+	sanitize: function sanitize(str) {
+		// Sanitize string to prevent injections
+		
+		return str.replace(/<|>/g, '');
+		
+		
+		
 	}
 	
 	

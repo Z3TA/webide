@@ -35,6 +35,24 @@ What I'm working on
 -------------------
 
 
+Edit link on web page,
+that takes you to the editor,
+and lets you edit the web page in WYSIWYG
+
+
+
+
+
+
+todo: Make a guide for how you create plugins
+All .js files in .jzedit/plugins will load automatically! (show .jzedit in file list!)
+
+
+todo: Make editor run with sudo -u nobody ! eg. do not puke in home dir.
+
+
+todo: Make a plugin that inserts date: edit -> Insert todays date (had one before but removed because I accidentally hit Ctrl+D !?)
+
 
 PWA example with push notifications
 
@@ -68,16 +86,17 @@ Should the editor listen for push notifications? Recive PM !? Pull requests !?
 Probably not because that would be annoying.
 
 Reading editor/IDE submissions on HN.
-I found another cloud IDE project which was abandonded, it seems they pivoted to only providing a static-site-generator - with a very simple to use WYSIWYG editor.
-Then I looked up organisations using that tool, but they seemt to have switched to another static-site-generator, 
-and are using Github for editing ... (focusing more on the source control, while the other site hides the source control part)
+I found another cloud IDE project which was abandonded, it seems they pivoted to only providing a static-site-generator 
+- with a very simple to use WYSIWYG editor.
+Then I looked up organisations using that tool, but they seem to have switched to another static-site-generator, 
+and are using Github for editing ... (with more focus on the source control, while the other site hides the source control part)
 For non-devs we want to hide the SCM part, but developers prefer to choose their own tools.
 
 
 
 Focus more on making websites/documentation!?
 
-Make single page example, with a share button, that lets a computer-illiteral able to propse changes (see What I'm thinking/Easier collaboration)
+Make single page example, with a share button, that lets a computer-illiteral able to propse changes (see: What I'm thinking/Easier collaboration)
 
 
 ==================
@@ -983,6 +1002,11 @@ Default storage is only 5MB so we need to be clever about what we store!
 Find scripts and stylesheets in html files, and cache those
 Find require in .js files and cache those.
 
+----
+
+
+Multiple selections:
+When searching, find all, create multiple selections(cursors), so that when you type, you insert att all carets!
 
 
 What I'm thinking
@@ -3665,6 +3689,10 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+
+Waiting until connected before showing welcome and login dialog gives a low score on Google pagespeed,
+so should probably load the dialog right away (then hide it after auto-login or whatever !?)
 
 ---
 
