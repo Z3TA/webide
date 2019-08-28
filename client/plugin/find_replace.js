@@ -688,6 +688,8 @@
 					
 					if(ignoreCase) flags += "i";
 					
+					newString = newString.replace(/\\n/g, "\n"); // Allow inserting new-lines
+					
 					// Support groups: $1 etc
 					var re = new RegExp(searchString, flags);
 					newString = selectedText.replace(re, newString);
