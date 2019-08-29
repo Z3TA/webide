@@ -75,24 +75,30 @@
 			document.execCommand('insertunorderedlist');
 		});
 		
+		buttonWithIcon("outdent.svg", "outdent", function() {
+			document.execCommand("outdent");
+		});
+		
 		buttonWithIcon("paragraph.svg", "Insert paragraph", function() {
 			document.execCommand("insertparagraph");
+		});
+		
+		
+		buttonWithIcon("left.svg", "left", function() {
+			document.execCommand("justifyleft");
 		});
 		
 		buttonWithIcon("center.svg", "center", function() {
 			document.execCommand("justifycenter");
 		});
 		
-		buttonWithIcon("left.svg", "left", function() {
-			document.execCommand("justifyleft");
-		});
-		
 		buttonWithIcon("right.svg", "right", function() {
 			document.execCommand("justifyright");
 		});
 		
-		buttonWithIcon("outdent.svg", "outdent", function() {
-			document.execCommand("outdent");
+		
+		buttonWithIcon("undo.svg", "undo", function() {
+			document.execCommand("undo");
 		});
 		
 		buttonWithIcon("redo.svg", "redo", function() {
@@ -115,9 +121,6 @@
 			document.execCommand("underline");
 		});
 		
-		buttonWithIcon("undo.svg", "undo", function() {
-			document.execCommand("undo");
-		});
 		
 		buttonWithIcon("unlink.svg", "unlink", function() {
 			document.execCommand("unlink");
