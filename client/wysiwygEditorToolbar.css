@@ -1,0 +1,45 @@
+
+.wysiwygEditorToolbar {
+	background-color: black;
+	position: fixed;
+	bottom: 0px;
+	opacity: .8;
+	border: 1px solid black; /* need border >0 for rounded corners! */
+	border-radius: 5px 5px 0px 0px;
+	pading-left: 5px;
+	pading-right: 5px;
+	display: block;
+	width: 100%;
+	
+	text-align: center;
+	
+}
+
+.wysiwygEditorToolbarButton {
+	
+	width: 8%;
+	
+	
+	
+	text-align: center;
+	vertical-align: middle;
+	margin: 0;
+	padding: 0;
+	background: black;
+	cursor: pointer;
+	overflow: hidden;
+	
+	border: 0px solid yellow;
+}
+
+.wysiwygEditorToolbarButton:hover {
+	
+}
+
+.wysiwygEditorToolbarButton img {
+	width: 95%;
+	height: 95%;
+	
+	border: 0px solid pink;
+	
+}

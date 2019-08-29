@@ -111,7 +111,9 @@ var WysiwygEditor;
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
 		wysiwygEditor.whenLoaded = whenLoaded;
 		
-		wysiwygEditor.captureConsoleLog = options.captureConsoleLog || true;
+		wysiwygEditor.captureConsoleLog = options.captureConsoleLog==false ? false : true;
+		
+		wysiwygEditor.toolbar = options.toolbar==false ? false : true;
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
@@ -369,8 +371,9 @@ var WysiwygEditor;
 		// Decide window width, height and placement ...
 		var windowPadding = 0;
 		var unityLeftThingy = 10;
+		var titleBarHeight = 31;
 		var previeWidth = width || Math.round(screen.width / 3.5) - windowPadding * 2;
-		var previewHeight = height || (screen.height - windowPadding * 2);
+		var previewHeight = height || (screen.height - windowPadding * 2) - titleBarHeight*2;
 		var posX = left || (screen.width - previeWidth - windowPadding);
 		var posY = top || windowPadding;
 		
@@ -479,6 +482,8 @@ var WysiwygEditor;
 			x = Math.round(pos.left + 1);
 			y = Math.round(pos.top + 1);
 		}
+		
+		console.log("Got caret position: x=" + x + " y=" + y + " char=" + caretPos + " text=" + (text || baseNode.innerText) + " ");
 		
 		// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
 		return {x: x, y: y, char: caretPos, text: text || baseNode.innerText };
@@ -636,7 +641,7 @@ console.warn("Unable to get caret position!");
 		var doc = previewWin.window.document;
 		var range = doc.createRange();
 		
-		if(BROWSER=="Firefox" && node.tagName == "BR") {
+		if(node && BROWSER=="Firefox" && node.tagName == "BR") {
 			// Firefox can set the caret position, but it's not possible to input/write after the caret has been set in a br element
 			node = node.parentNode; // Most likely a p element
 		}
@@ -1401,10 +1406,12 @@ console.warn("Unable to get caret position!");
 			// We don't want to take away focus from the content-editable
 		}
 		
+		console.log("WysiwygEditor.previewInput: placeCaretSuccess=" + placeCaretSuccess);
+		
 		if(placeCaretSuccess) {
 		// Focus the content-edit window
 		wysiwygEditor.previewWin.focus();
-		EDITOR.input = false;
+			EDITOR.input = false;
 		}
 		
 		console.timeEnd("previewInput");
@@ -1787,7 +1794,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		// Capture errors on the content-editable so that they do not go by unoticed
 		previewWin.window.addEventListener("error", captureError);
 		
-		
+			
 		if(previewWin.loaded === true) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
 			attachEvents();
@@ -1900,167 +1907,197 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 				callback(null);
 			}, 1);
 			
+				
+				if(wysiwygEditor.toolbar) {
+					
+				// Prevent zooming (have to use zoom buttons in toolbar)
+				var meta = document.createElement("meta");
+				meta.setAttribute("name", "viewport");
+				meta.setAttribute("content", "width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0");
+				doc.head.appendChild(meta);
+				
+				
+				var toolbarCss = doc.createElement("link");
+					toolbarCss.setAttribute("rel", "stylesheet");
+					toolbarCss.setAttribute("type", "text/css");
+					toolbarCss.setAttribute("href", "/wysiwygEditorToolbar.css");
+					doc.head.appendChild(toolbarCss);
+					
+					var toolbar = doc.createElement("script");
+					toolbar.setAttribute("src", "/WysiwygEditorToolbar.js");
+					doc.head.appendChild(toolbar);
+					
+					// In some browser we have to call this manually:
+					win.WysiwygEditorUpdate = function update() {
+						wysiwygEditor.previewInput();
+					};
+
+				if(BROWSER != "Chrome") alertBox('"What you see is what you get" (WYSIWYG) editing only works well in Chrome browser. You are currently using ' + BROWSER + ' browser.', "BROWSER_SUPPORT", "warning");
+				
+			}
+				
+			}
 		}
-	}
-	
-	WysiwygEditor.prototype.dance = function dance() {
-		// We need to dance to make sure source code and content-editable code is the same ...
-		var wysiwygEditor = this;
 		
-		if(!wysiwygEditor.previewWin) throw new Error("Unable to get preview window!");
-		
-		var doc = wysiwygEditor.previewWin.document;
-		if(!doc) throw new Error("Unable to get preview window document!");
-		
-		var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
-		
-		console.log("srcHtmlBeforeDance=" + UTIL.lbChars(srcHtmlBeforeDance));
-		
-		var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
-		
-		if(bodyTags.length === 0) {
-			// The user probably have an open html tag above the body element
-			// or the document is not yet fully loaded !?
+		WysiwygEditor.prototype.dance = function dance() {
+			// We need to dance to make sure source code and content-editable code is the same ...
+			var wysiwygEditor = this;
 			
-			throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
+			if(!wysiwygEditor.previewWin) throw new Error("Unable to get preview window!");
+			
+			var doc = wysiwygEditor.previewWin.document;
+			if(!doc) throw new Error("Unable to get preview window document!");
+			
+			var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
+			
+			console.log("srcHtmlBeforeDance=" + UTIL.lbChars(srcHtmlBeforeDance));
+			
+			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+			
+			if(bodyTags.length === 0) {
+				// The user probably have an open html tag above the body element
+				// or the document is not yet fully loaded !?
+				
+				throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
+			}
+			
+			var body = bodyTags[0];
+			
+			// Need to know line break convention before getting the content-editable code!
+			console.log("WYSIWYG determine line break convention:");
+			wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML);
+			
+			// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
+			var prevBodyHtml = wysiwygEditor.getContentEditableCode();
+			console.log("(after write) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+			
+			if(srcHtmlBeforeDance == prevBodyHtml) {
+				console.warn("No dance needed !?");
+				return;
+			}
+			
+			wysiwygEditor.ignoreSourceFileChange = true;
+			
+			// Sanitize (add line breaks etc) to the content-editable code
+			var sanitazed = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
+			
+			if(sanitazed != prevBodyHtml) {
+				wysiwygEditor.setContentEditableBody(sanitazed);
+				prevBodyHtml = wysiwygEditor.getContentEditableCode();
+				console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+			}
+			
+			var sourceFile = wysiwygEditor.sourceFile;
+			var allSourceHtml = sourceFile.text;
+			
+			// Use the contenteditable line break convention in the source file to make life easier
+			if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
+				var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
+				allSourceHtml = allSourceHtml.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
+				console.log("Replaced line breaks in source code: allSourceHtml=" + UTIL.lbChars(allSourceHtml));
+			}
+			
+			// Replace the the content of the body element with the content-editable code
+			allSourceHtml = changeCodeInBody(prevBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
+			
+			console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
+			
+			sourceFile.reload(allSourceHtml);
+			
+			// Finally make the body of the source file the body of the content-editable
+			var sourceBody = wysiwygEditor.getSourceCodeBody();
+			wysiwygEditor.setContentEditableBody(sourceBody);
+			
+			
+			// The source code and content-editable should now have the same line breaks!
+			
+			console.log("(after) sourceBody=" + UTIL.lbChars(sourceBody));
+			
+			// The source code and content editable code should now be the same!
+			if(wysiwygEditor.getContentEditableCode() != sourceBody) {
+				throw new Error("Source code does not match!\n \
+				wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
+				sourceBody=" + UTIL.lbChars(sourceBody) + "\n\n\
+				diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), sourceBody, null, 2)));
+			}
+			
+			sourceFile.checkGrid();
+			
+			// Problem: The source code and a "compiled" page might diff a lot
+			// Solution: .... ???
+			
+			var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, sourceBody);
+			console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
+			
+			// It's ok to add new lines, but not OK to add new content
+			
+			// Only index and xml pages can contain SSG server code! So we do not need to worry about that
+			
+			
+			wysiwygEditor.ignoreSourceFileChange = false;
+			
 		}
 		
-		var body = bodyTags[0];
-		
-		// Need to know line break convention before getting the content-editable code!
-		console.log("WYSIWYG determine line break convention:");
-		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML);
-		
-		// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
-		var prevBodyHtml = wysiwygEditor.getContentEditableCode();
-		console.log("(after write) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
-		
-		if(srcHtmlBeforeDance == prevBodyHtml) {
-			console.warn("No dance needed !?");
-			return;
+		WysiwygEditor.prototype.enableEdit = function enableEdit(callback) {
+			var wysiwygEditor = this;
+			
+			wysiwygEditor.onlyPreview = false;
+			
+			wysiwygEditor.reload(true, callback);
+			
 		}
 		
-		wysiwygEditor.ignoreSourceFileChange = true;
-		
-		// Sanitize (add line breaks etc) to the content-editable code
-		var sanitazed = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
-		
-		if(sanitazed != prevBodyHtml) {
-			wysiwygEditor.setContentEditableBody(sanitazed);
-			prevBodyHtml = wysiwygEditor.getContentEditableCode();
-			console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+		WysiwygEditor.prototype.disableEdit = function disableEdit(callback) {
+			var wysiwygEditor = this;
+			
+			console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
+			
+			// Disable content editable, but keep the window open for preview
+			
+			
+			wysiwygEditor.onlyPreview = true;
+			
+			var doc = wysiwygEditor.previewWin.document;
+			
+			if(!doc) {
+				// The window has probably been closed!
+				return callback();
+			}
+			
+			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+			
+			if(bodyTags.length === 0) {
+				// The preview window has probably been closed.
+				// Don't bother about it
+				return callback();
+			}
+			
+			var body = bodyTags[0];
+			
+			body.setAttribute("contenteditable", "false");
+			
+			body.onmouseup = null;
+			body.onkeyup = null;
+			body.onselectionchange = null;
+			body.onpaste = null;
+			body.oninput = null;
+			
+			
+			if(callback) callback();
+			
 		}
 		
-		var sourceFile = wysiwygEditor.sourceFile;
-		var allSourceHtml = sourceFile.text;
-		
-		// Use the contenteditable line break convention in the source file to make life easier
-		if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
-			var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
-			allSourceHtml = allSourceHtml.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
-			console.log("Replaced line breaks in source code: allSourceHtml=" + UTIL.lbChars(allSourceHtml));
-		}
-		
-		// Replace the the content of the body element with the content-editable code
-		allSourceHtml = changeCodeInBody(prevBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
-		
-		console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
-		
-		sourceFile.reload(allSourceHtml);
-		
-		// Finally make the body of the source file the body of the content-editable
-		var sourceBody = wysiwygEditor.getSourceCodeBody();
-		wysiwygEditor.setContentEditableBody(sourceBody);
-		
-		
-		// The source code and content-editable should now have the same line breaks!
-		
-		console.log("(after) sourceBody=" + UTIL.lbChars(sourceBody));
-		
-		// The source code and content editable code should now be the same!
-		if(wysiwygEditor.getContentEditableCode() != sourceBody) {
-			throw new Error("Source code does not match!\n \
-			wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
-			sourceBody=" + UTIL.lbChars(sourceBody) + "\n\n\
-			diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), sourceBody, null, 2)));
-		}
-		
-		sourceFile.checkGrid();
-		
-		// Problem: The source code and a "compiled" page might diff a lot
-		// Solution: .... ???
-		
-		var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, sourceBody);
-		console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
-		
-		// It's ok to add new lines, but not OK to add new content
-		
-		// Only index and xml pages can contain SSG server code! So we do not need to worry about that
-		
-		wysiwygEditor.ignoreSourceFileChange = false;
-		
-	}
-	
-	WysiwygEditor.prototype.enableEdit = function enableEdit(callback) {
-		var wysiwygEditor = this;
-		
-		wysiwygEditor.onlyPreview = false;
-		
-		wysiwygEditor.reload(true, callback);
-		
-	}
-	
-	WysiwygEditor.prototype.disableEdit = function disableEdit(callback) {
-		var wysiwygEditor = this;
-		
-		console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
-		
-		// Disable content editable, but keep the window open for preview
-		
-		
-		wysiwygEditor.onlyPreview = true;
-		
-		var doc = wysiwygEditor.previewWin.document;
-		
-		if(!doc) {
-			// The window has probably been closed!
-			return callback();
-		}
-		
-		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
-		
-		if(bodyTags.length === 0) {
-			// The preview window has probably been closed.
-			// Don't bother about it
-			return callback();
-		}
-		
-		var body = bodyTags[0];
-		
-		body.setAttribute("contenteditable", "false");
-		
-		body.onmouseup = null;
-		body.onkeyup = null;
-		body.onselectionchange = null;
-		body.onpaste = null;
-		body.oninput = null;
-		
-		
-		if(callback) callback();
-		
-	}
-	
-	WysiwygEditor.prototype.consoleLog = function consoleLog(arg) {
-		var wysiwygEditor = this;
-		
-		// Console log takes many arguments and concatenates them
-		console.log("Console log detected!");
-		var msg = "";
-		for (var i=0; i<arg.length; i++) {
-			console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
-			if(typeof arg[i] == "string") msg = msg + " " + arg[i];
-			else if(typeof arg[i] == "object") {
-				var stringifyError = false;
+		WysiwygEditor.prototype.consoleLog = function consoleLog(arg) {
+			var wysiwygEditor = this;
+			
+			// Console log takes many arguments and concatenates them
+			console.log("Console log detected!");
+			var msg = "";
+			for (var i=0; i<arg.length; i++) {
+				console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
+				if(typeof arg[i] == "string") msg = msg + " " + arg[i];
+				else if(typeof arg[i] == "object") {
+					var stringifyError = false;
 				try {
 					var jsonStr = JSON.stringify(arg[i]);
 				}

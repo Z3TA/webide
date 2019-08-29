@@ -34,6 +34,11 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+When deleting a line in WYSIWYG editor contenteditable in Firefox, the editor get focus!
+
+WYSIWYG toolbar
+
+
 Make single page example, with a share button, 
 that lets a computer-illiteral able to propse changes ...
 

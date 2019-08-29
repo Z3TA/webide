@@ -1055,7 +1055,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
-		JSX = options.jsx || true,
+		JSX = options.jsx || false,
 		jsxMaybe = false,
 		jsxOpenElements = [];
 		

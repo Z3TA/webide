@@ -982,9 +982,13 @@ file.mode = "text";
 		var file = this;
 		var grid = file.grid;
 		
-		if(text == undefined) throw new Error("Argument text is undefined!");
-		if(text.length == 0) throw new Error("Argument text has zero length!");
-		if(row == undefined) throw new Error("Argument row is undefined!");
+		if(text == undefined) throw new Error("File.insertTextOnRow: First parameter text is undefined!");
+		if(text.length == 0) {
+//throw new Error("File.insertTextOnRow: First parameter text has zero length!");
+			console.warn("File.insertTextOnRow doing nothing because text.length=" + text.length);
+			return;
+		}
+		if(row == undefined) throw new Error("File.insertTextOnRow: Second parameter row is undefined!");
 		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
