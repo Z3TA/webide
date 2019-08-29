@@ -9,6 +9,8 @@
 "use strict";
 
 var DIALOG_Z_INDEX = 256;
+var DIALOG_LAST_MSG = "";
+
 
 function Dialog(msg, options) {
 	var dialog = this;
@@ -38,9 +40,27 @@ function Dialog(msg, options) {
 		return 1;
 	}
 	
+	
+	if(typeof EDITOR != "undefined" && EDITOR.openDialogs) {
+		// Prevent the exact same message from showing again
+		for(var i=0; i<EDITOR.openDialogs.length; i++) {
+			if(EDITOR.openDialogs[i].message == msg) {
+				EDITOR.openDialogs[i].incrementRepeatCounter();
+				dialog.repeat = EDITOR.openDialogs[i];
+				return 0;
+			}
+			else {
+				console.log("Not the same:\n" + msg + "\n" + EDITOR.openDialogs[i].message);
+			}
+		}
+	}
+	
+	
 	var message = document.createElement("div");
 	message.setAttribute("class", "message");
 	message.innerHTML = msg; // Support HTML
+	
+	dialog.message = msg;
 	
 	var img;
 	
@@ -211,9 +231,34 @@ else {
 		callback();
 	}
 }
+Dialog.prototype.incrementRepeatCounter = function incrementRepeatCounter() {
+	var dialog = this;
+	
+	if(dialog.repeatedTimes) {
+		dialog.repeatedTimes++;
+		dialog.repeatedTimesEl.innerText = dialog.repeatedTimes;
+	}
+	else {
+		dialog.repeatedTimes = 1;
+		
+		dialog.repeatedTimesEl = document.createElement("span");
+		dialog.repeatedTimesEl.innerText = dialog.repeatedTimes;
+		
+		var repeatDiv = document.createElement("div");
+		repeatDiv.appendChild(document.createTextNode("Message repeated "));
+		repeatDiv.appendChild(dialog.repeatedTimesEl);
+		repeatDiv.appendChild(document.createTextNode(" times(s)"));
+		
+		dialog.div.appendChild(repeatDiv);
+	}
+	
+}
+
 
 function alertBox(msg, code, icon, recursionCount) {
 	var dialog = new Dialog(msg, {icon: icon, code: code});
+	
+	if(dialog.repeat) return dialog.repeat;
 	
 	if(!dialog.div) {
 		return setTimeout(function wait() {
