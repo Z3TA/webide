@@ -687,18 +687,31 @@ EDITOR.addTest(2, function JSX5(callback) {
 		});
 			
 EDITOR.addTest(function JSX6(callback) {
-				EDITOR.openFile("jsx6.js", '(\' <   \'>\')\n(\' <b   "> \')\n(\' <\/script>\')\n', function(err, file) {
-						
-						UTIL.assert(file.grid[0].indentation, 0);
-						UTIL.assert(file.grid[1].indentation, 0);
-						UTIL.assert(file.grid[2].indentation, 0);
-						UTIL.assert(file.grid[3].indentation, 0);
-						
-						EDITOR.closeFile(file.path);
-						callback(true);
-					});
-				});
+	EDITOR.openFile("jsx6.js", '(\' <   \'>\')\n(\' <b   "> \')\n(\' <\/script>\')\n', function(err, file) {
 		
+		UTIL.assert(file.grid[0].indentation, 0);
+		UTIL.assert(file.grid[1].indentation, 0);
+		UTIL.assert(file.grid[2].indentation, 0);
+		UTIL.assert(file.grid[3].indentation, 0);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+
+EDITOR.addTest(1, function JSX7(callback) {
+	EDITOR.openFile("jsx7.js", 'if(x < y)\n\n\'<a \\n></a>\';\n\n">"\n// meh\n', function(err, file) {
+		
+		UTIL.assert(file.grid[5].indentation, 0);
+		
+		//EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+
+
 EDITOR.addTest(function constVar(callback) {
 	EDITOR.openFile("constVar.js", 'const foo = 1;\nlet bar = 2;\n', function(err, file) {
 		
