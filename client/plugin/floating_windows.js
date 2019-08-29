@@ -96,6 +96,10 @@
 			browserWindowOptions = {};
 		}
 		
+		if(typeof browserWindowOptions != "object") {
+			browserWindowOptions = {};
+		}
+		
 		EDITOR.ctxMenu.hide();
 		windowMenuNewWindow.hide();
 		
