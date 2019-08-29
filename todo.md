@@ -34,9 +34,9 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-When deleting a line in WYSIWYG editor contenteditable in Firefox, the editor get focus!
 
-WYSIWYG toolbar
+thinking: Add a "suggest change" button on any web page.
+&fork=url&pullrequest=user@email.com
 
 
 Make single page example, with a share button, 
