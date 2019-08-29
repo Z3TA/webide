@@ -34,10 +34,58 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+Make single page example, with a share button, 
+that lets a computer-illiteral able to propse changes ...
 
 Edit link on web page,
 that takes you to the editor,
 and lets you edit the web page in WYSIWYG
+
+
+
+Easier collaboration
+---------------------
+
+Single page WYSIWYG
+
+Have an edit link on the page, which pulls up the IDE in "newb friendly" mode
+Where all he/she sees is a contenteditable (WYSIWYG) with a toolbar, and some buttons:
+"Propose changes",
+
+
+Edit this page -> A propose file change template
+Putting a non coder into into an IDE might be too much to stommach.
+Instead go right into a "contenteditable" ...
+With a button that say "Propose changes" with "reasoning" text box. (that automatically comes up after you've edited)
+
+
+It's not about the editor, it's about what you *can do* with the editor.
+In the copy, do not write about editor features, 
+write what you can do! And *show* what you can do (using images/video) 
+
+
+Pull request ?
+1. Have a button on any web page that say's edit,
+2. Opens that page on webide.se ...
+3. Changes are made ...
+4. A "pull" request is generated
+5. ???
+6. Profit
+
+The edit button need to specify how the pull request should be delivered.
+To another webide.se user !?
+
+
+Clone any public repository,
+make edits,
+commit,
+click "Make pull request" or "Share" button
+You get a link, give/send it to the project maintainer
+Maintainer previews/reviews the changes, then click "Merge upstreap" or "Export diff"
+
+
+
+
 
 
 
@@ -96,7 +144,6 @@ For non-devs we want to hide the SCM part, but developers prefer to choose their
 
 Focus more on making websites/documentation!?
 
-Make single page example, with a share button, that lets a computer-illiteral able to propse changes (see: What I'm thinking/Easier collaboration)
 
 
 ==================
@@ -1011,47 +1058,6 @@ When searching, find all, create multiple selections(cursors), so that when you 
 
 What I'm thinking
 ==================
-
-
-Easier collaboration
----------------------
-
-Single page WYSIWYG
-
-Have an edit link on the page, which pulls up the IDE in "newb friendly" mode
-Where all he/she sees is a contenteditable (WYSIWYG) with a toolbar, and some buttons:
-"Propose changes",
-
-
-Edit this page -> A propose file change template
-Putting a non coder into into an IDE might be too much to stommach.
-Instead go right into a "contenteditable" ...
-With a button that say "Propose changes" with "reasoning" text box. (that automatically comes up after you've edited)
-
-
-It's not about the editor, it's about what you *can do* with the editor.
-In the copy, do not write about editor features, 
-write what you can do! And *show* what you can do (using images/video) 
-
-
-Pull request ?
-1. Have a button on any web page that say's edit,
-2. Opens that page on webide.se ...
-3. Changes are made ...
-4. A "pull" request is generated
-5. ???
-6. Profit
-
-The edit button need to specify how the pull request should be delivered.
-To another webide.se user !?
-
-
-Clone any public repository,
-make edits,
-commit,
-click "Make pull request" or "Share" button
-You get a link, give/send it to the project maintainer
-Maintainer previews/reviews the changes, then click "Merge upstreap" or "Export diff"
 
 
 ---

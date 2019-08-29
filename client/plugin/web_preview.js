@@ -4,6 +4,7 @@
 	"use strict";
 	
 	var winMenuWysiwygHtml;
+	var tempCtxMenuWebPreview;
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
@@ -51,7 +52,7 @@
 		if(!file) return true;
 		if(!file.path.match(/html?$/i)) return true;
 		
-		menuItem = EDITOR.ctxMenu.addTemp("Web Preview", webPreview);
+		tempCtxMenuWebPreview = EDITOR.ctxMenu.addTemp("Web Preview", webPreview);
 		
 	}
 	
