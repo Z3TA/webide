@@ -21,11 +21,16 @@
 			
 			winMenuWysiwygHtml = EDITOR.windowMenu.add("What you see is what you get", ["Edit", 120], startHtmlWysiwyg);
 			
-			if(QUERY_STRING["wysiwyg"]) {
+			if(QUERY_STRING["single_page_wysiwyg"]) {
+				
+				// Note: For static site generator's sites use ?editPage=URL
+				
+				// To open a single page in WYSIWYG mode, use ?single_page_wysiwyg=PATH
+				
 				CLIENT.on("loginSuccess", function(loggedIn) {
 					// Need to wait for the reopen-files plugin ...
 					setTimeout(function() {
-						editFile(QUERY_STRING["wysiwyg"]);
+						editFile(QUERY_STRING["single_page_wysiwyg"]);
 					}, 500);
 					
 				});
