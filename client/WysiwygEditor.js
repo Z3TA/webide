@@ -111,9 +111,9 @@ var WysiwygEditor;
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
 		wysiwygEditor.whenLoaded = whenLoaded;
 		
-		wysiwygEditor.captureConsoleLog = options.captureConsoleLog==false ? false : true;
+		wysiwygEditor.captureConsoleLog = (options.captureConsoleLog==true);
 		
-		wysiwygEditor.toolbar = options.toolbar==false ? false : true;
+		wysiwygEditor.toolbar = (options.toolbar==true);
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
@@ -1908,7 +1908,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			}, 1);
 			
 				
-				if(wysiwygEditor.toolbar) {
+			if(wysiwygEditor.onlyPreview && wysiwygEditor.toolbar) {
 					
 				// Prevent zooming (have to use zoom buttons in toolbar)
 				var meta = document.createElement("meta");
