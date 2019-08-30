@@ -78,7 +78,6 @@
 			if(QUERY_STRING.editPage) {
 				// ### quickedit.js ...
 				var url = QUERY_STRING.editPage;
-				var nodes = QUERY_STRING.nodes.split(",");
 				
 				var site = isSite(url);
 				
