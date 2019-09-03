@@ -170,6 +170,9 @@ EDITOR.plugin({
 				}
 				
 				alertBox(msg);
+				
+				EDITOR.dashboard.hide();
+				
 			}
 			else console.log("forksite: filesToDownload=" + filesToDownload.length + " filesDownloaded=" + filesDownloaded.length + " filesToOpen=" + filesToOpen 
 			+ " filesOpened=" + filesOpened + " Waiting for " + UTIL.compare(filesToDownload, filesDownloaded).join(", ") );
