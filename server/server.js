@@ -2538,6 +2538,9 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
 				
+				//foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted);
+				
+				
 			}
 			
 			// ALSO UPDATE removeuser.js !!!
