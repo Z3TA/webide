@@ -3822,6 +3822,7 @@ li.onclick = function(clickEvent) {
 	}
 	
 	var stats = null; // Key:value to store stats
+	EDITOR.statsEnabled = true;
 	EDITOR.localStorage.getItem("_stats_", function(err, str) {
 		if(err) {
 			console.error(err);
@@ -3844,6 +3845,9 @@ li.onclick = function(clickEvent) {
 	
 	EDITOR.stat = function stat(key, retry) {
 		// Increment a key value
+		
+		if(!EDITOR.statsEnabled) return;
+		
 		if(retry == undefined) retry = 0;
 		
 		if(stats == null && retry < 3) {
@@ -3871,6 +3875,9 @@ li.onclick = function(clickEvent) {
 	
 	EDITOR.statInfo = function statInfo(key, val) {
 		// Pushes a string to a key array
+		
+		if(!EDITOR.statsEnabled) return;
+		
 		if(!stats.hasOwnProperty(key)) stats[key] = [];
 		
 		var statsObj = stats[key];
@@ -7510,6 +7517,9 @@ function main() {
 		// Send statistics
 		if(typeof stats == "object" && Object.keys(stats).length > 0) {
 			setTimeout(function sendStat() {
+				
+				if(!EDITOR.statsEnabled) return;
+				
 				var post = {json: JSON.stringify(stats)};
 				UTIL.httpPost("https://www.webtigerteam.com/editor/stats", post, function(err, resp) {
 					if(err == null && resp == "OK") {
