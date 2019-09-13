@@ -126,6 +126,8 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		
 		themeLoaded = true;
 		
+		EDITOR.stat("dark_theme");
+		
 	}
 	
 	

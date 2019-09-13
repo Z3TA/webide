@@ -720,6 +720,8 @@ console.warn("Could not find the search string that was used!");
 					
 					EDITOR.renderNeeded();
 					
+					EDITOR.stat("find_in_files");
+					
 				}
 				
 				

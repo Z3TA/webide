@@ -205,6 +205,8 @@
 			
 			console.log("print2pdf: Finished print2pdf");
 			
+			EDITOR.stat("print_to_pdf");
+			
 		});
 	}
 	

@@ -1092,6 +1092,8 @@ file.fixCaret();
 		}
 		
 		EDITOR.renderNeeded();
+		
+		EDITOR.stat("undo");
 	}
 	
 	function redo(file, ev, moveCaret) {
@@ -1137,6 +1139,8 @@ file.fixCaret();
 		}
 		
 		EDITOR.renderNeeded();
+		
+		EDITOR.stat("redo");
 	}
 	
 	function copyObjProp(fromObj) {

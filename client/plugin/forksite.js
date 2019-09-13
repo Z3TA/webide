@@ -173,6 +173,8 @@ EDITOR.plugin({
 				
 				EDITOR.dashboard.hide();
 				
+				EDITOR.stat("fork_website");
+				
 			}
 			else console.log("forksite: filesToDownload=" + filesToDownload.length + " filesDownloaded=" + filesDownloaded.length + " filesToOpen=" + filesToOpen 
 			+ " filesOpened=" + filesOpened + " Waiting for " + UTIL.compare(filesToDownload, filesDownloaded).join(", ") );

@@ -43,7 +43,7 @@
 		
 		hide_gotoLineInput();
 		
-		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: gotoLineFromKeyboardComboG}); // ctrl + G
 		EDITOR.bindKey({desc: "Goto line ...", charCode: key_J, combo: CTRL, fun: show_gotoInputEmacs}); // ctrl + J (Emacs)
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 		
@@ -65,15 +65,15 @@
 			grammar: ["(goto|go to|jump to) line|jump to|jump) <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
-		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["Navigate", 11], show_gotoInput);
+		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["Navigate", 11], gotoLineFromWindowMenu);
 		
-		EDITOR.registerAltKey({char: "g", alt:1, label: "goto line", fun: show_gotoInput});
+		EDITOR.registerAltKey({char: "g", alt:1, label: "goto line", fun: gotoLineFromVirtualKeyboard});
 		
 		}
 	
 	function gotoLine_unload() {
 		
-		EDITOR.unbindKey(show_gotoInput);
+		EDITOR.unbindKey(gotoLineFromKeyboardComboG);
 		EDITOR.unbindKey(show_gotoInputEmacs);
 		
 		EDITOR.unbindKey(hide_gotoLineInput);
@@ -82,7 +82,7 @@
 		
 		EDITOR.windowMenu.remove(winMenuGotoLine);
 		
-		EDITOR.unregisterAltKey(show_gotoInput);
+		EDITOR.unregisterAltKey(gotoLineFromVirtualKeyboard);
 		
 	}
 	
@@ -96,6 +96,8 @@
 console.warn("line=" + line + " is not a number! match=" + JSON.stringify(match) + " RE_SUB=" + RE_SUB); 
 			return false; // Did not capture it
 		}
+		
+		EDITOR.stat("goto_line_voice");
 		
 		if(file) {
 file.gotoLine(line);
@@ -160,7 +162,23 @@ file.gotoLine(line);
 
 	}
 	
+	function gotoLineFromWindowMenu(file, combo) {
+		EDITOR.stat("gotoLineFromWindowMenu");
+		return show_gotoInput(file, combo);
+	}
+	
+	function gotoLineFromVirtualKeyboard(file, combo) {
+		EDITOR.stat("gotoLineFromVirtualKeyboard");
+		return show_gotoInput(file, combo);
+	}
+	
+	function gotoLineFromKeyboardComboG(file, combo) {
+		EDITOR.stat("gotoLineFromKeyboardComboG");
+		return show_gotoInput(file, combo);
+	}
+	
 	function show_gotoInputEmacs(file, combo) {
+		EDITOR.stat("gotoLineFromKeyboardComboJ");
 		return show_gotoInput(file, combo);
 	}
 	

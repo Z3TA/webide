@@ -49,6 +49,8 @@ function unloadHelp() {
 			if(err) return alertBox(err.message);
 			
 			helpWindow = theWindow;
+			
+			EDITOR.stat("show_documentation");
 		});
 		
 		return false;

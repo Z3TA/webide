@@ -96,6 +96,8 @@
 		if(winMenuToggleFileTabs) winMenuToggleFileTabs.deactivate();
 		
 		EDITOR.resizeNeeded();
+		
+		EDITOR.stat("hide_fileTabs");
 	}
 	
 	function showFileTabs(excludeFile) {

@@ -14,12 +14,12 @@
 		desc: "Create new file option to context menu and bound to Ctrl + N",
 		load: function load() {
 			// Bind to ctrl + N
-			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: keyboardNewFile});
+			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: newFileFromKeyboardCombo});
 			
-			menuItem = EDITOR.ctxMenu.add("New file", keyboardNewFile, 1);
-			winMenuNewFile = EDITOR.windowMenu.add("New file", ["File", 2], keyboardNewFile);
+			menuItem = EDITOR.ctxMenu.add("New file", newFileFromContextMenu, 1);
+			winMenuNewFile = EDITOR.windowMenu.add("New file", ["File", 2], newFileFromWindowMenu);
 			
-			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: keyboardNewFile});
+			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: newFileFromVirtualKeyboard});
 			
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
@@ -28,15 +28,35 @@
 			EDITOR.ctxMenu.remove(menuItem);
 			EDITOR.windowMenu.remove(winMenuNewFile);
 			
-			EDITOR.unbindKey(keyboardNewFile);
+			EDITOR.unbindKey(newFileFromKeyboardCombo);
 			
-			EDITOR.unregisterAltKey(keyboardNewFile);
+			EDITOR.unregisterAltKey(newFileFromVirtualKeyboard);
 			
 			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
 		},
 		order: 10
 	});
+	
+	function newFileFromKeyboardCombo() {
+		EDITOR.stat("newFileFromKeyboardCombo");
+		return keyboardNewFile();
+	}
+	
+	function newFileFromVirtualKeyboard() {
+		EDITOR.stat("newFileFromVirtualKeyboard");
+		return keyboardNewFile();
+	}
+	
+	function newFileFromWindowMenu() {
+		EDITOR.stat("newFileFromWindowMenu");
+		return keyboardNewFile();
+	}
+	
+	function newFileFromContextMenu() {
+		EDITOR.stat("newFileFromContextMenu");
+		return keyboardNewFile();
+	}
 	
 	function keyboardNewFile(file, combo, character, charCode, direction) {
 		EDITOR.ctxMenu.hide();

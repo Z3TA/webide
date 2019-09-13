@@ -98,6 +98,7 @@
 		btnUseTwoSpaces.innerText = "Use two spaces";
 		btnUseTwoSpaces.onclick = function() {
 			updateIndentation(2);
+			EDITOR.stat("manage_indentation_twospaces");
 		}
 		indentationManager.appendChild(btnUseTwoSpaces);
 		
@@ -106,6 +107,7 @@
 		btnUseFourSpaces.innerText = "Use four spaces";
 		btnUseFourSpaces.onclick = function() {
 			updateIndentation(4);
+			EDITOR.stat("manage_indentation_fourspaces");
 		}
 		indentationManager.appendChild(btnUseFourSpaces);
 		
@@ -114,6 +116,7 @@
 		btnUseTabs.innerText = "Use tabs";
 		btnUseTabs.onclick = function() {
 			updateIndentation(1);
+			EDITOR.stat("manage_indentation_tabs");
 		}
 		indentationManager.appendChild(btnUseTabs);
 		

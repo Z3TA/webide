@@ -37,6 +37,8 @@
 		file.insertText(text);
 		file.insertLineBreak();
 		
+		EDITOR.stat("lorem_ipsum");
+		
 		return false; // false = prevent default browser action
 		
 		

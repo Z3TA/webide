@@ -158,6 +158,8 @@ sendit();
 			showErrorMessage(message, source, lineno, colno, error)
 		});
 		
+		EDITOR.stat("error");
+		
 	}
 	
 	function findSourcePath(source, callback) {

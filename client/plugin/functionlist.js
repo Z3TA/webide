@@ -75,6 +75,7 @@
 				});
 				
 				hideFunctionList();
+				EDITOR.stat("hide_functionList");
 			});
 		}
 		
@@ -530,13 +531,17 @@ leftColumn.removeChild(functionListWrap);
 				
 				console.log("Functionlist is now hidden");
 				console.log(UTIL.getStack("why hide function list?"));
+				
 			}
 		}
+		
+		
 	}
 	
 	function toggleFunctionList() {
 		if(functionListActive) {
 			hideFunctionList();
+			EDITOR.stat("hide_functionList");
 		}
 		else {
 			showFunctionList();

@@ -34,7 +34,7 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-todo: Stats for usage!
+regression: Inlined console.log no longer works in Chrome!
 
 todo: Test the Gutenberg editor (in Wordpress)
 

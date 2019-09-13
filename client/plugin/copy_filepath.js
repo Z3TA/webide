@@ -56,6 +56,8 @@
 					}
 				});
 			}
+			
+			EDITOR.stat("copy_file_path");
 		}
 		else {
 			alertBox("No file open!");

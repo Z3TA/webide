@@ -65,6 +65,7 @@
 		
 		if(endOfParagraph == -1) {
 			alertBox("Did not find end of paragraph");
+			EDITOR.stat("wordwrap_noEndOfParagraph");
 			return false;
 		}
 		
@@ -209,6 +210,8 @@
 		EDITOR.renderNeeded();
 		
 		//alertBox("Text word wrapped!");
+		
+		EDITOR.stat("wordwrap_text");
 		
 		return false;
 		

@@ -544,6 +544,8 @@
 			
 			end = start + searchStrLenght; // Will select from start to end
 			
+			EDITOR.stat("find_regexp");
+			
 		}
 		else {
 			
@@ -592,6 +594,7 @@
 			
 			end = start + searchStrLenght;
 			
+			EDITOR.stat("find_plaintext");
 		}
 		
 		lastSearchEnd = end;
@@ -696,6 +699,10 @@
 					
 					console.log("Regex replacing '" + selectedText + "' with '" + newString + "'");
 					
+					EDITOR.stat("replace_regexp");
+				}
+				else {
+					EDITOR.stat("replace_plaintext");
 				}
 				
 				// Insert the new string

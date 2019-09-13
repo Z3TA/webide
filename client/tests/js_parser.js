@@ -615,6 +615,9 @@ EDITOR.addTest(function nameOfArrowFunction(callback) {
 	});
 });
 
+
+if(EDITOR.settings.jsx) {
+	
 EDITOR.addTest(2, function JSX1(callback) {
 
 		EDITOR.openFile("jsx1.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
@@ -709,7 +712,7 @@ EDITOR.addTest(1, function JSX7(callback) {
 		callback(true);
 	});
 });
-
+}
 
 
 EDITOR.addTest(function constVar(callback) {

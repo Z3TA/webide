@@ -338,6 +338,8 @@
 		}
 		
 		EDITOR.resizeNeeded();
+		
+		EDITOR.stat("virtual_keyboard");
 	}
 	
 	function hideBuiltinKeyboard() {

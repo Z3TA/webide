@@ -69,6 +69,7 @@
 		fileExplorerWrap = document.createElement("div");
 		fileExplorerWrap.setAttribute("class", "wrap fileExplorer");
 		fileExplorerWrap.setAttribute("id", "fileExplorer");
+		fileExplorerWrap.style.display="none";
 		
 		fileExplorerHeader = document.createElement("div");
 		fileExplorerHeader.setAttribute("class", "fileExplorer header");
@@ -107,7 +108,7 @@
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
 		EDITOR.discoveryBar.add(discoveryBarImage, 10);
 		
-		toggleFileExplorer(visible);
+		if(visible) toggleFileExplorer(visible);
 		
 	}
 	
@@ -265,6 +266,10 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			winMenuFileExplorer.deactivate();
 			
 			discoveryBarImage.setAttribute("class", "");
+			
+			EDITOR.stat("hide_fileExplorer");
+			
+			console.warn("toggleFileExplorer: hide!");
 			
 		}
 		return false;

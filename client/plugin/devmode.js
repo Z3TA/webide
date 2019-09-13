@@ -189,6 +189,7 @@ console.time = console.timeEnd = function() {};
 		winMenuToggleDevMode.activate();
 		
 		if(EDITOR.settings.devMode == false || devModeManuallOffOnce) alertBox("Editor devMode active! EDITOR.version=" + EDITOR.version);
+	
 	}
 	
 	function enableDebugMode() {
@@ -236,6 +237,7 @@ console.time = console.timeEnd = function() {};
 		if(EDITOR.settings.devMode) {
 			enableDevMode();
 			console.log("devMode enabled");
+			EDITOR.stat("dev_mode");
 		}
 		else {
 			disableDebugMode();

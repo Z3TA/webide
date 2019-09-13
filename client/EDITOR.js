@@ -112,7 +112,8 @@ EDITOR.settings = {
 	autoCompleteKey: 9, // Tab
 	insert: false,
 	useCliboardcatcher: false, // Some browsers (IE) can only capture clipboard events if a text element is focused
-	caretAnimation: true
+	caretAnimation: true,
+	jsx: false
 };
 
 EDITOR.runningTests = false;   // Able to ignore some stuff like alerts while tests are running
@@ -2813,6 +2814,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		disable: function disableDiscoveryBar() {
 			EDITOR.discoveryBar.hide();
 			EDITOR.discoveryBar.enabled = false;
+			EDITOR.stat("disable_discoveryBar");
 		},
 		isVisible: true,
 		enabled: true
@@ -3380,6 +3382,9 @@ if(menuItem.parentMenu) {
 			windowMenuHeight.style.display="none";
 			
 			EDITOR.windowMenu.isVisible = false;
+			
+			EDITOR.stat("disable_windowMenu");
+			
 		},
 		hide: function hideWindowMenu() {
 			if(dropdownMenuRoot) dropdownMenuRoot.hide(true);
@@ -4549,8 +4554,10 @@ var word = "";
 		else if(options.length == 1) {
 			completeWord(word, options[0], mcl[0]);
 			if(functionArguments && functionArguments.length > 0) EDITOR.addInfo( file.caret.row, file.caret.col, functionArguments.join(",") );
-			
-		}
+			}
+		
+		if(options.length == 0) EDITOR.stat("autocomplete_nothing");
+		else EDITOR.stat("autocomplete_found");
 		
 		return false; // disable default action
 		
@@ -6132,6 +6139,8 @@ EDITOR.dashboard = {
 		
 		setTimeout(placeDashboard , 500);
 		
+			EDITOR.stat("show_dashboard");
+			
 		return true;
 		
 		function placeDashboard() {

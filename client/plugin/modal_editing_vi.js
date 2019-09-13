@@ -2732,6 +2732,9 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				alertBox('You are now in "VIM" mode. Press ' + EDITOR.getKeyFor("toggleVim") + ' to toggle to another mode.', "VIM_MODE");
 firstTimeVim = false;
 			}
+			
+			EDITOR.stat("vim_mode");
+			
 		}
 		
 		EDITOR.ctxMenu.hide();

@@ -39,7 +39,7 @@
 		var charEnter = 13;
 		
 		// Bind to ctrl + S
-		EDITOR.bindKey({desc: "Save current file", charCode: char_S, combo: CTRL, fun: saveCurrentFile});
+		EDITOR.bindKey({desc: "Save current file", charCode: char_S, combo: CTRL, fun: saveFileFromKeyboardCombo});
 		
 		EDITOR.bindKey({desc: "Hide save as dialog", fun: hideSaveDialog, charCode: charEscape, combo: 0});
 		
@@ -48,19 +48,19 @@
 		// Add items to the canvas context meny
 		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
 		
-		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveCurrentFile);
+		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveFileFromWindowMenu);
 		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", ["File", 2], saveAs);
 		
 		EDITOR.on("showMenu", showSaveOption);
 		
-		EDITOR.registerAltKey({char: "s", alt:2, label: "save", fun: saveCurrentFile});
+		EDITOR.registerAltKey({char: "s", alt:2, label: "save", fun: saveFileFromVirtualKeyboard});
 		
 	}
 	
 	function unloadFileSaver() {
 		// Cleaning up, for example when disabling a plugin
 		
-		EDITOR.unbindKey(saveCurrentFile);
+		EDITOR.unbindKey(saveFileFromKeyboardCombo);
 		EDITOR.unbindKey(hideSaveDialog);
 		EDITOR.unbindKey(enter);
 		
@@ -71,9 +71,31 @@
 		
 		EDITOR.removeEvent("showMenu", showSaveOption);
 		
-		EDITOR.unregisterAltKey(saveCurrentFile);
+		EDITOR.unregisterAltKey(saveFileFromVirtualKeyboard);
 		
 		hideSaveDialog();
+	}
+	
+	function saveFileFromVirtualKeyboard(file, combo) {
+		EDITOR.stat("saveFileFromVirtualKeyboard");
+		return saveCurrentFile(file, combo);
+	}
+	
+	function saveFileFromContextMenu(file, combo) {
+		EDITOR.stat("saveFileFromContextMenu");
+		EDITOR.ctxMenu.hide();
+		return saveCurrentFile(file, combo);
+	}
+	
+	function saveFileFromWindowMenu(file, combo) {
+		EDITOR.stat("saveFileFromWindowMenu");
+		windowMenuSave.hide();
+		return saveCurrentFile(file, combo);
+	}
+	
+	function saveFileFromKeyboardCombo(file, combo) {
+		EDITOR.stat("saveFileFromKeyboardCombo");
+		return saveCurrentFile(file, combo);
 	}
 	
 	function setCaretPosition(elemId, caretPos) {
@@ -500,9 +522,6 @@ console.warn("The save was canceled: " + err.message);
 	
 	
 	function saveCurrentFile(file, combo, character, charCode, direction) {
-		
-		EDITOR.ctxMenu.hide();
-		
 		if(file.savedAs === false || combo.sum == CTRL + SHIFT) {
 			saveAs();
 		}
@@ -511,7 +530,6 @@ console.warn("The save was canceled: " + err.message);
 		}
 		
 		return false;
-		
 	}
 	
 	function showSaveOption(file, x, y, ev) {
@@ -519,7 +537,7 @@ console.warn("The save was canceled: " + err.message);
 		if(file.isSaved) return true;
 		if(!file.savedAs) return true;
 		
-		EDITOR.ctxMenu.addTemp("Save file", saveCurrentFile);
+		EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu);
 		
 	}
 	

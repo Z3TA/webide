@@ -71,6 +71,8 @@
 		
 		winMenuSpeech.activate();
 		active = true;
+		
+		EDITOR.stat("speech_assistant");
 	}
 	
 	function disableSpeechAssistant() {
