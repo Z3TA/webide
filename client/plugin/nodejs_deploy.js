@@ -227,8 +227,10 @@
 						
 						if(pw != null) CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
 							if(err) alertBox(err.message);
-							else alertBox(pj.name + " deployed to production: " + resp.prodFolder);
-							
+							else {
+alertBox(pj.name + " deployed to production: " + resp.prodFolder);
+								EDITOR.stat("nodejs_deploy");
+							}
 						});
 						
 					});

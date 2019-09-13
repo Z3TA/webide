@@ -83,6 +83,8 @@
 			//win.moveTo(options.left, options.top);
 			
 			windowMenuSplitScreen.hide();
+			
+			EDITOR.stat("split_screen");
 		}); 
 		
 		// canvas freezes when the other window is closed !?
@@ -154,6 +156,8 @@
 				}, 1000);
 				
 				if(typeof callback == "function") callback(null, browserWindow);
+				
+				EDITOR.stat("floating_window");
 				
 				function checkIfClosed() {
 					if(!browserWindow || browserWindow.closed) {

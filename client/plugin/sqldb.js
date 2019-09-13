@@ -275,6 +275,8 @@ option.setAttribute("selected", "selected");
 }
 				else write(results, file);
 			
+				EDITOR.stat("sql_query");
+				
 			});
 			
 		});

@@ -193,6 +193,8 @@
 			
 			EDITOR.openFile("/tmp/collaboration_instructions.txt", txt);
 			
+			EDITOR.stat("collaboration_invite");
+			
 		});
 		
 	}
@@ -294,6 +296,8 @@
 				}
 			}
 			}
+			
+			EDITOR.stat("collaboration_mode");
 			
 		}
 		

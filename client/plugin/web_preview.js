@@ -220,6 +220,9 @@
 			}
 			
 			
+			if(wysiwyg) EDITOR.stat("web_wysiwyg");
+			else EDITOR.stat("web_preview");
+			
 		});
 	}
 	

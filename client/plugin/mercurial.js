@@ -929,6 +929,8 @@ updateCommitFileSelect();
 					if(err) throw err;
 				});
 				
+				EDITOR.stat("mercurial_commit");
+				
 			}
 		}
 		

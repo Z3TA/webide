@@ -271,6 +271,9 @@ console.warn("Terminal events already active!");
 			
 			// We might get terminal data before we get the open callback!
 			openTerminalFile(terminalName, startTerminalCallback);
+			
+			EDITOR.stat("terminal_emulator");
+			
 			});
 	}
 	

@@ -1825,6 +1825,13 @@ site = selectedSite;
 									}
 								}
 								
+								if(edit) {
+									EDITOR.stat("ssg_wysiwyg");
+								}
+								else {
+									EDITOR.stat("ssg_preview");
+								}
+								
 								function reCompile(reCompileCallback) {
 									compile(resolvePath(site, site.source), resolvePath(site, site.preview), ignoreDraft, function recompiled(err) {
 										reCompileCallback(err);
@@ -2381,6 +2388,8 @@ whenAllFilesReloaded();
 				if(err) throw err;
 				
 				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));
+				
+				EDITOR.stat("ssg_publish");
 				
 				function urlElementString(url) {
 					

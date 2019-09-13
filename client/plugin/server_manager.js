@@ -631,7 +631,7 @@
 				EDITOR.fileExplorer(protocol.toLowerCase() + "://" + hostName);
 				hideServerManger();
 				EDITOR.ctxMenu.update(menuItem, true, menuString);
-}
+			}
 }
 		
 	}

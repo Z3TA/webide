@@ -250,6 +250,8 @@
 				*/
 				
 				EDITOR.renderNeeded();
+				
+				EDITOR.stat("spellcheck_correct_suggested");
 			}
 		}
 	}
