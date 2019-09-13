@@ -214,6 +214,8 @@ alertBox("Failed to automatically login as " + userValue + "." +
 						
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 						
+						EDITOR.stat("loginSuccess");
+						
 						if( userValue.match(/^guest\d+$/) && pwValue != "guest") {
 							// User have logged in with a guest account
 							// It's Not the first time user logs in
@@ -519,7 +521,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 					else {
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
 						saveLogin({user: user.value, pw: pw.value});
-						
+						EDITOR.stat("loginSuccess");
 					}
 				});
 				

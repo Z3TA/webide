@@ -46,7 +46,7 @@
 		
 		var key_E = 69;
 		
-		EDITOR.bindKey({desc: "File explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
+		EDITOR.bindKey({desc: "File explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorerFromKeyboardCombo});
 		
 		EDITOR.on("fileExplorer", openFileExplorerTool);
 		EDITOR.on("move", fileExplorerFileMoved);
@@ -56,11 +56,11 @@
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorer, 9);
+		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorerFromContextMenu, 9);
 		
-		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorer);
+		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorerFromWindowMenu);
 		
-		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorer});
+		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorerFromVirtualKeyboard});
 		
 		
 		leftColumn = document.getElementById("leftColumn");
@@ -103,7 +103,7 @@
 		
 		discoveryBarImage = document.createElement("img");
 		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryBarImage.title = "File explorer (" + EDITOR.getKeyFor(toggleFileExplorer) + ")"
+		discoveryBarImage.title = "File explorer (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
 		EDITOR.discoveryBar.add(discoveryBarImage, 10);
 		
@@ -121,9 +121,9 @@
 		
 		EDITOR.windowMenu.remove(winMenuFileExplorer);
 		
-		EDITOR.unregisterAltKey(toggleFileExplorer);
+		EDITOR.unregisterAltKey(toggleFileExplorerFromVirtualKeyboard);
 		
-		EDITOR.unbindKey(toggleFileExplorer);
+		EDITOR.unbindKey(toggleFileExplorerFromKeyboardCombo);
 		
 		EDITOR.removeEvent("fileExplorer", openFileExplorerTool);
 		EDITOR.removeEvent("move", fileExplorerFileMoved);
@@ -133,8 +133,30 @@ gapi.auth2.getAuthInstance().signOut();
 		}
 	}
 	
+	function toggleFileExplorerFromWindowMenu() {
+		toggleFileExplorer();
+		EDITOR.stat("toggleFileExplorerFromWindowMenu");
+	}
+	
+	function toggleFileExplorerFromVirtualKeyboard() {
+		toggleFileExplorer();
+		EDITOR.stat("toggleFileExplorerFromVirtualKeyboard");
+	}
+	
+	function toggleFileExplorerFromKeyboardCombo() {
+		toggleFileExplorer();
+		EDITOR.stat("toggleFileExplorerFromKeyboardCombo");
+		return PREVENT_DEFAULT;
+	}
+	
 	function toggleFileExplorerFromDiscoveryBar() {
 		toggleFileExplorer();
+		EDITOR.stat("toggleFileExplorerFromDiscoveryBar");
+	}
+	
+	function toggleFileExplorerFromContextMenu() {
+		toggleFileExplorer();
+		EDITOR.stat("toggleFileExplorerFromContextMenu");
 	}
 	
 	function updateSigninStatus(isSignedIn) {

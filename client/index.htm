@@ -7,7 +7,7 @@
 	
 	
 	<!-- Block third party scripts -->
-	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' ; img-src data: 'self'; connect-src wss: ws: 'self' http: https: ; object-src 'none'">
+	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' ; img-src data: 'self'; connect-src 'self' https://www.webtigerteam.com ; object-src 'none' ">
 	<!--
 	Do I need 'unsafe-inline' ?
 	YEH: Or we can't have inline <script>. eg. optimization for Google Page speed. 
@@ -17,6 +17,10 @@
 	But those older browsers probably don't support Content-Security-Policy either. So we could probably fall-back to "unsafe" behaviour if needed!?
 	
 	Do I need 'unsafe-eval' ? Not when I'm allowed to load <script> files dynamicly.
+	
+	Should I be able to connect to other servers ?
+	connect-src wss: ws: 'self' http: https:
+	
 	
 	more info: https://csp-evaluator.withgoogle.com/
 	-->

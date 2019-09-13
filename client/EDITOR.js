@@ -220,6 +220,7 @@ EDITOR.lastTimeInteraction = new Date();
 EDITOR.modes = ["default", "*"]; // You can bind keys for use in different modes. * means all modes
 EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 
+
 (function() { // Non global editor code ...
 	
 	// These variables and functions are private ...
@@ -401,7 +402,7 @@ ctxMenuVisibleOnce = true;
 	
 	
 	// # Server Storage (to replace localStorage)
-	var _serverStorage = null; // Will be populated once the data is recived from the server
+	var _serverStorage = null; // Will be populated once the data is received from the server
 	
 	EDITOR.storage = {
 		setItem: function storageSetItem(id, val, callback) {
@@ -3820,6 +3821,72 @@ li.onclick = function(clickEvent) {
 		}
 	}
 	
+	var stats = null; // Key:value to store stats
+	EDITOR.localStorage.getItem("_stats_", function(err, str) {
+		if(err) {
+			console.error(err);
+		}
+		else {
+			if(str == null) {
+				stats = {};
+				return;
+			}
+			
+			try {
+				stats = JSON.parse(str);
+			}
+			catch(err) {
+				console.error("Unable to parse str=" + str + " Error: " + err.message);
+				stats = {};
+			}
+		}
+	});
+	
+	EDITOR.stat = function stat(key, retry) {
+		// Increment a key value
+		if(retry == undefined) retry = 0;
+		
+		if(stats == null && retry < 3) {
+			console.warn("stats not yet loaded!");
+			setTimeout(function() {
+				EDITOR.stat(key, ++retry);
+			}, 100);
+			
+			return;
+		}
+		
+		if(!stats.hasOwnProperty(key)) stats[key] = 0;
+		if(typeof stats[key] == "number") stats[key]++;
+		else {
+			console.warn("key=" + key + " is of type=" + typeof stats[key]);
+			return;
+		}
+		
+		EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
+			if(err) {
+				console.error(err);
+			}
+		});
+	}
+	
+	EDITOR.statInfo = function statInfo(key, val) {
+		// Pushes a string to a key array
+		if(!stats.hasOwnProperty(key)) stats[key] = [];
+		
+		var statsObj = stats[key];
+		
+		if(Array.isArray(statsObj)) {
+			statsObj.push(val);
+			EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
+				if(err) {
+					console.error(err);
+				}
+			});
+		}
+		else {
+			console.error("Not an array: key=" + key + " " )
+		}
+	}
 	
 	EDITOR.addInfo = function(row, col, textString, file, lvl) {
 		// Will display a talk bubble (plugin/render_info.js)
@@ -7436,73 +7503,92 @@ function main() {
 	
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 130], EDITOR.discoveryBar.toggle);
 	
-	windowLoaded = true;
-	
-}
-
-function moveCursorToEnd(el) {
-	if (typeof el.selectionStart == "number") {
-		el.selectionStart = el.selectionEnd = el.value.length;
-	} else if (typeof el.createTextRange != "undefined") {
-		el.focus();
-		var range = el.createTextRange();
-		range.collapse(false);
-		range.select();
-	}
-}
-
-EDITOR.animationFrame = 0;
-var isAnimating = false;
-function animate() {
-	
-	runAnimations(++EDITOR.animationFrame);
-	
-	// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
-	if(EDITOR.animationFunctions.length > 0) {
-		isAnimating = true;
-		window.requestAnimationFrame(animate);
-	}
-	else isAnimating = false;
-}
-
-function runAnimations(animationFrame) {
-	for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
-}
-
-function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
-	
-	EDITOR.dashboard.hide(true);
-	
-	var maxParallel = 5; // Running too many tests at once will cause timeout issues
-	var abortOnError = false;
-	
-	if(onlyOne) testFirstTest = true;
-	
-	/*
-		Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
-		Then run the tests there. And open any bad files here for debugging!?
-		
-	*/
-	
-	// Prepare for tests ...
-	
-	// Sort the tests by parallel and order
-	EDITOR.tests.sort(function sortTests(a, b) {
-		if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
-		else if(b.parallel && !a.parallel) return -1;
-		else if(a.parallel == b.parallel) {
-			if(a.order > b.order) return 1;
-			if(b.order > a.order) return -1;
-			else return 0;
+		// Send statistics
+		if(typeof stats == "object" && Object.keys(stats).length > 0) {
+			setTimeout(function sendStat() {
+				var post = {json: JSON.stringify(stats)};
+				UTIL.httpPost("https://www.webtigerteam.com/editor/stats", post, function(err, resp) {
+					if(err == null && resp == "OK") {
+						// Reset
+						stats = {};
+						EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
+							if(err) {
+								console.error(err);
+							}
+						});
+					}
+				});
+				
+			}, 10000);
 		}
-	});
+		
+		windowLoaded = true;
+		
+	}
 	
-	if(!onlyOne) {
-		// Close all files
-		for(var path in EDITOR.files) {
-			if(EDITOR.files[path].saved) EDITOR.closeFile(path)
-			else {
-				alertBox("Please save or close file before running tests: " + path);
+	function moveCursorToEnd(el) {
+		if (typeof el.selectionStart == "number") {
+			el.selectionStart = el.selectionEnd = el.value.length;
+		} else if (typeof el.createTextRange != "undefined") {
+			el.focus();
+			var range = el.createTextRange();
+			range.collapse(false);
+			range.select();
+		}
+	}
+	
+	EDITOR.animationFrame = 0;
+	var isAnimating = false;
+	function animate() {
+		
+		runAnimations(++EDITOR.animationFrame);
+		
+		// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
+		if(EDITOR.animationFunctions.length > 0) {
+			isAnimating = true;
+			window.requestAnimationFrame(animate);
+		}
+		else isAnimating = false;
+	}
+	
+	function runAnimations(animationFrame) {
+		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
+	}
+	
+	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
+		
+		EDITOR.dashboard.hide(true);
+		
+		var maxParallel = 5; // Running too many tests at once will cause timeout issues
+		var abortOnError = false;
+		
+		if(onlyOne) testFirstTest = true;
+		
+		/*
+			Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
+			Then run the tests there. And open any bad files here for debugging!?
+			
+		*/
+		
+		// Prepare for tests ...
+		
+		// Sort the tests by parallel and order
+		EDITOR.tests.sort(function sortTests(a, b) {
+			if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
+			else if(b.parallel && !a.parallel) return -1;
+			else if(a.parallel == b.parallel) {
+				if(a.order > b.order) return 1;
+				if(b.order > a.order) return -1;
+				else return 0;
+			}
+		});
+		
+		if(!onlyOne) {
+			// Close all files
+			for(var path in EDITOR.files) {
+				if(EDITOR.files[path].saved) EDITOR.closeFile(path)
+				else {
+					alertBox("Please save or close file before running tests: " + path);
 				return;
 			}
 		}
