@@ -104,6 +104,7 @@ rm temp/release/linux/changeset.js
 rm temp/release/linux/semver.js
 #rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm
+rm temp/release/linux/client/gfx/smallfont_4x6.png
 rm temp/release/linux/replaceStringInFileWithContentOfFile.js
 rm temp/release/linux/server/privkey.pem
 rm temp/release/linux/server/fullchain.pem
