@@ -7528,7 +7528,7 @@ function main() {
 	
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 130], EDITOR.discoveryBar.toggle);
 	
-		setTimeout(sendStatistics, 10000);
+		sendStatistics();
 		
 		windowLoaded = true;
 	}
