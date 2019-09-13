@@ -215,7 +215,7 @@
 			
 			console.log("Parsing " + file.path);
 			
-			var js = parseJavaScript(file);
+			var js = parseJavaScript(file, {jsx: EDITOR.settings.jsx});
 			
 			
 			file.haveParsed(js); // Tell the file that it has been parsed so that functions depending on the parsed data can update
@@ -511,7 +511,7 @@
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
 							
-							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow, jsMode: true});
+							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow, jsMode: true, jsx: EDITOR.settings.jsx});
 							// The parser will find the first function and only parse that
 							
 							//console.log("newParse=" + JSON.stringify(newParse));
@@ -725,7 +725,7 @@
 								
 								// Make a full parse and compare to see if there are any bugs
 								console.log("fullParse to check for errors:");
-								var fullParse = parseJavaScript(file, {noIndention: true});
+								var fullParse = parseJavaScript(file, {noIndention: true, jsx: EDITOR.settings.jsx});
 								
 								if(fullParse.comments.length != oldParse.comments.length) {
 									console.log(fullParse.comments);
@@ -779,7 +779,7 @@
 			
 			// Parse the whole file
 			console.log("Parsing whole file");
-			var newParse = parseJavaScript(file);
+			var newParse = parseJavaScript(file, {jsx: EDITOR.settings.jsx});
 			
 			
 			
@@ -1055,7 +1055,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false, // Server Side JavaScript
-		JSX = options.jsx || EDITOR.settings.jsx || false,
+		JSX = options.jsx || false,
 		jsxMaybe = false,
 		jsxOpenElements = [];
 		
