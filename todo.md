@@ -36,27 +36,12 @@ What I'm working on
 
 todo: Test the Gutenberg editor (in Wordpress)
 
-Tried to get puppeteer running, but gave up, Chrome wont start in Chroot!
-
-old account: -rw-r--r-- 1 0 0 0 Aug 15  2018 /bin/sh
-new account: lrwxrwxrwx 1 0 0 4 Sep  2 11:11 /bin/sh -> dash
-
-Who does it work on new accounts, while old accounts get EACESS errors !?
-
-try installing and running puppeteer in chroot!
-
-When running npm init from command line:
-Error: spawn /usr/bin/node EACCES
-npm seemt to spawn node which spawns another nodejs!? ...
 
 bug: When getting error from nodejs it always points to the first coulumn,
 while the error is on column X. Very fonfusing!!
 
 
-
 ?editPage vs &wysiwyg
-
-
 
 
 thinking: Add a "suggest change" button on any web page.
@@ -210,17 +195,7 @@ virtual keyb too big
 annoying when ctx menu comes up when selecting text using stylus 
 
 
-
-Can't click on login button!
-
-Implementing split screen
-
-
-
 todo: Able to change key bindings?
-
-
-
 
 
 todo: Write test for installing installAllModules with run_nodejs command.

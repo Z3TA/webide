@@ -26,7 +26,15 @@ and make it run <i>live</i> in the cloud with one click,
 
 <p><a href="https://webide.se/">webide.se</a> runs JZedit - a editor/IDE for the cloud, 
 and offers shell/workspace for developing and editing web sites, apps and Node.JS services, 
-with database support for persistence, on always on containers.</p>
+with database support for persistence, on always-online containers.</p>
+
+<p>Our goal is to be the best editor for developing progressive web apps and web sites using vanilla JavaScript.<br>
+This will be achived by having:</p>
+
+<ul>
+	<li>Better static analysis and type inference with <i>vanilla</i> JavaScript, then you can get using TypeScript.</li>
+	<li>Performance comparable to native editors like Sublime Text, Notepad++ and Vim</li>
+</ul>
 
 
 <h2>JZedit selling points</h2>
@@ -34,7 +42,7 @@ with database support for persistence, on always on containers.</p>
 <ul>
 	<li>Runs in the browser</li>
 	<li>JavaScript support</li>
-	<li>Written in vanilla JS with open source</li>
+	<li>Written in vanilla JS with shared source</li>
 	<li>Fast and Simple.</li>
 </ul>
 
@@ -43,7 +51,7 @@ with database support for persistence, on always on containers.</p>
 	<li>Separate backend/frontend lets you run the server on any PC/VPS/server (npm install -g jzedit) 
 	and connect to it from anywhere</li>
 	<li>The server can be set up for multiple users.
-	 Where each user share the same environment, but get separated isolated work spaces.</li>
+	Where each user share the same environment, but get separated isolated work spaces.</li>
 </ul>
 
 <h3>Runs everywhere</h3>
@@ -161,7 +169,7 @@ Or CPU/board development. Or a new programming language.</p>
 with GUI buttons for preview and publishing using the built in static site generator ...</p>
 
 
-<h2>For non-technical users</h2>
+<h2>Also for non-technical users</h2>
 
 <p>The editor is not only for developers, it can also be setup so that a non-technical user can use it,
 for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. 
@@ -188,11 +196,17 @@ Plugins can be hot loaded, so while making a plugin, you can reload the plugin w
 <h2>What makes JZedit better then existing editors/IDE's, or what does it do differently !?</h2>
 
 <p>JZedit is written in "vanilla" JavaScript, eg. no compilation or build step,
-just hit refresh in your browser. 
-Or if you are working on a plugin, hit <kbd>F7</kbd> to hot reload the plugin without reloading the editor.</p>
+it's easy to add new functionality, and all you have to do to see the new changes is to refresh/reload. 
+Or if you are working on a plugin, press <kbd>F7</kbd> key to hot reload the plugin without refreshing.</p>
 
 <p>The editor <i>does Not</i> use the document object model (DOM) or "content-editable" for text rendering!
-JZedit uses 2d Canvas, which is much faster then the DOM.</p>
+JZedit uses 2d Canvas, which is faster then the DOM.</p>
+
+<p>When editing a file, it's parsed client-side an every key stroke,
+which enables automatic indentation, and "IDE" features like function-list and auto-complete.</p>
+
+<p>You can run the cloud editor on your computer, mobile phone, or your own server, not only the client, but also the server.
+Eg. you could host the editor on your mobile phone or laptop, then let others connect to it via Wifi.</p>
 
 
 
