@@ -34,8 +34,6 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-regression: Inlined console.log no longer works in Chrome!
-
 todo: Test the Gutenberg editor (in Wordpress)
 
 Tried to get puppeteer running, but gave up, Chrome wont start in Chroot!

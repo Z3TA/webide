@@ -111,7 +111,7 @@ var WysiwygEditor;
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
 		wysiwygEditor.whenLoaded = whenLoaded;
 		
-		wysiwygEditor.captureConsoleLog = (options.captureConsoleLog==true);
+		wysiwygEditor.captureConsoleLog = options.captureConsoleLog==false ? false : true;
 		
 		wysiwygEditor.toolbar = (options.toolbar==true);
 		
