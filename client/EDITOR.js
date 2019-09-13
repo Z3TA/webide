@@ -8395,6 +8395,9 @@ function onMessage(windowMessageEvent) {
 		console.warn("jzedit does not recognise msg=" + msg);
 		//throw new Error("Unable to handle message: " + msg);
 	}
+		
+		EDITOR.stat("window_message");
+		
 }
 
 function copy(copyEvent) {
