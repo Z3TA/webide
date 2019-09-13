@@ -4301,6 +4301,10 @@ EDITOR.fireEvent("btk");
 			caret.index is always the index in file.text (it doesn't correspond to the position in a big file)
 			
 		*/
+		
+		if(mouseX == undefined) mouseX = EDITOR.canvasMouseX;
+		if(mouseY == undefined) mouseX = EDITOR.canvasMouseY;
+		
 		if(EDITOR.currentFile) {
 			
 			var file = EDITOR.currentFile,

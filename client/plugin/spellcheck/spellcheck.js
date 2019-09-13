@@ -190,10 +190,10 @@
 		runSpellCheck(file);
 	}
 	
-	function showSpellSuggestion() {
+	function showSpellSuggestion(file, posX, posY, clickEvent) {
 		
-		var file = EDITOR.currentFile;
-		var caret = file.caret;
+		
+		var caret = EDITOR.mousePositionToCaret(posX, posY);
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
@@ -204,21 +204,29 @@
 		function wordOnCaret(word, start, end) {
 			
 			var suggestion = "";
-			console.log("CLICK:" + word + " " + JSON.stringify(caret));
+			console.log("showSpellSuggestion:wordOnCaret: word=" + word + " caret=" + JSON.stringify(caret));
 			
+			if(!word) {
+				console.warn("showSpellSuggestion:wordOnCaret: No word on caret!");
+				return;
+			}
 			
 			if(misspelled.hasOwnProperty(word)) {
 				suggestion = misspelled[word];
 			}
+			else {
+				console.log("showSpellSuggestion:wordOnCaret: word=" + word + " not in misspelled=" + Object.keys(misspelled))
+			}
 			
 			if(suggestion) {
+				console.log("showSpellSuggestion:wordOnCaret: suggestion=" + suggestion);
 				EDITOR.ctxMenu.addTemp(suggestion, replaceWord);
 			}
-			/*
-				else {
-				EDITOR.contextMenuAddTemp("No spelling suggestion for <i>" + word + "</i>");
+			else {
+				console.log("showSpellSuggestion:wordOnCaret: No spell suggestion found!");
+				EDITOR.ctxMenu.addTemp("No spelling suggestion for <i>" + word + "</i>");
 				}
-			*/
+			
 			
 			function replaceWord() {
 				EDITOR.ctxMenu.hide();

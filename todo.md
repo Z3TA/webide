@@ -36,8 +36,6 @@ What I'm working on
 
 todo: Stats for usage!
 
-bug: Spellcheck suggested word gets hidden most of the time ? eg. it doesnt show up!
-
 todo: Test the Gutenberg editor (in Wordpress)
 
 Tried to get puppeteer running, but gave up, Chrome wont start in Chroot!
@@ -2713,6 +2711,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+In SCM, able to see all changes containing the selected text:
+hg grep --all Content-Security-Policy client/index.htm
+
 
 When connecting to a remote server via FTP/SFTP check opened files, compare them with file on disk (the hash) and mark them as saved if it's the same.
 
