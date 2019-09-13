@@ -703,6 +703,7 @@ alertBox("No file open!");
 				else {
 					if(runningScripts.indexOf(filePath) == -1) runningScripts.push(filePath);
 					console.log("Started script: " + json.filePath);
+					EDITOR.stat("run_nodejs_script");
 					}
 			});
 		}
