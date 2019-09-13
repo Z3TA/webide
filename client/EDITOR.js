@@ -3822,6 +3822,7 @@ li.onclick = function(clickEvent) {
 	}
 	
 	var stats = null; // Key:value to store stats
+	var saveStatsTimer;
 	EDITOR.statsEnabled = true;
 	EDITOR.localStorage.getItem("_stats_", function(err, str) {
 		if(err) {
@@ -3866,11 +3867,15 @@ li.onclick = function(clickEvent) {
 			return;
 		}
 		
-		EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
-			if(err) {
-				console.error(err);
-			}
-		});
+		// Premature optimization to prevent JSON.stringify from klogging down key presses
+		clearTimeout(saveStatsTimer);
+		saveStatsTimer = setTimeout(function saveStats() {
+			EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
+				if(err) {
+					console.error(err);
+				}
+			});
+		}, 5000);
 	}
 	
 	EDITOR.statInfo = function statInfo(key, val) {
@@ -5321,7 +5326,10 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		var json = {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath, workingDir: workingDir};
 		
 		CLIENT.cmd("connect", json, function(err, json) {
-			if(err) callback(err);
+			if(err) {
+callback(err);
+				EDITOR.stat("connect_" + protocol + "_fail");
+			}
 			else {
 				
 				setWorkingDirectory(json.workingDirectory);
@@ -5329,6 +5337,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 				EDITOR.connections[serverAddress] = {protocol: protocol};
 				callback(null, json.workingDirectory);
 				
+				EDITOR.stat("connect_" + protocol + "_success");
 			}
 		});
 		
@@ -6148,6 +6157,8 @@ EDITOR.openFileTool = function fileOpenTool(options, filePath) {
 		if(ret === true) break; // Only open one tool
 	}
 	
+		if(!ret) EDITOR.statInfo("tool_openFileTool_enoext", UTIL.getFileExtension(filePath));
+		
 	return ret;
 }
 
@@ -6235,7 +6246,10 @@ function tool(eventListenerName) {
 		}
 		
 			alertBox("No " + eventListenerName + " (" + f.length + " tools) handled the request!", 404, "warning");
-	}
+	
+			EDITOR.statInfo("tool_" + eventListenerName + "_enoext", UTIL.getFileExtension(file.path));
+			
+		}
 }
 
 EDITOR.fileExplorer = function fileExplorerTool(directory) {
@@ -7514,30 +7528,37 @@ function main() {
 	
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 130], EDITOR.discoveryBar.toggle);
 	
-		// Send statistics
-		if(typeof stats == "object" && Object.keys(stats).length > 0) {
-			setTimeout(function sendStat() {
-				
-				if(!EDITOR.statsEnabled) return;
-				
+		setTimeout(sendStatistics, 10000);
+		
+		windowLoaded = true;
+	}
+	
+	function sendStatistics() {
+		if(EDITOR.statsEnabled && typeof stats == "object" && Object.keys(stats).length > 0) {
+			
+			if(typeof navigator.sendBeacon == "function") {
+				var sent = navigator.sendBeacon("https://www.webtigerteam.com/editor/stats", "json=" +  encodeURIComponent(JSON.stringify(stats)));
+				if(sent) reset();
+			}
+			else {
 				var post = {json: JSON.stringify(stats)};
 				UTIL.httpPost("https://www.webtigerteam.com/editor/stats", post, function(err, resp) {
 					if(err == null && resp == "OK") {
-						// Reset
-						stats = {};
-						EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
-							if(err) {
-								console.error(err);
-							}
-						});
+						reset();
 					}
 				});
-				
-			}, 10000);
+			}
 		}
 		
-		windowLoaded = true;
-		
+		function reset() {
+			stats = {};
+			clearTimeout(saveStatsTimer);
+			EDITOR.localStorage.setItem("_stats_", JSON.stringify(stats), function(err) {
+				if(err) {
+					console.error(err);
+				}
+			});
+		}
 	}
 	
 	function moveCursorToEnd(el) {
@@ -8758,6 +8779,8 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 	// Prevent scrolling down when hitting space in Firefox
 	if(EDITOR.input && charCode == 32) preventDefault = true;
 	
+		EDITOR.stat("key_press");
+		
 	if(preventDefault) {
 		console.log("keyPressed: Preventing default browser action!");
 		if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
@@ -9402,7 +9425,7 @@ function mouseDown(mouseDownEvent) {
 	// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
 	
 	if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
-	
+		
 	EDITOR.touchDown = true;
 	
 	//if(dropdownMenuRoot && !dropdownMenuRoot.active) dropdownMenuRoot.hide(true);
@@ -9573,6 +9596,9 @@ function mouseDown(mouseDownEvent) {
 	
 	EDITOR.interact("mouseDown", mouseDownEvent);
 	
+		if(mouseDownEvent.type == "touchstart") EDITOR.stat("touch_down");
+		else EDITOR.stat("mouse_down");
+		
 	if(preventDefault) {
 		console.log("mouseDown:Preventing default!");
 		mouseDownEvent.preventDefault(); // To prevent the annoying menus
@@ -10093,6 +10119,7 @@ function htmlToImage(html, callback) {
 	}
 	
 	function confirmExit() {
+		sendStatistics();
 		for(var path in EDITOR.files) {
 			if(!EDITOR.files[path].isSaved) return "Are you sure you want to close the editor ?";
 		}
