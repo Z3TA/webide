@@ -462,16 +462,22 @@ function adduser() {
 		// Will be mounted when the user logs in
 	
 	// Create directory for executables
+		/*
+			
+			
 		fs.mkdirSync(HOME + username + "/usr/");
 		fs.mkdirSync(HOME + username + "/usr/bin/");
 	
 		fs.chmodSync(HOME + username + "/usr/", "555");
 		fs.chmodSync(HOME + username + "/usr/bin/", "555");
-	
+		*/
 	
 	// npm needs /usr/local/etc or it will try to create it
-		fs.mkdirSync(HOME + username + "/usr/local/");
+		/*
+			fs.mkdirSync(HOME + username + "/usr/local/");
 		fs.mkdirSync(HOME + username + "/usr/local/etc");
+		*/
+		
 		//chownrDirSync(HOME + username + "/usr/local/", uid, gid);
 		//chmodrSync(HOME + username + "/usr/local/", "555");
 	

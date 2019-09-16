@@ -697,7 +697,7 @@ function main() {
 	else getGuestCount();
 	
 	function getGuestCount() {
-		if(!USERNAME && !NO_CHROOT) {
+		if(!USERNAME && !NO_CHROOT && !DEBUG_CHROOT) {
 			
 			mysqlConnect();
 			
@@ -2410,7 +2410,7 @@ function checkMounts(options, checkMountsCallback) {
 		module_mount("/lib64/", homeDir + "lib64", folderMounted);
 		
 		if(DEBUG_CHROOT) {
-			foldersToMount += 5;
+			foldersToMount += 9;
 			
 			// Note you need to manually delete /home/user/etc
 			
@@ -2419,7 +2419,10 @@ function checkMounts(options, checkMountsCallback) {
 			module_mount("/proc/", homeDir + "proc/", folderMounted);
 			module_mount("/bin/", homeDir + "bin/", folderMounted);
 			module_mount("/dev/", homeDir + "dev/", folderMounted);
-			
+			module_mount("/run/", homeDir + "run/", folderMounted);
+			module_mount("/var/", homeDir + "var/", folderMounted);
+			module_mount("/sys/", homeDir + "sys/", folderMounted);
+			module_mount("/sbin/", homeDir + "sbin/", folderMounted);
 		}
 		else {
 			
@@ -2538,7 +2541,7 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
 				
-				//foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				
 				
 			}
