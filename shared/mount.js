@@ -140,7 +140,7 @@ console.log("Folder exist: " + sourcePath);
 					makeDirP(parentFolder, function(err) {
 						if(err) {
 							if(err.code == "EEXIST" && err.message.indexOf(parentFolder) != -1) {
-								// If mount is called several time with the same root folders there can be racing
+								// If mount is called several times with the same root folders there can be racing
 								console.log("Racing to create parentFolder=" + parentFolder + ": " + err.message);
 							}
 							else {

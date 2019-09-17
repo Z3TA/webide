@@ -34,6 +34,12 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+when a nodejs script is in an embed editor view, how should the user run the script ?
+Reaching for Node.js > run in the menu might be too much!?
+
+Add a floating play button in bottom right corner !?
+
+
 todo: When logging in with guest:guest on embed, and the user already have a guest account, use that guest account instead of creating a new one,
 but do create a new guest account if the login fail.
 

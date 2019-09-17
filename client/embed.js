@@ -23,22 +23,27 @@
 	
 	// Name (description) of plugins to disable when embedded:
 	var disablePlugins = [
-		"Server login dialog",
-		"Static site generator management interface",
-		"File explorer window widget",
-		"Mercurial SCM integration",
-		"Run shell commands on local or remote system",
-		"Manage and connect to FTP/SSH servers.",
-		"Manage console logs, devTools and toggle devMode",
+		//"Server login dialog",
+		//"Static site generator management interface",
+		"Show list of JS functions in left column",
+		//"File explorer window widget",
+		//"Mercurial SCM integration",
+		//"Manage and connect to FTP/SSH servers.",
+		//"Manage console logs, devTools and toggle devMode",
 		'Adds "Close file" and "Close the editor" key combos and a "Close file" context menu item',
 		"Create new file option to context menu and bound to Ctrl + N",
-		"Adds option to reload the file from disk in the context menu"
+		//"Adds option to reload the file from disk in the context menu"
 	];
 	
 	var bookMarklet = document.getElementById("jzedit_bookmarklet");
 	console.log("bookMarklet ? " + !!bookMarklet);
 	if(bookMarklet) windowLoaded();
 	else window.addEventListener("load", windowLoaded);
+	
+	var hostHostname = window.location.hostname;
+	var scripts = document.getElementsByTagName("script");
+	var scriptSrc = scripts[scripts.length-1].src;
+	
 	
 	function windowLoaded() {
 		
@@ -83,7 +88,11 @@
 			var editorQuery = "?embed=true&disable=menu,file_tabs&dev=false";
 			var query = ta.getAttribute("query");
 			
-			if(query) editor += "&" + query;
+			if(query) editorQuery += "&" + query;
+			
+			if(!query || (query.indexOf("user") == -1 && query.indexOf("pw") == -1)) {
+				editorQuery += "&user=guest&pw=guest";
+			}
 			
 			var counter = 0;
 			var fileNameOriginal = fileName;
@@ -110,6 +119,7 @@
 			iframe.setAttribute("width", editorWidth);
 			iframe.setAttribute("height", editorHeight);
 			iframe.setAttribute("class", "editor JZedit");
+			iframe.setAttribute("allowfullscreen", "true");
 			iframe.setAttribute("frameborder", "0");
 			
 			ta.parentNode.insertBefore(iframe, ta);
@@ -125,8 +135,8 @@
 				// We cant access the editor object unless the editor is run with the same protocol hostname and port!
 				
 				this.contentWindow.postMessage({
-					"openFile": {
-						name: fileName,
+					"createFile": {
+						path: hostHostname + "/" + fileName, // note: /embed/ will be prepended!
 						content: fileContent
 					}
 				}, "*");
@@ -168,11 +178,19 @@ window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 		
 		var url;
 		
+		//var reLocalIp = /(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/;
+		
+		//console.log("document.currentScript.src=" + document.currentScript && document.currentScript.src);
+		
 		if(document.currentScript) {
 			url = document.currentScript.src;
 			url = url.slice(0, url.lastIndexOf("/") + 1);
 			return url;
 			}
+		else if(scriptSrc) {
+			url = scriptSrc.slice(0, scriptSrc.lastIndexOf("/") + 1);
+			return url;
+		}
 		else {
 			console.warn("Unable to determine editor URL!");
 			//return "http://127.0.0.1:8080/";

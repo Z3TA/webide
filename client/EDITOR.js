@@ -8390,13 +8390,43 @@ function onMessage(windowMessageEvent) {
 		});
 		
 	});
-	else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true)
-	else {
+	else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true);
+		else if(msg.createFile) {
+			
+			console.log("createFile: ", EDITOR.user);
+			
+			if(EDITOR.user) createFileOnce(false);
+			else {
+				console.log("createFile: Waiting for login ...");
+				CLIENT.on("loginSuccess", createFileOnce);
+			}
+			
+		}
+		else {
 		console.warn("jzedit does not recognise msg=" + msg);
 		//throw new Error("Unable to handle message: " + msg);
 	}
 		
 		EDITOR.stat("window_message");
+		
+		function createFileOnce(removeListener) {
+			console.log("createFileOnce! removeListener=" + removeListener)
+			var filePath = UTIL.joinPaths("/embed/", msg.createFile.path);
+			var content = msg.createFile.content;
+			createFile(filePath, content);
+			if(removeListener !== false) CLIENT.removeEvent("loginSuccess", createFileOnce);
+		}
+		
+		function createFile(filePath, content) {
+			console.log("createFile: filePath=" + filePath);
+			EDITOR.createPath(UTIL.getDirectoryFromPath(filePath), function(err, path) {
+				if(err) return alertBox("Unable to create path:" + filePath + " Error:" + err.message);
+				EDITOR.saveToDisk(filePath, content, function(err, path) {
+					if(err) return alertBox("Unable save file path:" + filePath + " Error:" + err.message);
+					EDITOR.openFile(filePath);
+				});
+			});
+		}
 		
 }
 
