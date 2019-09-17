@@ -34,6 +34,34 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+todo: When logging in with guest:guest on embed, and the user already have a guest account, use that guest account instead of creating a new one,
+but do create a new guest account if the login fail.
+
+Able to run node.js script when embedded on a web site
+
+Editor sometimes scrolls down while embedded.
+
+Embedding
+
+nodejsplayground.com
+
+Add MongdoDB database support!
+
+Prevent node from stealing SSH keys, only allow the user worker and hg/git to access ssh keys !?
+
+
+
+Old accounts are nuked, can't run hg clone! 
+hg clone ssh://hg@hg.sr.ht/~jz/survey-example --debug
+abort: Exec format error
+but it works on new accounts
+
+Start using hg.sr.ht for public repos! since hggit stopped working on Github, and Bitbucket ending support for Mercurial
+
+Rebrand as a nodejs playground !?
+
+usecases:
+Writing tutorials, guides, learning material
 
 
 
