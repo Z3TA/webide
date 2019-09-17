@@ -34,6 +34,12 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
+When tesing out for example a hello world http server,
+the user should be told *where* to chich url to go to see the result. 
+
+Detect /sock/name and show a banner: "Running on" "Access from" https://app.user.webide.se
+
+
 when a nodejs script is in an embed editor view, how should the user run the script ?
 Reaching for Node.js > run in the menu might be too much!?
 
