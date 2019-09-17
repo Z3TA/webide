@@ -35,6 +35,9 @@
   # Connect to other servers via ssh
   network,
 
+  # Many scripts wants to access urandom ... For example when doing a SSL handshake!?
+  /dev/urandom r,
+
   # bins that have their own profile
   %HOME%%USERNAME%/usr/bin/hg Px,
   %HOME%%USERNAME%/usr/bin/git Px,
@@ -77,6 +80,7 @@
 
     # /dev/null is often used
     %HOME%%USERNAME%/dev/null rw,
+    /dev/urandom r,
 
     # Connecting to mySQL
     /run/mysqld/mysqld.sock rw,
