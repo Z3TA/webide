@@ -533,7 +533,7 @@
 			*/
 			
 			if(EDITOR.files.hasOwnProperty(path)) switchToFile(path);
-			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Objject.keys(EDITOR.files)));
+			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 		}
 		
 		function createTabList() {
