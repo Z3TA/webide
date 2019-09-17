@@ -519,6 +519,11 @@ Try running the command inside/outside the chroot:
 Also see: http://manpages.ubuntu.com/manpages/bionic/man5/apparmor.d.5.html
 
 
+Job for apparmor.service failed because the control process exited with error code
+& Reload failed for AppArmor initialization.
+`service apparmor status` will show the error message and what line the parser error is on
+
+
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 Where is the program ?
