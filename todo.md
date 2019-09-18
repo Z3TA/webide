@@ -8,6 +8,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
+Solve a problem! Do not make a solution and then look for a problem that it can solve ...
+
 Probably should read though this file and reletlessly delete stuff.
 
 NEVER run hg up on working folder. Instead copy the whole folder and make the hg up.
@@ -33,6 +35,22 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 
 What I'm working on
 -------------------
+
+Send pull request in SCM.
+
+
+todo: Hide the nodejs run bar when switching to another file.
+
+---
+
+Add a widget that let users suggest a change and send you a diff
+
+User click "Suggest change",
+Page is replaced by a WYSIWYG editor. That has a toolbar with "Generate diff" which can be downloaded/shared (navigator.share).
+
+Bookmarklets > Replace textarea, Edit page
+
+
 
 Editor sometimes scrolls down while embedded.
 And sometimes it doesn't resize after hiding a widget, for example save-as. (it does resize most of the time, but once in a while it does not)

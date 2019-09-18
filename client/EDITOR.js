@@ -67,7 +67,8 @@ EDITOR.settings = {
 		"svg",
 		"defs",
 		"marker",
-		"g"
+		"g",
+		"figure"
 	],
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {

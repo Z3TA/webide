@@ -82,10 +82,26 @@
 			nodeJsBanner.show();
 			urlHolder.appendChild(urlNode);
 			
-			startStopButton.innerText = "Start";
-			startStopButton.onclick = runNodeJsScript;
+			startStopButton.innerText = "Save & Run";
+			startStopButton.onclick = saveAndRun;
 			
 		}
+	}
+	
+	function saveAndRun() {
+		var file = EDITOR.currentFile;
+		
+		if(!file) return alertBox("No file open!");
+		
+		var ext = UTIL.getFileExtension(file.path);
+		
+		if(ext == "js" || ext == "stdout") {
+			EDITOR.saveFile(file, function(err, path) {
+				if(err) return alertBox("Problem saving file: " + err.message);
+				else runNodeJsScript();
+			});
+		}
+		else return alertBox("Not a JavaScript file: " + file.path);
 	}
 	
 	function showNodejsBanner(banner) {
@@ -717,8 +733,8 @@ startStopButton.classList.remove("start");
 		
 		if(startStopButton) {
 startStopButton.classList.add("start");
-			startStopButton.innerText = "Restart";
-			startStopButton.onclick = runNodeJsScript;
+			startStopButton.innerText = "Save & Restart";
+			startStopButton.onclick = saveAndRun;
 		}
 	}
 	
