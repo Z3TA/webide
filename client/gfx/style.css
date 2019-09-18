@@ -1792,7 +1792,34 @@ margin-top: 20px;
 }
 
 
+/* ### runBanner */
 
+.runBanner {
+	pisition: relative;
+	border: 0px solid pink;
+}
+
+.runBanner .url {
+	display:inline-block;
+	border: 0px solid blue;
+	vertical-align: middle;
+}
+
+.runBanner .url a {
+	color: white;
+}
+
+button.startStop {
+	display:inline-block;
+	width: 50px;
+	height; 20px;
+	float: right;
+	vertical-align: middle;
+	margin: 0;
+	padding: 1px;
+}
+
+/* ### loader animation */
 .loader {
 	display: inline-block;
 	vertical-align: middle;
@@ -1866,10 +1893,6 @@ margin-top: 20px;
 
 @media (max-height: 570px) { /* HEIGHT Less then or equal to */
 
-	* {
-		font-size: 10px;
-	}
-	
 	.canvasContextmenu {
 		max-height: 100%;
 		max-width: 75%;
@@ -1925,9 +1948,6 @@ margin-top: 20px;
 	.header .discoveryBar .discoveryItem img {
 		height: 18px;
 	}
-	
-	
-	
 	
 }
 

@@ -5648,7 +5648,7 @@ callback(err);
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
-	EDITOR.createWidget = function(buildFunction, parentNode, id) {
+	EDITOR.createWidget = function(buildFunction, parentNode) {
 		
 		// Some boilderplate/abstraction for creating HTML form widget, 
 		
@@ -5755,7 +5755,7 @@ callback(err);
 		}
 		
 		widget.create = function(grid) {
-			// Add input elements in a grid, witch is a multi dimentional array or rows and columns
+			// Add input elements in a grid, which is a multi dimentional array or rows and columns
 			
 			// each item can have {type=(input,button), class=(half), label=(text on button or input label)
 			

@@ -34,26 +34,15 @@ Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg 
 What I'm working on
 -------------------
 
-When tesing out for example a hello world http server,
-the user should be told *where* to chich url to go to see the result. 
-
-Detect /sock/name and show a banner: "Running on" "Access from" https://app.user.webide.se
-That banner can also have a play/stop button!!!
-
-when a nodejs script is in an embed editor view, how should the user run the script ?
-Reaching for Node.js > run in the menu might be too much!?
-
-Add a floating play button in bottom right corner !?
-
-
-todo: When logging in with guest:guest on embed, and the user already have a guest account, use that guest account instead of creating a new one,
-but do create a new guest account if the login fail.
-
-Able to run node.js script when embedded on a web site
-
 Editor sometimes scrolls down while embedded.
+And sometimes it doesn't resize after hiding a widget, for example save-as. (it does resize most of the time, but once in a while it does not)
 
-Embedding
+
+
+thinking: Let nodejsplayground.com be a separate service ..?
+When you go to something.nodejsplayground.com you want to see what !?
+
+
 
 nodejsplayground.com
 
@@ -1751,6 +1740,10 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+issue: node.classList.a| can't autocomplete add(), remote, etc
+
+bug: The end line of function in the function list doesn't seem to update when you write code within a function!
 
 autocomplete: can't find insideRegExp variable in js_parser.js
 

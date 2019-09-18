@@ -137,8 +137,8 @@
 					console.log("credentials: ", obj);
 					if(obj && obj.editorServerUser) {
 						console.log("Using saved credentials to login ...");
-						userValue = userValue || obj["editorServerUser"];
-						pwValue = pwValue || obj["editorServerPw"];
+						userValue = obj["editorServerUser"] || userValue;
+						pwValue = obj["editorServerPw"] || pwValue;
 					}
 					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin &&
 					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost" && !userValue) {
@@ -214,7 +214,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 						
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 						
-						if( userValue.match(/^guest\d+$/) && pwValue != "guest") {
+						if( userValue.match(/^guest\d+$/) && pwValue != "guest" && QUERY_STRING["user"] != "guest") {
 							// User have logged in with a guest account
 							// It's Not the first time user logs in
 							

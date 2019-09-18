@@ -1570,7 +1570,12 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				// filename is just the file name, not the whole path!
 				console.log("sockEvent: eventType=" + eventType + " filename=" + filename);
 				if(!filename) console.warn("sockEvent: eventType=" + eventType + " filename=" + filename);
-				else createdSockets.push("/sock/" + filename);
+				else {
+createdSockets.push("/sock/" + filename);
+					// Always use http: just in case the SSL registration failed (even though it will result in an additional roundtrip)
+					user.send({nodejsUrl: {url: "http://" + filename + "." + user.name + "." + TLD, scriptName: filePath}});
+					
+				}
 			}
 		}
 		

@@ -13,6 +13,8 @@
 	
 	var winMenuStartScript, winMenuStopScript;
 	
+	var nodeJsBanner, startStopButton, urlHolder;
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -31,12 +33,15 @@
 		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
+		EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe);
+		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
 		CLIENT.on("nodejsDebug", nodejsDebugMsg);
+		CLIENT.on("nodejsUrl", showNodejsBanner);
 		
-		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
+		nodeJsBanner = EDITOR.createWidget(createBanner);
 		
 	}
 	
@@ -48,13 +53,81 @@
 		EDITOR.windowMenu.remove(winMenuStopScript);
 		
 		EDITOR.removeEvent("showMenu", showRunNodejsScriptMenuItem);
+		EDITOR.removeEvent("runScript", runNodeJsScriptMaybe);
+		EDITOR.removeEvent("previewTool", runNodeJsScriptMaybe);
+		EDITOR.removeEvent("fileOpen", nodejsScriptFileOpenedMaybe);
 		
 		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
 		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
+		CLIENT.removeEvent("nodejsUrl", showNodejsBanner);
+	}
+	
+	function nodejsScriptFileOpenedMaybe(file) {
 		
-		EDITOR.removeEvent("runScript", runNodeJsScriptMaybe);
-		EDITOR.removeEvent("previewTool", runNodeJsScriptMaybe);
+		var ext = UTIL.getFileExtension(file.path);
+		if(ext != "js") return;
+		
+		var reSock = /\/sock\/([^'" ]*)/;
+		var match = file.text.match(reSock);
+		
+		if(match && EDITOR.user) {
+			var name = match[1];
+			
+			var url = "http://" + name + "." + EDITOR.user.name + "." + document.location.hostname;
+			
+			var urlNode = createBannerUrl(url);
+			urlNode.appendChild(document.createTextNode(" (click start to run)"));
+			
+			nodeJsBanner.show();
+			urlHolder.appendChild(urlNode);
+			
+			startStopButton.innerText = "Start";
+			startStopButton.onclick = runNodeJsScript;
+			
+		}
+	}
+	
+	function showNodejsBanner(banner) {
+		nodeJsBanner.show();
+		
+		var url = banner.url;
+		
+		while(urlHolder.firstChild) urlHolder.removeChild(urlHolder.firstChild);
+		var link = createBannerUrl(url);
+		urlHolder.appendChild(link);
+	}
+	
+	function createBannerUrl(url) {
+		
+		var span = document.createElement("span");
+		var link = document.createElement("a");
+		link.setAttribute("href", url);
+		link.setAttribute("target", "_blank");
+		link.innerText = url;
+		
+		span.appendChild(document.createTextNode("URL: "));
+		span.appendChild(link);
+		
+		return span;
+	}
+	
+	function createBanner() {
+		var wrap = document.createElement("div");
+		wrap.classList.add("runBanner");
+		
+		urlHolder = document.createElement("div");
+		urlHolder.classList.add("url");
+		
+		startStopButton = document.createElement("button");
+		startStopButton.classList.add("startStop");
+		startStopButton.classList.add("button");
+		startStopButton.classList.add("start");
+		
+		wrap.appendChild(urlHolder);
+		wrap.appendChild(startStopButton);
+		
+		return wrap;
 	}
 	
 	function runNodeJsScriptMaybe(file, combo) {
@@ -378,7 +451,7 @@
 			// end if(msg.stderr)
 		}
 		else if(msg.close) {
-			runningScripts.splice(runningScripts.indexOf(filePath), 1);
+			scriptStopped(filePath);
 			stdout(msg);
 		}
 		else if(msg.noMoreBreakPoints) {
@@ -626,11 +699,35 @@
 		}
 	}
 	
+	function scriptStarted(filePath) {
+		if(runningScripts.indexOf(filePath) == -1) runningScripts.push(filePath);
+		
+		nodeJsBanner.show();
+		
+		if(startStopButton) {
+startStopButton.classList.remove("start");
+			startStopButton.innerText = "Stop";
+			startStopButton.onclick = stopNodeJsScript
+		}
+	}
+	
+	function scriptStopped(filePath) {
+		if(runningScripts.indexOf(filePath) != -1) runningScripts.splice(runningScripts.indexOf(filePath), 1);
+		else console.warn("filePath=" + filePath + " not in runningScripts=" + JSON.stringify(runningScripts));
+		
+		if(startStopButton) {
+startStopButton.classList.add("start");
+			startStopButton.innerText = "Restart";
+			startStopButton.onclick = runNodeJsScript;
+		}
+	}
 	
 	function stopNodeJsScript() {
 		if(!EDITOR.currentFile) return ALLOW_DEFAULT;
 		
 		var filePath = EDITOR.currentFile.path;
+		
+		console.log("Stop nodejs script: " + filePath);
 		
 		EDITOR.ctxMenu.hide();
 		
@@ -646,7 +743,8 @@
 				else return alertBox(err.message);
 			}
 			
-			runningScripts.splice(filePath, 1);
+			scriptStopped(filePath);
+			
 				console.log("Stopped script: " + json.filePath);
 			});
 		
@@ -664,6 +762,8 @@ alertBox("No file open!");
 		}
 		
 		var filePath = file.path;
+		
+		console.log("Run nodejs script: " + filePath);
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
@@ -701,7 +801,9 @@ alertBox("No file open!");
 			CLIENT.cmd("run_nodejs", json, function(err, json) {
 				if(err) throw err;
 				else {
-					if(runningScripts.indexOf(filePath) == -1) runningScripts.push(filePath);
+					
+					scriptStarted(filePath);
+					
 					console.log("Started script: " + json.filePath);
 					EDITOR.stat("run_nodejs_script");
 					}
