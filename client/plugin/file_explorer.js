@@ -56,9 +56,9 @@
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorerFromContextMenu, 9);
+		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorerFromContextMenu, 9, toggleFileExplorerFromKeyboardCombo);
 		
-		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorerFromWindowMenu);
+		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorerFromWindowMenu, toggleFileExplorerFromKeyboardCombo);
 		
 		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorerFromVirtualKeyboard});
 		

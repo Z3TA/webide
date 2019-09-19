@@ -3260,7 +3260,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 	
 	var dropdownMenuRoot;
 	EDITOR.windowMenu = {
-		add: function addWindowMenuItem(label, where, whenClicked, separator) {
+		add: function addWindowMenuItem(label, where, whenClicked, separator, keyComboFunction) {
 			/*
 				Example:
 				
@@ -3269,6 +3269,11 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				separator = top or bottom
 				
 			*/
+			
+			if(typeof separator == "function" && keyComboFunction == undefined) {
+				keyComboFunction = separator;
+				separator = undefined;
+			}
 			
 			if(separator !== undefined) {
 				if(separator != "top" && separator != "bottom") throw new Error("Fourth argument separator=" + separator + " should be either top or bottom!")
@@ -3322,7 +3327,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 				}
 			}
 			
-			var keyCombo = EDITOR.getKeyFor(whenClicked);
+			var keyCombo = EDITOR.getKeyFor(keyComboFunction || whenClicked);
 			
 			
 			var action = function menuItemClick(clickEvent) {
@@ -3404,13 +3409,18 @@ if(menuItem.parentMenu) {
 	
 	
 	EDITOR.ctxMenu = {
-		add: function addCtxMenuItem(htmlText, position, callback) {
+		add: function addCtxMenuItem(htmlText, position, callback, keyboardFunction) {
 			if(typeof position == "function" && typeof callback == "number") {
 				var posTemp = callback;
 				callback = position;
 				position = posTemp;
 			}
 			else if(typeof position == "function" && callback == undefined) {
+				callback = position;
+				position = undefined;
+			}
+			else if(typeof position == "function" && typeof callback == "function") {
+				keyboardFunction = callback;
 				callback = position;
 				position = undefined;
 			}
@@ -3434,7 +3444,7 @@ if(menuItem.parentMenu) {
 			
 			li.appendChild(menuText);
 			
-			var keyCombo = EDITOR.getKeyFor(callback);
+			var keyCombo = EDITOR.getKeyFor(keyboardFunction || callback);
 			var keyComboEl = document.createElement("span");
 			keyComboEl.setAttribute("class", "key");
 			if(keyCombo) keyComboEl.innerText = keyCombo;
@@ -3562,12 +3572,17 @@ li.onclick = function(clickEvent) {
 			}
 			
 		},
-		addTemp: function addTempCtxMenuItem(htmlText, addSeparator, callback) {
+		addTemp: function addTempCtxMenuItem(htmlText, addSeparator, callback, keyboardFunction) {
 			/*
 				These items are removed when the menu is hidden
 			*/
 			
 			if(typeof addSeparator == "function" && callback == undefined) {
+				callback = addSeparator;
+				addSeparator = true;
+			}
+			else if(typeof addSeparator == "function" && typeof callback == "function") {
+				keyboardFunction = callback;
 				callback = addSeparator;
 				addSeparator = true;
 			}
@@ -3592,7 +3607,7 @@ li.onclick = function(clickEvent) {
 			
 			li.appendChild(menuText);
 			
-			var keyCombo = EDITOR.getKeyFor(callback);
+			var keyCombo = EDITOR.getKeyFor(keyboardFunction || callback);
 			var keyComboEl = document.createElement("span");
 			keyComboEl.setAttribute("class", "key");
 			if(keyCombo) keyComboEl.innerText = keyCombo;

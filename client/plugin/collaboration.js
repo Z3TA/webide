@@ -91,8 +91,8 @@
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
-			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu);
-			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu);
+			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
+			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			
 			var discoveryItem = document.createElement("img");

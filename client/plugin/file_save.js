@@ -48,7 +48,7 @@
 		// Add items to the canvas context meny
 		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
 		
-		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveFileFromWindowMenu);
+		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
 		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", ["File", 2], saveAs);
 		
 		EDITOR.on("showMenu", showSaveOption);
@@ -537,7 +537,7 @@ console.warn("The save was canceled: " + err.message);
 		if(file.isSaved) return true;
 		if(!file.savedAs) return true;
 		
-		EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu);
+		EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu, saveFileFromKeyboardCombo);
 		
 	}
 	

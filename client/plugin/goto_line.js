@@ -65,7 +65,7 @@
 			grammar: ["(goto|go to|jump to) line|jump to|jump) <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
-		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["Navigate", 11], gotoLineFromWindowMenu);
+		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["Navigate", 11], gotoLineFromWindowMenu, gotoLineFromKeyboardComboG);
 		
 		EDITOR.registerAltKey({char: "g", alt:1, label: "goto line", fun: gotoLineFromVirtualKeyboard});
 		
