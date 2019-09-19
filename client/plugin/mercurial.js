@@ -256,6 +256,13 @@
 					if(err) return alertBox(err);
 					
 					EDITOR.share(file, clickEvent);
+					
+					var email = QUERY_STRING["pullrequest"];
+					
+					if(email) {
+						alertBox('Send the pull request to <a href="mailto:' + email + '">' + email + '</a>');
+					}
+					
 				});
 			});
 		}
@@ -2689,6 +2696,13 @@ var error = err.message;
 		}
 		div.appendChild(butClone);
 		
+		var butPullRequest = document.createElement("button");
+		butPullRequest.appendChild(document.createTextNode("Make pull request"));
+		butPullRequest.setAttribute("title", "Export the latest changes");
+		butPullRequest.setAttribute("class", "button half");
+		butPullRequest.onclick = exportPullRequest;
+		div.appendChild(butPullRequest);
+		
 		var cancel = document.createElement("button");
 		cancel.appendChild(document.createTextNode("Cancel version control"));
 		cancel.setAttribute("class", "button");
@@ -2696,6 +2710,7 @@ var error = err.message;
 					hideVersionControlWidget();
 		}
 		div.appendChild(cancel);
+		
 		
 		return div;
 	}
