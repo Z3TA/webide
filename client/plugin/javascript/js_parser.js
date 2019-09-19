@@ -1372,7 +1372,7 @@
 			
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.warn("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
