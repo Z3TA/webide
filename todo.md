@@ -38,14 +38,10 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
-"Make pull request" (from the menu)
-- Make sure there are no uncommitted changes
-  (include changes made to file1, file2? [Yes, commit] [Ignore changes] 
-- Export latest changeset, or the changes made by current user, or since cloning !?
-- Call EDITOR.share (send to e-mail or download)
-
+todo: Manually test the pull request function when there is unsaved files and uncommited changes!
 
 todo: When navigating away from a nodejs or .stdout file, automatically hide the run-nodejs banner
+
 
 share tool.
 

@@ -66,34 +66,31 @@
 	}
 	
 	function nodejsScriptFileOpenedMaybe(file) {
-		
 		var ext = UTIL.getFileExtension(file.path);
-		if(ext != "js") return;
-		
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);
 		
-		if(match && EDITOR.user) {
-			var name = match[1];
+		if((ext == "js" || ext == "stdout") && match && EDITOR.user) {
+			var name = match[1].trim();
 			
 			var url = "http://" + name + "." + EDITOR.user.name + "." + document.location.hostname;
 			
-			var urlNode = createBannerUrl(url);
-			urlNode.appendChild(document.createTextNode(" (click start to run)"));
-			
-			nodeJsBanner.show();
-			urlHolder.appendChild(urlNode);
+			showNodejsBanner({url: url});
 			
 			startStopButton.innerText = "Save & Run";
-			startStopButton.onclick = saveAndRun;
-			
+			startStopButton.onclick = function() {
+saveAndRun(file);
+			}
 		}
+		else nodeJsBanner.hide();
 	}
 	
-	function saveAndRun() {
-		var file = EDITOR.currentFile;
+	function saveAndRun(file) {
+		if(!(file instanceof File)) file = EDITOR.currentFile;
 		
 		if(!file) return alertBox("No file open!");
+		
+		if(file != EDITOR.currentFile) EDITOR.showFile(file);
 		
 		var ext = UTIL.getFileExtension(file.path);
 		
