@@ -61,6 +61,8 @@
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
 		CLIENT.removeEvent("nodejsDebug", nodejsDebugMsg); 
 		CLIENT.removeEvent("nodejsUrl", showNodejsBanner);
+		
+		nodeJsBanner.unload();
 	}
 	
 	function nodejsScriptFileOpenedMaybe(file) {
@@ -128,7 +130,7 @@
 		return span;
 	}
 	
-	function createBanner() {
+	function createBanner(widget) {
 		var wrap = document.createElement("div");
 		wrap.classList.add("runBanner");
 		
@@ -140,8 +142,14 @@
 		startStopButton.classList.add("button");
 		startStopButton.classList.add("start");
 		
+		var hideButton = document.createElement("button");
+		hideButton.classList.add("button");
+		hideButton.innerText = "Hide";
+		hideButton.onclick = widget.hide;
+		
 		wrap.appendChild(urlHolder);
 		wrap.appendChild(startStopButton);
+		wrap.appendChild(hideButton);
 		
 		return wrap;
 	}
