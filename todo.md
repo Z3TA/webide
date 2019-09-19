@@ -31,15 +31,57 @@ Android browser will not run the script if it contains a default keyword such as
 
 Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
 
+Before you start working on something new, first discribe the problem, 
+(and do a quick research to find out if a solutions already exist.)
 
 
 What I'm working on
 -------------------
 
+problem: Write blog posts on the phone while eating, edit later on a PC.
+
+Dictate plugin.
+What you say is inserted
+Press Start or T 
+buttons: Start listening, new paragraph, new line
+(insert p and br if it's a htm/html file!)
+
+
+
+"Make pull request" (from the menu)
+- Make sure there are no uncommitted changes
+  (include changes made to file1, file2? [Yes, commit] [Ignore changes] 
+- Export latest changeset, or the changes made by current user, or since cloning !?
+- Call EDITOR.share (send to e-mail or download)
+
+
+todo: When navigating away from a nodejs or .stdout file, automatically hide the run-nodejs banner
+
+share tool.
+
+When export file is created
+
+Automatically bring up clone dialog when a repo is in the clipboard!?
+
 Send pull request in SCM.
+
+Able to generate a diff for the pull request
+
+Able to upload diffs and apply them in another copy of the repo
 
 
 todo: Hide the nodejs run bar when switching to another file.
+
+todo: Documentation viewever, show documentation in the footer, or in the right column if wide screen.
+For example when you type fs.| show https://github.com/nodejs/node/blob/master/doc/api/fs.md
+Then when you write fs.readF| automatically scroll down to readFile section.
+
+todo: Autocomplete for nodejs, require("| show all built in modules
+
+blog: Treating errors as first class citizens, or treating errors as exceptions.
+
+
+actual problem: Information, keeping it updated, and adding services.
 
 ---
 
