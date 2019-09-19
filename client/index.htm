@@ -7,8 +7,13 @@
 	
 	
 	<!-- Block third party scripts -->
-	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' ; img-src data: 'self'; connect-src 'self' https://www.webtigerteam.com ; object-src 'none' ">
+	
 	<!--
+	
+	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' ; img-src data: 'self'; connect-src 'self' https://www.webtigerteam.com ; object-src 'none' ">
+	
+	Speech recognition in Chrome: !?
+	
 	Do I need 'unsafe-inline' ?
 	YEH: Or we can't have inline <script>. eg. optimization for Google Page speed. 
 	
@@ -271,6 +276,8 @@
 	<script async="true" src="plugin/bigger_text.js"></script>
 	
 	<script async="true" src="plugin/bookmarklet.js"></script>
+	
+	<script async="true" src="plugin/dictate.js"></script>
 	
 	
 	<!-- BEGIN TESTS -->
