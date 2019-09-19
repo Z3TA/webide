@@ -23,22 +23,25 @@ desc: "Allow sharing stuff with other apps",
 
 			console.log("typeof navigator.share=" + typeof navigator.share);
 
+			EDITOR.on("share", shareSomething);
+			
 },
 		unload: function unloadShare() {
 
 			if(windowMenu) EDITOR.windowMenu.remove(windowMenu);
 			
+			EDITOR.removeEvent("share", shareSomething);
+			
 }
 });
 	
 	
-	function shareSomething() {
+	function shareSomething(file, combo) {
+		
+		if(file == undefined) file = EDITOR.currentFile;
 		
 		if(typeof BrowserFile != "undefined") {
-			 
-			var file = EDITOR.currentFile;
-			
-			var fileBits = [file.text];
+			 var fileBits = [file.text];
 			var fileName = UTIL.getFilenameFromPath(file.path);
 			var options = {type: "text/plain"};
 			
@@ -47,10 +50,10 @@ desc: "Allow sharing stuff with other apps",
 			];
 		}
 		else {
-			alertBox("Unable to create a file object!");
+			alertBox("The share module was unable to create a file object!");
+			return false;
 		}
 		
-
 		if (navigator.canShare && navigator.canShare( { files: filesArray } )) {
 			navigator.share({
 				files: filesArray,
@@ -60,7 +63,8 @@ desc: "Allow sharing stuff with other apps",
 			})
 			.then(shareSuccessful)
 			.catch(shareError);
-		} else {
+		} 
+		else {
 			
 			// Try sharing the file as text
 			navigator.share({
@@ -69,9 +73,9 @@ desc: "Allow sharing stuff with other apps",
 			})
 			.then(shareSuccessful)
 			.catch(shareError);
-			
 		}
 		
+		return true;
 		
 		function shareSuccessful() {
 			console.log('Share was successful.');

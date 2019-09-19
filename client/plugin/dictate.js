@@ -39,7 +39,7 @@ load: function loadDictate() {
 			
 },
 unload: function unloadDictate() {
-widget.unload();
+			if(widget) widget.unload();
 		}
 	});
 	

@@ -38,16 +38,6 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
-problem: Write blog posts on the phone while eating, edit later on a PC.
-
-Dictate plugin.
-What you say is inserted
-Press Start or T 
-buttons: Start listening, new paragraph, new line
-(insert p and br if it's a htm/html file!)
-
-
-
 "Make pull request" (from the menu)
 - Make sure there are no uncommitted changes
   (include changes made to file1, file2? [Yes, commit] [Ignore changes] 

@@ -187,7 +187,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	runScript: [], // Plugins can register as program runners
 	stopScript: [],
 	showDashboard: [], // Useful for example starting and stopping timers, refresh content etc
-	hideDashboard: []
+	hideDashboard: [],
+	share: [] // Share a file with other apps on the platform
 };
 
 EDITOR.renderFunctions = [];
@@ -6228,6 +6229,8 @@ EDITOR.previewTool = tool("previewTool", false);
 EDITOR.runScript = tool("runScript", false);
 
 EDITOR.stopScript = tool("stopScript", false);
+	
+	EDITOR.share = tool("share", false);
 
 function tool(eventListenerName) {
 	return function(file, ev) {

@@ -46,7 +46,7 @@
 	var progressBar;
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
-	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations, winMenuClone;
+	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations, winMenuClone, winMenuPullRequest;
 	
 	var discoveryBarImg;
 	
@@ -79,6 +79,7 @@
 		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["SCM", 6], diffWorkingDirectory);
 		winMenuAnnotations = EDITOR.windowMenu.add("Show annotations", ["SCM", 11], toggleAnotations);
 		winMenuClone = EDITOR.windowMenu.add("Clone a repository", ["SCM", 15], showCloneDialog);
+		winMenuPullRequest = EDITOR.windowMenu.add("Export pull request", ["SCM", 17], exportPullRequest);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -132,11 +133,132 @@
 		EDITOR.windowMenu.remove(winMenuDiffRevision);
 		EDITOR.windowMenu.remove(winMenuAnnotations);
 		EDITOR.windowMenu.remove(winMenuClone);
+		EDITOR.windowMenu.remove(winMenuPullRequest);
 		
 		EDITOR.discoveryBar.remove(discoveryBarImg);
 		
 		hideMercurialWidgets();
 		
+	}
+	
+	function exportPullRequest(clickEvent, ignoreUnsavedFiles) {
+		
+		var directory = UTIL.getDirectoryFromPath(EDITOR.currentFile && EDITOR.currentFile.path);
+		
+		// Check for uncommited changes
+		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
+			if(err) {
+				console.log("mercurial.status error: " + err.message);
+				// Most likely no local repository found !?
+				// Because this is run every time the menu is opened, ignore any error
+				//if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED" && err.code != "ENOENT" && err.code != "ENOSYS") alertBox(err.message);
+				return;
+			}
+			else {
+				
+				rootDir = status.rootDir;
+				
+				var unsavedFiles = [];
+				for(var filePath in EDITOR.files) {
+					if(UTIL.isInFilePath(filePath, rootDir) && !EDITOR.files[filePath].isSaved) {
+						unsavedFiles.push(EDITOR.files[filePath]);
+					}
+				}
+				
+				if(unsavedFiles.length > 0 && !ignoreUnsavedFiles) {
+					var question = "Include unsaved changes in these files ?\n" + unsavedFiles.join("\n");
+					var saveAll = "Save the files";
+					var ignore = "Ignore unsaved changes";
+					var cancel = "Cancel";
+					return confirmBox(question, [saveAll, ignore, cancel], function(answer) {
+						if(answer == cancel) return;
+						else if(answer == ignore) exportPullRequest(clickEvent, true);
+						else if(answer == saveAll) {
+							var filesToSave = unsavedFiles.length;
+							var filesSaved = 0;
+							for(var i=0; i<unsavedFiles.length; i++) {
+								EDITOR.saveFile(unsavedFiles[i], fileSaved);
+							}
+						}
+						else throw new Error("Unknown answer=" + answer);
+						
+						function fileSaved(err) {
+							filesSaved++;
+							
+							if(err) alertBox(err.message);
+							else if(filesSaved == filesToSave) exportPullRequest(clickEvent);
+						}
+					});
+				}
+				
+				console.log("mercurial.status: " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
+				
+				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
+				
+				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
+					
+					var question = "Do following files has not been commited. Do you have to include the changes?";
+					if(status.modified.length > 0) question += "\nModified: " + status.modified.join(", ");
+					if(status.added.length > 0) question += "\nAdded: " + status.added.join(", ");
+					if(status.removed.length > 0) question += "\nRemoved: " + status.removed.join(", ");
+					if(status.missing.length > 0) question += "\nMissing: " + status.missing.join(", ");
+					
+					var commit = "Commit";
+					var ignore = "Ignore these files";
+					var cancel = "Cancel";
+					return confirmBox(question, [commit, ignore, cancel], function(answer) {
+						if(answer == cancel) return;
+						else if(answer == commit) showCommitDialog();
+						else if(answer == ignore) {
+							commenceExport(rootDir);
+						}
+						else throw new Error("Unknown answer=" + answer);
+					});
+				}
+				else commenceExport(rootDir);
+			}
+		});
+		
+		function commenceExport(directory) {
+			CLIENT.cmd("mercurial.log", {directory: directory}, function logList(err, resp) {
+				if(err) throw err;
+				
+				var changes = resp.revisions;
+				
+				if(changes.length == 0) return alertBox("There are no commited changes!");
+				
+				
+				//console.log("mercurial.log changes:");
+				//console.log(changes);
+				
+				// They should already be in order. But just in case: Place latest change first
+				changes.sort(function sortChanges(a, b) {
+					if(a.rev > b.rev) return -1;
+					else if(b.rev > a.rev) return 1;
+					else return 0;
+				});
+				
+				//alertBox("Latest change: " + JSON.stringify(changes, null, 2));
+				
+				var lastChangedBy = changes[0].user;
+				var lastChangeDate = changes[0].date[0];
+				
+				for(var i=0; i<changes.length; i++) {
+					if(changes[i].user != lastChangedBy) {
+						changes.length = i+1;
+						break;
+					}
+				}
+				
+				var revs = changes.map(function(change) { return change.rev }).join("+");
+				
+				exportChanges(revs, rootDir, function(err, file) {
+					if(err) return alertBox(err);
+					
+					EDITOR.share(file, clickEvent);
+				});
+			});
+		}
 	}
 	
 	function cloneRepoMaybe() {
@@ -202,14 +324,14 @@
 		if(!file) return true;
 		
 		if(file.savedAs) {
-		var directory = UTIL.getDirectoryFromPath(file.path);
+			var directory = UTIL.getDirectoryFromPath(file.path);
 		}
 		else {
 			var directory = EDITOR.workingDirectory;
 		}
 		
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
-				if(err) {
+			if(err) {
 				console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found !?
 				// Because this is run every time the menu is opened, ignore any error
@@ -234,34 +356,34 @@
 				
 				/*
 					
-				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
+					if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
 					EDITOR.ctxMenu.addTemp("Push", false, function() {
-						EDITOR.ctxMenu.hide();
-						mercurialPush(status.rootDir);
+					EDITOR.ctxMenu.hide();
+					mercurialPush(status.rootDir);
 					});
-				}
-				
-				if(QUERY_STRING.pull) {
+					}
+					
+					if(QUERY_STRING.pull) {
 					EDITOR.ctxMenu.addTemp("Pull (update+merge)", false, function() {
 					EDITOR.ctxMenu.hide();
 					mercurialDance(file);
-				});
-				}
-				
-				var showAnnotationsString = "Show commit messages";
+					});
+					}
+					
+					var showAnnotationsString = "Show commit messages";
 					var annotateMenuItem = EDITOR.ctxMenu.addTemp(showAnnotationsString, false, annotateOn);
-				if(doAnnotate) EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
-				else EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
-				
-				var showHistoryString = "Version history";
+					if(doAnnotate) EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
+					else EDITOR.ctxMenu.update(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
+					
+					var showHistoryString = "Version history";
 					var historyMenyItem = EDITOR.ctxMenu.addTemp(showHistoryString, true, showVersionHistory);
-				if(versionHistoryVisible) EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
-				else EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
+					if(versionHistoryVisible) EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
+					else EDITOR.ctxMenu.update(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
 				*/
 				
-				}
+			}
 		});
-		}
+	}
 	
 	function mercurialCommitTool(directoryOrFile) {
 		
@@ -460,14 +582,14 @@
 		diffButton.onclick = function diffButtonClick() {
 			var files = [];
 			var selectedFiles = fileSelect.options;
-				for(var i=0, filePath; i<selectedFiles.length; i++) {
-					if(selectedFiles[i].selected) {
-						filePath = selectedFiles[i].value;
+			for(var i=0, filePath; i<selectedFiles.length; i++) {
+				if(selectedFiles[i].selected) {
+					filePath = selectedFiles[i].value;
 					files.push(filePath);
-						}
 				}
+			}
 			mercurialDiff(rootDir, files);
-			};
+		};
 		
 		group.appendChild(diffButton);
 		
@@ -518,7 +640,7 @@
 		refreshButton.setAttribute("class", "button");
 		refreshButton.appendChild(document.createTextNode("Refresh"));
 		refreshButton.onclick = function() {
-updateCommitFileSelect();
+			updateCommitFileSelect();
 		};
 		group.appendChild(refreshButton);
 		
@@ -571,11 +693,11 @@ updateCommitFileSelect();
 			function revertTheFiles() {
 				
 				CLIENT.cmd("mercurial.revert", {directory: rootDir, files: revertFiles}, function reverted(err, resp) {
-						
-						if(err) alertBox(err.message);
+					
+					if(err) alertBox(err.message);
 					
 					updateCommitFileSelect(rootDir);
-				
+					
 					// Reload the files opened in the editor
 					var fullPath;
 					for (var i=0; i<revertFiles.length; i++) {
@@ -2057,7 +2179,7 @@ var error = err.message;
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
 			
-			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev, files: filePaths}, function hgDiff(err, resp) {
+			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev, files: filePaths}, function hgDiffFile(err, resp) {
 				
 				if(err) return alertBox(err.message);
 				
@@ -2076,7 +2198,7 @@ var error = err.message;
 		butCatFile.setAttribute("class", "button");
 		butCatFile.innerText = "See file";
 		butCatFile.setAttribute("title", "See the selected file at the selected revision.");
-		butCatFile.onclick = function diffFileClick() {
+		butCatFile.onclick = function catClick() {
 			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
 			if(selectedRevisions.length > 1) return alertBox("More then one revision is selected. Click to deselect.");
 			var selectedRev = selectedRevisions[0];
@@ -2091,7 +2213,7 @@ var error = err.message;
 			console.log(filePaths);
 			if(filePaths.length != 1) return alertBox("Only one file can be selected!");
 			var filePath = filePaths[0];
-			CLIENT.cmd("mercurial.cat", {directory: fileDirectory, rev: selectedRev.rev, file: filePath}, function hgDiff(err, resp) {
+			CLIENT.cmd("mercurial.cat", {directory: fileDirectory, rev: selectedRev.rev, file: filePath}, function hgCat(err, resp) {
 				
 				if(err) return alertBox(err.message);
 				
@@ -2112,37 +2234,51 @@ var error = err.message;
 		butExport.setAttribute("class", "half button");
 		butExport.innerText = "Export";
 		butExport.setAttribute("title", "Export the selected revisions to be imported by someone else");
-		butExport.onclick = function diffClick() {
-			
+		butExport.onclick = function exportClick() {
 			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
-			
-			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 			var changes = selectedRevisions.map(function(sel) {return sel.rev}).join("+");
-			CLIENT.cmd("mercurial.export", {directory: fileDirectory, changes: changes}, function hgDiff(err, resp) {
-				
-				if(err) return alertBox(err.message);
-				var text = resp.text;
-				var email = QUERY_STRING["pullrequest"];
-				if(email) {
-					var message = '# To: <' + email + '>\n' +
-					'# Subject: Pull request\n' +
-					'# \n';
-					
-					text = message + text
-				}
-				
-				var fileName = "rev" + changes + ".diff";
-				EDITOR.openFile(fileName, text, function(err, file) {
-					if(err) alertBox(err.message);
-				});
-			});
-		};
+			exportChanges(changes, rootDir);
+		}
 		div.appendChild(butExport);
 		
 		
 		return div;
 		
 	}
+	
+	function exportChanges(changes, rootDir, callback) {
+		
+		if(!changes) throw new Error("No changes selected! (changes=" + changes + ")");
+		
+		var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+		CLIENT.cmd("mercurial.export", {directory: fileDirectory, changes: changes}, function hgExport(err, resp) {
+			
+			if(err) {
+				if(callback) callback(err);
+				else alertBox(err.message);
+				return;
+			}
+			var text = resp.text;
+			var email = QUERY_STRING["pullrequest"];
+			if(email) {
+				var message = '# To: <' + email + '>\n' +
+				'# Subject: Pull request\n' +
+				'# \n';
+				
+				text = message + text
+			}
+			
+			var fileName = "rev" + changes + ".diff";
+			EDITOR.openFile(fileName, text, function(err, file) {
+				if(err) {
+					if(callback) callback(err);
+					else alertBox(err.message);
+					return;
+				}
+				if(callback) callback(null, file);
+			});
+		});
+	};
 	
 	function fillHistoryTable(filePath) {
 		

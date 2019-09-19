@@ -1236,7 +1236,13 @@ namedFunction = false;
 		}
 	},
 	
-	
+	isInFilePath: function isInFilePath(filePath, folderPath) {
+		filePath = filePath.replace(/\\/g, "/");
+		folderPath = filePath.replace(/\\/g, "/");
+		folderPath = UTIL.trailingSlash(folderPath);
+		if(filePath.indexOf(folderPath) == 0) return true;
+		else return false;
+	},
 	
 	isFilePath: function isFilePath(filePath) {
 		
