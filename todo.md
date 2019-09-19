@@ -38,25 +38,18 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
+Add MongdoDB database support!
+
+nodejsplayground.com
+
+
+
+
 todo: Manually test the pull request function when there is unsaved files and uncommited changes!
 
-todo: When navigating away from a nodejs or .stdout file, automatically hide the run-nodejs banner
+todo: Automatically bring up clone dialog when a repo is in the clipboard!?
 
-
-share tool.
-
-When export file is created
-
-Automatically bring up clone dialog when a repo is in the clipboard!?
-
-Send pull request in SCM.
-
-Able to generate a diff for the pull request
-
-Able to upload diffs and apply them in another copy of the repo
-
-
-todo: Hide the nodejs run bar when switching to another file.
+todo: Able to upload diffs and apply them in another copy of the repo
 
 todo: Documentation viewever, show documentation in the footer, or in the right column if wide screen.
 For example when you type fs.| show https://github.com/nodejs/node/blob/master/doc/api/fs.md
@@ -67,41 +60,11 @@ todo: Autocomplete for nodejs, require("| show all built in modules
 blog: Treating errors as first class citizens, or treating errors as exceptions.
 
 
-actual problem: Information, keeping it updated, and adding services.
+actual problem: Sending out Information, keeping information updated, and making custom services?
 
----
+problem: When you install a npm module, the install script has access to your home dir, and might steal your ssh keys
+Prevent node from stealing SSH keys, only allow the user worker and hg/git to access ssh keys !!
 
-Add a widget that let users suggest a change and send you a diff
-
-User click "Suggest change",
-Page is replaced by a WYSIWYG editor. That has a toolbar with "Generate diff" which can be downloaded/shared (navigator.share).
-
-Bookmarklets > Replace textarea, Edit page
-
-
-
-Editor sometimes scrolls down while embedded.
-And sometimes it doesn't resize after hiding a widget, for example save-as. (it does resize most of the time, but once in a while it does not)
-
-
-
-thinking: Let nodejsplayground.com be a separate service ..?
-When you go to something.nodejsplayground.com you want to see what !?
-
-
-
-nodejsplayground.com
-
-Add MongdoDB database support!
-
-Prevent node from stealing SSH keys, only allow the user worker and hg/git to access ssh keys !?
-
-
-
-Old accounts are nuked, can't run hg clone! 
-hg clone ssh://hg@hg.sr.ht/~jz/survey-example --debug
-abort: Exec format error
-but it works on new accounts
 
 Start using hg.sr.ht for public repos! since hggit stopped working on Github, and Bitbucket ending support for Mercurial
 
@@ -117,14 +80,6 @@ todo: Test the Gutenberg editor (in Wordpress)
 
 bug: When getting error from nodejs it always points to the first coulumn,
 while the error is on column X. Very fonfusing!!
-
-
-?editPage vs &wysiwyg
-
-
-thinking: Add a "suggest change" button on any web page.
-&fork=url&pullrequest=user@email.com
-
 
 Make single page example, with a share button, 
 that lets a computer-illiteral able to propse changes ...
@@ -1786,6 +1741,14 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+bug: Old accounts are nuked, can't run hg clone! 
+hg clone ssh://hg@hg.sr.ht/~jz/survey-example --debug
+abort: Exec format error
+but it works on new accounts
+
+bug: Editor sometimes scrolls down while embedded.
+And sometimes it doesn't resize after hiding a widget, for example save-as. (it does resize most of the time, but once in a while it does not)
 
 issue: node.classList.a| can't autocomplete add(), remote, etc
 
