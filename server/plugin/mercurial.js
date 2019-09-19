@@ -1677,6 +1677,67 @@ args.push("-c " + json.changes);
 		});
 }
 
+MERCURIAL.export = function hgexport(user, json, callback) {
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory specified!"));
+	if(json.changes == undefined) return callback(new Error("No changes/revisions specified!"));
+	
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var spawn = require('child_process').spawn;
+		
+		var args = ["export", json.changes];
+		
+		console.log("hg export args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
+		
+		var expo = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var stdout = "";
+		var stderr = "";
+		
+		expo.stdout.on('data', function exportStdout(data) {
+			stdout += data;
+		});
+		
+		expo.stderr.on('data', function exportStderr(data) {
+			stderr += data;
+		});
+		
+		expo.on('error', function exportError(err) {
+			console.log("stdout=" + stdout);
+			console.log("stderr=" + stderr);
+			if(callback) callback(err);
+			callback = null;
+		});
+		
+		expo.on('close', function exportDone(exitCode) {
+			//if(stdout.length < 500) console.log("hg diff stdout=" + stdout);
+			//else console.log("hg diff stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+			console.log("export stdout=" + stdout);
+			console.log("export stderr=" + stderr);
+			
+			console.log("export exitCode=" + exitCode);
+			
+			if(exitCode || stderr) {
+				var err = new Error(stderr);
+				err.code = exitCode;
+				if(callback) callback(err);
+				callback = null;
+				return;
+			}
+			
+			var resp = {
+				text: stdout
+			}
+			
+			callback(null, resp);
+			
+		});
+	});
+}
+
 MERCURIAL.cat = function hgcat(user, json, callback) {
 	
 	// Shows the state of a file at a given revision

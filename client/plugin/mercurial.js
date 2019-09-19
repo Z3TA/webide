@@ -39,8 +39,7 @@
 	var versionHistoryVisible = false;
 	var versionHistoryWidget = EDITOR.createWidget(buildVersionHistoryWidget);
 	var historyTableBody;
-	var selectedRev; // {id, files}
-	var lastActiveHistoryTableRow;
+	var selectedRevisions = []; // [{id, files}]
 	
 	var versionControlWidget = EDITOR.createWidget(buildVersionControlWidget);
 	
@@ -2026,15 +2025,16 @@ var error = err.message;
 		butDiff.setAttribute("title", "Compare all changes in selected revision with the revison before it.");
 		butDiff.onclick = function diffClick() {
 			
-			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
 			
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
-			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev}, function hgDiff(err, resp) {
+			var changes = selectedRevisions.map(function(sel) {return sel.rev}).join("+");
+			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: changes}, function hgDiff(err, resp) {
 				
 				if(err) return alertBox(err.message);
 				
 				var text = resp.text;
-				var fileName = "rev" + selectedRev.rev + ".diff";
+				var fileName = "rev" + changes + ".diff";
 				EDITOR.openFile(fileName, text, function(err, file) {
 					if(err) alertBox(err.message);
 				});
@@ -2047,9 +2047,13 @@ var error = err.message;
 		butDiffFile.innerText = "See Changes to selected file(s)";
 		butDiffFile.setAttribute("title", "Compare selected file(s) in selected revision with the revison before it.");
 		butDiffFile.onclick = function diffFileClick() {
-			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
+			if(selectedRevisions.length > 1) return alertBox("More then one revision is selected. Click to deselect.");
+			var selectedRev = selectedRevisions[0];
+			
 			// rootDir is not included in filePaths
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+			
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
 			
@@ -2073,7 +2077,10 @@ var error = err.message;
 		butCatFile.innerText = "See file";
 		butCatFile.setAttribute("title", "See the selected file at the selected revision.");
 		butCatFile.onclick = function diffFileClick() {
-			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
+			if(selectedRevisions.length > 1) return alertBox("More then one revision is selected. Click to deselect.");
+			var selectedRev = selectedRevisions[0];
+			
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
@@ -2100,6 +2107,38 @@ var error = err.message;
 			});
 		};
 		div.appendChild(butCatFile);
+		
+		var butExport = document.createElement("button");
+		butExport.setAttribute("class", "half button");
+		butExport.innerText = "Export";
+		butExport.setAttribute("title", "Export the selected revisions to be imported by someone else");
+		butExport.onclick = function diffClick() {
+			
+			if(selectedRevisions.length == 0) return alertBox("No revision selected. (click on it)");
+			
+			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+			var changes = selectedRevisions.map(function(sel) {return sel.rev}).join("+");
+			CLIENT.cmd("mercurial.export", {directory: fileDirectory, changes: changes}, function hgDiff(err, resp) {
+				
+				if(err) return alertBox(err.message);
+				var text = resp.text;
+				var email = QUERY_STRING["pullrequest"];
+				if(email) {
+					var message = '# To: <' + email + '>\n' +
+					'# Subject: Pull request\n' +
+					'# \n';
+					
+					text = message + text
+				}
+				
+				var fileName = "rev" + changes + ".diff";
+				EDITOR.openFile(fileName, text, function(err, file) {
+					if(err) alertBox(err.message);
+				});
+			});
+		};
+		div.appendChild(butExport);
+		
 		
 		return div;
 		
@@ -2226,8 +2265,6 @@ var error = err.message;
 				
 				if(tr.nodeName != "TR") throw new Error("Unable to get which table row on the version history you clicked on");
 				
-				if(lastActiveHistoryTableRow) lastActiveHistoryTableRow.setAttribute("class", "");
-				
 				console.log("selectedRev:");
 				console.log(tr);
 				var rev = parseInt(tr.id.slice(3)); // remove rev from rev123
@@ -2242,13 +2279,37 @@ var error = err.message;
 				
 				
 				function selectRev(changeSet) {
-					selectedRev = changeSet;
 					
-					console.log(selectedRev);
+					var alreadySelected = false;
+					if(!e.ctrlKey) {
+						deselectAllOther(); // Recursive function
+					}
+					if(alreadySelected) return;
 					
-					tr.setAttribute("class", "selected");
+					if(selectedRevisions.indexOf(changeSet) == -1) {
+						selectedRevisions.push(changeSet);
+						tr.classList.add("selected");
+					}
+					else {
+						selectedRevisions.splice(selectedRevisions.indexOf(changeSet), 1);
+						tr.classList.remove("selected");
+					}
 					
-					lastActiveHistoryTableRow = tr;
+					console.log("selectedRevisions=" + JSON.stringify(selectedRevisions));
+					
+					function deselectAllOther() {
+						if( selectedRevisions.length == 0 ) return;
+						for(var i=0; i<selectedRevisions.length; i++) {
+							if(selectedRevisions[i] == changeSet) alreadySelected = true;
+							else {
+								var tr = document.getElementById("rev" + selectedRevisions[i].rev);
+								tr.classList.remove("selected");
+								selectedRevisions.splice(i, 1);
+								return deselectAllOther();
+							}
+						}
+					}
+					
 				}
 				
 			};
@@ -2258,7 +2319,7 @@ var error = err.message;
 	
 	function revDiffSelectedRev() {
 		// Show diff of selected rev
-		alert(selectedRev.rev);
+		alert(JSON.stringify(selectedRevisions, null, 2));
 	}
 	
 	function mercurialDiff(directory, filePaths) {
