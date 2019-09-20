@@ -50,7 +50,13 @@
 	var bindTest = false;
 	var ignoreFileSave = "";
 	var ignoreUndoRedoEvent = {}; // filePath: [ev.order...]
-	var winMenuUndo, winMenuRedo, winMenuInvite;
+	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord;
+	
+	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
+	var playbackInterval, isPlaying = false, playbackFile, recordInfo = {}, lastRecordItem = -1;
+	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder
+	
+	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -91,9 +97,12 @@
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
+			recordWidget = EDITOR.createWidget(buildRecordWidget);
+			
 			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
+			winMenuRecord = EDITOR.windowMenu.add("Record (with voiceover)", ["Tools", 30], recordWidget.show);
 			
 			var discoveryItem = document.createElement("img");
 			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
@@ -151,6 +160,395 @@
 		},
 		order: 100
 	});
+	
+	function buildRecordWidget() {
+		
+		var wrap = document.createElement("div");
+		
+		playButton = document.createElement("button");
+		playButton.classList.add("recordButton", "button", "half");
+		playButton.innerText = "▶ Start playback";
+		playButton.onclick = startOrStopPlayback;
+		wrap.appendChild(playButton);
+		
+		recordButton = document.createElement("button");
+		recordButton.classList.add("playButton", "button", "half");
+		recordButton.innerText = "● Start recording";
+		recordButton.onclick = startOrStopRecording;
+		wrap.appendChild(recordButton);
+		
+		audioPlayer = document.createElement("audio");
+		audioPlayer.setAttribute("controls", "true");
+		wrap.appendChild(audioPlayer);
+		
+		if(!navigator.mediaDevices) {
+			var inputSound = document.createElement("input");
+			inputSound.setAttribute("type", "file");
+			inputSound.setAttribute("accept", "audio/*");
+			inputSound.setAttribute("capture", "trye");
+			inputSound.addEventListener('change', function(e) {
+				var file = e.target.files[0];
+				audioPlayer.srcObject = file;
+			});
+			wrap.appendChild(inputSound);
+		}
+		
+		soundVisualizer = document.createElement("canvas");
+		wrap.appendChild(soundVisualizer);
+		
+		
+		saveRecordButton = document.createElement("button");
+		saveRecordButton.classList.add("button", "half");
+		saveRecordButton.innerText = "Save recording";
+		saveRecordButton.onclick = saveRecord;
+		saveRecordButton.disabled = true;
+		wrap.appendChild(saveRecordButton);
+		
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("button", "half");
+		cancelButton.innerText = "Cancel";
+		cancelButton.onclick = recordWidget.hide;
+		wrap.appendChild(cancelButton);
+		
+		
+		recordTimeline = document.createElement("input");
+		recordTimeline.classList.add("timeline");
+		recordTimeline.setAttribute("type", "range");
+		recordTimeline.setAttribute("min", 0);
+		recordTimeline.setAttribute("max", 10*60*1000/playbackFPS); // 10 minutes in ms
+		recordTimeline.setAttribute("value", 0);
+		onRangeChange(recordTimeline, recordTimelineChange)
+		wrap.appendChild(recordTimeline);
+		
+		return wrap;
+	}
+	
+	function saveRecord() {
+		var data = {
+			info: recordInfo,
+			record: record
+		}
+		
+		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.filePath + ".json"), JSON.stringify(data, null, 2));
+	}
+	
+	function startOrStopRecording() {
+		if(isRecording) stopRecording();
+		else startRecordning();
+	}
+	
+	function startOrStopPlayback() {
+		if(isPlaying) stopPlayback();
+		else startPlayback();
+	}
+	
+	function stopRecording() {
+		isRecording = false;
+		recordButton.innerText = "● Start recordning";
+		saveRecordButton.disabled = false;
+		
+		// Stop the audio stream
+		mediaRecorder.stop();
+		console.log(mediaRecorder.state);
+		console.log("recorder stopped");
+		// mediaRecorder.requestData();
+		
+		/*
+			var stream = audioPlayer.srcObject;
+			var tracks = stream.getTracks();
+			tracks.forEach(function(track) {
+			track.stop();
+			});
+		*/
+		
+	}
+	
+	function startRecordning() {
+		
+		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
+			alertBox("Failed to get microphone access! Error: " + err.message);
+		});
+		
+		var file = EDITOR.currentFile;
+		if(!file) return alertBox("No file open!");
+		
+		recordInfo.filePath = file.path;
+		recordInfo.startText = file.text;
+		
+		recordInfo.startDate = (new Date()).getTime();
+		
+		record.length = 0; // Reset
+		
+		isRecording = true;
+		recordButton.innerText = "■ Stop recordning";
+		
+	}
+	
+	function gotAudio(stream) {
+		
+		// It will take some time for the user to allow the audio capture, so reset the start date to when we start recording!
+		recordInfo.startDate = (new Date()).getTime();
+		
+		var chunks = [];
+		
+		mediaRecorder = new MediaRecorder(stream);
+		
+		visualize(stream);
+		
+		mediaRecorder.start();
+		console.log(mediaRecorder.state);
+		console.log("recorder started");
+		
+		mediaRecorder.onstop = function(e) {
+			console.log("data available after MediaRecorder.stop() called.");
+			
+			audioPlayer.controls = true;
+			var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+			chunks = [];
+			var audioURL = window.URL.createObjectURL(blob);
+			audioPlayer.src = audioURL;
+			console.log("recorder stopped");
+			
+		}
+		
+		mediaRecorder.ondataavailable = function(e) {
+			chunks.push(e.data);
+		}
+		
+	}
+	
+	function visualize(stream) {
+		var audioCtx = new (window.AudioContext || webkitAudioContext)();
+		var canvasCtx = soundVisualizer.getContext("2d");
+		
+		var source = audioCtx.createMediaStreamSource(stream);
+		
+		var analyser = audioCtx.createAnalyser();
+		analyser.fftSize = 2048;
+		var bufferLength = analyser.frequencyBinCount;
+		var dataArray = new Uint8Array(bufferLength);
+		
+		source.connect(analyser);
+		//analyser.connect(audioCtx.destination);
+		
+		draw();
+		
+		function draw() {
+			var WIDTH = soundVisualizer.width;
+			var HEIGHT = soundVisualizer.height;
+			
+			requestAnimationFrame(draw);
+			
+			analyser.getByteTimeDomainData(dataArray);
+			
+			canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+			canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+			
+			canvasCtx.lineWidth = 2;
+			canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+			
+			canvasCtx.beginPath();
+			
+			var sliceWidth = WIDTH * 1.0 / bufferLength;
+			var x = 0;
+			
+			
+			for(var i = 0; i < bufferLength; i++) {
+				
+				var v = dataArray[i] / 128.0;
+				var y = v * HEIGHT/2;
+				
+				if(i === 0) {
+					canvasCtx.moveTo(x, y);
+				} else {
+					canvasCtx.lineTo(x, y);
+				}
+				
+				x += sliceWidth;
+			}
+			
+			canvasCtx.lineTo(soundVisualizer.width, soundVisualizer.height/2);
+			canvasCtx.stroke();
+			
+		}
+	}
+	
+	
+	function recordFileChange(fileChangeEvent) {
+		record.push({date: (new Date()).getTime(), change: fileChangeEvent});
+	}
+	
+	function stopPlayback() {
+		isPlaying = false;
+		clearInterval(playbackInterval);
+		playButton.innerText = "▶ Start playback";
+	}
+	
+	function isRecordJson(file) {
+		if(!file) return null;
+		
+		var ext = UTIL.getFileExtension(file.path);
+		if(ext != "json") return null;
+		
+		var reRecord = /"record": \[/;
+		if(!file.text.match(reRecord)) return null;
+		
+		try {
+			var data = JSON.parse(file.text);
+		}
+		catch {
+			console.warn("Parse failed: " + err.message);
+			return null;
+		}
+		
+		if(!data) return null;
+		if(!data.info) return null;
+		if(!data.record) return null;
+		
+		return data;
+	}
+	
+	function startPlayback() {
+		isPlaying = true;
+		
+		if(record.length == 0) {
+			alertBox("No file change events where captured!");
+			playAudio();
+			return;
+		}
+		
+		var data = isRecordJson(EDITOR.currentFile);
+		if(data) {
+			record = data.record;
+			recordInfo = data.info;
+			
+			recordTimeline.value = 0;
+		}
+		
+		if(recordTimeline.value == 0 || lastRecordItem >= record.length) {
+			lastRecordItem = -1;
+		}
+		
+		if(lastRecordItem == -1) {
+			// Reset
+			var filePath = UTIL.joinPaths("/playback/", recordInfo.filePath)
+			if(EDITOR.files.hasOwnProperty(filePath)) {
+				playbackFile = EDITOR.files[filePath];
+				playbackFile.reload(recordInfo.startText);
+				EDITOR.showFile(playbackFile);
+				return start();
+			}
+			
+			EDITOR.openFile(filePath, recordInfo.startText, function(err, file) {
+				if(err) return alertBox(err.message);
+				
+				playbackFile = file;
+				
+				start();
+			});
+		}
+		else start();
+		
+		function start() {
+			playbackStart = recordInfo.startDate;
+			
+			var lastItem = record[record.length-1];
+			recordTimeline.max = Math.ceil((lastItem.date - playbackStart) / playbackFPS) + 1;
+			
+			playbackInterval = setInterval(playProgress, 1000/playbackFPS);
+			playButton.innerText = "■ Stop playback";
+			
+			playAudio();
+		}
+		
+		function playAudio() {
+			if(recordTimeline.value > 0) audioPlayer.currentTime = recordTimeline.value * playbackFPS / 1000;
+			audioPlayer.play();
+		}
+		
+	}
+	
+	function playProgress() {
+		recordTimeline.value++;
+		
+		if(lastRecordItem+1 >= record.length) return stopPlayback();
+		
+		if(record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*playbackFPS)) {
+			lastRecordItem++;
+			
+			var moveCaret = true;
+			redo(playbackFile, record[lastRecordItem].change, moveCaret);
+			
+		}
+	}
+	
+	function recordTimelineChange(currentValue, oldValue, e) {
+		console.log("recordTimelineChange: currentValue=" + currentValue + " oldValue=" + oldValue);
+		
+		if(playbackFile == undefined) return alertBox("No playback file selected");
+		
+		EDITOR.showFile(playbackFile); 
+		
+		playbackStart = recordInfo.startDate;
+		
+		if(currentValue > oldValue) {
+			// Play forward
+			for(var i=oldValue; i<currentValue; i++) {
+				if(lastRecordItem+1 >= record.length) return stopPlayback();
+				if(record[lastRecordItem+1].date <= (playbackStart+i*playbackFPS)) {
+					lastRecordItem++;
+					
+					var moveCaret = true;
+					redo(playbackFile, record[lastRecordItem].change, moveCaret);
+					
+				}
+			}
+		}
+		else {
+			// Play backwards
+			
+			if(lastRecordItem >= record.length) lastRecordItem--;
+			
+			for(var i=oldValue; i>currentValue; i--) {
+				
+				
+				if(record[lastRecordItem].date >= (playbackStart+i*playbackFPS)) {
+					
+					var moveCaret = true;
+					undo(playbackFile, record[lastRecordItem].change, moveCaret);
+					
+					lastRecordItem--;
+				}
+			}
+			
+		}
+		
+	}
+	
+	function onRangeChange(inputRange, callback) {
+		var gotInputEvent = false;
+		var currentValue = inputRange.value;
+		var oldValue = 0;
+		inputRange.addEventListener("input", function(e) {
+			currentValue = inputRange.value;
+			if(currentValue != oldValue) callback(currentValue, oldValue, e);
+			oldValue = currentValue;
+			gotInputEvent = true;
+		});
+		inputRange.addEventListener("change", function(e) {
+			if(!gotInputEvent) {
+				currentValue = inputRange.value;
+callback(currentValue, oldValue, e);
+				oldValue = currentValue;
+			}
+		});
+		inputRange.addEventListener("mousedown", function getOldValue(e) {
+			if(!oldValue) oldValue = inputRange.value;
+			inputRange.removeEventListener("mousedown", getOldValue);
+		});
+	}
+	
+	
 	
 	function callabFileSaved(file) {
 		console.log("callabFileSaved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
@@ -384,6 +782,8 @@ fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
 			ignoreUndoRedoEvent[file.path] = [];
 		}
 		
+		if(isRecordJson(file)) recordWidget.show();
+		
 		if(!collabMode) return true;
 		
 		if(file.noCollaboration) {
@@ -505,6 +905,10 @@ console.warn("Collaboration disabled in " + file.path);
 		if(!saveUndoRedoHistory) {
 			// Prevent undo/redo action to be recorded when we get the echo
 			ignoreUndoRedoEvent[file.path].push(fileChangeEvent.order);
+		}
+		
+		if(isRecording) {
+			recordFileChange(fileChangeEvent);
 		}
 		
 		return true;

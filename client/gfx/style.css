@@ -1819,6 +1819,13 @@ margin-top: 20px;
 	padding: 1px;
 }
 
+
+
+.timeline {
+	width: 100%;
+}
+
+
 /* ### loader animation */
 .loader {
 	display: inline-block;

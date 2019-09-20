@@ -8,18 +8,15 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
-Solve a problem! Do not make a solution and then look for a problem that it can solve ...
+Solve a problem! Do not look for problems that fit a solution!
 
 Probably should read though this file and reletlessly delete stuff.
 
-NEVER run hg up on working folder. Instead copy the whole folder and make the hg up.
+NEVER switch to an earlier revision on working folder. Instead copy the whole folder and make the hg up.
 hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
 
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
-
-Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
-Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a JavaScript file (detect nodejs ? require, no window)
 
 Happy path: (manually check on prod after each release)
 1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
@@ -29,7 +26,7 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
-Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add)
+Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couln't recover from a hg up, etc)
 
 Before you start working on something new, first discribe the problem, 
 (and do a quick research to find out if a solutions already exist.)
@@ -38,11 +35,35 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
+problem: How do best explain programming concepts ?
+solution: Able to record what you type while explaining with voice
+
+Publish tutorial (move files to wwwpub ?)
+Publish app (register appname.nodejsplayground.com ?)
+
+
 Add MongdoDB database support!
 
 nodejsplayground.com
 
+problem: Build a great community
+Add a chat !?
+IRC client !?
 
+Explore the apps:
+All apps put into "production" get a name.nodejsplayground.com
+Automatically take screenshots of those apps, meta description or package.json description,
+and display them on the nodejsplayground.com site.
+
+
+Problem: How to talk to users ?
+Have a text chat, where you can ask anything !?
+"There are no stpid question. Ask anything! Please be patient when waiting for an answer."
+
+
+
+Annotation/playback (macro)
+Able to record speech, then play it back with editor commands, for example to make tutorials.
 
 
 todo: Manually test the pull request function when there is unsaved files and uncommited changes!
