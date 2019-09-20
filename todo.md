@@ -35,7 +35,7 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
-problem: How do best explain programming concepts ?
+problem: How to best explain programming concepts ?
 solution: Able to record what you type while explaining with voice
 
 Publish tutorial (move files to wwwpub ?)

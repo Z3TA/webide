@@ -166,18 +166,25 @@
 		var wrap = document.createElement("div");
 		
 		playButton = document.createElement("button");
-		playButton.classList.add("recordButton", "button", "half");
+		playButton.classList.add("playButton", "button", "half");
 		playButton.innerText = "▶ Start playback";
 		playButton.onclick = startOrStopPlayback;
 		wrap.appendChild(playButton);
 		
 		recordButton = document.createElement("button");
-		recordButton.classList.add("playButton", "button", "half");
+		recordButton.classList.add("recordButton", "button", "half");
 		recordButton.innerText = "● Start recording";
 		recordButton.onclick = startOrStopRecording;
 		wrap.appendChild(recordButton);
 		
+		soundVisualizer = document.createElement("canvas");
+		soundVisualizer.classList.add("soundVisualizer");
+		soundVisualizer.setAttribute("width", "200");
+		soundVisualizer.setAttribute("height", "26");
+		wrap.appendChild(soundVisualizer);
+		
 		audioPlayer = document.createElement("audio");
+		audioPlayer.classList.add("audioPlayer");
 		audioPlayer.setAttribute("controls", "true");
 		wrap.appendChild(audioPlayer);
 		
@@ -193,8 +200,6 @@
 			wrap.appendChild(inputSound);
 		}
 		
-		soundVisualizer = document.createElement("canvas");
-		wrap.appendChild(soundVisualizer);
 		
 		
 		saveRecordButton = document.createElement("button");
@@ -286,6 +291,9 @@
 	
 	function gotAudio(stream) {
 		
+		document.activeElement.blur(); // Don't want keystrokes to accidentally push stop
+		EDITOR.input = true;
+		
 		// It will take some time for the user to allow the audio capture, so reset the start date to when we start recording!
 		recordInfo.startDate = (new Date()).getTime();
 		
@@ -333,6 +341,9 @@
 		
 		draw();
 		
+		var fillColor = "#555";
+		var strokeColor = "#fff";
+		
 		function draw() {
 			var WIDTH = soundVisualizer.width;
 			var HEIGHT = soundVisualizer.height;
@@ -341,11 +352,11 @@
 			
 			analyser.getByteTimeDomainData(dataArray);
 			
-			canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+			canvasCtx.fillStyle = fillColor;
 			canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 			
-			canvasCtx.lineWidth = 2;
-			canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+			canvasCtx.lineWidth = 1;
+			canvasCtx.strokeStyle = strokeColor;
 			
 			canvasCtx.beginPath();
 			
@@ -452,8 +463,17 @@
 		function start() {
 			playbackStart = recordInfo.startDate;
 			
+			// Max value should be total ticks = "total record time" / "time per tick"
+			// Time per tick is 1000/playbackFPS
+			
+			var totalRecordTimeAudio = audioPlayer.duration * 1000; // ms
 			var lastItem = record[record.length-1];
-			recordTimeline.max = Math.ceil((lastItem.date - playbackStart) / playbackFPS) + 1;
+			var totalRecordTimeRecord = lastItem.date-playbackStart; // ms
+			var totalRecordTime = Math.max(totalRecordTimeAudio, totalRecordTimeRecord);
+			
+			recordTimeline.max = Math.ceil(totalRecordTime / (1000/playbackFPS)) + 1;
+			
+			console.log("playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 			
 			playbackInterval = setInterval(playProgress, 1000/playbackFPS);
 			playButton.innerText = "■ Stop playback";
@@ -462,18 +482,34 @@
 		}
 		
 		function playAudio() {
-			if(recordTimeline.value > 0) audioPlayer.currentTime = recordTimeline.value * playbackFPS / 1000;
+			seekAudio();
 			audioPlayer.play();
 		}
+		
+	}
+	
+	function seekAudio() {
+		
+		// Note: audioPlayer.currentTime is in seconds, not milli-seconds!
+		audioPlayer.currentTime = recordTimeline.value * 1000/playbackFPS / 1000;
+		
+		console.log("seekAudio: recordTimeline.value=" + recordTimeline.value + " playbackFPS=" + playbackFPS + " audioPlayer.currentTime=" + audioPlayer.currentTime + "s");
 		
 	}
 	
 	function playProgress() {
 		recordTimeline.value++;
 		
-		if(lastRecordItem+1 >= record.length) return stopPlayback();
+		if(lastRecordItem+1 >= record.length) return; // Keep running until we reach max !?
 		
-		if(record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*playbackFPS)) {
+		console.log("playbackStart=" + playbackStart + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-playbackStart) + " time-line=" + (recordTimeline.value*1000/playbackFPS))
+		
+		// Interval time is 1000/playbackFPS
+		// recordTimeline.value is incremented every 1000/playbackFPS ms
+		// One tick in recordTimeline.value is roughly 1000/playbackFPS ms
+		// X time-line ticks is around X*1000/playbackFPS ms
+		
+		if(record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS)) {
 			lastRecordItem++;
 			
 			var moveCaret = true;
@@ -491,11 +527,13 @@
 		
 		playbackStart = recordInfo.startDate;
 		
+		seekAudio();
+		
 		if(currentValue > oldValue) {
 			// Play forward
 			for(var i=oldValue; i<currentValue; i++) {
 				if(lastRecordItem+1 >= record.length) return stopPlayback();
-				if(record[lastRecordItem+1].date <= (playbackStart+i*playbackFPS)) {
+				if(record[lastRecordItem+1].date <= (playbackStart+i*1000/playbackFPS)) {
 					lastRecordItem++;
 					
 					var moveCaret = true;
@@ -508,17 +546,23 @@
 			// Play backwards
 			
 			if(lastRecordItem >= record.length) lastRecordItem--;
+			if(lastRecordItem <= -1) return;
+			
+			if(!record[lastRecordItem]) throw new Error("lastRecordItem=" + lastRecordItem + " record.length=" + record.length)
 			
 			for(var i=oldValue; i>currentValue; i--) {
 				
 				
-				if(record[lastRecordItem].date >= (playbackStart+i*playbackFPS)) {
+				if(record[lastRecordItem].date >= (playbackStart+i*1000/playbackFPS)) {
 					
 					var moveCaret = true;
 					undo(playbackFile, record[lastRecordItem].change, moveCaret);
 					
 					lastRecordItem--;
 				}
+				
+				if(lastRecordItem==-1) break;
+				
 			}
 			
 		}

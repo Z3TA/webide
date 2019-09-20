@@ -1820,10 +1820,27 @@ margin-top: 20px;
 }
 
 
-
 .timeline {
 	width: 100%;
 }
+
+.audioPlayer {
+	height: 26px;
+	vertical-align: middle;
+	background-color: transparent;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.soundVisualizer {
+	vertical-align: middle;
+	border: 1px solid #222;
+	margin-left: 5px;
+	margin-right: 5px;
+	background-color: #555555;
+}
+
+
 
 
 /* ### loader animation */
