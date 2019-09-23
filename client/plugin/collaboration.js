@@ -55,7 +55,10 @@
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
 	var playbackInterval, isPlaying = false, playbackFile, recordInfo = {}, lastRecordItem = -1;
 	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
-	var audioBlob, loadedAudioFile
+	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
+	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
+	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
+	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -282,6 +285,8 @@
 		recordButton.innerText = "● Start recordning";
 		saveRecordButton.disabled = false;
 		
+		EDITOR.removeEvent("mouseMove", recordMouseMovement);
+		
 		// Stop the audio stream
 		mediaRecorder.stop();
 		console.log(mediaRecorder.state);
@@ -313,6 +318,8 @@
 		recordInfo.startText = file.text;
 		
 		recordInfo.startDate = (new Date()).getTime();
+		
+		EDITOR.on("mouseMove", recordMouseMovement);
 		
 		record.length = 0; // Reset
 		
@@ -416,6 +423,38 @@
 		}
 	}
 	
+	function recordMouseMovement(mouseX, mouseY, target, mouseMoveEvent) {
+
+		if(target.className == "fileCanvas") {
+			var file = EDITOR.currentFile;
+			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
+			var clickFeel = EDITOR.settings.gridWidth / 2;
+			var gridRow = file.grid[mouseRow] || {indentation: 0};
+			var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+			
+			if(mouseRow != lastRecordedMouseCaretRow || mouseCol != lastRecordedMouseCaretCol) {
+				var mouseEvent = {
+					row: mouseRow,
+					col: mouseCol
+				};
+			}
+			
+			lastRecordedMouseCaretRow = mouseRow;
+			lastRecordedMouseCaretCol = mouseCol;
+		}
+		else {
+			
+			if(target.id && target.id != lastRecordedMouseTargetId) {
+				var mouseEvent = {
+					targetId: target.id
+				};
+				
+				lastRecordedMouseTargetId = target.id;
+			}
+		}
+		
+		if(mouseEvent) record.push({date: (new Date()).getTime(), mouse: mouseEvent});
+	}
 	
 	function recordFileChange(fileChangeEvent) {
 		record.push({date: (new Date()).getTime(), change: fileChangeEvent});
@@ -520,6 +559,15 @@
 			return;
 		}
 		
+		if(!fakeMouseElement) {
+fakeMouseElement = document.createElement("div");
+			fakeMouseElement.classList.add("fakeMouseElement");
+			fakeMouseElement.style.width = playbackMouseSize + "px";
+			fakeMouseElement.style.height = playbackMouseSize + "px";
+			
+			document.documentElement.appendChild(fakeMouseElement);
+		}
+		
 		if(recordTimeline.value == 0 || lastRecordItem >= record.length) {
 			lastRecordItem = -1;
 		}
@@ -585,6 +633,8 @@
 	function playProgress() {
 		recordTimeline.value++;
 		
+		mousePlaybackAnimation();
+		
 		if(lastRecordItem+1 >= record.length) return; // Keep running until we reach max !?
 		
 		console.log("playbackStart=" + playbackStart + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-playbackStart) + " time-line=" + (recordTimeline.value*1000/playbackFPS))
@@ -594,17 +644,117 @@
 		// One tick in recordTimeline.value is roughly 1000/playbackFPS ms
 		// X time-line ticks is around X*1000/playbackFPS ms
 		
-		if(record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS)) {
+		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS) ) {
 			lastRecordItem++;
 			
-			var moveCaret = true;
-			redo(playbackFile, record[lastRecordItem].change, moveCaret);
+			if(record[lastRecordItem].change) redo(playbackFile, record[lastRecordItem].change, true);
+			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
 			
 		}
+		
+		
+		
+	}
+	
+	function mousePlayback(mouseEvent, instant) {
+		
+		var row = mouseEvent.row;
+		var col = mouseEvent.col;
+		var targetId = mouseEvent.targetId;
+		
+		console.log("mousePlayback: row=" + row + " col=" + col + " targetId=" + targetId);
+		
+		if(row != undefined && col != undefined) {
+			
+			var file = EDITOR.currentFile;
+			var indentation = file.grid[row] && file.grid[row].indentation || 0;
+			var indentationWidth = indentation * EDITOR.settings.tabSpace;
+			var top = EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight;
+			var middle = top + Math.floor(EDITOR.settings.gridHeight/2);
+			var left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn + col) * EDITOR.settings.gridWidth;
+			var rect = EDITOR.canvas.getBoundingClientRect();
+			
+			console.log("mousePlayback: indentation=" + indentation + " indentationWidth=" + indentationWidth + " top=" + top + " middle=" + middle + " left=" + left + " rect=" + JSON.stringify(rect) + "  ");
+			
+			var mouseX = Math.round(rect.left + left + EDITOR.settings.gridWidth/2);
+			var mouseY = rect.top + middle;
+			
+		}
+		else if(targetId) {
+			var target = document.getElementById(targetId);
+			if(!target) return alertBox("Unable to locate element with id=" + targetId);
+			
+			var rect = target.getBoundingClientRect();
+			
+			var mouseX = Math.round(rect.left + target.offsetWidth/2);
+			var mouseY = Math.round(rect.top + target.offsetHeight/2);;
+			
+		}
+		else {
+			stopPlayback();
+			throw new Error("mouseEvent=" + JSON.stringify(mouseEvent));
+		}
+		
+		if(!UTIL.isNumeric(mouseX) || !UTIL.isNumeric(mouseY)) throw new Error("mouseX=" + mouseX + " mouseY=" + mouseY + " rect=" + JSON.stringify(rect));
+		
+		if(mousePlaybackPositionX == -100 && mousePlaybackPositionY == -100) instant = true;
+		
+		mousePlaybackAnimation(mouseX, mouseY, instant);
+		
+	}
+	
+	function mousePlaybackAnimation(newDestX, newDestY, instant) {
+		
+		console.log("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant)
+		
+		if(instant) {
+			mousePlaybackPositionX = newDestX;
+			mousePlaybackPositionY = newDestY;
+			mousePlaybackPositionLastSetX = newDestX;
+			mousePlaybackPositionLastSetY = newDestY;
+			mousePlaybackDeltaX = 0;
+			mousePlaybackDeltaY = 0;
+			mousePlaybackCountdown = 1;
+		}
+		else if(newDestX != undefined && newDestY != undefined) {
+			var countdown = 30;
+			
+			mousePlaybackDeltaX = (newDestX - mousePlaybackPositionX) / countdown;
+			mousePlaybackDeltaY = (newDestY - mousePlaybackPositionY) / countdown;
+			
+			mousePlaybackCountdown = countdown;
+		}
+		
+		if(mousePlaybackCountdown > 0) {
+			mousePlaybackPositionX = Math.round(mousePlaybackPositionX + mousePlaybackDeltaX);
+			mousePlaybackPositionY = Math.round(mousePlaybackPositionY + mousePlaybackDeltaY);
+			
+			console.log("mousePlaybackAnimation: mousePlaybackPositionX=" + mousePlaybackPositionX + " mousePlaybackPositionY=" + mousePlaybackPositionY + " mousePlaybackDeltaX=" + mousePlaybackDeltaX + " mousePlaybackDeltaY=" + mousePlaybackDeltaY);
+			
+			mousePlaybackCountdown--;
+			
+			if(mousePlaybackCountdown == 0) {
+				// Because we are rounding the position it will be off, so we need to set it often
+				mousePlaybackPositionX = mousePlaybackPositionLastSetX;
+				mousePlaybackPositionY = mousePlaybackPositionLastSetY;
+			}
+			
+			fakeMouseElement.style.left = Math.round(mousePlaybackPositionX - playbackMouseSize/2) + "px";
+			fakeMouseElement.style.top = Math.round(mousePlaybackPositionY - playbackMouseSize/2) + "px";
+			
+		}
+		
+		if(isNaN(mousePlaybackPositionX) || isNaN(mousePlaybackPositionY)) {
+			stopPlayback();
+			throw new Error("mousePlaybackPositionX=" + mousePlaybackPositionX + " mousePlaybackPositionY=" + mousePlaybackPositionY + " mousePlaybackDeltaX=" + mousePlaybackDeltaX + " mousePlaybackDeltaY=" + mousePlaybackDeltaY + " newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant + " ");
+		}
+		
 	}
 	
 	function recordTimelineChange(currentValue, oldValue, e) {
 		console.log("recordTimelineChange: currentValue=" + currentValue + " oldValue=" + oldValue);
+		
+		if(playbackFile && !EDITOR.files.hasOwnProperty(playbackFile.path)) playbackFile = undefined; // It has probably been closed
 		
 		if(playbackFile == undefined) return alertBox("No playback file selected");
 		
@@ -622,8 +772,8 @@
 					lastRecordItem++;
 					
 					var moveCaret = true;
-					redo(playbackFile, record[lastRecordItem].change, moveCaret);
-					
+					if(record[lastRecordItem].change) redo(playbackFile, record[lastRecordItem].change, moveCaret);
+					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 				}
 			}
 		}
@@ -641,7 +791,8 @@
 				if(record[lastRecordItem].date >= (playbackStart+i*1000/playbackFPS)) {
 					
 					var moveCaret = true;
-					undo(playbackFile, record[lastRecordItem].change, moveCaret);
+					if(record[lastRecordItem].change) undo(playbackFile, record[lastRecordItem].change, moveCaret);
+					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					
 					lastRecordItem--;
 				}

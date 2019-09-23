@@ -1840,6 +1840,16 @@ margin-top: 20px;
 	background-color: #555555;
 }
 
+.fakeMouseElement {
+	position: absolute;
+	z-index: 40;
+	top: 100px;
+	left: 100px;
+	opacity: .4;
+	background-color: red;
+	border-radius: 50%;
+}
+
 
 
 
