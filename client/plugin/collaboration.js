@@ -55,7 +55,7 @@
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
 	var playbackInterval, isPlaying = false, playbackFile, recordInfo = {}, lastRecordItem = -1;
 	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
-	var audioBlob
+	var audioBlob, loadedAudioFile
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -146,7 +146,7 @@
 			
 			// TEST-CODE-START
 			if(bindTest) {
-			EDITOR.unbindKey(testCollaboration);
+				EDITOR.unbindKey(testCollaboration);
 				EDITOR.unbindKey(testUndoRedo);
 			}
 			// TEST-CODE-END
@@ -235,7 +235,7 @@
 		
 		if(typeof FileReader != "undefined") {
 			if(audioBlob) {
-saveAudio(audioBlob, audioFilePath);
+				saveAudio(audioBlob, audioFilePath);
 				recordInfo.audioPath = audioFilePath;
 			}
 			else alertBox("No audio data!");
@@ -258,8 +258,9 @@ saveAudio(audioBlob, audioFilePath);
 				var base64AudioMessage = reader.result.split(',')[1];
 				EDITOR.createPath(folder, function(err) {
 					if(err) return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
-					EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err) {
+					EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err, path, hash) {
 						if(err) alertBox("Failed to save audio data! " + err.message);
+						loadedAudioFile = path;
 					});
 				});
 			};
@@ -454,11 +455,7 @@ saveAudio(audioBlob, audioFilePath);
 	function startPlayback() {
 		isPlaying = true;
 		
-		if(record.length == 0) {
-			alertBox("No file change events where captured!");
-			playAudio();
-			return;
-		}
+		console.log("startPlayback!");
 		
 		var data = isRecordJson(EDITOR.currentFile);
 		if(data) {
@@ -466,6 +463,61 @@ saveAudio(audioBlob, audioFilePath);
 			recordInfo = data.info;
 			
 			recordTimeline.value = 0;
+			
+			console.log("Data loaded from " + EDITOR.currentFile.path);
+		}
+		
+		
+		console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+		if(recordInfo.audioPath && loadedAudioFile != recordInfo.audioPath) {
+			console.log("Loading audio file " + recordInfo.audioPath);
+			// couln't find a way to decode a binary string to something the audio player can understand, but it can however understand base64!'
+			EDITOR.readFromDisk(recordInfo.audioPath, false, "base64", function(err, path, data, hash) {
+				if(err) return alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
+				
+				var audioData = data;
+				
+				console.log("Audio file loaded! path=" + path + " audioData=" + (typeof audioData) + " isAraray?" + Array.isArray(audioData) + " data.length=" + audioData.length);
+				
+				/*
+					var context = new AudioContext();
+					var source = context.createBufferSource();
+					context.decodeAudioData(audio.data, function(buffer) {
+					source.buffer = buffer;
+					}, null);
+				*/
+				
+				//var buffer = str2ab(audioData);
+				
+				//var audioBlob = new Blob(audioData, { 'type' : 'audio/ogg; codecs=opus' });
+				//var audioURL = window.URL.createObjectURL(audioData);
+				//audioPlayer.src = audioURL;
+				
+				audioPlayer.src = getEncodedString(audioData);
+				
+				loadedAudioFile = path;
+				
+				function getEncodedString(str) {
+					return 'data:audio/audio/ogg;base64,' + str;
+				}
+				
+				function str2ab(str) {
+					var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+					var bufView = new Uint16Array(buf);
+					for (var i=0, strLen=str.length; i < strLen; i++) {
+						bufView[i] = str.charCodeAt(i);
+					}
+					return buf;
+				}
+				
+				
+			});
+		}
+		
+		if(record.length == 0) {
+			alertBox("No file change events where captured in the recording!");
+			playAudio();
+			return;
 		}
 		
 		if(recordTimeline.value == 0 || lastRecordItem >= record.length) {
@@ -493,6 +545,7 @@ saveAudio(audioBlob, audioFilePath);
 		else start();
 		
 		function start() {
+			
 			playbackStart = recordInfo.startDate;
 			
 			// Max value should be total ticks = "total record time" / "time per tick"
@@ -614,7 +667,7 @@ saveAudio(audioBlob, audioFilePath);
 		inputRange.addEventListener("change", function(e) {
 			if(!gotInputEvent) {
 				currentValue = inputRange.value;
-callback(currentValue, oldValue, e);
+				callback(currentValue, oldValue, e);
 				oldValue = currentValue;
 			}
 		});
@@ -737,38 +790,38 @@ callback(currentValue, oldValue, e);
 			
 			var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
 			if(showCollaborationNotice) {
-			if(json.cId == userConnectionId) {
-				var msg = "You are in collaboration mode with ";
-				var others = connectedClientIds.filter(notMe);
-				if(others.length > 2) {
-					for (var i=0; i < others.length-1; i++) {
-						msg += json.connectionCLientAliases[ others[i] ] + ", ";
-				}
-					msg += "and " + json.connectionCLientAliases[others[others.length-1]];
-				}
-				else if(others.length == 2) {
-					msg += json.connectionCLientAliases[ others[0] ] + " and " + json.connectionCLientAliases[ others[1] ]
-				}
-				else if(others.length == 1) {
-					msg += json.connectionCLientAliases[ others[0] ]
-				}
-				else throw new Error("others.length=" + others.length);
-				
+				if(json.cId == userConnectionId) {
+					var msg = "You are in collaboration mode with ";
+					var others = connectedClientIds.filter(notMe);
+					if(others.length > 2) {
+						for (var i=0; i < others.length-1; i++) {
+							msg += json.connectionCLientAliases[ others[i] ] + ", ";
+						}
+						msg += "and " + json.connectionCLientAliases[others[others.length-1]];
+					}
+					else if(others.length == 2) {
+						msg += json.connectionCLientAliases[ others[0] ] + " and " + json.connectionCLientAliases[ others[1] ]
+					}
+					else if(others.length == 1) {
+						msg += json.connectionCLientAliases[ others[0] ]
+					}
+					else throw new Error("others.length=" + others.length);
+					
 					alertBox(msg, "COLLABORATION_NOTICE");
-			}
-			else {
-				if(clientLeaveDialog.hasOwnProperty(json.alias)) {
-					clientLeaveDialog[json.alias].close();
-					delete clientLeaveDialog[json.alias];
 				}
 				else {
-					var msg = json.alias + " joined your session.";
-					
-					if(!wasInCollabMode) msg += "\nYou are now in collaboration mode!";
-					
+					if(clientLeaveDialog.hasOwnProperty(json.alias)) {
+						clientLeaveDialog[json.alias].close();
+						delete clientLeaveDialog[json.alias];
+					}
+					else {
+						var msg = json.alias + " joined your session.";
+						
+						if(!wasInCollabMode) msg += "\nYou are now in collaboration mode!";
+						
 						alertBox(msg, "COLLABORATION_NOTICE");
+					}
 				}
-			}
 			}
 			
 			EDITOR.stat("collaboration_mode");
@@ -836,8 +889,8 @@ callback(currentValue, oldValue, e);
 	function collabMoveCaret(file, caret) {
 		
 		if(file.noCollaboration) {
-console.warn("Not moving caret because collaboration disabled in " + file.path);
-		return;
+			console.warn("Not moving caret because collaboration disabled in " + file.path);
+			return;
 		}
 		
 		var caretEvent = {
@@ -852,7 +905,7 @@ console.warn("Not moving caret because collaboration disabled in " + file.path);
 	
 	function collabFileOpen(file) {
 		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) {
-fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
+			fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
 		}
 		if(!ignoreUndoRedoEvent.hasOwnProperty(file.path)) {
 			ignoreUndoRedoEvent[file.path] = [];
@@ -863,8 +916,8 @@ fileChangeEventOrderCounters[file.path] = -1; // -1 to prevent 0:null
 		if(!collabMode) return true;
 		
 		if(file.noCollaboration) {
-console.warn("Collaboration disabled in " + file.path);
-		return;
+			console.warn("Collaboration disabled in " + file.path);
+			return;
 		}
 		
 		if(!file.isSaved) syncFile(file);
@@ -890,8 +943,8 @@ console.warn("Collaboration disabled in " + file.path);
 	function collabSelectText(file, selection) {
 		if(!collabMode) return true;
 		if(file.noCollaboration) {
-console.warn("Collaboration disabled in " + file.path);
-		return;
+			console.warn("Collaboration disabled in " + file.path);
+			return;
 		}
 		
 		console.log(selection);
@@ -921,29 +974,29 @@ console.warn("Collaboration disabled in " + file.path);
 		console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
 		
 		if(file.noCollaboration) {
-console.warn("Collaboration disabled in " + file.path);
-		return;
+			console.warn("Collaboration disabled in " + file.path);
+			return;
 		}
 		
 		if(file == undefined) throw new Error("file=" + file);
-			if(change == undefined) throw new Error("change=" + file);
-			if(text == undefined) throw new Error("text=" + file);
-			if(index == undefined) throw new Error("index=" + index);
-			if(row == undefined) throw new Error("row=" + row);
-			if(col == undefined) throw new Error("col=" + col);
-			
-			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
-			
-			var fileChangeEvent = {
-				filePath: file.path, 
-				type: change, 
-				text: text, 
-				index: index, 
-				row: row || file.caret.row,
-				col: col || file.caret.col,
-				order: ++fileChangeEventOrderCounters[file.path], 
-				cId: userConnectionId // The server adds cId, but we also want it in the file change object
-			};
+		if(change == undefined) throw new Error("change=" + file);
+		if(text == undefined) throw new Error("text=" + file);
+		if(index == undefined) throw new Error("index=" + index);
+		if(row == undefined) throw new Error("row=" + row);
+		if(col == undefined) throw new Error("col=" + col);
+		
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+		
+		var fileChangeEvent = {
+			filePath: file.path, 
+			type: change, 
+			text: text, 
+			index: index, 
+			row: row || file.caret.row,
+			col: col || file.caret.col,
+			order: ++fileChangeEventOrderCounters[file.path], 
+			cId: userConnectionId // The server adds cId, but we also want it in the file change object
+		};
 		
 		console.log("fileChangeEvent.order=" + fileChangeEvent.order);
 		
@@ -1114,8 +1167,8 @@ console.warn("Collaboration disabled in " + file.path);
 			if(!file) console.log("File not opened, no need to sync: path=" + sync.path);
 			else {
 				if(file.noCollaboration) {
-console.warn("Not syncing because collaboration is disabled in " + file.path);
-				return;
+					console.warn("Not syncing because collaboration is disabled in " + file.path);
+					return;
 				}
 				
 				if(file.isSaved && file.hash == sync.hash) updateFileConent(file, sync.text);
@@ -1160,8 +1213,8 @@ console.warn("Not syncing because collaboration is disabled in " + file.path);
 			}
 			
 			if(file.noCollaboration) {
-console.warn("Not updating because collaboration disabled in " + file.path);
-			return;
+				console.warn("Not updating because collaboration disabled in " + file.path);
+				return;
 			}
 			
 			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
@@ -1189,11 +1242,11 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 					previousEvent = arr[i];
 					
 					//if(arr[i].cId == userConnectionId) {
-						// I just sent an event with this order
-						// In my point of view I was first
-						//console.warn("Change " + i + "/" + arr.length + " of ev.order=" + ev.order + " was made by this client.");
-						// We need to transform the event with the other event in mind
-						//transformBackwards(ev, previousEvent);
+					// I just sent an event with this order
+					// In my point of view I was first
+					//console.warn("Change " + i + "/" + arr.length + " of ev.order=" + ev.order + " was made by this client.");
+					// We need to transform the event with the other event in mind
+					//transformBackwards(ev, previousEvent);
 					//}
 					if(arr[i].cId == ev.cId) {
 						throw new Error("User with cId=" + ev.cId + " sent two change events with the same order! " + JSON.stringify(arr[i]) + " vs " + JSON.stringify(ev));
@@ -1244,13 +1297,13 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
 			
 			if(json.cId != userConnectionId) {
-			// ### Apply file change
+				// ### Apply file change
 				
-			ignoreFileChange = true;
-			redo(file, ev, false);
-			ignoreFileChange = false;
-			
-			if(file == EDITOR.currentFile) EDITOR.renderNeeded();
+				ignoreFileChange = true;
+				redo(file, ev, false);
+				ignoreFileChange = false;
+				
+				if(file == EDITOR.currentFile) EDITOR.renderNeeded();
 			}
 			
 			// Undo-redo
@@ -1354,7 +1407,7 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 			if(prev.text.indexOf("\n") != -1) ev.row--;
 		}
 		//else if(prev.type == "reload") { // The file was reloaded with new text
-			// No need to transform, the chnage was over-written
+		// No need to transform, the chnage was over-written
 		//}
 		
 	}
@@ -1372,14 +1425,14 @@ console.warn("Not updating because collaboration disabled in " + file.path);
 		console.log("collabRedo!");
 		
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
-console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
+			console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
 		}
 		
 		var history = undoRedoHistory[file.path];
 		
 		if(history.length == 0) {
-console.warn("Unable to redo: No undo/redo history to undo! history.length=" + history.length + "");
+			console.warn("Unable to redo: No undo/redo history to undo! history.length=" + history.length + "");
 			return PREVENT_DEFAULT;
 		}
 		
@@ -1424,7 +1477,7 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 				if(history[i].cId != userConnectionId) transformBackwards(change, history[i]);
 			}
 			console.log("Transformed change=" + JSON.stringify(change));
-			}
+		}
 		
 		saveUndoRedoHistory = false;
 		redo(file, change, true);
@@ -1447,7 +1500,7 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 		// Why explicitly check for EDITOR.input !? Does not work if undo via window menu
 		// Answer: To prevent undo when undoing something inside a <input> element!!
 		if(!EDITOR.input) return true; 
-			
+		
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
 			console.warn("collabUndo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
@@ -1489,7 +1542,7 @@ console.warn("Unable to redo: No undo/redo history to undo! history.length=" + h
 			for (var i=history.index+1; i<history.length; i++) {
 				//console.log("collabUndo:  i=" + i + " history.length=" + history.length);
 				if(history[i].cId != userConnectionId) {
-transformBackwards(change, history[i]);
+					transformBackwards(change, history[i]);
 					console.log("collabUndo: Ended up with index=" + change.index + " and row=" + change.row);
 				}
 			}
@@ -1567,7 +1620,7 @@ transformBackwards(change, history[i]);
 		
 		if(moveCaret && caret) {
 			file.caret = caret;
-file.fixCaret();
+			file.fixCaret();
 			file.scrollToCaret();
 		}
 		
@@ -1747,7 +1800,7 @@ file.fixCaret();
 			collabMode = false;
 			
 			setTimeout(function cleanup() {
-
+				
 				// Clean for next run
 				for(var obj in fileChangeEventOrderCounters) delete fileChangeEventOrderCounters[obj];
 				for(var obj in fileChangeEvents) delete fileChangeEvents[obj];
@@ -1836,7 +1889,7 @@ file.fixCaret();
 					EDITOR.input = true; // Allow input
 					
 					if(!collabMode) throw new Error("collabMode=" + collabMode);
-
+					
 					// Undo/redo in colaboration mode
 					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
 					if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
@@ -1845,28 +1898,28 @@ file.fixCaret();
 					
 					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert b
 					if(file.text != "a\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-
+					
 				}, function() {
 					
 					fileChangeOrder = 2; // Will cause next change to get order=3
-		
-		f({change: "insert", index: 0, text: "å"});
-		if(file.text != "åa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-		
+					
+					f({change: "insert", index: 0, text: "å"});
+					if(file.text != "åa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
 				}, function() {
 					
-		EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert b
-		if(file.text != "åab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-		
+					EDITOR.mock("keydown", {char: "Y", ctrlKey: true}); // Redo insert b
+					if(file.text != "åab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
 				}, function() {
 					
-		f({change: "insert", index: 1, text: "ä"});
-		if(file.text != "åäab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
-		
+					f({change: "insert", index: 1, text: "ä"});
+					if(file.text != "åäab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					
 				}, function() {
 					
 					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert b
-		if(file.text != "åäa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					if(file.text != "åäa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 					
 					collabMode = false;
 					
@@ -1891,7 +1944,7 @@ file.fixCaret();
 		
 		EDITOR.openFile("undoredo.txt", "\n", function colaborationTestFileOpened(err, file) {
 			if(err) throw err;
-
+			
 			EDITOR.mock("typing", "ab");
 			if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
@@ -2175,7 +2228,7 @@ file.fixCaret();
 	
 	function timeSerial(func) {
 		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");
-		 
+		
 		var timers = [];
 		// Wait between each step
 		var timeMult = 100;
