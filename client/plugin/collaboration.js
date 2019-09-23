@@ -54,7 +54,8 @@
 	
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
 	var playbackInterval, isPlaying = false, playbackFile, recordInfo = {}, lastRecordItem = -1;
-	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder
+	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
+	var audioBlob
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -229,12 +230,40 @@
 	}
 	
 	function saveRecord() {
+		
+		var audioFilePath = UTIL.joinPaths("/recordings/", recordInfo.filePath + ".ogg");
+		
+		if(typeof FileReader != "undefined") {
+			if(audioBlob) {
+saveAudio(audioBlob, audioFilePath);
+				recordInfo.audioPath = audioFilePath;
+			}
+			else alertBox("No audio data!");
+		}
+		
 		var data = {
 			info: recordInfo,
 			record: record
 		}
 		
 		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.filePath + ".json"), JSON.stringify(data, null, 2));
+		
+		function saveAudio(audioBlob, audioFilePath) {
+			
+			var folder = UTIL.getDirectoryFromPath(audioFilePath);
+			var reader = new FileReader();
+			reader.readAsDataURL(audioBlob);
+			reader.onload = function gotData() {
+				
+				var base64AudioMessage = reader.result.split(',')[1];
+				EDITOR.createPath(folder, function(err) {
+					if(err) return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
+					EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err) {
+						if(err) alertBox("Failed to save audio data! " + err.message);
+					});
+				});
+			};
+		}
 	}
 	
 	function startOrStopRecording() {
@@ -269,6 +298,8 @@
 	}
 	
 	function startRecordning() {
+		
+		// todo: Better indicator that we are actually recording. Very annoying if it somehow stops recordning and we don't notice it.
 		
 		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
 			alertBox("Failed to get microphone access! Error: " + err.message);
@@ -311,9 +342,9 @@
 			console.log("data available after MediaRecorder.stop() called.");
 			
 			audioPlayer.controls = true;
-			var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+			audioBlob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
 			chunks = [];
-			var audioURL = window.URL.createObjectURL(blob);
+			var audioURL = window.URL.createObjectURL(audioBlob);
 			audioPlayer.src = audioURL;
 			console.log("recorder stopped");
 			
@@ -391,6 +422,7 @@
 	
 	function stopPlayback() {
 		isPlaying = false;
+		audioPlayer.pause();
 		clearInterval(playbackInterval);
 		playButton.innerText = "▶ Start playback";
 	}
