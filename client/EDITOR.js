@@ -9881,6 +9881,9 @@ function mouseMove(mouseMoveEvent) {
 		}
 	}
 	
+		while(!target.id && target.parent) target = target.parent;
+		console.log("target.id=" + target.id);
+		
 	//console.log("EDITOR.input=" + EDITOR.input);
 	
 	EDITOR.interact("mouseMove", mouseMoveEvent);

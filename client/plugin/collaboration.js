@@ -58,7 +58,8 @@
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
-	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY
+	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
+	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenuHeight"]
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -444,7 +445,9 @@
 		}
 		else {
 			
-			if(target.id && target.id != lastRecordedMouseTargetId) {
+			while(!target.id && target.parent) target = target.parent;
+				
+			if(target.id && target.id != lastRecordedMouseTargetId && targetsToBeIgnored.indexOf(target.id) != -1) {
 				var mouseEvent = {
 					targetId: target.id
 				};

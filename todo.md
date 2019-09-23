@@ -35,11 +35,15 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
+with recordnings, use OT instead of undo/redo so that users can type at the same time!
+
+todo: Give all elements an id so they can be targeted when recordning!
+
 problem: How to best explain programming concepts ?
 solution: Able to record what you type while explaining with voice
 
-Publish tutorial (move files to wwwpub ?)
-Publish app (register appname.nodejsplayground.com ?)
+Publish tutorial:  Shows the tutorial under tutorials on nodejsplayground.com  (move files to wwwpub ?)
+Publish app: Shows the app under apps on nodejsplayground.com (register appname.nodejsplayground.com ?)
 
 
 Add MongdoDB database support!
