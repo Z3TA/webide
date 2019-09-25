@@ -229,7 +229,7 @@ sendit();
 		// We need editor errors to look different to other dialogs.
 		// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
 		var death = document.createElement("div");
-		death.setAttribute("id", "death");
+		death.setAttribute("id", "errorOverlay");
 		death.style.width = window.innerWidth + "px";
 		death.style.height = window.innerHeight + "px";
 		death.style.zIndex = "2";

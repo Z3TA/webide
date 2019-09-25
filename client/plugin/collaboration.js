@@ -59,7 +59,7 @@
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
 	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
-	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenuHeight"]
+	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenuHeight", "errorOverlay"];
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -722,7 +722,7 @@ fakeMouseElement = document.createElement("div");
 		}
 		else if(targetId) {
 			var target = document.getElementById(targetId);
-			if(!target) return alertBox("Unable to locate element with id=" + targetId);
+			if(!target) return alertBox("When playing back mouse event.type=" + mouseEvent.type + " we where unable to locate element with id=" + targetId);
 			
 			var rect = target.getBoundingClientRect();
 			
