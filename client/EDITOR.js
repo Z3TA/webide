@@ -2844,7 +2844,6 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
-		
 		menu.domElement = document.createElement("table");
 		menu.domElement.setAttribute("border", "0");
 		menu.domElement.setAttribute("cellspacing", "0");
@@ -2869,6 +2868,8 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		menu.domElement.addEventListener("mouseover", stillActive);
 		
+		
+		
 		var windowMenu = document.getElementById("windowMenu");
 		windowMenu.appendChild(menu.domElement); // All menus goes into the windowMenu div (no nested lists!)
 		
@@ -2876,7 +2877,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			if(!mouseEvent) mouseEvent = event;
 			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
 			
-			console.log("DropdownMenu:stillActive: ul=", menu.domElement, " movedto=", element);
+			console.log("DropdownMenu:stillActive: domElement=", menu.domElement, " movedto=", element);
 			menu.active = true;
 		}
 		
@@ -3139,6 +3140,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			item.domElement.setAttribute("border", "0");
 			item.domElement.setAttribute("cellspacing", "0");
 			item.domElement.setAttribute("cellpadding", "0");
+			
 			item.wrapper = document.createElement("tr");
 			item.domElement.appendChild(item.wrapper);
 		}
@@ -3147,6 +3149,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		item.separator = options.separator ? " separator" + options.separator : ""; // top or bottom
 		
 		item.domElement.setAttribute("class", "item" + item.separator);
+		item.domElement.setAttribute("id", "dropdownMenu_" + label);
 		
 		item.activated = false;
 		
@@ -3156,6 +3159,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		item.text = document.createElement("td");
 		item.text.setAttribute("class", "label");
+		
 		item.text.innerText = label;
 		item.wrapper.appendChild(item.text);
 		
@@ -3239,6 +3243,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		
 		function showSubmenu() {
+			console.log("showSubmenu");
 			var rect = item.domElement.getBoundingClientRect();
 			
 			if(stemParent) stemParent.activated = true;
@@ -3247,6 +3252,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		}
 		
 		function showSubmenuMaybe() {
+			console.log("showSubmenuMaybe");
 			if(stemParent && stemParent.activated) {
 				
 				item.parentMenu.hideSiblings(item.subMenu);
@@ -9881,10 +9887,13 @@ function mouseMove(mouseMoveEvent) {
 		}
 	}
 	
-		while(!target.id && target.parent) target = target.parent;
-		console.log("target.id=" + target.id);
+		while(!target.id && target.parentNode) {
+			console.log("target.id=" + target.id + " target.tagName=" + target.tagName + " target.class=" + target.class);
+			target = target.parentNode;
+		}
+		console.log("Final: target.id=" + target.id + " target.tagName=" + target.tagName + " target.class=" + target.class + " target.parentNode=", target.parentNode);
 		
-	//console.log("EDITOR.input=" + EDITOR.input);
+		//console.log("EDITOR.input=" + EDITOR.input);
 	
 	EDITOR.interact("mouseMove", mouseMoveEvent);
 	

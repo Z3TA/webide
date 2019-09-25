@@ -45,6 +45,12 @@ solution: Able to record what you type while explaining with voice
 Publish tutorial:  Shows the tutorial under tutorials on nodejsplayground.com  (move files to wwwpub ?)
 Publish app: Shows the app under apps on nodejsplayground.com (register appname.nodejsplayground.com ?)
 
+Making a new blog post or page:
+Type in an URL that does not exist, like www.yoursite.com/newpage, and instead of a 404 page you 
+will get an embedded editor, where you can preview and publish directly.
+
+
+
 
 Add MongdoDB database support!
 

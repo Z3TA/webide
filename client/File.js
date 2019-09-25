@@ -1140,6 +1140,17 @@ file.mode = "text";
 		
 	}
 	
+	File.prototype.rowColFromMouse = function(mouseX, mouseY) {
+		var file = this;
+		
+		var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
+		var clickFeel = EDITOR.settings.gridWidth / 2;
+		var gridRow = file.grid[mouseRow] || {indentation: 0};
+		var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+		
+		return {row: mouseRow, col: mouseCol};
+	}
+	
 	File.prototype.insertSpace = function(spaceCount, caret) {
 		// Insert spaceCount spaces at caret
 		var file = this;

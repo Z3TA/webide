@@ -287,6 +287,7 @@
 		saveRecordButton.disabled = false;
 		
 		EDITOR.removeEvent("mouseMove", recordMouseMovement);
+		EDITOR.removeEvent("mouseClick", recordMouseClick);
 		
 		// Stop the audio stream
 		mediaRecorder.stop();
@@ -321,6 +322,9 @@
 		recordInfo.startDate = (new Date()).getTime();
 		
 		EDITOR.on("mouseMove", recordMouseMovement);
+		EDITOR.on("mouseClick", recordMouseClick);
+		
+		
 		
 		record.length = 0; // Reset
 		
@@ -428,26 +432,24 @@
 
 		if(target.className == "fileCanvas") {
 			var file = EDITOR.currentFile;
-			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
-			var clickFeel = EDITOR.settings.gridWidth / 2;
-			var gridRow = file.grid[mouseRow] || {indentation: 0};
-			var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 			
-			if(mouseRow != lastRecordedMouseCaretRow || mouseCol != lastRecordedMouseCaretCol) {
+			var grid = file.rowColFromMouse(mouseX, mouseY);
+			
+			if(grid.row != lastRecordedMouseCaretRow || grid.col != lastRecordedMouseCaretCol) {
 				var mouseEvent = {
-					row: mouseRow,
-					col: mouseCol
+					row: grid.row,
+					col: grid.col
 				};
 			}
 			
-			lastRecordedMouseCaretRow = mouseRow;
-			lastRecordedMouseCaretCol = mouseCol;
+			lastRecordedMouseCaretRow = grid.row;
+			lastRecordedMouseCaretCol = grid.col;
 		}
 		else {
 			
-			while(!target.id && target.parent) target = target.parent;
+			while(!target.id && target.parentNode) target = target.parentNode;
 				
-			if(target.id && target.id != lastRecordedMouseTargetId && targetsToBeIgnored.indexOf(target.id) != -1) {
+			if(target.id && target.id != lastRecordedMouseTargetId && targetsToBeIgnored.indexOf(target.id) == -1) {
 				var mouseEvent = {
 					targetId: target.id
 				};
@@ -456,7 +458,42 @@
 			}
 		}
 		
-		if(mouseEvent) record.push({date: (new Date()).getTime(), mouse: mouseEvent});
+		if(mouseEvent) {
+			mouseEvent.type = "move";
+record.push({date: (new Date()).getTime(), mouse: mouseEvent});
+		}
+		
+	}
+	
+	function recordMouseClick(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
+		
+		if(target.className == "fileCanvas") {
+			var file = EDITOR.currentFile;
+			var grid = file.rowColFromMouse(mouseX, mouseY);
+			var mouseClick = {
+				row: grid.row,
+				col: grid.col,
+				mouseButton: button,
+				keyboardCombo: keyboardCombo
+			};
+		}
+		else {
+			while(!target.id && target.parentNode) target = target.parentNode;
+			if(target.id) {
+				var mouseClick = {
+					targetId: target.id,
+					mouseButton: button,
+					keyboardCombo: keyboardCombo
+				};
+			}
+		}
+		
+		if(mouseClick) {
+			mouseClick.type = "click";
+			record.push({date: (new Date()).getTime(), mouse: mouseClick});
+		}
+		
+		return true;
 	}
 	
 	function recordFileChange(fileChangeEvent) {
@@ -557,7 +594,7 @@
 		}
 		
 		if(record.length == 0) {
-			alertBox("No file change events where captured in the recording!");
+			alertBox("No file change events where captured in the recording! Or the current file doesn't have a json record array.");
 			playAudio();
 			return;
 		}
@@ -571,7 +608,7 @@ fakeMouseElement = document.createElement("div");
 			document.documentElement.appendChild(fakeMouseElement);
 		}
 		
-		if(recordTimeline.value == 0 || lastRecordItem >= record.length) {
+		if(recordTimeline.value == 0 || lastRecordItem >= record.length-1) {
 			lastRecordItem = -1;
 		}
 		
@@ -690,7 +727,7 @@ fakeMouseElement = document.createElement("div");
 			var rect = target.getBoundingClientRect();
 			
 			var mouseX = Math.round(rect.left + target.offsetWidth/2);
-			var mouseY = Math.round(rect.top + target.offsetHeight/2);;
+			var mouseY = Math.round(rect.top + target.offsetHeight/2);
 			
 		}
 		else {
@@ -700,10 +737,63 @@ fakeMouseElement = document.createElement("div");
 		
 		if(!UTIL.isNumeric(mouseX) || !UTIL.isNumeric(mouseY)) throw new Error("mouseX=" + mouseX + " mouseY=" + mouseY + " rect=" + JSON.stringify(rect));
 		
-		if(mousePlaybackPositionX == -100 && mousePlaybackPositionY == -100) instant = true;
+		if(mouseEvent.type == "move") {
+			
+			if(targetId) {
+				fireEvent( mouseEvent.targetId, "mouseover" );
+			}
+			
+			if(mousePlaybackPositionX == -100 && mousePlaybackPositionY == -100) instant = true;
+			
+			mousePlaybackAnimation(mouseX, mouseY, instant);
+			
+		}
+		else if(mouseEvent.type == "click") {
+			
+			mousePlaybackAnimation(mouseX, mouseY, true);
+			
+			if(targetId) {
+				target.focus();
+				fireEvent( mouseEvent.targetId, "click" );
+			}
+			
+		}
+		else throw new Error("Unknown mouse event type=" + mouseEvent.type + " in mouseEvent=" + JSON.stringify(mouseEvent));
 		
-		mousePlaybackAnimation(mouseX, mouseY, instant);
 		
+		
+		
+	}
+	
+	function fireEvent( elementId, eventName ) {
+		var el = document.getElementById(elementId)
+		
+		if(!el) throw new Error("Unable to find element with id=" + elementId);
+		
+		var onname = 'on' + eventName;
+		
+		if(typeof el.dispatchEvent == "function") {
+			if(typeof Event == "function") {
+				var evObj = new Event(eventName);
+			}
+			else if(typeof document.createEvent == "function") {
+				var evObj = document.createEvent( 'Events' );
+				evObj.initEvent( eventName, true, false );
+			}
+			else throw new Error("Unable to create a new event! Event and document.createEvent are not supported by " + BROWSER);
+			
+			console.log("Dispatching to elementId=" + elementId + " eventName=" + eventName + " evObj=", evObj);
+			el.dispatchEvent( evObj );
+		}
+		else if(typeof el.fireEvent == "function") {
+			console.log("Firing onname=" + onname + " on elementId=" + elementId);
+			el.fireEvent( onname );
+		}
+		else if(el.hasOwnProperty(onname)) {
+			console.log("Calling onname=" + onname + " on elementId=" + elementId);
+			el[onname]();
+		}
+		else throw new Error("No means to trigger eventName=" + eventName + " on elementId=" + elementId + " in BROWSER=" + BROWSER);
 	}
 	
 	function mousePlaybackAnimation(newDestX, newDestY, instant) {
