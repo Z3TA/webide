@@ -53,7 +53,7 @@
 	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord;
 	
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
-	var playbackInterval, isPlaying = false, playbackFile, recordInfo = {}, lastRecordItem = -1;
+	var playbackInterval, isPlaying = false, recordInfo = {}, lastRecordItem = -1;
 	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
@@ -323,7 +323,7 @@
 		
 		EDITOR.on("mouseMove", recordMouseMovement);
 		EDITOR.on("mouseClick", recordMouseClick);
-		
+		EDITOR.on("fileShow", recordFileShow);
 		
 		
 		record.length = 0; // Reset
@@ -331,6 +331,12 @@
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
 		
+	}
+	
+	function recordFileShow(file) {
+		
+		
+		record.push({date: (new Date()).getTime(), fileShow: file.path});
 	}
 	
 	function gotAudio(stream) {
@@ -496,7 +502,15 @@
 		return true;
 	}
 	
-	function recordFileChange(fileChangeEvent) {
+	function recordFileChange(file, fileChangeEvent) {
+		
+		if(!recordInfo.files) recordInfo.files = {};
+		if(!recordInfo.files.hasOwnProperty(file.path)) {
+recordInfo.files[file.path] = {
+				startText: file.text
+			};
+		}
+		
 		record.push({date: (new Date()).getTime(), change: fileChangeEvent});
 	}
 	
@@ -617,21 +631,27 @@
 		
 		if(lastRecordItem == -1) {
 			// Reset
-			var filePath = UTIL.joinPaths("/playback/", recordInfo.filePath)
-			if(EDITOR.files.hasOwnProperty(filePath)) {
-				playbackFile = EDITOR.files[filePath];
-				playbackFile.reload(recordInfo.startText);
-				EDITOR.showFile(playbackFile);
-				return start();
+			var filesToReset = 0;
+			var filesReset = 0;
+			var filePath, file;
+			for(var origFilePath in recordInfo.files) {
+				filePath = playBackFile(origFilePath);
+				filesToReset++;
+				if(EDITOR.files.hasOwnProperty(filePath)) {
+					file = EDITOR.files[filePath];
+					file.reload(recordInfo.files[origFilePath].startText);
+					filesReset++;
+				}
+				else {
+					EDITOR.openFile(filePath, recordInfo.startText, function(err, file) {
+						filesReset++;
+						if(err) return alertBox("Unable to reset filePath=" + filePath + " Error: " + err.message);
+						if(filesReset == filesToReset) start();
+					});
+				}
 			}
-			
-			EDITOR.openFile(filePath, recordInfo.startText, function(err, file) {
-				if(err) return alertBox(err.message);
-				
-				playbackFile = file;
-				
-				start();
-			});
+			if(filesReset == filesToReset) start();
+			return;
 		}
 		else start();
 		
@@ -697,13 +717,19 @@
 		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS) ) {
 			lastRecordItem++;
 			
-			if(record[lastRecordItem].change) redo(playbackFile, record[lastRecordItem].change, true);
+			if(record[lastRecordItem].change) redo(EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)], record[lastRecordItem].change, true);
 			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
 			
 		}
 		
 		
 		
+	}
+	
+	function playBackFile(filePath) {
+		// Prevent playback from overwriting existing files
+		
+		return UTIL.joinPaths("/playback/", filePath);
 	}
 	
 	function mousePlayback(mouseEvent, instant) {
@@ -859,11 +885,7 @@
 	function recordTimelineChange(currentValue, oldValue, e) {
 		console.log("recordTimelineChange: currentValue=" + currentValue + " oldValue=" + oldValue);
 		
-		if(playbackFile && !EDITOR.files.hasOwnProperty(playbackFile.path)) playbackFile = undefined; // It has probably been closed
-		
-		if(playbackFile == undefined) return alertBox("No playback file selected");
-		
-		EDITOR.showFile(playbackFile); 
+		var file;
 		
 		playbackStart = recordInfo.startDate;
 		
@@ -877,7 +899,10 @@
 					lastRecordItem++;
 					
 					var moveCaret = true;
-					if(record[lastRecordItem].change) redo(playbackFile, record[lastRecordItem].change, moveCaret);
+					if(record[lastRecordItem].change) {
+						file = EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)];
+						redo(file, record[lastRecordItem].change, moveCaret);
+					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 				}
 			}
@@ -896,7 +921,10 @@
 				if(record[lastRecordItem].date >= (playbackStart+i*1000/playbackFPS)) {
 					
 					var moveCaret = true;
-					if(record[lastRecordItem].change) undo(playbackFile, record[lastRecordItem].change, moveCaret);
+					if(record[lastRecordItem].change) {
+						file = EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)];
+						undo(file, record[lastRecordItem].change, moveCaret);
+					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					
 					lastRecordItem--;
@@ -1293,7 +1321,7 @@
 		}
 		
 		if(isRecording) {
-			recordFileChange(fileChangeEvent);
+			recordFileChange(file, fileChangeEvent);
 		}
 		
 		return true;

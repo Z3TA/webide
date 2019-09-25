@@ -35,6 +35,10 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
+Able to switch between files when recordning
+
+Able to write in input text boxes when recording.
+
 with recordnings, use OT instead of undo/redo so that users can type at the same time!
 
 todo: Give all elements an id so they can be targeted when recordning!

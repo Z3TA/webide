@@ -72,6 +72,8 @@
 		if(content == undefined) content = "";
 		
 		EDITOR.openFile(path, content, function(err, file) {
+			if(err) return alertBox("Unable to create new file: " + err.message);
+			
 			// Mark the file as NOT saved, because its a NEW file
 			file.isSaved = false;
 			file.savedAs = false;
