@@ -59,7 +59,7 @@
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
 	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
-	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenuHeight", "errorOverlay"];
+	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenu", "windowMenuHeight", "errorOverlay", "body", "footer"];
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -745,12 +745,14 @@ fakeMouseElement = document.createElement("div");
 			
 			if(mousePlaybackPositionX == -100 && mousePlaybackPositionY == -100) instant = true;
 			
+			mousePlaybackPositionLastSetX = mouseX;
+			mousePlaybackPositionLastSetY = mouseY;
+			
 			mousePlaybackAnimation(mouseX, mouseY, instant);
+			
 			
 		}
 		else if(mouseEvent.type == "click") {
-			
-			mousePlaybackAnimation(mouseX, mouseY, true);
 			
 			if(targetId) {
 				target.focus();
@@ -801,16 +803,16 @@ fakeMouseElement = document.createElement("div");
 		console.log("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant)
 		
 		if(instant) {
+			if(!UTIL.isNumeric(newDestX) || !UTIL.isNumeric(newDestY)) throw new Error("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant);
+			
 			mousePlaybackPositionX = newDestX;
 			mousePlaybackPositionY = newDestY;
-			mousePlaybackPositionLastSetX = newDestX;
-			mousePlaybackPositionLastSetY = newDestY;
 			mousePlaybackDeltaX = 0;
 			mousePlaybackDeltaY = 0;
 			mousePlaybackCountdown = 1;
 		}
 		else if(newDestX != undefined && newDestY != undefined) {
-			var countdown = 30;
+			var countdown = 10; // Mouse smoothness
 			
 			mousePlaybackDeltaX = (newDestX - mousePlaybackPositionX) / countdown;
 			mousePlaybackDeltaY = (newDestY - mousePlaybackPositionY) / countdown;
