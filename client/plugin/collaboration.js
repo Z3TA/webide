@@ -429,7 +429,7 @@
 	}
 	
 	function recordMouseMovement(mouseX, mouseY, target, mouseMoveEvent) {
-
+		
 		if(target.className == "fileCanvas") {
 			var file = EDITOR.currentFile;
 			
@@ -448,7 +448,7 @@
 		else {
 			
 			while(!target.id && target.parentNode) target = target.parentNode;
-				
+			
 			if(target.id && target.id != lastRecordedMouseTargetId && targetsToBeIgnored.indexOf(target.id) == -1) {
 				var mouseEvent = {
 					targetId: target.id
@@ -460,7 +460,7 @@
 		
 		if(mouseEvent) {
 			mouseEvent.type = "move";
-record.push({date: (new Date()).getTime(), mouse: mouseEvent});
+			record.push({date: (new Date()).getTime(), mouse: mouseEvent});
 		}
 		
 	}
@@ -576,6 +576,9 @@ record.push({date: (new Date()).getTime(), mouse: mouseEvent});
 				
 				loadedAudioFile = path;
 				
+				setTimeout(setTimelineMax, 1000);
+				
+				
 				function getEncodedString(str) {
 					return 'data:audio/audio/ogg;base64,' + str;
 				}
@@ -600,7 +603,7 @@ record.push({date: (new Date()).getTime(), mouse: mouseEvent});
 		}
 		
 		if(!fakeMouseElement) {
-fakeMouseElement = document.createElement("div");
+			fakeMouseElement = document.createElement("div");
 			fakeMouseElement.classList.add("fakeMouseElement");
 			fakeMouseElement.style.width = playbackMouseSize + "px";
 			fakeMouseElement.style.height = playbackMouseSize + "px";
@@ -636,17 +639,6 @@ fakeMouseElement = document.createElement("div");
 			
 			playbackStart = recordInfo.startDate;
 			
-			// Max value should be total ticks = "total record time" / "time per tick"
-			// Time per tick is 1000/playbackFPS
-			
-			var totalRecordTimeAudio = audioPlayer.duration * 1000; // ms
-			var lastItem = record[record.length-1];
-			var totalRecordTimeRecord = lastItem.date-playbackStart; // ms
-			var totalRecordTime = Math.max(totalRecordTimeAudio, totalRecordTimeRecord);
-			
-			recordTimeline.max = Math.ceil(totalRecordTime / (1000/playbackFPS)) + 1;
-			
-			console.log("playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 			
 			playbackInterval = setInterval(playProgress, 1000/playbackFPS);
 			playButton.innerText = "■ Stop playback";
@@ -658,6 +650,24 @@ fakeMouseElement = document.createElement("div");
 			seekAudio();
 			audioPlayer.play();
 		}
+		
+	}
+	
+	function setTimelineMax() {
+		
+		// Note: Audio might still be loading (audioPlayer.duration=undefined)
+		
+		// Max value should be total ticks = "total record time" / "time per tick"
+		// Time per tick is 1000/playbackFPS
+		
+		var totalRecordTimeAudio = audioPlayer.duration ? audioPlayer.duration * 1000 : 0; // ms
+		var lastItem = record[record.length-1];
+		var totalRecordTimeRecord = lastItem.date-playbackStart; // ms
+		var totalRecordTime = Math.max(totalRecordTimeAudio, totalRecordTimeRecord);
+		
+		recordTimeline.max = Math.ceil(totalRecordTime / (1000/playbackFPS)) + 1;
+		
+		console.log("playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 		
 	}
 	
