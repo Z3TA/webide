@@ -51,7 +51,7 @@
 		
 		var index = currentScript.indexOf("/plugin/");
 		if(index == -1) {
-alertBox("Script is not in the plugin folder: " + currentScript);
+			alertBox("Unable to hot reload plugin! Current opened file is not in the plugin folder: " + currentScript);
 			return true;
 		}
 		currentScript = currentScript.slice(index);
