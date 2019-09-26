@@ -21,6 +21,7 @@
 			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 50], splitScreen);
 			
 			discoveryItem = document.createElement("img");
+			discoveryItem.setAttribute("id", "floatingWindowsDiscovery");
 			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Open new window";
 			discoveryItem.onclick = openWindowFromMenu;

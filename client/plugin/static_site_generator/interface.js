@@ -260,6 +260,7 @@
 		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
 		
 		discoveryBarImage = document.createElement("img");
+		discoveryBarImage.setAttribute("id", "SSG_discovery");
 		discoveryBarImage.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImage.title = "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")"
 		discoveryBarImage.onclick = toggleSSG;

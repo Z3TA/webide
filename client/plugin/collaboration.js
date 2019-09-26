@@ -58,7 +58,7 @@
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
-	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
+	var lastRecordedMouseTarget, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
 	var targetsToBeIgnoredRegexp = [];
 	var targetsToBeIgnored = [
 		"canvas", 
@@ -129,6 +129,7 @@
 			winMenuRecord = EDITOR.windowMenu.add("Record (with voiceover)", ["Tools", 30], recordWidget.show);
 			
 			var discoveryItem = document.createElement("img");
+			discoveryItem.setAttribute("id", "collaborationDiscovery");
 			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Invite collaborator";
 			discoveryItem.onclick = inviteFromDiscoveryBar;
@@ -312,6 +313,8 @@
 		
 		EDITOR.removeEvent("mouseMove", recordMouseMovement);
 		EDITOR.removeEvent("mouseClick", recordMouseClick);
+		EDITOR.removeEvent("fileShow", recordFileShow);
+		
 		
 		// Stop the audio stream
 		mediaRecorder.stop();
@@ -330,8 +333,12 @@
 	}
 	
 	function startRecordning() {
-		
 		// todo: Better indicator that we are actually recording. Very annoying if it somehow stops recordning and we don't notice it.
+		
+		if(isRecording) {
+			alertBox("Already recording! Click stop before retake.");
+			return;
+		}
 		
 		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
 			alertBox("Failed to get microphone access! Error: " + err.message);
@@ -340,14 +347,29 @@
 		var file = EDITOR.currentFile;
 		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
 		
-		recordInfo.startFile = file.path;
-		
-		if(!recordInfo.files) recordInfo.files = {};
-		if(!recordInfo.files.hasOwnProperty(file.path)) {
-			recordInfo.files[file.path] = {
-				startText: file.text
-			};
+		if(record.length > 0) {
+			var yes = "Overwrite";
+			var no = "Cancel";
+			confirmBox("Do you want to replace the current recording ?", [yes, no], function(answer) {
+				if(answer == yes) sure();
+				else if(answer == no) {
+					
+				}
+				else throw new Error("Unknown answer=" + answer);
+			});
 		}
+		else sure();
+		
+		function sure() {
+			
+			recordInfo.startFile = file.path;
+			
+			if(!recordInfo.files) recordInfo.files = {};
+			if(!recordInfo.files.hasOwnProperty(file.path)) {
+				recordInfo.files[file.path] = {
+					startText: file.text
+				};
+			}
 		
 		recordInfo.startDate = (new Date()).getTime();
 		
@@ -360,7 +382,7 @@
 		
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
-		
+		}
 	}
 	
 	function recordFileShow(file, lastFile) {
@@ -486,7 +508,7 @@
 		}
 		else {
 			
-			var mouseTarget = findMouseTarget(target);
+			var mouseTarget = findMouseTarget(target, "move");
 			
 			if(mouseTarget) {
 				
@@ -494,7 +516,7 @@
 					target: mouseTarget
 				};
 				
-				lastRecordedMouseTargetId = target.id;
+				lastRecordedMouseTarget = target;
 			}
 		}
 		
@@ -520,7 +542,7 @@
 			};
 		}
 		else {
-			var mouseTarget = findMouseTarget(target);
+			var mouseTarget = findMouseTarget(target, "click");
 			
 			if(mouseTarget) {
 				var mouseClick = {
@@ -550,19 +572,39 @@ if(!target) {
 			else return null;
 		}
 		
+		// No need to record same target over and over
+		if(target == lastRecordedMouseTarget) {
+			console.log("findMouseTarget: target=", target, " is same as lastRecordedMouseTarget");
+			return null;
+		}
+		
+		if(type == "move") {
+			// Ignore if target is a parent of last target to prevent mouse from jumping in playback
+			var allChildren = target.getElementsByTagName("*");
+			for(var i=0; i<allChildren.length; i++) {
+				if(allChildren[i] == lastRecordedMouseTarget) {
+					console.log("findMouseTarget: target=", target, " is a parent/grandparent for lastRecordedMouseTarget=", lastRecordedMouseTarget);
+					return null;
+				}
+			}
+		}
+		
 		if(recursion > 100) throw new Error("Max recursion reached! target=", target);
 		
-var id = target.id;
+		var id = target.id;
 		var mouseTarget = {};
 		var tag = target.tagName;
+		
+		if(tag == "HTML" || tag == "BODY") {
+			console.log("findMouseTarget: Giving up because tag=" + tag);
+return null;
+		}
 		
 		if(id) {
 			if(targetsToBeIgnored.indexOf(id) != -1) {
 				console.log("findMouseTarget: Ignoring id=" + id);
 				return findMouseTarget(target.parentNode, type, recursion, last);
 			}
-			
-			if(id == lastRecordedMouseTargetId) return null;
 			
 			for(var i=0; i<targetsToBeIgnoredRegexp.length; i++) {
 				if(id.match( targetsToBeIgnoredRegexp[i] )) {
@@ -573,14 +615,14 @@ var id = target.id;
 			
 			mouseTarget.id = id;
 			mouseTarget.tag = tag; // Save tag for debugging
-console.log("findMouseTarget: Found id=" + id);
+			console.log("findMouseTarget: Found id=" + id + " with tag=" + tag);
 return mouseTarget;
 		}
 		
 		
-		var innerText = target.innerText.trim();
+		var innerText = typeof target.innerText == "string" && target.innerText.trim();
 		
-		if(tag && innerText.length > 0) {
+		if(tag && typeof innerText == "string" && innerText.length > 0) {
 			// Is it unique ?
 			var elements = document.getElementsByTagName(tag);
 			var elementsWithText = 0;
@@ -991,7 +1033,10 @@ elementsWithText++;
 		}
 		
 		if(elementsWithText == 1) return targetElement;
-		else if(elementsWithText > 1) throw new Error("There exist more then one element with tag=" + target.tag + " and innerText=" + target.innerText);
+		else if(elementsWithText > 1) {
+			console.warn("There exist more then one element with tag=" + target.tag + " and innerText=" + target.innerText);
+			return targetElement;
+		}
 		
 		return null;
 		

@@ -51,6 +51,7 @@
 			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
 			var discoveryItem = document.createElement("img");
+			discoveryItem.setAttribute("id", "terminalDiscovery");
 			discoveryItem.src = "gfx/board.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Terminal emulator"
 			discoveryItem.onclick = startTerminalFromMenu;

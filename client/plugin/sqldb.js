@@ -44,6 +44,7 @@ else {
 			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
 			
 			discoveryBarImg = document.createElement("img");
+						discoveryBarImg.setAttribute("id", "sqlDiscovery");
 			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryBarImg.title = "SQL Database"
 			discoveryBarImg.onclick = toggleDbManager;

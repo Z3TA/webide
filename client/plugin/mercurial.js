@@ -98,6 +98,7 @@
 		EDITOR.registerAltKey({char: ",", alt:1, label: "version control", fun: showVersionControlWidget});
 		
 		discoveryBarImg = document.createElement("img");
+		discoveryBarImg.setAttribute("id", "sourceControlDiscovery");
 		discoveryBarImg.src = "gfx/share.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImg.title = "Version control"
 		discoveryBarImg.onclick = toggleVersionControlWidget;

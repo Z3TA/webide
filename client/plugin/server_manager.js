@@ -89,6 +89,7 @@
 			
 			
 			discoveryBarImage = document.createElement("img");
+			discoveryBarImage.setAttribute("id", "FtpSftpDiscovery");
 			discoveryBarImage.src = "gfx/cloud.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryBarImage.title = "FTP/SFT (" + EDITOR.getKeyFor(showServerManger) + ")";
 			discoveryBarImage.onclick = toggleShowServerManger;

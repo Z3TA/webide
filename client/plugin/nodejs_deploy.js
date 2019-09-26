@@ -45,6 +45,7 @@
 						winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
 						
 						var discoveryItem = document.createElement("img");
+						discoveryItem.setAttribute("id", "deployDiscovery");
 						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 						discoveryItem.title = "Node.JS Deploy (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
 						discoveryItem.onclick = nodejsDeployFromDiscoveryBar;

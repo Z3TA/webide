@@ -103,6 +103,7 @@
 		//exploreDir(EDITOR.workingDirectory);
 		
 		discoveryBarImage = document.createElement("img");
+		discoveryBarImage.setAttribute("id", "fileExplorerDiscovery");
 		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImage.title = "File explorer (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
