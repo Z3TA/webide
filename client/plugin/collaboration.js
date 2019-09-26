@@ -59,7 +59,26 @@
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
 	var lastRecordedMouseTargetId, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
-	var targetsToBeIgnored = ["canvas", "discoveryBar", "tabList", "windowMenu", "windowMenuHeight", "errorOverlay", "body", "footer"];
+	var targetsToBeIgnoredRegexp = [];
+	var targetsToBeIgnored = [
+		"canvas", 
+		"discoveryBar", 
+		"tabList", 
+		"windowMenu", 
+		"windowMenuHeight", 
+		"errorOverlay", 
+		"body", 
+		"footer", 
+		"header", 
+		"saveRecordButton", 
+		"cancelRecordningButton", 
+		"recordTimeline", 
+		"recordningAudioPlayer", 
+		"recordningSoundVisualizer", 
+		"startOrStopRecordningButton", 
+		"startOrStopPlaybackButton",
+		"wireframe"
+	];
 	
 	// todo: use collabreod and collabundo when playing back so that the watcher can also type
 	
@@ -171,24 +190,28 @@
 		var wrap = document.createElement("div");
 		
 		playButton = document.createElement("button");
+		playButton.setAttribute("id", "startOrStopPlaybackButton");
 		playButton.classList.add("playButton", "button", "half");
 		playButton.innerText = "▶ Start playback";
 		playButton.onclick = startOrStopPlayback;
 		wrap.appendChild(playButton);
 		
 		recordButton = document.createElement("button");
+		recordButton.setAttribute("id", "startOrStopRecordningButton");
 		recordButton.classList.add("recordButton", "button", "half");
 		recordButton.innerText = "● Start recording";
 		recordButton.onclick = startOrStopRecording;
 		wrap.appendChild(recordButton);
 		
 		soundVisualizer = document.createElement("canvas");
+		soundVisualizer.setAttribute("id", "recordningSoundVisualizer");
 		soundVisualizer.classList.add("soundVisualizer");
 		soundVisualizer.setAttribute("width", "200");
 		soundVisualizer.setAttribute("height", "26");
 		wrap.appendChild(soundVisualizer);
 		
 		audioPlayer = document.createElement("audio");
+		audioPlayer.setAttribute("id", "recordningAudioPlayer");
 		audioPlayer.classList.add("audioPlayer");
 		audioPlayer.setAttribute("controls", "true");
 		wrap.appendChild(audioPlayer);
@@ -205,9 +228,8 @@
 			wrap.appendChild(inputSound);
 		}
 		
-		
-		
 		saveRecordButton = document.createElement("button");
+		saveRecordButton.setAttribute("id", "saveRecordButton");
 		saveRecordButton.classList.add("button", "half");
 		saveRecordButton.innerText = "Save recording";
 		saveRecordButton.onclick = saveRecord;
@@ -215,6 +237,7 @@
 		wrap.appendChild(saveRecordButton);
 		
 		var cancelButton = document.createElement("button");
+		cancelButton.setAttribute("id", "cancelRecordningButton");
 		cancelButton.classList.add("button", "half");
 		cancelButton.innerText = "Cancel";
 		cancelButton.onclick = recordWidget.hide;
@@ -222,12 +245,13 @@
 		
 		
 		recordTimeline = document.createElement("input");
+		recordTimeline.setAttribute("id", "recordTimeline");
 		recordTimeline.classList.add("timeline");
 		recordTimeline.setAttribute("type", "range");
 		recordTimeline.setAttribute("min", 0);
 		recordTimeline.setAttribute("max", 10*60*1000/playbackFPS); // 10 minutes in ms
 		recordTimeline.setAttribute("value", 0);
-		onRangeChange(recordTimeline, recordTimelineChange)
+		onRangeChange(recordTimeline, timelineChange)
 		wrap.appendChild(recordTimeline);
 		
 		return wrap;
@@ -235,7 +259,7 @@
 	
 	function saveRecord() {
 		
-		var audioFilePath = UTIL.joinPaths("/recordings/", recordInfo.filePath + ".ogg");
+		var audioFilePath = UTIL.joinPaths("/recordings/", recordInfo.startFile + ".ogg");
 		
 		if(typeof FileReader != "undefined") {
 			if(audioBlob) {
@@ -250,7 +274,7 @@
 			record: record
 		}
 		
-		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.filePath + ".json"), JSON.stringify(data, null, 2));
+		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
 		
 		function saveAudio(audioBlob, audioFilePath) {
 			
@@ -314,10 +338,16 @@
 		});
 		
 		var file = EDITOR.currentFile;
-		if(!file) return alertBox("No file open!");
+		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
 		
-		recordInfo.filePath = file.path;
-		recordInfo.startText = file.text;
+		recordInfo.startFile = file.path;
+		
+		if(!recordInfo.files) recordInfo.files = {};
+		if(!recordInfo.files.hasOwnProperty(file.path)) {
+			recordInfo.files[file.path] = {
+				startText: file.text
+			};
+		}
 		
 		recordInfo.startDate = (new Date()).getTime();
 		
@@ -333,10 +363,13 @@
 		
 	}
 	
-	function recordFileShow(file) {
+	function recordFileShow(file, lastFile) {
 		
+		if(!lastFile) lastFile = EDITOR.currentFile;
 		
-		record.push({date: (new Date()).getTime(), fileShow: file.path});
+		if(lastFile) {
+			record.push({date: (new Date()).getTime(), changeFile: {to: file.path, from: lastFile.path}});
+		}
 	}
 	
 	function gotAudio(stream) {
@@ -453,11 +486,12 @@
 		}
 		else {
 			
-			while(!target.id && target.parentNode) target = target.parentNode;
+			var mouseTarget = findMouseTarget(target);
 			
-			if(target.id && target.id != lastRecordedMouseTargetId && targetsToBeIgnored.indexOf(target.id) == -1) {
+			if(mouseTarget) {
+				
 				var mouseEvent = {
-					targetId: target.id
+					target: mouseTarget
 				};
 				
 				lastRecordedMouseTargetId = target.id;
@@ -470,6 +504,8 @@
 		}
 		
 	}
+	
+	
 	
 	function recordMouseClick(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
@@ -484,27 +520,102 @@
 			};
 		}
 		else {
-			while(!target.id && target.parentNode) target = target.parentNode;
-			if(target.id) {
+			var mouseTarget = findMouseTarget(target);
+			
+			if(mouseTarget) {
 				var mouseClick = {
-					targetId: target.id,
+					target: mouseTarget,
 					mouseButton: button,
-					keyboardCombo: keyboardCombo
+					keyboardCombo: keyboardCombo,
+					type: "click"
 				};
+				
+				record.push({date: (new Date()).getTime(), mouse: mouseClick});
 			}
-		}
-		
-		if(mouseClick) {
-			mouseClick.type = "click";
-			record.push({date: (new Date()).getTime(), mouse: mouseClick});
 		}
 		
 		return true;
 	}
 	
+	function findMouseTarget(target, type, recursion, last) {
+		// Find the click target, it can be an ID or a tagName and innerText
+		
+		if(recursion == undefined) recursion = 0;
+		else recursion++;
+
+if(!target) {
+			console.log("findMouseTarget: target=" + target + " recursion=" + recursion + " last=" + JSON.stringify(last) + " (no more parent nodes to check)");
+			
+			if(last) return last;
+			else return null;
+		}
+		
+		if(recursion > 100) throw new Error("Max recursion reached! target=", target);
+		
+var id = target.id;
+		var mouseTarget = {};
+		var tag = target.tagName;
+		
+		if(id) {
+			if(targetsToBeIgnored.indexOf(id) != -1) {
+				console.log("findMouseTarget: Ignoring id=" + id);
+				return findMouseTarget(target.parentNode, type, recursion, last);
+			}
+			
+			if(id == lastRecordedMouseTargetId) return null;
+			
+			for(var i=0; i<targetsToBeIgnoredRegexp.length; i++) {
+				if(id.match( targetsToBeIgnoredRegexp[i] )) {
+					console.log("findMouseTarget: Regexp ignoring id=" + id);
+					return findMouseTarget(target.parentNode, type, recursion, last);
+				}
+			}
+			
+			mouseTarget.id = id;
+			mouseTarget.tag = tag; // Save tag for debugging
+console.log("findMouseTarget: Found id=" + id);
+return mouseTarget;
+		}
+		
+		
+		var innerText = target.innerText.trim();
+		
+		if(tag && innerText.length > 0) {
+			// Is it unique ?
+			var elements = document.getElementsByTagName(tag);
+			var elementsWithText = 0;
+			for(var i=0; i<elements.length; i++) {
+				if(elements[i].innerText.trim() == innerText) elementsWithText++;
+				
+			}
+			if(elementsWithText == 1) {
+				mouseTarget.tag = tag;
+				mouseTarget.innerText = innerText;
+				console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText);
+				// We prefer id over tag and innerText, so keep looking until we find and id, or use last
+				if(type == "move") return mouseTarget; // Prefer upper most element when recordning mouse movements
+				else if(type == "click") {
+					// Prefer elements that has click handlers if we are recordning clicks
+					if(typeof target.onclick == "function") return mouseTarget;
+					
+				}
+				
+				return findMouseTarget(target.parentNode, type, recursion, last ? last : mouseTarget);
+			}
+		}
+		
+		console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText);
+		
+		// Does it have any click/mouseover/mousedown handlers ?
+		
+		
+		return findMouseTarget(target.parentNode, type, recursion, last);
+		
+	}
+	
+	
 	function recordFileChange(file, fileChangeEvent) {
 		
-		if(!recordInfo.files) recordInfo.files = {};
 		if(!recordInfo.files.hasOwnProperty(file.path)) {
 recordInfo.files[file.path] = {
 				startText: file.text
@@ -548,6 +659,8 @@ recordInfo.files[file.path] = {
 	function startPlayback() {
 		isPlaying = true;
 		
+		var alreadyStarted = false;
+		
 		console.log("startPlayback!");
 		
 		var data = isRecordJson(EDITOR.currentFile);
@@ -564,6 +677,11 @@ recordInfo.files[file.path] = {
 		console.log("audioPlayer.readyState=" + audioPlayer.readyState);
 		if(recordInfo.audioPath && loadedAudioFile != recordInfo.audioPath) {
 			console.log("Loading audio file " + recordInfo.audioPath);
+			var waitingForAudioData = true;
+			audioPlayer.onloadeddata = function audioLoadedEvent() {
+				startMaybe("audioLoadedEvent");
+			};
+			
 			// couln't find a way to decode a binary string to something the audio player can understand, but it can however understand base64!'
 			EDITOR.readFromDisk(recordInfo.audioPath, false, "base64", function(err, path, data, hash) {
 				if(err) return alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
@@ -590,7 +708,7 @@ recordInfo.files[file.path] = {
 				
 				loadedAudioFile = path;
 				
-				setTimeout(setTimelineMax, 1000);
+				waitingForAudioData = false;
 				
 				
 				function getEncodedString(str) {
@@ -611,11 +729,12 @@ recordInfo.files[file.path] = {
 		}
 		
 		if(record.length == 0) {
-			alertBox("No file change events where captured in the recording! Or the current file doesn't have a json record array.");
+			alertBox("Current opened file doesn't seem to be a editor recording (json log). And there are no editor recording already loaded.");
 			playAudio();
 			return;
 		}
 		
+		// Don't bother checking if there actually are any mouse playback events
 		if(!fakeMouseElement) {
 			fakeMouseElement = document.createElement("div");
 			fakeMouseElement.classList.add("fakeMouseElement");
@@ -634,31 +753,46 @@ recordInfo.files[file.path] = {
 			var filesToReset = 0;
 			var filesReset = 0;
 			var filePath, file;
+			var startText;
 			for(var origFilePath in recordInfo.files) {
 				filePath = playBackFile(origFilePath);
 				filesToReset++;
+				startText = recordInfo.files[origFilePath].startText;
 				if(EDITOR.files.hasOwnProperty(filePath)) {
 					file = EDITOR.files[filePath];
-					file.reload(recordInfo.files[origFilePath].startText);
+					file.reload(startText);
 					filesReset++;
 				}
 				else {
-					EDITOR.openFile(filePath, recordInfo.startText, function(err, file) {
+					EDITOR.openFile(filePath, startText, function(err, file) {
 						filesReset++;
 						if(err) return alertBox("Unable to reset filePath=" + filePath + " Error: " + err.message);
-						if(filesReset == filesToReset) start();
+						startMaybe("afterOpenFile");
 					});
 				}
 			}
-			if(filesReset == filesToReset) start();
+			startMaybe("filesChecked");
+			
 			return;
 		}
-		else start();
+		else startMaybe("notResetting");
+		
+		function startMaybe(from) {
+			console.warn("startMaybe: from=" + from + " waitingForAudioData=" + waitingForAudioData + " filesReset=" + filesReset + " filesToReset=" + filesToReset);
+			if(!waitingForAudioData && filesReset == filesToReset) start();
+		}
 		
 		function start() {
 			
+			if(alreadyStarted) throw new Error("Playback already started!");
+			
+			alreadyStarted = true;
+			
 			playbackStart = recordInfo.startDate;
 			
+			setTimelineMax();
+			
+			showPlaybackFile(recordInfo.startFile);
 			
 			playbackInterval = setInterval(playProgress, 1000/playbackFPS);
 			playButton.innerText = "■ Stop playback";
@@ -687,7 +821,7 @@ recordInfo.files[file.path] = {
 		
 		recordTimeline.max = Math.ceil(totalRecordTime / (1000/playbackFPS)) + 1;
 		
-		console.log("playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
+		console.log("setTimelineMax: playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 		
 	}
 	
@@ -705,7 +839,12 @@ recordInfo.files[file.path] = {
 		
 		mousePlaybackAnimation();
 		
-		if(lastRecordItem+1 >= record.length) return; // Keep running until we reach max !?
+		if(lastRecordItem+1 >= record.length) {
+			stopPlayback();
+			return;
+		}
+		
+		var file, filePath;
 		
 		console.log("playbackStart=" + playbackStart + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-playbackStart) + " time-line=" + (recordTimeline.value*1000/playbackFPS))
 		
@@ -717,17 +856,47 @@ recordInfo.files[file.path] = {
 		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS) ) {
 			lastRecordItem++;
 			
-			if(record[lastRecordItem].change) redo(EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)], record[lastRecordItem].change, true);
+			if(record[lastRecordItem].change) {
+				
+				filePath = playBackFile(record[lastRecordItem].change.filePath);
+				if(!EDITOR.files.hasOwnProperty(filePath)) {
+					alertBox("File closed ? " + filePath);
+					stopPlayback();
+					return;
+				}
+				file = EDITOR.files[filePath];
+				
+				redo(file, record[lastRecordItem].change, true);
+				
+			}
 			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
-			
+			if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 		}
 		
-		
-		
+	}
+	
+	function showPlaybackFile(originalFilePath) {
+		var filePath = playBackFile(originalFilePath);
+		if(!EDITOR.files.hasOwnProperty(filePath)) {
+			//alertBox("File closed ? " + filePath);
+			
+			console.warn("Unable to show playback originalFilePath=" + originalFilePath + " because it can not be found in opened files!");
+			
+			stopPlayback();
+			return;
+		}
+		var file = EDITOR.files[filePath];
+		EDITOR.showFile(file);
 	}
 	
 	function playBackFile(filePath) {
 		// Prevent playback from overwriting existing files
+		
+		if(filePath.indexOf("/playback/") == 0) {
+			// Note: The recorder might move the mouse over /foo/bar, but when playing back
+console.warn("Path already in /playback/ filePath=" + filePath);
+			return filePath;
+		}
 		
 		return UTIL.joinPaths("/playback/", filePath);
 	}
@@ -736,9 +905,9 @@ recordInfo.files[file.path] = {
 		
 		var row = mouseEvent.row;
 		var col = mouseEvent.col;
-		var targetId = mouseEvent.targetId;
+		var target = mouseEvent.target;
 		
-		console.log("mousePlayback: row=" + row + " col=" + col + " targetId=" + targetId);
+		console.log("mousePlayback: row=" + row + " col=" + col + " target=" + JSON.stringify(target));
 		
 		if(row != undefined && col != undefined) {
 			
@@ -756,14 +925,14 @@ recordInfo.files[file.path] = {
 			var mouseY = rect.top + middle;
 			
 		}
-		else if(targetId) {
-			var target = document.getElementById(targetId);
-			if(!target) return alertBox("When playing back mouse event.type=" + mouseEvent.type + " we where unable to locate element with id=" + targetId);
+		else if(target) {
+			var targetElement = getMouseTargetElement(target);
+			if(!targetElement) return console.warn("When playing back mouse event.type=" + mouseEvent.type + " was unable to locate target=" + JSON.stringify(target));
 			
-			var rect = target.getBoundingClientRect();
+			var rect = targetElement.getBoundingClientRect();
 			
-			var mouseX = Math.round(rect.left + target.offsetWidth/2);
-			var mouseY = Math.round(rect.top + target.offsetHeight/2);
+			var mouseX = Math.round(rect.left + targetElement.offsetWidth/2);
+			var mouseY = Math.round(rect.top + targetElement.offsetHeight/2);
 			
 		}
 		else {
@@ -775,8 +944,8 @@ recordInfo.files[file.path] = {
 		
 		if(mouseEvent.type == "move") {
 			
-			if(targetId) {
-				fireEvent( mouseEvent.targetId, "mouseover" );
+			if(targetElement) {
+				fireEvent( targetElement, "mouseover" );
 			}
 			
 			if(mousePlaybackPositionX == -100 && mousePlaybackPositionY == -100) instant = true;
@@ -790,9 +959,9 @@ recordInfo.files[file.path] = {
 		}
 		else if(mouseEvent.type == "click") {
 			
-			if(targetId) {
-				target.focus();
-				fireEvent( mouseEvent.targetId, "click" );
+			if(targetElement) {
+				targetElement.focus();
+				fireEvent( targetElement, "click" );
 			}
 			
 		}
@@ -803,10 +972,33 @@ recordInfo.files[file.path] = {
 		
 	}
 	
-	function fireEvent( elementId, eventName ) {
-		var el = document.getElementById(elementId)
+	function getMouseTargetElement(target) {
 		
-		if(!el) throw new Error("Unable to find element with id=" + elementId);
+		if(target.id != undefined) {
+			if(targetsToBeIgnored.indexOf(target.id) != -1) return null;
+			
+			return document.getElementById(target.id);
+		}
+		
+		var elements = document.getElementsByTagName(target.tag);
+		var elementsWithText = 0;
+		var targetElement;
+		for(var i=0; i<elements.length; i++) {
+			if(elements[i].innerText.trim() == target.innerText) {
+elementsWithText++;
+				targetElement = elements[i];
+			}
+		}
+		
+		if(elementsWithText == 1) return targetElement;
+		else if(elementsWithText > 1) throw new Error("There exist more then one element with tag=" + target.tag + " and innerText=" + target.innerText);
+		
+		return null;
+		
+	}
+	
+	function fireEvent( el, eventName ) {
+		if(el == undefined) throw new Error("fireEvent: el=" + el + ". A target element need to be specified in first argument!");
 		
 		var onname = 'on' + eventName;
 		
@@ -820,18 +1012,18 @@ recordInfo.files[file.path] = {
 			}
 			else throw new Error("Unable to create a new event! Event and document.createEvent are not supported by " + BROWSER);
 			
-			console.log("Dispatching to elementId=" + elementId + " eventName=" + eventName + " evObj=", evObj);
+			console.log("Dispatching to el=", el, " eventName=" + eventName + " evObj=", evObj);
 			el.dispatchEvent( evObj );
 		}
 		else if(typeof el.fireEvent == "function") {
-			console.log("Firing onname=" + onname + " on elementId=" + elementId);
+			console.log("Firing onname=" + onname + " on el=", el);
 			el.fireEvent( onname );
 		}
 		else if(el.hasOwnProperty(onname)) {
-			console.log("Calling onname=" + onname + " on elementId=" + elementId);
+			console.log("Calling onname=" + onname + " on el=", el);
 			el[onname]();
 		}
-		else throw new Error("No means to trigger eventName=" + eventName + " on elementId=" + elementId + " in BROWSER=" + BROWSER);
+		else throw new Error("No means to trigger eventName=" + eventName + " on el=", el, " in BROWSER=" + BROWSER);
 	}
 	
 	function mousePlaybackAnimation(newDestX, newDestY, instant) {
@@ -882,14 +1074,24 @@ recordInfo.files[file.path] = {
 		
 	}
 	
-	function recordTimelineChange(currentValue, oldValue, e) {
-		console.log("recordTimelineChange: currentValue=" + currentValue + " oldValue=" + oldValue);
+	/*
+		var playForward = playback(redo);
+		var playBackward = playback(undo);
+		function playback(undoRedoFunction) {
+		}
+	*/
+	
+	function timelineChange(currentValue, oldValue, e) {
+		console.log("timelineChange: currentValue=" + currentValue + " oldValue=" + oldValue);
 		
-		var file;
+		var filePath, file;
+		var moveCaret = true;
 		
 		playbackStart = recordInfo.startDate;
 		
 		seekAudio();
+		
+		
 		
 		if(currentValue > oldValue) {
 			// Play forward
@@ -898,12 +1100,19 @@ recordInfo.files[file.path] = {
 				if(record[lastRecordItem+1].date <= (playbackStart+i*1000/playbackFPS)) {
 					lastRecordItem++;
 					
-					var moveCaret = true;
 					if(record[lastRecordItem].change) {
-						file = EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)];
+						filePath = playBackFile(record[lastRecordItem].change.filePath);
+						if(!EDITOR.files.hasOwnProperty(filePath)) {
+							alertBox("File closed ? " + filePath);
+							stopPlayback();
+							return;
+						}
+						file = EDITOR.files[filePath];
+						if(EDITOR.currentFile != file) EDITOR.showFile(file);
 						redo(file, record[lastRecordItem].change, moveCaret);
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
+					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 				}
 			}
 		}
@@ -917,15 +1126,21 @@ recordInfo.files[file.path] = {
 			
 			for(var i=oldValue; i>currentValue; i--) {
 				
-				
 				if(record[lastRecordItem].date >= (playbackStart+i*1000/playbackFPS)) {
 					
-					var moveCaret = true;
 					if(record[lastRecordItem].change) {
-						file = EDITOR.files[playBackFile(record[lastRecordItem].change.filePath)];
+						filePath = playBackFile(record[lastRecordItem].change.filePath);
+						if(!EDITOR.files.hasOwnProperty(filePath)) {
+							alertBox("File closed ? " + filePath);
+							stopPlayback();
+							return;
+						}
+						file = EDITOR.files[filePath];
+						if(EDITOR.currentFile != file) EDITOR.showFile(file);
 						undo(file, record[lastRecordItem].change, moveCaret);
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
+					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.from);
 					
 					lastRecordItem--;
 				}

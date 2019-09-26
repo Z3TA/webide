@@ -4807,7 +4807,7 @@ console.warn("Not showing: file.path=" + file.path + " because showFile=" + show
 		var f = EDITOR.eventListeners.fileShow.map(funMap);
 		console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);
 		for(var i=0; i<f.length; i++) {
-			f[i](file); // Call function
+			f[i](file, EDITOR.lastFileShowed); // Call function
 		}
 		
 		
