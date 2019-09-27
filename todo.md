@@ -35,13 +35,9 @@ Before you start working on something new, first discribe the problem,
 What I'm working on
 -------------------
 
-Able to switch between files when recordning
-
 Able to write in input text boxes when recording.
 
 with recordnings, use OT instead of undo/redo so that users can type at the same time!
-
-todo: Give all elements an id so they can be targeted when recordning!
 
 problem: How to best explain programming concepts ?
 solution: Able to record what you type while explaining with voice
@@ -79,6 +75,7 @@ Have a text chat, where you can ask anything !?
 Annotation/playback (macro)
 Able to record speech, then play it back with editor commands, for example to make tutorials.
 
+todo: Check out the new Chrome file API, maybe sync a folder with the device!? (so that you can edit files offline)
 
 todo: Manually test the pull request function when there is unsaved files and uncommited changes!
 

@@ -9886,12 +9886,14 @@ function mouseMove(mouseMoveEvent) {
 			f[i](mouseX, mouseY, target, mouseMoveEvent); // Call it
 		}
 	}
-	
-		while(!target.id && target.parentNode) {
+		
+		/*
+			while(!target.id && target.parentNode) {
 			console.log("target.id=" + target.id + " target.tagName=" + target.tagName + " target.class=" + target.class);
 			target = target.parentNode;
-		}
-		console.log("Final: target.id=" + target.id + " target.tagName=" + target.tagName + " target.class=" + target.class + " target.parentNode=", target.parentNode);
+			}
+			console.log("Final: target.id=" + target.id + " target.tagName=" + target.tagName + " target.class=" + target.class + " target.parentNode=", target.parentNode);
+		*/
 		
 		//console.log("EDITOR.input=" + EDITOR.input);
 	

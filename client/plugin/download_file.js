@@ -6,7 +6,7 @@
 		desc: "Download file",
 		load:function loadDownload() {
 			
-			windowMenu = EDITOR.windowMenu.add("Download", ["File", 16], downloadFile);
+			windowMenu = EDITOR.windowMenu.add("Download", ["File", 130], downloadFile);
 			
 			EDITOR.on("share", downloadFile);
 			
