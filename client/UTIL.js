@@ -2499,7 +2499,11 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		
 		
+	},
+	addProps: function addObjectProperties(from, to) {
+		for(var name in from) to[name] = from[name]; // Mutating!
 	}
+	
 	
 	
 }

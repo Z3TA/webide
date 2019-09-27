@@ -26,18 +26,19 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
-Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couln't recover from a hg up, etc)
+Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couldn't recover from a hg up, etc)
 
-Before you start working on something new, first discribe the problem, 
+Before you start working on something new, first describe the problem, 
 (and do a quick research to find out if a solutions already exist.)
 
 
 What I'm working on
 -------------------
 
-Able to write in input text boxes when recording.
+todo: Able to use context menu in recording?
 
-with recordnings, use OT instead of undo/redo so that users can type at the same time!
+
+with recordings, use OT instead of undo/redo so that users can type at the same time!
 
 problem: How to best explain programming concepts ?
 solution: Able to record what you type while explaining with voice
@@ -49,6 +50,10 @@ Making a new blog post or page:
 Type in an URL that does not exist, like www.yoursite.com/newpage, and instead of a 404 page you 
 will get an embedded editor, where you can preview and publish directly.
 
+
+idea: clap and laugh buttons when recording, will insert a clap/cheer or laughter audio, like if talking to an audience. (psychology: you will like something more if it seems like others like it)
+
+idea: Possible to insert voice variables, like user name, and a voice will speak the user's name.
 
 
 

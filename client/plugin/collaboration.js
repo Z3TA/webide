@@ -314,7 +314,7 @@
 		EDITOR.removeEvent("mouseMove", recordMouseMovement);
 		EDITOR.removeEvent("mouseClick", recordMouseClick);
 		EDITOR.removeEvent("fileShow", recordFileShow);
-		
+		EDITOR.removeEvent("keyPressed", recordKeyPress);
 		
 		// Stop the audio stream
 		mediaRecorder.stop();
@@ -376,12 +376,75 @@
 		EDITOR.on("mouseMove", recordMouseMovement);
 		EDITOR.on("mouseClick", recordMouseClick);
 		EDITOR.on("fileShow", recordFileShow);
+			EDITOR.on("keyPressed", recordKeyPress);
 		
 		
 		record.length = 0; // Reset
 		
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
+		}
+	}
+	
+	function recordKeyPress(file, character, combo, keyPressEvent) {
+		// All file changes are already recorded. Only record key-presses outside the editor. eg. in html input's
+		if(EDITOR.input) return ALLOW_DEFAULT;
+		
+		var el = keyPressEvent.target;
+		
+		var keyPressEvent = {
+			char: character,
+			target: {
+				tag: el.tagName
+			}
+		}
+		
+		var target = keyPressEvent.target;
+		if(el.id) target.id = el.id;
+		else if(el.name) target.name = el.name;
+		else throw new Error("No id or name attribute in " + target.tag + ". Can not record key press!")
+		
+		
+		record.push({date: (new Date()).getTime(), keyPress: keyPressEvent});
+		
+		return ALLOW_DEFAULT;
+	}
+	
+	function keyPressPlayback(keyPressEvent, backwards) {
+		
+		if(keyPressEvent.target.id) {
+			var target = document.getElementById(keyPressEvent.target.id);
+		}
+		else if(keyPressEvent.target.name) {
+			var nodes = document.getElementsByName(keyPressEvent.target.name);
+			if(nodes.length > 1) {
+console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
+				alertBox("More then one item with with name=" + keyPressEvent.target.name);
+				return;
+			}
+			var target = nodes[0];
+			
+		}
+		else if(keyPressEvent.target.tag) {
+			var nodes = document.getElementsByTagName(keyPressEvent.target.tag);
+			if(nodes.length > 1) {
+				console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
+				alertBox("More then one item with with name=" + keyPressEvent.target.name);
+				return;
+			}
+			var target = nodes[0];
+		}
+		
+		if(!target) {
+			alertBox("Unable to find target for keyPressEvent=" + JSON.stringify(keyPressEvent));
+			return;
+		}
+		
+		if(backwards) {
+			EDITOR.typeIntoElement(target, "\b");
+		}
+		else {
+			EDITOR.typeIntoElement(target, keyPressEvent.char);
 		}
 	}
 	
@@ -554,6 +617,10 @@
 				
 				record.push({date: (new Date()).getTime(), mouse: mouseClick});
 			}
+			else if(target.id != "startOrStopRecordningButton") {
+				console.warn("Failed to find a suitable target for mouse click: target:", target)
+				alertBox("Failed to find a suitable target for mouse click: target.id=" + target.id + " target.tagName=" + target.tagName);
+			}
 		}
 		
 		return true;
@@ -564,21 +631,21 @@
 		
 		if(recursion == undefined) recursion = 0;
 		else recursion++;
-
-if(!target) {
+		
+		if(!target) {
 			console.log("findMouseTarget: target=" + target + " recursion=" + recursion + " last=" + JSON.stringify(last) + " (no more parent nodes to check)");
 			
 			if(last) return last;
 			else return null;
 		}
 		
-		// No need to record same target over and over
-		if(target == lastRecordedMouseTarget) {
-			console.log("findMouseTarget: target=", target, " is same as lastRecordedMouseTarget");
-			return null;
-		}
-		
 		if(type == "move") {
+			// No need to record same target over and over
+			if(target == lastRecordedMouseTarget) {
+				console.log("findMouseTarget: target=", target, " is same as lastRecordedMouseTarget");
+				return null;
+			}
+			
 			// Ignore if target is a parent of last target to prevent mouse from jumping in playback
 			var allChildren = target.getElementsByTagName("*");
 			for(var i=0; i<allChildren.length; i++) {
@@ -913,6 +980,8 @@ recordInfo.files[file.path] = {
 			}
 			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
 			if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
+			if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
+			
 		}
 		
 	}
@@ -1158,6 +1227,7 @@ elementsWithText++;
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
+					if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
 				}
 			}
 		}
@@ -1186,6 +1256,7 @@ elementsWithText++;
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.from);
+					if(record[lastRecordItem].keyPress) keyPressPlayback(record[lastRecordItem].keyPress, true);
 					
 					lastRecordItem--;
 				}

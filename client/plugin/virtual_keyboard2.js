@@ -930,46 +930,12 @@ return false;
 		
 		console.log("el: id=" + el.id + " node=" + el.nodeName + " type=" + el.type);
 		
-		
-		
-		// If a input or textarea element had focus, send it the character!
-		if(el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")) {
-			
-			var key = String.fromCharCode(charCode);
-			
-			insertAtCaret(el, key);
-			
-			el.focus();
-			
-			// Fire events
-			var ev = {
-				charCode: charCode,
-				key: key,
-				shiftKey: false,
-				altKey: false,
-				ctrlKey: false,
-			}
-			
-			if(KeyCode) ev.KeyCode = KeyCode;
-			
-			var keydown = new Event('keydown');
-			var keyup = new Event('keyup');
-			var keypress = new Event('keyup');
-			
-			addProps(ev, keydown);
-			addProps(ev, keyup);
-			addProps(ev, keypress);
-			
-			el.dispatchEvent(keydown);
-			el.dispatchEvent(keyup);
-			el.dispatchEvent(keypress);
-			
+		if(EDITOR.isTextInputElement(el)) {
+EDITOR.typeIntoElement(el, charCode);
 		}
 		else {
-			
 			EDITOR.input = true;
-			
-		}
+			}
 		// I tried to optimize response time (it's very slow on Nokia N9) but while the first character displays fast, the next is slow due to the cpu being busy ...
 		//EDITOR.renderColumn(EDITOR.currentFile.caret.row, EDITOR.currentFile.caret.col, key, EDITOR.settings.style.textColor);
 		//setTimeout(defaultAction, 0); // Needed in order to make the canvas update!
@@ -978,93 +944,9 @@ return false;
 		console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 		//}
 		
-		function addProps(from, to) {
-			for(var name in from) to[name] = from[name];
-		}
 	}
 	
 	
-	function insertAtCaret(t, text) {
-		/*
-			The caret is lost when the element is blurred, eg when you push a button on the virtual keyboard.
-			Solution: Save the caret position every time the element blurs
-		*/
-		
-		if(text == undefined) throw new Error("text=" + text + " t=", t);
-		
-		var sTop = t.scrollTop || parseInt(t.getAttribute("sTop")) || 0;
-		var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;
-		var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd")) || 0;
-		
-		console.log("insertAtCaret: text=" + text + " Element: id=" + t.id + " sTop=" + sTop + " selStart=" + selStart + " selEnd=" + selEnd);
-		
-		if( typeof selStart != "number" || isNaN(selStart) ){
-			throw new Error("Unable to get caret position (selStart=" + selStart + ") for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") + " value=" + t.value );
-		}
-		if( typeof selEnd != "number" || isNaN(selEnd) ){
-			throw new Error("Unable to get selection end (selEnd=" + selEnd + ") for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") + " value=" + t.value );
-		}
-		if( typeof sTop != "number" || isNaN(sTop) ) {
-			throw new Error("Unable to get scroll position (sTop=" + sTop + ") for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") + " value=" + t.value );
-		}
-		
-		//console.log("selStart=" + selStart + " (" + t.getAttribute("sTop") + ")");
-		
-		var front = (t.value).substring(0, selStart);
-		var back = (t.value).substring(selEnd, t.value.length);
-		
-		
-		if(text == "←") {
-			if(selStart>0) selStart--;
-		}
-		else if(text == "→") {
-			if(selStart<t.value.length) selStart++;
-		}
-		else if(text == "↑") {
-			if(sTop>0) sTop--;
-		}
-		else if(text == "↓") {
-			sTop++;
-		}
-		else if(text == "\b") {
-			console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
-			t.value = front.slice(0, -1) + back;
-			selStart = selStart - 1;
-		}
-		else {
-			console.log("Adding character(s): " + text + " at selStart=" + selStart);
-			t.value = front + text + back;
-			selStart = selStart + text.length;
-		}
-		
-		t.selectionStart = selStart;
-		t.selectionEnd = selStart;
-		t.focus();
-		t.scrollTop = sTop;
-		
-		t.setAttribute("sTop", sTop);
-		t.setAttribute("selStart", selStart);
-		t.setAttribute("selEnd", selStart);
-		
-		
-		if(EDITOR.settings.devMode) {
-			// Sanity check
-			var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
-			var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
-			var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
-			
-			if( typeof selStart != "number" || isNaN(selStart) ){
-				throw new Error("Nuked selectionStart for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
-			}
-			if( typeof selEnd != "number" || isNaN(selEnd) ){
-				throw new Error("Nuked selection end for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
-			}
-			if( typeof sTop != "number" || isNaN(sTop) ) {
-				throw new Error("Nuked scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
-			}
-		}
-		
-	}
 	
 	
 	function addButtons() {
