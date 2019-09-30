@@ -13,6 +13,8 @@
   deny %HOME%%USERNAME%/lib/** wl,
   deny %HOME%%USERNAME%/lib64/** wl,
 
+  deny %HOME%%USERNAME%/.ssh/** rwl,
+
   # New in ubuntu 18
   %HOME%%USERNAME%/lib/** mr,
   %HOME%%USERNAME%/usr/lib/** mr,
@@ -79,6 +81,8 @@
     deny %HOME%%USERNAME%/proc/** wl,
     deny %HOME%%USERNAME%/lib/** wl,
     deny %HOME%%USERNAME%/lib64/** wl,
+    
+    deny %HOME%%USERNAME%/.ssh/** rwl,
     
     # Restrict network access! Only allow unix sockets
     network unix,

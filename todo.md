@@ -99,9 +99,6 @@ blog: Treating errors as first class citizens, or treating errors as exceptions.
 
 actual problem: Sending out Information, keeping information updated, and making custom services?
 
-problem: When you install a npm module, the install script has access to your home dir, and might steal your ssh keys
-Prevent node from stealing SSH keys, only allow the user worker and hg/git to access ssh keys !!
-
 
 Start using hg.sr.ht for public repos! since hggit stopped working on Github, and Bitbucket ending support for Mercurial
 
