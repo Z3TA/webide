@@ -22,7 +22,7 @@
 		
 		var description = document.createElement("span");
 		description.setAttribute("class", "description");
-		description.appendChild(document.createTextNode("Total page views last 30 days"));
+		description.appendChild(document.createTextNode("Requests to your wwwpub last 12 days"));
 		
 		pageViewStat.appendChild(description);
 		//pageViewStat.appendChild(document.createElement("hr"));
@@ -36,11 +36,11 @@
 		var previousDiv = document.createElement("div");
 		previousDiv.setAttribute("class", "previous");
 		
-		previousDiv.appendChild(document.createTextNode("Previous: "));
+		previousDiv.appendChild(document.createTextNode("Last week: "));
 		
 		var previous = document.createElement("span");
 		previous.setAttribute("class", "value strong");
-		previous.innerText = (1320).toLocaleString();;
+		previous.innerText = (1320).toLocaleString();
 		
 		previousDiv.appendChild(previous);
 		
@@ -60,10 +60,83 @@
 		
 		pageViewStat.appendChild(canvas);
 		
-		var fakeData = [500,600,1075,1150,1100,1200,1420,1320,1337];
-		drawGraph(fakeData);
+		//var fakeData = [500,600,1075,1150,1100,1200,1420,1320,1337];
+		//drawGraph(fakeData);
+		
+		var logsToCheck = 0;
+		var logsChecked = 0;
+		var logs = [];
+		var totalHttpRequests = 0;
+		CLIENT.on("loginSuccess", function loggedInToServer(login) {
+			checkLog(0);
+			for(var i=1; i<=12; i++) checkLog(i);
+		});
 		
 		return pageViewStat;
+		
+		function checkLog(n) {
+			logsToCheck++;
+			var nr = "";
+			if(n > 0) nr = nr + n;
+			CLIENT.cmd("readLines", {start: 1, end: 1, path: "/log/access.log" + (nr ? "." + nr : "")}, readLines);
+			function readLines(err, resp) {
+				logsChecked++;
+				if(err) {
+					console.warn("requests_stat: " + err.message);
+					logs[n] = 0;
+				}
+				else {
+					logs[n] = resp.totalLines;
+					totalHttpRequests += resp.totalLines;
+					console.log("requests_stat: n=" + n + " resp.totalLines=" + resp.totalLines);
+				}
+				if(logsChecked == logsToCheck) {
+					
+					logs.reverse(); // So that todays is last
+					
+					drawGraph(logs);
+					
+					total.innerText = (totalHttpRequests).toLocaleString();
+					
+					var prev = 0;
+					var last = 0;
+					for(var i=2; i<=6; i++) {
+						prev += logs[i];
+						console.log("requests_stat: logs[" + i + "]=" + logs[i] + " prev=" + prev);
+					}
+					for(var i=7; i<=11; i++) {
+						last += logs[i];
+						console.log("requests_stat: logs[" + i + "]=" + logs[i] + " last=" + last);
+					}
+					
+					previous.innerText = (prev).toLocaleString();
+					
+					var perc = Math.round(((last/prev) - 1) * 100, 1);
+					var str = (perc).toLocaleString() + "%";
+					
+					if(perc > 0) {
+str = "+" + str;
+						percIncrease.classList.add("posetive");
+						percIncrease.classList.remove("negative");
+					}
+					else {
+						percIncrease.classList.remove("posetive");
+						percIncrease.classList.add("negative");
+					}
+					
+					percIncrease.innerText = str;
+					
+					// Reset if we login to another server
+					logsToCheck = 0;
+					logsChecked = 0;
+					
+				}
+				else {
+					console.log("requests_stat: n=" + n + " logsChecked=" + logsChecked + " logsToCheck=" + logsToCheck);
+				}
+			}
+		}
+		
 		
 		function drawGraph(data) {
 			var ctx = canvas.getContext("2d", {alpha: true});
