@@ -35,6 +35,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Able to share and open snippets (nodejs playground)
+https://webide.se/?open=https://url.to/file.js
+
+Share single file,
+share project ? (publish tar ?) auto update ?
+
+
 todo: Able to use context menu in recording?
 
 

@@ -1357,8 +1357,6 @@ elementsWithText++;
 		
 		if(connectionClosedDialog) connectionClosedDialog.close();
 		
-		if(QUERY_STRING.open && !EDITOR.files.hasOwnProperty(QUERY_STRING.open)) EDITOR.openFile(QUERY_STRING.open);
-		
 	}
 	
 	function collabJoin(json) {
