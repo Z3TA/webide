@@ -38,6 +38,7 @@ What I'm working on
 Saving editor recordings,
 use EDITOR.publish to publish the recording
 
+todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
 
 todo: Able to use context menu in recording?
 
