@@ -14,12 +14,17 @@ EDITOR.plugin({
 desc: "Allow sharing stuff with other apps",
 		load:function loadShare() {
 
+			CLIENT.on("uploadedFiles", uploadedFiles);
+			
+			// todo: Share files via URL
+			// ask: Share file to other app on your device, or share file via URL
+			
 			if(typeof navigator.share == "undefined") {
 				console.warn("navigator.share not available on your browser/device (" + BROWSER + ")");
 				return;
 			}
 			
-			windowMenu = EDITOR.windowMenu.add("Send/Share", ["File", 15], shareSomething);
+			windowMenu = EDITOR.windowMenu.add("Share via other app", ["File", 15], shareSomething);
 
 			console.log("typeof navigator.share=" + typeof navigator.share);
 
@@ -32,9 +37,19 @@ desc: "Allow sharing stuff with other apps",
 			
 			EDITOR.removeEvent("share", shareSomething);
 			
+			CLIENT.removeEvent("uploadedFiles", uploadedFiles);
 }
 });
 	
+	function uploadedFiles(fileNames) {
+		console.log("uploadedFiles: " + JSON.stringify(fileNames));
+		
+		for(var i=0, path; i<fileNames.length; i++) {
+			path = "/upload/" + fileNames[i];
+			EDITOR.openFile(path);
+		}
+		
+	}
 	
 	function shareSomething(file, combo) {
 		

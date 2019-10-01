@@ -3331,6 +3331,201 @@ function handleHttpRequest(request, response) {
 		}
 		return;
 	}
+	else if(firstDir == "share") {
+		// ### Upload files to user via web share (https://developers.google.com/web/updates/2018/12/web-share-target)
+		var Busboy = require('busboy');
+		var sendToUser = "";
+		var files = [];
+		if (request.method === 'POST') {
+			// Figure out what user should get the file
+			// Probably the user with the same IP !?
+			var conn, ip;
+			conns: for(var username in USER_CONNECTIONS) {
+				for(var i=0; i<USER_CONNECTIONS[username].connections.length; i++) {
+					conn = USER_CONNECTIONS[username].connections[i];
+					ip = conn.headers["x-real-ip"] || conn.remoteAddress;
+					if(ip == IP) {
+						sendToUser = username;
+						console.log("User found: " + sendToUser);
+						break conns;
+					}
+					//console.log(UTIL.objInfo(conn));
+				}
+			}
+			
+			var busboy = new Busboy({ headers: request.headers });
+			busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+				console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+				file.on('data', function(data) {
+					console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+					
+				});
+				file.on('end', function() {
+					console.log('File [' + fieldname + '] Finished');
+				});
+				
+				// Save file in temp dir, then move it to the user home dir.
+				var saveTo = module_path.join(module_os.tmpDir(), module_path.basename(fieldname));
+				file.pipe(module_fs.createWriteStream(saveTo));
+				files.push(saveTo);
+							
+			});
+			busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+				console.log('Field [' + fieldname + ']: value: ', val);
+				
+				if(fieldname == "user") sendToUser = val;
+			});
+			busboy.on('finish', function() {
+				console.log('Done parsing form!');
+				
+				var done = function(uploadMessage) {
+					response.writeHead(200, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
+					response.end(uploadMessage);
+				}
+				
+				var uploadedFiles = [];
+				
+				if(files.length == 0) {
+					done("Error: Did not recieve any files!");
+				}
+				else if(sendToUser) {
+					
+					var copyFile = function copyFile(fromPath, username, fileName) {
+						
+						var uploadFolder = HOME_DIR + username + "/upload/";
+						var toPath =  uploadFolder + fileName;
+						
+						// First create the upload dir if it doesn't already exist
+						console.log("Checking folder: " + uploadFolder);
+						module_fs.stat(uploadFolder, function(err, stats) {
+							if(err) {
+								if(err.code == "ENOENT") {
+									module_fs.mkdir(uploadFolder, function(err) {
+										if(err) {
+console.error(err);
+											filesFailed.push(fileName, " Error: " + err.message);
+											filesMovedCount++;
+											doneMaybe();
+										}
+										else folderCreated(uploadFolder);
+									});
+								}
+								else throw err;
+							}
+							else if(stats.isDirectory()) {
+								console.log("Folder exist: " + uploadFolder);
+								folderCreated(uploadFolder);
+							}
+							else {
+								console.log("Not a directory: " + uploadFolder);
+								filesFailed.push(fileName, " Error: Problem with upload folder");
+								filesMovedCount++;
+								doneMaybe();
+							}
+						});
+						
+						function folderCreated(uploadFolder) {
+							
+							console.log("Copying file: " + fromPath + " to " + toPath);
+							module_fs.copyFile(fromPath, toPath, fileCopied);
+						}
+						
+						function doneMaybe() {
+							if(filesMovedCount == files.length) {
+								if(files.length == 1) {
+									var uploadMessage = "Success: File sent to " + sendToUser;
+								}
+								else {
+									var uploadMessage = "Success: " + files.length + "files sent to " + sendToUser;
+								}
+								
+								if(filesFailed.length > 0) {
+									var uploadMessage = "Warning: " + filesFailed.length + " / " + files.length + " failed to upload to " + sendToUser + "!\n" + filesFailed.join("\n");
+								}
+								
+								// Notify the user
+								var user_connections = USER_CONNECTIONS[username];
+								if(user_connections) {
+									
+									var data = JSON.stringify({
+										uploadedFiles: uploadedFiles
+									});
+									
+									console.log("Notifying user " + username + " (" + user_connections.connections.length + " connections): data: " + data);
+									
+									for (var i=0; i<user_connections.connections.length; i++) {
+										user_connections.connections[i].write(data);
+									}
+								}
+								else {
+									uploadMessage += "Warning: " + username + " is not online!";
+									console.log("User " + username + " not online!");
+								}
+								
+								done(uploadMessage);
+							}
+						}
+						
+						function fileCopied(err) {
+							filesMovedCount++;
+							if(err) {
+								console.error(err);
+								filesFailed.push(fileName, " Error: " + err.message);
+							}
+							else {
+								console.log("Copied file to " + toPath);
+								uploadedFiles.push(fileName);
+								module_fs.unlink(fromPath, function(err) {
+									if(err) console.error(err);
+									else console.log("Deleted " + fromPath);
+								});
+							}
+							
+							doneMaybe();
+							
+						}
+					}
+					
+					// Need to copy the file into user dir. Can't move/rename: EXDEV: cross-device link not permitted
+					var filesMovedCount = 0;
+					var filesFailed = [];
+					
+					// Does user exist ?
+					var homeDir = HOME_DIR + sendToUser;
+					console.log("Checking folder: " + homeDir);
+					module_fs.stat(homeDir, function(err, stats) {
+						if(err) {
+							console.log("Folder not found: " + homeDir + " Assuming user doesnt exist.");
+							done("Error: User does not exist:" + sendToUser);
+						}
+						else if(stats.isDirectory()) {
+							console.log("Folder exist: " + homeDir + "");
+							
+							var fileName;
+							for (var i=0; i<files.length; i++) {
+								fileName = UTIL.getFilenameFromPath(files[i]);
+								copyFile(files[i], sendToUser, fileName);
+							}
+						}
+						else {
+							done("Error: Not a folder:" + homeDir);
+						}
+					});
+					
+				}
+				else {
+					done("Error: Found no user to send the file to! Add a user field!");
+				}
+				
+			});
+			request.pipe(busboy);
+		}
+		else if (request.method === 'GET') {
+			response.writeHead(400, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
+			response.end('Expected a HTTP POST!');
+		}
+		return;
+	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
 		localFolder = HTTP_ENDPOINTS[firstDir];

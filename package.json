@@ -23,6 +23,7 @@
   "version": "1.0.0",
   "author": "Johan Zetterberg <zeta@zetafiles.org>",
   "dependencies": {
+    "busboy": "^0.3.1",
     "dirname": "https://github.com/Z3TA/nwjs_dirname/tarball/master",
     "ftp": "https://github.com/Z3TA/node-ftp/tarball/master",
     "generate-password": "^1.4.1",
