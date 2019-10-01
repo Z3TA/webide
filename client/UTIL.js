@@ -2502,6 +2502,11 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	},
 	addProps: function addObjectProperties(from, to) {
 		for(var name in from) to[name] = from[name]; // Mutating!
+	},
+	isPrivateIp: function privateIp(ipAddr) {
+		var rePrivateIp = /(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/;
+		if(ipAddr.match(rePrivateIp)) return true;
+		else return false;
 	}
 	
 	

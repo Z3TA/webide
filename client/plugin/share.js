@@ -90,13 +90,19 @@ desc: "Allow sharing stuff with other apps",
 			if(filePath.indexOf("/wwwpub/") != 0) throw new Error("File is not in /wwwpub/ ! path=" + filePath);
 			
 			var loc = document.location;
-			var path = filePath.replace("/wwwpub/", "");
-			var url = loc.protocol + "//" + EDITOR.user.name + "." + loc.hostname + "/" + path;
 			
-			EDITOR.putIntoClipboard(url, function(err, prompted) {
+			//if(UTIL.isPrivateIp(loc.hostname)) var editorUrl = EDITOR.settings.publicUrl || "https://webide.se/"; 
+			
+			var editorUrl = loc.protocol + "//" + loc.hostname + "/";
+			
+			var path = filePath.replace("/wwwpub/", "");
+			var fileUrl = loc.protocol + "//" + EDITOR.user.name + "." + loc.hostname + "/" + path;
+			var shareUrl = editorUrl + "?open=" + encodeURIComponent(fileUrl);
+			
+			EDITOR.putIntoClipboard(shareUrl, function(err, prompted) {
 				if(!prompted) {
 					var copied = err ? "" : "copied to clipboard";
-					var msg = 'Public URL ' + copied + ':\n<a href="' + url + '" target="_blank">' + url + '</a>'
+					var msg = 'Public URL ' + copied + ':\n<a href="' + shareUrl + '" target="_blank">' + shareUrl + '</a>';
 					alertBox(msg);
 				}
 			});
@@ -116,6 +122,9 @@ desc: "Allow sharing stuff with other apps",
 		}
 		else if(file.path.indexOf("/wwwpub/") == 0) {
 			return shareUsingUrl(file);
+		}
+		else if(UTIL.isPrivateIp(document.location.hostname)) {
+			return shareUsingWebShare(file);
 		}
 		else {
 			var webShare = "Share via other app";

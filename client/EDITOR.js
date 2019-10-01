@@ -114,7 +114,8 @@ EDITOR.settings = {
 	insert: false,
 	useCliboardcatcher: false, // Some browsers (IE) can only capture clipboard events if a text element is focused
 	caretAnimation: true,
-	jsx: false
+	jsx: false,
+	publicUrl: "https://webide.se/" // When document.location.hostname is a private IP, use this address for public URL's
 };
 
 EDITOR.runningTests = false;   // Able to ignore some stuff like alerts while tests are running
