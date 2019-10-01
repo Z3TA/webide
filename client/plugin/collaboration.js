@@ -53,7 +53,7 @@
 	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord;
 	
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
-	var playbackInterval, isPlaying = false, recordInfo = {}, lastRecordItem = -1;
+	var playbackInterval, isPlaying = false, recordInfo, lastRecordItem = -1;
 	var playbackStart, saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
@@ -71,6 +71,7 @@
 		"footer", 
 		"header", 
 		"saveRecordButton", 
+		"publishRecordButton", 
 		"cancelRecordningButton", 
 		"recordTimeline", 
 		"recordningAudioPlayer", 
@@ -229,13 +230,19 @@
 			wrap.appendChild(inputSound);
 		}
 		
-		saveRecordButton = document.createElement("button");
+		var saveRecordButton = document.createElement("button");
 		saveRecordButton.setAttribute("id", "saveRecordButton");
 		saveRecordButton.classList.add("button", "half");
 		saveRecordButton.innerText = "Save recording";
 		saveRecordButton.onclick = saveRecord;
-		saveRecordButton.disabled = true;
 		wrap.appendChild(saveRecordButton);
+		
+		var publishRecordButton = document.createElement("button");
+		publishRecordButton.setAttribute("id", "publishRecordButton");
+		publishRecordButton.classList.add("button", "half");
+		publishRecordButton.innerText = "Publish recording";
+		publishRecordButton.onclick = publishRecord;
+		wrap.appendChild(publishRecordButton);
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("id", "cancelRecordningButton");
@@ -262,6 +269,8 @@
 		
 		var audioFilePath = UTIL.joinPaths("/recordings/", recordInfo.startFile + ".ogg");
 		
+		if(!recordInfo || !record) return alertBox("Unable to save recordning. No recorded input?");
+		
 		if(typeof FileReader != "undefined") {
 			if(audioBlob) {
 				saveAudio(audioBlob, audioFilePath);
@@ -277,23 +286,95 @@
 		
 		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
 		
-		function saveAudio(audioBlob, audioFilePath) {
-			
-			var folder = UTIL.getDirectoryFromPath(audioFilePath);
-			var reader = new FileReader();
-			reader.readAsDataURL(audioBlob);
-			reader.onload = function gotData() {
-				
-				var base64AudioMessage = reader.result.split(',')[1];
-				EDITOR.createPath(folder, function(err) {
-					if(err) return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
-					EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err, path, hash) {
-						if(err) alertBox("Failed to save audio data! " + err.message);
-						loadedAudioFile = path;
-					});
+	}
+	
+	function saveAudio(audioBlob, audioFilePath, callback) {
+		var folder = UTIL.getDirectoryFromPath(audioFilePath);
+		var reader = new FileReader();
+		reader.readAsDataURL(audioBlob);
+		reader.onload = function gotData() {
+			var base64AudioMessage = reader.result.split(',')[1];
+			EDITOR.createPath(folder, function(err) {
+				if(err) {
+					if(callback) callback(err);
+					return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
+				}
+				EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err, path, hash) {
+					if(err) {
+alertBox("Failed to save audio data! " + err.message);
+						if(callback) callback(err);
+						return;
+					}
+					loadedAudioFile = path;
+					if(callback) callback(null, path);
 				});
-			};
+			});
+		};
+	}
+	
+	function publishRecord(clickEvent) {
+		
+		var file = EDITOR.currentFile;
+		var audioSaved = false;
+		var dataSaved = false;
+		
+		if(recordInfo && record) {
+			
+			if(recordInfo.startFile == undefined || recordInfo.startFile == "undefined") {
+throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" + JSON.stringify(recordInfo, null, 2));
+			}
+			
+			var data = {
+				info: recordInfo,
+				record: record
+			}
+			
 		}
+		else {
+			var data = isRecordJson(file);
+			recordInfo = data.info;
+			record = data.record;
+		}
+		
+		
+		var audioFilePath = UTIL.joinPaths("/wwwpub/recordings/", recordInfo.startFile + ".ogg");
+		var dataFilePath = UTIL.joinPaths("/wwwpub/recordings/", recordInfo.startFile + ".json");
+		
+		if(!data) return alertBox("No recording available! Either open a saved recordning (json) file, or make a new recording.");
+		
+		if(loadedAudioFile) {
+			// Move the audio file to wwwpub
+			EDITOR.move(loadedAudioFile, audioFilePath, audioSaved);
+		}
+		else if(audioBlob) {
+			// Save the audio file
+			saveAudio(audioBlob, audioFilePath, audioSaved);
+		}
+		else {
+			alertBox("No audio data detected! Sharing recording without audio ...");
+			saveDataFile(data);
+		}
+		
+		function audioSaved(err) {
+			if(err) return alertBox("Failed to save audio: " + err.message);
+			
+			recordInfo.audioPath = audioFilePath;
+			
+			saveDataFile(data);
+		}
+		
+		function saveDataFile(data) {
+			
+			var dataStr = JSON.stringify(data, null, 2);
+			EDITOR.saveToDisk(dataFilePath, dataStr, function(err) {
+				if(err) return alertBox("Failed to save data: " + err.message);
+				
+				EDITOR.share(dataFilePath, clickEvent);
+				
+			});
+		}
+		
+		
 	}
 	
 	function startOrStopRecording() {
@@ -309,7 +390,6 @@
 	function stopRecording() {
 		isRecording = false;
 		recordButton.innerText = "● Start recordning";
-		saveRecordButton.disabled = false;
 		
 		EDITOR.removeEvent("mouseMove", recordMouseMovement);
 		EDITOR.removeEvent("mouseClick", recordMouseClick);
@@ -346,6 +426,7 @@
 		
 		var file = EDITOR.currentFile;
 		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
+		if(!file.savedAs) return alertBox("The file need to be saved-as before starting a recording! (empty file is fine, we just need a name!)");
 		
 		if(record.length > 0) {
 			var yes = "Overwrite";
@@ -361,6 +442,8 @@
 		else sure();
 		
 		function sure() {
+			
+			if(!recordInfo) recordInfo = {};
 			
 			recordInfo.startFile = file.path;
 			

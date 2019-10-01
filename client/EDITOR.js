@@ -6263,8 +6263,8 @@ function tool(eventListenerName) {
 		if(! file instanceof File) throw new Error("First argument file need to be a File object!");
 		
 		// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
-		console.log("ev.constructor.name=" + ev.constructor.name);
-		if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
+			console.log("ev.constructor.name=" + (ev && ev.constructor && ev.constructor.name));
+			if(typeof ev != "object") throw new Error("Second argument to " + eventListenerName + " needs to be an event object (mouseClick,keyPress, etc)!");
 		
 		
 			if(!EDITOR.eventListeners.hasOwnProperty(eventListenerName)) throw new Error("Unknown event listener: " + eventListenerName);
@@ -6308,7 +6308,7 @@ EDITOR.move = function renameFile(oldPath, newPath, callback) {
 	
 	console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
 	
-	if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
+		if(callback == undefined || typeof callback != "function") throw new Error("Expected third function parameter to be a callback!");
 	
 		if(oldPath instanceof File) oldPath = oldPath.path;
 		

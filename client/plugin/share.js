@@ -23,7 +23,8 @@ desc: "Allow sharing stuff with other apps",
 
 			console.log("typeof navigator.share=" + typeof navigator.share);
 
-			EDITOR.on("share", shareSomething);
+			var order = 100; // Before download_file.js
+			EDITOR.on("share", shareSomething, order);
 			
 },
 		unload: function unloadShare() {
@@ -46,36 +47,38 @@ desc: "Allow sharing stuff with other apps",
 		
 	}
 	
-	function shareUsingUrl(file) {
+	function shareUsingUrl(filePath) {
 		
-		if(file.path.indexOf("/wwwpub/") == 0) {
-			showUrl(file);
+		if(filePath.indexOf("/wwwpub/") == 0) {
+			showUrl(filePath);
 		}
 		else {
 			
-			var newPath = UTIL.joinPaths("/wwwpub/", file.path); 
+			var newPath = UTIL.joinPaths("/wwwpub/", filePath); 
 			
 			var move = "Move the file to wwwpub folder";
 			var copy = "Share a copy of the file ";
 			var cancel = "Cancel";
 			
 			confirmBox("Move or copy the file to " + newPath + " ?", [move, copy, cancel], function(answer) {
-				if(answer == move) return moveFile(file);
-				else if(answer == copy) return copyFile(file);
+				if(answer == move) return moveFile(filePath);
+				else if(answer == copy) return copyFile(filePath);
 				else if(answer != cancel) throw new Error("Unexpected answer=" + answer);
 			});
 			
 		}
 		
-		function moveFile(file) {
-			EDITOR.move(file, newPath, function(err, newPath) {
+		return true;
+		
+		function moveFile(filePath) {
+			EDITOR.move(filePath, newPath, function(err, newPath) {
 				if(err) return alertBox(err.message);
 				else showUrl(newPath);
 			});
 		}
 		
-		function copyFile(file) {
-			EDITOR.copyFile(file, newPath, function(err, newPath) {
+		function copyFile(filePath) {
+			EDITOR.copyFile(filePath, newPath, function(err, newPath) {
 				if(err) return alertBox(err.message);
 				else showUrl(newPath);
 			});
@@ -111,87 +114,106 @@ desc: "Allow sharing stuff with other apps",
 		
 	}
 	
-	function shareSomething(file, combo) {
+	function shareSomething(filePath, combo) {
 		
-		if(file == undefined) file = EDITOR.currentFile;
-		if(file == undefined) return alertBox("No file specified. Please open the file you want to share.");
+		// Need to return true if we claim the share event, or false if we do not!
+		
+		if(filePath instanceof File) filePath = filePath.path;
+		if(filePath == undefined) filePath = EDITOR.currentFile.path;
+		if(filePath == undefined) {
+//alertBox("No file specified. Please open the file you want to share. Or specify a file path.");
+			return false;
+		}
 		
 		if(typeof navigator.share == "undefined") {
 			console.warn("navigator.share not available on your browser/device (" + BROWSER + ")");
-			return shareUsingUrl(file);
+			return shareUsingUrl(filePath);
 		}
-		else if(file.path.indexOf("/wwwpub/") == 0) {
-			return shareUsingUrl(file);
+		else if(filePath.indexOf("/wwwpub/") == 0) {
+			return shareUsingUrl(filePath);
 		}
 		else if(UTIL.isPrivateIp(document.location.hostname)) {
-			return shareUsingWebShare(file);
+			return shareUsingWebShare(filePath);
 		}
 		else {
 			var webShare = "Share via other app";
 			var urlShare = "Share as URL";
 			var cancel = "Cancel";
 			confirmBox("Share the file with other apps on your device, or make it accessable via a web address/URL?", [webShare, urlShare, cancel], function(answer) {
-				if(answer == webShare) shareUsingWebShare(file);
-				else if(answer == urlShare) shareUsingUrl(file);
+				if(answer == webShare) shareUsingWebShare(filePath);
+				else if(answer == urlShare) shareUsingUrl(filePath);
 				else if(answer != cancel) throw new Error("Unexpected answer=" + answer);
 			});
 		}
 	}
 	
-function shareUsingWebShare(file) {
-		if(typeof BrowserFile != "undefined") {
-			var fileBits = [file.text];
-			var fileName = UTIL.getFilenameFromPath(file.path);
-			var options = {type: "text/plain"};
-			
-			var filesArray = [
-				new BrowserFile(fileBits, fileName, options)
-			];
-		}
-		else {
-			alertBox("The share module was unable to create a file object!");
-			return false;
-		}
+	function shareUsingWebShare(filePath) {
 		
-		if (navigator.canShare && navigator.canShare( { files: filesArray } )) {
-			navigator.share({
-				files: filesArray,
-				title: fileName,
-				name: fileName,
-				text: 'File shared from ' + document.location.hostname,
-			})
-			.then(shareSuccessful)
-			.catch(shareError);
-		} 
+		if(EDITOR.files.hasOwnProperty(filePath)) {
+			gotFile(filePath, EDITOR.files[filePath].text);
+		}
 		else {
-			
-			// Try sharing the file as text
-			navigator.share({
-				title: fileName,
-				text: file.text,
-			})
-			.then(shareSuccessful)
-			.catch(shareError);
+			EDITOR.readFromDisk(filePath, function(err, data) {
+				if(err) return alertBox("Unable to open filePath=" + filePath + " Error: " + err.message);
+				gotFile(filePath, data);
+			});
 		}
 		
 		return true;
 		
-		function shareSuccessful() {
-			console.log('Share was successful.');
-			windowMenu.hide();
-		}
-		
-		function shareError(err) {
-			console.error(err);
+		function gotFile(text) {
 			
-			var CANCEL = 20;
-			
-			if(err.code != CANCEL) {
-				alertBox("Problems sharing fileName=" + fileName + " Error: " + err.message + " (code=" + err.code + ")");
+			if(typeof BrowserFile != "undefined") {
+				var fileBits = [filePath.text];
+				var fileName = UTIL.getFilenameFromPath(filePath);
+				var options = {type: "text/plain"};
+				
+				var filesArray = [
+					new BrowserFile(fileBits, fileName, options)
+				];
 			}
+			else {
+				alertBox("The share module was unable to create a file object!");
+				return false;
+			}
+			
+			if (navigator.canShare && navigator.canShare( { files: filesArray } )) {
+				navigator.share({
+					files: filesArray,
+					title: fileName,
+					name: fileName,
+					text: 'File shared from ' + document.location.hostname,
+				})
+				.then(shareSuccessful)
+				.catch(shareError);
+			} 
+			else {
+				
+				// Try sharing the file as text
+				navigator.share({
+					title: fileName,
+					text: text,
+				})
+				.then(shareSuccessful)
+				.catch(shareError);
+			}
+			
+			function shareSuccessful() {
+				console.log('Share was successful.');
+				windowMenu.hide();
+			}
+			
+			function shareError(err) {
+				console.error(err);
+				
+				var CANCEL = 20;
+				
+				if(err.code != CANCEL) {
+					alertBox("Problems sharing fileName=" + fileName + " Error: " + err.message + " (code=" + err.code + ")");
+				}
+			}
+			
 		}
-		
 	}
-	
 	
 })();
