@@ -1680,6 +1680,8 @@ if(path != file.path) reOpen(file.path, path);
 	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
 		
+		if(from instanceof File) from = from.path;
+		
 		CLIENT.cmd("copyFile", {from: from, to: to}, function(err, json) {
 			if(err) callback(err);
 			else callback(null, json.to);
@@ -6307,6 +6309,8 @@ EDITOR.move = function renameFile(oldPath, newPath, callback) {
 	
 	if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
 	
+		if(oldPath instanceof File) oldPath = oldPath.path;
+		
 	if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
 	
 	if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
