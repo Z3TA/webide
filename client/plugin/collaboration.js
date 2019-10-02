@@ -844,6 +844,7 @@ recordInfo.files[file.path] = {
 		audioPlayer.pause();
 		clearInterval(playbackInterval);
 		playButton.innerText = "▶ Start playback";
+		fakeMouseElement.classList.add("hidden");
 	}
 	
 	function isRecordJson(file) {
@@ -961,6 +962,7 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 			
 			document.documentElement.appendChild(fakeMouseElement);
 		}
+		fakeMouseElement.classList.remove("hidden");
 		
 		if(recordTimeline.value == 0 || lastRecordItem >= record.length-1) {
 			lastRecordItem = -1;
@@ -1035,7 +1037,7 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 		// Max value should be total ticks = "total record time" / "time per tick"
 		// Time per tick is 1000/playbackFPS
 		
-		var totalRecordTimeAudio = audioPlayer.duration ? audioPlayer.duration * 1000 : 0; // ms
+		var totalRecordTimeAudio = isFinite(audioPlayer.duration) ? audioPlayer.duration * 1000 : 0; // ms
 		var lastItem = record[record.length-1];
 		var totalRecordTimeRecord = lastItem.date-playbackStart; // ms
 		var totalRecordTime = Math.max(totalRecordTimeAudio, totalRecordTimeRecord);
@@ -1044,19 +1046,28 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 		
 		console.log("setTimelineMax: playbackStart=" + playbackStart + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 		
+		if(!isFinite(parseInt(recordTimeline.max))) throw new Error("recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord);
+		
 	}
 	
 	function seekAudio() {
 		
 		// Note: audioPlayer.currentTime is in seconds, not milli-seconds!
-		audioPlayer.currentTime = recordTimeline.value * 1000/playbackFPS / 1000;
+		audioPlayer.currentTime = parseInt(recordTimeline.value) * 1000/playbackFPS / 1000;
 		
 		console.log("seekAudio: recordTimeline.value=" + recordTimeline.value + " playbackFPS=" + playbackFPS + " audioPlayer.currentTime=" + audioPlayer.currentTime + "s");
 		
 	}
 	
 	function playProgress() {
-		recordTimeline.value++;
+		
+		if(isNaN(parseInt(recordTimeline.value))) {
+			stopPlayback();
+			throw new Error("Not a number: recordTimeline.value=" + recordTimeline.value + " lastRecordItem=" + lastRecordItem + " record.length=" + record.length + "");
+		}
+		
+		recordTimeline.value = parseInt(recordTimeline.value) + 1;
+		
 		
 		mousePlaybackAnimation();
 		
@@ -1067,15 +1078,20 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 		
 		var file, filePath;
 		
-		console.log("playbackStart=" + playbackStart + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-playbackStart) + " time-line=" + (recordTimeline.value*1000/playbackFPS))
+		console.log("playbackStart=" + playbackStart + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-playbackStart) + " time-line=" + (recordTimeline.value*1000/playbackFPS) + " recordTimeline.max=" + recordTimeline.max);
 		
 		// Interval time is 1000/playbackFPS
 		// recordTimeline.value is incremented every 1000/playbackFPS ms
 		// One tick in recordTimeline.value is roughly 1000/playbackFPS ms
 		// X time-line ticks is around X*1000/playbackFPS ms
 		
-		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+recordTimeline.value*1000/playbackFPS) ) {
+		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+parseInt(recordTimeline.value)*1000/playbackFPS) ) {
 			lastRecordItem++;
+			
+			if(parseInt(recordTimeline.value) > parseInt(recordTimeline.max)) {
+				stopPlayback();
+				throw new Error("recordTimeline.value=" + recordTimeline.value + " recordTimeline.max=" + recordTimeline.max + " lastRecordItem=" + lastRecordItem + " record.length=" + record.length + " ");
+			}
 			
 			if(record[lastRecordItem].change) {
 				
