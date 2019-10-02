@@ -102,7 +102,7 @@ desc: "Allow sharing stuff with other apps",
 			var fileUrl = loc.protocol + "//" + EDITOR.user.name + "." + loc.hostname + "/" + path;
 			var shareUrl = editorUrl + "?open=" + encodeURIComponent(fileUrl);
 			
-			EDITOR.putIntoClipboard(shareUrl, function(err, prompted) {
+			EDITOR.putIntoClipboard(shareUrl, "Share this URL: ", function(err, prompted) {
 				if(!prompted) {
 					var copied = err ? "" : "copied to clipboard";
 					var msg = 'Public URL ' + copied + ':\n<a href="' + shareUrl + '" target="_blank">' + shareUrl + '</a>';

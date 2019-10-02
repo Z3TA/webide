@@ -39,8 +39,7 @@ EDITOR.plugin({
 	
 	function forkWebsite() {
 		winMenuForkWebsite.hide();
-		var defaultValue = "https://";
-		promptBox("URL of website to copy: ", false, defaultValue, 0, function(url) {
+		promptBox("URL of website to copy: ", {defaultValue: "https://", dialogDelay: 0}, function(url) {
 			if(url) forkSite(url)
 		});
 	}

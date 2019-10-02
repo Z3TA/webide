@@ -493,7 +493,7 @@
 			askWhereToSave();
 			
 			function askWhereToSave() {
-				promptBox(whereToSaveMessage, false, defaultPath, function(filePath) {
+				promptBox(whereToSaveMessage, {defaultValue: defaultPath}, function(filePath) {
 					if(filePath) {
 						console.log("Saving file: " + filePath);
 						saveFile(filePath, function fileSaved(err, path) {
@@ -1899,7 +1899,7 @@ site = selectedSite;
 		
 		var temporaryPassword = "";
 		if( selectedSite.repoPw == "") {
-			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", true, undefined, 0, function(pw) {
+			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", {isPassword: true, dialogDelay: 0}, function(pw) {
 				if(pw) {
 					temporaryPassword = pw;
 					start();

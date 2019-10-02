@@ -45,7 +45,7 @@ function testDialogs() {
 	
 	//confirm("Are you sure you want eat this?");
 	
-		//promptBox("What is your name?", false, undefined, function(answer) {alert(answer);});
+		//promptBox("What is your name?", function(answer) {alert(answer);});
 	
 	//var q = prompt("What is your name?");
 	

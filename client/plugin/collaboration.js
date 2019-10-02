@@ -127,7 +127,7 @@
 			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
-			winMenuRecord = EDITOR.windowMenu.add("Record (with voiceover)", ["Tools", 30], recordWidget.show);
+			winMenuRecord = EDITOR.windowMenu.add("Record tutorial", ["Tools", 30], recordWidget.show);
 			
 			var discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");
@@ -299,6 +299,7 @@
 					if(callback) callback(err);
 					return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
 				}
+				console.log("saveAudio: Created path: " + folder);
 				EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err, path, hash) {
 					if(err) {
 alertBox("Failed to save audio data! " + err.message);
@@ -306,7 +307,11 @@ alertBox("Failed to save audio data! " + err.message);
 						return;
 					}
 					loadedAudioFile = path;
+					
+					console.log("saveAudio: Saved audio in path=" + path);
+					
 					if(callback) callback(null, path);
+					
 				});
 			});
 		};
@@ -336,29 +341,44 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			record = data.record;
 		}
 		
-		
-		var audioFilePath = UTIL.joinPaths("/wwwpub/recordings/", recordInfo.startFile + ".ogg");
-		var dataFilePath = UTIL.joinPaths("/wwwpub/recordings/", recordInfo.startFile + ".json");
+		var rootFolder = "/wwwpub/recordings/";
+		var audioFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".ogg");
+		var dataFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".json");
+		var dataFolder = UTIL.getDirectoryFromPath(dataFilePath);
 		
 		if(!data) return alertBox("No recording available! Either open a saved recordning (json) file, or make a new recording.");
 		
-		if(loadedAudioFile) {
-			// Move the audio file to wwwpub
-			EDITOR.move(loadedAudioFile, audioFilePath, audioSaved);
-		}
-		else if(audioBlob) {
-			// Save the audio file
-			saveAudio(audioBlob, audioFilePath, audioSaved);
-		}
-		else {
-			alertBox("No audio data detected! Sharing recording without audio ...");
-			saveDataFile(data);
-		}
-		
-		function audioSaved(err) {
-			if(err) return alertBox("Failed to save audio: " + err.message);
+		EDITOR.createPath(dataFolder, function(err) {
+			if(err) return alertBox("Failed to create dataFolder=" + dataFolder + " Error: " + err.message);
 			
-			recordInfo.audioPath = audioFilePath;
+			
+			if(loadedAudioFile) {
+				// Move the audio file to wwwpub
+				EDITOR.move(loadedAudioFile, audioFilePath, whenAudioSaved);
+			}
+			else if(audioBlob) {
+				// Save the audio file
+				saveAudio(audioBlob, audioFilePath, whenAudioSaved);
+			}
+			else if(recordInfo.audioPath) {
+				// Move the audio file to wwwpub
+				EDITOR.move(recordInfo.audioPath, audioFilePath, whenAudioSaved);
+			}
+			else {
+				alertBox("No audio data detected! Sharing recording without audio ...");
+				saveDataFile(data);
+			}
+			
+		});
+		
+		
+		function whenAudioSaved(err) {
+			if(err) {
+alertBox("Failed to save audio: " + err.message);
+			}
+			else {
+recordInfo.audioPath = audioFilePath;
+			}
 			
 			saveDataFile(data);
 		}
@@ -369,7 +389,9 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			EDITOR.saveToDisk(dataFilePath, dataStr, function(err) {
 				if(err) return alertBox("Failed to save data: " + err.message);
 				
-				EDITOR.share(dataFilePath, clickEvent);
+				EDITOR.share(dataFilePath, clickEvent, function() {
+
+				});
 				
 			});
 		}
@@ -420,13 +442,13 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			return;
 		}
 		
-		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
-			alertBox("Failed to get microphone access! Error: " + err.message);
-		});
-		
 		var file = EDITOR.currentFile;
 		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
 		if(!file.savedAs) return alertBox("The file need to be saved-as before starting a recording! (empty file is fine, we just need a name!)");
+		
+		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
+			alertBox("Failed to get microphone access! Error: " + err.message);
+		});
 		
 		if(record.length > 0) {
 			var yes = "Overwrite";
@@ -876,7 +898,13 @@ recordInfo.files[file.path] = {
 			
 			// couln't find a way to decode a binary string to something the audio player can understand, but it can however understand base64!'
 			EDITOR.readFromDisk(recordInfo.audioPath, false, "base64", function(err, path, data, hash) {
-				if(err) return alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
+				waitingForAudioData = false;
+				
+				if(err) {
+alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
+					startMaybe("readFileFromDiskError");
+					return;
+				}
 				
 				var audioData = data;
 				
@@ -899,8 +927,6 @@ recordInfo.files[file.path] = {
 				audioPlayer.src = getEncodedString(audioData);
 				
 				loadedAudioFile = path;
-				
-				waitingForAudioData = false;
 				
 				
 				function getEncodedString(str) {
@@ -972,6 +998,9 @@ recordInfo.files[file.path] = {
 		function startMaybe(from) {
 			console.warn("startMaybe: from=" + from + " waitingForAudioData=" + waitingForAudioData + " filesReset=" + filesReset + " filesToReset=" + filesToReset);
 			if(!waitingForAudioData && filesReset == filesToReset) start();
+			
+			if(from == "audioLoadedEvent") audioPlayer.onloadeddata = null; // Prevent the event from firing when stopping a recording
+			
 		}
 		
 		function start() {

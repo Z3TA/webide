@@ -665,7 +665,7 @@ return;
 				clickEvent.preventDefault();
 				clickEvent.stopPropagation();
 
-				promptBox("Create new folder (path):", false, path, function(newFolderPath) {
+				promptBox("Create new folder (path):", {defaultValue: path}, function(newFolderPath) {
 					if(newFolderPath == path) return;
 					newFolderPath = UTIL.trailingSlash(newFolderPath);
 					if(newFolderPath) CLIENT.cmd("createPath", {pathToCreate: newFolderPath}, function folderCreatedMaybe(err, json) {
@@ -721,7 +721,7 @@ return;
 			
 			var oldPath = el.getAttribute("path");
 			
-			promptBox("Rename file:", false, oldPath, function(newPath) {
+			promptBox("Rename file:", {defaultValue: oldPath}, function(newPath) {
 				if(newPath) EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 					if(err) alertBox(err.message);
 					else {
@@ -732,7 +732,7 @@ return;
 						
 						var basePath = UTIL.getDirectoryFromPath(oldPath.replace(/[/\\]$/, ""));
 						if(newPath.indexOf(basePath) != 0) {
-// The file or folder was moved into another directory
+							// The file or folder was moved into another directory
 							el.parentElement.removeChild(el);
 						}
 						

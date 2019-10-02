@@ -794,9 +794,7 @@ alertBox("No file open!");
 		
 		// Check if the file requires arguments
 		if(file.text.indexOf("process.argv") != -1) {
-			var isPassword = false;
-			var dialogDelay = 0;
-			promptBox("Use these arguments (process.argv): ", isPassword, defaultArguments, dialogDelay, function(args) {
+			promptBox("Use these arguments (process.argv): ", {defaultValue: defaultArguments, dialogDelay: 0}, function(args) {
 				if(args==null) return;
 				json.args = args;
 				defaultArguments = args;

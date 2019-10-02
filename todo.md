@@ -42,6 +42,8 @@ todo: Test sharing files with the editor to see if the OS HTTP-posts's the file 
 
 todo: Able to use context menu in recording?
 
+todo: Record keyboard shortcuts and display them during playback
+
 
 with recordings, use OT instead of undo/redo so that users can type at the same time!
 

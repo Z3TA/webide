@@ -339,37 +339,35 @@ function confirmBox(msg, options, callback, recursionCount) {
 	
 }
 
-function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursionCount) {
+function promptBox(msg, options, callback, recursionCount) {
 	
 	console.log("promptBox: typeof isPassword = " + (typeof isPassword));
 	
-	if(typeof isPassword == "function" && callback == undefined) {
-		callback = isPassword;
-		isPassword = false;
-		defaultValue = undefined;
+	if(typeof options == "function" && callback == undefined) {
+		callback = options;
+		options = undefined;
 	}
-	else if(typeof defaultValue == "function" && callback == undefined) {
-		callback = defaultValue;
-		if(typeof isPassword == "string") {
-defaultValue = isPassword;
-			isPassword = false;
-		}
-		else defaultValue = undefined;
+	
+	if(options == undefined) options = {};
+	
+	var availableOptions = [
+		"isPassword",
+		"defaultValue",
+		"dialogDelay",
+		"selectAll"
+	];
+	
+	for(var option in options) {
+		if(availableOptions.indexOf(option) == -1) throw new Error(option + " is not a valid option for promptBox!");
 	}
-	else if(typeof dialogDelay == "function" && callback == undefined) {
-		callback = dialogDelay;
-		
-		if(typeof defaultValue == "number") {
-dialogDelay = defaultValue;
-			
-			if(typeof isPassword == "string") {
-				defaultValue = isPassword;
-				isPassword = false;
-			}
-			else defaultValue = undefined;
-			
-		}
-		else dialogDelay = undefined;
+	
+	var isPassword = options.isPassword;
+	var defaultValue = options.defaultValue;
+	var dialogDelay = options.dialogDelay;
+	var selectAll = options.selectAll;
+	
+	if(selectAll) {
+		dialogDelay = 0;
 	}
 	
 	if(typeof callback != "function") throw new Error("No callback function! callback=" + callback + " arguments=" + JSON.stringify(arguments));
@@ -387,7 +385,7 @@ dialogDelay = defaultValue;
 			
 			if(recursionCount > 4) console.warn("promptBox: Unable to show promptBox msg=" + msg + "");
 			
-			promptBox(msg, isPassword, defaultValue, callback, dialogDelay, recursionCount);
+			promptBox(msg, options, callback, recursionCount);
 			
 		}, 100);
 	}
@@ -459,6 +457,10 @@ dialogDelay = defaultValue;
 	if(dialogDelay === 0) {
 		if(typeof EDITOR != "undefined") EDITOR.input = false;
 		input.focus();
+		
+		if(selectAll) {
+			input.select();
+		}
 	
 	}
 	

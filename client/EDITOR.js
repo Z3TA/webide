@@ -613,7 +613,12 @@ EDITOR.bindKey(b);
 		oscillator.stop(audioCtx.currentTime + duration/1000)
 	}
 	
-	EDITOR.putIntoClipboard = function putIntoClipboard(text, callback) {
+	EDITOR.putIntoClipboard = function putIntoClipboard(text, description, callback) {
+		
+		if(typeof description == "function" && callback == undefined) {
+			callback = description;
+			description = undefined;
+		}
 		
 		EDITOR.pseudoClipboard = text;
 		
@@ -660,7 +665,7 @@ EDITOR.bindKey(b);
 					var usePseudo = "Use pseudo clipboard";
 					var alwaysAsk = "Ask me every time";
 					var manualCopy = "Manually copy";
-					confirmBox("Your browser wont allow putting data into the clipboard. Use a pseudo clipboard within the editor ?", [usePseudo, alwaysAsk, manualCopy], function(answer) {
+					confirmBox("The editor failed to put text into the cliboard. The clipboard API is either not allowed in your browser " + BROWSER + ", or you have not allowed it. Do you want to use a pseudo clipboard that only works inside the editor ?", [usePseudo, alwaysAsk, manualCopy], function(answer) {
 						if(answer == usePseudo) {
 							usePseudoClipboard = true;
 							return pseudo();
@@ -687,7 +692,7 @@ usePseudoClipboard = false;
 			// prompt can not handle multiple lines
 			//window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 			
-			promptBox("Copy to clipboard: Ctrl+C, Enter", text, 0, function() {
+			promptBox( (description ? description.trim() + " " : "") + "Copy to clipboard: Ctrl+C", {defaultValue: text, dialogDelay: 0, selectAll: true}, function() {
 				if(callback) callback(null, true);
 			});
 			
@@ -753,7 +758,7 @@ usePseudoClipboard = false;
 				prompt will only get the first row. We need a textarea so you can paste many rows!
 			*/
 			
-			promptBox("Paste the clipboard content here:", EDITOR.pseudoClipboard, 0, function(data) {
+			promptBox("Paste the clipboard content here:", {defaultValue: EDITOR.pseudoClipboard, dialogDelay: 0}, function(data) {
 				if(typeof data == "string" && data.length > 0) readSuccess(data);
 				else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
 			});
@@ -6224,14 +6229,14 @@ EDITOR.pathPickerTool = function pathPicker(options, callback) {
 	// If no path picker wanted to handle it: Use the stone-age path picker
 	var defaultPath = options && options.defaultPath;
 	var instruction = (options && options.instruction) || "Choose a file path:";
-	promptBox(instruction, false, defaultPath, function(path) {
-		if(!path) {
-			var error = new Error("Aborted when picking path");
-			error.code = "CANCEL";
-			return gotPath(error);
-		}
-		else return gotPath(null, path);
-	});
+		promptBox(instruction, {defaultValue: defaultPath}, function(path) {
+			if(!path) {
+				var error = new Error("Aborted when picking path");
+				error.code = "CANCEL";
+				return gotPath(error);
+			}
+			else return gotPath(null, path);
+		});
 	
 	return true; // True as in "we found a path picker"
 	
@@ -6308,8 +6313,8 @@ EDITOR.move = function renameFile(oldPath, newPath, callback) {
 	
 	console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
 	
-		if(callback == undefined || typeof callback != "function") throw new Error("Expected third function parameter to be a callback!");
-	
+		if(callback == undefined || typeof callback != "function") throw new Error("Expected third function argument callback in EDITOR.move to be a callback function! typeof callback = " + (typeof callback) + " ");
+		
 		if(oldPath instanceof File) oldPath = oldPath.path;
 		
 	if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
@@ -8310,17 +8315,17 @@ function fileDrop(fileDropEvent) {
 			}
 			
 			if(!handled) {
-				promptBox("Where do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
-					if(path) {
-						EDITOR.checkPath(path, function(err, path) {
-							if(err && err.code != "CANCEL") return alertBox(err.message);
-							else if(!err) saveFile(file, path, false, function(err, path) {
-								if(err) alertBox(err.message);
-								else alertBox("The file has been saved: " + path);
+					promptBox("Where do you want to save the dropped " + fileType + " file ?", {defaultValue: filePath}, function(path) {
+						if(path) {
+							EDITOR.checkPath(path, function(err, path) {
+								if(err && err.code != "CANCEL") return alertBox(err.message);
+								else if(!err) saveFile(file, path, false, function(err, path) {
+									if(err) alertBox(err.message);
+									else alertBox("The file has been saved: " + path);
+								});
 							});
-						});
-					}
-				});
+						}
+					});
 			}
 		}
 		else {

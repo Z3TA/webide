@@ -129,7 +129,7 @@
 		if(!file.path.match(/html?$/i)) {
 			var fileExt = UTIL.getFileExtension(file.path);
 			var nameSugg = UTIL.getDirectoryFromPath(file.path) + UTIL.getFileNameWithoutExtension(file.path) + ".htm";
-			promptBox("Can not preview a HTML file unless the file extension is .htm or .html. Rename " + UTIL.getFilenameFromPath(file.path) + " ?<br><br>New path: ", false, nameSugg, function(newPath) {
+			promptBox("Can not preview a HTML file unless the file extension is .htm or .html. Rename " + UTIL.getFilenameFromPath(file.path) + " ?<br><br>New path: ", {defaultValue: nameSugg}, function(newPath) {
 				if(newPath) {
 					var filePath = file.path
 					file = null; // Don't linger on the old ref, the renamed file will get a new file object!
