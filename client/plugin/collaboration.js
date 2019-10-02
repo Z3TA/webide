@@ -341,10 +341,12 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			record = data.record;
 		}
 		
-		var rootFolder = "/wwwpub/recordings/";
+		var wwwpub = "/wwwpub";
+		var rootFolder = UTIL.joinPaths(wwwpub, "/recordings/");
 		var audioFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".ogg");
 		var dataFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".json");
 		var dataFolder = UTIL.getDirectoryFromPath(dataFilePath);
+		var publicAudioUrl = document.location.protocol + "//" + EDITOR.user.name + "." + document.location.hostname + audioFilePath.replace(wwwpub, "");
 		
 		if(!data) return alertBox("No recording available! Either open a saved recordning (json) file, or make a new recording.");
 		
@@ -377,7 +379,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 alertBox("Failed to save audio: " + err.message);
 			}
 			else {
-recordInfo.audioPath = audioFilePath;
+				recordInfo.audioPath = publicAudioUrl;
 			}
 			
 			saveDataFile(data);
@@ -844,7 +846,7 @@ recordInfo.files[file.path] = {
 		audioPlayer.pause();
 		clearInterval(playbackInterval);
 		playButton.innerText = "▶ Start playback";
-		fakeMouseElement.classList.add("hidden");
+		if(fakeMouseElement) fakeMouseElement.classList.add("hidden");
 	}
 	
 	function isRecordJson(file) {
@@ -888,26 +890,57 @@ recordInfo.files[file.path] = {
 			console.log("Data loaded from " + EDITOR.currentFile.path);
 		}
 		
+		if(!recordInfo) return alertBox("Unable to start playback. " + UTIL.getFilenameFromPath(EDITOR.currentFile.path) + " doesn't seemt to contain a json record." );
 		
 		console.log("audioPlayer.readyState=" + audioPlayer.readyState);
 		if(recordInfo.audioPath && loadedAudioFile != recordInfo.audioPath) {
 			console.log("Loading audio file " + recordInfo.audioPath);
-			var waitingForAudioData = true;
-			audioPlayer.onloadeddata = function audioLoadedEvent() {
-				startMaybe("audioLoadedEvent");
-			};
 			
-			// couln't find a way to decode a binary string to something the audio player can understand, but it can however understand base64!'
-			EDITOR.readFromDisk(recordInfo.audioPath, false, "base64", function(err, path, data, hash) {
-				waitingForAudioData = false;
+			var waitingForAudioData = true;
+			
+			if(recordInfo.audioPath.match(/^https?:/i)) {
+				audioPlayer.src = recordInfo.audioPath;
 				
-				if(err) {
-alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
-					startMaybe("readFileFromDiskError");
-					return;
+				// The file loads, but audioPlayer.onloadeddata doesn't fire ...
+				
+				console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+				
+				var wait = function wait() {
+					var waitInterval = setInterval(function() {
+						console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+						
+						var HAVE_ENOUGH_DATA = 4;
+						
+						if(audioPlayer.readyState == HAVE_ENOUGH_DATA) {
+							clearInterval(waitInterval);
+							waitingForAudioData = false;
+							startMaybe("loadedAudioFromUrl");
+						}
+						
+					}, 100);
 				}
 				
-				var audioData = data;
+				wait();
+				
+			}
+			else {
+				
+				
+				audioPlayer.onloadeddata = function audioLoadedEvent() {
+					startMaybe("audioLoadedEvent");
+				};
+				
+				// couln't find a way to decode a binary string to something the audio player can understand, but it can however understand base64!'
+				EDITOR.readFromDisk(recordInfo.audioPath, false, "base64", function(err, path, data, hash) {
+					waitingForAudioData = false;
+					
+					if(err) {
+alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
+						startMaybe("readFileFromDiskError");
+						return;
+					}
+					
+					var audioData = data;
 				
 				console.log("Audio file loaded! path=" + path + " audioData=" + (typeof audioData) + " isAraray?" + Array.isArray(audioData) + " data.length=" + audioData.length);
 				
@@ -945,6 +978,7 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 				
 				
 			});
+			}
 		}
 		
 		if(record.length == 0) {
@@ -1652,7 +1686,12 @@ elementsWithText++;
 			ignoreUndoRedoEvent[file.path] = [];
 		}
 		
-		if(isRecordJson(file)) recordWidget.show();
+		var data = isRecordJson(file);
+		if(data) {
+			recordInfo = data.info;
+			record = data.record;
+recordWidget.show();
+		}
 		
 		if(!collabMode) return true;
 		
