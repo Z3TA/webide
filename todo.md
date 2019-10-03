@@ -35,8 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Saving editor recordings,
-use EDITOR.publish to publish the recording
+Make tutorials using the recording feature.
+
+
 
 todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
 
@@ -44,8 +45,8 @@ todo: Able to use context menu in recording?
 
 todo: Record keyboard shortcuts and display them during playback
 
+todo: with recordings, use OT instead of undo/redo so that users can type at the same time!
 
-with recordings, use OT instead of undo/redo so that users can type at the same time!
 
 problem: How to best explain programming concepts ?
 solution: Able to record what you type while explaining with voice

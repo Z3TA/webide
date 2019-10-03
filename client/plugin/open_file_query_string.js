@@ -114,7 +114,10 @@ else openWebPath(path, text, function(err) {
 			EDITOR.openFile(path, function(err) {
 				if(err) {
 					console.log("openFileMaybe: Failed to open path=" + path + " Error: " + err.message);
-					if(callback) {
+					if(err.code == "ENOENT") {
+						// Ask if user wants to create it!?
+					}
+					else if(callback) {
 						callback(err)
 						callback = null;
 					}

@@ -58,7 +58,7 @@
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
-	var lastRecordedMouseTarget, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY;
+	var lastRecordedMouseTarget, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY, fakeMouseElementHideTimer;
 	var targetsToBeIgnoredRegexp = [];
 	var targetsToBeIgnored = [
 		"canvas", 
@@ -470,6 +470,7 @@ alertBox("Failed to save audio: " + err.message);
 			if(!recordInfo) recordInfo = {};
 			
 			recordInfo.startFile = file.path;
+			recordInfo.alias = (EDITOR.user && EDITOR.user.name) || "Playback";
 			
 			if(!recordInfo.files) recordInfo.files = {};
 			if(!recordInfo.files.hasOwnProperty(file.path)) {
@@ -666,8 +667,26 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 			
 			var grid = file.rowColFromMouse(mouseX, mouseY);
 			
+			// Index is needed for the transform
+			console.log("recordMouseMovement: row=" + grid.row + " col=" + grid.col);
+			if(grid.row >= 0 && file.grid.length-1 >= grid.row) {
+				if(grid.col >= 0 && file.grid[grid.row].length-1 >= grid.col) {
+					var index = file.getIndexFromRowCol(grid.row, grid.col);
+				}
+				else {
+					var gridRow = file.grid[grid.row];
+					if(file.grid.length-1 == grid.row) {
+						if(gridRow.length > 0) var index = gridRow[gridRow.length-1].index;
+						else var index = gridRow.startIndex;
+					}
+					else var index = file.grid[grid.row+1].startIndex;
+				}
+			}
+			else var index = -1;
+			
 			if(grid.row != lastRecordedMouseCaretRow || grid.col != lastRecordedMouseCaretCol) {
 				var mouseEvent = {
+					index: index, 
 					row: grid.row,
 					col: grid.col
 				};
@@ -876,6 +895,13 @@ recordInfo.files[file.path] = {
 	function startPlayback() {
 		isPlaying = true;
 		
+		/*
+			Record changes made by the user during the playback to be able to transform the playback with the user changes!
+			
+			If the user is already in collaboration mode, it will appear to the othes that the user is doing to changes.
+			
+		*/
+		
 		var alreadyStarted = false;
 		
 		console.log("startPlayback!");
@@ -1004,6 +1030,8 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 		
 		if(lastRecordItem == -1) {
 			// Reset
+			
+			// ### Open files for playback
 			var filesToReset = 0;
 			var filesReset = 0;
 			var filePath, file;
@@ -1012,6 +1040,23 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 				filePath = playBackFile(origFilePath);
 				filesToReset++;
 				startText = recordInfo.files[origFilePath].startText;
+				
+				// Save file changes made by the user during the playback in order to transform the playback events
+				// The order counter need to start at the max order value from the recordning
+				if(recordInfo.lastOrder == undefined) {
+					for(var i=record.length-1; i>0; i--) {
+						if(record[i].change) {
+							recordInfo.lastOrder = record[i].change.order;
+							break;
+						}
+					}
+				}
+				if(recordInfo.lastOrder == undefined) recordInfo.lastOrder = 0;
+				
+				fileChangeEventOrderCounters[filePath] = recordInfo.lastOrder;
+				fileChangeEvents[filePath] = [];
+				//fileChangeEvents[filePath][0] = [];
+				
 				if(EDITOR.files.hasOwnProperty(filePath)) {
 					file = EDITOR.files[filePath];
 					file.reload(startText);
@@ -1119,6 +1164,9 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 		// One tick in recordTimeline.value is roughly 1000/playbackFPS ms
 		// X time-line ticks is around X*1000/playbackFPS ms
 		
+		var fileChangeEvent;
+		var arr;
+		
 		while(lastRecordItem+1 < record.length && record[lastRecordItem+1].date <= (playbackStart+parseInt(recordTimeline.value)*1000/playbackFPS) ) {
 			lastRecordItem++;
 			
@@ -1127,9 +1175,11 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 				throw new Error("recordTimeline.value=" + recordTimeline.value + " recordTimeline.max=" + recordTimeline.max + " lastRecordItem=" + lastRecordItem + " record.length=" + record.length + " ");
 			}
 			
-			if(record[lastRecordItem].change) {
+			fileChangeEvent = record[lastRecordItem].change;
+			
+			if(fileChangeEvent) {
 				
-				filePath = playBackFile(record[lastRecordItem].change.filePath);
+				filePath = playBackFile(fileChangeEvent.filePath);
 				if(!EDITOR.files.hasOwnProperty(filePath)) {
 					alertBox("File closed ? " + filePath);
 					stopPlayback();
@@ -1137,7 +1187,31 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 				}
 				file = EDITOR.files[filePath];
 				
-				redo(file, record[lastRecordItem].change, true);
+				// The change event need to be transformed depending on the user changes during playback
+				// All recorded events should be ordered before any user change
+				var order = recordInfo.lastOrder;
+				var changeEvents = fileChangeEvents[file.path];
+				if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+				if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+				var currentOrder = fileChangeEventOrderCounters[file.path];
+				var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
+				while(order++ < currentOrder) {
+					arr = changeEvents[order];
+					
+					if(!arr) {
+						throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
+					}
+					
+					for (var i=arr.length-1; i>-1; i--) {
+						transformBackwards(copyOfFileChangeEvent, arr[i]);
+					}
+				}
+				
+				ignoreFileChange = true;
+				var caret = redo(file, copyOfFileChangeEvent);
+				ignoreFileChange = false;
+				
+				// Show the playback caret !?
 				
 			}
 			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
@@ -1180,11 +1254,50 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		var col = mouseEvent.col;
 		var target = mouseEvent.target;
 		
+		
 		console.log("mousePlayback: row=" + row + " col=" + col + " target=" + JSON.stringify(target));
 		
 		if(row != undefined && col != undefined) {
 			
+			// We actually have to transform mouse positions too! Even if they are just screen coordinates, the "tutorial" might point to a special word that might have moved elsewhere!
+			
+			var order = recordInfo.lastOrder;
 			var file = EDITOR.currentFile;
+			var changeEvents = fileChangeEvents[file.path];
+			if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+			if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+			var currentOrder = fileChangeEventOrderCounters[file.path];
+			var fileChangeEvent = {
+				index: mouseEvent.index,
+				row: row,
+				col: col
+			}
+			var arr;
+			console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+			while(order++ < currentOrder) {
+				
+				arr = changeEvents[order];
+				
+				if(!arr) {
+					//continue;
+					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " order=" + order + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) );
+				}
+				
+				for (var i=arr.length-1; i>-1; i--) {
+					transformBackwards(fileChangeEvent, arr[i]);
+				}
+				
+				console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+			}
+			
+			// Transformed position
+			row = fileChangeEvent.row;
+			col = fileChangeEvent.col;
+			
+			if(row != mouseEvent.row || col != mouseEvent.col) {
+				console.log("mousePlayback: Transformed from row=" + mouseEvent.row + " to " + row + " and from col=" + mouseEvent.col + " to " + col + "");
+			}
+			
 			var indentation = file.grid[row] && file.grid[row].indentation || 0;
 			var indentationWidth = indentation * EDITOR.settings.tabSpace;
 			var top = EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight;
@@ -1214,6 +1327,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		}
 		
 		if(!UTIL.isNumeric(mouseX) || !UTIL.isNumeric(mouseY)) throw new Error("mouseX=" + mouseX + " mouseY=" + mouseY + " rect=" + JSON.stringify(rect));
+		
+		fakeMouseElement.classList.remove("hidden");
 		
 		if(mouseEvent.type == "move") {
 			
@@ -1367,7 +1482,14 @@ elementsWithText++;
 		
 		seekAudio();
 		
+		clearTimeout(fakeMouseElementHideTimer);
+		fakeMouseElementHideTimer = setTimeout(function() {
+			fakeMouseElement.classList.add("hidden");
+		}, 5000);
 		
+		var fileChangeEvent;
+		var arr;
+		var order = recordInfo.lastOrder;
 		
 		if(currentValue > oldValue) {
 			// Play forward
@@ -1376,16 +1498,38 @@ elementsWithText++;
 				if(record[lastRecordItem+1].date <= (playbackStart+i*1000/playbackFPS)) {
 					lastRecordItem++;
 					
-					if(record[lastRecordItem].change) {
-						filePath = playBackFile(record[lastRecordItem].change.filePath);
+					fileChangeEvent = record[lastRecordItem].change;
+					if(fileChangeEvent) {
+						filePath = playBackFile(fileChangeEvent.filePath);
+						
 						if(!EDITOR.files.hasOwnProperty(filePath)) {
 							alertBox("File closed ? " + filePath);
 							stopPlayback();
 							return;
 						}
+						
+						var changeEvents = fileChangeEvents[filePath];
+						if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+						if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+						var currentOrder = fileChangeEventOrderCounters[filePath];
+						var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
+						while(order++ < currentOrder) {
+							arr = changeEvents[order];
+							
+							if(!arr) {
+								throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
+							}
+							
+							for (var i=arr.length-1; i>-1; i--) {
+								transformBackwards(copyOfFileChangeEvent, arr[i]);
+							}
+						}
+						
 						file = EDITOR.files[filePath];
 						if(EDITOR.currentFile != file) EDITOR.showFile(file);
-						redo(file, record[lastRecordItem].change, moveCaret);
+						ignoreFileChange = true;
+						redo(file, copyOfFileChangeEvent, moveCaret);
+						ignoreFileChange = false;
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
@@ -1412,9 +1556,31 @@ elementsWithText++;
 							stopPlayback();
 							return;
 						}
+						
+						var changeEvents = fileChangeEvents[filePath];
+						if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+						if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+						var currentOrder = fileChangeEventOrderCounters[filePath];
+						var copyOfFileChangeEvent = UTIL.cloneObject(record[lastRecordItem].change);
+						while(order++ < currentOrder) {
+							arr = changeEvents[order];
+							
+							if(!arr) {
+								continue;
+								//throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
+							}
+							
+							for (var i=arr.length-1; i>-1; i--) {
+								transformBackwards(copyOfFileChangeEvent, arr[i]);
+							}
+						}
+						
 						file = EDITOR.files[filePath];
 						if(EDITOR.currentFile != file) EDITOR.showFile(file);
-						undo(file, record[lastRecordItem].change, moveCaret);
+						
+						ignoreFileChange = true;
+						undo(file, copyOfFileChangeEvent, moveCaret);
+						ignoreFileChange = false;
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.from);
@@ -1818,6 +1984,13 @@ recordWidget.show();
 		
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
+		}
+		else if(isPlaying && !collabMode) {
+			// ### Save file changes during playback in order to be able to transform playback events
+			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			fileChangeEvents[file.path][fileChangeEvent.order] = [];
+			
+			fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
 		}
 		
 		return true;
@@ -2454,6 +2627,8 @@ recordWidget.show();
 		EDITOR.renderNeeded();
 		
 		EDITOR.stat("redo");
+		
+		return caret;
 	}
 	
 	function copyObjProp(fromObj) {

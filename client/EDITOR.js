@@ -9861,8 +9861,8 @@ function mouseUp(mouseUpEvent) {
 	
 	if(button == undefined) button = 0; // For like touch events
 	
-	console.log("Mouse up on class " + target.className + "!");
-	console.log(mouseUpEvent);
+	//console.log("Mouse up on class " + target.className + "!");
+	//console.log(mouseUpEvent);
 	
 	if(target.className == "fileCanvas") {
 		
