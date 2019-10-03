@@ -1055,7 +1055,6 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 				
 				fileChangeEventOrderCounters[filePath] = recordInfo.lastOrder;
 				fileChangeEvents[filePath] = [];
-				//fileChangeEvents[filePath][0] = [];
 				
 				if(EDITOR.files.hasOwnProperty(filePath)) {
 					file = EDITOR.files[filePath];
@@ -1280,7 +1279,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 				
 				if(!arr) {
 					//continue;
-					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " order=" + order + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) );
+					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + "currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) );
 				}
 				
 				for (var i=arr.length-1; i>-1; i--) {
@@ -1566,8 +1565,8 @@ elementsWithText++;
 							arr = changeEvents[order];
 							
 							if(!arr) {
-								continue;
-								//throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
+								//continue;
+								throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) );
 							}
 							
 							for (var i=arr.length-1; i>-1; i--) {
@@ -1985,8 +1984,8 @@ recordWidget.show();
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
 		}
-		else if(isPlaying && !collabMode) {
-			// ### Save file changes during playback in order to be able to transform playback events
+		else if(!collabMode && recordInfo && recordInfo.files && recordInfo.files.hasOwnProperty(file.path.replace("playback/", ""))) {
+			// We always want to save changes if the file belongs to a playback file in order to transform the playback
 			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			fileChangeEvents[file.path][fileChangeEvent.order] = [];
 			
