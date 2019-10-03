@@ -491,6 +491,8 @@ alertBox("Failed to save audio: " + err.message);
 		
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
+			
+			EDITOR.stat("recording");
 		}
 	}
 	
@@ -727,13 +729,18 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 				row: grid.row,
 				col: grid.col,
 				mouseButton: button,
-				keyboardCombo: keyboardCombo
+				keyboardCombo: keyboardCombo,
+				type: "click"
 			};
+			
+			console.log("recordMouseClick: button=" + button + " row=" +  grid.row + " col=" +  grid.col);
+			
 		}
 		else {
 			var mouseTarget = findMouseTarget(target, "click");
 			
 			if(mouseTarget) {
+				
 				var mouseClick = {
 					target: mouseTarget,
 					mouseButton: button,
@@ -741,13 +748,15 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 					type: "click"
 				};
 				
-				record.push({date: (new Date()).getTime(), mouse: mouseClick});
+				console.log("recordMouseClick: button=" + button + " mouseTarget=" + JSON.stringify(mouseTarget));
 			}
 			else if(target.id != "startOrStopRecordningButton") {
 				console.warn("Failed to find a suitable target for mouse click: target:", target)
 				alertBox("Failed to find a suitable target for mouse click: target.id=" + target.id + " target.tagName=" + target.tagName);
 			}
 		}
+		
+		if(mouseClick) record.push({date: (new Date()).getTime(), mouse: mouseClick});
 		
 		return true;
 	}
@@ -1099,6 +1108,8 @@ alertBox("Unable to read " + recordInfo.audioPath + " Error: " + err.message);
 			playButton.innerText = "■ Stop playback";
 			
 			playAudio();
+			
+			EDITOR.stat("playback");
 		}
 		
 		function playAudio() {
@@ -1346,10 +1357,32 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		}
 		else if(mouseEvent.type == "click") {
 			
-			if(targetElement) {
+			if(mouseEvent.row != undefined && mouseEvent.col != undefined) {
+				// Click on canvas
+				
+				
+				
+			}
+			else if(targetElement) {
 				targetElement.focus();
 				fireEvent( targetElement, "click" );
 			}
+			
+			// Animate
+			if(fakeMouseElement) {
+				fakeMouseElement.classList.add("click");
+				playbackMouseSize = playbackMouseSize * 2;
+				fakeMouseElement.style.width = playbackMouseSize + "px";
+				fakeMouseElement.style.height = playbackMouseSize + "px";
+				setTimeout(function() {
+					fakeMouseElement.classList.remove("click");
+					playbackMouseSize = Math.floor(playbackMouseSize / 2);
+					fakeMouseElement.style.width = playbackMouseSize + "px";
+					fakeMouseElement.style.height = playbackMouseSize + "px";
+				}, 200);
+			}
+			
+			mousePlaybackAnimation(mouseX, mouseY, true);
 			
 		}
 		else throw new Error("Unknown mouse event type=" + mouseEvent.type + " in mouseEvent=" + JSON.stringify(mouseEvent));
@@ -1372,7 +1405,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		var targetElement;
 		for(var i=0; i<elements.length; i++) {
 			if(elements[i].innerText.trim() == target.innerText) {
-elementsWithText++;
+				elementsWithText++;
 				targetElement = elements[i];
 			}
 		}
@@ -2578,7 +2611,7 @@ recordWidget.show();
 		
 		EDITOR.renderNeeded();
 		
-		EDITOR.stat("undo");
+		if(!isPlaying) EDITOR.stat("undo");
 	}
 	
 	function redo(file, ev, moveCaret) {
@@ -2625,7 +2658,7 @@ recordWidget.show();
 		
 		EDITOR.renderNeeded();
 		
-		EDITOR.stat("redo");
+		if(!isPlaying) EDITOR.stat("redo");
 		
 		return caret;
 	}
