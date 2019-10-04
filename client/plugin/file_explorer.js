@@ -152,6 +152,7 @@ gapi.auth2.getAuthInstance().signOut();
 	}
 	
 	function toggleFileExplorerFromDiscoveryBar() {
+		console.log("Toggle file explorer (from discovery bar) visible=" + visible);
 		toggleFileExplorer();
 		EDITOR.stat("toggleFileExplorerFromDiscoveryBar");
 	}

@@ -2571,7 +2571,17 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		
 		if(typeof callback !== "function") throw new Error("Ssecond argument: callback - needs to be a function! Did you mean EDITOR.addEvent ?");
 		
-		return EDITOR.addEvent(eventName, {fun: callback, order: order});
+		var options = {fun: callback};
+
+if(typeof order == "number") options.order = order;
+else if(typeof order == "object") {
+			for(var name in order) {
+				options[name] = order[name];
+			}
+		}
+		else if(order != undefined) throw new Error("Unable to determine what parameter order=" + order + " in third argument to EDITOR.on means!");
+		
+		return EDITOR.addEvent(eventName, options);
 	}
 	
 	EDITOR.addEvent = function(eventName, options) {
@@ -3669,12 +3679,12 @@ li.onclick = function(clickEvent) {
 		},
 		hide: function hideCtxMenu() {
 			
-			console.log(UTIL.getStack("Hide menu"));
+			console.log(UTIL.getStack("Hide context menu"));
 			
 			var menu = document.getElementById("canvasContextmenu");
 			
 			if(!menu.classList.contains("visible")) {
-				console.warn("Menu already hidden. No need to hide it!");
+				console.warn("Context menu already hidden. No need to hide it!");
 				return;
 			}
 			

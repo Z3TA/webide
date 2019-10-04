@@ -504,8 +504,8 @@ alertBox("Failed to save audio: " + err.message);
 		recordInfo.startDate = (new Date()).getTime();
 		
 		EDITOR.on("mouseMove", recordMouseMovement);
-		EDITOR.on("mouseClick", recordMouseClick);
-		EDITOR.on("fileShow", recordFileShow);
+			EDITOR.on("mouseClick", recordMouseClick, {dir: "down"});
+			EDITOR.on("fileShow", recordFileShow);
 			EDITOR.on("keyPressed", recordKeyPress);
 		
 		
@@ -744,6 +744,8 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 	
 	function recordMouseClick(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
+		console.log("recordMouseClick: button=" + button + " mouseDirection=" + mouseDirection + "");
+		
 		if(target.className == "fileCanvas") {
 			var file = EDITOR.currentFile;
 			var grid = file.rowColFromMouse(mouseX, mouseY);
@@ -755,7 +757,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 				type: "click"
 			};
 			
-			console.log("recordMouseClick: button=" + button + " row=" +  grid.row + " col=" +  grid.col);
+			console.log("recordMouseClick: row=" +  grid.row + " col=" +  grid.col);
 			
 		}
 		else {
@@ -770,7 +772,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 					type: "click"
 				};
 				
-				console.log("recordMouseClick: button=" + button + " mouseTarget=" + JSON.stringify(mouseTarget));
+				console.log("recordMouseClick: mouseTarget=" + JSON.stringify(mouseTarget));
 			}
 			else if(target.id != "startOrStopRecordningButton") {
 				console.warn("Failed to find a suitable target for mouse click: target:", target)
@@ -1619,7 +1621,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 				// Figure out which file we are in and switch to it
 				var foundFile = false;
 				if(currentValue > oldValue) {
-					for(var i=currentValue; i>oldValue; i--) {
+					for(var i=Math.min(currentValue, record.length-1); i>oldValue; i--) {
 						if(!record[i]) throw new Error("i=" + i + " record.length=" + record.length + " currentValue=" + currentValue + " oldValue=" + oldValue);
 						if(record[i].changeFile) {
 							foundFile = record[i].changeFile.to;
@@ -1629,7 +1631,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 				}
 				else {
 					// currentValue <= oldValue
-					for(var i=currentValue; i<oldValue; i++) {
+					for(var i=Math.min(currentValue, record.length-1); i<oldValue; i++) {
+						if(!record[i]) throw new Error("i=" + i + " record.length=" + record.length + " currentValue=" + currentValue + " oldValue=" + oldValue);
 						if(record[i].changeFile) {
 							foundFile = record[i].changeFile.to;
 							break;
