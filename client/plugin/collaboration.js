@@ -881,7 +881,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 			}
 			else if(target.id != "startOrStopRecordningButton") {
 				console.warn("Failed to find a suitable target for mouse click: target:", target)
-				alertBox("Failed to find a suitable target for mouse click: target.id=" + target.id + " target.tagName=" + target.tagName);
+				alertBox("Failed to find a suitable target for mouse click: id=" + target.id + " tagName=" + target.tagName + " type=" + target.type + " value=" + target.value + " innerText=" + target.innerText);
 			}
 		}
 		
@@ -959,24 +959,26 @@ return mouseTarget;
 			var elementsWithText = 0;
 			for(var i=0; i<elements.length; i++) {
 				if(elements[i].innerText.trim() == innerText) elementsWithText++;
-				
 			}
 			if(elementsWithText == 1) {
 				mouseTarget.tag = tag;
 				mouseTarget.text = innerText;
-				console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText);
+				console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText + " type=" + target.type);
 				// We prefer id over tag and innerText, so keep looking until we find and id, or use last
 				if(type == "move") return mouseTarget; // Prefer upper most element when recordning mouse movements
 				else if(type == "click") {
 					// Prefer elements that has click handlers if we are recordning clicks
 					if(typeof target.onclick == "function") return mouseTarget;
 					
+					// Buttons is always good for click events
+					if(tag == "BUTTON") return mouseTarget;
+					
 				}
 				
 				return findMouseTarget(target.parentNode, type, recursion, last ? last : mouseTarget);
 			}
 		}
-		else if(tag == "INPUT" && target.type=="button" && target.value) {
+		else if(tag == "INPUT" && (target.type=="button" || target.type=="submit") && target.value) {
 			mouseTarget.tag = tag;
 			mouseTarget.text = target.value;
 			return mouseTarget;
@@ -987,7 +989,7 @@ return mouseTarget;
 			return mouseTarget;
 		}
 		
-		console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText);
+		console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText + " value=" + target.value);
 		
 		// Does it have any click/mouseover/mousedown handlers ?
 		
