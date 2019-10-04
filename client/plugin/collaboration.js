@@ -64,6 +64,7 @@
 	var targetsToBeIgnored = [
 		"canvas", 
 		"discoveryBar", 
+		"leftColumn",
 		"tabList", 
 		"windowMenu", 
 		"windowMenuHeight", 
@@ -994,6 +995,9 @@ var file = fileOrData;
 	}
 	
 	function resetPlayback(callback) {
+		
+		EDITOR.ctxMenu.hide(); // Because the playback might have opened it
+		
 		// ### Open files for playback
 		var filesToReset = 0;
 		var filesReset = 0;
@@ -1454,9 +1458,12 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 			
 			if(mouseEvent.row != undefined && mouseEvent.col != undefined) {
 				// Click on canvas
-				
-				
-				
+				var LEFT_CLICK = 0;
+				var RIGHT_CLICK = 2;
+				if(mouseEvent.mouseButton != LEFT_CLICK) {
+					// Editor is hard coded to show the context meny when you click with anything but the main mouse button
+					EDITOR.ctxMenu.show(mouseX, mouseY);
+				}
 			}
 			else if(targetElement) {
 				targetElement.focus();
@@ -1606,6 +1613,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		var moveCaret = true;
 		var playbackStart = recordInfo.startDate;
 		
+		EDITOR.ctxMenu.hide(); // Because the playback might have opened it
+		
 		if(lastRecordItem == -1) {
 			resetPlayback(function(err) {
 				if(err) return alertBox(err.message);
@@ -1631,7 +1640,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 				}
 				else {
 					// currentValue <= oldValue
-					for(var i=Math.min(currentValue, record.length-1); i<oldValue; i++) {
+					for(var i=Math.min(currentValue, record.length-1); i<Math.min(oldValue, record.length); i++) {
 						if(!record[i]) throw new Error("i=" + i + " record.length=" + record.length + " currentValue=" + currentValue + " oldValue=" + oldValue);
 						if(record[i].changeFile) {
 							foundFile = record[i].changeFile.to;

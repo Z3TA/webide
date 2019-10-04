@@ -3511,12 +3511,11 @@ li.onclick = function(clickEvent) {
 				//menu.insertBefore(li, menu.children[position]);
 			}
 			
-			// tabindex is needed in order for tab navigating to work (in Chrome)
-			li.setAttribute("tabindex", (position || 10));
 			
 			menu.appendChild(li);
 			
 			// Re-order the menu items
+			var itemCount = 100; // High number to give room for temporary ctxmenu items 
 			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
 			items.sort(function(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
@@ -3529,6 +3528,15 @@ li.onclick = function(clickEvent) {
 			});
 			items.forEach(function (li) {
 				menu.appendChild(li);
+				
+				itemCount++;
+				
+				// tabindex is needed in order for tab navigating to work (in Chrome)
+				li.setAttribute("tabindex", itemCount);
+				
+				// An id is needed so that the menu item can be targeted while recording
+				li.id = "ctxMenuItem" + itemCount;
+				
 			});
 			
 			// Don't forget to call EDITOR.ctxMenu.hide() after the item has been clicked!
@@ -3651,6 +3659,24 @@ li.onclick = function(clickEvent) {
 			}
 			
 			tempItems.appendChild(li);
+			
+			var items = tempItems.childNodes;
+			var itemCount = 0; // Temporary items will get a low tab index
+			
+			items.forEach(function(li) {
+				if(li.tagName == "LI") {
+					
+					itemCount++;
+					
+					// tabindex is needed in order for tab navigating to work (in Chrome)
+					li.setAttribute("tabindex", itemCount);
+					
+					// An id is needed so that the menu item can be targeted while recording
+					li.id = "ctxMenuItem" + itemCount;
+				}
+				
+			});
+			
 			
 			// Add many: accept array?
 			

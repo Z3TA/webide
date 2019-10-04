@@ -10,7 +10,7 @@ Note to myself
 
 Solve a problem! Do not look for problems that fit a solution!
 
-Probably should read though this file and reletlessly delete stuff.
+Probably should read through this file and reletlessly delete stuff.
 
 NEVER switch to an earlier revision on working folder. Instead copy the whole folder and make the hg up.
 hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
@@ -40,8 +40,6 @@ Make tutorials using the recording feature.
 
 
 todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
-
-todo: Able to use context menu in recording?
 
 todo: Record keyboard shortcuts and display them during playback
 
@@ -1783,6 +1781,15 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 
 BUGS (and issues)
 =================
+
+
+---
+
+Autocompleting in EDITOR.js line 3667 on a DOM node element hangs the editor for a ling time, then gives an error:
+jzedit/client/plugin/javascript/autocomplete.js:1241
+Uncaught TypeError: Cannot read property 'domElement' of undefined
+
+---
 
 bug: Old accounts are nuked, can't run hg clone! 
 hg clone ssh://hg@hg.sr.ht/~jz/survey-example --debug
@@ -3987,6 +3994,13 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+---
+
+Able to sort a list of strings alphabetically,
+also able to store functions in a file alphabetically !? Right clicking on the function list -> "reorder functions alphabetically"
+
+---
 
 Drag an drop selected text.
 When text is selected, you can hold down left mouse button, then release it where you want the text to be moved
