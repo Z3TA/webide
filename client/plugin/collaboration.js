@@ -57,7 +57,7 @@
 	var saveRecordButton, recordWidget, audioPlayer, soundVisualizer, mediaRecorder;
 	var audioBlob, loadedAudioFile, lastRecordedMouseCaretRow = -1, lastRecordedMouseCaretCol = -1;
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
-	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0;
+	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0, keyComboDiv;
 	var lastRecordedMouseTarget, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY, fakeMouseElementHideTimer;
 	
 	var targetsToBeIgnoredRegexp = [];
@@ -80,6 +80,7 @@
 		"recordningSoundVisualizer", 
 		"startOrStopRecordningButton", 
 		"startOrStopPlaybackButton",
+		"restartPlaybackButton",
 		"wireframe"
 	];
 	
@@ -206,6 +207,13 @@
 		recordButton.innerText = "● Start recording";
 		recordButton.onclick = startOrStopRecording;
 		wrap.appendChild(recordButton);
+		
+		var restartButton = document.createElement("button");
+		restartButton.setAttribute("id", "restartPlaybackButton");
+		restartButton.classList.add("restartButton", "button", "half");
+		restartButton.innerText = "Restart";
+		restartButton.onclick = restartPlayback;
+		wrap.appendChild(restartButton);
 		
 		soundVisualizer = document.createElement("canvas");
 		soundVisualizer.setAttribute("id", "recordningSoundVisualizer");
@@ -442,6 +450,7 @@ alertBox("Failed to save audio: " + err.message);
 		EDITOR.removeEvent("mouseClick", recordMouseClick);
 		EDITOR.removeEvent("fileShow", recordFileShow);
 		EDITOR.removeEvent("keyPressed", recordKeyPress);
+		EDITOR.removeEvent("keyDown", recordKeyCombo);
 		
 		// Stop the audio stream
 		mediaRecorder.stop();
@@ -508,7 +517,7 @@ alertBox("Failed to save audio: " + err.message);
 			EDITOR.on("mouseClick", recordMouseClick, {dir: "down"});
 			EDITOR.on("fileShow", recordFileShow);
 			EDITOR.on("keyPressed", recordKeyPress);
-		
+			EDITOR.on("keyDown", recordKeyCombo);
 		
 		record.length = 0; // Reset
 		
@@ -517,6 +526,101 @@ alertBox("Failed to save audio: " + err.message);
 			
 			EDITOR.stat("recording");
 		}
+	}
+	
+	function recordKeyCombo(file, character, combo, keyDownEvent) {
+		/*
+			
+			We are only interested into keyboard combinations, so that we can then show they combo and run the function during playback
+			Don't bother trying to record/playback terminal in vim mode interaction.
+			
+		*/
+		
+		if(combo.sum == 0) return;
+		if(!character) return;
+		
+		// When playing back, the othe ruser might have rebinded the key, we still want to fire the same function, so save the names of the keybinding functions triggered
+		var matchedKeyBindings = [];
+		
+		var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
+		var key = keyDownEvent.key || null;
+		var keyBindings = EDITOR.keyBindings();
+		for(var i=0, binding; i<keyBindings.length; i++) {
+			binding = keyBindings[i];
+			if( (binding.char === character || binding.charCode === charCode || binding.key === key) && // === so that undefined doesn't match null
+			(binding.combo == combo.sum || binding.combo === undefined) &&
+			(binding.dir == "down" || binding.dir === undefined) && // down is the default direction
+			(binding.mode == EDITOR.mode || binding.mode == "*") ) {
+				matchedKeyBindings.push(UTIL.getFunctionName(binding.fun));
+			}
+		}
+		
+		if(matchedKeyBindings.length == 0) {
+			console.log("recordKeyCombo: Did not find any key binding for character=" + character + " and combo=" + JSON.stringify(combo));
+			return;
+		}
+		
+		var keyComboEvent = {
+			combo: combo,
+			target: keyDownEvent.target.className,
+			filePath: file.path,
+			keyBindings: matchedKeyBindings
+		};
+		
+console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
+
+		record.push({date: (new Date()).getTime(), keyCombo: keyComboEvent});
+	}
+	
+	function playbackKeyCombo(keyComboEvent) {
+		
+		var keyDownEvent = null;
+		
+		var descriptions = [];
+		
+		console.log("playbackKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
+		
+		var filePath = playBackFile(keyComboEvent.filePath);
+		if(!EDITOR.files.hasOwnProperty(filePath)) {
+			stopPlayback();
+			throw new Error("File not open? filePath=" + filePath);
+		}
+		var file = EDITOR.files[filePath];
+		
+		var keyBindings = EDITOR.keyBindings();
+		for(var i=0, binding, fName, funReturn; i<keyBindings.length; i++) {
+			binding = keyBindings[i];
+			fName = UTIL.getFunctionName(binding.fun);
+			if(keyComboEvent.keyBindings.indexOf(fName) != -1) {
+				descriptions.push(binding.desc);
+				funReturn = binding.fun(file, keyComboEvent.combo);
+			}
+		}
+		
+		if(!keyComboDiv) {
+			keyComboDiv = document.createElement("div");
+			keyComboDiv.classList.add("playbackKeyCombo");
+
+			var big = document.createElement("div");
+			big.classList.add("combo");
+			
+			var small = document.createElement("div");
+			small.classList.add("description");
+			
+			keyComboDiv.appendChild(big);
+			keyComboDiv.appendChild(small);
+
+			document.documentElement.appendChild(keyComboDiv);
+}
+
+		keyComboDiv.childNodes[0].innerText = EDITOR.getKeyFor(keyComboEvent.keyBindings[0]);
+		keyComboDiv.childNodes[1].innerText = descriptions.join("\n");
+		keyComboDiv.classList.remove("hidden")
+
+setTimeout(function() {
+			keyComboDiv.classList.add("hidden")
+}, 5000);
+		
 	}
 	
 	function recordKeyPress(file, character, combo, keyPressEvent) {
@@ -859,7 +963,7 @@ return mouseTarget;
 			}
 			if(elementsWithText == 1) {
 				mouseTarget.tag = tag;
-				mouseTarget.innerText = innerText;
+				mouseTarget.text = innerText;
 				console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText);
 				// We prefer id over tag and innerText, so keep looking until we find and id, or use last
 				if(type == "move") return mouseTarget; // Prefer upper most element when recordning mouse movements
@@ -871,6 +975,16 @@ return mouseTarget;
 				
 				return findMouseTarget(target.parentNode, type, recursion, last ? last : mouseTarget);
 			}
+		}
+		else if(tag == "INPUT" && target.type=="button" && target.value) {
+			mouseTarget.tag = tag;
+			mouseTarget.text = target.value;
+			return mouseTarget;
+		}
+		else if(tag == "BUTTON" && innerText) {
+			mouseTarget.tag = tag;
+			mouseTarget.text = innerText;
+			return mouseTarget;
 		}
 		
 		console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText);
@@ -994,9 +1108,18 @@ var file = fileOrData;
 		
 	}
 	
+	function restartPlayback() {
+		stopPlayback();
+		lastRecordItem = -1; // first "frame" is 0, so -1 means it has not yet started playing
+		recordTimeline.value = 0;
+		seekAudio();
+	}
+	
 	function resetPlayback(callback) {
 		
-		EDITOR.ctxMenu.hide(); // Because the playback might have opened it
+		// Because the playback might have opened these
+		EDITOR.ctxMenu.hide(); 
+		EDITOR.windowMenu.hide();
 		
 		// ### Open files for playback
 		var filesToReset = 0;
@@ -1308,6 +1431,7 @@ var file = fileOrData;
 			if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse);
 			if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 			if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
+			if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
 			
 		}
 		
@@ -1388,8 +1512,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 				arr = changeEvents[order];
 				
 				if(!arr) {
-					//continue;
-					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + "currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) );
+					stopPlayback();
+					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) + " file.path=" + file.path + " recordInfo.files=" + JSON.stringify(recordInfo.files) );
 				}
 				
 				for (var i=arr.length-1; i>-1; i--) {
@@ -1506,7 +1630,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		var elementsWithText = 0;
 		var targetElement;
 		for(var i=0; i<elements.length; i++) {
-			if(elements[i].innerText.trim() == target.innerText) {
+			if(elements[i].innerText.trim() == target.text || elements[i].value == target.text) {
 				elementsWithText++;
 				targetElement = elements[i];
 			}
@@ -1514,7 +1638,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		
 		if(elementsWithText == 1) return targetElement;
 		else if(elementsWithText > 1) {
-			console.warn("There exist more then one element with tag=" + target.tag + " and innerText=" + target.innerText);
+			console.warn("There exist more then one element with tag=" + target.tag + " and text=" + target.text);
 			return targetElement;
 		}
 		
@@ -1704,6 +1828,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 					if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
+						if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
 				}
 			}
 		}
@@ -1755,7 +1880,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.from);
 					if(record[lastRecordItem].keyPress) keyPressPlayback(record[lastRecordItem].keyPress, true);
-					
+						if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
+						
 					lastRecordItem--;
 				}
 				
@@ -2006,6 +2132,12 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 			loadRecord(data);
 		}
 		
+		if(isPlaying) {
+			// New file opened during playback, save edits
+			fileChangeEventOrderCounters[file.path] = recordInfo.lastOrder;
+			fileChangeEvents[file.path] = [];
+		}
+		
 		if(!collabMode) return true;
 		
 		if(file.noCollaboration) {
@@ -2132,7 +2264,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
 		}
-		else if(!collabMode && recordInfo && recordInfo.files && recordInfo.files.hasOwnProperty(file.path.replace("playback/", ""))) {
+		else if(!collabMode && recordInfo && recordInfo.files && file.path.indexOf("/playback/") == 0 && recordInfo.files.hasOwnProperty(file.path.replace("playback/", ""))) {
 			// We always want to save changes if the file belongs to a playback file in order to transform the playback
 			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			fileChangeEvents[file.path][fileChangeEvent.order] = [];

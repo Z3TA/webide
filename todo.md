@@ -38,6 +38,9 @@ What I'm working on
 Make tutorials using the recording feature.
 
 
+Uncaught Error: Server: API error: ENOENT: no such file or directory, scandir '/static_site_generator_blog_example/' 
+
+
 
 todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
 
@@ -1783,6 +1786,10 @@ BUGS (and issues)
 =================
 
 
+
+when renaming a folder 
+Uncaught Error: folder=/ssg_blog_example/source/historier is not a directory! 
+
 ---
 
 Autocompleting in EDITOR.js line 3667 on a DOM node element hangs the editor for a ling time, then gives an error:
@@ -2778,6 +2785,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+
+
+long press name of folder to rename (currently need to click on icon) 
+
+cant preview markdown files directly in SSG
 
 In SCM, able to see all changes containing the selected text:
 hg grep --all Content-Security-Policy client/index.htm
@@ -3969,6 +3982,7 @@ Bugs have higher prio! Fix bugs and issues before implementing new features! The
 
 When implementing a new feature
 -------------------------------
+Ask yourself, what is problem you want to solve?
 Priotize the feature list to make sure you are implementing the most critical feature.
 Design it in your head
 If possible, make it as an independent plugin (should only depend on editor.js, File.js and UTIL.js. It should not depend on other plugins)

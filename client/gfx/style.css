@@ -1859,6 +1859,34 @@ margin-top: 20px;
 	background-color: green;
 }
 
+.playbackKeyCombo {
+	display: inline-block;
+	position: absolute;
+	top: 75%; 
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+	background-color: #ccc;
+	padding: 1em;
+	border-radius: 5px;
+	visibility: visible;
+	opacity: 1;
+}
+
+.playbackKeyCombo .combo {
+	font-size: 200%;
+}
+
+.playbackKeyCombo .desc {
+	font-size: 100%;
+}
+
+.playbackKeyCombo.hidden {
+	opacity: 0;
+	visibility: hidden;
+	transition: 1s;
+}
+
 
 /* ### loader animation */
 .loader {
