@@ -1495,7 +1495,7 @@ file.mode = "text";
 			}
 		}
 		
-		if(deselect.length > 0) EDITOR.fireEvent("deselect", deselect);
+		//if(deselect.length > 0) EDITOR.fireEvent("deselect", deselect);
 		
 		// Remove all deselected boxes
 		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
@@ -1527,9 +1527,8 @@ file.mode = "text";
 		
 		file.checkSelection();
 		
-		if(EDITOR.eventListeners.deselect.length > 0) {
-			EDITOR.fireEvent("select", [ file, selection.map(function(box) {return {index: box.index} }) ]);
-		}
+		if(EDITOR.eventListeners.select.length > 0) EDITOR.fireEvent("select", [ file, selection.map(function(box) {return {index: box.index} }) ]);
+		
 		
 		EDITOR.renderNeeded();
 		
@@ -1554,9 +1553,10 @@ file.mode = "text";
 		else {
 			// Deselect all
 			
-			if(EDITOR.eventListeners.deselect.length > 0) {
-				EDITOR.fireEvent("deselect", [ file, selected.map(function(box) {return {index: box.index} }) ]);
-			}
+			//EDITOR.fireEvent("deselectAll", [ file ]);
+			
+			//if(EDITOR.eventListeners.deselect.length > 0) EDITOR.fireEvent("deselect", [ file, selected.map(function(box) {return {index: box.index} }) ]);
+			
 			
 			for(var i=0; i<selectedLength; i++) {
 				selected[i].selected = false;

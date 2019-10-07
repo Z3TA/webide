@@ -35,7 +35,8 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Record selection/deselection
+When recordning selections, 
+selections keep getting deselected every time there is a selection ...
 
 
 ---

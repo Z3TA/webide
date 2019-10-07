@@ -178,8 +178,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 		previewTool: [],
 	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
-	select: [], // Selecting text
-	deselect: [], 
+	select: [], // Selecting text. note: The select event will be spammed when the user is selecting using the mouse as it will keep deselecting and selecting while moving the mouse
+	// Don't implement deselect and deselectAll events because deselect and select will be spammed while the user select using the mouse
 	sanitize: [], // For example foramtting and santizing text pasted or dropped into the editor
 	parse: [], // Language parsers should listen to this event and parse any string on request and return a parse-object {}
 	registerAltKey: [], // Virtual keyboards can choose to update alternate keys so you can for example save file via Alt + S etc. Kinda like key-bindings but for virtual keyboards

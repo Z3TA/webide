@@ -59,6 +59,7 @@
 	var fakeMouseElement, playbackMouseSize = EDITOR.settings.gridWidth, mousePlaybackCountdown = 0, mousePlaybackPositionX = -100;
 	var mousePlaybackPositionY = -100, mousePlaybackDeltaX = 0, mousePlaybackDeltaY = 0, keyComboDiv;
 	var lastRecordedMouseTarget, mousePlaybackPositionLastSetX, mousePlaybackPositionLastSetY, fakeMouseElementHideTimer;
+	var lastSelectEvent = {start: -1, end: -1};
 	
 	var targetsToBeIgnoredRegexp = [];
 	var targetsToBeIgnored = [
@@ -100,7 +101,6 @@
 			EDITOR.on("fileChange", collabFileChange);
 			EDITOR.on("afterSave", callabFileSaved);
 			EDITOR.on("select", collabSelectText);
-			EDITOR.on("deselect", recordDeselect);
 			
 			/*
 				EDITOR.on("interaction", function(file, action, ev) {
@@ -161,7 +161,6 @@
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			EDITOR.removeEvent("afterSave", callabFileSaved);
 			EDITOR.removeEvent("select", collabSelectText);
-			EDITOR.removeEvent("deselect", recordDeselect);
 			
 			CLIENT.removeEvent("echo", collabHandleEcho);
 			CLIENT.removeEvent("loginSuccess", collabLoginSuccess);
@@ -647,6 +646,18 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 		EDITOR.renderNeeded();
 	}
 	
+	function playbackDeselectAll(deselectAllEvent) {
+		var filePath = playBackFile(deselectAllEvent.filePath);
+		if(!EDITOR.files.hasOwnProperty(filePath)) {
+			stopPlayback();
+			throw new Error("File not open? filePath=" + filePath);
+		}
+		var file = EDITOR.files[filePath];
+		
+		file.removeHighlights();
+		EDITOR.renderNeeded();
+	}
+	
 	function playbackKeyCombo(keyComboEvent) {
 		
 		var keyDownEvent = null;
@@ -938,6 +949,8 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 			};
 			
 			console.log("recordMouseClick: row=" +  grid.row + " col=" +  grid.col);
+			
+			recordDeselect(file, file.selected);
 			
 		}
 		else {
@@ -1511,6 +1524,7 @@ var file = fileOrData;
 			if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
 			if(record[lastRecordItem].select) playbackSelect( record[lastRecordItem].select );
 			if(record[lastRecordItem].deselect) playbackDeselect( record[lastRecordItem].deselect );
+			
 		}
 		
 	}
@@ -1909,6 +1923,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 						if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
 						if(record[lastRecordItem].select) playbackSelect( record[lastRecordItem].select );
 						if(record[lastRecordItem].deselect) playbackDeselect( record[lastRecordItem].deselect );
+						if(record[lastRecordItem].deselectAll) playbackDeselectAll( record[lastRecordItem].deselectAll );
 				}
 			}
 		}
@@ -2252,8 +2267,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 	function collabSelectText(file, selection) {
 		if(!collabMode && !isRecording) return true;
 		if(file.noCollaboration) {
-			console.warn("Collaboration disabled in " + file.path);
-			return;
+			console.warn("Record selection: Collaboration disabled in " + file.path);
+			return true;
 		}
 		
 		console.log(selection);
@@ -2262,7 +2277,10 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 			throw new Error("Not an array: " + JSON.stringify(selection));
 		}
 		
-		if(selection.length == 0) return true;
+		if(selection.length == 0) {
+			console.warn("Record selection: selection.length=" + selection.length);
+			return true;
+		}
 		
 		selection.sort(function sortByIndex(a, b) {
 			return a.index - b.index;
@@ -2274,10 +2292,19 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 			end: selection[selection.length-1].index,
 		};
 		
+		if(lastSelectEvent.filePath == selectEvent.filePath && lastSelectEvent.start == selectEvent.start && lastSelectEvent.end == selectEvent.end) {
+			console.log("Record selection same as lastSelectEvent=" + JSON.stringify(lastSelectEvent));
+			return true;
+		}
+		
+		lastSelectEvent = selectEvent;
+		
 		if(collabMode) CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
 		
-		if(isRecording) record.push({date: (new Date()).getTime(), select: selectEvent});
-		
+		if(isRecording) {
+			console.log("Record selection select: start=" + selectEvent.start + " end=" + selectEvent.end);
+			record.push({date: (new Date()).getTime(), select: selectEvent});
+		}
 		return true;
 	}
 	
