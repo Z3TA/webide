@@ -1476,7 +1476,7 @@ file.mode = "text";
 		//console.log(typeof box);
 		
 		// Turn the box to an array of boxes, if it's not already an array
-		if(Object.prototype.toString.call( box ) != '[object Array]') {
+		if(!Array.isArray(box)) {
 			box = [box];
 		}
 		
@@ -1495,7 +1495,7 @@ file.mode = "text";
 			}
 		}
 		
-		//EDITOR.fireEvent("deselect", [deselect]);
+		if(deselect.length > 0) EDITOR.fireEvent("deselect", deselect);
 		
 		// Remove all deselected boxes
 		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
@@ -1527,7 +1527,9 @@ file.mode = "text";
 		
 		file.checkSelection();
 		
-		EDITOR.fireEvent("select", [file, selection]);
+		if(EDITOR.eventListeners.deselect.length > 0) {
+			EDITOR.fireEvent("select", [ file, selection.map(function(box) {return {index: box.index} }) ]);
+		}
 		
 		EDITOR.renderNeeded();
 		
@@ -1541,11 +1543,21 @@ file.mode = "text";
 		if(selectedLength == 0) return; // Early return optimization
 		
 		if(box) {
+			
+			if(EDITOR.eventListeners.deselect.length > 0) {
+				EDITOR.fireEvent("deselect", [ file, [{index: box.index}] ]);
+			}
+			
 			box.selected = false;
 			selected.splice(selected.indexOf(box), 1);
 		}
 		else {
 			// Deselect all
+			
+			if(EDITOR.eventListeners.deselect.length > 0) {
+				EDITOR.fireEvent("deselect", [ file, selected.map(function(box) {return {index: box.index} }) ]);
+			}
+			
 			for(var i=0; i<selectedLength; i++) {
 				selected[i].selected = false;
 			}
@@ -3722,7 +3734,20 @@ file.mode = "text";
 			box.highlighted = true;
 			file.highlighted.push(box);
 		}
+	}
+	
+	File.prototype.removeHighLightTextRange = function highLightTextRange(start, end) {
+		// Remove highlights text from start to end
+		var file = this;
 		
+		var textRange = file.createTextRange(start, end);
+		textRange.forEach(removeHighLight);
+		
+		function removeHighLight(box) {
+			// box is a gridBox
+			box.highlighted = false;
+			file.highlighted.splice(file.highlighted.indexOf(box), 1);
+		}
 	}
 	
 	File.prototype.removeHighlights = function() {

@@ -100,6 +100,7 @@
 			EDITOR.on("fileChange", collabFileChange);
 			EDITOR.on("afterSave", callabFileSaved);
 			EDITOR.on("select", collabSelectText);
+			EDITOR.on("deselect", recordDeselect);
 			
 			/*
 				EDITOR.on("interaction", function(file, action, ev) {
@@ -160,6 +161,7 @@
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			EDITOR.removeEvent("afterSave", callabFileSaved);
 			EDITOR.removeEvent("select", collabSelectText);
+			EDITOR.removeEvent("deselect", recordDeselect);
 			
 			CLIENT.removeEvent("echo", collabHandleEcho);
 			CLIENT.removeEvent("loginSuccess", collabLoginSuccess);
@@ -580,6 +582,69 @@ alertBox("Failed to save audio: " + err.message);
 console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 
 		record.push({date: (new Date()).getTime(), keyCombo: keyComboEvent});
+	}
+	
+	function otransform(file, fileChangeEvent) {
+		var order = recordInfo.lastOrder;
+		var changeEvents = fileChangeEvents[file.path];
+		if(!changeEvents) {
+			stopPlayback();
+			throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+		}
+		if(!Array.isArray(changeEvents)) {
+			stopPlayback();
+			throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+		}
+		var currentOrder = fileChangeEventOrderCounters[file.path];
+		var arr;
+		console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+		while(order++ < currentOrder) {
+			
+			arr = changeEvents[order];
+			
+			if(!arr) {
+				stopPlayback();
+				throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) + " file.path=" + file.path + " recordInfo.files=" + JSON.stringify(recordInfo.files) );
+			}
+			
+			for (var i=arr.length-1; i>-1; i--) {
+				transformBackwards(fileChangeEvent, arr[i]);
+			}
+			
+			console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+		}
+		
+		return fileChangeEvent;
+	}
+	
+	function playbackSelect(selectEvent) {
+		var filePath = playBackFile(selectEvent.filePath);
+		if(!EDITOR.files.hasOwnProperty(filePath)) {
+			stopPlayback();
+			throw new Error("File not open? filePath=" + filePath);
+		}
+		var file = EDITOR.files[filePath];
+		
+		var start = otransform(file, {index: selectEvent.start, row: 0});
+		var end = otransform(file, {index: selectEvent.end, row: 0});
+		
+		file.highLightTextRange(start.index, end.index);
+		EDITOR.renderNeeded();
+	}
+	
+	function playbackDeselect(deselectEvent) {
+		var filePath = playBackFile(deselectEvent.filePath);
+		if(!EDITOR.files.hasOwnProperty(filePath)) {
+			stopPlayback();
+			throw new Error("File not open? filePath=" + filePath);
+		}
+		var file = EDITOR.files[filePath];
+		
+		var start = otransform(file, {index: deselectEvent.start, row: 0});
+		var end = otransform(file, {index: deselectEvent.end, row: 0});
+		
+		file.removeHighLightTextRange(start.index, end.index);
+		EDITOR.renderNeeded();
 	}
 	
 	function playbackKeyCombo(keyComboEvent) {
@@ -1444,7 +1509,8 @@ var file = fileOrData;
 			if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 			if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
 			if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
-			
+			if(record[lastRecordItem].select) playbackSelect( record[lastRecordItem].select );
+			if(record[lastRecordItem].deselect) playbackDeselect( record[lastRecordItem].deselect );
 		}
 		
 	}
@@ -1841,6 +1907,8 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.to);
 					if(record[lastRecordItem].keyPress) keyPressPlayback( record[lastRecordItem].keyPress );
 						if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
+						if(record[lastRecordItem].select) playbackSelect( record[lastRecordItem].select );
+						if(record[lastRecordItem].deselect) playbackDeselect( record[lastRecordItem].deselect );
 				}
 			}
 		}
@@ -1893,6 +1961,10 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 					if(record[lastRecordItem].changeFile) showPlaybackFile(record[lastRecordItem].changeFile.from);
 					if(record[lastRecordItem].keyPress) keyPressPlayback(record[lastRecordItem].keyPress, true);
 						if(record[lastRecordItem].keyCombo) playbackKeyCombo( record[lastRecordItem].keyCombo );
+						
+						// Reversed
+						if(record[lastRecordItem].select) playbackDeselect( record[lastRecordItem].select );
+						if(record[lastRecordItem].deselect) playbackSelect( record[lastRecordItem].deselect );
 						
 					lastRecordItem--;
 				}
@@ -2178,13 +2250,17 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 	}
 	
 	function collabSelectText(file, selection) {
-		if(!collabMode) return true;
+		if(!collabMode && !isRecording) return true;
 		if(file.noCollaboration) {
 			console.warn("Collaboration disabled in " + file.path);
 			return;
 		}
 		
 		console.log(selection);
+		
+		if(!Array.isArray(selection)) {
+			throw new Error("Not an array: " + JSON.stringify(selection));
+		}
 		
 		if(selection.length == 0) return true;
 		
@@ -2196,9 +2272,43 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 			filePath: file.path,
 			start: selection[0].index,
 			end: selection[selection.length-1].index,
+		};
+		
+		if(collabMode) CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
+		
+		if(isRecording) record.push({date: (new Date()).getTime(), select: selectEvent});
+		
+		return true;
+	}
+	
+	function recordDeselect(file, selection) {
+		if(!isRecording) return true;
+		if(file.noCollaboration) {
+			console.warn("Collaboration disabled in " + file.path);
+			return;
 		}
 		
-		CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
+		console.log(selection);
+		
+		if(!Array.isArray(selection)) {
+			throw new Error("Not an array: " + JSON.stringify(selection));
+		}
+		
+		if(selection.length == 0) return true;
+		
+		selection.sort(function sortByIndex(a, b) {
+			return a.index - b.index;
+		});
+		
+		var deselectEvent = {
+			filePath: file.path,
+			start: selection[0].index,
+			end: selection[selection.length-1].index,
+		};
+		
+		//if(collabMode) CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
+		
+		if(isRecording) record.push({date: (new Date()).getTime(), deselect: deselectEvent});
 		
 		return true;
 	}

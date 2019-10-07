@@ -35,11 +35,51 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Record selection/deselection
+
+
+---
+
+Snippet explorer ?
+
+Automaitcally searches Node.JS documentation (if it's a node.js file) and stack overflow for code snippets - depending on context (nearby text)
+With arrow buttons/swipe where you can find more related snippets
+
+For example var http = require("http") should automatically bring up http examples from the node.js documentation.
+
+
+---
+
+When writing node.JS and using Node.JS modules
+I read the documentation! ...
+And usually copy/paste example code to get started
+
+How do I help users with that workflow ?
+That workflow is however tiresome on mobile as it takes so much effort to switch between browser tabs.
+
+
+
+
+Use the record function to create a welcome "video" showing core features of the editor.
+* Node.JS HTTP server example
+* Function list
+* Automatic indentation
+
+
+
+
 Make tutorials using the recording feature.
 
 
 Uncaught Error: Server: API error: ENOENT: no such file or directory, scandir '/static_site_generator_blog_example/' 
 
+
+when clicking prev via desc bar on md file in ssg:
+Error: Server: API error: ENOENT: no such file or directory, open '/my_web_site/preview/blog/test.md'
+    at Object.cmd (https://webide.se/:1:91912)
+    at Object.readFromDisk (https://webide.se/:1:173174)
+    at openPreviewWin (https://webide.se/:93:36798)
+    at previewServed (https://webide.se/:93:37638) 
 
 
 todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
@@ -1138,6 +1178,10 @@ When searching, find all, create multiple selections(cursors), so that when you 
 
 What I'm thinking
 ==================
+
+It seems code editors/IDE's needs a sales process.
+When people check the editor out they will just stare at it for 3 seconds, then go check the next thing ...
+Witch the record function I can show them the core features of the editor.
 
 
 ---
