@@ -438,6 +438,7 @@
 		launchServe({sourcePage: fileHtml, testFile: "previewAutocomplete.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
 			
+			setTimeout(function() {
 			var file = preview.sourceFile;
 			var index = file.text.indexOf(var1) + var1.length;
 			var atCaret = autoComplete(file, index);
@@ -449,6 +450,8 @@
 			
 			cleanup();
 			callback(true);
+			}, 100); // Wait for the window to load
+			
 		});
 		
 		function autoComplete(file, index) {
