@@ -35,6 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Fix issues in Edge browser on Windows 10
+
+
 When recordning selections, 
 selections keep getting deselected every time there is a selection ...
 
