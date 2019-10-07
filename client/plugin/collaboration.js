@@ -464,10 +464,12 @@ alertBox("Failed to save audio: " + err.message);
 		EDITOR.removeEvent("keyDown", recordKeyCombo);
 		
 		// Stop the audio stream
+		if(mediaRecorder) {
 		mediaRecorder.stop();
 		console.log(mediaRecorder.state);
 		console.log("recorder stopped");
 		// mediaRecorder.requestData();
+		}
 		
 		/*
 			var stream = audioPlayer.srcObject;
