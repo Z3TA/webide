@@ -669,7 +669,7 @@ file.mode = "text";
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
-					throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!");
+					throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character! file.path=" + file.path);
 				}
 				
 				// Make sure the box has these properties:
@@ -765,7 +765,7 @@ file.mode = "text";
 				throw new Error("Caret on row " + caret.row + " (caret=" + JSON.stringify(caret) + "). Expected it to be on row " + (file.grid.length-1) + " because caret.eof = true in file.path=" + file.path);
 			}
 			else if(caret.eol != true) {
-				throw new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + "");
+				throw new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + " file.path=" + file.path);
 			}
 		}
 		if(caret.eol) {
