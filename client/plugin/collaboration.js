@@ -1118,7 +1118,7 @@ recordInfo.files[file.path] = {
 		try {
 			var data = JSON.parse(file.text);
 		}
-		catch {
+		catch(err) {
 			console.warn("Parse failed: " + err.message);
 			return null;
 		}
