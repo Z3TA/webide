@@ -306,19 +306,29 @@
 		
 		if(typeof FileReader != "undefined") {
 			if(audioBlob) {
-				saveAudio(audioBlob, audioFilePath);
-				recordInfo.audioPath = audioFilePath;
+				saveAudio(audioBlob, audioFilePath, function(err) {
+					if(err) alertBox(err.message);
+					else {
+recordInfo.audioPath = audioFilePath;
+					}
+					saveData();
+				});
 			}
-			else alertBox("No audio data!");
+			else {
+alertBox("No audio data!");
+				saveData();
+			}
 		}
+		else saveData();
 		
-		var data = {
-			info: recordInfo,
-			record: record
+		function saveData() {
+			var data = {
+				info: recordInfo,
+				record: record
+			}
+			
+			EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
 		}
-		
-		EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
-		
 	}
 	
 	function saveAudio(audioBlob, audioFilePath, callback) {
