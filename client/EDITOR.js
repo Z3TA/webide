@@ -6753,15 +6753,15 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		return FAIL;
 	}
 	
-	var stackLines = UTIL.parseStackTrace(errorStack);
-	
-	if(!stackLines) {
+		var parsedError = UTIL.parseErrorMessage(errorStack);
+		
+		if(!parsedError) {
 		console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
 		//alertBox(message || errorStack, "ERROR_PARSING", "error");
 		return FAIL;
 	}
 	
-	if(stackLines && !message && stackLines.message) message = stackLines.message;
+		if(parsedError && !message && parsedError.message) message = parsedError.message;
 	
 	if(!message) {
 		EDITOR.error(  new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) )  );
@@ -6784,6 +6784,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	}
 	
 	var sourcePath = "";
+		var stackLines = parsedError.stack;
 	stackLoop: for (var i=0; i<stackLines.length; i++) {
 		for(var filePath in EDITOR.files) {
 			
@@ -6803,8 +6804,8 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 				
 				console.log("showMessageFromStackTrace: sourcePath in filePath: yes!");
 				var file = EDITOR.files[filePath];
-				var lineno = stackLines[i].lineno;
-				var colno = stackLines[i].colno;
+				var lineno = stackLines[i].line;
+				var colno = stackLines[i].col;
 				break stackLoop;
 			}
 			else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
