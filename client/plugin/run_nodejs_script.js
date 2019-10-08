@@ -33,8 +33,9 @@
 		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
-		EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe);
 		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
+		
+		if(!UTIL.isPrivateIp(window.location.hostname)) EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe); // Show banner with endpoint
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
