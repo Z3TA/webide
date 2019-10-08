@@ -1420,7 +1420,7 @@ var file = fileOrData;
 		// Max value should be total ticks = "total record time" / "time per tick"
 		// Time per tick is 1000/playbackFPS
 		
-		var totalRecordTimeAudio = isFinite(audioPlayer.duration) ? audioPlayer.duration * 1000 : 0; // ms
+		var totalRecordTimeAudio = (audioPlayer && isFinite(audioPlayer.duration)) ? audioPlayer.duration * 1000 : 0; // ms
 		var lastItem = record[record.length-1];
 		var totalRecordTimeRecord = lastItem.date-recordInfo.startDate; // ms
 		var totalRecordTime = Math.max(totalRecordTimeAudio, totalRecordTimeRecord);
@@ -1429,9 +1429,9 @@ var file = fileOrData;
 		
 		console.log("setTimelineMax: recordInfo.startDate=" + recordInfo.startDate + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 		
-		if(isNaN(recordTimeline.max) || !UTIL.isNumeric(recordTimeline.max)) throw new Error("recordTimeline.max=" + recordTimeline.max);
-		
-		if(!isFinite(parseInt(recordTimeline.max))) throw new Error("recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord);
+		if(isNaN(recordTimeline.max) || !UTIL.isNumeric(recordTimeline.max) || !isFinite(parseInt(recordTimeline.max))) {
+			throw new Error("recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " lastItem.date=" + lastItem.date + " recordInfo.startDate=" + recordInfo.startDate);
+		}
 		
 	}
 	
