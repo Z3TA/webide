@@ -63,6 +63,8 @@ var DEBUG = 7;
 
 var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
+var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false); // Translate all paths like if the home dir was the root folder
+
 var DISPLAY_ID = 0; // Counter of visual displays
 
 var PIPE_COUNTER = 0;
@@ -158,6 +160,12 @@ var PORTS_IN_USE = [HTTP_PORT];
 var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
 var GUEST_POOL = []; // Because it's a bit slow to create new users
 var CREATE_USER_LOCK = false; // Can only create one user at a time
+var ALLOW_GUESTS = true;
+
+if(getArg(["noguest", "noguests"])) ALLOW_GUESTS = false;
+if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
+//console.log("ALLOW_GUESTS=" + ALLOW_GUESTS + " " + getArg(["guest", "guest", "guests"]));
+
 
 var GCSF = {}; // username: GCSF session
 
@@ -655,7 +663,7 @@ function main() {
 	
 	if(info.uid < 0) log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	
-	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
+	if(info.uid > 0 && !USERNAME && !NO_CHROOT) {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
 		log(info);
 		process.exit();
@@ -697,9 +705,10 @@ function main() {
 	else getGuestCount();
 	
 	function getGuestCount() {
-		if(!USERNAME && !NO_CHROOT && !DEBUG_CHROOT) {
-			
-			mysqlConnect();
+		
+		mysqlConnect();
+		
+		if(!USERNAME && !NO_CHROOT && !DEBUG_CHROOT && ALLOW_GUESTS) {
 			
 			module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 				if(err) {
@@ -1608,7 +1617,7 @@ function sockJsConnection(connection) {
 						if(USERNAME == username && PASSWORD == password) idSuccess();
 						else idFail("Wong username or password! (Username specified in server arguments)");
 					}
-					else if(username == "guest" && !NO_CHROOT) {
+					else if(username == "guest" && !NO_CHROOT && ALLOW_GUESTS) {
 						// ### Login as guest
 						// Assign a user from the guest pool
 						if(GUEST_POOL.length == 0) {
@@ -1799,7 +1808,7 @@ function sockJsConnection(connection) {
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
-							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
+							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
 							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
 							
@@ -3743,7 +3752,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
-	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--chroot=" + !NO_CHROOT];
+	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--chroot=" + !NO_CHROOT, "--virtualroot=" + VIRTUAL_ROOT];
 	
 	options.env = {
 		username: name,
@@ -3755,7 +3764,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		PATH: process.env.PATH
 	}
 	
-	// For forking when running in the Termux Adnorid app
+	// For forking when running in the Termux Android app
 	if(module_os.platform()=="android") {
 		options.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}

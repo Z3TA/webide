@@ -35,7 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Trying running Node.JS scripts on Windows and Edge browser ...
+
 
 Fix issues in Edge browser on Windows 10
 

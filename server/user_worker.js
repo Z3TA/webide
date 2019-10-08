@@ -52,6 +52,8 @@ var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 //log("process.env.uid=" + process.env.uid, 7);
 //log("process.env=" + JSON.stringify(process.env));
 
+var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
+
 
 if(USE_CHROOT) {
 	var npmOptions = {
@@ -267,7 +269,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	if(pathToFileOrDir == undefined) throw new Error("pathToFileOrDir=" + pathToFileOrDir);
 	
-	//console.log(user.name + " translatePath=" + pathToFileOrDir);
+	console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 	
@@ -275,7 +277,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		pathToFileOrDir = pathToFileOrDir.replace("~", user.homeDir);
 	}
 	
-	if(user.rootPath && !USE_CHROOT) {
+	if(user.rootPath && !USE_CHROOT && VIRTUAL_ROOT) {
 		var urlModule = require("url");
 		var pathModule = require("path");
 		

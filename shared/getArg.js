@@ -37,6 +37,8 @@ function getArg(word) {
 		if(value === undefined) return true;
 		else if(value === "false") return false;
 		else if(value === "true") return true;
+		else if(value === "no") return false;
+		else if(value === "yes") return true;
 		else return value;
 	}
 	else return undefined;
