@@ -33,7 +33,7 @@ var UTIL = require("../client/UTIL.js");
 
 var HTTP_ENDPOINTS = {};
 var defaultHomeDir = DEFAULT.home_dir;
-var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
+var HOME_DIR = UTIL.trailingSlash(getArg(["h", "homedir", "home"]) || defaultHomeDir);
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
 
@@ -666,7 +666,7 @@ function main() {
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {
 			if(err && err.code == "ENOENT") {
 				log("Did not find " + passwordFile, NOTICE);
-				log("Please specify --username=user and --password=pw in argv!\nOr use ./hashPw.js to generate a password hash and save it in " + passwordFile + "", NOTICE);
+				log("Please specify --username=user and --password=pw in argv!\nOr use ./hashPw.js to generate a password hash and save it in " + passwordFile + "\nAnd specify the home root folder using -h or --homedir=path", NOTICE);
 				process.exit();
 			}
 		});
@@ -1739,7 +1739,18 @@ function sockJsConnection(connection) {
 						else {
 							// Get home, uid and gid
 							readEtcPasswd(username, function(err, passwd) {
-								if(err) throw err;
+								if(err) {
+									if(process.platform === "win32") {
+										homeDir = UTIL.trailingSlash(UTIL.joinPaths(HOME_DIR, username));
+										shell = false;
+										uid = undefined;
+										gid = undefined;
+										rootPath = homeDir;
+										acceptUser();
+										return;
+									}
+									throw err;
+								}
 								
 								homeDir = passwd.homeDir;
 								shell = passwd.shell;
