@@ -104,6 +104,8 @@ var UTIL = {
 			foo/bar returns foo
 		*/
 		
+		if(path == undefined) throw new Error("UTIL.getFolderName: path=" + path);
+		
 		var delimiter = UTIL.getPathDelimiter(path);
 		
 		if(path.charAt(path.length) != delimiter) {
@@ -130,6 +132,67 @@ var UTIL = {
 		if(folders.length > 1) return folders[folders.length-2];
 		else return folders[0];
 		
+	},
+	
+	firstFolder: function getFirstFolder(path, excludePath) {
+		// Returns the name of the root folder eg. /foo/bar/ returns foo (without folder delimiters, nor drive litters)
+		// But if you want to get the first name of the folder, say baz in /foo/bar/baz set second argument to /foo/bar/
+		
+		var folders = UTIL.getFolders(path);
+		
+		var i = 0;
+		
+		if(excludePath) {
+			var excludeFolders = UTIL.getFolders(excludePath);
+			for (; i<excludeFolders.length; i++) {
+				if(excludeFolders[i] == folders[i]) continue;
+				else break;
+			}
+			if(i>0) i--;
+		}
+		
+		if(folders.length < 2) return "";
+		
+		return UTIL.getFolderName(folders[1+i]);
+	},
+	
+	prependDir: function prependDir(path, folderToAddBefore, afterPath) {
+		// Adds a directory infront of a file path
+		// Example: adding baz to /foo/bar/ it becomes /baz/foo/bar/
+		// If afterPath is specified, it will be added after that path
+		
+		var folders = UTIL.getFolders(path);
+		var folderNames = [];
+		if(afterPath) {
+			var afterFolders = UTIL.getFolders(afterPath);
+			for (var i=0; i<folders.length; i++) {
+				if(afterFolders[i] == folders[i]) {
+					console.log("" + afterFolders[i] + " == " + folders[i]);
+					continue;
+				}
+				else {
+					console.log("Adding folder: " + folders[i]);
+					
+					folderNames.push( UTIL.getFolderName( folders[i]) );
+				}
+			}
+			if(i>0) i--;
+			
+			var startFolder = afterPath;
+		}
+		else {
+			var startFolder = folders[0];
+			var folderNames = folders.map( UTIL.getFolderName );
+			folderNames.shift(); // Remove root
+		}
+		
+		//console.log("startFolder=" + startFolder);
+		//console.log("folderNames=" + JSON.stringify(folderNames));
+		
+		var folder = UTIL.joinPaths( startFolder , folderToAddBefore, folderNames.join( UTIL.getPathDelimiter(path) )  );
+		
+		if(!UTIL.isDirectory(path)) return UTIL.joinPaths(folder, UTIL.getFilenameFromPath(path));
+		return folder;
 	},
 	
 	splitPath: function splitPath(path) {

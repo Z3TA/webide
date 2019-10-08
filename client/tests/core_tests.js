@@ -40,6 +40,34 @@
 		
 	}
 	
+	EDITOR.addTest(function testPrependDir(callback) {
+		
+		UTIL.assert(UTIL.prependDir("c:\\Users\\zetaf\\test\\test.js", "playback", "c:\\Users\\zetaf\\"), "c:\\Users\\zetaf\\playback\\test\\test.js");
+		
+		UTIL.assert(UTIL.prependDir("c:\\foo\\bar\\kaboom\\filename.js", "baz", "c:\\foo\\bar\\"), "c:\\foo\\bar\\baz\\kaboom\\filename.js");
+		
+		UTIL.assert(UTIL.prependDir("c:\\foo\\bar\\kaboom\\filename.js", "baz"), "c:\\baz\\foo\bar\\kaboom\\filename.js");
+		
+		UTIL.assert(UTIL.prependDir("/foo/bar/", "baz"), "/baz/foo/bar/");
+		UTIL.assert(UTIL.prependDir("/foo/bar/", "baz", "/foo/"), "/foo/baz/bar/");
+		
+		
+		callback(true);
+		
+	});
+	
+	EDITOR.addTest(function testFirstFolder(callback) {
+		
+		UTIL.assert(UTIL.firstFolder("c:\\foo\\bar\\kaboom\\filename.js"), "foo");
+		UTIL.assert(UTIL.firstFolder("c:\\foo\\bar\\kaboom\\filename.js", "c:\\foo\\bar\\"), "kaboom");
+		
+		UTIL.assert(UTIL.firstFolder("/foo/bar/baz"), "foo");
+		UTIL.assert(UTIL.firstFolder("/foo/bar/baz", "/foo/"), "bar");
+		
+		callback(true);
+		
+	});
+	
 	EDITOR.addTest(function getFoldersNoPath(callback) {
 		
 		var folders = UTIL.getFolders("sftp://foo.bar");

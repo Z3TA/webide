@@ -1549,13 +1549,13 @@ var file = fileOrData;
 	function playBackFile(filePath) {
 		// Prevent playback from overwriting existing files
 		
-		if(filePath.indexOf("/playback/") == 0) {
+		if(UTIL.firstFolder(filePath, EDITOR.user.homeDir) == "playback") {
 			// Note: The recorder might move the mouse over /foo/bar, but when playing back
-console.warn("Path already in /playback/ filePath=" + filePath);
+console.warn("Path already in playback folder: filePath=" + filePath);
 			return filePath;
 		}
 		
-		return UTIL.joinPaths("/playback/", filePath);
+		return UTIL.prependDir(filePath, "playback", EDITOR.user.homeDir);
 	}
 	
 	function mousePlayback(mouseEvent, instant) {
@@ -2415,7 +2415,7 @@ console.warn("Path already in /playback/ filePath=" + filePath);
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
 		}
-		else if(!collabMode && recordInfo && recordInfo.files && file.path.indexOf("/playback/") == 0 && recordInfo.files.hasOwnProperty(file.path.replace("playback/", ""))) {
+		else if(!collabMode && recordInfo && recordInfo.files && UTIL.firstFolder(file.path, EDITOR.user.homeDir) == "playback" && recordInfo.files.hasOwnProperty(file.path.replace("playback" + UTIL.getPathDelimiter(file.path), ""))) {
 			// We always want to save changes if the file belongs to a playback file in order to transform the playback
 			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			fileChangeEvents[file.path][fileChangeEvent.order] = [];
