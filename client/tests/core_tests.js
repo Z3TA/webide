@@ -1659,6 +1659,15 @@
 	
 	EDITOR.addTest(function testParseJavaScriptError(callback) {
 		
+		// Safari browser on Macbook pro
+		var s = UTIL.parseErrorMessage('the message: oleLog@http://192.168.0.3/WysiwygEditor.js:2130:56\nconsoleLogCapturer@http://192.168.0.3/WysiwygEditor.js:1808:28\nhttp://192.168.0.3/0tgxkypi7y/inlineConsoleLog.htm:4:12');
+		if(s.line != 2130) throw new Error("s.line=" + s.line + " s=" + JSON.stringify(s, null, 2));
+		if(s.col != 56) throw new Error("s.col=" + s.col + " s=" + JSON.stringify(s, null, 2));
+		if(s.source != "http://192.168.0.3/WysiwygEditor.js") throw new Error("s.source=" + s.source + " s=" + JSON.stringify(s, null, 2));
+		if(s.message != "the message") throw new Error("s.message=" + s.message + " s=" + JSON.stringify(s, null, 2));
+		if(s.stack.length != 3) throw new Error("s.stack.length=" + s.stack.length + " s=" + JSON.stringify(s, null, 2));
+		
+		
 		// Firefox browser running on Linux (Ubuntu)
 		var s = UTIL.parseErrorMessage("hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24\nconsoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4\n@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1");
 		if(s.fun != "oleLog") throw new Error("s.fun=" + s.fun + " s=" + JSON.stringify(s, null, 2));
@@ -1683,6 +1692,7 @@
 		if(s.source != "/home/zeta/test/error2.js") throw new Error("s.source=" + s.source + " s=" + JSON.stringify(s, null, 2));
 		if(s.message != "foobar") throw new Error("s.message=" + s.message + " s=" + JSON.stringify(s, null, 2));
 		if(s.stack.length != 0) throw new Error("s.stack.length=" + s.stack.length + " s=" + JSON.stringify(s, null, 2));
+		
 		
 		callback(true);
 	});

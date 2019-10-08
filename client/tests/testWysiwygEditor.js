@@ -354,7 +354,7 @@
 		});
 	});
 	
-	EDITOR.addTest(510, false, function inlineConsoleLog(callback) {
+	EDITOR.addTest(521, false, function inlineConsoleLog(callback) {
 		// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
 		var msgStr = '"console.log test ' + (new Date()).getTime() + '"';
 		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
@@ -429,7 +429,7 @@
 		});
 	});
 	
-	EDITOR.addTest(false, function previewAutocomplete(callback) {
+	EDITOR.addTest(500, false, function previewAutocomplete(callback) {
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';
@@ -450,7 +450,7 @@
 			
 			cleanup();
 			callback(true);
-			}, 100); // Wait for the window to load
+			}, 500); // Wait for the window to load
 			
 		});
 		

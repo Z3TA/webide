@@ -6754,6 +6754,9 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	}
 	
 		var parsedError = UTIL.parseErrorMessage(errorStack);
+		//var stackLines = UTIL.parseStackTrace(errorStack);
+		
+		console.log("parsedError: " + JSON.stringify(parsedError, null, 2));
 		
 		if(!parsedError) {
 		console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
@@ -6784,7 +6787,13 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	}
 	
 	var sourcePath = "";
-		var stackLines = parsedError.stack;
+		var stackLines = parsedError.stack || parsedError;
+		
+		var lineno, colno;
+		
+		var file = findFile(stackLines);
+		
+		function findFile(stackLines) {
 	stackLoop: for (var i=0; i<stackLines.length; i++) {
 		for(var filePath in EDITOR.files) {
 			
@@ -6802,16 +6811,27 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 					continue;
 				}
 				
-				console.log("showMessageFromStackTrace: sourcePath in filePath: yes!");
+						
 				var file = EDITOR.files[filePath];
-				var lineno = stackLines[i].line;
-				var colno = stackLines[i].col;
+						lineno = stackLines[i].line || stackLines[i].lineno;
+						colno = stackLines[i].col || stackLines[i].colno;
+						console.log("showMessageFromStackTrace: sourcePath in filePath: yes! ");
+						
 				break stackLoop;
 			}
 			else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
 		}
 	}
-	
+			
+			return file;
+		}
+		
+		if(!file) {
+			console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace");
+			stackLines = UTIL.parseStackTrace(errorStack)
+			var file = findFile(stackLines);
+		}
+		
 	if(file && lineno) {
 		var row = lineno - 1;
 		var gridRow = file.grid[row];
@@ -6831,7 +6851,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		return SUCCESS;
 		
 	}
-	else console.warn("showMessageFromStackTrace: Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+		else console.warn("showMessageFromStackTrace: file=" + file + " lineno=" + lineno + " Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
 	
 	return FAIL;
 }

@@ -917,7 +917,7 @@ alertBox("No file open!");
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(function testNodeErroMessage1(callback) {
+	EDITOR.addTest(1, function testNodeErroMessage1(callback) {
 		
 		var errMsg = "Error: What a great name!";
 		

@@ -35,6 +35,10 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+
+Testing in different browsers
+
 Fix issues in Edge browser on Windows 10
 
 

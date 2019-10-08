@@ -752,9 +752,97 @@ console.warn("fun=" + fun);
 		var fun;
 		var stack = [];
 		
+		console.log("parseErrorMessage: " + errorString);
+		
 		errorString = errorString.trim();
 		
 		var rows = errorString.split(/\n|\r\n/);
+		
+		console.log("parseErrorMessage: rows=" + JSON.stringify(rows, null, 2));
+		
+		
+		/*
+			Safari makes the same stack trace as Firefox, 
+			with the small but important detail:
+			it leaves out the @ if there is no function name
+			
+			console.log test 1570444592082: oleLog@http://192.168.0.3/WysiwygEditor.js:2130:56
+			consoleLogCapturer@http://192.168.0.3/WysiwygEditor.js:1808:28
+			http://192.168.0.3/0tgxkypi7y/inlineConsoleLog.htm:4:12
+			
+			
+		*/
+		
+		if( errorString.match(/[^@].*:\d+:\d+/) && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
+			
+			console.log("parseErrorMessage: Matched Safari error");
+			
+			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastColonSpace;
+			
+			for(var row=rows.length-1; row>-1; row--) {
+				rowstr = rows[row].trim();
+				lastColumn = rowstr.lastIndexOf(":");
+				
+				if(lastColumn == -1) throw new Error( "Parse error (probably Safari browser) Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
+				
+				colMaybe = rowstr.slice(lastColumn+1);
+				rowstr = rowstr.slice(0, lastColumn);
+				lastColumn = rowstr.lastIndexOf(":");
+				lineMaybe = rowstr.slice(lastColumn+1);
+				
+				if( UTIL.isNumeric(colMaybe) && UTIL.isNumeric(lineMaybe) ) {
+					line = parseInt(lineMaybe);
+					col = parseInt(colMaybe);
+					rowstr = rowstr.slice(0, lastColumn);
+				}
+				else if(UTIL.isNumeric(colMaybe)) {
+					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					line = parseInt(colMaybe);
+					col = undefined;
+				}
+				
+				lastAt = rowstr.lastIndexOf("@");
+				
+				if(lastAt != -1) {
+					source = rowstr.slice(lastAt+1);
+					rowstr = rowstr.slice(0, lastAt);
+				}
+				else {
+					source
+					fun = "";
+				}
+				
+				if(rowstr.length > 0) {
+					lastColonSpace = rowstr.lastIndexOf(": ");
+					
+					if(lastColonSpace == -1) {
+						if(lastAt != -1) fun = rowstr;
+						else source = rowstr;
+					}
+					else {
+						if(lastAt != -1) fun = rowstr.slice(lastColonSpace+2);
+						else source = rowstr.slice(lastColonSpace+2);
+						
+rowstr = rowstr.slice(0, lastColonSpace);
+						
+						if(message) throw new Error("Message have already been found! message=" + message + " rowstr="  + rowstr + " errorString=" + errorString);
+						
+						message = rowstr;
+						
+						console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
+					}
+				}
+				
+				if(source.length == 0) throw new Error("source.length=" + source.length + " rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				
+				stack.unshift({fun: fun, source: source, line: line, col: col});
+				
+			}
+			
+			return {message: message, source: source, line: line, col: col, fun: fun, stack: stack};
+			
+		}
+		
 		
 		/*
 			Firefox desktop browser for Linux (Ubuntu)
@@ -762,9 +850,13 @@ console.warn("fun=" + fun);
 			hi 1552910288020: oleLog@http://127.0.0.1:8080/WysiwygEditor.js:2083:24
 			consoleLogCapturer@http://127.0.0.1:8080/WysiwygEditor.js:1791:4
 			@http://127.0.0.1:8080/gme8e1qgab/inlineConsoleLog.htm:4:1
+			
 		*/
-		if(errorString.match(/@.*:\d+:\d+$/)) {
-
+		
+		else if( errorString.match(/@.*:\d+:\d+$/) ) {
+			
+			console.log("parseErrorMessage: Matched Firefox error");
+			
 			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastColonSpace;
 			
 			for(var row=rows.length-1; row>-1; row--) {
@@ -791,7 +883,9 @@ console.warn("fun=" + fun);
 				
 				lastAt = rowstr.lastIndexOf("@");
 				
-				if(lastAt == -1) throw new Error("No @ in rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				if(lastAt == -1) {
+					throw new Error("No @ in row=" + row + " rowstr=" + rowstr + " errorString=" + errorString + " colMaybe=" + colMaybe + " lineMaybe=" + lineMaybe);
+				}
 				
 				source = rowstr.slice(lastAt+1);
 				
@@ -825,6 +919,7 @@ console.warn("fun=" + fun);
 			return {message: message, source: source, line: line, col: col, fun: fun, stack: stack};
 		}
 		
+		
 		/*
 			Node.JS and Chromium (v8) errors:
 			
@@ -846,6 +941,8 @@ console.warn("fun=" + fun);
 			
 		*/
 		else if( errorString.match(/at .*:\d+:\d+/) ) {
+			
+			console.log("parseErrorMessage: Matched Node.JS and Chromium (v8) error");
 			
 			var namedFunction = false;
 			var lastColumn, colMaybe, lineMaybe, lastSpaceAndLeftParenthese, firstAt
@@ -923,6 +1020,8 @@ namedFunction = false;
 		*/
 		if( errorString.match(/.*:\d+/) && errorString.match(/ *?\^*/) ) {
 			
+			console.log("parseErrorMessage: Matched v8 throw string");
+			
 			if(message) throw new Error("Message have already been found! message=" + message + " errorString=" + errorString);
 			
 			var upArrowFound = false;
@@ -956,6 +1055,7 @@ namedFunction = false;
 					}
 					else {
 						console.warn("parseErrorMessage: Unable to find line-nr: rowstr=" + rowstr + " errorString=" + errorString);
+						
 					}
 				}
 				else {
