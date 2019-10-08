@@ -2347,6 +2347,13 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		a = a.trim();
 		b = b.trim();
 		
+		// Node.js on Windows
+		if(a.indexOf("file:///") == 0) a = a.slice(8);
+		if(b.indexOf("file:///") == 0) b = b.slice(8);
+		
+		if(a.indexOf("file://") == 0) a = a.slice(7);
+		if(b.indexOf("file://") == 0) b = b.slice(7);
+		
 		if(a.indexOf("file:") == 0) a = a.slice(5);
 		if(b.indexOf("file:") == 0) b = b.slice(5);
 		
@@ -2364,6 +2371,8 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			var root = UTIL.root(b);
 			b = UTIL.resolvePath(root, b.replace(root, ""));
 		}
+		
+		console.log("isSamePath: Comparing\na=" + a + "\nb=" + b);
 		
 		return (a==b);
 		

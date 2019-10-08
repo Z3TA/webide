@@ -299,8 +299,14 @@ saveAndRun(file);
 			
 			stdout(msg);
 			
-			var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr}) == SUCCESS);
+			console.log("msg.stderr=" + UTIL.lbChars(msg.stderr));
 			
+			var ignore = ["Debugger attached.\r\nWaiting for the debugger to disconnect...\r\n"];
+			
+			if(ignore.indexOf(msg.stderr) == -1) {
+				
+				var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr}) == SUCCESS);
+			}
 			
 			return;
 			
@@ -848,6 +854,9 @@ alertBox("No file open!");
 		EDITOR.renderNeeded();
 		
 		function write(str) {
+			// Lines breaks will ne CRLF on Windows
+			str = str.replace(/\r/g, ""); // Remove all CR
+			
 			if(eof) {
 				// Auto scroll down
 				//var method = file.insertText.bind(file);

@@ -1322,8 +1322,8 @@ function stopNodeJsScript(filePath, callback) {
 	// Give it a chance to teardown before killing it
 	childProcess.kill('SIGTERM');
 	childProcess.kill('SIGINT');
-	childProcess.kill('SIGQUIT');
-	childProcess.kill('SIGHUP');
+	if(process.platform != "win32") childProcess.kill('SIGQUIT'); // Node.JS on Windows will throw "Unknown signal: SIGQUIT"
+	if(process.platform != "win32") childProcess.kill('SIGHUP'); // Node.JS on Windows will throw "Error: kill ENOSYS""
 	
 	// Give the other kill signals a chance before sending final kill signal
 	var killTimeout = setTimeout(function kill() {

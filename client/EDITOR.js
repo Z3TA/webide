@@ -10341,7 +10341,10 @@ function htmlToImage(html, callback) {
 			if(url) domurl.revokeObjectURL(url);
 		}
 		
-		if( domurl.createObjectUR ) {
+		// img.onload does not fire in Edge browser on Windows!
+		
+		
+		if( domurl.createObjectURL ) {
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 			var url = domurl.createObjectURL(svg);
 			img.src = url;
