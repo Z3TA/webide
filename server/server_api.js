@@ -958,15 +958,14 @@ var encoding = "utf8";
 
 API.readFromDisk = function readFromDisk(user, json, callback) {
 	
-	var path = user.translatePath(json.path);
-	if(path instanceof Error) return callback(path);
-	
 	var returnBuffer = json.returnBuffer;
 	var encoding = json.encoding;
-	
+	var path = json.path;
 	var fileContent = "";
 	var stream;
 	var fileBuffer = [];
+	
+	if(path == undefined) return callback(new Error("No path specified in options to API.readFromDisk!"));
 	
 	if(!callback) {
 		throw new Error("No callback defined!");
@@ -1078,10 +1077,18 @@ console.warn(err.message);
 		
 			// Asume local file system
 			
+		var module_path = require("path");
+		if(!module_path.isAbsolute(path)) return callback(new Error("Not an absolute path: " + path));
+		
+		var path = user.translatePath(json.path);
+		if(path instanceof Error) return callback(path);
+		
 			if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
 			
 		// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 				
+		console.log("Read from disk: path=" + path);
+		
 				fs.readFile(path, function(err, buffer) {
 			if(err) return callback(err);
 			else {

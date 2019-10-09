@@ -869,6 +869,8 @@ usePseudoClipboard = false;
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
+		var pathToBeOpened = path;
+		
 		// Convert path delimters !? 
 		
 		
@@ -1047,6 +1049,8 @@ usePseudoClipboard = false;
 			if(err) return fileOpenError(err);
 			
 			console.log("Loading file to editor: " + path);
+			
+			if(path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
 			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path);
 			
