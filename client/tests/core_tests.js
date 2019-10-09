@@ -708,7 +708,7 @@
 	});
 	
 	EDITOR.addTest(1, function test_fixIndentation(callback) {
-		EDITOR.openFile("test_fixIndentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
+		EDITOR.openFile("/test_fixIndentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
 			if(err) throw err;
 			if(!file) throw new Error("file=" + file);
 			
@@ -721,6 +721,7 @@
 			file.putCharacter("}");
 			
 			EDITOR.saveFile(file, file.path, function fileSaved(err) {
+				if(err) throw err;
 				
 				if(file.grid[6].indentationCharacters == "") throw new Error("Expected a tab (indentation character) on line 7");
 				
