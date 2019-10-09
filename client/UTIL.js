@@ -2735,8 +2735,49 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
 		}
 		return copy;
-	}
+	},
 	
+	fixInconsistentLineBreaks: function fixInconsistentLineBreaks(text, lineBreak) {
+		
+		if(lineBreak == "\r\n") {
+			console.log("Searching for lonely (LF) \\n characters ... ");
+			
+			var fixed = false;
+			var index = text.indexOf("\n");
+			var rowCount = 0;
+			while(index > -1) {
+				if(text.charAt(index-1) != "\r") {
+					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					text = text.substring(0, index) + "\r" + text.substring(index);
+					console.log("Inserted (CR) on index=" + index);
+					fixed = true;
+				}
+				rowCount++;
+				index = text.indexOf("\n", index+1);
+			}
+			
+			console.log("Searching for lonely (CR) \\r characters ... ");
+			index = text.indexOf("\r");
+			rowCount = 0;
+			while(index > -1) {
+				if(text.charAt(index+1) != "\n") {
+					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					text = text.substring(0, index+1) + "\n" + text.substring(index+1);
+					console.log("Inserted (LF) on index=" + (index+1));
+					fixed = true;
+				}
+				rowCount++;
+				index = text.indexOf("\r", index+2);
+			}
+			
+			
+			if(fixed) {
+				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
+			}
+		}
+		
+		return text;
+	}
 	
 	
 }

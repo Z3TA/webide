@@ -47,7 +47,7 @@ var BrowserFile = File; // Native file object. todo: Rename our File variable to
 		
 		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
-		file.text = fixInconsistentLineBreaks(text, file.lineBreak); // Many functions count on the linebreak character being consistent
+		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak); // Many functions count on the linebreak character being consistent
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
@@ -126,47 +126,6 @@ var BrowserFile = File; // Native file object. todo: Rename our File variable to
 	
 	
 	
-	function fixInconsistentLineBreaks(text, lineBreak) {
-		
-		if(lineBreak == "\r\n") {
-			console.log("Searching for lonely (LF) \\n characters ... ");
-			
-			var fixed = false;
-			var index = text.indexOf("\n");
-			var rowCount = 0;
-			while(index > -1) {
-				if(text.charAt(index-1) != "\r") {
-					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
-					text = text.substring(0, index) + "\r" + text.substring(index);
-					console.log("Inserted (CR) on index=" + index);
-					fixed = true;
-				}
-				rowCount++;
-				index = text.indexOf("\n", index+1);
-			}
-			
-			console.log("Searching for lonely (CR) \\r characters ... ");
-			index = text.indexOf("\r");
-			rowCount = 0;
-			while(index > -1) {
-				if(text.charAt(index+1) != "\n") {
-					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
-					text = text.substring(0, index+1) + "\n" + text.substring(index+1);
-					console.log("Inserted (LF) on index=" + (index+1));
-					fixed = true;
-				}
-				rowCount++;
-				index = text.indexOf("\r", index+2);
-			}
-			
-			
-			if(fixed) {
-				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
-			}
-		}
-		
-		return text;
-	}
 	
 	
 	File.prototype.setFileExtension = function() {
@@ -651,7 +610,7 @@ file.mode = "text";
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					throw new Error("File grid sanity check error: Expected the last " + file.lineBreak.length + " characters(s) (" + UTIL.lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
+					throw new Error("File grid sanity check error: Expected the last " + file.lineBreak.length + " characters(s) (" + UTIL.lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path + " file.text=" + UTIL.lbChars(file.text));
 				}
 			}
 			
@@ -3099,7 +3058,7 @@ file.mode = "text";
 		
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
-		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
+		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak);
 		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);

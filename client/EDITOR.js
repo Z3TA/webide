@@ -8889,7 +8889,23 @@ function paste(pasteEvent) {
 			
 			text = EDITOR.sanitizeText(file, text);
 			
-			// If there is a text selection. Delete the selection first!
+				
+				/*
+					// Make sure the copied text has the wanted line-break convention before inserting it
+					var lbText = UTIL.determineLineBreakCharacters(text);
+					if(file.lineBreak != lbText) {
+					alertBox("Replacing " + UTIL.lbChars(lbText) + " with " + UTIL.lbChars(file.lineBreak));
+					text = text.replace(new RegExp(lbText, "g"), file.lineBreak);
+					}
+					else {
+					alertBox("lbText=" + UTIL.lbChars(lbText) + " same as file.lineBreak=" + UTIL.lbChars(file.lineBreak));
+					}
+				*/
+				
+				text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak);
+				
+				
+				// If there is a text selection. Delete the selection first!
 			file.deleteSelection();
 			
 			file.insertText(text);
