@@ -672,12 +672,12 @@ console.warn("fun=" + fun);
 			
 		*/
 		
-		console.log("Determining what line break characters to use ...");
+		console.log("determineLineBreakCharacters: " + UTIL.getStack("Determining what line break characters to use"));
 		
 		//console.log("determineLineBreakCharacters text=" + text);
 		
 		if(text.length == 0) {
-			console.warn("Can't determine line breaks without any text!");
+			console.warn("determineLineBreakCharacters: Can't determine line breaks without any text!");
 			if(typeof EDITOR != "undefined") return EDITOR.settings.defaultLineBreakCharacter;
 			else return "\n";
 		}
@@ -685,29 +685,29 @@ console.warn("fun=" + fun);
 		var nr = UTIL.occurrences(text, "\n\r", true),
 		rn = UTIL.occurrences(text, "\r\n", true)
 		
-		console.log("Line break? nr=" + nr + " rn=" + rn + "");
+		console.log("determineLineBreakCharacters: Line break? nr=" + nr + " rn=" + rn + " text.length=" + text.length);
 		
 		if(rn > nr) {
-			console.log("Using CRLF");
+			console.log("determineLineBreakCharacters: Using CRLF");
 			return "\r\n";
 		}
 		else if(nr > rn && nr > 1) {
-			console.warn("Using LFCR");
+			console.warn("determineLineBreakCharacters: Using LFCR");
 			return "\n\r";
 		}
 		else if(text.indexOf("\n") > -1) {
-			console.log("Using LF (text has LF but no CRLF or LFCR)");
+			console.log("determineLineBreakCharacters: Using LF (text has LF but no CRLF or LFCR)");
 			return "\n";
 		}
 		else {
 			// Text has no line breaks. Use the default: (cr lf in windows)
-			console.warn("Text has no line breaks!");
+			console.warn("determineLineBreakCharacters: Text has no line breaks!");
 			if(typeof navigator != "undefined" && navigator.platform.indexOf("Win") > -1) {
-				console.log("Using CRLF (Because it's Windows)");
+				console.log("determineLineBreakCharacters: Using CRLF (Because it's Windows)");
 				return "\r\n";
 			}
 			else {
-				console.log("Using LF (Because it's Not Windows)");
+				console.log("determineLineBreakCharacters: Using LF (Because it's Not Windows)");
 				return "\n";
 			}
 		}

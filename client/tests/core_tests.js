@@ -1685,7 +1685,7 @@
 		callback(true);
 	});
 	
-	EDITOR.addTest(1, function testParseJavaScriptError(callback) {
+	EDITOR.addTest(function testParseJavaScriptError(callback) {
 		
 		// Edge on Windows 10
 		var s = UTIL.parseErrorMessage('Error: This is an error! 1570601270105\nat Anonymous function (http://127.0.0.1/rpr9comthz/inlineErrorMessages.htm:4:1)');

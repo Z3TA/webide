@@ -143,12 +143,33 @@ var WysiwygEditor;
 			wysiwygEditor.isCompiled = true;
 			
 			var srcHTML = wysiwygEditor.getSourceCodeBody();
-			var lbSrc = UTIL.determineLineBreakCharacters(srcHTML);
+			
+			
+			//if(srcHTML.length == 0) throw new Error("srcHTML=" + srcHTML + " srcHTML.length=" + srcHTML.length);
+			
+			// If text has no line-break UTIL.determineLineBreakCharacters will return OS default!
+			
+			if(srcHTML.indexOf("\n") != -1) var lbSrc = UTIL.determineLineBreakCharacters(srcHTML);
+			else var lbSrc = wysiwygEditor.lineBreak;
+			
 			var rawMainHtml = getElementContent(compiledSource, wysiwygEditor.bodyTagPreview, lbSrc);
-			var lbMain = UTIL.determineLineBreakCharacters(rawMainHtml);
+			
+			if(rawMainHtml.indexOf("\n") != -1) var lbMain = UTIL.determineLineBreakCharacters(rawMainHtml);
+			else var lbMain = wysiwygEditor.lineBreak;
+			
 			
 			// Sanity check
-			if(wysiwygEditor.lineBreak != lbSrc) throw new Error("lbSrc=" + UTIL.lbChars(lbSrc) + " wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+			if(wysiwygEditor.lineBreak != lbSrc) {
+				throw new Error("lbSrc=" + UTIL.lbChars(lbSrc) +
+				" wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) +
+				" srcHTML contains linebreak ? " + (srcHTML.indexOf("\n") != -1) +
+				" rawMainHtml contains linebreak ? " + (rawMainHtml.indexOf("\n") != -1) +
+				" srcHTML= " + UTIL.lbChars(srcHTML) +
+				" rawMainHtml=" + UTIL.lbChars(rawMainHtml) + "");
+			}
+			
+			
+			
 			
 			/*
 				
@@ -2708,22 +2729,32 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	
 	function getElementContent(fileText, bodyTag, lineBreak) {
 		
-		if(fileText == undefined) throw new Error("Need fileText");
+		if(fileText == undefined) throw new Error("fileText=" + fileText);
+		if(fileText.length == 0) throw new Error("fileText=" + fileText + " fileText.length=" + fileText.length);
+		
 		if(bodyTag == undefined) {
 			bodyTag = "body";
 			console.warn("Using bodyTag=" + bodyTag);
 		}
-		if(lineBreak == undefined) lineBreak = UTIL.determineLineBreakCharacters(fileText);
+		
+		if(lineBreak == undefined) {
+			console.log("getElementContent: lineBreak=" + lineBreak + " Figuring out lineBreak from fileText.length=" + fileText.length);
+			lineBreak = UTIL.determineLineBreakCharacters(fileText);
+		}
+		else {
+			var lineBreakText = UTIL.determineLineBreakCharacters(fileText)
+		}
 		
 		// In order for the diff to work, we can not start and end on the same row as the <body> or </body> tags
 		// so there needs to be a line-break after <body> and before </body>
 		
-		var srcMatchBody = fileText.match(regexBody(bodyTag, lineBreak));
+		var srcMatchBody = fileText.match(regexBody(bodyTag, lineBreakText || lineBreak));
 		
 		if(srcMatchBody == null) {
 			console.log(fileText);
 			throw new Error("Can not find bodyTag=" + bodyTag + " with a line break after it!" + 
-			" There need to be a line break after the opening and before the closing of the " + bodyTag + " element!");
+			" There need to be a line break after the opening and before the closing of the " + bodyTag + " element!" +
+			" lineBreak=" + UTIL.lbChars(lineBreak) + " lineBreakText=" + UTIL.lbChars(lineBreak) + " fileText=" + UTIL.lbChars(fileText));
 		}
 		
 		if(srcMatchBody.length != 2) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
@@ -2734,6 +2765,17 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		//bodyHtml = removeHeadWhiteSpace(bodyHtml, lineBreak);
 		//bodyHtml = removeTailWhiteSpace(bodyHtml, lineBreak);
+		
+		/*
+			problem: The contentediable on Edge browser (Windows 10) will use CRLF for line breaks???? And the source file might use LF ...
+			solution: When getting the source code body, always convert to the line-breaks used by contenteditable !?
+			
+			if(lineBreakText && lineBreakText != lineBreak) {
+			alertBox("Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
+			console.warn("lineBreak=" + UTIL.lbChars(lineBreak) + " was specified. But text has lineBreakText=" + UTIL.lbChars(lineBreakText) + " Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
+			bodyHtml = bodyHtml.replace(new RegExp(lineBreakText, "g"), lineBreak);
+			}
+		*/
 		
 		return bodyHtml;
 		
