@@ -167,11 +167,11 @@ var UTIL = {
 			var afterFolders = UTIL.getFolders(afterPath);
 			for (var i=0; i<folders.length; i++) {
 				if(afterFolders[i] == folders[i]) {
-					console.log("" + afterFolders[i] + " == " + folders[i]);
+					//console.log("prependDir: " + afterFolders[i] + " == " + folders[i]);
 					continue;
 				}
 				else {
-					console.log("Adding folder: " + folders[i]);
+					//console.log("prependDir: Adding folder: " + folders[i]);
 					
 					folderNames.push( UTIL.getFolderName( folders[i]) );
 				}
@@ -186,13 +186,21 @@ var UTIL = {
 			folderNames.shift(); // Remove root
 		}
 		
-		//console.log("startFolder=" + startFolder);
-		//console.log("folderNames=" + JSON.stringify(folderNames));
+		//console.log("prependDir: startFolder=" + startFolder);
+		//console.log("prependDir: folderNames=" + JSON.stringify(folderNames));
 		
-		var folder = UTIL.joinPaths( startFolder , folderToAddBefore, folderNames.join( UTIL.getPathDelimiter(path) )  );
+		var folder = UTIL.trailingSlash(   UTIL.joinPaths(  startFolder , folderToAddBefore, folderNames.join( UTIL.getPathDelimiter(path) )  )   );
 		
-		if(!UTIL.isDirectory(path)) return UTIL.joinPaths(folder, UTIL.getFilenameFromPath(path));
-		return folder;
+		if(!UTIL.isDirectory(path)) {
+			// path is a file path
+			var filePath = UTIL.joinPaths(folder, UTIL.getFilenameFromPath(path));
+			console.log("prependDir: Returning a file path: " + filePath);
+			return filePath;
+		}
+		else {
+			console.log("prependDir: Returning a folder path: " + folder);
+			return folder;
+		}
 	},
 	
 	splitPath: function splitPath(path) {

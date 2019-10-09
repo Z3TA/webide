@@ -46,7 +46,7 @@
 		
 		UTIL.assert(UTIL.prependDir("c:\\foo\\bar\\kaboom\\filename.js", "baz", "c:\\foo\\bar\\"), "c:\\foo\\bar\\baz\\kaboom\\filename.js");
 		
-		UTIL.assert(UTIL.prependDir("c:\\foo\\bar\\kaboom\\filename.js", "baz"), "c:\\baz\\foo\bar\\kaboom\\filename.js");
+		UTIL.assert(UTIL.prependDir("c:\\foo\\bar\\kaboom\\filename.js", "baz"), "c:\\baz\\foo\\bar\\kaboom\\filename.js");
 		
 		UTIL.assert(UTIL.prependDir("/foo/bar/", "baz"), "/baz/foo/bar/");
 		UTIL.assert(UTIL.prependDir("/foo/bar/", "baz", "/foo/"), "/foo/baz/bar/");
