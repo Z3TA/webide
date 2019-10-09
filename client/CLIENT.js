@@ -156,7 +156,8 @@ var CLIENT = {}; // Client object is global
 			}
 		}
 		
-		properCallStackError[id] = new Error("Problem with " + req + " command:");
+		properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
+		// The error message will show if you click "bugreport!" (it's in the stack trace!?)
 		
 		if(callback) {
 callbackWaitList[id] = callback;
@@ -431,12 +432,16 @@ reconnectTimeoutTime += 10000;
 					
 					if(json.error) {
 						var errMsg = "Server: " + json.error;
-						err = properCallStackError[json.id] ||  new Error();
+						err = properCallStackError[json.id] || new Error(errMsg);
 						err.message = errMsg;
 						// Seems it's not possible to overwrite error.message, but can we overwrite error.stack ?
 						if(err.message != errMsg) {
 							err = new Error(errMsg);
 							err.stack = properCallStackError[json.id].stack;
+							
+							if(err.stack != properCallStackError[json.id].stack) {
+								alertBox("Unable to update " + err.message + " error message in " + BROWSER + ". The error message is: " + errMsg);
+							}
 						}
 						if(json.errorCode) err.code = json.errorCode;
 					}
