@@ -1120,7 +1120,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			}
 			
 			if(stdout) {
-				user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
+				user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), stdout: stdout, type: "npm"}});
 			}
 			
 			return callback(null);
@@ -1186,15 +1186,28 @@ function npm(arg, extraOptions, callback) {
 	
 	//stdio: ['pipe', 'pipe', 'pipe', 'ipc']; // To be able to access stdout from npmProcess.stdout
 	
-	var npmPath = "/usr/lib/node_modules/npm/bin/npm-cli.js";
 	var stdout = "";
 	var stderr = "";
 	var npmError = null;
+	
+	// We hardcode the path because of Apparmor!?
+	if(process.platform == "win32") { 
+		var npmPath = "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js";
+		/*
+			On Windows we might have to edit (as Administrator) C:\Program Files\nodejs\node_modules\npm\npmrc
+			And hardcore the prefix to C:\Program Files\nodejs\node_modules\npm
+			in order to prevent error: "Failed to replace env in config: ${APPDATA}"
+		*/
+	}
+	else {
+		var npmPath = "/usr/lib/node_modules/npm/bin/npm-cli.js";
+	}
+	
 	console.log("Spawning npmPath=" + npmPath + " with arg=" + JSON.stringify(arg) + " npmOptions=" + JSON.stringify(npmOptions) + " ...");
 	npmPath = (npmPath + " ").trim();
 	// Use fork instead of spawn to prevent running shebang ? 
 	// Nope: Fork also executes the shebang!? or does it!? todo: find out!
-	var npmProcess =  require('child_process').fork(npmPath, arg, npmOptions);
+	var npmProcess = require('child_process').fork(npmPath, arg, npmOptions);
 	
 	var fakeProgressInterval = setInterval(fakeProgress, 500);
 	
@@ -1441,7 +1454,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 							
 							if(stdout) {
 								stdout += "\n"; // Re-add the new line after running trim()
-								user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
+								user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), stdout: stdout, type: "npm"}});
 							}
 							
 							packageJsonExist = true;
@@ -1584,7 +1597,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				else {
 createdSockets.push("/sock/" + filename);
 					// Always use http: just in case the SSL registration failed (even though it will result in an additional roundtrip)
-					user.send({nodejsUrl: {url: "http://" + filename + "." + user.name + "." + TLD, scriptName: filePath}});
+					user.send({nodejsUrl: {url: "http://" + filename + "." + user.name + "." + TLD, scriptName: user.toVirtualPath(filePath)}});
 					
 				}
 			}
@@ -1593,7 +1606,7 @@ createdSockets.push("/sock/" + filename);
 		function messageFromNodeScript(message, handle) {
 			console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
 			console.log(message);
-			user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
+			user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), ICP: message}});
 		}
 		
 		function nodejScriptClose(code, signal) {
@@ -1607,7 +1620,7 @@ createdSockets.push("/sock/" + filename);
 			
 			delete user.runningNodeJsScripts[filePath];
 			
-			user.send({nodejsMessage: {scriptName: filePath, close: {code: code, signal: signal}}});
+			user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), close: {code: code, signal: signal}}});
 			
 			function deleteFile(filePath) {
 				var fs = require("fs");
@@ -1627,7 +1640,7 @@ createdSockets.push("/sock/" + filename);
 			
 			if(err.message == "spawn /usr/bin/node ENOENT") user.send("Failed to start nodejs. Contact system administrator.");
 			
-			//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
+			//user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), error: err.message}});
 		}
 		
 		function stdin(text) {
@@ -1640,7 +1653,7 @@ createdSockets.push("/sock/" + filename);
 			var text = data.toString("utf8");
 			console.log(user.name + ":" + filePath + ":stdout: " + UTIL.lbChars(text) + "");
 			
-			user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
+			user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), stdout: text}});
 		}
 		
 		function nodejsScriptStderr(data) {
@@ -1692,11 +1705,11 @@ createdSockets.push("/sock/" + filename);
 					
 				}
 				else {
-					user.send({nodejsMessage: {scriptName: filePath, cannotFindModule: matchModuleError[1]}});
+					user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), cannotFindModule: matchModuleError[1]}});
 				}
 			}
 			
-			user.send({nodejsMessage: {scriptName: filePath, stderr: stderr}});
+			user.send({nodejsMessage: {scriptName: user.toVirtualPath(filePath), stderr: stderr}});
 		}
 	}
 }

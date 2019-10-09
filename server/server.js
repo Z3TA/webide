@@ -1835,7 +1835,8 @@ function sockJsConnection(connection) {
 								ip: IP,
 								cId: userConnectionId,
 								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
-								editorVersion: EDITOR_VERSION
+								editorVersion: EDITOR_VERSION,
+								platform: process.platform
 							};
 							
 							if(NO_CHROOT) {

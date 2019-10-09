@@ -5596,7 +5596,7 @@ callback(err);
 		if(lastCharOfPath != "/" && lastCharOfPath != "\\") throw new Error("Last character is not a file path delimiter: " + directoryPathToCreate);
 		
 		var json = {pathToCreate: directoryPathToCreate};
-		CLIENT.cmd("createPath", json, function(err, json) {
+		CLIENT.cmd("createPath", json, function pathCreated(err, json) {
 			if(err) {
 				if(createPathCallback) createPathCallback(err);
 				else throw err;

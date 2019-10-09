@@ -35,11 +35,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Managed to nuke the editor in Windows by opening a file that did not have / infront
-File path=/test_fixIndentation.js not in EDITOR.openFileQueue=["test_fixIndentation.js"]
 
 
-Trying to run tests on Windows 10
+
+Sometimes the virtual root gets appended twice!
+
+
+Run tests on Windows 10:
+node server/server.js -p 80 -nochroot -virtualroot -noguest -h C:\Users\
+
 
 Fix issues in Edge browser on Windows 10
 

@@ -88,6 +88,8 @@ Double click (run) windows_create_desktop_shortcut.vbs
 
 
 
+
+
 Mac OS X
 --------
 1. Download and install nodejs from https://nodejs.org/
@@ -215,6 +217,11 @@ On Windows the following npm package will install the build dependencies:
 npm install --global --production windows-build-tools
 ```
 
+
+NPM Error: Failed to replace env in config: ${APPDATA}
+------------------------------------------------------
+Edit file as Administrator: C:\Program Files\nodejs\node_modules\npm\npmrc
+Replace "prefix=${APPDATA}\npm" with "prefix=C:\Program Files\nodejs\node_modules\npm"
 
 
 Running the editor in Google Cloud Shell
