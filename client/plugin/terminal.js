@@ -1464,9 +1464,12 @@ file.insertLineBreak();
 	// TEST-CODE-START
 	
 	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
-	EDITOR.addTest(1000, false, function openFileFromTerminal(callback) {
+	EDITOR.addTest(1, false, function openFileFromTerminal(callback) {
 		
-		EDITOR.openFile("terminal1337", '\n', function(err, file) {
+		EDITOR.openFile("terminal1337", '', function(err, file) {
+			
+			file.lineBreak = "\n"; // Default line-break on Windows is \r\n. But we always use just \n in the terminal (also pty on Windows!)
+			
 			terminalFiles.push(file);
 			terminalFileShow(file)
 			

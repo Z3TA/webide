@@ -35,11 +35,19 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Does terminal on Windows use CRLF !?
+
+
 Trying to run tests on Windows 10
 
 Fix issues in Edge browser on Windows 10
 
 Testing in different browsers
+
+
+bug: Fading text in margin on .diff file a green line below a red line - the text in the fading right margin becomes red
+
+polish: It's annoying when you search for something, and can't find it, because you have a space at the end of the search query
 
 ---
 
