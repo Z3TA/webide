@@ -80,7 +80,7 @@ otherwise you will get a "this file comes from another computer" warning every t
 Easiest method is to open a command prompt (Click on start menu => run, then type "cmd.exe")
 but right click on "cmd.exe" and select "Run as administrator". 
 Then type: `npm install --global --production windows-build-tools`
-
+(try again if it hangs)
 After nodejs and all dependencies are installed, double click (run) start.bat
 
 Add a desktop shortcut:
