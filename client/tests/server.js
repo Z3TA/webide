@@ -568,23 +568,34 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		
 	});
 	
-	EDITOR.addTest(function cloudDep(callback) {
+	EDITOR.addTest(1, function cloudDep(callback) {
 		
 		// Test to make sure we can run the cloud bin's
 		
 		var commandsToRun = 0;
 		var commandsFinished = 0;
 		var ready = false;
+		var platform;
 		
-		test("python --version");
-		test("hg --version");
-		test("node --version");
-		test("npm --version");
-		test("bash --version");
-		test("tar --version");
-		test("echo test > testzip && gzip testzip && gunzip testzip && rm testzip");
-		test('ssh-keygen -b 2048 -t rsa -f ./testkey -q -N "" && rm testkey');
-		test('sh -c "echo hi"');
+		CLIENT.cmd("platform", function(err, plat) {
+			if(err) throw err;
+			
+			platform = plat;
+			
+			test("python --version");
+			test("hg --version");
+			test("node --version");
+			test("npm --version");
+			
+			if(platform != "win32") {
+				test("bash --version");
+				test("tar --version");
+				test("echo test > testzip && gzip testzip && gunzip testzip && rm testzip");
+				test('ssh-keygen -b 2048 -t rsa -f ./testkey -q -N "" && rm testkey');
+				test('sh -c "echo hi"');
+			}
+			
+		});
 		
 		function test(cmd) {
 			commandsToRun++;
@@ -599,7 +610,15 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 				// Python gives version in stderr ...
 				stderr = stderr.trim().replace(/^Python 2\..*/, "");
 				
+				// npm in Windows will go nuts (complaining about how it can't replace env variables)
+				if(cmd == "npm --version" && platform == "win32" && resp.stdout) {
+					console.warn("NPM stdout=" + resp.stdout + " stderr=" + resp.stderr);
+					stderr = "";
+				}
+				
 				if(stderr) return error(new Error(resp.stderr));
+				
+				
 				
 				doneMaybe();
 			});

@@ -3296,6 +3296,11 @@ API.memory = function memory(user, json, callback) {
 	callback(null, {total: os.totalmem(), free: os.freemem()});
 }
 
+API.platform = function platform(user, json, callback) {
+	callback(null, process.platform);
+}
+
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");

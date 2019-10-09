@@ -3609,7 +3609,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(5, false, testEditAtTheSameTime);
+	EDITOR.addTest(false, testEditAtTheSameTime);
 	
 	function timeSerial(func) {
 		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");

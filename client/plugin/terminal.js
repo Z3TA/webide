@@ -1464,7 +1464,7 @@ file.insertLineBreak();
 	// TEST-CODE-START
 	
 	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
-	EDITOR.addTest(1, false, function openFileFromTerminal(callback) {
+	EDITOR.addTest(10000, false, function openFileFromTerminal(callback) {
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			

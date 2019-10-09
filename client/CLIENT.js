@@ -156,7 +156,7 @@ var CLIENT = {}; // Client object is global
 			}
 		}
 		
-		properCallStackError[id] = new Error("Problem with " + req + " ...");
+		properCallStackError[id] = new Error("Problem with " + req + " command:");
 		
 		if(callback) {
 callbackWaitList[id] = callback;
