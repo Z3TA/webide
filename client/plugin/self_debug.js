@@ -270,8 +270,9 @@ sendit();
 			else if(answer == sendBugReport) {
 				var errorReportFilePath = "bugreport.txt";
 				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
-					
 					if(err && typeof GUI != "undefined") GUI.showDevTools(); // nw.js
+					
+					if(err) return alertBox("Unable to open errorReportFilePath=" + errorReportFilePath + " Error: " + err.message);
 					
 					file.moveCaretToEndOfFile(file.caret, function() {
 						file.scrollToCaret(file.caret);

@@ -1925,7 +1925,7 @@
 		}
 	});
 	
-	EDITOR.addTest(function editBigFile(callback) {
+	EDITOR.addTest(1, function editBigFile(callback) {
 		// note: Need to place the testfile.txt inside the user home dir!
 		
 		var filePath = "/testfile.txt";
@@ -1935,11 +1935,18 @@
 		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {
 			if(err) throw err;
 			
+			if(EDITOR.files.hasOwnProperty(testFile)) throw new Error("testFile=" + testFile + " is already open!");
+			
 			console.log("Opening " + testFile + " ...");
-			EDITOR.openFile(testFile, function(err, file) {
+			EDITOR.openFile(testFile, function gotoLine2000(err, file) {
+				if(err) throw err;
+				
+				if(!file.isBig) throw new Error("file.isBig=" + file.isBig + " file.text.length=" + file.text.length + " file.grid.length=" + file.grid.length);
+				if(file.totalRows != -1) throw new Error("Expected file.totalRows=" + file.totalRows + " to be 34000 !");
+				
 				
 				console.log("Going to line 2000 in " + testFile + " ...");
-				file.gotoLine(2000, function(err) {
+				file.gotoLine(2000, function atLine2000(err) {
 					if(err) throw err;
 					
 					file.moveCaretToEndOfLine();
@@ -1968,13 +1975,13 @@
 							}
 							else {
 								console.log("Going to line 5000 in " + testFile + " ...");
-								file.gotoLine(5000, function(err) {
+								file.gotoLine(5000, function checkLine5000(err) {
 									if(err) throw err;
 									
 									var text = file.rowText(file.caret.row);
 									var expectedText = "L5000_abcdefghijklmnopqrstuvwxyzåäöABCD";
 									
-									if(text != expectedText) throw new Error("Expected line 5000 to be " + expectedText);
+									if(text != expectedText) throw new Error('Expected line 5000 to be "' + expectedText + '" but it is "' + text + '".');
 									else {
 										EDITOR.closeFile(file);
 										console.log("Deleting " + testFile + " ...");

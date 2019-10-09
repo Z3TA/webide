@@ -334,6 +334,11 @@ API.download = function download(user, json, callback) {
 }
 
 API.readLines = function readLines(user, json, callback) {
+	/*
+		
+		note: Don't specify lineBreak unless you know the line-break convention, or the result might end up with one big line!
+		
+	*/
 	
 	console.log("readLines: json=" + JSON.stringify(json)); 
 	
@@ -346,7 +351,7 @@ API.readLines = function readLines(user, json, callback) {
 	var parse = url.parse(path);
 	
 	var encoding = json.encoding || "utf8";
-	var lb = json.lineBreak;
+	var lb = json.lineBreak || undefined;
 	var startLine = json.start || 1;
 	var MAX_LINES = json.max || 10000;
 	var endLine = json.end || MAX_LINES;
@@ -362,7 +367,6 @@ API.readLines = function readLines(user, json, callback) {
 	var textHead = "";
 	var StringDecoder = require('string_decoder').StringDecoder;
 	var decoder = new StringDecoder(encoding);
-	var lb;
 	var rowsWanted = (endLine-startLine) + 1;
 	
 	var readOptions = {};
@@ -468,7 +472,7 @@ API.readLines = function readLines(user, json, callback) {
 		function streamClose() {
 			console.log("Stream closed! path=" + path);
 		
-		if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
+		if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines, lineBreak: lb});
 		callback = null;
 		}
 		
@@ -1176,11 +1180,10 @@ console.warn(err.message);
 
 API.copyFile = function copyFile(user, json, callback) {
 	
-	var source = user.translatePath(json.from);
-	var target = user.translatePath(json.to);
+	var source =json.from;
+	var target = json.to;
 	
-	if(source instanceof Error) return callback(source);
-	if(target instanceof Error) return callback(target);
+	// Both API.readFromDisk and API.saveToDisk will translate the path, so we don't have to run user.translatePath() here!
 	
 	// Use buffers and Not text, or images will not work!
 	API.readFromDisk(user, {path: source, returnBuffer: true}, function fileRead(err, read) {

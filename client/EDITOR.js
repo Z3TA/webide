@@ -4788,16 +4788,27 @@ var word = "";
 		showFile = undefined;
 	}
 	
-	EDITOR.showFile = function(file, focus, overrideShowFile) {
+	EDITOR.showFile = function(fileOrFilePath, focus, overrideShowFile) {
 		
-		if(!(file instanceof File)) {
-			file = EDITOR.files[file];
+		if(fileOrFilePath instanceof File) {
+			var file = fileOrFilePath;
+		}
+		else if(typeof fileOrFilePath == "string") {
+			if(EDITOR.files.hasOwnProperty(fileOrFilePath)) {
+				var file = EDITOR.files[file];
+			}
+else {
+				throw new Error("File not open: fileOrFilePath=" + fileOrFilePath + " Open files are: " + JSON.stringify(Object.keys(EDITOR.files)));
+}
+		}
+		else {
+			throw new Error("fileOrFilePath=" + fileOrFilePath + " is not a string nor an instance of File!");
 		}
 		
 		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
 		
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
-console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
+			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
 		return;
 		}
 		

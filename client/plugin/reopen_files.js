@@ -254,7 +254,11 @@
 				// Make the file with last state "open" the current file
 				
 				// Switch to this file
-				EDITOR.showFile(EDITOR.files[setCurrent])
+				
+				if(!EDITOR.files.hasOwnProperty(setCurrent)) {
+					throw new Error("reopenfiles plugin: After all files has been reopened we want to show setCurrent=" + setCurrent + " . But it's not opened! Opened files are: " + JSON.stringify(Object.keys(EDITOR.files)));
+				}
+				else EDITOR.showFile(EDITOR.files[setCurrent]);
 				
 			}
 

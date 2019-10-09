@@ -84,8 +84,8 @@ var BrowserFile = File; // Native file object. todo: Rename our File variable to
 			checkGridError = err;
 		}
 		
-		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length=1
-		file.totalRows = file.grid.length-1; // Only big files use this, and big files (currently) can't be edited, so we don't have to track and update this (yet)
+		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length will be 1
+		file.totalRows = file.grid.length-1; // Only big files use this!
 		if(file.isBig) file.totalRows = -1; // Leaving it to loadFilePart() to find totalRows
 		
 		var checkCaretError = null;
@@ -341,7 +341,7 @@ file.mode = "text";
 				throw new Error("row=" + row + " < 0");
 			}
 			else if(row >= grid.length) {
-				throw new Error("row=" + row + " >= grid.length=" + grid.length);
+				throw new Error("File:createCaret: row=" + row + " >= grid.length=" + grid.length + " file.isBig=" + file.isBig);
 			}
 			else {
 				// Place the caret on that row
@@ -3741,13 +3741,13 @@ file.mode = "text";
 		
 		var file = this;
 		
-		if(file.isStreaming) throw new Error("Can't goto line in a file that is streaming!");
+		if(file.isStreaming) throw new Error("File.gotoLine: Can't goto line in a file that is streaming!");
 		
 		if(undefined == line) {
-			throw new Error("line=" + line + " is undefined!");
+			throw new Error("File.gotoLine: line=" + line + " is undefined!");
 		}
 		else if(isNaN(line)) {
-			throw new Error("line=" + line + " is not a number!");
+			throw new Error("File.gotoLine: line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
 			console.warn("Can't go to line=" + line + " because it's below 1!");
@@ -3785,11 +3785,13 @@ file.mode = "text";
 			
 			if(partStartRow < 0) partStartRow = 0;
 			
+			if(file.totalRows == 0) throw new Error("File.gotoLine: Problem in large file: file.totalRows=" + file.totalRows + " file.path=" + file.path + " file.grid.length=" + file.grid.length);
+			
 			file.loadFilePart(partStartRow, function placeCaretAfterLoadingPart() {
 				
 				var gridRow = fileRow - file.partStartRow; // This is the line we want to go to, translated to the new file part
 				
-				if(gridRow < 0) throw new Error("gridRow=" + gridRow + " fileRow=" + fileRow + " file.partStartRow=" + file.partStartRow + " line=" + line + " file.grid.length=" + file.grid.length);
+				if(gridRow < 0 || gridRow >= file.grid.length) throw new Error("File.gotoLine: Problem in large file: gridRow=" + gridRow + " fileRow=" + fileRow + " file.partStartRow=" + file.partStartRow + " line=" + line + " file.grid.length=" + file.grid.length);
 				
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
@@ -3801,7 +3803,7 @@ file.mode = "text";
 			});
 		} 
 		else {
-			throw new Error("fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length);
+			throw new Error("File.gotoLine: fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length);
 		}
 		
 	}
@@ -4131,7 +4133,7 @@ file.mode = "text";
 		
 		/*
 			if(this.loadFilePartDialog && this.loadFilePartDialog.isOpen()) {
-			var error = new Error("Waiting for user dialog to choose if to save the current buffer/chunk or abort ...");
+			var error = new Error("File.loadFilePart: Waiting for user dialog to choose if to save the current buffer/chunk or abort ...");
 			if(callback) callback(error);
 			else console.warn(error);
 			return;
@@ -4153,7 +4155,7 @@ file.mode = "text";
 					});
 				}
 				else {
-					var error = new Error("loadFilePart aborted by user because unsaved changes.");
+					var error = new Error("File.loadFilePart: Aborted by user because unsaved changes.");
 					if(callback) callback(error);
 					else console.warn(error.message);
 				}
@@ -4163,17 +4165,21 @@ file.mode = "text";
 		
 		if(partStartRow == undefined) partStartRow = 0;
 		
-		if(partStartRow < 0) throw new Error("Can not begin stream in negative row:" + partStartRow);
+		if(partStartRow < 0) throw new Error("File.loadFilePart: Can not begin stream in negative row:" + partStartRow);
 		
 		if(file.totalRows != -1) {
-			if(partStartRow >= file.totalRows) throw new Error("Can not begin stream in above file.totalRows=" + file.totalRows);
+			if(partStartRow >= file.totalRows) {
+				throw new Error("File.loadFilePart: Can not begin stream in above file.totalRows=" + file.totalRows + " (partStartRow=" + partStartRow + ")");
+			}
 		}
 		
-		if(callback == undefined) console.warn("loadFilePart with no callback!");
+		if(callback == undefined) console.warn("File.loadFilePart: loadFilePart with no callback!");
 		
 		var endRow = partStartRow + EDITOR.settings.bigFileLoadRows;
 		
-		CLIENT.cmd("readLines", {path: file.path, start: partStartRow+1, end: endRow+1, lineBreak: file.lineBreak, max: EDITOR.settings.bigFileLoadRows}, function readLines(err, resp) {
+		//alertBox("File.loadFilePart: file.grid.length=" + file.grid.length + " file.path=" + file.path);
+		
+		CLIENT.cmd("readLines", {path: file.path, start: partStartRow+1, end: endRow+1, lineBreak: file.grid.length > 1 && file.lineBreak, max: EDITOR.settings.bigFileLoadRows}, function readLines(err, resp) {
 			
 			if(err) {
 				if(callback) callback(err);
@@ -4181,7 +4187,9 @@ file.mode = "text";
 			}
 			else {
 				
-				// resp: {path, lines, end, totalLines}
+				// resp: {path, lines, end, totalLines, lineBreak?}
+				
+				if(resp.lineBreak) file.lineBreak = resp.lineBreak;
 				file.text = resp.lines.join(file.lineBreak);
 				
 				var endReached = resp.end == resp.totalLines;
@@ -4192,22 +4200,22 @@ file.mode = "text";
 				
 				file.grid = file.createGrid();
 				
-				console.log("Loaded " + file.grid.length + " rows! EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows);
+				console.log("File.loadFilePart: Loaded " + file.grid.length + " rows! EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows);
 				
-				console.log("Fixing caret ... ");
-				console.log("file.caret.row=" + file.caret.row + " ");
+				console.log("File.loadFilePart: Fixing caret ... ");
+				console.log("File.loadFilePart: file.caret.row=" + file.caret.row + " ");
 				
 				var diff = (file.partStartRow - partStartRow);
 				
-				console.log("diff=" + diff);
+				console.log("File.loadFilePart: diff=" + diff);
 				
 				// Move the caret to the same position it was on
 				file.caret.row += diff;
-				console.log("Placed it at file.caret.row=" + file.caret.row + " ");
+				console.log("File.loadFilePart: Placed it at file.caret.row=" + file.caret.row + " ");
 				
 				if(file.caret.row < 0) {
 					// Place the caret at the top
-					console.log("Place the caret at the top");
+					console.log("File.loadFilePart: Place the caret at the top");
 					file.caret.row = 0;
 					file.caret.col = 0;
 					
@@ -4229,7 +4237,7 @@ file.mode = "text";
 				}
 				else if(file.caret.row >= (file.grid.length)) {
 					// Place the caret at EOF
-					console.log("Place the caret at EOF");
+					console.log("File.loadFilePart: Place the caret at EOF");
 					file.caret.row = file.grid.length-1;
 					file.caret.col = file.grid[file.grid.length-1].length -1;
 					file.caret.eol = true;
@@ -4238,7 +4246,7 @@ file.mode = "text";
 				
 				file.fixCaret();
 				
-				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
+				console.log("File.loadFilePart: After fixing caret: file.caret.row=" + file.caret.row + " ");
 				
 				file.partStartRow = partStartRow;
 				
@@ -4264,7 +4272,7 @@ file.mode = "text";
 					file.tail = false;
 				}
 				
-				console.log("file.totalRows=" + file.totalRows);
+				console.log("File.loadFilePart: file.totalRows=" + file.totalRows);
 				var totalLineBreaks = resp.totalLines-1;
 			file.totalRows = totalLineBreaks;
 			
