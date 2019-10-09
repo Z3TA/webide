@@ -55,10 +55,11 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	if(!remote) return callback(new Error("A remote URL need to be specified! remote=" + remote));
 	
 	var localPath = user.translatePath(local);
-	
 	if(localPath instanceof Error) return callback(localPath);
 	
 	localPath = UTIL.trailingSlash(localPath);
+	
+	console.log("MERCURIAL.clone: localPath=" + localPath + " remote=" + remote);
 	
 	//if(localPath.split(/\/|\\/).length < 4) return callback(new Error("Can not clone into a root folder. Use an intermediary directly like /repo" + localPath + ""));
 	

@@ -140,6 +140,13 @@ function testClone() {
 	
 	EDITOR.addTest(function cloneFromGithub(callback) {
 		/*
+			This needs hggit!
+			
+			User needs a .hgrc folder in his/her home dir, including:
+			[extensions]
+			hgext.bookmarks =
+			hggit =
+			
 			Cloning from Github has stopped working 3-4 times already so we need an automatic test
 			Make sure the test user has a SSH key registered on Github!
 			
@@ -147,9 +154,12 @@ function testClone() {
 			Is it because we have more then one user/ssh-key per IP !?
 			
 			Cloning from HTTP gives long Python error in prod (works in dev)
-			Clinging via SSH gives "Host key verification failed" (works in dev), (yes, SSH key has been added to Github)
+			Cloning via SSH gives "Host key verification failed" (works in dev), (yes, SSH key has been added to Github)
 			
-			Ufter updating hggit we can no longer clone using HTTP (same error as in prod). Downgrading didn't help
+			After updating hggit we can no longer clone using HTTP (same error as in prod). Downgrading didn't help
+			
+			It however seem to work after upgrading to Ubuntu 18 :P
+			
 			
 		*/
 		var testFolderParent = "/cloneFromGithub/";

@@ -609,7 +609,8 @@ API.writeLines = function writeLines(user, json, writeLinesCallback) {
 	var end = json.end;
 	var content = json.content;
 	var overwrite = json.overwrite;
-	var path = json.path;
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
 	
 	if(overwrite != undefined && end == undefined) return writeLinesCallback(new Error("option overwrite=" + overwrite + " but end=" + end + " "));
 	if(overwrite == undefined && end != undefined) return writeLinesCallback(new Error("Expected overwrite=" + overwrite + " to be true when end=" + end + " is set!"));
@@ -1167,6 +1168,9 @@ API.copyFile = function copyFile(user, json, callback) {
 	var source = user.translatePath(json.from);
 	var target = user.translatePath(json.to);
 	
+	if(source instanceof Error) return callback(source);
+	if(target instanceof Error) return callback(target);
+	
 	// Use buffers and Not text, or images will not work!
 	API.readFromDisk(user, {path: source, returnBuffer: true}, function fileRead(err, read) {
 
@@ -1224,7 +1228,7 @@ API.copyFile = function copyFile(user, json, callback) {
 API.move = function move(user, json, callback) {
 	/*
 		
-		Use EDITOR.move ! (don't call this directly)
+		note: Use EDITOR.move ! (don't call this directly)
 		
 	*/
 	
@@ -1233,6 +1237,12 @@ API.move = function move(user, json, callback) {
 	
 	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
 	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
+	
+	oldPath = user.translatePath(oldPath);
+	if(oldPath instanceof Error) return callback(oldPath);
+	
+	newPath = user.translatePath(newPath);
+	if(newPath instanceof Error) return callback(newPath);
 	
 	// Figure out if it's a directory or a file
 	var lastChar = oldPath.charAt(oldPath.length-1);

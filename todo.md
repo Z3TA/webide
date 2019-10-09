@@ -35,7 +35,8 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Does terminal on Windows use CRLF !?
+Managed to nuke the editor in Windows by opening a file that did not have / infront
+File path=/test_fixIndentation.js not in EDITOR.openFileQueue=["test_fixIndentation.js"]
 
 
 Trying to run tests on Windows 10
