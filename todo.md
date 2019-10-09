@@ -58,6 +58,8 @@ polish: It's annoying when you search for something, and can't find it, because 
 
 polish: Syntax-check file after saving and highlight syntax errors, like misspelled retrn, so you don't have to run the script only to get a syntax error.
 
+polish: Successfully pushed to undefined (no changes) repo is undefined when clicking Push via SCM widget.
+
 ---
 
 Snippet explorer ?
