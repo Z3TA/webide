@@ -1078,7 +1078,11 @@ console.warn(err.message);
 			// Asume local file system
 			
 		var module_path = require("path");
-		if(!module_path.isAbsolute(path)) return callback(new Error("Not an absolute path: " + path));
+		if(!module_path.isAbsolute(path)) {
+			var error = new Error("Not an absolute path: " + path);
+			error.code = "NOT_ABSOLUTE";
+			return callback(error);
+		}
 		
 		var path = user.translatePath(json.path);
 		if(path instanceof Error) return callback(path);
@@ -1322,8 +1326,7 @@ return callback(new Error("Moving folders between servers not yet implemented!")
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	
-	var path = user.translatePath(json.path);
-	if(path instanceof Error) return callback(path);
+	var path = json.path;
 	
 	// Check path for protocol
 	var url = require("url");
@@ -1379,6 +1382,17 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 		
 		// It's a normal file path
 		
+		var module_path = require("path");
+		if(!module_path.isAbsolute(path)) {
+			var error = new Error("Not an absolute path: " + path);
+			error.code = "NOT_ABSOLUTE";
+			return callback(error);
+		}
+		
+		var path = user.translatePath(json.path);
+		if(path instanceof Error) return callback(path);
+		
+		
 		var fs = require("fs");
 		
 		fs.stat(path, checkSize);
@@ -1399,8 +1413,7 @@ API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 
 	if(json.path == undefined) return saveToDiskCallback(new Error("json.path=" + json.path));
 	
-	var path = user.translatePath(json.path);
-	if(path instanceof Error) return saveToDiskCallback(path);
+	var path = json.path;
 	
 	var inputBuffer = json.inputBuffer || false;
 	var encoding = json.encoding || "utf-8";
@@ -1469,6 +1482,16 @@ else if(protocol == "sftp:") {
 	else {
 		
 		// Asume local file-system
+		
+		var module_path = require("path");
+		if(!module_path.isAbsolute(path)) {
+			var error = new Error("Not an absolute path: " + path);
+			error.code = "NOT_ABSOLUTE";
+			return saveToDiskCallback(error);
+		}
+		
+		var path = user.translatePath(json.path);
+		if(path instanceof Error) return saveToDiskCallback(path);
 		
 		var fs = require("fs");
 		

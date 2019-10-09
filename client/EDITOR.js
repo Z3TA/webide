@@ -1050,7 +1050,7 @@ usePseudoClipboard = false;
 			
 			console.log("Loading file to editor: " + path);
 			
-			if(path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
+			if(!notFromDisk && path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
 			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path);
 			
@@ -1238,7 +1238,7 @@ usePseudoClipboard = false;
 		
 		function gotSize(err, size) {
 			if(err) {
-				if(err.code === 'ENOENT' || err.code == "550" || err.message.indexOf("No such file") != -1) {
+				if(err.code === 'ENOENT' || err.code == "NOT_ABSOLUTE" || err.code == "550" || err.message.indexOf("No such file") != -1) {
 					callback(false);
 				}
 				else {
@@ -1629,7 +1629,7 @@ if(path != file.path) reOpen(file.path, path);
 			console.log("Successfully saved " + file.path);
 			
 			// Change state to saved, and call afterSave listeners
-			file.saved(function(err) {
+			file.saved(function updatedSavedState(err) {
 				
 				// Call back without an error even though some of the afterSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
