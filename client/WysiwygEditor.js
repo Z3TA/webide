@@ -1805,7 +1805,8 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		}
 		
 		function consoleLogCapturer() {
-			wysiwygEditor.consoleLog(arguments);
+			var stack = (new previewWin.window.Error("stack")).stack;
+			wysiwygEditor.consoleLog(arguments, stack);
 		}
 		
 		function attachEvents() {
@@ -2087,11 +2088,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 		}
 		
-		WysiwygEditor.prototype.consoleLog = function consoleLog(arg) {
+		WysiwygEditor.prototype.consoleLog = function consoleLog(arg, stack) {
 			var wysiwygEditor = this;
 			
 			// Console log takes many arguments and concatenates them
-			console.log("Console log detected!");
+		console.log("Console log detected! arg.length=" + arg.length + " stack=" + stack);
 			var msg = "";
 			for (var i=0; i<arg.length; i++) {
 				console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
@@ -2127,7 +2128,12 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		
-		var inlinedMessage = EDITOR.showMessageFromStackTrace({message: msg, url: wysiwygEditor.url, path: wysiwygEditor.sourceFile.path});
+		var inlinedMessage = EDITOR.showMessageFromStackTrace({
+			message: msg, 
+			url: wysiwygEditor.url, 
+			path: wysiwygEditor.sourceFile.path, 
+			stackTrace: stack
+		});
 		
 		if(!inlinedMessage) {
 			console.warn("Unable to inline msg=" + msg);
