@@ -912,7 +912,7 @@ alertBox("No file open!");
 		
 		for (var i=0; i<callFrames.length; i++) {
 			for(var path in EDITOR.files) {
-				if( UTIL.isSamePath(path, callFrames[i].url) ) return {
+				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.home, path), callFrames[i].url) ) return {
 					file: EDITOR.files[path],
 					row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
 					col: callFrames[i].columnNumber
