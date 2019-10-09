@@ -332,6 +332,7 @@ console.warn("Terminal events already active!");
 			}
 			
 			file.mode = "text";
+			file.lineBreak = "\n";
 			file.parse = false;
 			file.parsed = null;
 			file.noChangeEvents = true;
@@ -1465,7 +1466,7 @@ file.insertLineBreak();
 	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
 	EDITOR.addTest(1000, false, function openFileFromTerminal(callback) {
 		
-		EDITOR.openFile("terminal1337", '', function(err, file) {
+		EDITOR.openFile("terminal1337", '\n', function(err, file) {
 			terminalFiles.push(file);
 			terminalFileShow(file)
 			
