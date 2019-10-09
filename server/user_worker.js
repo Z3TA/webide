@@ -356,7 +356,16 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 		return realPath;
 	}
 	
-	if(realPath.indexOf(user.rootPath) != 0) {
+	// Only translate paths that link to the local file system
+	var urlModule = require("url");
+	var pathModule = require("path");
+	var parsedUrl = urlModule.parse(realPath);
+	var protocol = parsedUrl.protocol ? parsedUrl.protocol.toLowerCase() : "LOCAL:";
+	protocol = protocol.substring(0, protocol.length-1); // Remove colon:
+	if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) return realPath;
+	
+	
+	if(  realPath.indexOf(user.rootPath) != 0) {
 		throw new Error("realPath=" + realPath + " does not contain user.rootPath=" + user.rootPath);
 	}
 	

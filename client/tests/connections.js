@@ -108,7 +108,7 @@
 	});
 	
 	
-	EDITOR.addTest(function testFtpConnection(callback) {
+	EDITOR.addTest(1, function testFtpConnection(callback) {
 		var testFolder = "ftp://100m.se/demo/jzedit-test/";
 var protocol = "ftp";
 		var serverAddress = "100m.se";
