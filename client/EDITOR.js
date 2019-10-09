@@ -6032,15 +6032,19 @@ callback(err);
 				(window.location.href will be populated at DOMContentLoaded)
 				
 			*/
-			console.log("theWindow.location.href = " + theWindow.location.href);
+			
+			try { // Edge browser throws 0: Permission denied
+				console.log("theWindow.location.href = " + theWindow.location.href); 
 			console.log("New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
 			console.log("theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
-			
+				
 			if(theWindow.location.href == "about:blank") theWindow.loaded = false; 
 			else theWindow.loaded = true;
 			
 			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
 			if(url == "about:blank") theWindow.isBlankUrl = true;
+			}
+			catch(err) {}
 			
 			theWindow.addEventListener("load", function() {
 				console.log("New window: " +  UTIL.timeStamp() + " load event!");
@@ -6708,29 +6712,37 @@ EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
 EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	// Finds a currently opened file from the stack trace, and shows the message on the line from the stack trace
 	
-	console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(options));
+		// Edge will throw SCRIPT28: SCRIPT28: Out of stack space
+		// When trying to stringify the options!
+		console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(Object.keys(options)));
 	
 	if(options.message) {
+			console.log("showMessageFromStackTrace: message=options.message=" + options.message);
 		var message = options.message;
 	}
 	else if(options.error) {
-		var message = options.error.message;
+			console.log("showMessageFromStackTrace: options.error! message=options.error.message=" + options.error.message);
+			var message = options.error.message;
 	}
 	else if(options.errorEvent) {
-		if(!options.errorEvent.error) {
+			if(!options.errorEvent.error) {
 			console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
 			return FAIL;
 		}
-		var message = options.errorEvent.error.message;
+			console.log("showMessageFromStackTrace: options.errorEvent! message=options.errorEvent.error.message=" + options.errorEvent.error.message);
+			var message = options.errorEvent.error.message;
 	}
 	
 	if(options.stackTrace) {
-		var errorStack = options.stackTrace;
+			console.log("showMessageFromStackTrace: options.stackTrace!");
+			var errorStack = options.stackTrace;
 	}
 	else if(options.error) {
+			console.log("showMessageFromStackTrace: options.error!");
 		var errorStack = options.error.stack;
 	}
 	else if(options.errorEvent) {
+			console.log("showMessageFromStackTrace: options.errorEvent!");
 		var errorStack = options.errorEvent.error.stack;
 		
 		if(!errorStack) {
@@ -6745,6 +6757,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		
 	}
 	else {
+			console.log("showMessageFromStackTrace: Generating stack!");
 		var errorStack = UTIL.getStack(message);
 	}
 	
@@ -6826,7 +6839,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 			return file;
 		}
 		
-		if(!file) {
+		if(!file || !lineno) {
 			console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace");
 			stackLines = UTIL.parseStackTrace(errorStack)
 			var file = findFile(stackLines);

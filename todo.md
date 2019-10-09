@@ -35,7 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Nodejs inline console log and errors can't figure out the file if we run with VIRTUAL_ROOT
+Trying to run tests on Windows 10
 
 Fix issues in Edge browser on Windows 10
 

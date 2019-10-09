@@ -1685,7 +1685,16 @@
 		callback(true);
 	});
 	
-	EDITOR.addTest(function testParseJavaScriptError(callback) {
+	EDITOR.addTest(1, function testParseJavaScriptError(callback) {
+		
+		// Edge on Windows 10
+		var s = UTIL.parseErrorMessage('Error: This is an error! 1570601270105\nat Anonymous function (http://127.0.0.1/rpr9comthz/inlineErrorMessages.htm:4:1)');
+		if(s.line != 4) throw new Error("s.line=" + s.line + " s=" + JSON.stringify(s, null, 2));
+		if(s.col != 1) throw new Error("s.col=" + s.col + " s=" + JSON.stringify(s, null, 2));
+		if(s.source != "http://127.0.0.1/rpr9comthz/inlineErrorMessages.htm") throw new Error("s.source=" + s.source + " s=" + JSON.stringify(s, null, 2));
+		if(s.message != "Error: This is an error! 1570601270105") throw new Error("s.message=" + s.message + " s=" + JSON.stringify(s, null, 2));
+		if(s.stack.length != 1) throw new Error("s.stack.length=" + s.stack.length + " s=" + JSON.stringify(s, null, 2));
+		
 		
 		// Safari browser on Macbook pro
 		var s = UTIL.parseErrorMessage('the message: oleLog@http://192.168.0.3/WysiwygEditor.js:2130:56\nconsoleLogCapturer@http://192.168.0.3/WysiwygEditor.js:1808:28\nhttp://192.168.0.3/0tgxkypi7y/inlineConsoleLog.htm:4:12');
@@ -1704,7 +1713,7 @@
 		if(s.stack.length != 3) throw new Error("s.stack.length=" + s.stack.length + " s=" + JSON.stringify(s, null, 2));
 		
 		
-		// Nodejs v8 (V8 egnine) running on Linux 
+		// Nodejs v8 (V8 engine) running on Linux 
 		var s = UTIL.parseErrorMessage("/home/zeta/test/error.js:7\na=1;\n ^\n\n\nReferenceError: a is not defined\nat /home/zeta/test/error.js:7:2\nat /home/zeta/test/error.js:9:3\nat Object.<anonymous> (/home/zeta/test/error.js:12:3)\nat Module._compile (module.js:652:30)\nat Object.Module._extensions..js (module.js:663:10)\nat Module.load (module.js:565:32)\nat tryModuleLoad (module.js:505:12)\nat Function.Module._load (module.js:497:3)\nat Function.Module.runMain (module.js:693:10)\nat startup (bootstrap_node.js:188:16)");
 		if(s.line != 7) throw new Error("s.line=" + s.line + " s=" + JSON.stringify(s, null, 2));
 		if(s.col != 2) throw new Error("s.col=" + s.col + " s=" + JSON.stringify(s, null, 2));

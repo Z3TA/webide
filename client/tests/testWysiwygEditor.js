@@ -357,7 +357,7 @@
 	EDITOR.addTest(521, false, function inlineConsoleLog(callback) {
 		// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
 		var msgStr = '"console.log test ' + (new Date()).getTime() + '"';
-		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log(' + msgStr + ');\n},250);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, compiledPage: fileHtml, testFile: "inlineConsoleLog.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
@@ -395,7 +395,7 @@
 	EDITOR.addTest(520, false, function inlineErrorMessages(callback) {
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
 		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
-		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},250);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, compiledPage: fileHtml, testFile: "inlineErrorMessages.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;

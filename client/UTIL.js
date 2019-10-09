@@ -823,6 +823,39 @@ console.warn("fun=" + fun);
 		
 		console.log("parseErrorMessage: rows=" + JSON.stringify(rows, null, 2));
 		
+		/*
+			
+			Edge on Windows 10
+			Error: This is an error! 1570601270105
+			at Anonymous function (http://127.0.0.1/rpr9comthz/inlineErrorMessages.htm:4:1)
+			
+		*/
+		var reEdgeStack = /at (.*) \((.*):(\d+):(\d+)\)/;
+		var match = errorString.match(reEdgeStack);
+		// prevent it from catching Nodejs v8 errors!
+		if(match && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
+			console.log("parseErrorMessage: Matched Edge error");
+			
+			var message = errorString.slice(match.index);
+			
+			for(var i=0; i<rows.length; i++) {
+				match = rows[i].match(reEdgeStack);
+				if(match) {
+					source = match[2];
+					line = match[3];
+					col = match[4];
+					fun = match[1];
+					
+					stack.unshift({fun: fun, source: source, line: line, col: col});
+				}
+			}
+			
+			var message = rows.shift(); // Message is on first line
+			
+			
+			return {message: message, source: source, line: line, col: col, fun: fun, stack: stack};
+			
+		}
 		
 		/*
 			Safari makes the same stack trace as Firefox, 
@@ -836,7 +869,7 @@ console.warn("fun=" + fun);
 			
 		*/
 		
-		if( errorString.match(/[^@].*:\d+:\d+/) && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
+		else if( errorString.match(/[^@].*:\d+:\d+/) && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
 			
 			console.log("parseErrorMessage: Matched Safari error");
 			
@@ -1534,9 +1567,15 @@ else {
 		// Used in debugging, to get a stack trace of function being called
 		// ex: console.log(UTIL.getStack("foo"));
 		
+		console.log("UTIL.getStack: msg=" + msg);
+		
 		if(msg == undefined) msg = "";
 		
+		try { // Edge will throw 0: Access is denied 
 		var str = new Error(msg).stack;
+		}
+		catch(err) {
+		}
 		
 		if(str == undefined) str = "Unable to get call stack!"
 		else {
