@@ -389,6 +389,7 @@
 		tabFileItem.setAttribute("title", path);
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
+		if(!EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " is not in " + JSON.stringify(Object.keys(EDITOR.files)));
 		
 		if(EDITOR.files[path].isSaved == false) {
 			showUnsavedStatus(tabFileItem)
