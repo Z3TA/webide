@@ -7010,7 +7010,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 	}
 	
 	if(closedCount == 0) {
-		var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + ":" + UTIL.shortString(dialog.div.innerText, 50) });
+		var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + " = " + UTIL.shortString(dialog.div.innerText, 50) });
 		throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
 	}
 }
@@ -7862,6 +7862,8 @@ function main() {
 	}
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
+		
+		if(EDITOR.openDialogs.length > 0) return alert("Close all open dialogs before running tests!"); // Tests that try to close dialogs will fail
 		
 		EDITOR.dashboard.hide(true);
 		

@@ -50,6 +50,8 @@ bug: Fading text in margin on .diff file a green line below a red line - the tex
 
 polish: It's annoying when you search for something, and can't find it, because you have a space at the end of the search query
 
+polish: Syntax-check file after saving and highlight syntax errors, like misspelled retrn, so you don't have to run the script only to get a syntax error.
+
 ---
 
 Snippet explorer ?
