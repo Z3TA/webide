@@ -6768,10 +6768,10 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		var errorStack = options.errorEvent.error.stack;
 		
 		if(!errorStack) {
-			console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
+			//console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
 			//Firefox browser wont give access to the error event, because it's in another window !?
 			
-			console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
+			//console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
 			// It seems we can still extract some data out of it! ...
 			
 			errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
