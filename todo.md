@@ -35,14 +35,8 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+README.txt got corrupt while editing on Windows!!!
 
-
-
-Sometimes the virtual root gets appended twice!
-
-
-Run tests on Windows 10:
-node server/server.js -p 80 -nochroot -virtualroot -noguest -h C:\Users\
 
 
 Fix issues in Edge browser on Windows 10

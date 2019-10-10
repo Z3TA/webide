@@ -387,10 +387,35 @@ But it's also possible to use the editor as a "cloud" editor, running on a serve
 
 It's recommended to use ZFS (file system) on the server,
 so each user can have their own file-system and be able to take snapshots etc.
+
+
+Running the cloud server on Windows
+-----------------------------------
+It is not recommended to run the cloud server on Windows due to lack of Apparmor, and no POSIX commands like chroot and setuid,
+meaning that all users will have the same access rights as the user running the server (DO NOT run the server with a Admin account!)
+
+For the cloud server to run on Windows, first install Node.JS build dependencies and Mercurial. And run npm install.
+Then you manually have to activate each user by creating a .jzeditpw file in their user directory, 
+with the hash generated from node hashPw.js
+
+To start the server:
+````
+node server/server.js -p 80 -nochroot -virtualroot -noguest -h C:\Users\
+````
+<!---
+-p 80 will start the server on port 80
+-nochroot will disable chroot which does not work on Windows
+-virtualroot is like a virtual chroot, meaning users see C:\Users\username\foo\bar as just /foo/bar
+-noguest will disable guest accounts, which is currently not support on Windows
+-h C:\Users\ specifies where the user folders are located. (needed with -virtualroot)
+-->
+
+The following text assumes you are on a Unix/Linux like operating system ...
+
 
 Installing/upgrading Nodejs
 ---------------------------
-Uninstall nodejs if it's already installed, then install it form nodesource.
+Uninstall nodejs if it's already installed, then install it foromnodesource.
 See https://github.com/nodesource/distributions
 
 `sudo apt remove nodejs && sudo apt remove npm`
