@@ -1942,7 +1942,7 @@
 				if(err) throw err;
 				
 				if(!file.isBig) throw new Error("file.isBig=" + file.isBig + " file.text.length=" + file.text.length + " file.grid.length=" + file.grid.length);
-				if(file.totalRows != -1) throw new Error("Expected file.totalRows=" + file.totalRows + " to be 34000 !");
+				if(file.totalRows != 33999) throw new Error("Expected file.totalRows=" + file.totalRows + " to be 33999 !");
 				
 				
 				console.log("Going to line 2000 in " + testFile + " ...");

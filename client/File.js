@@ -4250,15 +4250,6 @@ file.mode = "text";
 				
 				file.partStartRow = partStartRow;
 				
-				
-				//EDITOR.renderNeeded();
-				
-				if(callback) callback(null);
-				
-				// Force render!?
-				//EDITOR.shouldRender = true;
-				//EDITOR.render();
-				
 				if(endReached) {
 					file.tail = true;
 					file.head = false;
@@ -4275,6 +4266,8 @@ file.mode = "text";
 				console.log("File.loadFilePart: file.totalRows=" + file.totalRows);
 				var totalLineBreaks = resp.totalLines-1;
 			file.totalRows = totalLineBreaks;
+				
+				if(callback) callback(null);
 			
 			}
 			});

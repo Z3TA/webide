@@ -35,9 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-problem?? EDITOR.openFile calls back before a big file has loaded a file part!
 
-readLines specifying lineBreak CRLF when the actual file has LF results in a looong line
 
 
 Sometimes the virtual root gets appended twice!
