@@ -429,7 +429,8 @@
 		});
 	});
 	
-	EDITOR.addTest(500, false, function previewAutocomplete(callback) {
+	// Run this test early so that it doesn't fail randomly
+	EDITOR.addTest(7, false, function previewAutocomplete(callback) {
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';
@@ -450,7 +451,7 @@
 			
 			cleanup();
 			callback(true);
-			}, 500); // Wait for the window to load
+			}, 1000); // Wait for the window to load (some times it can take a very long time)
 			
 		});
 		
@@ -459,8 +460,10 @@
 			var key_tab = 9;
 			var wordDelimiters = " \t\r\n;:()"
 			
-			file.moveCaretToIndex(index);
 			EDITOR.showFile(file);
+			
+			file.moveCaretToIndex(index);
+			
 			EDITOR.mock("keydown", {charCode: key_tab}); // tab to autocomplete
 			
 			return file.wordAtCaret(file.caret, wordDelimiters);

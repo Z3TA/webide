@@ -2496,9 +2496,7 @@ API.deleteFile = function deleteFile(user, json, callback) {
 
 API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	
-	var directory = user.translatePath(json.directory);
-	if(directory instanceof Error) return callback(directory);
-	
+	var directory = json.directory;
 	var recursive = json.recursive || false;
 	
 	// Check path for protocol
@@ -2560,6 +2558,9 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	else {
 		
 		// It's a normal file path
+		
+		var directory = user.translatePath(json.directory);
+		if(directory instanceof Error) return callback(directory);
 		
 		var fs = require("fs");
 		

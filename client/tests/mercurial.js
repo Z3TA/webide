@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	EDITOR.addTest(function noNeedToCommit(callback) {
+	EDITOR.addTest(1, function noNeedToCommit(callback) {
 		/*
 			bug: Server says "no need to commit" even though files have been changed.
 			
@@ -27,7 +27,7 @@
 		});
 		
 		function clone() {
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function clonedRepo(err, json) {
 				if(err) {
 					alertBox(err.message, err.code || "HG_CLONE_ERROR");
 					throw err
@@ -36,13 +36,13 @@
 				var fileName = "anewfile.yo.test";
 				var filePath = testFolder + fileName
 				
-				EDITOR.openFile(filePath, "A new file", function (err, file) {
+				EDITOR.openFile(filePath, "A new file", function openedFile(err, file) {
 					if(err) throw err;
 					
-					EDITOR.saveFile(file, filePath, function (err, path) {
+					EDITOR.saveFile(file, filePath, function savedFile(err, path) {
 						if(err) throw err;
 						
-						CLIENT.cmd("mercurial.status", {directory: testFolder}, function(err, json) {
+						CLIENT.cmd("mercurial.status", {directory: testFolder}, function mercurialStatus(err, json) {
 							if(err) throw err
 							
 							if(json.untracked.indexOf(fileName) == -1) {

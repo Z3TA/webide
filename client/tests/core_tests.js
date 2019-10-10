@@ -1925,7 +1925,7 @@
 		}
 	});
 	
-	EDITOR.addTest(1, function editBigFile(callback) {
+	EDITOR.addTest(function editBigFile(callback) {
 		// note: Need to place the testfile.txt inside the user home dir!
 		
 		var filePath = "/testfile.txt";

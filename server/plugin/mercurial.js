@@ -293,7 +293,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
-		//console.log("hg.status checkDir answer: rootDir=" + rootDir);
+		console.log("hg.status checkDir answer: rootDir=" + rootDir);
 		
 		if(err) return callback(err);
 		
@@ -307,7 +307,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
-				//console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
+				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
 				
 				if(err) return callback(err);
 				else if(stderr) return callback(stderr);
@@ -1998,11 +1998,19 @@ function checkDir(user, virtualPath, callback) {
 		}
 	});
 	
-	function findDotHg(dir, findDotHgCallback) {
+	function findDotHg(localDirectory, findDotHgCallback) {
 		// Recursively dig down the path to find a .hg folder
-		var dirList = UTIL.getFolders(dir);
-		dir = dirList.pop();
-		CORE.listFiles(user, {pathToFolder: dir}, function(err, fileList) {
+		var dirList = UTIL.getFolders(localDirectory);
+		var dir = dirList.pop();
+		
+		try {
+			var virtualDirectory = user.toVirtualPath(dir);
+		}
+		catch(err) {
+			return findDotHgCallback(err);
+		}
+		
+		CORE.listFiles(user, {pathToFolder: virtualDirectory}, function(err, fileList) {
 			
 			if(err) {
 return findDotHgCallback(err);
