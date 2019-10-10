@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	EDITOR.addTest(1, function noNeedToCommit(callback) {
+	EDITOR.addTest(function noNeedToCommit(callback) {
 		/*
 			bug: Server says "no need to commit" even though files have been changed.
 			
@@ -160,14 +160,31 @@ function testClone() {
 			
 			It however seem to work after upgrading to Ubuntu 18 :P
 			
-			
 		*/
+		
+		if(EDITOR.user.platform == "win32") {
+			/*
+				Tried to make hggit work on Windows but got Python errors (urlopen).
+				Considering we already spent one week making hggit work on Linux, and it failing randomly. I'm not even gonna try on Windows.
+			*/
+			return callback(true);
+		}
+		
+		
 		var testFolderParent = "/cloneFromGithub/";
 		var testCounter = 0;
 		var cloneSuccess = 0;
+		var cloneTests = 0; 
 		
-		testClone("https://github.com/Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "http/")); // Using HTTP
-		testClone("git@github.com:Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "ssh/")); // Using Git/SSH 
+		// Folder might exist if earlier test failed
+		CLIENT.cmd("deleteDirectory", {directory: testFolderParent, recursive: true}, function(err, json) {
+			if(err && err.code != "ENOENT") throw err
+			
+			cloneTests++;testClone("https://github.com/Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "http/")); // Using HTTP
+			
+			cloneTests++;testClone("git@github.com:Z3TA/test1.git", UTIL.joinPaths(testFolderParent, "ssh/")); // Using Git/SSH
+			
+		});
 		
 		function testClone(repository, testFolder) {
 			
@@ -188,7 +205,7 @@ function testClone() {
 				}
 				else {
 					
-					if(++cloneSuccess == 2) {
+					if(++cloneSuccess == cloneTests) {
 						cleanup(function(err) {
 							if(err) throw err;
 							callback(true);

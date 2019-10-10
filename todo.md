@@ -1199,6 +1199,13 @@ When searching, find all, create multiple selections(cursors), so that when you 
 What I'm thinking
 ==================
 
+Trying to make stuff work on Windows is even harder then before.
+The Node.JS and Python experience is not that great. It's easier on Linux, but still fiddly.
+Maybe we should give up on native platforms and only focus on the web!? In order for users to get a "it just works" experience. (no install or setup)
+
+
+---
+
 It seems code editors/IDE's needs a sales process.
 When people check the editor out they will just stare at it for 3 seconds, then go check the next thing ...
 Witch the record function I can show them the core features of the editor.

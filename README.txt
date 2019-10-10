@@ -218,10 +218,22 @@ npm install --global --production windows-build-tools
 ```
 
 
-NPM Error: Failed to replace env in config: ${APPDATA}
-------------------------------------------------------
+NPM Error: Failed to replace env in config: ${APPDATA} on Windows
+------------------------------------------------------------------
 Edit file as Administrator: C:\Program Files\nodejs\node_modules\npm\npmrc
 Replace "prefix=${APPDATA}\npm" with "prefix=C:\Program Files\nodejs\node_modules\npm"
+
+
+Using Git repositories with Mercurial on Windows
+------------------------------------------------
+You need to install "hggit" which is a Python module for Mercurial.
+It is however very tricky to get it to work ...
+
+If you are brave:
+
+1. Install Python, Mercurial and TortoiseHg if it's not already installed
+2. Install hggit: (see https://hg-git.github.io/)
+3. Generate SSH key and edit mercurial.ini
 
 
 Running the editor in Google Cloud Shell
