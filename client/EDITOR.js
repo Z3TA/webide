@@ -9929,7 +9929,7 @@ function mouseDown(mouseDownEvent) {
 	lastMouseDownEventType = mouseDownEvent.type;
 	
 	var el = EDITOR.lastElementWithFocus || mouseDownEvent.target;
-		if(el) { // Edge throws a InvalidStateError. Why?
+		if(!!el) { // Edge and IE11 throws a InvalidStateError on some elements unless we bang-bang it!?
 	// selectionStart etc seem to get lost when the element lose focus, so save it!
 	// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
 	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
