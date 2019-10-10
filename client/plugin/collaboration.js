@@ -197,21 +197,27 @@
 		
 		playButton = document.createElement("button");
 		playButton.setAttribute("id", "startOrStopPlaybackButton");
-		playButton.classList.add("playButton", "button", "half");
+		playButton.classList.add("playButton");
+		playButton.classList.add("button");
+		playButton.classList.add("half");
 		playButton.innerText = "▶ Start playback";
 		playButton.onclick = startOrStopPlayback;
 		wrap.appendChild(playButton);
 		
 		recordButton = document.createElement("button");
 		recordButton.setAttribute("id", "startOrStopRecordningButton");
-		recordButton.classList.add("recordButton", "button", "half");
+		recordButton.classList.add("recordButton");
+		recordButton.classList.add("button");
+		recordButton.classList.add("half");
 		recordButton.innerText = "● Start recording";
 		recordButton.onclick = startOrStopRecording;
 		wrap.appendChild(recordButton);
 		
 		var restartButton = document.createElement("button");
 		restartButton.setAttribute("id", "restartPlaybackButton");
-		restartButton.classList.add("restartButton", "button", "half");
+		restartButton.classList.add("restartButton");
+		restartButton.classList.add("button");
+		restartButton.classList.add("half");
 		restartButton.innerText = "Restart";
 		restartButton.onclick = restartPlayback;
 		wrap.appendChild(restartButton);
@@ -243,21 +249,24 @@
 		
 		var saveRecordButton = document.createElement("button");
 		saveRecordButton.setAttribute("id", "saveRecordButton");
-		saveRecordButton.classList.add("button", "half");
+		saveRecordButton.classList.add("button");
+		saveRecordButton.classList.add("half");
 		saveRecordButton.innerText = "Save recording";
 		saveRecordButton.onclick = saveRecord;
 		wrap.appendChild(saveRecordButton);
 		
 		var publishRecordButton = document.createElement("button");
 		publishRecordButton.setAttribute("id", "publishRecordButton");
-		publishRecordButton.classList.add("button", "half");
+		publishRecordButton.classList.add("button");
+		publishRecordButton.classList.add("half");
 		publishRecordButton.innerText = "Publish recording";
 		publishRecordButton.onclick = publishRecord;
 		wrap.appendChild(publishRecordButton);
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("id", "cancelRecordningButton");
-		cancelButton.classList.add("button", "half");
+		cancelButton.classList.add("button");
+		cancelButton.classList.add("half");
 		cancelButton.innerText = "Cancel";
 		cancelButton.onclick = recordWidget.hide;
 		wrap.appendChild(cancelButton);
