@@ -82,7 +82,8 @@
 			for(var j=0; j<comment.text.length;j++) {
 				//textWidth = Math.max(textWidth, ctx.measureText(comment.text[j]).width);
 				console.log("imgWidth=" + comment.text[j].width);
-				textWidth = Math.max(textWidth, comment.text[j].width);
+				textWidth = Math.max(textWidth, comment.text[j].width, Math.ceil(comment.str.length * EDITOR.settings.gridWidth));
+				// Some browsers (IE11) can't get image width! (width=0)
 			}
 			
 			if(comment.count > 1) {

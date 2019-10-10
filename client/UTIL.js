@@ -439,6 +439,10 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 		return html;
 	},	
 	
+	stripHtml: function stripHtml(str) {
+		return str.replace(/<[^>]*>?/gm, '');
+	},
+	
 	textDiff: function textDiff(originalText, editedText) {
 		/*
 			return {inserted: inserted, removed: removed};

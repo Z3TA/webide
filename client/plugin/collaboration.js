@@ -3323,7 +3323,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	}
 	
 	// 5
-	EDITOR.addTest(1, false, testUndoRedoWhileInCollabMode);
+	EDITOR.addTest(5, false, testUndoRedoWhileInCollabMode);
 	
 	function testUndoRedo(callback) {
 		var Z = 90;

@@ -4009,6 +4009,8 @@ li.onclick = function(clickEvent) {
 		if(file.grid.length <= row) throw new Error("file only has " + file.grid.length + " rows!" +
 		" Unable to place info message on row=" + row);
 		
+		// Why not just create div's and show them on top of the canvas!?!?
+		
 		// Convert the text to an array, one line per row
 		var txt = textString.split("\n");
 		
@@ -4093,10 +4095,12 @@ console.warn("Too many info messages added to row=" + row + " and col=" + col);
 			htmlToImage(item, function(img) {
 				imgArray.push(img);
 				
+				imagesMade++;
+				
 				console.log("imagesToMake=" + imagesToMake);
 				console.log("imagesMade=" + imagesMade);
 				
-				if(++imagesMade == imagesToMake) {
+				if(imagesMade == imagesToMake) {
 					allImagesMade();
 				}
 			});
@@ -10345,26 +10349,14 @@ function htmlToImage(html, callback) {
 	
 	html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
 	
-	/*
-		var data = '<svg xmlns="http://www.w3.org/2000/svg">' +
-		'<foreignObject width="100%" height="100%">' +
-		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
-		'<em>I</em> like ' + 
-		'<span style="color:white; text-shadow:0 0 2px blue;">' +
-		'cheese</span>' +
-		'</div>' +
-		'</foreignObject>' +
-		'</svg>';
-		
-	*/
 	
 	// The svg seems to need a width and height beforehand, or it will use a default width of 100px
-	var width = EDITOR.settings.gridWidth * html.length;
-	var height = EDITOR.settings.gridHeight;
+	var width = Math.ceil(EDITOR.settings.gridWidth * html.length);
+		var height = Math.ceil(EDITOR.settings.gridHeight);
 	
 	//  width="' + width + '" height="' + height + '"
 	
-	//console.log("width=" + width);
+		//console.log("htmlToImage: width=" + width);
 	
 	var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
 		//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
@@ -10377,31 +10369,43 @@ function htmlToImage(html, callback) {
 		data += '</foreignObject>';
 		data += '</svg>';
 		
-		// 
+		// foreignObject in SVG seem to have stopped working in IE11 !?!?!?
 		
-		console.log("Creating SVG image: data=" + data);
+		if(BROWSER == "MSIE") {
+			var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"><text x="0" y="16">' + UTIL.stripHtml(html) + '</text></svg>';
+		}
+		
+		console.log("htmlToImage: (BROWSER=" + BROWSER + ") Creating SVG image: data=" + data);
 		
 		var img = new Image();
 		
 		var domurl = window.URL || window.webkitURL || window;
 		
 		img.onload = function () {
-			console.log("SVG image created!");
+			console.log("htmlToImage: SVG image created! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
+			
 			callback(img);
-			if(url) domurl.revokeObjectURL(url);
+			if(url) {
+				console.log("htmlToImage: Releasing object URL")
+				domurl.revokeObjectURL(url);
+			}
 		}
 		
-		// img.onload does not fire in Edge browser on Windows!
-		
-		
-		if( domurl.createObjectURL ) {
+		if( domurl.createObjectURL) {
+			console.log("htmlToImage: Creating image using domurl.createObjectURL")
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 			var url = domurl.createObjectURL(svg);
 			img.src = url;
 		}
 		else {
+			console.log("htmlToImage: Creating image using data src")
 			data = "data:image/svg+xml," + data;
 			img.src = data;
+		
+			console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
+			// img.onload wont fire !?
+			callback(img);
+			callback = null;
 		}
 		
 	}
