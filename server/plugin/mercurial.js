@@ -45,16 +45,16 @@ var execFileOptions = {
 MERCURIAL.clone = function hgclone(user, json, callback) {
 	// Clone a remote repository
 	
-	var local = json.local;
+	var virtualPath = json.local;
 	var remote = json.remote;
 	var hguser = json.user;
 	var pw = json.pw;
 	var save = json.save;
 	
-	if(!local) return callback(new Error("A local directory need to be specified! local=" + local));
+	if(!virtualPath) return callback(new Error("A local directory need to be specified! local=" + json.local));
 	if(!remote) return callback(new Error("A remote URL need to be specified! remote=" + remote));
 	
-	var localPath = user.translatePath(local);
+	var localPath = user.translatePath(virtualPath);
 	if(localPath instanceof Error) return callback(localPath);
 	
 	localPath = UTIL.trailingSlash(localPath);
@@ -63,8 +63,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	
 	//if(localPath.split(/\/|\\/).length < 4) return callback(new Error("Can not clone into a root folder. Use an intermediary directly like /repo" + localPath + ""));
 	
-	// First make sure that a Mercurial repo does Not already exist at the target locatino
-	CORE.listFiles(user, {pathToFolder: localPath}, function(err, fileList) {
+	// First make sure that a Mercurial repo does Not already exist at the target location
+	CORE.listFiles(user, {pathToFolder: virtualPath}, function(err, fileList) {
 		
 		if(err) {
 			if(err.code == "ENOENT") clone();
@@ -159,7 +159,7 @@ console.log("clone error stderr=" + stderr);
 			// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 			
 				if(destinationNotEmpty) {
-				cloneDone("The destination folder is not empty: " + local + destinationNotEmpty[1]);
+				cloneDone("The destination folder is not empty: " + virtualPath + destinationNotEmpty[1]);
 				}
 			else if(stderr) {
 				cloneDone(err.message + "\n" + stderr);
@@ -217,7 +217,7 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 				
 				// What error message to show ?
 				if(stderr.match(reNoSuchFileOrDirectory)) {
-					cloneDone("Directory does not exist: " + local);
+					cloneDone("Directory does not exist: " + virtualPath);
 				}			
 				else cloneDone(stderr);
 			
@@ -263,7 +263,7 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 			user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
 			
 			if(errorMessage) callback(new Error(errorMessage));
-			else callback(errorMessage, {path: local});
+			else callback(errorMessage, {path: virtualPath});
 				
 			callback = null;
 			}

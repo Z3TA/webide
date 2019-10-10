@@ -7628,7 +7628,8 @@ function main() {
 	CLIENT.on("loginSuccess", function loggedInToServer(login) {
 		EDITOR.user = {
 			name: login.user,
-			home: login.homeDir
+			home: login.homeDir,
+				platform: login.platform
 		};
 		
 		if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
@@ -7636,7 +7637,7 @@ function main() {
 		EDITOR.installDirectory = login.installDirectory || "/";
 		//alertBox(JSON.stringify(login));
 		
-		console.log("Logged in as user: " + EDITOR.user.name);
+			console.log("Logged in as user: " + EDITOR.user.name + " on a " + EDITOR.user.platform + " server");
 		
 		// Use servers working directory
 		CLIENT.cmd("workingDirectory", null, function(err, json) {

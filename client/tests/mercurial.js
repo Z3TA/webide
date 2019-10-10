@@ -104,7 +104,7 @@ function testClone() {
 					});
 				}
 				else if(err) {
-					throw err
+					throw new Error("err.code=" + err.code + " err.message=" + err.message);
 				}
 				else {
 					
@@ -128,11 +128,9 @@ function testClone() {
 		
 		function cleanup(cleanupCallback) {
 			CLIENT.cmd("deleteDirectory", {directory: "/mercurialCloneRepoUniqueName/", recursive: true}, function(err, json) {
-				if(err) throw err
-				else {
-					cleanupCallback();
-				}
-			});
+				if(err) return cleanupCallback(err);
+				else cleanupCallback(null);
+				});
 		}
 		
 	});
