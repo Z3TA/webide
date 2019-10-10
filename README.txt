@@ -387,7 +387,8 @@ But it's also possible to use the editor as a "cloud" editor, running on a serve
 
 It's recommended to use ZFS (file system) on the server,
 so each user can have their own file-system and be able to take snapshots etc.
-
+
+
 
 Running the cloud server on Windows
 -----------------------------------
