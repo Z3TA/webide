@@ -185,6 +185,11 @@ if (!String.prototype.repeat) {
 
 (function() {
 	
+	if(typeof Promise == "undefined") {
+		console.warn("Promises not supported in BROWSER=" + BROWSER);
+		return;
+	}
+	
 	var promisifiedOldGUM = function(constraints, successCallback, errorCallback) {
 		
 		// First get ahold of getUserMedia, if present
