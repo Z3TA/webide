@@ -36,8 +36,13 @@ What I'm working on
 -------------------
 
 
+Testing in IE11
+
 Testing in different browsers
 
+
+
+todo: A smilie-face in the menu, with the options, "send a smile", and "send a frown" (a sad face) like in IE11
 
 bug: Fading text in margin on .diff file a green line below a red line - the text in the fading right margin becomes red
 

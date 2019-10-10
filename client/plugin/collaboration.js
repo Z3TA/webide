@@ -3322,7 +3322,8 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		});
 	}
 	
-	EDITOR.addTest(5, false, testUndoRedoWhileInCollabMode);
+	// 5
+	EDITOR.addTest(1, false, testUndoRedoWhileInCollabMode);
 	
 	function testUndoRedo(callback) {
 		var Z = 90;

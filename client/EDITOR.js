@@ -3668,7 +3668,10 @@ li.onclick = function(clickEvent) {
 			var items = tempItems.childNodes;
 			var itemCount = 0; // Temporary items will get a low tab index
 			
-			items.forEach(function(li) {
+			// items is not a proper array, so we can not use array methods! (at least not in older browsers, IE)
+			for (var i=0; i<items.length; i++) setIndex(items[i]);
+			
+			function setIndex(li) {
 				if(li.tagName == "LI") {
 					
 					itemCount++;
@@ -3680,7 +3683,7 @@ li.onclick = function(clickEvent) {
 					li.id = "ctxMenuItem" + itemCount;
 				}
 				
-			});
+			}
 			
 			
 			// Add many: accept array?

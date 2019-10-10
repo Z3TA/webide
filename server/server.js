@@ -3653,6 +3653,11 @@ console.error(err);
 			responseHeaders['Content-Type'] = module_mimeMap[fileExtension];
 			responseHeaders['Content-Length'] = stats.size;
 			
+			// Some browsers (like IE11) doesn't use utf8 by default
+			if(fileExtension == "js" || fileExtension == "svg" || fileExtension == "htm" || fileExtension == "html" || fileExtension == "css") {
+				responseHeaders['Content-Type'] += "; charset=utf-8";
+			}
+			
 			response.writeHead(200, responseHeaders);
 			
 			var readStream = module_fs.createReadStream(filePath);
