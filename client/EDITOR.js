@@ -2713,6 +2713,19 @@ else if(typeof order == "object") {
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 	
+	EDITOR.hasEvent = function(eventName, fun) {
+		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) throw new Error("Unknown editor event: " + eventName);
+		
+		var events = EDITOR.eventListeners[eventName];
+		for(var i=0; i<events.length; i++) {
+			if(events[i].fun == fun) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	// Add feature icons for discovery
 	EDITOR.discoveryBar = {
 		add: function addDiscoveryItem(element, position) {
