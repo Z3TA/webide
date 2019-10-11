@@ -35,6 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Live preview SVG images
+
+Make a logo on yellow background that reads web IDE
+
+Rebranding. Make it just webide, not JZedit!
 
 
 
