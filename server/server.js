@@ -3354,6 +3354,9 @@ function handleHttpRequest(request, response) {
 	}
 	else if(firstDir == "share") {
 		// ### Upload files to user via web share (https://developers.google.com/web/updates/2018/12/web-share-target)
+		// note: This code has never been tested, so it probably doesn't work :P
+		// todo: Test this If or whenever the web share API is implemented on any plaform, most likely Android?
+		// When added to "home screen", you should get editor as an option when sharing files
 		var Busboy = require('busboy');
 		var sendToUser = "";
 		var files = [];

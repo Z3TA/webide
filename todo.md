@@ -37,6 +37,7 @@ What I'm working on
 
 
 
+
 idea: A smilie-face in the menu, with the options, "send a smile", and "send a frown" (a sad face) like in IE11
 
 bug: Fading text in margin on .diff file a green line below a red line - the text in the fading right margin becomes red
@@ -91,7 +92,6 @@ Error: Server: API error: ENOENT: no such file or directory, open '/my_web_site/
     at previewServed (https://webide.se/:93:37638) 
 
 
-todo: Test sharing files with the editor to see if the OS HTTP-posts's the file to the editor!
 
 todo: Record keyboard shortcuts and display them during playback
 
