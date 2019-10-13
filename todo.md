@@ -35,11 +35,26 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+todo: svg preview doesn't load the image when window opens on Firefox
+
+shift+ scroll to increment/decrement a numeric value
+
+
+
+nodejsplayground.com
+
+* Clone existing repo
+* Interactive tutorials
+* Write code, send pull request
+
+
+
 Live preview SVG images
 
 Make a logo on yellow background that reads web IDE
 
 Rebranding. Make it just webide, not JZedit!
+
 
 
 

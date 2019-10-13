@@ -60,6 +60,7 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		
 		
 		// Go left
+		if(caret.eol) i--;
 		if(file.text[i] == " ") i--;
 		
 		while(isNr(file.text[i]) && i > 0) {
