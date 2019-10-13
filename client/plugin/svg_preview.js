@@ -20,20 +20,32 @@ unload: function unloadSvgPreview() {
 			
 			EDITOR.removeEvent("previewTool", previewSvg);
 			
-}
-});
-
+			for(var filePath in filesInPreviw) {
+				if(filesInPreviw[filePath].previewWin) {
+filesInPreviw[filePath].previewWin.close();
+				}
+			}
+			
+		}
+	});
+	
 	function buildSvgPreviewWidget() {
 		/*
 			A range slider for zooming in out which will resize the preview window
 		*/
 		
 		var wrap = document.createElement("div");
+		wrap.classList.add("svgZoomSliderWrap");
 		
 		var label = document.createElement("label")
 		label.setAttribute("for", "svgZoomSlider");
+		label.classList.add("svgZoomSliderLabel");
 		label.innerText = "SVG Zoom: "
 		wrap.appendChild(label);
+		
+		var svgZoomSliderHolder = document.createElement("div")
+		svgZoomSliderHolder.classList.add("svgZoomSliderHolder");
+		wrap.appendChild(svgZoomSliderHolder);
 		
 		zoomSlider = document.createElement("input");
 		zoomSlider.setAttribute("id", "svgZoomSlider");
@@ -43,7 +55,7 @@ unload: function unloadSvgPreview() {
 		zoomSlider.setAttribute("max", 1000);
 		zoomSlider.setAttribute("value", 100);
 		onRangeChange(zoomSlider, zoomSliderChange);
-		wrap.appendChild(zoomSlider);
+		svgZoomSliderHolder.appendChild(zoomSlider);
 		
 		return wrap;
 		
@@ -92,14 +104,14 @@ unload: function unloadSvgPreview() {
 			var y2 = m[4];
 		}
 		
-		console.log("zoomSliderChange: x1=" + x1 + " x2=" + x2 + " y1=" + y1 + " y2=" + y2 + " ");
-		
 		var orgWidth = x2-x1;
 		var orgHeight = y2-y1;
 		var widthScale = width/height;
 		
 		var width = Math.ceil(orgWidth * currentValue / 100);
 		var height = Math.ceil(orgHeight * currentValue / 100);
+		
+		console.log("zoom: width=" + width + " height=" + height + " orgWidth=" + orgWidth + " orgHeight=" + orgHeight + " x1=" + x1 + " x2=" + x2 + " y1=" + y1 + " y2=" + y2 + " ");
 		
 		var previewWin = info.previewWin;
 		
@@ -135,47 +147,47 @@ unload: function unloadSvgPreview() {
 			return false;
 		}
 		
-		var folder = UTIL.getDirectoryFromPath(file.path);
-		var fileName = UTIL.getFilenameFromPath(file.path);
-		
-		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
-			if(err) return alertBox(err.message);
-			
-			var urlPath = json.url;
-			
-			// HTTP serve gives the URL without protocol !?
-			var reHttp = /^http(s?):/i;
-			if(!urlPath.match(reHttp)) {
-				if(window.location.protocol.match(reHttp)) {
-					urlPath = window.location.protocol + "//" + urlPath;
-				}
-				else urlPath = "http://" + urlPath;
-			}
-			var fileName = UTIL.getFilenameFromPath(file.path);
-			var url = UTIL.joinPaths(urlPath, fileName);
-			
-			console.log("previewSvg: url=" + url);
-			
-			// Figure out image width/height
-			
-			
-			
-			var windowOptions = {
-				url: "about:blank"
-			};
 			
 			filesInPreviw[file.path] = {
-				windowOptions: windowOptions,
-				file: file
+			file: file
 			};
 			
-			if(!EDITOR.hasEvent("fileChange", previewSvgFileChanged)) EDITOR.on("fileChange", previewSvgFileChanged);
+			if(!EDITOR.hasEvent("fileChange", previewSvgFileChanged)) {
+EDITOR.on("fileChange", previewSvgFileChanged);
+		}
+		
+		var info = filesInPreviw[file.path];
+		// , waitUntilLoaded: true
+		EDITOR.createWindow({url: "about:blank"}, function windowCreated(err, previewWin) {
+			if(err) return alertBox(err.message);
 			
-			reopen(filesInPreviw[file.path]);
+			info.previewWin = previewWin;
 			
+			focusEditor(previewWin);
+			
+			// The onload event is not called in Chrome!?
+			
+				alertBox("previewWin loaded!");
+				
+				widget.show();
+				if(typeof zoomSlider != undefined) zoom(info, zoomSlider.value);
+				
+				refresh(filesInPreviw[file.path]);
+				
+				focusEditor(previewWin);
+				
+			
+			
+			previewWin.window.onbeforeunload = function onbeforeunload() {
+				// User closed the preview window
+				delete filesInPreviw[info.file.path];
+				
+				if(Object.keys(filesInPreviw).length == 0) EDITOR.removeEvent("fileChange", previewSvgFileChanged);
+				
+				widget.hide();
+			};
 			
 		});
-		
 		
 		return true;
 	}
@@ -183,13 +195,10 @@ unload: function unloadSvgPreview() {
 	function previewSvgFileChanged(file) {
 		if(!filesInPreviw.hasOwnProperty(file.path)) return;
 		
-		// note: We can't use location.reload() because we would loose track of the window!
-		// instead we need to close and reopen the window
-		
-		// problem2: The editor loses focus when the new window is opened!
-		
-		var info = filesInPreviw[file.path];
-		
+		refresh(filesInPreviw[file.path]);
+	}
+	
+	function refresh(info) {
 		var previewWin = info.previewWin;
 		
 		if(previewWin == undefined) throw new Error("previewWin=" + previewWin);
@@ -198,9 +207,10 @@ unload: function unloadSvgPreview() {
 		
 		if(doc == undefined) throw new Error("doc=" + doc);
 		
-		doc.body.innerHTML = file.text;
+		doc.body.innerHTML = info.file.text;
 		
-		//reopen(filesInPreviw[file.path]);
+		doc.body.style.margin = "0px";
+		
 	}
 	
 	function focusEditor(previewWin) {
@@ -221,56 +231,6 @@ unload: function unloadSvgPreview() {
 		
 		EDITOR.canvas.focus();
 		
-	}
-	
-	function reopen(info) {
-		
-		info.isReloading = true;
-		
-		if(info.previewWin) info.previewWin.close();
-		
-		
-		
-		EDITOR.createWindow(info.windowOptions, function windowCreated(err, previewWin) {
-			if(err) return alertBox(err.message);
-			
-			info.previewWin = previewWin;
-			
-			focusEditor(previewWin);
-			
-			previewWin.onload = function() {
-				info.isReloading = false;
-				widget.show();
-				if(typeof zoomSlider != undefined) zoom(info, zoomSlider.value);
-				
-				var body = previewWin.document.body;
-				
-				if(body == undefined) throw new Error("Opened window has no body!");
-				
-				body.innerHTML = info.file.text;
-				
-				body.style.margin = "0px";
-				
-				focusEditor(previewWin);
-				
-			}
-			
-			previewWin.window.onbeforeunload = function onbeforeunload() {
-				if(!info.isReloading) {
-					
-					// User closed the preview window
-					
-					delete filesInPreviw[info.file.path];
-					
-					if(Object.keys(filesInPreviw).length == 0) EDITOR.removeEvent("fileChange", previewSvgFileChanged);
-					
-					widget.hide();
-					
-				}
-			};
-			
-		});
-
 	}
 	
 })();
