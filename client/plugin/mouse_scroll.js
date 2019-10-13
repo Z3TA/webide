@@ -42,7 +42,7 @@
 			console.log("yo");
 		}
 		
-		else {
+		else if(combo.sum == 0) {
 			
 			var file = EDITOR.currentFile;
 			

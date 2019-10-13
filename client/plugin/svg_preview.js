@@ -165,10 +165,6 @@ EDITOR.on("fileChange", previewSvgFileChanged);
 			
 			focusEditor(previewWin);
 			
-			// The onload event is not called in Chrome!?
-			
-				alertBox("previewWin loaded!");
-				
 				widget.show();
 				if(typeof zoomSlider != undefined) zoom(info, zoomSlider.value);
 				

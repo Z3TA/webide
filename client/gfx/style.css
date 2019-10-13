@@ -1888,6 +1888,19 @@ margin-top: 20px;
 }
 
 
+.svgZoomSliderWrap {
+}
+.svgZoomSliderHolder {
+	width:auto;
+}
+.svgZoomSliderLabel {
+	float:left;
+}
+.svgZoomSlider {
+	width: 100%;
+}
+
+
 /* ### loader animation */
 .loader {
 	display: inline-block;
