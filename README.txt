@@ -1,13 +1,11 @@
 
-JZedit is a text/code editor/IDE for JavaScript, CSS, HTML and Node.JS development.
+WebIDE is a text/code editor/IDE for creating progressive web apps (PWA) and editing websites.
 
 More guides/articles are available in the documentation/ 
 folder (or https://webide.se/about/about.htm)
 
+Demo: https://webide.se/
 
-webide.se ?
------------
-https://webide.se/ is the jzedit editor running as a cloud editor.
 In this readme you will find instructions on how to run the editor locally on your computer, 
 or host it on your own server.
 
@@ -17,14 +15,14 @@ Install instructions
 ====================
 
 The editor can be download from here:
-https://www.webtigerteam.com/jzedit/download/
+https://www.webtigerteam.com/editor/download/
 
 If you only want the server/cloud version, download it from the link above.
 The easiest way to install the desktop version is via npm:
 
-`npm install --global jzedit`
+`npm install --global webide.se`
 
-Then type `npm start` to start the editor. Or (if you installed globally) `jzedit [path to file]`
+Then type `npm start` to start the editor. Or (if you installed globally) `webide [path to file]`
 
 
 
@@ -44,7 +42,7 @@ sudo apt-get update
 sudo apt-get install -y nodejs
 ```
 
-3. Navigate to the folder where you put jzedit: `cd jzedit`
+3. Navigate to the folder where you put webide: `cd webide`
 
 4. Install "node_modules" packages: `npm install`
 
@@ -54,7 +52,7 @@ Via GUI: Right click, Properties, Permissions tab, Allow executing file as progr
 
 6. Add desktop shortcut (Unity/GNOME): 
 Unity: Double click on linux_launcher.desktop to start the editor.
-Then right click on the JZedit icon on the Launcher (left side menu), and select "Lock to Launcher"
+Then right click on the WebIDE icon on the Launcher (left side menu), and select "Lock to Launcher"
 
 Gnome: Run ./linux_create_desktop_shortcut.sh
 
@@ -72,7 +70,7 @@ otherwise you will get a "this file comes from another computer" warning every t
 
 2. Open a command prompt (Click on start menu => run, then type "cmd.exe")
 
-3. Navigate to the folder this file is located in via the command prompt: cd path\to\jzedit
+3. Navigate to the folder this file is located in via the command prompt: cd path\to\webide
 
 4. Install the dependencies by typing `npm install` and hit enter in the command prompt.
 
@@ -97,7 +95,7 @@ Mac OS X
 
 2. Open a terminal: cmd + Space, and type `terminal`
 
-3. Navigate to the folder this file is located in via the terminal: `cd path/to/jzedit`
+3. Navigate to the folder this file is located in via the terminal: `cd path/to/webide`
 
 4. Install the dependencies by typing `npm install` and hit enter in the terminal.
 
@@ -110,8 +108,8 @@ Mac OS X
 Chromebook
 ----------
 
-Go to the chrome web store and search for jzedit.
-It's named "JavaScript & Node JS & HTML CSS editor / IDE" and has an pink/rainbow promo image.
+Go to the chrome web store and search for webide.
+It's named "Editor/IDE for making progressive web apps (PWA)".
 
 That will use the hosted version on webide.se
 
@@ -119,7 +117,7 @@ We tried to make a pure Chrome app, but that turned out to be too much work.
 
 If you root the device you might be able to install nodejs. And then:
 ````
-npm install -g jzedit
+npm install -g webide
 npm start
 ````
 
@@ -141,19 +139,19 @@ But if you however want to run the editor locally on your phone, you can do this
 
 4. Type "Y" and press Enter to confirm you want to install nodejs ...
 
-5. Type "npm install jzedit" (without the quotes) and press Enter
+5. Type "npm install webide.se" (without the quotes) and press Enter
 
-6. Type "cd node_modules/jzedit/server" (without the quotes) and press Enter
+6. Type "cd node_modules/webide.se/server" (without the quotes) and press Enter
 
 7. Type "node server.js --user=admin --pw=admin -nochroot" (without the quotes) and press Enter
 
 8. Start Chrome and go to url: http://127.0.0.1:8099
 
-9. You will probably get a dialog about adding JZedit to your home screen.
+9. You will probably get a dialog about adding WebIDE to your home screen.
 It is recommended that you do so, as it will allow running the editor without browser bars.
 (note: Add-to-home-screen might not work on some Android versions)
 
-10. If you added JZedit to your home screen you can now close Chrome and click on JZedit on your home screen.
+10. If you added WebIDE to your home screen you can now close Chrome and click on WebIDE on your home screen.
 
 Note that while you can start the client and connect to another server, in order to run the server on your 
 Android device you have to start Termux and repeat step 6-7 above every time, so you might want to automate it,
@@ -162,26 +160,26 @@ And/or use Tasker or other app to make the both the server and the client start 
 
 
 
-Able to type jzedit via "unix" terminal without installing via npm --global
+Able to type webide via "unix" terminal without installing via npm --global
 ----------------------------------------------------------------------------
-In a unix like environment it's possible to open files and even pipe to bin/jzedit,
+In a unix like environment it's possible to open files and even pipe to bin/webide,
 in order to send streams of text to the editor.
 Just add the bin folder to your PATH environment variable:
 ```
-export PATH="$PATH:/path/to/node_modules/jzedit/bin"
+export PATH="$PATH:/path/to/node_modules/webide.se/bin"
 ```
 Put it in ~/.bashrc to make the PATH update permanent.
 
 
-Able to type jzedit in Windows command prompt without installing via npm --global
+Able to type webide in Windows command prompt without installing via npm --global
 -----------------------------------------------------------------------------------
-Add the jzedit/bin folder to the Path environment variable:
+Add the webide/bin folder to the Path environment variable:
 (Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
 Select: Path, then click Edit, then New, and write:
 ```
-C:\path\to\where\you\installed\node_modules\jzedit\bin\
+C:\path\to\where\you\installed\node_modules\webide.se\bin\
 ```
-(tip: Use the file explorer to navigate to the jzedit\bin folder, then copy the path/address)
+(tip: Use the file explorer to navigate to the webide\bin folder, then copy the path/address)
 Click OK > OK > OK
 You have to open a new Command Prompt for the change to take effect.
 
@@ -201,7 +199,7 @@ export PATH="$NPM_PACKAGES/bin:$PATH"
 EOT
 
 npm config set prefix=$HOME/.npm-packages
-npm install --global jzedit
+npm install --global webide.se
 ```
 
 
@@ -246,7 +244,7 @@ Login with your Google account.
 2. If the shell terminal didn't open by itself, click on the icon in the top right 
 that looks like >_ and says "Activate Google Cloud Shell"
 It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
-`curl https://www.webtigerteam.com/jzedit/download/`
+`curl https://www.webtigerteam.com/editor/download/`
 
 3. Take notice of the latest server release for jzedit. Then type:
 `wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz`
