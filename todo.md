@@ -38,18 +38,11 @@ What I'm working on
 Rebranding from jzedit to webide ...
 Need to rename folders, services etc!
 
-Rename .jzeditpw to .webidepw
-Rename .jzeditor_storage to .webide
+Only use one dot folder!!!
 
 for homedir in /home/*; do sudo mkdir "$homedir"/.webide/; done
 for homedir in /home/*; do sudo mv "$homedir"/.jzeditpw "$homedir"/.webide/password; done
 for homedir in /home/*; do sudo mv "$homedir"/.jzeditStorage "$homedir"/.webide/storage; done
-
-
-Only use one dot folder!!!
-
-.webide/password
-.webide/storage
 
 
 Hmm, did I forget about /promo/ folder !?
