@@ -20,7 +20,7 @@ EDITOR.plugin({
 		
 		var srcUrl = loc.protocol + "//" + loc.hostname + "/embed.js";
 		
-		var link = '<a href="javascript:(function(){var s=document.createElement(\'script\');s.setAttribute(\'id\', \'jzedit_bookmarklet\');s.setAttribute(\'src\',\'' + srcUrl +'\');document.body.appendChild(s);})()">Code editor</a>';
+		var link = '<a href="javascript:(function(){var s=document.createElement(\'script\');s.setAttribute(\'id\', \'webide_bookmarklet\');s.setAttribute(\'src\',\'' + srcUrl +'\');document.body.appendChild(s);})()">Code editor</a>';
 		
 		alertBox("Drag the following link to the bookmark bar: " + link + "<br><br>When clicked it will turn the first textarea on the page into a code editor!");
 		

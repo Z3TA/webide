@@ -5,8 +5,8 @@
 		
 	*/
 	
-	var nameOfJS = "jzedit_js_overload.js";
-	var nameOfCSS = "jzedit_css_overload.css"
+	var nameOfJS = "webide_js_overload.js";
+	var nameOfCSS = "webide_css_overload.css"
 	
 	var menuItem;
 	var winMenuEditorCustomization;

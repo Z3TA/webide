@@ -514,7 +514,7 @@ function recycleGuestAccounts(callback) {
 						}
 						else {
 							// We got an unknown error ... We however don't want the server to restart, or it would go into a restart loop
-							sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message + "\n\n" + err.stack);
+							sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message + "\n\n" + err.stack);
 processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
 						}
 					}
@@ -526,7 +526,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 				// Sometimes the home dir doesn't exist! wtf!?
 				console.log("id=" + id + " homeDir=" + homeDir + " homeDirStat=" + JSON.stringify(homeDirStat));
 				
-				var lastLoginFile = UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]);
+				var lastLoginFile = UTIL.joinPaths([homeDir, ".webide/" "storage/", "lastLogin"]);
 				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
@@ -593,7 +593,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		var exec = module_child_process.exec;
 		
 		var options = {
-			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+			cwd: module_path.join(__dirname, "../") // Run in webide folder where removeuser.js is located
 		}
 		//console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
@@ -670,7 +670,7 @@ function main() {
 	}
 	
 	if(NO_CHROOT && !USERNAME && CURRENT_USER) {
-		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".jzeditpw");
+		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".webide/" "password");
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {
 			if(err && err.code == "ENOENT") {
 				log("Did not find " + passwordFile, NOTICE);
@@ -780,7 +780,7 @@ function main() {
 			HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
 		}
 		
-		wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
+		wsServer.installHandlers(HTTP_SERVER, {prefix:'/webide'});
 		
 		
 		if(HTTP_IP == "127.0.0.1") {
@@ -906,7 +906,7 @@ function openStdinChannel() {
 function openRemoteFileServer() {
 	/*
 		Enable users to write
-		sudo jzeditr /path/to/file
+		sudo webider /path/to/file
 		while ssh:ed into a server
 		and the file will open in the editor client,
 		then sent back when saved.
@@ -1176,7 +1176,7 @@ function createGuestUser(id, callback) {
 		
 		
 		var options = {
-			cwd: module_path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
+			cwd: module_path.join(__dirname, "../") // Run in webide folder where adduser.js is located
 		}
 		console.log("Create " + username + ": Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
@@ -1239,7 +1239,7 @@ function broadcast(myIp) {
 	// Listen to and answer broadcast messages
 	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 	
-	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
+	var serverAdvertiseMessage = "WebIDE server url: " + makeUrl();
 	
 	log(serverAdvertiseMessage);
 	
@@ -1289,7 +1289,7 @@ function broadcast(myIp) {
 				console.log('broadcastClient: message: address=' + rinfo.address + ' port=' + rinfo.port +' message=' + message);
 			}
 			
-			var lookForServerMessage = "Where can I find a jzedit server?"
+			var lookForServerMessage = "Where can I find a WebIDE server?"
 			
 			if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
 			
@@ -1652,7 +1652,7 @@ function sockJsConnection(connection) {
 								guestPw = module_pwHash(guestPw);
 							}
 							
-							module_fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
+							module_fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".webide/", "password"]), guestPw, function(err) {
 								if(err) throw err;
 								console.log("Saved guest=" + guestUser + " new password");
 							});
@@ -1681,7 +1681,7 @@ function sockJsConnection(connection) {
 						
 						console.log("New guest login: " + guestUser);
 						
-						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: user=" + guestUser + " IP=" + IP);
+						sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: user=" + guestUser + " IP=" + IP);
 						
 						username = guestUser;
 						idSuccess(alreadyCheckedMounts);
@@ -1697,7 +1697,7 @@ function sockJsConnection(connection) {
 					
 					function checkPw() {
 						
-						var passwordFile = UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]);
+						var passwordFile = UTIL.joinPaths([HOME_DIR, username, ".webide/", "password"]);
 						module_fs.readFile(passwordFile, "utf8", function readPw(err, pwstringFromFile) {
 							if(err) {
 								console.error(err);
@@ -1711,7 +1711,7 @@ function sockJsConnection(connection) {
 								if(password == pwstringFromFile) idSuccess();
 								else {
 									idFail("Wrong password for user: " + username);
-									console.log("Hashed pw *" + password + "* (entered by user) != *" + pwstringFromFile + "* (.jzeditpw file)");
+									console.log("Hashed pw *" + password + "* (entered by user) != *" + pwstringFromFile + "* (.webide/password file)");
 								}
 							}
 						});
@@ -1884,13 +1884,13 @@ function sockJsConnection(connection) {
 								}
 							}
 							
-							module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]), unixTimeStamp(), function(err) {
+							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
 								if(err && err.code == "ENOENT") {
-									// The .jzeditStorage probably doesn't exist!
-									module_fs.mkdir(UTIL.joinPaths([homeDir, ".jzeditStorage/"]), function(err) {
+									// .webide/storage/ probably doesn't exist in the home dir!
+									module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
 										if(err) throw err;
 										// Try again
-										module_fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage", "lastLogin"]), unixTimeStamp(), function(err) {
+										module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
 											if(err) throw err;
 											else lastLoginFileUpdated()
 										});
@@ -2935,7 +2935,7 @@ function checkMounts(options, checkMountsCallback) {
 					
 					apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
 					apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-					apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, UTIL.parentFolder(__dirname));
+					apparmorProfile = apparmorProfile.replace(/%WEBIDE%/g, UTIL.parentFolder(__dirname));
 					
 					// Create the profile
 					module_fs.writeFile(dest, apparmorProfile, function (err) {
@@ -3571,7 +3571,7 @@ console.error(err);
 		
 		localFolder = module_path.resolve("../client/");
 		
-		//console.log("Serving from the jzedit client folder: " + localFolder);
+		//console.log("Serving from the webide client folder: " + localFolder);
 		
 		/*
 			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
@@ -3819,7 +3819,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		else {
 			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
 			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
-			// Easiest solution is to remove and re-add the user. If it's in production you should install the jzedit_user_mounts.service'
+			// Easiest solution is to remove and re-add the user.
 			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
 			throw err;
 		}
@@ -4294,7 +4294,7 @@ function getGroupId(groupName, callback) {
 		
 		var groups = groupData.split(/\r|\n/);
 		
-		// format: jzedit_users:x:115:
+		// format: groupname:x:115:
 		
 		for (var i=0, group, name, id; i<groups.length; i++) {
 			group = groups[i].split(":");
@@ -4835,7 +4835,7 @@ function gcsfLogout(username, callback) {
 	var mountDir = HOME_DIR + username + "/googleDrive";
 	var command = "./gcsf logout " + username;
 	var options = {
-		cwd: module_path.join(__dirname, "../") // Run in jzedit folder where removeuser.js is located
+		cwd: module_path.join(__dirname, "../") // Run in webide folder where removeuser.js is located
 	}
 	
 	gcsfCleanup(username);

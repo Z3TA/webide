@@ -2666,7 +2666,7 @@ else if(typeof order == "object") {
 			}
 			
 			var speechRecognitionList = new SpeechGrammarList();
-			var grammar = "#JSGF V1.0; grammar JZedit;";
+			var grammar = "#JSGF V1.0; grammar WebIDE;";
 			grammar += "<number>=1|2|3|4|5|6|7|8|9|0;";
 			grammar += "<numbers>=<number>|<number><number>|<number><number><number>|<number><number><number><number>;"
 			grammar += "public <phrase> = " + speechRecognitionGrammar.join(' | ') + ' ;';
@@ -8699,7 +8699,7 @@ function onMessage(windowMessageEvent) {
 			
 		}
 		else {
-		console.warn("jzedit does not recognise msg=" + msg);
+			console.warn("Ddoes not recognise msg=" + msg);
 		//throw new Error("Unable to handle message: " + msg);
 	}
 		

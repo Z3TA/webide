@@ -197,7 +197,7 @@ user.identify = function identify(info) {
 	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
-	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".jzeditStorage" + path.sep) ;
+	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".webide/storage" + path.sep) ;
 	
 	console.log("Identified as user.name=" + user.name + " workingDirectory=" + user.workingDirectory);
 	
@@ -322,11 +322,8 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		translatedPath = pathModule.resolve(translatedPath);
 		//console.log("(after resolve) translatedPath=" + translatedPath);
 		
-		if(translatedPath == pathModule.resolve("users.pw")) {
-			console.warn("User name=" + user.name + " is accessing users.pw");
-		}
-		else if(translatedPath == "/etc/jzedit_user") {
-			console.warn("User name=" + user.name + " is accessing /etc/jzedit_user");
+		if(translatedPath == "/etc/passwd") {
+			console.warn("User name=" + user.name + " is accessing /etc/passwd");
 		}
 		
 		if(isDirectory) translatedPath = UTIL.trailingSlash(translatedPath);

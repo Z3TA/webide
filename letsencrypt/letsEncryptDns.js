@@ -12,15 +12,15 @@
 	
 	
 	Note: Certbot currently don't support hooks with automaitcally renewing, so you need to use crontab!
-	Add the following command to crontab on the cloudIDE server (replace path to jzedit):
-	certbot renew --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	Add the following command to crontab on the cloudIDE server (replace path to webide):
+	certbot renew --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Update: Certbot seem to be able to handle the renewal!
 	check: https://transparencyreport.google.com/https/certificates?cert_search_auth=&cert_search_cert=&cert_search=include_expired:true;include_subdomains:true;domain:johan.webide.se&lu=cert_search
 	
 	
-	How to test on the cloudIDE server (replace path to jzedit):
-	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	How to test on the cloudIDE server (replace path to webide):
+	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Remove --staging --dry-run for running in production.
 	And don't forget to delete /etc/letsencrypt/live/domain.tld/ or certbot will create domain.tld-0001/

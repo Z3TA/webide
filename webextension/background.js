@@ -31,8 +31,8 @@ function createMenuItem() {
 	}
 	
 	browser.contextMenus.create({
-		id: "jzedit",
-		title: "JZedit",
+		id: "webide",
+		title: "WebIDE",
 		contexts: ["all"]
 	}, onCreated);
 	console.log("browser.contextMenus.create success!");

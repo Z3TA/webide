@@ -35,7 +35,45 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Rebranding from jzedit to webide ...
+Need to rename folders, services etc!
+
+Rename .jzeditpw to .webidepw
+Rename .jzeditor_storage to .webide
+
+Only use one dot folder!!!
+
+.webide/password
+.webide/storage
+
+
+Hmm, did I forget about /promo/ folder !?
+
+
+---
+
+
+Feedback, new menu item smilie face.
+happy, sad
+please motivate "feedback.txt"
+wdiget "send feedback" and also in context menu
+
+Thanks for the feedback, 
+Would you like to give more details?
+[Write feedback, Not now]
+
+Please write what makes you happy, and if possible how the editor could make you even more happy:
+
+
+Help improve the editor by writing why it makes you sad, and what it should do to make you happy:
+
+
+
+
 todo: svg preview doesn't load the image when window opens on Firefox
+
+todo: playback, do events that are within the same 1-3? ms at the same time
+todo: playback, look forward to next mouse movement and interpolate
 
 shift+ scroll to increment/decrement a numeric value
 
@@ -67,6 +105,8 @@ polish: It's annoying when you search for something, and can't find it, because 
 polish: Syntax-check file after saving and highlight syntax errors, like misspelled retrn, so you don't have to run the script only to get a syntax error.
 
 polish: Successfully pushed to undefined (no changes) repo is undefined when clicking Push via SCM widget. (only when there was no changes pushed!)
+
+bug: A line break inside a xml tag breaks the coloring!
 
 ---
 

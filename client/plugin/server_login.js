@@ -310,13 +310,13 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		form.appendChild(labelUrl);
 		
 		if(RUNTIME == "nw.js") {
-			var defaultUrl =  "http://localhost:8099/jzedit";
+			var defaultUrl =  "http://localhost:8099/webide";
 		}
 		else if(window.location.protocol == "file:") { // Firefox (chrome-less)
-			var defaultUrl = "http://localhost:8099/jzedit";
+			var defaultUrl = "http://localhost:8099/webide";
 		}
 		else { // Browser (other)
-			var defaultUrl = window.location.protocol + "//" + window.location.host + "/jzedit";
+			var defaultUrl = window.location.protocol + "//" + window.location.host + "/webide";
 		}
 		
 		var urlValue;
@@ -334,7 +334,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		url.setAttribute("type", "text");
 		url.setAttribute("id", "serverLoginUrl");
 		url.setAttribute("class", "inputtext url");
-		url.setAttribute("title", "URL to JZedit server");
+		url.setAttribute("title", "URL to WebIDE server");
 		url.setAttribute("size", "30");
 		url.setAttribute("value", urlValue);
 		url.onchange = saveUserPw;
@@ -490,7 +490,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			}
 			else {
 				CLIENT.connect(server, function connectionOpen(err) {
-					if(err) alertBox("Problem connecting to JZedit server on " + JSON.stringify(server));
+					if(err) alertBox("Problem connecting to WebIDE server on " + JSON.stringify(server));
 					else {
 						console.log("Attempting logging in after connection ...");
 						identify();

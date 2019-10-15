@@ -2,8 +2,8 @@
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
 /*
-	This is a useful script for those managing jzedit running as a cloud editor,
-	it will add users both as system users and into the /etc/jzedit_users file.
+	This is a useful script for those managing webide running as a cloud editor,
+	it will add users both as system users and into the /etc/webide_users file.
 	
 	Make this script executable:
 	sudo chmod +x adduser.js
@@ -315,7 +315,7 @@ function adduser() {
 			var hashedPassword = pwHash(password);
 		}
 		
-		fs.writeFileSync(UTIL.joinPaths([HOME, username, "/.jzeditpw"]), hashedPassword, ENCODING);
+		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/" "password"]), hashedPassword, ENCODING);
 		
 		
 		// Add skeleton files ...
@@ -326,7 +326,7 @@ function adduser() {
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_blog_example", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/.webide/storage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/.ssh/", homeDir);
 		
@@ -368,7 +368,7 @@ function adduser() {
 	}
 	
 		// Replace %USERNAME% %HOMEDIR% and %DOMAIN%
-		updateFile(homeDir + ".jzeditStorage/cmsjz_sites");
+		updateFile(homeDir + ".webide/storage/cmsjz_sites");
 		updateFile(homeDir + "ssg_blog_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
@@ -529,7 +529,7 @@ function createApparmorProfile(template, username) {
 	var apparmorProfile = fs.readFileSync(template, ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
+	apparmorProfile = apparmorProfile.replace(/%WEBIDE%/g, __dirname);
 	
 	var dest = template.replace("someuser", username);
 	var homeDot = HOME.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
@@ -666,7 +666,7 @@ function getGroupId(groupName) {
 	
 	var groups = groupData.split(/\r|\n/);
 	
-	// format: jzedit_users:x:115:
+	// format: groupname:x:115:
 	
 	for (var i=0, group, name, id; i<groups.length; i++) {
 		group = groups[i].split(":");

@@ -26,7 +26,7 @@ console.log("Days since last activity:");
 eachUser(HOME, function(user) {
 	//console.log(user);
 	filesToRead++;
-	fs.readFile(user.homeDir + ".jzeditStorage/lastLogin", "utf8", function(err, data) {
+	fs.readFile(user.homeDir + ".webideStorage/lastLogin", "utf8", function(err, data) {
 		
 if(err) {
 			if(err.code != "ENOENT") throw err;

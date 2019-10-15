@@ -100,7 +100,7 @@ console.warn("A2HS: Already got appinstalled event!");
 		var yes = "Yes, make it look like a native app!";
 		var no = "No, I prefer the browser";
 		
-		confirmBox("Do you want add JZedit to your home screen/desktop ?\nIt will give the editor a more native feel.", [yes, no], function(answer) {
+		confirmBox("Do you want add WebIDE to your home screen/desktop ?\nIt will give the editor a more native feel.", [yes, no], function(answer) {
 			if(answer == yes) {
 				// Show the prompt
 				deferredPrompt.prompt();

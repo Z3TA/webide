@@ -1,7 +1,7 @@
 /*
 	
 	Inlcuding this file on your web page makes it possible to tell
-	jzedit to edit the page you are looking at ...
+	webide to edit the page you are looking at ...
 	
 	The "secret" combo depends on the browser! It's left Mouse click while holding
 	Chrome: Ctrl + Alt
@@ -14,7 +14,7 @@
 	Optionally also paste the following code to the header:
 	
 	<menu type="context" id="edit">
-	<menuitem label="Edit on webide.se" onclick="editPage()" icon="https://webide.se/gfx/jz64.png"></menuitem>
+	<menuitem label="Edit on webide.se" onclick="editPage()" icon="https://webide.se/favicon.ico"></menuitem>
 	</menu>
 	
 	And contextmenu="edit" to the wrap elelement (also in header.htm)

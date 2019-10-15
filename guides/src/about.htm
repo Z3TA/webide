@@ -20,24 +20,21 @@ and make it run <i>live</i> in the cloud with one click,
 
 </abstract>
 
-<h1>JZedit editor/IDE</h1>
+<h1>WebIDE</h1>
 
-<!--<p><a href="https://webide.se/">webide.se</a> is a free <a href="#jzedit">JZedit</a> server.</p>-->
+<p>WebIDE is develped by <a href="https://webtigerteam.com/editor/">Web Tiger Team</a>.
+It is a cloud/web editor/IDE built in Node.js/JavaScript.</p>
 
-<p><a href="https://webide.se/">webide.se</a> runs JZedit - a editor/IDE for the cloud, 
-and offers shell/workspace for developing and editing web sites, apps and Node.JS services, 
-with database support for persistence, on always-online containers.</p>
-
-<p>Our goal is to be the best editor for developing progressive web apps and web sites using vanilla JavaScript.<br>
+<p>The goal with WebIDE is to be the best editor for developing progressive web apps (PWA) and web sites using vanilla JavaScript.<br>
 This will be achived by having:</p>
 
 <ul>
-	<li>Better static analysis and type inference with <i>vanilla</i> JavaScript, then you can get using TypeScript.</li>
-	<li>Performance comparable to native editors like Sublime Text, Notepad++ and Vim</li>
+	<li>Static analysis and type inference for <i>vanilla</i> JavaScript</li>
+	<li>Performance comparable to native text editors</li>
 </ul>
 
 
-<h2>JZedit selling points</h2>
+<h2>WebIDE selling points</h2>
 
 <ul>
 	<li>Runs in the browser</li>
@@ -48,7 +45,7 @@ This will be achived by having:</p>
 
 <h3>Cloud editor</h3>
 <ul>
-	<li>Separate backend/frontend lets you run the server on any PC/VPS/server (npm install -g jzedit) 
+	<li>Separate backend/frontend lets you run the server on any PC/VPS/server (npm install -g webide.se) 
 	and connect to it from anywhere</li>
 	<li>The server can be set up for multiple users.
 	Where each user share the same environment, but get separated isolated work spaces.</li>
@@ -57,7 +54,7 @@ This will be achived by having:</p>
 <h3>Runs everywhere</h3>
 <ul>
 	<li>You can run the (front-end) client on any device that has a HTML compatible web browser.
-	JZedit supports Chromebook's, Smart-phones, tablets, and even smart-TV's and watches (if they have a built in web browser)</li>
+	WebIDE supports Chromebook's, Smart-phones, tablets, and even smart-TV's and watches (if they have a built in web browser)</li>
 	<li>It's possible to run the editor embedded on a web site.</li>
 	<li>You can of course also run it <a href="#local">locally on your own developer machine</a>.</li>
 </ul>
@@ -103,7 +100,7 @@ This will be achived by having:</p>
 	<li>Go to any file. <kbd>Ctrl+O</kbd></li>
 	<li>Able to open and edit huge files several GB big</li>
 	<li>Open files from any remote machine, 
-	for example when SSH:ed type jzeditr /path/to/file and it will open in the editor</li>
+	for example when SSH:ed type webider /path/to/file and it will open in the editor</li>
 	<li>Automatically wrap text <kbd>Ctrl+W</kbd></li>
 	<li>Spell checking with multiple languages and camelCase support.</li>
 	<li>Automatic CSS refresh in preview mode.</li>
@@ -154,13 +151,13 @@ This will be achived by having:</p>
 
 <h3>Build your own cloud IDE</h3>
 
-<p>Use JZedit as base for your own web based IDE, for example for integration with your cloud offerings.
+<p>Use WebIDE as base for your own web based IDE, for example for integration with your cloud offerings.
 Or CPU/board development. Or a new programming language.</p>
 
 
 <h3>Use it for local development</h3>
 
-<p><b>npm install -g jzedit</b> and you will have a simple, extendable editor for JavaScript and web development.</p>
+<p><b>npm install -g webide.se</b> and you will have a simple, extendable editor for JavaScript and web development.</p>
 
 
 <h3>Web site editor</h3>
@@ -181,26 +178,26 @@ merge if necessary, and ask the user to write a commit message before publishing
 
 <h2>Architecture</h2>
 
-<p>JZedit is made in JavaScript, HTML and CSS. And it use hardware accelerated HTML 2d Canvas for text rendering.</p>
+<p>WebIDE is made in JavaScript, HTML and CSS. And it use hardware accelerated HTML 2d Canvas for text rendering.</p>
 
-<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
+<p>WebIDE's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
 
 <p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
 And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
 
-<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
+<p>WebIDE has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
 Each plugin is a independent unit and do not depend on, or interfere with other plugins.<br>
 Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 
 
-<h2>What makes JZedit better then existing editors/IDE's, or what does it do differently !?</h2>
+<h2>What makes WebIDE better then existing editors/IDE's, or what does it do differently !?</h2>
 
-<p>JZedit is written in "vanilla" JavaScript, eg. no compilation or build step,
+<p>WebIDE is written in "vanilla" JavaScript, eg. no compilation or build step,
 it's easy to add new functionality, and all you have to do to see the new changes is to refresh/reload. 
 Or if you are working on a plugin, press <kbd>F7</kbd> key to hot reload the plugin without refreshing.</p>
 
 <p>The editor <i>does Not</i> use the document object model (DOM) or "content-editable" for text rendering!
-JZedit uses 2d Canvas, which is faster then the DOM.</p>
+WebIDE uses 2d Canvas, which is faster then the DOM.</p>
 
 <p>When editing a file, it's parsed client-side an every key stroke,
 which enables automatic indentation, and "IDE" features like function-list and auto-complete.</p>
@@ -230,14 +227,14 @@ and visual aids to show which parts of the code does what, what parts are hot, t
 
 
 
-<a name="local"><h3>Run JZedit locally</h3>
+<a name="local"><h3>Run WebIDE locally</h3>
 
 <p>Skeptical about running the editor in the cloud?
 You can install the editor on your own workstation or server!</p>
 
 <p>First install nodejs, (sudo apt install nodejs) or download from <a href="https://nodejs.org/">Node.js website</a>.<br>
-With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install -g jzedit</b>.<br>
-To run the editor type <b>npm start</b>, or if you installed globally (-g flag) jzedit [path/to/file].<br>
+With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install -g webide.se</b>.<br>
+To run the editor type <b>npm start</b>, or if you installed globally (-g flag) webide [path/to/file].<br>
 Or if you only want to run the server and open the editor in a browser, type <b>npm run server</b>.</p>
 
 

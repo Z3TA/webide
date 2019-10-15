@@ -40,16 +40,16 @@ var CLIENT = {}; // Client object is global
 
 		console.log("CLIENT: protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
-		var defaultURL = loc.protocol + "://" + loc.host + "/jzedit"; // loc.host includes port!
+		var defaultURL = loc.protocol + "://" + loc.host + "/webide"; // loc.host includes port!
 		
 		if(protocol.toLowerCase() == "file") {
-			defaultURL = "http://localhost:8099/jzedit";
+			defaultURL = "http://localhost:8099/webide";
 			
 			if(RUNTIME == "browser") console.warn("CLIENT: It's recommended to access the editor via a HTTP server!");
 		}
 		else if(protocol.toLowerCase() == "chrome-extension") {
 			// We are running as *the* chromeos app !?
-			defaultURL = "https://webide.se/jzedit";
+			defaultURL = "https://webide.se/webide";
 		}
 		
 		console.log("CLIENT: defaultURL=" + defaultURL);
@@ -58,7 +58,7 @@ var CLIENT = {}; // Client object is global
 		
 		var url = server.url || defaultURL; // 'http://' + host + ':' + port + pathName + apiUrl
 		
-		console.log("CLIENT: Connecting to jzedit server: url=" + url);
+		console.log("CLIENT: Connecting to webide server: url=" + url);
 		//connection = new SockJS(apiUrl);
 		
 		var sockJsReservedQuirk = '';
@@ -350,7 +350,7 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 		else {
 			console.log("CLIENT: connection.readyState=" + connection.readyState);
 			if(callback) {
-				var err = new Error("Not connected to jzedit server");
+				var err = new Error("Not connected to webide server");
 				err.code = "CONNECTION_CLOSED";
 				callback(err);
 			}

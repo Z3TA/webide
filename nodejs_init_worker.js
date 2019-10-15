@@ -2,7 +2,7 @@
 	
 	A node script that manage other node scripts ...
 	
-	Each jzedit/webide user has it's own nodejs deamon manager worker (this script)
+	Each webide user has it's own nodejs deamon manager worker (this script)
 	chroot into the user's home dir and set uid and gid to the user's id.
 	
 	open log file in user's home dir /log/deamon_manager.log

@@ -4,7 +4,7 @@
 /*
 	To update the IDE:
 	1. Download new updates
-	2. cd to this folder, eg: cd /srv/jzedit
+	2. cd to this folder, eg: cd /srv/webide
 	3. nodejs update.js (Run this script)
 	
 	*/
@@ -30,7 +30,7 @@ var UTIL = require("./client/UTIL.js");
 
 if(HEADLESS) startUpdate();
 else {
-	console.log("This script is for when running as a cloud IDE. It will update the jzedit configuration!");
+	console.log("This script is for when running as a cloud IDE. It will update the WebIDE configuration!");
 	console.log("Press Enter to continue ... Or Ctrl+C to abort");
 	process.stdin.once('data', function () {
 		startUpdate();
@@ -40,13 +40,13 @@ else {
 function startUpdate() {
 	
 // Update services
-copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
-//copyFileSync("./etc/systemd/jzedit_signup.service", "/etc/systemd/system/jzedit_signup.service");
-//copyFileSync("./etc/systemd/jzedit_nodejs_init.service", "/etc/systemd/system/jzedit_nodejs_init.service");
+	copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
+	//copyFileSync("./etc/systemd/webide_signup.service", "/etc/systemd/system/webide_signup.service");
+	//copyFileSync("./etc/systemd/webide_nodejs_init.service", "/etc/systemd/system/webide_nodejs_init.service");
 
 run("systemctl daemon-reload");
-//run("systemctl restart jzedit");
-//run("systemctl restart jzedit_signup");
+	//run("systemctl restart webide");
+	//run("systemctl restart webide_signup");
 
 
 eachUser(HOME, function(user) {
@@ -88,9 +88,9 @@ eachUser(HOME, function(user) {
 
 run("systemctl reload apparmor");
 	run("systemctl reload nginx");
-	run("systemctl restart jzedit");
-	run("systemctl restart jzedit_signup");
-	run("systemctl restart jzedit_nodejs_init");
+		run("systemctl restart webide");
+		run("systemctl restart webide_signup");
+		run("systemctl restart webide_nodejs_init");
 	
 });
 }
@@ -104,7 +104,7 @@ function createApparmorProfile(template, username) {
 	var apparmorProfile = fs.readFileSync(template, ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
+	apparmorProfile = apparmorProfile.replace(/%WEBIDE%/g, __dirname);
 	
 	var dest = template.replace("someuser", username);
 	var homeDot = HOME.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots

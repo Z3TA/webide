@@ -165,7 +165,7 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 	console.log("serviceWorker updateCache: latestVersionMaybe=" + latestVersionMaybe);
 	
 	var latestVersion = latestVersionMaybe;
-	var cacheVersion = "jzedit_v" + latestVersionMaybe;
+	var cacheVersion = "webide_v" + latestVersionMaybe;
 	
 	if(forceRefresh) return refreshCache(cacheVersion);
 	
@@ -178,7 +178,7 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 		if(keys.length > 1) {
 			console.warn("serviceWorker has more then one cached version!");
 			// Delete all caches besides the highest version
-			var highestCacheVersion = "jzedit_v" + highestVersion;
+			var highestCacheVersion = "webide_v" + highestVersion;
 			return caches.keys().then(function(keys) {
 				return Promise.all(keys.map(function(key) {
 					if(key != highestCacheVersion) {
@@ -402,7 +402,7 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 
 
 function versionNrFromKey(key) {
-	var prefix = "jzedit_v";
+	var prefix = "webide_v";
 	var nr = key.replace(prefix, "");
 	if(key == nr) {
 		console.warn("Not a cache key=" + key);

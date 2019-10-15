@@ -1763,12 +1763,11 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						"/proc/", 
 						"/run/", 
 						//"/sock/", 
-						"/.jzeditStorage/", 
+						"/.webide/", 
 						"/.config/", 
 						"/.npm/", 
 						"/.ssh/",
 						"/.bash_history",
-						"/.jzeditpw",
 						"/.node_repl_history",
 						"/.npm-packages/"
 					]; // Ignore mounted files and folders

@@ -32,7 +32,7 @@ var fs = require("fs");
 var exec = require("child_process").execSync;
 //exec("apt update");
 
-// Make sure we are inside the jzedit root folder ...
+// Make sure we are inside the webide root folder ...
 // The following with crash the script if the files doesn't exist
 exec("chmod +x removeuser.js");
 exec("chmod +x adduser.js");
@@ -76,29 +76,29 @@ exec("systemctl enable status-email-user@.service");
 
 
 	// Install the cloud-IDE service that runs server/server.js
-console.log("Installing jzedit.service");
-	var jzedit_service = fs.readFileSync("etc/systemd/jzedit.service", ENCODING);
-jzedit_service = jzedit_service.replace("webide.se", HOSTNAME);
-jzedit_service = jzedit_service.replace("zeta@zetafiles.org", ADMIN_EMAIL);
-fs.writeFileSync("/etc/systemd/system/jzedit.service", jzedit_service);
-	exec("systemctl enable jzedit");
+console.log("Installing webide.service");
+var webide_service = fs.readFileSync("etc/systemd/webide.service", ENCODING);
+webide_service = webide_service.replace("webide.se", HOSTNAME);
+webide_service = webide_service.replace("zeta@zetafiles.org", ADMIN_EMAIL);
+fs.writeFileSync("/etc/systemd/system/webide.service", webide_service);
+exec("systemctl enable webide");
 	
 
 
 // Signup service to let users signup
 	// If you enable automatic signup you probably also want to edit client/signup/signup.htm
-console.log("Installing jzedit_signup.service");
+console.log("Installing webide_signup.service");
 console.log("Automatic signup available at: http://" + HOSTNAME + "/signup/signup.htm");
-var signup_service = fs.readFileSync("etc/systemd/jzedit_signup.service", ENCODING);
+var signup_service = fs.readFileSync("etc/systemd/webide_signup.service", ENCODING);
 signup_service = signup_service.replace(/webide\.se/g, HOSTNAME);
-fs.writeFileSync("/etc/systemd/system/jzedit_signup.service", signup_service);
-exec("systemctl enable jzedit_signup");
+fs.writeFileSync("/etc/systemd/system/webide_signup.service", signup_service);
+exec("systemctl enable webide_signup");
 	
 
 // Install Service that let users run nodejs micro-services
-console.log("Installing jzedit_nodejs_init.service");
-exec("cp etc/systemd/jzedit_nodejs_init.service /etc/systemd/system/jzedit_nodejs_init.service");
-exec("systemctl enable jzedit_nodejs_init");
+console.log("Installing webide_nodejs_init.service");
+exec("cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service");
+exec("systemctl enable webide_nodejs_init");
 
 
 	// Install Nginx (needed to let users have their own home page under user.yourdomain.com)
@@ -106,9 +106,9 @@ console.log("Installing Nginx");
 	exec("apt install nginx -y");
 	
 console.log("Installing " + HOSTNAME + ".nginx config");
-var jzedit_nginx = fs.readFileSync("etc/nginx/webide.se.nginx", ENCODING);
-jzedit_nginx = jzedit_nginx.replace(/webide\.se/g, HOSTNAME);
-fs.writeFileSync("/etc/nginx/sites-available/" + HOSTNAME + ".nginx", jzedit_nginx);
+var webide_nginx = fs.readFileSync("etc/nginx/webide.se.nginx", ENCODING);
+webide_nginx = webide_nginx.replace(/webide\.se/g, HOSTNAME);
+fs.writeFileSync("/etc/nginx/sites-available/" + HOSTNAME + ".nginx", webide_nginx);
 execTry("ln -s /etc/nginx/sites-available/" + HOSTNAME + ".nginx  /etc/nginx/sites-enabled/" + HOSTNAME + "")
 
 console.log("Installing signup." + HOSTNAME + ".nginx config");

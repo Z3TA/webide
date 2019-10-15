@@ -916,7 +916,7 @@ console.warn("Unable to get caret position!");
 		}
 		else if(fileExt == "js") {
 			/*
-				It's not a good idea to reload just the JS unless the file's are designed to be able to do that (like plugins in jzedit)
+				It's not a good idea to reload just the JS unless the file's are designed to be able to do that (like plugins in webide)
 				As variables might still hold state. Old html elements would still linger, etc.
 				
 				It's better to store state in web storage. For example localStorage. And have the "app" go to where you last left when you refresh.

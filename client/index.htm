@@ -11,6 +11,7 @@
 	<!--
 	
 	Is it possible that the Content-Security-Policy interfers with the speech to text api!?
+	It did not work when I turned off CSP! 
 	
 	<meta http-equiv="Content-Security-Policy" content="default-src blob: 'self' 'unsafe-inline' ; img-src data: 'self'; connect-src 'self' https://www.webtigerteam.com ; object-src 'none' ">
 	
@@ -46,24 +47,28 @@
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-	<link rel="apple-touch-icon" href="gfx/jz192.png">
-	<link rel="apple-touch-startup-image" href="gfx/jz512.png">
+	<link rel="apple-touch-icon" href="gfx/apple-touch-icon.png">
+	<link rel="apple-touch-startup-image" href="gfx/android-chrome-512x512.png">
+	
+	<link rel="mask-icon" href="/gfx/safari-pinned-tab.svg" color="#4c4944">
+	
 	
 	<!-- Chrome might use this icon -->
-	<link rel="icon" href="gfx/jz64.png" sizes="64x64" />
-	<link rel="icon" href="gfx/jz128.png" sizes="128x128" />
-	<link rel="icon" href="gfx/jz192.png" sizes="192x192" />
-	<link rel="icon" href="gfx/jz512.png" sizes="512x512" />
+	<link rel="icon" type="image/png" sizes="32x32" href="/gfx/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/gfx/favicon-16x16.png">
+	
+	
+	<meta name="msapplication-TileColor" content="#f3e036">
+	<meta name="theme-color" content="#ffffff">
 	
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
 	<!-- The maximum-scale=1, minimum-scale=1 is needed so that mobile browsers don't butcher the text by zooming out -->
 	
 	<link rel="manifest" href="/manifest.webmanifest" />
-	<meta name="theme-color" content="#4c4944" />
 	
 	<!-- Fallback application metadata for legacy browsers -->
-	<meta name="application-name" content="JZedit">
+	<meta name="application-name" content="WebIDE">
 	
 	
 	<link rel="stylesheet" type="text/css" href="gfx/style.css" />
@@ -259,7 +264,7 @@
 	
 	<script async="true" src="plugin/text-mode-indentation.js"></script>
 	
-	<script async="true" src="plugin/jzedit_config.js"></script>
+	<script async="true" src="plugin/webide_config.js"></script>
 	
 	<script async="true" src="plugin/hide_window_menu.js"></script>
 	
@@ -330,7 +335,7 @@
 <body id="body">
 <noscript>
 <div>
-	<p class="noscript">JZedit web IDE is built with JavaScript<br />
+	<p class="noscript">WebIDE is built with JavaScript<br />
 	(you need to enable JavaScript!)</p>
 	
 	<p class="noscript"><a href="about/about.htm">about</a> - <a href="signup/signup.htm">signup</a></p>

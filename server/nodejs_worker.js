@@ -186,27 +186,27 @@ function parseString(obj) {
 				Remove unnessesary functions from the stack trace
 				
 				 Error
-				,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:112:15)
-				,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:99:16)
+			,    at getStack (/home/zeta/dev/webide/server/nodejs_worker.js:112:15)
+			,    at readScript (/home/zeta/dev/webide/server/nodejs_worker.js:99:16)
 				,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
 				
 				
 				Error
-				,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:143:15)
-				,    at Object.scriptContext.console.log (/home/zeta/dev/jzedit/server/nodejs_worker.js:71:19)
+			,    at getStack (/home/zeta/dev/webide/server/nodejs_worker.js:143:15)
+			,    at Object.scriptContext.console.log (/home/zeta/dev/webide/server/nodejs_worker.js:71:19)
 				,    at /nodejs/funfuncat.js:8:9
 				,    at Object.exports.runInContext (vm.js:44:17)
-				,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:121:18)
+			,    at readScript (/home/zeta/dev/webide/server/nodejs_worker.js:121:18)
 				,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
 				
 			*/
 			
 			for (var i=0; i<stack.length; i++) {
-				if(stack[i].indexOf("at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js") != -1) {
+			if(stack[i].indexOf("at readScript (/home/zeta/dev/webide/server/nodejs_worker.js") != -1) {
 					stack.splice(i, 2);
 					return filterStack(stack);
 				}
-				else if(stack[i].indexOf("/home/zeta/dev/jzedit/server/nodejs_worker.js") != -1) {
+			else if(stack[i].indexOf("/home/zeta/dev/webide/server/nodejs_worker.js") != -1) {
 					stack.splice(i, 1);
 					return filterStack(stack);
 				}

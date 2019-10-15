@@ -25,7 +25,7 @@ letsencrypt.register = function register(domain, adminEmail, wildcard, callback)
 		certbot certonly --nginx --noninteractive --agree-tos --email zeta@zetafiles.org -d johan.webide.se
 		
 		with wildcard certificate: 
-		certbot certonly --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/jzedit/letsencrypt/certbot-manual-cleanup-hook.sh" 
+		certbot certonly --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
 		
 		certonly = Don't mess with nginx config files
 		

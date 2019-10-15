@@ -9,8 +9,8 @@
 	
 	sudo chmod +x hashPw.js
 	
-	Remove ending line break in .jzeditpw file: 
-	truncate -s -1 /home/user/.jzeditpw
+	Remove ending line break in .webide/password file: 
+	truncate -s -1 /home/user/.webide/password
 	
 */
 
@@ -80,5 +80,5 @@ console.time("Time taken");
 console.timeEnd("Time taken");
 	
 	console.log("Hash: " + hash);
-	console.log("echo -n " + hash + " > $HOME/.jzeditpw");
+	console.log("echo -n " + hash + " > $HOME/.webide/password");
 }

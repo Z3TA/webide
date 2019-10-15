@@ -2,8 +2,8 @@
 
 
 Test in bash:
-cd path/to/jzedit/bin
-counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done | ./jzedit hi.txt
+	cd path/to/webide/bin
+	counter=0;while true; do echo hi $counter; counter=$((counter+1)); sleep 2; done | ./webide hi.txt
 
 */
 

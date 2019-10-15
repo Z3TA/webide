@@ -254,7 +254,7 @@ clientConnected = true;
 }
 
 function broadcast() {
-	// Listen to and send broadcast messages asking for jzedit server
+	// Listen to and send broadcast messages asking for webide server
 	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 	
 	var broadcastPort = 6024;
@@ -286,12 +286,12 @@ function broadcast() {
 		console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
 		
 		
-		// jzedit server url: http://127.0.0.1/
-		// jzedit server url: http://127.0.0.1:8099/
+		// webide server url: http://127.0.0.1/
+		// webide server url: http://127.0.0.1:8099/
 		
 		message = message.toString("utf8");
 		
-		var matchUrl = message.match(/jzedit server url: (https?):\/\/(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):?(\d*)?/);
+		var matchUrl = message.match(/webide server url: (https?):\/\/(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):?(\d*)?/);
 		
 		if(matchUrl) {
 			var proto = matchUrl[1];
@@ -313,7 +313,7 @@ function broadcast() {
 	broadcastClient.bind(broadcastPort);
 	
 	function ask(broadcastAddress) {
-		var lookForServerMessage = "Where can I find a jzedit server?"
+		var lookForServerMessage = "Where can I find a webide server?"
 		var message = new Buffer(lookForServerMessage);
 		broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
 			console.log("Sent '" + message + "'");
@@ -363,7 +363,7 @@ function checkServer(ip, callback) {
 		return;
 	}
 	
-	log("Checking for a jzedit server on ip=" + ip + " ...", DEBUG);
+	log("Checking for a webide server on ip=" + ip + " ...", DEBUG);
 	
 	var http = require("http");
 	
@@ -397,7 +397,7 @@ function checkServer(ip, callback) {
 		var options = {
 			host: ip,
 			port: port,
-			path: '/jzedit',
+			path: '/webide',
 			method: 'GET'
 		};
 		

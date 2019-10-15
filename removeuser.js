@@ -32,20 +32,20 @@ var child_process = require('child_process');
 
 if(FORCE) startDelete();
 else {
-// Make sure it's a jzedit user!
+	// Make sure it's a webide user!
 	try {
-var hashedPw = fs.readFileSync(UTIL.joinPaths([HOME, username, ".jzeditpw"]), ENCODING);
+		var hashedPw = fs.readFileSync(UTIL.joinPaths([HOME, username, ".webide/" "password"]), ENCODING);
 // Should throw if the file doesn't exist!
 }
 catch(err) {
 		console.log(err.message);
-		console.log(username + " is probably not a jzedit user. Use -force flag to delete anaway.");
+		console.log(username + " is probably not a webide user. Use -force flag to delete anaway.");
 		process.exit();
 	}
 	
 	if(UNATTENDED) startDelete();
 	else {
-	console.log("It's recommended to disable the jzedit service and reboot the server to release any mounted folders.");
+		console.log("It's recommended to disable the webide service and reboot the server to release any mounted folders.");
 	console.log("Deleting a user while a folder is mounted will result in the mounted folder also getting deleted!");
 	console.log("Press Enter to continue ... Or Ctrl+C to abort");
 	process.stdin.once('data', function () {
@@ -111,7 +111,7 @@ unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-c
 	It's probably *not* a good idea to delete a user while he/she is using the system.
 	But here's how to do it:
 	1. Delete the system account so the user can't re-login: userdel username
-	2. Restart the jzedit.service to force a logout: systemctl restart jzedit
+		2. Restart the webide.service to force a logout: systemctl restart webide
 	3. Do the unmounting and deletion of data : ./removeuser.js username
 	
 	Unmounting nodejs_username will fail if the user is still logged in!
@@ -257,7 +257,7 @@ NOZFS = true;
 					}
 					else if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
 						// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
-						// Try to restart jzedit server to see if it helps
+						// Try to restart webide server to see if it helps
 					// Last resort is to reboot to get rid of all the mounts
 					
 					// This script might be called from the editor service itself, so don't kill it!
@@ -287,16 +287,16 @@ else userdel();
 }
 
 function restartEditorService() {
-	console.log("Restarting jzedit service ...");
+	console.log("Restarting webide service ...");
 	try {
-		var restartJzeditStdout = child_process.execSync("service jzedit restart");
-		restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
+		var restartStdout = child_process.execSync("service webide restart");
+		restartStdout = restartStdout.toString(ENCODING);
 	}
-	catch(restartJzeditErr) {
-		console.log("restartJzeditErr: " + restartJzeditErr.message);
-		throw new Error("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
+	catch(restartErr) {
+		console.log("restartErr: " + restartErr.message);
+		throw new Error("Unable to restart webide service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
 	}
-	if(restartJzeditStdout) console.log(restartJzeditStdout);
+	if(restartStdout) console.log(restartStdout);
 }
 
 
@@ -391,7 +391,7 @@ if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 	
 	return;
 	// Server was unable to boot after adding stuff to fstab!!
-	// We made jzedit_user_mounts.service instead, that mounts the mount-points on system upstart
+	// We made webide_user_mounts.service instead, that mounts the mount-points on system upstart
 	// But then we got issues after re-installing server
 	// So we ended up with server.js being responsible for mounting the mount-points.
 }

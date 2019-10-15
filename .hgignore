@@ -20,3 +20,5 @@ package-lock.json
 bundle.js
 etc/userdir_skeleton/nodejs_examples/pwa_push_notifications/keys.dat
 
+client/test_bookmarklet.htm
+

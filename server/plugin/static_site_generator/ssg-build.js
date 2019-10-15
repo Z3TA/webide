@@ -1884,15 +1884,15 @@ function getStack(scriptName, lineNr) {
 	
 	/*
 		Error
-		,    at getStack (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1810:16)
-		,    at Object.document.console.log (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:485:18)
-		,    at evalmachine.<anonymous>:3:9,    at checkChar (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1290:13)
-		,    at Document.evaluate (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1238:3)
-		,    at evalFile (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:398:13)
-		,    at evalDir (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:376:5)
-		,    at evaluate (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:368:2)
-		,    at /home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:159:3
-		,    at checkComplete (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:871:5)
+		,    at getStack (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:1810:16)
+		,    at Object.document.console.log (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:485:18)
+		,    at evalmachine.<anonymous>:3:9,    at checkChar (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:1290:13)
+		,    at Document.evaluate (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:1238:3)
+		,    at evalFile (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:398:13)
+		,    at evalDir (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:376:5)
+		,    at evaluate (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:368:2)
+		,    at /home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:159:3
+		,    at checkComplete (/home/zeta/projects/webide/server/plugin/static_site_generator/ssg-build.js:871:5)
 		
 	*/
 	

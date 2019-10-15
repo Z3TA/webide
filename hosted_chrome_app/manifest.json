@@ -1,15 +1,13 @@
 {
-	"name": "PWA web editor/IDE",
+	"name": "WebIDE",
 	"short_name": "webide.se",
 	"description": "New: Editor/IDE for creating progressive web apps, and web sites. (JavaScript, Node JS, HTML CSS)",
-	"version": "300",
+	"version": "400",
 	"manifest_version": 2,
 	
 	"icons": {
-		"64": "jz64.png",
-		"128": "jz128.png",
-		"192": "jz192.png",
-		"512": "jz512.png"
+		"192": "android-chrome-192x192.png",
+		"512": "android-chrome-512x512.png"
 	},
 	
 	"permissions": [

@@ -155,7 +155,7 @@ function httpRequest(request, response) {
 	}
 	
 	var homeDir = UTIL.trailingSlash(UTIL.joinPaths([HOME_DIR, username]));
-	var pwFilePath = UTIL.joinPaths([homeDir, ".jzeditpw"]);
+	var pwFilePath = UTIL.joinPaths([homeDir, ".webide", "password"]);
 	
 	fs.readFile(pwFilePath, "utf8", function(err, pwFileContent) {
 		if(err) {

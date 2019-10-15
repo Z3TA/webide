@@ -99,7 +99,7 @@ sendit();
 		
 		function sendit() {
 			var message = file.text;
-			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (err, respStr) {
+			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'WebIDE' }, function (err, respStr) {
 				if(err) {
 					alertBox("Problem sending bug report:  " + err.message);
 					throw err;
@@ -321,7 +321,7 @@ sendit();
 		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
 		
 		var message = 'To: "Editor bug report" <zeta@zetafiles.org>\n' +
-		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
+		'Subject: WebIDE ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +

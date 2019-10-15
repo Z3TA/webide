@@ -1,6 +1,6 @@
 /*
 	
-	Finds all jzedit users
+	Finds all webide users
 	
 */
 
@@ -36,7 +36,7 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 			
 			fs.readdir(HOME, function (err, homeDirs) {
 				if(err) throw err;
-				// Check each home-dir for .jzeditpw file
+				// Check each home-dir for .webide folder
 				for (var i=0; i<homeDirs.length; i++) {
 					usersToCheck++;
 					checkPw(homeDirs[i]);
@@ -66,11 +66,11 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 		});
 		
 		function checkPw(username) {
-		fs.readFile(UTIL.joinPaths([HOME, username, ".jzeditpw"]), ENCODING, function readpw(err, hashedPw) {
+		fs.readFile(UTIL.joinPaths([HOME, username, ".webide/" "password"]), ENCODING, function readpw(err, hashedPw) {
 				if(err) {
-					// No .jzeditpw file means it's not a jzedit user
+				// No .webide folder means it's not a webide user
 				if(err.code != "ENOENT" && err.code != "ENOTDIR") throw err; // Only throw if we get something else then "file not found"
-					console.log("Not a jzedit user: " + username);
+				console.log("Not a webide user: " + username);
 				}
 				else {
 					
@@ -79,7 +79,7 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 					userFoundCb(users[username]);
 				}
 				else {
-					console.warn(".jzeditpw found in " + HOME + username + " but user does not exist in " + etcPasswPath);
+					console.warn(".webide/password found in " + HOME + username + " but user does not exist in " + etcPasswPath);
 				}
 				
 				}

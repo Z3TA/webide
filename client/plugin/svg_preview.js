@@ -163,15 +163,14 @@ EDITOR.on("fileChange", previewSvgFileChanged);
 			
 			info.previewWin = previewWin;
 			
-			focusEditor(previewWin);
-			
 				widget.show();
 				if(typeof zoomSlider != undefined) zoom(info, zoomSlider.value);
 				
+			setTimeout(function() {
 				refresh(filesInPreviw[file.path]);
 				
 				focusEditor(previewWin);
-				
+			}, 100);
 			
 			
 			previewWin.window.onbeforeunload = function onbeforeunload() {

@@ -35,7 +35,7 @@
 		//"Adds option to reload the file from disk in the context menu"
 	];
 	
-	var bookMarklet = document.getElementById("jzedit_bookmarklet");
+	var bookMarklet = document.getElementById("webide_bookmarklet");
 	console.log("bookMarklet ? " + !!bookMarklet);
 	if(bookMarklet) windowLoaded();
 	else window.addEventListener("load", windowLoaded);
@@ -118,7 +118,7 @@
 			var iframe = document.createElement("iframe");
 			iframe.setAttribute("width", editorWidth);
 			iframe.setAttribute("height", editorHeight);
-			iframe.setAttribute("class", "editor JZedit");
+			iframe.setAttribute("class", "editor webide");
 			iframe.setAttribute("allowfullscreen", "true");
 			iframe.setAttribute("frameborder", "0");
 			

@@ -4,7 +4,7 @@
 	
 	Lets people automatically signup to get an editor account by navigating to /signup/ in a web browser.
 	
-	See etc/jzedit_signup_service.nginx and etc/jzedit_signup.service (systemd)
+	See etc/webide_signup_service.nginx and etc/webide_signup.service (systemd)
 	
 	Provides an API via Websockets (SockJS) with the following Methods:
 	usernameAvailable: username
@@ -159,7 +159,7 @@ answer("createError:" + username + ":" + HOSTNAME + ":" + err);
 						else {
 							response.writeHead(200, 'OK', responseHeaders);
 							response.end("User " + username + " successfully created!");
-							sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using HTTP POST");
+							sendMail("webide_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using HTTP POST");
 						}
 					});
 				});
@@ -229,7 +229,7 @@ function sockJsConnection(connection) {
 				if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
 				else {
 					answer("created:" + username + ":" + HOSTNAME);
-					sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using sockJS connection");
+					sendMail("webide_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using sockJS connection");
 				}
 			});
 		});
@@ -363,7 +363,7 @@ function createAccount(userData, callback) {
 
 function sendAlert(text) {
 	
-	sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, "JZedit cloud editor signup problems", text);
+	sendMail("webide_signup_service@" + HOSTNAME, ADMIN_EMAIL, "WebIDE signup problems", text);
 	
 }
 

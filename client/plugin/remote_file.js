@@ -3,9 +3,9 @@
 	/*
 		
 		Some functionality is dublicated with stdin_channel.js plugin!
-		The main different is that remote_file.js work with bin/jzeditr and stdin_channel.js work with bin/jzedit
+		The main different is that remote_file.js work with bin/webider and stdin_channel.js work with bin/webide
 		
-		bin/jzedit is for running locally, and bin/jzeditr should run remotely.
+		bin/webide is for running locally, and bin/webider should run remotely.
 		
 	*/
 	
@@ -16,7 +16,7 @@
 	var ENTER = String.fromCharCode(13);
 	
 	EDITOR.plugin({
-		desc: "Open files and pipe data to the editor from remote computers (using bin/jzeditr)",
+		desc: "Open files and pipe data to the editor from remote computers (using bin/webider)",
 		load: loadRemoteFileHandler,
 		unload: unloadRemoteFileHandler
 	});
