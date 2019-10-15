@@ -40,9 +40,23 @@ Need to rename folders, services etc!
 
 Only use one dot folder!!!
 
+Migrating to the new name:
+
 for homedir in /home/*; do sudo mkdir "$homedir"/.webide/; done
 for homedir in /home/*; do sudo mv "$homedir"/.jzeditpw "$homedir"/.webide/password; done
 for homedir in /home/*; do sudo mv "$homedir"/.jzeditStorage "$homedir"/.webide/storage; done
+
+sudo systemctl stop jzedit jzedit_nodejs_init jzedit_signup
+systemctl disable jzedit jzedit_nodejs_init jzedit_signup
+
+sudo rm /etc/systemd/system/jzedit*
+
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+
+# Now run ./upgrade.sh zeta@ubuntu-16-staging
+
+
 
 
 Hmm, did I forget about /promo/ folder !?

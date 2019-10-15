@@ -66,7 +66,7 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 		});
 		
 		function checkPw(username) {
-		fs.readFile(UTIL.joinPaths([HOME, username, ".webide/" "password"]), ENCODING, function readpw(err, hashedPw) {
+		fs.readFile(UTIL.joinPaths([HOME, username, ".webide/", "password"]), ENCODING, function readpw(err, hashedPw) {
 				if(err) {
 				// No .webide folder means it's not a webide user
 				if(err.code != "ENOENT" && err.code != "ENOTDIR") throw err; // Only throw if we get something else then "file not found"
