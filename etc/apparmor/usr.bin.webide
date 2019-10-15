@@ -5,10 +5,8 @@
 #
 # Don't forget to reload/restart apparmor for changes to take effect
 #
-# Last Modified: Thu May 18 15:57:11 2017
-#include <tunables/global>
 
-/usr/bin/jzedit {
+/usr/bin/webide {
   #include <abstractions/apache2-common>
   #include <abstractions/base>
   #include <abstractions/python>
@@ -19,10 +17,9 @@
   /bin/dash rix,
   /dev/tty rw,
   /home/** rw,
-  /srv/jzedit/** rix,
-  /etc/jzedit_users r,
+  /srv/webide/** rix,
   /usr/bin/hg rix,
-  /usr/bin/jzedit rix,
+  /usr/bin/webide rix,
   /usr/bin/python2.7 ix,
   /usr/bin/stat ix,
 }

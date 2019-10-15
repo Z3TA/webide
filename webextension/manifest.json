@@ -1,7 +1,7 @@
 {
 	
 	"manifest_version": 2,
-	"name": "JZedit",
+	"name": "WebIDE",
 	"version": "1.0",
 	
 	"description": "Right click to edit web page, open's the web page in jzedit",

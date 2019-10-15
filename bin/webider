@@ -4,12 +4,13 @@
 /*
 	
 	For editing files remotely. For example when ssh:ed into a server:
-	sudo jzeditr /path/to/file
+	sudo webider /path/to/file
 	
 	install:
-	wget https://www.webtigerteam.com/jzedit/download/jzedit
-	chomd +x jzedit
-	sudo mv jzedit /usr/local/bin
+	wget https://www.webtigerteam.com/editor/download/webider
+	mv webider webide
+	chomd +x webide
+	sudo mv webide /usr/local/bin
 	
 */
 
@@ -25,7 +26,7 @@ var module_net = require("net");
 
 var homeDir = module_os.homedir();
 
-var jsonFileLocation = "/.jzedit/jzeditr.json";
+var jsonFileLocation = "/.webide/webider.json";
 var settingsFileLocation1 = "/root" + jsonFileLocation;
 var settingsFileLocation2 = homeDir + jsonFileLocation;
 
@@ -45,7 +46,7 @@ function findSettings(settings) {
 				if(err) {
 					debug("Unable to open settings from " + settingsFileLocation2 + " (" + err.code + ")");
 					
-					ask("Host name or IP of JZedit instance", "localhost", function(err, answer) {
+					ask("Host name or IP of WebIDE instance", "localhost", function(err, answer) {
 						if(err) throw err;
 						
 						settings.host = answer;
@@ -140,7 +141,7 @@ function gotSettings(settings, settingsFile) {
 
 	debug("Got settings: " + JSON.stringify(settings));
 	
-	if(!settings.host) return ask("Host name or IP of JZedit instance", function(err, answer) {
+	if(!settings.host) return ask("Host name or IP of WebIDE instance", function(err, answer) {
 		if(err) throw err;
 		
 		settings.host = answer;

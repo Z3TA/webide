@@ -9,13 +9,13 @@ Set shell = WScript.CreateObject("WScript.Shell")
 
 workingPath = fso.GetAbsolutePathName(".")
 desktopPath = shell.SpecialFolders("Desktop")
-linkPath = fso.BuildPath(desktopPath, "JZedit.LNK") ' Place link on desktop
+linkPath = fso.BuildPath(desktopPath, "WebIDE.LNK") ' Place link on desktop
 
 Set shortCut = shell.CreateShortcut(linkPath)
 
 shortCut.TargetPath =  fso.BuildPath(workingPath, "start.bat")
 shortCut.Arguments = "restart"
-'  shortCut.Description = "JZedit"
+'  shortCut.Description = "WebIDE"
 '  shortCut.HotKey = "ALT+CTRL+J"
 shortCut.IconLocation = fso.BuildPath(workingPath + "\client", "favicon.ico") '"C:\Program Files\MyApp\MyProgram.EXE, 2"
 '  shortCut.WindowStyle = "1"

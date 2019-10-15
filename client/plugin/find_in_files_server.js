@@ -248,6 +248,7 @@ console.warn("Could not find the search string that was used!");
 			console.log("path=" + path);
 			
 			EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
+				if(err) return alertBox("Failed to open file. Maybe it has moved?\npath=\n" + path + "\nError: " + err.message);
 				
 				console.log("file opened=" + file.path);
 				

@@ -1,1 +1,1 @@
-zip jzedit.zip jz64.png jz128.png jz192.png jz512.png manifest.json
+zip webide.zip android-chrome-192x192.png android-chrome-512x512.png manifest.json
