@@ -1,7 +1,7 @@
 #
-# cd /srv/jzedit , or to where you placed the files
-# sudo cp etc/systemd/jzedit_nodejs_init.service /etc/systemd/system/jzedit_nodejs_init.service
-# sudo systemctl enable jzedit_nodejs_init   or   sudo systemctl daemon-reload
+# cd /srv/webide , or to where you placed the files
+# sudo cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service
+# sudo systemctl enable webide_nodejs_init   or   sudo systemctl daemon-reload
 #
 
 [Unit]
@@ -11,11 +11,11 @@ After=network.target
 [Service]
 User=root
 
-# Change to the jzedit directory
-WorkingDirectory=/srv/jzedit/
+# Change to the webide directory
+WorkingDirectory=/srv/webide/
 
 # Change to node or nodejs if you are not using apparmor.
-# See etc/apparmor/usr.bin.jzedit for example apparmor profile (run makeprofile.sh to create one)
+# See etc/apparmor/usr.bin.webide for example apparmor profile (run makeprofile.sh to create one)
 
 # See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
 

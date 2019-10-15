@@ -43,7 +43,7 @@
   signal send set=term peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=term peer=/usr/bin/nodejs_%USERNAME%,
 
-  # Allow network so it can talk to jzedit_nodejs_init.service
+  # Allow network so it can talk to webide_nodejs_init.service
   # It also needs internet access to connect to ftp/sftp/ftps servers!
   # So Allow *all* network
   network,
@@ -73,7 +73,7 @@
   owner /etc/passwd r,
 
   # Some files might be created by root, such as lastLogin
-  %HOME%%USERNAME%/.jzeditStorage/** rw,
+  %HOME%%USERNAME%/.webide/storage/** rw,
 
   # Write to Google Drive
   %HOME%%USERNAME%/googleDrive/** rw,
@@ -81,12 +81,12 @@
   # Open terminal (pty)
   %HOME%%USERNAME%/dev/ptmx rw,
 
-  %JZEDIT%/node_modules/** mr,
-  %JZEDIT%/server/** r,
-  %JZEDIT%/shared/** r,
-  %JZEDIT%/client/** r,
-  %JZEDIT%/nodejs_init_worker.js r,
-  %JZEDIT%/default.js r,
+  %WEBIDE%/node_modules/** mr,
+  %WEBIDE%/server/** r,
+  %WEBIDE%/shared/** r,
+  %WEBIDE%/client/** r,
+  %WEBIDE%/nodejs_init_worker.js r,
+  %WEBIDE%/default.js r,
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,

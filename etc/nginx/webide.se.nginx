@@ -49,7 +49,7 @@ server {
   # Serve the bundle on request's to / (root)
   location = / {
     gzip_static on;
-    alias /srv/jzedit/client/;
+    alias /srv/webide/client/;
     try_files bundle.htm =404;
     expires 12h;
   }
@@ -96,7 +96,7 @@ server {
   error_page 502 @badgateway;
   
   
-  location /jzedit {
+  location /webide {
     # Upgrade to websocket
     
     proxy_pass http://127.0.0.1:8099;

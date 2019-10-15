@@ -6,7 +6,7 @@
 #  cp etc/systemd/systemd-email.sh /usr/local/bin/
 #  chmod 774 /usr/local/bin/systemd-email.sh
 #
-#  Test: systemctl start status-email-user@jzedit.service
+#  Test: systemctl start status-email-user@webide.service
 #
 
 echo "Sending report ..."

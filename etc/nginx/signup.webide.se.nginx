@@ -1,5 +1,5 @@
 # How to install:
-# 1. cd /srv/jzedit , or to where the jzedit edit files are
+# 1. cd /srv/webide , or to where the webide edit files are
 # 2. Make sure nginx is installed: apt-get install nginx
 # 3. mv etc/signup.webide.se.nginx etc/signup.yourdomain.com.nginx
 # 4. sudo cp etc/nginx/signup.yourdomain.com.nginx /etc/nginx/sites-available/signup.yourdomain.com.nginx
