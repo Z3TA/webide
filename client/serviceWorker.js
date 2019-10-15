@@ -99,16 +99,12 @@ var CACHE_FILES = [
 	
 	
 	'/manifest.webmanifest', // Loaded at every page load, needed for "add to home screen" (A2HS)
-	'/gfx/jz192.png', // Chrome also downloads this icon on every page load
+	'/gfx/android-chrome-192x192.png', // Chrome also downloads this icon on every page load
 	
 	/*
 		Google page speed complains about too many files being downloaded,
 		so skip documentation etc (users rarely look at them anyway)
 		
-		// Logos for A2HS and other stuff
-		'/gfx/jz64.png',
-		'/gfx/jz192.png',
-		'/gfx/jz512.png',
 		
 	// About documentation etc
 	'/about/about.htm',

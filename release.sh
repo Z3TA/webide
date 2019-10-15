@@ -21,7 +21,7 @@ commit=$(cat version.txt)
 semver=$(cat SEMVER)
 version=1
 beta=_alpha
-name=jzedit
+name=webide
 echo $name-v$version$beta-$commit
 
 echo "Delete old files if they exists"
@@ -53,7 +53,7 @@ sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/lin
 #sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/client/manifest.webapp
 
 echo "Copy over version.txt"
-# version.txt can for example be used by other programs to get the jzedit commmit id (version)
+# version.txt can for example be used by other programs to get the webide commmit id (version)
 cp version.txt temp/release/linux/client/
 
 
@@ -167,7 +167,7 @@ echo "Clean up the server release"
 # CLient is meant to run in the browser
 rm -rf temp/release/server/bin/
 
-rm -rf temp/release/server/jzedit.app/
+rm -rf temp/release/server/webide.app/
 
 rm temp/release/server/linux_start.sh
 rm temp/release/server/start.bat
@@ -221,10 +221,10 @@ if [[ "$@" =~ "-publish" ]]
 then
 
   # Move the files to www
-  scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
-  scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+  scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/editor/download/
+  scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/editor/download/
 
-  scp temp/release/npm/bin/jzeditr zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+  scp temp/release/npm/bin/webider zeta@192.168.0.1:/tank/www/webtigerteam.com/webide/download/
 
   echo "Make NPM release"
   cd temp/release/npm

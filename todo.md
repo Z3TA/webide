@@ -54,6 +54,8 @@ sudo rm /etc/systemd/system/jzedit*
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
 
+sudo mv /srv/jzedit /srv/webide
+
 # Now run ./upgrade.sh zeta@ubuntu-16-staging
 
 

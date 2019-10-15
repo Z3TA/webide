@@ -5,7 +5,7 @@ echo "linux_start.sh running in folder: $PWD"
 #
 # This script will run the editor locally.
 # 
-# If you want to run a shared "cloud" server see README.txt, jzedit.service, and jzedit.apparmor
+# If you want to run a shared "cloud" server see README.txt, webide.service, and webide.apparmor
 #
 # We are using this bash script (instead of start.js) to fix the desktop icon ....
 #
@@ -30,7 +30,7 @@ function startClient {
 	#chromium-browser --app=$url > /dev/null 2>&1 ||
 	chromium-browser --app=$url ||
 	chrome --app=$url > /dev/null 2>&1 ||
-	unity-webapps-runner -i JZedit -h http://127.0.0.1:8099/index.htm 2>&1 ||
+	unity-webapps-runner -i WebIDE -h http://127.0.0.1:8099/index.htm 2>&1 ||
 	firefox -new-tab $url > /dev/null 2>&1 ||
 	open "$url" 2>&1 ||
 	echo "Failed to start the client!"

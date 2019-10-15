@@ -8,7 +8,7 @@
 #
 # Use example (on a server where you want to store the backups):
 # sudo crontab -e
-# 30 2 * * * ssh user@ide.server "bash /path/to/jzedit/backup.sh pool /home/ /somewhere/backup/" > /dev/null && scp user@ide.server:/somewhere/backup/* /local/backup/directory/
+# 30 2 * * * ssh user@ide.server "bash /path/to/webide/backup.sh pool /home/ /somewhere/backup/" > /dev/null && scp user@ide.server:/somewhere/backup/* /local/backup/directory/
 #
 # How to recover from a backup:
 # gunzip -c /path/to/user.gz | ssh root@ide.server zfs recv pool/home/user
