@@ -526,7 +526,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 				// Sometimes the home dir doesn't exist! wtf!?
 				console.log("id=" + id + " homeDir=" + homeDir + " homeDirStat=" + JSON.stringify(homeDirStat));
 				
-				var lastLoginFile = UTIL.joinPaths([homeDir, ".webide/" "storage/", "lastLogin"]);
+				var lastLoginFile = UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]);
 				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
@@ -670,7 +670,7 @@ function main() {
 	}
 	
 	if(NO_CHROOT && !USERNAME && CURRENT_USER) {
-		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".webide/" "password");
+		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".webide/", "password");
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {
 			if(err && err.code == "ENOENT") {
 				log("Did not find " + passwordFile, NOTICE);

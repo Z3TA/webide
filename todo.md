@@ -41,8 +41,9 @@ Need to rename folders, services etc!
 Rename .jzeditpw to .webidepw
 Rename .jzeditor_storage to .webide
 
-for homedir in /home/*; do sudo mkdir /home/"$homedir"/.webide/; done
-
+for homedir in /home/*; do sudo mkdir "$homedir"/.webide/; done
+for homedir in /home/*; do sudo mv "$homedir"/.jzeditpw "$homedir"/.webide/password; done
+for homedir in /home/*; do sudo mv "$homedir"/.jzeditStorage "$homedir"/.webide/storage; done
 
 
 Only use one dot folder!!!

@@ -50,6 +50,9 @@
 		if(EDITOR.localStorage) {
 			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
 				var url = stored.editorServerUrl;
+				
+				url = url.replace(/jzedit/i, "webide"); // Automatically login after rebranding from jzedit to webide
+				
 				if(url) server = {url: url};
 				
 				/*
