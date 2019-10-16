@@ -38,20 +38,8 @@ What I'm working on
 Moving audioCOntext after next interaction did not help!
 Maybe show a dialog, asking the user if he wants to enable audio when audio is first used!?
 
-Editor in "has been updated, want to reload?" loop!
 
-https://webide.se/version.txt says 4930
-https://webide.se/EDITOR.js says 4930
-
-EDITOR.version in console says 4919
-
-bundle.htm has EDITOR={version:4930}
-
-Nginx caching the bundle!?
-
-Message says "The editor has been updated from version=4919 to 4930
-Reload to get the new version."
-
+todo: Check if user's Nginx config works as intended
 
 
 Make a promo video !?
