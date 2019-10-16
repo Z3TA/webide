@@ -582,10 +582,12 @@ EDITOR.bindKey(b);
 		console.warn("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
-	
-	var Audio = window.AudioContext || window.webkitAudioContext;
-	if(Audio) var audioCtx = new Audio;
+	var audioCtx; // AudioContext must be created after a user gesture!
+	EDITOR.onNextInteraction(function createAudioContext() {
+		var Audio = window.AudioContext || window.webkitAudioContext;
+		if(Audio) audioCtx = new Audio;
 	else console.warn("Audio API not supported on " + BROWSER);
+	});
 	
 	EDITOR.beep = function beep(volume, frequency, type, duration) {
 		// Makes a beep sound
@@ -4895,7 +4897,7 @@ else {
 		EDITOR.resizeNeeded(); // Update the view
 		EDITOR.renderNeeded();
 		
-		EDITOR.interact("showFile", window.event);
+		//EDITOR.interact("showFile", window.event);
 	}
 	
 	EDITOR.getKeyFor = function(funName) {
