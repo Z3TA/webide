@@ -34,7 +34,7 @@ if(FORCE) startDelete();
 else {
 	// Make sure it's a webide user!
 	try {
-		var hashedPw = fs.readFileSync(UTIL.joinPaths([HOME, username, ".webide/" "password"]), ENCODING);
+		var hashedPw = fs.readFileSync(UTIL.joinPaths([HOME, username, ".webide/", "password"]), ENCODING);
 // Should throw if the file doesn't exist!
 }
 catch(err) {
