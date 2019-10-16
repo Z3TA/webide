@@ -246,18 +246,18 @@ that looks like >_ and says "Activate Google Cloud Shell"
 It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
 `curl https://www.webtigerteam.com/editor/download/`
 
-3. Take notice of the latest server release for jzedit. Then type:
-`wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3397-server.tar.gz`
-(replace the number 3397 with the latest jzedit server relase!)
+3. Take notice of the latest server release for webide. Then type:
+`wget https://www.webtigerteam.com/editor/download/webide-v1_alpha-3397-server.tar.gz`
+(replace the number 3397 with the latest webide server relase!)
 This will download the gzipped tar archive.
 
 (tip: Pressing tab in the terminal will auto-complete file paths)
 
 4. Then unpack the tarball:
-`tar xf jzedit-v1_alpha-3397-server.tar.gz`
+`tar xf webide-v1_alpha-3397-server.tar.gz`
 
 5. And go into it's folder:
-`cd jzedit-v1_alpha-3397-server`
+`cd webide-v1_alpha-3397-server`
 
 6. Install dependencies:
 `npm install`
@@ -286,7 +286,7 @@ How to update
 =============
 
 If you installed using npm: 
-`npm update -g jzedit`
+`npm update -g webide.se`
 
 The service worker might have cached and old version of the editor client,
 so if anything looks weird, try reloading the page.
@@ -305,14 +305,14 @@ Then hit Ctrl + Shift + S to post it. (There will be a confirmation box).
 Editing files on remote computers
 =================================
 The editor opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
-You can install bin/jzeditr on the remote computer, and then use jzeditr as an editor replacement.
-The files will be opened on your your local developer machine that is running JZedit.
+You can install bin/webider on the remote computer, and then use webider as an editor replacement.
+The files will be opened on your your local developer machine that is running WebIDE.
 
-installing jzeditr on a remote computer (it also need to have nodejs installed!):
+installing webider on a remote computer (it also need to have nodejs installed!):
 ```
-wget https://www.webtigerteam.com/jzedit/download/jzeditr
-chmod +x jzeditr
-sudo mv jzeditr /usr/local/bin
+wget https://www.webtigerteam.com/editor/download/webider
+chmod +x webider
+sudo mv webider /usr/local/bin
 ```
 
 You might also have to configure the firewall to allow incoming connections to your developer machine.
@@ -394,7 +394,7 @@ It is not recommended to run the cloud server on Windows due to lack of Apparmor
 meaning that all users will have the same access rights as the user running the server (DO NOT run the server with a Admin account!)
 
 For the cloud server to run on Windows, first install Node.JS build dependencies and Mercurial. And run npm install.
-Then you manually have to activate each user by creating a .jzeditpw file in their user directory, 
+Then you manually have to activate each user by creating a .webide/password in their user directory, 
 with the hash generated from node hashPw.js
 
 To start the server:
@@ -437,14 +437,14 @@ sudo apt-get update
 sudo apt-get install python-certbot-nginx 
 ````
 
-Automatically set up the server for running jzedit as a cloud-IDE:
+Automatically set up the server for running WebIDE as a cloud-IDE:
 ------------------------------------------------------------------
 If you have a Linux (Ubuntu) server you can run this install script:
 `node cloudide_install.js --domain=yourdomain.com`
 
 The editor will be installed as a SystemD daemon.
 
-Start the jzedit server: sudo systemctl start jzedit
+Start the webide server: sudo systemctl start webide
 
 Edit /etc/nginx/sites-available/yourdomain.com.nginx
 
@@ -459,7 +459,7 @@ sudo apt update
 sudo apt install xvfb x11vnc chromium-browser
 ````
 
-Adding and removing jzedit users
+Adding and removing webide users
 --------------------------------
 Use the following script to add users to the cloud ide:
 `./adduser.js username password`
@@ -691,7 +691,7 @@ Problems running apt
 You might get an error like this:
 unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
 
-This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
+This is because the program is mounted in user dir's. Stop webide and then reboot the server to release all mountpoints.
 
 
 
@@ -721,7 +721,7 @@ Note: This also work on the Opera Mobile app
 
 Once Opera Mobile is connected to the Debugger, you can control it from the debugger.
 
-If you have not done it alredy, start up a node JZedit server:
+If you have not done it alredy, start the WebIDE server:
 sudo node server/server.js -p 8080 -ip 192.168.0.1
 (change IP to the machine's IP)
 

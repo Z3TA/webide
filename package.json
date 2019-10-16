@@ -1,17 +1,17 @@
 {
-  "name": "jzedit",
+  "name": "webide.se",
   "main": "client/index.htm",
   "window": {
-    "title": "JZedit",
+    "title": "WebIDE",
     "show": true,
-    "icon": "client/gfx/jz64.png",
+    "icon": "client/gfx/logo.svg",
     "toolbar": true,
     "frame": true,
     "transparent": false,
     "always-on-top": false
   },
   "bin": {
-    "jzedit": "./bin/jzedit"
+    "webide": "./bin/webide"
   },
   "private": true,
   "license": "SEE LICENSE IN LICENSE.txt",
@@ -48,7 +48,7 @@
   },
   "repository": {
     "type": "Mercurial",
-    "url": "http://hg.webtigerteam.com/repo/jzedit/"
+    "url": "http://hg.webtigerteam.com/repo/webide/"
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",

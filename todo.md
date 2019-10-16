@@ -35,8 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-todo: Find jzedit in .txt .sh, .md etc
-
 Rebranding from jzedit to webide ...
 Need to rename folders, services etc!
 
@@ -60,6 +58,9 @@ sudo mv /srv/jzedit /srv/webide
 
 # Now run ./upgrade.sh zeta@ubuntu-16-staging
 
+
+todo: Rename repo to webide!
+todo: re-register npm module with new name webide.se
 
 ---
 

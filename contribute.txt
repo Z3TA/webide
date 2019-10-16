@@ -19,17 +19,17 @@ Linux: https://www.mercurial-scm.org/release/mercurial-4.5.3.tar.gz
 Follow the install instructions. Make sure hg is added to "PATH" !
 
 
-Get the jzedit source code
+Get the WebIDE source code
 --------------------------
 Clone the project: 
 cd my-projects (where you want to place the files)
-hg clone https://hg.webtigerteam.com/repo/jzedit/
+hg clone https://hg.webtigerteam.com/repo/webide/
 
 
 Mercurial commands:
 -------------------
 # Clone the repository/folder
-$ hg clone https://hg.webtigerteam.com/repo/jzedit/ JZedit-new-feature
+$ hg clone https://hg.webtigerteam.com/repo/webide/ webide-new-feature
 
 # Make sure you are up to date
 $ hg pull

@@ -4,7 +4,7 @@
 	"name": "WebIDE",
 	"version": "1.0",
 	
-	"description": "Right click to edit web page, open's the web page in jzedit",
+	"description": "Right click to edit web page, open's the web page in WebIDE",
 	
 	"icons": {
 		"48": "icons/jz48.png",
