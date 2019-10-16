@@ -162,13 +162,15 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 	
 	var latestVersion = latestVersionMaybe;
 	var cacheVersion = "webide_v" + latestVersionMaybe;
+	var highestVersion = 0;
 	
 	if(forceRefresh) return refreshCache(cacheVersion);
 	
 	return caches.keys().then(function(keys) {
 		
 		var versions = keys.map(versionNrFromKey);
-		var highestVersion = Math.max.apply(null, versions);
+		highestVersion = Math.max.apply(null, versions);
+		
 		console.log("serviceWorker cache versions: " + JSON.stringify(versions) + " highestVersion=" + highestVersion + " latestVersionMaybe=" + latestVersionMaybe);
 		
 		if(keys.length > 1) {

@@ -35,6 +35,12 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Editor in "has been updated, want to reload?" loop!
+
+No option to add to home screen !?
+
+
+
 Make a promo video !?
 
 
