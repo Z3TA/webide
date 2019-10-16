@@ -108,8 +108,9 @@ Mac OS X
 Chromebook
 ----------
 
-Go to the chrome web store and search for webide.
-It's named "Editor/IDE for making progressive web apps (PWA)".
+Go to the chrome web store and search for node.js.
+Then scroll down to apps. And click "More apps".
+Then scroll down until you see "WebIDE - hosted by https://webide.se"
 
 That will use the hosted version on webide.se
 

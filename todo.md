@@ -37,23 +37,14 @@ What I'm working on
 
 Rebranding from jzedit to webide ...
 
-Update chrome web store
 
 todo: Rename repo to webide!
-todo: re-register npm module with new name webide.se
+
 
 ---
 /zpcdata/projects/webide/node_modules/sockjs/lib/webjs.js:164
 this.log('info', ( (req.headers && req.headers["x-real-ip"]) || (req.connection && req.connection.remoteAddress)) + ' ' + req.method + ' ' + req.url + ' ' + td + 'ms ' + (res.finished ? res.statusCode : '(unfinished)'));
 ---
-
-README.txt: Go to the chrome web store and search for webide.
-It's named "Editor/IDE for making progressive web apps (PWA)".
-
-What should it be named ?
-
-
-----
 
 Hmm, did I forget about /promo/ folder !?
 

@@ -228,7 +228,7 @@ then
   scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/editor/download/
   scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/editor/download/
 
-  scp temp/release/npm/bin/webider zeta@192.168.0.1:/tank/www/webtigerteam.com/webide/download/
+  scp temp/release/npm/bin/webider zeta@192.168.0.1:/tank/www/webtigerteam.com/editor/download/
 
   echo "Make NPM release"
   cd temp/release/npm
