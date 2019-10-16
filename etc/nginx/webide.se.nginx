@@ -75,17 +75,6 @@ server {
     proxy_pass http://127.0.0.1:8099;
     
   }
-  
-
-  # These files are unlikely to change, so set a high expire date
-  location ~* \.(jpg|jpeg|png|gif|ico|ttf|svg)$ {
-    expires 30d;
-  }
-
-  # These files does not change that often, so make them cache-able
-  location ~* \.(css|htm|html)$ {
-    expires 3d;
-  }
 
   location @badgateway {
     add_header Access-Control-Allow-Origin * always;
