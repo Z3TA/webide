@@ -32,6 +32,9 @@ console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
 			
 		}).catch(function(err) {
 			alertBox("Failed to get registerd service workers: " + err.message)
+		}).then(function() {
+			EDITOR.windowMenu.hide();
+			EDITOR.reload();
 		});
 	}
 	

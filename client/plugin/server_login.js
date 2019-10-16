@@ -492,8 +492,31 @@ alertBox("Failed to automatically login as " + userValue + "." +
 				else alertBox("Already logged in as user=" + EDITOR.user.name + " on \n" + CLIENT.url);
 			}
 			else {
-				CLIENT.connect(server, function connectionOpen(err) {
-					if(err) alertBox("Problem connecting to WebIDE server on " + JSON.stringify(server));
+				CLIENT.connect(server, function connectionOpen(errConnect) {
+					if(errConnect) {
+						
+						// Couln't connect after renameing /jzedit to /webide ...
+						// The editor will only check the version after a successful connection
+						// But the connection failed, so make sure we are on the latest client version
+						UTIL.httpGet("version.txt", function(errGetVersion, str) {
+							if(errGetVersion) {
+								
+								var msg = 'Problem connecting to WebIDE server on ' + JSON.stringify(server) + '\n\n<ul>';
+								msg += '<li>* Click two times on "Use default URL" then click the Login button again.</li>\n';
+								msg += '<li>* In the top menu choose: Editor > Unregister service worker.</li>\n';
+								msg += '<li>* Contact support.</li>';
+								msg += '</ul>';
+								
+								alertBox(msg);
+								
+								return;
+							}
+							var version = parseInt(str);
+							if(isNaN(version)) throw new Error("str=" + str + " version=" + version);
+							CLIENT.fireEvent("editorVersion", version);
+						});
+						
+					}
 					else {
 						console.log("Attempting logging in after connection ...");
 						identify();
