@@ -58,6 +58,20 @@ sudo mv /srv/jzedit /srv/webide
 
 # Now run ./upgrade.sh zeta@ubuntu-16-staging
 
+cd /srv/webide
+sudo cp etc/systemd/webide.service /etc/systemd/system/webide.service
+sudo systemctl enable webide
+
+sudo cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service
+sudo systemctl enable webide_nodejs_init
+
+sudo cp etc/systemd/webide_signup.service /etc/systemd/system/webide_signup.service
+sudo systemctl enable webide_signup
+
+sudo systemctl start webide webide_nodejs_init webide_signup
+sudo systemctl status webide webide_nodejs_init webide_signup
+
+
 
 todo: Rename repo to webide!
 todo: re-register npm module with new name webide.se

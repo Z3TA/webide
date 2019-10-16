@@ -21,7 +21,7 @@ WorkingDirectory=/srv/webide/
 
 # See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
 
-ExecStart=/usr/bin/nodejs signup_service.js --hostname=webide.se --port=8099 --public_port=80
+ExecStart=/usr/bin/nodejs signup_service.js --hostname=webide.se
 
 Restart=always
 
