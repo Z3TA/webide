@@ -46,11 +46,6 @@ todo: Rename repo to webide!
 this.log('info', ( (req.headers && req.headers["x-real-ip"]) || (req.connection && req.connection.remoteAddress)) + ' ' + req.method + ' ' + req.url + ' ' + td + 'ms ' + (res.finished ? res.statusCode : '(unfinished)'));
 ---
 
-Hmm, did I forget about /promo/ folder !?
-
-
----
-
 
 Feedback, new menu item smilie face.
 happy, sad
