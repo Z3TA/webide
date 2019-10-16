@@ -6,7 +6,7 @@
 #
 
 [Unit]
-Description=Signup service for JZedit cloud editor
+Description=Signup service for WebIDE cloud editor
 After=network.target
 OnFailure=status-email-user@%n.service
 
@@ -21,7 +21,7 @@ WorkingDirectory=/srv/webide/
 
 # See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
 
-ExecStart=/usr/bin/nodejs signup_service.js --hostname=webide.se
+ExecStart=/usr/bin/nodejs signup_service.js --hostname=webide.se --port=8099 --public_port=80
 
 Restart=always
 

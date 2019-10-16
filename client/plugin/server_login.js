@@ -51,10 +51,10 @@
 			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
 				var url = stored.editorServerUrl;
 				
-				url = url.replace(/jzedit/i, "webide"); // Automatically login after rebranding from jzedit to webide
-				
-				if(url) server = {url: url};
-				
+				if(url) {
+					url = url.replace(/jzedit/i, "webide"); // Automatically login after rebranding from jzedit to webide
+					server = {url: url};
+				}
 				/*
 					if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" &&
 					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {

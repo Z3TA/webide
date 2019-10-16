@@ -91,6 +91,7 @@ Please write what makes you happy, and if possible how the editor could make you
 
 Help improve the editor by writing why it makes you sad, and what it should do to make you happy:
 
+Please bother me with your issues.
 
 
 
