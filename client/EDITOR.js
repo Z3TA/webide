@@ -36,7 +36,8 @@ EDITOR.parseFileExtensionAsCode = [
 	"vb",
 	"xml", 
 	"json", 
-	"css", 
+	"css",
+	"webmanifest"
 ];
 
 // These file extensions will be treated as plain text
@@ -582,39 +583,7 @@ EDITOR.bindKey(b);
 		console.warn("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
-	var audioCtx; // AudioContext must be created after a user gesture!
-	EDITOR.onNextInteraction(function createAudioContext() {
-		var Audio = window.AudioContext || window.webkitAudioContext;
-		if(Audio) audioCtx = new Audio;
-	else console.warn("Audio API not supported on " + BROWSER);
-	});
-	
-	EDITOR.beep = function beep(volume, frequency, type, duration) {
-		// Makes a beep sound
-		
-		if(!audioCtx) {
-			console.warn("Audio API not supported on " + BROWSER);
-			return;
-		}
-		
-		if(volume == undefined) volume = 0.15;
-		if(frequency == undefined) frequency = 100;
-		if(type == undefined) type = "square";
-		if(duration == undefined) duration = 120;
-		
-		var oscillator = audioCtx.createOscillator();
-		var gainNode = audioCtx.createGain();
-		oscillator.connect(gainNode);
-		gainNode.connect(audioCtx.destination);
-		
-		
-		gainNode.gain.value = volume;
-		oscillator.frequency.value = frequency;
-		oscillator.type = type;
-		
-		oscillator.start();
-		oscillator.stop(audioCtx.currentTime + duration/1000)
-	}
+
 	
 	EDITOR.putIntoClipboard = function putIntoClipboard(text, description, callback) {
 		
@@ -4242,6 +4211,43 @@ EDITOR.fireEvent("btk");
 		
 	}
 	
+
+	var audioCtx; // AudioContext must be created after a user gesture!
+
+	EDITOR.onNextInteraction(function createAudioContext() {
+		var Audio = window.AudioContext || window.webkitAudioContext;
+		if(Audio) audioCtx = new Audio;
+		else console.warn("Audio API not supported on " + BROWSER);
+	});
+
+	
+	EDITOR.beep = function beep(volume, frequency, type, duration) {
+		// Makes a beep sound
+		
+		if(!audioCtx) {
+			console.warn("Audio API not supported on " + BROWSER);
+			return;
+		}
+		
+		if(volume == undefined) volume = 0.15;
+		if(frequency == undefined) frequency = 100;
+		if(type == undefined) type = "square";
+		if(duration == undefined) duration = 120;
+		
+		var oscillator = audioCtx.createOscillator();
+		var gainNode = audioCtx.createGain();
+		oscillator.connect(gainNode);
+		gainNode.connect(audioCtx.destination);
+		
+		
+		gainNode.gain.value = volume;
+		oscillator.frequency.value = frequency;
+		oscillator.type = type;
+		
+		oscillator.start();
+		oscillator.stop(audioCtx.currentTime + duration/1000)
+	}
+
 	EDITOR.fireEvent = function(eventName, args, callback) {
 		
 		if(args == undefined) args = [];

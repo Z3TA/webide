@@ -1,13 +1,13 @@
 {
-  "lang": "en",
-  "name": "PWA web editor/IDE",
-  "short_name": "webide.se",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#fff",
-  "theme_color": "#4c4944",
-  "description": "Editor/IDE for creating progressive web apps, and web sites.",
-  "icons": [
+    "lang": "en",
+    "name": "PWA web editor/IDE",
+    "short_name": "webide.se",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fff",
+    "theme_color": "#4c4944",
+    "description": "Editor/IDE for creating progressive web apps, and web sites.",
+    "icons": [
     {
       "src": "/gfx/android-chrome-192x192.png",
       "sizes": "192x192",
@@ -18,19 +18,19 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-],
+    ],
+
 "share_target": {
-    "action": "/share/",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "files": [
-        {
-          "name": "file",
-          "accept": ["*/*"]
-        }
-      ]
-    }
+      "action": "/share/",
+      "method": "POST",
+      "enctype": "multipart/form-data",
+      "params": {
+          "files": [
+              {
+                  "name": "file",
+                  "accept": ["*/*"]
+              }
+          ]
+      }
   }
 }
