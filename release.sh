@@ -19,7 +19,7 @@ fi
 node changeset.js
 commit=$(cat version.txt)
 semver=$(cat SEMVER)
-version=1
+version=2
 beta=_alpha
 name=webide
 echo $name-v$version$beta-$commit

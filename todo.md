@@ -36,57 +36,8 @@ What I'm working on
 -------------------
 
 Rebranding from jzedit to webide ...
-Need to rename folders, services etc!
 
-Only use one dot folder!!!
-
-Migrating to the new name:
-
-sudo systemctl stop jzedit jzedit_nodejs_init jzedit_signup
-systemctl disable jzedit jzedit_nodejs_init jzedit_signup
-sudo rm /etc/systemd/system/jzedit*
-
-sudo systemctl daemon-reload
-sudo systemctl reset-failed
-
-
-for homedir in /home/*; do sudo mkdir "$homedir"/.webide/; done
-for homedir in /home/*; do sudo mv "$homedir"/.jzeditpw "$homedir"/.webide/password; done
-for homedir in /home/*; do sudo mv "$homedir"/.jzeditStorage "$homedir"/.webide/storage; done
-
-
-sudo mv /srv/jzedit /srv/webide
-
-find / -type l -ls | grep jzedit
-
-/etc/logrotate.d/nginx.logrotate.conf -> /srv/jzedit/etc/nginx/nginx.logrotate.conf
-
-unlink /etc/logrotate.d/nginx.logrotate.conf
-
-
-mkdir -p /srv/webide/server
-cp /srv/jzedit/server/GUEST_COUNTER /srv/webide/server/
-
-
-
-# Now run ./upgrade.sh zeta@ubuntu-16-staging
-
-cd /srv/webide
-sudo cp etc/systemd/webide.service /etc/systemd/system/webide.service
-sudo systemctl enable webide
-
-sudo cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service
-sudo systemctl enable webide_nodejs_init
-
-sudo cp etc/systemd/webide_signup.service /etc/systemd/system/webide_signup.service
-sudo systemctl enable webide_signup
-
-sudo systemctl start webide webide_nodejs_init webide_signup
-sudo systemctl status webide webide_nodejs_init webide_signup
-
-ls -s /srv/webide/etc/nginx/nginx.logrotate.conf /etc/logrotate.d/nginx.logrotate.conf
-
-
+Update chrome web store
 
 todo: Rename repo to webide!
 todo: re-register npm module with new name webide.se
