@@ -51,7 +51,7 @@ server {
     gzip_static on;
     alias /srv/webide/client/;
     try_files bundle.htm =404;
-    expires 12h;
+    expires 0;
   }
 
   location / {
