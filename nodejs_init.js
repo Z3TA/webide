@@ -327,6 +327,8 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 				worker.on("message", messageFromWorker);
 				worker.on("exit", workerExitHandler);
 				
+				log("worker.connected=" + worker.connected + " worker.killed=" + worker.killed + " worker.pid=" + worker.pid + " ", DEBUG);
+				
 				worker.send({ping: firstPing});
 				
 			});
