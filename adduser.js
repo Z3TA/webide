@@ -307,16 +307,6 @@ function adduser() {
 		
 		//var gid = getGroupId(groupName);
 		
-		if(NO_PW_HASH) {
-			var hashedPassword = password;
-		}
-		else {
-			var pwHash = require("./server/pwHash.js");
-			var hashedPassword = pwHash(password);
-		}
-		
-		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/" "password"]), hashedPassword, ENCODING);
-		
 		
 		// Add skeleton files ...
 	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
@@ -326,7 +316,7 @@ function adduser() {
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_blog_example", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/.webide/storage", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/.webide/", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/.ssh/", homeDir);
 		
@@ -502,6 +492,19 @@ function adduser() {
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
 		*/
+		
+		
+		// Activate the user by creating the password file
+		if(NO_PW_HASH) {
+			var hashedPassword = password;
+		}
+		else {
+			var pwHash = require("./server/pwHash.js");
+			var hashedPassword = pwHash(password);
+		}
+		
+		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/", "password"]), hashedPassword, ENCODING);
+		
 		
 		console.log("User with username=" + username + ", password=" + password + ", uid=" + uid + ", gid=" + gid + ", homeDir=" + homeDir + " successfully added! ");
 		
