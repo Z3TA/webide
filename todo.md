@@ -35,6 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+autocomplete CSS !?
 
 Make a promo video !
 Showcase:
