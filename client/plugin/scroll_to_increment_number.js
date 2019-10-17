@@ -22,9 +22,32 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		console.log("scrollNumer: combo.sum=" + combo.sum + " dir=" + dir);
 		if(combo.sum != SHIFT) return;
 		
-		var caret = EDITOR.mousePositionToCaret(EDITOR.canvasMouseX, EDITOR.canvasMouseY);
+		var caret = EDITOR.mousePositionToCaret(EDITOR.canvasMouseX, EDITOR.canvasMouseY, 0);
 		
 		var file = EDITOR.currentFile;
+		
+		/*
+			EDITOR.addRender(scrollToIncrementDebugPosition, 20000);
+			function scrollToIncrementDebugPosition() {
+			var indentation = file.grid[caret.row].indentation;
+			var indentationWidth = indentation * EDITOR.settings.tabSpace
+			var top = EDITOR.settings.topMargin + (caret.row-file.startRow) * EDITOR.settings.gridHeight;
+			var left = EDITOR.settings.leftMargin + (caret.col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			EDITOR.canvasContext.beginPath();
+			EDITOR.canvasContext.rect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+			EDITOR.canvasContext.rect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+			
+			EDITOR.canvasContext.strokeStyle = "red";
+			//EDITOR.canvasContext.fillStyle = "#FF0000";
+			EDITOR.canvasContext.stroke();
+			console.log("changeNumericValue: top=" + top + " left=" + left + " caret.row=" + caret.row + " caret.col=" + caret.col + " file.startRow=" + file.startRow);
+			}
+			setTimeout(function() {
+			EDITOR.removeRender(scrollToIncrementDebugPosition);
+			}, 1000);
+		*/
+		
 		var number = onNumber(file, caret);
 		
 		if(!number) return;
@@ -62,6 +85,10 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		// Go left
 		if(caret.eol) i--;
 		if(file.text[i] == " ") i--;
+		
+		// Skip over px, pt, em, %
+		if(file.text[i].match(/m|x|t/)) i = i - 2;
+		if(file.text[i].match(/e|p|%/)) i--;
 		
 		while(isNr(file.text[i]) && i > 0) {
 			console.log("scrollNumer: onNumber: Left, Numeric value=" + file.text[i] + " at i=" + i);

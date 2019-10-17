@@ -35,14 +35,25 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+Make a promo video !
+Showcase:
+Automatic indentation
+The function list
+Live preview
+Running a Node.js script
+
+
+
 Moving audioCOntext after next interaction did not help!
 Maybe show a dialog, asking the user if he wants to enable audio when audio is first used!?
 
+todo: Validate JSON files as well as webmanifest on save to prevent nasty suprises, show a red circle if there is any errors
 
 todo: Check if user's Nginx config works as intended
 
 
-Make a promo video !?
+
 
 
 todo: Rename repo to webide!

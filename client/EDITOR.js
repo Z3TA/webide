@@ -4406,7 +4406,7 @@ EDITOR.fireEvent("btk");
 		return removeFrom(EDITOR.preRenderFunctions, fun);
 	}
 	
-	EDITOR.mousePositionToCaret = function (mouseX, mouseY) {
+	EDITOR.mousePositionToCaret = function (mouseX, mouseY, clickFeel) {
 		/*
 			Returns a caret on the file.grid
 			
@@ -4424,9 +4424,10 @@ EDITOR.fireEvent("btk");
 		
 		if(EDITOR.currentFile) {
 			
-			var file = EDITOR.currentFile,
-			grid = file.grid,
-			clickFeel = EDITOR.settings.gridWidth / 2;
+			var file = EDITOR.currentFile;
+			var grid = file.grid;
+			
+			if(clickFeel == undefined) clickFeel = EDITOR.settings.gridWidth / 2;
 			
 			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
 			
