@@ -711,14 +711,6 @@ console.warn("Unable to get caret position!");
 		if(!file) throw new Error("file=" + file);
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile);
 		
-		if(file != sourceFile) return true;
-		
-		if(type == "reload" && wysiwygEditor.isCompiled) return wysiwygEditor.close();
-		
-		wysiwygEditor.sourceFileIsSaved = false;
-		
-		if(!wysiwygEditor.bodyExistInSource()) return true;
-		
 		var previewWin = wysiwygEditor.previewWin;
 		
 		try {
@@ -730,6 +722,25 @@ console.warn("Unable to get caret position!");
 			wysiwygEditor.close();
 			return;
 		}
+		
+		var fileExt = UTIL.getFileExtension(file.path);
+		
+		if(fileExt == "css") {
+			return updateStylesheet(doc, file);
+		}
+		
+		
+		
+		if(file != sourceFile) return true;
+		
+		if(type == "reload" && wysiwygEditor.isCompiled) return wysiwygEditor.close();
+		
+		wysiwygEditor.sourceFileIsSaved = false;
+		
+		if(!wysiwygEditor.bodyExistInSource()) return true;
+		
+		
+		
 		
 		wysiwygEditor.setStartRow(); // In case more rows was added above the body tag
 		
@@ -874,44 +885,8 @@ console.warn("Unable to get caret position!");
 			var doc = win.document;
 			if(!doc) throw new Error("Unable to get document from wysiwygEditor window! doc=" + doc);
 			
-			var links = doc.getElementsByTagName('link');
-			for (var i=0; i<links.length; i++) {
-				if(links[i].getAttribute("rel").toLowerCase().indexOf("stylesheet") != -1) {
-					//console.log(links[i].href);
-					if(links[i].href.indexOf(fileName) != -1) {
-						
-						// Remove the link and append a style element instead
-						
-						var parent = links[i].parentNode;
-						
-						var style = document.createElement("style")
-						style.setAttribute("href", links[i].href);
-						style.innerText = file.text;
-						
-						parent.insertBefore(style, links[i]);
-						parent.removeChild(links[i]);
-						
-						console.log("Replaced link css with style for " + fileName);
-						
-						return saveEventCallback(null);
-						
-					}
-				}
-			}
-			// Update style
-			var style = doc.getElementsByTagName('style');
-			for (var i=0, href; i<style.length; i++) {
-				href = style[i].getAttribute("href");
-				if(href) {
-					if(href.indexOf(fileName) != -1) {
-						style[i].innerText = file.text;
-						console.log("Replaced style content for " + fileName);
-						return saveEventCallback(null);
-					}
-				}
-			}
+			return updateStylesheet(doc, file, saveEventCallback);
 			
-			return saveEventCallback(null);
 			//console.log("fileName=" + fileName + " was not found on the page in preview.");
 		}
 		else if(fileExt == "js") {
@@ -947,6 +922,53 @@ console.warn("Unable to get caret position!");
 		}
 		
 		else return saveEventCallback(null);
+	}
+	
+	function updateStylesheet(doc, file, callback) {
+		var fileName = UTIL.getFilenameFromPath(file.path);
+		var links = doc.getElementsByTagName('link');
+		for (var i=0; i<links.length; i++) {
+			if(links[i].getAttribute("rel").toLowerCase().indexOf("stylesheet") != -1) {
+				//console.log(links[i].href);
+				if(links[i].href.indexOf(fileName) != -1) {
+					
+					// Remove the link and append a style element instead
+					
+					var parent = links[i].parentNode;
+					
+					var style = document.createElement("style")
+					style.setAttribute("href", links[i].href);
+					style.innerText = file.text;
+					
+					parent.insertBefore(style, links[i]);
+					parent.removeChild(links[i]);
+					
+					console.log("Replaced link css with style for " + fileName);
+					
+					
+					if(callback) callback(null);
+					return;
+					
+				}
+			}
+		}
+		// Update style
+		var style = doc.getElementsByTagName('style');
+		for (var i=0, href; i<style.length; i++) {
+			href = style[i].getAttribute("href");
+			if(href) {
+				if(href.indexOf(fileName) != -1) {
+					style[i].innerText = file.text;
+					console.log("Replaced style content for " + fileName);
+					if(callback) callback(null);
+					return;
+				}
+			}
+		}
+		
+		console.warn("Stylesheet not found: fileName=" + fileName);
+		
+		if(callback) callback(null);
 	}
 	
 	WysiwygEditor.prototype.previewKeyDown = function previewKeyDown(keyDownEvent) {
