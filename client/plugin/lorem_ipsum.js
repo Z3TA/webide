@@ -35,7 +35,7 @@
 		text = text + "."; // Puntiation!
 		
 		file.insertText(text);
-		file.insertLineBreak();
+		//file.insertLineBreak();
 		
 		EDITOR.stat("lorem_ipsum");
 		
