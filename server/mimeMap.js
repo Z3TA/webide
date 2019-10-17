@@ -7,6 +7,7 @@ var mimeMap = {
 	html: "text/html",
 	htm: "text/html",
 	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
 	js: "application/x-javascript",
 	midi: "audio/x-midi",
 	mp3: "audio/mpeg",
