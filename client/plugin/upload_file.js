@@ -58,10 +58,10 @@ fileInput = document.createElement("input")
 		
 		console.log("files is an array ? " + Array.isArray(files));
 		
-if(files.length == 1) var instruction = "Where to save the file ?";
-else var instruction = "Where to save the files ?";
+		if(files.length == 1) var instruction = "Where to save " + files[0].name + " ? (specify folder path)";
+		else var instruction = "Where to save the files ? (specify folder path)";
 
-		EDITOR.pathPickerTool({instruction: instruction, defaultPath: "/upload/"}, function(err, path) {
+		EDITOR.pathPickerTool({instruction: instruction, defaultPath: EDITOR.workingDirectory || "/upload/"}, function(err, path) {
 			if(err) return alertBox("Unable to get a upload path: " + err.message);
 			
 			EDITOR.createPath(path, function(err) {

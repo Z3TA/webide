@@ -8415,7 +8415,7 @@ function fileDrop(fileDropEvent) {
 		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
-		if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = "/upload/" + filePath;
+		if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = (EDITOR.workingDirectory || "/upload/") + filePath;
 		
 		var fileType = file.type;
 		
