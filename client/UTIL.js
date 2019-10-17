@@ -1569,6 +1569,19 @@ else {
 		return filePath;
 	},
 	
+	getRelativeRootDots: function getRelativePath(path, root) {
+		
+		// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
+		var relativePath = path.replace(root, "");
+		console.log("relativePath=" + relativePath);
+		var folderLevels = UTIL.occurrences(relativePath, "/", false);
+		var relativePath = "";
+		for (var i=0; i<folderLevels; i++) {
+			relativePath += "../";
+		}
+		return relativePath;
+	},
+	
 	isDirectory: function isDirectory(path) {
 		// It's a directory if the path ends with a slash
 		var lastChar = path.slice(path.length-1);

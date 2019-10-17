@@ -249,7 +249,7 @@
 		
 		EDITOR.on("fileOpen", fileOpen);
 		
-		EDITOR.on("fileDrop", fileDrop);
+		
 		
 		EDITOR.on("previewTool", ssgPreviewTool, 1000); // Run before web_preview.js
 		
@@ -290,7 +290,6 @@
 		EDITOR.removeEvent("fileShow", fileShow);
 		EDITOR.removeEvent("exit", SSG_cleanup);
 		EDITOR.removeEvent("fileOpen", fileOpen);
-		EDITOR.removeEvent("fileDrop", fileDrop);
 		EDITOR.removeEvent("previewTool", ssgPreviewTool);
 		
 		
@@ -456,130 +455,6 @@
 	}
 	
 	
-	function fileDrop(dataFile) {
-		// When a file is dropped into the editor
-		
-		var currentFile = EDITOR.currentFile;
-		
-		if(!currentFile) return false; // No file is open so the image is probably not supposed to go into a SSG site
-		
-		// Check if the currently opened file belongs to a SSG project:
-		for(var i=0; i<sites.length; i++) {
-			if(currentFile.path.indexOf(resolvePath(sites[i], sites[i].source)) != -1) {
-				handleFile(sites[i], dataFile);
-				return true;
-			}
-		}
-		
-		console.log("Current file does not belong to any SSG project!");
-		
-		return false; // Returing true means we handled the filedrop
-		
-		function handleFile(site, dataFile) {
-			
-			console.log("Current file belongs to SSG project: " + site.name);
-			
-			var filePath = dataFile.path || dataFile.name;
-			var fileType = dataFile.type;
-			var isImage = (fileType.indexOf("image") != -1);
-			
-			var defaultPath;
-			if(filePath.match(/\/\\/)) defaultPath = filePath;
-			else defaultPath = resolvePath(site, site.source) + filePath;
-			
-			if(isImage) var whereToSaveMessage = "Where to save the image ?"
-			else var whereToSaveMessage = "Where to save the file ?";
-			
-			askWhereToSave();
-			
-			function askWhereToSave() {
-				promptBox(whereToSaveMessage, {defaultValue: defaultPath}, function(filePath) {
-					if(filePath) {
-						console.log("Saving file: " + filePath);
-						saveFile(filePath, function fileSaved(err, path) {
-							if(err) return alertBox(err.message);
-							
-							console.log("Saved file: " + path);
-							
-							var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
-							
-							if(currentFileName.match(/^(header|footer).html?/)) {
-								var fileSrc = path.replace(resolvePath(site, site.source), "/"); // File paths needs to be absolute!
-							}
-							else {
-								// File paths needs to be relative!
-								var relativePath = getRelativePath(currentFile.path, resolvePath(site, site.source));
-								var fileSrc = relativePath + path.replace(resolvePath(site, site.source), ""); 
-							}
-							
-							if(isImage) {
-								// todo: Some sort of crop and resize tool
-								currentFile.insertText('<img src="' + fileSrc + '">');
-							}
-							else {
-								var fileName = UTIL.getFilenameFromPath(filePath);
-								currentFile.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
-							}
-							
-						});
-					}
-				});
-			}
-			
-			function saveFile(filePath, callback) {
-				
-				var folders = UTIL.getFolders(filePath);
-				
-				if(folders.length > 1) {
-					EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (path) {
-						if(path === false) {
-							console.log("Path doesn't exist!");
-							var createPath = "Create the path";
-							var saveElsewhere = "Save the file elsewhere";
-							var dontSave = "Don't save the file";
-							confirmBox("The folder does not exist: " + folders[folders.length-1] + "\n" + 
-							"Do you want to create the path ?", [createPath, saveElsewhere, dontSave], function(answer) {
-								if(answer == createPath) {
-									EDITOR.createPath(folders[folders.length-1], function(err) {
-										if(err) throw err;
-										else readFile();
-									});
-								}
-								else if(answer == saveElsewhere) {
-									askWhereToSave();
-								}
-								else if(answer == dontSave) {
-									// Do nothing
-								}
-								else throw new Error("Unexpected answer=" + answer);
-								
-							});
-							
-						}
-						else {
-							console.log("Path exist!");
-							readFile();
-						}
-					});
-				}
-				else readFile(); // It will be saved in the root dir
-				
-				function readFile() {
-					var reader = new FileReader();
-					reader.onload = function (event) {
-						var data = event.target.result;
-						
-						// Specifying encoding:base64 will magically convert to binary!
-						// We do have to remove the data:image/png metadata though!
-						data = data.replace("data:" + fileType + ";base64,", "");
-						EDITOR.saveToDisk(filePath, data, false, "base64", callback);
-					};
-					reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
-				}
-			}
-			
-		}
-	}
 	
 	function switchSite(index) {
 		// Switch to the site
@@ -1613,7 +1488,7 @@ site = selectedSite;
 					recursionCounter = 1;
 					
 					
-					var relativePath = getRelativePath(sourceFile.path, resolvePath(site, site.source));
+					var relativePath = UTIL.getRelativeRootDots(sourceFile.path, resolvePath(site, site.source));
 					
 					var text = sourceFile.text; // Don't change file.text directly or we'll mess up the grid!
 					
@@ -2625,19 +2500,5 @@ whenAllFilesReloaded();
 		
 		return true;
 	}
-	
-	function getRelativePath(path, root) {
-		
-		// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
-		var relativePath = path.replace(root, "");
-		console.log("relativePath=" + relativePath);
-		var folderLevels = UTIL.occurrences(relativePath, "/", false);
-		var relativePath = "";
-		for (var i=0; i<folderLevels; i++) {
-			relativePath += "../";
-		}
-		return relativePath;
-	}
-	
 	
 })();
