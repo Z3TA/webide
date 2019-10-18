@@ -292,7 +292,12 @@
 			type: "delete", "linebreak", "insert", "text", deleteTextRange, deleteCharacter, reload, removeRow
 		*/
 		
+		
+		
+		
 		if(shouldParse(file)) { // If the file should be parsed or not
+			
+			var evilSize = 10000;
 			
 			/*
 				We should not need to re-parse if we're just typeing, unless we type some special character like { or } or " or '
@@ -310,7 +315,7 @@
 				character = characters;
 			}
 			
-			if(file.parsed && characters.length==1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters)==-1)  {
+			if(file.text.length > evilSize && file.parsed && characters.length==1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters)==-1)  {
 				
 				console.log("no re-parse opt");
 				
@@ -363,7 +368,7 @@
 				}
 				return;
 			}
-			else if(file.parsed && (type=="delete" || type=="linebreak" || type=="insert" || type=="text" || type=="deleteTextRange" || type=="removeRow")) { // If the file was parsed before
+			else if(file.text.length > evilSize && file.parsed && (type=="delete" || type=="linebreak" || type=="insert" || type=="text" || type=="deleteTextRange" || type=="removeRow")) { // If the file was parsed before
 				
 				//console.log("type=" + type + " characters=" + characters);
 				
