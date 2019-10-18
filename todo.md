@@ -35,6 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+regression: Node.js console.log messages are no longer inlined!
+Both in Firefox and Chrome, wtf!
+Why doesn't the test fail!!??
+
+
 Make the welcome message a playback, that shows the editors main features ...
 * automatic indentation: Show some coding
 * Using the function list to navigate
