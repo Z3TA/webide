@@ -14,7 +14,7 @@
 		var charIndex = file.caret.index;
 		var insideQuote = areWeInsideQuote(file, charIndex);
 		
-		if(!(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "xml" || insideQuote)) {
+		if(!(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "xml" || insideQuote || file.text.slice(0,15) == "<!DOCTYPE html>" )) {
 			console.log("Not autocompleting tags because its not a html file or inside a quote");
 			return;
 		}
