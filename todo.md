@@ -35,7 +35,23 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-autocomplete CSS !?
+Make the welcome message a playback, that shows the editors main features ...
+* automatic indentation: Show some coding
+* Using the function list to navigate
+* Run a nodejs (script http-server example?)
+
+---
+?playback=playbacksourcefile
+should not open the playback file, but instead show the first frame, then show a big play button in the center of the screen.
+---
+Able to embed code tutorials
+---
+Use the new web File API to offline sync folders!
+When online, files are saved both locally and in the cloud.
+When offline, the last known hash will be stored and the saves will be saved locally.
+When back online, it will be safe to over-write the cloud version of the file if the last known hash matches the hash on the cloud file.
+(Native file system API doesn't seem to be able to get the actualy name/path of the files you open LOL!)
+---
 
 Make a promo video !
 Showcase:

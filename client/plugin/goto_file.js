@@ -174,7 +174,7 @@
 	
 	function openLocalFile(directory) {
 		console.log("Telling the editor to open the file dialog window ...");
-		EDITOR.localFileDialog(directory, function after_dialog_open_file(filePath, content) {
+		EDITOR.localFileDialog(directory, function after_dialog_open_file(filePath, content, fileHandle) {
 			
 			//console.log("filePath=" + filePath);
 			//console.log("content=" + content);
@@ -189,6 +189,8 @@
 				file.isSaved = true;
 				file.savedAs = true;
 				file.changed = false;
+				
+				if(fileHandle) file.nativeFileSystemFileHandle = fileHandle;
 				
 				EDITOR.renderNeeded();
 				EDITOR.render();

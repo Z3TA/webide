@@ -1515,6 +1515,37 @@ usePseudoClipboard = false;
 		
 		function beginSaving() {
 			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
+			
+			if(file.nativeFileSystemFileHandle) {
+				
+				file.nativeFileSystemFileHandle.createWriter().then(function(writer) {
+					// Make sure we start with an empty file
+					writer.truncate(0).then(function() {
+						// Write the full length of the contents
+						writer.write(0, text).then(function() {
+							// Close the file and write the contents to disk
+							writer.close().then(function() {
+								
+								if(typeof window.crypto == "object") {
+									crypto.subtle.digest('SHA-256', text).then(function(hash) {
+										doneSaving(null, path, hash);
+									}, function(err) {
+										console.error(new Error("Failed to hash the text using crypty API after saving the file using native file system API"));
+										doneSaving(null, path, null);
+									});;
+								}
+								else doneSaving(null, path, null);
+								
+							});
+						});
+					});
+				}).catch(function(err) {
+					callback(err);
+				});
+				
+				return;
+			}
+			
 			if(file.path != path || !file.savedAs) {
 				if(EDITOR.files.hasOwnProperty(path) && EDITOR.files[path] != file) {
 					var err = new Error("There is already a file open with path=" + path);
@@ -1530,7 +1561,7 @@ usePseudoClipboard = false;
 						var cancel = "Cancel";
 						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
 							if(answer == overwrite) {
-if(path != file.path) reOpen(file.path, path);
+								if(path != file.path) reOpen(file.path, path);
 								else EDITOR.saveToDisk(file.path, file.text, doneSaving);
 							}
 							else {
@@ -1644,11 +1675,9 @@ if(path != file.path) reOpen(file.path, path);
 			path = trimmedPath;
 		}
 		
-		var protocol = UTIL.urlProtocol(path);
-		
-			var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
-			CLIENT.cmd("saveToDisk", json, function saveToDiskCmd(err, json) {
-				if(err) {
+		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
+		CLIENT.cmd("saveToDisk", json, function saveToDiskCmd(err, json) {
+			if(err) {
 				if(saveToDiskCallback) saveToDiskCallback(err);
 				else throw err;
 			}
@@ -1657,7 +1686,7 @@ if(path != file.path) reOpen(file.path, path);
 				else console.log("File saved to disk: " + json.path);
 			}
 		});
-		}
+	}
 	
 	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
@@ -1699,7 +1728,7 @@ if(path != file.path) reOpen(file.path, path);
 		// For example when pasting or dragging text to the editor
 		
 		if(typeof file == "string" && text == undefined) {
-text = file;
+			text = file;
 			file = EDITOR.currentFile;
 		}
 		
@@ -1726,6 +1755,26 @@ text = file;
 		*/
 		
 		console.log("Bringing up the file open dialog ...");
+		
+		if(typeof window.chooseFileSystemEntries == "function") {
+			console.log("Using native file system API!");
+			
+			window.chooseFileSystemEntries().then(function(fileHandle) {
+				fileHandle.getFile().then(function readText(localFile) {
+					localFile.text().then(function(fileContent) {
+						var filePath = "/local/file";
+						callback(filePath, fileContent, fileHandle);
+					});
+				});
+			}).catch(function(err) {
+				var error = new Error("Something went wrong when using the native file system API to open a file: " + err.message);
+				callback(err);
+			});
+			
+			
+			return;
+		}
+		
 		
 		EDITOR.fileOpenCallback = callback;
 		
@@ -1906,7 +1955,7 @@ text = file;
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
-				}
+			}
 			else var containZeroWidthCharacters = false;
 			
 			//ctx.imageSmoothingEnabled = true;
@@ -2187,10 +2236,10 @@ text = file;
 		*/
 		
 		if(!EDITOR.shouldResize && !resizeOverride) {
-console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
-		return;
+			console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
+			return;
 		}
-
+		
 		//console.warn(UTIL.getStack("EDITOR.resize!"));
 		
 		EDITOR.shouldResize = false; // Prevent this function from running again
@@ -2202,7 +2251,7 @@ console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize);
 			console.warn("Not resizing because oldFullScreenWidget=", oldFullScreenWidget);
 			return;
 		}
-
+		
 		
 		
 		console.time("resize");
@@ -2253,8 +2302,8 @@ console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize);
 		var columns = document.getElementById("columns");
 		var virtualKeyboard = document.getElementById("virtualKeyboard2");
 		if(!footer) {
-console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
-		return;
+			console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
+			return;
 		}
 		
 		var headerHeight = parseInt(header.offsetHeight);
@@ -2431,7 +2480,7 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
 			
 			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
-		
+			
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.width = EDITOR.view.canvasWidth + "px";
 			dashboard.style.height = EDITOR.view.canvasHeight + "px";
@@ -2529,14 +2578,14 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		/*
 			function showCanvasNodes() {
 			for(var i=0; i<canvasNodes.length; i++) {
-				// Do not show hidden fileCanvas's
-				if(canvasNodes[i].getAttribute("class") != "fileCanvas") {
-					//console.log("canvasNodes[" + i + "].getAttribute('class')=" + canvasNodes[i].getAttribute("class"));
-					canvasNodes[i].style.display = "block";
-				}
+			// Do not show hidden fileCanvas's
+			if(canvasNodes[i].getAttribute("class") != "fileCanvas") {
+			//console.log("canvasNodes[" + i + "].getAttribute('class')=" + canvasNodes[i].getAttribute("class"));
+			canvasNodes[i].style.display = "block";
+			}
 			}
 			EDITOR.renderNeeded();
-		}
+			}
 		*/
 	}
 	
@@ -2548,9 +2597,9 @@ console.warn("Not resizing because no footer!"); // Page has not yet fully loade
 		if(typeof callback !== "function") throw new Error("Ssecond argument: callback - needs to be a function! Did you mean EDITOR.addEvent ?");
 		
 		var options = {fun: callback};
-
-if(typeof order == "number") options.order = order;
-else if(typeof order == "object") {
+		
+		if(typeof order == "number") options.order = order;
+		else if(typeof order == "object") {
 			for(var name in order) {
 				options[name] = order[name];
 			}
