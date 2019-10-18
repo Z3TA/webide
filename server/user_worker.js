@@ -269,7 +269,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	if(pathToFileOrDir == undefined) throw new Error("pathToFileOrDir=" + pathToFileOrDir);
 	
-	console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
+	//console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 	
