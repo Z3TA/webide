@@ -7710,6 +7710,8 @@ function main() {
 				platform: login.platform
 		};
 		
+			if(login.homeDir != "/") EDITOR.stat("nochroot");
+			
 		if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
 		
 		EDITOR.installDirectory = login.installDirectory || "/";
