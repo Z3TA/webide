@@ -22,28 +22,18 @@ and make it run <i>live</i> in the cloud with one click,
 
 <h1>WebIDE</h1>
 
-<p>WebIDE is develped by <a href="https://webtigerteam.com/editor/">Web Tiger Team</a>.
-It is a cloud/web editor/IDE built in Node.js/JavaScript.</p>
-
-<p>The goal with WebIDE is to be the best editor for developing progressive web apps (PWA) and web sites using vanilla JavaScript.<br>
-This will be achived by having:</p>
-
-<ul>
-	<li>Static analysis and type inference for <i>vanilla</i> JavaScript</li>
-	<li>Performance comparable to native text editors</li>
-</ul>
+<p>WebIDE is an online environment for developing Node.JS, progressive web apps (PWA), websites, blog, etc.</p>
 
 
-<h2>WebIDE selling points</h2>
+<h3>Node.js and databases</h3>
 
-<ul>
-	<li>Runs in the browser</li>
-	<li>JavaScript support</li>
-	<li>Written in vanilla JS with shared source</li>
-	<li>Fast and Simple.</li>
-</ul>
+<p>WebIDE is a environment where you can not just run Node.JS code, you can also create databases,
+and push your creations into "production" where they run live in the cloud without going to sleep.</p>
 
-<h3>Cloud editor</h3>
+<p>When you run a Node.js Script, a HTTPS endpoint is automatically created so you can access it from app.user.webide.se<nr>
+(There is also a wwwpub folder where you can put static web content, accessible from user.webide.se.)</p>
+
+<h3>Self-hostable</h3>
 <ul>
 	<li>Separate backend/frontend lets you run the server on any PC/VPS/server (npm install -g webide.se) 
 	and connect to it from anywhere</li>
@@ -61,14 +51,14 @@ This will be achived by having:</p>
 
 <h3>JavaScript support</h3>
 <ul>
-	<li>Incremental JavaScript parsing (in web worker)</li>
+	<li>Incremental JavaScript parsing</li>
 	<li>Function list for quick navigation</li>
-	<li>Automatic indentation</li>
+	<li><b>Automatic indentation</b> (WebIDE is the only editor I'm aware of that has <a href="https://youtu.be/JF_CW9tp8mk">fully automated indentation</a>)</li>
 	<li>Auto-completion and function-argument hinting.</li>
 	<li>Shows console.log messages inside the editor</li>
 	<li>Run Node.JS scripts.</li>
 	<li>Automatic quote insertion</li>
-	<li>Different colors for strings, comments and HTML tags (also inside strings/templates)</li>
+	<li>Semantic coloring for strings, comments and HTML tags (also inside strings/templates)</li>
 </ul>
 
 <h3>Edit files remotely</h3>
@@ -137,63 +127,28 @@ This will be achived by having:</p>
 <p>Despite the above features, the editor is pretty fast and light-weight. Total download size is only 2 MB.</p>
 
 
-<h2>Use cases</h2>
-
-<h3>In the classroom</h3>
-
-<p>Teachers can run the server on their PC or a dedicated box, so each student get access to the same developer enviroment.</p>
-
-
-<h3>Develop in the cloud or LAN</h3>
-
-<p>Have the same environment in development as in production. Always accessible from any computer. Similar to SSH -X on unix/Linux.<br>
-
-
-<h3>Build your own cloud IDE</h3>
-
-<p>Use WebIDE as base for your own web based IDE, for example for integration with your cloud offerings.
-Or CPU/board development. Or a new programming language.</p>
-
-
-<h3>Use it for local development</h3>
-
-<p><b>npm install -g webide.se</b> and you will have a simple, extendable editor for JavaScript and web development.</p>
 
 
 <h3>Web site editor</h3>
 
-<p>The editor can be open in WYSIWYG mode,
+<p>The editor can be open web sites in WYSIWYG mode,
 with GUI buttons for preview and publishing using the built in static site generator ...</p>
 
 
-<h2>Also for non-technical users</h2>
+<h2>Simple work-flows</h2>
 
-<p>The editor is not only for developers, it can also be setup so that a non-technical user can use it,
-for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. 
-with simplified source control management.<br>
-For example when using the built in static site generator together with a software repository, 
-it will automatically pull new updates from the repo,
+<p>For example when using the built in static site generator together with a software repository, 
+WebIDE will automatically pull new updates from the repo,
 merge if necessary, and ask the user to write a commit message before publishing.</p>
 
 
-<h2>Architecture</h2>
-
-<p>WebIDE is made in JavaScript, HTML and CSS. And it use hardware accelerated HTML 2d Canvas for text rendering.</p>
-
-<p>WebIDE's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
-
-<p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
-And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
-
-<p>WebIDE has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-Each plugin is a independent unit and do not depend on, or interfere with other plugins.<br>
-Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 
 
 <h2>What makes WebIDE better then existing editors/IDE's, or what does it do differently !?</h2>
 
-<p>WebIDE is written in "vanilla" JavaScript, eg. no compilation or build step,
-it's easy to add new functionality, and all you have to do to see the new changes is to refresh/reload. 
+<p>WebIDE is written by one guy in simple "vanilla" JavaScript.
+It's easy to add new functionality, and all you have to do to see the new changes is to refresh/reload,
+there is no build/compilation step. 
 Or if you are working on a plugin, press <kbd>F7</kbd> key to hot reload the plugin without refreshing.</p>
 
 <p>The editor <i>does Not</i> use the document object model (DOM) or "content-editable" for text rendering!
@@ -202,7 +157,8 @@ WebIDE uses 2d Canvas, which is faster then the DOM.</p>
 <p>When editing a file, it's parsed client-side an every key stroke,
 which enables automatic indentation, and "IDE" features like function-list and auto-complete.</p>
 
-<p>You can run the cloud editor on your computer, mobile phone, or your own server, not only the client, but also the server.
+<p>You can run the cloud editor on your computer, mobile phone, or your own server, not only the client, 
+but also the server.
 Eg. you could host the editor on your mobile phone or laptop, then let others connect to it via Wifi.</p>
 
 
@@ -225,6 +181,19 @@ That editor was however dismissed, because there where "really no need to see th
 <p>The web environment and JavaScript allows rapid development and we would like to experiment with stuff like speech-to-text,
 and visual aids to show which parts of the code does what, what parts are hot, the scope of variables etc.</p>
 
+
+<h2>WebIDE Architecture</h2>
+
+<p>WebIDE is made in JavaScript, HTML and CSS. And it use hardware accelerated HTML 2d Canvas for text rendering.</p>
+
+<p>WebIDE's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
+
+<p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
+And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
+
+<p>WebIDE has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
+Each plugin is a independent unit and do not depend on, or interfere with other plugins.<br>
+Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 
 
 <a name="local"><h3>Run WebIDE locally</h3>
