@@ -5,7 +5,7 @@
 
   <h1>Instructions for hosting the editor yourself</h1>
   
-  <p>Note that the editor can be <a href="../about/download_instructions.htm">downloaded and run like a native app</a>.</p>
+<p>Note that the editor can be <a href="../about/download_instructions.htm">downloaded and run like a native app</a>.</p>
 	
 	<p>This is a tutorial for setting up the <i>back-end/server</i> only (which can then be accessed from a web browser).</p>
   
@@ -71,7 +71,16 @@ When setting up the server for multiple users however it's recommended to host i
 	
 	<p>For example for a software team or school.</p>
 	
-<p>This might require a bit of fiddling and is currently covered in README.txt under "Running as a cloud editor"</p>
+<textarea cols="60" rows="2">
+sudo ./cloudide_install.js -email your@mail.com -host yourdomain.com
+</textarea>
+
+<p>This script will use apt to install Nginx, Apparmor, etc. And setup systemd services and Nginx site config.</p>
+
+<p>If you are running this in a cointainer you need to forward port 80 and 443 (Http and httpS) to it.</p>
+
+<p>If you get stuck you can find more info in theREADME.txt under "Running as a cloud editor".<br>
+You can also e-mail editor@webtigerteam.com for support.</p>
 	
 
   

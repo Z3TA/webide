@@ -21,4 +21,5 @@ bundle.js
 etc/userdir_skeleton/nodejs_examples/pwa_push_notifications/keys.dat
 client/test_bookmarklet.htm
 hosted_chrome_app/webide.zip
+guides/preview/*
 

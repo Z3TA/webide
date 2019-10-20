@@ -35,6 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Work on first time use experience. Installing the editor and using it as a cloud editor/IDE.
+
+
+
+
 regression: Node.js console.log messages are no longer inlined!
 Both in Firefox and Chrome, wtf!
 Why doesn't the test fail!!??
