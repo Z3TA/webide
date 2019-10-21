@@ -68,7 +68,7 @@ console.warn("A2HS: Already got appinstalled event!");
 		
 		EDITOR.windowMenu.remove(windowMenuAdd2HS);
 		
-		var yes = "OK, I will click on the JZ icon";
+		var yes = "OK, I will click on the WebIDE icon";
 		var no = "No, I'll keep using this"
 		confirmBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
 			if(answer == yes) {
