@@ -35,20 +35,56 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+regression: Pressing tab inside a function arguments should show the function parameters!
+
+
+
+
+Most money seem to be in learning and tutorials!! ...
+
+
+Make the welcome message a playback,
+
+Assume the user has no idea what he/she clicked on ...
+Explain what they are looking at
+
+Make a introduction video, 
+from "signup" to making an app!?
+
+Hello and welcome to WebIDE, an online code editor and integrated web developer environment
+for creating Node.JS apps and websites.
+This is a playback which uses the collaboration feature, so you can edit the code while watching the tutorial.
+Lets get quick started by create a "hello world" micro-service in Node.JS ...
+
+We will use the http module,
+
+create a server
+
+instead of using a port number we will use a unix socket and WebIDE will automatically create a HTTPS endpoint for us.
+
+! Need a way to show Node.JS documentation. I always read the documentation in a web browser, then copy paste ...
+I actually don't know any module/libraries by heart
+
+
+
+
+
+show the editors main features ...
+
+* automatic indentation: Show some coding
+* Using the function list to navigate
+* Run a nodejs (script http-server example?)
+
+
+
 Work on first time use experience. Installing the editor and using it as a cloud editor/IDE.
 
 
 
 
-regression: Node.js console.log messages are no longer inlined!
-Both in Firefox and Chrome, wtf!
-Why doesn't the test fail!!??
 
 
-Make the welcome message a playback, that shows the editors main features ...
-* automatic indentation: Show some coding
-* Using the function list to navigate
-* Run a nodejs (script http-server example?)
 
 ---
 ?playback=playbacksourcefile

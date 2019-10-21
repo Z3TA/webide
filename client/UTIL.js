@@ -2411,9 +2411,25 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		a = a.trim();
 		b = b.trim();
 		
+		/*
+			
+			problem: Windows sometimes use three slashes in file:/// But Linux only uses two. 
+			solution: Only replace 3 slashes if we find a drive-letter
+			
+		*/
+		
+		var reDriveLetter = /^[a-zA-Z]+:(\/|\\)+/;
+		
 		// Node.js on Windows
-		if(a.indexOf("file:///") == 0) a = a.slice(8);
-		if(b.indexOf("file:///") == 0) b = b.slice(8);
+		if(a.indexOf("file:///") == 0) {
+a = a.slice(8);
+			if(!a.match(reDriveLetter) && a[0] != "/") a = "/" + a;
+		}
+		if(b.indexOf("file:///") == 0) {
+b = b.slice(8);
+			if(!b.match(reDriveLetter) && b[0] != "/") b = "/" + b;
+		}
+		
 		
 		if(a.indexOf("file://") == 0) a = a.slice(7);
 		if(b.indexOf("file://") == 0) b = b.slice(7);

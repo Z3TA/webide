@@ -210,6 +210,7 @@ saveAndRun(file);
 				EDITOR.addInfo(loc.row, col, text, loc.file, level);
 			}
 }
+		else throw new Error("Unknown nodejsDebugMsg: json=" + JSON.stringify(json));
 	}
 	
 	function showRunNodejsScriptMenuItem() {
@@ -839,7 +840,7 @@ alertBox("No file open!");
 	
 	function appendFile(file, msg) {
 		
-		console.log("appendFile: " + file.path + " msg=" + msg);
+		console.log("appendFile: " + file.path + " msg=" + JSON.stringify(msg));
 		
 		file.noCollaboration = true; // Don't send changes of this file to collaborators (they will get the changes via the server anyway)
 		
@@ -912,13 +913,18 @@ alertBox("No file open!");
 		
 		for (var i=0; i<callFrames.length; i++) {
 			for(var path in EDITOR.files) {
-				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.home, path), callFrames[i].url) ) return {
+				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.home, path), callFrames[i].url) ) {
+return {
 					file: EDITOR.files[path],
 					row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
 					col: callFrames[i].columnNumber
 				};
 			}
+else {
+					console.log("findFile: Not the same: path=" + path + " callFrames[" + i + "].url=" + callFrames[i].url);
+}
 		}
+}
 		
 		return null;
 	}
@@ -926,6 +932,41 @@ alertBox("No file open!");
 	
 	
 	// TEST-CODE-START
+	
+	EDITOR.addTest(1, false, function nodeJsInlineConsoleLogTest(callback) {
+		
+		var data = '\nconsole.log("Hello world!");\n\n';
+		var filePath = "/nodeJsInlineConsoleLogTest.js";
+		
+		EDITOR.saveToDisk(filePath, data, function(err) {
+			if(err) throw err;
+			
+			EDITOR.openFile(filePath, function(err, file) {
+				if(err) throw err;
+				
+				runNodeJsScript();
+				
+				setTimeout(function() {
+					
+					var info = EDITOR.info[0];
+					
+					if(!info) throw new Error("No info bubble visible!");
+					
+					if(info.row != 1) throw new Error("info=" + JSON.stringify(info))
+					
+					// Cleanup
+					EDITOR.closeFile(file);
+					
+					EDITOR.deleteFile(file.path);
+					
+					callback(true);
+				}, 500);
+				
+			});
+			
+		})
+		
+	});
 	
 	EDITOR.addTest(function testNodeErroMessage1(callback) {
 		
