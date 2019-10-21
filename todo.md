@@ -35,6 +35,8 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+when making a release: tag the commit using semver !?
+
 Most money seem to be in learning and tutorials!! ...
 
 

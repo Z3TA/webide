@@ -444,7 +444,7 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	cancel.addEventListener("click", function(clickEvent) {callback(null); dialog.close(clickEvent)}, false);
 	
-	
+	if(!options.rows) {
 	input.addEventListener("keydown", function(keyDownEvent) {
 		var enterKey = 13;
 		var escapeKey = 27;
@@ -458,7 +458,7 @@ function promptBox(msg, options, callback, recursionCount) {
 		// Clicking escape should be same as cancel
 		else if(keyDownEvent.keyCode == escapeKey) cancel.click();
 	});
-	
+	}
 	
 	dialog.div.appendChild(input);
 	dialog.div.appendChild(cancel);

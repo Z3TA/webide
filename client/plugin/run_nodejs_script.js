@@ -205,6 +205,8 @@ saveAndRun(file);
 			
 			var loc = findFile(json.console.stack);
 			
+			if(!loc.file) throw new Error(loc.filePath + " no longer open ?");
+			
 			if(loc) {
 				var col = columnMinusIndention(loc.file, loc.row, loc.col);
 				EDITOR.addInfo(loc.row, col, text, loc.file, level);
@@ -915,7 +917,8 @@ alertBox("No file open!");
 			for(var path in EDITOR.files) {
 				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.home, path), callFrames[i].url) ) {
 return {
-					file: EDITOR.files[path],
+						filePath: path,
+						file: EDITOR.files[path],
 					row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
 					col: callFrames[i].columnNumber
 				};
@@ -955,7 +958,7 @@ else {
 					if(info.row != 1) throw new Error("info=" + JSON.stringify(info))
 					
 					// Cleanup
-					EDITOR.closeFile(file);
+					EDITOR.closeFile(file.path);
 					EDITOR.closeFile("/nodeJsInlineConsoleLogTest.js.stdout");
 					
 					if(nodeJsBanner) nodeJsBanner.hide();
