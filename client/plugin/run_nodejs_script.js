@@ -933,7 +933,7 @@ else {
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, false, function nodeJsInlineConsoleLogTest(callback) {
+	EDITOR.addTest(false, function nodeJsInlineConsoleLogTest(callback) {
 		
 		var data = '\nconsole.log("Hello world!");\n\n';
 		var filePath = "/nodeJsInlineConsoleLogTest.js";
@@ -963,7 +963,7 @@ else {
 					EDITOR.deleteFile(file.path);
 					
 					callback(true);
-				}, 500);
+				}, 1000);
 				
 			});
 			

@@ -3220,7 +3220,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(4, false, testCollaboration);
+	EDITOR.addTest(7, false, testCollaboration);
 	
 	
 	function testUndoRedoWhileInCollabMode(callback) {
@@ -3337,7 +3337,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	}
 	
 	// 5
-	EDITOR.addTest(5, false, testUndoRedoWhileInCollabMode);
+	EDITOR.addTest(1, false, testUndoRedoWhileInCollabMode);
 	
 	function testUndoRedo(callback) {
 		var Z = 90;
@@ -3586,7 +3586,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 					// We should now have recived our own echo
 					var lastChange = fileChangeEvents[file.path][fileChangeOrder][0];
 					
-					if(lastChange.text != "m") throw new Error("Unexpected lastChange=" + JSON.stringify(lastChange));
+					if(!lastChange || lastChange.text != "m") throw new Error("Unexpected lastChange=" + JSON.stringify(lastChange) + " fileChangeOrder=" + fileChangeOrder + " fileChangeEvents=" + JSON.stringify(Object.keys(fileChangeEvents)) + " fileChangeEvents[" + file.path + "]=" + JSON.stringify(fileChangeEvents[file.path]));
 					
 					fileChangeOrder = 2; // So that the following will get order=3
 					f({change: "insert", index: 3, text: "g"});
@@ -3624,14 +3624,14 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(typeof callback != "function") return false;
 	}
 	
-	EDITOR.addTest(false, testEditAtTheSameTime);
+	EDITOR.addTest(6, false, testEditAtTheSameTime);
 	
 	function timeSerial(func) {
 		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");
 		
 		var timers = [];
 		// Wait between each step
-		var timeMult = 100;
+		var timeMult = 200;
 		
 		var timer;
 		for(var i=0; i<func.length; i++) {

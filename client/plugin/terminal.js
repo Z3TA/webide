@@ -1464,7 +1464,7 @@ file.insertLineBreak();
 	// TEST-CODE-START
 	
 	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
-	EDITOR.addTest(10000, false, function openFileFromTerminal(callback) {
+	EDITOR.addTest(false, function openFileFromTerminal(callback) {
 		
 		EDITOR.openFile("terminal1337", '', function(err, file) {
 			
@@ -1498,7 +1498,9 @@ file.insertLineBreak();
 				// Wait until the file have been opened, then close it
 				setTimeout(function closeTheFile() {
 					console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
+					
 					EDITOR.closeFile(filePath);
+					
 					filesClosed++;
 					if(filesClosed==filesOpened) {
 						// Test finished!

@@ -2110,7 +2110,8 @@
 		
 	});
 	
-	EDITOR.addTest(1000, false, function testDoubleLogin(callback) {
+	// This test might screw up other tests!?
+	EDITOR.addTest(700000, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice
 		
 		var userValue = "";
