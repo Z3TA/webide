@@ -7761,7 +7761,7 @@ function main() {
 	});
 	
 		CLIENT.on("workerClose", function() {
-			alertBox("workerClose event!");
+			//alertBox("workerClose event!");
 			fileOpenExtraCallbacks.length = 0;
 			EDITOR.openFileQueue.length = 0;
 	});
