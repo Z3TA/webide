@@ -21,7 +21,7 @@ var DEFAULT_FOLDER_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = re
 
 var FIND_FILES_ABORTED = false;
 var FIND_FILES_IN_FLIGHT = 0;
-
+var FIND_IN_FILES_ABORTED = false;
 var ECHO_COUNTER = 0;
 
 API.countLines = function countLines(user, json, callback) {
@@ -2799,6 +2799,8 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	
 	if(!caseSensitive) flags += "i";
 	
+	FIND_IN_FILES_ABORTED = false;
+	
 	searchDir(searchPath, 0);
 	
 	function searchDir(folderPath, folderDepth) {
@@ -2813,7 +2815,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 		API.listFiles(user, {pathToFolder: folderPath}, function gotFileList(err, fileList) {
 			
-			if(abort) return console.log("Aborting file search/replace");
+			if(FIND_IN_FILES_ABORTED) return console.log("Aborting file search/replace");
 			
 			if(err) return abortError(err);
 			
@@ -2860,17 +2862,17 @@ searchDir(fileList[i].path, folderDepth);
 		
 		console.log("continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(abort) return console.log("Aborting from continueSearchFiles()");
+		if(FIND_IN_FILES_ABORTED) return console.log("Aborting from continueSearchFiles()");
 		if(done) return console.log("Already done! from continueSearchFiles()");
 		
 		if(totalFiles >= searchMaxFiles) {
 			doneFinish("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
-			abort = true;
+			FIND_IN_FILES_ABORTED = true;
 			return;
 		}
 		else if(totalMatches >= maxTotalMatches) {
 			doneFinish("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
-			abort = true;
+			FIND_IN_FILES_ABORTED = true;
 			return;
 		}
 		else while(fileQueue.length > 0 && filesBeingSearched < maxFilesToSearchAtTheSameTime) searchNextFileInQueue();
@@ -2883,7 +2885,7 @@ searchDir(fileList[i].path, folderDepth);
 		
 		console.log("doneMaybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(abort) return console.log("Aborting from doneMaybe()");
+		if(FIND_IN_FILES_ABORTED) return console.log("Aborting from doneMaybe()");
 		if(done) throw new Error("We should not be calling doneMaybe() if done!");
 		
 		sendProgress();
@@ -2899,7 +2901,7 @@ searchDir(fileList[i].path, folderDepth);
 	
 		console.log("searchNextFileInQueue: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(abort) return console.log("Aborting from searchNextFileInQueue()");
+		if(FIND_IN_FILES_ABORTED) return console.log("Aborting from searchNextFileInQueue()");
 		if(done) throw new Error("We should not be calling searchNextFileInQueue() if !");
 		
 		var filePath = fileQueue.pop(); // Last in, first out
@@ -3025,7 +3027,7 @@ searchDir(fileList[i].path, folderDepth);
 	}
 	
 	function doneFinish(msg) {
-		if(abort) throw new Error("Called done while aborting!");
+		if(FIND_IN_FILES_ABORTED) throw new Error("Called done while aborting!");
 		if(done) throw new Error("Already done!");
 		
 		done = true;
@@ -3040,8 +3042,8 @@ searchDir(fileList[i].path, folderDepth);
 	}
 	
 	function abortError(err) {
-		if(!abort) findReplaceInFilesCallback(err);
-		abort = true;
+		if(!FIND_IN_FILES_ABORTED) findReplaceInFilesCallback(err);
+		FIND_IN_FILES_ABORTED = true;
 	}
 	
 	function sendProgress() {
@@ -3247,6 +3249,13 @@ API.abortFindFiles = function abortFindFiles(user, json, abortFindFilesCallback)
 	FIND_FILES_ABORTED = true;
 abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 	}
+
+API.abortFindInFiles = function abortFindInFiles(user, json, callback) {
+	FIND_IN_FILES_ABORTED = true;
+	callback(null);
+}
+
+
 
 API.run = function run(user, json, callback) {
 	// Runs a shell command

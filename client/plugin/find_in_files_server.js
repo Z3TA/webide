@@ -467,6 +467,18 @@ console.warn("Could not find the search string that was used!");
 		buttonBrowseFolder.setAttribute("class", "button");
 		buttonBrowseFolder.setAttribute("value", "Browse folder");
 		
+		var buttonCancel = document.createElement("input");
+		buttonCancel.setAttribute("type", "button");
+		buttonCancel.setAttribute("class", "button");
+		buttonCancel.setAttribute("value", "Cancel search");
+		buttonCancel.onclick = function() {
+			
+			CLIENT.cmd("abortFindInFiles", function(err) {
+				if(err) alertBox("Failed to cancel find in files!", "CMD_FAIL", "error");
+				else alertBox("Find in files canceled!");
+			});
+			
+		}
 		
 		var labelRegexOption = document.createElement("label");
 		labelRegexOption.setAttribute("for", "regexOption");
@@ -586,6 +598,11 @@ console.warn("Could not find the search string that was used!");
 		td = document.createElement("td");
 		td.appendChild(inputFileFilter);
 		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(buttonCancel);
+		tr.appendChild(td);
+		
 		
 		table.appendChild(tr);
 		
