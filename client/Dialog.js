@@ -354,7 +354,9 @@ function promptBox(msg, options, callback, recursionCount) {
 		"isPassword",
 		"defaultValue",
 		"dialogDelay",
-		"selectAll"
+		"selectAll",
+		"placeholder",
+		"rows"
 	];
 	
 	for(var option in options) {
@@ -399,10 +401,18 @@ function promptBox(msg, options, callback, recursionCount) {
 	else {
 		var input = document.createElement("textarea");
 		input.setAttribute("type", "text");
+		
+		if(options.rows) {
+			input.setAttribute("rows", options.rows);
+		}
 	}
 	
 	input.setAttribute("class", "input prompt");
 	input.setAttribute("focus", "true");
+	
+	if(options.placeholder) {
+		input.setAttribute("placeholder", options.placeholder);
+	}
 	
 	if(defaultValue) {
 		if(isPassword) input.setAttribute("value", defaultValue);
