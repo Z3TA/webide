@@ -35,11 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-
-regression: Pressing tab inside a function arguments should show the function parameters!
-
-
-
+Able to cancel a "find in files" search.
 
 Most money seem to be in learning and tutorials!! ...
 

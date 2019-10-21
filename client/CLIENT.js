@@ -411,6 +411,8 @@ reconnectTimeoutTime += 10000;
 				console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
 			}
 			
+			if(json.code && json.code == "WORKER_CLOSE") CLIENT.fireEvent("workerClose");
+			
 			if(json.resp) {
 				var resp = json.resp;
 				for(var method in resp) {

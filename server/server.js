@@ -2174,7 +2174,7 @@ function sockJsConnection(connection) {
 									}, recreateUserProcessSleepTime);
 								}
 								
-								send({msg: msg, id: 0});
+								send({msg: msg, code: "WORKER_CLOSE", id: 0});
 								
 							}
 							

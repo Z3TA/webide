@@ -919,7 +919,6 @@ usePseudoClipboard = false;
 		}
 		
 		if(EDITOR.openFileQueue.indexOf(path) != -1) {
-			
 			console.log("File in EDITOR.openFileQueue! path=" + path);
 			
 			/*
@@ -948,6 +947,21 @@ usePseudoClipboard = false;
 				console.log("Pushing callback=" + UTIL.getFunctionName(callback) + " to fileOpenExtraCallbacks for path=" + path);
 				
 				fileOpenExtraCallbacks[path].push(callback);
+				
+				/*
+					problem: The server might have restarted and will thus not call back, but the client refuses to open the file because it's still in the open file queue
+					solution: Detect server restarts and clear the queue
+				*/
+				
+				setTimeout(function() {
+					if(fileOpenExtraCallbacks.hasOwnProperty(path)) {
+						console.warn("File still not opened ? path=" + path);
+						// Happens when you open a file, but get disconnected before it opens, server restarts and never calls back.
+						// But cal also be a slow network/drive. 
+						//alertBox("The file is still in the open file queue: " + path + ". Unless you are on a slow network/drive it's best to restart the editor!");
+					}
+				}, 2000);
+				
 				return; // Don't do anything else
 			}
 			else alertBox("Please wait ... Opening file: " + path);
@@ -7746,10 +7760,16 @@ function main() {
 		});
 	});
 	
-	CLIENT.on("connectionLost", function() {
-		EDITOR.user = null;
+		CLIENT.on("workerClose", function() {
+			alertBox("workerClose event!");
+			fileOpenExtraCallbacks.length = 0;
+			EDITOR.openFileQueue.length = 0;
 	});
 	
+		CLIENT.on("workerRestart", function() {
+			EDITOR.user = null;
+		});
+		
 	
 	var progressValue = 0;
 	var progressMax = 1;
