@@ -35,8 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Able to cancel a "find in files" search.
-
 Most money seem to be in learning and tutorials!! ...
 
 

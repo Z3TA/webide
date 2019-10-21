@@ -956,6 +956,9 @@ else {
 					
 					// Cleanup
 					EDITOR.closeFile(file);
+					EDITOR.closeFile("/nodeJsInlineConsoleLogTest.js.stdout");
+					
+					if(nodeJsBanner) nodeJsBanner.hide();
 					
 					EDITOR.deleteFile(file.path);
 					
