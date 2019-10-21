@@ -7766,11 +7766,7 @@ function main() {
 			EDITOR.openFileQueue.length = 0;
 	});
 	
-		CLIENT.on("workerRestart", function() {
-			EDITOR.user = null;
-		});
 		
-	
 	var progressValue = 0;
 	var progressMax = 1;
 	CLIENT.on("progress", function handleProgress(increment) {
