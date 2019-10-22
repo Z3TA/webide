@@ -35,6 +35,24 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+f
+
+Issues with the recording functinality
+
+Make some tutorials
+
+Sell to ordinary people instead of developers ?
+Selling to developers seem to be a dead end. Either they are required to use Visual Studio. 
+Or they are using something they have no issues with. eg. they have set it up using plugins or what not to suit their workflow.
+It is impossible to make them change IDE unless there is some pain-point in their current setup.
+I used plain Notepad for a few years, yeh, it didn't even have line numbers. Then I swithed to an editor that had line numbers, and that was I all needed ...
+Until I tried another editor, which had a function-list, didn't know I wanted one until I saw it.
+Then the function list stopped working and I made my own editor ...
+So good luck 
+
+
+
 when making a release: tag the commit using semver !?
 
 Most money seem to be in learning and tutorials!! ...

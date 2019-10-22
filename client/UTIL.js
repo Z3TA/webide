@@ -156,9 +156,22 @@ var UTIL = {
 		return UTIL.getFolderName(folders[1+i]);
 	},
 	
+	removeDir: function removeDir(path, dir) {
+		// Removes the directory from a path
+		// example /foo/bar/baz, /foo/ becomes /bar/baz
+		var pathDelimiter = UTIL.getPathDelimiter(path);
+		var path = path.replace(dir, "");
+		
+		if(!UTIL.isInFilePath(path, dir)) throw new Error("path=" + path + " does not contain dir=" + dir);
+		
+		if(path.charAt(0) != pathDelimiter) path = pathDelimiter + path;
+		
+		return path;
+	},
+	
 	prependDir: function prependDir(path, folderToAddBefore, afterPath) {
 		// Adds a directory infront of a file path
-		// Example: adding baz to /foo/bar/ it becomes /baz/foo/bar/
+		// Example: prepending baz to /foo/bar/ it becomes /baz/foo/bar/
 		// If afterPath is specified, it will be added after that path
 		
 		var folders = UTIL.getFolders(path);
@@ -1445,6 +1458,7 @@ namedFunction = false;
 	},
 	
 	isInFilePath: function isInFilePath(filePath, folderPath) {
+		// Returns true if the folder is in the filepath. eg. if the file is inside the folder
 		filePath = filePath.replace(/\\/g, "/");
 		folderPath = filePath.replace(/\\/g, "/");
 		folderPath = UTIL.trailingSlash(folderPath);

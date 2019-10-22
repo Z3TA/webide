@@ -172,11 +172,13 @@
 			EDITOR.windowMenu.remove(winMenuUndo);
 			EDITOR.windowMenu.remove(winMenuRedo);
 			EDITOR.windowMenu.remove(winMenuInvite);
-			
+			EDITOR.windowMenu.remove(winMenuRecord);
+
 			// TEST-CODE-START
 			if(bindTest) {
 				EDITOR.unbindKey(testCollaboration);
 				EDITOR.unbindKey(testUndoRedo);
+				EDITOR.unbindKey(testEditAtTheSameTime);
 			}
 			// TEST-CODE-END
 			
@@ -310,7 +312,7 @@
 	
 	function saveRecord() {
 		
-		var audioFilePath = UTIL.joinPaths("/recordings/", recordInfo.startFile + ".ogg");
+		var audioFilePath = UTIL.joinPaths(EDITOR.user.home, "/recordings/", recordInfo.startFile + ".ogg");
 		
 		if(!recordInfo || !record) return alertBox("Unable to save recordning. No recorded input?");
 		
@@ -337,7 +339,7 @@ alertBox("No audio data!");
 				record: record
 			}
 			
-			EDITOR.openFile(UTIL.joinPaths("/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
+			EDITOR.openFile(UTIL.joinPaths(EDITOR.user.home, "/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
 		}
 	}
 	
@@ -392,7 +394,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			loadRecord(file);
 		}
 		
-		var wwwpub = "/wwwpub";
+		var wwwpub = UTIL.joinPaths(EDITOR.user.home, "/wwwpub/");
 		var rootFolder = UTIL.joinPaths(wwwpub, "/recordings/");
 		var audioFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".ogg");
 		var dataFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".json");
@@ -1563,13 +1565,15 @@ var file = fileOrData;
 	function playBackFile(filePath) {
 		// Prevent playback from overwriting existing files
 		
-		if(UTIL.firstFolder(filePath) == "playback") {
+		var playbackDir = UTIL.joinPaths(EDITOR.user.home, "/playback/");
+		
+		if(UTIL.isInFilePath(filePath, playbackDir)) {
 			// Note: The recorder might move the mouse over /foo/bar, but when playing back
 console.warn("Path already in playback folder: filePath=" + filePath);
 			return filePath;
 		}
 		
-		return UTIL.prependDir(filePath, "playback");
+		return UTIL.prependDir(filePath, playbackDir);
 	}
 	
 	function mousePlayback(mouseEvent, instant) {
@@ -2426,10 +2430,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			ignoreUndoRedoEvent[file.path].push(fileChangeEvent.order);
 		}
 		
+		var playbackDir = UTIL.joinPaths(EDITOR.user.home, "/playback/");
+		
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
 		}
-		else if(!collabMode && recordInfo && recordInfo.files && UTIL.firstFolder(file.path) == "playback" && recordInfo.files.hasOwnProperty(file.path.replace("playback" + UTIL.getPathDelimiter(file.path), ""))) {
+		else if(!collabMode && recordInfo && recordInfo.files && UTIL.isInFilePath(file.path, playbackDir) && recordInfo.files.hasOwnProperty(UTIL.removeDir(file.path, playbackDir))) {
 			// We always want to save changes if the file belongs to a playback file in order to transform the playback
 			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			fileChangeEvents[file.path][fileChangeEvent.order] = [];
