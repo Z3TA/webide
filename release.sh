@@ -10,6 +10,8 @@ if [[ "$@" =~ "-publish" ]]
 then
   node semver.js
   rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+  # Create a tag so that we can easily go back to last release
+  hg tag $(cat SEMVER)
 else
     echo "Not updating SEMVER because no -publish flag!"
 fi
