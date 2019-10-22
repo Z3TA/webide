@@ -96,6 +96,9 @@
 			//EDITOR.addRender(renderCollaborationCarets);
 			//EDITOR.on("moveCaret", collabMoveCaret);
 			
+			// Inititate all files that are already open
+			for(var filePath in EDITOR.files) collabFileOpen(EDITOR.files[filePath]);
+			
 			EDITOR.on("fileOpen", collabFileOpen);
 			EDITOR.on("fileClose", collabFileClose);
 			EDITOR.on("fileChange", collabFileChange);
@@ -1598,14 +1601,15 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		if(row != undefined && col != undefined) {
 			
-			// We actually have to transform mouse positions too! Even if they are just screen coordinates, the "tutorial" might point to a special word that might have moved elsewhere!
+			// We actually have to transform mouse positions too! 
+			// Even if they are just screen coordinates, the "tutorial" might point to a special word that might have moved elsewhere!
 			
 			var order = recordInfo.lastOrder;
 			var file = EDITOR.currentFile;
 			var changeEvents = fileChangeEvents[file.path];
 			if(!changeEvents) {
 				stopPlayback();
-				throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
+				throw new Error(  "file.path=" + file.path + " not in fileChangeEvents" + JSON.stringify( Object.keys(fileChangeEvents) )  );
 			}
 			if(!Array.isArray(changeEvents)) {
 				stopPlayback();
@@ -1618,14 +1622,14 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				col: col
 			}
 			var arr;
-			console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+			console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "  fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 			while(order++ < currentOrder) {
 				
 				arr = changeEvents[order];
 				
 				if(!arr) {
 					stopPlayback();
-					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) + " file.path=" + file.path + " recordInfo.files=" + JSON.stringify(recordInfo.files) );
+					throw new Error( "order=" + order + " not in changeEvents=" + JSON.stringify(changeEvents, null, 2) + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + " changeEvents=" + JSON.stringify(changeEvents) + " fileChangeEventOrderCounters[file.path]=" + JSON.stringify(fileChangeEventOrderCounters[file.path]) + " file.path=" + file.path + " recordInfo.files=" + JSON.stringify(recordInfo.files) );
 				}
 				
 				for (var i=arr.length-1; i>-1; i--) {
@@ -2379,7 +2383,9 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(row == undefined) throw new Error("row=" + row);
 		if(col == undefined) throw new Error("col=" + col);
 		
-		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+		if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) {
+			throw new Error("file.path=" + file.path + " not in fileChangeEventOrderCounters=" + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+		}
 		
 		var fileChangeEvent = {
 			filePath: file.path, 

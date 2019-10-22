@@ -35,6 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Info boxes when I use the arrow keys ...
+
+Run code when playback does !?
+Need to first save as ?
+
 Found bug when I was making a tutorial, use the recording playback to repeat the bug!
 But when I playback a second time the bug is not there!
 
