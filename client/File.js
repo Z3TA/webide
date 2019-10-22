@@ -28,7 +28,7 @@ var BrowserFile = File; // Native file object. todo: Rename our File variable to
 		file.hash == ""; // For storing the file hash for convenient access. Only the last saved state! To prevent overwriting changed files
 		
 		file.changed = false; // If the file has changed from last save
-		file.isSaved = false;
+		file.isSaved = false; // file.isSaved is the opposit of file.changed, but can only be true if the file is also saved as!
 		file.savedAs = false;
 		file.lastChange = new Date();
 		

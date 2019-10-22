@@ -85,7 +85,7 @@
 		"wireframe"
 	];
 	
-	// todo: use collabreod and collabundo when playing back so that the watcher can also type
+	var discoveryItem;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -95,6 +95,8 @@
 			
 			//EDITOR.addRender(renderCollaborationCarets);
 			//EDITOR.on("moveCaret", collabMoveCaret);
+			
+			recordWidget = EDITOR.createWidget(buildRecordWidget);
 			
 			// Inititate all files that are already open
 			for(var filePath in EDITOR.files) collabFileOpen(EDITOR.files[filePath]);
@@ -129,14 +131,12 @@
 			
 			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
-			recordWidget = EDITOR.createWidget(buildRecordWidget);
-			
 			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			winMenuRecord = EDITOR.windowMenu.add("Record tutorial", ["Tools", 30], recordWidget.show);
 			
-			var discoveryItem = document.createElement("img");
+			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");
 			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Invite collaborator";
@@ -157,6 +157,9 @@
 			
 			//EDITOR.removeRender(renderCollaborationCarets);
 			//EDITOR.removeEvent("moveCaret", collabMoveCaret);
+			
+			recordWidget.unload();
+			//recordWidget = null;
 			
 			EDITOR.removeEvent("fileOpen", collabFileOpen);
 			EDITOR.removeEvent("fileClose", collabFileClose);
@@ -191,6 +194,8 @@
 			EDITOR.unregisterAltKey(collabUndo);
 			EDITOR.unregisterAltKey(collabRedo);
 			EDITOR.unregisterAltKey(invite);
+			
+			EDITOR.discoveryBar.remove(discoveryItem);
 			
 		},
 		order: 100
@@ -506,6 +511,7 @@ alertBox("Failed to save audio: " + err.message);
 		var file = EDITOR.currentFile;
 		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
 		if(!file.savedAs) return alertBox("The file need to be saved-as before starting a recording! (empty file is fine, we just need a name!)");
+		if(!file.isSaved) return alertBox("The file need to be saved before starting a recording!");
 		
 		if(navigator.mediaDevices) navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(gotAudio).catch(function(err) {
 			alertBox("Failed to get microphone access! Error: " + err.message);
@@ -610,6 +616,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 			stopPlayback();
 			throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
 		}
+		if(changeEvents.length > 0) {
 		var currentOrder = fileChangeEventOrderCounters[file.path];
 		var arr;
 		console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
@@ -627,6 +634,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 			}
 			
 			console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+		}
 		}
 		
 		return fileChangeEvent;
@@ -1615,6 +1623,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				stopPlayback();
 				throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
 			}
+			if(changeEvents.length > 0) {
 			var currentOrder = fileChangeEventOrderCounters[file.path];
 			var fileChangeEvent = {
 				index: mouseEvent.index,
@@ -1638,14 +1647,16 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				
 				console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 			}
-			
-			// Transformed position
-			row = fileChangeEvent.row;
-			col = fileChangeEvent.col;
-			
-			if(row != mouseEvent.row || col != mouseEvent.col) {
-				console.log("mousePlayback: Transformed from row=" + mouseEvent.row + " to " + row + " and from col=" + mouseEvent.col + " to " + col + "");
+				
+				// Transformed position
+				row = fileChangeEvent.row;
+				col = fileChangeEvent.col;
+				
+				if(row != mouseEvent.row || col != mouseEvent.col) {
+					console.log("mousePlayback: Transformed from row=" + mouseEvent.row + " to " + row + " and from col=" + mouseEvent.col + " to " + col + "");
+				}
 			}
+			
 			
 			var indentation = file.grid[row] && file.grid[row].indentation || 0;
 			var indentationWidth = indentation * EDITOR.settings.tabSpace;
