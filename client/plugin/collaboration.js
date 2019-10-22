@@ -723,7 +723,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 			document.documentElement.appendChild(keyComboDiv);
 }
 
-		keyComboDiv.childNodes[0].innerText = EDITOR.getKeyFor(keyComboEvent.keyBindings[0]);
+		keyComboDiv.childNodes[0].innerText = EDITOR.getKeyFor(keyComboEvent.keyBindings[0], keyComboEvent.combo.sum);
 		keyComboDiv.childNodes[1].innerText = descriptions.join("\n");
 		keyComboDiv.classList.remove("hidden")
 

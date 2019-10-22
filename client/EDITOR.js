@@ -4970,7 +4970,7 @@ else {
 		//EDITOR.interact("showFile", window.event);
 	}
 	
-	EDITOR.getKeyFor = function(funName) {
+	EDITOR.getKeyFor = function(funName, actualComboSum) {
 		// Returns a string representing the key combination for the keyBidning "fun" name.
 		
 		if(typeof funName == "function") funName = UTIL.getFunctionName(funName); // Convert to string
@@ -5253,7 +5253,7 @@ else {
 					character = f.char;
 				}
 				
-				switch(f.combo) {
+				switch(actualComboSum || f.combo) {
 					case 1: combo = "SHIFT"; break;
 					case 2: combo = "CTRL"; break;
 					case 3: combo = "SHIFT + CTRL"; break;

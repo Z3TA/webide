@@ -35,8 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Info boxes when I use the arrow keys ...
-
 Run code when playback does !?
 Need to first save as ?
 
