@@ -35,6 +35,23 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+pwa_push_notifications demo is not working!
+
+
+Playback file when opening the editor for the first time:
+(speak while typing)
+
+[show a message and a bug play button, Play "name of file" (Intro/welcome) and a skip button]
+
+Hello and welcome to WebIDE, an editor for creating apps using Node.JS/JavaScript and web technology.
+
+
+Don't worry, your computer has not been taken over by a evil deamon, this is actually the playback feature of the editor.
+
+
+
+----
+
 Run code when playback does !?
 Need to first save as ?
 

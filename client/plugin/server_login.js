@@ -150,7 +150,10 @@
 						var createAccount = "Create a New account";
 						var loginAsGuest = "Login as Guest";
 						
-						return confirmBox("Welcome to " + window.location.hostname + " - a progressive web app (PWA) editor/IDE - with JavaScript and Node.JS support! Code, preview, and push to production. Inclduing database and Linux shell.\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+						// Note: The title in index.htm will be the header in Google search, and the text below will be the description!
+						// Google will only show the first 150 characters ...
+						//                .....................................................................................................................................................
+						return confirmBox("" + window.location.hostname + " lets you develop and also host websites and Node.JS services. Including database support and many cool features! \n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 							if(answer == loginAsGuest) {
 								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
 								userValue = "guest";
