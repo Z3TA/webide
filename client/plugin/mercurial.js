@@ -2819,7 +2819,7 @@ var error = err.message;
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
 						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, function authorized(username, password, save) {
-							if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: fileDirectory, user: username, pw: password, save: save}, hgPull);
 						}, "Pull");
 						return;
 					}
@@ -2829,14 +2829,14 @@ var error = err.message;
 					else throw err;
 				}
 				else {
-					mercurialUpdate();
+					mercurialUpdate(fileDirectory);
 				}
 			}
 		});
 	}
 	
 	
-	function mercurialUpdate(fileDirectory, reloadFiles) {
+	function mercurialUpdate(fileDirectory) {
 		
 		/*
 			For files opened in the editor:
