@@ -1,6 +1,6 @@
 
 function main() {
-
+	
 	var express = require('express');
 	var httpServer = express();
 	
@@ -13,7 +13,8 @@ function main() {
 	var server;
 	var sendPush;
 	getKeys(function(err, keys) {
-
+		if(err) throw err;
+		
 		server = startServer(httpServer, serverRunning);
 		sendPush = makeSendPush(keys);
 		
@@ -24,13 +25,13 @@ function main() {
 			res.status(200).send({publicKey: publicKey});
 		});
 		
-});
+	});
 	
 	function serverRunning(err, url) {
 		if(err) throw err;
 		
 		console.log("PWA push notifications example server listening on " + url);
-		}
+	}
 	
 	
 	httpServer.post("/api/pushSubscription", function(req, res) {
@@ -51,7 +52,7 @@ function makeSendPush(keys) {
 		var options = {
 			vapidDetails: {
 				// Put your e-mail, or URL to contact page in subject. More info: https://tools.ietf.org/html/draft-thomson-webpush-vapid-02
-				subject: 'mailto: ' + process.env.myName + "@" + process.env.tld, 
+				subject: 'mailto: ' + process.env.myName + "@" + process.env.tld,
 				
 				publicKey: keys.publicKey,
 				privateKey: keys.privateKey
@@ -82,8 +83,14 @@ function getKeys(cb) {
 	var fileName = "keys.dat";
 	fs.readFile(fileName, "utf8", function(err, data) {
 		if(err) {
-			if(err.code == "ENOENT") generate();
-			else throw err; // Unexpected error
+			if(err.code == "ENOENT") {
+				generate();
+				return;
+			}
+			else {
+				if(cb) return cb(err);
+				else throw err; // Unexpected error
+			}
 		}
 		else {
 			try {
@@ -92,21 +99,24 @@ function getKeys(cb) {
 			catch(err) {
 				console.warn("Unable to parse: " + err.message);
 				generate();
+				return;
 			}
+			cb(null, keys);
 		}
-		cb(null, keys);
 	});
 	
 	function generate() {
 		console.log("Generating new keys!");
-		var ebpush = require('web-push');
+		var webpush = require('web-push');
 		keys = webpush.generateVAPIDKeys();
+		
+		cb(null, keys);
+		
 		var data = JSON.stringify(keys);
 		fs.writeFile(fileName, data, function(err) {
 			if(err) throw err;
 			console.log("Keys saved!");
 		});
-		
 	}
 }
 
