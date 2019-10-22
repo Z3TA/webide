@@ -27,7 +27,7 @@
 	function positive() {
 		EDITOR.stat("happy_smile");
 		
-		askForFeedback("Thank you so much! If you want to give more details do so in the box below: ", {rows: 5, placeholder: "I like... It wouls also be cool if..."}, "Feedback, happy smile");
+		askForFeedback("Thank you so much! If you want to give more details do so in the box below: ", {rows: 5, placeholder: "I like... It would also be cool if..."}, "Feedback, happy smile");
 	}
 	
 	function negative() {
