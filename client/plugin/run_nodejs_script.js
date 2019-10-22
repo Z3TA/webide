@@ -309,7 +309,8 @@ saveAndRun(file);
 			
 			if(ignore.indexOf(msg.stderr) == -1) {
 				
-				var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr}) == SUCCESS);
+				var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr, level: 1}) == SUCCESS);
+				
 			}
 			
 			return;

@@ -35,6 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+When clicking pull and update you get "Error: Server: API error: No directory defined"
+
 pwa_push_notifications demo is not working!
 
 
