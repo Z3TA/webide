@@ -11,7 +11,7 @@
 	hg log foo.txt -r 15:tip
 	
 	Get heads (multiple heads means a merge is needed)
-	hg heads --topo
+	hg heads
 	
 	List files that need to merge:
 	hg resolve --list
@@ -1457,10 +1457,10 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["heads", "--topo"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["heads"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
-			console.log("hg heads --topo stderr=" + stderr);
-			console.log("hg heads --topo stdout=" + stdout);
+			console.log("hg heads stderr=" + stderr);
+			console.log("hg heads stdout=" + stdout);
 			
 			if(err) return callback(err);
 			if(stderr) return callback(stderr);

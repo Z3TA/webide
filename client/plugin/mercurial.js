@@ -462,7 +462,8 @@
 			If all files are resolved, and not changed (hg status): show commit widget
 			Open any unresolved file and show resolve widget
 			
-			2. Check for multible heads (hg heads --topo)
+			2. Check for multible heads (hg heads)
+			problem: Why using --topo ??? Problem: There is a hidden branch and the editor refuse to pull because of it (it can't merge the hidden head)
 			
 			If there are multible heads, ask the user if he/she wants to merge
 			If the merge was successful, continue ...
