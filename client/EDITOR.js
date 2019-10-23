@@ -2266,14 +2266,19 @@ usePseudoClipboard = false;
 			return;
 		}
 		
-		
-		
-		console.time("resize");
-		
 		pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
 		var windowHeight = parseInt(window.innerHeight);
 		var windowWidth = parseInt(window.innerWidth);
+		
+		// There is an annoying bug in Ubuntu that *sometimes* when the window is de-maximized
+		// The window is resized to 1x1 px and moved to the top left corner.
+		if(windowHeight < 100 && windowWidth < 100) {
+			window.resizeTo(100, 100);
+			return;
+		}
+		
+		console.time("resize");
 		
 		// Resize listeners (before)
 		var f = EDITOR.eventListeners.beforeResize.map(funMap);
