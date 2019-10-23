@@ -1563,7 +1563,7 @@ usePseudoClipboard = false;
 			if(file.path != path || !file.savedAs) {
 				if(EDITOR.files.hasOwnProperty(path) && EDITOR.files[path] != file) {
 					var err = new Error("There is already a file open with path=" + path);
-					if(callback) callback(err, path);
+					if(callback) return callback(err, path);
 					else throw err;
 				}
 				console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
@@ -1581,7 +1581,7 @@ usePseudoClipboard = false;
 							else {
 								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
-								callback(err);
+								return callback(err);
 							}
 						});
 					}
@@ -1649,7 +1649,7 @@ usePseudoClipboard = false;
 				
 				// Call back without an error even though some of the afterSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
-				if(callback) callback(null, path);
+				if(callback) return callback(null, path);
 				
 			}); 
 		}
