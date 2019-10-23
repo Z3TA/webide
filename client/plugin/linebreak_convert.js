@@ -3,6 +3,7 @@
 	"use strict";
 	
 	var menuItem;
+	var winMenu;
 	
 	EDITOR.plugin({
 		desc: "Convert line break convention between Unix and Windows format (LF vs CRLF)",
@@ -12,14 +13,17 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
+		//menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
+		
+		winMenu = EDITOR.windowMenu.add("Convert line-breaks", ["File", 17], convertLinebreaks);
 		
 		EDITOR.registerAltKey({char: "back", alt:3, label: "Convert line-breaks", fun: convertLinebreaks});
 		
 	}
 	
 	function unload() {
-		EDITOR.ctxMenu.remove(menuItem);
+		//EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.windowMenu.remove(winMenu);
 		EDITOR.unregisterAltKey(convertLinebreaks);
 	}
 	

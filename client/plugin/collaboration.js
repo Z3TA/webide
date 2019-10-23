@@ -129,7 +129,7 @@
 			EDITOR.registerAltKey({char: "ABC", label: "redo", alt: 2, fun: collabRedo});
 			EDITOR.registerAltKey({char: "(", label: "Invite collaborator", alt: 3, fun: invite});
 			
-			menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
+			//menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
 			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
@@ -174,7 +174,7 @@
 			CLIENT.removeEvent("clientLeave", collabLeave);
 			CLIENT.removeEvent("connectionLost", collabConnectionLost);
 			
-			EDITOR.ctxMenu.remove(menu);
+			//EDITOR.ctxMenu.remove(menu);
 			EDITOR.windowMenu.remove(winMenuUndo);
 			EDITOR.windowMenu.remove(winMenuRedo);
 			EDITOR.windowMenu.remove(winMenuInvite);

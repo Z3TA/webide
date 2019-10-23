@@ -31,7 +31,7 @@
 		desc: "Print to PDF",
 		load: function() {
 			
-			menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
+			//menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
 			
 			EDITOR.registerAltKey({char: ")", alt:3, label: "Print", fun: print2pdf});
 			
@@ -40,7 +40,7 @@
 		},
 		unload: function() {
 			
-			EDITOR.ctxMenu.remove(menuItem);
+			//EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.unregisterAltKey(print2pdf);
 			

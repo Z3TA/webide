@@ -8,7 +8,6 @@
 	var nameOfJS = "webide_js_overload.js";
 	var nameOfCSS = "webide_css_overload.css"
 	
-	var menuItem;
 	var winMenuEditorCustomization;
 	
 	EDITOR.plugin({
@@ -31,8 +30,6 @@
 		}
 		
 		EDITOR.on("afterSave", configurationMaybe);
-		
-		menuItem = EDITOR.ctxMenu.add("Editor customization", showLocalCustomization, 20);
 		
 		winMenuEditorCustomization = EDITOR.windowMenu.add("Customization scripts", ["Editor", 16], showLocalCustomization);
 		

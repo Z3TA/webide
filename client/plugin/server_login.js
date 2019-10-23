@@ -42,7 +42,7 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
-		menuItem = EDITOR.ctxMenu.add("Switch user", loginDialogFromMenu, 13);
+		//menuItem = EDITOR.ctxMenu.add("Switch user", loginDialogFromMenu, 13);
 		
 		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", ["Editor", 2], loginDialogFromMenu);
 		
@@ -96,7 +96,7 @@
 		
 		EDITOR.windowMenu.remove(winMenuLogin);
 		
-		if(menuItem) EDITOR.ctxMenu.remove(menuItem);
+		//if(menuItem) EDITOR.ctxMenu.remove(menuItem);
 	}
 	
 	function serverLoginLoginNeeded(loginNeededByCommand) {
