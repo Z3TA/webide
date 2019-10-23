@@ -54,16 +54,27 @@ desc: "Allow sharing stuff with other apps",
 		}
 		else {
 			
-			var newPath = UTIL.joinPaths("/wwwpub/", filePath); 
+			var newPath = UTIL.joinPaths(EDITOR.user.home, "/wwwpub/", filePath); 
 			
 			var move = "Move the file to wwwpub folder";
 			var copy = "Share a copy of the file ";
 			var cancel = "Cancel";
 			
 			confirmBox("Move or copy the file to " + newPath + " ?", [move, copy, cancel], function(answer) {
-				if(answer == move) return moveFile(filePath);
-				else if(answer == copy) return copyFile(filePath);
-				else if(answer != cancel) throw new Error("Unexpected answer=" + answer);
+				
+				if(answer == move || answer == copy) {
+					// Create the target folder first!
+					var directory = UTIL.getDirectoryFromPath(newPath);
+					EDITOR.createPath(directory, function(err) {
+						if(err) return alertBox("Unable to create directory=" + directory + " Error: " + err.message);
+						
+						if(answer == move) return moveFile(filePath);
+						else if(answer == copy) return copyFile(filePath);
+						else if(answer != cancel) throw new Error("Unexpected answer=" + answer);
+						
+					})
+				}
+				
 			});
 			
 		}
@@ -72,14 +83,14 @@ desc: "Allow sharing stuff with other apps",
 		
 		function moveFile(filePath) {
 			EDITOR.move(filePath, newPath, function(err, newPath) {
-				if(err) return alertBox(err.message);
+				if(err) return alertBox("Unable to move " + filePath + " Error: " + err.message);
 				else showUrl(newPath);
 			});
 		}
 		
 		function copyFile(filePath) {
 			EDITOR.copyFile(filePath, newPath, function(err, newPath) {
-				if(err) return alertBox(err.message);
+				if(err) return alertBox("Unable to copy " + filePath + " to " + newPath + " Error: " + err.message);
 				else showUrl(newPath);
 			});
 		} 
@@ -90,7 +101,10 @@ desc: "Allow sharing stuff with other apps",
 			
 			if(filePath instanceof File) filePath = filePath.path;
 			
-			if(filePath.indexOf("/wwwpub/") != 0) throw new Error("File is not in /wwwpub/ ! path=" + filePath);
+			var wwwpub = "/wwwpub/";
+			if(filePath.indexOf(wwwpub) != 0) wwwpub = UTIL.joinPaths(EDITOR.user.home, wwwpub);
+			
+			if(filePath.indexOf(wwwpub) != 0) throw new Error("File is not in " + wwwpub + " ! filePath=" + filePath);
 			
 			var loc = document.location;
 			
@@ -98,7 +112,7 @@ desc: "Allow sharing stuff with other apps",
 			
 			var editorUrl = loc.protocol + "//" + loc.hostname + "/";
 			
-			var path = filePath.replace("/wwwpub/", "");
+			var path = filePath.replace(wwwpub, "");
 			var fileUrl = loc.protocol + "//" + EDITOR.user.name + "." + loc.hostname + "/" + path;
 			var shareUrl = editorUrl + "?open=" + encodeURIComponent(fileUrl);
 			

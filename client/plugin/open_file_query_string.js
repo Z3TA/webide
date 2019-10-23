@@ -59,7 +59,7 @@
 						CLIENT.cmd("httpGet", {url: path}, function(err, text) {
 							if(err) {
 								console.log("openFileMaybe: Server failed to download url=" + path + " Error: " + err.message);
-								alertBox("Unable to get url: " + path + " Error: " + err.message);
+								alertBox("Unable to open/download the resource specified the query-string: " + path + " Error: " + err.message);
 								
 								if(callback) {
 callback(err) 

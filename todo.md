@@ -35,8 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Audio doesn't load when starting playback!?
-
 Hide context menu in playback when clicking !?
 
 When starting a playback, setup the editor like when it was recorded,

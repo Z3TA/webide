@@ -437,7 +437,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		
 		function whenAudioSaved(err) {
 			if(err) {
-alertBox("Failed to save audio: " + err.message);
+				alertBox("Failed to save audio! dataFolder=" + dataFolder + " Error: " + err.message);
 			}
 			else {
 				recordInfo.audioPath = publicAudioUrl;
@@ -450,11 +450,12 @@ alertBox("Failed to save audio: " + err.message);
 			
 			var dataStr = JSON.stringify(data, null, 2);
 			EDITOR.saveToDisk(dataFilePath, dataStr, function(err) {
-				if(err) return alertBox("Failed to save data: " + err.message);
+				if(err) return alertBox("Failed to save dataFilePath=" + dataFilePath + " Error: " + err.message);
 				
-				EDITOR.share(dataFilePath, clickEvent, function() {
-
+				EDITOR.share(dataFilePath, clickEvent, function(err) {
+					if(err) return alertBox("Failed to share dataFilePath=" + dataFilePath + " Error: " + err.message);
 				});
+				
 				
 			});
 		}
@@ -1740,6 +1741,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				if(mouseEvent.mouseButton != LEFT_CLICK) {
 					// Editor is hard coded to show the context meny when you click with anything but the main mouse button
 					EDITOR.ctxMenu.show(mouseX, mouseY);
+				}
+				else {
+					// Also hide it when left clicking
+					EDITOR.ctxMenu.hide();
 				}
 			}
 			else if(targetElement) {
