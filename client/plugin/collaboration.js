@@ -1291,7 +1291,7 @@ var file = fileOrData;
 			
 			// The file loads, but audioPlayer.onloadeddata doesn't fire ...
 			
-			console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+			console.log("Loading audio from web url:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
 			
 			var wait = function wait() {
 				var waitInterval = setInterval(function() {
@@ -1312,6 +1312,8 @@ var file = fileOrData;
 		}
 		else {
 			
+			console.log("Loading audio from disk:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
+			
 			audioPlayer.onloadeddata = function audioLoadedEvent() {
 				done(null);
 			};
@@ -1327,6 +1329,15 @@ var file = fileOrData;
 				
 				console.log("Audio file loaded! path=" + path + " audioData=" + (typeof audioData) + " isAraray?" + Array.isArray(audioData) + " data.length=" + audioData.length);
 				
+				if(BROWSER == "Chrome") {
+					var audioBlob = base64toBlob(audioData, 'audio/ogg; codecs=opus')
+					var audioURL = window.URL.createObjectURL(audioBlob);
+					audioPlayer.src = audioURL;
+				}
+				else {
+					audioPlayer.src = getEncodedString(audioData);
+				} 
+				
 				/*
 					var context = new AudioContext();
 					var source = context.createBufferSource();
@@ -1341,13 +1352,34 @@ var file = fileOrData;
 				//var audioURL = window.URL.createObjectURL(audioData);
 				//audioPlayer.src = audioURL;
 				
-				audioPlayer.src = getEncodedString(audioData);
+				
 				
 				loadedAudioFile = path;
 				
 				
 				function getEncodedString(str) {
 					return 'data:audio/audio/ogg;base64,' + str;
+				}
+				
+				function base64toBlob(base64Data, contentType) {
+					contentType = contentType || '';
+					var sliceSize = 1024;
+					var byteCharacters = atob(base64Data);
+					var bytesLength = byteCharacters.length;
+					var slicesCount = Math.ceil(bytesLength / sliceSize);
+					var byteArrays = new Array(slicesCount);
+					
+					for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+						var begin = sliceIndex * sliceSize;
+						var end = Math.min(begin + sliceSize, bytesLength);
+						
+						var bytes = new Array(end - begin);
+						for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+							bytes[i] = byteCharacters[offset].charCodeAt(0);
+						}
+						byteArrays[sliceIndex] = new Uint8Array(bytes);
+					}
+					return new Blob(byteArrays, { type: contentType });
 				}
 				
 				function str2ab(str) {
@@ -1373,18 +1405,9 @@ var file = fileOrData;
 	function startPlayback() {
 		isPlaying = true;
 		
-		/*
-			Record changes made by the user during the playback to be able to transform the playback with the user changes!
-			
-			If the user is already in collaboration mode, it will appear to the othes that the user is doing to changes.
-			
-		*/
-		
 		var alreadyStarted = false;
 		
 		console.log("startPlayback!");
-		
-		// Start playback if either audio or record load loads
 		
 		var audioLoadedSuccessfully = false;
 		
@@ -1399,8 +1422,10 @@ var file = fileOrData;
 				init();
 			});
 		}
-		else init();
-		
+		else {
+			console.warn("No audio record found recordInfo.audioPath=" + recordInfo.audioPath + " or audio already loaded loadedAudioFile=" + loadedAudioFile);
+			init();
+		}
 		function init() {
 			initPlayback(EDITOR.currentFile, start);
 		}
@@ -1526,7 +1551,8 @@ var file = fileOrData;
 				var changeEvents = fileChangeEvents[file.path];
 				if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
 				if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
-				var currentOrder = fileChangeEventOrderCounters[file.path];
+				if(changeEvents > 0) {
+					var currentOrder = fileChangeEventOrderCounters[file.path];
 				var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
 				while(order++ < currentOrder) {
 					arr = changeEvents[order];
@@ -1539,7 +1565,7 @@ var file = fileOrData;
 						transformBackwards(copyOfFileChangeEvent, arr[i]);
 					}
 				}
-				
+				}
 				ignoreFileChange = true;
 				var caret = redo(file, copyOfFileChangeEvent);
 				ignoreFileChange = false;
@@ -1932,9 +1958,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						var changeEvents = fileChangeEvents[filePath];
 						if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
 						if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
-						var currentOrder = fileChangeEventOrderCounters[filePath];
-						var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
-						while(order++ < currentOrder) {
+							var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
+							if(changeEvents.length > 0) {
+								var currentOrder = fileChangeEventOrderCounters[filePath];
+								while(order++ < currentOrder) {
 							arr = changeEvents[order];
 							
 							if(!arr) {
@@ -1945,11 +1972,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 								transformBackwards(copyOfFileChangeEvent, arr[i]);
 							}
 						}
-						
-						file = EDITOR.files[filePath];
+							}
+							
+							file = EDITOR.files[filePath];
 						if(EDITOR.currentFile != file) EDITOR.showFile(file);
 						ignoreFileChange = true;
-						redo(file, copyOfFileChangeEvent, moveCaret);
+							redo(file, copyOfFileChangeEvent, moveCaret);
 						ignoreFileChange = false;
 					}
 					if(record[lastRecordItem].mouse) mousePlayback(record[lastRecordItem].mouse, true);
@@ -1985,10 +2013,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						var changeEvents = fileChangeEvents[filePath];
 						if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
 						if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
-						if(changeEvents.length > 0) {
+							var copyOfFileChangeEvent = UTIL.cloneObject(record[lastRecordItem].change);
+							if(changeEvents.length > 0) {
 								var currentOrder = fileChangeEventOrderCounters[filePath];
-						var copyOfFileChangeEvent = UTIL.cloneObject(record[lastRecordItem].change);
-						while(order++ < currentOrder) {
+								while(order++ < currentOrder) {
 							arr = changeEvents[order];
 							
 							if(!arr) {
