@@ -500,7 +500,9 @@
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
 				
 				//closeFileButton.setAttribute("class", "blink closeFileTab ");
-				closeFileButton.setAttribute("class", "closeFileTab blink");
+				closeFileButton.classList.add("closeFileTab");
+				closeFileButton.classList.add("blink");
+				
 				
 				var yes = "Ignore changes";
 				var no = "Don't close!"
@@ -509,9 +511,9 @@
 					if(answer == yes) {
 						EDITOR.closeFile(path);
 					}
-					closeFileButton.setAttribute("class", "closeFileTab blink");
 					
-				});
+					closeFileButton.classList.remove("blink");
+					});
 				
 				//alertBox("File not saved.\nCtrl click to close without saving.");
 				console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
