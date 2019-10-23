@@ -50,7 +50,7 @@
 	var bindTest = false;
 	var ignoreFileSave = "";
 	var ignoreUndoRedoEvent = {}; // filePath: [ev.order...]
-	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord;
+	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord, winMenuTutorials;
 	
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
 	var playbackInterval, isPlaying = false, recordInfo, lastRecordItem = -1;
@@ -135,6 +135,7 @@
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
 			winMenuRecord = EDITOR.windowMenu.add("Screen/code casting", ["Tools", 30], recordWidget.show);
+			winMenuTutorials = EDITOR.windowMenu.add("First intro", ["Editor", "Tutorials", "Intro", 1], tutorialPlayFirstIntro);
 			
 			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");
@@ -200,6 +201,10 @@
 		},
 		order: 100
 	});
+	
+	function tutorialPlayFirstIntro() {
+		
+	}
 	
 	function buildRecordWidget() {
 		
@@ -1558,10 +1563,10 @@ var file = fileOrData;
 				var changeEvents = fileChangeEvents[file.path];
 				if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
 				if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
+				var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
 				if(changeEvents > 0) {
 					var currentOrder = fileChangeEventOrderCounters[file.path];
-				var copyOfFileChangeEvent = UTIL.cloneObject(fileChangeEvent);
-				while(order++ < currentOrder) {
+					while(order++ < currentOrder) {
 					arr = changeEvents[order];
 					
 					if(!arr) {
@@ -3090,6 +3095,9 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	}
 	
 	function redo(file, ev, moveCaret) {
+		
+		if(ev == undefined) throw new Error("ev=" + ev + " file.path=" + (file && file.path) + " moveCaret=" + JSON.stringify(moveCaret));
+		
 		console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text + " moveCaret=" + moveCaret);
 		
 		if(ev.type == "removeRow") {

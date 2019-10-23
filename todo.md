@@ -35,9 +35,63 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Get an intro screencast to automatically start first time you use the editor ...
 
+Just open intro.json screencast source and instruct user to click "start playback" !?
+
+Or a big play button !? That say play intro, or skip
+
+
+---
+
+Make a introduction video, 
+
+Welcome to WebIDE.
+Click "Start playback" button located at bottom of the screen to start the welcome intro!
+(It plays audio and shows a short introduction to the IDE.)
+
+
+Hello and welcome to WebIDE, an editor for creating web sites and apps.
+
+This intro uses the screen/code-casting feature of the editor.
+
+My name is Zäta, and I created this editor.
+
+Now I will quickly show you the layout ...
+
+At the very top you can find a dropdown menu where you can discover most features of the editor.
+
+The most useful features can also be found by right-clicking to bring up the context menu.
+
+On the left side, or on the top (depending on your screen size) you will find the discovery bar.
+The discovery bar show icons for cool features, for example: 
+The file explorer,
+Or live preview, that can be used to run node scripts, or open a HTML file in a preview window.
+
+Some useful keyboard shortcuts are:
+* Ctrl+O to open/search for any file.
+* Ctrl+S to save a file
+
+You can also use this editor on your smartphone or tablet,
+where most features can be discovered via the virtual keyboard.
+
+
+For more screencast tutorials go to Editor in the top menu.
+
+If you have any feedback, good or bad, let me know by clicking 
+the smilie face in the top right menu.
+
+
+
+---
 
 welcome intro
+
+
+
+
+
+---
 
 Tutorials using Screen/code-casting!
 
@@ -47,19 +101,12 @@ Make developer guides ...
 
 ---
 
-target audience: 
+target audience: beginners !?!?
 
-Playback file when opening the editor for the first time:
-(speak while typing)
+---
 
-[show a message and a bug play button, Play "name of file" (Intro/welcome) and a skip button]
-
-Hello and welcome to WebIDE, an editor for creating apps using Node.JS/JavaScript and web technology.
-
-
-Don't worry, your computer has not been taken over by a evil deamon, this is actually the playback feature of the editor.
-
-
+Make sure you do not run into any hiccups when using the editor/IDE while following someone else's course/tutorial.
+So go find JavaScript tutorials and make sure they work in the Editor.
 
 ----
 
@@ -99,12 +146,8 @@ Make the welcome message a playback,
 Assume the user has no idea what he/she clicked on ...
 Explain what they are looking at
 
-Make a introduction video, 
-from "signup" to making an app!?
 
-Hello and welcome to WebIDE, an online code editor and integrated web developer environment
-for creating Node.JS apps and websites.
-This is a playback which uses the collaboration feature, so you can edit the code while watching the tutorial.
+
 Lets get quick started by create a "hello world" micro-service in Node.JS ...
 
 We will use the http module,
