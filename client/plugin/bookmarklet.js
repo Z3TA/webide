@@ -22,7 +22,7 @@ EDITOR.plugin({
 		
 		var link = '<a href="javascript:(function(){var s=document.createElement(\'script\');s.setAttribute(\'id\', \'webide_bookmarklet\');s.setAttribute(\'src\',\'' + srcUrl +'\');document.body.appendChild(s);})()">Code editor</a>';
 		
-		alertBox("Drag the following link to the bookmark bar: " + link + "<br><br>When clicked it will turn the first textarea on the page into a code editor!");
+		alertBox("Drag the following link to the bookmark bar: " + link + "<br><br>When clicked it will replace the first textarea on any web page with this editor!");
 		
 	}
 	
