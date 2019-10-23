@@ -3460,7 +3460,7 @@ if(menuItem.parentMenu) {
 			var windowMenuHeight = document.getElementById("windowMenuHeight");
 			windowMenuHeight.style.display="block";
 			
-			EDITOR.windowMenu.isVisible = true;
+			EDITOR.windowMenu.isEnabled = true;
 		},
 		disable: function enableWindowMenu() {
 			var windowMenu = document.getElementById("windowMenu");
@@ -3469,12 +3469,13 @@ if(menuItem.parentMenu) {
 			var windowMenuHeight = document.getElementById("windowMenuHeight");
 			windowMenuHeight.style.display="none";
 			
-			EDITOR.windowMenu.isVisible = false;
+			EDITOR.windowMenu.isEnabled = false;
 			
 			EDITOR.stat("disable_windowMenu");
 			
 		},
 		hide: function hideWindowMenu() {
+			// Hides the dropdown menu. Use EDITOR.windowMenu.disable() to hide the whole menu
 			if(dropdownMenuRoot) dropdownMenuRoot.hide(true);
 		},
 		click: function clickWindowMenu(where, onlyifactive) {

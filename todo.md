@@ -35,11 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-in playback when there is a click on the canvas: EDITOR.windowMenu.hide();
-
 
 
 welcome intro
+
+Tutorials using Screen/code-casting!
 
 ---
 

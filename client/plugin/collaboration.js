@@ -555,11 +555,8 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		
 		record.length = 0; // Reset
 		
-			recordInfo.windowMenuVisible = EDITOR.windowMenu.isVisible;
+			recordInfo.windowMenuEnabled = EDITOR.windowMenu.isEnabled;
 			recordInfo.discoveryBarVisible = EDITOR.discoveryBar.isVisible;
-			
-			if(EDITOR.windowMenu.isVisible) 
-				
 			
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
@@ -1242,7 +1239,7 @@ var file = fileOrData;
 		EDITOR.ctxMenu.hide(); 
 		EDITOR.windowMenu.hide();
 		
-		if(recordInfo.windowMenuVisible) EDITOR.windowMenu.show();
+		if(recordInfo.windowMenuEnabled) EDITOR.windowMenu.enable();
 		if(recordInfo.discoveryBarVisible) EDITOR.discoveryBar.show();
 		
 		// ### Open files for playback
