@@ -1707,7 +1707,7 @@ usePseudoClipboard = false;
 		
 		if(from instanceof File) from = from.path;
 		
-		CLIENT.cmd("copyFile", {from: from, to: to}, function(err, json) {
+		CLIENT.cmd("copyFile", {from: from, to: to}, function afterFileCopied(err, json) {
 			if(err) callback(err);
 			else callback(null, json.to);
 		});

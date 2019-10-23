@@ -54,13 +54,15 @@ desc: "Allow sharing stuff with other apps",
 		}
 		else {
 			
+			console.log(UTIL.getStack("shareUsingUrl"));
+			
 			var newPath = UTIL.joinPaths(EDITOR.user.home, "/wwwpub/", filePath); 
 			
 			var move = "Move the file to wwwpub folder";
-			var copy = "Share a copy of the file ";
+			var copy = "Make a copy of the file ";
 			var cancel = "Cancel";
 			
-			confirmBox("Move or copy the file to " + newPath + " ?", [move, copy, cancel], function(answer) {
+			confirmBox("Move or copy " + filePath + " to " + newPath + " ?", [move, copy, cancel], function(answer) {
 				
 				if(answer == move || answer == copy) {
 					// Create the target folder first!
@@ -82,14 +84,14 @@ desc: "Allow sharing stuff with other apps",
 		return true;
 		
 		function moveFile(filePath) {
-			EDITOR.move(filePath, newPath, function(err, newPath) {
+			EDITOR.move(filePath, newPath, function afterFileMovedToWwwPub(err, newPath) {
 				if(err) return alertBox("Unable to move " + filePath + " Error: " + err.message);
 				else showUrl(newPath);
 			});
 		}
 		
 		function copyFile(filePath) {
-			EDITOR.copyFile(filePath, newPath, function(err, newPath) {
+			EDITOR.copyFile(filePath, newPath, function afterFileCopiedToWwwPub(err, newPath) {
 				if(err) return alertBox("Unable to copy " + filePath + " to " + newPath + " Error: " + err.message);
 				else showUrl(newPath);
 			});

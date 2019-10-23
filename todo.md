@@ -35,14 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Hide context menu in playback when clicking !?
+in playback when there is a click on the canvas: EDITOR.windowMenu.hide();
 
-When starting a playback, setup the editor like when it was recorded,
-eg. save windowMenuVisible, discoveryBarVisible, etc!?
 
-can't seem to go backwards in timeline, get errors like:
-Error: order=189 not in changeEvents=[]
-    at seek (http://127.0.0.1:8099/plugin/collaboration.js:1995:15)
 
 welcome intro
 
@@ -4259,6 +4254,14 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+---
+
+Idea: A REPL (Ctrl +R) ? The you can use to evaluate from the current scope.
+For example
+function add(a, b) { return a + b; }
+Then you open the REPL and type add(1,2) It shows 3 (the return value)
+Or every time you write ? it evaluates whatever left of the ? !?
 
 ---
 

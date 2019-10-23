@@ -555,6 +555,12 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		
 		record.length = 0; // Reset
 		
+			recordInfo.windowMenuVisible = EDITOR.windowMenu.isVisible;
+			recordInfo.discoveryBarVisible = EDITOR.discoveryBar.isVisible;
+			
+			if(EDITOR.windowMenu.isVisible) 
+				
+			
 		isRecording = true;
 		recordButton.innerText = "■ Stop recordning";
 			
@@ -1235,6 +1241,9 @@ var file = fileOrData;
 		// Because the playback might have opened these
 		EDITOR.ctxMenu.hide(); 
 		EDITOR.windowMenu.hide();
+		
+		if(recordInfo.windowMenuVisible) EDITOR.windowMenu.show();
+		if(recordInfo.discoveryBarVisible) EDITOR.discoveryBar.show();
 		
 		// ### Open files for playback
 		var filesToReset = 0;
