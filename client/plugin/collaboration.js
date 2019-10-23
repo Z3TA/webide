@@ -711,25 +711,25 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 			keyComboDiv = document.createElement("div");
 			keyComboDiv.classList.add("playbackKeyCombo");
 
-			var big = document.createElement("div");
-			big.classList.add("combo");
+			var theKeyCombo = document.createElement("kbd");
+			theKeyCombo.classList.add("combo");
 			
-			var small = document.createElement("div");
-			small.classList.add("description");
+			var textDescription = document.createElement("div");
+			textDescription.classList.add("description");
 			
-			keyComboDiv.appendChild(big);
-			keyComboDiv.appendChild(small);
+			keyComboDiv.appendChild(theKeyCombo);
+			keyComboDiv.appendChild(textDescription);
 
 			document.documentElement.appendChild(keyComboDiv);
 }
 
-		keyComboDiv.childNodes[0].innerText = EDITOR.getKeyFor(keyComboEvent.keyBindings[0], keyComboEvent.combo.sum);
-		keyComboDiv.childNodes[1].innerText = descriptions.join("\n");
-		keyComboDiv.classList.remove("hidden")
+		keyComboDiv.childNodes[0].innerText = EDITOR.getKeyFor(keyComboEvent.keyBindings[0], keyComboEvent.combo.sum); // theKeyCombo
+		keyComboDiv.childNodes[1].innerText = descriptions.join("\n"); // textDescription
+		keyComboDiv.classList.remove("hidden");
 
 setTimeout(function() {
 			keyComboDiv.classList.add("hidden")
-}, 5000);
+		}, 7000);
 		
 	}
 	
