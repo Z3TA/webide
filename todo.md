@@ -35,12 +35,22 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Audio doesn't load when starting playback!?
+
+Hide context menu in playback when clicking !?
 
 When starting a playback, setup the editor like when it was recorded,
 eg. save windowMenuVisible, discoveryBarVisible, etc!?
 
+can't seem to go backwards in timeline, get errors like:
+Error: order=189 not in changeEvents=[]
+    at seek (http://127.0.0.1:8099/plugin/collaboration.js:1995:15)
 
-hide window menu
+welcome intro
+
+---
+
+Make developer guides ...
 
 ---
 

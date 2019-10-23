@@ -1985,7 +1985,8 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						var changeEvents = fileChangeEvents[filePath];
 						if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
 						if(!Array.isArray(changeEvents)) throw new Error("Not an array: changeEvents=" + JSON.stringify(changeEvents, null, 2));
-						var currentOrder = fileChangeEventOrderCounters[filePath];
+						if(changeEvents.length > 0) {
+								var currentOrder = fileChangeEventOrderCounters[filePath];
 						var copyOfFileChangeEvent = UTIL.cloneObject(record[lastRecordItem].change);
 						while(order++ < currentOrder) {
 							arr = changeEvents[order];
@@ -1999,8 +2000,8 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 								transformBackwards(copyOfFileChangeEvent, arr[i]);
 							}
 						}
-						
-						file = EDITOR.files[filePath];
+							}
+							file = EDITOR.files[filePath];
 						if(EDITOR.currentFile != file) EDITOR.showFile(file);
 						
 						ignoreFileChange = true;
