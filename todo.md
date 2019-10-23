@@ -36,8 +36,15 @@ What I'm working on
 -------------------
 
 
-pwa_push_notifications demo is not working!
+When starting a playback, setup the editor like when it was recorded,
+eg. save windowMenuVisible, discoveryBarVisible, etc!?
 
+
+hide window menu
+
+---
+
+target audience: 
 
 Playback file when opening the editor for the first time:
 (speak while typing)
@@ -52,6 +59,11 @@ Don't worry, your computer has not been taken over by a evil deamon, this is act
 
 
 ----
+
+bug: Autocomplete: EDITOR.windowMenu.rem
+gives EDITOR.windowMenu.remoteProtocols[] from plugin/hide_window_menu.js unload
+
+---
 
 Run code when playback does !?
 Need to first save as ?

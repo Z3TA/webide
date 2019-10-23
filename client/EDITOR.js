@@ -3621,6 +3621,26 @@ li.onclick = function(clickEvent) {
 			}
 			
 		},
+		activate: function activateContextMenuItem(menuElement) {
+			if(menuElement == undefined) throw new Error("First argument menuElement=" + menuElement + " must be defined!");
+			var li = menuElement;
+			
+			var child = li.childNodes;
+			var bullet = child[0];
+			
+			bullet.classList.add("active");
+			bullet.classList.remove("inactive");
+		},
+		deactivate: function activateContextMenuItem(menuElement) {
+			if(menuElement == undefined) throw new Error("First argument menuElement=" + menuElement + " must be defined!");
+			var li = menuElement;
+			
+			var child = li.childNodes;
+			var bullet = child[0];
+			
+			bullet.classList.remove("active");
+			bullet.classList.add("inactive");
+		},
 		update: function updateCtxMenuItem(menuElement, active, htmlText, callback) {
 			
 			if(menuElement == undefined) throw new Error("menuElement=" + menuElement + " !");
