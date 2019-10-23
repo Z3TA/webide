@@ -134,7 +134,7 @@
 			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
-			winMenuRecord = EDITOR.windowMenu.add("Record tutorial", ["Tools", 30], recordWidget.show);
+			winMenuRecord = EDITOR.windowMenu.add("Screen/code casting", ["Tools", 30], recordWidget.show);
 			
 			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");
