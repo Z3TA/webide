@@ -36,9 +36,9 @@
 			
 			EDITOR.addRender(showMarkdownHeadings, 3000);
 			
-			EDITOR.registerAltKey({char: "z", label: "zoom", alt: 1, fun: zoomSwitch});
+			EDITOR.registerAltKey({char: "z", label: S("zoom"), alt: 1, fun: zoomSwitch});
 			
-			winMenuZoom = EDITOR.windowMenu.add("Zoom out", ["View", 20], zoomSwitch);
+			winMenuZoom = EDITOR.windowMenu.add(S("zoom_out"), [S("View"), 20], zoomSwitch);
 			
 			
 		},

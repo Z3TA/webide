@@ -131,11 +131,11 @@
 			
 			//menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
-			winMenuUndo = EDITOR.windowMenu.add("Undo", ["Edit", 3], collabUndoViaMenu, collabUndo);
-			winMenuRedo = EDITOR.windowMenu.add("Redo", ["Edit", 3], collabRedoViaMenu, collabRedo);
-			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", ["Editor", 3], invite);
+			winMenuUndo = EDITOR.windowMenu.add("Undo", [S("Edit"), 3], collabUndoViaMenu, collabUndo);
+			winMenuRedo = EDITOR.windowMenu.add("Redo", [S("Edit"), 3], collabRedoViaMenu, collabRedo);
+			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", [S("Editor"), 3], invite);
 			winMenuRecord = EDITOR.windowMenu.add("Screen/code casting", ["Tools", 30], recordWidget.show);
-			winMenuTutorials = EDITOR.windowMenu.add("First intro", ["Editor", "Tutorials", "Intro", 1], tutorialPlayFirstIntro);
+			winMenuTutorials = EDITOR.windowMenu.add("First intro", [S("Editor"), "Tutorials", "Intro", 1], tutorialPlayFirstIntro);
 			
 			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");

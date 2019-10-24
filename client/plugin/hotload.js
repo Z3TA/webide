@@ -27,7 +27,7 @@
 		
 		EDITOR.bindKey({desc: "Hot-Reload current plugin script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
-		winMenuHotReload = EDITOR.windowMenu.add("Reload current plugin", ["Editor", 10], reloadCurrentScript);
+		winMenuHotReload = EDITOR.windowMenu.add("Reload current plugin", [S("Editor"), 10], reloadCurrentScript);
 		
 	}
 	

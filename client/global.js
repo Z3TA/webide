@@ -123,24 +123,30 @@ var ERROR = 1;
 var WARNING = 2;
 var INFO = 3;
 
-var LOCALE = "en";
+var LOCALE = ((navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.language) || "en";
 
 function S(key, values, locale) {
-	if(!LANG.hasOwnProperty(LOCALE)) {
-		alertBox("LOCALE=" + LOCALE + " not added. Using default (en)");
-		LOCALE = "en";
-	}
 	
 	if(locale == undefined) locale = LOCALE;
 	
+	if(!LANG.hasOwnProperty(locale)) {
+		alertBox("locale=" + locale + " not added. Changing locale to default (en)");
+		locale = LOCALE = "en";
+	}
+	
+	if(!LANG.hasOwnProperty(locale)) return key + "!NO-LOCALES-LOADED!";
+	
+	if(!LANG[locale].hasOwnProperty(key) && LANG[locale].hasOwnProperty(key.toLowerCase())) key = key.toLowerCase();
+	
 	if(!LANG[locale].hasOwnProperty(key)) {
+		
 		var data = {
 			meddelande: "locale=" + locale + "\nLOCALUE=" + LOCALE + "\nkey=" + key + "\nvalues=" + values + "\nStack=" + UTIL.getStack(key), 
 			namn: 'WebIDE', 
 			subject: "No tranlsation for " + key + " in " + LOCALE 
 		}
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", data, function (err, respStr) {});
-		if(locale == "en") return "!MISSING-TRANSLATION!";
+		if(locale == "en") return key + "!MISSING-TRANSLATION!";
 		else if(locale != LANG.__altLocale) return S(key, values, LANG.__altLocale);
 		else return S(key, values, "en")
 	}

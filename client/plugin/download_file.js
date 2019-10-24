@@ -6,7 +6,7 @@
 		desc: "Download file",
 		load:function loadDownload() {
 			
-			windowMenu = EDITOR.windowMenu.add("Download", ["File", 130], downloadFile);
+			windowMenu = EDITOR.windowMenu.add("Download", [S("File"), 130], downloadFile);
 			
 			var order = 500; // After share.js
 			EDITOR.on("share", downloadFile, order);

@@ -77,13 +77,13 @@
 			
 			//build();
 			
-			EDITOR.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
-			EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
-			EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
+			EDITOR.bindKey({desc: S("show_remote_server_manager"), fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
+			EDITOR.bindKey({desc: S("hide_remote_server_manager"), fun: hideServerManger, charCode: charEscape, combo: 0});
+			EDITOR.bindKey({desc: S("connect_to_server_in_server_manager"), fun: serverManagerEnter, charCode: charEnter, combo: 0});
 			
 			menuItem = EDITOR.ctxMenu.add(menuString, showServerManger, 15);
 			
-			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", ["Editor", "Remote FS", 1], showServerManger);
+			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", [S("Editor"), S("remote_fs"), 1], showServerManger);
 			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			

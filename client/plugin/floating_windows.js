@@ -17,7 +17,7 @@
 		load: function loadFloatingWindow() {
 			
 			ctxMenuNewWindow = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
-			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", ["File", 9], openInNewWindow);
+			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", [S("File"), 9], openInNewWindow);
 			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 50], splitScreen);
 			
 			discoveryItem = document.createElement("img");

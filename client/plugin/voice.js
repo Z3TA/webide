@@ -44,7 +44,7 @@
 			
 			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
 			
-			winMenuSpeech = EDITOR.windowMenu.add("Speech Synthesis", ["Tools", 15], toggleSpeechAssistant);
+			winMenuSpeech = EDITOR.windowMenu.add(S("speech_synthesis"), [S("Tools"), 15], toggleSpeechAssistant);
 			
 			if(active) activateSpeechAssistant();
 			

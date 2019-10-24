@@ -35,7 +35,7 @@
 		
 		EDITOR.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
 		
-		winMenuFindInFiles = EDITOR.windowMenu.add("Find in files", ["File", 8], findInFiles);
+		winMenuFindInFiles = EDITOR.windowMenu.add("Find in files", [S("File"), 8], findInFiles);
 		
 		EDITOR.registerAltKey({char: "f", alt:2, label: "Find in files", fun: findInFiles});
 		

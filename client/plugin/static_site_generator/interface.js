@@ -230,17 +230,17 @@
 		
 		
 		//build();
-		var SSG_label = "Static site generator";
+		var SSG_label = S("ssg");
 		menuItem = EDITOR.ctxMenu.add(SSG_label, showSSG, 11);
 		
-		windowMenuSSG = EDITOR.windowMenu.add(SSG_label, ["Tools", 4], showSSG);
+		windowMenuSSG = EDITOR.windowMenu.add(SSG_label, [S("Tools"), 4], showSSG);
 		/*
-			EDITOR.windowMenu.add("New Page", ["Tools", SSG_label], newPage);
-			EDITOR.windowMenu.add("Preview", ["Tools", SSG_label], previewSSG);
-			EDITOR.windowMenu.add("WYSIWYG", ["Tools", SSG_label], wysiwygSSG);
-			EDITOR.windowMenu.add("Sync with Repo", ["Tools", SSG_label], syncSSG);
-			EDITOR.windowMenu.add("Publish", ["Tools", SSG_label], publishSSG);
-			EDITOR.windowMenu.add("Settings/new", ["Tools", SSG_label], editSiteSettings);
+			EDITOR.windowMenu.add("New Page", [S("Tools"), SSG_label], newPage);
+			EDITOR.windowMenu.add("Preview", [S("Tools"), SSG_label], previewSSG);
+			EDITOR.windowMenu.add("WYSIWYG", [S("Tools"), SSG_label], wysiwygSSG);
+			EDITOR.windowMenu.add("Sync with Repo", [S("Tools"), SSG_label], syncSSG);
+			EDITOR.windowMenu.add("Publish", [S("Tools"), SSG_label], publishSSG);
+			EDITOR.windowMenu.add("Settings/new", [S("Tools"), SSG_label], editSiteSettings);
 		*/
 		
 		EDITOR.on("fileShow", fileShow);

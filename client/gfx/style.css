@@ -1168,6 +1168,8 @@ div.gotoFile li:hover {
 	overflow: hidden;
 	overflow-x:-webkit-marquee;
 	
+	text-transform: capitalize;
+	
 }
 
 .windowMenu .key {

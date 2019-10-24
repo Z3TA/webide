@@ -17,7 +17,7 @@
 			fun: wordWrap
 		});
 		
-		winMenuWrap = EDITOR.windowMenu.add("Wrap paragraph", ["Edit", 5], wordWrap);
+		winMenuWrap = EDITOR.windowMenu.add(S("wrap_paragraph"), [S("Edit"), 5], wordWrap);
 	}
 	
 	function unload() {

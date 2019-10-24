@@ -40,7 +40,7 @@
 		
 		EDITOR.registerAltKey({char: "f", alt:1, label: "find", fun: findReplace});
 		
-		winMenuFindReplace = EDITOR.windowMenu.add("Find/replace", ["File", 7], findReplace);
+		winMenuFindReplace = EDITOR.windowMenu.add("Find/replace", [S("File"), 7], findReplace);
 		
 		// Point variables to the document object model
 		findReplaceDiv = document.getElementById("findReplace");

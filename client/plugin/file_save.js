@@ -48,8 +48,8 @@
 		// Add items to the canvas context meny
 		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
 		
-		windowMenuSave = EDITOR.windowMenu.add("Save", ["File", 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
-		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", ["File", 2], saveAs);
+		windowMenuSave = EDITOR.windowMenu.add("Save", [S("File"), 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
+		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", [S("File"), 2], saveAs);
 		
 		EDITOR.on("showMenu", showSaveOption);
 		

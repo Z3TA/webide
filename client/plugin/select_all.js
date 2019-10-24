@@ -4,13 +4,13 @@
 	"use strict";
 		
 	EDITOR.bindKey({
-		desc: "Select all text",
+		desc: S("select_all_text"),
 		charCode: 65,
 		combo: CTRL,
 		fun: selectAll
 	});
 	
-	EDITOR.windowMenu.add("Select All text", ["File", 6], selectAll);
+	EDITOR.windowMenu.add(S("select_all_text"), [S("File"), 6], selectAll);
 	
 	function selectAll(file, combo, character, charCode, keyPushDirection) {
 		

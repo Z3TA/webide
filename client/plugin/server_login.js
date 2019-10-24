@@ -44,7 +44,7 @@
 		
 		//menuItem = EDITOR.ctxMenu.add("Switch user", loginDialogFromMenu, 13);
 		
-		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", ["Editor", 2], loginDialogFromMenu);
+		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", [S("Editor"), 2], loginDialogFromMenu);
 		
 		var server = undefined;
 		if(EDITOR.localStorage) {

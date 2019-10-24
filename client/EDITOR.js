@@ -3373,13 +3373,13 @@ usePseudoClipboard = false;
 				dropdownMenuRoot = new DropdownMenu({orientation: "horizontal", parentMenu: null});
 				
 				// Add top level menu entries to control the order
-				dropdownMenuRoot.addItem("Editor", undefined, undefined, 1);
-				dropdownMenuRoot.addItem("File", undefined, undefined, 2);
-				dropdownMenuRoot.addItem("Edit", undefined, undefined, 3);
-				dropdownMenuRoot.addItem("View", undefined, undefined, 4);
-				dropdownMenuRoot.addItem("Navigate", undefined, undefined, 5);
-				dropdownMenuRoot.addItem("Tools", undefined, undefined, 6);
-				dropdownMenuRoot.addItem("Node.JS", undefined, undefined, 7);
+				dropdownMenuRoot.addItem(S("Editor"), undefined, undefined, 1);
+				dropdownMenuRoot.addItem(S("File"), undefined, undefined, 2);
+				dropdownMenuRoot.addItem(S("Edit"), undefined, undefined, 3);
+				dropdownMenuRoot.addItem(S("View"), undefined, undefined, 4);
+				dropdownMenuRoot.addItem(S("Navigate"), undefined, undefined, 5);
+				dropdownMenuRoot.addItem(S("Tools"), undefined, undefined, 6);
+				dropdownMenuRoot.addItem(S("NodeJS"), undefined, undefined, 7);
 				
 				
 			}

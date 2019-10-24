@@ -9,7 +9,7 @@ EDITOR.plugin({
 			var charCode_K = 75;
 			
 			EDITOR.bindKey({ charCode: charCode_K, combo: SHIFT + CTRL, desc: "Show all keyBindings", fun: showKeyBindings });
-			winMenuShowKeybindings = EDITOR.windowMenu.add("Show all key bindings", ["Editor", 2], showKeyBindings);
+			winMenuShowKeybindings = EDITOR.windowMenu.add(S("show_all_key_bindings"), [S("Editor"), 2], showKeyBindings);
 			
 		},
 		unload: function unloadShowKeyBindings() {

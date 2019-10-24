@@ -7,9 +7,9 @@ EDITOR.plugin({
 desc: "Upload file",
 load: function loadUpload() {
 
-			windowMenu = EDITOR.windowMenu.add("Upload file from device", ["File", 140], uploadFile);
+			windowMenu = EDITOR.windowMenu.add(S("upload_from_device"), [S("File"), 140], uploadFile);
 
-			EDITOR.registerAltKey({char: "u", alt:2, label: "Upload", fun: uploadFile});
+			EDITOR.registerAltKey({char: "u", alt:2, label: S("Upload"), fun: uploadFile});
 			
 },
 unload: function unloadUpload() {

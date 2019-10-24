@@ -128,8 +128,8 @@
 	canvas.style.position = "relative";
 	canvas.style.zIndex = 4; // Above the dashboard, but below the context menu, and below the window menu's
 	
-	var labelShowBuiltin = "Virtual Keyboard";
-	var labelShowNative = "Native keyboard";
+	var labelShowBuiltin = S("virtual_keyboard");
+	var labelShowNative = S("native_keyboard");
 	
 	var winMenuKeyboard;
 	
@@ -151,11 +151,11 @@
 			addButtons();
 			
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
-			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, ["View", 120], toggleBetweenKeyboards);
+			winMenuKeyboard = EDITOR.windowMenu.add(labelShowBuiltin, [S("View"), 120], toggleBetweenKeyboards);
 			
-			winMenuVirtual = EDITOR.windowMenu.add("Virtual", ["Editor", "Keyboard/input"], menuPickVirtual);
-			winMenuOnScreen = EDITOR.windowMenu.add("Native onscreen", ["Editor", "Keyboard/input"], menuPickOnScreen);
-			winMenuPhysical = EDITOR.windowMenu.add("Physical keyboard", ["Editor", "Keyboard/input"], menuPickPhysical);
+			winMenuVirtual = EDITOR.windowMenu.add(S("virtual"), [S("Editor"), S("keyboard_input")], menuPickVirtual);
+			winMenuOnScreen = EDITOR.windowMenu.add(S("native_onscreen"), [S("Editor"), S("keyboard_input")], menuPickOnScreen);
+			winMenuPhysical = EDITOR.windowMenu.add(S("physical_keyboard"), [S("Editor"), S("keyboard_input")], menuPickPhysical);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);

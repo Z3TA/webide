@@ -60,13 +60,13 @@
 		EDITOR.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
 		EDITOR.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
 		
-		winMenuLastTab = EDITOR.windowMenu.add("Switch to last active file", ["Edit", 10], switchTab);
-		winMenuMoveTabLeft = EDITOR.windowMenu.add("Move tab left", ["Edit", 10], orderTabLeft, "top");
-		winMenuMoveTabRight = EDITOR.windowMenu.add("Move tab right", ["Edit", 10], switchTabRight);
-		winMenuTabLeft = EDITOR.windowMenu.add("Switch to left tab", ["Edit", 10], switchTabLeft);
-		winMenuTabRight = EDITOR.windowMenu.add("Switch to right tab", ["Edit", 10], switchTabRight, "bottom");
+		winMenuLastTab = EDITOR.windowMenu.add(S("switch_to_last_active_file"), [S("Edit"), 10], switchTab);
+		winMenuMoveTabLeft = EDITOR.windowMenu.add(S("move_tab_left"), [S("Edit"), 10], orderTabLeft, "top");
+		winMenuMoveTabRight = EDITOR.windowMenu.add(S("move_tab_right"), [S("Edit"), 10], switchTabRight);
+		winMenuTabLeft = EDITOR.windowMenu.add(S("switch_to_left_tab"), [S("Edit"), 10], switchTabLeft);
+		winMenuTabRight = EDITOR.windowMenu.add(S("switch_to_right_tab"), [S("Edit"), 10], switchTabRight, "bottom");
 		
-		EDITOR.registerAltKey({char: "space", alt:1, label: "Previous file/tab", fun: switchTab});
+		EDITOR.registerAltKey({char: "space", alt:1, label: S("previous_filetab"), fun: switchTab});
 		
 		setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {

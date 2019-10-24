@@ -17,7 +17,7 @@
 			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: newFileFromKeyboardCombo});
 			
 			menuItem = EDITOR.ctxMenu.add("New file", newFileFromContextMenu, 1, newFileFromKeyboardCombo);
-			winMenuNewFile = EDITOR.windowMenu.add("New file", ["File", 2], newFileFromWindowMenu, newFileFromKeyboardCombo);
+			winMenuNewFile = EDITOR.windowMenu.add("New file", [S("File"), 2], newFileFromWindowMenu, newFileFromKeyboardCombo);
 			
 			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: newFileFromVirtualKeyboard});
 			

@@ -19,7 +19,7 @@
 			
 			EDITOR.registerAltKey({char: "Enter", alt:3, label: "Change indentation", fun: showIndentationManager});
 			
-			winMenuIndentation = EDITOR.windowMenu.add("Manage indentation", ["File", 15], showIndentationManager);
+			winMenuIndentation = EDITOR.windowMenu.add("Manage indentation", [S("File"), 15], showIndentationManager);
 			
 			//showIndentationManager();
 			

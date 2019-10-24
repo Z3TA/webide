@@ -34,19 +34,19 @@ else {
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
 			
-			winMenuDbManager = EDITOR.windowMenu.add("Database manager", ["Tools", 2], showDbManager);
+						winMenuDbManager = EDITOR.windowMenu.add(S("database_manager"), [S("Tools"), 2], showDbManager);
 			
 			EDITOR.on("fileOpen", sqlFileMaybe);
 			
 			var char_Esc = 27;
 			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
 			
-			EDITOR.registerAltKey({char: "l", alt:2, label: "db/SQL", fun: showDbManager});
+						EDITOR.registerAltKey({char: "l", alt:2, label: S("db_sql"), fun: showDbManager});
 			
 			discoveryBarImg = document.createElement("img");
 						discoveryBarImg.setAttribute("id", "sqlDiscovery");
 			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarImg.title = "SQL Database"
+						discoveryBarImg.title = S("sql_database");
 			discoveryBarImg.onclick = toggleDbManager;
 						EDITOR.discoveryBar.add(discoveryBarImg, 80);
 						

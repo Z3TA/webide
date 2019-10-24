@@ -31,9 +31,9 @@
 		
 		EDITOR.on("afterSave", configurationMaybe);
 		
-		winMenuEditorCustomization = EDITOR.windowMenu.add("Customization scripts", ["Editor", 16], showLocalCustomization);
+		winMenuEditorCustomization = EDITOR.windowMenu.add(S("customization_scripts"), [S("Editor"), 16], showLocalCustomization);
 		
-		EDITOR.registerAltKey({char: "Compl", alt:3, label: "Editor customization", fun: showLocalCustomization});
+		EDITOR.registerAltKey({char: "Compl", alt:3, label: S("customization_scripts"), fun: showLocalCustomization});
 		
 		var root = (EDITOR.user && EDITOR.user.homeDir) || "/";
 		

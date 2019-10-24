@@ -44,7 +44,7 @@ load:function loadT9prediction() {
 
 			EDITOR.addMode("T9P");
 			
-			windowMenu = EDITOR.windowMenu.add("T9 input prediction", ["Edit", 10], toggleT9);
+			windowMenu = EDITOR.windowMenu.add(S("t9_input_prediction"), [S("Edit"), 10], toggleT9);
 
 
 },

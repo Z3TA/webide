@@ -80,7 +80,7 @@
 		
 		//menu = EDITOR.ctxMenu.add('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		
-		winMenuGotoFile = EDITOR.windowMenu.add("Open/search file", ["File", 12], show_gotoFileInput);
+		winMenuGotoFile = EDITOR.windowMenu.add("Open/search file", [S("File"), 12], show_gotoFileInput);
 		
 	}
 	

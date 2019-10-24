@@ -87,7 +87,7 @@ console.warn("A2HS: Already got appinstalled event!");
 		// Stash the event so it can be triggered later.
 		deferredPrompt = evt;
 		
-		windowMenuAdd2HS = EDITOR.windowMenu.add("Add to home screen", ["Editor", 10], addToHomeScreen);
+		windowMenuAdd2HS = EDITOR.windowMenu.add("Add to home screen", [S("Editor"), 10], addToHomeScreen);
 	}
 	
 	function ask() {

@@ -60,12 +60,12 @@
 	
 	function loadSpellchecker() {
 		
-		menuItem = EDITOR.ctxMenu.add("Spellcheck ", toggleSpellCheck, 10);
-		windowMenuSpellcheck = EDITOR.windowMenu.add("Spellcheck", ["Tools", 2], toggleSpellCheck);
+		menuItem = EDITOR.ctxMenu.add(S("Spellcheck"), toggleSpellCheck, 10);
+		windowMenuSpellcheck = EDITOR.windowMenu.add(S("Spellcheck"), [S("Tools"), 2], toggleSpellCheck);
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		
-		EDITOR.registerAltKey({char: "0", alt:2, label: "Spellcheck", fun: toggleSpellCheck});
+		EDITOR.registerAltKey({char: "0", alt:2, label: S("Spellcheck"), fun: toggleSpellCheck});
 		
 	}
 	
@@ -100,7 +100,7 @@
 		
 		console.log("Change status to enabled=" + enabled);
 		
-		EDITOR.ctxMenu.update(menuItem, enabled, "Spellcheck");
+		EDITOR.ctxMenu.update(menuItem, enabled, S("Spellcheck"));
 		EDITOR.windowMenu.update(windowMenuSpellcheck, {active: enabled});
 		
 		

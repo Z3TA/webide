@@ -38,9 +38,9 @@
 	
 	function bugReportLoad() {
 		var key_S = 83;
-		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: S("send_bug_report"), charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 		
-		winMenuBugreport = EDITOR.windowMenu.add("Send bug report", ["Editor", 8], sendBugReport);
+		winMenuBugreport = EDITOR.windowMenu.add(S("send_bug_report"), [S("Editor"), 8], sendBugReport);
 		
 		EDITOR.on("error", windowError);
 		EDITOR.on("showMenu", showSendBugReportMenuItem);

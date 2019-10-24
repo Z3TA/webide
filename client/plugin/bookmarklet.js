@@ -6,7 +6,7 @@
 EDITOR.plugin({
 		desc: "Bookmarklet",
 		load: function loadBookmarkletPlugin() {
-			winMenuBookmarklet = EDITOR.windowMenu.add("Bookmarklet", ["Editor", 1], bookmarklet);
+			winMenuBookmarklet = EDITOR.windowMenu.add("Bookmarklet", [S("Editor"), 1], bookmarklet);
 		},
 		unload: function unloadBookmarkletPlugin() {
 			EDITOR.windowMenu.remove(winMenuBookmarklet);

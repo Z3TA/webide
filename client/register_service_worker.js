@@ -17,7 +17,7 @@ console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
 		console.log('ServiceWorker Registration failed with ' + error);
 });
 
-			var windowMenuUnregisterServiceWorker = EDITOR.windowMenu.add("Unregister service worker", ["Editor", 90], unregisterServiceWorker);
+			var windowMenuUnregisterServiceWorker = EDITOR.windowMenu.add("Unregister service worker", [S("Editor"), 90], unregisterServiceWorker);
 		}
 		console.warn("Service worker not supported by " + (typeof BROWSER != "undefined" ? BROWSER : "browser"))
 		

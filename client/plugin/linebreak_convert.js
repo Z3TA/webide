@@ -15,7 +15,7 @@
 		
 		//menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
 		
-		winMenu = EDITOR.windowMenu.add("Convert line-breaks", ["File", 17], convertLinebreaks);
+		winMenu = EDITOR.windowMenu.add("Convert line-breaks", [S("File"), 17], convertLinebreaks);
 		
 		EDITOR.registerAltKey({char: "back", alt:3, label: "Convert line-breaks", fun: convertLinebreaks});
 		

@@ -9,7 +9,7 @@
 		load: function load() {
 			
 			menuItem = EDITOR.ctxMenu.add("Copy file path", copyFilePath, 5);
-			winMenuCopyFilePath = EDITOR.windowMenu.add("Copy file path", ["File", 5], copyFilePath);
+			winMenuCopyFilePath = EDITOR.windowMenu.add("Copy file path", [S("File"), 5], copyFilePath);
 			
 			EDITOR.registerAltKey({char: "d", alt:1, label: "Copy file path", fun: copyFilePath});
 			

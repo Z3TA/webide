@@ -19,7 +19,7 @@ desc: "Allow sharing stuff with other apps",
 			// todo: Share files via URL
 			// ask: Share file to other app on your device, or share file via URL
 			
-			windowMenu = EDITOR.windowMenu.add("Share", ["File", 15], shareSomething);
+			windowMenu = EDITOR.windowMenu.add(S("Share"), [S("File"), 15], shareSomething);
 
 			console.log("typeof navigator.share=" + typeof navigator.share);
 

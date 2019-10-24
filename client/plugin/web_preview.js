@@ -20,7 +20,7 @@
 			discoveryItem.onclick = webPreviewFromDiscovery;
 			EDITOR.discoveryBar.add(discoveryItem, 30);
 			
-			winMenuWysiwygHtml = EDITOR.windowMenu.add("What you see is what you get", ["Edit", 120], startHtmlWysiwyg);
+			winMenuWysiwygHtml = EDITOR.windowMenu.add(S("wysiwyg"), [S("Edit"), 120], startHtmlWysiwyg);
 			
 			if(QUERY_STRING["single_page_wysiwyg"]) {
 				
