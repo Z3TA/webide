@@ -142,7 +142,7 @@ var USE_HTTPS = !!(getArg(["ssl", "https"]) || false); // Only use for local dev
 var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 
 // On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
-var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.editor_http_port; 
+var HTTP_PORT = getArg(["port", "port"]) || DEFAULT.editor_http_port; 
 if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
 // For generating URL's
