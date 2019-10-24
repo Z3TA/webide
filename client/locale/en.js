@@ -151,7 +151,7 @@ LANG["en"] = {
 	sql_database: "SQL Database",
 	
 	t9_input_prediction: "T9 input prediction",
-	terminal: "terminal emulator", 
+	terminal_emulator: "terminal emulator", 
 	theme: "theme",
 	toggle_full_screen: "Toggle full screen mode",
 	tools: "tools",

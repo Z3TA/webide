@@ -35,6 +35,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Test on different devices.
+
+Test install from npm experience on different OS:es
+
+
+
+
 Localization. So I can make tutorials in Swedish, because while I can read and write English, my speach is very bad.
 
 css capitalize 

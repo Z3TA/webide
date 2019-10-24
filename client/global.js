@@ -123,7 +123,7 @@ var ERROR = 1;
 var WARNING = 2;
 var INFO = 3;
 
-var LOCALE = ((navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.language) || "en";
+var LOCALE = QUERY_STRING["locale"] || ((navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.language) || "en";
 
 function S(key, values, locale) {
 	
