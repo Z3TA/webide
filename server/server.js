@@ -22,10 +22,10 @@ var STDIN_PORT = DEFAULT.stdin_channel_port;
 
 var REMOTE_FILE_PORT =  getArg(["remote-file-port", "remote-file-port"]) || DEFAULT.remote_file_port || 8103;
 
-var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
-var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
-var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
-var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
+var SMTP_PORT = getArg(["smtp_port", "smtp_port"]) || DEFAULT.smtp_port;
+var SMTP_HOST = getArg(["smtp_host", "smtp_host"]) || DEFAULT.smtp_host;
+var SMTP_USER = getArg(["smtp_user", "smtp_user"]) || "";
+var SMTP_PW = getArg(["smtp_pass", "smtp_pass"]) || "";
 
 var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 
@@ -33,7 +33,7 @@ var UTIL = require("../client/UTIL.js");
 
 var HTTP_ENDPOINTS = {};
 var defaultHomeDir = DEFAULT.home_dir;
-var HOME_DIR = UTIL.trailingSlash(getArg(["h", "homedir", "home"]) || defaultHomeDir);
+var HOME_DIR = UTIL.trailingSlash(getArg(["home", "homedir", "home"]) || defaultHomeDir);
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
 
@@ -50,7 +50,7 @@ var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);
 
-var MYSQL_PORT = getArg(["mysql", "mysql-port", "mysql-unix-socket"]) || "/var/run/mysqld/mysqld.sock";
+var MYSQL_PORT = getArg(["mysql", "mysql_port", "mysql_unix_socket"]) || "/var/run/mysqld/mysqld.sock";
 
 var EOF = String.fromCharCode(3);
 
@@ -83,7 +83,7 @@ var log; // Using small caps because it looks and feels better
 	logModule.setLogLevel(LOGLEVEL);
 	log = logModule.log;
 	
-	var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
+	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout, if specified write to a file
 	
 	if(logFile) logModule.setLogFile(logFile);
 	
@@ -112,7 +112,7 @@ var log; // Using small caps because it looks and feels better
 
 var CURRENT_USER = "ROOT";
 
-var USERNAME = getArg(["u", "user", "username"]);
+var USERNAME = getArg(["user", "user", "username"]);
 var PASSWORD = getArg(["pw", "pw", "password"]);
 
 if(USERNAME && !PASSWORD) {
@@ -150,7 +150,7 @@ var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might ru
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 
 var defaultDomain = DEFAULT.domain;
-var DOMAIN = getArg(["d", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
+var DOMAIN = getArg(["domain", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
 
 var CHROMIUM_DEBUG_PORT = 9222;
 var VNC_PORT = 5901;

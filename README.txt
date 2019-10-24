@@ -400,14 +400,14 @@ with the hash generated from node hashPw.js
 
 To start the server:
 ````
-node server/server.js -p 80 -nochroot -virtualroot -noguest -h C:\Users\
+node server/server.js -port 80 -nochroot -virtualroot -noguest -home C:\Users\
 ````
 <!---
--p 80 will start the server on port 80
+-port 80 will start the server on port 80
 -nochroot will disable chroot which does not work on Windows
 -virtualroot is like a virtual chroot, meaning users see C:\Users\username\foo\bar as just /foo/bar
 -noguest will disable guest accounts, which is currently not support on Windows
--h C:\Users\ specifies where the user folders are located. (needed with -virtualroot)
+-home C:\Users\ specifies where the user folders are located. (needed with -virtualroot)
 -->
 
 The following text assumes you are on a Unix/Linux like operating system ...

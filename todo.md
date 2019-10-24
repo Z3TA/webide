@@ -35,6 +35,8 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Hide windows menu when right clicking on canvas when playback
+
 Test on different devices.
 
 Test install from npm experience on different OS:es
