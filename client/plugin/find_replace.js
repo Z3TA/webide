@@ -26,9 +26,9 @@
 		var char_F = 70;
 		var char_Esc = 27;
 		
-		EDITOR.bindKey({desc: "Find or replace in current file", charCode: char_F, combo: CTRL, fun: findReplace});
+		EDITOR.bindKey({desc: S("find_replace"), charCode: char_F, combo: CTRL, fun: findReplace});
 		
-		EDITOR.bindKey({desc: "Hide the find/replace GUI", charCode: char_Esc, fun: hideFindReplaceGui});
+		EDITOR.bindKey({desc: S("hide_find_replace_widget"), charCode: char_Esc, fun: hideFindReplaceGui});
 		
 		EDITOR.on("moveCaret", resetLastSearchStrLength);
 		
@@ -38,9 +38,9 @@
 			fun: findInFile
 		});
 		
-		EDITOR.registerAltKey({char: "f", alt:1, label: "find", fun: findReplace});
+		EDITOR.registerAltKey({char: "f", alt:1, label: S("find_replace"), fun: findReplace});
 		
-		winMenuFindReplace = EDITOR.windowMenu.add("Find/replace", [S("File"), 7], findReplace);
+		winMenuFindReplace = EDITOR.windowMenu.add(S("find_replace"), [S("File"), 7], findReplace);
 		
 		// Point variables to the document object model
 		findReplaceDiv = document.getElementById("findReplace");

@@ -16,14 +16,14 @@
 		desc: "Open file in new window",
 		load: function loadFloatingWindow() {
 			
-			ctxMenuNewWindow = EDITOR.ctxMenu.add("Open in new window", openInNewWindow, 4);
-			windowMenuNewWindow = EDITOR.windowMenu.add("Open in new window", [S("File"), 9], openInNewWindow);
-			windowMenuSplitScreen = EDITOR.windowMenu.add("Split screen/new window", ["View", 50], splitScreen);
+			ctxMenuNewWindow = EDITOR.ctxMenu.add(S("open_in_new_window"), openInNewWindow, 4);
+			windowMenuNewWindow = EDITOR.windowMenu.add(S("open_in_new_window"), [S("File"), 9], openInNewWindow);
+			windowMenuSplitScreen = EDITOR.windowMenu.add(S("split_screen_new_window"), [S("View"), 50], splitScreen);
 			
 			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "floatingWindowsDiscovery");
 			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Open new window";
+			discoveryItem.title = S("open_in_new_window");
 			discoveryItem.onclick = openWindowFromMenu;
 			EDITOR.discoveryBar.add(discoveryItem, 100);
 			

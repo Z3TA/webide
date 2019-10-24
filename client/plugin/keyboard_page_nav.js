@@ -6,25 +6,25 @@
 	var END = 35;
 	var HOME = 36;
 	
-	EDITOR.bindKey({desc: 'Moves the caret one "page" up', charCode: 33, combo: 0, fun: pageUp});
-	EDITOR.bindKey({desc: 'Moves the caret one "page" down', charCode: 34, combo: 0, fun: pageDown});
+	EDITOR.bindKey({desc: S("moves_caret_one_page_up"), charCode: 33, combo: 0, fun: pageUp});
+	EDITOR.bindKey({desc: S("moves_caret_one_page_down"), charCode: 34, combo: 0, fun: pageDown});
 	
-	EDITOR.bindKey({desc: 'Moves the caret to the end of file', charCode: END, combo: CTRL, fun: end});
-	EDITOR.bindKey({desc: 'Moves the caret to the beginning of file', charCode: HOME, combo: CTRL, fun: home});
+	EDITOR.bindKey({desc: S("moves_caret_to_end_of_file"), charCode: END, combo: CTRL, fun: end});
+	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_file"), charCode: HOME, combo: CTRL, fun: home});
 	
-	EDITOR.bindKey({desc: 'Moves the caret to the end of the line', charCode: END, combo: 0, fun: endOfLine, mode: "default"});
-	EDITOR.bindKey({desc: 'Moves the caret to the beginning of the line', charCode: HOME, combo: 0, fun: startOfLine, mode: "default"});
+	EDITOR.bindKey({desc: S("moves_caret_to_end_of_line"), charCode: END, combo: 0, fun: endOfLine, mode: "default"});
+	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_line"), charCode: HOME, combo: 0, fun: startOfLine, mode: "default"});
 	
-	EDITOR.bindKey({desc: 'Selects all from current position to the start', charCode: HOME, combo: CTRL + SHIFT, fun: selectToTop, mode: "default"});
-	EDITOR.bindKey({desc: 'Selects all from current position to the end', charCode: END, combo: CTRL + SHIFT, fun: selectToEnd, mode: "default"});
+	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_start"), charCode: HOME, combo: CTRL + SHIFT, fun: selectToTop, mode: "default"});
+	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_end"), charCode: END, combo: CTRL + SHIFT, fun: selectToEnd, mode: "default"});
 	
-	EDITOR.windowMenu.add("Page up", ["Navigate", 10], pageUp);
-	EDITOR.windowMenu.add("Page down", ["Navigate", 10], pageDown);
+	EDITOR.windowMenu.add(S("page_up"), [S("Navigate"), 10], pageUp);
+	EDITOR.windowMenu.add(S("page_down"), [S("Navigate"), 10], pageDown);
 	
-	EDITOR.windowMenu.add("End of File", ["Navigate", 10], end, "top");
-	EDITOR.windowMenu.add("Beginning of file", ["Navigate", 10], home);
-	EDITOR.windowMenu.add("End of line", ["Navigate", 10], endOfLine);
-	EDITOR.windowMenu.add("Beginning of line", ["Navigate", 10], startOfLine, "bottom");
+	EDITOR.windowMenu.add(S("end_of_file"), [S("Navigate"), 10], end, "top");
+	EDITOR.windowMenu.add(S("beginning_of_file"), [S("Navigate"), 10], home);
+	EDITOR.windowMenu.add(S("end_of_line"), [S("Navigate"), 10], endOfLine);
+	EDITOR.windowMenu.add(S("beginning_of_line"), [S("Navigate"), 10], startOfLine, "bottom");
 	
 	function selectToTop(file) {
 		var selection = [],

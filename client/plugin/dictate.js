@@ -35,7 +35,7 @@ load: function loadDictate() {
 			
 			widget = EDITOR.createWidget(buildDictateBar);
 
-			winMenuDictate = EDITOR.windowMenu.add("Dicate (speech to text)", ["Tools", 50], initDictate);
+			winMenuDictate = EDITOR.windowMenu.add(S("dictate_speech_to_text"), [S("Tools"), 50], initDictate);
 			
 },
 unload: function unloadDictate() {

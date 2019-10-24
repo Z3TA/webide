@@ -33,9 +33,9 @@
 			
 			//menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
 			
-			EDITOR.registerAltKey({char: ")", alt:3, label: "Print", fun: print2pdf});
+			EDITOR.registerAltKey({char: ")", alt:3, label: S("print"), fun: print2pdf});
 			
-			winMenuPrint = EDITOR.windowMenu.add("Print to PDF", ["Tools", 6], print2pdf);
+			winMenuPrint = EDITOR.windowMenu.add(S("print_to_pdf"), [S("Tools"), 6], print2pdf);
 			
 		},
 		unload: function() {

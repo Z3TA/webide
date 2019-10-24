@@ -19,15 +19,15 @@
 		
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
 		
-		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
-		EDITOR.bindKey({desc: "Close the editor", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
+		EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: CTRL, fun: closeFile});
+		EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
-		menuItem = EDITOR.ctxMenu.add("Close file", closeFile, 3);
+		menuItem = EDITOR.ctxMenu.add(S("close_file"), closeFile, 3);
 		
-		windowMenuClose = EDITOR.windowMenu.add("Close", [S("File"), 3], closeFile);
-		windowMenuQuit = EDITOR.windowMenu.add("Quit", [S("Editor"), 20], closeEditor);
+		windowMenuClose = EDITOR.windowMenu.add(S("close"), [S("File"), 3], closeFile);
+		windowMenuQuit = EDITOR.windowMenu.add(S("Quit"), [S("Editor"), 20], closeEditor);
 		
-		EDITOR.registerAltKey({char: "x", alt:2, label: "Close file", fun: closeFile});
+		EDITOR.registerAltKey({char: "x", alt:2, label: S("close_file"), fun: closeFile});
 		
 	}
 	

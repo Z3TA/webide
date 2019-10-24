@@ -31,23 +31,23 @@
 						
 						var keyF1 = 112;
 						var keyF3 = 114;
-						EDITOR.bindKey({desc: "Deoploy the nodejs project the currently open file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
+						EDITOR.bindKey({desc: S("deploy_current_nodejs_project"), fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
 						
-						EDITOR.bindKey({desc: "(Re)Start the in-production nodejs project the currently open file belongs to", fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
+						EDITOR.bindKey({desc: S("restart_nodejs_project_in_production"), fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
 						
-						EDITOR.bindKey({desc: "Stop the in-production nodejs project the currently open file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+						EDITOR.bindKey({desc: S("stop_nodejs_project_in_production"), fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
 						
-						EDITOR.bindKey({desc: "Remove the nodejs project the currently open file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
+						EDITOR.bindKey({desc: S("remove_nodejs_project_from_production"), fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
 						
-						winMenuProdDeploy = EDITOR.windowMenu.add("Deploy to production", ["Node.JS", 5], nodejsDeploy, "top");
-						winMenuProdRestart = EDITOR.windowMenu.add("Restart production", ["Node.JS", 5], nodejsProdRestart);
-						winMenuProdStop= EDITOR.windowMenu.add("Stop production", ["Node.JS", 5], nodejsProdStop);
-						winMenuProdRemove = EDITOR.windowMenu.add("Remove from production", ["Node.JS", 5], nodejsProdRemove, "bottom");
+						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.JS", 5], nodejsDeploy, "top");
+						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.JS", 5], nodejsProdRestart);
+						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.JS", 5], nodejsProdStop);
+						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.JS", 5], nodejsProdRemove, "bottom");
 						
 						var discoveryItem = document.createElement("img");
 						discoveryItem.setAttribute("id", "deployDiscovery");
 						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-						discoveryItem.title = "Node.JS Deploy (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
+						discoveryItem.title = S("nodejs_deploy") + " (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
 						discoveryItem.onclick = nodejsDeployFromDiscoveryBar;
 						EDITOR.discoveryBar.add(discoveryItem, 90);
 						

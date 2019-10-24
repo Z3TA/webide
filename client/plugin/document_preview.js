@@ -46,7 +46,7 @@
 		EDITOR.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});
 		EDITOR.addEvent("mouseClick", {fun: mouseClick, targetClass:"documentPreviewCanvas", button: 0});
 		
-		//winMenuDocumentPreview = EDITOR.windowMenu.add("View", ["Preview/scrollbar", 10], wut?);
+		//winMenuDocumentPreview = EDITOR.windowMenu.add(S("View"), ["Preview/scrollbar", 10], wut?);
 		
 	}
 	

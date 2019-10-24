@@ -56,11 +56,11 @@
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.ctxMenu.add("File explorer", toggleFileExplorerFromContextMenu, 9, toggleFileExplorerFromKeyboardCombo);
+		menuItem = EDITOR.ctxMenu.add(S("file_explorer"), toggleFileExplorerFromContextMenu, 9, toggleFileExplorerFromKeyboardCombo);
 		
-		winMenuFileExplorer = EDITOR.windowMenu.add("File explorer", ["View", 70], toggleFileExplorerFromWindowMenu, toggleFileExplorerFromKeyboardCombo);
+		winMenuFileExplorer = EDITOR.windowMenu.add(S("file_explorer"), [S("View"), 70], toggleFileExplorerFromWindowMenu, toggleFileExplorerFromKeyboardCombo);
 		
-		EDITOR.registerAltKey({char: "0", alt:1, label: "File Explorer", fun: toggleFileExplorerFromVirtualKeyboard});
+		EDITOR.registerAltKey({char: "0", alt:1, label: S("file_explorer"), fun: toggleFileExplorerFromVirtualKeyboard});
 		
 		
 		leftColumn = document.getElementById("leftColumn");
@@ -105,7 +105,7 @@
 		discoveryBarImage = document.createElement("img");
 		discoveryBarImage.setAttribute("id", "fileExplorerDiscovery");
 		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryBarImage.title = "File explorer (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
+		discoveryBarImage.title = S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
 		EDITOR.discoveryBar.add(discoveryBarImage, 10);
 		

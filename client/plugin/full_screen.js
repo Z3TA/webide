@@ -14,9 +14,9 @@
 
 			var keyF11 = 122;
 			
-			EDITOR.bindKey({desc: "Toggle full screen mode", charCode: keyF11, fun: toggleTullScreen});
+			EDITOR.bindKey({desc: S("toggle_full_screen"), charCode: keyF11, fun: toggleTullScreen});
 			
-			winMenuFullScreen = EDITOR.windowMenu.add("Full screen", ["View", 10], toggleTullScreen);
+			winMenuFullScreen = EDITOR.windowMenu.add(S("full_screen"), [S("View"), 10], toggleTullScreen);
 			
 			
 		},

@@ -43,9 +43,9 @@
 		
 		hide_gotoLineInput();
 		
-		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: gotoLineFromKeyboardComboG}); // ctrl + G
-		EDITOR.bindKey({desc: "Goto line ...", charCode: key_J, combo: CTRL, fun: show_gotoInputEmacs}); // ctrl + J (Emacs)
-		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
+		EDITOR.bindKey({desc: S("goto_line"), charCode: key_G, combo: CTRL, fun: gotoLineFromKeyboardComboG}); // ctrl + G
+		EDITOR.bindKey({desc: S("goto_line"), charCode: key_J, combo: CTRL, fun: show_gotoInputEmacs}); // ctrl + J (Emacs)
+		EDITOR.bindKey({desc: S("hide_goto_line_widget"), charCode: key_Esc, fun: hide_gotoLineInput});
 		
 		var voiceRegexp = /((go ?to)|(jump( ?to)?))?( ?line)? (\d*)/i;
 		
@@ -65,9 +65,9 @@
 			grammar: ["(goto|go to|jump to) line|jump to|jump) <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
-		winMenuGotoLine = EDITOR.windowMenu.add("Goto line", ["Navigate", 11], gotoLineFromWindowMenu, gotoLineFromKeyboardComboG);
+		winMenuGotoLine = EDITOR.windowMenu.add(S("goto_line"), [S("Navigate"), 11], gotoLineFromWindowMenu, gotoLineFromKeyboardComboG);
 		
-		EDITOR.registerAltKey({char: "g", alt:1, label: "goto line", fun: gotoLineFromVirtualKeyboard});
+		EDITOR.registerAltKey({char: "g", alt:1, label: S("goto_line"), fun: gotoLineFromVirtualKeyboard});
 		
 		}
 	

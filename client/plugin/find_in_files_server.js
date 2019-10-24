@@ -31,11 +31,11 @@
 		var keyEscape = 27;
 		
 		// Pressing Ctrl + shift + F should hide or show the search window
-		EDITOR.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
+		EDITOR.bindKey({desc: S("find_in_files"), charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
 		
-		EDITOR.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
+		EDITOR.bindKey({desc: S("hide_find_in_files_widget"), charCode: keyEscape, fun: hideFindInFilesGui});
 		
-		winMenuFindInFiles = EDITOR.windowMenu.add("Find in files", [S("File"), 8], findInFiles);
+		winMenuFindInFiles = EDITOR.windowMenu.add(S("find_in_files"), [S("File"), 8], findInFiles);
 		
 		EDITOR.registerAltKey({char: "f", alt:2, label: "Find in files", fun: findInFiles});
 		

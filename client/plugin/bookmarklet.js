@@ -6,7 +6,7 @@
 EDITOR.plugin({
 		desc: "Bookmarklet",
 		load: function loadBookmarkletPlugin() {
-			winMenuBookmarklet = EDITOR.windowMenu.add("Bookmarklet", [S("Editor"), 1], bookmarklet);
+			winMenuBookmarklet = EDITOR.windowMenu.add(S("Bookmarklet"), [S("Editor"), 1], bookmarklet);
 		},
 		unload: function unloadBookmarkletPlugin() {
 			EDITOR.windowMenu.remove(winMenuBookmarklet);
@@ -22,7 +22,7 @@ EDITOR.plugin({
 		
 		var link = '<a href="javascript:(function(){var s=document.createElement(\'script\');s.setAttribute(\'id\', \'webide_bookmarklet\');s.setAttribute(\'src\',\'' + srcUrl +'\');document.body.appendChild(s);})()">Code editor</a>';
 		
-		alertBox("Drag the following link to the bookmark bar: " + link + "<br><br>When clicked it will replace the first textarea on any web page with this editor!");
+		alertBox(S("drag_following_link_to_bookmark_bar") + ": " + link + "<br><br>" + S("when_bookmarklet_clicked"));
 		
 	}
 	

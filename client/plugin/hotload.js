@@ -25,9 +25,9 @@
 		//alert("load");
 		var keyF7 = 118;
 		
-		EDITOR.bindKey({desc: "Hot-Reload current plugin script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
+		EDITOR.bindKey({desc: S("hotreload_plugin"), fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
-		winMenuHotReload = EDITOR.windowMenu.add("Reload current plugin", [S("Editor"), 10], reloadCurrentScript);
+		winMenuHotReload = EDITOR.windowMenu.add(S("hotreload_plugin"), [S("Editor"), 10], reloadCurrentScript);
 		
 	}
 	
@@ -118,6 +118,8 @@ pluginDescription = EDITOR.plugins[i].desc;
 			catch(err) {
 				return err;
 			}
+			
+			EDITOR_stat("hotreload_plugin");
 			
 			return true;
 		}

@@ -37,13 +37,13 @@
 			// Switch devMode on or off by hitting Ctrl + Alt + D
 			EDITOR.bindKey({desc: "DevMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 			
-			winMenuReloadEditor = EDITOR.windowMenu.add("Restart", [S("Editor"), 11], reloadEditor);
-			winMenuToggleDevMode = EDITOR.windowMenu.add("Developer mode", [S("Editor"), 9], toggleDevMode);
+			winMenuReloadEditor = EDITOR.windowMenu.add(S("Restart"), [S("Editor"), 11], reloadEditor);
+			winMenuToggleDevMode = EDITOR.windowMenu.add(S("developer_mode"), [S("Editor"), 9], toggleDevMode);
 			
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.ctxMenu.add("Show dev tools", showDevTools, 21); // Built in Chromium dev tools
+			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.ctxMenu.add(S("show_dev_tools"), showDevTools, 21); // Built in Chromium dev tools
 			
 			console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			

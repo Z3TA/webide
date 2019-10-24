@@ -30,9 +30,9 @@
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
 			
-			menuItem = EDITOR.ctxMenu.add("Terminal", startTerminalFromMenu, 16);
+			menuItem = EDITOR.ctxMenu.add(S("terminal_emulator"), startTerminalFromMenu, 16);
 			
-			winMenuTerminal = EDITOR.windowMenu.add("Terminal emulator", ["Tools", 10], startTerminalFromMenu);
+			winMenuTerminal = EDITOR.windowMenu.add(S("terminal_emulator"), [S("Tools"), 10], startTerminalFromMenu);
 			
 			CLIENT.on("terminal", terminalMessage);
 			

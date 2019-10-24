@@ -39,21 +39,22 @@
 		var charEnter = 13;
 		
 		// Bind to ctrl + S
-		EDITOR.bindKey({desc: "Save current file", charCode: char_S, combo: CTRL, fun: saveFileFromKeyboardCombo});
+		EDITOR.bindKey({desc: S("save_current_file"), charCode: char_S, combo: CTRL, fun: saveFileFromKeyboardCombo});
 		
-		EDITOR.bindKey({desc: "Hide save as dialog", fun: hideSaveDialog, charCode: charEscape, combo: 0});
+		EDITOR.bindKey({desc: S("hide_saveas_widget"), fun: hideSaveDialog, charCode: charEscape, combo: 0});
 		
+		// todo: use inpout.keyup instead of global listener!
 		EDITOR.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
 		// Add items to the canvas context meny
-		menu = EDITOR.ctxMenu.add("Save as ...", saveAs, 2);
+		menu = EDITOR.ctxMenu.add(S("save_as"), saveAs, 2);
 		
-		windowMenuSave = EDITOR.windowMenu.add("Save", [S("File"), 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
-		windowMenuSaveAs = EDITOR.windowMenu.add("Save as", [S("File"), 2], saveAs);
+		windowMenuSave = EDITOR.windowMenu.add(S("save"), [S("File"), 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
+		windowMenuSaveAs = EDITOR.windowMenu.add(S("save_as"), [S("File"), 2], saveAs);
 		
 		EDITOR.on("showMenu", showSaveOption);
 		
-		EDITOR.registerAltKey({char: "s", alt:2, label: "save", fun: saveFileFromVirtualKeyboard});
+		EDITOR.registerAltKey({char: "s", alt:2, label: S("save"), fun: saveFileFromVirtualKeyboard});
 		
 	}
 	

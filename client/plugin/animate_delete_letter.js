@@ -9,7 +9,7 @@
 		desc: "Show animation when deleting letters",
 		load: function() {
 			
-			windowMenuExplodingCharacters = EDITOR.windowMenu.add("Exploding characters", ["View", "Effects", 60, 1], toggleExplodingCharacters);
+			windowMenuExplodingCharacters = EDITOR.windowMenu.add(S("exploding_characters"), [S("View"), S("Effects"), 60, 1], toggleExplodingCharacters);
 			
 			if(activated) activateExplodingCharacters();
 			

@@ -40,11 +40,11 @@
 		
 		
 		var char_Esc = 27;
-		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
+		EDITOR.bindKey({desc: S("hide_login_widget"), charCode: char_Esc, fun: hideLoginDialog});
 		
 		//menuItem = EDITOR.ctxMenu.add("Switch user", loginDialogFromMenu, 13);
 		
-		winMenuLogin = EDITOR.windowMenu.add("Switch server/user", [S("Editor"), 2], loginDialogFromMenu);
+		winMenuLogin = EDITOR.windowMenu.add(S("switch_server_user"), [S("Editor"), 2], loginDialogFromMenu);
 		
 		var server = undefined;
 		if(EDITOR.localStorage) {

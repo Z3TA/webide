@@ -37,7 +37,11 @@ What I'm working on
 
 Localization. So I can make tutorials in Swedish, because while I can read and write English, my speach is very bad.
 
+css capitalize 
 
+Search for .title .innerText .value promptBox and alertBox and translate
+
+Plugins probably need an id parameter instead of description!
 
 
 

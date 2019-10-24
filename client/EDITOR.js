@@ -3379,7 +3379,7 @@ usePseudoClipboard = false;
 				dropdownMenuRoot.addItem(S("View"), undefined, undefined, 4);
 				dropdownMenuRoot.addItem(S("Navigate"), undefined, undefined, 5);
 				dropdownMenuRoot.addItem(S("Tools"), undefined, undefined, 6);
-				dropdownMenuRoot.addItem(S("NodeJS"), undefined, undefined, 7);
+				dropdownMenuRoot.addItem("Node.JS", undefined, undefined, 7);
 				
 				
 			}
@@ -7646,7 +7646,7 @@ function main() {
 	EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 	//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 	
-	EDITOR.windowMenu.add("Autocomplete", ["Edit", 2], EDITOR.autoComplete);
+	EDITOR.windowMenu.add(S("Autocomplete"), [S("Edit"), 2], EDITOR.autoComplete);
 	
 	EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
 		fun: function showContextMenu() {
@@ -7664,9 +7664,9 @@ function main() {
 		}
 	});
 	
-	EDITOR.windowMenu.add("Live/preview", ["Tools", 1], EDITOR.previewTool);
+		EDITOR.windowMenu.add(S("live_preview"), [S("Tools"), 1], EDITOR.previewTool);
 	
-	EDITOR.registerAltKey({char: "Enter", alt:1, label: "Run script", fun:
+		EDITOR.registerAltKey({char: "Enter", alt:1, label: S("run_nodejs_script"), fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 			EDITOR.runScript(file, someEvent);
 		}
@@ -7931,7 +7931,7 @@ function main() {
 		}
 	*/
 	
-		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add("Discovery bar", ["View", 130], EDITOR.discoveryBar.toggle);
+		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
 	
 		sendStatistics();
 		

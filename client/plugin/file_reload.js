@@ -13,10 +13,10 @@
 	
 	function load() {
 		
-		menuItem = EDITOR.ctxMenu.add("Relode from disk", reloadFile, 6);
-		winMenuReloadFromDisk = EDITOR.windowMenu.add("Reload from disk", [S("Edit"), 4], reloadFile);
+		menuItem = EDITOR.ctxMenu.add(S("reload_from_disk"), reloadFile, 6);
+		winMenuReloadFromDisk = EDITOR.windowMenu.add(S("reload_from_disk"), [S("Edit"), 4], reloadFile);
 		
-		EDITOR.registerAltKey({char: "back", alt:1, label: "Reload file", fun: reloadFile});
+		EDITOR.registerAltKey({char: "back", alt:1, label: S("reload_from_disk"), fun: reloadFile});
 		
 	}
 	

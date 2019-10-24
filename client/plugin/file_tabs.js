@@ -33,7 +33,7 @@
 	
 	function file_tabs() {
 		
-		winMenuToggleFileTabs = EDITOR.windowMenu.add("File tabs", ["View", 90], toggleFileTabs);
+		winMenuToggleFileTabs = EDITOR.windowMenu.add(S("file_tabs"), [S("View"), 90], toggleFileTabs);
 		
 		if(!fileTabsActive) return;
 		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
@@ -51,14 +51,14 @@
 		var key_pageUP = 33;
 		var key_pageDown = 34;
 		
-		EDITOR.bindKey({desc: "Switch tab to last active tab", charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
+		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 		
-		EDITOR.bindKey({desc: "Move current tab to the left", charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
-		EDITOR.bindKey({desc: "Move current tab to the right", charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
+		EDITOR.bindKey({desc: S("move_tab_left"), charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
+		EDITOR.bindKey({desc: S("move_tab_right"), charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
 		// todo: implement tab drag and drop to change order
 		
-		EDITOR.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
-		EDITOR.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
+		EDITOR.bindKey({desc: S("switch_to_left_tab"), charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
+		EDITOR.bindKey({desc: S("switch_to_right_tab"), charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
 		
 		winMenuLastTab = EDITOR.windowMenu.add(S("switch_to_last_active_file"), [S("Edit"), 10], switchTab);
 		winMenuMoveTabLeft = EDITOR.windowMenu.add(S("move_tab_left"), [S("Edit"), 10], orderTabLeft, "top");

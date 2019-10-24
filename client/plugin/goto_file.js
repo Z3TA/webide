@@ -60,14 +60,16 @@
 		var charP = 80;
 		var charO = 79;
 		
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
-		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
+		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
+		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
+		EDITOR.bindKey({desc: S("hide_goto_file_widget"), charCode: charEscape, fun: hide_gotoFileInput});
+		
+		//  hmm, can I move these to keyup on the input box? probably not
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyUp, fun: gotoFile_moveUp});
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyDown, fun: gotoFile_moveDown});
 		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openFile});
 		
-		EDITOR.registerAltKey({char: "o", alt:2, label: "open file", fun: show_gotoFileInput});
+		EDITOR.registerAltKey({char: "o", alt:2, label: S("open_search_file"), fun: show_gotoFileInput});
 		
 		EDITOR.on("openFileTool", openLocalFileTool);
 		EDITOR.on("openFileTool", openAnyFileTool);
@@ -76,11 +78,11 @@
 		CLIENT.on("fileFound", gotoFileFileFound);
 		CLIENT.on("pathGlob", gotoFilePathGlob);
 		
-		menuItem = EDITOR.ctxMenu.add('Open/search file', show_gotoFileInput, 4);
+		menuItem = EDITOR.ctxMenu.add(S("open_search_file"), show_gotoFileInput, 4);
 		
 		//menu = EDITOR.ctxMenu.add('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		
-		winMenuGotoFile = EDITOR.windowMenu.add("Open/search file", [S("File"), 12], show_gotoFileInput);
+		winMenuGotoFile = EDITOR.windowMenu.add(S("open_search_file"), [S("File"), 12], show_gotoFileInput);
 		
 	}
 	

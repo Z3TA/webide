@@ -122,25 +122,25 @@
 			var Y = 89;
 			var Z = 90;
 			
-			EDITOR.bindKey({desc: "Redo change", charCode: Y, fun: collabRedo, combo: CTRL});
-			EDITOR.bindKey({desc: "Undo change", charCode: Z, fun: collabUndo, combo: CTRL});
+			EDITOR.bindKey({desc: S("Redo"), charCode: Y, fun: collabRedo, combo: CTRL});
+			EDITOR.bindKey({desc: S("Undo"), charCode: Z, fun: collabUndo, combo: CTRL});
 			
-			EDITOR.registerAltKey({char: "ABC", label: "undo", alt: 1, fun: collabUndo}); 
-			EDITOR.registerAltKey({char: "ABC", label: "redo", alt: 2, fun: collabRedo});
-			EDITOR.registerAltKey({char: "(", label: "Invite collaborator", alt: 3, fun: invite});
+			EDITOR.registerAltKey({char: "ABC", label: S("Undo"), alt: 1, fun: collabUndo}); 
+			EDITOR.registerAltKey({char: "ABC", label: S("Redo"), alt: 2, fun: collabRedo});
+			EDITOR.registerAltKey({char: "(", label: S("invite_collaborator"), alt: 3, fun: invite});
 			
 			//menu = EDITOR.ctxMenu.add("Invite collaborator", invite, 14);
 			
-			winMenuUndo = EDITOR.windowMenu.add("Undo", [S("Edit"), 3], collabUndoViaMenu, collabUndo);
-			winMenuRedo = EDITOR.windowMenu.add("Redo", [S("Edit"), 3], collabRedoViaMenu, collabRedo);
-			winMenuInvite = EDITOR.windowMenu.add("Invite collaborator", [S("Editor"), 3], invite);
-			winMenuRecord = EDITOR.windowMenu.add("Screen/code casting", ["Tools", 30], recordWidget.show);
-			winMenuTutorials = EDITOR.windowMenu.add("First intro", [S("Editor"), "Tutorials", "Intro", 1], tutorialPlayFirstIntro);
+			winMenuUndo = EDITOR.windowMenu.add(S("Undo"), [S("Edit"), 3], collabUndoViaMenu, collabUndo);
+			winMenuRedo = EDITOR.windowMenu.add(S("Redo"), [S("Edit"), 3], collabRedoViaMenu, collabRedo);
+			winMenuInvite = EDITOR.windowMenu.add(S("invite_collaborator"), [S("Editor"), 3], invite);
+			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 30], recordWidget.show);
+			winMenuTutorials = EDITOR.windowMenu.add(S("first_intro"), [S("Editor"), S("Tutorials"), S("Intro"), 1], tutorialPlayFirstIntro);
 			
 			discoveryItem = document.createElement("img");
 			discoveryItem.setAttribute("id", "collaborationDiscovery");
 			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Invite collaborator";
+			discoveryItem.title = S("invite_collaborator");
 			discoveryItem.onclick = inviteFromDiscoveryBar;
 			EDITOR.discoveryBar.add(discoveryItem, 70);
 			

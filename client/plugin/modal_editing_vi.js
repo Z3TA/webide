@@ -221,7 +221,7 @@
 			// If more modes are added we want to move the toggle modes out
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: M, combo: CTRL, mode: "*"});
 			
-			winMenuVim = EDITOR.windowMenu.add("Vim command mode", [S("Editor"), 12], toggleVim);
+			winMenuVim = EDITOR.windowMenu.add(S("vim_command_mode"), [S("Editor"), 12], toggleVim);
 			
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			

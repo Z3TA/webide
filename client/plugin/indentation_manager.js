@@ -10,16 +10,16 @@
 		desc: "Set the indentation convention and fix all indentation errors",
 		load: function loadIndentationManager() {
 			
-			menuItem = EDITOR.ctxMenu.add("Indentation ...", showIndentationManager, 8);
+			menuItem = EDITOR.ctxMenu.add(S("manage_indentation"), showIndentationManager, 8);
 			
 			var charEscape = 27;
-			EDITOR.bindKey({desc: "Hide indentation manager", fun: hideIndentationManager, charCode: charEscape, combo: 0});
+			EDITOR.bindKey({desc: S("hide_indentation_manager"), fun: hideIndentationManager, charCode: charEscape, combo: 0});
 			
 			EDITOR.on("fileShow", showIndentationConvention);
 			
-			EDITOR.registerAltKey({char: "Enter", alt:3, label: "Change indentation", fun: showIndentationManager});
+			EDITOR.registerAltKey({char: "Enter", alt:3, label: S("manage_indentation"), fun: showIndentationManager});
 			
-			winMenuIndentation = EDITOR.windowMenu.add("Manage indentation", [S("File"), 15], showIndentationManager);
+			winMenuIndentation = EDITOR.windowMenu.add(S("manage_indentation"), [S("File"), 15], showIndentationManager);
 			
 			//showIndentationManager();
 			

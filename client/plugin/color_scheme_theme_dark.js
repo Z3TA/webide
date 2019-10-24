@@ -29,7 +29,7 @@
 	function loadDarkTheme() {
 		
 		
-		winMenuDarkTheme = EDITOR.windowMenu.add("Dark theme", ["View", "Theme", 40, 2], toggleDarkTheme);
+		winMenuDarkTheme = EDITOR.windowMenu.add(S("dark_theme"), [S("View"), S("Theme"), 40, 2], toggleDarkTheme);
 		
 		if(QUERY_STRING["theme"] && QUERY_STRING["theme"] != "dark") return;
 		

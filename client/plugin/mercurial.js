@@ -69,17 +69,17 @@
 	function loadMercurial() {
 		
 		var char_Esc = 27;
-		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
-		EDITOR.bindKey({desc: "Source control: Commit", fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
-		EDITOR.bindKey({desc: "Source control: Compare working directory with parent revision", fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
+		EDITOR.bindKey({desc: S("hide_mercurial_widget"), charCode: char_Esc, fun: hideMercurialWidgets});
+		EDITOR.bindKey({desc: S("version_control_commit"), fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
+		EDITOR.bindKey({desc: S("version_control_diff_working_directory"), fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
 		
-		winMenuMercurial = EDITOR.windowMenu.add("Source/version control", ["Tools", 2], toggleVersionControlWidget);
-		winMenuMercurial2 = EDITOR.windowMenu.add("Show command bar", ["SCM", 8, 1], toggleVersionControlWidget);
-		winMenuCommit = EDITOR.windowMenu.add("Commit", ["SCM", 5], showCommitDialog);
-		winMenuDiffRevision = EDITOR.windowMenu.add("Diff revision", ["SCM", 6], diffWorkingDirectory);
-		winMenuAnnotations = EDITOR.windowMenu.add("Show annotations", ["SCM", 11], toggleAnotations);
-		winMenuClone = EDITOR.windowMenu.add("Clone a repository", ["SCM", 15], showCloneDialog);
-		winMenuPullRequest = EDITOR.windowMenu.add("Export pull request", ["SCM", 17], exportPullRequest);
+		winMenuMercurial = EDITOR.windowMenu.add(S("version_control"), [S("Tools"), 2], toggleVersionControlWidget);
+		winMenuMercurial2 = EDITOR.windowMenu.add(S("show_command_bar"), [S("SCM"), 8, 1], toggleVersionControlWidget);
+		winMenuCommit = EDITOR.windowMenu.add(S("Commit"), ["SCM", 5], showCommitDialog);
+		winMenuDiffRevision = EDITOR.windowMenu.add(S("diff_revision"), [S("SCM"), 6], diffWorkingDirectory);
+		winMenuAnnotations = EDITOR.windowMenu.add(S("show_annotactions"), [S("SCM"), 11], toggleAnotations);
+		winMenuClone = EDITOR.windowMenu.add(S("clone_a_repository"), [S("SCM"), 15], showCloneDialog);
+		winMenuPullRequest = EDITOR.windowMenu.add(S("export_pull_request"), [S("SCM"), 17], exportPullRequest);
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);

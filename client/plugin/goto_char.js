@@ -16,10 +16,10 @@
 	});
 	
 	function loadGoToCharacter() {
-		EDITOR.bindKey({desc: "Goto character ...", charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
-		EDITOR.bindKey({desc: "Hide the goto-character GUI", charCode: KEY_ESC, fun: hideGotoCharWidget});
+		EDITOR.bindKey({desc: S("goto_char_index"), charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
+		EDITOR.bindKey({desc: S("hide_goto_char_widget"), charCode: KEY_ESC, fun: hideGotoCharWidget});
 		
-		winMenuGotoCharacter = EDITOR.windowMenu.add("Goto character", ["Navigate", 12], showGotoCharWidget);
+		winMenuGotoCharacter = EDITOR.windowMenu.add(S("goto_char_index"), [S("Navigate"), 12], showGotoCharWidget);
 	}
 	
 	function unloadGoToCharacter() {

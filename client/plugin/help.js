@@ -15,9 +15,9 @@ function loadHelp() {
 
 		var keyF1 = 112;
 		
-		EDITOR.bindKey({desc: "Show help files", fun: showHelp, charCode: keyF1, combo: 0});
+		EDITOR.bindKey({desc: S("show_help_files"), fun: showHelp, charCode: keyF1, combo: 0});
 		
-		winMenuHelp = EDITOR.windowMenu.add("Documentation", [S("Editor"), 12], showHelp);
+		winMenuHelp = EDITOR.windowMenu.add(S("Documentation"), [S("Editor"), 12], showHelp);
 		
 }
 

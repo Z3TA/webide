@@ -25,11 +25,11 @@
 		
 		var keyF2 = 113;
 		var keyF4 = 115;
-		EDITOR.bindKey({desc: "Runs the current (nodejs) file", fun: runNodeJsScript, charCode: keyF2, combo: 0});
-		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF4, combo: 0});
+		EDITOR.bindKey({desc: S("run_nodejs_script"), fun: runNodeJsScript, charCode: keyF2, combo: 0});
+		EDITOR.bindKey({desc: S("stop_nodejs_script"), fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
-		winMenuStartScript = EDITOR.windowMenu.add("Run script", ["Node.JS", 2], runNodeJsScript);
-		winMenuStopScript = EDITOR.windowMenu.add("Stop script", ["Node.JS", 2], stopNodeJsScript);
+		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.JS", 2], runNodeJsScript);
+		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.JS", 2], stopNodeJsScript);
 		
 		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
