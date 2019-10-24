@@ -123,4 +123,40 @@ var ERROR = 1;
 var WARNING = 2;
 var INFO = 3;
 
+var LOCALE = "en";
+
+function S(key, values, locale) {
+	if(!LANG.hasOwnProperty(LOCALE)) {
+		alertBox("LOCALE=" + LOCALE + " not added. Using default (en)");
+		LOCALE = "en";
+	}
+	
+	if(locale == undefined) locale = LOCALE;
+	
+	if(!LANG[locale].hasOwnProperty(key)) {
+		var data = {
+			meddelande: "locale=" + locale + "\nLOCALUE=" + LOCALE + "\nkey=" + key + "\nvalues=" + values + "\nStack=" + UTIL.getStack(key), 
+			namn: 'WebIDE', 
+			subject: "No tranlsation for " + key + " in " + LOCALE 
+		}
+		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", data, function (err, respStr) {});
+		if(locale == "en") return "!MISSING-TRANSLATION!";
+		else if(locale != LANG.__altLocale) return S(key, values, LANG.__altLocale);
+		else return S(key, values, "en")
+	}
+	
+	var str = LANG[locale][key];
+	
+	if(values) {
+		for(var i=0; i<values.length; i++) {
+			str = str.replace("$" + (i+1), values[i]);
+		}
+	}
+	
+	return str;
+}
+
+var LANG = {};
+
+
 Error.stackTraceLimit = Infinity;

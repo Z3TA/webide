@@ -35,6 +35,12 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Localization. So I can make tutorials in Swedish, because while I can read and write English, my speach is very bad.
+
+
+
+
+
 Get an intro screencast to automatically start first time you use the editor ...
 
 Just open intro.json screencast source and instruct user to click "start playback" !?
@@ -59,24 +65,36 @@ My name is Zäta, and I created this editor.
 
 Now I will quickly show you the layout ...
 
-At the very top you can find a dropdown menu where you can discover most features of the editor.
+At the very top you can find a dropdown menu where you can discover most editor features.
 
 The most useful features can also be found by right-clicking to bring up the context menu.
 
 On the left side, or on the top (depending on your screen size) you will find the discovery bar.
 The discovery bar show icons for cool features, for example: 
 The file explorer,
-Or live preview, that can be used to run node scripts, or open a HTML file in a preview window.
+Or live preview - that can be used to run node scripts, or open a HTML files in a preview window.
 
 Some useful keyboard shortcuts are:
 * Ctrl+O to open/search for any file.
 * Ctrl+S to save a file
 
+Use your device default keys for copy/pasting, most likely Ctrl+C and Ctrl+V
+
 You can also use this editor on your smartphone or tablet,
 where most features can be discovered via the virtual keyboard.
 
+(console.log("bullshit");)
 
-For more screencast tutorials go to Editor in the top menu.
+If you do not already know how to code websites and apps,
+don't worry, the built in mind-reading artificial intelligence will do it for you,
+all you have to do is to think of the app you want to create,
+and the editor will write all the code.
+
+we are not there yet though ... we need funding *cought*
+So in the meantime, there will be guides and tutorials,
+that will help you become a JavaScript ninja.
+
+For more screencast tutorials go to Editor > Tutorials in the top menu.
 
 If you have any feedback, good or bad, let me know by clicking 
 the smilie face in the top right menu.
