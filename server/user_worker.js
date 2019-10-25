@@ -404,8 +404,9 @@ user.loadStorage = function loadStorage(callback) {
 			
 			if(err.code == "ENOENT") {
 				
-				console.log("Creating directory: " + user.storageDir)
-				fs.mkdir(user.storageDir, function createdStorageDir(err) {
+				console.log("Creating directory: " + user.storageDir);
+				
+				API.createPath(user, {pathToCreate:  user.storageDir}, function createdStorageDir(err) {
 					if(err) {
 						callback(err);
 						throw err;
