@@ -673,6 +673,12 @@ process.on('message', function commandMessage(message) {
 	
 });
 
+process.on('disconnect', function ipcChannelClosed(message) {
+	log("IPC channel is closed!");
+	
+	
+	
+});
 
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
