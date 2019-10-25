@@ -35,10 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Taking a screenshot for readme
-
-Server issues when running on Macbook.
-
 Hide windows menu when right clicking on canvas when playback
 
 Test on different devices.

@@ -97,6 +97,7 @@ Test in bash:
 		// ALways make the latest file opened in arguments the stdin-file 
 		if(!stdinFile) stdinFileOpened(null, file);
 
+		EDITOR.dashboard.hide();
 	}
 	
 	function stdinPrint(str) {
