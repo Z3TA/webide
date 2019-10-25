@@ -35,6 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Ask to save file before previewing:
+From dasboard - new hml doc - preview - it just says File not found
+
 Server issues when running on Macbook.
 
 Hide windows menu when right clicking on canvas when playback
