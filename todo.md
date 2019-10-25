@@ -35,6 +35,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+When running nodejs script is says socketname.webide.se and not the real socket name
+
+When console logging undefined, the editor info becomes empty (instead of printing "undefined")
+
+Taking a screenshot for readme
+
+
 Ask to save file before previewing:
 From dasboard - new hml doc - preview - it just says File not found
 

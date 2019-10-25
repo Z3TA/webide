@@ -1552,6 +1552,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				myName: user.name,
 				dev: true,
 				tld: TLD,
+				TLD: TLD,
 				PATH: "/usr/bin:/bin"
 			},
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
