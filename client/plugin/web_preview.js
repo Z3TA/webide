@@ -5,6 +5,7 @@
 	
 	var winMenuWysiwygHtml;
 	var tempCtxMenuWebPreview;
+	var alwaysSaveBeforePreview = false;
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
@@ -126,6 +127,36 @@
 		
 		if(!isHTML(file)) return false;
 		
+		if(!file.isSaved) {
+			
+			if(alwaysSaveBeforePreview) {
+				saveit(function() {
+					webPreviewTool(file);
+				});
+				return true;
+			}
+			
+			var save = "Save & Preview";
+			var always = "Always save first";
+			var cancel = "Cancel preview";
+			confirmBox("Save before previewing?\n" + file.path, [save, always, cancel], function(answer) {
+				if(answer == save) {
+					saveit(function() {
+						webPreviewTool(file);
+					});
+				}
+				else if(answer == always) {
+					alwaysSaveBeforePreview = true;
+					saveit(function() {
+						webPreviewTool(file);
+					});
+				}
+				else if(answer != cancel) throw new Error("Unknown answer=" + answer);
+			});
+			
+			return true;
+		}
+		
 		if(!file.path.match(/html?$/i)) {
 			var fileExt = UTIL.getFileExtension(file.path);
 			var nameSugg = UTIL.getDirectoryFromPath(file.path) + UTIL.getFileNameWithoutExtension(file.path) + ".htm";
@@ -140,12 +171,19 @@
 					});
 				}
 			});
-			return false;
+			return true;
 		}
 		
 		openPreviewWindow(file);
 		
 		return true;
+		
+		function saveit(cb) {
+			EDITOR.saveFile(file, function(err) {
+				if(err) return alertBox("Failed to save " + file.path + " Error: " + err.message);
+				else cb(null);
+			});
+		}
 	}
 	
 	function isHTML(file) {

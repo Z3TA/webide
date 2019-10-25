@@ -105,7 +105,7 @@
 		
 		jsFile.appendChild(document.createTextNode("Node.JS script (JavaScript)"));
 		jsFile.onclick = function(clickEvent) {
-			createNewFile("main.js", '/*\n\n\*/\n\nconsole.log("hello world!");\n\n');
+			createNewFile( UTIL.joinPaths(EDITOR.user.home, "nodejs/main.js"), '/*\n\n\*/\n\nconsole.log("hello world!");\n\n');
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(jsFile);
@@ -124,7 +124,7 @@
 		
 		htmlButton.appendChild(document.createTextNode("Web document (HTML)"));
 		htmlButton.onclick = function(clickEvent) {
-			createNewFile("index.htm", '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
+			createNewFile( UTIL.joinPaths(EDITOR.user.home, "wwwpub/document.htm"), '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(htmlButton);
@@ -140,7 +140,7 @@
 		cssButton.appendChild(cssImg);
 		cssButton.appendChild(document.createTextNode("Stylesheet (CSS)"));
 		cssButton.onclick = function(clickEvent) {
-			createNewFile("stylesheet.css", '\nbody {\ncolor: black;\nbackground: white;\n}\n\n');
+			createNewFile( UTIL.joinPaths(EDITOR.user.home, "wwwpub/stylesheet.css"), '\nbody {\ncolor: black;\nbackground: white;\n}\n\n');
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(cssButton);
