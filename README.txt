@@ -6,30 +6,46 @@ folder (or https://webide.se/about/about.htm)
 
 Demo: https://webide.se/
 
-In this readme you will find instructions on how to run the editor locally on your computer, 
-or host it on your own server.
+Try it locally: `npx webide.se`
 
 
 
-Install instructions
-====================
-
-The editor can be download from here:
-https://www.webtigerteam.com/editor/download/
-
-If you only want the server/cloud version, download it from the link above.
-The easiest way to install the desktop version is via npm:
+Quick start
+===========
+Assuming you already have node.js installed. Open cmd or terminal:
 
 `npm install --global webide.se`
 
-Then type `npm start` to start the editor. Or (if you installed globally) `webide [path to file]`
+Then type `webide [path to file]` to edit any file.
+
+
+If you did not install globally
+-------------------------------
+For example if you only want to run the server, but without setting it up as a cloud IDE:
+```
+cd node_modules/webide.se
+npm run server
+```
+Then open the URL in your browser: http://127.0.0.1:8099/
+
+If you are on a remote server:
+```
+node server/server.js --ip=192.168.122.50 --username=test --password=secret -nochroot
+```
+Replace the IP with your public IP-address.
+
+If you want to host many users you need to setup the editor as a cloud IDE. See instructions further down in this readme ...
 
 
 
-Making a desktop icon and manually installing
-=============================================
 
-See instructions for your operating system.
+Installing as a Desktop editor (single user)
+============================================
+
+Download from here: (use latest version!)
+https://www.webtigerteam.com/editor/download/
+
+See instructions for your operating system below:
 
 Linux:
 ------
@@ -100,9 +116,9 @@ Mac OS X
 4. Install the dependencies by typing `npm install` and hit enter in the terminal.
 
 5. After nodejs and all dependencies are installed, type this in the terminal:
-`node server/server.js --port=8080 --user=admin --pw=admin -nochroot`
+`node server/server.js --port=8099 --user=admin --pw=admin -nochroot`
 
-6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8080/
+6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8099/
 
 
 Chromebook
@@ -116,11 +132,8 @@ That will use the hosted version on webide.se
 
 We tried to make a pure Chrome app, but that turned out to be too much work.
 
-If you root the device you might be able to install nodejs. And then:
-````
-npm install -g webide
-npm start
-````
+If you root the device you might be able to install nodejs and run `npm install -g webide`
+
 
 
 
@@ -164,8 +177,8 @@ And/or use Tasker or other app to make the both the server and the client start 
 Able to type webide via "unix" terminal without installing via npm --global
 ----------------------------------------------------------------------------
 In a unix like environment it's possible to open files and even pipe to bin/webide,
-in order to send streams of text to the editor.
-Just add the bin folder to your PATH environment variable:
+in order to send streams of text to the editor,
+just add the bin folder to your PATH environment variable:
 ```
 export PATH="$PATH:/path/to/node_modules/webide.se/bin"
 ```
@@ -235,6 +248,7 @@ If you are brave:
 3. Generate SSH key and edit mercurial.ini
 
 
+
 Running the editor in Google Cloud Shell
 ========================================
 
@@ -289,8 +303,10 @@ How to update
 If you installed using npm: 
 `npm update -g webide.se`
 
-The service worker might have cached and old version of the editor client,
-so if anything looks weird, try reloading the page.
+If you are using a hosted web app (PWA):
+The service worker might have cached an old version of the editor client,
+Go to Editor in the WebIDE top menu, and click "Unregister Service Worker". Then reload the page.
+
 If it still looks weird, hit Ctrl+Shift+I in to start your browser's developer tools,
 then find the Application tab, click on service worker, then force the service worker to (un)register/update.
 
@@ -306,8 +322,9 @@ Then hit Ctrl + Shift + S to post it. (There will be a confirmation box).
 Editing files on remote computers
 =================================
 The editor opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
-You can install bin/webider on the remote computer, and then use webider as an editor replacement.
-The files will be opened on your your local developer machine that is running WebIDE.
+You can install bin/webider on any remote computer, and then use webider as an editor replacement.
+(webider will connect to a WebIDE server and the files will be opened in the local client,
+there is no enctryption, so only use on LAN for now, eg. not over the Internet)
 
 installing webider on a remote computer (it also need to have nodejs installed!):
 ```
@@ -326,14 +343,15 @@ Font settings and styling
 
 The editor only works with mono-space font's (because of the "grid").
 
-Make style changes in settings_overload.js instead of EDITOR.js
+Make global changes in settings_overload.js
+Each user can make their own customizations using Editor > Customization scripts
 
-For the optimal text experience, try different system/OS font settings like hinting etc.
+For the optimal text experience, try different system/OS font settings on your local machine, like hinting etc.
 
 Example: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Uncheck "Smooth edges of screen fonts"
 
 You can find 'DejaVu Sans Mono' and 'Liberation Mono' in gfx/font, which should look good both with and without anti-alias. 
-(You might need to install them to your system for them to work in the editor!)
+(You might have to install the fonts to your system to make them work in the editor!)
 
 
 
@@ -343,12 +361,12 @@ If you take a screen-shot and zoom in, you will notice the text edges has red, g
 This creates an "anti-alias" effect because each pixel on LCD monitors has a red, green and blue line!
 
 "LCD Text" is the default on most operating systems. But some people might see "rainbows".
-"LCD Text" is unnecessary with a high-resolution monitor.
+"LCD Text" is unnecessary on a high-resolution monitor.
 
 
 Turn off "LCD Text" / sub-pixel-antialas
 -----------------------------------------
-Set "EDITOR.settings.sub_pixel_antialias = false" in settings_overload.js
+Set "EDITOR.settings.sub_pixel_antialias = false" in settings_overload.js or webide_js_overload.js
 
 To turn off LCD text for the whole browser (and not just the editor's text area) you need to edit
 linux_start.sh or start.js and add --disable-lcd-text to the browser arguments.
@@ -357,8 +375,8 @@ Or turn it off in your operating system! (It's already turned off if you have a 
 
 
 
-Re-compiling dependencies for other version of Node.JS
-=======================================================
+Re-compiling dependencies for another version of Node.JS
+========================================================
 `node-gyp rebuild --target=1.2.3`
 
 
