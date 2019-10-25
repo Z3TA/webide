@@ -1243,15 +1243,16 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 			var changesetId = [];
 			var changesets = {};
 			var logCounter = 0;
-			
+			var args; 
 			for(var i=0, changeId; i<lines.length; i++) {
 				lines[i] = lines[i].split(":");
 				changeId = parseInt(lines[i][0]);
 				
 				if(changesetId.indexOf(changeId) == -1) {
 					changesetId.push(changeId);
-					
-					execFile('hg', ["-v", "log", "--rev", changeId], { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, hglog);
+					args = ["-v", "log", "--rev", changeId]
+					console.log("execFile: hg args=" + JSON.stringify(args));
+					execFile('hg',args , { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, hglog);
 					}
 				lines[i] = changeId; // Map line to changeset
 			}
