@@ -76,9 +76,10 @@
 			
 			var url = "http://" + name + "." + EDITOR.user.name + "." + document.location.hostname;
 			
-			showNodejsBanner({url: url});
+			//showNodejsBanner({url: url});
+			nodeJsBanner.show();
 			
-			startStopButton.innerText = "Save & Run";
+			startStopButton.innerText = "Run Node.JS script";
 			startStopButton.onclick = function() {
 saveAndRun(file);
 			}
@@ -105,9 +106,12 @@ saveAndRun(file);
 	}
 	
 	function showNodejsBanner(banner) {
+		
 		nodeJsBanner.show();
 		
 		var url = banner.url;
+		
+		console.log("showNodejsBanner: url=" +url);
 		
 		while(urlHolder.firstChild) urlHolder.removeChild(urlHolder.firstChild);
 		var link = createBannerUrl(url);
@@ -749,7 +753,7 @@ startStopButton.classList.remove("start");
 		
 		if(startStopButton) {
 startStopButton.classList.add("start");
-			startStopButton.innerText = "Save & Restart";
+			startStopButton.innerText = "Save & Restart Node.JS script";
 			startStopButton.onclick = saveAndRun;
 		}
 	}

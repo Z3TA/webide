@@ -60,6 +60,6 @@ function httpRequest(request, response) {
 	}
 	
 	function notifyListening() {
-	console.log("Listening on http://" + unixSocket.split("/")[2] + "." + process.env.myName + ".%DOMAIN%/");
+	console.log("Listening on http://" + unixSocket.split("/")[2] + "." + process.env.myName + "." + process.env.tld);
 	}
 
