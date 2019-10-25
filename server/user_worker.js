@@ -676,7 +676,13 @@ process.on('message', function commandMessage(message) {
 process.on('disconnect', function ipcChannelClosed(message) {
 	log("IPC channel is closed!");
 	
+	/*
+		What to do now ?
+		We can no longer communicate with the parent process (server.js)
+		so there is not much we can do
+	*/
 	
+	process.exit();
 	
 });
 
