@@ -1,15 +1,16 @@
 
-WebIDE is a text/code editor/IDE for creating progressive web apps (PWA) and editing websites.
+WebIDE is a code editor/IDE for creating progressive web apps (PWA) and websites.
 
-More guides/articles are available in the documentation/ 
-folder (or https://webide.se/about/about.htm)
-
-Demo: https://webide.se/
+Web app: https://webide.se/
 
 Try it locally: `npx webide.se`
 
-
 <img src="https://www.webtigerteam.com/editor/webide_screenshot.png" />
+
+Project homepage: https://webtigerteam.com/editor/
+
+More guides/articles are available in the documentation/ 
+folder (or https://webide.se/about/about.htm)
 
 
 
@@ -33,11 +34,11 @@ Then open the URL in your browser: http://127.0.0.1:8099/
 
 If you are on a remote server:
 ```
-node server/server.js --ip=192.168.122.50 --username=test --password=secret -nochroot
+node server/server.js --ip=192.168.122.50 --username=admin --password=admin -nochroot
 ```
 Replace the IP with your public IP-address.
 
-If you want to host many users you need to setup the editor as a cloud IDE. See instructions further down in this readme ...
+If you want to host many users you need to setup the editor as a [cloud IDE](#cloudIDE).
 
 
 
@@ -399,7 +400,7 @@ Go into settings... Look for browser bar (General settings: Toolbar).. Select to
 
 
 
-
+<a id="cloudIDE"></a>
 Running as a cloud editor
 =========================
 You can use the editor "natively" running on your desktop via nw.js or in the browser. 
