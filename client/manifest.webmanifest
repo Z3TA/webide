@@ -1,6 +1,6 @@
 {
   "lang": "en",
-  "name": "PWA web editor/IDE",
+  "name": "WebIDE - PWA web editor/IDE",
   "short_name": "webide.se",
   "start_url": ".",
   "display": "standalone",
