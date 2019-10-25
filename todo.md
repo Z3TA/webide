@@ -35,13 +35,27 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Hide windows menu when right clicking on canvas when playback
+Reading: https://news.ycombinator.com/item?id=21289832
+
+Every second time you get "it seems window already loaded"
+
+Issues with previwing web pages in IE
+
+"Save and restart nodejs script" doesn't fit on the url banner widget. It also need some margins!
+
+Testing on Internet Explorer in Windows Server
+
+todo: Test npx and npm install on Windows!
 
 Test on different devices.
 
 Test install from npm experience on different OS:es
 
 
+Make that playback intro!
+
+One issue with Node.JS is that it's very low level, compared to say PHP.
+It's really for advanced developers ...
 
 
 Localization. So I can make tutorials in Swedish, because while I can read and write English, my speach is very bad.
