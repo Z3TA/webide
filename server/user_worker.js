@@ -1744,7 +1744,7 @@ function createInspector(url) {
 	});
 	
 	ws.on('message', function wsMessage(data) {
-		console.log("wsMessage: data=" + data);
+		console.log("wsMessage: data=" + JSON.stringify(data, null, 2));
 		
 		try {
 			var json = JSON.parse(data);

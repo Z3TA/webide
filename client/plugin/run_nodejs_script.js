@@ -207,6 +207,9 @@ saveAndRun(file);
 			text = text.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
 			text = text.replace(">", "&gt;");
 			
+			// console.log(undefined) results in an empty message
+			if(text == "") text = "undefined?";
+			
 			var loc = findFile(json.console.stack);
 			
 			if(!loc.file) throw new Error(loc.filePath + " no longer open ?");
