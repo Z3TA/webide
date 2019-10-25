@@ -1754,8 +1754,8 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 					EDITOR.ctxMenu.show(mouseX, mouseY);
 				}
 				else {
-					// Also hide it when left clicking
 					EDITOR.ctxMenu.hide();
+					EDITOR.windowMenu.hide();
 				}
 			}
 			else if(targetElement) {
