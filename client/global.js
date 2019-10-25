@@ -130,7 +130,7 @@ function S(key, values, locale) {
 	if(locale == undefined) locale = LOCALE;
 	
 	if(!LANG.hasOwnProperty(locale)) {
-		alertBox("locale=" + locale + " not added. Changing locale to default (en)");
+		//alertBox("locale=" + locale + " not yet supported. English (en) will be used.");
 		locale = LOCALE = "en";
 	}
 	
