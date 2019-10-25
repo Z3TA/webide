@@ -450,6 +450,12 @@ a:visited {
 	background-color: rgb(41, 42, 48);
 }
 
+.leftColumn .discoveryBar {
+	/* Try to prevent the top line in Safari (probably an inactive scrollbar) */
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
 .header .discoveryBar {
 	background-color: #1d2029;
 }
