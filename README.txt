@@ -723,7 +723,7 @@ Note: This also work on the Opera Mobile app
 Once Opera Mobile is connected to the Debugger, you can control it from the debugger.
 
 If you have not done it alredy, start the WebIDE server:
-sudo node server/server.js -p 8080 -ip 192.168.0.1
+sudo node server/server.js -port 8080 -ip 192.168.0.1
 (change IP to the machine's IP)
 
 Click "Console" in the Opera 12 debugger
