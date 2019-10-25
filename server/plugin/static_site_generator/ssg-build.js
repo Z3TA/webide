@@ -1019,6 +1019,9 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		var arrAuthor = [];
 		var arrDescription = [];
 		
+		// Use LF line breaks for consistence
+		data = data.replace(/\r\n/g, "\n");
+		
 		document.html = data;
 		
 		
