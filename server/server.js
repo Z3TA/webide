@@ -1883,18 +1883,24 @@ function sockJsConnection(connection) {
 									editorProcessArguments = "";
 								}
 							}
-							
-							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
+							else {
+								// Save last login
+							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function createLastLoginFile(err) {
 								if(err && err.code == "ENOENT") {
 									// .webide/storage/ probably doesn't exist in the home dir!
-									module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
-										if(err) throw err;
-										// Try again
-										module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
-											if(err) throw err;
-											else lastLoginFileUpdated()
+										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
+											if(err && err.code != "EEXIST") throw err;
+											
+											module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
+												if(err && err.code != "EEXIST") throw err;
+												// Try again
+												module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
+													if(err) throw err;
+													else lastLoginFileUpdated()
+												});
+											});
 										});
-									});
+										
 									return;
 								}
 								else if(err) throw err;
@@ -1908,6 +1914,7 @@ function sockJsConnection(connection) {
 								}
 								
 							});
+							}
 							
 							return true;
 							
