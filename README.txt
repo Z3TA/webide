@@ -9,6 +9,9 @@ Demo: https://webide.se/
 Try it locally: `npx webide.se`
 
 
+<img src="https://www.webtigerteam.com/editor/webide_screenshot.png" />
+
+
 
 Quick start
 ===========
