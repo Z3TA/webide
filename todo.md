@@ -35,12 +35,17 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Autocomplete Node.JS modules!
+(that way we do not need a doc/ref widget, you can rely on http. (tab) showing all available options, and http.createServer( showing the functon parameters !!!
+
+server plugin that requires the module, then checks available properties and methods (for var prop in module)
+And also gets the function parameters by stringifying the function.
+
+
 <button id="button">Button</button> should autocomplete button, because it's a global variale!!
 (Look for id="(.*)" in the HTML file that included the script!!  )
 (also look for the variable in the window object when in preview!!)
 
-Autocomplete Node.JS modules!
-(that way we do not need a doc/ref widget, you can rely on http. (tab) showing all available options, and http.createServer( showing the functon parameters !!!
 
 When user listens to a port, user should be told to listen on a unix socket instead! (when running as a cloud IDE)
 
