@@ -195,7 +195,7 @@
 		{name: "Promise.prototype.finally", arguments: "onFinally", type: "Promise", es: 2015},
 		{name: "Promise.prototype.then", arguments: "onFulfilled, onRejected", type: "Promise", es: 2015},
 		
-
+		
 		// ### Element (Should this be DOM_node !?)
 		{name: "Element",  variables: { prototype: {
 					"accessKey": {type: "String"},
@@ -243,8 +243,8 @@
 					"textContent": {type: "String"},
 					"title": {type: "String"}
 				}
-}
-},
+			}
+		},
 		{name: "Element.prototype.addEventListener", arguments: "event, function, useCapture", type: "undefined"},
 		{name: "Element.prototype.appendChild", arguments: "node", type: "Element"},
 		{name: "Element.prototype.blur", arguments: "", type: "undefined"},
@@ -386,7 +386,7 @@
 			EDITOR.removeEvent("fileParse", autoCompleteJS_fileParse);
 			
 			EDITOR.removePreRender(variableColors);
-		},
+		}
 	});
 	
 	
@@ -840,7 +840,7 @@
 				}
 				else {
 					console.log("charIndex=" + charIndex + " Not between func.start=" + func.start + " and " + func.end + " function=" + func.name);
-				
+					
 					// We are not inside this function, but we still want to check if it has global functions in it ...
 					console.log(func.name);
 					console.log("subfunctions=" + func.subFunctions.length)
@@ -872,30 +872,30 @@
 						console.log("Variable does not have a keys property: " + properties[0]);
 					}
 					else {
-					// Traverse the chain ... foo.bar.bas.xx
-					for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
-						if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
-							console.log("searchVariables: Setting new variable:" + properties[propertyIndex]);
-							variable = variable.keys[properties[propertyIndex]];
+						// Traverse the chain ... foo.bar.bas.xx
+						for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
+							if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
+								console.log("searchVariables: Setting new variable:" + properties[propertyIndex]);
+								variable = variable.keys[properties[propertyIndex]];
+							}
+							else {
+								break;
+							}
+						}
+						
+						var keyName = properties[propertyIndex]; // This is the word we are gonna auto-complete
+						
+						console.log("searchVariables: propertyIndex=" + propertyIndex + " keyName=" + keyName + "");
+						
+						
+						if( (!variable.hasOwnProperty("keys") || Object.keys(variable.keys).length == 0) && properties[properties.length-1] != "" ) {
+							console.log("searchVariables: Patch variable=" + JSON.stringify(variable, null, 2));
+							patchVariableKeysFromFunctionReturnObjectLiteral(variable, charIndex, js);
 						}
 						else {
-							break;
+							console.log("searchVariables: Variable " + properties[propertyIndex-1] + " already have " +  Object.keys(variable.keys).length + " keys!");
 						}
-					}
-					
-					var keyName = properties[propertyIndex]; // This is the word we are gonna auto-complete
-					
-					console.log("searchVariables: propertyIndex=" + propertyIndex + " keyName=" + keyName + "");
-					
-					
-					if( (!variable.hasOwnProperty("keys") || Object.keys(variable.keys).length == 0) && properties[properties.length-1] != "" ) {
-						console.log("searchVariables: Patch variable=" + JSON.stringify(variable, null, 2));
-						patchVariableKeysFromFunctionReturnObjectLiteral(variable, charIndex, js);
-					}
-					else {
-						console.log("searchVariables: Variable " + properties[propertyIndex-1] + " already have " +  Object.keys(variable.keys).length + " keys!");
-					}
-					
+						
 						// Traverse the chain again ... foo.bar.bas.xx
 						for(var propertyIndex=1; propertyIndex<properties.length; propertyIndex++) {
 							if(variable.keys.hasOwnProperty(properties[propertyIndex])) {
@@ -910,83 +910,83 @@
 						if(keyName == undefined) throw new Error("keyName=" + keyName + " properties=" + JSON.stringify(properties) + " propertyIndex=" + propertyIndex);
 						
 						if(variable.hasOwnProperty("keys") && keyName) {
-						// Search for keys
-						for(var key in variable.keys) {
-							console.log("searchVariables: Check if key " + key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
-							if(key.substr(0, keyName.length) == keyName) {
-								if(!optionExist(options, key)) {
-									pushVariable(keyName, variable.keys[key], key);
-								}
-								//options.push([keyName, key, 0]);
-							}
-						}
-					}
-					
-					console.log("searchVariables: variable.type=" + variable.type);
-					
-					if(variable.type=="unknown") {
-						variable.type=figureOutVariableType(variable.value, charIndex, js);
-					}
-					
-					if(variable.type == "this" && functionName) {
-						var p = functionName.split(".");
-						
-						searchFunctionThis(p[0], keyName, js);
-					}
-					else {
-						
-						// Look for prototype functions with the keyName
-							console.log("searchVariables: keyName=" + keyName + " properties=" + JSON.stringify(properties) + "");
-						
-						for (var i=0; i<builtInFunctions.length; i++) {
-								console.log("searchVariables: look for " + variable.type + ".prototype." + keyName);
-							if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
-								var key = builtInFunctions[i].name.slice(builtInFunctions[i].name.lastIndexOf(".")+1);
-								pushVariable(keyName, {method: true}, key);
-							}
-						}
-						// Check global function prototypes
-						var globalFunctions = getGlobalFunctions(js.functions);
-						for (var i=0; i<globalFunctions.length; i++) {
-							if( globalFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
-								var key = globalFunctions[i].name.slice(globalFunctions[i].name.lastIndexOf(".")+1);
-								pushVariable(keyName, {method: true}, key);
-							}
-						}
-						
-						// Check built in "class" prototype properties
-						for (var i=0; i<builtInFunctions.length; i++) {
-							if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype && builtInFunctions[i].name.indexOf(variable.type) == 0) {
-								var keys = Object.keys( builtInFunctions[i].variables.prototype );
-								for(var j=0; j<keys.length; j++) {
-									if( keys[j].indexOf(keyName)==0 ) {
-										pushVariable(keyName, {method: false}, keys[j]);
+							// Search for keys
+							for(var key in variable.keys) {
+								console.log("searchVariables: Check if key " + key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
+								if(key.substr(0, keyName.length) == keyName) {
+									if(!optionExist(options, key)) {
+										pushVariable(keyName, variable.keys[key], key);
 									}
+									//options.push([keyName, key, 0]);
 								}
 							}
 						}
 						
-						// Check for functions with that name, then check if the function has a property that match the word
-						if(properties.length > propertyIndex) {
-							for(var i=propertyIndex+1; i<properties.length; i++) {
-								keyName += "." + properties[i];
-							}
-						}
-						searchFunctionThis(variable.value, keyName, js);
+						console.log("searchVariables: variable.type=" + variable.type);
 						
-						// All objects has access to Object.prototype!
-						// But only show these if we have not yet discovered other keys. And not on natives!
-						if(options.length==0 && (variable.type=="Object" || Object.keys(variable.keys).length > 0 )) {
-							for (var i=0; i<objectPrototype.length; i++) {
-								if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
-									var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);
+						if(variable.type=="unknown") {
+							variable.type=figureOutVariableType(variable.value, charIndex, js);
+						}
+						
+						if(variable.type == "this" && functionName) {
+							var p = functionName.split(".");
+							
+							searchFunctionThis(p[0], keyName, js);
+						}
+						else {
+							
+							// Look for prototype functions with the keyName
+							console.log("searchVariables: keyName=" + keyName + " properties=" + JSON.stringify(properties) + "");
+							
+							for (var i=0; i<builtInFunctions.length; i++) {
+								console.log("searchVariables: look for " + variable.type + ".prototype." + keyName);
+								if( builtInFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
+									var key = builtInFunctions[i].name.slice(builtInFunctions[i].name.lastIndexOf(".")+1);
 									pushVariable(keyName, {method: true}, key);
 								}
 							}
+							// Check global function prototypes
+							var globalFunctions = getGlobalFunctions(js.functions);
+							for (var i=0; i<globalFunctions.length; i++) {
+								if( globalFunctions[i].name.indexOf(variable.type + ".prototype." + keyName) == 0 ) {
+									var key = globalFunctions[i].name.slice(globalFunctions[i].name.lastIndexOf(".")+1);
+									pushVariable(keyName, {method: true}, key);
+								}
+							}
+							
+							// Check built in "class" prototype properties
+							for (var i=0; i<builtInFunctions.length; i++) {
+								if(builtInFunctions[i].variables && builtInFunctions[i].variables.prototype && builtInFunctions[i].name.indexOf(variable.type) == 0) {
+									var keys = Object.keys( builtInFunctions[i].variables.prototype );
+									for(var j=0; j<keys.length; j++) {
+										if( keys[j].indexOf(keyName)==0 ) {
+											pushVariable(keyName, {method: false}, keys[j]);
+										}
+									}
+								}
+							}
+							
+							// Check for functions with that name, then check if the function has a property that match the word
+							if(properties.length > propertyIndex) {
+								for(var i=propertyIndex+1; i<properties.length; i++) {
+									keyName += "." + properties[i];
+								}
+							}
+							searchFunctionThis(variable.value, keyName, js);
+							
+							// All objects has access to Object.prototype!
+							// But only show these if we have not yet discovered other keys. And not on natives!
+							if(options.length==0 && (variable.type=="Object" || Object.keys(variable.keys).length > 0 )) {
+								for (var i=0; i<objectPrototype.length; i++) {
+									if( objectPrototype[i].name.indexOf("Object.prototype." + keyName) == 0 ) {
+										var key = objectPrototype[i].name.slice(objectPrototype[i].name.lastIndexOf(".")+1);
+										pushVariable(keyName, {method: true}, key);
+									}
+								}
+							}
+							
 						}
-						
 					}
-				}
 				}
 				
 			}
@@ -1221,10 +1221,10 @@
 			if(props.length == 1) {
 				var variable = scope.variables[value];
 				if(variable) {
-				console.log("figureOutVariableType: " + value + " is a variable type=" + variable.type);
-				if(addKeysToVariable) addKeysToVariable.keys = variable.keys;
-				return variable.type;
-			}
+					console.log("figureOutVariableType: " + value + " is a variable type=" + variable.type);
+					if(addKeysToVariable) addKeysToVariable.keys = variable.keys;
+					return variable.type;
+				}
 			}
 			
 			var variable = scope.variables[props[0]];
@@ -1278,7 +1278,7 @@
 			// Make sure all types are the same, with the exception of null !?
 			console.log("figureOutVariableType: types=" + JSON.stringify(types));
 			if(types.length > 1) {
-showWarningAt(charIndex, value + " can be " + types.join(", "));
+				showWarningAt(charIndex, value + " can be " + types.join(", "));
 			}
 			return types[0];
 		}
@@ -1322,10 +1322,10 @@ showWarningAt(charIndex, value + " can be " + types.join(", "));
 				}
 				
 				var props = ret.split(".");
-
-// Changle the scope to the function point ot view
+				
+				// Changle the scope to the function point ot view
 				var scope = getScope(func.start+1, js.functions, js.globalVariables);
-
+				
 				// Search the scope for variables and functions
 				var variable = scope.variables[props[0]];
 				if(variable) {
@@ -1335,7 +1335,7 @@ showWarningAt(charIndex, value + " can be " + types.join(", "));
 						for (var i=1; i<props.length; i++) {
 							variable = variable.keys[props[i]]
 							if(!variable) {
-console.warn("Found variable " + props[0] + " but not the member " + ret);
+								console.warn("Found variable " + props[0] + " but not the member " + ret);
 								return;
 							}
 						}
@@ -1343,7 +1343,7 @@ console.warn("Found variable " + props[0] + " but not the member " + ret);
 					}
 					return;
 				}
-else {
+				else {
 					
 					var otherFunction = scope.functions[ret];
 					if(otherFunction) {

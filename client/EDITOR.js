@@ -4589,6 +4589,8 @@ var word = "";
 		var options = []; // Word options
 		var mcl = []; // Move caret left
 		
+		var waitingForAsync = 0;
+		
 		/*
 			We want to include whole of document.getElementById("foobar").innerH
 			but only bar in foo(bar)
@@ -4653,45 +4655,21 @@ var word = "";
 		console.log("Calling autoComplete listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			
-			ret = f[i](file, word, wordLength, options.length);
+			ret = f[i](file, word, wordLength, options.length, callback);
 			
 			console.log("function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
-			if(ret) {
-				if(!Array.isArray(ret) && typeof ret == "object") {
-					if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
-					ret = ret.add;
-				}
-				
-				if(Array.isArray(ret)) {
-					for(var j=0; j<ret.length; j++) {
-						if(Array.isArray(ret[j])) {
-							addWord = ret[j][0];
-							addMcl = ret[j][1];
-							functionArguments = ret[j][2];
-						}
-						else {
-							addWord = ret[j];
-							addMcl = 0;
-						}
-						
-						console.log("addWord=" + addWord + " addMcl=" + addMcl);
-						
-						if(word.length > 0 && addWord.indexOf(word) != 0) {
-							console.warn("Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
-						}
-						if(options.indexOf(addWord) == -1) {
-							options.push(addWord);
-							mcl.push(addMcl);
-						}
-					}
-				}
-				else {
-					throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
-				}
-			}
+			if(ret && !ret.async) callback(ret);
+			else if(ret && ret.async) waitingForAsync++;
+			
 		}
 		
+if(waitingForAsync == 0) gotOptions();
+		
+		return PREVENT_DEFAULT;
+
+		function gotOptions() {
+			
 		if(options.length != mcl.length) {
 			throw new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " ");
 			return false;
@@ -4748,8 +4726,51 @@ var word = "";
 		
 		if(options.length == 0) EDITOR.stat("autocomplete_nothing");
 		else EDITOR.stat("autocomplete_found");
+		}
 		
-		return false; // disable default action
+		function callback(ret) {
+			if(!ret) return;
+			
+			if(!Array.isArray(ret) && typeof ret == "object") {
+				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
+				ret = ret.add;
+			}
+			
+			if(Array.isArray(ret)) {
+				for(var j=0; j<ret.length; j++) {
+					if(Array.isArray(ret[j])) {
+						addWord = ret[j][0];
+						addMcl = ret[j][1];
+						functionArguments = ret[j][2];
+					}
+					else {
+						addWord = ret[j];
+						addMcl = 0;
+					}
+					
+					console.log("addWord=" + addWord + " addMcl=" + addMcl);
+					
+					if(word.length > 0 && addWord.indexOf(word) != 0) {
+						console.warn("Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
+					}
+					if(options.indexOf(addWord) == -1) {
+						options.push(addWord);
+						mcl.push(addMcl);
+					}
+				}
+			}
+			else {
+				throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
+			}
+			
+			if(ret.async) {
+				waitingForAsync--;
+				if(waitingForAsync == 0) {
+					gotOptions();
+				}
+			}
+			
+		}
 		
 		function completeWord(word, wholeWord, moveCaret) {
 			

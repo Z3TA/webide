@@ -50,7 +50,10 @@ And also gets the function parameters by stringifying the function.
 When user listens to a port, user should be told to listen on a unix socket instead! (when running as a cloud IDE)
 
 
+---
 
+bug: When last Dialog is repeated, the "repeated x times" shows on the dialog that is currently visible (the first dialog)
+but it should say on the dialog that was repeated!
 
 ---
 

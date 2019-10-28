@@ -1062,7 +1062,8 @@
 		SSJS = false, // Server Side JavaScript
 		JSX = options.jsx || false,
 		jsxMaybe = false,
-		jsxOpenElements = [];
+		jsxOpenElements = [],
+		lastVariable;
 		
 		
 		// -----
@@ -1497,6 +1498,8 @@
 					else {
 						variable.value = rightSide;
 					}
+					
+					lastVariable = variable;
 					
 				}
 				else {
@@ -2937,7 +2940,7 @@
 				
 				word = word.trim();
 				
-				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
+				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord + "");
 				
 				//console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
 				if(singleStatementContext==1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
@@ -2966,11 +2969,15 @@
 					else if(word.charAt(0)=="(" && word.charAt(word.length-1)==")") {
 						// We got parameters for function call/declaration, or for/while/do loops
 						// Everything insiide a parentheses is added to the word 
-						//console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " singleStatementContext=" + singleStatementContext);
-						//lastWord = lastWord + word;
+						//console.log("In parentheses: word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " singleStatementContext=" + singleStatementContext + " lastVariable=" + (lastVariable && lastVariable.value));
 						if(singleStatementContext && word.indexOf(";") != -1) {
 							// Found variable declaration insode for loop !?
 							findVariables( word.slice(1,word.indexOf(";")), myFunction, subFunctionDepth);
+						}
+						else if(lastVariable && lastVariable.value) {
+							console.log("Got arguments=" + word + " for function call to " + lastVariable.value);
+							lastVariable.args = word;
+							lastVariable = undefined;
 						}
 						
 						word = "";
@@ -3103,13 +3110,13 @@
 						// If it's not found inside the function, asume it's a global
 						if(Object.hasOwnProperty.call(globalVariables, properties[0])) variable = globalVariables[properties[0]];
 						else {
-							//console.log("Variable " + properties[0] + " doesn't exist in global variables. Creating it!");
+							console.log("Variable " + properties[0] + " doesn't exist in global variables. Creating it!");
 							variable = globalVariables[properties[0]] = new Variable(); // Add it if it doesn't exist
 							
 						}
 					}
 					
-					//console.log("Variable: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ")");
+					console.log("Variable: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ")");
 					
 					if(properties.length>1) {
 						variable = traverseVariableTree(properties, variable, 1);
@@ -3155,6 +3162,7 @@
 		}
 		
 		function findVariables(str, myFunction, subFunctionDepth) {
+			//console.log("findVariables: str=" + str);
 			str = str.trim();
 			var variableDeclarationWord = str.slice(0, str.indexOf(" "));
 			if( variableDeclarationWord=="var" || variableDeclarationWord=="let" || variableDeclarationWord=="const" ) {
@@ -3258,6 +3266,7 @@
 		this.value = value || "";
 		this.keys = {};
 		this.method = false;
+		this.args = "";
 		
 		// Variables can be methods, all functions are however added to functions/subfunctions, so arguments have to be looked up from there
 		
