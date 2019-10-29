@@ -19,6 +19,7 @@ API.mercurial = require("./plugin/mercurial.js");
 API.spellcheck = require("./plugin/spellcheck/spellcheck.js");
 API.terminal = require("./plugin/terminal.js");
 API.mysql = require("./plugin/mysql.js");
+API.nodejsautocomplete = require("./plugin/nodejsautocomplete.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 

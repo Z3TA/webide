@@ -34,7 +34,7 @@
 				if(scope.variables[variableName].value == "require") {
 					
 					var requireArgs = scope.variables[variableName].args;
-					var moduleNameStr = requireArgs.replace("(", "").replace(")", "").trim();
+					var moduleNameStr = requireArgs.replace("(", "").replace(")", "").replace(/'/g, "").replace(/"/g, "").trim();
 					
 					console.log("autoCompleteNode: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
 					
@@ -44,16 +44,54 @@
 				}
 			}
 		}
-	}
 	
 	function checkModule(objectChain, moduleNameStr, cwd) {
 		// moduleNameStr can be both a module name and a path!
 		
-		CLIENT.cmd("nodejs.require", {nameStr: moduleNameStr, cwd: cwd}, function(err, members) {
+			CLIENT.cmd("nodejsautocomplete.require", {nameStr: moduleNameStr, cwd: cwd}, function(err, resp) {
+				if(err) return alertBox("Unable to get info about the " + moduleNameStr + " module: Error: " + err.message);
+				
+				var i = 1;
+				var chainStr = objectChain[0] + ".";
+				var options = [];
+				
+				findin(resp.variables)
+				
+				console.log("autoCompleteNode: checkModule: options=" + JSON.stringify(options) );
+				
+				callback(options);
+				
+				function findin(variables) {
+					
+					console.log("autoCompleteNode: findin: variables:" + JSON.stringify(  Object.keys(variables)  ) + " objectChain[" + i + "]=" + objectChain[i]);
+					
+					for(var name in variables) {
+						if(objectChain[i] == "") {
+							options.push(chainStr + name);
+						}
+						else if(name == objectChain[i]) {
+							if(objectChain.length > i-1 && objectChain[i+1] != "") {
+								i++;
+								chainStr = chainStr + name + "."; 
+								return findin(variables[name].keys);
+							}
+							else {
+								// Show all available method/properties ?
+								
+							}
+						}
+						else if(name.slice(0, objectChain[i].length) == objectChain[i]) {
+							// Autocomplete the name
+							options.push(chainStr + name);
+						}
+					}
+				}
+				
+			});
 			
-		});
-		
+		}
 	}
+	
 	
 	EDITOR.addTest(1, function autocomplete_node_modules(callback) {
 		EDITOR.openFile("autocomplete_node.js", 'var http = re\n', function(err, file) {

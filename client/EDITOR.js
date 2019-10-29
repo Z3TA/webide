@@ -4608,7 +4608,7 @@ var word = "";
 			
 			//if(char == "") continue; // "abc".indexOf("") = 0
 			
-			console.log("char=" + char);
+			console.log("EDITOR.autoComplete: char=" + char);
 			
 			if(char == "(") {
 				leftParentheses++;
@@ -4622,21 +4622,21 @@ var word = "";
 			
 			// don't include if(
 			else if(char == "(" && left2 == "i" && left1 == "f") {
-				console.log("break because of if(");
+				console.log("EDITOR.autoComplete: break because of if(");
 				break;
 			}
 			
 			//if(isWhiteSpace(char) || char == ",") break;
 			
 			word = char + word;
-			console.log("word=" + word);
+			console.log("EDITOR.autoComplete: word=" + word);
 		}
 		// Also go right just in case we are inside a word
 		
 		for(var i=file.caret.index; i<file.text.length; i++) {
 			char = file.text.charAt(i);
 			
-			console.log("char=" + char);
+			console.log("EDITOR.autoComplete: char=" + char);
 			
 			if(wordDelimitersRight.indexOf(char) > -1) break; // Exit loop
 			
@@ -4647,17 +4647,17 @@ var word = "";
 		
 		word = word.trim();
 		var wordLength = word.length;
-		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
+		console.log("EDITOR.autoComplete: Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
 		var ret, addWord, addMcl, functionArguments, removeOptions = [];
 		
 		var f = EDITOR.eventListeners.autoComplete.map(funMap);
-		console.log("Calling autoComplete listeners (" + f.length + ") ...");
+		console.log("EDITOR.autoComplete: Calling autoComplete listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			
 			ret = f[i](file, word, wordLength, options.length, callback);
 			
-			console.log("function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
+			console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
 			if(ret && !ret.async) callback(ret);
 			else if(ret && ret.async) waitingForAsync++;
@@ -4675,7 +4675,7 @@ if(waitingForAsync == 0) gotOptions();
 			return false;
 		}
 		
-		console.log("options:" + JSON.stringify(options, null, 2));
+			console.log("EDITOR.autoComplete: options:" + JSON.stringify(options, null, 2));
 		
 		var removeIndex = -1;
 		for(var i=0; i<removeOptions.length; i++) {
@@ -4691,7 +4691,7 @@ if(waitingForAsync == 0) gotOptions();
 			// Type up until the common character  fooBar vs fooBaz, type fooBa|
 			var shared = sharedStart(options);
 			
-			console.log("sharedStart=" + shared + " word=" + word);
+				console.log("EDITOR.autoComplete: sharedStart=" + shared + " word=" + word);
 			
 			// hmm!?
 			/*
@@ -4731,6 +4731,8 @@ if(waitingForAsync == 0) gotOptions();
 		function callback(ret) {
 			if(!ret) return;
 			
+			console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
+			
 			if(!Array.isArray(ret) && typeof ret == "object") {
 				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
 				ret = ret.add;
@@ -4748,10 +4750,10 @@ if(waitingForAsync == 0) gotOptions();
 						addMcl = 0;
 					}
 					
-					console.log("addWord=" + addWord + " addMcl=" + addMcl);
+					console.log("EDITOR.autoComplete: addWord=" + addWord + " addMcl=" + addMcl);
 					
 					if(word.length > 0 && addWord.indexOf(word) != 0) {
-						console.warn("Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
+						console.warn("EDITOR.autoComplete: Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
 					}
 					if(options.indexOf(addWord) == -1) {
 						options.push(addWord);
@@ -4785,7 +4787,7 @@ if(waitingForAsync == 0) gotOptions();
 					
 					
 				*/
-				console.warn("Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
+				console.warn("EDITOR.autoComplete: Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
 				for(var i=0; i<word.length; i++) {
 					file.moveCaretLeft();
 					file.deleteCharacter();
@@ -4796,7 +4798,7 @@ if(waitingForAsync == 0) gotOptions();
 				var insert = wholeWord.substring(word.length); // Start at length, continue to end
 			}
 			
-			console.log("Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
+			console.log("EDITOR.autoComplete: Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
 			
 			
 			/* Use insertText for non-single letters ...
