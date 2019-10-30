@@ -10,6 +10,8 @@
 	var lastInsertCBLLevel = {};
 	var force = false; // Toggle
 	
+	var winMenuShowLines;
+	
 	EDITOR.on("start", indention_helper);
 	
 	function indention_helper() {
@@ -22,10 +24,15 @@
 		
 		EDITOR.bindKey({desc: "Toggle indentation guides", charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
 		
+		winMenuShowLines = EDITOR.windowMenu.add(S("indentation_lines"), [S("View"), 100], toggleIndentationHelper);
+		
 	}
 	
 	function toggleIndentationHelper() {
 		force = force ? false : true;
+		
+		if(force) winMenuShowLines.activate();
+		else  winMenuShowLines.deactivate();
 		
 		EDITOR.renderNeeded();
 		
