@@ -96,7 +96,10 @@
 				
 				console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
 				
-				if( moduleInfoCache[moduleNameStr] ) return callback(null, moduleInfoCache[moduleNameStr]);
+				if( moduleInfoCache[moduleNameStr] ) {
+callback(null, moduleInfoCache[moduleNameStr]);
+					return true;
+				}
 				
 				var cwd = UTIL.getDirectoryFromPath(file.path);
 				
@@ -104,14 +107,22 @@
 					if(err) return callback(err);
 					
 					moduleInfoCache[moduleNameStr] = resp;
+					// Only save the cache for one second
+					setTimeout(function() {
+						delete moduleInfoCache[moduleNameStr];
+					}, 1000);
 					
 					callback(null,resp);
 				});
 				return true;
 			}
+			else {
+				console.log("autoCompleteNode: findModuleInScope: scope.variables[" + variableName + "].value=" + scope.variables[variableName].value + " (not require)");
+			}
 		}
 		
-		return callback(new Error("Did not find any variable named " + variableName + " in scope=" + JSON.stringify(scope, null, 2)));
+		callback(new Error("Did not find any variable named " + variableName + " in scope=" + JSON.stringify(scope, null, 2)));
+		return false;
 	}
 	
 	function traverseChain(findStr, variables) {
@@ -175,6 +186,19 @@
 		return null;
 	}
 	
+	function showArgumentHint(file, caret, argStr, argIndex) {
+		var args = argStr.split(",");
+		
+		console.log("autoCompleteNode: showArgumentHint: args.length=" + args.length + " argIndex=" + argIndex);
+		
+		if(argIndex < args.length) {
+			// Highlight the current parameter
+			argStr = argStr.replace(args[argIndex], "<b>" + args[argIndex] + "</b>");
+		}
+		
+		EDITOR.addInfo(caret.row, caret.col, argStr, file);
+	}
+	
 	function autoCompleteNode(file, wordToComplete, wordLength, gotOptions, callback) {
 		
 		console.log("autoCompleteNode: wordToComplete=" + wordToComplete);
@@ -191,16 +215,17 @@
 		if(fc) {
 			// Find module method fc.word
 			findModuleInScope(file, fc.word, function(err, moduleInfo) {
-				if(err) return alertBox("Unable to find module info about " + fc.word + " Error: " + err.message);
+				if(err) {
+					console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
+					return;
+				}
 				
 				console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
 				
-				var moduleName = getModuleName(file, fc.word)
-				
-				// Get real name
+				// Get mehod name chain
 				var words = fc.word.split(".");
 				words.shift();
-				words.unshift(moduleName);
+				words.unshift(moduleInfo.nameStr);
 				var fName = words.join(".");
 				
 				console.log("autoCompleteNode: fName=" + fName + "");
@@ -213,22 +238,19 @@
 					console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
 					if(moduleInfo.functions[i].name == fName) {
 						console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
+						return showArgumentHint(file, file.caret, moduleInfo.functions[i].arguments, fc.commasLeft);
 					}
 				}
 				
-				// Find variable member. eg. foo.bar.baz()
-				var chain = traverseChain(fc.word, moduleInfo.variables);
-				if(chain) {
-					console.log("autoCompleteNode: Found " + chain.name + " method=" + chain.variable.method + " args=" + chain.variable.args);
-				}
 			});
 		}
 		
-		return;
-		
 		// Check parsed variables from current file, check if value=="require", then check what the module returns
 		var found = findModuleInScope(file, wordToComplete, function(err, moduleInfo) {
-			if(err) return alertBox("Unable to get info about the " + wordToComplete + " module: Error: " + err.message);
+			if(err) {
+				console.log("autoCompleteNode: Unable to get info about the " + wordToComplete + " module: Error: " + err.message);
+				return callback();
+			}
 			
 			var objectChain = wordToComplete.split(".");
 			
@@ -238,7 +260,7 @@
 			
 			findin(moduleInfo.variables)
 			
-			console.log("autoCompleteNode: checkModule: options=" + JSON.stringify(options) );
+			console.log("autoCompleteNode: Calling back with opptions=" + JSON.stringify(options));
 			
 			callback(options);
 			
@@ -250,17 +272,11 @@
 					if(objectChain[i] == "") {
 						options.push(chainStr + name);
 					}
-					else if(name == objectChain[i]) {
-						if(objectChain.length > i-1 && objectChain[i+1] != "") {
-							i++;
+					else if(name == objectChain[i] && objectChain.length > i+1 && objectChain[i+1]) {
+						i++;
 							chainStr = chainStr + name + ".";
 							return findin(variables[name].keys);
 						}
-						else {
-							// Show all available method/properties ?
-							
-						}
-					}
 					else if(name.slice(0, objectChain[i].length) == objectChain[i]) {
 						// Autocomplete the name
 						if(variables[name].method) options.push([chainStr + name + "()", 1]);
@@ -271,7 +287,14 @@
 			
 		});
 		
-		if(found === true) return {async: true};
+		console.log("autoCompleteNode: found=" + found);
+		
+		if(found === true) {
+return {async: true};
+		}
+		else {
+			callback = null;
+		}
 		
 	}
 	

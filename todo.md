@@ -55,6 +55,11 @@ When user listens to a port, user should be told to listen on a unix socket inst
 bug: When last Dialog is repeated, the "repeated x times" shows on the dialog that is currently visible (the first dialog)
 but it should say on the dialog that was repeated!
 
+
+---
+
+Make a SQL table creator helper like in mySQL Query browser
+
 ---
 
 Reading: https://news.ycombinator.com/item?id=21289832

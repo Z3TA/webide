@@ -2,7 +2,7 @@
 var NODE = {
 
 	require: function(user, json, callback) {
-		var nameStr = json.nameStr;
+		var nameStr = json.nameStr; // Name of the module
 		var cwd = json.cwd;
 		if(cwd && nameStr.charAt(0) == ".") {
 			// nameStr is a path to a module!
@@ -23,7 +23,7 @@ var NODE = {
 		
 		collect(obj, variables, nameChain);
 		
-		callback(null, {variables: variables, functions: functions});
+		callback(null, {variables: variables, functions: functions, nameStr: relativePath || nameStr});
 		
 		function collect(obj, variables, nameChain) {
 			for(var name in obj) {
