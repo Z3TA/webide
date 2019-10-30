@@ -4601,6 +4601,7 @@ var word = "";
 		var leftParentheses = 0;
 		var rightParentheses = 0;
 		var dotInWord = false;
+		var caretStepLeft = 0;
 		for(var i=file.caret.index-1; i>-1; i--) {
 			char = left1;
 			left1 = left2;
@@ -4630,6 +4631,8 @@ var word = "";
 			
 			word = char + word;
 			console.log("EDITOR.autoComplete: word=" + word);
+			
+			caretStepLeft++;
 		}
 		// Also go right just in case we are inside a word
 		
@@ -4750,10 +4753,10 @@ if(waitingForAsync == 0) gotOptions();
 						addMcl = 0;
 					}
 					
-					console.log("EDITOR.autoComplete: addWord=" + addWord + " addMcl=" + addMcl);
+					console.log("EDITOR.autoComplete: word=" + word + " addWord=" + addWord + " addMcl=" + addMcl);
 					
 					if(word.length > 0 && addWord.indexOf(word) != 0) {
-						console.warn("EDITOR.autoComplete: Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not have word=" + word + " in it!");
+						console.warn("EDITOR.autoComplete: Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not start with word=" + word + " !");
 					}
 					if(options.indexOf(addWord) == -1) {
 						options.push(addWord);
@@ -4780,15 +4783,19 @@ if(waitingForAsync == 0) gotOptions();
 				// Delete the word, then insert the text
 				
 				/*
-					Removing the whole word is very annoying if that's Not what the user intended!
+					Issue 1: Removing the whole word is very annoying if that's Not what the user intended!
 					Can me make a smart decision somehow!?
 					
 					ex: User writes EDITOR.curr| but there is not EDITOR.curr.. BUT there's a currentFile
 					
+					Issue 2: When atuocompleting a quote ex: "foo" and you get "foobar" and "foobarr",
+					we don't want to delete 4 letters, only 3. Or the letter left to the " would also be deleted
+					solution: Calculate where in the word the caret is in, and only delete the characters to the left
+					
 					
 				*/
-				console.warn("EDITOR.autoComplete: Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
-				for(var i=0; i<word.length; i++) {
+				console.warn("EDITOR.autoComplete: Deleting word=" + word + " caretStepLeft=" + caretStepLeft + " to autocomple wholeWord=" + wholeWord);
+				for(var i=0; i<Math.min(caretStepLeft, word.length); i++) {
 					file.moveCaretLeft();
 					file.deleteCharacter();
 				}
