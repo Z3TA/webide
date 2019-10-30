@@ -1,6 +1,8 @@
 
 LANG["en"] = {
 	
+	
+	
 	add_to_home_screen: "Add to home screen",
 	autocomplete: "autocomplete",
 	
@@ -69,6 +71,7 @@ LANG["en"] = {
 	hide_remote_server_manager: "hide the FTP/SSH server manager",
 	hotreload_plugin: "Reload current plugin",
 	
+	indentation_lines: "indentation lines",
 	insert_lorem_ipsum: "Insert lorem ipsum",
 	intro: "intro",
 	invite_collaborator: "Invite collaborator",

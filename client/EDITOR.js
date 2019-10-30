@@ -4659,7 +4659,7 @@ var word = "";
 			
 			console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
-			if(ret && !ret.async) callback(ret);
+			if(ret && !ret.async) callback(ret, true);
 			else if(ret && ret.async) waitingForAsync++;
 			
 		}
@@ -4728,7 +4728,7 @@ if(waitingForAsync == 0) gotOptions();
 		else EDITOR.stat("autocomplete_found");
 		}
 		
-		function callback(ret) {
+		function callback(ret, notAsync) {
 			if(!ret) return;
 			
 			console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
@@ -4765,7 +4765,7 @@ if(waitingForAsync == 0) gotOptions();
 				throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
 			}
 			
-			if(ret.async) {
+			if(!notAsync) {
 				waitingForAsync--;
 				if(waitingForAsync == 0) {
 					gotOptions();

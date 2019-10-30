@@ -38,7 +38,7 @@ var NODE = {
 				else if(typeof obj[name] == "function") {
 					variables[name].method = true;
 					var func = parseFunction(obj[name].toString());
-					functions.push(  new Func(nameChain + "." + name, func.args)  ); 
+					functions.push(  new Func(nameChain + "." + name, (func && func.args))  ); 
 				}
 				else if(typeof obj[name] == "object") {
 					collect(obj[name], variables[name].keys, nameChain + "." + name)
@@ -52,7 +52,40 @@ var NODE = {
 
 
 function parseFunction(str) {
-	return "";
+	/*
+		Find the content inside the first parentheses
+	*/
+	
+	var left = 0;
+	var right = 0;
+	var lcount = 0;
+	var rcount = 0;
+	
+	for (var i=0, c; i<str.length; i++) {
+		c = str[i];
+		
+		if(c=="(") {
+			if(!left) left = i+1;
+			lcount++;
+		}
+		else if(c==")") {
+			if(!right) right = i;
+			rcount++;
+			if(lcount == rcount) {
+				
+				if(right > left) var args = str.slice(left, right);
+				console.log("parseFunction: Found args between left=" + left + " and right=" + right + " args=" + args);
+				
+				if(args && args.length != (right-left)) throw new Error("args.length=" + args.length + " right-left=" + (right-left) + " str=" + str);
+				
+				return {args: args ? args : ""};
+			}
+		}
+		
+		console.log("parseFunction: c=" + c + " left=" + left + " right=" + right + " lcount=" + lcount + " rcount=" + rcount + " ");
+	}
+	
+	return null;
 }
 
 // from client/plugin/javascript/js_parser.js
