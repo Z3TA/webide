@@ -3,6 +3,47 @@
 	
 	var moduleInfoCache;
 	
+	var builtinNodeModules = [
+		"assert",
+		"async_hooks",
+		"buffer",
+		"child_process",
+		"cluster",
+		"console",
+		"constants",
+		"crypto",
+		"dgram",
+		"dns",
+		"domain",
+		"events",
+		"fs",
+		"http",
+		"http2",
+		"https",
+		"inspector",
+		"module",
+		"net",
+		"os",
+		"path",
+		"perf_hooks",
+		"process",
+		"punycode",
+		"querystring",
+		"readline",
+		"repl",
+		"stream",
+		"string_decoder",
+		"timers",
+		"tls",
+		"trace_events",
+		"tty",
+		"url",
+		"util",
+		"v8",
+		"vm",
+		"zlib"
+	];
+	
 	EDITOR.plugin({
 		desc: "Autocomplete for Node.JS",
 		load: function load() {
@@ -34,7 +75,7 @@
 			c = file.text[i];
 			console.log("autoCompleteNode: insideFunctionCall: c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft);
 			if(foundLeftParenthesis) {
-				if(c=="}" || c=="]" || c==")" || c==";") {
+				if(c=="}" || c=="]" || c==")" || c==";" || c=="=") {
 					break;
 				}
 				else if(c.match(/\S/)) {
@@ -207,26 +248,59 @@ callback(null, moduleInfoCache[moduleNameStr]);
 		
 		// Autocomplete global Node.JS variables
 		
-		// Autocomplete built-in Node.JS module names if inside require() call
+		
 		
 		
 		// Show function parameters if inside function arguments
 		var fc = insideFunctionCall(file, file.caret);
 		if(fc) {
-			// Find module method fc.word
-			findModuleInScope(file, fc.word, function(err, moduleInfo) {
-				if(err) {
-					console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
-					return;
+			
+			if(fc.word == "require") {
+				console.log("autoCompleteNode: Inside a require call!");
+				// Autocomplete built-in Node.JS module names if inside require() call
+				
+				var strToCompleteStartsWithQuote = wordToComplete.charAt(0);
+				var strToCompleteEndsWithQuote = wordToComplete.charAt(0);
+				var validQuotes = ["'", '"', "`"];
+				if(validQuotes.indexOf(strToCompleteStartsWithQuote) == -1) strToCompleteStartsWithQuote = false;
+				if(validQuotes.indexOf(strToCompleteEndsWithQuote) == -1) strToCompleteEndsWithQuote = false;
+				
+				var options = [];
+				
+				var moduleNameToComplete = wordToComplete;
+				if(strToCompleteStartsWithQuote) moduleNameToComplete = moduleNameToComplete.replace(strToCompleteStartsWithQuote, "");
+				if(strToCompleteEndsWithQuote) moduleNameToComplete = moduleNameToComplete.replace(strToCompleteEndsWithQuote, "");
+				moduleNameToComplete = moduleNameToComplete.trim();
+				
+				var completedStrWithOrWithoutQuotes = "";
+				for(var i=0; i<builtinNodeModules.length; i++) {
+					if(builtinNodeModules[i].slice(0, moduleNameToComplete.length) == moduleNameToComplete) {
+						completedStrWithOrWithoutQuotes = "";
+						if(strToCompleteStartsWithQuote) completedStrWithOrWithoutQuotes += strToCompleteStartsWithQuote;
+						completedStrWithOrWithoutQuotes += builtinNodeModules[i];
+						if(strToCompleteEndsWithQuote) completedStrWithOrWithoutQuotes += strToCompleteEndsWithQuote;
+						
+						options.push(completedStrWithOrWithoutQuotes);
+					}
 				}
 				
-				console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
+				return options;
+			}
+			else {
+				// Find module method fc.word
+				findModuleInScope(file, fc.word, function(err, moduleInfo) {
+					if(err) {
+						console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
+						return;
+					}
+					
+					console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
 				
-				// Get mehod name chain
+					// Get mehod name chain
 				var words = fc.word.split(".");
 				words.shift();
-				words.unshift(moduleInfo.nameStr);
-				var fName = words.join(".");
+					words.unshift(moduleInfo.nameStr);
+					var fName = words.join(".");
 				
 				console.log("autoCompleteNode: fName=" + fName + "");
 				
@@ -238,11 +312,12 @@ callback(null, moduleInfoCache[moduleNameStr]);
 					console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
 					if(moduleInfo.functions[i].name == fName) {
 						console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
-						return showArgumentHint(file, file.caret, moduleInfo.functions[i].arguments, fc.commasLeft);
+							return showArgumentHint(file, file.caret, moduleInfo.functions[i].arguments, fc.commasLeft);
 					}
 				}
 				
 			});
+		}
 		}
 		
 		// Check parsed variables from current file, check if value=="require", then check what the module returns
