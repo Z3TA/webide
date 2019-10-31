@@ -623,7 +623,7 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 	
 	function removeFromStringList(text, remove, delimiter) {
 		
-		if(!UTIL.isString(text)) throw new Error("text is not a string!");
+		if(!UTIL.isString(text)) throw new Error("text is not a string! typeof text = " + (typeof text) );
 		if(!UTIL.isString(remove)) throw new Error("remove is not a string!");
 		if(!UTIL.isString(delimiter)) throw new Error("delimiter is not a string!");
 		
@@ -656,15 +656,23 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		
 		console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
 		
-		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
+		EDITOR.localStorage.getItem("openedFiles", function gotItemFromLocalStorage(err, openedFilesString) {
 			if(err) {
 				if(callback) return callback(err);
 				else throw err;
 			}
 			
+			if(openedFilesString == undefined) {
+				// User might have cleared history
+				openedFilesString = "";
+				for(var path in EDITOR.files) addToStringList(openedFilesString, path, fileDelimiter);
+			}
+			
 			console.log("reopenFiles: List before=" + openedFilesString);
 			openedFilesString = removeFromStringList(openedFilesString, filePath, fileDelimiter);
 			console.log("reopenFiles: List after=" + openedFilesString);
+			
+			
 			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 				if(err) {
 					if(callback) return callback(err);

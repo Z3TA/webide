@@ -35,6 +35,32 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Just use the nodejs repl for auto-complete ???
+put the function body inside the repl
+
+
+Show autocomplete for variable returned from function in Node!?
+var server = http.createServer();
+server.| ???
+
+
+Should pressing autocomplete on an empty line insert boilerplate code depending on context !?
+
+
+Can we lookup accepted answers from Stack Overflow that contains the string !?
+Eg. http.createServer
+
+Having autocomplete is not enough in order to figure out how to use a module!
+We also need to show the documentation!
+Need a way to show documentation!
+
+problem: How to figure out what web page to show !?
+If it's nodejs built in modules, we want to show the nodejs docs...
+
+Just show a link to the documentation ? eg. https://nodejs.org/api/[module_name].html
+
+
+
 Autocomplete Node.JS modules!
 (that way we do not need a doc/ref widget, you can rely on http. (tab) showing all available options, and http.createServer( showing the functon parameters !!!
 
@@ -49,6 +75,21 @@ And also gets the function parameters by stringifying the function.
 
 When user listens to a port, user should be told to listen on a unix socket instead! (when running as a cloud IDE)
 
+---
+
+todo: Clear Chrome history, then close a file. See if reopenfiles module handles it.
+
+---
+
+Make a Chrome extension, for developing chrome extensions!? And PWA's
+
+User gets an icon in their browser, and can click it to launch the editor
+
+---
+
+Write on nodejsplayground on how to embed tutorial screencast.
+?screencast=url
+show a play button like if it was a video!
 
 ---
 
