@@ -72,6 +72,7 @@
 		var word = "";
 		var commasLeft = 0;
 		var openParenthesis = 0;
+		var openCurlyBrackets = 0;
 		for(var i=caret.index-1, c; i>0; i--) {
 			c = file.text[i];
 			console.log("autoCompleteNode: insideFunctionCall: Searching left: i=" + i + " c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft + " openParenthesis=" + openParenthesis);
@@ -88,10 +89,16 @@
 			}
 			else if(c == "(") {
 				openParenthesis--;
-				if(openParenthesis == -1 && !foundLeftParenthesis) foundLeftParenthesis = i;
+				if(openParenthesis == -1 && openCurlyBrackets == 0 && !foundLeftParenthesis) foundLeftParenthesis = i;
 			}
 			else if(c == ")") {
 				openParenthesis++;
+			}
+			else if(c =="}") {
+				openCurlyBrackets++;
+			}
+			else if(c =="{") {
+				openCurlyBrackets--;
 			}
 			else if(c == ",") {
 				commasLeft++;
