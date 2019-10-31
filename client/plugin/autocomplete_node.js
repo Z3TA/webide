@@ -258,11 +258,6 @@ callback(null, moduleInfoCache[moduleNameStr]);
 		
 		if(!file.parsed) return;
 		
-		// Autocomplete global Node.JS variables
-		
-		
-		
-		
 		// Show function parameters if inside function arguments
 		var fc = insideFunctionCall(file, file.caret);
 		if(fc) {
@@ -300,7 +295,7 @@ callback(null, moduleInfoCache[moduleNameStr]);
 			}
 			else {
 				// Find module method fc.word
-				findModuleInScope(file, fc.word, function(err, moduleInfo) {
+				var found = findModuleInScope(file, fc.word, function(err, moduleInfo) {
 					if(err) {
 						console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
 						return;
@@ -329,7 +324,12 @@ callback(null, moduleInfoCache[moduleNameStr]);
 				}
 				
 			});
-		}
+				
+				if(found) {
+					console.log("autoCompleteNode: Not autocompleting because we are maybe showing function argument helper");
+					return;
+				}
+			}
 		}
 		
 		// Check parsed variables from current file, check if value=="require", then check what the module returns
@@ -373,18 +373,56 @@ callback(null, moduleInfoCache[moduleNameStr]);
 			}
 			
 		});
-		
-		console.log("autoCompleteNode: found=" + found);
-		
 		if(found === true) {
 return {async: true};
 		}
-		else {
-			callback = null;
+		
+		// ### Use the Node.JS REPL to autocomplete or show values etc
+		
+		if(gotOptions.length > 0) return; 
+		
+		var content = file.text;
+		var cwd = UTIL.getDirectoryFromPath(file.path);
+		var functions = file.parsed.functions;
+		if(functions.length > 0) {
+			var f = insideFunction(functions, file.caret.index, false, 0);
+			var content = file.text.slice(f.start, f.end);
 		}
+		
+		console.log("autoCompleteNode: Feed the REPL: content=" + content);
+		
+		CLIENT.cmd("nodejsrepl.feed", {content: content, cwd: cwd, ask: wordToComplete}, function(err, resp) {
+			if(err) return alertBox("Unable to feed the REPL! Error: " + err.message);
+			
+			if(resp) alertBox("REPL response: " + resp);
+			
+		});
+		return {async: true};
 		
 	}
 	
+	
+	function insideFunction(functions, caretIndex, parent, charactersLength) {
+		// Check if inside a function
+		// Returns the function, or false
+		var f, s;
+		
+		//console.log("insideFunction: Checking " + functions.length + " functions (parent=" + (parent && parent.name) + ") ...");
+		
+		for(var i=0; i<functions.length; i++) {
+			f = functions[i];
+			//console.log("insideFunction: f.name=" + f.name + " f.arrowFunction=" + f.arrowFunction + " f.start=" + f.start + " caretIndex=" + caretIndex + " f.end=" + f.end + " charactersLength=" + charactersLength + " ");
+			if(!f.arrowFunction && f.start < caretIndex && f.end >= caretIndex) {
+				// Deleted text are now allowed to be larger then the function body
+				if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
+					//console.log("insideFunction: Found function=" + f.name);
+					// Check sub functions
+					return insideFunction(f.subFunctions, caretIndex, f, charactersLength);
+				}
+			}
+		}
+		return parent;
+	}
 	
 	EDITOR.addTest(1, function autocomplete_node_modules(callback) {
 		EDITOR.openFile("autocomplete_node.js", 'var http = re\n', function(err, file) {

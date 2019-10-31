@@ -35,6 +35,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+REPL.autocomplete send str + tab + tab
+
+
 Just use the nodejs repl for auto-complete ???
 put the function body inside the repl
 

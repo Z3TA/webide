@@ -20,6 +20,7 @@ API.spellcheck = require("./plugin/spellcheck/spellcheck.js");
 API.terminal = require("./plugin/terminal.js");
 API.mysql = require("./plugin/mysql.js");
 API.nodejsautocomplete = require("./plugin/nodejsautocomplete.js");
+API.nodejsrepl = require("./plugin/nodejsrepl.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -215,6 +216,9 @@ user.teardown = function teardown(msg, terddownComplete) {
 		scriptsToStop++;
 		stopNodeJsScript(filePath, nodeJsScriptStopped);
 	}
+	
+	// Stop REPL
+	API.nodejsrepl.quit();
 	
 	doneMaybe();
 	
