@@ -8532,13 +8532,15 @@ function fileDrop(fileDropEvent) {
 	}
 	else {
 		// ### Handle single file
-		console.log("fileDrop: Dropped Single file !?");
+			
 		
 		// todo: What if you drop a single folder ?
 		
 		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
+			console.log("fileDrop: Dropped Single file !? file.path=" + file.path + " file.name=" + file.name);
+			
 		if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = (EDITOR.workingDirectory || "/upload/") + filePath;
 		
 		var fileType = file.type;
@@ -8762,10 +8764,10 @@ function fileDrop(fileDropEvent) {
 				});
 			}
 			else if(content.length > EDITOR.settings.bigFileSize) {
-				var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
-				console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + tmpPath);
+				//var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
+					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + filePath);
 				
-				EDITOR.checkPath(tmpPath, "Do not upload", function(err, fullPath) {
+					EDITOR.checkPath(filePath, "Do not upload", function(err, fullPath) {
 					if(err) {
 						if(err.code != "CANCEL") alertBox(err.message);
 						return;
