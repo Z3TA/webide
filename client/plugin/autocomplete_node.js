@@ -71,9 +71,10 @@
 		var foundLeftParenthesis = 0;
 		var word = "";
 		var commasLeft = 0;
-		for(var i=caret.index, c; i>0; i--) {
+		var openParenthesis = 0;
+		for(var i=caret.index-1, c; i>0; i--) {
 			c = file.text[i];
-			console.log("autoCompleteNode: insideFunctionCall: c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft);
+			console.log("autoCompleteNode: insideFunctionCall: Searching left: i=" + i + " c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft + " openParenthesis=" + openParenthesis);
 			if(foundLeftParenthesis) {
 				if(c=="}" || c=="]" || c==")" || c==";" || c=="=") {
 					break;
@@ -86,7 +87,11 @@
 				}
 			}
 			else if(c == "(") {
-				foundLeftParenthesis = i;
+				openParenthesis--;
+				if(openParenthesis == -1 && !foundLeftParenthesis) foundLeftParenthesis = i;
+			}
+			else if(c == ")") {
+				openParenthesis++;
 			}
 			else if(c == ",") {
 				commasLeft++;
