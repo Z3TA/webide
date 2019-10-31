@@ -119,7 +119,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 				return err;
 			}
 			
-			EDITOR_stat("hotreload_plugin");
+			EDITOR.stat("hotreload_plugin");
 			
 			return true;
 		}

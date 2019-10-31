@@ -1462,13 +1462,12 @@ ul.resolveList li {
 	vertical-align: middle;
 }
 
+
 /* ############### File explorer ############### */
 
 .annotationRev {
 	float: right;
 }
-
-/* ############### File explorer ############### */
 
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;

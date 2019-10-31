@@ -528,7 +528,8 @@ return;
 			
 			if(type == "folder") {
 				
-				li.setAttribute("class", "folder closed");
+				li.classList.add("folder");
+				li.classList.add("closed");
 				
 				li.ondrop = dropItem;
 				li.ondragover = dragOverItem;
@@ -556,7 +557,8 @@ return;
 				
 			}
 			else {
-				li.setAttribute("class", type); 
+				li.classList.add("file");
+				li.classList.add("type");
 				
 				var iconName = filetype;
 				if(iconName == "htm") iconName = "html";
