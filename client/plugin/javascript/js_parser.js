@@ -2975,7 +2975,7 @@
 							findVariables( word.slice(1,word.indexOf(";")), myFunction, subFunctionDepth);
 						}
 						else if(lastVariable && lastVariable.value) {
-							console.log("Got arguments=" + word + " for function call to " + lastVariable.value);
+							console.log("Got arguments=" + word + " for function call to variable with value=" + lastVariable.value + " method=" + lastVariable.method + " type=" + lastVariable.type + " lastVariableName=" + lastVariableName);
 							lastVariable.args = word;
 							lastVariable = undefined;
 						}
