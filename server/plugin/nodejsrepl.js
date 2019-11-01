@@ -83,7 +83,16 @@ replStarted = true;
 		function afterStartup() {
 			repl.stdin.write(json.content + "\n");
 			
-			if(json.ask) return REPL.ask(user, {content: json.ask}, callback);
+			if(json.run) {
+				setTimeout(function() {
+					REPL.run(user, {content: json.run}, callback);
+				}, 100);
+			}
+			else if(json.autocomplete) {
+				setTimeout(function() {
+					REPL.autocomplete(user, {content: json.autocomplete}, callback);
+				}, 100);
+			}
 			else callback(null);
 			
 			callback = null;
@@ -91,7 +100,7 @@ replStarted = true;
 		
 	},
 	
-	ask: function(user, json, callback) {
+	run: function(user, json, callback) {
 		
 		if(!repl) return callback(new Error("No REPL running. Start using nodejsrepl.feed!"));
 		
