@@ -394,8 +394,8 @@ return {async: true};
 		
 		console.log("autoCompleteNode: Feed the REPL: content=" + content);
 		
-		CLIENT.cmd("nodejsrepl.feed", {content: content, cwd: cwd, ask: wordToComplete}, function(err, resp) {
-			if(err) return alertBox("Unable to feed the REPL! Error: " + err.message);
+		CLIENT.cmd("nodejsrepl.feed", {content: content, cwd: cwd, autocomplete: wordToComplete}, function(err, resp) {
+			if(err) return alertBox(err.message);
 			
 			if(resp) alertBox("REPL response: " + resp);
 			

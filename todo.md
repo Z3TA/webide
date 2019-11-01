@@ -35,6 +35,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Implement language server for nodejs !???
+
+Can't seem to be able to send a tab character to the node REPL, it intepries it as a tab character - and does not trigger autocomplete
+
+REPL.autocomplete,
+send child functions first!
+Then send the body without the functions
+Then send the "challange"
+
 REPL.autocomplete send str + tab + tab
 
 
