@@ -384,20 +384,34 @@ return {async: true};
 		
 		if(gotOptions.length > 0) return; 
 		
-		var content = file.text;
+		var content = [];
+		var textContent = file.text;
 		var cwd = UTIL.getDirectoryFromPath(file.path);
-		var functions = file.parsed.functions;
-		if(functions.length > 0) {
-			var f = insideFunction(functions, file.caret.index, false, 0);
-			var content = file.text.slice(f.start, f.end);
+		var allFunctions = file.parsed.functions;
+		var functions = allFunctions;
+		if(allFunctions.length > 0) {
+			var f = insideFunction(allFunctions, file.caret.index, false, 0);
+			if(f) {
+				var textContent = file.text.slice(f.start, f.end);
+				var functions = f.subFunctions;
+			}
+			
+			for (var i=0; i<functions.length; i++) {
+				if(!functions[i].lambda) content.push(file.text.slice(functions[i].start, functions[i].end))
+				//textContent = textContent.replace(content[content.length-1], "");
+			}
+			
 		}
 		
-		console.log("autoCompleteNode: Feed the REPL: content=" + content);
+		var arrText = textContent.split(file.lineBreak);
+		content = content.concat(arrText);
 		
-		CLIENT.cmd("nodejsrepl.feed", {content: content, cwd: cwd, autocomplete: wordToComplete}, function(err, resp) {
+		//console.log("autoCompleteNode: Feed the REPL: content=" + JSON.stringify(content, null, 2));
+		
+		CLIENT.cmd("nodejsrepl.autocomplete", {before: textContent, cwd: cwd, complete: wordToComplete}, function(err, resp) {
 			if(err) return alertBox(err.message);
 			
-			if(resp) alertBox("REPL response: " + resp);
+			if(resp) alertBox("REPL response: " + JSON.stringify(resp));
 			
 		});
 		return {async: true};

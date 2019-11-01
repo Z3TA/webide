@@ -217,9 +217,6 @@ user.teardown = function teardown(msg, terddownComplete) {
 		stopNodeJsScript(filePath, nodeJsScriptStopped);
 	}
 	
-	// Stop REPL
-	API.nodejsrepl.quit();
-	
 	doneMaybe();
 	
 	// Disconnect from remote servers etc ...

@@ -1,131 +1,12 @@
 
-var repl;
+const Stream = require('stream');
+const repl = require('repl');
 
 var REPL = {
 	
-	feed: function(user, json, callback) {
-		
-		if(repl) {
-			// Clear it
-			send(repl.stdin, [".clear", "\n"], afterStartup);
-		}
-		else {
-
-			var pathToNodeJs = "/usr/bin/node";
-			
-			var replOptions = {
-				silent: true, // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-				execPath: pathToNodeJs
-			}
-			
-			if(user.chrooted) {
-				replOptions.execPath = pathToNodeJs;
-			}
-			
-			var fork = require('child_process').fork;
-			
-			// Need to use fork (not spawn) to be able to listen for stdin/stdiout!
-			
-			var args = ["-i"];
-			
-			console.log("Forking/spawning REPL with replOptions=" + JSON.stringify(replOptions) + " args=" + JSON.stringify(args));
-			repl = fork(args, replOptions);
-			
-			repl.stdin.setEncoding('utf-8');
-			
-			var replStarted = false;
-			
-			repl.stdout.on('data', function (data) {
-				console.log("repl stdout: data=" + data);
-				if(!replStarted) {
-replStarted = true;
-					console.log("REPL now started!");
-					afterStartup();
-				}
-			});
-			
-			repl.stderr.on('data', function (data) {
-				console.log("repl stderr: data=" + data);
-			});
-			
-			repl.on('error', function (err) {
-				console.log("repl error: err.message=" + err.message);
-				
-				if(callback) {
-					callback(err);
-					callback = null;
-				}
-				
-			});
-			
-			repl.on('close', function (exitCode) {
-				console.log("repl close: exitCode=" + exitCode);
-				repl = null;
-				
-				if(callback) {
-					callback(new Error("repl closed with code=" + exitCode));
-					callback = null;
-				}
-			});
-			
-			
-			/*
-				var waitForStartupTimer = setInterval(function() {
-				if(replStarted) {
-				clearInterval(waitForStartupTimer);
-				afterStartup();
-				}
-				}, 100);
-			*/
-		}
-		
-		function afterStartup() {
-			
-			send(repl.stdin, [json.content, "\n"], function() {
-				if(json.run) {
-					REPL.run(user, {content: json.run}, callback);
-				}
-				else if(json.autocomplete) {
-					REPL.autocomplete(user, {content: json.autocomplete}, callback);
-				}
-				else callback(null);
-				
-				callback = null;
-			});
-			
-		}
-		
-	},
 	
 	run: function(user, json, callback) {
 		
-		if(!repl) return callback(new Error("No REPL running. Start using nodejsrepl.feed!"));
-		
-		repl.stdout.on('data', read);
-		
-		var outputStr = "";
-		
-		function read(data) {
-			console.log("Record repl stdout: data=" + data);
-			
-			//if(data == "...") repl.stdin.write("\x03"); // CTRL+C
-			
-			outputStr += data.toString();
-			
-		}
-		
-		repl.stdin.write(json.content + "\n");
-		
-		setTimeout(waitForData, 100);
-		
-		function waitForData() {
-			console.log("outputStr=" + outputStr + " (" + outputStr.length + ")");
-			if(!outputStr || outputStr == ">") return setTimeout(waitForData, 100);
-			
-			repl.stdout.removeListener("data", read);
-			callback(null, outputStr);
-			callback = null;
-		}
 		
 	},
 	
@@ -133,53 +14,64 @@ replStarted = true;
 		
 		if(typeof callback != "function") throw new Error("callback=" + callback + " is not a function!");
 		
-		if(!repl) return callback(new Error("No REPL running. Start using nodejsrepl.feed!"));
+		var input = new Stream();
+		input.write = input.pause = input.resume = (buf) => {
+			console.log("input.write: " + buf);
+		};
+		input.readable = true;
 		
-		var maxWait = 10;
-		var waitCounter = 0;
+		var output = new Stream();
+		output.write = output.pause = output.resume = function(buf) {
+			console.log("output.write: " + buf);
+			output.accumulator.push(buf);
+		};
+		output.accumulator = [];
+		output.writable = true;
 		
-		console.log("REPL.autocomplete: json=" + JSON.stringify(json));
+		var replServer = repl.start({
+			input: input,
+			output: output,
+			useColors: false,
+			terminal: true,
+			useGlobal: true // Make it possible to require modules etc
+		});
 		
-		console.log("REPL.autocomplete: Sending TAB to clear ...");
-		send(repl.stdin, "\t");
-		
-		
-		repl.stdout.on('data', read);
-		
-		var outputStr = "";
-		
-		function read(data) {
-			console.log("REPL.autocomplete: Recording: data=" + data);
-			outputStr += data.toString();
+		var runBefore = json.before;
+		if(typeof runBefore == "string") runBefore = [runBefore];
+		for (var i=0; i<runBefore.length; i++) {
+			console.log("runBefore[" + i + "]=" + runBefore[i]);
+			replServer.write(runBefore[i] + (runBefore[i].slice(-1) == "\n" ? "" : "\n"));
 		}
 		
-		send(repl.stdin, [json.content, "\t"], waitForData);
+		//replServer.write('var foo = require( "http" ) ;\nvar server = foo.createServer( function lala() {});\nserver.\n');
 		
-		function waitForData() {
-			console.log("outputStr=" + outputStr + " (" + outputStr.length + ") Waiting for output...");
-			if(!outputStr || outputStr == ">") {
-				if(++waitCounter >= maxWait) {
-					return end(new Error("Did not get any outpot from the REPL when trying to autocomplete " + json.content), outputStr);
-				}
-				else {
-					console.log("REPL.autocomplete: Sending TAB");
-					send(repl.stdin, "\t");
-					return setTimeout(waitForData, 100);
-				}
-			}
-			else end(null, outputStr);
-			
-			function end(err, resp) {
-				repl.stdout.removeListener("data", read);
-				callback(null, outputStr);
-				callback = null;
-			}
-		}
 		
-	},
-	
-	quit: function() {
-		if(repl) repl.kill();
+		replServer.write("\n");
+		
+		// Send one Ctrl+C in case we got stuck
+		replServer.write(null, { ctrl: true, name: 'c' });
+		//replServer.emit('SIGINT');
+		//replServer.emit('SIGCONT');
+		
+		console.log("complete=" + json.complete);
+		
+		replServer.complete(json.complete, function(err, res) {
+			if(err) {
+				console.error(err);
+				callback(err);
+			}
+			else {
+				console.log("autocomplete res=" + JSON.stringify(res));
+				console.log("replServer output: " + replServer.output.accumulator.join('\n'));
+				
+				var completions = res[0];
+				
+				callback(null, completions);
+			}
+		});
+		
+		// replServer will kill itself!
+		
 	}
 	
 }
