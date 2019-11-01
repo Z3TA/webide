@@ -13,7 +13,6 @@
 	var inputFolder;
 	var isSearching = false;
 	var searchTimer;
-	var currentDir;
 	var matchesFound = 0;
 	var keyUp = 38;
 	var keyDown = 40;
@@ -30,6 +29,7 @@
 	var menuItem;
 	var folderPicker;
 	var winMenuGotoFile;
+	var gotoLine = null;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -611,6 +611,8 @@ console.warn("gotoList not available!");
 		return show_gotoFileInput(file, combo);
 	}
 	
+	var ignoreSelection = false;
+	
 	function show_gotoFileInput(file, combo) {
 		
 		EDITOR.ctxMenu.hide();
@@ -618,21 +620,83 @@ console.warn("gotoList not available!");
 		winMenuGotoFile.hide();
 		
 		if(file) {
-			currentDir = UTIL.getDirectoryFromPath(file.path);
 			
-			var selectedText = file.getSelectedText();
+			if(!ignoreSelection) {
+				// You can select a file path, and it will be opened ...
+				var selectedText = file.getSelectedText();
+			var clipboard = "";
+			if(UTIL.isFilePath(selectedText)) {
+					return EDITOR.openFile(selectedText, function(err) {
+					if(err) {
+						console.error(err);
+							ignoreSelection = true;
+						show_gotoFileInput(file, combo);
+						}
+					});
+			}
+			}
 			
-			var folderToSearchIn = currentDir;
-			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
+			// Is the caret on a file path or file name ? And a line number ? Eg. in a bug report
+			var filePath = ""
+			var notaPath = ":[]{}+-%#'\"";
+			var c = "";
+			for (var i=file.caret.index-1; i>0; i--) {
+				c = file.text[i];
+				if(notaPath.indexOf(c) != -1) break;
+				filePath = c + filePath;
+			}
+			for(var i=file.caret.index; i<file.text.length; i++) {
+				c = file.text[i];
+				if(notaPath.indexOf(c) != -1) break;
+				filePath = filePath + c;
+			}
+			console.log("Caret on a file/path? filePath=" + filePath);
+			
+			var reFileNameAndLineMaybe = /[^\\\/]*\.\w{1,4}$/;
+			var matchFile = filePath.match(reFileNameAndLineMaybe);
+			
+			
+			if(filePath) {
+				// Find line number
+				var rowStr = file.rowText(file.caret.row, false);
+				var i = rowStr.indexOf(filePath) + filePath.length;
+				console.log("Line number? " + rowStr[i] + rowStr[i+1] + " ( " + (rowStr[i] == ":") + ", " + UTIL.isNumeric(rowStr[i+1]) + ")");
+				if(rowStr[i] == ":" && UTIL.isNumeric(rowStr[i+1])) {
+					var nr = "";
+					for (++i; i<rowStr.length; i++) {
+						if( UTIL.isNumeric(rowStr[i]) ) nr += rowStr[i];
+						else break;
+					}
+					console.log("Line number? nr=" + nr);
+					gotoLine = parseInt(nr);
+					if(isNaN(gotoLine)) gotoLine = null;
+				}
+			}
+			
+			
+			if(UTIL.isFilePath(filePath)) {
+				var folderToSearchIn = UTIL.getDirectoryFromPath(filePath);
+				var fileToSearchFor = UTIL.getFilenameFromPath(filePath);
+}
+			else if(matchFile) {
+				var folderToSearchIn = EDITOR.workingDirectory;
+				var fileToSearchFor = matchFile[0];
+			}
 			else {
+				var folderToSearchIn = UTIL.getDirectoryFromPath(file.path);
+			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) {
+folderToSearchIn = EDITOR.workingDirectory;
+				}
+				else {
 				var folders = UTIL.getFolders(folderToSearchIn);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				folderToSearchIn = folders.pop();
 				console.log("folderToSearchIn=" + folderToSearchIn);
 			}
 		}
+			
+		}
 		
-		var clipboard = 
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 		
@@ -683,6 +747,11 @@ console.warn("gotoList not available!");
 			
 		}
 		
+		if(fileToSearchFor) {
+			inputGoto.value = fileToSearchFor;
+			typing(); // Trigger search
+		}
+		
 		return false; // Return false to prevent default
 	}
 	
@@ -694,6 +763,8 @@ console.warn("gotoList not available!");
 			console.log("abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
 			abortFindFiles();
 		}
+		
+		ignoreSelection = false;
 		
 		if(gotoInputIsVisible) {
 			
@@ -863,6 +934,11 @@ console.warn("gotoList not available!");
 						EDITOR.changeWorkingDir(dir);
 					}
 					
+					if(gotoLine) {
+						file.moveCaret(undefined, gotoLine-1);
+						file.scrollToCaret();
+						gotoLine = null;
+					}
 					
 				});
 				

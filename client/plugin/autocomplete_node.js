@@ -1,6 +1,9 @@
 (function() {
 	"use strict";
 	
+	if(!QUERY_STRING["autocomplete_node"]) return;
+	
+	
 	var moduleInfoCache;
 	
 	var builtinNodeModules = [

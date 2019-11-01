@@ -152,15 +152,16 @@ file.mode = "text";
 	}
 	
 	File.prototype.rowText = function(row, includeIndentationCharacters) {
+		var file = this;
+		
 		// Returns the characters on that row
 		
-		if(row == undefined) throw new Error("First argument row=" + row + " in File.rowText() need to be specified!");
+		if(row == undefined) row = file.caret.row;
+		//if(row == undefined) throw new Error("First argument row=" + row + " in File.rowText() need to be specified!");
 		
 		if(includeIndentationCharacters == undefined) includeIndentationCharacters = true; // Including indentation characters!
 		
-		var file = this;
-		
-		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.
+		// No need to check row because it will throw an error anyway if it's "wrong". But this gives friendlier error:
 		if(row < 0) throw new Error("row=" + row + " less then zero");
 		if(row >= file.grid.length) throw new Error("File.rowText: row=" + row + " can not be more or equal to file.grid.length=" + file.grid.length);
 		
