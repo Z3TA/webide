@@ -3160,11 +3160,15 @@ usePseudoClipboard = false;
 			for(var item in menu.items) {
 				subMenu = menu.items[item].subMenu;
 				
+				if(menu.items[item].domElement.hasAttribute("aria-expanded")) menu.items[item].domElement.setAttribute("aria-expanded", "false");
+				
 				if(subMenu) {
 					subMenu.hide(true, hideParents);
 				}
 			}
 		}
+		
+		
 		
 		if(menu.parentMenu === null) {
 			menu.activated = false;
@@ -3172,6 +3176,8 @@ usePseudoClipboard = false;
 		}
 		
 		console.warn("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
+		
+		if(menu.domElement.hasAttribute("aria-expanded")) menu.domElement.setAttribute("aria-expanded", "false");
 		
 		menu.domElement.style.display = "none";
 		menu.domElement.blur(); // Reset hover effect on touch screens
@@ -3226,6 +3232,7 @@ usePseudoClipboard = false;
 		item.domElement.setAttribute("class", "item" + item.separator);
 		item.domElement.setAttribute("id", "dropdownMenu_" + label);
 		
+		
 		item.activated = false;
 		
 		item.bullet = document.createElement("td");
@@ -3270,7 +3277,11 @@ usePseudoClipboard = false;
 		this.text.innerText = label;
 	}
 	DropdownMenuItem.prototype.hide = function setLabel() {
-		this.parentMenu.hide(true, true);
+		var item = this;
+		
+		if(item.domElement.hasAttribute("aria-expanded")) item.domElement.setAttribute("aria-expanded", "false");
+		item.parentMenu.hide(true, true);
+		
 	}
 	DropdownMenuItem.prototype.toggle = function setLabel() {
 		if(this.activated) this.deactivate();
@@ -3301,6 +3312,9 @@ usePseudoClipboard = false;
 		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
 		item.domElement.setAttribute("class", "item hasSubmenu" + item.separator);
 		
+		item.domElement.setAttribute("aria-haspopup", "true");
+		item.domElement.setAttribute("aria-expanded", "false");
+		
 		if(!item.domElement.onclick) {
 			item.domElement.onclick = showSubmenu;
 			item.domElement.addEventListener("mouseover", showSubmenuMaybe);
@@ -3319,6 +3333,9 @@ usePseudoClipboard = false;
 		
 		function showSubmenu() {
 			console.log("showSubmenu");
+			
+			item.domElement.setAttribute("aria-expanded", "true");
+			
 			var rect = item.domElement.getBoundingClientRect();
 			
 			if(stemParent) stemParent.activated = true;
@@ -4691,6 +4708,11 @@ if(waitingForAsync == 0) gotOptions();
 		
 		if(options.length > 1) {
 			
+				// Remove empty items
+				options = options.filter(function(item) {
+					return typeof item == "string" && item.length > 0;
+				});
+				
 			// Type up until the common character  fooBar vs fooBaz, type fooBa|
 			var shared = sharedStart(options);
 			
@@ -4779,7 +4801,9 @@ if(waitingForAsync == 0) gotOptions();
 		
 		function completeWord(word, wholeWord, moveCaret) {
 			
-			if(wholeWord.substring(0, word.length) != word) {
+			if(wholeWord.length == 0) console.warn("wholeWord.length=" + wholeWord.length + " wholeWord=" + wholeWord + " word=" + word + " moveCaret=" + moveCaret)
+			
+			if(wholeWord.substring(0, word.length) != word && wholeWord.length > 0) {
 				// Delete the word, then insert the text
 				
 				/*
@@ -4837,15 +4861,15 @@ if(waitingForAsync == 0) gotOptions();
 		if(!Array.isArray(array)) throw new Error("array=" + array + " needs to be an Array typeof array=" + typeof array);
 		if(array.length == 0) throw new Error("Array is empty: array=" + JSON.stringify(array));
 		// Return the text that all words in an array share
-		var A= array.concat().sort(), // Create new array with the words sorted
-		a1= A[0],
-		a2= A[A.length-1],
-		L= a1.length,
-		i= 0;
+		var sortedArray = array.concat().sort(); // Create new array with the words sorted
+		var firstElement = sortedArray[0];
+		var lastElement = sortedArray[sortedArray.length-1];
+		var firstElementLength = firstElement.length;
+		var i = 0;
 		
-		while(i<L && a1.charAt(i) === a2.charAt(i)) i++;
+		while(i<firstElementLength && firstElement.charAt(i) === lastElement.charAt(i)) i++;
 		
-		return a1.substring(0, i);
+		return firstElement.substring(0, i);
 	}
 	
 	EDITOR.autoCompletePath = function autoCompletePath(options, callback) {

@@ -35,12 +35,31 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Implement language server for nodejs !???
+Show some love for accessibilty.
+Use the Ubuntu screen reader.
+Make it so that you can use the editor. Focus on first time user experience.
+WITH EYES CLOSED!
 
-Can't seem to be able to send a tab character to the node REPL, it intepries it as a tab character - and does not trigger autocomplete
+
+
+
+
+See if we can make it possible to install node-opus in chroot...
+Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
+
+Implement language server for nodejs !???
 
 REPL.autocomplete,
 send child functions first!
+Then figure out the dependencies and send those,
+for example
+foo.bar depends on foo
+var foo = baz() depends on baz
+so both baz and foo need to be sent to the REPL.
+
+Stop all IO from the REPL when autocompleting!!
+
+
 Then send the body without the functions
 Then send the "challange"
 
