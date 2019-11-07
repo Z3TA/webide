@@ -35,9 +35,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
-
----
+Implement MS language server protocol ... !?
 
 
 Evaluating MS language server protocol ...
@@ -47,10 +45,6 @@ foo. yep
 It's however not possible to get function argument hints
 
 ---
-
-Just use the nodejs repl for auto-complete ???
-put the function body inside the repl
-
 
 Show autocomplete for variable returned from function in Node!?
 var server = http.createServer();
