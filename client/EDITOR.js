@@ -6989,6 +6989,12 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	var sourcePath = "";
 		var stackLines = parsedError.stack || parsedError;
 		
+		if(stackLines == undefined) {
+			EDITOR.error(  new Error( "Unable to find stackLines from options=" + JSON.stringify(options, null, 2) ) + "\nparsedError=" + JSON.stringify(parsedError, null, 2) );
+			return FAIL;
+		}
+		
+		
 		var lineno, colno;
 		
 		var file = findFile(stackLines);

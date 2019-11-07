@@ -35,8 +35,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-
-See if we can make it possible to install node-opus in chroot...
 Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
 
 ---

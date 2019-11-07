@@ -150,8 +150,11 @@ saveAndRun(file);
 		hideButton.onclick = widget.hide;
 		
 		wrap.appendChild(urlHolder);
-		wrap.appendChild(startStopButton);
+		
+		// Hidebutton comes first because we float right
 		wrap.appendChild(hideButton);
+		wrap.appendChild(startStopButton);
+		
 		
 		return wrap;
 	}
@@ -212,9 +215,9 @@ saveAndRun(file);
 			
 			var loc = findFile(json.console.stack);
 			
-			if(!loc.file) throw new Error(loc.filePath + " no longer open ?");
-			
 			if(loc) {
+				if(!loc.file) throw new Error(loc.filePath + " no longer open ?");
+				
 				var col = columnMinusIndention(loc.file, loc.row, loc.col);
 				EDITOR.addInfo(loc.row, col, text, loc.file, level);
 			}
@@ -497,7 +500,7 @@ saveAndRun(file);
 			
 		}
 		
-		else if(msg.ICP) alertBox("ICP from " + msg.scriptName + ": " + msg.ICP);
+		else if(msg.ICP) alertBox("ICP from " + msg.scriptName + ": " + JSON.stringify(msg.ICP, null, 2));
 		
 		else if(msg.error) alertBox(msg.scriptName + " error: " + msg.error);
 		
