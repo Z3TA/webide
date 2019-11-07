@@ -35,6 +35,17 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+unable to run npm init -y in chroot!
+
+probably because the node exe updated!!!
+
+
+See if we can make it possible to install node-opus in chroot...
+Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
+
+---
+
+
 Evaluating MS language server protocol ...
 var foo = require("h ... only works in js-ts-lsp
 foo. yep
@@ -95,10 +106,6 @@ WITH EYES CLOSED!
 
 ---
 
-See if we can make it possible to install node-opus in chroot...
-Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
-
----
 
 Make a Chrome extension, for developing chrome extensions!? And PWA's
 
