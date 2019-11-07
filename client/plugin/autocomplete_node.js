@@ -3,7 +3,6 @@
 	
 	if(!QUERY_STRING["autocomplete_node"]) return;
 	
-	
 	var moduleInfoCache;
 	
 	var builtinNodeModules = [
@@ -46,6 +45,33 @@
 		"vm",
 		"zlib"
 	];
+	
+	
+	var nodeGlobalFunctions = [
+		{name: "require", arguments: "moduleNameOrPathToFile", type: ["any",  "other"]},
+		{name: "setImmediate", arguments: "callback, args", type: "Object"},
+		
+		{name: "TextDecoder", arguments: "encoding, options", type: "TextDecoder", variables: {
+prototype: {
+					"encoding": {type: "String"},
+					"ignoreBOM": {type: "Boolen"},
+					"fatal": {type: "Boolen"}
+}
+}},
+		{name: "TextDecoder.prototype.decode", arguments: "data", type: "String"},
+		{name: "TextDecoder.prototype.encode", arguments: "data", type: "uint8array"},
+
+		
+		
+		{name: "URL", arguments: "input, base", type: "URL", variables: {
+				prototype: {
+					"hash": {type: "String"},
+					"host": {type: "String"},
+					"hostname": {type: "String"}
+				}
+		}},
+	];
+	
 	
 	EDITOR.plugin({
 		desc: "Autocomplete for Node.JS",
@@ -112,8 +138,14 @@
 		
 		console.log("autoCompleteNode: insideFunctionCall: word=" + word);
 		
-		if(!foundLeftParenthesis) return null;
-		if(!word) return null;
+		if(!foundLeftParenthesis) {
+			console.log("autoCompleteNode: insideFunctionCall: Returning null because foundLeftParenthesis=" + foundLeftParenthesis);
+			return null;
+		}
+		if(!word) {
+			console.log("autoCompleteNode: insideFunctionCall: Returning null because word=" + word);
+			return null;
+		}
 		
 		// Find the right parenthesis
 		var commasRight = 0;
@@ -127,7 +159,9 @@
 			}
 		}
 		
-		if(i==file.text.length) return null;
+		if(i==file.text.length) {
+			console.warn("autoCompleteNode: insideFunctionCall: i=" + i + " and file.text.length=" + file.text.length + " (did not find the right parenthesis) word=" + word);
+		}
 		
 		return {word: word, commasLeft: commasLeft, commasRight: commasRight};
 		
@@ -153,7 +187,7 @@
 				console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
 				
 				if( moduleInfoCache[moduleNameStr] ) {
-callback(null, moduleInfoCache[moduleNameStr]);
+					callback(null, moduleInfoCache[moduleNameStr]);
 					return true;
 				}
 				
@@ -181,66 +215,7 @@ callback(null, moduleInfoCache[moduleNameStr]);
 		return false;
 	}
 	
-	function traverseChain(findStr, variables) {
-		var objectChain = findStr.split(".");
-		var chainStr = objectChain[0] + ".";
-		var i = 1;
-		
-		return findin(variables);
-		
-		function findin(variables) {
-			
-			console.log("autoCompleteNode: traverseChain: findStr=" + findStr + " variables=" + JSON.stringify(  Object.keys(variables)  ) + " objectChain[" + i + "]=" + objectChain[i]);
-			
-			for(var name in variables) {
-				if(name == objectChain[i]) {
-					if(objectChain.length > i+1 && objectChain[i+1]) {
-						i++;
-						chainStr = chainStr + name + ".";
-						console.log(  "autoCompleteNode: traverseChain: Look for chainStr=" + chainStr + " in name=" + name + " keys=" + JSON.stringify( Object.keys(variables[name].keys) ) + " i=" + i + " objectChain.length=" + objectChain.length + " objectChain[" + i + "]=" + objectChain[i] + "  " );
-						return findin(variables[name].keys);
-					}
-					else {
-						return {chainStr: chainStr, name: name, variable: variables[name]};
-					}
-				}
-			}
-			
-			return null;
-		}
-	}
 	
-	function getModuleName(file, word) {
-		/*
-			Get the module name from foo.bar where foo = require("baz");
-			
-		*/
-		
-		if( word.indexOf(".") == -1 ) throw new Error("word=" + word + " does not contain a dot .");
-		
-		var objectChain = word.split(".");
-		
-		var variableName = objectChain[0]; // foo in foo.bar
-		
-		var scope = UTIL.scope(file.caret.index, file.parsed.functions, file.parsed.globalVariables);
-		
-		console.log("autoCompleteNode: getModuleName: variableName=" + variableName);
-		
-		if(scope.variables.hasOwnProperty(variableName)) {
-			if(scope.variables[variableName].value == "require") {
-				
-				var requireArgs = scope.variables[variableName].args;
-				var moduleNameStr = requireArgs.replace("(", "").replace(")", "").replace(/'/g, "").replace(/"/g, "").trim();
-				
-				console.log("autoCompleteNode: getModuleName: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
-				
-				return moduleNameStr;
-			}
-		}
-		
-		console.log("autoCompleteNode: getModuleName:  Did not find any variable named " + variableName + " in scope=" + JSON.stringify(scope, null, 2));
-		return null;
-	}
 	
 	function showArgumentHint(file, caret, argStr, argIndex) {
 		var args = argStr.split(",");
@@ -261,9 +236,21 @@ callback(null, moduleInfoCache[moduleNameStr]);
 		
 		if(!file.parsed) return;
 		
+		// Check global Node.JS functions
+		var options = [];
+		for (var i=0, match; i<nodeGlobalFunctions.length; i++) {
+			match = (nodeGlobalFunctions[i].name.substr(0, wordLength) == wordToComplete);
+			console.warn("autoCompleteNode: Do wordToComplete=" + wordToComplete + " match function name=" + nodeGlobalFunctions[i].name + "? " + match);
+			if(match) options.push([nodeGlobalFunctions[i].name + "()", 1]);
+		}
+		if(options.length > 0) return options;
+		
+		
 		// Show function parameters if inside function arguments
 		var fc = insideFunctionCall(file, file.caret);
 		if(fc) {
+			
+			console.log("autoCompleteNode: fc.word=" + fc.word);
 			
 			if(fc.word == "require") {
 				console.log("autoCompleteNode: Inside a require call!");
@@ -305,34 +292,37 @@ callback(null, moduleInfoCache[moduleNameStr]);
 					}
 					
 					console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
-				
+					
 					// Get mehod name chain
-				var words = fc.word.split(".");
-				words.shift();
+					var words = fc.word.split(".");
+					words.shift();
 					words.unshift(moduleInfo.nameStr);
 					var fName = words.join(".");
-				
-				console.log("autoCompleteNode: fName=" + fName + "");
-				
-				console.log("autoCompleteNode: moduleInfo.functions=" + JSON.stringify(moduleInfo.functions, null, 2));
-				
-				console.log("autoCompleteNode: moduleInfo.functions.length=" + moduleInfo.functions.length);
-				
-				for(var i=0; i<moduleInfo.functions.length; i++) {
-					console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
-					if(moduleInfo.functions[i].name == fName) {
-						console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
+					
+					console.log("autoCompleteNode: fName=" + fName + "");
+					
+					console.log("autoCompleteNode: moduleInfo.functions=" + JSON.stringify(moduleInfo.functions, null, 2));
+					
+					console.log("autoCompleteNode: moduleInfo.functions.length=" + moduleInfo.functions.length);
+					
+					for(var i=0; i<moduleInfo.functions.length; i++) {
+						console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
+						if(moduleInfo.functions[i].name == fName) {
+							console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
 							return showArgumentHint(file, file.caret, moduleInfo.functions[i].arguments, fc.commasLeft);
+						}
 					}
-				}
-				
-			});
+					
+				});
 				
 				if(found) {
 					console.log("autoCompleteNode: Not autocompleting because we are maybe showing function argument helper");
 					return;
 				}
 			}
+		}
+		else {
+console.log("autoCompleteNode: Not inside a function call!");
 		}
 		
 		// Check parsed variables from current file, check if value=="require", then check what the module returns
@@ -364,9 +354,9 @@ callback(null, moduleInfoCache[moduleNameStr]);
 					}
 					else if(name == objectChain[i] && objectChain.length > i+1 && objectChain[i+1]) {
 						i++;
-							chainStr = chainStr + name + ".";
-							return findin(variables[name].keys);
-						}
+						chainStr = chainStr + name + ".";
+						return findin(variables[name].keys);
+					}
 					else if(name.slice(0, objectChain[i].length) == objectChain[i]) {
 						// Autocomplete the name
 						if(variables[name].method) options.push([chainStr + name + "()", 1]);
@@ -377,89 +367,50 @@ callback(null, moduleInfoCache[moduleNameStr]);
 			
 		});
 		if(found === true) {
-return {async: true};
+			return {async: true};
 		}
 		
-		// ### Use the Node.JS REPL to autocomplete or show values etc
 		
-		if(gotOptions.length > 0) return; 
-		
-		var content = [];
-		var textContent = file.text;
-		var cwd = UTIL.getDirectoryFromPath(file.path);
-		var allFunctions = file.parsed.functions;
-		var functions = allFunctions;
-		if(allFunctions.length > 0) {
-			var f = insideFunction(allFunctions, file.caret.index, false, 0);
-			if(f) {
-				var textContent = file.text.slice(f.start, f.end);
-				var functions = f.subFunctions;
-			}
-			
-			for (var i=0; i<functions.length; i++) {
-				if(!functions[i].lambda) content.push(file.text.slice(functions[i].start, functions[i].end))
-				//textContent = textContent.replace(content[content.length-1], "");
-			}
-			
-		}
-		
-		var arrText = textContent.split(file.lineBreak);
-		content = content.concat(arrText);
-		
-		//console.log("autoCompleteNode: Feed the REPL: content=" + JSON.stringify(content, null, 2));
-		
-		CLIENT.cmd("nodejsrepl.autocomplete", {before: textContent, cwd: cwd, complete: wordToComplete}, function(err, resp) {
-			if(err) return alertBox(err.message);
-			
-			if(resp) alertBox("REPL response: " + JSON.stringify(resp));
-			
-		});
-		return {async: true};
-		
-	}
-	
-	
-	function insideFunction(functions, caretIndex, parent, charactersLength) {
-		// Check if inside a function
-		// Returns the function, or false
-		var f, s;
-		
-		//console.log("insideFunction: Checking " + functions.length + " functions (parent=" + (parent && parent.name) + ") ...");
-		
-		for(var i=0; i<functions.length; i++) {
-			f = functions[i];
-			//console.log("insideFunction: f.name=" + f.name + " f.arrowFunction=" + f.arrowFunction + " f.start=" + f.start + " caretIndex=" + caretIndex + " f.end=" + f.end + " charactersLength=" + charactersLength + " ");
-			if(!f.arrowFunction && f.start < caretIndex && f.end >= caretIndex) {
-				// Deleted text are now allowed to be larger then the function body
-				if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
-					//console.log("insideFunction: Found function=" + f.name);
-					// Check sub functions
-					return insideFunction(f.subFunctions, caretIndex, f, charactersLength);
-				}
-			}
-		}
-		return parent;
 	}
 	
 	EDITOR.addTest(1, function autocomplete_node_modules(callback) {
 		EDITOR.openFile("autocomplete_node.js", 'var http = re\n', function(err, file) {
 			var atCaret = autoComplete(file, 13);
-			UTIL.assert(file.rowText(0), "var http = require");
+			UTIL.assert(file.rowText(0), "var http = require()");
 			
-			file.write('("h');
-			file.moveCaretToEndOfLine();
-			var atCaret = autoComplete(file, 19);
-			UTIL.assert(file.rowText(0), 'var http = require("http');
+			file.insertText('"h');
+			var atCaret = autoComplete(file, 21);
+			UTIL.assert(file.rowText(0), 'var http = require("http)');
 			
+			file.insertText('"');
+			file.moveCaretRight();
+			file.insertText(';');
+			file.insertLineBreak();
+			file.insertText("http.cre");
 			// Make sure it can find the right method once patched
-			file.write('").cre');
-			file.moveCaretToEndOfLine();
-			var atCaret = autoComplete(file, 150);
-			UTIL.assert(file.rowText(0), 'var http = require("http").createServer()');
+			var atCaret = autoComplete(file, 36);
+			// note: This is async!
+			setTimeout(function() {
+				UTIL.assert(file.rowText(1), 'http.createServer()');
+				
+				EDITOR.closeFile(file);
+				callback(true);
+			}, 300);
 			
-			EDITOR.closeFile(file);
-			callback(true);
 		});
+		
+		function autoComplete(file, index) {
+			
+			var key_tab = 9;
+			var wordDelimiters = " \t\r\n;:()"
+			
+			file.moveCaretToIndex(index);
+			EDITOR.showFile(file);
+			EDITOR.mock("keydown", {charCode: key_tab}); // tab to autocomplete
+			
+			return file.wordAtCaret(file.caret, wordDelimiters);
+		}
 	});
+	
 	
 })();

@@ -21,6 +21,17 @@ var NODE = {
 		var functions = [];
 		var nameChain = nameStr;
 		
+		if(json.rets) {
+			for(var i=0; i<json.rets.length; i++) {
+				try{
+					obj = obj[rets[i]]();
+				}
+				catch(err) {
+					return callback(err);
+				}
+			}
+		}
+		
 		collect(obj, variables, nameChain);
 		
 		callback(null, {variables: variables, functions: functions, nameStr: relativePath || nameStr});

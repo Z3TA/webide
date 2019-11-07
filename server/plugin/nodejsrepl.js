@@ -32,7 +32,7 @@ var REPL = {
 			input: input,
 			output: output,
 			useColors: false,
-			terminal: true,
+			terminal: true, // Needed to be able to send Ctrl+C
 			useGlobal: true // Make it possible to require modules etc
 		});
 		

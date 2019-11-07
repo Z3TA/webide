@@ -35,36 +35,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Show some love for accessibilty.
-Use the Ubuntu screen reader.
-Make it so that you can use the editor. Focus on first time user experience.
-WITH EYES CLOSED!
+Evaluating MS language server protocol ...
+var foo = require("h ... only works in js-ts-lsp
+foo. yep
 
+It's however not possible to get function argument hints
 
-
-
-
-See if we can make it possible to install node-opus in chroot...
-Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
-
-Implement language server for nodejs !???
-
-REPL.autocomplete,
-send child functions first!
-Then figure out the dependencies and send those,
-for example
-foo.bar depends on foo
-var foo = baz() depends on baz
-so both baz and foo need to be sent to the REPL.
-
-Stop all IO from the REPL when autocompleting!!
-
-
-Then send the body without the functions
-Then send the "challange"
-
-REPL.autocomplete send str + tab + tab
-
+---
 
 Just use the nodejs repl for auto-complete ???
 put the function body inside the repl
@@ -109,6 +86,17 @@ When user listens to a port, user should be told to listen on a unix socket inst
 ---
 
 todo: Clear Chrome history, then close a file. See if reopenfiles module handles it.
+
+---
+Show some love for accessibilty.
+Use the Ubuntu screen reader.
+Make it so that you can use the editor. Focus on first time user experience.
+WITH EYES CLOSED!
+
+---
+
+See if we can make it possible to install node-opus in chroot...
+Follow guide: https://discord.js.org/#/docs/main/stable/general/welcome
 
 ---
 
