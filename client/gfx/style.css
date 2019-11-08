@@ -1116,6 +1116,18 @@ div.gotoFile li:hover {
 .windowMenu .pulloutbottom {
 }
 
+.windowMenu .menu.vertical.pulloutbottom {
+	display: block; /* Needed for max-height and scrolling to work ... */
+	max-height: 80vh;
+	overflow-y: auto; /* Android scrollbar is only visible when scrolling anyway, so no need to show it all the time */
+}
+
+.windowMenu .vertical tr:last-child {
+	background-color: #ddd;
+	padding-bottom: 20px;
+}
+
+
 .windowMenu .root {
 	background-color: transparent;
 	border: 0px solid red;
@@ -1127,7 +1139,7 @@ div.gotoFile li:hover {
 	margin: 0;
 	height: 27px;
 }
-.windowMenu .item:hover {
+.windowMenu .menu .item:hover {
 	background-color: #ffffff;
 	color: #000000;
 	

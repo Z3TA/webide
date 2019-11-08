@@ -35,6 +35,14 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+While we made it possible to scroll on the menu, there is no indication that it goes below the screen!
+
+Editor menu on mobile is too long, so you don't see the last two items!
+
+---
+
+How can I listen for events from the LSP!? like workspace/applyEdit
+
 Implement MS language server protocol ... !?
 
 
