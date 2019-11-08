@@ -289,6 +289,7 @@
 		if(useNative) {
 			// Don't show any
 			hideNativeKeyboard();
+			usePhysical = true;
 			EDITOR.ctxMenu.update(menuItem, false, labelShowBuiltin);
 			EDITOR.windowMenu.update(winMenuKeyboard, {active: false, label: labelShowBuiltin});
 		}
