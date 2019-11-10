@@ -147,7 +147,7 @@ LANG["en"] = {
 	stop_nodejs_project_in_production: "Stop the in-production nodejs project the currently open file belongs to",
 	stop_nodejs_script: "Stop script",
 	stop_production: "Stop production",
-	switch_server_user: "wwitch server/user",
+	switch_server_user: "switch server/user",
 	switch_to_last_active_file: "switch to last active file",
 	switch_to_left_tab: "switch to left tab",
 	switch_to_right_tab: "Switch to right tab",
