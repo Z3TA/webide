@@ -14,6 +14,9 @@ var NODE = {
 			
 		}
 		
+		/*
+			Requiring a module should be safe most of the time ...
+		*/
 		try {
 			var obj = require(absolutePath || nameStr);
 		}
@@ -24,17 +27,6 @@ var NODE = {
 		var variables = {};
 		var functions = [];
 		var nameChain = nameStr;
-		
-		if(json.rets) {
-			for(var i=0; i<json.rets.length; i++) {
-				try{
-					obj = obj[rets[i]]();
-				}
-				catch(err) {
-					return callback(err);
-				}
-			}
-		}
 		
 		collect(obj, variables, nameChain);
 		
