@@ -77,19 +77,40 @@
 			},
 			position: position
 		}, function(err, resp) {
-			console.log("lspAutoComplete: Got answer from completion request ...");
 			if(err) {
 				alertBox("Language server for language=" + trackedFiles[file].language + " was unable to handle completion request! Error: " + err.message + " position=" + JSON.stringify(position));
 			}
-			console.log("lspAutoComplete: textDocument/completion response: " + JSON.stringify(resp));
+			console.log("lspAutoComplete: textDocument/completion response: " + JSON.stringify(resp, null, 2));
 			
 			var items = resp.items;
 			
 			if(!items) throw new Error("No items in resp=" + JSON.stringify(resp, null, 2));
 			
-			for(var i=0; i<items.length; i++) {
-				options.push(items[i].label);
+			var completionsContainsDot = false;
+			
+			for(var i=0, completion; i<items.length; i++) {
+				completion = items[i].label;
+				options.push(completion);
+				if(completion.indexOf(".") != -1) completionsContainsDot = true;
 			}
+			
+			console.log("lspAutoComplete: completionsContainsDot=" + completionsContainsDot + " wordToComplete=" + wordToComplete + " options=" + JSON.stringify(options));
+			
+			var wordContainsDot = (wordToComplete.indexOf(".") != -1);
+			if(wordContainsDot && !completionsContainsDot) {
+				var leftSide = wordToComplete.slice(0, wordToComplete.lastIndexOf(".") + 1);
+// Assume the language server returned options for the right side of the dot
+				options = options.map(function(completion) {
+					return leftSide + completion;
+				});
+				console.log("lspAutoComplete: Added full chain to options = " + JSON.stringify(options));
+			}
+			
+			// Filter out all options that doesn't contain the word we want to autocomplete
+			options = options.filter(function(completion) {
+				return (completion.indexOf(wordToComplete) == 0);
+			});
+			console.log("lspAutoComplete: Filtered options = " + JSON.stringify(options));
 			
 			autoCompleteCallback(options);
 			

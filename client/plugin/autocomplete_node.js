@@ -1,7 +1,10 @@
 (function() {
 	"use strict";
 	
-	if(!QUERY_STRING["autocomplete_node"]) return;
+	if(QUERY_STRING["disable_nodejsautocomplete"]) {
+		console.warn("autoCompleteNode: Disabled by query string");
+		return;
+	}
 	
 	var moduleInfoCache;
 	

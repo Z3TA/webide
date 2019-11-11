@@ -10,6 +10,8 @@
 	
 	"use strict";
 	
+	if(QUERY_STRING["disable_builtinjsautocomplete"]) return;
+	
 	var builtInFunctions = [
 		{name: "eval", arguments: "codeString", type: ["undefined",  "other"]}, // todo: We can figure out what type is returned by analyzing the avaluated string
 		{name: "isFinite", arguments: "testValue", type: "Boolean"},
