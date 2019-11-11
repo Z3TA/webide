@@ -20,7 +20,8 @@
 	EDITOR.plugin({
 		desc: "Language server protocol",
 		load: loadLSP,
-		unload: unloadLSP
+		unload: unloadLSP,
+		order: 1000 // Load before reopen_files.js
 	});
 	
 	function loadLSP() {
@@ -30,6 +31,8 @@
 		
 		EDITOR.on("fileChange", lspFileChange);
 		
+		EDITOR.on("autoComplete", lspAutoComplete);
+		
 	}
 	
 	function unloadLSP() {
@@ -38,9 +41,61 @@
 		
 		EDITOR.removeEvent("fileChange", lspFileChange);
 		
+		EDITOR.removeEvent("autoComplete", lspAutoComplete);
+		
 		for(var path in trackedFiles) delete trackedFiles[path];
 		
 		for(var language in languageServers) stopLanguageServer(language);
+		
+	}
+	
+	function lspAutoComplete(file, wordToComplete, wordLength, gotOptions, autoCompleteCallback) {
+		
+		if(!trackedFiles.hasOwnProperty(file)) {
+			console.log("lspAutoComplete: not tracked: " + file.path);
+			return;
+		}
+		
+		var lsp = languageServers[trackedFiles[file].language];
+		
+		var row = file.caret.row;
+		var col = file.caret.col;
+		var indentationCharactersLength = file.grid[row].indentationCharacters.length;
+		
+		var position = {
+			line: row, 
+			character: col + indentationCharactersLength
+		}
+		
+		var options = [];
+		
+		lsp.req("textDocument/completion", {
+			textDocument: {
+				uri: trackedFiles[file].uri,
+				languageId: trackedFiles[file].language,
+				version: trackedFiles[file].version,
+			},
+			position: position
+		}, function(err, resp) {
+			console.log("lspAutoComplete: Got answer from completion request ...");
+			if(err) {
+				alertBox("Language server for language=" + trackedFiles[file].language + " was unable to handle completion request! Error: " + err.message + " position=" + JSON.stringify(position));
+			}
+			console.log("lspAutoComplete: textDocument/completion response: " + JSON.stringify(resp));
+			
+			var items = resp.items;
+			
+			if(!items) throw new Error("No items in resp=" + JSON.stringify(resp, null, 2));
+			
+			for(var i=0; i<items.length; i++) {
+				options.push(items[i].label);
+			}
+			
+			autoCompleteCallback(options);
+			
+		});
+		
+		return {async: true};
 		
 	}
 	
