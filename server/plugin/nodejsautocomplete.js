@@ -3,15 +3,19 @@ var NODE = {
 
 	require: function(user, json, callback) {
 		var nameStr = json.nameStr; // Name of the module
-		var cwd = json.cwd;
-		if(cwd && nameStr.charAt(0) == ".") {
+		var dir = json.directory;
+		if(dir && nameStr.charAt(0) == ".") {
 			// nameStr is a path to a module!
+			
 			var module_path = require("path");
-			var relativePath = path.relative(cwd, nameStr);
+			var absolutePath = module_path.resolve(dir, nameStr);
+		
+			console.log("nameStr=" + nameStr + " absolutePath=" + absolutePath + " dir=" + dir);
+			
 		}
 		
 		try {
-			var obj = require(relativePath || nameStr);
+			var obj = require(absolutePath || nameStr);
 		}
 		catch(err) {
 			return callback(err);
@@ -34,7 +38,7 @@ var NODE = {
 		
 		collect(obj, variables, nameChain);
 		
-		callback(null, {variables: variables, functions: functions, nameStr: relativePath || nameStr});
+		callback(null, {variables: variables, functions: functions, nameStr: absolutePath || nameStr});
 		
 		function collect(obj, variables, nameChain) {
 			for(var name in obj) {

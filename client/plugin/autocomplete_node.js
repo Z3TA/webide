@@ -194,9 +194,9 @@ prototype: {
 					return true;
 				}
 				
-				var cwd = UTIL.getDirectoryFromPath(file.path);
+				var directory = UTIL.getDirectoryFromPath(file.path);
 				
-				CLIENT.cmd("nodejsautocomplete.require", {nameStr: moduleNameStr, cwd: cwd}, function(err, resp) {
+				CLIENT.cmd("nodejsautocomplete.require", {nameStr: moduleNameStr, directory: directory}, function(err, resp) {
 					if(err) return callback(err);
 					
 					moduleInfoCache[moduleNameStr] = resp;
