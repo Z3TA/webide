@@ -21,6 +21,7 @@ API.terminal = require("./plugin/terminal.js");
 API.mysql = require("./plugin/mysql.js");
 API.nodejsautocomplete = require("./plugin/nodejsautocomplete.js");
 API.nodejsrepl = require("./plugin/nodejsrepl.js");
+API.LSP = require("./plugin/lsp.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -580,7 +581,6 @@ user.removeStorageItem = function removeStorageItem(itemName, callback) {
 	});
 	
 }
-
 
 process.on('message', function commandMessage(message) {
 	// # Process Message

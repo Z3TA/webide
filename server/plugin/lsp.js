@@ -1,5 +1,6 @@
 
 var rpc = require("vscode-jsonrpc");
+var module_child_process = require("child_process");
 
 var languageServers = {};
 
@@ -8,19 +9,148 @@ var LSP = {
 	start: function(user, json, callback) {
 		// Spawn a new language server
 		
-		var lang = json.language;
+		if(!json.language) return callback(new Error("No language specified!"));
+		
+		/*
+			The LSP will scan all files, so we don't want to set the root to the root
+		*/
+		
+		var rootDir = json.rootDir || user.homeDir + "nodejs_examples/";
+		var language = json.language; // Note: Use the language-id specified by LSP protocol. eg. javascript for JavaScript, php for PHP, cpp for C++
 		var binary = "node";
 		
-		if(language == "JavaScript") {
+		
+		
+		/*
+			
+			Users must manually install each language server in their home dir!
+			
+			git clone https://github.com/sourcegraph/javascript-typescript-langserver.git /lsb/
+			cd javascript-typescript-langserver
+			npm install
+			npm run build
+			
+			
+			todo: Make a shared folder for all users where all language servers are installed. eg. /share/lsp/...
+			or use /usr/share !
+			
+		*/
+		
+		if(language == "javascript") {
 			//var args = ["./flow/node_modules/flow-bin/cli.js", "lsp"];
 			var args = ["./javascript-typescript-langserver/lib/language-server-stdio.js"];
 		}
 		else {
-			return callback(new Error("A language server do not exist for language=" + language))
+			return callback(new Error("A language server do not exist for language=" + language + " ... (did you use the correct lanuage-id specified by the LSP protocol?)"))
 		}
 		
-		var childProcess = cp.spawn(binary, args);
 		
+		var childProcess = module_child_process.spawn(binary, args);
+		
+		// Debug
+		
+		childProcess.on("error", function(err) {
+			console.log("Language server for " + language + " error: err.message=" + err.message);
+			//delete languageServers[json.language];
+		});
+		childProcess.on("close", function(code) {
+			console.log("Language server for " + language + " close: code=" + code);
+			delete languageServers[json.language];
+		});
+		childProcess.stdout.on("data", function(data) {
+			console.log("" + language + " LSP stdout: " + data.toString());
+		});
+		childProcess.stderr.on("data", function(data) {
+			console.log("" + language + " LSP stderr: " + data.toString());
+		});
+		
+		// Use the RPC module for easier communication
+		
+		var connection = rpc.createMessageConnection( new rpc.StreamMessageReader(childProcess.stdout), new rpc.StreamMessageWriter(childProcess.stdin), {
+			error: function(err) {
+				console.log("" + language + " LSP-RSCP error: " + err.message);
+			}
+		});
+		
+		languageServers[language] = connection;
+		
+		connection.listen();
+		
+		function ready() {
+			console.log("LSP for language=" + language + " ready!");
+			callback(null);
+			callback = null;
+		}
+		
+		function initError(err) {
+			console.log("initError: err=" + err);
+			callback(err);
+			callback = null;
+		}
+		
+		connection.sendRequest("initialize", {
+			processId: process.pid,
+			rootPath: rootDir,
+			rootUri: "file://" + rootDir,
+			initializationOptions: {},
+			capabilities: {
+				completion: {
+					dynamicRegistration: true,
+					completionItem: {
+						snippetSupport: true,
+						commitCharactersSupport: true,
+						documentationFormat: true,
+						deprecatedSupport: true,
+						preselectSupport: true,
+						contextSupport: true
+					}
+				}
+			}
+		}).then(ready).catch(initError);
+		
+	},
+	
+	req: function(user, json, callback) {
+		
+		if(!json.language) return callback(new Error("No language specified!"));
+		if(!json.method) return callback(new Error("No method specified!"));
+		if(!json.options) return callback(new Error("No options specified!"));
+		
+		var connection = languageServers[json.language];
+		
+		if(!connection) {
+			var error = new Error("Language server for " + json.language + " has not started or got an error");
+			error.code = "ENOENT";
+			return callback(error);
+		}
+		
+		connection.sendRequest(json.method, json.options).then(function(resp) {
+			//console.log("request resp: " + JSON.stringify(resp, null, 2));
+			callback(null, resp);
+			
+		}).catch(function(err) {
+			//console.log("request error: " + err.message);
+			callback(err);
+		});
+	},
+	
+	notify: function(user, json, callback) {
+
+		if(!json.language) return callback(new Error("No language specified!"));
+		if(!json.method) return callback(new Error("No method specified!"));
+		if(!json.options) return callback(new Error("No options specified!"));
+		
+		var connection = languageServers[json.language];
+		
+		if(!connection) {
+			var error = new Error("Language server for " + json.language + " has not started or got an error");
+			error.code = "ENOENT";
+			return callback(error);
+		}
+		
+		var notification = new rpc.NotificationType(json.method);
+		
+		connection.sendNotification(notification, json.options);
 		
 	}
 	

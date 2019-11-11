@@ -1041,6 +1041,8 @@ file.mode = "text";
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
+		var endCol = grid[row].length-1 + grid[row].indentationCharacters.length;
+		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
 		
 		file.grid.splice(row, 1); // Remove the row
@@ -1057,7 +1059,7 @@ file.mode = "text";
 		EDITOR.renderNeeded();
 		
 		var col = 0;
-		file.change("removeRow", removedText, firstIndex, row, col);
+		file.change("removeRow", removedText, firstIndex, row, col, row, endCol);
 		
 		
 		return removedText;
@@ -1531,36 +1533,6 @@ file.mode = "text";
 		
 	}
 	
-	File.prototype.replaceText = function(oldText, newText) {
-		
-		throw new Error("file.replaceText is DEPRECATED! Use deleteTextRange and insertText instead!");
-		
-		var file = this;
-		
-		var index = file.text.indexOf(oldText);
-		
-		if(index == -1) throw new Error("File (" + file.path + ") does not contain oldText=" + oldText);
-		
-		var newIndex = index + newText.length;
-		
-		file.text = file.text.replace(oldText, newText);
-		
-		file.grid = file.createGrid(); // will probably have to rewrite for performance
-		
-		var dummyCaret = file.createCaret(newIndex);
-		
-		file.fixCaret(file.caret);
-		
-		file.scrollToCaret(dummyCaret);
-		
-		file.sanityCheck();
-		
-		EDITOR.renderNeeded();
-		
-		file.change("replaceText", newText, index, dummyCaret.row, dummyCaret.col);
-		
-	}
-	
 	File.prototype.deleteTextRange = function(firstIndex, lastIndex) {
 		var file = this;
 		
@@ -1595,6 +1567,13 @@ file.mode = "text";
 		*/
 		
 		var grid = file.grid;
+		
+		var endCaret = file.createCaret(lastIndex);
+		var indentationCharactersOnEndRow = grid[endCaret.row].indentationCharacters.length;
+		if(grid[endCaret.row].startIndex < lastIndex) {
+			indentationCharactersOnEndRow -= (lastIndex - grid[endCaret.row].startIndex);
+		}
+		
 		var deletionLength = lastIndex - firstIndex;
 		
 		deletionLength++; // same index is still one char
@@ -1872,7 +1851,7 @@ file.mode = "text";
 		
 		EDITOR.renderNeeded();
 		
-		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col);
+		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col, endCaret.row, endCaret.col + indentationCharactersOnEndRow);
 		
 		return removedText;
 
@@ -3061,6 +3040,9 @@ file.mode = "text";
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak);
 		
+		var endRow = file.grid.length-1;
+		var endCol = file.grid[endRow].length-1 + file.grid[endRow].indentationCharacters.length;
+		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);
 		
@@ -3068,7 +3050,7 @@ file.mode = "text";
 		
 		EDITOR.renderNeeded();
 		
-		file.change("reload", text, 0, 0, 0); // Fire events
+		file.change("reload", text, 0, 0, 0, endRow, endCol); // Fire events
 		
 	}
 	
@@ -3393,7 +3375,7 @@ file.mode = "text";
 		
 	}
 	
-	File.prototype.change = function(change, text, index, row, col, charId) {
+	File.prototype.change = function(change, text, index, row, col, endRow, endColPlusIndentationCharsLength) {
 		/*
 			This method is hopefully called every time the file changes.
 			So that we can know if the file has been saved or not.
@@ -3431,7 +3413,7 @@ file.mode = "text";
 			file.isCallingChangeEventListeners = f[i];
 			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(f[i]) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
 			//console.time("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
-			f[i](file, change, text, index, row, col);
+			f[i](file, change, text, index, row, col, endRow, endColPlusIndentationCharsLength);
 			//console.timeEnd("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
 		}
 		//console.timeEnd("fileChange eventListeners");
