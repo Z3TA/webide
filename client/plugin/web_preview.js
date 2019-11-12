@@ -11,7 +11,7 @@
 		desc: "Preview HTML files",
 		load: function loadWebPreview() {
 			
-			EDITOR.on("showMenu", maybeShowPreviewInMenu);
+			EDITOR.on("ctxMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
 			
 			var discoveryItem = document.createElement("img");
@@ -40,7 +40,7 @@
 		},
 		unload: function unloadWebPreview() {
 			
-			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
+			EDITOR.removeEvent("ctxMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("previewTool", webPreviewTool); 
 			
 			EDITOR.windowMenu.remove(winMenuWysiwygHtml);

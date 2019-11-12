@@ -52,7 +52,7 @@
 		windowMenuSave = EDITOR.windowMenu.add(S("save"), [S("File"), 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
 		windowMenuSaveAs = EDITOR.windowMenu.add(S("save_as"), [S("File"), 2], saveAs);
 		
-		EDITOR.on("showMenu", showSaveOption);
+		EDITOR.on("ctxMenu", showSaveOption);
 		
 		EDITOR.registerAltKey({char: "s", alt:2, label: S("save"), fun: saveFileFromVirtualKeyboard});
 		
@@ -70,7 +70,7 @@
 		EDITOR.windowMenu.remove(windowMenuSave);
 		EDITOR.windowMenu.remove(windowMenuSaveAs);
 		
-		EDITOR.removeEvent("showMenu", showSaveOption);
+		EDITOR.removeEvent("ctxMenu", showSaveOption);
 		
 		EDITOR.unregisterAltKey(saveFileFromVirtualKeyboard);
 		

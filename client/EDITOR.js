@@ -142,6 +142,7 @@ EDITOR.isScrolling = false; // Render optimization for scrolling
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	afk: [], // Away from keyboard
 	btk: [], // Back to keyboard
+	copy: [],
 	error: [],
 	fileClose: [], 
 	fileOpen: [],
@@ -174,7 +175,7 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		mergeTool: [],
 		fileDrop: [],
 		openFileTool: [],
-		showMenu: [],
+	ctxMenu: [],
 		voiceCommand: [],
 		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 		previewTool: [],
@@ -398,7 +399,7 @@ ctxMenuVisibleOnce = true;
 		
 		var f = EDITOR.eventListeners.changeWorkingDir.map(funMap);
 		console.log("Calling changeWorkingDir listeners (" + f.length + ") workingDirectory=" + workingDirectory);
-		for(var i=0; f.length; i++) {
+		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](workingDirectory); // Call function
 		}
@@ -593,18 +594,32 @@ EDITOR.bindKey(b);
 		}
 		
 		EDITOR.pseudoClipboard = text;
+		console.log("EDITOR.putIntoClipboard: Put " + text.length + " characters into EDITOR.pseudoClipboard");
 		
 		if (!navigator.clipboard) {
-			fallbackCopyTextToClipboard(text);
-			return;
+			return fallbackCopyTextToClipboard(text);
 		}
 		navigator.clipboard.writeText(text).then(function() {
 			console.log('Async: Copying to clipboard was successful!');
-			if(callback) callback(null, false);
+			done(null, true, false);
 		}, function(err) {
 			console.error('Async: Could not copy text: ', err);
-			fallbackCopyTextToClipboard(text);
+			return fallbackCopyTextToClipboard(text);
 		});
+		
+		function done(error, copiedIntoPlatformClipboard, manuallyCopied) {
+			var f = EDITOR.eventListeners.copy.map(funMap);
+			console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+			for(var i=0; i<f.length; i++) {
+				//console.log("function " + UTIL.getFunctionName(f[i]));
+				f[i](text, copiedIntoPlatformClipboard, manuallyCopied); // Call function
+			}
+			
+			if(callback) {
+				callback(error, copiedIntoPlatformClipboard, manuallyCopied);
+				callback = null;
+			}
+		}
 		
 		function fallbackCopyTextToClipboard(text) {
 			var textArea = document.createElement("textarea");
@@ -613,17 +628,21 @@ EDITOR.bindKey(b);
 			textArea.focus();
 			textArea.select();
 			
+			/*
+				note: This will trigger a (outside canvas) copy event!!
+			*/
 			try {
 				var successful = document.execCommand('copy');
 				var msg = successful ? 'successful' : 'unsuccessful';
 				console.log('Fallback: Copying text command was ' + msg);
-			} catch (err) {
+			}
+			catch (err) {
 				console.error('Fallback: Oops, unable to copy', err);
 			}
 			document.body.removeChild(textArea);
 			
 			if(successful) {
-				if(callback) callback(null, false);
+				done(null, true, false);
 			}
 			else {
 				
@@ -661,11 +680,10 @@ usePseudoClipboard = false;
 		}
 		
 		function prm() {
-			// prompt can not handle multiple lines
 			//window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 			
 			promptBox( (description ? description.trim() + " " : "") + "Copy to clipboard: Ctrl+C", {defaultValue: text, dialogDelay: 0, selectAll: true}, function() {
-				if(callback) callback(null, true);
+				done(null, true, true);
 			});
 			
 			return false;
@@ -673,7 +691,8 @@ usePseudoClipboard = false;
 		
 		function pseudo() {
 			EDITOR.pseudoClipboard = text;
-			if(callback) callback(null, false);
+			console.log("EDITOR.putIntoClipboard:pseudo: Put " + text.length + " characters into EDITOR.pseudoClipboard");
+			done(null, false, false);
 			return false;
 		}
 		
@@ -732,14 +751,20 @@ usePseudoClipboard = false;
 			
 			promptBox("Paste the clipboard content here:", {defaultValue: EDITOR.pseudoClipboard, dialogDelay: 0}, function(data) {
 				if(typeof data == "string" && data.length > 0) readSuccess(data);
-				else readFail(new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!"));
+				else {
+
+					var error = new Error("Unable to access clipboard data! navigator.clipboard and window.clipboardData not available!");
+					error.code = "CANCEL";
+					
+					readFail(error);
+				}
 			});
 			
 		}
 		
 		function readSuccess(text) {
 			console.log("getClipboardContent: readSuccess: text=" + text);
-			callback(null, text);
+			callback(null, text, false);
 		}
 		
 		function readFail(err) {
@@ -753,9 +778,9 @@ usePseudoClipboard = false;
 			}
 			
 			console.log("getClipboardContent: readFail: err.message=" + err.message);
-			if(EDITOR.pseudoClipboard) {
+			if(EDITOR.pseudoClipboard.length > 0 && err.code != "CANCEL") {
 				console.log("getClipboardContent: Using pseudoClipboard! data=" + EDITOR.pseudoClipboard);
-				return callback(null, EDITOR.pseudoClipboard);
+				return callback(null, EDITOR.pseudoClipboard, true);
 			}
 			else {
 				console.log("getClipboardContent: Nothing in pseudoClipboard! All attempts to read clipboard failed!");
@@ -3862,7 +3887,7 @@ li.onclick = function(clickEvent) {
 			
 			if(posY === undefined) posY = touchY + menuDownABit;
 			
-			var f = EDITOR.eventListeners.showMenu.map(funMap);
+			var f = EDITOR.eventListeners.ctxMenu.map(funMap);
 			for(var i=0, f; i<f.length; i++) {
 				f[i](EDITOR.currentFile, posX, posY, clickEvent);
 			}
@@ -8894,8 +8919,7 @@ function copy(copyEvent) {
 	
 	console.log("copyEvent EDITOR.input=" + EDITOR.input + 
 	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent +
-	" EDITOR.input=" + EDITOR.input);
+	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
@@ -8921,17 +8945,27 @@ function copy(copyEvent) {
 		}
 		copyEvent.preventDefault();
 		
+			var f = EDITOR.eventListeners.copy.map(funMap);
+			console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+			for(var i=0; i<f.length; i++) {
+				//console.log("function " + UTIL.getFunctionName(f[i]));
+				f[i](textToPutOnClipboard, true, false); // Call function
+			}
+			
+			EDITOR.pseudoClipboard = textToPutOnClipboard;
+			console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
+			
 	}
-	// else: Do the default action (enable copying outside the canvas)
-	
+		else {
+			// Do the default action (enable copying outside the canvas)
+			console.warn("Copying outside the canvas! EDITOR.input=" + EDITOR.input);
+		}
+		
 	//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
 	
-	EDITOR.interact("copy", copyEvent);
-	
-	EDITOR.pseudoClipboard = textToPutOnClipboard;
+		EDITOR.interact("copy", copyEvent);
 	
 	return textToPutOnClipboard;
-	
 }
 
 function cut(cutEvent) {

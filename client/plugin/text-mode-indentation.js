@@ -34,7 +34,7 @@
 			EDITOR.on("fileOpen", detectIndentation);
 			EDITOR.on("fileClose", cleanupIndentation);
 			
-			EDITOR.on("showMenu", showWhiteSpaceMaybe);
+			EDITOR.on("ctxMenu", showWhiteSpaceMaybe);
 			
 			winMenuShowIndentation = EDITOR.windowMenu.add(S("show_white_space"), [S("View"), 30], toggleShowWhiteSpace);
 			
@@ -49,7 +49,7 @@
 			EDITOR.removeEvent("fileOpen", detectIndentation);
 			EDITOR.removeEvent("fileClose", cleanupIndentation);
 			
-			EDITOR.removeEvent("showMenu", showWhiteSpaceMaybe);
+			EDITOR.removeEvent("ctxMenu", showWhiteSpaceMaybe);
 			
 			//EDITOR.ctxMenu.remove(menuItem);
 			

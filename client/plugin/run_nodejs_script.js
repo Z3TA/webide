@@ -31,7 +31,7 @@
 		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.JS", 2], runNodeJsScript);
 		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.JS", 2], stopNodeJsScript);
 		
-		EDITOR.on("showMenu", showRunNodejsScriptMenuItem);
+		EDITOR.on("ctxMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
 		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
 		
@@ -53,7 +53,7 @@
 		EDITOR.windowMenu.remove(winMenuStartScript);
 		EDITOR.windowMenu.remove(winMenuStopScript);
 		
-		EDITOR.removeEvent("showMenu", showRunNodejsScriptMenuItem);
+		EDITOR.removeEvent("ctxMenu", showRunNodejsScriptMenuItem);
 		EDITOR.removeEvent("runScript", runNodeJsScriptMaybe);
 		EDITOR.removeEvent("previewTool", runNodeJsScriptMaybe);
 		EDITOR.removeEvent("fileOpen", nodejsScriptFileOpenedMaybe);

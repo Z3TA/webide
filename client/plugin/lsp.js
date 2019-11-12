@@ -4,6 +4,11 @@
 	
 	https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/
 	
+	Having played around with Flow and javascript-typescript-langserver the conclusion is that they are not that good.
+	javascript-typescript-langserver will for example not parse Node.JS modules and requires "typings".
+	
+	
+	
 */
 
 (function() {

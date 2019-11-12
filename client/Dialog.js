@@ -442,7 +442,10 @@ function promptBox(msg, options, callback, recursionCount) {
 	cancel.setAttribute("class", "prompt");
 	cancel.appendChild(document.createTextNode("Cancel")); // Language?
 	
-	cancel.addEventListener("click", function(clickEvent) {callback(null); dialog.close(clickEvent)}, false);
+	cancel.addEventListener("click", function(clickEvent) {
+		callback(null); 
+		dialog.close(clickEvent);
+	}, false);
 	
 	if(!options.rows) {
 	input.addEventListener("keydown", function(keyDownEvent) {

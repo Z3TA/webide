@@ -35,6 +35,22 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Copy/cut/paste via context menu
+
+Get spawn EACCESS error when running NPM install
+npm can't run /usr/lib/node_modules/npm/node_modules/update-notifier/check.js
+
+
+Trying https://github.com/theia-ide/typescript-language-server instead of sourcegraph
+
+
+Looking at other LSP clients via Chrome dev tools WS messages ...
+
+
+Give up on LSP ? 
+
+
+
 While we made it possible to scroll on the menu, there is no indication that it goes below the screen!
 
 Editor menu on mobile is too long, so you don't see the last two items!

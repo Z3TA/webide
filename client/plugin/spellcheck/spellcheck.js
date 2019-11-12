@@ -128,7 +128,7 @@
 		EDITOR.on("fileChange", runSpellCheck);
 		EDITOR.on("fileOpen", spellCheckFile);
 		
-		EDITOR.on("showMenu", showSpellSuggestion);
+		EDITOR.on("ctxMenu", showSpellSuggestion);
 		
 		showProgressBar();
 		
@@ -141,7 +141,7 @@
 		
 		EDITOR.removeEvent("fileChange", runSpellCheck);
 		EDITOR.removeEvent("fileOpen", spellCheckFile);
-		EDITOR.removeEvent("showMenu", showSpellSuggestion);
+		EDITOR.removeEvent("ctxMenu", showSpellSuggestion);
 		
 		
 		

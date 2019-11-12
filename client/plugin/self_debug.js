@@ -43,7 +43,7 @@
 		winMenuBugreport = EDITOR.windowMenu.add(S("send_bug_report"), [S("Editor"), 8], sendBugReport);
 		
 		EDITOR.on("error", windowError);
-		EDITOR.on("showMenu", showSendBugReportMenuItem);
+		EDITOR.on("ctxMenu", showSendBugReportMenuItem);
 		
 	}
 	
@@ -51,7 +51,7 @@
 		EDITOR.unbindKey(sendBugReport);
 		
 		EDITOR.removeEvent("error", windowError);
-		EDITOR.removeEvent("showMenu", showSendBugReportMenuItem);
+		EDITOR.removeEvent("ctxMenu", showSendBugReportMenuItem);
 	
 		EDITOR.windowMenu.remove(winMenuBugreport);
 	}

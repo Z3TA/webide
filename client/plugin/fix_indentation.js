@@ -1,5 +1,9 @@
 (function() {
 	
+	/*
+		Hmm. this module doesn't fire file.change events ...
+	*/
+	
 	"use strict";
 	
 	EDITOR.plugin({
@@ -112,7 +116,7 @@
 		
 		if(file.mode != "code") return true; // Don't bother checking indentation of non code
 		
-		// Check the indentation of the surrounding rows BEFORE the parsed kicks in and updates the indentation
+		// Check the indentation of the surrounding rows BEFORE the parser updates the indentation
 		
 		indentationBefore = indentationAround(file, row);
 		

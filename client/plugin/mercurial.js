@@ -84,7 +84,7 @@
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
 		
-		EDITOR.on("showMenu", showScmMenuItemsMaybe);
+		EDITOR.on("ctxMenu", showScmMenuItemsMaybe);
 		
 		CLIENT.on("mercurialProgress", mercurialProgressStatus);
 		// Make the progress bar appear on top:
@@ -118,7 +118,7 @@
 		EDITOR.removeEvent("commitTool", mercurialCommitTool);
 		EDITOR.removeEvent("resolveTool", mercurialResolveTool);
 		
-		EDITOR.removeEvent("showMenu", showScmMenuItemsMaybe);
+		EDITOR.removeEvent("ctxMenu", showScmMenuItemsMaybe);
 		
 		EDITOR.ctxMenu.remove(repoCloneMenuItem);
 		
@@ -3139,10 +3139,10 @@ if(err) return alertBox(err.message);
 		
 		EDITOR.getSSHPublicKey(function(err, pubkey) {
 			if(err) return alertBox(err.message);
-			EDITOR.putIntoClipboard(pubkey, function(err, manual) {
+			EDITOR.putIntoClipboard(pubkey, function(err, copiedIntoPlatformClipboard, manuallyCopied) {
 				if(err) throw err;
-				console.log("Public key copied to clipboard!");
-				if(!manual) alertBox("Public key copied to clipboard!");
+				console.log("Public key copied to clipboard! copiedIntoPlatformClipboard=" + copiedIntoPlatformClipboard + " manuallyCopied=" + manuallyCopied);
+				if(!manuallyCopied) alertBox("Public key copied to " + (copiedIntoPlatformClipboard?"clipboard":"psuedo clipboard") + "!");
 			});
 		});
 		
