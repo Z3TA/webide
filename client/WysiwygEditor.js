@@ -216,6 +216,8 @@ var WysiwygEditor;
 					else msg += "Inserted: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.inserted[i].text) + "\n";
 				}
 				alertBox(msg);
+				console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+				console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
 				return wysiwygEditor.close();
 			}
 			else if(wysiwygEditor.ignoreTransform.removed.length > 0) {
@@ -2791,13 +2793,14 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		/*
 			problem: The contentediable on Edge browser (Windows 10) will use CRLF for line breaks???? And the source file might use LF ...
 			solution: When getting the source code body, always convert to the line-breaks used by contenteditable !?
-			
+		*/
+		
 			if(lineBreakText && lineBreakText != lineBreak) {
-			alertBox("Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
+			//alertBox("Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
 			console.warn("lineBreak=" + UTIL.lbChars(lineBreak) + " was specified. But text has lineBreakText=" + UTIL.lbChars(lineBreakText) + " Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
 			bodyHtml = bodyHtml.replace(new RegExp(lineBreakText, "g"), lineBreak);
 			}
-		*/
+		
 		
 		return bodyHtml;
 		
