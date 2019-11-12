@@ -35,13 +35,11 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Copy/cut/paste via context menu
+Trying https://github.com/theia-ide/typescript-language-server instead of sourcegraph
 
 Get spawn EACCESS error when running NPM install
-npm can't run /usr/lib/node_modules/npm/node_modules/update-notifier/check.js
-
-
-Trying https://github.com/theia-ide/typescript-language-server instead of sourcegraph
+npm can't run:
+node /usr/lib/node_modules/npm/node_modules/update-notifier/check.js '{"pkg":{"name":"npm","version":"6.11.3"}}'
 
 
 Looking at other LSP clients via Chrome dev tools WS messages ...

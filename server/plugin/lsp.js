@@ -17,9 +17,14 @@ var LSP = {
 		
 		var rootDir = json.rootDir || user.homeDir + "nodejs_examples/";
 		var language = json.language; // Note: Use the language-id specified by LSP protocol. eg. javascript for JavaScript, php for PHP, cpp for C++
-		var binary = "node";
 		
-		
+		if(json.bin && json.args) {
+			var binary = json.bin;
+			var args = json.args;
+		}
+		else {
+			
+			var binary = "node";
 		
 		/*
 			
@@ -43,7 +48,9 @@ var LSP = {
 		else {
 			return callback(new Error("A language server do not exist for language=" + language + " ... (did you use the correct lanuage-id specified by the LSP protocol?)"))
 		}
+		}
 		
+		console.log("Starting LSP server: binary=" + binary + " args=" + JSON.stringify(args));
 		
 		var childProcess = module_child_process.spawn(binary, args);
 		
@@ -56,13 +63,40 @@ var LSP = {
 		childProcess.on("close", function(code) {
 			console.log("Language server for " + language + " close: code=" + code);
 			delete languageServers[json.language];
+			
+			user.send({lspClose: {language: language, bin: binary, code: code}});
+			
 		});
+		
+		
+		if(childProcess.stdout && childProcess.stderr) {
 		childProcess.stdout.on("data", function(data) {
 			console.log("" + language + " LSP stdout: " + data.toString());
 		});
-		childProcess.stderr.on("data", function(data) {
-			console.log("" + language + " LSP stderr: " + data.toString());
-		});
+			
+			childProcess.stderr.on("data", function(data) {
+				console.log("" + language + " LSP stderr: " + data.toString());
+			});
+			
+		}
+		else {
+			console.log("childProcess.stdout=" + childProcess.stdout + " childProcess.stderr=" + childProcess.stderr);
+			
+			callback(new Error("Did not get a stdout or stderr stream from bin=" + binary + " with args=" + JSON.stringify(args)));
+			
+			/*
+				See the server log for more info! Example problem:
+				Language server for javascript error: err.message=spawn /.npm-packages/bin/typescript-language-server EACCES
+				
+				
+			*/
+			
+			childProcess.kill();
+			
+			return;
+		}
+		
+		
 		
 		// Use the RPC module for easier communication
 		
@@ -76,9 +110,9 @@ var LSP = {
 		
 		connection.listen();
 		
-		function ready() {
+		function ready(resp) {
 			console.log("LSP for language=" + language + " ready!");
-			callback(null);
+			callback(null, resp);
 			callback = null;
 		}
 		

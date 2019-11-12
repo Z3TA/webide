@@ -6,8 +6,10 @@
 	
 	Having played around with Flow and javascript-typescript-langserver the conclusion is that they are not that good.
 	javascript-typescript-langserver will for example not parse Node.JS modules and requires "typings".
+	But then I tried npm install -g typescript-language-server and npm install -g typescript and it worked much better!
 	
-	
+	Disable other autocomplete plugins when testing:
+	?lsp=true&disable_nodejsautocomplete=true&disable_builtinjsautocomplete=true
 	
 */
 
@@ -21,6 +23,22 @@
 	
 	var trackedFiles = {};
 	var languageServers = [];
+	var lspServers = {
+		"typescript-language-server": {
+			bin: "/.npm-packages/bin/typescript-language-server",
+			args: ["--stdio"]
+		}
+		/*
+			
+			npm i -g typescript
+			npm install -g typescript-language-server
+			
+		*/
+	}
+	
+	var languages = {
+		javascript: lspServers["typescript-language-server"]
+	}
 	
 	EDITOR.plugin({
 		desc: "Language server protocol",
@@ -38,6 +56,8 @@
 		
 		EDITOR.on("autoComplete", lspAutoComplete);
 		
+		CLIENT.on("lspClose", lspClose);
+		
 	}
 	
 	function unloadLSP() {
@@ -47,6 +67,8 @@
 		EDITOR.removeEvent("fileChange", lspFileChange);
 		
 		EDITOR.removeEvent("autoComplete", lspAutoComplete);
+		
+		CLIENT.removeEvent("lspClose", lspClose);
 		
 		for(var path in trackedFiles) delete trackedFiles[path];
 		
@@ -89,7 +111,11 @@
 			
 			var items = resp.items;
 			
-			if(!items) throw new Error("No items in resp=" + JSON.stringify(resp, null, 2));
+			if(!items) {
+				// Some language servers send the item is the resp
+				items = resp;
+				//throw new Error("No items in resp=" + JSON.stringify(resp, null, 2));
+			}
 			
 			var completionsContainsDot = false;
 			
@@ -125,11 +151,45 @@
 		
 	}
 	
+	function lspClose(obj) {
+		
+		console.log("lspClose: obj=" + JSON.stringify(obj));
+		
+		var language = obj.language;
+		
+		alertBox("Language server for language=" + language + " closed with code=" + obj.code);
+		
+		if(languageServers.hasOwnProperty(language)) {
+			
+for(var path in trackedFiles) {
+				if( trackedFiles[path].language == language ) delete trackedFiles[path];
+}
+
+delete languageServers[language];
+}
+
+	}
+	
 	function startLanguageServer(language, callback) {
-		CLIENT.cmd("LSP.start", {language: language}, function(err) {
+		
+		// todo: Handle several start request. eg. when two files are opened at the same time; prevent double lsp servers.
+		
+		if(languages.hasOwnProperty(language)) {
+			var lspServer = languages[language];
+		}
+		
+		var lspOptions ={language: language};
+		if(lspServer) {
+			lspOptions.bin = lspServer.bin;
+			lspOptions.args = lspServer.args;
+		}
+		
+		CLIENT.cmd("LSP.start", lspOptions, function(err, resp) {
 			if(err) {
 				return callback(err);
 			}
+			
+			console.log("startLanguageServer: resp=" + JSON.stringify(resp, null, 2));
 			
 			languageServers[language] = {
 				req: function(method, options, callback) {
@@ -141,7 +201,8 @@
 					CLIENT.cmd("LSP.notify", {language: language, method: method, options: options}, function(err, resp) {
 						callback(err, resp);
 					});
-				}
+				},
+				capabilities: resp.capabilities
 			};
 			
 			callback(null, languageServers[language]);
@@ -287,7 +348,13 @@
 		else lspServerStarted(null, languageServers[language]);
 		
 		function lspServerStarted(err, lsp) {
-			if(err) return alertBox("Unable to start the language server for language=" + language + " Error: " + err.message);
+			if(err) {
+alertBox("Unable to start the language server for language=" + language + " Error: " + err.message);
+				
+				delete trackedFiles[file];
+				
+				return;
+			}
 			
 			lsp.notify("textDocument/didOpen", {
 				textDocument: {

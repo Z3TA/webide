@@ -34,6 +34,9 @@
   signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=term peer=unconfined,
+  
+  signal receive set=exists peer=/usr/bin/nodejs_%USERNAME%//util,
+  
   signal send set=hup peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=int peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=int peer=/usr/bin/nodejs_%USERNAME%,
@@ -42,6 +45,8 @@
   signal send set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
   signal send set=term peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=term peer=/usr/bin/nodejs_%USERNAME%,
+
+
 
   # Allow network so it can talk to webide_nodejs_init.service
   # It also needs internet access to connect to ftp/sftp/ftps servers!
@@ -105,7 +110,7 @@
   # P means "use profile" (and clear enviroment), x means execute
   # We don't want ANY process to inherit from this process as it got root privalages!
 
-  # All these have their own apparmor profile
+  # All these programs have their own apparmor profile
   %HOME%%USERNAME%/usr/bin/hg px,
   %HOME%%USERNAME%/usr/bin/python px,
   %HOME%%USERNAME%/usr/bin/git px,
@@ -113,11 +118,10 @@
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
   %HOME%%USERNAME%/bin/bash px,
   
-  # Others
-  %HOME%%USERNAME%/bin/** Cx -> util,
-  %HOME%%USERNAME%/usr/bin/** Cx -> util,
-  %HOME%%USERNAME%/usr/share/npm/bin/** Cx -> util, 
-
+  # Allow the user worker process to spawn any app in the home dir
+  %HOME%%USERNAME%/** Cx -> util,
+  
+  
   profile util {
 
     # Just in case (deny overrides allow)
@@ -140,12 +144,9 @@
     /bin/** r,
     /usr/bin/** r,
 
-    %HOME%%USERNAME%/bin/** rix,
-    %HOME%%USERNAME%/usr/bin/** rix,
-    %HOME%%USERNAME%/usr/share/npm/bin/** rix,
-    %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/** rix,
-
-
+    %HOME%%USERNAME%/** rix,
+    
+    # User worker can talk to spawned processes
     signal receive set=cont peer=unconfined,
     signal receive set=exists peer=unconfined,
     signal receive set=int peer=/usr/bin/nodejs_%USERNAME%,
@@ -153,9 +154,24 @@
     signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
     signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
     signal receive set=term peer=unconfined,
-    signal receive set=abrt peer=/usr/bin/nodejs_%USERNAME%//util,
 
+    signal send set=exists peer=/usr/bin/nodejs_%USERNAME%,
+    
+    
+    # Spawned scripts can kill each other
+    signal receive set=abrt peer=/usr/bin/nodejs_%USERNAME%//util,
     signal send set=abrt peer=/usr/bin/nodejs_%USERNAME%//util,
+
+    signal receive set=term peer=/usr/bin/nodejs_%USERNAME%//util,
+    signal send set=term peer=/usr/bin/nodejs_%USERNAME%//util,
+    
+    signal receive set=kill peer=/usr/bin/nodejs_%USERNAME%//util,
+    signal send set=kill peer=/usr/bin/nodejs_%USERNAME%//util,
+
+    signal receive set=exists peer=/usr/bin/nodejs_%USERNAME%//util,
+    signal send set=exists peer=/usr/bin/nodejs_%USERNAME%//util,
+
+
 
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** mr,
