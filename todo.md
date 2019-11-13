@@ -37,27 +37,6 @@ What I'm working on
 -------------------
 
 
-
----
-
-Should pressing autocomplete on an empty line insert boilerplate code depending on context !?
-
-Maybe we should focus on a workflow not depending on autocomplete as documentation!?
-And try to incoroporate the proper documentation instead ?
-How can documentation be integrated !?
-
-We should not rely on any third party web page for documentation, as they can break or set a paywall at any time
-
-Having autocomplete is not enough in order to figure out how to use a module!
-We also need to show the documentation!
-Need a way to show documentation!
-
-problem: How to figure out what web page to show !?
-If it's nodejs built in modules, we want to show the nodejs docs...
-
-Just show a link to the documentation ? eg. https://nodejs.org/api/[module_name].html
-
-
 <button id="button">Button</button> should autocomplete button, because it's a global variale!!
 (Look for id="(.*)" in the HTML file that included the script!!  )
 (also look for the variable in the window object when in preview!!)
@@ -266,11 +245,6 @@ create a server
 
 instead of using a port number we will use a unix socket and WebIDE will automatically create a HTTPS endpoint for us.
 
-! Need a way to show Node.JS documentation. I always read the documentation in a web browser, then copy paste ...
-I actually don't know any module/libraries by heart
-
-
-
 
 
 show the editors main features ...
@@ -389,22 +363,7 @@ bug: A line break inside a xml tag breaks the coloring!
 
 ---
 
-Snippet explorer ?
 
-Automaitcally searches Node.JS documentation (if it's a node.js file) and stack overflow for code snippets - depending on context (nearby text)
-With arrow buttons/swipe where you can find more related snippets
-
-For example var http = require("http") should automatically bring up http examples from the node.js documentation.
-
-
----
-
-When writing node.JS and using Node.JS modules
-I read the documentation! ...
-And usually copy/paste example code to get started
-
-How do I help users with that workflow ?
-That workflow is however tiresome on mobile as it takes so much effort to switch between browser tabs.
 
 
 
@@ -485,9 +444,6 @@ todo: Automatically bring up clone dialog when a repo is in the clipboard!?
 
 todo: Able to upload diffs and apply them in another copy of the repo
 
-todo: Documentation viewever, show documentation in the footer, or in the right column if wide screen.
-For example when you type fs.| show https://github.com/nodejs/node/blob/master/doc/api/fs.md
-Then when you write fs.readF| automatically scroll down to readFile section.
 
 todo: Autocomplete for nodejs, require("| show all built in modules
 
@@ -723,20 +679,6 @@ Accordning to https://gs.statcounter.com/os-market-share/mobile/worldwide
 KaiOS has 1.1% wordwide market share, nothing in Africa!! and nothing in south america! and only 2% in Asia, with 4-5% in india.
 
 
----
-Besides text input, another main problem with developing on a phone is 
-looking up documentation and API's, for example, what code is needed to create a TCP server in Node.JS !?
-With a PC and big screen it's much easier to multi-task and switch back and forth between editor and documentation,
-and copy pasting from stack overflow :P
-
-Should there be a built in feature that searches Node.JS docks, Stack overflow and MDN !? =)
-
-assistant!
-when working with a nodejs module show the readme file for that module
-
-show mdn for javascript objects
-
-search stack overflow 
 ---
 
 
