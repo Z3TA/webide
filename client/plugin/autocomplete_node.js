@@ -238,16 +238,18 @@ prototype: {
 		console.log("autoCompleteNode: wordToComplete=" + wordToComplete);
 		
 		if(!file.parsed) return;
+		if(!file.parsed.language == "JS") return;
 		
-		// Check global Node.JS functions
-		var options = [];
+		if(wordLength > 0) {
+			// Check global Node.JS functions
+			var options = [];
 		for (var i=0, match; i<nodeGlobalFunctions.length; i++) {
 			match = (nodeGlobalFunctions[i].name.substr(0, wordLength) == wordToComplete);
 			console.warn("autoCompleteNode: Do wordToComplete=" + wordToComplete + " match function name=" + nodeGlobalFunctions[i].name + "? " + match);
 			if(match) options.push([nodeGlobalFunctions[i].name + "()", 1]);
 		}
 		if(options.length > 0) return options;
-		
+		}
 		
 		// Show function parameters if inside function arguments
 		var fc = insideFunctionCall(file, file.caret);
