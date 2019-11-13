@@ -46,31 +46,6 @@ How can documentation be integrated !?
 
 ----
 
-
-While we made it possible to scroll on the menu, there is no indication that it goes below the screen!
-
-Editor menu on mobile is too long, so you don't see the last two items!
-
----
-
-How can I listen for events from the LSP!? like workspace/applyEdit
-
-Implement MS language server protocol ... !?
-
-
-Evaluating MS language server protocol ...
-var foo = require("h ... only works in js-ts-lsp
-foo. yep
-
-It's however not possible to get function argument hints
-
----
-
-Show autocomplete for variable returned from function in Node!?
-var server = http.createServer();
-server.| ???
-
-
 Should pressing autocomplete on an empty line insert boilerplate code depending on context !?
 
 

@@ -1,3 +1,9 @@
+/*
+	
+	Q: How can I listen for events from the LSP!? like workspace/applyEdit !?
+	
+	
+*/
 
 var rpc = require("vscode-jsonrpc");
 var module_child_process = require("child_process");
