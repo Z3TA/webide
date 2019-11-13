@@ -28,10 +28,31 @@
 	}
 	
 	function contextCopyShowOptions(file, posX, posY, clickEvent) {
+		if(!file) return; // No file open
+		
 		if(file.selected.length == 0) {
 			// Nothing selected
 			if(clipboardHasData) {
-				EDITOR.ctxMenu.addTemp("Paste", true, ctxPaste);
+				EDITOR.getClipboardContent({silent: true}, function(err, text) {
+					
+					if(err) var contentPreview = "";
+					else {
+var contentPreview = ": ";
+						
+						if(text.length < 50) {
+contentPreview += text;
+						}
+						else if(text.indexOf("\n") != -1) {
+							var lines = UTIL.occurrences(text, "\n") + 1;
+							contentPreview = contentPreview + text.slice(0, Math.min(15, text.indexOf("\n"))) + "... (" + lines + " rows)";
+						}
+						else {
+							contentPreview = contentPreview + text.slice(0, 15) + "... (" + text.length + " characters)";
+						}
+					}
+					
+					EDITOR.ctxMenu.addTemp("Paste" + contentPreview, true, ctxPaste);
+				});
 			}
 		}
 		else {
