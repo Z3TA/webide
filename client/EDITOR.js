@@ -278,6 +278,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
+	discoveryBar.setAttribute("aria-label", "Discovery bar");
 	
 	var showDisoveryBarWindowMenuItem;
 	
@@ -3565,6 +3566,7 @@ if(menuItem.parentMenu) {
 			var li = document.createElement("li");
 			li.setAttribute("class", "item");
 			
+			
 			var bullet = document.createElement("span");
 			bullet.setAttribute("class", "bullet inactive");
 			
@@ -3581,6 +3583,8 @@ if(menuItem.parentMenu) {
 			keyComboEl.setAttribute("class", "key");
 			if(keyCombo) keyComboEl.innerText = keyCombo;
 			li.appendChild(keyComboEl);
+			
+			li.setAttribute("aria-label", htmlText + (keyCombo ? keyCombo : ""));
 			
 			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 			

@@ -136,6 +136,7 @@
 				else if(char == "\n") ; // Don't say anything'
 				else if(char == ";") add("semi-colon");
 				else if(char == ":") add("colon");
+				else if(char == ",") add("comma");
 				else {
 					// Todo: Add all emojis !?
 					add("charcode" + char.charCodeAt(0));
