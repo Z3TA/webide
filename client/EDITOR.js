@@ -698,7 +698,7 @@ usePseudoClipboard = false;
 		
 	}
 	
-	EDITOR.getClipboardContent = function getClipboardContent(callback) {
+	EDITOR.getClipboardContent = function getClipboardContent(options, callback) {
 		
 		/*
 			You need to be on HTTPS or 127.0.0.1 to get access to navigator.clipboard !?
@@ -707,6 +707,11 @@ usePseudoClipboard = false;
 			If the user says "No" we won't be able to access the clipboard until the user manually clears all settings.
 			
 		*/
+		
+		if(typeof options == "function" && callback == undefined) {
+			callback = options;
+			options = {};
+		}
 		
 		if(typeof callback != "function") throw new Error("First argument needs to be a callback function!");
 		
@@ -737,7 +742,7 @@ usePseudoClipboard = false;
 				readSuccess(data);
 			}
 		}
-		else {
+		else if(!options.silent) {
 			console.log("getClipboardContent: Using prompt! navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
 			
 			/*
@@ -760,6 +765,9 @@ usePseudoClipboard = false;
 				}
 			});
 			
+		}
+		else {
+			return callback(new Error("Could not read from clipboard! options=" + JSON.stringify(options)));
 		}
 		
 		function readSuccess(text) {
