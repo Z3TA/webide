@@ -282,7 +282,7 @@
 		if(!fileTabsActive) return;
 		
 		buildTabs();
-		}
+	}
 	
 	function tabFileShow(file) {
 		if(hiddenBecauseEmty) return showFileTabs();
@@ -397,9 +397,9 @@
 		
 		var closeFileButton = document.createElement("button");
 		closeFileButton.setAttribute("class", "closeFileTab");
-		closeFileButton.setAttribute("title", "Close "+ fileName);
+		closeFileButton.setAttribute("title", "Close file"); // + fileName
 		closeFileButton.setAttribute("id", "close_" + path);
-		closeFileButton.innerHTML = "&times;"; // x
+		//closeFileButton.innerHTML = "&times;"; // x
 		closeFileButton.addEventListener("click", closeTab, true); // Stop propagation so that we do not switch to this file.
 		// The click goes through anyway for some weird reason ...
 		
@@ -408,6 +408,8 @@
 		
 		var tabFileText = document.createElement("a");
 		tabFileText.innerText = fileName;
+		tabFileText.href = "#"; // Needed to make it clickable by screen-reader
+		tabFileText.setAttribute("title", "show file");
 		
 		//tabFileItem.appendChild(document.createTextNode(fileName));
 		tabFileItem.appendChild(tabFileText);
@@ -475,6 +477,8 @@
 			folderList.setAttribute("class", "folderFileList");
 			folderList.setAttribute("id", "tab_folder_list_" + folderName);
 			
+			
+			tabFolderItem.setAttribute("title", "directory");
 			tabFolderItem.appendChild(document.createTextNode(folderName));
 			tabFolderItem.appendChild(folderList);
 			
@@ -513,7 +517,7 @@
 					}
 					
 					closeFileButton.classList.remove("blink");
-					});
+				});
 				
 				//alertBox("File not saved.\nCtrl click to close without saving.");
 				console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
@@ -537,13 +541,16 @@
 			
 			if(EDITOR.files.hasOwnProperty(path)) switchToFile(path);
 			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+			
+			return false; // Prevent browser navigation
 		}
 		
 		function createTabList() {
 			tabList = document.createElement("ul");
 			tabList.setAttribute("id", "tabList");
 			tabList.setAttribute("class", "tabList");
-			
+			tabList.setAttribute("role", "navigation");
+			tabList.setAttribute("aria-label", "file tabs");
 			tabList.setAttribute("class", "noselect"); // Disable text selecting
 			
 			

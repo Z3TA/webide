@@ -37,6 +37,17 @@ What I'm working on
 -------------------
 
 
+Make file tabs a links so they can be clicked on by screen readers
+
+Show some love for accessibilty.
+Use the Ubuntu screen reader.
+Make it so that you can use the editor. Focus on first time user experience.
+WITH EYES CLOSED!
+
+---
+
+
+
 <button id="button">Button</button> should autocomplete button, because it's a global variale!!
 (Look for id="(.*)" in the HTML file that included the script!!  )
 (also look for the variable in the window object when in preview!!)
@@ -47,12 +58,6 @@ When user listens to a port, user should be told to listen on a unix socket inst
 ---
 
 todo: Clear Chrome history, then close a file. See if reopenfiles module handles it.
-
----
-Show some love for accessibilty.
-Use the Ubuntu screen reader.
-Make it so that you can use the editor. Focus on first time user experience.
-WITH EYES CLOSED!
 
 ---
 

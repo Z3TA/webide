@@ -798,11 +798,18 @@ border-color : transparent transparent transparent #efefef;
 
 ul#tabList li.tabFileItem a {
 	border-bottom: 2px solid transparent;
+	color: #585565;
+	text-decoration: none;
 	}
+
+ul#tabList li.tabFileItem a:visited {
+	
+}
 
 ul#tabList li.tabFileItem.active a {
 	padding-bottom: 1px;
 	border-bottom: 1px solid orange;
+	color: #000;
 }
 
 /* Folder item with only one file in it */
@@ -841,16 +848,34 @@ ul#tabList button.closeFileTab {
 	width: 12px;
 	height: 15px;
 	background-color: rgba(0,0,0,0);
+	
+}
+
+ul#tabList button.closeFileTab:before {
+	content: '❌';
+	font-size: 8px;
+	position: relative;
+	top: -4px;
+	/* colorize */
+	color: transparent;
+	text-shadow: 0 0 0 #85919e;
 }
 
 ul#tabList button.closeFileTab:hover {
-	background-color: #d34444;
+	/*background-color: #d34444;*/
 	color: #fdf7f7;
 }
+
+ul#tabList button.closeFileTab:hover:before {
+	/* give back the red color (doesn't matter what color you use below) */
+	color: #fdf7f7;
+}
+
 
 ul#tabList li.tabFileItem.active button.closeFileTab {
 	display: inline-block;
 }
+
 
 
 
