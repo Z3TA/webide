@@ -1116,12 +1116,6 @@ div.gotoFile li:hover {
 .windowMenu .pulloutbottom {
 }
 
-.windowMenu .menu.vertical.pulloutbottom {
-	display: block; /* Needed for max-height and scrolling to work ... */
-	max-height: 80vh;
-	overflow-y: auto; /* Android scrollbar is only visible when scrolling anyway, so no need to show it all the time */
-}
-
 .windowMenu .vertical tr:last-child {
 	background-color: #ddd;
 	padding-bottom: 20px;
@@ -2045,6 +2039,12 @@ margin-top: 20px;
 		height: 18px;
 	}
 	
+	.windowMenu .menu.vertical.pulloutbottom {
+		display: block; /* Needed for max-height and scrolling to work ... */
+		max-height: 80vh;
+		overflow-y: auto; /* Android scrollbar is only visible when scrolling anyway, so no need to show it all the time */
+	}
+	
 }
 
 
@@ -2184,6 +2184,7 @@ max-width: 40px;
 	}
 }
 
+
 /* Make mobile browsers NOT zoom */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 	select,
@@ -2194,9 +2195,7 @@ max-width: 40px;
 	}
 
 
-
 /* Detect OS theme */
-
 #themeDetector {
 	display: none;
 	content: "default";
@@ -2212,6 +2211,7 @@ max-width: 40px;
 		content: "dark";
 	}
 }
+
 
 /*** Styles added to fix the issue with zoom in on iphone ***/
 /* iPhone < 5: */

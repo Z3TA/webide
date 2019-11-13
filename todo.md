@@ -8,12 +8,15 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
-Solve a problem! Do not look for problems that fit a solution!
+Solve problems and pains! Do not look for problems that fit a solution!
 
 Probably should read through this file and reletlessly delete stuff.
 
-NEVER switch to an earlier revision on working folder. Instead copy the whole folder and make the hg up.
+Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couldn't recover from a hg up, etc)
+
+When using source control NEVER switch to an earlier revision on working folder. 
 hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
+Instead copy the whole project root folder elsewhere and run the "hg up" command there.
 
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
@@ -26,8 +29,6 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
-Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couldn't recover from a hg up, etc)
-
 Before you start working on something new, first describe the problem, 
 (and do a quick research to find out if a solutions already exist.)
 
@@ -35,27 +36,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+
+
+---
+
 Maybe we should focus on a workflow not depending on autocomplete as documentation!?
 And try to incoroporate the proper documentation instead ?
 How can documentation be integrated !?
 
-
-
-
-
-
-Trying https://github.com/theia-ide/typescript-language-server instead of sourcegraph
-
-Get spawn EACCESS error when running NPM install
-npm can't run:
-node /usr/lib/node_modules/npm/node_modules/update-notifier/check.js '{"pkg":{"name":"npm","version":"6.11.3"}}'
-
-
-Looking at other LSP clients via Chrome dev tools WS messages ...
-
-
-Give up on LSP ? 
-
+----
 
 
 While we made it possible to scroll on the menu, there is no indication that it goes below the screen!
@@ -3122,6 +3111,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Get spawn EACCESS error when running NPM install (due to npm checking for updates)
 
 When copy/pasting in a text file, everything become scrambled after saving/reloading
 
