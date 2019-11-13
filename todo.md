@@ -40,17 +40,13 @@ What I'm working on
 
 ---
 
+Should pressing autocomplete on an empty line insert boilerplate code depending on context !?
+
 Maybe we should focus on a workflow not depending on autocomplete as documentation!?
 And try to incoroporate the proper documentation instead ?
 How can documentation be integrated !?
 
-----
-
-Should pressing autocomplete on an empty line insert boilerplate code depending on context !?
-
-
-Can we lookup accepted answers from Stack Overflow that contains the string !?
-Eg. http.createServer
+We should not rely on any third party web page for documentation, as they can break or set a paywall at any time
 
 Having autocomplete is not enough in order to figure out how to use a module!
 We also need to show the documentation!
@@ -60,14 +56,6 @@ problem: How to figure out what web page to show !?
 If it's nodejs built in modules, we want to show the nodejs docs...
 
 Just show a link to the documentation ? eg. https://nodejs.org/api/[module_name].html
-
-
-
-Autocomplete Node.JS modules!
-(that way we do not need a doc/ref widget, you can rely on http. (tab) showing all available options, and http.createServer( showing the functon parameters !!!
-
-server plugin that requires the module, then checks available properties and methods (for var prop in module)
-And also gets the function parameters by stringifying the function.
 
 
 <button id="button">Button</button> should autocomplete button, because it's a global variale!!
