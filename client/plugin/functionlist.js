@@ -603,6 +603,7 @@ console.warn("functionListWrap not available!");
 				var line = functionListSelect.options[functionListSelect.selectedIndex].value;
 				if(isNaN(line)) throw new Error("line=" + line + " options=" + JSON.stringify(functionListSelect.options) + " selectedIndex=" + functionListSelect.selectedIndex);
 				EDITOR.currentFile.scrollToLine(line);
+				EDITOR.dashboard.hide();
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
