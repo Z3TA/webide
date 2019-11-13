@@ -8,6 +8,10 @@
 	javascript-typescript-langserver will for example not parse Node.JS modules and requires "typings".
 	But then I tried npm install -g typescript-language-server and npm install -g typescript and it worked much better!
 	
+	Whoa. The npm typescript-language-server is very inconsistent in what it returns in completion requests,
+	sometimes it returns the object properties, but sometime it throws in some global variables,
+	and somtimes it returns the universe and everything.
+	
 	Disable other autocomplete plugins when testing:
 	?lsp=true&disable_nodejsautocomplete=true&disable_builtinjsautocomplete=true
 	
@@ -38,6 +42,35 @@
 	
 	var languages = {
 		javascript: lspServers["typescript-language-server"]
+	}
+	
+	
+	var completionItemKind = {
+		text: 1, 
+		Method: 2, 
+		Function: 3, 
+		Constructor: 4, 
+		Field: 5, 
+		Variable: 6, 
+		Class: 7, 
+		Interface: 8, 
+		Module: 9, 
+		Property: 10, 
+		Unit: 11, 
+		Value: 12, 
+		Enum: 13, 
+		Keyword: 14, 
+		Snippet: 15, 
+		Color: 16, 
+		File: 17, 
+		Reference: 18, 
+		Folder: 19, 
+		EnumMember: 20, 
+		Constant: 21, 
+		Struct: 22, 
+		Event: 23, 
+		Operator: 24, 
+		TypeParameter: 25
 	}
 	
 	EDITOR.plugin({
@@ -96,6 +129,8 @@
 		
 		var options = [];
 		
+		console.log("lspAutoComplete: wordToComplete=" + wordToComplete + " (" + wordToComplete.length + " characters) position=" + JSON.stringify(position));
+		
 		lsp.req("textDocument/completion", {
 			textDocument: {
 				uri: trackedFiles[file].uri,
@@ -107,6 +142,7 @@
 			if(err) {
 				alertBox("Language server for language=" + trackedFiles[file].language + " was unable to handle completion request! Error: " + err.message + " position=" + JSON.stringify(position));
 			}
+			
 			console.log("lspAutoComplete: textDocument/completion response: " + JSON.stringify(resp, null, 2));
 			
 			var items = resp.items;
@@ -117,17 +153,26 @@
 				//throw new Error("No items in resp=" + JSON.stringify(resp, null, 2));
 			}
 			
+			console.log("lspAutoComplete: Found " + items.length + " items! wordContainsDot=" + wordContainsDot);
+			
 			var completionsContainsDot = false;
 			
 			for(var i=0, completion; i<items.length; i++) {
 				completion = items[i].label;
-				options.push(completion);
+				
+				if(!wordContainsDot || (wordContainsDot && items[i].kind == 5)) {
+					// We only want the object members ... completionItemKind id's doesn't make sense, but the magic number 5 seems to do what we want
+					options.push(completion);
+				}
+				
 				if(completion.indexOf(".") != -1) completionsContainsDot = true;
 			}
 			
+			console.log("lspAutoComplete: Added " + options.length + " options. completionsContainsDot=" + completionsContainsDot);
+			
 			console.log("lspAutoComplete: completionsContainsDot=" + completionsContainsDot + " wordToComplete=" + wordToComplete + " options=" + JSON.stringify(options));
 			
-			var wordContainsDot = (wordToComplete.indexOf(".") != -1);
+			
 			if(wordContainsDot && !completionsContainsDot) {
 				var leftSide = wordToComplete.slice(0, wordToComplete.lastIndexOf(".") + 1);
 // Assume the language server returned options for the right side of the dot
@@ -141,11 +186,14 @@
 			options = options.filter(function(completion) {
 				return (completion.indexOf(wordToComplete) == 0);
 			});
+			
 			console.log("lspAutoComplete: Filtered options = " + JSON.stringify(options));
 			
 			autoCompleteCallback(options);
 			
 		});
+		
+		var wordContainsDot = (wordToComplete.indexOf(".") != -1);
 		
 		return {async: true};
 		
@@ -167,6 +215,9 @@ for(var path in trackedFiles) {
 
 delete languageServers[language];
 }
+		
+		console.log("lspClose: trackedFiles: " + JSON.stringify(trackedFiles));
+		console.log("lspClose: languageServers: " + JSON.stringify(languageServers));
 
 	}
 	

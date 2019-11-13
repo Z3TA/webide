@@ -35,6 +35,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Maybe we should focus on a workflow not depending on autocomplete as documentation!?
+And try to incoroporate the proper documentation instead ?
+How can documentation be integrated !?
+
+
+
+
+
+
 Trying https://github.com/theia-ide/typescript-language-server instead of sourcegraph
 
 Get spawn EACCESS error when running NPM install
