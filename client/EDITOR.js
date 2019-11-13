@@ -366,7 +366,10 @@ ctxMenuVisibleOnce = true;
 			set: function setEditorInputFocus(newValue) {
 				console.warn("Set EDITOR.input to " + newValue);
 				console.log(UTIL.getStack("Set EDITOR.input to " + newValue));
-				if(newValue) _editorInput = true;
+				if(newValue) {
+_editorInput = true;
+					EDITOR.canvas.focus(); // Need to have focus if user are using a screen reader
+				}
 				else _editorInput = false;
 			},
 			enumerable: true
@@ -5072,6 +5075,7 @@ else {
 		
 		
 		EDITOR.input = focus;
+		
 		
 		var f = EDITOR.eventListeners.fileShow.map(funMap);
 		console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);

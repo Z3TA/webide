@@ -36,8 +36,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+When auto-completing by pressing tab: Tell the screen reader what was inserted
+and tell the autocomplete options (EDITOR.info message)
 
-Make file tabs a links so they can be clicked on by screen readers
 
 Show some love for accessibilty.
 Use the Ubuntu screen reader.
