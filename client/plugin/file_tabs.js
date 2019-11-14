@@ -387,7 +387,10 @@
 		
 		tabFileItem.setAttribute("class", "tabFileItem");
 		tabFileItem.setAttribute("title", path);
+		tabFileItem.setAttribute("role", "tab");
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
+		
+		tabFileItem.addEventListener("keydown", keyPressOnFileTab, false);
 		
 		if(!EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " is not in " + JSON.stringify(Object.keys(EDITOR.files)));
 		
@@ -443,6 +446,7 @@
 			folderList.setAttribute("class", "folderFileList active");
 			
 			tabFileItem.setAttribute("class", "tabFileItem active");
+			tabFileItem.setAttribute("aria-selected", "true");
 			
 			tabFolderItem.setAttribute("class", "tabFolderItem active" + single);
 			
@@ -451,7 +455,9 @@
 		}
 		else {
 			tabFolderItem.setAttribute("class", "tabFolderItem" + single);
+			
 			tabFileItem.setAttribute("class", "tabFileItem");
+			tabFileItem.setAttribute("aria-selected", "false");
 			
 		}
 		
@@ -466,7 +472,16 @@
 			}
 		}
 		
-		
+		function keyPressOnFileTab(keyPressEvent) {
+			var keyCodeDelete = 27;
+			console.log("keyPressOnFileTab: key=" + keyPressEvent.key + " keyCode=" + keyPressEvent.keyCode);
+			if(keyPressEvent.key=="Delete" || keyPressEvent.keyCode == keyCodeDelete) {
+				console.log("keyPressOnFileTab: Closing tab ...");
+				closeTab(keyPressEvent);
+				return false;
+			}
+			return true;
+		}
 		
 		function createFolder(folderName) {
 			tabFolderItem = document.createElement("li");
@@ -486,20 +501,20 @@
 			
 		}
 		
-		function closeTab(e) {
-			var closeFileButton = e.target;
+		function closeTab(ev) {
+			//var closeFileButton = ev.target;
 			
 			console.log("Closing tab for path=" + path);
 			
 			if(!EDITOR.files[path]) throw new Error("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			
 			console.log("saved?" + (EDITOR.files[path].isSaved));
-			console.log("e.ctrlKey?" + e.ctrlKey);
+			console.log("e.ctrlKey?" + ev.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);
 			console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
 			
 			
-			if(!EDITOR.files[path].isSaved && !e.ctrlKey) {
+			if(!EDITOR.files[path].isSaved && !ev.ctrlKey) {
 				
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
 				
@@ -549,7 +564,7 @@
 			tabList = document.createElement("ul");
 			tabList.setAttribute("id", "tabList");
 			tabList.setAttribute("class", "tabList");
-			tabList.setAttribute("role", "navigation");
+			tabList.setAttribute("role", "tablist");
 			tabList.setAttribute("aria-label", "file tabs");
 			tabList.setAttribute("class", "noselect"); // Disable text selecting
 			
