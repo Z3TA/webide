@@ -412,7 +412,7 @@
 		var tabFileText = document.createElement("a");
 		tabFileText.innerText = fileName;
 		tabFileText.href = "#"; // Needed to make it clickable by screen-reader
-		tabFileText.setAttribute("title", "show file");
+		tabFileText.setAttribute("aria-label", "show file");
 		
 		//tabFileItem.appendChild(document.createTextNode(fileName));
 		tabFileItem.appendChild(tabFileText);
