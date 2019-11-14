@@ -33,7 +33,7 @@ EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL 
 
 function testDialogs() {
 		
-	alertBox("This is a dialog window with a warning triangle", "TEST", "warning");
+	//alertBox("This is a dialog window with a warning triangle", "TEST", "warning");
 	
 	//alertBox("Anim cupidatat consectetur non ut id est irure excepteur laboris pariatur magna enim ut duis aute sint cillum.<br>Tempor reprehenderit ex ea mollit Lorem duis ut laboris occaecat voluptate et irure tempor incididunt in ipsum exercitation consequat ipsum cillum eiusmod dolore labore qui.", "error");
 	
@@ -45,7 +45,7 @@ function testDialogs() {
 	
 	//confirm("Are you sure you want eat this?");
 	
-		//promptBox("What is your name?", function(answer) {alert(answer);});
+		promptBox("What is your name?", function(answer) {alert(answer);});
 	
 	//var q = prompt("What is your name?");
 	

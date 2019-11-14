@@ -473,7 +473,7 @@
 		}
 		
 		function keyPressOnFileTab(keydownEvent) {
-			var keyCodeDelete = 27;
+			var keyCodeDelete = 46;
 			console.log("keyPressOnFileTab: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
 			if(keydownEvent.key=="Delete" || keydownEvent.keyCode == keyCodeDelete) {
 				console.log("keyPressOnFileTab: Closing tab ...");

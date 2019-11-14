@@ -20,6 +20,7 @@ function Dialog(msg, options) {
 	
 	var icon = options.icon;
 	var dialogDelay = options.delay;
+	var escapeAble = options.escapeAble || true;
 	
 	dialog.code = options.code || "MISC";
 	
@@ -82,9 +83,13 @@ function Dialog(msg, options) {
 	var div = dialog.div;
 	
 	div.setAttribute("class", "dialog");
+	div.setAttribute("aria-live", "assertive");
+	div.setAttribute("aria-atomic", "true");
+	
 	div.style.zIndex = (--DIALOG_Z_INDEX);
 	
 	div.addEventListener("click", focusDefaultElement, false);
+	if(escapeAble) div.addEventListener("keydown", dialogKeyDown, false);
 	
 	div.appendChild(message);
 	
@@ -139,6 +144,20 @@ function Dialog(msg, options) {
 	setTimeout(focusDefaultElement, dialogDelay); 
 	
 	return 0;
+	
+	function dialogKeyDown(keydownEvent) {
+		/*
+			Pressing esc should close the dialog
+			ref: https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/alertdialog.html
+		*/
+		var keyCodeEsc = 27;
+		console.log("dialogKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+		if(keydownEvent.key=="Escape" || keydownEvent.keyCode == keyCodeEsc) {
+			dialog.close();
+			return false;
+		}
+		return true;
+	}
 	
 	function focusDefaultElement() {
 		// Give focus to the element with attribute focus:true
@@ -274,6 +293,8 @@ function alertBox(msg, code, icon, recursionCount) {
 		}, 150);
 	}
 	
+	dialog.div.setAttribute("role", "alert");
+	
 	
 	var button = document.createElement("button");
 	button.setAttribute("class", "alert");
@@ -314,6 +335,8 @@ function confirmBox(msg, options, callback, recursionCount) {
 		
 		}, 100);
 	}
+	
+	dialog.div.setAttribute("role", "alertdialog");
 	
 	for (var i=0; i<options.length; i++) {
 		makeButton(i);
@@ -376,7 +399,7 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
 	
-	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay});
+	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeAble: false});
 	
 	if(!dialog.div) {
 		console.log("promptBox: Waiting until the body element is available ...");
@@ -392,6 +415,8 @@ function promptBox(msg, options, callback, recursionCount) {
 		}, 100);
 	}
 	
+	dialog.div.setAttribute("role", "alertdialog");
+	// Doesn't seem to be an ARIA standard for prompt boxes
 	
 	
 	if(isPassword) {
@@ -409,6 +434,8 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	input.setAttribute("class", "input prompt");
 	input.setAttribute("focus", "true");
+	
+	
 	
 	if(options.placeholder) {
 		input.setAttribute("placeholder", options.placeholder);
