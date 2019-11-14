@@ -327,6 +327,10 @@ canvas {
 	font-kerning : normal;
 	z-index: 2; /* Try not to cover the canvas as it might impact performance */
 	outline: none;
+	
+	/* hide annoying blinking cursor because of contenteditable=true */
+	cursor: none;
+	caret-color: transparent;
 }
 
 .wireframe {
