@@ -390,7 +390,7 @@
 		tabFileItem.setAttribute("role", "tab");
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
-		tabFileItem.addEventListener("keydown", keyPressOnFileTab, false);
+		tabFileItem.addEventListener("keydown", keyPressOnFileTab, false); // Wasn't able to capture keypress (when screen reader was on), so need to use keydown
 		
 		if(!EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " is not in " + JSON.stringify(Object.keys(EDITOR.files)));
 		
@@ -472,12 +472,12 @@
 			}
 		}
 		
-		function keyPressOnFileTab(keyPressEvent) {
+		function keyPressOnFileTab(keydownEvent) {
 			var keyCodeDelete = 27;
-			console.log("keyPressOnFileTab: key=" + keyPressEvent.key + " keyCode=" + keyPressEvent.keyCode);
-			if(keyPressEvent.key=="Delete" || keyPressEvent.keyCode == keyCodeDelete) {
+			console.log("keyPressOnFileTab: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+			if(keydownEvent.key=="Delete" || keydownEvent.keyCode == keyCodeDelete) {
 				console.log("keyPressOnFileTab: Closing tab ...");
-				closeTab(keyPressEvent);
+				closeTab(keydownEvent);
 				return false;
 			}
 			return true;
