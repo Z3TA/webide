@@ -29,12 +29,18 @@ Happy path: (manually check on prod after each release)
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
 
+Firefox dev tools sometimes hide console log messages!!
+
 Before you start working on something new, first describe the problem, 
 (and do a quick research to find out if a solutions already exist.)
 
 
 What I'm working on
 -------------------
+
+Make it so that you can use they keyboard to navigate the window menu!
+
+How does the context menu work!?!??!?! when pressing up/down
 
 When auto-completing by pressing tab: Tell the screen reader what was inserted
 and tell the autocomplete options (EDITOR.info message)

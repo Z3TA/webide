@@ -276,7 +276,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var keyboardCatcherLastInserted = "";
 	
-	var discoveryBar = document.createElement("div");
+	var discoveryBar = document.createElement("aside");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
 	
@@ -2960,6 +2960,7 @@ usePseudoClipboard = false;
 		menu.domElement.setAttribute("border", "0");
 		menu.domElement.setAttribute("cellspacing", "0");
 		menu.domElement.setAttribute("cellpadding", "0");
+		menu.domElement.setAttribute("role", "menu");
 		
 		if(menu.orientation == "vertical") {
 			// Each item is a table-row
@@ -2979,7 +2980,6 @@ usePseudoClipboard = false;
 		menu.domElement.addEventListener("mouseout", hideMaybe);
 		
 		menu.domElement.addEventListener("mouseover", stillActive);
-		
 		
 		
 		var windowMenu = document.getElementById("windowMenu");
@@ -3268,6 +3268,7 @@ usePseudoClipboard = false;
 		
 		item.domElement.setAttribute("class", "item" + item.separator);
 		item.domElement.setAttribute("id", "dropdownMenu_" + label);
+		item.domElement.setAttribute("role", "menuitem");
 		
 		
 		item.activated = false;
@@ -3276,11 +3277,18 @@ usePseudoClipboard = false;
 		item.bullet.setAttribute("class", "bullet");
 		item.wrapper.appendChild(item.bullet);
 		
-		item.text = document.createElement("td");
+		var textHolder = document.createElement("td");
+		
+		item.text = document.createElement("a"); 
+		item.text.href = "#"; // Need to be a link so it can be reached by screen reader
+		
 		item.text.setAttribute("class", "label");
 		
 		item.text.innerText = label;
-		item.wrapper.appendChild(item.text);
+		
+		textHolder.appendChild(item.text);
+		
+		item.wrapper.appendChild(textHolder);
 		
 		if(QUERY_STRING["menuOrder"]) item.text.innerText = item.order + ": " + label;
 		
@@ -3301,6 +3309,57 @@ usePseudoClipboard = false;
 		item.domElement.onclick = whenClicked;
 		
 		item.subMenu = null;
+		
+		item.domElement.addEventListener("keydown", windowMenuItemKeyDown);
+		function windowMenuItemKeyDown(keydownEvent) {
+			var keySpace= 32;
+			var keyEnter = 13;
+			var keyRightArrow = 39;
+			var keyLeftArrow = 37;
+			var keyDownArrow = 40;
+			var keyUpArrow = 38;
+			var keyHome = 36;
+			var keyEnd = 35;
+			
+			var code = keydownEvent.keyCode || keydownEvent.charCode || keydownEvent.which;
+			var key = keydownEvent.key;
+			
+			var target = keydownEvent.target;
+			
+			// ref: https://www.w3.org/TR/wai-aria-practices/examples/menubar/menubar-1/menubar-1.html
+			
+			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
+				item.domElement.click(); // Opens the submenu
+				
+				// Give focus to the first item in the submenu
+				var firstCell = item.subMenu.domElement.firstChild;
+				var label = firstCell.getElementsByTagName("a")[0];
+				label.focus(); 
+				
+				return false;
+			}
+			else if(key == "DownArrow" || code == keyDownArrow) {
+				// 
+				
+				//console.log("windowMenuItemKeyDown: item.subMenu.domElement=", item.subMenu.domElement);
+				//console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild=", item.subMenu.domElement.firstChild);
+				//console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild.nextSibling=", item.subMenu.domElement.firstChild.nextSibling);
+				var nextCell = item.subMenu.domElement.firstChild.nextSibling
+				console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild.nextSibling.getElementsByTagName=", item.subMenu.domElement.firstChild.nextSibling.getElementsByTagName("a"));
+				var nextCell = item.subMenu.domElement.firstChild.nextSibling;
+				console.log("windowMenuItemKeyDown: nextCell=", nextCell);
+				nextCell.focus();
+			}
+			else if(key == "RightArrow" || code == keyRightArrow) {
+				var menuSibling = item.domElement.parentNode.nextSibling;
+				console.log("windowMenuItemKeyDown: menuSibling=", menuSibling);
+				nextCell.click();
+			}
+			
+			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+		}
+		
+		
 	}
 	DropdownMenuItem.prototype.activate = function activate() {
 		this.bullet.setAttribute("class", "bullet active");
@@ -3587,7 +3646,7 @@ if(menuItem.parentMenu) {
 			if(keyCombo) keyComboEl.innerText = keyCombo;
 			li.appendChild(keyComboEl);
 			
-			li.setAttribute("aria-label", htmlText + (keyCombo ? keyCombo : ""));
+			li.setAttribute("aria-label", htmlText + (keyCombo ? " " + keyCombo : ""));
 			
 			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 			
@@ -7756,7 +7815,7 @@ function main() {
 			return PREVENT_DEFAULT;
 		}
 	});
-	
+		
 	EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
 	
 	EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
@@ -9589,13 +9648,13 @@ function keyIsDown(keyDownEvent) {
 		}
 	*/
 	
-	console.log("keyDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
-		//alertBox("keyDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
 	// Mac command key ?
 	if(charCode == charCodeCtrl) {
-		console.log("recognition start! (keyDown Ctrl)");
+			console.log("keyIsDown: recognition start! (keyDown Ctrl)");
 		if(recognition) {
 			try {
 				recognition.start();
@@ -9605,20 +9664,20 @@ function keyIsDown(keyDownEvent) {
 			}
 		}
 	}
-	//else console.log("recognition: Not ctrl! charCode=" + charCode);
+		//else console.log("keyIsDown: recognition: Not ctrl! charCode=" + charCode);
 	
 	
 	
 	// Prevent unsupported combo error ? 
 	// But what if we want a binding of *just* ALT!?
-	// Can't have that or it will mess all native combos. You need to bind to shift|alt|ctrl PLUS something else
+	// Can't have that or it will mess with all native combos. You need to bind to shift|alt|ctrl PLUS something else
 	// Shift <> stopped working
 	
 	if(charCode == charCodeCtrl) return true; // Ctrl
 	if(charCode == charCodeAlt) return true; // ALT
 	
 	if(combo.alt && combo.shift) {
-		console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
+			console.warn("keyIsDown: Alt + shift is the default for changing keyboard layout in Windows!");
 	}
 	
 	// Be aware of OS/shell specific key bindings! If there for example is a Gnome shell keybinding for Ctrl+Alt+Arrow (switiching workspace) the editor wont capture it! (the arrow key)
@@ -9629,7 +9688,7 @@ function keyIsDown(keyDownEvent) {
 	
 	// You probably want to use bindKey instead of eventListeners.keyDown!
 	var f = EDITOR.eventListeners.keyDown.map(funMap);
-	//console.log("Calling keyDown listeners (" + f.length + ") ...");
+		//console.log("keyIsDown: Calling keyDown listeners (" + f.length + ") ...");
 	for(var i=0; i<f.length; i++) {
 		funReturn = f[i](EDITOR.currentFile, character, combo, keyDownEvent); // Call function
 		
@@ -9643,13 +9702,13 @@ function keyIsDown(keyDownEvent) {
 		// Check key bindings
 		var capturedBy = [];
 		var f = [];
-		console.log("combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
+			console.log("keyIsDown: combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
 		for(var i=0, binding; i<keyBindings.length; i++) {
 			
 			binding = keyBindings[i];
 			
 			/*
-				console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
+					console.log("keyIsDown: " + UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
 				" char=" + (binding.char == character || binding.charCode == charCode) +
 				" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
 				" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
@@ -9671,26 +9730,26 @@ function keyIsDown(keyDownEvent) {
 				}
 			}
 			else {
-				//console.log("NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
+					//console.log("keyIsDown: NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
 		// call them
 		for(var i=0; i<f.length; i++) {
-			console.log("keyDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
+				console.log("keyIsDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
 			
 			if(captured) {
-				console.warn("Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
+					console.warn("keyIsDown: Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
 			}
 			
 			captured = true;
 			capturedBy.push(f[i]);
 			
-			if(!EDITOR.currentFile) console.warn("No file open!");
+				if(!EDITOR.currentFile) console.warn("keyIsDown: No file open!");
 			
 			funReturn = f[i](EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
 			
-			//console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
+				//console.log("keyIsDown: " + UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 			
 			if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 				preventDefault = true;
@@ -9727,7 +9786,7 @@ function keyIsDown(keyDownEvent) {
 		// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
 		
 		if( (combo.ctrl || metaCmdKey) && character == "C") {
-			console.log("Native command: copy !? MAC=" + MAC);
+				console.log("keyIsDown: Native command: copy !? MAC=" + MAC);
 			
 			if(MAC) nativeCopy = true;
 			
@@ -9750,7 +9809,7 @@ function keyIsDown(keyDownEvent) {
 			}
 		}
 		else if( (combo.ctrl || metaCmdKey) && character == "V") {
-			console.log("Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+				console.log("keyIsDown: Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 			
 			if(MAC) nativePaste = true;
 			
@@ -9767,7 +9826,7 @@ function keyIsDown(keyDownEvent) {
 			}
 		}
 		else if( (combo.ctrl || metaCmdKey) && character == "X") {
-			console.log("Native command: cut !?");
+				console.log("keyIsDown: Native command: cut !?");
 			
 			if(MAC) nativeCut = true;
 			
@@ -9796,9 +9855,9 @@ function keyIsDown(keyDownEvent) {
 		else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
 		else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 		else if(combo.alt) {} // Wait for ALT+key combo!
-		else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
-		else if(windowKey) {console.log("Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
-		else if(metaCmdKey) {console.log("meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
+			else if(charCode == 17 || combo.ctrl) {console.log("keyIsDown: Ctrl ...");} // Wait for Ctrl+key combo!
+			else if(windowKey) {console.log("keyIsDown: Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
+			else if(metaCmdKey) {console.log("keyIsDown: meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
 		//else if(combo.shift) {} // Wait for Shift+key combo!
 		//&&//&&//
 		else {
@@ -9833,8 +9892,12 @@ function keyIsDown(keyDownEvent) {
 		return false;
 	}
 	else {
-		//console.log("Executing default browser/OS action ...");
+			//console.log("keyIsDown: Executing default browser/OS action ...");
 		
+			if(keyDownEvent.target == document.getElementById("windowMenu")) {
+				console.log("keyIsDown: Key down on Window menu!");
+			}
+			
 		return true;
 	}
 	
