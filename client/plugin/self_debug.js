@@ -262,9 +262,12 @@ sendit();
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
+		console.log("selfDebug: Asking the user what to do...");
 		confirmBox("" + sourceLink + lineString + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
+			
+			console.log("selfDebug: answer=" + answer);
 			
 			if(answer == createTestRestart || answer == createTestKeepRunning) {
 				
@@ -295,6 +298,7 @@ sendit();
 				if(RUNTIME == "browser") {
 
 					if ('serviceWorker' in navigator) {
+						console.log("selfDebug: Unregister service worker ...");
 						navigator.serviceWorker.getRegistrations().then(function(registrations) {
 							
 							for(var registration in registrations) {
@@ -302,11 +306,19 @@ sendit();
 							}
 							
 						}).catch(function(err) {
-							console.warn("Failed to unregister service workers: " + err.message)
+							console.warn("selfDebug: Failed to unregister service workers: " + err.message)
 						});
 					}
 					
-					document.location = document.location.href;
+					console.log("selfDebug: Forcing reload ...");
+					if(document.location.href.indexOf('#') != -1) {
+						// If the location has a #hash in it, it won't reload the page!
+						console.log("selfDebug: Removing hash"); 
+						document.location = document.location.href.substr(0, document.location.href.indexOf('#'));
+					}
+					else {
+						document.location = document.location.href;
+					}
 				}
 				else if(RUNTIME=="nw.js") process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}

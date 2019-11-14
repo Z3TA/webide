@@ -1134,6 +1134,11 @@ div.gotoFile li:hover {
 	color: #6b6b6b;
 }
 
+.windowMenu a {
+	color: inherit;
+	text-decoration: none;
+}
+
 .windowMenu .branch {
 	background-color: rgb(235, 236, 239);
 	border: 1px solid #cac7c4;
@@ -1146,12 +1151,6 @@ div.gotoFile li:hover {
 .windowMenu .pulloutbottom {
 }
 
-.windowMenu .vertical tr:last-child {
-	background-color: #ddd;
-	padding-bottom: 20px;
-}
-
-
 .windowMenu .root {
 	background-color: transparent;
 	border: 0px solid red;
@@ -1163,10 +1162,10 @@ div.gotoFile li:hover {
 	margin: 0;
 	height: 27px;
 }
-.windowMenu .menu .item:hover {
+
+.windowMenu .menu .item.hovering {
 	background-color: #ffffff;
 	color: #000000;
-	
 }
 
 .windowMenu .bullet {
@@ -1228,7 +1227,7 @@ div.gotoFile li:hover {
 	padding: 0;
 }
 
-.windowMenu .item:hover .key {
+.windowMenu .item.hovering .key {
 	color: #1460AA;
 }
 

@@ -3107,7 +3107,14 @@ usePseudoClipboard = false;
 				console.warn("Item " + order[i].lable + " has same order=" + order[i].order + " as " + order[i-1]);
 			}
 			menu.itemWrapper.appendChild(order[i].domNode);
+			
+			// Convenient for going to the next/previous menu item
+			order[i].nextSibling = order[i+1];
+			order[i].previousSibling = order[i-1];
 		}
+		
+		menu.firstItem = order[0];
+		menu.lastItem = order[order.length-1];
 		
 		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
 		
@@ -3286,6 +3293,14 @@ usePseudoClipboard = false;
 		
 		item.text.innerText = label;
 		
+		item.text.onfocus = function() {
+			item.domElement.classList.add("hovering");
+		}
+		item.text.onblur = function() {
+			item.domElement.classList.remove("hovering");
+		}
+		
+		
 		textHolder.appendChild(item.text);
 		
 		item.wrapper.appendChild(textHolder);
@@ -3308,6 +3323,15 @@ usePseudoClipboard = false;
 		
 		item.domElement.onclick = whenClicked;
 		
+		item.domElement.onmouseover = function() {
+			//console.log("Mouse over: label=" + label);
+			item.domElement.classList.add("hovering");
+		}
+		item.domElement.onmouseout = function() {
+			//console.log("Mouse out: label=" + label);
+			item.domElement.classList.remove("hovering");
+		}
+		
 		item.subMenu = null;
 		
 		item.domElement.addEventListener("keydown", windowMenuItemKeyDown);
@@ -3326,37 +3350,107 @@ usePseudoClipboard = false;
 			
 			var target = keydownEvent.target;
 			
+			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode + " target=", target);
+			
 			// ref: https://www.w3.org/TR/wai-aria-practices/examples/menubar/menubar-1/menubar-1.html
 			
 			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
+				return openSubMenu();
+			}
+			else if(key == "UpArrow" || code == keyUpArrow) {
+				// If it has a submenu that will pull out under it, pressing down should pull it out
+				if(item.subMenu && !item.parentMenu.parentMenu) {
+					return openSubMenu(true);
+				}
+				
+				// Move focus to previous item
+				var cell = item.domElement.previousSibling;
+				if(!cell) cell = item.parentMenu.domElement.lastChild;
+				var label = cell.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				label.focus();
+				
+			}
+			else if(key == "DownArrow" || code == keyDownArrow) {
+				
+				// If it has a submenu that will pull out under it, pressing down should pull it out
+				if(item.subMenu && !item.parentMenu.parentMenu) {
+					return openSubMenu(false);
+				}
+				
+				// Move focus to next item
+				var cell = item.domElement.nextSibling;
+				if(!cell) cell = item.parentMenu.domElement.firstChild;
+				var label = cell.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				label.focus();
+			}
+			else if(key == "RightArrow" || code == keyRightArrow) {
+				
+				// If it has a submenu that will pull out to the right/side, pressing right should pull it out
+				if(item.subMenu && item.parentMenu.parentMenu) {
+					return openSubMenu(false);
+				}
+				
+				// If we are in a menu that pulls out/down, we should go the the next menu
+				if(item.parentMenu && item.parentMenu.parentMenu && !item.parentMenu.parentMenu.parentMenu) {
+					var parentMenuItem = item.parentMenu.parentMenuItem;
+					console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
+					
+					var menu = item.parentMenu.parentMenu;
+					console.log("windowMenuItemKeyDown: menu=", menu);
+					
+					menu.hideSiblings(); // Hide all submenus
+					
+					var nextItem = parentMenuItem.nextSibling;
+					if(!nextItem) nextItem = menu.firstItem;
+					console.log("windowMenuItemKeyDown: nextItem=", nextItem);
+					
+					nextItem.domElement.click(); // Show next submenu
+					
+					var subMenu = nextItem.subMenu;
+					console.log("windowMenuItemKeyDown: subMenu=", subMenu);
+					
+					var firstItem = subMenu.firstItem;
+					console.log("windowMenuItemKeyDown: firstItem=", firstItem);
+					
+					var label = firstItem.domElement.getElementsByTagName("a")[0];
+					console.log("windowMenuItemKeyDown: label=", label);
+					label.focus();
+					
+					return;
+				}
+				
+				// Move focus to next item
+				var nextItem = item.nextSibling;
+				if(!nextItem) nextItem = item.parentMenu.firstItem;
+				var label = nextItem.domElement.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " on nextItem=", nextItem);
+				label.focus();
+			}
+			
+			
+			function openSubMenu(focusLast) {
+				console.log("windowMenuItemKeyDown: Opening sub menu");
 				item.domElement.click(); // Opens the submenu
 				
-				// Give focus to the first item in the submenu
-				var firstCell = item.subMenu.domElement.firstChild;
-				var label = firstCell.getElementsByTagName("a")[0];
-				label.focus(); 
+				item.parentMenu.hideSiblings(item.subMenu); // Hide all other submenus in this menu
+				
+				if(focusLast) {
+					var cell = item.subMenu.domElement.lastChild;
+				}
+				else {
+					var cell = item.subMenu.domElement.firstChild;
+				}
+
+				var label = cell.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				label.focus();
 				
 				return false;
 			}
-			else if(key == "DownArrow" || code == keyDownArrow) {
-				// 
-				
-				//console.log("windowMenuItemKeyDown: item.subMenu.domElement=", item.subMenu.domElement);
-				//console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild=", item.subMenu.domElement.firstChild);
-				//console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild.nextSibling=", item.subMenu.domElement.firstChild.nextSibling);
-				var nextCell = item.subMenu.domElement.firstChild.nextSibling
-				console.log("windowMenuItemKeyDown: item.subMenu.domElement.firstChild.nextSibling.getElementsByTagName=", item.subMenu.domElement.firstChild.nextSibling.getElementsByTagName("a"));
-				var nextCell = item.subMenu.domElement.firstChild.nextSibling;
-				console.log("windowMenuItemKeyDown: nextCell=", nextCell);
-				nextCell.focus();
-			}
-			else if(key == "RightArrow" || code == keyRightArrow) {
-				var menuSibling = item.domElement.parentNode.nextSibling;
-				console.log("windowMenuItemKeyDown: menuSibling=", menuSibling);
-				nextCell.click();
-			}
 			
-			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+			
 		}
 		
 		
@@ -3406,8 +3500,9 @@ usePseudoClipboard = false;
 		}
 		
 		item.subMenu = new DropdownMenu({parentMenu: item.parentMenu, orientation: "vertical", pullout: pullout});
-		item.domElement.setAttribute("class", "item hasSubmenu" + item.separator);
+		item.subMenu.parentMenuItem = item;
 		
+		item.domElement.setAttribute("class", "item hasSubmenu" + item.separator);
 		item.domElement.setAttribute("aria-haspopup", "true");
 		item.domElement.setAttribute("aria-expanded", "false");
 		
