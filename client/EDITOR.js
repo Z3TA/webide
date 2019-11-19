@@ -2955,6 +2955,7 @@ usePseudoClipboard = false;
 		
 		menu.active = false; // If the mouse is on the menu
 		menu.activated = false; // true if the menu have been engaged
+		menu.visible = false; // If the menu is visible
 		
 		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
@@ -3192,6 +3193,7 @@ usePseudoClipboard = false;
 		menu.domElement.style.top = menuTop + "px";
 		menu.domElement.style.left = menuLeft + "px";
 		
+		menu.visible = true;
 		
 	}
 	DropdownMenu.prototype.hide = function hide(hideChildren, hideParents) {
@@ -3214,8 +3216,6 @@ usePseudoClipboard = false;
 			}
 		}
 		
-		
-		
 		if(menu.parentMenu === null) {
 			menu.activated = false;
 			return; // Never hide the stem
@@ -3229,6 +3229,9 @@ usePseudoClipboard = false;
 		menu.domElement.blur(); // Reset hover effect on touch screens
 		
 		//menu.domElement.setAttribute("class", "hidden");
+		
+		menu.visible = false;
+		
 	}
 	DropdownMenu.prototype.hideSiblings = function hide(stay) {
 		var menu = this;
@@ -3353,7 +3356,7 @@ usePseudoClipboard = false;
 			
 			var target = keydownEvent.target;
 			
-			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode + " target=", target);
+			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode + " target=", target + " (" + target.innerText + ")");
 			
 			// ref: https://www.w3.org/TR/wai-aria-practices/examples/menubar/menubar-1/menubar-1.html
 			
@@ -3516,14 +3519,24 @@ usePseudoClipboard = false;
 			// ### Pressing any key on the Window menu
 			else {
 				// Any other character searches the menu
-				var labels = item.parentMenu.domElement.getElementsByTagName("a");
+				
+				console.log("windowMenuItemKeyDown: item.subMenu?" + (item.subMenu) + " visible=" + (item.subMenu && item.subMenu.visible) + " active=" + (item.subMenu && item.subMenu.active) + " activated=" + (item.subMenu && item.subMenu.activated) + ""); 
+				
+				// If a submenu is opened, we want to do the search on that
+				if(item.subMenu && (item.subMenu.visible || item.subMenu.active || item.subMenu.activated)) {
+					var labels = item.subMenu.domElement.getElementsByTagName("a");
+				}
+				else {
+					var labels = item.parentMenu.domElement.getElementsByTagName("a");
+				}
+				
 				var character = String.fromCharCode(code).toLowerCase(); // keydownEvent.key ?
 				
 				for(var i=0, str, firstLetter; i<labels.length; i++) {
 					str = labels[i].innerText.toLowerCase();
 					firstLetter = str.charAt(0);
 					console.log("windowMenuItemKeyDown: str=" + str + " firstLetter=" + firstLetter + " character=" + character + " (" + (firstLetter==character) + ")");
-					if(firstLetter == character) {
+					if(firstLetter == character && labels[i] != target) {
 						console.log("windowMenuItemKeyDown: Focusing label=", labels[i], "");
 						labels[i].focus();
 						return false;
