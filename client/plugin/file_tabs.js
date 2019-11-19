@@ -29,6 +29,8 @@
 	
 	var hiddenBecauseEmty = false;
 	
+	var tabindex = 300; // See tabindex.txt
+	
 	EDITOR.on("start", file_tabs);
 	
 	function file_tabs() {
@@ -413,6 +415,8 @@
 		tabFileText.innerText = fileName;
 		tabFileText.href = "#"; // Needed to make it clickable by screen-reader
 		tabFileText.setAttribute("aria-label", "show file");
+		// hmm, tabindex get a weird order!
+		//tabFileText.setAttribute("tabindex", ++tabindex);
 		
 		//tabFileItem.appendChild(document.createTextNode(fileName));
 		tabFileItem.appendChild(tabFileText);
@@ -493,7 +497,7 @@
 			folderList.setAttribute("id", "tab_folder_list_" + folderName);
 			
 			
-			tabFolderItem.setAttribute("title", "directory");
+			tabFolderItem.setAttribute("title", "directory: " + folderName);
 			tabFolderItem.appendChild(document.createTextNode(folderName));
 			tabFolderItem.appendChild(folderList);
 			
