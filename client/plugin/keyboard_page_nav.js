@@ -27,6 +27,8 @@
 	EDITOR.windowMenu.add(S("beginning_of_line"), [S("Navigate"), 10], startOfLine, "bottom");
 	
 	function selectToTop(file) {
+		if(!EDITOR.input) return true;
+		
 		var selection = [],
 		grid = file.grid;
 		
@@ -49,6 +51,8 @@
 	}
 	
 	function selectToEnd(file) {
+		if(!EDITOR.input) return true;
+		
 		var selection = [],
 		grid = file.grid;
 		
@@ -71,6 +75,7 @@
 	}
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {
+		if(!EDITOR.input) return true;
 		// Move the cursor one page up
 		
 		// Move temporary caret and then scroll!??
@@ -88,6 +93,7 @@
 	}
 	
 	function pageDown(file) {
+		if(!EDITOR.input) return true;
 		// Move the cursor one page down
 		
 		file.checkCaret();
@@ -103,6 +109,7 @@
 	}
 
 	function end(file, combo) {
+		if(!EDITOR.input) return true;
 		
 		file.checkCaret(); // for sanity
 
@@ -127,6 +134,8 @@
 	
 	
 	function home(file, combo) {
+		if(!EDITOR.input) return true;
+		
 		file.checkCaret();
 
 		if(combo == CTRL) {
@@ -142,6 +151,7 @@
 	}
 	
 	function endOfLine(file, combo) {
+		if(!EDITOR.input) return true;
 		
 		var caret = file.caret;
 		
@@ -157,6 +167,7 @@
 		}
 	
 	function startOfLine(file, combo) {
+		if(!EDITOR.input) return true;
 		
 		var caret = file.caret;
 		

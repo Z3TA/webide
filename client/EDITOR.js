@@ -3346,6 +3346,7 @@ usePseudoClipboard = false;
 			var keyUpArrow = 38;
 			var keyHome = 36;
 			var keyEnd = 35;
+			var keyEsc = 27;
 			
 			var code = keydownEvent.keyCode || keydownEvent.charCode || keydownEvent.which;
 			var key = keydownEvent.key;
@@ -3360,11 +3361,29 @@ usePseudoClipboard = false;
 			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
 				return openSubMenu();
 			}
+			// ### pressing Escape key on window menu
+			else if(key == "Escape" || code == keyEsc) {
+				// Hide all menus and go into go into a edit mode
+				item.parentMenu.hide(true, true);
+				EDITOR.input = true;
+			}
+			// ### pressing Home key on window menu
+			else if(key == "Home" || code == keyHome) {
+				// Go to the first item in the menu
+				var cell = item.parentMenu.domElement.firstChild;
+				var label = cell.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
+				label.focus();
+			}
+			// ### pressing End key on window menu
+			else if(key == "End" || code == keyEnd) {
+				// Go to the last item in the menu
+				var cell = item.parentMenu.domElement.lastChild;
+				var label = cell.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
+				label.focus();
+			}
 			else if(key == "UpArrow" || code == keyUpArrow) {
-				// If it has a submenu that will pull out under it, pressing down should pull it out
-				if(item.subMenu && !item.parentMenu.parentMenu) {
-					return openSubMenu(true);
-				}
 				
 				// Move focus to previous item
 				var cell = item.domElement.previousSibling;
@@ -3491,6 +3510,10 @@ usePseudoClipboard = false;
 				var label = lastItem.domElement.getElementsByTagName("a")[0];
 				console.log("windowMenuItemKeyDown: Focusing label=", label, " on lastItem=", lastItem);
 				label.focus();
+			}
+			else {
+				// Any other character searches the menu
+				
 			}
 			
 			
