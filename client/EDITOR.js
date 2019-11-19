@@ -3359,7 +3359,9 @@ usePseudoClipboard = false;
 			
 			// ### pressing space or Enter on window menu
 			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
-				return openSubMenu();
+				if(item.subMenu) openSubMenu();
+				//else item.domElement.click(); // Click is default when pressing enter
+				return false;
 			}
 			// ### pressing Escape key on window menu
 			else if(key == "Escape" || code == keyEsc) {
@@ -3511,8 +3513,24 @@ usePseudoClipboard = false;
 				console.log("windowMenuItemKeyDown: Focusing label=", label, " on lastItem=", lastItem);
 				label.focus();
 			}
+			// ### Pressing any key on the Window menu
 			else {
 				// Any other character searches the menu
+				var labels = item.parentMenu.domElement.getElementsByTagName("a");
+				var character = String.fromCharCode(code).toLowerCase(); // keydownEvent.key ?
+				
+				for(var i=0, str, firstLetter; i<labels.length; i++) {
+					str = labels[i].innerText.toLowerCase();
+					firstLetter = str.charAt(0);
+					console.log("windowMenuItemKeyDown: str=" + str + " firstLetter=" + firstLetter + " character=" + character + " (" + (firstLetter==character) + ")");
+					if(firstLetter == character) {
+						console.log("windowMenuItemKeyDown: Focusing label=", labels[i], "");
+						labels[i].focus();
+						return false;
+					}
+				}
+				
+				console.log("windowMenuItemKeyDown: Did not find character=" + character + " in labels=", labels);
 				
 			}
 			
@@ -3531,8 +3549,11 @@ usePseudoClipboard = false;
 				}
 
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " (" + label.innerText + ") on cell=", cell);
 				label.focus();
+				
+				// Prevent click on first item
+				keydownEvent.preventDefault();
 				
 				return false;
 			}
