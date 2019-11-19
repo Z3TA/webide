@@ -276,7 +276,7 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	var keyboardCatcherLastInserted = "";
 	
-	var discoveryBar = document.createElement("aside");
+	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
 	
@@ -2802,10 +2802,11 @@ usePseudoClipboard = false;
 		return false;
 	}
 	
-	// Add feature icons for discovery
+	
+	var discoveryBarTabIndex = 600; // See tabindex.txt
 	EDITOR.discoveryBar = {
 		add: function addDiscoveryItem(element, position) {
-			
+			// Add feature icons for discovery
 			if(position == undefined) position = 99;
 			
 			var wrap = document.createElement("div");
@@ -2830,6 +2831,7 @@ usePseudoClipboard = false;
 			});
 			items.forEach(function (el) {
 				discoveryBar.appendChild(el);
+				//el.setAttribute("tabindex", ++discoveryBarTabIndex);
 			});
 			
 			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) return new Error("Discovery bar is disabled by query string!");
@@ -3354,6 +3356,7 @@ usePseudoClipboard = false;
 			
 			// ref: https://www.w3.org/TR/wai-aria-practices/examples/menubar/menubar-1/menubar-1.html
 			
+			// ### pressing space or Enter on window menu
 			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
 				return openSubMenu();
 			}
@@ -3371,6 +3374,7 @@ usePseudoClipboard = false;
 				label.focus();
 				
 			}
+			// ### pressing down on window menu
 			else if(key == "DownArrow" || code == keyDownArrow) {
 				
 				// If it has a submenu that will pull out under it, pressing down should pull it out
@@ -3385,6 +3389,7 @@ usePseudoClipboard = false;
 				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
 				label.focus();
 			}
+			// ### pressing right on window menu
 			else if(key == "RightArrow" || code == keyRightArrow) {
 				
 				// If it has a submenu that will pull out to the right/side, pressing right should pull it out
@@ -3426,6 +3431,65 @@ usePseudoClipboard = false;
 				if(!nextItem) nextItem = item.parentMenu.firstItem;
 				var label = nextItem.domElement.getElementsByTagName("a")[0];
 				console.log("windowMenuItemKeyDown: Focusing label=", label, " on nextItem=", nextItem);
+				label.focus();
+			}
+			// ### pressing left on window menu
+			else if(key == "LeftArrow" || code == keyLeftArrow) {
+				
+				// If we are in a submenu that was pulled out to the right, pressing left arrow should go back to parent menu
+				if(item.parentMenu && item.parentMenu.parentMenu && item.parentMenu.parentMenu && item.parentMenu.parentMenu.parentMenu) {
+					console.log("windowMenuItemKeyDown: Going back to left menu");
+					item.parentMenu.hide(); // Hide this menu
+					
+					var leftMenu =  item.parentMenu.parentMenu;
+					
+					// We need a bounding rect to the parent opener so it knows where to show up
+					var rect = leftMenu.parentMenuItem.domElement.getBoundingClientRect();
+					leftMenu.show(rect); // Show parent/left menu
+					
+					// Focus on the item that opened this menu
+					var parentMenuItem = item.parentMenu.parentMenuItem;
+					var label = parentMenuItem.domElement.getElementsByTagName("a")[0];
+					console.log("windowMenuItemKeyDown: label=", label);
+					label.focus();
+					
+					return;
+				}
+				
+				// If we are in a menu that pulls out/down, we should go the the left/last menu
+				if(item.parentMenu && item.parentMenu.parentMenu && !item.parentMenu.parentMenu.parentMenu) {
+					var parentMenuItem = item.parentMenu.parentMenuItem;
+					console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
+					
+					var menu = item.parentMenu.parentMenu;
+					console.log("windowMenuItemKeyDown: menu=", menu);
+					
+					menu.hideSiblings(); // Hide all submenus
+					
+					var lastItem = parentMenuItem.previousSibling;
+					if(!lastItem) lastItem = menu.lastItem;
+					console.log("windowMenuItemKeyDown: lastItem=", lastItem);
+					
+					lastItem.domElement.click(); // Show submenu
+					
+					var subMenu = lastItem.subMenu;
+					console.log("windowMenuItemKeyDown: subMenu=", subMenu);
+					
+					var firstItem = subMenu.firstItem;
+					console.log("windowMenuItemKeyDown: firstItem=", firstItem);
+					
+					var label = firstItem.domElement.getElementsByTagName("a")[0];
+					console.log("windowMenuItemKeyDown: label=", label);
+					label.focus();
+					
+					return;
+				}
+				
+				// Move focus to last item
+				var lastItem = item.previousSibling;
+				if(!lastItem) lastItem = item.parentMenu.lastItem;
+				var label = lastItem.domElement.getElementsByTagName("a")[0];
+				console.log("windowMenuItemKeyDown: Focusing label=", label, " on lastItem=", lastItem);
 				label.focus();
 			}
 			
@@ -3784,7 +3848,7 @@ li.onclick = function(clickEvent) {
 			menu.appendChild(li);
 			
 			// Re-order the menu items
-			var itemCount = 100; // High number to give room for temporary ctxmenu items 
+			var itemCount = 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200 
 			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
 			items.sort(function(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
@@ -3950,7 +4014,7 @@ li.onclick = function(clickEvent) {
 			tempItems.appendChild(li);
 			
 			var items = tempItems.childNodes;
-			var itemCount = 0; // Temporary items will get a low tab index
+			var itemCount = 100; // Temporary items in the context meny start with tabindex 100
 			
 			// items is not a proper array, so we can not use array methods! (at least not in older browsers, IE)
 			for (var i=0; i<items.length; i++) setIndex(items[i]);
