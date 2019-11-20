@@ -9926,7 +9926,7 @@ function keyIsDown(keyDownEvent) {
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
 	// Mac command key ?
-	if(charCode == charCodeCtrl) {
+	if(charCode == charCodeCtrl && 1==2) {
 			console.log("keyIsDown: recognition start! (keyDown Ctrl)");
 		if(recognition) {
 			try {
