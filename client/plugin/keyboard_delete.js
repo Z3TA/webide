@@ -11,7 +11,44 @@
 		});
 		
 		EDITOR.bindKey({desc: "Delete char to the right of cursor Emacs style", charCode: 68, combo: CTRL, fun: deleteRightCharacter}); // Ctrl+D
+		EDITOR.bindKey({desc: "Delete word to the right of cursor", charCode: 46, combo: CTRL, fun: deleteRightWord}); // Ctrl+Delete
+	}
+	
+	function deleteRightWord(file) {
 		
+		var char = file.text.charAt(file.caret.index);
+		var leftChar = file.text.charAt(file.caret.index-1);
+		
+		// If we are in the middle of a word, delete it all
+		while(leftChar.match(/\S/)) {
+			file.moveCaretLeft();
+			file.deleteCharacter();
+			leftChar = file.text.charAt(file.caret.index-1);
+		}
+		
+		// Delete all white space until we find a word, but stop on new line
+		while(char.match(/\s/) && char != "\r" && char != "\n" && file.caret.index < file.text.length) {
+			file.deleteCharacter();
+			char = file.text.charAt(file.caret.index);
+		}
+		
+		console.log("deleteRightWord: char=" + UTIL.lbChars(char));
+		
+		if(char == "\r" || char == "\n") {
+			file.moveCaretDown();
+			file.moveCaretToStartOfLine();
+			EDITOR.renderNeeded();
+			return false; // Don't delete any more
+		}
+		
+		// Delete until we find white space
+		while(char.match(/\S/) && file.caret.index < file.text.length) {
+			file.deleteCharacter();
+			char = file.text.charAt(file.caret.index);
+		}
+		
+		EDITOR.renderNeeded();
+		return false;
 	}
 	
 	function deleteRightCharacter(file) {
