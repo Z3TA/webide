@@ -38,9 +38,17 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+todo: Regression, keyboard combos now have to be explicit about the combinations (alt,ctrl,shift)
+
+issue: lang="en" with speech assistant, it will say en then n, where en sounds like n
+
+Editor sound assist
+
+3d sound! Use spatial sounds to aid 
+
 
 Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
-
+Make sure it works nice with voice 
 
 todo: When auto-completing by pressing tab: Tell the screen reader what was inserted
 and tell the autocomplete options (EDITOR.info message)

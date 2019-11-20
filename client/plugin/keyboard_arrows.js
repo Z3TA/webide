@@ -65,7 +65,7 @@
 		if(!EDITOR.input) return true;
 		if(!file) return true;
 		
-		console.log("Moving caret right ...");
+		console.log("Moving caret right ... combo=" + JSON.stringify(combo));
 		
 		// Holding down ctrl should step a while word!?
 		
@@ -81,7 +81,7 @@
 		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
-			// step to next word
+			console.log("step to next word");
 			for(var i=stepStart; i<file.text.length; i++) {
 				if(isWhiteSpace(file.text.charAt(i))) {
 					stepStop = i;

@@ -21,11 +21,6 @@
 	
 	if(QUERY_STRING["voice"]) active = true;
 	
-	if (!('speechSynthesis' in window)) {
-		console.warn("Speech Synthesis not possible in your browser!");
-		return;
-	}
-	
 	var lastRow = 0;
 	var lastCol = 0;
 	var lastTime = new Date();
@@ -35,7 +30,7 @@
 	var winMenuSpeech;
 	
 	EDITOR.plugin({
-		desc: "Speech Synthesis",
+		desc: "Speech Synthesis assistant",
 		load: function loadVoicePlugin() {
 			
 			console.log("Loading " + this.desc + " ...");
@@ -44,7 +39,7 @@
 			
 			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
 			
-			winMenuSpeech = EDITOR.windowMenu.add(S("speech_synthesis"), [S("Tools"), 15], toggleSpeechAssistant);
+			winMenuSpeech = EDITOR.windowMenu.add(S("speech_synthesis_assistant"), [S("Tools"), 15], toggleSpeechAssistant);
 			
 			if(active) activateSpeechAssistant();
 			
@@ -65,6 +60,12 @@
 	}
 	
 	function activateSpeechAssistant() {
+		
+		if (!('speechSynthesis' in window)) {
+			alertBox("Speech Synthesis not possible in your browser! (" + BROWSER + ")");
+			return;
+		}
+		
 		EDITOR.on("moveCaret", speakMoveCaret);
 		
 		speak("Speech assist activated!");
