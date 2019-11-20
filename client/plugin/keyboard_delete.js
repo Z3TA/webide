@@ -9,6 +9,15 @@
 			charCode: 46, 
 			fun: keydel
 		});
+		
+		EDITOR.bindKey({desc: "Delete char to the right of cursor Emacs style", charCode: 68, combo: CTRL, fun: deleteRightCharacter}); // Ctrl+D
+		
+	}
+	
+	function deleteRightCharacter(file) {
+		file.deleteCharacter();
+		EDITOR.renderNeeded();
+		return false;
 	}
 	
 	function keydel(file, combo, character, charCode, keyPush) {

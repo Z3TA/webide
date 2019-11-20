@@ -38,13 +38,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Make it so that you can use they keyboard to navigate the window menu!
 
-How does the context menu work!?!??!?! when pressing up/down
+Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
 
-When auto-completing by pressing tab: Tell the screen reader what was inserted
+
+todo: When auto-completing by pressing tab: Tell the screen reader what was inserted
 and tell the autocomplete options (EDITOR.info message)
 
+
+todo: Test using NVDA on windows
 
 Show some love for accessibilty.
 Use the Ubuntu screen reader.
