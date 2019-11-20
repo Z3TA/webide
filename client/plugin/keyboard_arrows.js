@@ -8,21 +8,114 @@
 	var key_UP = 38;
 	var key_DOWN = 40;
 	
-	EDITOR.bindKey({desc: "Moves the caret to the right, steps words with Ctrl, and selects with Shift combo", charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
-	EDITOR.bindKey({desc: "Moves the caret to the left, steps words with Ctrl, and selects with Shift combo", charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
-	EDITOR.bindKey({desc: "Moves the caret up, and selects with Shift combo", charCode: key_UP, fun: keyboard_arrows_moveUp});
-	EDITOR.bindKey({desc: "Moves the caret down, and selects with Shift combo", charCode: key_DOWN, fun: keyboard_arrows_moveDown});
-	
 	var selectStart, selectEnd;
 	
 	
 	
-	function isWhiteSpace(char) {
-		return (char == " " || char == "\n" || char == "\r");
+	// ## Right arrow
+	EDITOR.bindKey({desc: "Move caret right", charCode: key_RIGHT, fun: 
+		function moveCaretRight(file, combo) {
+			return keyboard_arrows_moveRight(file, combo);
+		}
+	});
+	
+	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT, fun: 
+		function moveCaretRightAndSelect(file, combo) {
+			return keyboard_arrows_moveRight(file, combo);
+		}
+	});
+	
+	EDITOR.bindKey({desc: "Move caret one word right", charCode: key_RIGHT, combo: CTRL, fun: 
+		function moveCaretOneWordRight(file, combo) {
+			return keyboard_arrows_moveRight(file, combo);
+		}
+	});
+	
+	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT+CTRL, fun: 
+		function moveCaretOneWordRightAndSelect(file, combo) {
+			return keyboard_arrows_moveRight(file, combo);
+		}
+	});
+	
+	
+	// ## Left arrow
+	EDITOR.bindKey({desc: "Move the caret left", charCode: key_LEFT, fun: 
+		function moveCaretLeft(file, combo) {
+			return keyboard_arrows_moveLeft(file, combo);
+		}
+	});
+	EDITOR.bindKey({desc: "Move caret one word left", charCode: key_LEFT, combo: CTRL, fun:
+		function moveCaretOneWordLeft(file, combo) {
+			return keyboard_arrows_moveLeft(file, combo);
+		}
+	});
+	EDITOR.bindKey({desc: "Move the caret left while selecting", charCode: key_LEFT, combo: SHIFT, fun:
+		function moveCaretLeftWhileSelecting(file, combo) {
+			return keyboard_arrows_moveLeft(file, combo);
+		}
+	});
+	EDITOR.bindKey({desc: "Move caret one word left while selecting", charCode: key_LEFT, combo: SHIFT+CTRL, fun:
+		function moveCaretOneWordLeftWhileSelecting(file, combo) {
+			return keyboard_arrows_moveLeft(file, combo);
+		}
+	});
+	
+	function keyboard_arrows_moveRight(file, combo) {
+		
+		if(!EDITOR.input) return true;
+		if(!file) return true;
+		
+		console.log("Moving caret right ...");
+		
+		// Holding down ctrl should step a while word!?
+		
+		
+		file.removeHighlights();
+		
+		var caret = file.caret;
+		var caretIndex = caret.index;
+		var stepStart = caretIndex;
+		var stepStop = caretIndex;
+		
+		
+		if(combo.alt) return true; // Do nothing if alt key is down
+		
+		if(combo.ctrl) {
+			// step to next word
+			for(var i=stepStart; i<file.text.length; i++) {
+				if(isWhiteSpace(file.text.charAt(i))) {
+					stepStop = i;
+					break;
+				}
+			}
+		}
+		
+		if(!combo.shift) file.deselect();
+		
+		for(var i=stepStart; i<=stepStop; i++) {
+			if(combo.shift) {
+				if(!caret.eol) {
+					file.select(file.grid[caret.row][caret.col], "right");
+				}
+			}
+			
+			file.moveCaretRight(caret);
+		}
+		
+		file.scrollToCaret(caret);
+		
+		EDITOR.renderNeeded();
+		
+		file.checkCaret();
+		
+		return false;
+		
 	}
 	
 	
-	function keyboard_arrows_moveLeft(file, combo, character, charCode, keyPush) {
+	// ## Left arrow
+	
+	function keyboard_arrows_moveLeft(file, combo) {
 		
 		if(!EDITOR.input) return true;
 		if(!file) return true;
@@ -82,58 +175,19 @@
 		
 	}
 	
-	function keyboard_arrows_moveRight(file, combo) {
-		
-		if(!EDITOR.input) return true;
-		if(!file) return true;
-		
-		console.log("Moving caret right ...");
-		
-		// Holding down ctrl should step a while word!?
-		
-		
-		file.removeHighlights();
-		
-		var caret = file.caret;
-		var caretIndex = caret.index;
-		var stepStart = caretIndex;
-		var stepStop = caretIndex;
-		
-		
-		if(combo.alt) return true; // Do nothing if alt key is down
-		
-		if(combo.ctrl) {
-			// step to next word
-			for(var i=stepStart; i<file.text.length; i++) {
-				if(isWhiteSpace(file.text.charAt(i))) {
-					stepStop = i;
-					break;
-				}
-			}
-		}
-		
-		if(!combo.shift) file.deselect();
-		
-		for(var i=stepStart; i<=stepStop; i++) {
-			if(combo.shift) {
-				if(!caret.eol) {
-					file.select(file.grid[caret.row][caret.col], "right");
-				}
-			}
-			
-			file.moveCaretRight(caret);
-		}
-		
-		file.scrollToCaret(caret);
-		
-		EDITOR.renderNeeded();
-		
-		file.checkCaret();
-		
-		return false;
-		
-	}
 	
+	// ## Up arrow
+	
+	EDITOR.bindKey({desc: "Move caret up", charCode: key_UP, fun: 
+		function moveCaretUp(file, combo) {
+			return keyboard_arrows_moveUp(file, combo);
+		}
+	});
+	EDITOR.bindKey({desc: "Move caret up while selecting", charCode: key_UP, combo: SHIFT, fun:
+		function moveCaretUpWhileSelecting(file, combo) {
+			return keyboard_arrows_moveUp(file, combo);
+		}
+	});
 	
 	function keyboard_arrows_moveUp(file, combo) {
 		
@@ -204,6 +258,20 @@
 	
 	}
 	
+	
+	// ## Key down
+	
+	EDITOR.bindKey({desc: "Move caret down", charCode: key_DOWN, fun: 
+		function moveCaretDown(file, combo) {
+			return keyboard_arrows_moveDown(file, combo);
+}
+	});
+	EDITOR.bindKey({desc: "Move caret down while selecting", charCode: key_DOWN, combo: SHIFT, fun:
+		function moveCaretDownWhileSelecting(file, combo) {
+			return keyboard_arrows_moveDown(file, combo);
+		}
+	});
+	
 	function keyboard_arrows_moveDown(file, combo) {
 		
 		if(!EDITOR.input) return true;
@@ -273,5 +341,8 @@
 		
 	}
 	
+	function isWhiteSpace(char) {
+		return (char == " " || char == "\n" || char == "\r");
+	}
 	
 })();
