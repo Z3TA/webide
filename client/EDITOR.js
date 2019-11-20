@@ -3440,14 +3440,21 @@ usePseudoClipboard = false;
 					var subMenu = nextItem.subMenu;
 					console.log("windowMenuItemKeyDown: subMenu=", subMenu);
 					
-					var firstItem = subMenu.firstItem;
+					if(subMenu) {
+						var firstItem = subMenu.firstItem;
 					console.log("windowMenuItemKeyDown: firstItem=", firstItem);
-					
 					var label = firstItem.domElement.getElementsByTagName("a")[0];
+					}
+					else {
+						var label = nextItem.domElement.getElementsByTagName("a")[0];
+						// Prevent click on the label
+						keydownEvent.preventDefault(); 
+					}
+					
 					console.log("windowMenuItemKeyDown: label=", label);
 					label.focus();
 					
-					return;
+					return false;
 				}
 				
 				// Move focus to next item
@@ -3710,6 +3717,56 @@ usePseudoClipboard = false;
 				dropdownMenuRoot.addItem(S("Tools"), undefined, undefined, 6);
 				dropdownMenuRoot.addItem("Node.JS", undefined, undefined, 7);
 				
+				// Add key bindings
+				
+				var showMenu = function(item) {
+					item.domElement.click(); // Opens the submenu
+					
+					item.parentMenu.hideSiblings(item.subMenu); // Hide all other submenus in this menu
+					
+					var cell = item.subMenu.domElement.firstChild;
+					
+					var label = cell.getElementsByTagName("a")[0];
+					label.focus();
+					
+					EDITOR.input = false;
+					
+					return false;
+				}
+				
+				// Only bother with the standard menu shortcuts. ref: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
+				EDITOR.bindKey({desc: "Open File window menu", charCode: 70, combo: ALT, fun: // Alt+F
+					function showFileMenu() {
+						return showMenu(dropdownMenuRoot.items[S("File")]);
+}
+				});
+				EDITOR.bindKey({desc: "Open Edit window menu", charCode: 69, combo: ALT, fun: // Alt+E
+					function showEditMenu() {
+						return showMenu(dropdownMenuRoot.items[S("Edit")]);
+					}
+				});
+				EDITOR.bindKey({desc: "Open View window menu", charCode: 86, combo: ALT, fun: // Alt+V
+					function showViewMenu() {
+						return showMenu(dropdownMenuRoot.items[S("View")]);
+					}
+				});
+				
+				// Key to activate the root window menu (Ctrl+Esc)
+				EDITOR.bindKey({desc: "Focus window menu", charCode: 27, combo: CTRL, fun:
+					function focusWindowMenu() {
+						console.log("windowMenu: Focusing on Window menu ...");
+						
+						var item = dropdownMenuRoot.items[S("Editor")];
+						var label = item.domElement.getElementsByTagName("a")[0];
+						
+						console.log("windowMenu: label=", label);
+						
+						label.focus();
+						
+						EDITOR.input = false;
+						return false;
+					}
+				});
 				
 			}
 			
@@ -9932,7 +9989,7 @@ function keyIsDown(keyDownEvent) {
 			*/
 			
 			if( (binding.char === character || binding.charCode === charCode || binding.key === key) && // === so that undefined doesn't match null
-			(binding.combo == combo.sum || binding.combo === undefined) && 
+			(binding.combo == combo.sum || (binding.combo === undefined && combo.sum===0)) && // Esc should not trigger all combinations of Esc
 			(binding.dir == "down" || binding.dir === undefined) && // down is the default direction
 			(binding.mode == EDITOR.mode || binding.mode == "*") ) {
 				
@@ -10220,7 +10277,7 @@ function keyIsUp(keyUpEvent) {
 		
 		binding = keyBindings[i];
 		
-		if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+		if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo.sum===0)) && (binding.dir == "up") && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 			
 			console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 			
