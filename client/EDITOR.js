@@ -219,6 +219,7 @@ EDITOR.input = false; // Wheter inputs should go to the current file in focus or
 
 EDITOR.fileOpenCallback = undefined;
 EDITOR.lastKeyPressed = "";
+EDITOR.lastKeyDown = "";
 EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an internal variable, but exposed so plugins can check if there's any files in it)
 
 EDITOR.lastTimeCharacterInserted = new Date();
@@ -9921,6 +9922,8 @@ function keyIsDown(keyDownEvent) {
 		}
 	*/
 	
+		EDITOR.lastKeyDown = key || charCode;
+		
 		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);

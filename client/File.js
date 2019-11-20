@@ -1309,7 +1309,7 @@ file.mode = "text";
 			throw new Error("Tried to insert a backspace character");
 		}
 		else if(character.charCodeAt(0) < 32) {
-			throw new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ")");
+			throw new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ") EDITOR.lastKeyDown=" + EDITOR.lastKeyDown);
 			return;
 		}
 		
