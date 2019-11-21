@@ -3271,7 +3271,7 @@ usePseudoClipboard = false;
 		var label = options.label;
 		if(!label) throw new Error("No label specified in options=" + JSON.stringify(options));
 		
-		var whenClicked = options.whenClicked;
+		item.whenClicked = options.whenClicked;
 		
 		item.order = options.order || 100;
 		
@@ -3342,7 +3342,7 @@ usePseudoClipboard = false;
 		item.pulloutIcon.setAttribute("class", "pulloutIcon");
 		item.wrapper.appendChild(item.pulloutIcon);
 		
-		item.domElement.onclick = whenClicked;
+		item.domElement.onclick = item.whenClicked;
 		
 		item.domElement.onmouseover = function() {
 			//console.log("Mouse over: label=" + label);
@@ -3379,7 +3379,16 @@ usePseudoClipboard = false;
 			// ### pressing space or Enter on window menu
 			if(key == "Space" || code == keySpace || key == "Enter" || code == keyEnter) {
 				if(item.subMenu) openSubMenu();
-				//else item.domElement.click(); // Click is default when pressing enter
+				else {
+					// Problem: Pressing Enter also presses enter on any item that becomes visible
+					// Solution: Delay the action. And also prevent default!
+					keydownEvent.preventDefault();
+					keydownEvent.stopPropagation();
+					setTimeout(function() {
+						//item.domElement.click(); // Click is default when pressing enter
+						item.whenClicked(keydownEvent);
+					}, 150); // Need to be slower then the button release!? no. Just slow enough... 150ms is not slow enough
+				}
 				return false;
 			}
 			// ### pressing Escape key on window menu
