@@ -65,6 +65,11 @@
 	function toggleSpeechAssistant() {
 		EDITOR.soundAssist = !EDITOR.soundAssist; // This will call checkSoundAssistStatus()
 		
+		winMenuSpeech.hide();
+		
+		EDITOR.canvas.focus();
+		EDITOR.input = true;
+		
 		return false;
 	}
 	
