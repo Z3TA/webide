@@ -402,7 +402,7 @@
 		
 		var closeFileButton = document.createElement("button");
 		closeFileButton.setAttribute("class", "closeFileTab");
-		closeFileButton.setAttribute("title", "Close file"); // + fileName
+		closeFileButton.setAttribute("title", "Close file: " + fileName + ""); // + fileName
 		closeFileButton.setAttribute("id", "close_" + path);
 		//closeFileButton.innerHTML = "&times;"; // x
 		closeFileButton.addEventListener("click", closeTab, true); // Stop propagation so that we do not switch to this file.
@@ -414,7 +414,7 @@
 		var tabFileText = document.createElement("a");
 		tabFileText.innerText = fileName;
 		tabFileText.href = "#"; // Needed to make it clickable by screen-reader
-		tabFileText.setAttribute("aria-label", "show file");
+		tabFileText.setAttribute("aria-label", "show file: " + fileName);
 		// hmm, tabindex get a weird order!
 		//tabFileText.setAttribute("tabindex", ++tabindex);
 		
@@ -569,7 +569,7 @@
 			tabList.setAttribute("id", "tabList");
 			tabList.setAttribute("class", "tabList");
 			tabList.setAttribute("role", "tablist");
-			tabList.setAttribute("aria-label", "file tabs");
+			tabList.setAttribute("aria-label", "File tabs");
 			tabList.setAttribute("class", "noselect"); // Disable text selecting
 			
 			
