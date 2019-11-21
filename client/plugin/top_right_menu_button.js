@@ -19,6 +19,7 @@ load: function loadTopRightMenuButton() {
 
 			winMenu = EDITOR.windowMenu.add("☰", [9], showContextMenu)
 			
+			winMenu.domElement.getElementsByTagName("a")[0].setAttribute("title", "Activate Context menu");
 			
 			return;
 			
@@ -26,16 +27,16 @@ load: function loadTopRightMenuButton() {
 			button.innerText = "☰";
 			button.setAttribute("title", "Activate Context menu");
 			button.setAttribute("class", "topRightMenuButton"); // For styling
-
+			
 			button.onclick = function(clickEvent) {
-EDITOR.ctxMenu.hide();
-EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
-};
+				EDITOR.ctxMenu.hide();
+				EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
+			};
 			
 			var header = document.getElementById("header");
 			header.appendChild(button);
 			
-},
+		},
 unload: function unloadTopRightMenuButton() {
 
 			EDITOR.windowMenu.remove(winMenu);
