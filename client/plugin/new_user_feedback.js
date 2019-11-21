@@ -14,6 +14,14 @@
 			windowMenFeedbackPositive = EDITOR.windowMenu.add("☺", ["☺", 1], positive);
 			windowMenFeedbackNegative = EDITOR.windowMenu.add("☹", ["☺", 2], negative);
 			
+			windowMenFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
+			
+			var rootMenuItem = windowMenFeedbackPositive.parentMenu.parentMenuItem;
+			var label = rootMenuItem.domElement.getElementsByTagName("a")[0];
+			label.setAttribute("title", "Send feedback");
+			
+			console.log("userFeedback: rootMenuItem=", rootMenuItem, " label=", label);
+			
 			if(QUERY_STRING["embed"]) return;
 			
 			CLIENT.on("loginSuccess", expectations, 2000);
