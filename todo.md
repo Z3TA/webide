@@ -78,6 +78,9 @@ todo: Clear Chrome history, then close a file. See if reopenfiles module handles
 
 ---
 
+Eval/REPL lets you run editor commands, or use just as a JS REPL
+
+---
 
 Make a Chrome extension, for developing chrome extensions!? And PWA's
 

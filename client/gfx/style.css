@@ -331,6 +331,13 @@ canvas {
 	/* hide annoying blinking cursor because of contenteditable=true */
 	cursor: none;
 	caret-color: transparent;
+	
+	/* try to disable mobile zoom when keyboard is on */
+	font-size: 21px; 
+	max-width:100%;
+	-webkit-text-size-adjust:none;
+	line-height:40px;
+	zoom: reset;
 }
 
 .wireframe {

@@ -17,10 +17,6 @@
 	*/
 	"use strict";
 	
-	var active = false;
-	
-	if(QUERY_STRING["voice"]) active = true;
-	
 	var lastRow = 0;
 	var lastCol = 0;
 	var lastTime = new Date();
@@ -36,17 +32,23 @@
 			console.log("Loading " + this.desc + " ...");
 			
 			var key_M = 77;
+			var key_S = 83;
 			
 			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
+			EDITOR.bindKey({desc: "Torn on or off sound assist", charCode: key_S, combo: ALT, fun: toggleSpeechAssistant}); // Alt + S
 			
-			winMenuSpeech = EDITOR.windowMenu.add(S("speech_synthesis_assistant"), [S("Tools"), 15], toggleSpeechAssistant);
+			EDITOR.on("soundAssist", checkSoundAssistStatus);
 			
-			if(active) activateSpeechAssistant();
+			winMenuSpeech = EDITOR.windowMenu.add(S("sound_assist"), [S("Tools"), 15], toggleSpeechAssistant);
+			
+			if(QUERY_STRING["voice"]) activateSpeechAssistant();
 			
 		},
 		unload: function unloadVoicePlugin() {
 			
 			EDITOR.unbindKey(test);
+			
+			EDITOR.removeEvent("soundAssist", checkSoundAssistStatus);
 			
 			EDITOR.windowMenu.remove(winMenuSpeech);
 			
@@ -54,9 +56,16 @@
 		}
 	});
 	
+	function checkSoundAssistStatus(activated) {
+		if(activated) activateSpeechAssistant();
+		else disableSpeechAssistant();
+		return ALLOW_DEFAULT;
+	}
+	
 	function toggleSpeechAssistant() {
-		if(active) disableSpeechAssistant();
-		else activateSpeechAssistant();
+		EDITOR.soundAssist = !EDITOR.soundAssist; // This will call checkSoundAssistStatus()
+		
+		return false;
 	}
 	
 	function activateSpeechAssistant() {
@@ -68,10 +77,9 @@
 		
 		EDITOR.on("moveCaret", speakMoveCaret);
 		
-		speak("Speech assist activated!");
+		EDITOR.say("Speech assist activated!");
 		
 		winMenuSpeech.activate();
-		active = true;
 		
 		EDITOR.stat("speech_assistant");
 	}
@@ -80,7 +88,6 @@
 		EDITOR.removeEvent("moveCaret", speakMoveCaret);
 		
 		winMenuSpeech.deactivate();
-		active = false;
 	}
 	
 	function changeFile() {
@@ -167,7 +174,7 @@
 			lastRow = caret.row;
 			lastCol = caret.col;
 			
-			speak(msg);
+			EDITOR.say(msg);
 		
 		}, 3); // To Preventing speak when moving fast
 		
@@ -209,48 +216,5 @@
 		
 		return false;
 	}
-	
-	function speak(text, rate) {
-		
-		console.log("speak: text=" + text);
-		
-		window.speechSynthesis.cancel(); // Stop ongoing speach
-		
-		//clearTimeout(sayingTimer);
-		
-		// Prevent current text from canceling
-		sayingTimer = setTimeout(function() {
-			
-			if(text == undefined) throw new Error("No text! text=" + text);
-			
-			if(rate !== undefined) {
-				if(rate < 0.1) throw new Error("Lowest rate is 0.1");
-				if(rate > 10) throw new Error("Highest rate is 10");
-			}
-			
-			console.log("Speaking: text=" + text);
-			
-			var msg = new SpeechSynthesisUtterance(text);
-			
-			msg.volume = 1; // 0 to 1
-			msg.rate = rate || 1; // 0.1 to 10
-			msg.pitch = 2; //0 to 2
-			msg.text = text;
-			msg.lang = 'en-US';
-			
-			msg.onend = function(e) {
-				console.log('Finished speak in ' + e.elapsedTime + ' seconds.');
-			};
-			
-			msg.onerror = function(event) {
-				console.log(event.error);
-			};
-			
-			window.speechSynthesis.speak(msg);
-			
-		}, 10);
-		
-	}
-	
 	
 })();

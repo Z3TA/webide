@@ -27,9 +27,9 @@
 		desc: "Indentate helper in plain text files",
 		load: function loadTextModeIndentation() {
 			
-			EDITOR.bindKey({desc: "Indentate", fun: indentate, charCode: TAB, combo: 0});
-			EDITOR.bindKey({desc: "de-Indentate", fun: deindentate, charCode: TAB, combo: SHIFT});
-			EDITOR.bindKey({desc: "Add indentation", fun: addindentation, charCode: ENTER, combo: 0});
+			EDITOR.bindKey({desc: "Indentate in a plain text file", fun: indentate, charCode: TAB, combo: 0});
+			EDITOR.bindKey({desc: "de-Indentate in a plain text file", fun: deindentate, charCode: TAB, combo: SHIFT});
+			EDITOR.bindKey({desc: "Add indentation in a plain text file", fun: addindentation, charCode: ENTER, combo: 0});
 			
 			EDITOR.on("fileOpen", detectIndentation);
 			EDITOR.on("fileClose", cleanupIndentation);

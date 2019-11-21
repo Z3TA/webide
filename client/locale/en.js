@@ -140,7 +140,7 @@ LANG["en"] = {
 	show_help_files: "Show help files",
 	show_remote_server_manager: "Show the FTP/SSH server manager",
 	show_white_space: "show white-space",
-	speech_synthesis_assistant: "speech Synthesis assistant",
+	sound_assist: "Sound assistant",
 	spellcheck: "spellcheck",
 	split_screen_new_window: "Split screen/new window",
 	ssg: "static site generator",

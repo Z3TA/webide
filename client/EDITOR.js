@@ -192,7 +192,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	stopScript: [],
 	showDashboard: [], // Useful for example starting and stopping timers, refresh content etc
 	hideDashboard: [],
-	share: [] // Share a file with other apps on the platform
+	share: [], // Share a file with other apps on the platform
+	soundAssist: [] // Get notified when soundAssist is turned on/off
 };
 
 EDITOR.renderFunctions = [];
@@ -228,6 +229,8 @@ EDITOR.lastTimeInteraction = new Date();
 EDITOR.modes = ["default", "*"]; // You can bind keys for use in different modes. * means all modes
 EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 
+EDITOR.soundAssist = false; // If set to true, widgets should make sounds (EDITOR.say) to aid the user
+EDITOR.speechRate = 1; // // 0.1 to 10
 
 (function() { // Non global editor code ...
 	
@@ -253,6 +256,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	var tildeAltActive = false;
 	
 	var renderCaretTimer;
+	
+	var pressCtrlCount = 0; // When pressed 5 times, soundAssist will be activated!
 	
 	var canvas, ctx; 
 	
@@ -348,16 +353,26 @@ ctxMenuVisibleOnce = true;
 	// # Working Directory
 	var workingDirectory; // Private variable
 	var _editorInput = true;
+	var _soundAssist = false;
+	
 	if(!Object.defineProperty) {
-		console.warn("Object.defineProperty not available!");
-		
-		//EDITOR.renderNeeded = renderNeeded; 
-		
+		// Object.defineProperty (ES5) should work in most browsers!
+		alert("Object.defineProperty not available in your browser (" + BROWSER + ") some editor functionality might not work!");
 	}
 	else {
 		Object.defineProperty(EDITOR, 'workingDirectory', {
 			get: function getWorkingDirectory() { return workingDirectory; },
 			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
+			enumerable: true
+		});
+		
+		Object.defineProperty(EDITOR, 'soundAssist', {
+			get: function() { return _soundAssist; },
+			set: function(newValue) {
+				if(typeof newValue != "boolean") throw new Error("EDITOR.soundAssist can only be true or false!");
+				_soundAssist = newValue;
+				EDITOR.fireEvent("soundAssist", [_soundAssist]);
+			},
 			enumerable: true
 		});
 		
@@ -7730,7 +7745,55 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 		}
 	}
 	
-
+	if('speechSynthesis' in window) {
+		EDITOR.say = function say(text, rate) {
+			
+			console.log("EDITOR.say: text=" + text + " rate=" + rate);
+			
+			if(rate == undefined) rate = EDITOR.speechRate;
+			
+			window.speechSynthesis.cancel(); // Stop ongoing speach
+			
+			//clearTimeout(sayingTimer);
+			
+			// Prevent current text from canceling
+			var sayingTimer = setTimeout(function() {
+				
+				if(text == undefined) throw new Error("No text! text=" + text);
+				
+				if(rate !== undefined) {
+					if(rate < 0.1) throw new Error("Lowest rate is 0.1");
+					if(rate > 10) throw new Error("Highest rate is 10");
+				}
+				
+				console.log("EDITOR.say:Speaking: text=" + text);
+				
+				var msg = new SpeechSynthesisUtterance(text);
+				
+				msg.volume = 1; // 0 to 1
+				msg.rate = rate || 1; // 0.1 to 10
+				msg.pitch = 2; //0 to 2
+				msg.text = text;
+				msg.lang = 'en-US';
+				
+				msg.onend = function(e) {
+					console.log('EDITOR.say: Finished speak in ' + e.elapsedTime + ' seconds.');
+				};
+				
+				msg.onerror = function(event) {
+					console.log("EDITOR.say: " + event.error);
+				};
+				
+				window.speechSynthesis.speak(msg);
+				
+			}, 10);
+			
+		}
+	}
+	else {
+		console.warn("Speech Synthesis not available! browser=" + BROWSER + "");
+	}
+	
 CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 	
 	var connectedFiles = filesOnServer();
@@ -9928,7 +9991,8 @@ function keyIsDown(keyDownEvent) {
 	
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
-	// Mac command key ?
+		
+		// Voice recognition support in browsers seem to have been discontinued :(
 	if(charCode == charCodeCtrl && 1==2) {
 			console.log("keyIsDown: recognition start! (keyDown Ctrl)");
 		if(recognition) {
@@ -9940,19 +10004,16 @@ function keyIsDown(keyDownEvent) {
 			}
 		}
 	}
-		//else console.log("keyIsDown: recognition: Not ctrl! charCode=" + charCode);
-	
-	
-	
-	// Prevent unsupported combo error ? 
-	// But what if we want a binding of *just* ALT!?
-	// Can't have that or it will mess with all native combos. You need to bind to shift|alt|ctrl PLUS something else
-	// Shift <> stopped working
-	
-	if(charCode == charCodeCtrl) return true; // Ctrl
-	if(charCode == charCodeAlt) return true; // ALT
-	
-	if(combo.alt && combo.shift) {
+		
+		// Prevent unsupported combo error ? 
+		// But what if we want a binding of *just* ALT!?
+		// Can't have that or it will mess with all native combos. You need to bind to shift|alt|ctrl PLUS something else
+		// Shift <> stopped working
+		
+		if(charCode == charCodeCtrl) return true; // Ctrl
+		if(charCode == charCodeAlt) return true; // ALT
+		
+		if(combo.alt && combo.shift) {
 			console.warn("keyIsDown: Alt + shift is the default for changing keyboard layout in Windows!");
 	}
 	
