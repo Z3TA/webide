@@ -38,6 +38,9 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Using the Ubuntu screen reader, can we navigate the UI!?
+
+
 todo: Regression, keyboard combos now have to be explicit about the combinations (alt,ctrl,shift)
 
 issue: lang="en" with speech assistant, it will say en then n, where en sounds like n
