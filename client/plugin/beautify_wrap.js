@@ -80,6 +80,7 @@
 		var pos = file.rowColFromMouse(posX, posY);
 		var row = pos.row;
 		
+		if(row < 0) return;
 		if(row >= file.grid.length) return;
 		
 		//console.log("beautify: posX=" + posX + " posY=" + posY + " pos.row=" + pos.row + " pos.col=" + pos.col + " file.grid[" + row + "].length=" + file.grid[row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);

@@ -10429,7 +10429,20 @@ function mouseDown(mouseDownEvent) {
 	EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 	// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
 	
-	if(mouseDownEvent.type == "touchstart") EDITOR.touchScreen = true;
+	if(mouseDownEvent.type == "touchstart") {
+			if(!EDITOR.touchScreen) {
+				/*
+					Detected a touch device.
+					If this is an Android phone we want to disable contentediable on the canvas element,
+					or the mobile browser will zoom in like alot when you touch a HTML element.
+					The reason why it has the contentEditable attribute is so that screenreaders will let users insert text.
+					The Android screenreader is not supported atm. Blind people would need to use a PC,
+					as text input would be an issue - and Google has deprecated Speech to text in Chrome :(
+				*/
+				canvas.contentEditable = false;
+			}
+			EDITOR.touchScreen = true;
+		}
 		
 	EDITOR.touchDown = true;
 	

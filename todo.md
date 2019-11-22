@@ -38,8 +38,10 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-regression: Safari wont show inline error message
-seems to be a problem with showing the info image
+Fucking mobile browser zooms
+every time you click on context menu, or window menu item
+(when the canvas get focused=)
+
 
 
 Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
