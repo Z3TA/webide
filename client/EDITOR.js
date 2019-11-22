@@ -4509,7 +4509,7 @@ li.onclick = function(clickEvent) {
 		var info = EDITOR.info;
 		
 		if(info.length > 100) {
-			console.warn("Too many info messages! Resetting!");
+			console.warn("EDITOR.addInfo: Too many info messages! Resetting!");
 			info.length = 0;
 		}
 		
@@ -4541,15 +4541,15 @@ li.onclick = function(clickEvent) {
 			
 			var found = false;
 			
-			//console.log("imgArray=" + imgArray.length);
+			console.log("EDITOR.addInfo: imgArray.length=" + imgArray.length);
 			
 			// Remove all text at next editor interaction ?
 			// nope: They will be removed when moving the cursor
 			/*
 				EDITOR.onNextInteraction(function(ev) {
-				console.log("editor interaction ev=", ev);
+				console.log("EDITOR.addInfo: editor interaction ev=", ev);
 				if(ev == "mouseMove") return;
-				console.warn("Clearing info! row=" + row + " col=" + col + " txt=" + JSON.stringify(txt));
+				console.warn("EDITOR.addInfo: Clearing info! row=" + row + " col=" + col + " txt=" + JSON.stringify(txt));
 				EDITOR.removeAllInfo(file, row, col);
 				});
 			*/
@@ -4558,16 +4558,20 @@ li.onclick = function(clickEvent) {
 			for(var i=0; i<info.length; i++) {
 				if(info[i].row == row && info[i].col == col) {
 					
-					if(info[i].str == textString) info[i].count++;
+					if(info[i].str == textString) {
+						console.log("EDITOR.addInfo: Same text as in info[" + i + "]");
+						info[i].count++;
+					}
 					else {
 						// Add text ...
 						// Adding too many info boxes can freeze the computer because we'll run out of memory!
 						if(info[i].text.length > 100) {
-console.warn("Too many info messages added to row=" + row + " and col=" + col);
+							console.warn("EDITOR.addInfo: Too many info messages added to row=" + row + " and col=" + col);
 						return;
 						}
 						
 						for(var j=0; j<imgArray.length; j++) {
+							console.log("EDITOR.addInfo: Adding info to info[" + i + "]");
 							info[i].text.push(imgArray[j]);
 						}
 					}
@@ -4577,7 +4581,7 @@ console.warn("Too many info messages added to row=" + row + " and col=" + col);
 			}
 			
 			if(!found) {
-				// No info found on that position. Add it!
+				console.log("EDITOR.addInfo: No info found on that position. Adding it!");
 				info.push({
 					row: row,
 					col: col,
@@ -4591,7 +4595,7 @@ console.warn("Too many info messages added to row=" + row + " and col=" + col);
 			
 			console.timeEnd("addInfo");
 			
-			console.log("Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+			console.log("EDITOR.addInfo: Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
 			// todo: only re-render if the info is in view
 			EDITOR.renderNeeded();
 			resizeAndRender();
@@ -4599,14 +4603,14 @@ console.warn("Too many info messages added to row=" + row + " and col=" + col);
 		}
 		
 		function makeImage(item) {
-			console.log("makeImage item=" + item);
+			console.log("EDITOR.addInfo: makeImage item=" + item);
 			htmlToImage(item, function(img) {
 				imgArray.push(img);
 				
 				imagesMade++;
 				
-				console.log("imagesToMake=" + imagesToMake);
-				console.log("imagesMade=" + imagesMade);
+				console.log("EDITOR.addInfo: imagesToMake=" + imagesToMake);
+				console.log("EDITOR.addInfo: imagesMade=" + imagesMade);
 				
 				if(imagesMade == imagesToMake) {
 					allImagesMade();
@@ -11045,13 +11049,14 @@ function htmlToImage(html, callback) {
 			console.log("htmlToImage: SVG image created! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
 			
 			callback(img);
+			callback = null;
 			if(url) {
 				console.log("htmlToImage: Releasing object URL")
 				domurl.revokeObjectURL(url);
 			}
 		}
 		
-		if( domurl.createObjectURL) {
+		if( domurl.createObjectURL && BROWSER != "Safari") { // Safari ends up with a zero width image
 			console.log("htmlToImage: Creating image using domurl.createObjectURL")
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 			var url = domurl.createObjectURL(svg);
@@ -11063,10 +11068,14 @@ function htmlToImage(html, callback) {
 			img.src = data;
 		
 			console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
-			// img.onload wont fire !?
-			callback(img);
-			callback = null;
 		}
+		// img.onload wont fire when you use data url !? (on different browsers, yeh)
+		setTimeout(function() {
+			if(callback) {
+				callback(img);
+				callback = null;
+			}
+		}, 10);
 		
 	}
 	

@@ -56,7 +56,7 @@
 		
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
-		//console.log("infoRender: comments.length=" + comments.length);
+		console.log("render_info: comments.length=" + comments.length);
 		
 		for(var i=0; i<comments.length; i++) {
 			comment = comments[i];
@@ -76,12 +76,12 @@
 
 			textHeight = comment.text.length * fontHeight;
 			
-			console.log("Rendering info message on row=" + comment.row + " textHeight=" + textHeight);
+			console.log("render_info: Rendering info message on row=" + comment.row + " textHeight=" + textHeight);
 			
 			// Measure max text width
 			for(var j=0; j<comment.text.length;j++) {
 				//textWidth = Math.max(textWidth, ctx.measureText(comment.text[j]).width);
-				console.log("imgWidth=" + comment.text[j].width);
+				console.log("render_info: imgWidth=" + comment.text[j].width);
 				textWidth = Math.max(textWidth, comment.text[j].width, Math.ceil(comment.str.length * EDITOR.settings.gridWidth));
 				// Some browsers (IE11) can't get image width! (width=0)
 			}
