@@ -1542,7 +1542,8 @@ file.mode = "text";
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
-		// This function currently don't know how to handle removing text that starts or ends with a line break! (it would result in a bug, where not all lines are removed)
+		// This function currently don't know how to handle removing text that starts or ends with a line break! 
+		// (it would result in a bug, where not all lines are removed)
 		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
 			// note: Second argument in String.substring is "up to, but not including"
 			var removedText = file.text.substring(firstIndex, lastIndex+1);
@@ -1557,8 +1558,10 @@ file.mode = "text";
 			if(EDITOR.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
 			throw new Error("firstIndex=" + firstIndex + " can not be on a line break! You might want to use file.removeRow(row) instead.");
 		}
-		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
+		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") {
+throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
+		}
 		/*
 		if(firstIndex > 0) {
 			if(file.text.charAt(firstIndex-1) == "\r" && file.text.charAt(firstIndex) == "\n") throw new Error("firstIndex=" + firstIndex + " is between a CR and LF!");

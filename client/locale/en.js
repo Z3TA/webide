@@ -76,6 +76,8 @@ LANG["en"] = {
 	intro: "intro",
 	invite_collaborator: "Invite collaborator",
 	
+	js_beautify: "Code format (js-beautify)",
+	
 	keyboard_input: "keyboard/input",
 	
 	live_preview: "Live/preview",

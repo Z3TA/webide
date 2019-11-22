@@ -38,31 +38,19 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Using the Ubuntu screen reader, can we navigate the UI!?
-
-
-todo: Regression, keyboard combos now have to be explicit about the combinations (alt,ctrl,shift)
-
-issue: lang="en" with speech assistant, it will say en then n, where en sounds like n
-
-Editor sound assist
-
-3d sound! Use spatial sounds to aid 
 
 
 Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
-Make sure it works nice with voice 
 
-todo: When auto-completing by pressing tab: Tell the screen reader what was inserted
-and tell the autocomplete options (EDITOR.info message)
+Making it possible to use the editor without a mouse...
 
+---
 
-todo: Test using NVDA on windows
+Offline mode!
 
-Show some love for accessibilty.
-Use the Ubuntu screen reader.
-Make it so that you can use the editor. Focus on first time user experience.
-WITH EYES CLOSED!
+Sync the whole folder (text files) with the client!
+So that you can work offline, and saved files will be synced once online!
+
 
 ---
 
@@ -802,10 +790,14 @@ todo
 ----
 
 
----
 
-Better mobile experience:
--------------------------
+
+
+
+
+
+mobile experience
+-----------------
 
 when screen is small when virtual keyboard is compact;
 increase keyboard letter size.
@@ -1154,6 +1146,23 @@ the virtual keyboard get split in half
 function to increase the text size. without zooming.
 
 text gets blurry when scrolling.
+
+
+
+
+Sound assist
+------------
+Show some love to blind people... Try using the editor with eye's shut.
+
+issue: lang="en" with speech assistant, it will say en then n, where en sounds like n
+
+idea: 3d sound! Use spatial sounds to aid 
+
+todo: When auto-completing by pressing tab: Tell the screen reader what was inserted
+and tell the autocomplete options (EDITOR.info message)
+
+todo: Test using NVDA on windows
+
 
 
 

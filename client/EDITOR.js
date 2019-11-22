@@ -8063,8 +8063,9 @@ function main() {
 	canvas = document.getElementById("canvas");
 	canvas.style.display="block";
 	
-	canvas.onpaste = function() {alert("paste canvas");};
-	
+		//canvas.onpaste = function() {};
+		// canvas.onpaste only trigger in Firefox when you tab away, then tab back to Firefox and paste
+		
 	// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
 	// Also make sure there are no drop or dragover events on window, document or parent elements!
 	
