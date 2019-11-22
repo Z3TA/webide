@@ -11048,11 +11048,17 @@ function htmlToImage(html, callback) {
 		img.onload = function () {
 			console.log("htmlToImage: SVG image created! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
 			
-			callback(img);
-			callback = null;
 			if(url) {
 				console.log("htmlToImage: Releasing object URL")
 				domurl.revokeObjectURL(url);
+			}
+			
+			if(callback) {
+				callback(img);
+				callback = null;
+			}
+			else {
+				console.warn("htmlToImage: Already called back because it took too long for the image to load.");
 			}
 		}
 		
@@ -11075,7 +11081,7 @@ function htmlToImage(html, callback) {
 				callback(img);
 				callback = null;
 			}
-		}, 10);
+		}, 20);
 		
 	}
 	
