@@ -2381,16 +2381,19 @@ function checkMounts(options, checkMountsCallback) {
 		// ### MySQL
 		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
 			if(err) {
+				
 				if(err.code == "ENOENT") {
 					console.warn("MySQL socket does not exist: " + MYSQL_PORT);
-					mysqlCheck = true;
-					checkMountsReadyMaybe();
-					return;
 				}
 				else {
-					log("err.code=" + err.code);
-					throw err;
+					// Sometimes we get 32 mount failure...
+					console.warn("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code);
 				}
+				
+				console.error(err);
+				mysqlCheck = true;
+				checkMountsReadyMaybe();
+				return;
 			}
 			
 			// Make sure a mysql user exist

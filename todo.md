@@ -38,10 +38,23 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Fucking mobile browser zooms
-every time you click on context menu, or window menu item
-(when the canvas get focused=)
+Server issues:
+Program exit
+Nov 22 17:25:22 webide.se nodejs[22022]:                       
+Nov 22 17:25:22 webide.se nodejs[22022]:                        
+Nov 22 17:25:22 webide.se nodejs[22022]: /srv/webide/server/server.js:2392
+Nov 22 17:25:22 webide.se nodejs[22022]:                                         throw err;
+Nov 22 17:25:22 webide.se nodejs[22022]:                                         ^
+Nov 22 17:25:22 webide.se nodejs[22022]: Error: Command failed: mount --bind /var/run/mysqld/mysqld.sock /home/johan/sock/mysql
+Nov 22 17:25:22 webide.se nodejs[22022]: mount: /home/johan/sock/mysql: mount(2) system call failed: No such file or directory.
 
+
+
+
+
+
+
+mouse select test fails on Android smartphone ... mouse_select.js:653
 
 
 Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
