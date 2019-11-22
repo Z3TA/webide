@@ -75,6 +75,8 @@
 	
 	function wrapJsMaybe(file, posX, posY, clickEvent) {
 		
+		if(!file) return;
+		
 		var pos = file.rowColFromMouse(posX, posY);
 		var row = pos.row;
 		

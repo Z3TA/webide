@@ -400,7 +400,7 @@ console.log("autoCompleteNode: Not inside a function call!");
 				
 				EDITOR.closeFile(file);
 				callback(true);
-			}, 300);
+			}, 500);
 			
 		});
 		

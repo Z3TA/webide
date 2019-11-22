@@ -3357,6 +3357,12 @@ usePseudoClipboard = false;
 		
 		item.domElement.addEventListener("keydown", windowMenuItemKeyDown);
 		function windowMenuItemKeyDown(keydownEvent) {
+			if(!keydownEvent && event) keydownEvent = event;
+			
+			// Prevent appending the hashtag #
+			keydownEvent.preventDefault();
+			keydownEvent.stopPropagation();
+			
 			var keySpace= 32;
 			var keyEnter = 13;
 			var keyRightArrow = 39;
@@ -3582,6 +3588,7 @@ usePseudoClipboard = false;
 			
 			function openSubMenu(focusLast) {
 				console.log("windowMenuItemKeyDown: Opening sub menu");
+				
 				item.domElement.click(); // Opens the submenu
 				
 				item.parentMenu.hideSiblings(item.subMenu); // Hide all other submenus in this menu
@@ -3675,8 +3682,10 @@ usePseudoClipboard = false;
 		return item.subMenu;
 		
 		
-		function showSubmenu() {
+		function showSubmenu(mouseEvent) {
 			console.log("showSubmenu");
+			
+			if(!mouseEvent && typeof event != "undefined") mouseEvent = event;
 			
 			item.domElement.setAttribute("aria-expanded", "true");
 			
@@ -3685,6 +3694,12 @@ usePseudoClipboard = false;
 			if(stemParent) stemParent.activated = true;
 			
 			item.subMenu.show(rect);
+			
+			// Prevent navigation on the link
+			mouseEvent.preventDefault();
+			mouseEvent.stopPropagation();
+			return false;
+			
 		}
 		
 		function showSubmenuMaybe() {
@@ -3833,6 +3848,7 @@ usePseudoClipboard = false;
 				// Assume that operations shoud be done in the editor, and not not DOM elements
 				
 				whenClicked(file, combo, character, charCode, direction, clickEvent);
+				
 			}
 			
 			item = menu.addItem(label, keyCombo, action, order, separator);
