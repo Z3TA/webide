@@ -3211,6 +3211,12 @@ usePseudoClipboard = false;
 		
 		menu.visible = true;
 		
+		// Safari wont give focus to the element when clicking on it, so do it manually
+		var item = menu.parentMenuItem;
+		//var item = menu.firstItem;
+		var label = item.domElement.getElementsByTagName("a")[0];
+		label.focus();
+		
 	}
 	DropdownMenu.prototype.hide = function hide(hideChildren, hideParents) {
 		var menu = this;
@@ -3360,8 +3366,8 @@ usePseudoClipboard = false;
 			if(!keydownEvent && event) keydownEvent = event;
 			
 			// Prevent appending the hashtag #
-			keydownEvent.preventDefault();
-			keydownEvent.stopPropagation();
+			//keydownEvent.preventDefault();
+			//keydownEvent.stopPropagation();
 			
 			var keySpace= 32;
 			var keyEnter = 13;
@@ -3696,8 +3702,7 @@ usePseudoClipboard = false;
 			item.subMenu.show(rect);
 			
 			// Prevent navigation on the link
-			mouseEvent.preventDefault();
-			mouseEvent.stopPropagation();
+			// Do not call preventDefault here or it would cause the submenu to hide when we move the mouse to a sibling!
 			return false;
 			
 		}

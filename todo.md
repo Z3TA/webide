@@ -38,6 +38,7 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+todo: Fix file tabs and window menu styling in dark theme
 
 
 Adding more keyboard shortcuts from: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts

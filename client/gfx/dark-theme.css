@@ -102,6 +102,24 @@ ul#tabList li.tabFileItem.active {
 	
 }
 
+ul#tabList li.tabFileItem a {
+	border-bottom: 2px solid transparent;
+	color: rgb(180,160,170);
+	
+	text-decoration: none;
+}
+
+ul#tabList li.tabFileItem a:visited {
+	
+}
+
+ul#tabList li.tabFileItem.active a {
+	padding-bottom: 1px;
+	border-bottom: 1px solid orange;
+	color: #f2f2f2;
+}
+
+
 
 select, select.functionList {
 	padding-left: 2px;
@@ -215,9 +233,7 @@ select, select.functionList {
 }
 
 
-
-
-.windowMenu .item:hover {
+.windowMenu .menu .item.hovering {
 	background-color: #2e60d0;
 	color: #ffffff;
 }
@@ -230,7 +246,7 @@ select, select.functionList {
 	color: #787982;
 }
 
-.windowMenu .item:hover .key {
+.windowMenu .item.hovering .key {
 	color: #ffffff;
 }
 
