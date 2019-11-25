@@ -4742,19 +4742,16 @@ EDITOR.fireEvent("btk");
 
 	var audioCtx; // AudioContext must be created after a user gesture!
 
-	EDITOR.onNextInteraction(function createAudioContext() {
-		var Audio = window.AudioContext || window.webkitAudioContext;
-		if(Audio) audioCtx = new Audio;
-		else console.warn("Audio API not supported on " + BROWSER);
-	});
-
-	
 	EDITOR.beep = function beep(volume, frequency, type, duration) {
 		// Makes a beep sound
 		
 		if(!audioCtx) {
-			console.warn("Audio API not supported on " + BROWSER);
-			return;
+			var Audio = window.AudioContext || window.webkitAudioContext;
+			if(Audio) audioCtx = new Audio;
+			else { 
+				console.warn("Audio API not supported on " + BROWSER);
+				return;
+			}
 		}
 		
 		if(volume == undefined) volume = 0.15;
