@@ -202,6 +202,10 @@
 	
 	var winMenuVim;
 	
+	var initialized = false;
+	
+	
+	
 	EDITOR.on("start", function addVimNormalMode() {
 		EDITOR.addMode("vimNormal");
 		EDITOR.addMode("vimInsert");
@@ -213,42 +217,11 @@
 		load: function loadVim() {
 			//vimMenuItem = EDITOR.ctxMenu.add("Vim/modal mode", toggleVim);
 			
-			EDITOR.on("fileOpen", vimFileOpen);
-			EDITOR.on("fileClose", vimFileClose);
-			EDITOR.on("fileShow", vimFileShow);
-			EDITOR.on("fileHide", vimFileHide);
-			
 			// If more modes are added we want to move the toggle modes out
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: M, combo: CTRL, mode: "*"});
 			
 			winMenuVim = EDITOR.windowMenu.add(S("vim_command_mode"), [S("Editor"), 12], toggleVim);
 			
-			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
-			
-			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: escapeFromInsert, charCode: ESC, combo: 0, mode: "vimInsert"});
-			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: vimEscape, charCode: ESC, combo: 0, mode: "vimNormal"});
-			
-			EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
-			EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeftArrowKey, charCode: LEFT, combo: 0, mode: "*"});
-			EDITOR.bindKey({desc: "Vim arrow right: Move caret right", fun: vimRightArrowKey, charCode: RIGHT, combo: 0, mode: "*"});
-			EDITOR.bindKey({desc: "Vim arrow up", fun: vimUpArrowKey, charCode: UP, combo: 0, mode: "*"});
-			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDownArrowKey, charCode: DOWN, combo: 0, mode: "*"});
-			
-			EDITOR.bindKey({desc: "Vim HOME", fun: vimHome, charCode: HOME, combo: 0, mode: "*"});
-			
-			EDITOR.bindKey({desc: "Vim END in Normal mode", fun: vimEndNormal, charCode: END, combo: 0, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Vim END in Insert mode", fun: vimEndInsert, charCode: END, combo: 0, mode: "vimInsert"});
-			
-			EDITOR.bindKey({desc: "Vim where am I", fun: vimWhereAmI, charCode: G, combo: CTRL, mode: "vimNormal"});
-			
-			EDITOR.bindKey({desc: "Vim Delete", fun: vimDelete, charCode: DELETE, combo: 0, mode: "*"});
-			
-			EDITOR.bindKey({desc: "Scroll half a window up", fun: vimScrollHalfScreenUp, charCode: U, combo: CTRL, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Scroll half a window down", fun: vimScrollHalfScreenDown, charCode: D, combo: CTRL, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Scroll one line up", fun: vimScrollOneLineUp, charCode: Y, combo: CTRL, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Scroll one line down", fun: vimScrollOneLineDown, charCode: E, combo: CTRL, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Scroll a whole a screen up", fun: vimScrollWholeScreenUp, charCode: B, combo: CTRL, mode: "vimNormal"});
-			EDITOR.bindKey({desc: "Scroll a whole a screen down", fun: vimScrollWholeScreenDown, charCode: F, combo: CTRL, mode: "vimNormal"});
 			
 			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
@@ -263,7 +236,6 @@
 				}
 			// TEST-CODE-END
 			
-			EDITOR.addRender(showCommandBuffer, 4600);
 			
 			if((window.location.href.indexOf("&vimactive") != -1)) {
 				toggleVim();
@@ -294,6 +266,54 @@
 		}
 		});
 		
+	function initVim() {
+		/*
+			Load these only when required, for fast editor startup time
+			
+			before: Load plugin: loadVim: 3.615234375ms
+			after: Load plugin: loadVim: 0.367919921875ms
+			
+		*/
+		
+		EDITOR.on("fileOpen", vimFileOpen);
+		EDITOR.on("fileClose", vimFileClose);
+		EDITOR.on("fileShow", vimFileShow);
+		EDITOR.on("fileHide", vimFileHide);
+		
+		
+		
+		EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
+		
+		EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: escapeFromInsert, charCode: ESC, combo: 0, mode: "vimInsert"});
+		EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: vimEscape, charCode: ESC, combo: 0, mode: "vimNormal"});
+		
+		EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
+		EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeftArrowKey, charCode: LEFT, combo: 0, mode: "*"});
+		EDITOR.bindKey({desc: "Vim arrow right: Move caret right", fun: vimRightArrowKey, charCode: RIGHT, combo: 0, mode: "*"});
+		EDITOR.bindKey({desc: "Vim arrow up", fun: vimUpArrowKey, charCode: UP, combo: 0, mode: "*"});
+		EDITOR.bindKey({desc: "Vim arrow down", fun: vimDownArrowKey, charCode: DOWN, combo: 0, mode: "*"});
+		
+		EDITOR.bindKey({desc: "Vim HOME", fun: vimHome, charCode: HOME, combo: 0, mode: "*"});
+		
+		EDITOR.bindKey({desc: "Vim END in Normal mode", fun: vimEndNormal, charCode: END, combo: 0, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Vim END in Insert mode", fun: vimEndInsert, charCode: END, combo: 0, mode: "vimInsert"});
+		
+		EDITOR.bindKey({desc: "Vim where am I", fun: vimWhereAmI, charCode: G, combo: CTRL, mode: "vimNormal"});
+		
+		EDITOR.bindKey({desc: "Vim Delete", fun: vimDelete, charCode: DELETE, combo: 0, mode: "*"});
+		
+		EDITOR.bindKey({desc: "Scroll half a window up", fun: vimScrollHalfScreenUp, charCode: U, combo: CTRL, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Scroll half a window down", fun: vimScrollHalfScreenDown, charCode: D, combo: CTRL, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Scroll one line up", fun: vimScrollOneLineUp, charCode: Y, combo: CTRL, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Scroll one line down", fun: vimScrollOneLineDown, charCode: E, combo: CTRL, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Scroll a whole a screen up", fun: vimScrollWholeScreenUp, charCode: B, combo: CTRL, mode: "vimNormal"});
+		EDITOR.bindKey({desc: "Scroll a whole a screen down", fun: vimScrollWholeScreenDown, charCode: F, combo: CTRL, mode: "vimNormal"});
+		
+		EDITOR.addRender(showCommandBuffer, 4600);
+		
+		initialized = true;
+	}
+	
 	function noEol(file, caret) {
 		if(file == undefined) file = EDITOR.currentFile;
 		if(file == undefined) return null;
@@ -2698,6 +2718,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 	}
 	
 	function toggleVim() {
+		
 		if(VIM_ACTIVE) {
 			messageToShow = 'DEFAULT (non modal) MODE';
 			showCommandBuffer(EDITOR.canvasContext);
@@ -2715,6 +2736,10 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 		}
 		else {
 			VIM_ACTIVE = true;
+			
+			if(!initialized) initVim();
+			
+			
 			EDITOR.setMode("vimNormal");
 			
 			EDITOR.on("keyPressed", vimKeyPress);
