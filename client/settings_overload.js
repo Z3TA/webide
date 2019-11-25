@@ -3,6 +3,9 @@
 	
 	(You might want to add it to .hgignore .gitignore or equivalent)
 	
+	Note: Induvidual users can change their settings using Customization Scripts (webide_js_overload.js)
+	
+	
 	1l0Oo[]{}.,   These characters should look different using a good programmin font
 	
 	Gotchas:
@@ -27,6 +30,11 @@
 	2) Firefox on Ubuntu 16 renders font differently!
 	3) If you have a high pixel density screen you can turn off LCD-sub-pixel-antialias as it's no longer needed
 	
+	problem: Chrome will wait until the font has loaded before running code ...
+	If the browser/connection is fast we want to load the font right away,
+	but if it's slow we want to wait or even skip loading the font.
+	solution: 
+	
 */
 
 (function() { // Self calling function to not clutter global scope
@@ -37,7 +45,66 @@
 	
 	var webFontLoading;
 	
-	console.log("settings_overload.js: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
+	var slowBrowser = false;
+	var verySlowBrowser = false;
+	var loadFont = [];
+	var whenFontLoaded = [];
+
+	var slowLoad = window.setTimeout( function() {
+		slowBrowser = true;
+		console.warn("settings_overload: browser is slow");
+	}, 100 );
+	
+	var verySlowLoad = window.setTimeout( function() {
+		verySlowBrowser = true;
+		console.warn("settings_overload: Browser is VERY slow");
+	}, 1000 );
+	
+	window.addEventListener( 'load', function() {
+		window.clearTimeout(slowLoad);
+		window.clearTimeout(verySlowLoad);
+		
+		if(verySlowBrowser) {
+			console.warn("settings_overload: Not loading font because browser is too slow!");
+			return;
+		}
+		
+		if(typeof loadFont != "function") {
+			console.log("settings_overload: No web font will be loaded!");
+			return;
+		}
+		
+		loadFont();
+		
+		if(document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(function () {
+				
+				console.log("settings_overload: All fonts ready!");
+				
+				if(typeof whenFontLoaded == "function") whenFontLoaded();
+
+				// Re-render with the new font
+				EDITOR.renderNeeded();
+				EDITOR.render();
+			});
+		}
+		else {
+			// Re-render after the font have fully loaded (we never know when)
+			setTimeout(function renderAfterFontLoad() {
+
+				console.log("settings_overload: All fonts ready maybe!?");
+				
+				if(typeof whenFontLoaded == "function") whenFontLoaded();
+				
+				EDITOR.renderNeeded();
+				EDITOR.render();
+			}, slowLoad ? 5000 : 1000);
+		}
+		
+		
+	}, false );
+	
+	console.log("settings_overload: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
 	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
@@ -58,9 +125,13 @@
 			
 			*/
 		
-		debug("Using ligatures with FiraCode");
-		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
-		EDITOR.settings.style.font = "Fira Code";
+debug("Using ligatures with FiraCode");
+		webFontLoading = "FiraCode";
+		loadFont = function() {
+			UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
+		};
+		whenFontLoaded = function() {
+EDITOR.settings.style.font = "Fira Code";
 		
 		if(browser == "Firefox") {
 			// Firefox renders font's differently
@@ -75,8 +146,8 @@
 			EDITOR.settings.gridWidth = 7.83;
 			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
 		}
+		};
 		
-		webFontLoading = "FiraCode";
 		
 	}
 	else if(MSWIN && (RUNTIME == "nw.js" || browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
@@ -171,27 +242,34 @@
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
 			// LiberationMono looks nice in Edge!
-			webFontLoading = "liberationMono";
-			UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css");
-			EDITOR.settings.style.font = "LiberationMono";
-			EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
-			EDITOR.settings.style.fontSize = 14;
-			EDITOR.settings.gridHeight = 22;
-			EDITOR.settings.gridWidth = 8.433;
+webFontLoading = "liberationMono";
+			loadFont = function() {
+				UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css");
+			};
+			whenFontLoaded = function() {
+EDITOR.settings.style.font = "LiberationMono";
+				EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
+				EDITOR.settings.style.fontSize = 14;
+				EDITOR.settings.gridHeight = 22;
+				EDITOR.settings.gridWidth = 8.433;
+			};
 			
 		}
+
 		else {
 			
+webFontLoading = "DejaVuSansMono";
+			loadFont = function() {
 			try {
 UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
-				webFontLoading = "DejaVuSansMono";
 			}
 			catch(err) {
 				if(err) {
 					debug("Failed to load font: " + err.message);
 				}
 			}
-			
+			};
+			whenFontLoaded = function() {
 			if(webFontLoading == "DejaVuSansMono") {
 				EDITOR.settings.style.font = "DejaVuSansMono";
 				EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
@@ -205,6 +283,8 @@ UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 			}
 			}
+			};
+
 		}
 		
 		
@@ -254,22 +334,16 @@ UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		
 	}
 	
-	if(webFontLoading) {
-// Re-render after the font have fully loaded (we never know when)
-		setTimeout(function renderAfterFontLoad() {
-			EDITOR.renderNeeded();
-			EDITOR.render();
-		}, 1000);
-	}
-	
 	function debug(msg) {
 		
-		console.log("settings_overload.js: debug: " + msg);
+		console.log("settings_overload: debug: " + msg);
 		return;
 		
 		// Because Edge and Firefox's Developer tools are so freaking slow
-		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform +
-		"\nligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\nMSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE);
+		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
+"MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
+		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n");
+		
 	}
 	
 	
