@@ -38,20 +38,15 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-Server issues:
-Program exit
-Nov 22 17:25:22 webide.se nodejs[22022]:                       
-Nov 22 17:25:22 webide.se nodejs[22022]:                        
-Nov 22 17:25:22 webide.se nodejs[22022]: /srv/webide/server/server.js:2392
-Nov 22 17:25:22 webide.se nodejs[22022]:                                         throw err;
-Nov 22 17:25:22 webide.se nodejs[22022]:                                         ^
-Nov 22 17:25:22 webide.se nodejs[22022]: Error: Command failed: mount --bind /var/run/mysqld/mysqld.sock /home/johan/sock/mysql
-Nov 22 17:25:22 webide.se nodejs[22022]: mount: /home/johan/sock/mysql: mount(2) system call failed: No such file or directory.
 
 
+Editor resize called twise! 
 
+Loaded bundle in 960ms if you do not count the renderAfterFontLoad and 
 
+FMP at 260ms
 
+Optemize startup time, release
 
 
 mouse select test fails on Android smartphone ... mouse_select.js:653

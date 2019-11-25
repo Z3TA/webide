@@ -94,10 +94,13 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 			
 			console.log(script.tag);
 			
+			bundle = bundle.replace("!SCRIPT_HERE!", "");
+			bundle = bundle.replace(script.tag, "!SCRIPT_HERE!");
+			
+			script.minified = minifiedJs;
+			
 			// Any $ dollar sign will do weird stuff in JavaScript's string replace, here's a workaround:
-			
-			bundle = bundle.replace(script.tag, function(){return '<script><!--\n' + minifiedJs + '\n--></script>\n'});
-			
+			//bundle = bundle.replace(script.tag, function(){return '<script><!--\n' + minifiedJs + '\n--></script>\n'});
 			
 			// not minified:
 			//bundle = bundle.replace(script.tag, function(){return '<script><!--\n' + content + '\n--></script>\n'});
@@ -117,11 +120,23 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 function done() {
 	var fs = require("fs");
 		
-		// Finally minify the HTML
-		console.log("Minifying final bundle ...");
-		var minify = require('html-minifier').minify;
-		var result = minify(bundle, {
-			removeComments: true,
+	/*
+		only one script tag in the bundle.htm !
+		Using Chrome lighthouse audit (default setting with throttling)
+		before: Score: 55 (First Contentful Paint 5.4 s), trace: DomContentLoaded@236ms  FirstMeaningfulPaint@275
+		after: Score: 48 (First Contentful Paint 5.5 s), trace: DomContentLoaded@106ms FirstMeaningfulPaint@218
+	*/
+	
+	var scriptContent = "";
+	for (var i=0; i<scripts.length; i++) {if(scripts[i].minified) scriptContent = scriptContent + scripts[i].minified + "\n";}
+	bundle = bundle.replace("!SCRIPT_HERE!", function(){return '<script><!--\n' + scriptContent + '\n--></script>\n'});
+	
+	
+	// Finally minify the HTML
+	console.log("Minifying final bundle ...");
+	var minify = require('html-minifier').minify;
+	var result = minify(bundle, {
+		removeComments: true,
 collapseWhitespace: true,
 			
 			minifyCSS: true,
