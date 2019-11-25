@@ -1966,11 +1966,22 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			// recursion is dangerious!
 			if(typeof recursion != "number") recursion = 0;
 			if(recursion > 100) {
-				throw new Error("UTIL.joinPaths: recursion=" + recursion + " paths.length=" + paths.length + " paths=", paths + " pathsParameter=", pathsParameter);
+				UTIL.objInfo(pathsParameter);
+				throw new Error("UTIL.joinPaths: Too much recursion=" + recursion + " paths.length=" + paths.length + " pathsParameter.length=" + pathsParameter.length + " pathsParameter=", pathsParameter);
 			}
 			
 			//console.log("flatten: paths=" + JSON.stringify(paths));
 			for (var i=0; i<paths.length; i++) {
+				
+				try {
+					var debugStr = JSON.stringify(paths[i], null, 2);
+				}
+				catch(err) {
+					// Probably circual structure
+					paths.splice(i, 1);
+					return flatten(paths, ++recursion);
+				}
+				
 				if( Array.isArray(paths[i]) ) {
 					if(paths[i].length == 0) {
 						paths.splice(i, 1);
@@ -1978,8 +1989,10 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 					}
 					else {
 						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
-						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
-						return flatten(paths, ++recursion);
+						var first = paths.slice( 0, i );
+						var middle = paths[i];
+						var end = paths.slice( i+1 );
+						return flatten(first.concat(middle, end), ++recursion);
 					}
 				}
 			}

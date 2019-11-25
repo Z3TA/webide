@@ -38,14 +38,12 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Load plugin: loadVim: 3.615234375ms
 
+Investigating if there are any plugins that take a long time to start...
 
-It seems Chrome wants to load error.svg and the font before doing anything else ...
-before: FMP 6632ms
-after: 
+low hanging fruit
 
-
-Editor resize called twise! 
 
 Loaded bundle in 960ms if you do not count the renderAfterFontLoad and 
 

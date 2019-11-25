@@ -1668,6 +1668,7 @@
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo//bar/baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		UTIL.assert(UTIL.toSystemPathDelimiters("C:\\\\foo\\\\bar\\\\baz.txt"), "C:\\\\foo\\bar\\baz.txt");
 		
+		
 		EDITOR.changeWorkingDir(oldWorkingDir);
 		
 		callback(true);
@@ -2076,7 +2077,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function testJoinPath(callback) {
+	EDITOR.addTest(1, function testJoinPath(callback) {
 		
 		var assert = UTIL.assert;
 		
@@ -2084,6 +2085,12 @@
 		assert(UTIL.joinPaths(["foo", ["keff", "beff"], "baz"]), "/foo/keff/beff/baz");
 		assert(UTIL.joinPaths("foo", ["keff", "beff"], "baz"), "/foo/keff/beff/baz");
 		assert(UTIL.joinPaths("http://127.0.0.1:8080/xucxrrklac/", ["en"], "index.htm"), "http://127.0.0.1:8080/xucxrrklac/en/index.htm");
+		
+		assert(UTIL.joinPaths([
+			"foo", 
+			["a", ["b", "c", ["d", "e"]]], 
+			"bar"
+		]), "/foo/a/b/c/d/e/bar/");
 		
 		
 		callback(true);

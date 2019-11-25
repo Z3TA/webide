@@ -2422,7 +2422,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	function getHomeDir() {
 		// User might now be logged in!
-		return EDITOR.user && EDITOR.user.home ? EDITOR.user.home : "/";
+		if(typeof EDITOR == "undefined") return "/";
+		if(!EDITOR.user) return "/";
+		
+		if(typeof EDITOR.user.home != "string") throw new Error("Not a string: " + EDITOR.user.home);
+		
+		return EDITOR.user.home;
 	}
 	
 	function collabFileChange(file, change, text, index, row, col) {
