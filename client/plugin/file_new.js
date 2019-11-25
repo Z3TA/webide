@@ -12,7 +12,7 @@
 	
 	EDITOR.plugin({
 		desc: "Create new file option to context menu and bound to Ctrl + N",
-		load: function load() {
+		load: function loadNewFilePlugin() {
 			// Bind to ctrl + N
 			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: newFileFromKeyboardCombo});
 			
@@ -24,7 +24,7 @@
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
 		},
-		unload: function unload() {
+		unload: function unloadNewFilePlugin() {
 			EDITOR.ctxMenu.remove(menuItem);
 			EDITOR.windowMenu.remove(winMenuNewFile);
 			

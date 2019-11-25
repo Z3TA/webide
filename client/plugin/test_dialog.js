@@ -9,13 +9,13 @@
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Test stuff",
-		load: function() {
+		load: function loadTestDialog() {
 			var charCode_D = 68;
 
 EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
 			
 		},
-		unload: function() {
+		unload: function unloadTestDialog() {
 		
 			EDITOR.unbindKey(testDialogs);
 			

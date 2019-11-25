@@ -78,14 +78,14 @@ prototype: {
 	
 	EDITOR.plugin({
 		desc: "Autocomplete for Node.JS",
-		load: function load() {
+		load: function loadNodejsAutocomplete() {
 			
 			EDITOR.on("autoComplete", autoCompleteNode);
 			
 			moduleInfoCache = {};
 			
 		},
-		unload: function unload() {
+		unload: function unloadNodejsAutocomplete() {
 			EDITOR.removeEvent("autoComplete", autoCompleteNode);
 			
 			moduleInfoCache = null;

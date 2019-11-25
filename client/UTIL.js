@@ -672,11 +672,15 @@ originalRow.push("");
 console.warn("fun=" + fun);
 			return fun;
 		}
-		if(fun.name) return fun.name;
+		
+		//if(fun.name) return fun.name;
 		
 		var ret = fun.toString();
 		ret = ret.substr('function '.length);
 		ret = ret.substr(0, ret.indexOf('('));
+		
+		if(fun.name && (ret.indexOf(" ") != -1 || ret.indexOf(")") != -1 || ret.indexOf("{") != -1 || ret.indexOf(" ") != -1)) return fun.name;
+		
 		return ret;
 	},
 

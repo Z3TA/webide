@@ -3,10 +3,10 @@
 	
 	EDITOR.plugin({
 		desc: "Highlight current line",
-		load: function() {
+		load: function loadLineHighlightRenderer() {
 			EDITOR.addRender(highLightLine, 100);
 },
-unload: function() {
+		unload: function unloadLineHighlightRenderer() {
 			EDITOR.removeRender(highLightLine);
 }
 	});

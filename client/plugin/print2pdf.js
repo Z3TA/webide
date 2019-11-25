@@ -29,7 +29,7 @@
 	
 	EDITOR.plugin({
 		desc: "Print to PDF",
-		load: function() {
+		load: function loadPrint2PdfSupport() {
 			
 			//menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
 			
@@ -38,7 +38,7 @@
 			winMenuPrint = EDITOR.windowMenu.add(S("print_to_pdf"), [S("Tools"), 6], print2pdf);
 			
 		},
-		unload: function() {
+		unload: function unloadPrint2PdfSupport() {
 			
 			//EDITOR.ctxMenu.remove(menuItem);
 			

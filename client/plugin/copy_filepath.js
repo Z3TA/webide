@@ -6,7 +6,7 @@
 	
 	EDITOR.plugin({
 		desc: 'Adds "Copy file path" to the context menu',
-		load: function load() {
+		load: function loadCopyFilePath() {
 			
 			menuItem = EDITOR.ctxMenu.add(S("copy_file_path"), copyFilePath, 5);
 			winMenuCopyFilePath = EDITOR.windowMenu.add(S("copy_file_path"), [S("File"), 5], copyFilePath);
@@ -14,7 +14,7 @@
 			EDITOR.registerAltKey({char: "d", alt:1, label: S("copy_file_path"), fun: copyFilePath});
 			
 		},
-		unload: function unload() {
+		unload: function unloadCopyFilePath() {
 			EDITOR.ctxMenu.remove(menuItem);
 			EDITOR.windowMenu.remove(winMenuCopyFilePath);
 			}

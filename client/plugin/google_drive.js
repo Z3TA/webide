@@ -23,7 +23,7 @@ console.warn("Disabling Google Drive integration when running locally");
 	
 EDITOR.plugin({
 	desc: "Mount Google Drive",
-	load: function() {
+	load: function loadGoogleDriveSupport() {
 			menuItem = EDITOR.ctxMenu.add(GD_MENU_NOT_CONNECTED, googleDriveInit, 17);
 
 			winMenuGoogleDrive = EDITOR.windowMenu.add("Google Drive", [S("Editor"), S("remote_fs"), 2], toggleGoogleDrive);
@@ -31,7 +31,7 @@ EDITOR.plugin({
 			EDITOR.registerAltKey({char: "&", alt:3, label: "Google Drive", fun: toggleGoogleDrive});
 			
 },
-	unload: function() {
+		unload: function unloadGoogleDriveSupport() {
 EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.windowMenu.remove(winMenuGoogleDrive);

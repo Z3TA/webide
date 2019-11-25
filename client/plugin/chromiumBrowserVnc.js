@@ -13,13 +13,13 @@
 	
 	EDITOR.plugin({
 		desc: "Run chromium-browser in noVNC",
-		load: function() {
+		load: function loadChromeBrowserInVnc() {
 			
 			var char_C = 67;
 			
 			EDITOR.bindKey({desc: "Launch chromium-browser in VNC", fun: debugInBrowserVnc, charCode: char_C, combo: CTRL + ALT});
 		},
-		unload: function() {
+		unload: function unloadChromeBrowserInVnc() {
 			EDITOR.unbindKey(debugInBrowserVnc);
 		}
 	});

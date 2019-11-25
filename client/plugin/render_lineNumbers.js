@@ -22,7 +22,7 @@
 	
 	EDITOR.plugin({
 		desc: "Render line numbers",
-		load: function() {
+		load: function loadLineNumberRenderer() {
 			// lineNumbers function will be called on every frame render
 			EDITOR.addRender(paintLineNumbers, 900);
 			
@@ -49,7 +49,7 @@
 			// END DEBUG CODE
 			
 		},
-		unload: function() {
+		unload: function unloadLineNumberRenderer() {
 			EDITOR.removeRender(paintLineNumbers);
 			EDITOR.removeEvent("afterResize", linerNumbersAfterResize);
 			cacheCanvas = null;

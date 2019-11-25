@@ -7,14 +7,14 @@
 	
 	EDITOR.plugin({
 		desc: "Show animation when deleting letters",
-		load: function() {
+		load: function loadExploadingCharacters() {
 			
 			windowMenuExplodingCharacters = EDITOR.windowMenu.add(S("exploding_characters"), [S("View"), S("Effects"), 60, 1], toggleExplodingCharacters);
 			
 			if(activated) activateExplodingCharacters();
 			
 		},
-		unload: function() {
+		unload: function unloadExploadingCharacters() {
 			
 			deactivateExplodingCharacters();
 			

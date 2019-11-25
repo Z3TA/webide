@@ -5,13 +5,13 @@
 	
 	EDITOR.plugin({
 		desc: "Launch noVNC",
-		load: function() {
+		load: function loadVncSupport() {
 			
 			var char_V = 86;
 			
 			EDITOR.bindKey({desc: "Launch noVNC", fun: launchNoVnc, charCode: char_V, combo: CTRL + ALT});
 		},
-		unload: function() {
+		unload: function unloadVncSupport() {
 			EDITOR.unbindKey(launchNoVnc);
 		}
 	});

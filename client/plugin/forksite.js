@@ -5,7 +5,7 @@
 	
 EDITOR.plugin({
 		desc: "Fork a web site",
-		load: function() {
+		load: function loadForSite() {
 
 			// Wait until logged in
 			CLIENT.on("loginSuccess", forkSiteAfterLoggedIn);
@@ -30,7 +30,7 @@ EDITOR.plugin({
 			}
 			
 		},
-		unload: function() {
+		unload: function unloadForSite() {
 			
 			CLIENT.removeEvent("loginSuccess", forkSiteAfterLoggedIn);
 			

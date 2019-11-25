@@ -35,7 +35,7 @@
 	
 	EDITOR.plugin({
 		desc: "Format JS using js-beautify",
-		load: function() {
+		load: function loadJSbeautifyTextWrapper() {
 			
 			//menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
 			
@@ -48,7 +48,7 @@
 			EDITOR.on("ctxMenu", wrapJsMaybe);
 			
 		},
-		unload: function() {
+		unload: function unloadJSbeautifyTextWrapper() {
 			
 			//EDITOR.ctxMenu.remove(menuItem);
 			
