@@ -198,7 +198,7 @@ EDITOR.changeWorkingDir(directory);
 		
 		EDITOR.ctxMenu.hide();
 		
-		//alertBox("toState=" + toState);
+		//alertBox("toggleFileExplorer: toState=" + toState);
 		
 		if(typeof toState == "boolean") visible = toState;
 		else visible = visible ? false : true; // Switch
@@ -286,6 +286,8 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 	}
 	
 	function exploreDir(fullPath) {
+		
+		//alertBox("exploreDir: fullPath=" + fullPath);
 		
 		console.warn("Exploring fullPath=" + fullPath);
 		
