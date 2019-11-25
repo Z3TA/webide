@@ -325,7 +325,7 @@
 	
 	function saveRecord() {
 		
-		var audioFilePath = UTIL.joinPaths(EDITOR.user.home, "/recordings/", recordInfo.startFile + ".ogg");
+		var audioFilePath = UTIL.joinPaths(getHomeDir(), "/recordings/", recordInfo.startFile + ".ogg");
 		
 		if(!recordInfo || !record) return alertBox("Unable to save recordning. No recorded input?");
 		
@@ -352,7 +352,7 @@ alertBox("No audio data!");
 				record: record
 			}
 			
-			EDITOR.openFile(UTIL.joinPaths(EDITOR.user.home, "/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
+			EDITOR.openFile(UTIL.joinPaths(getHomeDir(), "/recordings/", recordInfo.startFile + ".json"), JSON.stringify(data, null, 2));
 		}
 	}
 	
@@ -407,7 +407,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			loadRecord(file);
 		}
 		
-		var wwwpub = UTIL.joinPaths(EDITOR.user.home, "/wwwpub/");
+		var wwwpub = UTIL.joinPaths(getHomeDir(), "/wwwpub/");
 		var rootFolder = UTIL.joinPaths(wwwpub, "/recordings/");
 		var audioFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".ogg");
 		var dataFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".json");
@@ -1614,7 +1614,7 @@ var file = fileOrData;
 	function playBackFile(filePath) {
 		// Prevent playback from overwriting existing files
 		
-		var playbackDir = UTIL.joinPaths(EDITOR.user.home, "/playback/");
+		var playbackDir = UTIL.joinPaths(getHomeDir(), "/playback/");
 		
 		if(UTIL.isInFilePath(filePath, playbackDir)) {
 			// Note: The recorder might move the mouse over /foo/bar, but when playing back
@@ -2420,6 +2420,11 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		return true;
 	}
 	
+	function getHomeDir() {
+		// User might now be logged in!
+		return EDITOR.user && EDITOR.user.home ? EDITOR.user.home : "/";
+	}
+	
 	function collabFileChange(file, change, text, index, row, col) {
 		if(ignoreFileChange) return true;
 		
@@ -2492,7 +2497,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			ignoreUndoRedoEvent[file.path].push(fileChangeEvent.order);
 		}
 		
-		var playbackDir = UTIL.joinPaths(EDITOR.user.home, "/playback/");
+		var playbackDir = UTIL.joinPaths(getHomeDir(), "/playback/");
 		
 		if(isRecording) {
 			recordFileChange(file, fileChangeEvent);
