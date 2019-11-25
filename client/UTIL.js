@@ -1901,7 +1901,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 	},
 	
-	joinPaths: function joinPaths(paths) {
+	joinPaths: function joinPaths(pathsParameter) {
 		/*
 			
 			Puts a folder delimiter between each items in the array. Examples:
@@ -1914,18 +1914,18 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		//console.log("joinPaths: arguments=" + JSON.stringify(arguments));
 		
-		if(Object.prototype.toString.call( paths ) != '[object Array]') {
-			paths = [];
+		if(Object.prototype.toString.call( pathsParameter ) != '[object Array]') {
+			pathsParameter = [];
 			for (var i=0; i<arguments.length; i++) {
-				if(arguments[i]) paths.push(arguments[i]);
+				if(arguments[i]) pathsParameter.push(arguments[i]);
 			}
-			//paths = Array.prototype.slice.call(arguments);
-			//throw new Error("joinPaths: Argument needs to be an array: paths=" + paths);
+			//pathsParameter = Array.prototype.slice.call(arguments);
+			//throw new Error("joinPaths: Argument needs to be an array: pathsParameter=" + pathsParameter);
 		}
 		
 		//console.log("joinPaths: (before flatten): paths=" + JSON.stringify(paths));
 		
-		paths = flatten(paths);
+		var paths = flatten(pathsParameter);
 		
 		
 		//console.log("joinPaths: (after flatten): paths=" + JSON.stringify(paths));
@@ -1962,18 +1962,24 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		return path;
 		
-		function flatten(paths) {
+		function flatten(paths, recursion) {
+			// recursion is dangerious!
+			if(typeof recursion != "number") recursion = 0;
+			if(recursion > 100) {
+				throw new Error("UTIL.joinPaths: recursion=" + recursion + " paths.length=" + paths.length + " paths=", paths + " pathsParameter=", pathsParameter);
+			}
+			
 			//console.log("flatten: paths=" + JSON.stringify(paths));
 			for (var i=0; i<paths.length; i++) {
 				if( Array.isArray(paths[i]) ) {
 					if(paths[i].length == 0) {
 						paths.splice(i, 1);
-						return flatten(paths);
+						return flatten(paths, ++recursion);
 					}
 					else {
 						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
 						paths = paths.slice( 0, i ).concat( paths[i] ).concat( paths.slice( i+1 ) );
-						return flatten(paths);
+						return flatten(paths, ++recursion);
 					}
 				}
 			}
