@@ -673,13 +673,15 @@ console.warn("fun=" + fun);
 			return fun;
 		}
 		
-		//if(fun.name) return fun.name;
+		// perf: Using fun.name is 5 times faster then stringifying the function!
+		
+		if(fun.name) return fun.name;
 		
 		var ret = fun.toString();
 		ret = ret.substr('function '.length);
 		ret = ret.substr(0, ret.indexOf('('));
 		
-		if(fun.name && (ret.indexOf(" ") != -1 || ret.indexOf(")") != -1 || ret.indexOf("{") != -1 || ret.indexOf(" ") != -1)) return fun.name;
+		//if(fun.name && (ret == "" || ret.indexOf(" ") != -1 || ret.indexOf(")") != -1 || ret.indexOf("{") != -1 || ret.indexOf(" ") != -1)) return fun.name;
 		
 		return ret;
 	},

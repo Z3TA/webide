@@ -39,10 +39,6 @@ What I'm working on
 -------------------
 
 
-Investigating if there are any plugins that take a long time to start...
-
-low hanging fruit
-
 
 Loaded bundle in 960ms if you do not count the renderAfterFontLoad and 
 

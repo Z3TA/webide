@@ -47,7 +47,7 @@ EDITOR.plainTextFileExtensions = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
-	devMode: false,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
@@ -8417,7 +8417,7 @@ function main() {
 		console.log("Loading plugins (length=" + pluginLoaders.length + ")");
 		for(var i=0; i<pluginLoaders.length; i++) {
 			
-			console.time("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
+			//console.time("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
 			
 		if(EDITOR.settings.devMode) {
 				pluginLoaders[i](EDITOR);
@@ -8434,7 +8434,7 @@ function main() {
 			}
 		}
 			
-			console.timeEnd("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
+			//console.timeEnd("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
 	}
 	
 	
