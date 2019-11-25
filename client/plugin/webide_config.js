@@ -12,18 +12,18 @@
 	
 	EDITOR.plugin({
 		desc: "Editor configuration and customization via JS and CSS overloading",
-		load: load,
-		unload: unload,
+		load: loadCustomizationScripts,
+		unload: unloadCustomizationScripts,
 		order: 10000 // Run late
 	});
 	
-	function unload() {
+	function unloadCustomizationScripts() {
 		EDITOR.removeEvent("afterSave", configurationMaybe);
 		EDITOR.unregisterAltKey(showLocalCustomization);
 		EDITOR.windowMenu.remove(winMenuEditorCustomization);
 	}
 	
-	function load() {
+	function loadCustomizationScripts() {
 		if(!window.localStorage) {
 			console.warn("window.localStorage not available. Not able to load user configuration/customization!");
 			return;

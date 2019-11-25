@@ -33,7 +33,12 @@
 	problem: Chrome will wait until the font has loaded before running code ...
 	If the browser/connection is fast we want to load the font right away,
 	but if it's slow we want to wait or even skip loading the font.
-	solution: 
+	
+	solution: Wait for page load event before loading web fonts ?
+	before: FMP 6632ms
+	after: FMP 6123
+	
+	
 	
 */
 

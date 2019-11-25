@@ -7,11 +7,11 @@
 	
 	EDITOR.plugin({
 		desc: "Convert line break convention between Unix and Windows format (LF vs CRLF)",
-		load: load,
-		unload: unload,
+		load: loadLineBreakConventionManager,
+		unload: unloadLineBreakConventionManager,
 	});
 	
-	function load() {
+	function loadLineBreakConventionManager() {
 		
 		//menuItem = EDITOR.ctxMenu.add("Convert line-breaks", convertLinebreaks, 7);
 		
@@ -21,7 +21,7 @@
 		
 	}
 	
-	function unload() {
+	function unloadLineBreakConventionManager() {
 		//EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(winMenu);
 		EDITOR.unregisterAltKey(convertLinebreaks);

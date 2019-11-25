@@ -9,11 +9,11 @@
 	
 	EDITOR.plugin({
 		desc: "Enables refreshing the CSS",
-		load: load,
-		unload: unload,
+		load: loadCssRefresh,
+		unload: unloadCssRefresh,
 		});
 	
-	function load() {
+	function loadCssRefresh() {
 		var F6 = 117;
 		EDITOR.bindKey({desc: S("refresh_css"), charCode: F6, fun: refreshCss, combo: 0});
 		
@@ -21,7 +21,7 @@
 		
 		}
 	
-	function unload() {
+	function unloadCssRefresh() {
 		EDITOR.unbindKey(refreshCss);
 	
 		EDITOR.windowMenu.remove(winMenuCSS_refresh);

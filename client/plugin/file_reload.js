@@ -7,11 +7,11 @@
 	
 	EDITOR.plugin({
 		desc: "Adds option to reload the file from disk in the context menu",
-		load: load,
-		unload: unload
+		load: loadFileReload,
+		unload: unloadFileReload
 	});
 	
-	function load() {
+	function loadFileReload() {
 		
 		menuItem = EDITOR.ctxMenu.add(S("reload_from_disk"), reloadFile, 6);
 		winMenuReloadFromDisk = EDITOR.windowMenu.add(S("reload_from_disk"), [S("Edit"), 4], reloadFile);
@@ -20,7 +20,7 @@
 		
 	}
 	
-	function unload() {
+	function unloadFileReload() {
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
 		EDITOR.unregisterAltKey(reloadFile);

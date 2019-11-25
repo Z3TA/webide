@@ -6,11 +6,11 @@
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Word wrap text to fit inside line length limit",
-		load: load,
-		unload: unload,
+		load: loadWordWrap,
+		unload: unloadWordWrap,
 	});
 	
-	function load() {
+	function loadWordWrap() {
 		EDITOR.bindKey({
 			charCode: 87,
 			combo: CTRL,
@@ -20,7 +20,7 @@
 		winMenuWrap = EDITOR.windowMenu.add(S("wrap_paragraph"), [S("Edit"), 5], wordWrap);
 	}
 	
-	function unload() {
+	function unloadWordWrap() {
 		EDITOR.unbindKey(wordWrap);
 		EDITOR.windowMenu.remove(winMenuWrap);
 	}

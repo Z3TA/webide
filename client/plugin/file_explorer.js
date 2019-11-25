@@ -35,12 +35,12 @@
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
-		load: load,
-		unload: unload,
+		load: loadFileExplorer,
+		unload: unloadFileExplorer,
 		order: 500 // functionList: 200, (a higher number makes it start later)
 	});
 	
-	function load() {
+	function loadFileExplorer() {
 		
 		console.log("Initiating file explorer");
 		
@@ -113,7 +113,7 @@
 		
 	}
 	
-	function unload() {
+	function unloadFileExplorer() {
 		
 		EDITOR.exitFullScreenWidget(fileExplorerWrap);
 		

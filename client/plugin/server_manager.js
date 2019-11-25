@@ -50,11 +50,11 @@
 	
 	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
-		load: load,
-		unload: unload,
+		load: loadFtpServerManager,
+		unload: unloadFtpServerManager,
 	});
 	
-	function load() {
+	function loadFtpServerManager() {
 		// Called when the module is loaded
 		
 		console.log("Loading server manager");
@@ -100,7 +100,7 @@
 		
 	}
 	
-	function unload() {
+	function unloadFtpServerManager() {
 		// Cleaning up, for example when disabling a plugin
 		
 		EDITOR.unbindKey(showServerManger);
