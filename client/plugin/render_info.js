@@ -16,9 +16,7 @@
 	
 	EDITOR.on("start", infoBubbles);
 	
-	// Load icons
-	var iconError = new Image();
-	iconError.src = "gfx/error.svg";
+	var iconError; // Loaded when needed
 	
 	
 	function infoBubbles() {
@@ -105,7 +103,20 @@
 			// Draw the text
 			
 			if(comment.lvl == 1) {
-				ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
+				
+				var drawErrorIcon = function() {
+					console.log("render_info: Rendering error.svg");
+					ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
+				}
+				
+				if(iconError) drawErrorIcon();
+				else {
+					console.log("render_info: Loading error.svg ...");
+					iconError = new Image();
+					iconError.src = "gfx/error.svg";
+					iconError.onload = drawErrorIcon;
+				}
+				
 				iconPadding = 25;
 			}
 			else {

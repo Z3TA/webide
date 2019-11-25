@@ -40,6 +40,11 @@ What I'm working on
 
 
 
+It seems Chrome wants to load error.svg and the font before doing anything else ...
+before: FMP 6632ms
+after: 
+
+
 Editor resize called twise! 
 
 Loaded bundle in 960ms if you do not count the renderAfterFontLoad and 
