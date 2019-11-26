@@ -4264,6 +4264,8 @@ li.onclick = function(clickEvent) {
 			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 			
+			EDITOR.input = false;
+			
 			clearSelection();
 			if(ctxMenuVisibleOnce == false) EDITOR.renderNeeded();
 			ctxMenuVisibleOnce = true;
