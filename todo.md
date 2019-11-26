@@ -38,15 +38,6 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-
-
-Loaded bundle in 960ms if you do not count the renderAfterFontLoad and 
-
-FMP at 260ms
-
-Optemize startup time, release
-
-
 mouse select test fails on Android smartphone ... mouse_select.js:653
 
 
@@ -57,6 +48,8 @@ Making it possible to use the editor without a mouse...
 ---
 
 Offline mode!
+
+Able to start the editor while offline and continue from an earlier session.
 
 Sync the whole folder (text files) with the client!
 So that you can work offline, and saved files will be synced once online!

@@ -2090,7 +2090,7 @@
 			"foo", 
 			["a", ["b", "c", ["d", "e"]]], 
 			"bar"
-		]), "/foo/a/b/c/d/e/bar/");
+		]), "/foo/a/b/c/d/e/bar");
 		
 		
 		callback(true);
