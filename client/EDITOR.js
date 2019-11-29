@@ -1030,15 +1030,18 @@ usePseudoClipboard = false;
 		EDITOR.openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
 		console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 		
+		if(state && state.image) var isImage = true;
+		else var isImage = false;
+		
 		if(text == undefined) {
 			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
-			var ext = UTIL.getFileExtension(path);
+			var fileExtension = UTIL.getFileExtension(path);
 			var imageFileExt = ["jpg", "jpge", "gif", "bmp", "tiff", "png"];
-			if(imageFileExt.indexOf(ext) != -1) {
+			if(imageFileExt.indexOf(fileExtension) != -1) {
 				var isImage = true;
-				console.log("It's a image (" + ext + "): " + path);
+				console.log("It's a image (" + fileExtension + "): " + path);
 				
 				EDITOR.readFromDisk(path, false, "base64", load);
 				
@@ -1097,7 +1100,7 @@ usePseudoClipboard = false;
 			
 			if(err) return fileOpenError(err);
 			
-			console.log("Loading file to editor: " + path);
+			console.log("Loading file (isImage=" + isImage + ") to editor: " + path);
 			
 			if(!notFromDisk && path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
@@ -1559,7 +1562,21 @@ usePseudoClipboard = false;
 			path = trimmedPath;
 		}
 		
-		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
+		
+		
+		// Save the text, do not count on the garbage collector the be "slow"
+		if(file instanceof ImageFile) {
+var text = file.canvas.toDataURL();
+			text = text.slice(text.indexOf("base64,") + 7, -1); // toDateUrl ends with a quote! Remote it!
+			var encoding = "base64";
+			var isImage = true;
+		}
+		else {
+			var text = file.text;
+			var encoding = "utf-8";
+			var isImage = false;
+		}
+		var isBuffer = false;
 		
 		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors, returns) {
 			if(errors.length > 0) {
@@ -1645,7 +1662,7 @@ usePseudoClipboard = false;
 						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
 							if(answer == overwrite) {
 								if(path != file.path) reOpen(file.path, path);
-								else EDITOR.saveToDisk(file.path, file.text, doneSaving);
+								else EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 							}
 							else {
 								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
@@ -1655,7 +1672,7 @@ usePseudoClipboard = false;
 						});
 					}
 					else if(path != file.path) reOpen(file.path, path);
-					else EDITOR.saveToDisk(file.path, file.text, doneSaving);
+					else EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 				});
 			}
 			else if(file.hash)  {
@@ -1674,11 +1691,11 @@ usePseudoClipboard = false;
 						return;
 					}
 					
-					EDITOR.saveToDisk(file.path, file.text, doneSaving);
+					EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 				});
 			}
 			else {
-				EDITOR.saveToDisk(file.path, file.text, doneSaving);
+				EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 			}
 		}
 		
@@ -1688,12 +1705,12 @@ usePseudoClipboard = false;
 			EDITOR.closeFile(oldPath, true); // true = do not switch to another file
 			
 			// Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
-			EDITOR.openFile(newPath, text, function savedAs(err, newFile) {
+			EDITOR.openFile(newPath, text, {image: isImage}, function savedAs(err, newFile) {
 				if(err) throw err;
 				
 				file = newFile;
 				
-				EDITOR.saveToDisk(file.path, file.text, doneSaving);
+				EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 			}); 
 		}
 		
@@ -1979,6 +1996,7 @@ usePseudoClipboard = false;
 			
 			if(file.canvas) {
 				
+				ctx.clearRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
 				ctx.drawImage(file.canvas, 0, 0);
 				
 				return;

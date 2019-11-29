@@ -29,10 +29,41 @@
 			
 			loadCallback();
 		};
+		
+		console.log("Loading image data... ext=" + ext + " base64.length=" + base64.length);
+		
 		image.src = "data:image/" + ext + ";base64," + base64;
+		
 		
 	}
 
+	ImageFile.prototype.saved = function(callback) {
+		/*
+			Only set state
+			Let the editor handle saving and loading from disk
+		*/
+		var file = this;
+		
+		file.isSaved = true;
+		file.changed = false;
+		file.savedAs = true;
+		
+		// The afterSave event listeners need to take a callback or return something, so we can know when they're done'
+		EDITOR.callEventListeners("afterSave", file, function allListenersCalled(errors) {
+			
+			if(errors.length > 0) console.warn("Some afterSave event listeners failed:");
+			for (var i=0; i<errors.length; i++) {
+				console.error(errors[i]);
+			}
+			
+			if(errors) var err = new Error("Some afterSave event listeners failed! (see console log's in dev tools)");
+			
+			if(callback) callback(err);
+		});
+		
+	}
+	
+	
 })();
 
 

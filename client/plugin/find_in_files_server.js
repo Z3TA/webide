@@ -165,6 +165,8 @@
 		
 		var text = file.text;
 		
+		if(text == undefined) return false;
+		
 		if(file.grid.length < 2) return false;
 		
 		var secondLineContainsRegExp = (file.rowText(1).slice(0,8) == "RegExp: ");
