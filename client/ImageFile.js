@@ -42,9 +42,6 @@
 		
 		image.src = "data:image/" + ext + ";base64," + base64;
 		
-		
-		file.zoom = 1;
-		
 		// Source (file.canvas)
 		file.sx = 0;
 		file.sy = 0;
@@ -58,7 +55,7 @@
 	ImageFile.prototype.zoom = function(zoomLevel, dCenterX, dCenterY) {
 		var file = this;
 		
-		
+		file.zoomLevel = zoomLevel;
 		
 	}
 	

@@ -66,12 +66,12 @@ unload: function unloadImageEditor() {
 		
 		var file = EDITOR.currentFile;
 		
-		var zoomLevel = file.zoom + 0.1 * dir;
+		var zoomLevel = file.zoomLevel + 0.1 * dir;
 		
 		
 		if(zoomInput) zoomInput.value = zoomLevel*100;
 		
-		file.zoom(zoomLevel);
+		(zoomLevel);
 		
 	}
 	
