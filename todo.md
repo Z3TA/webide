@@ -43,8 +43,13 @@ Image editing
 
 todo: Make a intro screencast!!! file > tutorial > intro
 
+todo: Open and edit sound files! (cut, etc)
+
 After failing to save a file on remote fs, the sft://  gets opened twice:
 sftp://192.168.0.1/sftp://192.168.0.1/tank/www/static.visual-utopia.com/terrain13.js
+
+
+bug: Autocomplete get suggestions from inlined functions, eg. from EDITOR.plugin({load: theFunctionThatIsNotGlobal() {...
 
 
 mouse select test fails on Android smartphone ... mouse_select.js:653

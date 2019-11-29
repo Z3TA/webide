@@ -46,6 +46,8 @@
 			
 			var file = EDITOR.currentFile;
 			
+			if(file.grid == undefined) return;
+			
 			if(file) {
 				
 				var maxStartRow = Math.max(0, EDITOR.currentFile.grid.length - EDITOR.view.visibleRows/2);

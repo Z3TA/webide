@@ -27,6 +27,14 @@
 			
 			file.ctx.drawImage(image, 0, 0);
 			
+			// Width/height on the file.canvas
+			file.sWidth = image.width;
+			file.sHeight = image.width;
+			
+			// Width/height on the editor canvas
+			file.dWidth = image.width;
+			file.dHeight = image.height;
+			
 			loadCallback();
 		};
 		
@@ -35,8 +43,25 @@
 		image.src = "data:image/" + ext + ";base64," + base64;
 		
 		
+		file.zoom = 1;
+		
+		// Source (file.canvas)
+		file.sx = 0;
+		file.sy = 0;
+		
+		// Destination (on the editor canvas)
+		file.dx = 0;
+		file.dy = 0;
+		
 	}
-
+	
+	ImageFile.prototype.zoom = function(zoomLevel, dCenterX, dCenterY) {
+		var file = this;
+		
+		
+		
+	}
+	
 	ImageFile.prototype.saved = function(callback) {
 		/*
 			Only set state

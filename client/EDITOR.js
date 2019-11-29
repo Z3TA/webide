@@ -1997,7 +1997,7 @@ var text = file.canvas.toDataURL();
 			if(file.canvas) {
 				
 				ctx.clearRect(0, 0, EDITOR.view.canvasWidth, EDITOR.view.canvasHeight);
-				ctx.drawImage(file.canvas, 0, 0);
+				ctx.drawImage(file.canvas, file.sx, file.sy, file.sWidth, file.sHeight, file.dx, file.dy, file.dWidth, file.dHeight);
 				
 				return;
 			}
