@@ -77,6 +77,8 @@
 		
 		if(!file) return;
 		
+		if(file.text == undefined) return;
+		
 		var pos = file.rowColFromMouse(posX, posY);
 		var row = pos.row;
 		

@@ -365,6 +365,8 @@
 	
 	function isXML(file) {
 		
+		if(file.text == undefined) return false;
+		
 		if(file.parsed) {
 		if(file.parsed.language && file.parsed.language != "XML") {
 			console.warn("File has already been parsed:  file.parsed.language=" + file.parsed.language + " file.path=" + file.path);

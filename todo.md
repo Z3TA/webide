@@ -8,6 +8,14 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 
+Image editing
+
+
+
+After failing to save a file on remote fs, the sft://  gets opened twice:
+sftp://192.168.0.1/sftp://192.168.0.1/tank/www/static.visual-utopia.com/terrain13.js
+
+
 Solve problems and pains! Do not look for problems that fit a solution!
 
 Probably should read through this file and reletlessly delete stuff.

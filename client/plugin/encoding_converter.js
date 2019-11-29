@@ -15,6 +15,8 @@
 		
 		//console.warn(new Error("File loaded!").stack);
 		
+		if(file.text == undefined) return;
+		
 		if(!file.savedAs) {
 console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
 		return;

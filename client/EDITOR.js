@@ -1034,40 +1034,51 @@ usePseudoClipboard = false;
 			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
-			// Check the file size
-			console.log("Getting file size on disk. path=" + path);
-			EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
+			var ext = UTIL.getFileExtension(path);
+			var imageFileExt = ["jpg", "jpge", "gif", "bmp", "tiff", "png"];
+			if(imageFileExt.indexOf(ext) != -1) {
+				var isImage = true;
+				console.log("It's a image (" + ext + "): " + path);
 				
-				if(err) {
-					// Some FTP servers have issues getting the file size, 
-					// and we don't want the file to fail open just because of that!
-					console.warn("Unable to get file size from disk: " + err.message);
-					EDITOR.readFromDisk(path, load);
+				EDITOR.readFromDisk(path, false, "base64", load);
+				
+			}
+			else {
+				// Check the file size
+				console.log("Getting file size on disk. path=" + path);
+				EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 					
-					//fileOpenError(err);
-				}
-				else {
-					
-					console.log("fileSizeInBytes=" + fileSizeInBytes);
-					
-					if(fileSizeInBytes > EDITOR.settings.bigFileSize) {
-						//alertBox("Opening big fies is not yet supported!");
-						//fileOpenError(new Error("File too big: " + path));
-						//return;
+					if(err) {
+						// Some FTP servers have issues getting the file size, 
+						// and we don't want the file to fail open just because of that!
+						console.warn("Unable to get file size from disk: " + err.message);
+						EDITOR.readFromDisk(path, load);
 						
-						//if(RUNTIME == "browser") return fileOpenError(new Error("Opening large files not yet supported in the browser!"));
-						
-						console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
-						var notFromDisk = false;
-						var tooBig = true;
-						var text = "";
-						load(null, path, text, notFromDisk, null, tooBig);
+						//fileOpenError(err);
 					}
 					else {
-						EDITOR.readFromDisk(path, load);
+						
+						console.log("fileSizeInBytes=" + fileSizeInBytes);
+						
+						if(fileSizeInBytes > EDITOR.settings.bigFileSize) {
+							//alertBox("Opening big fies is not yet supported!");
+							//fileOpenError(new Error("File too big: " + path));
+							//return;
+							
+							//if(RUNTIME == "browser") return fileOpenError(new Error("Opening large files not yet supported in the browser!"));
+							
+							console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
+							var notFromDisk = false;
+							var tooBig = true;
+							var text = "";
+							load(null, path, text, notFromDisk, null, tooBig);
+						}
+						else {
+							EDITOR.readFromDisk(path, load);
+						}
 					}
-				}
-			});
+				});
+			}
 			
 		}
 		else {
@@ -1094,7 +1105,12 @@ usePseudoClipboard = false;
 			
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
 			
+			if(isImage) {
+				var newFile = new ImageFile(text, path, ++EDITOR.fileIndex, fileLoaded);
+			}
+			else {
 			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
+			}
 			
 			if(hash) newFile.hash = hash;
 			
@@ -1957,12 +1973,21 @@ usePseudoClipboard = false;
 		// if(EDITOR.currentFile && ctxMenuVisibleOnce) {
 		if(EDITOR.currentFile) {
 			
-			//console.log("render file=" + EDITOR.currentFile.path);
+			var file = EDITOR.currentFile;
 			
-			console.time("render");
+			//console.log("render file=" + file.path);
 			
-			if(!EDITOR.currentFile.render) {
-				console.warn("File render flag set to '" + EDITOR.currentFile.render + "'");
+			if(file.canvas) {
+				
+				ctx.drawImage(file.canvas, 0, 0);
+				
+				return;
+			}
+			
+			
+			
+			if(!file.render) {
+				console.warn("File render flag set to '" + file.render + "'");
 				
 				// Just paint the background
 				ctx.fillStyle = EDITOR.settings.style.bgColor;
@@ -1973,7 +1998,8 @@ usePseudoClipboard = false;
 				return;
 			}
 			
-			var file = EDITOR.currentFile;
+			console.time("render");
+			
 			var buffer = [];
 			var grid = EDITOR.currentFile.grid;
 			var funName = "";
@@ -4680,6 +4706,8 @@ li.onclick = function(clickEvent) {
 		
 		//console.log(UTIL.getStack("EDITOR.removeAllInfo!"));
 		
+		if(file instanceof ImageFile) return;
+		
 		if(!(file instanceof File)) throw new Error("Firs argument file=" + file + " needs to be a file object!");
 		
 		var info = EDITOR.info;
@@ -4954,6 +4982,8 @@ EDITOR.fireEvent("btk");
 			var file = EDITOR.currentFile;
 			var grid = file.grid;
 			
+			if(!file.grid) return null;
+			
 			if(clickFeel == undefined) clickFeel = EDITOR.settings.gridWidth / 2;
 			
 			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
@@ -4964,6 +4994,7 @@ EDITOR.fireEvent("btk");
 				console.warn("Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
 				
 				// For example when clicking under the text when scrolled down so only half the screen contains text
+				
 				return file.createCaret(undefined, grid.length-1, 0);
 				
 			}
@@ -4973,6 +5004,8 @@ EDITOR.fireEvent("btk");
 			}
 			else {
 				var gridRow = grid[mouseRow];
+				
+				if(gridRow == undefined) throw new Error("mouseRow=" + mouseRow + " grid.length=" + grid.length);
 				
 				//console.log("Mouse on row " + gridRow.lineNumber);
 				
@@ -5384,6 +5417,9 @@ if(waitingForAsync == 0) gotOptions();
 	EDITOR.showFile = function(fileOrFilePath, focus, overrideShowFile) {
 		
 		if(fileOrFilePath instanceof File) {
+			var file = fileOrFilePath;
+		}
+		else if(fileOrFilePath instanceof ImageFile) {
 			var file = fileOrFilePath;
 		}
 		else if(typeof fileOrFilePath == "string") {
@@ -10144,7 +10180,7 @@ function keyIsDown(keyDownEvent) {
 	//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
 	// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
 	
-	if(EDITOR.currentFile) {
+		if(EDITOR.currentFile && EDITOR.currentFile instanceof File) {
 		EDITOR.currentFile.checkGrid();
 		EDITOR.currentFile.checkCaret();
 	}
@@ -10857,10 +10893,6 @@ function mouseMove(mouseMoveEvent) {
 	
 	EDITOR.interact("mouseMove", mouseMoveEvent);
 	
-	// Canvas not available on IE before mouse move
-	if(typeof EDITOR.canvas != "undefined" && typeof EDITOR.canvas.style != "undefined") {
-		EDITOR.canvas.style.cursor = 'text';
-	}
 	
 	//return false;
 	

@@ -220,6 +220,9 @@
 	}
 	
 	function fixIndentationBeforeSave(file, callback) {
+		
+		if(file.text == undefined) return true;
+		
 		for (var row=0; row<file.grid.length; row++) {
 			if(file.grid[row].owned) fixIndentation(file, row);
 		}

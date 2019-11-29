@@ -30,6 +30,8 @@
 	function contextCopyShowOptions(file, posX, posY, clickEvent) {
 		if(!file) return; // No file open
 		
+		if(file.selected == undefined) return;
+		
 		if(file.selected.length == 0) {
 			// Nothing selected
 			if(clipboardHasData) {

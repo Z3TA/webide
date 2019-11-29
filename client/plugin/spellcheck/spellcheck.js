@@ -143,12 +143,12 @@
 		EDITOR.removeEvent("fileOpen", spellCheckFile);
 		EDITOR.removeEvent("ctxMenu", showSpellSuggestion);
 		
-		
-		
 		// clear text decorations
 		for(var filePath in EDITOR.files) clearFile(EDITOR.files[filePath])
 		
 		function clearFile(file) {
+			if(file.grid == undefined) return;
+			
 			for(var row = 0; row < file.grid.length; row++) {
 				for(var col = 0; col < file.grid[row].length; col++) {
 					file.grid[row][col].wave = false;
