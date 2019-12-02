@@ -16,6 +16,10 @@
 		file.canvas = document.createElement("canvas");
 		file.ctx = file.canvas.getContext("2d");
 		
+		// Source (file.canvas)
+		file.sx = 0;
+		file.sy = 0;
+		
 		var ext = UTIL.getFileExtension(path);
 		
 		var image = new Image();
@@ -29,11 +33,13 @@
 			
 			// Width/height on the file.canvas
 			file.sWidth = image.width;
-			file.sHeight = image.width;
+			file.sHeight = image.height;
 			
 			// Width/height on the editor canvas
 			file.dWidth = image.width;
 			file.dHeight = image.height;
+			
+			file.centralize(0,0);
 			
 			loadCallback();
 		};
@@ -42,18 +48,21 @@
 		
 		image.src = "data:image/" + ext + ";base64," + base64;
 		
-		// Source (file.canvas)
-		file.sx = 0;
-		file.sy = 0;
-		
-		// Destination (on the editor canvas)
-		file.dx = 0;
-		file.dy = 0;
-		
-
 		file.zoomLevel = 1;
 		
 	}
+	
+	ImageFile.prototype.centralize = function(centerX, centerY) {
+		var file = this;
+		
+		if(centerX == undefined) centerX = Math.round(EDITOR.view.canvasWidth/2);
+		if(centerY == undefined) centerY = Math.round(EDITOR.view.canvasHeight/2);
+		
+		file.dx = Math.round(centerX - file.dWidth/2);
+		file.dy = Math.round(centerY - file.dHeight/2);
+		
+	}
+	
 	
 	ImageFile.prototype.zoom = function(zoomLevel, dCenterX, dCenterY) {
 		var file = this;
@@ -69,6 +78,32 @@
 		
 		file.dWidth = width;
 		file.dHeight = height;
+		
+		file.centralize(dCenterX, dCenterY);
+		
+		
+		/*
+			if(width > EDITOR.view.canvasWidth || height > EDITOR.view.canvasHeight) {
+			
+			var ratio = Math.max(width/EDITOR.view.canvasWidth, height/EDITOR.view.canvasHeight);
+			var diffX = Math.max(width - EDITOR.view.canvasWidth);
+			var diffY = Math.max(height - EDITOR.view.canvasHeight);
+			
+			// We want to keep the same pixel on the cursor after zooming!
+			file.dx = -Math.round(diffX * ratio);
+			file.dy = -Math.round(diffY * ratio);
+			
+			
+			
+			var centerX = EDITOR.view.canvasWidth / 2;
+			var centerY = EDITOR.view.canvasHeight / 2;
+			
+			}
+			else {
+			file.dx = 0;
+			file.dy = 0;
+			}
+		*/
 		
 		EDITOR.renderNeeded();
 		
