@@ -66,12 +66,15 @@ unload: function unloadImageEditor() {
 		
 		var file = EDITOR.currentFile;
 		
-		var zoomLevel = file.zoomLevel + 0.1 * dir;
+		var mouseX = scrollEvent.offsetX==undefined ? scrollEvent.layerX : scrollEvent.offsetX;
+		var mouseY = scrollEvent.offsetY==undefined ? scrollEvent.layerY : scrollEvent.offsetY;
+		
+		var zoomLevel = file.zoomLevel + 0.1 * -dir; // Scrolling up zooms in (like in Gimp and Firefox)
 		
 		
 		if(zoomInput) zoomInput.value = zoomLevel*100;
 		
-		(zoomLevel);
+		file.zoom(zoomLevel, mouseX, mouseY);
 		
 	}
 	

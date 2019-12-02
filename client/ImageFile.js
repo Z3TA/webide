@@ -50,13 +50,35 @@
 		file.dx = 0;
 		file.dy = 0;
 		
+
+		file.zoomLevel = 1;
+		
 	}
 	
 	ImageFile.prototype.zoom = function(zoomLevel, dCenterX, dCenterY) {
 		var file = this;
 		
+		if(isNaN(parseFloat(zoomLevel))) throw new Error("Not a number: zoomLevel=" + zoomLevel + " file.zoomLevel=" + file.zoomLevel)
+		
 		file.zoomLevel = zoomLevel;
 		
+		var width = Math.round(file.sWidth * zoomLevel);
+		var height = Math.round(file.sHeight * zoomLevel);
+		
+		console.log("ImageFile.zoom: zoomLevel=" + zoomLevel + " sWidth=" + file.sWidth + " width=" + width + " sHeight=" + file.sHeight + " height=" + height);
+		
+		file.dWidth = width;
+		file.dHeight = height;
+		
+		EDITOR.renderNeeded();
+		
+		
+		
+		if(EDITOR.settings.devMode) {
+			EDITOR.canvasContext.beginPath();
+			EDITOR.canvasContext.arc(dCenterX, dCenterY, 20, 0, 2 * Math.PI); // Debug
+			EDITOR.canvasContext.stroke(); 
+		}
 	}
 	
 	ImageFile.prototype.saved = function(callback) {
