@@ -3363,10 +3363,14 @@ function handleHttpRequest(request, response) {
 		return;
 	}
 	else if(firstDir == "share") {
-		// ### Upload files to user via web share (https://developers.google.com/web/updates/2018/12/web-share-target)
-		// note: This code has never been tested, so it probably doesn't work :P
-		// todo: Test this If or whenever the web share API is implemented on any plaform, most likely Android?
-		// When added to "home screen", you should get editor as an option when sharing files
+		/*
+			### Upload files to user via web share
+			https://developers.google.com/web/updates/2018/12/web-share-target
+			https://stackoverflow.com/questions/57917599/how-to-handle-images-offline-in-a-pwa-share-target
+			
+			The PWA will navigate to /share as specified in manifest.webmanisfest
+			
+		*/
 		var Busboy = require('busboy');
 		var sendToUser = "";
 		var files = [];
@@ -3413,7 +3417,7 @@ function handleHttpRequest(request, response) {
 				console.log('Done parsing form!');
 				
 				var done = function(uploadMessage) {
-					response.writeHead(200, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
+					response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
 					response.end(uploadMessage);
 				}
 				
