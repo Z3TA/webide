@@ -32,7 +32,14 @@ var NODE = {
 		
 		callback(null, {variables: variables, functions: functions, nameStr: absolutePath || nameStr});
 		
-		function collect(obj, variables, nameChain) {
+		function collect(obj, variables, nameChain, recursion) {
+			if(recursion == undefined) recursion = 0;
+			
+			if(recursion > 100) {
+				throw new Error("Max recursion reached: recursion=" + recursion + " nameChain=" + nameChain);
+				return;
+			}
+			
 			for(var name in obj) {
 				
 				variables[name] = new Variable();
@@ -44,11 +51,13 @@ var NODE = {
 				else if(Object.prototype.toString.call(obj[name]) == '[object RegExp]') variables[name].type = "RegExp";
 				else if(typeof obj[name] == "function") {
 					variables[name].method = true;
+					console.log("Parse function: name=" + name);
 					var func = parseFunction(obj[name].toString());
 					functions.push(  new Func(nameChain + "." + name, (func && func.args))  ); 
 				}
 				else if(typeof obj[name] == "object") {
-					collect(obj[name], variables[name].keys, nameChain + "." + name)
+					console.log("recursion: name=" + name + " nameChain=" + nameChain);
+					collect(obj[name], variables[name].keys, nameChain + "." + name, ++recursion)
 				}
 			}
 		}
