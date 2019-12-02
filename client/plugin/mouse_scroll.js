@@ -46,6 +46,7 @@
 			
 			var file = EDITOR.currentFile;
 			
+if(file == undefined) return;
 			if(file.grid == undefined) return;
 			
 			if(file) {
