@@ -46,6 +46,9 @@ server {
   gzip on;
   gzip_types text/plain text/javascript application/json;
 
+  # Upload limit
+  client_max_body_size 2G;
+
   # Serve the bundle on request's to / (root)
   location = / {
     gzip_static on;
