@@ -282,6 +282,8 @@ EDITOR.speechRate = 1; // // 0.1 to 10
 	
 	var keyboardCatcherLastInserted = "";
 	
+	var cursorHidden = false;
+	
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
@@ -9797,6 +9799,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				//console.log("Rendering caret");
 				EDITOR.renderCaret(file.caret);
 				document.getElementById('canvas').style.cursor = 'text';
+					cursorHidden = false;
 			}
 			else {
 				//console.log("Fading caret");
@@ -9815,12 +9818,14 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				
 				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
 					document.getElementById('canvas').style.cursor = 'none'; // Hide mouse pointer while typing
+						cursorHidden = true;
 				}
 				
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
 					document.getElementById('canvas').style.cursor = 'text';
+						cursorHidden = false;
 				}, 3000);
 			}
 		}
@@ -10094,7 +10099,7 @@ function keyIsDown(keyDownEvent) {
 				recognition.start();
 			}
 			catch(err) {
-				console.warn(err.message);
+					console.error(err);
 			}
 		}
 	}
@@ -10911,6 +10916,11 @@ function mouseMove(mouseMoveEvent) {
 	
 	EDITOR.interact("mouseMove", mouseMoveEvent);
 	
+// Always show the mouse cursor when moving the mouse in case it has been hidden
+// Canvas not available on IE before mouse move
+if(cursorHidden && typeof EDITOR.canvas != "undefined" && typeof EDITOR.canvas.style != "undefined") {
+EDITOR.canvas.style.cursor = 'text';
+}
 	
 	//return false;
 	
