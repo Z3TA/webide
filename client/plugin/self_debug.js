@@ -160,7 +160,7 @@ sendit();
 		
 		EDITOR.stat("error");
 		
-		if(!EDITOR.devMode) {
+		if(!EDITOR.settings.devMode) {
 			// People are generally *very* bad at reporting bugs, only 1 in 10000 bugs will be reported.
 			// So send away a mini report, while trying not to leak any personal data
 			var miniReport = source + ":" + lineno + ":" + colno + "\n\nStacktrace:\n" + (error && error.stack) + "\n\nCurrent file: " + EDITOR.currentFile.path + "";
