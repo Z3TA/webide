@@ -220,11 +220,14 @@ leftColumn.removeChild(functionListWrap);
 		
 		if(file == undefined) {
 			file = EDITOR.currentFile;
-			if(!file) return;
+			if(!file) return true;
 			
-			caret = EDITOR.currentFile.caret;
+			caret = file.caret;
+			
 			center = true;
 		}
+		
+		if(caret == undefined) return true;
 		
 		var parent = {};
 		var scrollTo;
