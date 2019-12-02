@@ -1565,11 +1565,21 @@ usePseudoClipboard = false;
 		}
 		
 		
-		
 		// Save the text, do not count on the garbage collector the be "slow"
+		
 		if(file instanceof ImageFile) {
-var text = file.canvas.toDataURL();
-			text = text.slice(text.indexOf("base64,") + 7, -1); // toDateUrl ends with a quote! Remote it!
+			var text = file.canvas.toDataURL("image/png");
+			if(text.indexOf("base64,") == -1) throw new Error("text does not contain base64, !! text=" + text);
+			
+			console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+			
+			var quoted = (text.slice(0,1) == text.slice(-1) == '"'); // Some images doesn't get a quote around them!
+			
+			if(quoted) text = text.slice(text.indexOf("base64,") + 7, -1);
+			else text = text.slice(text.indexOf("base64,") + 7);
+			
+			console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+			
 			var encoding = "base64";
 			var isImage = true;
 		}
@@ -9528,7 +9538,7 @@ function paste(pasteEvent) {
 		var text = window.clipboardData.getData('Text');
 	} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
 		var text = pasteEvent.clipboardData.getData('text/plain');
-	}
+		}
 	else {
 		alertBox("Unable to get platform/OS clipboard data!");
 	}
@@ -9603,11 +9613,7 @@ function paste(pasteEvent) {
 	
 	//console.log("PASTE: " + UTIL.lbChars(text));
 	
-	if(EDITOR.input && EDITOR.currentFile) {
-		
-		pasteEvent.preventDefault();
-		
-			var f = EDITOR.eventListeners.paste.map(funMap);
+		var f = EDITOR.eventListeners.paste.map(funMap);
 			console.log("Calling paste listeners on paste event (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 			
@@ -9627,8 +9633,11 @@ function paste(pasteEvent) {
 			}
 		}
 		
+		if(EDITOR.input && EDITOR.currentFile) {
+			
+			pasteEvent.preventDefault();
 		// Insert text at caret position
-		if(EDITOR.currentFile) {
+		if(EDITOR.currentFile && EDITOR.currentFile instanceof File) {
 			var file = EDITOR.currentFile;
 			
 			text = EDITOR.sanitizeText(file, text);

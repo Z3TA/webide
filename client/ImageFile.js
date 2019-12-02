@@ -1,7 +1,7 @@
 
 (function() { 
 
-	ImageFile = function ImageFile(base64, path, fileIndex, loadCallback) {
+	ImageFile = function ImageFile(data, path, fileIndex, loadCallback) {
 		var file = this;
 		
 		file.hash = "";
@@ -19,6 +19,8 @@
 		// Source (file.canvas)
 		file.sx = 0;
 		file.sy = 0;
+		
+		file.zoomLevel = 1;
 		
 		var ext = UTIL.getFileExtension(path);
 		
@@ -39,16 +41,24 @@
 			file.dWidth = image.width;
 			file.dHeight = image.height;
 			
-			file.centralize(0,0);
+			file.centralize();
 			
 			loadCallback();
+			loadCallback = null;
 		};
 		
-		console.log("Loading image data... ext=" + ext + " base64.length=" + base64.length);
+		console.log("ImageFile: Loading image data... ext=" + ext + " data.length=" + data.length);
+		console.log("ImageFile: Image data starts with: " + data.slice(0, 100) + " and ends with " + data.slice(-100));
 		
-		image.src = "data:image/" + ext + ";base64," + base64;
+		if(data.indexOf("blob:") == 0) image.src = data;
+		else image.src = "data:image/" + ext + ";base64," + data;
 		
-		file.zoomLevel = 1;
+		setTimeout(function loadTimeout() {
+			if(!loadCallback) return;
+			
+			loadCallback(new Error("Failed to load the image in a timely manner: data=" + data));
+			loadCallback = null;
+		}, 2000);
 		
 	}
 	
@@ -69,17 +79,60 @@
 		
 		if(isNaN(parseFloat(zoomLevel))) throw new Error("Not a number: zoomLevel=" + zoomLevel + " file.zoomLevel=" + file.zoomLevel)
 		
+		// Where on the image is the mouse?
+		var mouseImageX = dCenterX - file.dx;
+		var mouseImageY = dCenterY - file.dy;
+		console.log("ImageFile.zoom: mouseImageX=" + mouseImageX);
+		
+		
+		
+		
 		file.zoomLevel = zoomLevel;
+		
+		
+		
+		
 		
 		var width = Math.round(file.sWidth * zoomLevel);
 		var height = Math.round(file.sHeight * zoomLevel);
 		
-		console.log("ImageFile.zoom: zoomLevel=" + zoomLevel + " sWidth=" + file.sWidth + " width=" + width + " sHeight=" + file.sHeight + " height=" + height);
 		
+		
+		
+		
+		var oldWidth = file.dWidth;
+		var oldHeight = file.dHeight;
+		
+		// Update
 		file.dWidth = width;
 		file.dHeight = height;
 		
-		file.centralize(dCenterX, dCenterY);
+		// How much larger has the image become
+		var deltaX = width - oldWidth;
+		var deltaY = height - oldHeight;
+		
+		var centerX = EDITOR.view.canvasWidth / 2;
+		var centerY = EDITOR.view.canvasHeight / 2;
+		
+		//file.dx = file.dx - Math.round((width - oldWidth)/2 + dCenterX);
+		//file.dy = file.dy - Math.round((height - oldHeight)/2 + dCenterY);
+		
+		console.log("ImageFile.zoom: zoomLevel=" + zoomLevel + " sWidth=" + file.sWidth + " width=" + width + " deltaX=" + deltaX + " sHeight=" + file.sHeight + " height=" + height);
+		
+		// Centralize the image
+		
+		
+		if(dCenterX < centerX) {
+			file.dx = Math.round(file.dx + deltaX/2);
+		}
+		else {
+			file.dx = Math.round(file.dx - deltaX);
+		}
+		
+		
+		//file.dy = Math.round((file.dy - (centerY - dCenterY)/deltaY);
+		
+		//file.centralize(dCenterX, dCenterY);
 		
 		
 		/*
