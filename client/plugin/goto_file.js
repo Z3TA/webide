@@ -619,7 +619,7 @@ console.warn("gotoList not available!");
 		
 		winMenuGotoFile.hide();
 		
-		if(file) {
+		if(file && file instanceof File) {
 			
 			if(!ignoreSelection) {
 				// You can select a file path, and it will be opened ...
