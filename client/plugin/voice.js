@@ -37,6 +37,9 @@
 			EDITOR.bindKey({desc: "Say something", charCode: key_M, combo: ALT, fun: test}); // Alt + M
 			EDITOR.bindKey({desc: "Torn on or off sound assist", charCode: key_S, combo: ALT, fun: toggleSpeechAssistant}); // Alt + S
 			
+			EDITOR.bindKey({desc: "Increase voice assist speed", key: "+", combo: SHIFT+CTRL, fun: increaseVoiceSpeed});
+			EDITOR.bindKey({desc: "Decrease voice assist speed", key: "-", combo: SHIFT+CTRL, fun: decreaseVoiceSpeed});
+			
 			EDITOR.on("soundAssist", checkSoundAssistStatus);
 			
 			winMenuSpeech = EDITOR.windowMenu.add(S("sound_assist"), [S("Tools"), 15], toggleSpeechAssistant);
@@ -55,6 +58,21 @@
 			disableSpeechAssistant();
 		}
 	});
+	
+	function increaseVoiceSpeed() {
+		// Stupid floating point nr will of course make it 0.00000000023 so prevent that
+		EDITOR.speechRate = ((EDITOR.speechRate*10 +1) | 0) / 10;
+		console.log("EDITOR.speechRate=" + EDITOR.speechRate);
+		EDITOR.say("Speech rate " + EDITOR.speechRate);
+		return false;
+	}
+	
+	function decreaseVoiceSpeed() {
+		EDITOR.speechRate = ((EDITOR.speechRate*10 - 1) | 0) / 10;
+console.log("EDITOR.speechRate=" + EDITOR.speechRate);
+		EDITOR.say("Speech rate " + EDITOR.speechRate);
+		return false;
+	}
 	
 	function checkSoundAssistStatus(activated) {
 		if(activated) activateSpeechAssistant();

@@ -4579,6 +4579,17 @@ li.onclick = function(clickEvent) {
 		
 		console.log("EDITOR.addInfo: textString=" + textString);
 		
+if(EDITOR.soundAssist) {
+if(lvl == 3) var message = "Info: ";
+else if(lvl == 2) var message = "Warning: ";
+else if(lvl == 1) var message = "Error: ";
+
+message = message + UTIL.getFilenameFromPath(file.path) + " line " + (row+1);
+if(col != 0) message = message + " column " + col;
+message = message + " " + textString;
+EDITOR.say(message);
+}
+
 		
 		// Convert the text to an array, one line per row
 		var txt = textString.split("\n");

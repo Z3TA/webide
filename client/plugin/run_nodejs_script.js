@@ -28,7 +28,7 @@
 		EDITOR.bindKey({desc: S("run_nodejs_script"), fun: runNodeJsScript, charCode: keyF2, combo: 0});
 		EDITOR.bindKey({desc: S("stop_nodejs_script"), fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
-		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.JS", 2], runNodeJsScript);
+		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.JS", 2], runNodeJsScriptFromMenu);
 		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.JS", 2], stopNodeJsScript);
 		
 		EDITOR.on("ctxMenu", showRunNodejsScriptMenuItem);
@@ -246,6 +246,29 @@ saveAndRun(file);
 		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Run nodejs script", addSeparator, runNodeJsScript);
 		if(scriptIsRunning) EDITOR.ctxMenu.update(scriptMenuItem, scriptIsRunning, "Stop nodej script", stopNodeJsScript);
 		else EDITOR.ctxMenu.update(scriptMenuItem, scriptIsRunning, "Run nodejs script", runNodeJsScript);
+		
+	}
+	
+	function runNodeJsScriptFromMenu() {
+		var file = EDITOR.currentFile;
+		
+		if(isNodejsScript(file)) runNodeJsScript(file);
+		else {
+			var fileName = UTIL.getFilenameFromPath(file.path);
+			var message = "Are you sure you want to run " + fileName + " with Node.js?";
+			if(fileName.match(/html?/i)) message += "\nThis looks like a HTML file, use Live/preview instead!?";
+			
+			var run = S("run_nodejs_script");
+			var preview = S("live_preview");
+			var cancel = S("cancel");
+			
+			confirmBox(message, [run, preview, cancel], function(answer, clickEvent) {
+				if(answer == run) runNodeJsScript(file);
+				else if(answer == preview) EDITOR.previewTool(file, clickEvent);
+				else if(answer != cancel) throw new Error("Unknown answer=" + answer);
+			});
+			
+		}
 		
 	}
 	

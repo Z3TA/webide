@@ -355,7 +355,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 		
 		button.appendChild(document.createTextNode(txt));
 		
-		button.addEventListener("click", function(clickEvent) {callback(txt); dialog.close(clickEvent);}, false);
+		button.addEventListener("click", function(clickEvent) {callback(txt, clickEvent); dialog.close(clickEvent);}, false);
 		
 		dialog.div.appendChild(button); 
 	}

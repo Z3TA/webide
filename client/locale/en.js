@@ -22,6 +22,7 @@ LANG["en"] = {
 	developer_mode: "Developer mode",
 	discovery_bar: "Discovery bar",
 	
+cancel: "Cancel",
 	clone_a_repository: "Clone a repository",
 	close: "close",
 	close_editor: "Close the editor",
@@ -119,7 +120,7 @@ LANG["en"] = {
 	restart: "restart",
 	restart_nodejs_project_in_production: "(Re)Start the in-production nodejs project the currently open file belongs to",
 	restart_production: "Restart production",
-	run_nodejs_script: "Run script",
+	run_nodejs_script: "Run with Node.js",
 	
 	save: "save",
 	save_as: "Save as",
