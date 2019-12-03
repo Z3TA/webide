@@ -4577,6 +4577,9 @@ li.onclick = function(clickEvent) {
 		
 		// Why not just create div's and show them on top of the canvas!?!?
 		
+		console.log("EDITOR.addInfo: textString=" + textString);
+		
+		
 		// Convert the text to an array, one line per row
 		var txt = textString.split("\n");
 		
@@ -8228,8 +8231,11 @@ function main() {
 		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 	}
 	
-	ctx.imageSmoothingEnabled = false; // Do not "smooth" the image, keep it sharp!
-	
+		// Do not "smooth" the image, keep it sharp!
+		ctx.imageSmoothingEnabled = false; 
+		ctx.webkitImageSmoothingEnabled = false;
+		ctx.mozImageSmoothingEnabled = false;
+		
 	
 	// Set the font only once for performance
 	ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
@@ -11094,8 +11100,13 @@ function getFile(url, callback) {
 }
 
 
-function htmlToImage(html, callback) {
+	function htmlToImage(html, textOnly, callback) {
 	
+		if(typeof textOnly == "function") {
+			callback = textOnly;
+			textOnly = false;
+		}
+		
 	if(!callback) throw new Error("No callback function in htmlToImage");
 	
 	html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
@@ -11122,7 +11133,7 @@ function htmlToImage(html, callback) {
 		
 		// foreignObject in SVG seem to have stopped working in IE11 !?!?!?
 		
-		if(BROWSER == "MSIE") {
+		if(BROWSER == "MSIE" || textOnly) {
 			var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"><text x="0" y="16">' + UTIL.stripHtml(html) + '</text></svg>';
 		}
 		
@@ -11133,7 +11144,7 @@ function htmlToImage(html, callback) {
 		var domurl = window.URL || window.webkitURL || window;
 		
 		img.onload = function () {
-			console.log("htmlToImage: SVG image created! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
+			console.log("htmlToImage: SVG image created/loaced! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
 			
 			if(url) {
 				console.log("htmlToImage: Releasing object URL")
@@ -11162,8 +11173,24 @@ function htmlToImage(html, callback) {
 		
 			console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
 		}
+		
+		img.onerror = function imageError(err) {
+			clearTimeout(timeoutTimer);
+			console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
+			
+			if(!callback) {
+				throw new Error("htmlToImage: Failed to create image. But we have already called back!");
+			}
+			
+			// Make sure we do not end up in a recursive loop
+			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html);
+			
+			htmlToImage(html, true, callback);
+		} 
+		
 		// img.onload wont fire when you use data url !? (on different browsers, yeh)
-		setTimeout(function() {
+		var timeoutTimer = setTimeout(function() {
+			console.log("htmlToImage: Callback timeout! callback?" + (!!callback));
 			if(callback) {
 				callback(img);
 				callback = null;

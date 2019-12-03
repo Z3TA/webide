@@ -38,6 +38,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+todo: Tell user if he/she is really sure when running a .html? file as a nodejs script. And use tools > Live preview instead.
+
+Guest run welcome.htm as Node.JS script ...
+
+
+
+
 Image zoom
 
 Image editing
