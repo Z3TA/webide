@@ -47,7 +47,7 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	askInterval = setInterval(ask, 10000);
 	
 	var installed = false;
-	var windowMenuAdd2HS;
+	var windowMenuAdd2HS = null;
 	
 	
 	
@@ -67,9 +67,10 @@ console.warn("A2HS: Already got appinstalled event!");
 		}
 		
 		EDITOR.windowMenu.remove(windowMenuAdd2HS);
+		windowMenuAdd2HS = null;
 		
 		var yes = "OK, I will click on the WebIDE icon";
-		var no = "No, I'll keep using this"
+		var no = "No, I'll keep using the browser";
 		confirmBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
 			if(answer == yes) {
 				window.onbeforeunload = null;
@@ -87,7 +88,9 @@ console.warn("A2HS: Already got appinstalled event!");
 		// Stash the event so it can be triggered later.
 		deferredPrompt = evt;
 		
-		windowMenuAdd2HS = EDITOR.windowMenu.add(S("add_to_home_screen"), [S("Editor"), 10], addToHomeScreen);
+		// This function can be called twice!
+		if(!windowMenuAdd2HS) windowMenuAdd2HS = EDITOR.windowMenu.add(S("add_to_home_screen"), [S("Editor"), 10], addToHomeScreen);
+		
 	}
 	
 	function ask() {
