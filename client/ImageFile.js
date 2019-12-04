@@ -22,6 +22,8 @@
 		
 		file.zoomLevel = 1;
 		
+		file.scaled = 1;
+		
 		var ext = UTIL.getFileExtension(path);
 		
 		var image = new Image();
@@ -62,6 +64,88 @@
 		
 	}
 	
+	ImageFile.prototype.pixelCoordinateFromMousePosition = function(mouseX, mouseY) {
+		// Calculate the pixel on the fiel.canvas
+		
+		var file = this;
+		
+		var x = Math.round((mouseX - file.dx) / file.zoomLevel);
+		var y = Math.round((mouseY - file.dy) / file.zoomLevel);
+		
+return {x: x, y: y};
+	}
+	
+	ImageFile.prototype.scale = function(n) {
+
+/*
+
+https://stackoverflow.com/questions/18547042/resizing-a-canvas-image-without-blurring-it
+
+*/
+
+		var file = this;
+		
+		file.scaled = file.scaled * n;
+		
+		if(file.scaled == 1) {
+			
+			if(file.original) file.canvas = file.original;
+			return;
+			
+		}
+		
+		if(!file.original) {
+file.original = file.canvas;
+			file.canvas = document.createElement("canvas");
+		}
+		
+		var origCanvas = file.original;
+		var origCanvasContext = file.original.getContext('2d');
+		
+		var scaledCanvas = file.canvas;
+		var scaledCanvasContext = file.canvas.getContext('2d');
+		
+		scaledCanvas.width = origCanvas.width * file.scaled;
+		scaledCanvas.height = origCanvas.height * file.scaled;
+		
+		console.log("ImageFile.scale: scaled=" + file.scaled + " origCanvas.width=" + origCanvas.width + " origCanvas.height=" + origCanvas.height + " scaledCanvas.width=" + scaledCanvas.width + " scaledCanvas.height=" + scaledCanvas.height);
+		
+		file.sWidth = scaledCanvas.width;
+		file.sHeight = scaledCanvas.height;
+		file.dWidth = scaledCanvas.width;
+file.dHeight = scaledCanvas.height;
+
+		scaledCanvasContext.imageSmoothingEnabled = false;
+		
+		scaledCanvasContext.drawImage(origCanvas, 0,0, scaledCanvas.width, scaledCanvas.height);
+		
+		file.centralize();
+		
+		EDITOR.renderNeeded();
+		
+		return;
+		
+		
+		var origData = origCanvasContext.getImageData(0,0, origCanvas.width, origCanvas.height);
+		var scaledData = scaledCanvasContext.getImageData(0,0, scaledCanvas.width, scaledCanvas.height);
+		for (var x=0; x<scaledCanvas.width; x++) {
+			for (var y=0; y<scaledCanvas.height; y++) {
+				for (var c=0; c<4; c++) {
+					// you can improve these calculations, I let them so for clarity
+					
+					// >>1 devides by 2
+					
+					scaledData.data[(y*scaledCanvas.height+x)*4+c] = origData.data[((y>>1)*origCanvas.height+(x>>1))*4+c];
+				}
+			}
+		}
+		scaledCanvasContext.putImageData(scaledData, 0, 0);
+		
+		
+		EDITOR.renderNeeded();
+		
+	}
+	
 	ImageFile.prototype.centralize = function(centerX, centerY) {
 		var file = this;
 		
@@ -70,6 +154,8 @@
 		
 		file.dx = Math.round(centerX - file.dWidth/2);
 		file.dy = Math.round(centerY - file.dHeight/2);
+		
+		EDITOR.renderNeeded();
 		
 	}
 	

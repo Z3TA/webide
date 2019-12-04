@@ -17,6 +17,7 @@
 			EDITOR.on("fileShow", showImageFileMaybe);
 			EDITOR.on("mouseScroll", zoomImage);
 			EDITOR.on("paste", imagePaste);
+			EDITOR.on("mouseClick", colorPicker);
 			
 			controls = EDITOR.createWidget(buildControls)
 			
@@ -26,6 +27,7 @@ unload: function unloadImageEditor() {
 			EDITOR.removeEvent("fileShow", showImageFileMaybe);
 			EDITOR.removeEvent("mouseScroll", zoomImage);
 			EDITOR.removeEvent("paste", imagePaste);
+			EDITOR.removeEvent("mouseClick", colorPicker);
 			
 			controls.unload();
 			
@@ -57,6 +59,15 @@ unload: function unloadImageEditor() {
 		};
 		wrap.appendChild(zoomLabel);
 		wrap.appendChild(zoomInput);
+		
+		var colorInput = document.createElement("input");
+		colorInput.setAttribute("id", "colorInput");
+		colorInput.setAttribute("type", "color");
+		colorInput.setAttribute("value", "#eeeeee"); // Need to have a start value for onchange to trigger
+		colorInput.onchange = function copyColorToClipboard() {
+			EDITOR.putIntoClipboard(colorInput.value);
+		};
+		wrap.appendChild(colorInput);
 		
 		
 		
@@ -113,9 +124,43 @@ unload: function unloadImageEditor() {
 		
 	}
 	
+	function colorPicker(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
+
+		var file = EDITOR.currentFile;
+		
+		if(!(file instanceof ImageFile)) return true;
+		
+		console.log("image_editor: colorPicker: target=" + target);
+		
+		if(target != EDITOR.canvas) return true;
+		
+		// Take the pixel from EDITOR.canvas rather then file.canvas
+		
+		var colors = EDITOR.canvasContext.getImageData(mouseX, mouseY, 1, 1).data;
+		
+		var red = colors[0];
+		var green = colors[1];
+		var blue = colors[2];
+		
+		var hex = "#" + UTIL.zeroPad(red.toString(16)) + UTIL.zeroPad(green.toString(16)) + UTIL.zeroPad(blue.toString(16));
+		
+		var rgbStr = "rgb(" + red + ", " + green + ", " + blue + ")";
+		
+		console.log("image_editor: colorPicker: red=" + red + " green=" + green + " blue=" + blue + " hex=" + hex);
+		
+		if(typeof colorInput != "undefined") colorInput.setAttribute("value", hex);
+		// Updating the colorInput will not trigger it's onchange event!
+EDITOR.putIntoClipboard(rgbStr);
+
+		return false;
+		
+	}
+	
 	function zoomImage(dir, steps, combo, scrollEvent) {
 		
 		var file = EDITOR.currentFile;
+		
+		if(! (file instanceof ImageFile)) return;
 		
 		var mouseX = scrollEvent.offsetX==undefined ? scrollEvent.layerX : scrollEvent.offsetX;
 		var mouseY = scrollEvent.offsetY==undefined ? scrollEvent.layerY : scrollEvent.offsetY;
