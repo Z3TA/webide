@@ -1,3 +1,15 @@
+/*
+	
+	!DO:NOT:BUNDLE!
+	
+	When is this useful!?
+	When you are on a small screen and want to make the code fit!?
+	
+	Both js-beautify and prettify sux, but js-beautify sux a little less...
+	
+	
+*/
+
 (function() {
 	"use strict";
 
@@ -43,7 +55,7 @@
 			
 			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
 			
-			EDITOR.bindKey({charCode: 87,combo: CTRL,fun: keybWrap}); // Ctrl+W
+			EDITOR.on("wrapText", wrapJavaScriptTool);
 			
 			EDITOR.on("ctxMenu", wrapJsMaybe);
 			
@@ -56,10 +68,9 @@
 			
 			EDITOR.windowMenu.remove(winMenuBeautify);
 			
-			EDITOR.unbindKey(keybWrap);
-			
 			EDITOR.removeEvent("ctxMenu", wrapJsMaybe);
-			
+			EDITOR.removeEvent("wrapText", wrapJavaScriptTool);
+
 		}
 	});
 	
@@ -98,10 +109,10 @@
 		
 	}
 	
-	function keybWrap(file) {
-		
-		return jsWrap(file, file.caret.row);
-		
+	function wrapJavaScriptTool(file, combo) {
+		var allowDefault = jsWrap(file, file.caret.row);
+		if(allowDefault) return false;
+		else return true; // Prevents other wrap tools
 	}
 	
 	function jsWrap(file, initRow) {

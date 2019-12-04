@@ -193,7 +193,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	showDashboard: [], // Useful for example starting and stopping timers, refresh content etc
 	hideDashboard: [],
 	share: [], // Share a file with other apps on the platform
-	soundAssist: [] // Get notified when soundAssist is turned on/off
+	soundAssist: [], // Get notified when soundAssist is turned on/off
+	wrapText: [] // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
 };
 
 EDITOR.renderFunctions = [];
@@ -1981,7 +1982,7 @@ usePseudoClipboard = false;
 			return;
 		}
 		
-		console.log("DebugCtx: EDITOR.render() ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " Using EDITOR.canvasContext?" + (ctx == EDITOR.canvasContext) + " ctx.font=" + ctx.font);
+		console.log("DebugCtx: EDITOR.render()  windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " Using EDITOR.canvasContext?" + (ctx == EDITOR.canvasContext) + " ctx.font=" + ctx.font);
 		
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
@@ -2375,7 +2376,7 @@ usePseudoClipboard = false;
 		
 		ctx.save();
 		
-		console.log("DebugCtx: canvasContextReset() Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
 		
 	}
 	
@@ -2611,7 +2612,7 @@ usePseudoClipboard = false;
 		
 		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight || resizeOverride) ) {
 			
-			console.log("DebugCtx: Before canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			console.log("DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
@@ -7020,6 +7021,8 @@ EDITOR.runScript = tool("runScript", false);
 EDITOR.stopScript = tool("stopScript", false);
 	
 	EDITOR.share = tool("share", false);
+	
+	EDITOR.wrapText = tool("wrapText", false);
 
 function tool(eventListenerName) {
 	return function(file, ev) {
@@ -7037,57 +7040,58 @@ function tool(eventListenerName) {
 			var f = EDITOR.eventListeners[eventListenerName].map(funMap);
 			console.log("Calling eventListener=" + eventListenerName + " (" + f.length + ")");
 		
-		var ret = false;
+		var ret = PASS;
 		
 		var combo = getCombo(ev);
 		
 			for(var i=0; i<f.length; i++) {
 				ret = f[i](file, combo);
-			if(ret === true) return true; // Only run once
-				else if(ret !== false) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
-		}
-		
+				if(ret === HANDLED) return PREVENT_DEFAULT; // Only run once
+					else if(ret !== PASS) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
+			}
+			
 			alertBox("No " + eventListenerName + " (" + f.length + " tools) handled the request!", 404, "warning");
-	
+			
 			EDITOR.statInfo("tool_" + eventListenerName + "_enoext", UTIL.getFileExtension(file.path));
 			
+			return ALLOW_DEFAULT;
 		}
-}
-
-EDITOR.fileExplorer = function fileExplorerTool(directory) {
-		var f = EDITOR.eventListeners.fileExplorer.map(funMap);
-		console.log("Calling fileExplorer listeners (" +f.length + ") to explore directory=" + directory);
-	
-	var ret = false;
-	
-		for(var i=0; i<f.length; i++) {
-			ret = f[i](directory);
-		if(ret === true) break; // Only open one tool
 	}
 	
-	return ret;
-}
-
-EDITOR.move = function renameFile(oldPath, newPath, callback) {
-	// Also used for renaming files and folders!
+	EDITOR.fileExplorer = function fileExplorerTool(directory) {
+		var f = EDITOR.eventListeners.fileExplorer.map(funMap);
+		console.log("Calling fileExplorer listeners (" +f.length + ") to explore directory=" + directory);
+		
+		var ret = false;
+		
+		for(var i=0; i<f.length; i++) {
+			ret = f[i](directory);
+			if(ret === true) break; // Only open one tool
+		}
+		
+		return ret;
+	}
 	
-	console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
-	
+	EDITOR.move = function renameFile(oldPath, newPath, callback) {
+		// Also used for renaming files and folders!
+		
+		console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
+		
 		if(callback == undefined || typeof callback != "function") throw new Error("Expected third function argument callback in EDITOR.move to be a callback function! typeof callback = " + (typeof callback) + " ");
 		
 		if(oldPath instanceof File) oldPath = oldPath.path;
 		
-	if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
-	
-	if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
-	
-	//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
-	
-	CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
-		if(err) return callback(err);
+		if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
 		
-		if(EDITOR.files.hasOwnProperty(oldPath)) {
-			// File is opened in the editor!
+		if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
+		
+		//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
+		
+		CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
+			if(err) return callback(err);
+			
+			if(EDITOR.files.hasOwnProperty(oldPath)) {
+				// File is opened in the editor!
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
 			var file = EDITOR.files[oldPath];
@@ -8284,7 +8288,7 @@ function main() {
 		setTimeout(debugCtx, 1000);
 		
 		function debugCtx() {
-			console.log("DebugCtx: (interval) ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
+			console.log("DebugCtx: (interval) windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
 		}
 		
 		
@@ -9498,7 +9502,7 @@ function copy(copyEvent) {
 		giveBackFocusAfterClipboardEvent = false;
 	}
 	
-	if(EDITOR.input && EDITOR.currentFile && (EDITOR.currentFile instanceof File)) {
+		if(EDITOR.input && EDITOR.currentFile && (EDITOR.currentFile instanceof File)) {
 		
 		var textToPutOnClipboard = "";
 		
@@ -9915,7 +9919,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 
 function resizeAndRender(afterResize) {
 	
-	//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling);
+		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
 	
 	// Only do the resize or render if it's actually needed
 	if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()

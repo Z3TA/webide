@@ -14,17 +14,37 @@
 		EDITOR.bindKey({
 			charCode: 87,
 			combo: CTRL,
-			fun: wordWrap
+			fun: callWordWrapTool
 		});
+		
+		EDITOR.on("wrapText", wrapTextParagraph);
 		
 		winMenuWrap = EDITOR.windowMenu.add(S("wrap_paragraph"), [S("Edit"), 5], wordWrap);
 	}
 	
 	function unloadWordWrap() {
-		EDITOR.unbindKey(wordWrap);
+		EDITOR.unbindKey(callWordWrapTool);
 		EDITOR.windowMenu.remove(winMenuWrap);
+		EDITOR.removeEvent("wrapText", wrapTextParagraph);
 	}
 
+	function callWordWrapTool(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
+		EDITOR.wrapText(file, keyDownEvent);
+	
+		return PREVENT_DEFAULT;
+	}
+	
+	function wrapTextParagraph(file, combo) {
+		
+		var ext = UTIL.getFileExtension(file.path);
+		
+		if(ext.match(/js/i)) return PASS;
+		
+		var success = wordWrap(file);
+		if(success) return HANDLED;
+		else return PASS;
+	}
+	
 	function wordWrap(file) {
 		"use strict";
 		
@@ -35,7 +55,7 @@
 		
 		//maxTextWidth = 20;
 		
-		if(!file) return true;
+		if(!file) return FAIL;
 		
 		console.log("file.lineBreak=" + UTIL.lbChars(file.lineBreak));
 		
@@ -64,9 +84,9 @@
 		}
 		
 		if(endOfParagraph == -1) {
-			alertBox("Did not find end of paragraph");
+			alertBox("Text word wrapper did not find end of paragraph");
 			EDITOR.stat("wordwrap_noEndOfParagraph");
-			return false;
+			return FAIL;
 		}
 		
 		// Search left to find two double breaks
@@ -89,8 +109,8 @@
 		}
 		
 		if(startOfParagraph == -1) {
-			alertBox("Did not find start of paragraph");
-			return false;
+			alertBox("Text word wrapper did not find start of paragraph");
+			return FAIL;
 		}
 		
 		
@@ -105,8 +125,8 @@
 		
 		// Make sure it's text or html and not code
 		if(text.indexOf("{") != -1 || text.match(/<ul/i) ) {
-			alertBox("Not word wrapping (not plain text) text=" + text);
-			return false;
+			alertBox("Text word wrapper Not word wrapping (not plain text) text=" + text);
+			return FAIL;
 		}
 		
 		// Todo: Make sure it doesn't contain HTML elements besides <p> and <br>
@@ -129,16 +149,16 @@
 			console.log("startOfParagraph=" + startOfParagraph);
 			console.log("endOfParagraph=" + endOfParagraph);
 			console.log("text=" + UTIL.lbChars(text));
-			return false;
+			return FAIL;
 		}
 		
 		if(firstCharacter == "<") {
 			if(lastCharacter != ">") {
-				alertBox("Paragraph must have an ending tag!");
+				alertBox("The word wrapper: Paragraph must have an ending tag!");
 				console.log("firstCharacter=" + firstCharacter);
 				console.log("lastCharacter=" + lastCharacter);
 				console.log("text=" + UTIL.lbChars(text));
-				return false;
+				return FAIL;
 			}
 		}
 		
@@ -213,7 +233,7 @@
 		
 		EDITOR.stat("wordwrap_text");
 		
-		return false;
+		return SUCCESS;
 		
 		
 		function getWord(index, searchLeft) {

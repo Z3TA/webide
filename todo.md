@@ -38,10 +38,13 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-todo: Tell user if he/she is really sure when running a .html? file as a nodejs script. And use tools > Live preview instead.
+bug: Word wrap functions runs both the html word wrapper and JS beutify!
+Make a EDITOR.codeFormat() tool !?
 
-Guest run welcome.htm as Node.JS script ...
-
+bug: When autocompleting </p> I get an error that say TDD is not defined!
+<p>Now you are probably thinking, what if I, from day one, whenever I write some code, 
+I also write code that automatically checks if the code is working!?<br>
+This is called "test driven development" (TDD).
 
 
 
