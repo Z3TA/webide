@@ -148,7 +148,7 @@ unload: function unloadImageEditor() {
 		
 		console.log("image_editor: colorPicker: red=" + red + " green=" + green + " blue=" + blue + " hex=" + hex);
 		
-		if(typeof colorInput != "undefined") colorInput.setAttribute("value", hex);
+		if(typeof colorInput != "undefined") colorInput.value = hex;
 		// Updating the colorInput will not trigger it's onchange event!
 EDITOR.putIntoClipboard(rgbStr);
 
