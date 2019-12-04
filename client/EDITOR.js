@@ -1945,6 +1945,9 @@ usePseudoClipboard = false;
 			ctx = EDITOR.canvasContext;
 		}
 		else if(ctx == undefined) {
+			
+			console.warn("EDITOR.render: Getting new canvas 2d context!");
+			
 			if(EDITOR.settings.sub_pixel_antialias == false) {
 				ctx = canvas.getContext("2d", {lowLatency: EDITOR.settings.lowLatencyCanvas, antialias: false});
 			}
@@ -1952,6 +1955,8 @@ usePseudoClipboard = false;
 				ctx = canvas.getContext("2d", {alpha: false, lowLatency: EDITOR.settings.lowLatencyCanvas, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text).
 			}
 		}
+		
+		
 		
 		if(!EDITOR.shouldRender && (canvas == EDITOR.canvas && !renderOverride)) {
 			console.warn("Not rendering because it's not needed!");
@@ -1975,6 +1980,8 @@ usePseudoClipboard = false;
 			console.warn("Not rendering because the canvas is too small! canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " ");
 			return;
 		}
+		
+		console.log("DebugCtx: EDITOR.render() ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " Using EDITOR.canvasContext?" + (ctx == EDITOR.canvasContext) + " ctx.font=" + ctx.font);
 		
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
@@ -2311,6 +2318,7 @@ usePseudoClipboard = false;
 	EDITOR.renderCaret = function(caret, colPlus, fillStyle, screenStartRow, bufferStartRow) {
 		var file = EDITOR.currentFile;
 		if(file == undefined) return;
+		if(!(file instanceof File)) return;
 		
 		if(colPlus == undefined) colPlus = 0;
 		if(fillStyle == undefined) fillStyle = EDITOR.settings.caret.color;
@@ -2349,6 +2357,26 @@ usePseudoClipboard = false;
 		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
 			window.requestAnimationFrame(animate);
 		}
+	}
+	
+	function canvasContextReset() {
+		
+		var ctx = EDITOR.canvasContext;
+		
+		// Do not "smooth" the image, keep it sharp!
+		ctx.imageSmoothingEnabled = false;
+		ctx.webkitImageSmoothingEnabled = false;
+		ctx.mozImageSmoothingEnabled = false;
+		
+		
+		// Set the font only once for performance
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		ctx.textBaseline = "middle";
+		
+		ctx.save();
+		
+		console.log("DebugCtx: canvasContextReset() Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		
 	}
 	
 	EDITOR.resize = function(resizeOverride) {
@@ -2583,17 +2611,19 @@ usePseudoClipboard = false;
 		
 		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight || resizeOverride) ) {
 			
+			console.log("DebugCtx: Before canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			
 			canvas.style.width = EDITOR.view.canvasWidth + "px";
 			canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
 			canvas.width  = canvasWidth;
 			canvas.height = canvasHeight;
 			
+			console.log("DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			
 			// The canvas is reset when resizing!
-			// Font is only set *once* (when resizing) because it's very expensive
-			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
-			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			EDITOR.canvasContext.textBaseline = "middle";
+			canvasContextReset();
+			
 			
 			// Squeeze the margin on really small screens
 			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
@@ -4579,17 +4609,17 @@ li.onclick = function(clickEvent) {
 		
 		console.log("EDITOR.addInfo: textString=" + textString);
 		
-if(EDITOR.soundAssist) {
-if(lvl == 3) var message = "Info: ";
-else if(lvl == 2) var message = "Warning: ";
-else if(lvl == 1) var message = "Error: ";
-
-message = message + UTIL.getFilenameFromPath(file.path) + " line " + (row+1);
-if(col != 0) message = message + " column " + col;
-message = message + " " + textString;
-EDITOR.say(message);
-}
-
+		if(EDITOR.soundAssist) {
+			if(lvl == 3) var message = "Info: ";
+			else if(lvl == 2) var message = "Warning: ";
+			else if(lvl == 1) var message = "Error: ";
+			
+			message = message + UTIL.getFilenameFromPath(file.path) + " line " + (row+1);
+			if(col != 0) message = message + " column " + col;
+			message = message + " " + textString;
+			EDITOR.say(message);
+		}
+		
 		
 		// Convert the text to an array, one line per row
 		var txt = textString.split("\n");
@@ -8242,19 +8272,22 @@ function main() {
 		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 	}
 	
-		// Do not "smooth" the image, keep it sharp!
-		ctx.imageSmoothingEnabled = false; 
-		ctx.webkitImageSmoothingEnabled = false;
-		ctx.mozImageSmoothingEnabled = false;
-		
-	
-	// Set the font only once for performance
-	ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-	ctx.textBaseline = "middle";
-	
-	EDITOR.canvas = canvas;
+		EDITOR.canvas = canvas;
 	EDITOR.canvasContext = ctx;
+		
+		// Don't bother resetting the canvas context here, wait for the resize!
 	
+		
+		setTimeout(debugCtx, 1);
+		setTimeout(debugCtx, 10);
+		setTimeout(debugCtx, 100);
+		setTimeout(debugCtx, 1000);
+		
+		function debugCtx() {
+			console.log("DebugCtx: (interval) ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
+		}
+		
+		
 	EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 	
 	EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
@@ -9452,9 +9485,11 @@ function onMessage(windowMessageEvent) {
 
 function copy(copyEvent) {
 	
-	console.log("copyEvent EDITOR.input=" + EDITOR.input + 
+		console.warn("copyEvent EDITOR.input=" + EDITOR.input + 
 	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent + 
+		" EDITOR.input=" + EDITOR.input + 
+		" copyEvent.target=" + copyEvent.target);
 	
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
@@ -9463,12 +9498,12 @@ function copy(copyEvent) {
 		giveBackFocusAfterClipboardEvent = false;
 	}
 	
-	if(EDITOR.input) {
+	if(EDITOR.input && EDITOR.currentFile && (EDITOR.currentFile instanceof File)) {
 		
 		var textToPutOnClipboard = "";
 		
 		if(EDITOR.currentFile) {
-			textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+				if(EDITOR.currentFile instanceof File) textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
 		}
 		
 		if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
@@ -11330,5 +11365,7 @@ function getFile(url, callback) {
 		menuIsFullScreen = false;
 		EDITOR.resizeNeeded();
 	}
+	
+	
 	
 })();
