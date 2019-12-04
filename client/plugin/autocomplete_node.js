@@ -238,7 +238,7 @@ prototype: {
 		console.log("autoCompleteNode: wordToComplete=" + wordToComplete);
 		
 		if(!file.parsed) return;
-		if(!file.parsed.language == "JS") return;
+		if(file.parsed.language != "JS") return;
 		
 		if(wordLength > 0) {
 			// Check global Node.JS functions
