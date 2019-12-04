@@ -44,7 +44,7 @@ server {
   ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
   gzip on;
-  gzip_types text/plain text/javascript application/json;
+  gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json;
 
   # Upload limit
   client_max_body_size 2G;
