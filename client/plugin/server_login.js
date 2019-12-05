@@ -504,7 +504,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 						UTIL.httpGet("version.txt", function(errGetVersion, str) {
 							if(errGetVersion) {
 								
-								var msg = 'Problem connecting to WebIDE server on ' + JSON.stringify(server) + '\n\n<ul>';
+								var msg = 'Try this if you have problems connecting to the server (' + JSON.stringify(server) + '):\n\n<ul>';
 								msg += '<li>* Click two times on "Use default URL" then click the Login button again.</li>\n';
 								msg += '<li>* In the top menu choose: Editor > Unregister service worker.</li>\n';
 								msg += '<li>* Contact support.</li>';
