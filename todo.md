@@ -38,15 +38,14 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
-ltest1@zpc:/node-v0.6.21$ ./configure
+Macbook keyboard combos???!?? Cmd+S to save !?? or stick with Ctrl?
 
-Make it possible to build node in chroot
 
-Using nvm
+todo: Don't ask user to "add 2 desktop" right away, make them manually do it via Menu, or it will feel too spammy!?
 
-Trying Nide
 
-webpack dev server refuses to listen on a unix socket. Use netns !?
+
+webpack dev server refuses to listen on a unix socket... Submit patch that allows unix socket in PORT env variable!
 
 Make it possible to run create-react-app
 
