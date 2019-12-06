@@ -38,6 +38,22 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+ltest1@zpc:/node-v0.6.21$ ./configure
+
+Make it possible to build node in chroot
+
+Using nvm
+
+Trying Nide
+
+webpack dev server refuses to listen on a unix socket. Use netns !?
+
+Make it possible to run create-react-app
+
+npx create-react-app my-app --template typescript
+
+
+color picker
 
 Image zoom
 

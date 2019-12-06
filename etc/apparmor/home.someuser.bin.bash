@@ -99,10 +99,8 @@
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
     # Scripts of scripts
-    %HOME%%USERNAME%/usr/bin/** ix,
-    %HOME%%USERNAME%/bin/** ix,
-    %HOME%%USERNAME%/usr/lib/node_modules/npm/** ix,
-    %HOME%%USERNAME%/usr/share/npm/bin/** ix,
+    %HOME%%USERNAME%/** ix,
+   
 
   }
 
