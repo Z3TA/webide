@@ -2552,8 +2552,18 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/cc", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
 				foldersToMount++;module_mount("/usr/bin/touch", homeDir + "usr/bin/touch", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/usr/bin/ld", homeDir + "usr/bin/ld", folderMounted); // Needed by make scripts
+				foldersToMount++;module_mount("/usr/bin/tr", homeDir + "usr/bin/tr", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/tail", homeDir + "usr/bin/tail", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/awk", homeDir + "usr/bin/awk", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/sort", homeDir + "usr/bin/sort", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/sha256sum", homeDir + "usr/bin/sha256sum", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/dirname", homeDir + "usr/bin/dirname", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/ar", homeDir + "usr/bin/ar", folderMounted); // Needed to compile Node.js!?
+				foldersToMount++;module_mount("/usr/bin/ranlib", homeDir + "usr/bin/ranlib", folderMounted); // Needed to compile Node.js!?
+				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
+				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
 				
-				
+
 				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
 				
 				foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
@@ -2571,6 +2581,7 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/sed", homeDir + "bin/sed", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
+				foldersToMount++;module_mount("/bin/uname", homeDir + "bin/uname", folderMounted); // Wanted by nvm
 				
 				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				

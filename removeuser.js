@@ -166,7 +166,18 @@ umount("/home/" + username + "/usr/bin/unzip");
 	umount("/home/" + username + "/usr/bin/cc");
 	umount("/home/" + username + "/usr/bin/touch");
 	umount("/home/" + username + "/usr/bin/ld");
-	
+	umount("/home/" + username + "/usr/bin/tr");
+	umount("/home/" + username + "/usr/bin/tail");
+	umount("/home/" + username + "/usr/bin/awk");
+	umount("/home/" + username + "/usr/bin/sort");
+	umount("/home/" + username + "/usr/bin/sha256sum");
+	umount("/home/" + username + "/usr/bin/dirname");
+	umount("/home/" + username + "/usr/bin/ar");
+	umount("/home/" + username + "/usr/bin/ranlib");
+	umount("/home/" + username + "/usr/bin/openssl");
+umount("/home/" + username + "/usr/bin/pkg-config");
+
+
 	umount("/home/" + username + "/usr/include");
 	umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
@@ -197,6 +208,7 @@ umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/bin/sed");
 	umount("/home/" + username + "/bin/grep");
 	umount("/home/" + username + "/bin/cp");
+	umount("/home/" + username + "/bin/uname");
 	
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
