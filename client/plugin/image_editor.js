@@ -174,18 +174,15 @@ EDITOR.putIntoClipboard(rgbStr);
 		
 	}
 	
-	function showControls() {
-		controls.show();
-	}
-	
 	function showImageFileMaybe(file) {
 		
 		if(file.canvas != undefined) {
 			EDITOR.canvas.style.cursor = 'default';
-			showControls();
+			controls.show();
 		}
 		else if(file.text != undefined) {
 			EDITOR.canvas.style.cursor = 'text';
+			controls.hide();
 		}
 		else {
 			EDITOR.canvas.style.cursor = 'help';

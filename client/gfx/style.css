@@ -660,6 +660,11 @@ td input[type=text] {
 	max-width: calc(100% - 16px);
 }
 
+input[type=color] {
+	margin-left: 1em;
+	vertical-align: middle;
+}
+
 
 
 .mercurialAnnotationWidget {
