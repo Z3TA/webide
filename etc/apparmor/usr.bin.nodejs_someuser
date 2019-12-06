@@ -177,8 +177,11 @@
     %HOME%%USERNAME%/** mr,
     owner %HOME%%USERNAME%/** rwl,
    
-    # Needed by ssh-keygen
+    # Needed by ssh-keygen and others
     %HOME%%USERNAME%/dev/null rw,
+    
+    # Needed by gunzip??
+    #%HOME%%USERNAME%/dev/ptmx rw,
 
 
   }
