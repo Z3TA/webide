@@ -59,6 +59,7 @@
   %HOME%%USERNAME%/bin/gzip ix,
   %HOME%%USERNAME%/usr/bin/unzip ix,
   %HOME%%USERNAME%/usr/bin/unrar ix,
+  %HOME%%USERNAME%/usr/bin/wget ix,
 
   # other bins
   %HOME%%USERNAME%/** Cx -> scripts,
@@ -70,6 +71,9 @@
     deny %HOME%%USERNAME%/proc/** wl,
     deny %HOME%%USERNAME%/lib/** wl,
     deny %HOME%%USERNAME%/lib64/** wl,
+
+    deny %HOME%%USERNAME%/.ssh/** rwl,
+    deny %HOME%%USERNAME%/.gnupg/** rwl,
 
     # Restrict network access! Only allow unix sockets
     network unix,
