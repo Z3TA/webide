@@ -9,6 +9,9 @@
   deny %HOME%%USERNAME%/lib/** wl,
   deny %HOME%%USERNAME%/lib64/** wl,
 
+  deny %HOME%%USERNAME%/.ssh/** rwl,
+  deny %HOME%%USERNAME%/.gnupg/** rwl,
+
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** mr,
   owner %HOME%%USERNAME%/** wl,

@@ -14,6 +14,8 @@
   deny %HOME%%USERNAME%/lib64/** wl,
 
   deny %HOME%%USERNAME%/.ssh/** rwl,
+  deny %HOME%%USERNAME%/.gnupg/** rwl,
+
 
   # New in ubuntu 18
   %HOME%%USERNAME%/lib/** mr,
@@ -70,6 +72,9 @@
   %HOME%%USERNAME%/bin/sh ix,
   %HOME%%USERNAME%/bin/dash ix,
 
+  # /dev/null is often used
+  %HOME%%USERNAME%/dev/null rw,
+
 
   # node can spawn scripts
   %HOME%%USERNAME%/** Cx -> scripts,
@@ -83,6 +88,8 @@
     deny %HOME%%USERNAME%/lib64/** wl,
     
     deny %HOME%%USERNAME%/.ssh/** rwl,
+    deny %HOME%%USERNAME%/.gnupg/** rwl,
+    
     
     # Restrict network access! Only allow unix sockets
     network unix,
