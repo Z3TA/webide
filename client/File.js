@@ -3338,12 +3338,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		*/
 		
 		var gridRow = grid[row];
-		var clone = gridRow.slice(0);
-		
-		if(clone.length > maxColumns) clone.length = maxColumns; // Optimization for files without line breaks
+		var clone = new Array(Math.min(gridRow.length, maxColumns));
 		
 		// Copy the values so preRenders doesn't have to reset them
-		for (var i=0; i<grid[row].length; i++) {
+		for (var i=0; i<clone.length; i++) {
 			clone[i] = {
 				char: gridRow[i].char,
 				index: gridRow[i].index,
@@ -3352,7 +3350,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				selected: gridRow[i].selected,
 				highlighted: gridRow[i].highlighted,
 				hasCharacter: true,
-				wave: grid[row][i].wave,
+				wave: gridRow[i].wave,
 				circle: false,
 				quote: false,
 				comment: false
@@ -3369,10 +3367,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		*/
 		
 		// slice wont copy these
-		clone.indentation = grid[row].indentation;
-		clone.lineNumber = grid[row].lineNumber;
-		clone.startIndex = grid[row].startIndex;
-		clone.owned = grid[row].owned;
+		clone.indentation = gridRow.indentation;
+		clone.lineNumber = gridRow.lineNumber;
+		clone.startIndex = gridRow.startIndex;
+		clone.owned = gridRow.owned;
 		
 		return clone;
 		
