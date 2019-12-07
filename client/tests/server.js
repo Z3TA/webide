@@ -78,9 +78,12 @@ var testFolder = "/testInstallNodejsModule/";
 				CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
 					if(err) throw err
 					
+// stdout file opens async, so wait to make sure it has opened
+setTimeout(function() {
 					EDITOR.closeFile("/testInstallNodejsModule/.stdout");
+callback(true);
+					}, 200);
 					
-					callback(true);
 				});
 			});
 		});
