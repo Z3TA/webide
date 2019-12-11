@@ -2137,7 +2137,7 @@ usePseudoClipboard = false;
 		else {
 			
 			setTimeout(function showDashboardMaybe() {
-				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden && EDITOR.user) {
+				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden && EDITOR.user && !(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1))) {
 					EDITOR.dashboard.show();
 					EDITOR.shouldRender = false;
 				}
