@@ -21,8 +21,9 @@
   %HOME%%USERNAME%/bin/** mr,
 
   signal receive set=hup peer=%HOME%%USERNAME%/bin/bash,
+  signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,
+  
   signal send set=hup peer=%HOME%%USERNAME%/bin/bash,
-
   signal send set=hup peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=hup peer=%HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js,
 
@@ -47,19 +48,22 @@
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
-  # bins without profile
+  # bins without profile (who needs network)
   %HOME%%USERNAME%/usr/bin/npm ix,
   %HOME%%USERNAME%/usr/bin/env ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,
   %HOME%%USERNAME%/usr/bin/ssh-keygen ix,
+  %HOME%%USERNAME%/usr/bin/unzip ix,
+  %HOME%%USERNAME%/usr/bin/unrar ix,
+  %HOME%%USERNAME%/usr/bin/wget ix,
+  %HOME%%USERNAME%/usr/bin/curl ix,
+  %HOME%%USERNAME%/usr/bin/host ix,
+
   %HOME%%USERNAME%/bin/ls ix,
   %HOME%%USERNAME%/bin/tar ix,
   %HOME%%USERNAME%/bin/gunzip ix,
   %HOME%%USERNAME%/bin/sh ix,
   %HOME%%USERNAME%/bin/gzip ix,
-  %HOME%%USERNAME%/usr/bin/unzip ix,
-  %HOME%%USERNAME%/usr/bin/unrar ix,
-  %HOME%%USERNAME%/usr/bin/wget ix,
 
   # other bins
   %HOME%%USERNAME%/** Cx -> scripts,
@@ -93,15 +97,54 @@
     %HOME%%USERNAME%/usr/bin/hg Px,
     %HOME%%USERNAME%/usr/bin/git Px,
     %HOME%%USERNAME%/usr/bin/node Px,
-    %HOME%%USERNAME%/usr/bin/bash Px,
     %HOME%%USERNAME%/usr/bin/python Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
     %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
+    %HOME%%USERNAME%/bin/bash Px,
+    
+    %HOME%%USERNAME%/usr/bin/wget px -> networkTool,
+    %HOME%%USERNAME%/usr/bin/curl px -> networkTool,
+    
+
     # Scripts of scripts
     %HOME%%USERNAME%/** ix,
    
-
+   
+    signal send set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
+    signal send set=kill peer=%HOME%%USERNAME%/bin/bash//networkTool,
+   
+    signal receive set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
+ 
+ 
+ 
   }
 
+}
+
+# Restrictive, but allow network
+profile networkTool {
+  deny %HOME%%USERNAME%/usr/** wl,
+  deny %HOME%%USERNAME%/bin/** wl,
+  deny %HOME%%USERNAME%/proc/** wl,
+  deny %HOME%%USERNAME%/lib/** wl,
+  deny %HOME%%USERNAME%/lib64/** wl,
+
+  %HOME%%USERNAME%/ r,
+  %HOME%%USERNAME%/** mr,
+    
+  owner %HOME%%USERNAME%/** wl,
+    
+  %HOME%%USERNAME%/lib/** mr,
+  %HOME%%USERNAME%/lib64/** mr,
+  %HOME%%USERNAME%/usr/** mr,
+  %HOME%%USERNAME%/bin/** mr,
+    
+    
+  %HOME%%USERNAME%/dev/null rw,
+  /dev/urandom r,
+    
+  network,
+      
+  signal receive set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
 }

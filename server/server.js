@@ -2325,6 +2325,8 @@ function checkMounts(options, checkMountsCallback) {
 	var sslCertChecked = false;
 	var hgrccacertsUptodate = true;
 	var passwdCreated = false;
+	var subuidCreated = false;
+	var subgidCreated = false;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
 	
@@ -2537,6 +2539,8 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
+				
+				
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 				foldersToMount++;module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
@@ -2562,12 +2566,22 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/ranlib", homeDir + "usr/bin/ranlib", folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
+				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (Docker) eg. curl | sh
+				foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
+				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
+				foldersToMount++;module_mount("/usr/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
 				
-
+				foldersToMount++;module_mount("/sbin/iptables", homeDir + "sbin/iptables", folderMounted); // Needed by docker
+				foldersToMount++;module_mount("/sbin/lsmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
+				
+				
 				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
 				
 				foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
 				
+				
+				foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
+				foldersToMount++;module_mount("/bin/cat", homeDir + "bin/cat", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
 				foldersToMount++;module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
 				foldersToMount++;module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
@@ -2593,10 +2607,12 @@ function checkMounts(options, checkMountsCallback) {
 			
 			foldersToMount++;module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 			
-			foldersToMount += 3;
-			module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
-			module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
-			module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+			foldersToMount++;module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
+			foldersToMount++;module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
+			foldersToMount++;module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+			foldersToMount++;module_mount("/proc/modules", homeDir + "proc/modules", folderMounted); // Needed by lsmod (Docker dep)
+			
+			foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
 			
 			
 			//foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
@@ -2646,6 +2662,47 @@ function checkMounts(options, checkMountsCallback) {
 		}
 		else passwdCreated = true;
 		
+		// Docker needs /etc/subuid, but we don't want to show what other users are on the system
+		if(!DEBUG_CHROOT) {
+			module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
+				var rows = data.split("\n");
+				var foundUser = false;
+				for (var i=0, col; i<rows.length; i++) {
+					col = rows[i].split(":");
+					if(col[0]==username) found(rows[i]);
+				}
+				if(!foundUser) throw new Error("Did not find username=" + username + " in /etc/subuid data=" + data);
+				function found(data) {
+					foundUser = true;
+					module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
+						subuidCreated = true;
+						checkMountsReadyMaybe();
+					});
+				}
+			});;
+		}
+		else subuidCreated = true;
+		
+		// Docker needs /etc/subgid, but we don't want to show what other users are on the system
+		if(!DEBUG_CHROOT) {
+			module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
+				var rows = data.split("\n");
+				var foundUser = false;
+				for (var i=0, col; i<rows.length; i++) {
+					col = rows[i].split(":");
+					if(col[0]==username) found(rows[i]);
+				}
+				if(!foundUser) throw new Error("Did not find username=" + username + " in /etc/subgid data=" + data);
+				function found(data) {
+					foundUser = true;
+					module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
+						subgidCreated = true;
+						checkMountsReadyMaybe();
+					});
+				}
+			});;
+		}
+		else subgidCreated = true;
 		
 		// Make sure nginx profile exist
 		var nginxSitesAvailable = "/etc/nginx/sites-available/"
@@ -2902,7 +2959,7 @@ function checkMounts(options, checkMountsCallback) {
 		
 		//console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
-		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -3794,8 +3851,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		HOME: NO_CHROOT ? homeDir : "/",
 		USER: name,
 		LOGNAME: name,
-		USER_NAME: name,
-		PATH: process.env.PATH
+		USER_NAME: name
 	}
 	
 	// For forking when running in the Termux Android app
@@ -3806,13 +3862,15 @@ function createUserWorker(name, uid, gid, homeDir) {
 	if(NO_CHROOT) {
 		if(uid != undefined) options.uid = parseInt(uid);
 		if(gid != undefined) options.gid = parseInt(gid);
+		
+		options.env.PATH =  process.env.PATH;
 	}
 	else {
 		options.env.uid = uid;
 		options.env.gid = gid;
 		
 		// Assume unix like system
-		options.env.PATH = "/usr/bin:/bin:/.npm-packages/bin";
+		options.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
 		
 		options.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		

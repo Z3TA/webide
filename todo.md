@@ -38,6 +38,46 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+regression: After zooming out we get another font size!
+
+Trying to run docker
+
+
+todo: in embed example in documents, the file is hidden by the dashboard! Don't show the dashboard when running emedded ...
+
+todo: In text mode, when pressing enter at start of line (after indentation) create the same amount of indentation on the row below
+  |press enter
+not land here
+   land here
+
+todo: When pressing backspace in text mode, and there is only indentation on the left side, delete all indentation and go to line above!?!?
+
+
+nodejsplayground.com - like codepen but better: https://codepen.io/mikayp-the-styleful/pen/NWPxoXR?editors=1111
+not sure about the implementation...
+
+The editor, pre-opened files: 
+css.css, index.htm, main.js, server.js
+
+A box for showing console messages
+
+A box for showing the live preview
+
+n
+
+
+
+web share: Problem: when you share to the app, it navigates to /share as specified in web manifest,
+but the editor doesn't know which user to send the file to, unless the user is already logged in.
+use cookies!?
+
+People don't trust apps, so they rather use a web app.
+But then they don't trust other people to store their files, they don't want to develop in the "cloud".
+
+Solution? Distribute the IDE as a VirtualBox and Qemu image !?
+
+
+
 Macbook keyboard combos???!?? Cmd+S to save !?? or stick with Ctrl?
 
 

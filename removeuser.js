@@ -176,8 +176,15 @@ umount("/home/" + username + "/usr/bin/unzip");
 	umount("/home/" + username + "/usr/bin/ranlib");
 	umount("/home/" + username + "/usr/bin/openssl");
 umount("/home/" + username + "/usr/bin/pkg-config");
-
-
+umount("/home/" + username + "/usr/bin/curl");
+	umount("/home/" + username + "/usr/bin/id");
+	umount("/home/" + username + "/usr/bin/newuidmap");
+	umount("/home/" + username + "/usr/bin/which");
+	
+	
+	umount("/home/" + username + "/sbin/iptables");
+	umount("/home/" + username + "/sbin/lsmod");
+	
 	umount("/home/" + username + "/usr/include");
 	umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
@@ -186,6 +193,8 @@ umount("/home/" + username + "/usr/bin/pkg-config");
 	umount("/home/" + username + "/proc/cpuinfo");
 	umount("/home/" + username + "/proc/stat");
 	umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
+	umount("/home/" + username + "/proc/modules");
+	
 	
 	umount("/home/" + username + "/dev/urandom");
 	umount("/home/" + username + "/dev/null");
@@ -194,6 +203,9 @@ umount("/home/" + username + "/usr/bin/pkg-config");
 	
 	//umount("/home/" + username + "/dev/tty");
 	
+
+umount("/home/" + username + "/bin/mktemp");
+umount("/home/" + username + "/bin/cat");
 umount("/home/" + username + "/bin/bash");
 umount("/home/" + username + "/bin/gunzip");
 umount("/home/" + username + "/bin/gzip");

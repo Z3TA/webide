@@ -124,4 +124,10 @@ export PATH="$NPM_PACKAGES/bin:$PATH"
 # Make it use a unix socket instead of tcp port!
 export PORT="/sock/test"
 
+# Able to install (and run?) docker
+#  curl -fsSL https://get.docker.com/rootless | sh
+export DOCKER_BIN="/dockerbin"
+export XDG_RUNTIME_DIR="/tmp/docker-1001"
+export DOCKER_HOST="unix:///tmp/docker-1001/docker.sock"
+
 
