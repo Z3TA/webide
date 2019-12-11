@@ -2230,7 +2230,8 @@ usePseudoClipboard = false;
 			var buffer = [];
 			
 			// Create the buffer
-			buffer.push(file.cloneRow(gridRow, 100)); // Clone the row
+			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see file.grid[gridRow].length
+			buffer.push(file.cloneRow(gridRow, maxColumns)); // Clone the row
 			
 			
 			// Load on the fly functionality on the buffer
