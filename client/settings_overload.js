@@ -284,7 +284,8 @@ UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 				
 				if(browser == "Firefox") {
 					// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
-				EDITOR.settings.gridWidth = 8;
+						// And now suddenly it's no longer needed!? Nothing changed ...
+				//EDITOR.settings.gridWidth = 8;
 				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 			}
 			}
