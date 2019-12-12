@@ -38,12 +38,20 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+If you want to run docker or use Linux namespaces, you need root permission. Period.
+
+
 todo: Able to manually mark a file as plain text! (so that indentation doesn't get lost)
 Save in local storage which files should be plain text files
 
 
+[rootlesskit:parent] error: failed to start the child: fork/exec /proc/self/exe: operation not permitted
+even when Apparmor is disabled!
+Unprivileged user namespaces are extremely dangerous!
+
 Trying to run docker
 
+perf: mount all of /usr/bin for faster nounting? Instead of induvidual programs.
 
 todo: in embed example in documents, the file is hidden by the dashboard! Don't show the dashboard when running emedded ...
 

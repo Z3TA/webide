@@ -29,7 +29,7 @@
 
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** mr,
-  owner %HOME%%USERNAME%/** wl,
+  owner %HOME%%USERNAME%/** wlk,
 
   %HOME%%USERNAME%/dev/null rw,
 
@@ -84,7 +84,7 @@
 
     %HOME%%USERNAME%/ r,
     %HOME%%USERNAME%/** mr,
-    owner %HOME%%USERNAME%/** rwl,
+    owner %HOME%%USERNAME%/** rwlk,
 
     # /dev/null is often used
     %HOME%%USERNAME%/dev/null rw,

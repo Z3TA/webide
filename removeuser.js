@@ -134,15 +134,6 @@ unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-c
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
 
 	// Same order as in server.js to make it easier to spot what is missing
-	umount("/home/" + username + "/usr/", true);
-	umount("/home/" + username + "/etc/", true);
-	umount("/home/" + username + "/proc/", true);
-	umount("/home/" + username + "/dev/pts", true);
-	umount("/home/" + username + "/dev/", true);
-	
-	// Just in case
-		umount("/home/" + username + "/run/", true);
-	umount("/home/" + username + "/bin/", true);
 
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
@@ -194,7 +185,7 @@ umount("/home/" + username + "/usr/bin/curl");
 	umount("/home/" + username + "/proc/stat");
 	umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
 	umount("/home/" + username + "/proc/modules");
-	
+	umount("/home/" + username + "/proc/self/exe");
 	
 	umount("/home/" + username + "/dev/urandom");
 	umount("/home/" + username + "/dev/null");
@@ -225,8 +216,24 @@ umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 
+	
+	umount("/home/" + username + "/usr/", true);
+	umount("/home/" + username + "/etc/", true);
+	umount("/home/" + username + "/proc/", true);
+	umount("/home/" + username + "/dev/pts", true);
+	umount("/home/" + username + "/dev/", true);
+	
+	// Just in case
+	umount("/home/" + username + "/run/", true);
+	umount("/home/" + username + "/bin/", true);
+	
+	
 fuseUmount("/home/" + username + "/googleDrive");
 
+	
+	
+	
+	
 // It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
 umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
 unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
