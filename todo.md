@@ -41,7 +41,6 @@ What I'm working on
 todo: Able to manually mark a file as plain text! (so that indentation doesn't get lost)
 Save in local storage which files should be plain text files
 
-regression: After zooming out we get another font size!
 
 Trying to run docker
 

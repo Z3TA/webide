@@ -16,17 +16,11 @@
 	var scrollStep = 5;
 	var loadOrder = 1500; // Should load after the renders
 	var winMenuZoom;
-	
+	var zoomedOnce = false;
 	
 	EDITOR.plugin({
 		desc: "Zoom in and highlight markdown headings",
 		load: function zoomInit() {
-			
-			o_gridHeight = EDITOR.settings.gridHeight;
-			o_gridWidth = EDITOR.settings.gridWidth;
-			o_fontSize = EDITOR.settings.style.fontSize;
-			o_font = EDITOR.settings.style.font;
-			o_scrollSpeedMultiplier = EDITOR.settings.scrollSpeedMultiplier;
 			
 			EDITOR.bindKey({desc: "Toggle zoom", charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 			
@@ -58,6 +52,16 @@
 		order: loadOrder
 	});
 	
+	function saveOriginalSettings() {
+		
+		o_gridHeight = EDITOR.settings.gridHeight;
+		o_gridWidth = EDITOR.settings.gridWidth;
+		o_fontSize = EDITOR.settings.style.fontSize;
+		o_font = EDITOR.settings.style.font;
+		o_scrollSpeedMultiplier = EDITOR.settings.scrollSpeedMultiplier;
+		
+	}
+	
 	function zoomSwitch(file, combo, character, charCode, direction) {
 		if(zoomedIn) zoomReset(file, combo, character, charCode, direction)
 		else zoom(file, combo, character, charCode, direction);
@@ -66,6 +70,10 @@
 	
 	function zoom(file, combo, character, charCode, direction) {
 		
+if(!zoomedOnce) saveOriginalSettings();
+
+zoomedOnce = true;
+
 		winMenuZoom.activate();
 		
 		console.log("zooming!");
