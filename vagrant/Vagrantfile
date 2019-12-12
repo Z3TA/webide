@@ -1,0 +1,33 @@
+# CURRENTLY NOT SUPPORTED!
+#
+# Proof of consept. The web IDE could be installed into a virtual machine (VM) using Vagrant!
+#
+# Installing for a single user for use on desktop or VPS is however very easy:
+# npm install -g webide.se
+#
+# But users might now want to run their IDE in the "cloud", 
+# and they might not want to run the IDE on their own machine \
+# due to security concerns, especially if they want to allow teenagers or stranges to use it.
+#
+# so the solution is to run the IDE inside a virtual machine!
+#
+#
+#
+# Installing the editor for multiple users is however more complicated
+# --------------------------------------------------------------------
+# Problem 1: We need a custom DNS server to handle letsencrypt challanges!
+# So that apps can listen on appname.username.yourdomain.com
+# Many browser features now depend on HTTPS/TSL to work, ortherwise we could have skipped registering SSL certificates.
+# 
+# Solution: Run the DNS server inside the VM, then make it the NS server for a dedicated domain, like myide.com
+#
+#
+# https://github.com/hashicorp/vagrant/issues/2662
+# https://www.vagrantup.com/docs/provisioning/shell.html#path
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/xenial64"
+  
+    config.vm.provision "shell", path: "https://webtigerteam.com/editor/install/singleuser.sh"
+end
+

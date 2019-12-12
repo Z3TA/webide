@@ -33,7 +33,7 @@ var exec = require("child_process").execSync;
 //exec("apt update");
 
 // Make sure we are inside the webide root folder ...
-// The following with crash the script if the files doesn't exist
+// The following will crash the script if the files doesn't exist
 exec("chmod +x removeuser.js");
 exec("chmod +x adduser.js");
 
