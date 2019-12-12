@@ -38,6 +38,12 @@ Before you start working on something new, first describe the problem,
 What I'm working on
 -------------------
 
+Fix pull issue with dual heads.
+add a note that you can always run the commands in the Terminal if there are any troubles
+
+
+Start using the cloud IDE full time in order to find more issues.
+
 If you want to run docker or use Linux namespaces, you need root permission. Period.
 
 
@@ -73,7 +79,7 @@ A box for showing console messages
 
 A box for showing the live preview
 
-n
+
 
 
 
