@@ -1,10 +1,16 @@
 Contributing
 ============
-If you make changes to this software, feel free to e-mail a patch to zeta@zetafiles.org
+If you make changes to this software, feel free to e-mail a patch to editor@webtigerteam.com
 
 If it's a big update, (for example a new plugin), you also have to include the following note:
 "I give you full irrevocable copy rights for this code, including but not limited to the right to sell, distribute, and make changes."
-Or use a permissive licence such as MIT, Apache, BSD, or Mozilla lincenses, with a disclaimer that it only applies to *your* code/plugin.
+
+You are allowed to credit yourself in the source code, for example: "This plugin was created by Z"
+And the copyright you give me is non-exclusive, meaning it's still *your* code, just don't complain if I make money off it.
+
+You can make changes in the source code as is, and send me the changed files.
+Or if you want to be helpful, contact me to get access to the source code repository, then follow the instructions below.
+
 
 
 Mercurial
@@ -21,6 +27,7 @@ Follow the install instructions. Make sure hg is added to "PATH" !
 
 Get the WebIDE source code
 --------------------------
+
 Clone the project: 
 cd my-projects (where you want to place the files)
 hg clone https://hg.webtigerteam.com/repo/webide/
@@ -88,7 +95,7 @@ EDITOR.addTest(function myTest(callback) {
 If the test is inlined put the following comment before the test(s):
 // TEST-CODE-START
 
-And the following code after the tests
+And the following comment after the tests
 // TEST-CODE-END
 
 If the tests are in seperate file(s), place them in the client/tests/ folder and
