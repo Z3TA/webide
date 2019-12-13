@@ -4961,7 +4961,7 @@ function gcsfCleanup(username) {
 function reportError(errorMessage) {
 	// A more soft error to prevent the server from restarting
 	console.error(errorMessage);
-	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, errorMessage);
+	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + errorMessage.split("\n")[0].slice(0, 100) , errorMessage); // from, to, subject, text
 }
 
 main();
