@@ -1759,6 +1759,8 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						"/lib/", 
 						"/lib64/", 
 						"/bin/", 
+						"/sbin/",
+						"/sys/",
 						"/etc/", 
 						"/proc/", 
 						"/run/", 
