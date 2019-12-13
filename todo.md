@@ -10,7 +10,9 @@ Note to myself
 
 Solve problems and pains! Do not look for problems that fit a solution!
 
-Probably should read through this file and reletlessly delete stuff.
+Before you start working on something new, first describe the problem, 
+(and do a quick research to find out if a solutions already exist.)
+
 
 Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couldn't recover from a hg up, etc)
 
@@ -31,12 +33,18 @@ Android browser will not run the script if it contains a default keyword such as
 
 Firefox dev tools sometimes hide console log messages!!
 
-Before you start working on something new, first describe the problem, 
-(and do a quick research to find out if a solutions already exist.)
+Probably should read through this file and reletlessly delete stuff.
 
 
 What I'm working on
 -------------------
+
+issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
+try to run "npm install" when you click "install all" !?
+
+Thinking of maybe using highlight.js to support code highlightning for more languages...
+
+Markdown live preivew!
 
 Fix pull issue with dual heads.
 add a note that you can always run the commands in the Terminal if there are any troubles
@@ -69,17 +77,13 @@ not land here
 todo: When pressing backspace in text mode, and there is only indentation on the left side, delete all indentation and go to line above!?!?
 
 
-nodejsplayground.com - like codepen but better: https://codepen.io/mikayp-the-styleful/pen/NWPxoXR?editors=1111
-not sure about the implementation...
+nodejsplayground.com - focus on tutorials!!
+Learn how to do X in JavaScript and Node.js
 
-The editor, pre-opened files: 
-css.css, index.htm, main.js, server.js
+There are already many JS playgrounds, like codepen and codesandbox,
+there are however fewer places that teaches you how to code, and learning is a huge market.
 
-A box for showing console messages
-
-A box for showing the live preview
-
-
+ resources, and project ideas for learning JavaScript 
 
 
 
