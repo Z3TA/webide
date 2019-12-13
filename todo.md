@@ -40,7 +40,11 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
+issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
+try to run "npm install" when you click "install all" !?
 
+
+todo: When publishing a SSG, first check open files that belongs to the project and make sure they are saved!
 
 Push & Notifications PWA example doesn't work!
 Also make it so you have to push a button to register for push notification (see deprication warning in console)
@@ -55,8 +59,6 @@ add a note that you can always run the commands in the Terminal if there are any
 issue: When autocompleting inside () I get a HTML completion. Don't do HTML completions inside .js files unless it's a XML string or JSX
 
 
-issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
-try to run "npm install" when you click "install all" !?
 
 Thinking of maybe using highlight.js to support code highlightning for more languages...
 

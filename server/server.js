@@ -2571,7 +2571,7 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
-
+				
 				foldersToMount++;module_mount("/sbin/iptables", homeDir + "sbin/iptables", folderMounted); // Needed by docker
 				foldersToMount++;module_mount("/sbin/lsmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
 				
@@ -2674,7 +2674,12 @@ function checkMounts(options, checkMountsCallback) {
 					col = rows[i].split(":");
 					if(col[0]==username) found(rows[i]);
 				}
-				if(!foundUser) throw new Error("Did not find username=" + username + " in /etc/subuid data=" + data);
+				if(!foundUser) {
+					reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
+					subuidCreated = true;
+					checkMountsReadyMaybe();
+					return;
+				}
 				function found(data) {
 					foundUser = true;
 					module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
@@ -2695,7 +2700,12 @@ function checkMounts(options, checkMountsCallback) {
 					col = rows[i].split(":");
 					if(col[0]==username) found(rows[i]);
 				}
-				if(!foundUser) throw new Error("Did not find username=" + username + " in /etc/subgid data=" + data);
+				if(!foundUser) {
+reportError("Did not find username=" + username + " in /etc/subgid data=" + data);
+					subgidCreated = true;
+					checkMountsReadyMaybe();
+					return;
+				}
 				function found(data) {
 					foundUser = true;
 					module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
@@ -4946,6 +4956,12 @@ function gcsfCleanup(username) {
 		return true;
 	}
 	return false;
+}
+
+function reportError(errorMessage) {
+	// A more soft error to prevent the server from restarting
+	console.error(errorMessage);
+	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, errorMessage);
 }
 
 main();
