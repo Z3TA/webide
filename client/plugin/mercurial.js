@@ -2853,6 +2853,12 @@ var error = err.message;
 		checkForUnresolved(fileDirectory, function checkedForUnresolved(err) {
 			if(err) throw err;
 			
+checkForChanges();
+
+		});
+
+		
+		function checkForChanges() {
 			// Check what revision we are on, and if we need to update
 			CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
 				if(err) throw err;
@@ -2871,16 +2877,16 @@ var error = err.message;
 					CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
 						if(err) throw err;
 						
-						// We only care about the files opened in the editor of which will also be updated
-						// either if it's not saved, or not commited
+						/*
+							If there are uncommited files when updating, depending on the version of Mercurial,
+							mercurial will either discard or merge the uncommited changes with the head...
+							So don't let the user Update before explicitly commiting or discarding the changes!
+						*/
 						
 						var uncommited = current.modified.concat(current.added);
 						var toBeUpdated = updated.modified.concat(updated.added).concat(updated.removed);
 						
-						checkOpenedFiles();
-						
-						function checkOpenedFiles() {
-							var filePath;
+						var filePath;
 							for(var path in EDITOR.files) {
 								filePath = path.replace(rootDir, ""); // So they can be compared
 								
@@ -2890,64 +2896,71 @@ var error = err.message;
 								}
 								else if(uncommited.indexOf(filePath) != -1 && toBeUpdated.indexOf(filePath) != -1) {
 									// File opened in the editor has not been commited
-									return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nUncommited changes will be lost!");
+								return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nDepending on the version of Mercurial used, the Uncommited changes might be lost!");
 								}
 							}
 							
-							// It's safe to update
-							doTheUpdate();
+						if(current.modified.length > 0) {
+							var mergeOrRevert = "Commit or Revert";
+							var updateAndMerge = "I'm prepared to merge or ";
+							alertBox("The following files has uncommited changes... Either commit or revert changes before updating: <ul><li>" + current.modified.join("</li><li>") + "</li></ul>");
+							showCommitDialog();
 						}
+						else doTheUpdate(); // It's safe to update
 						
-						function askDiscard(file, msg) {
-							// File is not saved
-							var optDiscard = "Discard unsaved changes";
-							var optAbort = "Abort the update";
-							confirmBox(msg, [optDiscard, optAbort], function(answer) {
-								if(answer == optDiscard) {
-									reload(file, function(err) {
-										if(err) throw err;
-										checkOpenedFiles();
-									});
-								}
-								else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
-								});
-						}
 						
-function askCommit(file, msg) {
-// File has not been commited
-var optAbort = "Abort udpate";
-var optCommit = "Commit";
-var optRevert = "Revert uncommited changes";
-var optMerge = "Merge uncommited changes to updated file"; // Default Mercurial behaviour
-
-confirmBox(msg, [optAbort, optCommit, optRevert, optMerge], function(answer) {
-
-if(answer == optCommit) {
-								showCommitDialog();
-}
-								else if(answer == optRevert) {
-CLIENT.cmd("mercurial.revert", {directory: fileDirectory, files: [file.path]}, function hgRevert(err, files) {
-if(err) throw err;
-
-									reload(file, function(err) {
-										if(err) throw err;
-										checkOpenedFiles();
-									});
-									});
-								}
-							else if(answer == optMerge) {
-var doNotSwitchFile = true;
-reopenFiles.push(file.path);
-								EDITOR.closeFile(file.path, doNotSwitchFile);
-checkOpenedFiles();
-}
-								else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
-								});
-}
 });
 			});
 		});
-
+		}
+		
+		function askDiscard(file, msg) {
+			// File is not saved
+			var optDiscard = "Discard unsaved changes";
+			var optAbort = "Abort the update";
+			confirmBox(msg, [optDiscard, optAbort], function(answer) {
+				if(answer == optDiscard) {
+					reload(file, function(err) {
+						if(err) throw err;
+						checkForChanges();
+					});
+				}
+				else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
+			});
+		}
+		
+		function askCommit(file, msg) {
+			// File has not been commited
+			var optAbort = "Abort udpate";
+			var optCommit = "Commit";
+			var optRevert = "Revert uncommited changes";
+			var optMerge = "Merge uncommited changes to updated file"; // Default Mercurial behaviour
+			
+			confirmBox(msg, [optAbort, optCommit, optRevert, optMerge], function(answer) {
+				
+				if(answer == optCommit) {
+					showCommitDialog();
+				}
+				else if(answer == optRevert) {
+					CLIENT.cmd("mercurial.revert", {directory: fileDirectory, files: [file.path]}, function hgRevert(err, files) {
+						if(err) throw err;
+						
+						reload(file, function(err) {
+							if(err) throw err;
+							checkForChanges();
+						});
+					});
+				}
+				else if(answer == optMerge) {
+					var doNotSwitchFile = true;
+					reopenFiles.push(file.path);
+					EDITOR.closeFile(file.path, doNotSwitchFile);
+					checkForChanges();
+				}
+				else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
+			});
+		}
+		
 		function doTheUpdate() {
 		
 		CLIENT.cmd("mercurial.update", {directory: fileDirectory}, function hgUpdate(err, resp) {
@@ -3032,7 +3045,7 @@ if(callback) callback(null, filePath);
 }
 });
 }
-		});
+		
 	}
 	
 	function figureOutDirectoryIfUndefined(fileDirectory) {

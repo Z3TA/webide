@@ -39,6 +39,24 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
+issue: When running hg update, and there is a uncommited change, hg wants to merge!
+Then if you remove the unmerged changes, hg wants you to commit! - but
+ you can't select the file you just modified, because it's the same as last commit
+
+solution: Check for modified files before running hg update. Then ask the user:
+"The folowing files has uncommited changes":
+alternatives: "commit or revert", "update & merge" (default)
+
+
+Fix pull issue with dual heads.
+add a note that you can always run the commands in the Terminal if there are any troubles
+
+
+---
+
+issue: When autocompleting inside () I get a HTML completion. Don't do HTML completions inside .js files unless it's a XML string or JSX
+
+
 issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
 try to run "npm install" when you click "install all" !?
 
@@ -46,9 +64,10 @@ Thinking of maybe using highlight.js to support code highlightning for more lang
 
 Markdown live preivew!
 
-Fix pull issue with dual heads.
-add a note that you can always run the commands in the Terminal if there are any troubles
 
+todo: Make it possible to have icons in the window menu and context menu, but only add icons to some items to make them easier to find.
+
+todo: Add all commands from the SCP command bar to the SCM window menu!
 
 Start using the cloud IDE full time in order to find more issues.
 
@@ -65,7 +84,8 @@ Unprivileged user namespaces are extremely dangerous!
 
 Trying to run docker
 
-perf: mount all of /usr/bin for faster nounting? Instead of induvidual programs.
+perf: mount all of /usr/bin for faster nounting? Instead of induvidual programs. (measure before and after!!)
+
 
 todo: in embed example in documents, the file is hidden by the dashboard! Don't show the dashboard when running emedded ...
 
