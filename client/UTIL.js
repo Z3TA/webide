@@ -1579,8 +1579,14 @@ else {
 			else filePath = url;
 		}
 		
+try {
 		filePath = decodeURIComponent(filePath); // decode åäö etc
-		
+		}
+catch(err) {
+console.error(err);
+console.warn("Unable to decodeURIComponent on filePath=" + filePath);
+}
+
 		//console.log("filePath=" + filePath);
 		
 		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
