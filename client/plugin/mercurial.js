@@ -2858,7 +2858,7 @@ var error = err.message;
 		});
 
 		
-		function checkForChanges() {
+		function checkForChanges(ignoreUpdatesInNotOpenedFile) {
 			// Check what revision we are on, and if we need to update
 			CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
 				if(err) throw err;
@@ -2876,6 +2876,8 @@ var error = err.message;
 					// Check status between current (.) revision and latested (tip) revision
 					CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
 						if(err) throw err;
+						
+						console.log("checkForChanges: updated=" + JSON.stringify(updated, null, 2));
 						
 						/*
 							If there are uncommited files when updating, depending on the version of Mercurial,
@@ -2896,18 +2898,19 @@ var error = err.message;
 								}
 								else if(uncommited.indexOf(filePath) != -1 && toBeUpdated.indexOf(filePath) != -1) {
 									// File opened in the editor has not been commited
-								return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nDepending on the version of Mercurial used, the Uncommited changes might be lost!");
+								return askCommit(EDITOR.files[path], "" + filePath + " has uncommited changes!\nTake appropriate action to prevent data loss.");
 								}
+else {
+console.log("checkForChanges: filePath=" + filePath + "  not changed.");
+}
 							}
 							
-						if(current.modified.length > 0) {
-							var mergeOrRevert = "Commit or Revert";
-							var updateAndMerge = "I'm prepared to merge or ";
+						if(current.modified.length == 0) doTheUpdate();
+						else if(current.modified.length == 1 && current.modified[0] == ignoreUpdatesInNotOpenedFile) doTheUpdate();
+						else {
 							alertBox("The following files has uncommited changes... Either commit or revert changes before updating: <ul><li>" + current.modified.join("</li><li>") + "</li></ul>");
 							showCommitDialog();
 						}
-						else doTheUpdate(); // It's safe to update
-						
 						
 });
 			});
@@ -2931,6 +2934,9 @@ var error = err.message;
 		
 		function askCommit(file, msg) {
 			// File has not been commited
+			
+			var filePath = file.path;
+			
 			var optAbort = "Abort udpate";
 			var optCommit = "Commit";
 			var optRevert = "Revert uncommited changes";
@@ -2942,7 +2948,7 @@ var error = err.message;
 					showCommitDialog();
 				}
 				else if(answer == optRevert) {
-					CLIENT.cmd("mercurial.revert", {directory: fileDirectory, files: [file.path]}, function hgRevert(err, files) {
+					CLIENT.cmd("mercurial.revert", {directory: fileDirectory, files: [filePath]}, function hgRevert(err, files) {
 						if(err) throw err;
 						
 						reload(file, function(err) {
@@ -2953,9 +2959,11 @@ var error = err.message;
 				}
 				else if(answer == optMerge) {
 					var doNotSwitchFile = true;
-					reopenFiles.push(file.path);
-					EDITOR.closeFile(file.path, doNotSwitchFile);
-					checkForChanges();
+					
+					reopenFiles.push(filePath);
+					EDITOR.closeFile(filePath, doNotSwitchFile);
+					checkForChanges(filePath.replace(rootDir, ""));
+					
 				}
 				else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
 			});
