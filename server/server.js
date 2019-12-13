@@ -2570,7 +2570,8 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
-				
+				foldersToMount++;module_mount("/usr/bin/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
+
 				foldersToMount++;module_mount("/sbin/iptables", homeDir + "sbin/iptables", folderMounted); // Needed by docker
 				foldersToMount++;module_mount("/sbin/lsmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
 				

@@ -3073,19 +3073,21 @@ if(callback) callback(null, filePath);
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
 		// 1. Check for unresolved files (hg resolve --list)
-		CLIENT.cmd("mercurial.resolvelist", {directory: fileDirectory}, function resolveList(err, resp) {
+		CLIENT.cmd("mercurial.resolvelist", {directory: fileDirectory}, function resolveList(err, resolvelist) {
 			if(err) {
 				if(callback) return callback(err);
 				else throw err;
 			}
 			
-			if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
+			console.log("mercurial.resolvelist: resolvelist=" + JSON.stringify(resolvelist, null, 2) + " ");
+			
+			if(resolvelist.resolved.length == 0 && resolvelist.unresolved.length == 0) {
 				checkForMultipleHeads(fileDirectory, callback);
 			}
-			else if(resp.unresolved.length > 0) {
+			else if(resolvelist.unresolved.length > 0) {
 				if(showAlert) alertBox("There are unresolved files! You have to edit the files manually. Then mark them as resolved.");
-				showResolveDialog(resp.resolved, resp.unresolved, fileDirectory);
-				//if(callback) callback(null, resp);
+				showResolveDialog(resolvelist.resolved, resolvelist.unresolved, fileDirectory);
+				//if(callback) callback(null, resolvelist);
 			}
 			else {
 				// All files are resolved
@@ -3099,13 +3101,27 @@ if(err) return alertBox(err.message);
 						checkForMultipleHeads(fileDirectory, callback);
 }
 					else {
-						if(showAlert) alertBox("You had unresolved files that are now marked as resolved. You also need to commit!");
+						/*
+							
+							problem: The user might have removed the current changes, meaning the file now looks like in the last revision,
+							meaning the commit dialog will not list it!
+							
+							solution: Check status to see if the marked files can be commited, if not - show a different message
+							
+						*/
+						
+						if(showAlert) {
+							if(status.modified.indexOf(resolvelist.resolved[0]) == -1) {
+								alertBox("Files has been marked as resolved... You need to commit (or make sure there is nothing to commit)");
+							}
+							else alertBox("The following files has been marked as resolved, and need to be commited: <ul><li>" + resolvelist.resolved.join("</li><li>") + "</li></ul>");
+						}
 						showCommitDialog();
 					}
 				});
 				
 				
-				//if(callback) callback(null, resp);
+				//if(callback) callback(null, resolvelist);
 			}
 		});
 	}

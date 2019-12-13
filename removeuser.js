@@ -171,8 +171,9 @@ umount("/home/" + username + "/usr/bin/curl");
 	umount("/home/" + username + "/usr/bin/id");
 	umount("/home/" + username + "/usr/bin/newuidmap");
 	umount("/home/" + username + "/usr/bin/which");
+	umount("/home/" + username + "/usr/bin/less");
 	
-	
+
 	umount("/home/" + username + "/sbin/iptables");
 	umount("/home/" + username + "/sbin/lsmod");
 	

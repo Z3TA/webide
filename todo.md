@@ -39,6 +39,8 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
+test what happens when you update while there are uncommited changes!
+
 issue: When running hg update, and there is a uncommited change, hg wants to merge!
 Then if you remove the unmerged changes, hg wants you to commit! - but
  you can't select the file you just modified, because it's the same as last commit
