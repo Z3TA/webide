@@ -22,6 +22,7 @@ Instead copy the whole project root folder elsewhere and run the "hg up" command
 
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
 
 Happy path: (manually check on prod after each release)
 1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
@@ -39,6 +40,7 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
+regression: Wen previewing it doesn't serve the serve dir! https://webide.se/welcome.htm
 
 
 Fix pull issue with dual heads.

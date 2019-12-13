@@ -1137,7 +1137,7 @@ div.gotoFile li:hover {
 }
 
 .windowMenu {
-	overflow: visible;
+	overflow: visible; /*because menus are nested*/
 	z-index: 5;
 	position: absolute; /* needed so that children can be on top of other elements */
 	
@@ -1170,6 +1170,9 @@ div.gotoFile li:hover {
 }
 
 .windowMenu .pulloutbottom {
+	display: table; /* Needed because its set to block when screen hieght is low in order to get vertical scrollbar  */
+	max-height: none;
+	
 }
 
 .windowMenu .root {
@@ -2094,9 +2097,23 @@ margin-top: 20px;
 	
 	.windowMenu .menu.vertical.pulloutbottom {
 		display: block; /* Needed for max-height and scrolling to work ... */
+		display: inline-block; /* Inline block sets the width to the width of the child, which fixes the issue with tables becoming super wide */
 		max-height: 80vh;
 		overflow-y: auto; /* Android scrollbar is only visible when scrolling anyway, so no need to show it all the time */
+		
+		/*
+			Problem: When we set display to block, the table will get very wide!
+			solution: Set display to inline-block
+			
+			What's interesting is that the menu width will stay the same...
+			eg. if we show a menu, and then resize the window from tall to small, the menu will remain thin.
+			same thing when resizing the window from short to tall, the menu will remain wide.
+			
+		*/
+		max-width: 390px;
+		
 	}
+	
 	
 }
 
