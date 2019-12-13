@@ -1,4 +1,6 @@
 
+var ImageFile;
+
 (function() { 
 
 	ImageFile = function ImageFile(data, path, fileIndex, loadCallback) {

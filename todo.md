@@ -40,7 +40,9 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
-regression: Wen previewing it doesn't serve the serve dir! https://webide.se/welcome.htm
+regression: prod only! Wen previewing it doesn't serve the serve dir! https://webide.se/welcome.htm
+
+UTIL.joinPaths is bugged when minified!
 
 
 Fix pull issue with dual heads.

@@ -2092,6 +2092,7 @@
 			"bar"
 		]), "/foo/a/b/c/d/e/bar");
 		
+		assert(UTIL.joinPaths("https://webide.se/wv7knxmwao/", undefined, "file.htm"), "https://webide.se/wv7knxmwao/file.htm");
 		
 		callback(true);
 	});

@@ -129,6 +129,12 @@ function done() {
 	
 	var scriptContent = "";
 	for (var i=0; i<scripts.length; i++) {if(scripts[i].minified) scriptContent = scriptContent + scripts[i].minified + "\n";}
+	
+	// UglifyJS will rmove "use strict" from random functions, which will cause errors
+	// Only use one global "use strict" flag so that we use strict everywhere!
+	scriptContent = '"use strict";\n' + scriptContent.replace(/"use strict";/g, "");
+	//scriptContent = '"use strict";\n' + scriptContent;
+	
 	bundle = bundle.replace("!SCRIPT_HERE!", function(){return '<script><!--\n' + scriptContent + '\n--></script>\n'});
 	
 	

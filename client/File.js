@@ -8,10 +8,10 @@
 
 "use strict";
 
-//var File; // File object is global
 
-var BrowserFile = File; // Native file object. todo: Rename our File variable to something else, or maybe incorporate the browsers File methods !?
+var BrowserFile = window.File; // Native file object. todo: Rename our File variable to something else, or maybe incorporate the browsers File methods !?
 
+var File; // File object is global
 
 (function() { // Encapsulate so that we do not bleed out to global scope
 	

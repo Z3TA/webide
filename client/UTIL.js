@@ -1913,7 +1913,7 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 	},
 	
-	joinPaths: function joinPaths(pathsParameter) {
+	joinPaths: function joinPaths(pathsArrayOrManyArgs) {
 		/*
 			
 			Puts a folder delimiter between each items in the array. Examples:
@@ -1926,14 +1926,29 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 		//console.log("joinPaths: arguments=" + JSON.stringify(arguments));
 		
-		if(Object.prototype.toString.call( pathsParameter ) != '[object Array]') {
-			pathsParameter = [];
+/*
+Problem: uglifyjs removes "use strict", and without "use strict" pointing a parameter to
+another object will also update that item in the arguments array!
+sulution: Use a new variable instead of reusing the parameter
+*/
+
+		if(Object.prototype.toString.call( pathsParameter ) == '[object Array]') {
+			var pathsParameter = pathsArrayOrManyArgs;
+		}
+else {
+			var pathsParameter = [];
 			for (var i=0; i<arguments.length; i++) {
-				if(arguments[i]) pathsParameter.push(arguments[i]);
+				//alertBox("i=" + i + " " + arguments[i] + " " + (typeof arguments[i]));
+				if(arguments[i] != undefined) {
+					pathsParameter.push(arguments[i]);
+					//alertBox("i=" + i + " " + arguments[i] + "=" + pathsParameter[pathsParameter.length-1]);
+				}
 			}
 			//pathsParameter = Array.prototype.slice.call(arguments);
 			//throw new Error("joinPaths: Argument needs to be an array: pathsParameter=" + pathsParameter);
 		}
+		
+		
 		
 		//console.log("joinPaths: (before flatten): paths=" + JSON.stringify(paths));
 		
