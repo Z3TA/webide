@@ -353,6 +353,10 @@ console.warn("Could not find the search string that was used!");
 	
 	function hideFindInFilesGui() {
 		
+CLIENT.cmd("abortFindInFiles", function(err) {
+if(err) console.error(err);
+});
+
 		if(divVisible) {
 			hide_find_in_files();
 			return false;
