@@ -40,9 +40,10 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
-regression: prod only! Wen previewing it doesn't serve the serve dir! https://webide.se/welcome.htm
 
-UTIL.joinPaths is bugged when minified!
+
+Push & Notifications PWA example doesn't work!
+Also make it so you have to push a button to register for push notification (see deprication warning in console)
 
 
 Fix pull issue with dual heads.
