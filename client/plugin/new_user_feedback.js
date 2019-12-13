@@ -6,7 +6,8 @@
 	"use strict";
 	
 	var windowMenFeedbackPositive, windowMenFeedbackNegative;
-	
+	var alreadySentFeedback = false;
+
 	EDITOR.plugin({
 		desc: "Get user feedback",
 		load: function loadUserFeedback() {
@@ -54,6 +55,8 @@
 		
 		if(EDITOR.startedCounter && EDITOR.startedCounter > 2) return;
 		
+if(alreadySentFeedback) return;
+
 		// 99% of new users close down the editor/IDE after 3 seconds, try get get some feedback
 		// Tried before to ask users to write feedback in the welcome.htm file, but no one did.
 		
@@ -75,7 +78,8 @@
 					}
 					else {
 						alertBox('Thanks for your invaluable feedback! Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.');
-					}
+					alreadySentFeedback = true;
+}
 				});
 			}
 		});
