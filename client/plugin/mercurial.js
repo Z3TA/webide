@@ -2853,8 +2853,8 @@ var error = err.message;
 		checkForUnresolved(fileDirectory, function checkedForUnresolved(err) {
 			if(err) throw err;
 			
-checkForChanges();
-
+			checkForChanges();
+			
 		});
 
 		
@@ -3099,7 +3099,7 @@ if(err) return alertBox(err.message);
 						checkForMultipleHeads(fileDirectory, callback);
 }
 					else {
-						if(showAlert) alertBox("All files are resolved. You need to commit!");
+						if(showAlert) alertBox("You had unresolved files that are now marked as resolved. You also need to commit!");
 						showCommitDialog();
 					}
 				});
