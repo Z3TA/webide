@@ -49,10 +49,6 @@
 		desc: "Format JS using js-beautify",
 		load: function loadJSbeautifyTextWrapper() {
 			
-			//menuItem = EDITOR.ctxMenu.add("Print to PDF", print2pdf, 3);
-			
-			//EDITOR.registerAltKey({char: ")", alt:3, label: S("print"), fun: print2pdf});
-			
 			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
 			
 			EDITOR.on("wrapText", wrapJavaScriptTool);
@@ -61,10 +57,6 @@
 			
 		},
 		unload: function unloadJSbeautifyTextWrapper() {
-			
-			//EDITOR.ctxMenu.remove(menuItem);
-			
-			//EDITOR.unregisterAltKey(print2pdf);
 			
 			EDITOR.windowMenu.remove(winMenuBeautify);
 			
@@ -100,7 +92,7 @@
 		
 		if(file.grid[row].length < EDITOR.view.visibleColumns) return;
 		
-		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Wrap", true, wrapJsAt, keybWrap);
+		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Wrap", true, wrapJsAt);
 		
 		function wrapJsAt() {
 			jsWrap(file, row);
