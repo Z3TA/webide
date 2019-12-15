@@ -40,6 +40,8 @@ Probably should read through this file and reletlessly delete stuff.
 What I'm working on
 -------------------
 
+Upload, also be able to upload from URL!
+
 issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
 try to run "npm install" when you click "install all" !?
 
