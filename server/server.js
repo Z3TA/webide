@@ -5033,6 +5033,13 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	DROPBOX[username] = dropboxDaemon;
 	
+	setTimeout(function() {
+		if(callback) {
+			callback(null, {timeout: true});
+			callback = null;
+		}
+	}, 6000);
+	
 	dropboxDaemon.on("close", function (code, signal) {
 		log(username + " Dropbox deamon close: code=" + code + " signal=" + signal, NOTICE);
 		

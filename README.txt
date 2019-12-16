@@ -482,6 +482,18 @@ sudo apt update
 sudo apt install xvfb x11vnc chromium-browser
 ````
 
+Installing/upgrading Dropbox daemon
+-----------------------------------
+see: https://www.dropbox.com/install-linux
+````
+wget https://www.dropbox.com/download?plat=lnx.x86_64
+
+````
+
+Extract files to /srv/webide/dropbox/
+
+
+
 Adding and removing webide users
 --------------------------------
 Use the following script to add users to the cloud ide:

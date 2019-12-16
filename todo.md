@@ -44,6 +44,9 @@ Why run your IDE in the cloud?
 What I'm working on
 -------------------
 
+todo: Test Dropbox implementation
+After we have recived last message from dropbox deamon, and no auth request, then callback after 100ms
+
 Can I run many instances of Dropbox Daemon?
 
 Implementing support for Dropbox
