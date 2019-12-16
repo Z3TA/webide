@@ -42,7 +42,7 @@
 	
 	function loadFileExplorer() {
 		
-		console.log("Initiating file explorer");
+		console.log("File explorer: Initiating file explorer");
 		
 		var key_E = 69;
 		
@@ -152,7 +152,7 @@ gapi.auth2.getAuthInstance().signOut();
 	}
 	
 	function toggleFileExplorerFromDiscoveryBar() {
-		console.log("Toggle file explorer (from discovery bar) visible=" + visible);
+		console.log("File explorer: Toggle file explorer (from discovery bar) visible=" + visible);
 		toggleFileExplorer();
 		EDITOR.stat("toggleFileExplorerFromDiscoveryBar");
 	}
@@ -163,7 +163,7 @@ gapi.auth2.getAuthInstance().signOut();
 	}
 	
 	function updateSigninStatus(isSignedIn) {
-		console.log("gapi isSignedIn=" + isSignedIn);
+		console.log("File explorer: gapi isSignedIn=" + isSignedIn);
 	}
 	
 	function fileExplorerFileMoved(from, to) {
@@ -184,7 +184,7 @@ gapi.auth2.getAuthInstance().signOut();
 		// The user wants to explore ...
 		// ATM this is the only file explorer, so always take the job!
 		
-		console.log("openFileExplorerTool: directory=" + directory);
+		console.log("File explorer: openFileExplorerTool: directory=" + directory);
 		
 		if(typeof directory == "string") {
 EDITOR.changeWorkingDir(directory);
@@ -221,7 +221,7 @@ EDITOR.changeWorkingDir(directory);
 				var pathToExplore = EDITOR.workingDirectory;
 			}
 			
-			console.log("pathToExplore=" + pathToExplore + " lastPathExplored=" + lastPathExplored + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+			console.log("File explorer: pathToExplore=" + pathToExplore + " lastPathExplored=" + lastPathExplored + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 			
 			exploreDir(pathToExplore);
 			
@@ -249,7 +249,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					fileExplorerHeader.insertBefore(hideButton, fileExplorerHeader.firstChild);
 				}
 			}
-			else console.log("fileExplorerWidth=" + fileExplorerWidth + " windowWidth=" + windowWidth + " window.innerWidth=" + window.innerWidth + " pixelRatio=" + pixelRatio);
+			else console.log("File explorer: fileExplorerWidth=" + fileExplorerWidth + " windowWidth=" + windowWidth + " window.innerWidth=" + window.innerWidth + " pixelRatio=" + pixelRatio);
 			
 			winMenuFileExplorer.activate();
 			
@@ -271,7 +271,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			
 			EDITOR.stat("hide_fileExplorer");
 			
-			console.warn("toggleFileExplorer: hide!");
+			console.warn("File explorer: toggleFileExplorer: hide!");
 			
 		}
 		return false;
@@ -282,14 +282,14 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 		
 		fileExplorerWrap.scrollTop = defaultScroll;
 		
-		console.log("Scrolled down on file explorer: defaultScroll=" + defaultScroll);
+		console.log("File explorer: Scrolled down on file explorer: defaultScroll=" + defaultScroll);
 	}
 	
 	function exploreDir(fullPath) {
 		
 		//alertBox("exploreDir: fullPath=" + fullPath);
 		
-		console.warn("Exploring fullPath=" + fullPath);
+		console.warn("File explorer: Exploring fullPath=" + fullPath);
 		
 		while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
 		
@@ -324,7 +324,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			option.appendChild(document.createTextNode(connName));
 			option.setAttribute("id", conn);
 			// Select the file-system that we are currently exploring
-			console.log("connName=" + connName + " fullPath=" + fullPath);
+			console.log("File explorer: connName=" + connName + " fullPath=" + fullPath);
 			if(fullPath.indexOf(connName) == 0) option.setAttribute("selected", "true");
 			fsSelect.appendChild(option);
 		}
@@ -334,14 +334,14 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 		
 		var folders = UTIL.getFolders(fullPath, true);
 		
-		//console.log("fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
+		//console.log("File explorer: fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
 		
 		// Recursive 
 		lookUpPath(folders, 0);
 		
 		function lookUpPath(folders, index, parent) {
 			var dir = folders[index];
-			console.log("Looking up path dir=" + dir);
+			console.log("File explorer: Looking up path dir=" + dir);
 			var findDir = index < (folders.length-1) ? folders[index+1] : null;
 			
 			buildList(dir, parent, findDir, function listBuilt(parent) {
@@ -362,7 +362,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			
 			//while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
 			
-			//console.log("targetPath=" + targetPath);
+			//console.log("File explorer: targetPath=" + targetPath);
 			
 			loadingSpinner.style.display="none";
 			
@@ -373,7 +373,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			measure(fileExplorerFolders);
 			
 			function measure(el) {
-				//console.log("measuring el=" + el);
+				//console.log("File explorer: measuring el=" + el);
 				
 				var childNodes = el.childNodes;
 				if(!childNodes) return false;
@@ -387,7 +387,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					
 					if(childNodes[i].nodeType != 1) continue; // Only bother with HTML elements, not text nodes
 					
-					//console.log("checking childNodes[" + i + "]=" + childNodes[i] + " nodeType=" + childNodes[i].nodeType);
+					//console.log("File explorer: checking childNodes[" + i + "]=" + childNodes[i] + " nodeType=" + childNodes[i].nodeType);
 					
 					//console.log(childNodes[i]);
 					
@@ -395,9 +395,9 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					
 					path = childNodes[i].getAttribute("path");
 					
-					console.log(targetPath + " == " + path + " ? " + (targetPath == path));
+					//console.log("File explorer: " + targetPath + " == " + path + " ? " + (targetPath == path));
 					
-					if(path == targetPath) {
+					if(path == targetPath || path == UTIL.trailingSlash(targetPath)) {
 						defaultScroll = totalHeight;
 						setTimeout(scroll, 100);
 						return true; 
@@ -406,7 +406,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					if(elClass == "folder open") {
 						
 						totalHeight += (measuredElements > 0 ? Math.round(totalHeight / ++measuredElements) : defaultHeight);
-						//console.log("totalHeight=" + totalHeight);
+						//console.log("File explorer: totalHeight=" + totalHeight);
 					}
 					
 					if(elClass == "tree" || elClass == "folder open") found = measure(childNodes[i])
@@ -420,7 +420,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 							totalHeight += parseInt(computedStyle.height);
 							measuredElements++;
 							
-							//console.log("totalHeight=" + totalHeight);
+							//console.log("File explorer: totalHeight=" + totalHeight);
 						}
 					}
 					
@@ -435,7 +435,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 	
 	function buildList(dir, parent, findDir, callback) {
 		
-		console.warn("Building file explorer tree for dir=" + dir + " in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
+		console.warn("File explorer: Building file explorer tree for dir=" + dir + " in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
 		
 		var dirFound = null;
 		
@@ -470,7 +470,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 					return alertBox("Google Drive error: " + err.message);
 				}
 				else if(err.code == "EACCES") {
-					console.warn("Unable to access " + dir);
+					console.warn("File explorer: Unable to access " + dir);
 					if(callback) callback(dirFound);
 return;
 				}
@@ -479,7 +479,7 @@ return;
 					return;
 				}
 				else {
-					console.log("err.code=" + err.code);
+					console.log("File explorer: err.code=" + err.code);
 					throw err;
 				}
 			}
@@ -499,7 +499,7 @@ return;
 		
 		function showItem(item) {
 			
-			console.log("item.type=" + item.type + " item.name=" + item.name);
+			console.log("File explorer: item.type=" + item.type + " item.name=" + item.name);
 			
 			var li = document.createElement("li");
 			var icon = document.createElement("img");
@@ -606,7 +606,7 @@ return;
 			
 			li.appendChild(document.createTextNode(displayName));
 			
-			//console.log("item.name=" + item.name);
+			//console.log("File explorer: item.name=" + item.name);
 			
 			ul.appendChild(li);
 			
@@ -642,7 +642,7 @@ return;
 	
 	function showFileItemMenu(el, fsFileItem) {
 		
-		console.log("showFileItemMenu el=" + el);
+		console.log("File explorer: showFileItemMenu el=" + el);
 		console.log(el);
 		
 		var fileItemMenuHolder = el;
@@ -751,7 +751,7 @@ return;
 								el.setAttribute("title", displayName);
 								displayName = displayName.substr(0, 37) + "...";
 							}
-							console.log("Inserting new folder name=" + displayName);
+							console.log("File explorer: Inserting new folder name=" + displayName);
 							el.insertBefore(document.createTextNode(displayName), el.childNodes[2]);
 						}
 						else {
@@ -826,17 +826,17 @@ return;
 		var box = childNodes[0];
 		var path = item.getAttribute("path");
 		
-		//console.log("path=" + path);
+		//console.log("File explorer: path=" + path);
 		
 		var elementsToCheck = 3;
 		
 		if(childNodes.length > elementsToCheck) {
 			// The folder is open, close it
 			
-			console.log("Closing file explorer folder: " + path);
+			console.log("File explorer: Closing file explorer folder: " + path);
 			
 			for (var i=elementsToCheck; i<childNodes.length; i++) {
-				console.log("removeChild: " + childNodes[i]);
+				console.log("File explorer: removeChild: " + childNodes[i]);
 				item.removeChild(childNodes[i]);
 			}
 			
@@ -851,7 +851,7 @@ return;
 		}
 		else {
 			
-			console.log("Opening file explorer folder: " + path);
+			console.log("File explorer: Opening file explorer folder: " + path);
 			
 			lastPathExplored = path;
 			
@@ -887,7 +887,7 @@ return;
 		
 		//alert("host=" + host);
 		
-		console.log("Changing fs host=" + host);
+		console.log("File explorer: Changing fs host=" + host);
 		
 		if(host=="local") {
 			// Find a local folder to explore
@@ -912,7 +912,7 @@ return;
 	}
 	
 	function dragItem(dragEvent) {
-		console.log("dragstart:");
+		console.log("File explorer: dragstart:");
 		console.log(dragEvent);
 		dragEvent.dataTransfer.setData("text", dragEvent.target.getAttribute("id"));
 	}
@@ -920,7 +920,7 @@ return;
 	function dropItem(dragEvent) {
 		dragEvent.preventDefault();
 		
-		console.log("drop:");
+		console.log("File explorer: drop:");
 		// We will get a drag event for every folder
 		console.log(dragEvent);
 		var fromPath = dragEvent.dataTransfer.getData("text");
@@ -936,7 +936,7 @@ return;
 		
 		// For some reason the drop event is called many times ... Ignore repeated moves
 		if(fromPath == lastMovedFrom && toFolder == lastMovedTo) {
-console.warn("Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
+			console.warn("File explorer: Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
 		return;
 		}
 		lastMovedFrom = fromPath;
@@ -952,11 +952,11 @@ console.warn("Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
 		// Ignore when dropping at the same place
 		var fromFolder = UTIL.getDirectoryFromPath(fromPath);
 		if(fromPath == dropOnPath) {
-console.warn("Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
+			console.warn("File explorer: Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
 		return;
 		}
 		if(fromFolder == toFolder) {
-console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
+			console.warn("File explorer: Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
 		return;
 		}
 		
@@ -969,7 +969,7 @@ console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" +
 		
 		var oldPath = fromPath;
 		var newPath = UTIL.trailingSlash(toFolder) + (UTIL.getFilenameFromPath(oldPath) || UTIL.getFolderName(oldPath));
-		console.log("fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
+		console.log("File explorer: fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
 		
 		EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 			if(err) return alertBox(err.message);
@@ -1000,7 +1000,7 @@ console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" +
 	}
 	
 	function dragOverItem(dragEvent) {
-		console.log("dragOver:");
+		console.log("File explorer: dragOver:");
 		console.log(dragEvent);
 		dragEvent.preventDefault();
 	}
@@ -1009,7 +1009,7 @@ console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" +
 		// Updates the id and path attribute for an item
 		// If it's a folder: Recursively update the path of the folder and all of it's child elements
 		
-		console.log("Updating fromPath=" + fromPath + " to newPath=" + newPath);
+		console.log("File explorer: Updating fromPath=" + fromPath + " to newPath=" + newPath);
 		
 		var element = document.getElementById(fromPath);
 		if(!element) throw new Error("Did not find element for path=" + fromPath);

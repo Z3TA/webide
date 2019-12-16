@@ -50,7 +50,7 @@
 				if(!url) return;
 				
 				var filName = UTIL.getFilenameFromPath(url);
-				var uploadDir = UTIL.joinPaths(EDITOR.user.homeDir, "upload");
+				var uploadDir = UTIL.trailingSlash(UTIL.joinPaths(EDITOR.user.homeDir, "upload"));
 				var uploadPath =  UTIL.joinPaths(uploadDir, filName);
 				var options = {url: url, createPath: true, path: uploadPath};
 				CLIENT.cmd("download", options, function(err, resp) {
