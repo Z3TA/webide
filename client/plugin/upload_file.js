@@ -4,10 +4,10 @@
 	var windowMenu;
 	
 EDITOR.plugin({
-desc: "Upload file",
+desc: "Upload file from device",
 load: function loadUpload() {
 
-			windowMenu = EDITOR.windowMenu.add(S("upload_from_device"), [S("File"), 140], uploadFile);
+			windowMenu = EDITOR.windowMenu.add(S("upload_from_device"), [S("File"), S("Upload"), 10], uploadFile);
 
 			EDITOR.registerAltKey({char: "u", alt:2, label: S("Upload"), fun: uploadFile});
 			

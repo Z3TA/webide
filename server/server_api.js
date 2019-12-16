@@ -208,18 +208,38 @@ API.httpGet = function httpGet(user, options, callback) {
 		return callback(new Error("Unsupported protocol: " + loc.protocol + " in url=" + url));
 	}
 	
-	var req = reqModule.request(url, gotResp);
+	var req;
 	var gotError = null;
+	var redirects = 0;
+	var maxRedirects = 10;
 	
-	req.on("error", function(err) {
-		callback(err);
-		gotError = true;
-	});
+	makeReq(url);
 	
-	req.end();
+	function makeReq(url) {
+		req = reqModule.request(url, gotResp);
+		
+		req.on("error", function(err) {
+			callback(err);
+			callback = null;
+			gotError = true;
+		});
+		
+		req.end();
+	}
 	
 	function gotResp(resp) {
 		//resp.setEncoding('utf8');
+		
+		if(resp.statusCode == 302 && resp.headers.location) {
+			redirects++;
+			if(++redirects > maxRedirects) {
+callback(new Error("Too many redirects! redirects=" + redirects));
+				callback = null;
+				return;
+			}
+			makeReq(resp.headers.location);
+			return;
+		}
 		
 		var data = [];
 		
@@ -238,6 +258,7 @@ API.httpGet = function httpGet(user, options, callback) {
 			
 			if(options.binary) {
 				callback(null, buffer);
+				callback = null;
 				return;
 			}
 			
@@ -275,13 +296,16 @@ API.httpGet = function httpGet(user, options, callback) {
 				
 				if(!iconv.encodingExists(charset)) {
 					gotError = true;
-					return callback(new Error("Unable to decode charset=" + charset));
+					callback(new Error("Unable to decode charset=" + charset));
+					callback = null;
+					return;
 				}
 				else {
 					body = iconv.decode(buffer, charset);
 				}
 			}
 			callback(null, body);
+			callback = null;
 		}
 	}
 }

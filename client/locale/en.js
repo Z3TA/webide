@@ -167,6 +167,7 @@ cancel: "Cancel",
 	unregister_service_worker: "Unregister service worker",
 	upload: "upload",
 	upload_from_device: "upload file from device",
+upload_from_url: "upload file from URL",
 	url_of_website_to_copy: "URL of website to copy",
 	
 	version_control: "Source/version control",
