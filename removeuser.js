@@ -172,8 +172,10 @@ umount("/home/" + username + "/usr/bin/curl");
 	umount("/home/" + username + "/usr/bin/newuidmap");
 	umount("/home/" + username + "/usr/bin/which");
 	umount("/home/" + username + "/usr/bin/less");
+	umount("/home/" + username + "/usr/bin/head");
+	umount("/home/" + username + "/usr/bin/expr");
 	
-
+	
 	umount("/home/" + username + "/sbin/iptables");
 	umount("/home/" + username + "/sbin/lsmod");
 	
@@ -213,7 +215,10 @@ umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/bin/grep");
 	umount("/home/" + username + "/bin/cp");
 	umount("/home/" + username + "/bin/uname");
+	umount("/home/" + username + "/bin/bzip2");
+	umount("/home/" + username + "/bin/readlink");
 	
+
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 

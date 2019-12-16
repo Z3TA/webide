@@ -37,12 +37,32 @@ Firefox dev tools sometimes hide console log messages!!
 Probably should read through this file and reletlessly delete stuff.
 
 
+Why run your IDE in the cloud?
+* You might be able to get higher bandwith, so uploads/downloads will be faster, you do not have to download anything to your local computer/device
+
+
 What I'm working on
 -------------------
 
-Install Ubuntu 10, then install mysql-query-browser. Make a mySQL integration to the IDE that looks like mysql query browser!
+Can I run many instances of Dropbox Daemon?
 
-Upload, also be able to upload from URL!
+Implementing support for Dropbox
+
+
+export LD_LIBRARY_PATH="/.dropbox-dist/dropbox-lnx.x86_64-86.4.146"
+
+
+todo: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #
+
+Install rclone globally!?
+
+Trying to install rclone.
+
+"connect to a storage provider"
+
+Able to connect to different storage providers
+
+Install Ubuntu 10, then install mysql-query-browser. Make a mySQL integration to the IDE that looks like mysql query browser!
 
 issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
 try to run "npm install" when you click "install all" !?

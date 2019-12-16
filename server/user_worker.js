@@ -984,6 +984,13 @@ API.remotePipe = function remotePipe(user, options, callback) {
 	});
 }
 
+API.startDropbox = function startDropbox(user, options, callback) {
+	parentRequest({startDropboxDaemon: options}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, resp);
+	});
+}
+
 function nodejs_init_action(action, prodFolder, pw, callback) {
 	if(action == undefined) throw new Error("action=" + action);
 	if(prodFolder == undefined) throw new Error("prodFolder=" + prodFolder);

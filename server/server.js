@@ -168,6 +168,7 @@ if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
 
 
 var GCSF = {}; // username: GCSF session
+var DROPBOX = {}; // username: Dropbox daemon
 
 // Declare modules here as a OPTIMIZATION
 var module_fs = require("fs");
@@ -244,6 +245,16 @@ process.on("SIGINT", function sigInt() {
 });
 
 process.on("exit", function () {
+	
+	// Also close spawned process!
+	for(var username in DROPBOX) {
+		try {
+			DROPBOX[username].kill();
+		}
+		catch(err) {
+			console.log("Unable to close Dropbox daemon for username=" + username);
+		}
+	}
 	
 	log("Program exit\n\n", DEBUG, true);
 });
@@ -1418,6 +1429,14 @@ function sockJsConnection(connection) {
 			
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
+				
+				
+				var dropboxDaemon = DROPBOX[userConnectionName];
+				if(dropboxDaemon) {
+					dropboxDaemon.kill();
+					delete DROPBOX[userConnectionName]
+				}
+				
 			}
 			else {
 				// Tell all remaining clients that this client disconnected
@@ -2139,6 +2158,12 @@ function sockJsConnection(connection) {
 										
 									}
 									
+									else if(req.startDropboxDaemon) {
+										startDropboxDaemon(userConnectionName, uid, gid, homeDir, function(err, resp) {
+											workerResp(err, resp);
+										});
+									}
+									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 									}
 								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
@@ -2571,6 +2596,9 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
+				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
+				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
+				
 				
 				foldersToMount++;module_mount("/sbin/iptables", homeDir + "sbin/iptables", folderMounted); // Needed by docker
 				foldersToMount++;module_mount("/sbin/lsmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
@@ -2597,6 +2625,8 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
 				foldersToMount++;module_mount("/bin/uname", homeDir + "bin/uname", folderMounted); // Wanted by nvm
+				foldersToMount++;module_mount("/bin/bzip2", homeDir + "bin/bzip2", folderMounted); // Needed by tar
+				foldersToMount++;module_mount("/bin/readlink", homeDir + "bin/readlink", folderMounted); // Needed by Dropbox client
 				
 				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				
@@ -4962,6 +4992,122 @@ function reportError(errorMessage) {
 	// A more soft error to prevent the server from restarting
 	console.error(errorMessage);
 	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + errorMessage.split("\n")[0].slice(0, 100) , errorMessage); // from, to, subject, text
+}
+
+function startDropboxDaemon(username, uid, gid, homeDir, callback) {
+	
+	if(DROPBOX.hasOwnProperty(username)) {
+		callback(new Error("There is already a Dropbox daemon for " + username));
+		callback = null;
+		return;
+	}
+	
+	var reBrowserUrl = /Please visit (.*) to link this device/;
+	var reLinked = /This computer is now linked to Dropbox/;
+	
+	
+	var options = {
+		uid: uid,
+		gid, gid,
+		cwd: homeDir
+	};
+	
+	options.env = {
+		username: username,
+		HOME: homeDir,
+		USER: username,
+		LOGNAME: username,
+		USER_NAME: username,
+		dropbox_path: UTIL.joinPaths(homeDir, "Dropbox/"),
+		TMPDIR: UTIL.joinPaths(homeDir, "tmp/")
+	}
+	
+	var args = [];
+	
+	
+	var daemon = module_path.join(__dirname, "./../dropbox/dropboxd");
+	
+	log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
+	
+	var dropboxDaemon = module_child_process.spawn(daemon, args, options);
+	
+	DROPBOX[username] = dropboxDaemon;
+	
+	dropboxDaemon.on("close", function (code, signal) {
+		log(username + " Dropbox deamon close: code=" + code + " signal=" + signal, NOTICE);
+		
+		delete DROPBOX[username];
+		
+		if(callback) {
+			callback( new Error("Dropbox daemon closed with code=" + code + " and signal=" + signal) );
+			callback = null;
+		}
+		
+	});
+	
+	dropboxDaemon.on("disconnect", function () {
+		log(username + " Dropbox daemon disconnect: dropboxDaemon.connected=" + dropboxDaemon.connected, DEBUG);
+	});
+	
+	dropboxDaemon.on("error", function (err) {
+		log(username + " Dropbox daemon error: err.message=" + err.message, ERROR);
+		console.error(err);
+		if(callback) {
+			callback(err);
+			callback = null;
+		}
+	});
+	
+	dropboxDaemon.stdout.on("data", function(data) {
+		log(username + "  Dropbox daemon stdout: " + data, INFO);
+		
+		var str = data.toString();
+		
+		
+		if(str.match(reLinked)) {
+			sendToClient(username, "dropbox", {linked: true})
+			
+		}
+		
+		if(!callback) return;
+		
+		
+		
+		var matchBrowserUrl = str.match(reBrowserUrl);
+		
+		if(matchBrowserUrl) {
+			log("" + username + " Dropbox daemon needs authorization from Dropbox ...", DEBUG);
+			var authUrl = matchBrowserUrl[1];
+			callback(null, {url: authUrl});
+			callback = null;
+		}
+	});
+	
+	dropboxDaemon.stderr.on("data", function (data) {
+		log(username + "  Dropbox daemon stderr: " + data, DEBUG);
+		
+	});
+	
+}
+
+function sendToClient(userConnectionName, cmd, obj) {
+	if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+		
+		var json = {id: 0};
+		json[cmd] = obj;
+		
+		var str = JSON.stringify(json);
+		
+		log(IP + " <= " + UTIL.shortString(str, 256));
+		
+		conn.write(str);
+		
+		for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+			USER_CONNECTIONS[userConnectionName].connections[i].write(str);
+		}
+		return true;
+	}
+	else return false;
 }
 
 main();

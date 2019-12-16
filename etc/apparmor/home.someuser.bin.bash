@@ -21,8 +21,10 @@
   %HOME%%USERNAME%/bin/** mr,
 
   signal receive set=hup peer=%HOME%%USERNAME%/bin/bash,
+  signal receive set=int peer=%HOME%%USERNAME%/bin/bash,
   signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,
   
+  signal send set=int peer=%HOME%%USERNAME%/bin/bash,
   signal send set=hup peer=%HOME%%USERNAME%/bin/bash,
   signal send set=hup peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=hup peer=%HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js,
@@ -113,9 +115,10 @@
    
     signal send set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
     signal send set=kill peer=%HOME%%USERNAME%/bin/bash//networkTool,
-   
+    signal send set=abrt peer=%HOME%%USERNAME%/bin/bash//scripts,
+    
     signal receive set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
- 
+    signal receive set=abrt peer=%HOME%%USERNAME%/bin/bash//scripts,
  
  
   }
