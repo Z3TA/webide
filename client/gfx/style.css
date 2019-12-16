@@ -1138,7 +1138,7 @@ div.gotoFile li:hover {
 
 .windowMenu {
 	overflow: visible; /*because menus are nested*/
-	z-index: 5;
+	z-index: 8;
 	position: absolute; /* needed so that children can be on top of other elements */
 	
 	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
@@ -1147,7 +1147,6 @@ div.gotoFile li:hover {
 	}
 
 .windowMenu .menu {
-	z-index: 5;
 	border-radius: 0;
 	margin: 0;
 	padding: 0;
