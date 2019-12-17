@@ -7537,6 +7537,8 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		var file = findFile(stackLines);
 		
 		function findFile(stackLines) {
+			if(!Array.isArray(stackLines)) throw new Error("Not an array: stackLines=" + stackLines + " (" + stackLines + "==undefined?" + (stackLines == undefined) + ")"    );
+
 	stackLoop: for (var i=0; i<stackLines.length; i++) {
 		for(var filePath in EDITOR.files) {
 			
@@ -7570,13 +7572,18 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		}
 		
 		if(!file || !lineno) {
-			console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace");
 			stackLines = UTIL.parseStackTrace(errorStack)
+			console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace: " + (!!stackLines));
+			if(stackLines) {
 			var file = findFile(stackLines);
+			}
+			else {
+				console.warn("showMessageFromStackTrace: Failed to get file from errorStack=", errorStack);
+			}
 		}
 		
-	if(file && lineno) {
-		var row = lineno - 1;
+		if(file && lineno) {
+			var row = lineno - 1;
 		var gridRow = file.grid[row];
 		if(!gridRow) { // Sanity check
 			EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));

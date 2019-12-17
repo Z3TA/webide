@@ -41,8 +41,24 @@ Why run your IDE in the cloud?
 * You might be able to get higher bandwith, so uploads/downloads will be faster, you do not have to download anything to your local computer/device
 
 
+Cloud functions are stupid, they are hard to debug. And the latency is terrible.
+
+
 What I'm working on
 -------------------
+
+
+
+Get error when running MongdoDB example:
+stackLines is null when trying to inline stdout message
+
+
+Creating a free MongdoDB cluster
+
+
+Thinking of what other cloud providers to support ...
+
+
 
 todo: Test Dropbox implementation
 After we have recived last message from dropbox deamon, and no auth request, then callback after 100ms
