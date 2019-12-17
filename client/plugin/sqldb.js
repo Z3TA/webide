@@ -9,6 +9,7 @@
 	var winMenuDbManager;
 	var discoveryBarImg;
 	var pluginActivated = false;
+	var databaseList;
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -109,6 +110,51 @@ else {
 		}
 	}
 	
+	function buildDbExplorer() {
+		var wrap = document.createElement("div");
+		div.classList.add("wrap");
+		div.classList.add("dbExplorer");
+		
+		databaseList = document.createElement("ul");
+		databaseList.classList.add("tree");
+		
+	}
+	
+	function updateDbExplorer(dbNames) {
+		
+		while (databaseList.firstChild) databaseList.removeChild(databaseList.firstChild);
+		
+		dbNames.forEach(function(name) {
+			
+			var li = document.createElement("li");
+			var icon = document.createElement("img");
+			icon.setAttribute("width", "22");
+			icon.setAttribute("height", "22");
+			icon.setAttribute("draggable", "false");
+			icon.setAttribute("src", "gfx/icon/db.svg");
+			icon.setAttribute("alt", "Database");
+			
+			li.setAttribute("id", name);
+			
+			li.addEventListener("click", function(e) {
+				openOrCloseFolder(li, name);
+				
+				// Try to stop event from propagating down though parents
+				e = window.event || e;
+				e.stopPropagation();
+				return false;
+				
+			}, false);
+			
+		});
+		
+	}
+	
+	function listDbTables(li, dbName) {
+		
+	}
+	
+	
 	function buildDbManager() {
 		
 		var holder = document.createElement("div");
@@ -176,6 +222,12 @@ else {
 	function getDatabases(selectedName) {
 		CLIENT.cmd("mysql.query", {database: selectedDb, query: "SHOW DATABASES"}, function(err, resp) {
 			if(err) return alertBox(err.message);
+			
+			var dbNames = results.map(function(obj) {
+				return obj.Database;
+			});
+			
+			updateDbExplorer(dbNames);
 			
 			// Empty options
 			while (selectMysqlDb.options.length > 0) selectMysqlDb.remove(0);
