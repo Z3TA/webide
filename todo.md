@@ -43,21 +43,23 @@ Why run your IDE in the cloud?
 
 Cloud functions are stupid, they are hard to debug. And the latency is terrible.
 
+When a program can't find a lib, try export LD_LIBRARY_PATH
+
 
 What I'm working on
 -------------------
 
-could probably use MongoDB Atlas integrations instead of installing MongoDB on the server !?
 
-Get error when running MongdoDB example:
-stackLines is null when trying to inline stdout message
+db explorer inspired by mySQL Query Browsers
 
 
-Creating a free MongdoDB cluster
+Try Mongo Compass
 
 
 Thinking of what other cloud providers to support ...
 
+
+todo: Docker (rootless) support like with Dropbox!?
 
 
 todo: Test Dropbox implementation
@@ -73,9 +75,7 @@ export LD_LIBRARY_PATH="/.dropbox-dist/dropbox-lnx.x86_64-86.4.146"
 
 todo: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #
 
-Install rclone globally!?
 
-Trying to install rclone.
 
 "connect to a storage provider"
 
