@@ -11246,7 +11246,17 @@ function getFile(url, callback) {
 			htmlToImage(html, true, callback);
 		} 
 		
-		// img.onload wont fire when you use data url !? (on different browsers, yeh)
+		/*
+			problem 1: Some browsers wont fire img.onload (when data url is used)
+			sultion: Use a timeout
+			
+			problem 2: Some browsers wont show the massage if the timeout is fired before img.onload
+			sultion: Skipp the timeout on browsers where img.onload is confirmed to work
+			
+			
+		*/
+		
+if(BROWSER != "Firefox") {
 		var timeoutTimer = setTimeout(function() {
 			console.log("htmlToImage: Callback timeout! callback?" + (!!callback));
 			if(callback) {
@@ -11254,7 +11264,7 @@ function getFile(url, callback) {
 				callback = null;
 			}
 		}, 20);
-		
+		}
 	}
 	
 	

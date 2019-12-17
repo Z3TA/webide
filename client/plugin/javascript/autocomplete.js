@@ -1549,12 +1549,14 @@
 				/* Traverse dot tree, foo.bar.baz() of theFunction...
 					
 				*/
+				console.log("insideFunctionCall: theFunction=", theFunction);
+				
 				for(var i=1; i<property.length; i++) {
-					
+					if(property[i]) {
 					theFunction = getFunctionWithName(theFunction.subFunctions, property[i]);
 					
 					if(theFunction) break;
-					
+					}
 					// Include the prototype!?
 				}
 			}

@@ -47,7 +47,7 @@ Cloud functions are stupid, they are hard to debug. And the latency is terrible.
 What I'm working on
 -------------------
 
-
+could probably use MongoDB Atlas integrations instead of installing MongoDB on the server !?
 
 Get error when running MongdoDB example:
 stackLines is null when trying to inline stdout message

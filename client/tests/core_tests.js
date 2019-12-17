@@ -2077,7 +2077,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function testJoinPath(callback) {
+	EDITOR.addTest(function testJoinPath(callback) {
 		
 		var assert = UTIL.assert;
 		
