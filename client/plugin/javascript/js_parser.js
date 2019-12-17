@@ -738,7 +738,11 @@
 									throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " " + compareObjects(fullParse.comments, oldParse.comments));
 								}
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
-								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
+								if(fullParse.xmlTags.length != oldParse.xmlTags.length) {
+									var newTags = fullParse.xmlTags.map(function(tag) { return file.text.slice(tag.start, tag.end);  });
+									var oldTags = oldParse.xmlTags.map(function(tag) { return file.text.slice(tag.start, tag.end);  });
+throw new Error(    "fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " fullParse.xmlTags=" + JSON.stringify(fullParse.xmlTags, null, 2) + " oldParse.xmlTags=" + JSON.stringify(oldParse.xmlTags, null, 2) + " newTags=" + JSON.stringify(newTags) + "\n oldTags=" + JSON.stringify(oldTags) + "\n tagDiff=" + JSON.stringify(UTIL.arrDiff(newTags, oldTags))    );
+								}
 								
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
 								
