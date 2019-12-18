@@ -220,6 +220,8 @@ EDITOR.discoveryBar.remove(discoveryBarImg);
 		
 		CLIENT.cmd("mysql.query", {database: dbName, query: "SHOW TABLES"}, function(err, resp) {
 			
+			if(err) return alertBox(err.message);
+			
 			console.log("dbExplorer: show tables: resp=" + JSON.stringify(resp, null, 2));
 			
 			var tables = resp.results.map(function(obj) {
@@ -300,7 +302,8 @@ return;
 		}
 		
 		CLIENT.cmd("mysql.query", {database: dbName, query: "DESCRIBE " + tableName }, function(err, resp) {
-			
+			if(err) return alertBox(err.message);
+
 			console.log("dbExplorer: DESCRIBE: resp=" + JSON.stringify(resp, null, 2));
 			
 			var fields = resp.results;
