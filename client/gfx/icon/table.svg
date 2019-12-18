@@ -1,0 +1,60 @@
+<svg version="1.1" baseProfile="full" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+
+<style type="text/css"><![CDATA[
+
+
+]]></style>
+
+</defs>
+
+		<rect x="1" y="1" width="30" height="30" fill="#d6e1fc" stroke="#85a8dc" stroke-width="1" />
+
+		<rect x="1" y="1" width="30" height="2" fill="#343bd5" />
+
+		<rect x="1" y="3" width="30" height="2" fill="#596ae5" />
+
+		<path class="faketext" stroke="#a6bfe6" stroke-width="2"  fill-opacity="0"
+
+		d="
+M 3 8
+		L 10 8
+		M 12 8
+		L 20 8
+		M 22 8
+		L 29 8
+
+		M 3 12
+				L 10 12
+				M 12 12
+				L 20 12
+		M 22 12
+		L 29 12
+
+		M 3 16
+				L 10 16
+				M 12 16
+				L 20 16
+		M 22 16
+		L 29 16
+
+M 3 20
+		L 10 20
+		M 12 20
+		L 20 20
+		M 22 20
+		L 29 20
+		
+		M 3 24
+		L 10 24
+		M 12 24
+		L 20 24
+		M 22 24
+		L 29 24
+		
+		"/>
+
+
+
+</svg>

@@ -167,6 +167,9 @@
 					EDITOR.renderNeeded();
 					return false;
 				}
+				else if(file.parsed.language=="XML") {
+					return true;
+				}
 				else {
 					throw new Error("What to do with the quote!? Unknown language: file.parsed.language=" + JSON.stringify(file.parsed.language));
 				}

@@ -11,7 +11,7 @@
 	var databaseList;
 	var dbExplorerWidget;
 	var connectedToDbServer = false;
-	
+	var getDefaultValuesForDbConnection; // Store function in order to be able to remove event
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -66,11 +66,14 @@ else {
 		},
 		unload: function unloadSqldb() {
 			
+			EDITOR.removeEvent("storageReady", getDefaultValuesForDbConnection);
+			
 			EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.windowMenu.remove(winMenuDbManager);
 			
 			if(dbManagerWidget) dbManagerWidget.unload();
+			if(dbExplorerWidget) dbExplorerWidget.unload();
 			
 			EDITOR.removeEvent("fileOpen", sqlFileMaybe);
 			
@@ -78,6 +81,7 @@ else {
 			
 			EDITOR.unregisterAltKey(showDbManager);
 			
+EDITOR.discoveryBar.remove(discoveryBarImg);
 		}
 	});
 	
@@ -125,15 +129,15 @@ else {
 		wrap.classList.add("wrap");
 		wrap.classList.add("dbExplorer");
 		
-var content = document.createElement("div");
-
+		var content = document.createElement("div");
+		
 		databaseList = document.createElement("ul");
 		databaseList.classList.add("tree");
 		
 		wrap.appendChild(databaseList);
 		
-wrap.appendChild(content);
-
+		wrap.appendChild(content);
+		
 		return wrap;
 	}
 	
@@ -168,23 +172,22 @@ wrap.appendChild(content);
 				
 			}, false);
 			
-			/*
-				
-				var icon = document.createElement("img");
-				icon.setAttribute("width", "22");
-				icon.setAttribute("height", "22");
-				icon.setAttribute("draggable", "false");
-				icon.setAttribute("src", "gfx/icon/db.svg");
-				icon.setAttribute("alt", "db");
-				
-				li.appendChild(icon);
-			*/
+			
+			
+			var icon = document.createElement("img");
+			icon.setAttribute("width", "20");
+			icon.setAttribute("height", "20");
+			icon.setAttribute("draggable", "false");
+			icon.setAttribute("src", "gfx/icon/db.svg");
+			icon.setAttribute("alt", "db");
+			
+			li.appendChild(icon);
 			
 			li.oncontextmenu = function contextmenu(contextMenuEvent) {
 				contextMenuEvent.preventDefault();
 				contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
 				
-				//showTables(li, name);
+				showContextMenu(li, name);
 				
 			};
 			
@@ -205,6 +208,16 @@ wrap.appendChild(content);
 	
 	function showOrHideTables(dbListItem, dbName) {
 		
+		var subList = dbListItem.getElementsByTagName("ul");
+		
+		if(subList.length > 0) {
+			// "close" the list
+			for(var i=0; i<subList.length; i++) {
+				dbListItem.removeChild(subList[i]);
+			}
+			return;
+		}
+		
 		CLIENT.cmd("mysql.query", {database: dbName, query: "SHOW TABLES"}, function(err, resp) {
 			
 			console.log("dbExplorer: show tables: resp=" + JSON.stringify(resp, null, 2));
@@ -219,6 +232,15 @@ wrap.appendChild(content);
 				
 				var li = document.createElement("li");
 				li.setAttribute("id", tableName);
+				
+				var icon = document.createElement("img");
+				icon.setAttribute("width", "20");
+				icon.setAttribute("height", "20");
+				icon.setAttribute("draggable", "false");
+				icon.setAttribute("src", "gfx/icon/table.svg");
+				icon.setAttribute("alt", "db");
+				
+				li.appendChild(icon);
 				
 				li.addEventListener("click", function clickOnTable(e) {
 					
@@ -236,6 +258,14 @@ return;
 					return false;
 					
 				}, false);
+				
+				li.oncontextmenu = function contextmenu(contextMenuEvent) {
+					contextMenuEvent.preventDefault();
+					contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
+					
+					showContextMenu(li, dbName, tableName);
+					
+				};
 				
 				var displayName = tableName;
 				var maxNameLength = 40;
@@ -258,6 +288,16 @@ return;
 	
 	
 	function showOrHideFields(tableListItem, dbName, tableName) {
+		
+		var subList = tableListItem.getElementsByTagName("ul");
+		
+		if(subList.length > 0) {
+			// "close" the list
+			for(var i=0; i<subList.length; i++) {
+				tableListItem.removeChild(subList[i]);
+			}
+			return;
+		}
 		
 		CLIENT.cmd("mysql.query", {database: dbName, query: "DESCRIBE " + tableName }, function(err, resp) {
 			
@@ -283,6 +323,14 @@ return;
 				
 				li.appendChild(document.createTextNode(displayName));
 				
+				li.oncontextmenu = function contextmenu(contextMenuEvent) {
+					contextMenuEvent.preventDefault();
+					contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
+					
+					showContextMenu(li, dbName, tableName, fieldName);
+					
+				};
+				
 				fieldList.appendChild(li);
 				
 			});
@@ -290,6 +338,19 @@ return;
 			tableListItem.appendChild(fieldList);
 			
 		});
+		
+	}
+	
+	function showContextMenu(li, dbName, tableName, fieldName) {
+
+		var subList = li.getElementsByTagName("ul");
+		
+		if(subList.length > 0) {
+			// Place menu before the sub list
+		}
+		else {
+			// Place menu where?
+		}
 		
 	}
 	
@@ -404,12 +465,14 @@ return;
 		
 		holder.appendChild(connectDialog);
 		
-		EDITOR.on("storageReady", function getDefaultValuesForDbConnection() {
+		getDefaultValuesForDbConnection = function getDefaultValuesForDbConnection() {
 			inputHostname.value = EDITOR.storage.getItem("lastDbHostname");
 			inputUsername.value = EDITOR.storage.getItem("lastDbUsername");
 			inputPassword.value = EDITOR.storage.getItem("lastDbPassword");
 			inputPort.value = EDITOR.storage.getItem("lastDbPort") || 3306;
-		});
+		}
+		
+		EDITOR.on("storageReady", getDefaultValuesForDbConnection);
 		
 		
 		function showConnectToServer() {

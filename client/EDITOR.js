@@ -2768,7 +2768,7 @@ if(elements[i].style.display != "none") {
 			lowest order nr will execute first!
 		*/
 		
-		if(typeof callback !== "function") throw new Error("Ssecond argument: callback - needs to be a function! Did you mean EDITOR.addEvent ?");
+		if(typeof callback !== "function") throw new Error("Second argument: callback needs to be a function! Did you mean EDITOR.addEvent ?");
 		
 		var options = {fun: callback};
 		

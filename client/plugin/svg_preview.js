@@ -25,6 +25,8 @@ unload: function unloadSvgPreview() {
 filesInPreviw[filePath].previewWin.close();
 				}
 			}
+
+widget.unload();
 			
 		}
 	});

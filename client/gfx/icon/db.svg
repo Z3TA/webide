@@ -1,0 +1,65 @@
+<svg version="1.1" baseProfile="full" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+
+	<defs>
+
+		<linearGradient id="linearGradient">
+			<stop class="stop1" offset="0%"/>
+			<stop class="stop2" offset="33%"/>
+			<stop class="stop3" offset="66%"/>
+			<stop class="stop4" offset="90%"/>
+			<stop class="stop5" offset="100%"/>
+		</linearGradient>
+
+		<linearGradient id="linearGradient2">
+						<stop class="borderstop1" offset="0%"/>
+						<stop class="borderstop2" offset="50%"/>
+						<stop class="borderstop3" offset="100%"/>
+				</linearGradient>
+
+<style type="text/css"><![CDATA[
+			
+			.cylinder {
+				fill: url(#linearGradient);
+				stroke: url(#linearGradient2);
+								stroke-width: 1.5;
+			}
+			.stop1 { stop-color: #ffe895; }
+			.stop2 { stop-color: #fdf8df; }
+			.stop3 { stop-color: #fade64; }
+			.stop4 { stop-color: #fade64; }
+			.stop5 { stop-color: #ffefc3; }
+
+			.borderstop1 { stop-color: #debb43; }
+			.borderstop2 { stop-color: #c49b18; }
+			.borderstop3 { stop-color: #c5981b; }
+			
+			
+.lines {
+stroke: url(#linearGradient2);
+stroke-width: 0.5;
+fill: none
+
+			}
+			
+			
+			
+			]]></style>
+
+</defs>
+
+		<path d="M 2 4 
+		C 2 0, 31 0, 30 4
+		V 28
+		C 22 34, 2 30, 2 28
+V 4
+" class="cylinder" />
+
+<path d="
+		M 2 11
+				C 7 8, 33 9, 30 11
+				M 2 20
+		C 12 23, 21 23, 30 20
+" class="lines" />
+
+
+</svg>
