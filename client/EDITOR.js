@@ -288,6 +288,7 @@ EDITOR.speechRate = 1; // // 0.1 to 10
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
+	discoveryBar.setAttribute("place", "vertical");
 	
 	var showDisoveryBarWindowMenuItem;
 	
@@ -492,17 +493,22 @@ _editorInput = true;
 	
 	/*
 		
-		This big difference between EDITOR.localStorage and EDITOR.storage is that EDITOR.localStorage works offline!
+		The big difference between EDITOR.localStorage and EDITOR.storage is that EDITOR.localStorage works offline!
 		
-		todo: EDITOR.localStorage and EDITOR.storage (should) have the same interface to make it easy to switch between them.
+		First I made EDITOR.storage work like window.localStorage, then I started making a Packaged chrome app, 
+		but chrome.storage is async, so I had to refactor everything that used localStorage.
+		Now when I've decided to use Hosted Chrome app instead, 
+		I haven't bothered to refactor back to sync window.localStorage.
 		
-		I started making a Packaged chrome app, but it was too much work to get everything to work,
-		for example, Packaged chrome apps doesn't support localStorage, 
-		instead it have it's own "chrome.storage" that works differently from localStorage.
+		So now EDITOR.localStorage is async while EDITOR.storage is sync.
+		But we should mainly use EDITOR.storage in order to not depend on which client/device is used,
+		eg. you should be able to jump from one device to another and the working state should be the same!
 		
-		chrome.storage is async while localStorage is sync. So I had to refactor everything that used localStorage.
-		Now when I've decided to use Hosted Chrome app instead, localStorage works like in the browser.
-		But I choose to keep the sync version, because "storage" probably needs to be async if we choose to support more platforms in the future.
+		todo: refactor: Always use EDITOR.storage, but sync data with localStorage and fallback to localStorage if offline!
+		when user comes back from being offline, data should be synced with the server,
+		hash the data and save lastServerHash, then compare when overloading data to make sure no data is lost,
+		if the data on the server has changed while the user was offline and the user changed the data,
+		ask the user what value they want to use.
 		
 	*/
 	
@@ -2540,13 +2546,10 @@ usePseudoClipboard = false;
 		leftColumn.style.height = EDITOR.view.canvasHeight + "px";
 		rightColumn.style.height = EDITOR.view.canvasHeight + "px";
 		
-		shareHeight(leftColumn.childNodes, contentHeight);
-		shareHeight(rightColumn.childNodes, contentHeight);
-		
-		
 		
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe 
 		// (wrappers should have css: overflow: auto!important;)
+		// To make 
 		
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
 		//console.log("leftColumnPadding=" + leftColumnPadding);
@@ -2563,7 +2566,7 @@ usePseudoClipboard = false;
 		var rightWrappers = rightColumn.getElementsByClassName("wrap");
 		for (var i = 0; i < rightWrappers.length; i++) {
 			rightWrappers[i].style.width = rightWrappers[i].offsetWidth + "px";
-			//rightWrappers[i].style.height = rightColumnHeight + "px";
+			rightWrappers[i].style.height = rightColumnHeight + "px";
 			//rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		
@@ -2573,6 +2576,9 @@ usePseudoClipboard = false;
 			wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
 			wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
 		}
+		
+		shareHeight(leftColumn.childNodes, contentHeight);
+		shareHeight(rightColumn.childNodes, contentHeight);
 		
 		/*
 			var wrappers = document.getElementsByClassName("wrap");
@@ -2709,9 +2715,11 @@ usePseudoClipboard = false;
 			var maxTotalHeight = contentHeight;
 			
 			for (var i = 0; i < elements.length; i++) {
+if(elements[i].style.display != "none") {
 				computedStyle = window.getComputedStyle(elements[i], null);
 				totalHeight += parseInt(computedStyle.height);
 			}
+}
 			
 			var height = 0;
 			var newHeight = 0;
@@ -2719,6 +2727,12 @@ usePseudoClipboard = false;
 			if(availableHeight < 0) {
 				// One or more elements need to shrink
 				for (var i = 0; i < elements.length; i++) {
+					
+					if(elements[i].getAttribute("place") == "vertical") {
+						elements[i].style.height = maxTotalHeight + "px";
+						continue;
+					}
+					
 					computedStyle = window.getComputedStyle(elements[i], null);
 					height = parseInt(computedStyle.height);
 					
@@ -2834,6 +2848,10 @@ usePseudoClipboard = false;
 		if(eventName == "start" && calledStartListeners) {
 			console.warn("Editor's start event has already been fired! " + funName + " will run right away!");
 			options.fun(); 
+		}
+		else if(eventName == "storageReady" && _serverStorage != null) {
+			console.warn("Editor's storageReady event has already been fired! " + funName + " will run right away!");
+			options.fun();
 		}
 		
 		
@@ -7947,6 +7965,27 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 	}
 	else {
 		console.warn("Speech Synthesis not available! browser=" + BROWSER + "");
+	}
+	
+	
+	/*
+		Encrypting sounds like a good idea, but it depens on what you want to protect from.
+		For example:
+		* Laptop get stolen
+		* Server get hacked
+		
+		What happens when you forget the password for the key or lose the key?
+		All encrypted data, inluding backups of encrypted data will be useless.
+		
+		When the key is changed, the editor need to remember everything it encrypted with that key
+		and re-encrypt it with the new key...
+	*/
+	EDITOR.encrypt = function encrypt(str) {
+		console.warn("EDITOR.encryp not yet implemented!");
+		return str;
+	}
+	EDITOR.decrypt = function decryot(str) {
+		return str;
 	}
 	
 CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {

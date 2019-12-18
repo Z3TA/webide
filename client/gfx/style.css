@@ -552,6 +552,10 @@ label {
 	break-after: avoid;
 }
 
+input + label {
+	margin-left: 1em;
+}
+
 a.signup {
 	padding: 3px;
 	border-radius: 3px;
@@ -1690,6 +1694,20 @@ ul.resolveList li {
 	bottom:0;
 }
 
+
+/* ###### dbExplorer */
+.dbExplorer {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 13px;
+	box-sizing: border-box;
+	border-left: 2px solid #e8e8e8;
+	/* Can not have padding, or the canvas will fall down */
+}
+
+.dbExplorer ul {
+	background-color: #fff; /* #e8e8e8 */
+	color: black;
+}
 
 noscript div {
 	font-size: 2em;

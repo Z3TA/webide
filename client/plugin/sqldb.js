@@ -8,12 +8,39 @@
 	var selectMysqlDb; // Select element
 	var winMenuDbManager;
 	var discoveryBarImg;
-	var pluginActivated = false;
 	var databaseList;
+	var dbExplorerWidget;
+	var connectedToDbServer = false;
+	
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
 		load: function loadSqldb() {
+			
+			dbManagerWidget = EDITOR.createWidget(buildDbManager);
+			
+			var rightColumn = document.getElementById("rightColumn");
+			dbExplorerWidget = EDITOR.createWidget(buildDbExplorer, rightColumn)
+			
+			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
+			
+			winMenuDbManager = EDITOR.windowMenu.add(S("database_manager"), [S("Tools"), 2], showDbManager);
+			
+			EDITOR.on("fileOpen", sqlFileMaybe);
+			
+			var char_Esc = 27;
+			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
+			
+			EDITOR.registerAltKey({char: "l", alt:2, label: S("db_sql"), fun: showDbManager});
+			
+			discoveryBarImg = document.createElement("img");
+			discoveryBarImg.setAttribute("id", "sqlDiscovery");
+			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryBarImg.title = S("sql_database");
+			discoveryBarImg.onclick = toggleDbManager;
+			EDITOR.discoveryBar.add(discoveryBarImg, 80);
+			
+			
 			
 			// Only load if db service is available!
 			if(CLIENT.connectionId) checkDbService();
@@ -31,34 +58,13 @@
 }
 else {
 						console.log("loadSqldb: query resp:", resp);
+						connectedToDbServer = true;
 			
-			dbManagerWidget = EDITOR.createWidget(buildDbManager);
-			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
-			
-						winMenuDbManager = EDITOR.windowMenu.add(S("database_manager"), [S("Tools"), 2], showDbManager);
-			
-			EDITOR.on("fileOpen", sqlFileMaybe);
-			
-			var char_Esc = 27;
-			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
-			
-						EDITOR.registerAltKey({char: "l", alt:2, label: S("db_sql"), fun: showDbManager});
-			
-			discoveryBarImg = document.createElement("img");
-						discoveryBarImg.setAttribute("id", "sqlDiscovery");
-			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-						discoveryBarImg.title = S("sql_database");
-			discoveryBarImg.onclick = toggleDbManager;
-						EDITOR.discoveryBar.add(discoveryBarImg, 80);
-						
-						pluginActivated = true;
 			}
 				});
 			}
 		},
 		unload: function unloadSqldb() {
-			
-			if(!pluginActivated) return;
 			
 			EDITOR.ctxMenu.remove(menuItem);
 			
@@ -93,6 +99,10 @@ else {
 		EDITOR.ctxMenu.update(menuItem, true);
 	}
 	
+	function showDbExplorer() {
+		dbExplorerWidget.show();
+	}
+	
 	function hideDbManager() {
 		dbManagerWidget.hide();
 		EDITOR.ctxMenu.update(menuItem, false);
@@ -112,45 +122,174 @@ else {
 	
 	function buildDbExplorer() {
 		var wrap = document.createElement("div");
-		div.classList.add("wrap");
-		div.classList.add("dbExplorer");
+		wrap.classList.add("wrap");
+		wrap.classList.add("dbExplorer");
 		
+var content = document.createElement("div");
+
 		databaseList = document.createElement("ul");
 		databaseList.classList.add("tree");
 		
+		wrap.appendChild(databaseList);
+		
+wrap.appendChild(content);
+
+		return wrap;
 	}
 	
 	function updateDbExplorer(dbNames) {
+		
+		if(!databaseList) showDbExplorer();
 		
 		while (databaseList.firstChild) databaseList.removeChild(databaseList.firstChild);
 		
 		dbNames.forEach(function(name) {
 			
-			var li = document.createElement("li");
-			var icon = document.createElement("img");
-			icon.setAttribute("width", "22");
-			icon.setAttribute("height", "22");
-			icon.setAttribute("draggable", "false");
-			icon.setAttribute("src", "gfx/icon/db.svg");
-			icon.setAttribute("alt", "Database");
+			console.log("dbExplorer: database name=" + name);
 			
+			var li = document.createElement("li");
 			li.setAttribute("id", name);
 			
-			li.addEventListener("click", function(e) {
-				openOrCloseFolder(li, name);
+			li.addEventListener("click", function clickOnDatabase(e) {
+				
+				console.log("dbExplorer: Click on database " + name + " e=", e);
 				
 				// Try to stop event from propagating down though parents
 				e = window.event || e;
 				e.stopPropagation();
+				if( e.target !== this) {
+					console.warn("dbExplorer: Click e.target=" + e.target + " not on database " + name + "");
+					return;
+				}
+				
+				showOrHideTables(li, name);
+				
 				return false;
 				
 			}, false);
+			
+			/*
+				
+				var icon = document.createElement("img");
+				icon.setAttribute("width", "22");
+				icon.setAttribute("height", "22");
+				icon.setAttribute("draggable", "false");
+				icon.setAttribute("src", "gfx/icon/db.svg");
+				icon.setAttribute("alt", "db");
+				
+				li.appendChild(icon);
+			*/
+			
+			li.oncontextmenu = function contextmenu(contextMenuEvent) {
+				contextMenuEvent.preventDefault();
+				contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
+				
+				//showTables(li, name);
+				
+			};
+			
+			var displayName = name;
+			var maxNameLength = 40;
+			if(displayName.length > maxNameLength) {
+				li.setAttribute("title", displayName);
+				displayName = displayName.substr(0, maxNameLength-3) + "...";
+			}
+			
+			li.appendChild(document.createTextNode(displayName));
+			
+			databaseList.appendChild(li);
 			
 		});
 		
 	}
 	
-	function listDbTables(li, dbName) {
+	function showOrHideTables(dbListItem, dbName) {
+		
+		CLIENT.cmd("mysql.query", {database: dbName, query: "SHOW TABLES"}, function(err, resp) {
+			
+			console.log("dbExplorer: show tables: resp=" + JSON.stringify(resp, null, 2));
+			
+			var tables = resp.results.map(function(obj) {
+				return obj["Tables_in_" + dbName];
+			});
+			
+			var tableList = document.createElement("ul");
+			
+			tables.forEach(function(tableName) {
+				
+				var li = document.createElement("li");
+				li.setAttribute("id", tableName);
+				
+				li.addEventListener("click", function clickOnTable(e) {
+					
+					console.log("dbExplorer: Click on table " + tableName + " e=", e);
+					
+					e = window.event || e;
+					e.stopPropagation();
+					if( e.target !== this) {
+						console.warn("dbExplorer: Click e.target=" + e.target + " not on table " + tableName + "");
+return;
+					}
+					
+					showOrHideFields(li, dbName, tableName);
+					
+					return false;
+					
+				}, false);
+				
+				var displayName = tableName;
+				var maxNameLength = 40;
+				if(displayName.length > maxNameLength) {
+					li.setAttribute("title", displayName);
+					displayName = displayName.substr(0, maxNameLength-3) + "...";
+				}
+				
+				li.appendChild(document.createTextNode(displayName));
+				
+				tableList.appendChild(li);
+				
+			});
+			
+			dbListItem.appendChild(tableList);
+			
+		});
+		
+	}
+	
+	
+	function showOrHideFields(tableListItem, dbName, tableName) {
+		
+		CLIENT.cmd("mysql.query", {database: dbName, query: "DESCRIBE " + tableName }, function(err, resp) {
+			
+			console.log("dbExplorer: DESCRIBE: resp=" + JSON.stringify(resp, null, 2));
+			
+			var fields = resp.results;
+			
+			var fieldList = document.createElement("ul");
+			
+			fields.forEach(function(obj) {
+				
+				var fieldName = obj.Field;
+				
+				var li = document.createElement("li");
+				li.setAttribute("id", fieldName);
+				
+				var displayName = fieldName;
+				var maxNameLength = 40;
+				if(displayName.length > maxNameLength) {
+					li.setAttribute("title", displayName);
+					displayName = displayName.substr(0, maxNameLength-3) + "...";
+				}
+				
+				li.appendChild(document.createTextNode(displayName));
+				
+				fieldList.appendChild(li);
+				
+			});
+			
+			tableListItem.appendChild(fieldList);
+			
+		});
 		
 	}
 	
@@ -194,6 +333,11 @@ else {
 		createDbButton.onclick = createDatabase;
 		holder.appendChild(createDbButton);
 		
+		var connectButton = document.createElement("button");
+		connectButton.setAttribute("class", "button");
+		connectButton.innerText = "Connect to DB server";
+		connectButton.onclick = showConnectToServer;
+		holder.appendChild(connectButton);
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
@@ -201,14 +345,96 @@ else {
 		cancelButton.onclick = hideDbManager;
 		holder.appendChild(cancelButton);
 		
-		/*
-			todo: Select database
-			
-			todo: Run selected query (runs the selected text as a SQL query)
-			
-		*/
 		
-		getDatabases();
+		// ### Connect dialog
+		
+		var connectDialog = document.createElement("fieldset");
+		
+		var connectionCaption = document.createElement("legend")
+		connectionCaption.innerText = "Connect to mySQL server:"
+		connectDialog.appendChild(connectionCaption);
+		
+		
+		var labelHostname = document.createElement("label");
+		labelHostname.setAttribute("for", "inputHostname");
+		labelHostname.innerText = "Hostname: ";
+		connectDialog.appendChild(labelHostname);
+		
+		var inputHostname = document.createElement("input");
+		inputHostname.setAttribute("type", "text");
+		connectDialog.appendChild(inputHostname);
+		
+		var labelPort = document.createElement("label");
+		labelPort.setAttribute("for", "inputPort");
+		labelPort.innerText = "Port: ";
+		connectDialog.appendChild(labelPort);
+		
+		var inputPort = document.createElement("input");
+		inputPort.setAttribute("type", "text");
+		inputPort.setAttribute("type", "number");
+		inputPort.setAttribute("min", "0");
+		inputPort.setAttribute("max", "65535");
+		inputPort.value = 3306;
+		connectDialog.appendChild(inputPort);
+		
+		
+		var labelUsername = document.createElement("label");
+		labelUsername.setAttribute("for", "inputUsername");
+		labelUsername.innerText = "Username: ";
+		connectDialog.appendChild(labelUsername);
+		
+		var inputUsername = document.createElement("input");
+		inputUsername.setAttribute("type", "text");
+		connectDialog.appendChild(inputUsername);
+		
+		var labelPassword = document.createElement("label");
+		labelPassword.setAttribute("for", "inputPassword");
+		labelPassword.innerText = "Password: ";
+		connectDialog.appendChild(labelPassword);
+		
+		var inputPassword = document.createElement("input");
+		inputPassword.setAttribute("type", "password");
+		connectDialog.appendChild(inputPassword);
+		
+		var connectToDbServerButton = document.createElement("button");
+		connectToDbServerButton.setAttribute("class", "button");
+		connectToDbServerButton.innerText = "Connect";
+		connectToDbServerButton.onclick = connectToServer;
+		connectDialog.appendChild(connectToDbServerButton);
+		
+		holder.appendChild(connectDialog);
+		
+		EDITOR.on("storageReady", function getDefaultValuesForDbConnection() {
+			inputHostname.value = EDITOR.storage.getItem("lastDbHostname");
+			inputUsername.value = EDITOR.storage.getItem("lastDbUsername");
+			inputPassword.value = EDITOR.storage.getItem("lastDbPassword");
+			inputPort.value = EDITOR.storage.getItem("lastDbPort") || 3306;
+		});
+		
+		
+		function showConnectToServer() {
+			connectDiv.classList.remove("hidden");
+		}
+		
+		function connectToServer() {
+			
+			EDITOR.storage.setItem("lastDbHostname", inputHostname.value);
+			EDITOR.storage.setItem("lastDbUsername", inputUsername.value);
+			EDITOR.storage.setItem("lastDbPassword", inputPassword.value);
+			EDITOR.storage.setItem("lastDbPort", inputPort.value);
+			
+			CLIENT.cmd("mysql.connect", {
+hostname: inputHostname.value,
+username: inputUsername.value,
+password: inputPassword.value,
+port: inputPort.value
+			}, function(err) {
+				if(err) alertBox(err.message);
+				else getDatabases();
+});
+		}
+		
+		if(connectedToDbServer) getDatabases();
 		
 		return holder;
 	}
@@ -220,8 +446,13 @@ else {
 	}
 	
 	function getDatabases(selectedName) {
+		
+		console.log(UTIL.getStack("dbExplorer: getDatabases()"));
+		
 		CLIENT.cmd("mysql.query", {database: selectedDb, query: "SHOW DATABASES"}, function(err, resp) {
 			if(err) return alertBox(err.message);
+			
+			var results = resp.results;
 			
 			var dbNames = results.map(function(obj) {
 				return obj.Database;
@@ -232,7 +463,7 @@ else {
 			// Empty options
 			while (selectMysqlDb.options.length > 0) selectMysqlDb.remove(0);
 			
-			var results = resp.results;
+			
 			var fields = resp.fields;
 			
 			// Fill options

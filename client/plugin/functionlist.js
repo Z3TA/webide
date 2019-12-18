@@ -54,7 +54,9 @@
 		
 		functionListWrap.setAttribute("id", "functionListWrap");
 		functionListWrap.setAttribute("class", "wrap functionListWrap");
-		
+		functionListWrap.setAttribute("place", "vertical");
+
+
 		functionListWrap.oncontextmenu = function hideMaybe() {
 			var disable = "Always hide the function list";
 			var hide = "Hide function list";

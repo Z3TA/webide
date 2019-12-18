@@ -43,7 +43,7 @@ else {
 		
 		if(dbName == undefined) return callback(new Error("No database specified!"));
 		
-		connect(user.name, dbName, function runQuery(err) {
+			connectIfNotConnectedAndUseDatabase(user.name, dbName, function runQuery(err) {
 			if(err) return callback(err);
 			
 			connection.query(json.query, function(err, results, fields) {
@@ -57,41 +57,93 @@ else {
 			});
 		});
 	},
-	databases: function showMysqlDatabases(user, json, callback) {
-		connect(user.name, currentDb, function runQuery(err) {
-			if(err) return callback(err);
+		connect: function mysqlConnect(user, json, callback) {
+			// Connects to a database
 			
-			connection.query(json.query, callback);
+			connect(json.username, json.password, json.hostname, json.database, callback);
+			
+		}
+		
+}
+}
+
+function connectIfNotConnectedAndUseDatabase(editorUsername, database, callback) {
+	
+	if(!connection || connection.state === 'disconnected') {
+		if(!lastPassword) {
+			// Connect to local server
+			connect(editorUsername, undefined, undefined, database, callback);
+		}
+		else {
+			connect(lastUsername, lastPassword, lastHostname, lastDatabase, callback);
+		}
+	}
+	else if(database != lastDatabase) {
+		connection.query("USE " + database, function(err) {
+			if(!err) lastDatabase = database;
+			
+			callback(err);
 		});
 	}
-	
+	else {
+		callback(null);
+	}
 	
 }
-}
 
+var lastUsername, lastPassword, lastHostname, lastDatabase;
 
-function connect(username, database, callback) {
+function connect(username, password, hostname, database, callback) {
 	
-	//console.log(JSON.stringify(connection, null, 2));
+	if(arguments.length != 5) throw new Error("Need 5 arguments!");
+	
+	lastUsername = username;
+	lastPassword = password;
+	lastHostname = hostname;
+	lastDatabase = database;
+	
+	if(hostname) {
+		var connectionOptions = {
+			user: username,
+			password: password,
+			host: hostname,
+			database: database || "information_schema"
+		};
+		
+		makeConnection(connectionOptions);
+	}
+	else {
+		// Connect to local database
+		var socket = "/sock/mysql";
+		
+		module_fs.stat(socket, function(err, stats) {
+			if(err && err.code == "ENOENT") return callback(new Error("Can not find " + socket + ". MySQL is probably not installed or configured on this server. See mySQL section in README.txt for more info."));
+			else if(err) throw err;
+			
+			console.log(JSON.stringify(stats, null, 2));
+			
+			console.log("stats.isSocket()=" + stats.isSocket());
+			
+			var connectionOptions = {
+				user: username,
+				socketPath: socket,
+				authSwitchHandler: true, // Need to be true:ish
+				database: database || "information_schema"
+			};
+
+			makeConnection(connectionOptions);
+			
+		});
+		return;
+	}
+	
+	function makeConnection(connectionOptions) {
+		
+		//console.log(JSON.stringify(connection, null, 2));
 	
 	//if(connection && database == currentDb && !connection._closing) return callback(null);
 	
-	var socket = "/sock/mysql";
-	
-	module_fs.stat(socket, function(err, stats) {
-		if(err && err.code == "ENOENT") return callback(new Error("Can not find " + socket + ". MySQL is probably not installed or configured on this server. See mySQL section in README.txt for more info."));
-		else if(err) throw err;
-		
-		console.log(JSON.stringify(stats, null, 2));
-		
-		console.log("stats.isSocket()=" + stats.isSocket());
-		
-		connection = module_mysql.createConnection({
-			user: username,
-			socketPath: socket,
-			authSwitchHandler: true, // Need to be true:ish
-			database: database || "information_schema"
-		});
+		connection = module_mysql.createConnection(connectionOptions);
 		
 		var processUser = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
 		
@@ -112,7 +164,7 @@ function connect(username, database, callback) {
 			}
 		});
 		
-	});
+	}
 	
 }
 
