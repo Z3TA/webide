@@ -31,6 +31,8 @@ var ImageFile;
 		var image = new Image();
 		image.onload = function() {
 			
+			console.log("ImageFile: Got onload event for path=" + path);
+			
 			// Same width/height as the image
 			file.canvas.width = image.width;
 			file.canvas.height = image.height;
@@ -54,13 +56,21 @@ var ImageFile;
 		console.log("ImageFile: Loading image data... ext=" + ext + " data.length=" + data.length);
 		console.log("ImageFile: Image data starts with: " + data.slice(0, 100) + " and ends with " + data.slice(-100));
 		
-		if(data.indexOf("blob:") == 0) image.src = data;
-		else image.src = "data:image/" + ext + ";base64," + data;
+		if(data.indexOf("blob:") != 0 && data.indexOf("data:") != 0) {
+			var extra = "data:image/" + ext + ";base64,";
+}
+		
+		if(extra) {
+			console.log("ImageFile: Putting " + extra + " infront of data");
+			data = extra + data;
+		}
+		
+		image.src = data;
 		
 		setTimeout(function loadTimeout() {
 			if(!loadCallback) return;
 			
-			loadCallback(new Error("Failed to load the image in a timely manner: data=" + data));
+			loadCallback(new Error("Failed to load the image in a timely manner: data=" + data.slice(0, 200) + " (" + data.length + " byte) ..."));
 			loadCallback = null;
 		}, 2000);
 		

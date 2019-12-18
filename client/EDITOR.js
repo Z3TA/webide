@@ -9144,7 +9144,17 @@ function fileDrop(fileDropEvent) {
 			}
 		}
 		
-		if(EDITOR.currentFile) {
+			var reImage = /data:image\/(.*);base64,/;
+			var matchImage = text.match(reImage);
+			if(matchImage) {
+				var ext = matchImage[1];
+				EDITOR.openFile("image." + ext, text, {image: true}, function(err, file) {
+if(err) alertBox("Failed to open text as image: " + err.message);
+});
+				return;
+			}
+			
+			if(EDITOR.currentFile) {
 			// Drop the text into the current file
 			
 			// Get row and col

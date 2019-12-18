@@ -49,7 +49,12 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-db explorer doesn't get a scrollbar!
+
+
+
+Thinking about how to integrate and share files between different cloud services.
+like for example image editing, or database administration,
+instead of implementing everything into the IDE, we should use existing cloud services!
 
 
 db explorer inspired by mySQL Query Browsers
