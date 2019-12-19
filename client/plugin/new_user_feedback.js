@@ -64,7 +64,7 @@ if(alreadySentFeedback) return;
 		"Help keep the editor free from \"telemetry\" by leaving feeback! " +
 		'Many of the editor features are work-in-progress. What should be priotized?\n' +
 		'Leave feedback via the smilie-face menu or send an e-mail to <a href="mailto:editor@webtigerteam.com">editor@webtigerteam.com</a>.\n' +
-		'Before trying the editor/IDE, what are your expectations?.' + 
+		'Before trying the editor/IDE, what are your expectations?' + 
 		'\n', {rows: 5, placeholder: "The features you would like to have in a code editor/IDE or why you are already reaching for the close tab button ..."}, "WebIDE: New user expectations")
 		
 	}
