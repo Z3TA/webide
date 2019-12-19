@@ -5012,13 +5012,16 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 		cwd: homeDir
 	};
 	
+	
+	var dropboxPath = UTIL.joinPaths(homeDir, "Dropbox/");
+	
 	options.env = {
 		username: username,
 		HOME: homeDir,
 		USER: username,
 		LOGNAME: username,
 		USER_NAME: username,
-		dropbox_path: UTIL.joinPaths(homeDir, "Dropbox/"),
+		dropbox_path: dropboxPath,
 		TMPDIR: UTIL.joinPaths(homeDir, "tmp/")
 	}
 	
@@ -5027,7 +5030,41 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	var daemon = module_path.join(__dirname, "./../dropbox/dropboxd");
 	
-	log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
+	// First check if the Dropbox folder exist
+	// If it doesn't exist it means it's the first time the user connects to Dropbox, and it will take some time for the data to sync
+	var firstTime = true;
+	module_fs.stat(dropboxPath, function(err, stats) {
+		if(err && err.code == "ENOENT") {
+			module_fs.mkdir(dropboxPath, function(err) {
+				if(err) {
+					var error = new Error("Failed to create Dropbox folder " + dropboxPath + " Error: " + err.message + " code=" + err.code);
+					error.code = err.code;
+					
+					callback(error);
+					callback = null;
+					return;
+				}
+				else init();
+			});
+			
+			return;
+		}
+		else if(err) {
+			callback(err);
+			callback = null;
+			return;
+		}
+		else {
+
+			firstTime = false;
+			
+			init();
+		}
+		
+	});
+	
+	function init() {
+		log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
 	
 	var dropboxDaemon = module_child_process.spawn(daemon, args, options);
 	
@@ -5110,11 +5147,11 @@ var str = data.toString();
 					callback(null, {timeout: true});
 					callback = null;
 				}
-}, 200);
+}, (firstTime ? 3000 : 200));
 		}
 		
 	});
-	
+	}
 }
 
 function sendToClient(userConnectionName, cmd, obj) {

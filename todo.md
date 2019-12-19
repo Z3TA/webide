@@ -49,7 +49,11 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-Adding class notranslate to things that should not be translated
+When connecting to dropbox I got a prompt to run /bin/sh as root! huh?
+
+Getting an error when the Dropbox folder doesn't exist!!
+
+
 
 Thanks to Google translate adding localization is not a priority,
 we can't rely on it it long term thoug, because they will remove useful feature at any time!
