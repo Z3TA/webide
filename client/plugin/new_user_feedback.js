@@ -67,20 +67,8 @@ if(alreadySentFeedback) return;
 	function askForFeedback(msg, options, subject) {
 		promptBox(msg, options, function(feedback) {
 			if(feedback) {
-				UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback" }, function (err, respStr) {
-					if(err) {
-						alertBox("Problem sending feedback:  " + err.message);
-						throw err;
-					}
-					else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
-						alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (" + respStr + ")");
-						console.log("respStr=" + respStr);
-					}
-					else {
-						alertBox('Thanks for your invaluable feedback! Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.');
-					alreadySentFeedback = true;
-}
-				});
+				EDITOR.sendFeedback(feedback, subject);
+alreadySentFeedback = true;
 			}
 		});
 	}

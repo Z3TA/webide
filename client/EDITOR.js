@@ -5887,15 +5887,8 @@ else {
 					character = f.char;
 				}
 				
-				switch(actualComboSum || f.combo) {
-					case 1: combo = "SHIFT"; break;
-					case 2: combo = "CTRL"; break;
-					case 3: combo = "SHIFT + CTRL"; break;
-					case 4: combo = "ALT"; break;
-					case 5: combo = "SHIFT + ALT"; break;
-					case 6: combo = "CTRL + ALT"; break;
-					case 7: combo = "SHIFT + CTRL + ALT"; break;
-				}
+				var combo = comboSumToString(actualComboSum || f.combo);
+				
 				
 				//console.log("getKeyFor: funName=" + funName + " combo=" + combo + " character=" + character);
 				
@@ -5908,6 +5901,20 @@ else {
 		
 		return null;
 		
+	}
+	
+	function comboSumToString(sum) {
+		var combo = "";
+		switch(sum) {
+			case 1: combo = "SHIFT"; break;
+			case 2: combo = "CTRL"; break;
+			case 3: combo = "SHIFT + CTRL"; break;
+			case 4: combo = "ALT"; break;
+			case 5: combo = "SHIFT + ALT"; break;
+			case 6: combo = "CTRL + ALT"; break;
+			case 7: combo = "SHIFT + CTRL + ALT"; break;
+		}
+		return combo;
 	}
 	
 	EDITOR.keyBindings = function() {
@@ -7990,6 +7997,24 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 		return str;
 	}
 	
+	EDITOR.sendFeedback = function sendFeedback(feedback, subject) {
+		
+		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback" }, function (err, respStr) {
+			if(err) {
+				alertBox("Problem sending feedback:  " + err.message);
+				throw err;
+			}
+			else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
+				alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (" + respStr + ")");
+				console.log("respStr=" + respStr);
+			}
+			else {
+				alertBox('Thanks for your invaluable feedback! Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.');
+			}
+		});
+		
+	}
+	
 CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 	
 	var connectedFiles = filesOnServer();
@@ -9909,6 +9934,23 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 		
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:
+			
+			if(character.charCodeAt(0) < 32) {
+				// This will send a control character and the File will complain...
+				// Ask the user what he/she wanted to do
+				var comboStr = comboSumToString(combo.sum);
+				promptBox("Missing key-binding for " + keyPressEvent.key + " + " + comboStr + "  \nWhat would you like the editor to do?", 
+{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
+function(answer) {
+					if(!answer) return;
+					
+					var message = answer + "\nkey=" + keyPressEvent.key + " combo=" + JSON.stringify(combo) + " comboStr=" + comboStr;
+					EDITOR.sendFeedback(message, "Keybinding wanted");
+				});
+				
+				return;
+			}
+			
 			
 			file.putCharacter(character);
 			

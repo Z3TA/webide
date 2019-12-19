@@ -49,6 +49,15 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+canvas regression
+
+fixing issues before releasing
+
+
+Can I run many instances of Dropbox Daemon?
+
+Implementing support for Dropbox
+
 Dropbox seem to be the gloue of the cloud and what most cloud apps seem to use. So we need to make it first class!
 
 Thinking about how to integrate and share files between different cloud services.
@@ -57,22 +66,14 @@ instead of implementing everything into the IDE, we should use existing cloud se
 
 
 
-
-Trying to load a blob url! blob:https://jspaint.app/5e2ffb56-8817-42c3-ba62-afc12fb57c8d
-
-todo: Add "new file" and "save" to discovery bar!?
-
-todo: Add Dropbox sync to discovery bar
-
-
-
-todo: Chromium suddenly devided it wants to traslate the page the IDE ... We should support it!
+todo: Chromium suddenly decided it wants to traslate the page the IDE ... We should support it!
 
 
 
 
 db explorer inspired by mySQL Query Browsers
 
+Install Ubuntu 10, then install mysql-query-browser. Make a mySQL integration to the IDE that looks like mysql query browser!
 
 Try Mongo Compass
 
@@ -80,29 +81,17 @@ Try Mongo Compass
 Thinking of what other cloud providers to support ...
 
 
-todo: Docker (rootless) support like with Dropbox!?
-
-
-todo: Test Dropbox implementation
-After we have recived last message from dropbox deamon, and no auth request, then callback after 100ms
-
-Can I run many instances of Dropbox Daemon?
-
-Implementing support for Dropbox
-
-
-export LD_LIBRARY_PATH="/.dropbox-dist/dropbox-lnx.x86_64-86.4.146"
-
-
-todo: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #
+todo: Docker (rootless) support like with Dropbox!? using podman? systemd-nspawn? 
+offiscial rootless Docker requers unprivileged namespace access, not sure if I want to allow that
 
 
 
-"connect to a storage provider"
 
-Able to connect to different storage providers
 
-Install Ubuntu 10, then install mysql-query-browser. Make a mySQL integration to the IDE that looks like mysql query browser!
+todo: fix: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #
+
+
+
 
 issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...
 try to run "npm install" when you click "install all" !?
@@ -125,6 +114,13 @@ issue: When autocompleting inside () I get a HTML completion. Don't do HTML comp
 
 
 Thinking of maybe using highlight.js to support code highlightning for more languages...
+Not a good idea because regexp highlightning is very brittle and you need crazy regexp patterns
+Need to make a lexer/parser for every language ...
+While colors make the editor more interesting, too many colors makes it confusing.
+So we only have to color stuff that matters:
+* Know if a string is closed or not
+* Know if you misspelled a variable or keyword, especially object parameters which doesn't give syntax errors
+
 
 Markdown live preivew!
 
