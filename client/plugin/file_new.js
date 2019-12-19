@@ -9,6 +9,7 @@
 	var menuItem;
 	var newFileDashboardWidget;
 	var winMenuNewFile;
+	var discoveryBarImage;
 	
 	EDITOR.plugin({
 		desc: "Create new file option to context menu and bound to Ctrl + N",
@@ -23,6 +24,12 @@
 			
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
+			discoveryBarImage = document.createElement("img");
+			discoveryBarImage.src = "gfx/add-file.svg";  // Icon created by: https://www.flaticon.com/authors/phatplus
+			discoveryBarImage.title = S("new_file");
+			discoveryBarImage.onclick = newFileFromDiscoveryBar;
+			EDITOR.discoveryBar.add(discoveryBarImage, 10);
+			
 		},
 		unload: function unloadNewFilePlugin() {
 			EDITOR.ctxMenu.remove(menuItem);
@@ -34,9 +41,15 @@
 			
 			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
+			EDITOR.discoveryBar.remove(discoveryBarImage)
 		},
 		order: 10
 	});
+	
+	function newFileFromDiscoveryBar() {
+		EDITOR.stat("newFileFromDiscoveryBar");
+		return keyboardNewFile();
+	}
 	
 	function newFileFromKeyboardCombo() {
 		EDITOR.stat("newFileFromKeyboardCombo");
@@ -58,7 +71,7 @@
 		return keyboardNewFile();
 	}
 	
-	function keyboardNewFile(file, combo, character, charCode, direction) {
+	function keyboardNewFile() {
 		EDITOR.ctxMenu.hide();
 		winMenuNewFile.hide();
 		EDITOR.dashboard.hide();
