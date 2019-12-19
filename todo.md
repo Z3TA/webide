@@ -49,12 +49,26 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-
-
+Dropbox seem to be the gloue of the cloud and what most cloud apps seem to use. So we need to make it first class!
 
 Thinking about how to integrate and share files between different cloud services.
 like for example image editing, or database administration,
 instead of implementing everything into the IDE, we should use existing cloud services!
+
+
+
+
+Trying to load a blob url! blob:https://jspaint.app/5e2ffb56-8817-42c3-ba62-afc12fb57c8d
+
+todo: Add "new file" and "save" to discovery bar!?
+
+todo: Add Dropbox sync to discovery bar
+
+
+
+todo: Chromium suddenly devided it wants to traslate the page the IDE ... We should support it!
+
+
 
 
 db explorer inspired by mySQL Query Browsers

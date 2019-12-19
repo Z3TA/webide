@@ -39,6 +39,7 @@ cancel: "Cancel",
 	download: "download",
 	download_website: "Download a website",
 	drag_following_link_to_bookmark_bar: "Drag the following link to the bookmark bar",
+	dropbox_sync: "Dropbox sync",
 	
 	edit: "edit",
 	editor: "editor",

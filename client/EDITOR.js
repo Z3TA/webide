@@ -2928,8 +2928,10 @@ if(elements[i].style.display != "none") {
 	var discoveryBarTabIndex = 600; // See tabindex.txt
 	EDITOR.discoveryBar = {
 		add: function addDiscoveryItem(element, position) {
-			// Add feature icons for discovery
-			if(position == undefined) position = 99;
+			
+			// note: Don't add icon captions, it will look ugly, and make the CSS complicated, and the text wont fit.
+			
+			if(position == undefined) throw new Error("Second argument: position need to be defined!");
 			
 			var wrap = document.createElement("div");
 			wrap.setAttribute("class", "discoveryItem");
@@ -9144,104 +9146,116 @@ function fileDrop(fileDropEvent) {
 			}
 		}
 		
-			var reImage = /data:image\/(.*);base64,/;
+			var reImage = /^data:image\/(.*);base64,/;
 			var matchImage = text.match(reImage);
 			if(matchImage) {
 				var ext = matchImage[1];
 				EDITOR.openFile("image." + ext, text, {image: true}, function(err, file) {
-if(err) alertBox("Failed to open text as image: " + err.message);
-});
+					if(err) alertBox("Failed to open text as image: " + err.message);
+				});
 				return;
 			}
 			
+			var reBlobUrl = /^blob:.*:\/\//;
+			var matchBlobUrl = text.match(reBlobUrl);
+			if(matchBlobUrl) {
+				
+				console.log("fileDrop: Dropped a blob URL ...")
+				
+// Blob URL's can only be accessed if they are from the same page :/
+
+			}
+			
+			
+			
 			if(EDITOR.currentFile) {
-			// Drop the text into the current file
+				// Drop the text into the current file
+				
+				// Get row and col
+				var mouseX = fileDropEvent.offsetX;
+				var mouseY = fileDropEvent.offsetY;
+				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+				
+				text = EDITOR.sanitizeText(EDITOR.currentFile, text);
+				
+				EDITOR.currentFile.insertText(text, caret);
+				
+			}
+			else {
+				// Create a new file with the dropped text
+				EDITOR.openFile(undefined, text); 
+				
+			}
+			return;
+		}
+		
+		if(fileDropEvent.dataTransfer.files.length == 0) {
+			return alertBox("The dropped object doesn't seem to be a file!");
+		}
+		
+		console.log("fileDrop: fileDropEvent.dataTransfer:");
+		console.log( fileDropEvent.dataTransfer );
+		
+		var items = fileDropEvent.dataTransfer.items;
+		var files = fileDropEvent.dataTransfer.files;
+		
+		console.log("items.length=" + items.length + " files.length=" + files.length);
+		
+		var filesToSave = 0;
+		var filesSaved = 0;
+		var lastPath; // The last path if many files where saved
+		var uploadErrors = []; // List of errors during the upload
+		var fileToOpen; // Open this file (if specified) when all files have been uploaded
+		var foldersToRead = 0;
+		var foldersRead = 0;
+		var done = false;
+		
+		if(items && items.length > 1) {
+			console.log("fileDrop: Dropped " + items.length + " items ...");
+			var progressBar = document.createElement("progress");
+			progressBar.max = items.length;
+			progressBar.value = 0;
+			var footer = document.getElementById("footer");
+			footer.appendChild(progressBar);
+			EDITOR.resizeNeeded(); // To show the progress bar
 			
-			// Get row and col
-			var mouseX = fileDropEvent.offsetX;
-			var mouseY = fileDropEvent.offsetY;
-			var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-			
-			text = EDITOR.sanitizeText(EDITOR.currentFile, text);
-			
-			EDITOR.currentFile.insertText(text, caret);
-			
+			for (var i=0; i<items.length; i++) {
+				// webkitGetAsEntry is where the magic happens
+				var item = items[i].webkitGetAsEntry();
+				if (item) {
+					traverseFileTree(item);
+				}
+			}
+			return;
 		}
 		else {
-			// Create a new file with the dropped text
-			EDITOR.openFile(undefined, text); 
+			// ### Handle single file
 			
-		}
-		return;
-	}
-	
-	if(fileDropEvent.dataTransfer.files.length == 0) {
-		return alertBox("The dropped object doesn't seem to be a file!");
-	}
-	
-	console.log("fileDrop: fileDropEvent.dataTransfer:");
-	console.log( fileDropEvent.dataTransfer );
-	
-	var items = fileDropEvent.dataTransfer.items;
-	var files = fileDropEvent.dataTransfer.files;
-	
-	console.log("items.length=" + items.length + " files.length=" + files.length);
-	
-	var filesToSave = 0;
-	var filesSaved = 0;
-	var lastPath; // The last path if many files where saved
-	var uploadErrors = []; // List of errors during the upload
-	var fileToOpen; // Open this file (if specified) when all files have been uploaded
-	var foldersToRead = 0;
-	var foldersRead = 0;
-	var done = false;
-	
-	if(items && items.length > 1) {
-		console.log("fileDrop: Dropped " + items.length + " items ...");
-		var progressBar = document.createElement("progress");
-		progressBar.max = items.length;
-		progressBar.value = 0;
-		var footer = document.getElementById("footer");
-		footer.appendChild(progressBar);
-		EDITOR.resizeNeeded(); // To show the progress bar
-		
-		for (var i=0; i<items.length; i++) {
-			// webkitGetAsEntry is where the magic happens
-			var item = items[i].webkitGetAsEntry();
-			if (item) {
-				traverseFileTree(item);
-			}
-		}
-		return;
-	}
-	else {
-		// ### Handle single file
 			
-		
-		// todo: What if you drop a single folder ?
-		
-		var file = fileDropEvent.dataTransfer.files[0];
-		var filePath = file.path || file.name;
-		
+			// todo: What if you drop a single folder ?
+			
+			var file = fileDropEvent.dataTransfer.files[0];
+			var filePath = file.path || file.name;
+			
 			console.log("fileDrop: Dropped Single file !? file.path=" + file.path + " file.name=" + file.name);
 			
-		if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = (EDITOR.workingDirectory || "/upload/") + filePath;
-		
-		var fileType = file.type;
-		
-		// The default action is to open the file in the editor.
-		// But if the editor don't support the file, ask plugins what to do with it ...
-		var handled = false;
-		if(!supported(fileType)) {
+			if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = (EDITOR.workingDirectory || "/upload/") + filePath;
 			
+			var fileType = file.type;
+			
+			// The default action is to open the file in the editor.
+			// But if the editor don't support the file, ask plugins what to do with it ...
+			var handled = false;
+			if(!supported(fileType)) {
+				
 				var f = EDITOR.eventListeners.fileDrop.map(funMap);
 				console.log("fileDrop: File is not supported. Calling fileDrop listeners (" +f.length + ")");
 				for(var i=0, h=false; i<f.length; i++) {
 					h = f[i](file);
-				if(h) handled = true;
-			}
-			
-			if(!handled) {
+					if(h) handled = true;
+				}
+				
+				if(!handled) {
 					promptBox("Where do you want to save the dropped " + fileType + " file ?", {defaultValue: filePath}, function(path) {
 						if(path) {
 							EDITOR.checkPath(path, function(err, path) {

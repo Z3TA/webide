@@ -49,9 +49,9 @@
 			promptBox("URL to download from: ", {defaultValue: defaultUrl}, function(url) {
 				if(!url) return;
 				
-				var filName = UTIL.getFilenameFromPath(url);
+				var fileName = UTIL.getFilenameFromPath(url);
 				var uploadDir = UTIL.trailingSlash(UTIL.joinPaths(EDITOR.user.homeDir, "upload"));
-				var uploadPath =  UTIL.joinPaths(uploadDir, filName);
+				var uploadPath =  UTIL.joinPaths(uploadDir, fileName);
 				var options = {url: url, createPath: true, path: uploadPath};
 				CLIENT.cmd("download", options, function(err, resp) {
 					if(err) {

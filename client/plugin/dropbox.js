@@ -3,6 +3,7 @@
 
 	var winMenuDropbox;
 	var authWindow;
+	var discoveryBarImage;
 	
 	EDITOR.plugin({
 		desc: "Mount Dropbox",
@@ -14,6 +15,12 @@
 			
 			CLIENT.on("dropbox", dropboxMessage);
 			
+			discoveryBarImage = document.createElement("img");
+			discoveryBarImage.src = "gfx/icon/dropbox.svg";
+			discoveryBarImage.title = S("dropbox_sync");
+			discoveryBarImage.onclick = activateOrDeactivateDropboxSync;
+			EDITOR.discoveryBar.add(discoveryBarImage, 50);
+			
 		},
 		unload: function unloadGoogleDriveSupport() {
 			
@@ -22,8 +29,14 @@
 			EDITOR.unregisterAltKey(startDropbox);
 			
 			CLIENT.removeEvent("dropbox", dropboxMessage);
+			
+			EDITOR.discoveryBar.remove(discoveryBarImage);
 		}
 	});
+	
+	function activateOrDeactivateDropboxSync() {
+		alertBox("Click Dropbox");
+	}
 	
 	function dropboxMessage(resp) {
 		
@@ -34,6 +47,8 @@
 			if(authWindow) authWindow.close();
 			
 			alertBox("Dropbox linked!");
+			
+			discoveryBarImage.classList.add("active");
 			
 		}
 		
