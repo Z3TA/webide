@@ -417,6 +417,7 @@
 		tabFileText.setAttribute("aria-label", "show file: " + fileName);
 		// hmm, tabindex get a weird order!
 		//tabFileText.setAttribute("tabindex", ++tabindex);
+		tabFileText.classList.add("notranslate");
 		
 		//tabFileItem.appendChild(document.createTextNode(fileName));
 		tabFileItem.appendChild(tabFileText);

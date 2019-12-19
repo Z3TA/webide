@@ -49,7 +49,10 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-canvas regression
+Adding class notranslate to things that should not be translated
+
+Thanks to Google translate adding localization is not a priority,
+we can't rely on it it long term thoug, because they will remove useful feature at any time!
 
 fixing issues before releasing
 

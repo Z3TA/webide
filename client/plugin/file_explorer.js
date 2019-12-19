@@ -597,7 +597,8 @@ return;
 				
 			};
 			
-			
+			li.classList.add("notranslate");
+
 			var displayName = item.name;
 			if(displayName.length > maxNameLength) {
 				li.setAttribute("title", displayName);
