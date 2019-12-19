@@ -5035,27 +5035,55 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	var firstTime = true;
 	module_fs.stat(dropboxPath, function(err, stats) {
 		if(err && err.code == "ENOENT") {
+			console.log(dropboxPath + " path missing! Creating it...");
 			module_fs.mkdir(dropboxPath, function(err) {
 				if(err) {
 					var error = new Error("Failed to create Dropbox folder " + dropboxPath + " Error: " + err.message + " code=" + err.code);
 					error.code = err.code;
 					
+					console.error(error);
+					
 					callback(error);
 					callback = null;
 					return;
 				}
-				else init();
+				else {
+					console.log("Dropbox folder created successfully! Now changing the owner of " + dropboxPath + " to " + username + " ...");
+					module_fs.chown(dropboxPath, uid, gid, function(err) {
+						if(err) {
+							var error = new Error("Failed to change ownership of Dropbox folder " + dropboxPath + "  to " + username + " Error: " + err.message + " code=" + err.code);
+							error.code = err.code;
+							
+							console.error(error);
+							
+							callback(error);
+							callback = null;
+							return;
+						}
+						else {
+							console.log("Successfully changed owner of " + dropboxPath + " to " + username + "");
+							init();
+						}
+})
+					return;
+				}
 			});
 			
 			return;
 		}
 		else if(err) {
+			console.log("Failed to stat " + dropboxPath);
+			console.error(err);
+			console.log("err.code=" + err.code);
 			callback(err);
 			callback = null;
+			
 			return;
 		}
 		else {
-
+			
+			console.log("Dropbox folder already exist: " + dropboxPath);
+			
 			firstTime = false;
 			
 			init();
@@ -5065,14 +5093,14 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	function init() {
 		log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
-	
-	var dropboxDaemon = module_child_process.spawn(daemon, args, options);
-	
-	DROPBOX[username] = dropboxDaemon;
-	
-	setTimeout(function loadTimout() {
-		if(callback) {
-			var error = new Error("Dropbox failed to load in a timely manner, please contact WebIDE support!");
+		
+		var dropboxDaemon = module_child_process.spawn(daemon, args, options);
+		
+		DROPBOX[username] = dropboxDaemon;
+		
+		setTimeout(function loadTimout() {
+			if(callback) {
+				var error = new Error("Dropbox failed to load in a timely manner, please contact WebIDE support!");
 			callback(error);
 			callback = null;
 		}
@@ -5147,7 +5175,7 @@ var str = data.toString();
 					callback(null, {timeout: true});
 					callback = null;
 				}
-}, (firstTime ? 3000 : 200));
+				}, (firstTime ? 6000 : 200));
 		}
 		
 	});
