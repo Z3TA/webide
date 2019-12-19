@@ -5190,7 +5190,7 @@ function sendToClient(userConnectionName, cmd, obj) {
 		
 		var str = JSON.stringify(json);
 		
-		log(IP + " <= " + UTIL.shortString(str, 256));
+		//log(IP + " <= " + UTIL.shortString(str, 256));
 		
 		conn.write(str);
 		
