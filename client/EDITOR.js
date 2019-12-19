@@ -2634,7 +2634,7 @@ usePseudoClipboard = false;
 			
 			
 			// Squeeze the margin on really small screens
-			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile) {
+			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile && (EDITOR.currentFile instanceof File)) {
 				var maxLine = Math.max(10, EDITOR.currentFile.grid.length+1);
 				var lineLetters = (" " + maxLine).trim().length;
 				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters + EDITOR.settings.gridWidth + 5);
