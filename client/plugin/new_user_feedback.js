@@ -36,7 +36,7 @@
 	function positive() {
 		EDITOR.stat("happy_smile");
 		
-		askForFeedback("Thank you so much! If you want to give more details do so in the box below: ", {rows: 5, placeholder: "I like... It would also be cool if..."}, "Feedback, happy smile");
+		askForFeedback("What did you like? Leave feedback in the box below: ", {rows: 5, placeholder: "I like... It would also be cool if..."}, "Feedback, happy smile");
 	}
 	
 	function negative() {
@@ -60,7 +60,12 @@ if(alreadySentFeedback) return;
 		// 99% of new users close down the editor/IDE after 3 seconds, try get get some feedback
 		// Tried before to ask users to write feedback in the welcome.htm file, but no one did.
 		
-		askForFeedback("Hi!\nBefore trying the editor/IDE, please write what you would like to find:", {rows: 5, placeholder: "The features you would like to have in a code editor/IDE or why you are already reaching for the close tab button ..."}, "WebIDE: New user expectations")
+		askForFeedback("Hi!\n" +
+		"Help keep the editor free from \"telemetry\" by leaving feeback! " +
+		'Many of the editor features are work-in-progress. What should be priotized?\n' +
+		'Leave feedback via the smilie-face menu or send an e-mail to <a href="mailto:editor@webtigerteam.com">editor@webtigerteam.com</a>.\n' +
+		'Before trying the editor/IDE, what are your expectations?.' + 
+		'\n', {rows: 5, placeholder: "The features you would like to have in a code editor/IDE or why you are already reaching for the close tab button ..."}, "WebIDE: New user expectations")
 		
 	}
 	
@@ -68,7 +73,7 @@ if(alreadySentFeedback) return;
 		promptBox(msg, options, function(feedback) {
 			if(feedback) {
 				EDITOR.sendFeedback(feedback, subject);
-alreadySentFeedback = true;
+				alreadySentFeedback = true;
 			}
 		});
 	}

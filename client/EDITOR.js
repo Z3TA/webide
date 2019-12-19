@@ -8009,7 +8009,9 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 				console.log("respStr=" + respStr);
 			}
 			else {
-				alertBox('Thanks for your invaluable feedback! Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.');
+				alertBox('Thanks for your invaluable feedback! ' + 
+' Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
+' ');
 			}
 		});
 		
@@ -9940,8 +9942,8 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				// Ask the user what he/she wanted to do
 				var comboStr = comboSumToString(combo.sum);
 				promptBox("Missing key-binding for " + keyPressEvent.key + " + " + comboStr + "  \nWhat would you like the editor to do?", 
-{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
-function(answer) {
+				{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
+				function(answer) {
 					if(!answer) return;
 					
 					var message = answer + "\nkey=" + keyPressEvent.key + " combo=" + JSON.stringify(combo) + " comboStr=" + comboStr;
