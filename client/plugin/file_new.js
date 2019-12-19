@@ -24,9 +24,10 @@
 			
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
+			// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
 			discoveryBarImage = document.createElement("img");
 			discoveryBarImage.src = "gfx/add-file.svg";  // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarImage.title = S("new_file");
+			discoveryBarImage.title = S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")";
 			discoveryBarImage.onclick = newFileFromDiscoveryBar;
 			EDITOR.discoveryBar.add(discoveryBarImage, 10);
 			
