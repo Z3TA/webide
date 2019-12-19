@@ -81,6 +81,7 @@ var CACHE_FILES = [
 	'/gfx/upload.svg',
 	'/gfx/upload.svg',
 	'/gfx/add-file.svg',
+'/gfx/icon/dropbox.svg',
 	
 	// Cache font
 	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
