@@ -107,7 +107,7 @@
 		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImage.title = S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
-		EDITOR.discoveryBar.add(discoveryBarImage, 10);
+		EDITOR.discoveryBar.add(discoveryBarImage, 20);
 		
 		if(visible) toggleFileExplorer(visible);
 		
@@ -133,8 +133,8 @@
 		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
 gapi.auth2.getAuthInstance().signOut();
 		}
-
-EDITOR.discoveryBar.remove(discoveryBarImage);
+		
+		EDITOR.discoveryBar.remove(discoveryBarImage);
 	}
 	
 	function toggleFileExplorerFromWindowMenu() {

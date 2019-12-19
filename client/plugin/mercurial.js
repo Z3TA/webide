@@ -102,7 +102,7 @@
 		discoveryBarImg.src = "gfx/share.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImg.title = "Version control"
 		discoveryBarImg.onclick = toggleVersionControlWidget;
-		EDITOR.discoveryBar.add(discoveryBarImg, 20);
+		EDITOR.discoveryBar.add(discoveryBarImg, 70);
 		
 	}
 	

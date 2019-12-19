@@ -4,6 +4,7 @@
 	var winMenuDropbox;
 	var authWindow;
 	var discoveryBarImage;
+	var activated = false;
 	
 	EDITOR.plugin({
 		desc: "Mount Dropbox",
@@ -17,9 +18,11 @@
 			
 			discoveryBarImage = document.createElement("img");
 			discoveryBarImage.src = "gfx/icon/dropbox.svg";
-			discoveryBarImage.title = S("dropbox_sync");
-			discoveryBarImage.onclick = activateOrDeactivateDropboxSync;
+			discoveryBarImage.title = "Dropbox";
+			discoveryBarImage.onclick = startDropbox;
 			EDITOR.discoveryBar.add(discoveryBarImage, 50);
+			
+			// note: Deactivating Dropbox sync doesn't make sence
 			
 		},
 		unload: function unloadGoogleDriveSupport() {
@@ -35,7 +38,7 @@
 	});
 	
 	function activateOrDeactivateDropboxSync() {
-		alertBox("Click Dropbox");
+		
 	}
 	
 	function dropboxMessage(resp) {

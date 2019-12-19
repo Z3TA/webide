@@ -55,7 +55,7 @@
 			discoveryItem.src = "gfx/board.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryItem.title = "Terminal emulator"
 			discoveryItem.onclick = startTerminalFromMenu;
-			EDITOR.discoveryBar.add(discoveryItem, 50);
+			EDITOR.discoveryBar.add(discoveryItem, 40);
 			
 		},
 		unload: function unloadTerminal() {

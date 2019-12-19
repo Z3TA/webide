@@ -75,7 +75,7 @@ function connectIfNotConnectedAndUseDatabase(editorUsername, database, callback)
 			connect(editorUsername, undefined, undefined, database, callback);
 		}
 		else {
-			connect(lastUsername, lastPassword, lastHostname, lastDatabase, callback);
+			connect(lastUsername, lastPassword, lastHostname, database, callback);
 		}
 	}
 	else if(database != lastDatabase) {

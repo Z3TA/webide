@@ -38,7 +38,7 @@
 			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 			discoveryBarImg.title = S("sql_database");
 			discoveryBarImg.onclick = toggleDbManager;
-			EDITOR.discoveryBar.add(discoveryBarImg, 80);
+			EDITOR.discoveryBar.add(discoveryBarImg, 70);
 			
 			
 			
