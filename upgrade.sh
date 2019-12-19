@@ -51,6 +51,7 @@ fi
 rsync -r --delete temp/release/server/ $SERVER:/srv/webide/
 rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
 
+rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
 
 rsync -r --delete node_modules/ $SERVER:/srv/webide/node_modules/
 
