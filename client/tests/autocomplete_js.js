@@ -365,6 +365,10 @@
 			
 			var atCaret = autoComplete(file, 52);
 			
+			// The bug caused an error
+			
+			EDITOR.closeFile(file.path)
+			
 			callback(true);
 		});
 	});
