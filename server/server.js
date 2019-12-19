@@ -5004,7 +5004,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	var reBrowserUrl = /Please visit (.*) to link this device/;
 	var reLinked = /This computer is now linked to Dropbox/;
-	
+	var reLastLibLoaded = /linuxffi.gnu\.compiled/;
 	
 	var options = {
 		uid: uid,
@@ -5033,9 +5033,10 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	DROPBOX[username] = dropboxDaemon;
 	
-	setTimeout(function() {
+	setTimeout(function loadTimout() {
 		if(callback) {
-			callback(null, {timeout: true});
+			var error = new Error("Dropbox failed to load in a timely manner, please contact WebIDE support!");
+			callback(error);
 			callback = null;
 		}
 	}, 6000);
@@ -5092,6 +5093,25 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	dropboxDaemon.stderr.on("data", function (data) {
 		log(username + "  Dropbox daemon stderr: " + data, DEBUG);
+		
+var str = data.toString();
+
+		if(str.match(reLastLibLoaded)) {
+			/*
+				The last library has loaded and Dropbox is soon fully started...
+				If we are not authorized we will get a browser url to stdout
+				-- And once authorized we will get a "This computer is now linked" message to stdout
+				But if we do not need to authorize we will get nothing!
+				
+				So wait for a auth request, and if we do not get any, assume everything is OK
+			*/
+			setTimeout(function waitForBrowserUrl() {
+				if(callback) {
+					callback(null, {timeout: true});
+					callback = null;
+				}
+}, 200);
+		}
 		
 	});
 	
