@@ -247,12 +247,14 @@ process.on("SIGINT", function sigInt() {
 process.on("exit", function () {
 	
 	// Also close spawned process!
+	// Hmm, it seems Node/Linux automatically cleans up after us!? (so we don't have to do this?)
 	for(var username in DROPBOX) {
+		log("Killing Dropbox daemon for username=" + username, DEBUG);
 		try {
 			DROPBOX[username].kill();
 		}
 		catch(err) {
-			console.log("Unable to close Dropbox daemon for username=" + username);
+			log("Unable to close Dropbox daemon for username=" + username + " Error: " + err.message, WARN);
 		}
 	}
 	
@@ -1430,12 +1432,7 @@ function sockJsConnection(connection) {
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
 				
-				
-				var dropboxDaemon = DROPBOX[userConnectionName];
-				if(dropboxDaemon) {
-					dropboxDaemon.kill();
-					delete DROPBOX[userConnectionName]
-				}
+				//stopDropboxDaemon(userConnectionName);
 				
 			}
 			else {
@@ -2158,8 +2155,19 @@ function sockJsConnection(connection) {
 										
 									}
 									
+									// ### Dropbox worker requests
 									else if(req.startDropboxDaemon) {
 										startDropboxDaemon(userConnectionName, uid, gid, homeDir, function(err, resp) {
+											workerResp(err, resp);
+										});
+									}
+									else if(req.checkDropboxDaemon) {
+										checkDropboxDaemon(userConnectionName, function(err, resp) {
+											workerResp(err, resp);
+										});
+									}
+									else if(req.stopDropboxDaemon) {
+										stopDropboxDaemon(userConnectionName, function(err, resp) {
 											workerResp(err, resp);
 										});
 									}
@@ -4997,14 +5005,24 @@ function reportError(errorMessage) {
 function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	if(DROPBOX.hasOwnProperty(username)) {
-		callback(new Error("There is already a Dropbox daemon for " + username));
+		var error = new Error("Dropbox daemon already serving " + username)
+		error.code = "ALREADY_RUNNING";
+		callback(error);
 		callback = null;
 		return;
 	}
 	
+	if(!module_ps) return callback(new Error("Module ps not loaded."));
+	
 	var reBrowserUrl = /Please visit (.*) to link this device/;
 	var reLinked = /This computer is now linked to Dropbox/;
 	var reLastLibLoaded = /linuxffi.gnu\.compiled/;
+	var reProgramPath = /setting program path '([^']*)'/;
+	var reRunning = /dropbox: running dropbox/;
+	
+	var programPath = "";
+	
+	var didStartSanityCheck = false;
 	
 	var options = {
 		uid: uid,
@@ -5035,7 +5053,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	var firstTime = true;
 	module_fs.stat(dropboxPath, function(err, stats) {
 		if(err && err.code == "ENOENT") {
-			console.log(dropboxPath + " path missing! Creating it...");
+			log(username + " " + dropboxPath + " path missing! Creating it...", DEBUG);
 			module_fs.mkdir(dropboxPath, function(err) {
 				if(err) {
 					var error = new Error("Failed to create Dropbox folder " + dropboxPath + " Error: " + err.message + " code=" + err.code);
@@ -5048,7 +5066,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 					return;
 				}
 				else {
-					console.log("Dropbox folder created successfully! Now changing the owner of " + dropboxPath + " to " + username + " ...");
+					log(username + " Dropbox folder created successfully! Now changing the owner of " + dropboxPath + " to " + username + " ...", DEBUG);
 					module_fs.chown(dropboxPath, uid, gid, function(err) {
 						if(err) {
 							var error = new Error("Failed to change ownership of Dropbox folder " + dropboxPath + "  to " + username + " Error: " + err.message + " code=" + err.code);
@@ -5061,7 +5079,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 							return;
 						}
 						else {
-							console.log("Successfully changed owner of " + dropboxPath + " to " + username + "");
+							log(username + " Successfully changed owner of " + dropboxPath + " to " + username + "", DEBUG);
 							init();
 						}
 })
@@ -5072,9 +5090,9 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 			return;
 		}
 		else if(err) {
-			console.log("Failed to stat " + dropboxPath);
+			log(username + " Failed to stat " + dropboxPath, NOTICE);
 			console.error(err);
-			console.log("err.code=" + err.code);
+			log("err.code=" + err.code, DEBUG);
 			callback(err);
 			callback = null;
 			
@@ -5082,7 +5100,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 		}
 		else {
 			
-			console.log("Dropbox folder already exist: " + dropboxPath);
+			log(username + " Dropbox folder already exist: " + dropboxPath, DEBUG);
 			
 			firstTime = false;
 			
@@ -5092,6 +5110,10 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	});
 	
 	function init() {
+		
+		if(didStartSanityCheck) throw new Error("init have already been called!");
+		didStartSanityCheck = true;
+		
 		log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
 		
 		var dropboxDaemon = module_child_process.spawn(daemon, args, options);
@@ -5138,8 +5160,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 		
 		
 		if(str.match(reLinked)) {
-			sendToClient(username, "dropbox", {linked: true})
-			
+			sendToClient(username, "dropbox", {linked: true});
 		}
 		
 		if(!callback) return;
@@ -5177,10 +5198,224 @@ var str = data.toString();
 				}
 				}, (firstTime ? 6000 : 200));
 		}
-		
+			else if(str.match(reProgramPath)) {
+				
+				if(programPath) {
+					var oldPath = programPath;
+				}
+				
+				var match = str.match(reProgramPath);
+				programPath = match[1];
+				
+				log(username + " Found dropbox program path: " + programPath + " oldPath=" + oldPath, DEBUG);
+				
+				if(oldPath && oldPath != programPath) log(username + " Found another Dropbox path! programPath=" + programPath + " oldPath=" + oldPath, WARN);
+				
+			}
+else if(str.match(reRunning)) {
+				
+				log(username + " detected Dropbox running!", DEBUG);
+				
+				setTimeout(whenDropboxIsReallyRunning, 5000);
+				
+			}
+			
 	});
 	}
+	
+	function whenDropboxIsReallyRunning() {
+		
+		if(!programPath) {
+			log(username + " Dropbox program path not yet found!", WARN);
+			return;
+		}
+		
+		log(username + " Dropbox running with programPath=" + programPath, DEBUG);
+		
+		module_ps.lookup({
+			command: programPath,
+			psargs: "aux" // a=Include those not started by us, x=dont need to have a tty   u=include user  l=long format (l doesnt seem to work together with u)
+		}, function(err, resultList ) {
+			if (err) {
+				throw new Error( err );
+			}
+			
+			var found = false;
+			
+			resultList.forEach(function( p ){
+				if( p ) {
+					
+					log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
+					
+					found = true;
+					
+					if(programPath.indexOf(homeDir) == 0) {
+
+						if(!DROPBOX.hasOwnProperty(username)) {
+							log(username + " It seems the Dropbox daemon we started have closed!", DEBUG);
+							// note: Dropbox sometimes closed the process we spawned, and sometimes keep it open...
+							// Have a kill method even though the original process have closed, 
+// because we still want to be able to kill the Dropbox daemon!
+							DROPBOX[username] = {};
+						}
+						else {
+							// note: The process that we started might still be running
+							var oldKill = DROPBOX[username].kill;
+						}
+						
+						log(username + " Overwriting Dropbox kill method!", NOTICE);
+						
+						DROPBOX[username].kill = function killDropboxDaemon() {
+							
+							if(oldKill) {
+								try {
+									oldKill.call(DROPBOX[username]);
+								}
+								catch(err) {
+									console.error(err);
+									log(username + " Failed to kill the process we started but Dropbox decided not to use.", WARN);
+								}
+							}
+							
+							module_ps.kill( p.pid, function( err ) {
+								if (err) {
+									console.error(err);
+									log("Failed to kill Dropbox daemon for username=" + username + " p.pid=" + p.pid, WARN);
+								}
+								else {
+									log("Killed Dropbox daemon for username=" + username + " pid=" + p.pid);
+								}
+							});
+						};
+						
+					}
+				}
+				else throw new Error("Expected p");
+			});
+			
+			if(!found) {
+				log(username + " Did not find Dropbox process us ps !!", WARN);
+			}
+			
+		});
+	}
 }
+
+function checkDropboxDaemon(username, callback) {
+	if(DROPBOX.hasOwnProperty(username)) {
+		// Likely alive
+		callback(null, {alive: true, dead: false});
+	}
+	else {
+		
+		checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
+			if(err) throw err;
+			
+			if(otherDaemons.length > 0) {
+				// Migth be alive
+				callback(null, {alive: true, dead: true});
+				
+			}
+			else {
+				// Definitely dead
+				callback(null, {alive: false, dead: true});
+			}
+			
+		});
+		
+	}
+}
+
+function stopDropboxDaemon(username, callback) {
+	
+	if(!DROPBOX.hasOwnProperty(username)) {
+		var error = new Error("No Dropbox deamon registered for " + username);
+		error.code = "DEAD";
+		callback(error);
+		callback = null;
+		return;
+	}
+	
+	var dropboxDaemon = DROPBOX[username];
+	
+	if(dropboxDaemon) {
+		log(username + " Killing Dropbox daemon", DEBUG);
+		try {
+			dropboxDaemon.kill();
+		}
+		catch(err) {
+			console.error(err);
+			log(username + " Failed to kill Dropbox daemon", WARN);
+			callback(err);
+			callback = null;
+			return;
+		}
+		
+		delete DROPBOX[username];
+		
+		checkToMakeSure(true);
+	}
+	else checkToMakeSure(false);
+	
+	function checkToMakeSure(killed) {
+		/*
+			Check to make sure ALL Dropbox daemons are stopped.
+			note: If a daemon is still running while deleting the Dropbox folder, all files will be deleted!
+		*/
+		
+		checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
+			if(err) throw err;
+
+			if(otherDaemons.length > 0) {
+				
+				if(killed) {
+					var errMsg = "We killed one deamon, but there appears to be more...";
+				}
+				else {
+					var errMsg = "There appears to be more Dropbox deamons that we did not know about...";
+				}
+				var error = new Error(errMsg);
+				return callback(error);
+				
+			}
+			else {
+				callback(null);
+			}
+
+});
+		
+	}
+}
+
+function checkForOtherDropboxDaemons(username, callback) {
+	
+	var daemons = [];
+	
+	module_ps.lookup({
+		command: ".*dropbox.*",
+		psargs: "aux" // a=Include those not started by us, x=dont need to have a tty   u=include user  l=long format (l doesnt seem to work together with u)
+	}, function(err, resultList ) {
+		if (err) {
+			return callback(err);
+		}
+		
+		resultList.forEach(function( p ){
+			if( p ) {
+				
+				log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
+				
+				daemons.push(p);
+			}
+			
+		});
+		
+		callback(null, daemons);
+		
+	});
+	
+}
+
+
 
 function sendToClient(userConnectionName, cmd, obj) {
 	if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {

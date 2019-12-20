@@ -1,10 +1,18 @@
+
+/*
+	
+	todo: Watch the Dropbox folder in order to refresh the file explorer (if the Dropbox folder is open)
+	and ask the user to reload open files if they have been updated
+	
+*/
+
 (function() {
 "use strict";
 
 	var winMenuDropbox;
 	var authWindow;
 	var discoveryBarImage;
-	var activated = false;
+	var daemonAlive = false;
 	
 	EDITOR.plugin({
 		desc: "Mount Dropbox",
@@ -16,10 +24,13 @@
 			
 			CLIENT.on("dropbox", dropboxMessage);
 			
+			CLIENT.on("loginSuccess", checkIfDropboxIsRunning);
+			
 			discoveryBarImage = document.createElement("img");
 			discoveryBarImage.src = "gfx/icon/dropbox.svg";
 			discoveryBarImage.title = "Dropbox";
-			discoveryBarImage.onclick = startDropbox;
+			discoveryBarImage.onclick = dropboxDiscoveryClicked;
+			discoveryBarImage.oncontextmenu = dropboxDiscoveryContextMenuActivated;
 			EDITOR.discoveryBar.add(discoveryBarImage, 50);
 			
 			// note: Deactivating Dropbox sync doesn't make sence
@@ -33,12 +44,88 @@
 			
 			CLIENT.removeEvent("dropbox", dropboxMessage);
 			
+			CLIENT.removeEvent("loginSuccess", checkIfDropboxIsRunning);
+			
 			EDITOR.discoveryBar.remove(discoveryBarImage);
 		}
 	});
 	
-	function activateOrDeactivateDropboxSync() {
+	function checkIfDropboxIsRunning() {
+		CLIENT.cmd("checkDropboxDaemon", function(err, resp) {
+			if(err) {
+				alertBox("Unable to get Dropbox status: " + err.message);
+				return;
+			}
+			
+			if(!resp.dead) {
+				dropboxDaemonIsRunning();
+			}
+			
+		});
+	}
+	
+	function dropboxDiscoveryContextMenuActivated() {
+		if(daemonAlive) {
+			var yes = "Yes, disconnect from Dropbox";
+			var no = "No, keep Dropbox syncronized";
+			confirmBox("Do you want to stop the Dropbox daemons?", [yes, no], function(answer) {
+				if(answer == yes) disconnectFromDropbox();
+			});
+		}
+		else {
+			alertBox("Drobox daemon not active.")
+		}
+	}
+	
+	function disconnectFromDropbox() {
+		CLIENT.cmd("stopDropboxDaemon", function(err, resp) {
+			if(err) {
+				alertBox("Failed to stop Dropbox daemon: " + err.message);
+				return;
+			}
+			else {
+dropboxDaemonWasKilled();
+				alertBox("Dropbox daemon(s) stopped!");
+			}
+		});
+	}
+	
+	function dropboxDiscoveryClicked() {
+		/*
+			note: The user might want to explore the Dropbox folder, so don't kill the daemon here
+		*/
 		
+		if(daemonAlive) {
+			EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
+		}
+		else startDropbox();
+		
+	}
+	
+	
+	
+	function startOrKillDropboxDaemon() {
+		
+		if(daemonAlive) {
+			disconnectFromDropbox();
+		}
+		else {
+			startDropbox();
+		}
+		
+	}
+	
+	function dropboxDaemonIsRunning() {
+		daemonAlive = true;
+		discoveryBarImage.classList.add("active");
+		winMenuDropbox.activate();
+		
+	}
+	
+	function dropboxDaemonWasKilled() {
+		daemonAlive = false;
+		discoveryBarImage.classList.remove("active");
+		winMenuDropbox.deactivate();
 	}
 	
 	function dropboxMessage(resp) {
@@ -51,7 +138,7 @@
 			
 			alertBox("Dropbox linked!");
 			
-			discoveryBarImage.classList.add("active");
+			dropboxDaemonIsRunning();
 			
 		}
 		
@@ -59,9 +146,14 @@
 	}
 	
 	function startDropbox() {
-		CLIENT.cmd("startDropbox", {code: null}, function(err, resp) {
-			if(err) return alertBox(err.message);
-
+		CLIENT.cmd("startDropboxDaemon", function(err, resp) {
+			if(err) {
+alertBox(err.message);
+				
+				
+				return;
+			}
+			
 			if(resp.url) {
 				// The auth page is not responsive!
 				EDITOR.createWindow({url: resp.url, width: 1010, height: 610}, function(err, win) {
@@ -73,11 +165,9 @@
 				
 			}
 			else if(resp.timeout) {
+				dropboxDaemonIsRunning();
 				EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
 			}
-			
-			winMenuDropbox.activate();
-			
 			
 		});
 	}

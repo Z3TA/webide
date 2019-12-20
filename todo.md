@@ -49,16 +49,18 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-When connecting to dropbox I got a prompt to run /bin/sh as root! huh?
 
-Getting an error when the Dropbox folder doesn't exist!!
 
+When saving-as a file, and it's parent folder is open in the file explorer, update the folder!
+
+
+
+todo: progress bar in dark theme Safari needs styling (its currently dark green)
 
 
 Thanks to Google translate adding localization is not a priority,
 we can't rely on it it long term thoug, because they will remove useful feature at any time!
 
-fixing issues before releasing
 
 
 Can I run many instances of Dropbox Daemon?

@@ -984,8 +984,21 @@ API.remotePipe = function remotePipe(user, options, callback) {
 	});
 }
 
-API.startDropbox = function startDropbox(user, options, callback) {
-	parentRequest({startDropboxDaemon: options}, function(err, resp) {
+// ### Dropbox
+API.startDropboxDaemon = function startDropboxDaemon(user, options, callback) {
+	parentRequest({startDropboxDaemon: options || true}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, resp);
+	});
+}
+API.checkDropboxDaemon = function checkDropboxDaemon(user, options, callback) {
+	parentRequest({checkDropboxDaemon: options || true}, function(err, resp) {
+		if(err) callback(err);
+		else callback(err, resp);
+	});
+}
+API.stopDropboxDaemon = function stopDropboxDaemon(user, options, callback) {
+	parentRequest({stopDropboxDaemon: options || true}, function(err, resp) {
 		if(err) callback(err);
 		else callback(err, resp);
 	});
