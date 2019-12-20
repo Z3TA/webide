@@ -100,7 +100,12 @@ var CACHE_FILES = [
 	'/gfx/icon/html.svg',
 	'/gfx/icon/js.svg',
 	
-	
+	// Database icons
+	'/gfx/icon/db.svg',
+	'/gfx/icon/table.svg',
+'/gfx/icon/field.svg',
+
+
 	'/manifest.webmanifest', // Loaded at every page load, needed for "add to home screen" (A2HS)
 	'/gfx/android-chrome-192x192.png', // Chrome also downloads this icon on every page load
 	

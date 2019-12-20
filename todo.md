@@ -50,34 +50,8 @@ What I'm working on
 -------------------
 
 
-When saving-as a file, and it's parent folder is open in the file explorer, update the folder!
 
-
-
-todo: progress bar in dark theme Safari needs styling (its currently dark green)
-
-
-Thanks to Google translate adding localization is not a priority,
-we can't rely on it it long term thoug, because they will remove useful feature at any time!
-
-
-
-Can I run many instances of Dropbox Daemon?
-
-Implementing support for Dropbox
-
-Dropbox seem to be the gloue of the cloud and what most cloud apps seem to use. So we need to make it first class!
-
-Thinking about how to integrate and share files between different cloud services.
-like for example image editing, or database administration,
-instead of implementing everything into the IDE, we should use existing cloud services!
-
-
-
-todo: Chromium suddenly decided it wants to traslate the page the IDE ... We should support it!
-
-
-
+port doesn't seem to matter when connecting...
 
 db explorer inspired by mySQL Query Browsers
 
@@ -93,7 +67,11 @@ todo: Docker (rootless) support like with Dropbox!? using podman? systemd-nspawn
 offiscial rootless Docker requers unprivileged namespace access, not sure if I want to allow that
 
 
+When saving-as a file, and it's parent folder is open in the file explorer, update the folder!
 
+
+
+todo: progress bar in dark theme Safari needs styling (its currently dark green)
 
 
 todo: fix: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #

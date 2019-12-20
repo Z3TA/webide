@@ -1,0 +1,51 @@
+<svg version="1.1" baseProfile="full" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+
+	<defs>
+
+		<linearGradient id="linearGradient" x2="0%" y2="100%">
+			<stop class="stop1" offset="0%"/>
+			<stop class="stop2" offset="100%"/>
+		</linearGradient>
+
+		<linearGradient id="linearGradient2" x2="0%" y2="100%">
+			<stop class="borderstop1" offset="0%"/>
+			<stop class="borderstop2" offset="100%"/>
+		</linearGradient>
+
+		<filter id="shadow" x="0" y="0" width="130%" height="130%">
+			<feOffset result="offOut" in="SourceGraphic" dx="2" dy="2" />
+			<feGaussianBlur result="blurOut" in="offOut" stdDeviation="2" />
+			<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+
+		</filter>
+
+<style type="text/css"><![CDATA[
+			
+			.diamond {
+				fill: url(#linearGradient);
+				stroke: url(#linearGradient2);
+				stroke-width: 1.5;
+			}
+
+			.stop1 { stop-color: #e0ffff; }
+			.stop2 { stop-color: #499595; }
+
+			.borderstop1 { stop-color: #848b8b; }
+			.borderstop2 { stop-color: #416161; }
+			
+			
+			
+			]]></style>
+
+</defs>
+
+		<path d="M 15 4
+		L 28 15
+		L 16 27
+		L 4 15
+		L 16 4
+
+		" class="diamond"  filter="url(#shadow)" />
+
+		
+</svg>

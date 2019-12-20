@@ -79,7 +79,8 @@ function connectIfNotConnectedAndUseDatabase(editorUsername, database, callback)
 		}
 	}
 	else if(database != lastDatabase) {
-		connection.query("USE " + database, function(err) {
+console.log("Switching to database=" + database);
+		connection.query("USE `" + database + "`", function(err) {
 			if(!err) lastDatabase = database;
 			
 			callback(err);

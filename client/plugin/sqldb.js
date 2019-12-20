@@ -12,12 +12,14 @@
 	var dbExplorerWidget;
 	var connectedToDbServer = false;
 	var getDefaultValuesForDbConnection; // Store function in order to be able to remove event
+	var connectionManager;
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
 		load: function loadSqldb() {
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
+			connectionManager = EDITOR.createWidget(buildConnectionManager);
 			
 			var rightColumn = document.getElementById("rightColumn");
 			dbExplorerWidget = EDITOR.createWidget(buildDbExplorer, rightColumn)
@@ -175,8 +177,8 @@ EDITOR.discoveryBar.remove(discoveryBarImg);
 			
 			
 			var icon = document.createElement("img");
-			icon.setAttribute("width", "20");
-			icon.setAttribute("height", "20");
+			icon.setAttribute("width", "18");
+			icon.setAttribute("height", "18");
 			icon.setAttribute("draggable", "false");
 			icon.setAttribute("src", "gfx/icon/db.svg");
 			icon.setAttribute("alt", "db");
@@ -236,11 +238,11 @@ EDITOR.discoveryBar.remove(discoveryBarImg);
 				li.setAttribute("id", tableName);
 				
 				var icon = document.createElement("img");
-				icon.setAttribute("width", "20");
-				icon.setAttribute("height", "20");
+				icon.setAttribute("width", "16");
+				icon.setAttribute("height", "16");
 				icon.setAttribute("draggable", "false");
 				icon.setAttribute("src", "gfx/icon/table.svg");
-				icon.setAttribute("alt", "db");
+				icon.setAttribute("alt", "db-table");
 				
 				li.appendChild(icon);
 				
@@ -268,6 +270,8 @@ return;
 					showContextMenu(li, dbName, tableName);
 					
 				};
+				
+				li.ondblclick = makeSelectAll(tableName, dbName);
 				
 				var displayName = tableName;
 				var maxNameLength = 40;
@@ -316,6 +320,17 @@ return;
 				
 				var li = document.createElement("li");
 				li.setAttribute("id", fieldName);
+				
+				
+				var icon = document.createElement("img");
+				icon.setAttribute("width", "12");
+				icon.setAttribute("height", "12");
+				icon.setAttribute("draggable", "false");
+				icon.setAttribute("src", "gfx/icon/field.svg");
+				icon.setAttribute("alt", "table-field");
+				
+				li.appendChild(icon);
+				
 				
 				var displayName = fieldName;
 				var maxNameLength = 40;
@@ -399,7 +414,7 @@ return;
 		
 		var connectButton = document.createElement("button");
 		connectButton.setAttribute("class", "button");
-		connectButton.innerText = "Connect to DB server";
+		connectButton.innerText = "Connect to DB server...";
 		connectButton.onclick = showConnectToServer;
 		holder.appendChild(connectButton);
 		
@@ -410,63 +425,122 @@ return;
 		holder.appendChild(cancelButton);
 		
 		
+		if(connectedToDbServer) getDatabases();
+		
+		return holder;
+		
+		function showConnectToServer() {
+			connectionManager.show();
+			dbManagerWidget.hide();
+		}
+	}
+	
+	function buildConnectionManager() {
 		// ### Connect dialog
 		
-		var connectDialog = document.createElement("fieldset");
+		var connectDialog = document.createElement("div");
 		
-		var connectionCaption = document.createElement("legend")
-		connectionCaption.innerText = "Connect to mySQL server:"
-		connectDialog.appendChild(connectionCaption);
+		//var connectionCaption = document.createElement("legend")
+		//connectionCaption.innerText = "Connect to mySQL server:"
+		//connectDialog.appendChild(connectionCaption);
 		
+		var table = document.createElement("table");
+		var tr = document.createElement("tr");
 		
+		var td = document.createElement("td");
+		td.setAttribute("align", "right");
 		var labelHostname = document.createElement("label");
 		labelHostname.setAttribute("for", "inputHostname");
 		labelHostname.innerText = "Hostname: ";
-		connectDialog.appendChild(labelHostname);
+		td.appendChild(labelHostname);
+		tr.appendChild(td);
 		
+		var td = document.createElement("td");
 		var inputHostname = document.createElement("input");
 		inputHostname.setAttribute("type", "text");
-		connectDialog.appendChild(inputHostname);
+		inputHostname.setAttribute("size", "20");
+		td.appendChild(inputHostname);
+		tr.appendChild(td);
 		
+		var td = document.createElement("td");
+		td.setAttribute("align", "right");
+		var labelUsername = document.createElement("label");
+		labelUsername.setAttribute("for", "inputUsername");
+		labelUsername.innerText = "Username: ";
+		td.appendChild(labelUsername);
+		tr.appendChild(td);
+		
+		var td = document.createElement("td");
+		var inputUsername = document.createElement("input");
+		inputUsername.setAttribute("size", "15");
+		inputUsername.setAttribute("type", "text");
+		td.appendChild(inputUsername);
+		tr.appendChild(td);
+		
+		var td = document.createElement("td");
+		var connectToDbServerButton = document.createElement("button");
+		connectToDbServerButton.setAttribute("class", "button");
+		connectToDbServerButton.innerText = "Connect";
+		connectToDbServerButton.onclick = connectToServer;
+		td.appendChild(connectToDbServerButton);
+		tr.appendChild(td);
+		
+		
+		table.appendChild(tr);
+		var tr = document.createElement("tr");
+		
+		var td = document.createElement("td");
+		td.setAttribute("align", "right");
 		var labelPort = document.createElement("label");
 		labelPort.setAttribute("for", "inputPort");
 		labelPort.innerText = "Port: ";
-		connectDialog.appendChild(labelPort);
+		td.appendChild(labelPort);
+		tr.appendChild(td);
 		
+		var td = document.createElement("td");
 		var inputPort = document.createElement("input");
 		inputPort.setAttribute("type", "text");
 		inputPort.setAttribute("type", "number");
 		inputPort.setAttribute("min", "0");
 		inputPort.setAttribute("max", "65535");
+		inputPort.setAttribute("size", "6");
 		inputPort.value = 3306;
-		connectDialog.appendChild(inputPort);
+		td.appendChild(inputPort);
+		tr.appendChild(td);
 		
 		
-		var labelUsername = document.createElement("label");
-		labelUsername.setAttribute("for", "inputUsername");
-		labelUsername.innerText = "Username: ";
-		connectDialog.appendChild(labelUsername);
-		
-		var inputUsername = document.createElement("input");
-		inputUsername.setAttribute("type", "text");
-		connectDialog.appendChild(inputUsername);
-		
+		var td = document.createElement("td");
+		td.setAttribute("align", "right");
 		var labelPassword = document.createElement("label");
 		labelPassword.setAttribute("for", "inputPassword");
 		labelPassword.innerText = "Password: ";
-		connectDialog.appendChild(labelPassword);
+		td.appendChild(labelPassword);
+		tr.appendChild(td);
 		
+		
+		var td = document.createElement("td");
 		var inputPassword = document.createElement("input");
 		inputPassword.setAttribute("type", "password");
-		connectDialog.appendChild(inputPassword);
+		inputPassword.setAttribute("size", "15");
+		td.appendChild(inputPassword);
+		tr.appendChild(td);
 		
-		var connectToDbServerButton = document.createElement("button");
-		connectToDbServerButton.setAttribute("class", "button");
-		connectToDbServerButton.innerText = "Connect";
-		connectToDbServerButton.onclick = connectToServer;
-		connectDialog.appendChild(connectToDbServerButton);
 		
-		holder.appendChild(connectDialog);
+		
+		var td = document.createElement("td");
+		var cancel = document.createElement("button");
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel";
+		cancel.onclick = function() {
+			dbManagerWidget.show();
+			connectionManager.hide();
+		};
+		td.appendChild(cancel);
+		tr.appendChild(td);
+		
+		table.appendChild(tr);
+		connectDialog.appendChild(table);
+		
 		
 		getDefaultValuesForDbConnection = function getDefaultValuesForDbConnection() {
 			inputHostname.value = EDITOR.storage.getItem("lastDbHostname");
@@ -477,10 +551,8 @@ return;
 		
 		EDITOR.on("storageReady", getDefaultValuesForDbConnection);
 		
+		return connectDialog;
 		
-		function showConnectToServer() {
-			connectDiv.classList.remove("hidden");
-		}
 		
 		function connectToServer() {
 			
@@ -490,19 +562,21 @@ return;
 			EDITOR.storage.setItem("lastDbPort", inputPort.value);
 			
 			CLIENT.cmd("mysql.connect", {
-hostname: inputHostname.value,
-username: inputUsername.value,
-password: inputPassword.value,
-port: inputPort.value
+				hostname: inputHostname.value,
+				username: inputUsername.value,
+				password: inputPassword.value,
+				port: inputPort.value
 			}, function(err) {
 				if(err) alertBox(err.message);
-				else getDatabases();
-});
+				else {
+getDatabases();
+					
+					dbManagerWidget.show();
+					connectionManager.hide();
+					
+				}
+			});
 		}
-		
-		if(connectedToDbServer) getDatabases();
-		
-		return holder;
 	}
 	
 	function changeDb(e) {
@@ -561,6 +635,33 @@ option.setAttribute("selected", "selected");
 				getDatabases(dbName);
 			});
 		});
+	}
+	
+	function makeSelectAll(tableName, dbName) {
+		return function() {
+			openQueryFile(function(err, file) {
+				if(err) throw err;
+				
+				file.writeLineBreak();
+				file.writeLineBreak();
+				
+				var selStart = file.caret.index;
+				
+				file.writeLine("SELECT * FROM `" + tableName + "`");
+				
+				var selEnd = file.caret.index;
+				
+				file.writeLineBreak();
+				file.writeLineBreak();
+				
+				var selectRange = file.createTextRange(selStart, selEnd);
+				file.select(selectRange);
+				
+				selectMysqlDb.value = dbName;
+				changeDb();
+
+			});
+		}
 	}
 	
 	function createTable() {

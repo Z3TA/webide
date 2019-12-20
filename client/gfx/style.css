@@ -550,6 +550,7 @@ li ul {
 
 label {
 	break-after: avoid;
+	white-space:nowrap;
 }
 
 input + label {
@@ -578,6 +579,16 @@ input[type=text], input[type=password], select.select {
 	padding: 3px;
 	margin: 4px;
 	}
+
+input[type=number] {
+border-radius: 2px;
+border: 1px inset #4a4a4a;
+font-size: 16px;
+background-color: #e6e6e6;
+box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
+padding: 3px;
+margin: 4px;
+}
 
 input[type=checkbox] {
 	text-align: absmiddle;
@@ -1695,7 +1706,7 @@ ul.resolveList li {
 }
 
 
-/* ###### dbExplorer */
+/* ###### Database Explorer */
 .dbExplorer {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 13px;
@@ -1713,6 +1724,12 @@ ul.resolveList li {
 	vertical-align: middle;
 	margin-right: 4px;
 }
+
+.dbExplorer li {
+	min-height: 16px; /* prevent hanging letters gjq from clipping */
+}
+
+
 
 noscript div {
 	font-size: 2em;
