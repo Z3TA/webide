@@ -50,7 +50,6 @@ What I'm working on
 -------------------
 
 
-
 When saving-as a file, and it's parent folder is open in the file explorer, update the folder!
 
 

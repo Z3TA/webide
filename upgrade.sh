@@ -11,6 +11,16 @@ fi
 # Exit if anything fails
 set -e
 
+# Check if something is not commmited
+
+if hg status | grep -q '^M ';
+  then
+    hg status
+    echo "You need to commit first!"
+    exit 1
+fi
+
+
 # Make sure our machine and the server runs the same version of NodeJS and Linux distribution !? So that native npm packages doesn't break
 # Or just recompile after copying !?
 
