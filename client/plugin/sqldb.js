@@ -13,6 +13,15 @@
 	var connectedToDbServer = false;
 	var getDefaultValuesForDbConnection; // Store function in order to be able to remove event
 	var connectionManager;
+	var tableEditor;
+	
+	var mySqlDataTypes = [
+		"VARCHAR",
+		"TEXT",
+		"INT",
+		"DATETIME",
+		"TIMESTAMP"
+	];
 	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
@@ -20,6 +29,7 @@
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			connectionManager = EDITOR.createWidget(buildConnectionManager);
+			tableEditor = EDITOR.createWidget(buildTableEditor);
 			
 			var rightColumn = document.getElementById("rightColumn");
 			dbExplorerWidget = EDITOR.createWidget(buildDbExplorer, rightColumn)
@@ -579,6 +589,167 @@ getDatabases();
 		}
 	}
 	
+	var editTableName;
+	
+	function buildTableEditor() {
+		var wrap = document.createElement("div");
+		
+		var labelEditTableName = document.createElement("label");
+		labelEditTableName.setAttribute("for", "editTableName");
+		labelEditTableName.innerText = "Table name: ";
+		wrap.appendChild(labelEditTableName);
+		
+		editTableName = document.createElement("input")
+		editTableName.setAttribute("type", "text");
+		wrap.appendChild(editTableName);
+		
+		var buttonAddColumn = document.createElement("button");
+		buttonAddColumn.classList.add("button");
+		buttonAddColumn.innerText = "➕ Add column";
+		buttonAddColumn.onclick = function() {
+			var column = makeEditColumn();
+			tbody.appendChild(column);
+EDITOR.resizeNeeded();
+		}
+		wrap.appendChild(buttonAddColumn);
+		
+		var tableFields = document.createElement("table");
+		tableFields.classList.add("input");
+		var thead = document.createElement("thead")
+		var tr = document.createElement("tr");
+		
+		var th = document.createElement("th");
+		th.innerText = "Column Name";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Data Type";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Not Null";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Auto Inc";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Flags";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Default value";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Comments";
+		tr.appendChild(th);
+		
+		thead.appendChild(tr);
+		tableFields.appendChild(thead);
+		
+		var tbody = document.createElement("tbody")
+		
+		var column = makeEditColumn();
+		
+		tbody.appendChild(column)
+		
+		tableFields.appendChild(tbody);
+		
+		wrap.appendChild(tableFields);
+		
+		
+		
+		var dataTypes = document.createElement("datalist");
+		dataTypes.setAttribute("id", "dataTypes");
+		mySqlDataTypes.forEach(function(name) {
+			var opt = document.createElement("option");
+			opt.setAttribute("value", name);
+			dataTypes.appendChild(opt);
+		});
+		wrap.appendChild(dataTypes);
+		
+		
+		
+		return wrap;
+		
+		
+		
+	}
+	
+	function makeEditColumn(options) {
+		
+		if(options == undefined) options = {
+			notNull: true
+		};
+		
+		var tr = document.createElement("tr");
+		tr.classList.add("dbtable_column");
+		tr.onfocus = function() {
+			activateTableCoumn = tr;
+			tr.classList.add("selected");
+		}
+		tr.onblur = function() {
+			tr.classList.remove("selected");
+		}
+		
+		var td = document.createElement("td");
+		
+		var icon = document.createElement("img");
+		icon.setAttribute("with", "12");
+		icon.setAttribute("height", "12");
+		icon.setAttribute("src", "gfx/icon/field.svg");
+		icon.setAttribute("alt", "normal");
+		
+		var inputName = document.createElement("input");
+		inputName.setAttribute("type", "text");
+		td.appendChild(inputName);
+		tr.appendChild(td);
+		
+		
+		var td = document.createElement("td");
+		var inputDatatype = document.createElement("input");
+		inputDatatype.setAttribute("type", "text");
+		inputDatatype.setAttribute("list", "dataTypes");
+		td.appendChild(inputDatatype);
+		tr.appendChild(td);
+		
+		var td = document.createElement("td");
+		var inputNotNull = document.createElement("input");
+		inputNotNull.setAttribute("type", "checkbox");
+		td.appendChild(inputNotNull);
+		tr.appendChild(td);
+		
+		var td = document.createElement("td");
+		var inputAutoInc = document.createElement("input");
+		inputAutoInc.setAttribute("type", "checkbox");
+		td.appendChild(inputAutoInc);
+		tr.appendChild(td);
+		
+		
+		
+		var td = document.createElement("td");
+		var inputDefault = document.createElement("input");
+		inputDefault.setAttribute("type", "text");
+		td.appendChild(inputDefault);
+		tr.appendChild(td);
+		
+		var td = document.createElement("td");
+		var inputComment = document.createElement("input");
+		inputComment.setAttribute("type", "text");
+		td.appendChild(inputComment);
+		tr.appendChild(td);
+		
+		
+		
+		
+		return tr;
+		
+		
+	}
+	
+	
 	function changeDb(e) {
 		console.log(e);
 		
@@ -665,6 +836,12 @@ option.setAttribute("selected", "selected");
 	}
 	
 	function createTable() {
+		
+		tableEditor.show();
+		dbManagerWidget.hide();
+		
+		return;
+		
 		openQueryFile(function(err, file) {
 			if(err) throw err;
 			
