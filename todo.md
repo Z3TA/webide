@@ -50,6 +50,7 @@ What I'm working on
 -------------------
 
 
+mySQL create table
 
 port doesn't seem to matter when connecting...
 

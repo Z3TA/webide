@@ -13,7 +13,10 @@
 	var connectedToDbServer = false;
 	var getDefaultValuesForDbConnection; // Store function in order to be able to remove event
 	var connectionManager;
-	var tableEditor;
+	//var tableEditor;
+	var createTableHelper;
+	var addColumnHelper;
+	var addKeyHelper;
 	
 	var mySqlDataTypes = [
 		"VARCHAR",
@@ -23,13 +26,30 @@
 		"TIMESTAMP"
 	];
 	
+	var keyKinds = [
+		"INDEX",
+		"PRIMARY",
+		"UNIQUE",
+		"FULLTEXT",
+		"SPATIAL"
+	];
+	
+	var keyTypes = [
+		"BTREE",
+		"HASH",
+		"RTREE"
+	];
+	
 	EDITOR.plugin({
 		desc: "Mange SQL databases",
 		load: function loadSqldb() {
 			
 			dbManagerWidget = EDITOR.createWidget(buildDbManager);
 			connectionManager = EDITOR.createWidget(buildConnectionManager);
-			tableEditor = EDITOR.createWidget(buildTableEditor);
+			//tableEditor = EDITOR.createWidget(buildTableEditor);
+			createTableHelper = EDITOR.createWidget(buildCreateTableHelper);
+			addColumnHelper = EDITOR.createWidget(buildAddColumnHelper);
+			addKeyHelper = EDITOR.createWidget(buildAddKeyHelper);
 			
 			var rightColumn = document.getElementById("rightColumn");
 			dbExplorerWidget = EDITOR.createWidget(buildDbExplorer, rightColumn)
@@ -591,6 +611,288 @@ getDatabases();
 	
 	var editTableName;
 	
+	function buildCreateTableHelper() {
+
+		var wrap = document.createElement("div");
+		
+		var labelTableName = document.createElement("label");
+		labelTableName.setAttribute("for", "tableName");
+		labelTableName.innerText = "Table name: ";
+		wrap.appendChild(labelTableName);
+		
+		var tableName = document.createElement("input")
+		tableName.setAttribute("id", "tableName");
+		tableName.setAttribute("type", "text");
+		wrap.appendChild(tableName);
+		
+		
+		var buttonInsertSQL = document.createElement("button");
+		buttonInsertSQL.classList.add("button");
+		buttonInsertSQL.innerText = "Insert CREATE TABLE statement";
+		buttonInsertSQL.onclick = function() {
+			
+			openQueryFile(function(err, file) {
+				if(err) throw err;
+				
+				var sql = "CREATE TABLE `" + tableName.value + "` (\n\n)\n\n";
+				
+				file.insertText(sql);
+				
+				file.moveCaretUp();
+				file.moveCaretUp();
+				file.moveCaretUp();
+				
+				EDITOR.renderNeeded();
+				
+			});
+		}
+		wrap.appendChild(buttonInsertSQL);
+		
+
+var buttonAddColumn = document.createElement("button");
+		buttonAddColumn.classList.add("button");
+		buttonAddColumn.innerText = "➕ Add column";
+		buttonAddColumn.onclick = function() {
+			addColumnHelper.show();
+EDITOR.resizeNeeded();
+		}
+		wrap.appendChild(buttonAddColumn);
+		
+		
+		var buttonAddKey = document.createElement("button");
+		buttonAddKey.classList.add("button");
+		buttonAddKey.innerText = "➕ Add key";
+		buttonAddKey.onclick = function() {
+			addKeyHelper.show();
+			EDITOR.resizeNeeded();
+		}
+		wrap.appendChild(buttonAddKey);
+		
+return wrap;
+	}
+	
+	function buildAddColumnHelper() {
+		
+		var wrap = document.createElement("div");
+		
+		var labelName = document.createElement("label");
+		labelName.setAttribute("for", "inputName");
+		labelName.innerText = "Column name: ";
+		wrap.appendChild(labelName);
+		
+		var inputName = document.createElement("input");
+		inputName.setAttribute("id", "inputName");
+		inputName.setAttribute("type", "text");
+		inputName.setAttribute("size", "20");
+		wrap.appendChild(inputName);
+		
+		
+		var labelType = document.createElement("label");
+		labelType.setAttribute("for", "inputDatatype");
+		labelType.innerText = "Type: ";
+		wrap.appendChild(labelType);
+		
+		var inputDatatype = document.createElement("input");
+		inputDatatype.setAttribute("id", "inputDatatype");
+		inputDatatype.setAttribute("type", "text");
+		inputDatatype.setAttribute("list", "dataTypes");
+		inputDatatype.setAttribute("size", "10");
+		wrap.appendChild(inputDatatype);
+		
+		var dataTypes = document.createElement("datalist");
+		dataTypes.setAttribute("id", "dataTypes");
+		mySqlDataTypes.forEach(function(name) {
+			var opt = document.createElement("option");
+			opt.setAttribute("value", name);
+			dataTypes.appendChild(opt);
+		});
+		wrap.appendChild(dataTypes);
+		
+		
+		var inputNotNull = document.createElement("input");
+		inputNotNull.setAttribute("id", "inputNotNull");
+		inputNotNull.setAttribute("type", "checkbox");
+		wrap.appendChild(inputNotNull);
+		
+		var labelNotNull = document.createElement("label");
+		labelNotNull.setAttribute("for", "inputNotNull");
+		labelNotNull.innerText = "Not null";
+		labelNotNull.classList.add("checkbox");
+		wrap.appendChild(labelNotNull);
+		
+		
+		var inputAutoInc = document.createElement("input");
+		inputAutoInc.setAttribute("id", "inputAutoInc");
+		inputAutoInc.setAttribute("type", "checkbox");
+		wrap.appendChild(inputAutoInc);
+		
+		var labelAutoInc = document.createElement("label");
+		labelAutoInc.setAttribute("for", "inputAutoInc");
+		labelAutoInc.innerText = "Auto inc";
+		labelAutoInc.classList.add("checkbox");
+		wrap.appendChild(labelAutoInc);
+		
+		
+		var labelDefault = document.createElement("label");
+		labelDefault.setAttribute("for", "inputDefault");
+		labelDefault.innerText = "Default value: ";
+		wrap.appendChild(labelDefault);
+		
+		var inputDefault = document.createElement("input");
+		inputDefault.setAttribute("id", "inputDefault");
+		inputDefault.setAttribute("type", "text");
+		inputDefault.setAttribute("size", "15");
+		wrap.appendChild(inputDefault);
+		
+		
+		var labelComment = document.createElement("label");
+		labelComment.setAttribute("for", "inputComment");
+		labelComment.innerText = "Comment: ";
+		wrap.appendChild(labelComment);
+		
+		var inputComment = document.createElement("input");
+		inputComment.setAttribute("id", "inputComment");
+		inputComment.setAttribute("type", "text");
+		wrap.appendChild(inputComment);
+		
+		
+		var buttonInsertSQL = document.createElement("button");
+		buttonInsertSQL.classList.add("button");
+		buttonInsertSQL.innerText = "Put inside CREATE TABLE statement";
+		buttonInsertSQL.onclick = function() {
+			
+			var file = EDITOR.currentFile;
+			if(!file.text.match(/CREATE TABLE/i)) {
+				return alertBox("Current file has no CREATE TABLE statement!");
+			}
+			
+			var sql = "  `" + inputName.value + "` " + inputDatatype.value;
+			if(inputNotNull.checked) sql += " NOT NULL";
+			if(inputDefault.value) sql += " DEFAULT '" + inputDefault.value + "'";
+			if(inputAutoInc.checked) sql += " AUTO_INCREMENT";
+			if(inputComment.value) sql += " COMMENT '" + inputComment.value + "'";
+			
+			sql += ",\n";
+			
+			file.insertText(sql);
+			//EDITOR.renderNeeded();
+			
+		}
+		wrap.appendChild(buttonInsertSQL);
+		
+		var buttonCancel = document.createElement("button")
+		buttonCancel.classList.add("button");
+		buttonCancel.innerText = "Cancel";
+		buttonCancel.onclick = function() {
+			addColumnHelper.hide();
+		}
+		wrap.appendChild(buttonCancel);
+		
+		return wrap;
+		
+	}
+	
+	function buildAddKeyHelper() {
+		
+		var wrap = document.createElement("div");
+		
+		var labelName = document.createElement("label");
+		labelName.setAttribute("for", "inputName");
+		labelName.innerText = "Key name: ";
+		wrap.appendChild(labelName);
+		
+		var inputName = document.createElement("input");
+		inputName.setAttribute("id", "inputName");
+		inputName.setAttribute("type", "text");
+		inputName.setAttribute("size", "15");
+		wrap.appendChild(inputName);
+		
+		
+		var labelKind = document.createElement("label");
+		labelKind.setAttribute("for", "keyKind");
+		labelKind.innerText = "Kind: ";
+		wrap.appendChild(labelKind);
+		
+		var keyKind = document.createElement("select");
+		keyKind.setAttribute("id", "keyKind");
+		keyKinds.forEach(function(kind) {
+			var option = document.createElement("option");
+			option.innerText = kind;
+			keyKind.appendChild(option);
+		});
+		wrap.appendChild(keyKind);
+		
+		
+		var labelType = document.createElement("label");
+		labelType.setAttribute("for", "keyKind");
+		labelType.innerText = "Type: ";
+		wrap.appendChild(labelType);
+		
+		var keyType = document.createElement("select");
+		keyTypes.forEach(function(type) {
+			var option = document.createElement("option");
+			option.innerText = type;
+			keyType.appendChild(option);
+		});
+		wrap.appendChild(keyType);
+		
+		
+		var labelColumns = document.createElement("label");
+		labelColumns.setAttribute("for", "inputColumns");
+		labelColumns.innerText = "Column(s): ";
+		wrap.appendChild(labelColumns);
+		
+		var inputColumns = document.createElement("input");
+		inputColumns.setAttribute("id", "inputColumns");
+		inputColumns.setAttribute("type", "text");
+		inputColumns.setAttribute("title", "comma separated column names");
+		inputColumns.setAttribute("size", "20");
+		wrap.appendChild(inputColumns);
+		
+		
+		var buttonInsertSQL = document.createElement("button");
+		buttonInsertSQL.classList.add("button");
+		buttonInsertSQL.innerText = "Put inside CREATE TABLE statement";
+		buttonInsertSQL.onclick = function() {
+			
+			var file = EDITOR.currentFile;
+			if(!file.text.match(/CREATE TABLE/i)) {
+				return alertBox("Current file has no CREATE TABLE statement!");
+			}
+			
+			var kind = keyKinds.value;
+			var columns = inputColumns.value.split(",");
+			columns = columns.map(function(str) { return "`" + str.trim() + "`" });
+			
+			var sql = "";
+			
+			if(kind == "PRIMARY") sql = "PRIMARY KEY (" + columns.join(", ") + ")";
+			else {
+				sql = "INDEX `" + inputName.value + "` (" + columns.join(", ") + ")";
+			}
+			
+			
+			sql += ",\n";
+			
+			file.insertText(sql);
+			//EDITOR.renderNeeded();
+			
+		}
+		wrap.appendChild(buttonInsertSQL);
+		
+		var buttonCancel = document.createElement("button")
+		buttonCancel.classList.add("button");
+		buttonCancel.innerText = "Cancel";
+		buttonCancel.onclick = function() {
+			addKeyHelper.hide();
+		}
+		wrap.appendChild(buttonCancel);
+		
+		return wrap;
+		
+	}
+	
+	
 	function buildTableEditor() {
 		var wrap = document.createElement("div");
 		
@@ -623,15 +925,21 @@ EDITOR.resizeNeeded();
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
+		th.innerText = "Keys";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
 		th.innerText = "Data Type";
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
 		th.innerText = "Not Null";
+		th.classList.add("tiny");
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
 		th.innerText = "Auto Inc";
+		th.classList.add("tiny");
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
@@ -671,6 +979,49 @@ EDITOR.resizeNeeded();
 		wrap.appendChild(dataTypes);
 		
 		
+		var labelKey = document.createElement("label");
+		labelKey.innerText = "New key: ";
+		labelKey.setAttribute("for", "inputNewKey");
+		wrap.appendChild(labelKey);
+		
+		var inputNewKey = document.createElement("input");
+		inputNewKey.setAttribute("id", "inputNewKey");
+		inputNewKey.setAttribute("type", "text");
+		wrap.appendChild(inputNewKey);
+		
+		var keyKind = document.createElement("select");
+		keyKinds.forEach(function(keyKind) {
+			var option = document.createElement("option");
+			option.innerText = keyKind;
+			keyKind.appendChild(option);
+		});
+		wrap.appendChild(keyKind);
+		
+		var keyType = document.createElement("select");
+		keyTypes.forEach(function(keyType) {
+			var option = document.createElement("option");
+			option.innerText = keyType;
+			keyType.appendChild(option);
+		});
+		wrap.appendChild(keyType);
+		
+		var buttonAddKey = document.createElement("button");
+		var tableKeys = [];
+		buttonAddKey.innerText = "Add new key";
+		buttonAddKey.onclick = function() {
+			var i = tableKeys.push({
+				name: inputNewKey.value,
+				kind: keyKind.value,
+				type: keyType.value,
+				columns: []
+			});
+			
+			
+			
+			
+		}
+		
+		wrap.appendChild(buttonAddKey);
 		
 		return wrap;
 		
@@ -695,49 +1046,57 @@ EDITOR.resizeNeeded();
 		}
 		
 		var td = document.createElement("td");
-		
-		var icon = document.createElement("img");
-		icon.setAttribute("with", "12");
-		icon.setAttribute("height", "12");
-		icon.setAttribute("src", "gfx/icon/field.svg");
-		icon.setAttribute("alt", "normal");
-		
 		var inputName = document.createElement("input");
 		inputName.setAttribute("type", "text");
+		if(options.name) inputName.value = options.name;
 		td.appendChild(inputName);
 		tr.appendChild(td);
+		
+		var tdKeys = document.createElement("td");
+		var inputPrimaryKey = document.createElement("input");
+		inputPrimaryKey.setAttribute("name", "PRIMARY");
+		inputPrimaryKey.setAttribute("type", "checkbox");
+		if(options.PRIMARY) inputPrimaryKey.setAttribute("checked", "true");
+		tdKeys.appendChild(inputNotNull);
+		tr.appendChild(tdKeys);
 		
 		
 		var td = document.createElement("td");
 		var inputDatatype = document.createElement("input");
 		inputDatatype.setAttribute("type", "text");
 		inputDatatype.setAttribute("list", "dataTypes");
+		if(options.dataType) inputDatatype.value = options.dataType;
 		td.appendChild(inputDatatype);
 		tr.appendChild(td);
 		
 		var td = document.createElement("td");
 		var inputNotNull = document.createElement("input");
 		inputNotNull.setAttribute("type", "checkbox");
+		if(options.notNull) inputNotNull.setAttribute("checked", "true");
 		td.appendChild(inputNotNull);
 		tr.appendChild(td);
 		
 		var td = document.createElement("td");
 		var inputAutoInc = document.createElement("input");
 		inputAutoInc.setAttribute("type", "checkbox");
+		if(options.autoInc) inputAutoInc.setAttribute("checked", "true");
 		td.appendChild(inputAutoInc);
 		tr.appendChild(td);
 		
-		
+		var tdFlags = document.createElement("td");
+		tr.appendChild(tdFlags);
 		
 		var td = document.createElement("td");
 		var inputDefault = document.createElement("input");
 		inputDefault.setAttribute("type", "text");
+		if(options.defaultValue) inputDefault.value = options.defaultValue;
 		td.appendChild(inputDefault);
 		tr.appendChild(td);
 		
 		var td = document.createElement("td");
 		var inputComment = document.createElement("input");
 		inputComment.setAttribute("type", "text");
+		if(options.comment) inputComment.value = options.comment;
 		td.appendChild(inputComment);
 		tr.appendChild(td);
 		
@@ -837,8 +1196,7 @@ option.setAttribute("selected", "selected");
 	
 	function createTable() {
 		
-		tableEditor.show();
-		dbManagerWidget.hide();
+		createTableHelper.show();
 		
 		return;
 		
