@@ -7513,8 +7513,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	}
 	
 	if(!errorStack) {
-		EDITOR.error(new Error("Specify either a stackTrace, error or errorEvent in options!"));
-		return FAIL;
+			return new Error("Specify either a stackTrace, error or errorEvent in options!");
 	}
 	
 		var parsedError = UTIL.parseErrorMessage(errorStack);
@@ -7531,8 +7530,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		if(parsedError && !message && parsedError.message) message = parsedError.message;
 	
 	if(!message) {
-		EDITOR.error(  new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) )  );
-		return FAIL;
+			return new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) + " It does not appear to be an error message!" );
 	}
 	
 	if(options.url) {
@@ -7554,8 +7552,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		var stackLines = parsedError.stack || parsedError;
 		
 		if(stackLines == undefined) {
-			EDITOR.error(  new Error( "Unable to find stackLines from options=" + JSON.stringify(options, null, 2) ) + "\nparsedError=" + JSON.stringify(parsedError, null, 2) );
-			return FAIL;
+			return new Error( "Unable to find stackLines from options=" + JSON.stringify(options, null, 2) + "\nparsedError=" + JSON.stringify(parsedError, null, 2) );
 		}
 		
 		
@@ -7613,8 +7610,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 			var row = lineno - 1;
 		var gridRow = file.grid[row];
 		if(!gridRow) { // Sanity check
-			EDITOR.error(new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length));
-			return FAIL;
+			return new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length);
 		}
 		var indentationCharacters = file.grid[row].indentationCharacters.length;
 		var col = colno - indentationCharacters;

@@ -2180,7 +2180,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			stackTrace: stack
 		});
 		
-		if(!inlinedMessage) {
+		if(!inlinedMessage || (inlinedMessage instanceof Error)) {
 			console.warn("Unable to inline msg=" + msg);
 			consoleLogOriginal(msg);
 			//alertBox(msg);
@@ -2203,7 +2203,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			path: wysiwygEditor.sourceFile.path
 		});
 		
-		if(!inlinedMessage) {
+		if(!inlinedMessage || (inlinedMessage instanceof Error)) {
 			
 			var message = errorEvent.message;
 			var source = errorEvent.filename;

@@ -344,8 +344,21 @@ saveAndRun(file);
 			var ignore = ["Debugger attached.\r\nWaiting for the debugger to disconnect...\r\n"];
 			
 			if(ignore.indexOf(msg.stderr) == -1) {
-				
+				/*
+					problem: Some apps use stderr instead of stdout for faster logging... And will not have a callstack!
+					
+					
+				*/
+				try {
 				var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr, level: 1}) == SUCCESS);
+				}
+				catch(err) {
+if(EDITOR.settings.devMode) {
+throw err;
+}
+					alertBox("There are issues with locating errors from stderr. Try running " + filePath + " from the terminal emulator instead!");
+					console.error(err);
+				}
 				
 			}
 			

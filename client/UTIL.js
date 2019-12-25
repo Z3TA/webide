@@ -910,7 +910,7 @@ console.warn("fun=" + fun);
 				rowstr = rows[row].trim();
 				lastColumn = rowstr.lastIndexOf(":");
 				
-				if(lastColumn == -1) throw new Error( "Parse error (probably Safari browser) Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
+				if(lastColumn == -1) throw new Error( "Parse error (probably Safari browser BROWSER=" + ((typeof BROWSER != undefined) && BROWSER) + ") Unable to find : (column character) in rowstr=" + rowstr + " errorString=" + errorString + " rows=" + JSON.stringify(rows, null, 2) );
 				
 				colMaybe = rowstr.slice(lastColumn+1);
 				rowstr = rowstr.slice(0, lastColumn);
