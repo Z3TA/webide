@@ -1113,7 +1113,7 @@ usePseudoClipboard = false;
 			
 			if(!notFromDisk && path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
-			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path);
+			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path + " same: text?" + (EDITOR.files[path].text==text) + " hash?" + (EDITOR.files[path].hash==hash) + " How come it's already open?");
 			
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
 			
