@@ -35,7 +35,7 @@
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
 		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
 		
-		if(!UTIL.isPrivateIp(window.location.hostname)) EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe); // Show banner with endpoint
+		if(!UTIL.isPrivateIp(window.location.hostname) || EDITOR.settings.devMode) EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe); // Show banner with endpoint
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
@@ -67,6 +67,9 @@
 	}
 	
 	function nodejsScriptFileOpenedMaybe(file) {
+		
+		if(!(file instanceof File)) return;
+		
 		var ext = UTIL.getFileExtension(file.path);
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);

@@ -74,6 +74,7 @@ var ImageFile;
 			loadCallback = null;
 		}, 2000);
 		
+		EDITOR.stat("new_ImageFile");
 	}
 	
 	ImageFile.prototype.pixelCoordinateFromMousePosition = function(mouseX, mouseY) {
