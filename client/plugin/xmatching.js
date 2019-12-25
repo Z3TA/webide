@@ -73,7 +73,7 @@ var func = customRender;
 			
 			if(!file.caret.eol && buffer[row].length > 0) {
 				if(!buffer[row][col]) throw new Error("Unable to find character on row=" + row + " col=" + col + " buffer[row][col]=" + buffer[row][col] + " bufferStartRow=" + bufferStartRow +
-				" bufferEndRow=" + bufferEndRow + " startRow=" + startRow + " buffer.length=" + buffer.length + " buffer[" + row + "].length=" + (buffer[row] && buffer[row].length) + " file.path=" + file.path + " user=" + (EDITOR.user && EDITOR.user.name));
+				" bufferEndRow=" + bufferEndRow + " startRow=" + startRow + " buffer.length=" + buffer.length + " buffer[" + row + "].length=" + (buffer[row] && buffer[row].length) + " file.path=" + file.path + " How come the col/row doesn't exist on the grid!?");
 				charAtCaret = buffer[row][col].char;
 			}
 			
