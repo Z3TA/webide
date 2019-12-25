@@ -51,6 +51,12 @@ What I'm working on
 
 
 
+Fix user errors.
+
+
+Able to "reset" a cloud IDE account without losing data. 
+Due to some accounts being "nuked", eg some stuff not working and I have no idea why.
+
 
 
 prio: Being able to work full time only using the cloud IDE
