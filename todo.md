@@ -50,6 +50,12 @@ What I'm working on
 -------------------
 
 
+
+
+
+prio: Being able to work full time only using the cloud IDE
+
+
 mySQL create table
 
 port doesn't seem to matter when connecting...
