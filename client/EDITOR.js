@@ -1033,11 +1033,12 @@ usePseudoClipboard = false;
 				return fileOpenError(err);
 			*/
 		}
+		else {
+			EDITOR.openFileQueue.push(path);
+			console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+		}
 		
 		if(!UTIL.isString(path)) return fileOpenError(new Error("EDITOR.openFile: Error: First argument is not a string: path=" + path));
-		
-		EDITOR.openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
-		console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 		
 		if(state && state.image) var isImage = true;
 		else var isImage = false;
@@ -1247,8 +1248,10 @@ usePseudoClipboard = false;
 		
 		function removeFromQueue(path) {
 			if(EDITOR.openFileQueue.indexOf(path) == -1) throw new Error("File path=" + path + " not in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
-			EDITOR.openFileQueue.splice(EDITOR.openFileQueue.indexOf(path), 1); // Take the file off the queue
-			if(EDITOR.openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			
+			var removed = EDITOR.openFileQueue.splice(EDITOR.openFileQueue.indexOf(path), 1); // Take the file off the queue
+			
+			if(EDITOR.openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue) + " removed=" + removed);
 			console.log("Removed from EDITOR.openFileQueue! path=" + path);
 		}
 		
@@ -7610,7 +7613,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 			var row = lineno - 1;
 		var gridRow = file.grid[row];
 		if(!gridRow) { // Sanity check
-			return new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length);
+				return new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length);
 		}
 		var indentationCharacters = file.grid[row].indentationCharacters.length;
 		var col = colno - indentationCharacters;
