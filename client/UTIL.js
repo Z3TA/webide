@@ -1195,7 +1195,7 @@ namedFunction = false;
 			
 		}
 		
-		throw new Error("Unable to determine formatting of errorString=" + errorString);
+		throw new Error("Unable to determine formatting of errorString='" + errorString + "'\nDoes it have a call stack? Why not!?\nBROWSER=" + (typeof BROWSER != undefined && BROWSER));
 		
 		
 		

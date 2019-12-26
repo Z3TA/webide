@@ -49,6 +49,9 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+Chromebooks doesn't seem to give an error stack when you get an error while in live preview (WysiwygEditor)
+
+
 
 
 Fix user errors.
