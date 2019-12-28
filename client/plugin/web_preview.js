@@ -16,10 +16,10 @@
 			
 			var discoveryItem = document.createElement("img");
 			discoveryItem.src = "gfx/multimedia.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Live Preview"
+			discoveryItem.title = "Live Preview/Run"
 			discoveryItem.setAttribute("id","previewDiscovery");
 			discoveryItem.onclick = webPreviewFromDiscovery;
-			EDITOR.discoveryBar.add(discoveryItem, 30);
+			EDITOR.discoveryBar.add(discoveryItem, 30, "run");
 			
 			winMenuWysiwygHtml = EDITOR.windowMenu.add(S("wysiwyg"), [S("Edit"), 120], startHtmlWysiwyg);
 			

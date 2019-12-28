@@ -49,6 +49,16 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+todo: Able to hide and show discovery bar captions via view
+
+todo: Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
+
+
+Adopt design for first time users, and first time computer users!
+
+
+
+
 Chromebooks doesn't seem to give an error stack when you get an error while in live preview (WysiwygEditor)
 
 

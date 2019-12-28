@@ -13,6 +13,7 @@
 	var folderPicker;
 	var suggestedFolderButtons = {};
 	var windowMenuSave, windowMenuSaveAs;
+	var discoveryBarImage;
 	
 	var mimeMap = {
 		css: "text/css",
@@ -56,6 +57,14 @@
 		
 		EDITOR.registerAltKey({char: "s", alt:2, label: S("save"), fun: saveFileFromVirtualKeyboard});
 		
+		
+		// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
+		discoveryBarImage = document.createElement("img");
+		discoveryBarImage.src = "gfx/disk.svg";  // Icon created by: https://www.flaticon.com/authors/phatplus
+		discoveryBarImage.title = S("save_current_file") + " (" + EDITOR.getKeyFor(saveFileFromKeyboardCombo) + ")";
+		discoveryBarImage.onclick = saveFileFromDiscoveryBar;
+		EDITOR.discoveryBar.add(discoveryBarImage, 20, "save");
+		
 	}
 	
 	function unloadFileSaver() {
@@ -75,6 +84,13 @@
 		EDITOR.unregisterAltKey(saveFileFromVirtualKeyboard);
 		
 		hideSaveDialog();
+	}
+	
+	function saveFileFromDiscoveryBar(clickEvent) {
+		var file = EDITOR.currentFile;
+		var combo = UTIL.getKeyComboFromEvent(clickEvent);
+		EDITOR.stat("saveFileFromDiscoveryBar");
+		return saveCurrentFile(file, combo);
 	}
 	
 	function saveFileFromVirtualKeyboard(file, combo) {
@@ -522,7 +538,7 @@ console.warn("The save was canceled: " + err.message);
 	}
 	
 	
-	function saveCurrentFile(file, combo, character, charCode, direction) {
+	function saveCurrentFile(file, combo) {
 		if(file.savedAs === false || combo.sum == CTRL + SHIFT) {
 			saveAs();
 		}

@@ -2529,6 +2529,27 @@ b = b.slice(8);
 		return arr;
 	},
 	
+	getKeyComboFromEvent: function getKeyComboFromEvent(eventObject) {
+		var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+		
+		if(eventObject.shiftKey) {
+			combo.shift = true;
+			combo.sum += SHIFT;
+		}
+		
+		if(eventObject.altKey) {
+			combo.alt = true;
+			combo.sum  += ALT;
+		}
+		
+		if(eventObject.ctrlKey) {
+			combo.ctrl = true;
+			combo.sum  += CTRL;
+		}
+		
+		return combo;
+	},
+	
 	key: function keyFromKeyEvent(keyEvent) {
 		// Gets the key character from a key event
 		if(keyEvent.key) return keyEvent.key;

@@ -2933,7 +2933,8 @@ if(elements[i].style.display != "none") {
 		add: function addDiscoveryItem(element, position) {
 			
 			// note: Don't add icon captions, it will look ugly, and make the CSS complicated, and the text wont fit.
-			
+			// But it's impossible to know what the icons do, users testing showed that the user had no idea how to create a new file, nor how to save it!
+
 			if(position == undefined) throw new Error("Second argument: position need to be defined!");
 			
 			var wrap = document.createElement("div");

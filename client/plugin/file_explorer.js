@@ -107,7 +107,7 @@
 		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
 		discoveryBarImage.title = S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
 		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
-		EDITOR.discoveryBar.add(discoveryBarImage, 20);
+		EDITOR.discoveryBar.add(discoveryBarImage, 40, "dir");
 		
 		if(visible) toggleFileExplorer(visible);
 		

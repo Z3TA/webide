@@ -9,7 +9,7 @@
 	var menuItem;
 	var newFileDashboardWidget;
 	var winMenuNewFile;
-	var discoveryBarImage;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Create new file option to context menu and bound to Ctrl + N",
@@ -24,12 +24,25 @@
 			
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
+			
 			// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
-			discoveryBarImage = document.createElement("img");
+			discoveryBarIcon = document.createElement("div");
+			discoveryBarIcon.onclick = newFileFromDiscoveryBar;
+			discoveryBarIcon.title = S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")";
+			
+			
+			var discoveryBarImage = document.createElement("img");
 			discoveryBarImage.src = "gfx/add-file.svg";  // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarImage.title = S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")";
-			discoveryBarImage.onclick = newFileFromDiscoveryBar;
-			EDITOR.discoveryBar.add(discoveryBarImage, 10);
+			discoveryBarIcon.appendChild(discoveryBarImage);
+			
+			
+				var discoveryBarCaption = document.createElement("figcaption");
+				discoveryBarCaption.innerText = "new";
+discoveryBarCaption.classList.add("discoveryBarCaption");
+				discoveryBarIcon.appendChild(discoveryBarCaption);
+			
+			
+			EDITOR.discoveryBar.add(discoveryBarIcon, 10);
 			
 		},
 		unload: function unloadNewFilePlugin() {
@@ -42,7 +55,7 @@
 			
 			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
-			EDITOR.discoveryBar.remove(discoveryBarImage)
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 		},
 		order: 10
 	});
