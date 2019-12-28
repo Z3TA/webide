@@ -116,6 +116,8 @@
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
 		inputFind.setAttribute("size", size);
+inputFind.setAttribute("autocomplete", "off");
+
 		//inputFind.setAttribute("value", "X(..)X");
 		
 		
@@ -124,6 +126,7 @@
 		inputReplace.setAttribute("id", "inputReplace");
 		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
+inputReplace.setAttribute("autocomplete", "off");
 		//inputReplace.setAttribute("value", "Y$1Y");
 		
 		var labelFind = document.createElement("label");
