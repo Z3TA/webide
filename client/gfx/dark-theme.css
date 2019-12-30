@@ -144,6 +144,7 @@ select, select.functionList {
 .fileExplorer {
 	border-left: 2px solid #2a2929;
 	border-left: 1px solid #222021;
+	scrollbar-color: #a26d7e #30342d;
 }
 
 .fileExplorer ul {
@@ -200,6 +201,7 @@ select, select.functionList {
 	border-radius: 0px 0px 5px 5px;
 	box-shadow: 0px 1px 1px #121214;
 	color: #f3f3f6;
+scrollbar-color: rgba(80,80,90, .9) transparent;
 }
 
 .windowMenu .menu.pulloutright {
@@ -403,6 +405,7 @@ a:visited {
 
 .dashboard {
 	background-color: #1e1f22;
+	scrollbar-color: rgba(80,80,90, .9) transparent;
 }
 
 .dashboardWidget {
@@ -464,6 +467,13 @@ a:visited {
 
 .discoveryBar {
 	background-color: rgb(41, 42, 48);
+	scrollbar-color: rgba(80,80,90, .9) transparent;
+}
+
+.discoveryItem figcaption {
+	
+	
+	background-color: rgba(41,42,48, .75);
 }
 
 .leftColumn .discoveryBar {
