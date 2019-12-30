@@ -669,11 +669,11 @@ button .key.inline {
 }
 
 button .key.inline:before {
-content: "(";
+	content: "(";
 }
 
 button .key.inline:after {
-content: ")";
+	content: ")";
 }
 
 
@@ -1905,6 +1905,9 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	background-color: rgba(255,255,255, .75);
 }
 
+.discoveryItem figcaption.hidden {
+display: none;
+}
 
 .header .discoveryBar {
 	border: 0px solid pink;

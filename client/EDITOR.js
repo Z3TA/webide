@@ -291,7 +291,7 @@ EDITOR.speechRate = 1; // // 0.1 to 10
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
 	discoveryBar.setAttribute("place", "vertical");
 	
-	var showDisoveryBarWindowMenuItem;
+	var showDisoveryBarWindowMenuItem, showDisoveryBarCaptions;
 	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
@@ -2955,6 +2955,7 @@ if(elements[i].style.display != "none") {
 			var caption = document.createElement("figcaption");
 			caption.innerText = captionText;
 			caption.classList.add("discoveryBarCaption");
+			if(!EDITOR.discoveryBar.captions) caption.classList.add("hidden");
 			item.appendChild(caption);
 			
 			
@@ -3099,6 +3100,32 @@ if(elements[i].style.display != "none") {
 				EDITOR.discoveryBar.hide();
 			}
 		},
+		toggleCaptions: function toggleDiscoveryBarCaptions(wantedState) {
+			
+			if(wantedState === true && EDITOR.discoveryBar.captions) return;
+			if(wantedState === false && !EDITOR.discoveryBar.captions) return;
+			
+			var elList = document.getElementsByClassName("discoveryBarCaption");
+			if(EDITOR.discoveryBar.captions) {
+				
+				for(var i=0; i<elList.length; i++) {
+					elList[i].classList.add("hidden");
+				}
+				
+				EDITOR.discoveryBar.captions = false;
+				if(showDisoveryBarCaptions) showDisoveryBarCaptions.deactivate();
+			}
+			else {
+				
+				for(var i=0; i<elList.length; i++) {
+					elList[i].classList.remove("hidden");
+				}
+				if(showDisoveryBarCaptions) showDisoveryBarCaptions.activate();
+				EDITOR.discoveryBar.captions = true;
+			}
+			
+			
+		},
 		disable: function disableDiscoveryBar() {
 			// Disables the entire discovery bar
 			EDITOR.discoveryBar.hide();
@@ -3106,7 +3133,8 @@ if(elements[i].style.display != "none") {
 			EDITOR.stat("disable_discoveryBar");
 		},
 		isVisible: true,
-		enabled: true
+		enabled: true,
+		captions: true
 	}
 	
 	
@@ -8710,9 +8738,11 @@ function main() {
 		
 		}
 	*/
-	
+		
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
-	
+		showDisoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
+		showDisoveryBarCaptions.activate();
+		
 		sendStatistics();
 		
 		windowLoaded = true;

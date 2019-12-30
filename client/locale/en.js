@@ -21,6 +21,7 @@ LANG["en"] = {
 	deploy_to_production: "Deploy to production",
 	developer_mode: "Developer mode",
 	discovery_bar: "Discovery bar",
+	discovery_bar_captions: "Discovery bar captions",
 	
 cancel: "Cancel",
 	clone_a_repository: "Clone a repository",
