@@ -194,7 +194,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	hideDashboard: [],
 	share: [], // Share a file with other apps on the platform
 	soundAssist: [], // Get notified when soundAssist is turned on/off
-	wrapText: [] // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
+	wrapText: [], // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
+	findInFiles: [] // Starts a find-in-files tool when calling EDITOR.findInFiles()
 };
 
 EDITOR.renderFunctions = [];
@@ -2931,21 +2932,22 @@ if(elements[i].style.display != "none") {
 	var discoveryBarTabIndex = 600; // See tabindex.txt
 	EDITOR.discoveryBar = {
 		addIcon: function addDiscoveryIcon(imageSrc, position, title, captionText, whenclicked, whenConextMenuActivated) {
+			// Adds a standard item with an icon
 			
 			var item = document.createElement("div");
 			item.onclick = function clickIcon(clickEvent) {
 				var file = EDITOR.currentFile;
 				var combo = getCombo(clickEvent);
 				
-				whenclicked(file, combo);
+				whenclicked(file, combo, clickEvent);
 				return false;
 			};
 			item.title = title;
 			
-if(whenConextMenuActivated) {
-item.oncontextmenu = whenConextMenuActivated;
-}
-
+			if(whenConextMenuActivated) {
+				item.oncontextmenu = whenConextMenuActivated;
+			}
+			
 			var image = document.createElement("img");
 			image.src = imageSrc;
 			item.appendChild(image);
@@ -2960,6 +2962,7 @@ item.oncontextmenu = whenConextMenuActivated;
 			
 		},
 		add: function addDiscoveryItem(element, position) {
+			// Adds an item
 			
 			// note: Don't add icon captions, it will look ugly, and make the CSS complicated, and the text wont fit.
 			// But it's impossible to know what the icons do, users testing showed that the user had no idea how to create a new file, nor how to save it!
@@ -2998,10 +3001,19 @@ item.oncontextmenu = whenConextMenuActivated;
 			return element;
 		},
 		remove: function removeDiscoveryItem(element) {
+			// Removes an item
 			var wrap = element.parentNode;
 			discoveryBar.removeChild(wrap);
 		},
+		activate: function activateDiscoveryBarItem(element) {
+			// Actiaves an item
+			element.classList.add("active");
+		},
+		deactivate: function deactivateDiscoveryBarItem(element) {
+			element.classList.remove("active");
+		},
 		show: function showDiscoveryBar() {
+			// Shows the whole discovery bar
 			if(!EDITOR.discoveryBar.enabled) {
 				console.warn("Discovery bar not enabled!");
 				return;
@@ -3070,6 +3082,7 @@ item.oncontextmenu = whenConextMenuActivated;
 			
 		},
 		hide: function hideDiscoveryBar() {
+			// Hides the whole discovery bar
 			console.log("discoveryBar:hide: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			discoveryBar.style.display = "none";
 			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.deactivate();
@@ -3077,6 +3090,7 @@ item.oncontextmenu = whenConextMenuActivated;
 			EDITOR.resizeNeeded();
 		},
 		toggle: function toggleDiscoveryBar() {
+			// Hides or shows the whole discovery bar
 			console.log("discoveryBar:toggle: discoveryBar.style.display=" + discoveryBar.style.display);
 			if(discoveryBar.style.display == "none") {
 				EDITOR.discoveryBar.show();
@@ -3086,6 +3100,7 @@ item.oncontextmenu = whenConextMenuActivated;
 			}
 		},
 		disable: function disableDiscoveryBar() {
+			// Disables the entire discovery bar
 			EDITOR.discoveryBar.hide();
 			EDITOR.discoveryBar.enabled = false;
 			EDITOR.stat("disable_discoveryBar");
@@ -7086,6 +7101,8 @@ EDITOR.stopScript = tool("stopScript", false);
 	
 	EDITOR.wrapText = tool("wrapText", false);
 
+	EDITOR.findInFiles = tool("findInFiles", false);
+	
 function tool(eventListenerName) {
 	return function(file, ev) {
 		if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;

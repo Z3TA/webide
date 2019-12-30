@@ -43,7 +43,7 @@
 		
 		winMenuFindReplace = EDITOR.windowMenu.add(S("find_replace"), [S("File"), 7], findReplace);
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 70,  S("find_replace"), "find", findReplace);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 70,  S("find_replace"), "find", findReplaceFromDiscoveryBar);
 		// Icon created by: https://www.flaticon.com/authors/phatplus
 		
 		// Point variables to the document object model
@@ -417,6 +417,11 @@ inputReplace.setAttribute("autocomplete", "off");
 		return true;
 	}
 	
+	
+	function findReplaceFromDiscoveryBar(file, combo, clickEvent) {
+		if(combo.shift) EDITOR.findInFiles(file, clickEvent);
+		else findReplace(file, combo);
+	}
 	
 	function findReplace(file, combo, character, charCode, keyPushDirection) {
 		

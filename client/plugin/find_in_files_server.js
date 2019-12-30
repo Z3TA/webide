@@ -47,6 +47,8 @@
 		
 		EDITOR.on("dblclick", fifdblclick);
 		
+		EDITOR.on("findInFiles", findInFilesTool);
+		
 		CLIENT.on("foundInFile", foundInFile);
 		CLIENT.on("findInFilesStatus", findInFilesProgressStatus);
 		
@@ -317,6 +319,11 @@ console.warn("Could not find the search string that was used!");
 		
 	}
 	
+function findInFilesTool(file) {
+findInFiles(file);
+return true;
+}
+
 	function findInFiles(file) {
 		
 		console.log("divVisible=" + divVisible);

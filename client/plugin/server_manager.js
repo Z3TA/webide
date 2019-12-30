@@ -46,7 +46,7 @@
 	
 	var winMenuServerManager;
 	
-	var discoveryBarImage;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
@@ -87,13 +87,8 @@
 			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			
-			
-			discoveryBarImage = document.createElement("img");
-			discoveryBarImage.setAttribute("id", "FtpSftpDiscovery");
-			discoveryBarImage.src = "gfx/cloud.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarImage.title = "FTP/SFT (" + EDITOR.getKeyFor(showServerManger) + ")";
-			discoveryBarImage.onclick = toggleShowServerManger;
-			EDITOR.discoveryBar.add(discoveryBarImage, 60);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/cloud.svg", 60, "FTP/SFTP (" + EDITOR.getKeyFor(showServerManger) + ")", "FTP", toggleShowServerManger);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 		});
 		
@@ -112,6 +107,8 @@
 		EDITOR.unregisterAltKey(showServerManger);
 		
 		EDITOR.windowMenu.remove(winMenuServerManager);
+		
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		if(serverManager) {
 			var footer = document.getElementById("footer");
@@ -580,7 +577,8 @@
 		
 		EDITOR.resizeNeeded();
 		
-		discoveryBarImage.setAttribute("class", "active");
+		discoveryBarIcon.classList.add("active");
+		
 		
 		return false;
 		
@@ -594,7 +592,7 @@
 		
 		if(serverManager) serverManager.style.display = "none";
 		
-		discoveryBarImage.setAttribute("class", "");
+		discoveryBarIcon.classList.remove("active");
 		
 		EDITOR.resizeNeeded();
 		
