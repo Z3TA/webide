@@ -25,6 +25,7 @@
 	var altKeyPressed = false;
 	var ctrlKeyPressed = false;
 	var terminalActive = false;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -50,12 +51,9 @@
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
-			var discoveryItem = document.createElement("img");
-			discoveryItem.setAttribute("id", "terminalDiscovery");
-			discoveryItem.src = "gfx/board.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Terminal emulator"
-			discoveryItem.onclick = startTerminalFromMenu;
-			EDITOR.discoveryBar.add(discoveryItem, 40);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator"), "term", startTerminalFromMenu);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
+			
 			
 		},
 		unload: function unloadTerminal() {
@@ -73,6 +71,8 @@
 			
 			EDITOR.unregisterAltKey(altKey);
 			EDITOR.unregisterAltKey(ctrlKey);
+			
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 			
 			if(terminalActive) removeTerminalEvents();
 			

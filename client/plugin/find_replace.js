@@ -13,6 +13,7 @@
 	var lastSearchStrLength = 0;
 	var lastSearchDirection = "right"; // right|left
 	var winMenuFindReplace;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Find and Replace",
@@ -42,6 +43,9 @@
 		
 		winMenuFindReplace = EDITOR.windowMenu.add(S("find_replace"), [S("File"), 7], findReplace);
 		
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 70,  S("find_replace"), "find", findReplace);
+		// Icon created by: https://www.flaticon.com/authors/phatplus
+		
 		// Point variables to the document object model
 		findReplaceDiv = document.getElementById("findReplace");
 		inputFind = document.getElementById("inputFind");
@@ -55,6 +59,7 @@
 		findAllButton = document.getElementById("findAllButton");
 		replaceAllButton = document.getElementById("replaceAllButton");
 		ignoreCaseOption  = document.getElementById("ignoreCaseOption");
+		
 		
 	}
 	
@@ -71,6 +76,7 @@
 		
 		EDITOR.windowMenu.remove(winMenuFindReplace);
 		
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		// Cleanup
 		hide_search();

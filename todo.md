@@ -49,14 +49,22 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+working on discovery bar icons as quick access to common actions
+
 todo: Able to hide and show discovery bar captions via view
 
-todo: Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
+todo: Remember view>file-explorer,file-tabs etc
+Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
 
 
-Adopt design for first time users, and first time computer users!
+Adopt design for first time users, and computer noobs!
 
 
+
+A file explorer (on dashboard?) that shows screenshot of .htm files!? like in MS Office for SSG sites
+whith option to create new site
+
+bug: Sometimes when clicking to close a file on the file tabs it opens a new browser tab! (when we get the confirm box?)
 
 
 Chromebooks doesn't seem to give an error stack when you get an error while in live preview (WysiwygEditor)

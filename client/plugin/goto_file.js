@@ -30,6 +30,7 @@
 	var folderPicker;
 	var winMenuGotoFile;
 	var gotoLine = null;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -84,6 +85,8 @@
 		
 		winMenuGotoFile = EDITOR.windowMenu.add(S("open_search_file"), [S("File"), 12], show_gotoFileInput);
 		
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/data.svg", 30,  S("open_search_file") + " (" + EDITOR.getKeyFor(show_gotoFileInput2) + ")", "open", show_gotoFileInput2);
+		
 	}
 	
 	function gotoFile_unload() {
@@ -105,6 +108,8 @@
 		 EDITOR.ctxMenu.remove(menuItem);
 		
 		EDITOR.windowMenu.remove(winMenuGotoFile);
+		
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		hide_gotoFileInput();
 	}

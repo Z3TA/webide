@@ -31,7 +31,7 @@
 	var hideButton;
 	var loadingSpinner;
 	var winMenuFileExplorer;
-	var discoveryBarImage;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -102,12 +102,8 @@
 		
 		//exploreDir(EDITOR.workingDirectory);
 		
-		discoveryBarImage = document.createElement("img");
-		discoveryBarImage.setAttribute("id", "fileExplorerDiscovery");
-		discoveryBarImage.src = "gfx/data.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryBarImage.title = S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")"
-		discoveryBarImage.onclick = toggleFileExplorerFromDiscoveryBar;
-		EDITOR.discoveryBar.add(discoveryBarImage, 40, "dir");
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/folder.svg", 50,  S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")", "dir", toggleFileExplorerFromDiscoveryBar);
+		
 		
 		if(visible) toggleFileExplorer(visible);
 		
@@ -134,7 +130,7 @@
 gapi.auth2.getAuthInstance().signOut();
 		}
 		
-		EDITOR.discoveryBar.remove(discoveryBarImage);
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
 	}
 	
 	function toggleFileExplorerFromWindowMenu() {

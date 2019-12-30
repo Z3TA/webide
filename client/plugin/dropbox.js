@@ -11,7 +11,7 @@
 
 	var winMenuDropbox;
 	var authWindow;
-	var discoveryBarImage;
+	var discoveryBarIcon;
 	var daemonAlive = false;
 	
 	EDITOR.plugin({
@@ -26,14 +26,11 @@
 			
 			CLIENT.on("loginSuccess", checkIfDropboxIsRunning);
 			
-			discoveryBarImage = document.createElement("img");
-			discoveryBarImage.src = "gfx/icon/dropbox.svg";
-			discoveryBarImage.title = "Dropbox";
-			discoveryBarImage.onclick = dropboxDiscoveryClicked;
-			discoveryBarImage.oncontextmenu = dropboxDiscoveryContextMenuActivated;
-			EDITOR.discoveryBar.add(discoveryBarImage, 50);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/icon/dropbox.svg", 60, "Dropbox", "Dropbox", dropboxDiscoveryClicked, dropboxDiscoveryContextMenuActivated);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
-			// note: Deactivating Dropbox sync doesn't make sence
+			
+			// note: Deactivating Dropbox sync doesn't make sense
 			
 		},
 		unload: function unloadGoogleDriveSupport() {
@@ -46,7 +43,7 @@
 			
 			CLIENT.removeEvent("loginSuccess", checkIfDropboxIsRunning);
 			
-			EDITOR.discoveryBar.remove(discoveryBarImage);
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 		}
 	});
 	

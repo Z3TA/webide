@@ -6,7 +6,8 @@
 	var winMenuWysiwygHtml;
 	var tempCtxMenuWebPreview;
 	var alwaysSaveBeforePreview = false;
-	
+	var discoveryBarIcon;
+
 	EDITOR.plugin({
 		desc: "Preview HTML files",
 		load: function loadWebPreview() {
@@ -14,12 +15,8 @@
 			EDITOR.on("ctxMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
 			
-			var discoveryItem = document.createElement("img");
-			discoveryItem.src = "gfx/multimedia.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = "Live Preview/Run"
-			discoveryItem.setAttribute("id","previewDiscovery");
-			discoveryItem.onclick = webPreviewFromDiscovery;
-			EDITOR.discoveryBar.add(discoveryItem, 30, "run");
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/multimedia.svg", 40,  "Live Preview/Run", "run", webPreviewFromDiscovery);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			winMenuWysiwygHtml = EDITOR.windowMenu.add(S("wysiwyg"), [S("Edit"), 120], startHtmlWysiwyg);
 			
@@ -44,6 +41,9 @@
 			EDITOR.removeEvent("previewTool", webPreviewTool); 
 			
 			EDITOR.windowMenu.remove(winMenuWysiwygHtml);
+
+EDITOR.discoveryBar.remove(discoveryBarIcon);
+
 		},
 		order: 2100 // Run after reopen_files to prevent warning of file already being opened
 	});

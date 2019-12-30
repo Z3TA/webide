@@ -26,23 +26,8 @@
 			
 			
 			// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
-			discoveryBarIcon = document.createElement("div");
-			discoveryBarIcon.onclick = newFileFromDiscoveryBar;
-			discoveryBarIcon.title = S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")";
 			
-			
-			var discoveryBarImage = document.createElement("img");
-			discoveryBarImage.src = "gfx/add-file.svg";  // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarIcon.appendChild(discoveryBarImage);
-			
-			
-				var discoveryBarCaption = document.createElement("figcaption");
-				discoveryBarCaption.innerText = "new";
-discoveryBarCaption.classList.add("discoveryBarCaption");
-				discoveryBarIcon.appendChild(discoveryBarCaption);
-			
-			
-			EDITOR.discoveryBar.add(discoveryBarIcon, 10);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/add-file.svg", 10,  S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")", "new", newFileFromDiscoveryBar);
 			
 		},
 		unload: function unloadNewFilePlugin() {

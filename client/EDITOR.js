@@ -2930,6 +2930,35 @@ if(elements[i].style.display != "none") {
 	
 	var discoveryBarTabIndex = 600; // See tabindex.txt
 	EDITOR.discoveryBar = {
+		addIcon: function addDiscoveryIcon(imageSrc, position, title, captionText, whenclicked, whenConextMenuActivated) {
+			
+			var item = document.createElement("div");
+			item.onclick = function clickIcon(clickEvent) {
+				var file = EDITOR.currentFile;
+				var combo = getCombo(clickEvent);
+				
+				whenclicked(file, combo);
+				return false;
+			};
+			item.title = title;
+			
+if(whenConextMenuActivated) {
+item.oncontextmenu = whenConextMenuActivated;
+}
+
+			var image = document.createElement("img");
+			image.src = imageSrc;
+			item.appendChild(image);
+			
+			var caption = document.createElement("figcaption");
+			caption.innerText = captionText;
+			caption.classList.add("discoveryBarCaption");
+			item.appendChild(caption);
+			
+			
+			return EDITOR.discoveryBar.add(item, position);
+			
+		},
 		add: function addDiscoveryItem(element, position) {
 			
 			// note: Don't add icon captions, it will look ugly, and make the CSS complicated, and the text wont fit.
@@ -2966,6 +2995,7 @@ if(elements[i].style.display != "none") {
 			
 			EDITOR.discoveryBar.show();
 			
+			return element;
 		},
 		remove: function removeDiscoveryItem(element) {
 			var wrap = element.parentNode;
