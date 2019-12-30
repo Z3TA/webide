@@ -10,7 +10,7 @@
 	
 	var ctxMenuNewWindow;
 	var windowMenuNewWindow, windowMenuSplitScreen;
-	var discoveryItem;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Open file in new window",
@@ -20,19 +20,15 @@
 			windowMenuNewWindow = EDITOR.windowMenu.add(S("open_in_new_window"), [S("File"), 9], openInNewWindow);
 			windowMenuSplitScreen = EDITOR.windowMenu.add(S("split_screen_new_window"), [S("View"), 50], splitScreen);
 			
-			discoveryItem = document.createElement("img");
-			discoveryItem.setAttribute("id", "floatingWindowsDiscovery");
-			discoveryItem.src = "gfx/new-window.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = S("open_in_new_window");
-			discoveryItem.onclick = openWindowFromMenu;
-			EDITOR.discoveryBar.add(discoveryItem, 100);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/new-window.svg", 130, S("open_in_new_window"), "+win", openWindowFromMenu);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 		},
 		unload: function unloadFloatingWindow() {
 			EDITOR.ctxMenu.remove(ctxMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuSplitScreen);
-			EDITOR.discoveryBar.remove(discoveryItem);
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 		},
 	});
 	

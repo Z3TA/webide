@@ -49,10 +49,6 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-todo: test to make sure class activate works and is used on discovery bar icons
-
-working on discovery bar icons as quick access to common actions
-
 todo: Able to hide and show discovery bar captions via view
 
 todo: Remember view>file-explorer,file-tabs etc

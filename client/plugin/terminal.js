@@ -51,7 +51,7 @@
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			EDITOR.registerAltKey({char: "t", alt:1, label: "Terminal", fun: startTerminalFromMenu});
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator"), "term", startTerminalFromMenu);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 90,  S("terminal_emulator"), "term", startTerminalFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			

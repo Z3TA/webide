@@ -664,6 +664,20 @@ button .key:hover {
 	color: white;
 	}
 
+button .key.inline {
+	display: inline;
+}
+
+button .key.inline:before {
+content: "(";
+}
+
+button .key.inline:after {
+content: ")";
+}
+
+
+
 
 .highlighted {
 	background-color: orange!important;
@@ -1864,6 +1878,7 @@ Assuming it's placed in the left column
 
 .discoveryBar {
 	display: inline-block;
+	scrollbar-width: thin;
 }
 
 .discoveryBar .discoveryItem img {
@@ -1927,7 +1942,7 @@ padding: 0;
 	
 }
 
-.discoveryBar .discoveryItem:hover img, .discoveryBar .discoveryItem img.active {
+.discoveryBar .discoveryItem:hover img, .discoveryBar .discoveryItem .active img {
 	filter: none;
 	-webkit-filter: grayscale(0%);
 	cursor: pointer;

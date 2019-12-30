@@ -26,7 +26,7 @@
 			
 			CLIENT.on("loginSuccess", checkIfDropboxIsRunning);
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/icon/dropbox.svg", 60, "Dropbox", "Dropbox", dropboxDiscoveryClicked, dropboxDiscoveryContextMenuActivated);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/icon/dropbox.svg", 70, "Dropbox", "Dropbox", dropboxDiscoveryClicked, dropboxDiscoveryContextMenuActivated);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			
@@ -114,14 +114,14 @@ dropboxDaemonWasKilled();
 	
 	function dropboxDaemonIsRunning() {
 		daemonAlive = true;
-		discoveryBarImage.classList.add("active");
+		discoveryBarIcon.classList.add("active");
 		winMenuDropbox.activate();
 		
 	}
 	
 	function dropboxDaemonWasKilled() {
 		daemonAlive = false;
-		discoveryBarImage.classList.remove("active");
+		discoveryBarIcon.classList.remove("active");
 		winMenuDropbox.deactivate();
 	}
 	

@@ -85,7 +85,7 @@
 		"wireframe"
 	];
 	
-	var discoveryItem;
+	var discoveryBarIcon;
 	
 	EDITOR.plugin({
 		desc: "Let you see changes live while logged in from different devices. Also handles undo/redo",
@@ -137,12 +137,8 @@
 			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 30], recordWidget.show);
 			winMenuTutorials = EDITOR.windowMenu.add(S("first_intro"), [S("Editor"), S("Tutorials"), S("Intro"), 1], tutorialPlayFirstIntro);
 			
-			discoveryItem = document.createElement("img");
-			discoveryItem.setAttribute("id", "collaborationDiscovery");
-			discoveryItem.src = "gfx/treaty.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryItem.title = S("invite_collaborator");
-			discoveryItem.onclick = inviteFromDiscoveryBar;
-			EDITOR.discoveryBar.add(discoveryItem, 110);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/treaty.svg", 140, S("invite_collaborator"), "colab", inviteFromDiscoveryBar);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			
 			// TEST-CODE-START
@@ -196,7 +192,7 @@
 			EDITOR.unregisterAltKey(collabRedo);
 			EDITOR.unregisterAltKey(invite);
 			
-			EDITOR.discoveryBar.remove(discoveryItem);
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 			
 		},
 		order: 100

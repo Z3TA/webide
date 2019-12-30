@@ -31,7 +31,7 @@
 		var keyEscape = 27;
 		
 		// Pressing Ctrl + shift + F should hide or show the search window
-		EDITOR.bindKey({desc: S("find_in_files"), charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
+		EDITOR.bindKey({desc: S("find_in_files"), charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + Shift + F
 		
 		EDITOR.bindKey({desc: S("hide_find_in_files_widget"), charCode: keyEscape, fun: hideFindInFilesGui});
 		
@@ -493,6 +493,17 @@ if(err) console.error(err);
 			
 		}
 		
+		var closeDialogButton = document.createElement("button");
+		closeDialogButton.classList.add("button");
+		closeDialogButton.innerText = "Close dialog"
+		closeDialogButton.onclick = hide_find_in_files;
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideFindInFilesGui) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		closeDialogButton.appendChild(closeDialogKeyBind);
+		
+		
 		var labelRegexOption = document.createElement("label");
 		labelRegexOption.setAttribute("for", "regexOption");
 		labelRegexOption.appendChild(document.createTextNode("Use regex")); // Language settings!?
@@ -615,6 +626,11 @@ if(err) console.error(err);
 		td = document.createElement("td");
 		td.appendChild(buttonCancel);
 		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(closeDialogButton);
+		tr.appendChild(td);
+		
 		
 		
 		table.appendChild(tr);

@@ -38,7 +38,7 @@
 	
 	var askToOpenSourceFileIfOpenedPreviewFile = true;
 	
-	var discoveryBarImage;
+	var discoveryBarIcon;
 	
 	// Add plugin to editor
 	EDITOR.plugin({
@@ -259,12 +259,7 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
 		
-		discoveryBarImage = document.createElement("img");
-		discoveryBarImage.setAttribute("id", "SSG_discovery");
-		discoveryBarImage.src = "gfx/website.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryBarImage.title = "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")"
-		discoveryBarImage.onclick = toggleSSG;
-		EDITOR.discoveryBar.add(discoveryBarImage, 60);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/website.svg", 100, "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")", "SSG", toggleSSG);
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
@@ -606,15 +601,19 @@
 		buttonSettings.setAttribute("value", "Settings / new");
 		buttonSettings.addEventListener("click", editSiteSettings, false);
 		
-		var buttonCancel = document.createElement("input");
+		var buttonCancel = document.createElement("button");
 		buttonCancel.setAttribute("type", "button");
 		buttonCancel.setAttribute("class", "button");
 		buttonCancel.setAttribute("id", "buttonCancel");
-		buttonCancel.setAttribute("value", "Cancel");
-		
+		buttonCancel.innerText = "Close dialog";
 		buttonCancel.addEventListener("click", function() {
 			hideSSG();
 		}, false);
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideSSG) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		buttonCancel.appendChild(closeDialogKeyBind);
 		
 		
 		controlView.appendChild(labelSite); // Includes selectSite
@@ -1309,7 +1308,7 @@
 		
 		manager.style.display = "block";
 		
-		discoveryBarImage.setAttribute("class", "active");
+		discoveryBarIcon.classList.add("active");
 		
 		EDITOR.resizeNeeded();
 		
@@ -1334,7 +1333,7 @@
 			}
 		}
 		
-		discoveryBarImage.setAttribute("class", "");
+		discoveryBarIcon.classList.remove("active");
 		
 		return false;
 	}

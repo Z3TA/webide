@@ -48,7 +48,7 @@
 	
 	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations, winMenuClone, winMenuPullRequest;
 	
-	var discoveryBarImg;
+	var discoveryBarIcon;
 	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
@@ -97,12 +97,7 @@
 		
 		EDITOR.registerAltKey({char: ",", alt:1, label: "version control", fun: showVersionControlWidget});
 		
-		discoveryBarImg = document.createElement("img");
-		discoveryBarImg.setAttribute("id", "sourceControlDiscovery");
-		discoveryBarImg.src = "gfx/share.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-		discoveryBarImg.title = "Version control"
-		discoveryBarImg.onclick = toggleVersionControlWidget;
-		EDITOR.discoveryBar.add(discoveryBarImg, 70);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/share.svg", 110, "Version control", "SCM", toggleVersionControlWidget);
 		
 	}
 	
@@ -136,7 +131,7 @@
 		EDITOR.windowMenu.remove(winMenuClone);
 		EDITOR.windowMenu.remove(winMenuPullRequest);
 		
-		EDITOR.discoveryBar.remove(discoveryBarImg);
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		hideMercurialWidgets();
 		
@@ -2706,11 +2701,16 @@ var error = err.message;
 		div.appendChild(butPullRequest);
 		
 		var cancel = document.createElement("button");
-		cancel.appendChild(document.createTextNode("Cancel version control"));
+		cancel.appendChild(document.createTextNode("Close dialog"));
 		cancel.setAttribute("class", "button");
 		cancel.onclick = function() {
 					hideVersionControlWidget();
 		}
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideMercurialWidgets) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		cancel.appendChild(closeDialogKeyBind);
+		
 		div.appendChild(cancel);
 		
 		
@@ -2728,7 +2728,7 @@ var error = err.message;
 		versionControlWidget.show();
 		winMenuMercurial.activate();
 		winMenuMercurial2.activate();
-				discoveryBarImg.setAttribute("class", "active");
+		discoveryBarIcon.classList.add("active");
 	}
 	
 	function hideVersionControlWidget() {
@@ -2736,7 +2736,7 @@ var error = err.message;
 		versionControlWidget.hide();
 		winMenuMercurial.deactivate();
 		winMenuMercurial2.deactivate();
-				discoveryBarImg.setAttribute("class", "");
+		discoveryBarIcon.classList.remove("active");
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {

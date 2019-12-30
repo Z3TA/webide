@@ -5689,7 +5689,7 @@ else {
 			"FINAL", // [24]
 			"HANJA", // [25]
 			"", // [26]
-			"ESCAPE", // [27]
+			"ESC", // [27]
 			"CONVERT", // [28]
 			"NONCONVERT", // [29]
 			"ACCEPT", // [30]
@@ -8551,7 +8551,7 @@ function main() {
 			
 			// Many plugins depend on the storage being available ...
 			// They need to be refactored to start on EDITOR.on("storageReady" ... !!
-			// Treat EDITOR.storage as window.localStorage! Eg. It's all strings so you jave to JSON.parse !
+				// Treat EDITOR.storage like window.localStorage! Eg. It's all strings so you have to JSON.parse !
 			
 				var f = EDITOR.eventListeners.storageReady.map(funMap);
 				for(var i=0; i<f.length; i++) {

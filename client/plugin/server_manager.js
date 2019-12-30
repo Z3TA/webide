@@ -87,7 +87,7 @@
 			
 			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/cloud.svg", 60, "FTP/SFTP (" + EDITOR.getKeyFor(showServerManger) + ")", "FTP", toggleShowServerManger);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/cloud.svg", 80, "FTP/SFTP (" + EDITOR.getKeyFor(showServerManger) + ")", "FTP", toggleShowServerManger);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 		});
@@ -235,14 +235,20 @@
 		buttonDisconnect.addEventListener("click", disconnectConnection, false);
 		connectionView.appendChild(buttonDisconnect)
 		
-		var buttonCancel = document.createElement("input");
+		var buttonCancel = document.createElement("button");
 		buttonCancel.setAttribute("type", "button");
 		buttonCancel.setAttribute("class", "button");
 		buttonCancel.setAttribute("id", "buttonCancel");
-		buttonCancel.setAttribute("value", "Cancel");
+		buttonCancel.innerText = "Close dialog";
 		buttonCancel.addEventListener("click", function() {
 			hideServerManger(); // Hide the whole connection manager
 		}, false);
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideServerManger) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		buttonCancel.appendChild(closeDialogKeyBind);
+		
 		connectionView.appendChild(buttonCancel)
 		
 		

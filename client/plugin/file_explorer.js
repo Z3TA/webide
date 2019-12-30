@@ -251,7 +251,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			
 			winMenuFileExplorer.activate();
 			
-			discoveryBarImage.setAttribute("class", "active");
+			discoveryBarIcon.classList.add("active");
 			
 		}
 		else {
@@ -265,7 +265,7 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			
 			winMenuFileExplorer.deactivate();
 			
-			discoveryBarImage.setAttribute("class", "");
+			discoveryBarIcon.classList.remove("active");
 			
 			EDITOR.stat("hide_fileExplorer");
 			

@@ -85,7 +85,7 @@
 		
 		winMenuGotoFile = EDITOR.windowMenu.add(S("open_search_file"), [S("File"), 12], show_gotoFileInput);
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/data.svg", 30,  S("open_search_file") + " (" + EDITOR.getKeyFor(show_gotoFileInput2) + ")", "open", show_gotoFileInput2);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/data.svg", 30,  S("open_search_file") + " (" + EDITOR.getKeyFor(show_gotoFileInput2) + ")", "open", gotoFileFromDiscoveryBar);
 		
 	}
 	
@@ -279,11 +279,16 @@
 		gotoButton.setAttribute("value", "Open");
 		gotoButton.setAttribute("title", "Press Enter to Open selected file");
 		
-		var cancelButton = document.createElement("input");
-		cancelButton.setAttribute("type", "button");
+		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
 		cancelButton.setAttribute("id", "cancelButton");
-		cancelButton.setAttribute("value", "Cancel");
+		cancelButton.innerText = "Close dialog";
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hide_gotoFileInput) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		cancelButton.appendChild(closeDialogKeyBind);
+		
 		
 		var localButton = document.createElement("button");
 		localButton.setAttribute("type", "button");
@@ -616,7 +621,14 @@ console.warn("gotoList not available!");
 		return show_gotoFileInput(file, combo);
 	}
 	
+	function gotoFileFromDiscoveryBar(file, combo) {
+		console.log("gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
+		if(!gotoInputIsVisible) show_gotoFileInput(file, combo);
+		else hide_gotoFileInput();
+	}
+	
 	var ignoreSelection = false;
+	
 	
 	function show_gotoFileInput(file, combo) {
 		
@@ -757,6 +769,8 @@ folderToSearchIn = EDITOR.workingDirectory;
 			typing(); // Trigger search
 		}
 		
+		discoveryBarIcon.classList.add("active");
+		
 		return false; // Return false to prevent default
 	}
 	
@@ -770,6 +784,8 @@ folderToSearchIn = EDITOR.workingDirectory;
 		}
 		
 		ignoreSelection = false;
+		
+		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 		
 		if(gotoInputIsVisible) {
 			
@@ -792,6 +808,8 @@ folderToSearchIn = EDITOR.workingDirectory;
 			
 			return false;
 		}
+		
+		
 		
 		return true;
 	}

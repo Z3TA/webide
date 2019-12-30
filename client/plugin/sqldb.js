@@ -7,7 +7,7 @@
 	var queryFileId = 0;
 	var selectMysqlDb; // Select element
 	var winMenuDbManager;
-	var discoveryBarImg;
+	var discoveryBarIcon;
 	var databaseList;
 	var dbExplorerWidget;
 	var connectedToDbServer = false;
@@ -65,13 +65,8 @@
 			
 			EDITOR.registerAltKey({char: "l", alt:2, label: S("db_sql"), fun: showDbManager});
 			
-			discoveryBarImg = document.createElement("img");
-			discoveryBarImg.setAttribute("id", "sqlDiscovery");
-			discoveryBarImg.src = "gfx/database.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-			discoveryBarImg.title = S("sql_database");
-			discoveryBarImg.onclick = toggleDbManager;
-			EDITOR.discoveryBar.add(discoveryBarImg, 70);
-			
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/database.svg", 120, S("sql_database"), "DB", toggleDbManager);
+			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			
 			// Only load if db service is available!
@@ -113,7 +108,7 @@ else {
 			
 			EDITOR.unregisterAltKey(showDbManager);
 			
-EDITOR.discoveryBar.remove(discoveryBarImg);
+			EDITOR.discoveryBar.remove(discoveryBarIcon);
 		}
 	});
 	
@@ -128,7 +123,7 @@ EDITOR.discoveryBar.remove(discoveryBarImg);
 	function showDbManager() {
 		EDITOR.ctxMenu.hide();
 		winMenuDbManager.hide();
-		discoveryBarImg.setAttribute("class", "active");
+		discoveryBarIcon.classList.add("active");
 		//if(dbManagerWidget.visible) return hideDbManager();
 		
 		dbManagerWidget.show();
@@ -142,7 +137,7 @@ EDITOR.discoveryBar.remove(discoveryBarImg);
 	function hideDbManager() {
 		dbManagerWidget.hide();
 		EDITOR.ctxMenu.update(menuItem, false);
-		discoveryBarImg.setAttribute("class", "");
+		discoveryBarIcon.classList.remove("active");
 		
 		return ALLOW_DEFAULT;
 	}
@@ -450,8 +445,14 @@ return;
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
-		cancelButton.innerText = "Cancel";
+		cancelButton.innerText = "Close dialog";
 		cancelButton.onclick = hideDbManager;
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideDbManager) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		cancelButton.appendChild(closeDialogKeyBind);
+		
 		holder.appendChild(cancelButton);
 		
 		

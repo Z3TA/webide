@@ -43,7 +43,7 @@
 		
 		winMenuFindReplace = EDITOR.windowMenu.add(S("find_replace"), [S("File"), 7], findReplace);
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 70,  S("find_replace"), "find", findReplaceFromDiscoveryBar);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 60, S("find_replace") + " (Ctrl+F) or Hold down shift-key to find in files (Ctrl+Shift+F)", "find", findReplaceFromDiscoveryBar);
 		// Icon created by: https://www.flaticon.com/authors/phatplus
 		
 		// Point variables to the document object model
@@ -196,6 +196,30 @@ inputReplace.setAttribute("autocomplete", "off");
 		ignoreCaseOption.setAttribute("class", "option ignoreCase");
 		
 		
+		var buttonFindInFiles = document.createElement("button");
+		buttonFindInFiles.innerText = "Find in files...";
+		buttonFindInFiles.classList.add("button");
+		buttonFindInFiles.onclick = function(clickEvent) {
+			EDITOR.findInFiles(EDITOR.currentFile, clickEvent);
+			hide_search();
+			return false;
+		}
+		var findInFilesKeyBind = document.createElement("span");
+		findInFilesKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor("findInFiles") ));
+		findInFilesKeyBind.setAttribute("class", "key inline");
+		buttonFindInFiles.appendChild(findInFilesKeyBind);
+		
+		var closeDialogButton = document.createElement("button");
+		closeDialogButton.classList.add("button");
+		closeDialogButton.innerText = "Close dialog"
+		closeDialogButton.onclick = hideFindReplaceGui;
+		
+		var closeDialogKeyBind = document.createElement("span");
+		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideFindReplaceGui) ));
+		closeDialogKeyBind.setAttribute("class", "key inline");
+		closeDialogButton.appendChild(closeDialogKeyBind);
+		
+		
 		var table = document.createElement("table"),
 			tr = document.createElement("tr"),
 			td = document.createElement("td");
@@ -226,6 +250,10 @@ inputReplace.setAttribute("autocomplete", "off");
 		td.appendChild(ignoreCaseLabel);
 		tr.appendChild(td);
 		
+		td = document.createElement("td");
+		td.appendChild(buttonFindInFiles);
+		tr.appendChild(td);
+		
 		table.appendChild(tr);
 		
 		
@@ -254,7 +282,13 @@ inputReplace.setAttribute("autocomplete", "off");
 		td.appendChild(regexOptionLabel);
 		tr.appendChild(td);
 		
+		td = document.createElement("td");
+		td.appendChild(closeDialogButton);
+		tr.appendChild(td);
+		
 		table.appendChild(tr);
+		
+		
 		
 		
 		findReplaceDiv.appendChild(table);
@@ -376,6 +410,7 @@ inputReplace.setAttribute("autocomplete", "off");
 			EDITOR.renderNeeded();
 		}
 		
+		discoveryBarIcon.classList.remove("active");
 	}
 	
 	function show_search() {
@@ -401,6 +436,8 @@ inputReplace.setAttribute("autocomplete", "off");
 				EDITOR.input = false;
 			}
 			
+			discoveryBarIcon.classList.add("active");
+			
 			console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			
 			EDITOR.resizeNeeded();
@@ -420,7 +457,11 @@ inputReplace.setAttribute("autocomplete", "off");
 	
 	function findReplaceFromDiscoveryBar(file, combo, clickEvent) {
 		if(combo.shift) EDITOR.findInFiles(file, clickEvent);
-		else findReplace(file, combo);
+		else {
+			if(searchVisible) hide_search();
+			else findReplace(file, combo);
+			
+		}
 	}
 	
 	function findReplace(file, combo, character, charCode, keyPushDirection) {
