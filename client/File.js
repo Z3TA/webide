@@ -1544,6 +1544,9 @@ file.mode = "text";
 		
 		// This function currently don't know how to handle removing text that starts or ends with a line break! 
 		// (it would result in a bug, where not all lines are removed)
+		// We want the operation to be "atomic" eg. only generate *one* change event.
+		
+		
 		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
 			// note: Second argument in String.substring is "up to, but not including"
 			var removedText = file.text.substring(firstIndex, lastIndex+1);

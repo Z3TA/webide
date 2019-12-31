@@ -360,7 +360,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, false, function autocompleteInDotDotSyntaxErrorArrowFunction(callback) {
+	EDITOR.addTest(false, function autocompleteInDotDotSyntaxErrorArrowFunction(callback) {
 		EDITOR.openFile("/mywebsiteproject/autocompleteInDotDotSyntaxErrorArrowFunction.js", 'foo(x => {\nconst y = bar.baz().buzz();\nconsole..log(\n', function(err, file) {
 			
 			var atCaret = autoComplete(file, 52);

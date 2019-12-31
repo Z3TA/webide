@@ -3726,6 +3726,39 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		}
 	}
 	
+	EDITOR.addTest(1, false, function testInsertManyTextRowsThenUndo(callback) {
+		/*
+			How the heck do I solve this?
+			
+			inserText should be able to be reversed with deleteTextRange, 
+			but deleteTextRange cannot handle ending index on line breaks!
+
+We want each change to be atomic, eg. only one change event.
+			
+		*/
+		EDITOR.openFile("testInsertManyTextRowsThenUndo.txt", "abc\njkl\nmno\n", function (err, file) {
+			if(err) throw err;
+			var caret = file.createCaret(4);
+			file.insertText("def\nghi\n", caret);
+			
+			UTIL.assert(file.text, "abc\ndef\nghi\njkl\nmno\n");
+			
+			collabUndo(file);
+			
+			UTIL.assert(file.text, "abc\njkl\nmno\n");
+			
+			collabRedo(file);
+			
+			UTIL.assert(file.text, "abc\ndef\nghi\njkl\nmno\n");
+			
+			EDITOR.closeFile(file);
+			
+			callback(true);
+			
+			
+		});
+	});
+	
 	// TEST-CODE-END
 	
 	
