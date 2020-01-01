@@ -2997,7 +2997,7 @@ if(elements[i].style.display != "none") {
 			
 			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) return new Error("Discovery bar is disabled by query string!");
 			
-			EDITOR.discoveryBar.show();
+			//EDITOR.discoveryBar.show();
 			
 			return element;
 		},
@@ -3016,7 +3016,7 @@ if(elements[i].style.display != "none") {
 		show: function showDiscoveryBar() {
 			// Shows the whole discovery bar
 			if(!EDITOR.discoveryBar.enabled) {
-				console.warn("Discovery bar not enabled!");
+				throw new Error("Discovery bar not enabled!");
 				return;
 			}
 			
@@ -3039,6 +3039,11 @@ if(elements[i].style.display != "none") {
 					discoveryBar.setAttribute("class", "discoveryBar wrap");
 					
 					var parent = document.getElementById("leftColumn"); // rightColumn, leftColumn
+					
+					// Make sure the discovery bar is placed on the most left
+					if(parent.firstChild) parent.insertBefore(discoveryBar, parent.firstChild);
+					else parent.appendChild(discoveryBar);
+					
 				}
 				else {
 					// At the top
@@ -3050,9 +3055,10 @@ if(elements[i].style.display != "none") {
 					if(tabList) setHeight();
 					else setTimeout(setHeight, 1000);
 					
+					parent.appendChild(discoveryBar);
 				}
 				
-				parent.appendChild(discoveryBar);
+				
 				EDITOR.resizeNeeded();
 			}
 			
@@ -3068,6 +3074,7 @@ if(elements[i].style.display != "none") {
 			}
 			
 			EDITOR.discoveryBar.isVisible = true;
+			if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBar") != "true") EDITOR.storage.setItem("showDiscoveryBar", "true");
 			EDITOR.resizeNeeded();
 			
 			function setHeight() {
@@ -3088,6 +3095,7 @@ if(elements[i].style.display != "none") {
 			discoveryBar.style.display = "none";
 			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.deactivate();
 			EDITOR.discoveryBar.isVisible = false;
+			if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBar") != "false") EDITOR.storage.setItem("showDiscoveryBar", "false");
 			EDITOR.resizeNeeded();
 		},
 		toggle: function toggleDiscoveryBar() {
@@ -8577,6 +8585,13 @@ function main() {
 			
 			_serverStorage = json.storage;
 			
+				if(_serverStorage.showDiscoveryBar == "false") {
+					EDITOR.discoveryBar.hide();
+				}
+else if(_serverStorage.showDiscoveryBar == "true") {
+EDITOR.discoveryBar.show();
+}
+				
 			// Many plugins depend on the storage being available ...
 			// They need to be refactored to start on EDITOR.on("storageReady" ... !!
 				// Treat EDITOR.storage like window.localStorage! Eg. It's all strings so you have to JSON.parse !
@@ -8742,6 +8757,12 @@ function main() {
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
 		showDisoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
 		showDisoveryBarCaptions.activate();
+		
+		var hideDiscoveryBarButton = document.createElement("button");
+		hideDiscoveryBarButton.classList.add("hide");
+		hideDiscoveryBarButton.innerText = "Hide";
+		hideDiscoveryBarButton.onclick = EDITOR.discoveryBar.hide;
+		EDITOR.discoveryBar.add(hideDiscoveryBarButton, 1000)
 		
 		sendStatistics();
 		

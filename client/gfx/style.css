@@ -1540,7 +1540,7 @@ div.gotoFile li:hover {
 
 .dialog a:link, a:visited { /* a *with* a href */
 	text-decoration: underline;
-cursor: pointer;
+	cursor: pointer;
 }
 
 
@@ -1970,6 +1970,11 @@ padding: 0;
 	margin: 10px;
 margin-top: 20px;
 }
+
+.discoveryBar button.hide {
+
+}
+
 
 
 /* ### runBanner */

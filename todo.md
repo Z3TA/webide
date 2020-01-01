@@ -50,8 +50,12 @@ What I'm working on
 -------------------
 
 
+
+
 todo: Remember view>file-explorer,file-tabs etc
 Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
+
+bug: When deleting 3 rows, then undo, the first row gets indentation characters inserted!
 
 
 Adopt design for first time users, and computer noobs!
