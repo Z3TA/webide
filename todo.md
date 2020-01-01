@@ -49,6 +49,10 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+file INSERT TEXT need to be able to be reversed by FILE DELETE TEXT( range)!!
+
+
+
 Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
 todo: Also remember discovery bar captions
