@@ -13,6 +13,8 @@
 	
 	function loadFileReload() {
 		
+		EDITOR.bindKey({desc: S("save_current_file"), key: "R", combo: CTRL+SHIFT, fun: reloadFile});
+		
 		menuItem = EDITOR.ctxMenu.add(S("reload_from_disk"), reloadFile, 6);
 		winMenuReloadFromDisk = EDITOR.windowMenu.add(S("reload_from_disk"), [S("Edit"), 4], reloadFile);
 		
@@ -21,6 +23,8 @@
 	}
 	
 	function unloadFileReload() {
+		EDITOR.unbindKey(reloadFile);
+		
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
 		EDITOR.unregisterAltKey(reloadFile);
@@ -50,6 +54,8 @@ if(!file) return true;
 		
 		EDITOR.ctxMenu.hide();
 		
+return PREVENT_DEFAULT;
+
 		function reload() {
 			
 			if(file.isBig) {

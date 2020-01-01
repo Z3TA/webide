@@ -107,7 +107,7 @@ todo: progress bar in dark theme Safari needs styling (its currently dark green)
 
 todo: fix: When Ctrl clicking for example on a file tab, the browser opens the editor in an additional tab #
 
-
+todo: Try parcel (bundler) dev server
 
 
 issue: When you get asked to insall a nodejs module, and select "install all modues" it never works ...

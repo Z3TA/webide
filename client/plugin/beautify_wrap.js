@@ -1,11 +1,10 @@
 /*
 	
-	!DO:NOT:BUNDLE!
 	
-	When is this useful!?
+	When is wrapping single paragraphs/functions useful!?
 	When you are on a small screen and want to make the code fit!?
 	
-	Both js-beautify and prettify sux, but js-beautify sux a little less...
+	Both js-beautify and prettify sucks, but js-beautify sucks a little less...
 	
 	
 */
@@ -49,6 +48,8 @@
 		desc: "Format JS using js-beautify",
 		load: function loadJSbeautifyTextWrapper() {
 			
+			EDITOR.bindKey({desc: S("save_current_file"), key: "B", combo: CTRL + SHIFT, fun: beautify});
+			
 			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
 			
 			EDITOR.on("wrapText", wrapJavaScriptTool);
@@ -57,6 +58,8 @@
 			
 		},
 		unload: function unloadJSbeautifyTextWrapper() {
+			
+			EDITOR.unbindKey(beautify);
 			
 			EDITOR.windowMenu.remove(winMenuBeautify);
 			
@@ -208,9 +211,10 @@
 		
 		//console.log("beautify: dependenciesLoaded=" + dependenciesLoaded + " file.path=" + file.path);
 		
-		if(dependenciesLoaded) return jsBeautifyLoaded(null);
+		if(dependenciesLoaded) jsBeautifyLoaded(null);
+		else loadDependencies(deps, jsBeautifyLoaded);
 		
-		loadDependencies(deps, jsBeautifyLoaded);
+		return PREVENT_DEFAULT;
 		
 		function jsBeautifyLoaded(err) {
 			//console.log("beautify: jsBeautifyLoaded: err=" + err);
@@ -226,13 +230,17 @@ alertBox("Failed to load dependencies: " + err.message);
 			
 			console.log("beautify: before:\n" + text);
 			
+			// html_beautify and js_beautify functions are inserted to global scope by beautify.js
+			
 			if(isHTML(file)) text = html_beautify(text, jsSettings);
 			else if(isJS(file)) text = js_beautify(text, jsSettings);
-			else return alertBox("Unable to format file type " + UTIL.getFileExtension(file.path));
+			else return alertBox("Unable to js-beautify ." + UTIL.getFileExtension(file.path) + " file types!");
 			
 			console.log("beautify: after:\n" + text);
 			
 			file.reload(text);
+			
+			alertBox(file.path + ' was re-formatted/styled by js-beautify!\n<a title="' + EDITOR.getKeyFor("reloadFile") + '">Reload from disk</a> to undo. Or <a title="' + EDITOR.getKeyFor("saveFileFromKeyboardCombo") + '">save</a> to apply.');
 			
 		}
 	}

@@ -5961,7 +5961,7 @@ else {
 					character = getKeyboardMapping[f.charCode];
 				}
 				else {
-					character = f.char;
+					character = f.char || f.key;
 				}
 				
 				var combo = comboSumToString(actualComboSum || f.combo);

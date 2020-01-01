@@ -1533,6 +1533,18 @@ div.gotoFile li:hover {
 	
 }
 
+.dialog a { /* a without href, for example a title hidden message */
+	border-bottom: 1px dotted;
+	cursor: help;
+}
+
+.dialog a:link, a:visited { /* a *with* a href */
+	text-decoration: underline;
+cursor: pointer;
+}
+
+
+
 /* ############### Mercurial plugin widgets ############### */
 .repoCommit select {
 	overflow-y: scroll;
