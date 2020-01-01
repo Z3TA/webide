@@ -49,7 +49,9 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
+todo: Also remember discovery bar captions
 
 
 todo: Remember view>file-explorer,file-tabs etc
