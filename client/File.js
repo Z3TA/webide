@@ -1157,15 +1157,13 @@ file.mode = "text";
 		
 		var index = caret.index;
 		
-		// Insert the text
-		file.text = file.text.substr(0, index) + text + file.text.substring(index, file.text.length);
 		
-		/* 
-			Update the grid ...
-		*/
-		
+		// Fix inconsistent line breaks
 		text = text.replace(/\r/g, "");
-		text = text.replace(/\n/g, file.lineBreak);
+		if(file.lineBreak.length > 1) text = text.replace(/\n/g, file.lineBreak);
+		
+		file.text = file.text.substr(0, index) + text + file.text.substring(index, file.text.length); // Insert the text
+		
 		var textRows = text.split(file.lineBreak);
 		
 		// Insert the first row on the same row as the caret
@@ -1538,9 +1536,195 @@ file.mode = "text";
 		
 		console.log("deleteTextRange: firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " " + JSON.stringify(file.rowFromIndex(firstIndex)));
 		
+		file.sanityCheck();
+		file.debugGrid();
+		
 		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
+		
+		if(file.lineBreak == "\r\n") {
+			if(file.text.charAt(firstIndex) == "\n") throw new Error("First index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
+			if(file.text.charAt(lastIndex) == "\n") throw new Error("Last index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
+		}
+		
+		/*
+			This function need to be able to reverse File.inserText()!
+			The challange is updating the grid, and gridRow.indentationCharacters
+		*/
+		
+		console.log("++++++++ deleteTextRange ++++++++");
+		
+		console.time("deleteTextRange");
+		
+		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
+		
+		var grid = file.grid;
+		
+		var startCaret = file.createCaret(firstIndex);
+		// note: firstIndex can be inside indentation characters!
+		// note: iff firstIndex is on a linebreak, the caret will have col=[end col] and eol=true
+		if(startCaret.index > firstIndex) { // firstIndex is inside indentation characters!
+			var startColIndentationCharCount = firstIndex-startCaret.index;
+		}
+		else var startColIndentationCharCount = grid[startCaret.row].indentationCharacters.length;
+		
+		var endCaret = file.createCaret(lastIndex);
+		var endRow = endCaret.row;
+		if(endCaret.eol) endRow++;
+		
+		var endColBeforeChange = endCaret.col;
+		// note: lastIndex can also be inside indentation characters!
+		if(endCaret.index > lastIndex) { // lastIndex is inside indentation characters!
+			var endColIndentCharCount = lastIndex - endCaret.index ;
+		}
+		var endColIndentCharCount = grid[endCaret.row].indentationCharacters.length;
+		
+		var deletionLength = lastIndex - firstIndex;
+		deletionLength++; // same index is still one char
+		
+		
+		// Now when we got the values for the file.change, we can start changing the file state/content
+		
+		console.log("deleteTextRange: firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " startCaret=" + JSON.stringify(startCaret) + " endCaret=" + JSON.stringify(endCaret));
+		console.log("deleteTextRange: startColIndentationCharCount=" + startColIndentationCharCount + " endColIndentCharCount=" + endColIndentCharCount + " deletionLength=" + deletionLength); 
+		
+		file.text = deletePart(file.text, firstIndex, lastIndex); // Delete the text
+		
+		
+		if(startColIndentationCharCount < 0) {
+			console.log("deleteTextRange: Delete " + Math.abs(startColIndentationCharCount) + " indentation characters from row=" + startCaret.row);
+			grid[startCaret.row].indentationCharacters = grid[startCaret.row].indentationCharacters.slice(0, startColIndentationCharCount);
+			grid[startCaret.row].startIndex += startColIndentationCharCount;
+		}
+		
+		if(endColIndentCharCount < 0) {
+			console.log("deleteTextRange: Delete " + Math.abs(endColIndentCharCount) + " indentation characters from row=" + endCaret.row);
+			grid[endCaret.row].indentationCharacters = grid[endCaret.row].indentationCharacters.slice(0, endColIndentCharCount);
+			grid[endCaret.row].startIndex += endColIndentCharCount;
+		}
+		
+		if(startCaret.row == endRow) {
+			// Text was deleted from one row only
+			
+			if(endCaret.col > 0) {
+				
+				// Update index of remaining columns on the row
+				
+				for(var col=endCaret.col; col < grid[endCaret.row].length; col++) {
+					console.log("deleteTextRange: Updating index on row=" + endCaret.row + " col=" + col + " to " + (grid[endCaret.row][col].index - deletionLength));
+					grid[endCaret.row][col].index -= deletionLength;
+				}
+				// Delete columns to be deleted from first row
+				for(var col=startCaret.col; col<=endCaret.col; col++) {
+					console.log("deleteTextRange: Deleting col=" + col + " from row=" + startCaret.row);
+					grid[startCaret.row].splice(startCaret.col, 1); // Remove same index
+				 }
+			}
+			
+		}
+		else if(endRow > startCaret.row) {
+			// Merge the first row with the end row
+			
+			// Remove the deleted columns from the first row
+			var columsToRemove = grid[startCaret.row].length - startCaret.col;
+			var col = startCaret.col;
+			console.log("deleteTextRange: columsToRemove=" + columsToRemove + " from row=" + startCaret.row + " grid[" + startCaret.row + "].length=" + grid[startCaret.row].length);
+			while(columsToRemove > 0) {
+				console.log("deleteTextRange: Removing col char=" + grid[startCaret.row][col].char);
+				grid[startCaret.row].splice(col, 1);
+				columsToRemove--;
+			}
+			console.log("deleteTextRange: grid[" + startCaret.row + "].length=" + grid[startCaret.row].length);
+			
+			if(endCaret.index > lastIndex || endCaret.eol) {
+				// lastIndex is within the indentation characters
+				// or lastIndex is on a line break!
+				// The deleted indentation characters has already been removed.
+				// Add the remaining indentation characters from the last row
+				var indentationCharactersToAdd = grid[endCaret.row].indentationCharacters.length;
+				for(var i=0; i<grid[endCaret.row].indentationCharacters.length; i++) {
+					console.log("deleteTextRange: Adding indentation character=" + UTIL.lbChars(grid[endCaret.row].indentationCharacters.charAt(i)) + " from row=" + endCaret.row + " with index=" + (firstIndex+i));
+					grid[startCaret.row].push( new Box(grid[endCaret.row].indentationCharacters.charAt(i), firstIndex+i) );
+				}
+			}
+			else {
+				var indentationCharactersToAdd = 0;
+			}
+			
+			// Add the remaining columns on the last row
+			if(endCaret.eol) var col = 0; // endCaret.eol means lastIndex is on a line break character
+			else var col = endCaret.col+1
+			
+			for(var index=firstIndex+indentationCharactersToAdd; col<grid[endRow].length; col++, index++) {
+				
+				console.log("deleteTextRange: Adding column=" + col + " from row=" + endRow + " to row=" + startCaret.row + " and giving it index=" + index);
+				
+				if(grid[endRow][col] == undefined) throw new Error("col=" + col + " does not exist! grid[" + endCaret.row + "].length=" + grid[endCaret.row].length);
+				
+				grid[endRow][col].index = index; // Update index of the column
+				grid[startCaret.row].push( grid[endRow][col] ); // Add the column
+				
+			}
+			
+			// Remove deleted rows
+			var rowsToRemove = endRow - startCaret.row;
+			
+			var row = startCaret.row+1;
+			console.log("deleteTextRange: rowsToRemove=" + rowsToRemove + " grid.length=" + grid.length + " row=" + row + " endCaret.eol=" + endCaret.eol);
+			
+			while(rowsToRemove > 0) {
+				console.log("deleteTextRange: Removing row!");
+				file.grid.splice(row, 1);
+				rowsToRemove--;
+			}
+			console.log("deleteTextRange: grid.length=" + grid.length + "");
+			
+		}
+		else throw new Error("endRow=" + endRow + " startCaret.row=" + startCaret.row);
+		
+		
+		// Update indexes on all rows below
+		var lineNumberDecrementor = endRow - startCaret.row;
+		fixIndexOnRemainingRows(grid, startCaret.row+1, deletionLength, lineNumberDecrementor);
+		
+		grid[startCaret.row].owned = true;
+		
+		
+		if(grid.length == 0) throw new Error("Grid length should never be zero!");
+		
+		if(file.caret.index >= firstIndex) {
+			file.fixCaret(file.caret);
+		}
+		
+		// Update the view if it's below
+		if(  file.startRow >= (file.grid.length - EDITOR.view.visibleRows / 2)  ) file.scrollToCaret();
+		
+		
+		
+		
+		console.timeEnd("deleteTextRange");
+		
+		file.sanityCheck();
+		
+		EDITOR.renderNeeded();
+		
+		
+		file.change("deleteTextRange", removedText, firstIndex, startCaret.row, startCaret.col, startColIndentationCharCount, endRow, endColIndentCharCount);
+		
+		return removedText;
+		
+		
+		// Old implementation below:
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		// This function currently don't know how to handle removing text that starts or ends with a line break! 
 		// (it would result in a bug, where not all lines are removed)
@@ -3041,13 +3225,14 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		if(text == undefined) throw new Error("No text!");
 		
+		var index = 0, row = 0, col = 0, startColIndentationCharCount = 0, 
+		endRowBeforeChange =  file.grid.length-1, 
+		endColBeforeChange = file.grid[endRowBeforeChange].length-1, 
+		endColIndentCharCount = file.grid[endRowBeforeChange].indentationCharacters.length;
 		
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak);
-		
-		var endRow = file.grid.length-1;
-		var endCol = file.grid[endRow].length-1 + file.grid[endRow].indentationCharacters.length;
 		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);
@@ -3056,7 +3241,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		EDITOR.renderNeeded();
 		
-		file.change("reload", text, 0, 0, 0, endRow, endCol); // Fire events
+		file.change("reload", text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount); // Fire events
 		
 	}
 	
@@ -3379,10 +3564,16 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 	}
 	
-	File.prototype.change = function(change, text, index, row, col, endRow, endColPlusIndentationCharsLength) {
+	File.prototype.change = function(change, text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount) {
 		/*
 			This method is hopefully called every time the file changes.
 			So that we can know if the file has been saved or not.
+			
+			
+			endRow and endColIncludingIndentationCharsLength wanted by LSP protocol (https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/)
+			While it's not explicitly documented (LSP documentation sux) I assume endRow and endCol is *before* the change.
+			And most LSP implementations don't support Range and require you to send the whole file content on each change ... 
+			
 			
 		*/
 		var file = this;
@@ -3417,7 +3608,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			file.isCallingChangeEventListeners = f[i];
 			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(f[i]) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
 			//console.time("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
-			f[i](file, change, text, index, row, col, endRow, endColPlusIndentationCharsLength);
+			f[i](file, change, text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount);
 			//console.timeEnd("fileChange event listener: " + UTIL.getFunctionName(f[i]) + "");
 		}
 		//console.timeEnd("fileChange eventListeners");
@@ -4581,7 +4772,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
 		txt = txt.replace(/\t/g, "→");
 		
-		console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
+		console.log("visualizeTextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
 		
 		function spaces(n) {
 			var str = "";

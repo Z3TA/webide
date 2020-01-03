@@ -258,45 +258,65 @@
 		
 	});
 	
-	EDITOR.addTest(function testDeleteTextRange(callback) {
+	EDITOR.addTest(1, function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
 		EDITOR.openFile("testDeleteTextRange.js", '', function (err, file) {
 			
-			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
+			// file.deleteTextRange calls file.sanityCheck which will detect most errors!
 			
 			// Also make sure the change event is giving the correct data
 			EDITOR.on("fileChange", change);
 			var charsAfter = ""; // Will update in change
 			var charactersDeleted = "";
 			
+			test("abc#def#ghi#jkl#}", 4,11, "def\nghi\n");
+			//        ^^^^^^^^
+			
+			test("abc#def#ghi#jkl#}", 3,10, "\ndef\nghi");
+			//       ^^^^^^^^
+			
+			test("abc#def#ghi#jkl#}", 3,11, "\ndef\nghi\n");
+			//       ^^^^^^^^^
+			
 			test("<body>#<div>#→Hello World!#→</div>##</body>#", 13,25, "\tHello World!");
 			
 			test("<body>#<div>#→#→Hello World!#→#</div>#→#→</body>#→", 15,27, "\tHello World!");
 			
-			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18, "\t\tabc\r\n\t\tdef\r\n");
+			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18, "abc\r\n\t\tdef");
+			//             ^^^^^^^^^^
 			
-			test("{@#→abc@#→def@#}", 4,12, "\tabc\r\n\tdef\r\n");
+			test("{@#→abc@#→def@#}", 4,12, "abc\r\n\tdef");
+			//        ^^^^^^^^^
 			
-			test("abc#def##", 0,6, "abc\ndef\n");
+			test("abc#def##", 0,6, "abc\ndef");
+			//    ^^^^^^^
 			
 			test("abcd#efghijk", 0,11, "abcd\nefghijk");
 			
 			test("foo bar", 2,4);
 			
 			test("abc#def#ghi#jkl#", 1,13);
+			//     ^^^^^^^^^^^^^
 			
-			test("{#    abc#    def#}#", 6,16, "    abc\n    def\n");
-			test("{#→→→→abc#→→→→def#}#", 6,16, "\t\t\t\tabc\n\t\t\t\tdef\n");
+			test("{#    abc#    def#}#", 6,16, "abc\n    def");
+			//          ^^^^^^^^^^^
+			
+			test("{#→→→→abc#→→→→def#}#", 6,16, "abc\n\t\t\t\tdef");
+			//          ^^^^^^^^^^^
 			
 			test("{#    abc#    def#}gfi#", 7,20, "bc\n    def\n}gf");
+			//           ^^^^^^^^^^^^^^
 			
-			test("{ab#    cde#", 0,10, "{ab\n    cde\n");
+			test("{ab#    cde#", 0,10, "{ab\n    cde");
+			//    ^^^^^^^^^^^
 			
-			test("{#    {#    }#}", 12,14, "    }\n}");
+			test("{#    {#    }#}", 12,14, "}\n}");
+			//                ^^^
 			
 			test("→abc#→def", 1,3);
 			
-			test("→abc#→def", 1,8, "\tabc\n\tdef");
+			test("→abc#→def", 1,8, "abc\n\tdef");
+			//     ^^^^^^^^
 			
 			EDITOR.closeFile(file.path);
 			
@@ -320,6 +340,9 @@
 				var charsBefore = file.text;
 				
 				file.grid = file.createGrid();
+				file.fixCaret();
+				file.sanityCheck();
+				
 				
 				if(expectedRemovedText == undefined) expectedRemovedText = file.text.slice(start, end+1);
 				

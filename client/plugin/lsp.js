@@ -268,7 +268,7 @@ delete languageServers[language];
 		});
 	}
 	
-	function lspFileChange(file, type, characters, caretIndex, row, col, endRow, endCol) {
+	function lspFileChange(file, type, characters, caretIndex, row, col, colIndent, endRow, endCol, endColIndent) {
 		
 		if(!trackedFiles.hasOwnProperty(file)) {
 			console.log("lspFileChange: not tracked: " + file.path);
@@ -281,9 +281,8 @@ delete languageServers[language];
 		
 		var text = "";
 		var rangeLength = 0;
-		var indentLength = file.grid[row].indentationCharacters.length;
 		var range = {
-			start: {line: row, character: col+indentLength}
+			start: {line: row, character: col+colIndent}
 		};
 		
 		if(type == "removeRow") {
@@ -302,7 +301,7 @@ delete languageServers[language];
 			text = characters;
 		}
 		else if(type == "deleteTextRange") { // Deleted a bunch of text
-			range.end = {line: endRow, character: endCol};
+			range.end = {line: endRow, character: endCol+endColIndent};
 			rangeLength = characters.length;
 		}
 		else if(type == "linebreak") { // A line break was inserted
@@ -314,7 +313,7 @@ delete languageServers[language];
 			rangeLength = characters.length;
 		}
 		else if(type == "reload") { // The file was reloaded with new text
-			range.end = {line: endRow, character: endCol};
+			range.end = {line: endRow, character: endCol+endColIndent};
 			text = characters;
 		}
 		else {

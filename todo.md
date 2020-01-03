@@ -51,7 +51,7 @@ What I'm working on
 
 file INSERT TEXT need to be able to be reversed by FILE DELETE TEXT( range)!!
 
-
+todo: When adding discovery icons to header, add them before file tabs! (file tabs should always be last due to styling)
 
 Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
@@ -62,6 +62,8 @@ todo: Remember view>file-explorer,file-tabs etc
 Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
 
 bug: When deleting 3 rows, then undo, the first row gets indentation characters inserted!
+
+bug: Dropbox deamon keeps lingering after user is gone, and use a shitload of CPU...
 
 
 Adopt design for first time users, and computer noobs!

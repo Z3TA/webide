@@ -3726,14 +3726,11 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		}
 	}
 	
-	EDITOR.addTest(1, false, function testInsertManyTextRowsThenUndo(callback) {
+	EDITOR.addTest(2, false, function testInsertManyTextRowsThenUndo(callback) {
 		/*
-			How the heck do I solve this?
 			
-			inserText should be able to be reversed with deleteTextRange, 
-			but deleteTextRange cannot handle ending index on line breaks!
-
-We want each change to be atomic, eg. only one change event.
+			inserText should be able to be reversed with deleteTextRange!
+			and we want each change to only generate one change event.
 			
 		*/
 		EDITOR.openFile("testInsertManyTextRowsThenUndo.txt", "abc\njkl\nmno\n", function (err, file) {
