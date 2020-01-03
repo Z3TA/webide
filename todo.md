@@ -49,20 +49,28 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-file INSERT TEXT need to be able to be reversed by FILE DELETE TEXT( range)!!
+When running a HTML file with Node.JS !?
+Stacktrace:
+Error: Unable to determine formatting of errorString=SyntaxError: Invalid or unexpected token
+    at Object.parseJavaScriptErrorMessage [as parseErrorMessage] (https://webide.se/:4:11591)
+    at Object.showMessageFromStackTrace (https://webide.se/:12:106123)
+    at WysiwygEditor.error (https://webide.se/:74:30723)
+    at captureError (https://webide.se/:74:27750) 
 
 todo: When adding discovery icons to header, add them before file tabs! (file tabs should always be last due to styling)
+
+Release new semver MAJOR!
+
 
 Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
 todo: Also remember discovery bar captions
 
-issue: parser doesn't dedext HTML when there is a line break after for example <a 
+issue: parser doesn't detect HTML when there is a line break after for example <a 
 
 todo: Remember view>file-explorer,file-tabs etc
 Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
 
-bug: When deleting 3 rows, then undo, the first row gets indentation characters inserted!
 
 bug: Dropbox deamon keeps lingering after user is gone, and use a shitload of CPU...
 
@@ -81,8 +89,6 @@ Chromebooks doesn't seem to give an error stack when you get an error while in l
 
 
 
-
-Fix user errors.
 
 
 Able to "reset" a cloud IDE account without losing data. 
