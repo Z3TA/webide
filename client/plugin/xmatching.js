@@ -30,8 +30,8 @@
 
 
 		var name = "xMatcher" + xMatcher.length;
-		var customRender = function (ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
-			highlightMatch(ctx, buffer, file, a, b, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow);
+		var customRender = function (ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
+			highlightMatch(ctx, buffer, file, a, b, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns);
 		}
 		
 var func = customRender;
@@ -50,7 +50,7 @@ var func = customRender;
 
 	}
 	
-	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) {
+	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -64,7 +64,7 @@ var func = customRender;
 		//console.log("row=" + row + " col=" + col + "");
 		
 		// Is the caret inside the buffer!?
-		var caretInsideBuffer = row >= 0 && row < buffer.length && buffer[row].length >= col;
+		var caretInsideBuffer = row >= 0 && row < buffer.length && buffer[row].length > col;
 		
 		if(caretInsideBuffer) {
 			// What type of character is the caret on?
@@ -73,7 +73,7 @@ var func = customRender;
 			
 			if(!file.caret.eol && buffer[row].length > 0) {
 				if(!buffer[row][col]) throw new Error("Unable to find character on row=" + row + " col=" + col + " buffer[row][col]=" + buffer[row][col] + " bufferStartRow=" + bufferStartRow +
-				" bufferEndRow=" + bufferEndRow + " startRow=" + startRow + " buffer.length=" + buffer.length + " buffer[" + row + "].length=" + (buffer[row] && buffer[row].length) + " file.path=" + file.path + " How come the col/row doesn't exist on the grid!?");
+				" bufferEndRow=" + bufferEndRow + " startRow=" + startRow + " buffer.length=" + buffer.length + " buffer[" + row + "].length=" + (buffer[row] && buffer[row].length) + " maxColumns=" + maxColumns + " file.path=" + file.path + " How come the col/row doesn't exist on the grid!?");
 				charAtCaret = buffer[row][col].char;
 			}
 			

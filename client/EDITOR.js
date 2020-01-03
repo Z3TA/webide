@@ -2085,7 +2085,7 @@ usePseudoClipboard = false;
 			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
 				//console.time("prerender: " + funName);
-				buffer = EDITOR.preRenderFunctions[i](buffer, file, bufferStartRow); // Call render
+				buffer = EDITOR.preRenderFunctions[i](buffer, file, bufferStartRow, maxColumns); // Call render
 				//console.timeEnd("prerender: " + funName);
 			}
 			//console.timeEnd("preRenders");
@@ -2128,7 +2128,7 @@ usePseudoClipboard = false;
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
 				//console.time("render: " + funName);
-				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, screenStartRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, screenStartRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns); // Call render
 				//console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
