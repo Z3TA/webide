@@ -148,9 +148,9 @@
 			
 			// We should now have deleted everything!
 			
-			if(file.text.length > 0) {
+			if(file.text != "\n") {
 				console.log(UTIL.lbChars(file.text));
-				throw new Error("Expected all content to be deleted! file.text.length=" + file.text.length);
+				throw new Error("Expected all content except the line break to be deleted! file.text.length=" + file.text.length);
 			}
 			
 			/*
@@ -258,7 +258,7 @@
 		
 	});
 	
-	EDITOR.addTest(1, function testDeleteTextRange(callback) {
+	EDITOR.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
 		EDITOR.openFile("testDeleteTextRange.js", '', function (err, file) {
 			
@@ -268,6 +268,18 @@
 			EDITOR.on("fileChange", change);
 			var charsAfter = ""; // Will update in change
 			var charactersDeleted = "";
+			
+			test("abc#def#", 0,0, "a");
+			//    ^
+			
+			test("abc#def#", 2,2, "c");
+			//      ^
+			
+			test("abc#def#", 3,3, "\n");
+			//       ^
+			
+			test("abc#def#", 7,7, "\n");
+			//           ^
 			
 			test("abc#def#ghi#jkl#}", 4,11, "def\nghi\n");
 			//        ^^^^^^^^

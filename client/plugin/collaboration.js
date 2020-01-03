@@ -3539,10 +3539,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			file.insertText("123\nabc\ndef\n456");
 			if(file.text != "123\nabc\ndef\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
-			var sel = file.createTextRange(4,10);
+			var sel = file.createTextRange(4,10); // abc#def
 			file.select(sel);
 			file.deleteSelection();
-			if(file.text != "123\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			if(file.text != "123\n\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo delete selection
 			if(file.text != "123\nabc\ndef\n456\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
@@ -3726,7 +3726,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		}
 	}
 	
-	EDITOR.addTest(2, false, function testInsertManyTextRowsThenUndo(callback) {
+	EDITOR.addTest(false, function testInsertManyTextRowsThenUndo(callback) {
 		/*
 			
 			inserText should be able to be reversed with deleteTextRange!

@@ -1542,7 +1542,7 @@ file.mode = "text";
 		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
-		
+
 		if(file.lineBreak == "\r\n") {
 			if(file.text.charAt(firstIndex) == "\n") throw new Error("First index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
 			if(file.text.charAt(lastIndex) == "\n") throw new Error("Last index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
@@ -1607,19 +1607,16 @@ file.mode = "text";
 		if(startCaret.row == endRow) {
 			// Text was deleted from one row only
 			
-			if(endCaret.col > 0) {
-				
-				// Update index of remaining columns on the row
-				
-				for(var col=endCaret.col; col < grid[endCaret.row].length; col++) {
-					console.log("deleteTextRange: Updating index on row=" + endCaret.row + " col=" + col + " to " + (grid[endCaret.row][col].index - deletionLength));
-					grid[endCaret.row][col].index -= deletionLength;
-				}
-				// Delete columns to be deleted from first row
-				for(var col=startCaret.col; col<=endCaret.col; col++) {
-					console.log("deleteTextRange: Deleting col=" + col + " from row=" + startCaret.row);
-					grid[startCaret.row].splice(startCaret.col, 1); // Remove same index
-				 }
+			// Update index of remaining columns on the row
+			
+			for(var col=endCaret.col; col < grid[endCaret.row].length; col++) {
+				console.log("deleteTextRange: Updating index on row=" + endCaret.row + " col=" + col + " to " + (grid[endCaret.row][col].index - deletionLength));
+				grid[endCaret.row][col].index -= deletionLength;
+			}
+			// Delete columns to be deleted from first row
+			for(var col=startCaret.col; col<=endCaret.col; col++) {
+				console.log("deleteTextRange: Deleting col=" + col + " from row=" + startCaret.row);
+				grid[startCaret.row].splice(startCaret.col, 1); // Remove same index
 			}
 			
 		}
