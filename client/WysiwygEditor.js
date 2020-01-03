@@ -66,6 +66,8 @@ var WysiwygEditor;
 	var oldCodeWindowPosition;
 	var oldCodeWindowSize;
 	
+	var knowsAboutIgnoreTransformNotYetImplemented = []; // Only tell the user once per file
+	
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
 		
@@ -101,7 +103,10 @@ var WysiwygEditor;
 		wysiwygEditor.sourceFile = sourceFile;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
-		if(sourceFile.text.indexOf("<?JS") != -1) throw new Error("Source file contains dynamic script tags. Ignore/transform filter not yet implemented.");
+		if(sourceFile.text.indexOf("<?JS") != -1 && knowsAboutIgnoreTransformNotYetImplemented.indexOf(wysiwygEditor.sourceFile.path) == -1) {
+alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet supported in live-preview. So after making changes you have to manually click preview to re-generate the page.");
+			knowsAboutIgnoreTransformNotYetImplemented.push(wysiwygEditor.sourceFile.path);
+		}
 		
 		wysiwygEditor.reloadAfterSave = false;
 		
@@ -205,11 +210,10 @@ var WysiwygEditor;
 			
 			wysiwygEditor.setStartRow();
 			
-			
+			if(!wysiwygEditor.onlyPreview) {
 			// Because "ignoreTransform" is not yet supported:
-			
-			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
-				var msg = "Can not edit the page in WYSIWYG mode because the HTML does not match the source:\n";
+				if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
+					var msg = "Can not edit the page in WYSIWYG mode (wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview + ") because the HTML does not match the source:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
 					msg += "Line " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1 + wysiwygEditor.startRow) + ": ";
 					if(wysiwygEditor.ignoreTransform.inserted[i].text == "") msg += " Inserted New line\n"
@@ -230,6 +234,8 @@ var WysiwygEditor;
 				alertBox(msg);
 				return wysiwygEditor.close();
 			}
+		}
+			
 		}
 		else wysiwygEditor.ignoreTransform = null; // Not compiled
 		
@@ -1893,7 +1899,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			/*
 				"dancing" will mess up the source code, so we want to avoid it if possible.
-				I'ts only needed if we want to edit in WYSIWYG mode !?
+				I'ts only needed if we want to edit in WYSIWYG mode!? yep
 			*/
 			if(!wysiwygEditor.onlyPreview) wysiwygEditor.dance();
 			
