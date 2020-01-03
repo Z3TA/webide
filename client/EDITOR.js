@@ -7421,7 +7421,7 @@ EDITOR.reload = function reload(url) {
 }
 
 var waitingForFileToBeParsed = {};
-EDITOR.parse = function parse(fileOrString, lang, path, callback) {
+	EDITOR.parse = function parse(fileOrString, lang, path, callback) {
 	/*
 		Useful for when you want to parse a file, but not open it. Returns:
 		{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
@@ -7459,6 +7459,8 @@ EDITOR.parse = function parse(fileOrString, lang, path, callback) {
 	}
 	
 	function parseDone(err, parseResult) {
+			if(!waitingForFileToBeParsed.hasOwnProperty(path)) throw new Error("path=" + path + " not in waitingForFileToBeParsed=" + JSON.stringify(waitingForFileToBeParsed, null, 2) + "\nfileOrString=" + fileOrString+ " lang=" + lang + " err?" + (!!err) + " parseResult?" + (!!parseResult) + ". How did this happen!?");
+			
 		for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
 			waitingForFileToBeParsed[path][i](err, parseResult);
 		}
