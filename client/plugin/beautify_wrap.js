@@ -137,7 +137,7 @@
 		console.log("beautify: wrap: startRow=" + startRow + " endRow=" + endRow);
 		
 		var settings = {
-			indent_size: file.indentation.length,
+			indent_size: 0, // file.indentation.length,
 			indent_char: file.indentation.charAt(0),
 			indent_with_tabs: (file.indentation == "\t"),
 			eol: file.lineBreak,
@@ -183,7 +183,14 @@
 			
 			console.log("beautify: wrap: before:\n" + text);
 			
-			text = js_beautify(text, settings);
+			if(isHTML(file)) {
+				console.log("beautify: wrap: using html_beautify for file.path=" + file.path)
+				text = html_beautify(text, settings);
+			}
+			else if(isJS(file)) {
+				console.log("beautify: wrap: using js_beautify for file.path=" + file.path)
+				text = js_beautify(text, settings);
+			}
 			
 			console.log("beautify: wrap: after:\n" + text);
 			
@@ -199,12 +206,15 @@
 		
 		var file = EDITOR.currentFile;
 		
+		// Use zero indent size because the Editor will take care of the indentation!
+		// And some users like to use 100 <main> elements after each other making jsBeautify end up using 3 character line length ...
 		var jsSettings = {
-			indent_size: file.indentation.length,
+			indent_size: 0, // file.indentation.length
 			indent_char: file.indentation.charAt(0),
 			indent_with_tabs: (file.indentation == "\t"),
 			eol: file.lineBreak,
 			end_with_newline: true, // opinioned, nice for version control
+			wrap_line_length: EDITOR.view.visibleColumns - 1 // Where to break line
 		}
 		
 		var htmlSettings = undefined;
@@ -228,12 +238,20 @@ alertBox("Failed to load dependencies: " + err.message);
 			
 			var text = file.text;
 			
+			console.log("beautify: jsSettings=" + JSON.stringify(jsSettings, null, 2));
+			
 			console.log("beautify: before:\n" + text);
 			
 			// html_beautify and js_beautify functions are inserted to global scope by beautify.js
 			
-			if(isHTML(file)) text = html_beautify(text, jsSettings);
-			else if(isJS(file)) text = js_beautify(text, jsSettings);
+			if(isHTML(file)) {
+				console.log("beautify: using html_beautify for file.path=" + file.path)
+				text = html_beautify(text, jsSettings);
+			}
+			else if(isJS(file)) {
+				console.log("beautify: using js_beautify for file.path=" + file.path)
+text = js_beautify(text, jsSettings);
+			}
 			else return alertBox("Unable to js-beautify ." + UTIL.getFileExtension(file.path) + " file types!");
 			
 			console.log("beautify: after:\n" + text);

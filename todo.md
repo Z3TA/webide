@@ -57,6 +57,7 @@ Detect if running as PWA on desktop, or in "browser" so we know if we can use Ct
 
 todo: Also remember discovery bar captions
 
+issue: parser doesn't dedext HTML when there is a line break after for example <a 
 
 todo: Remember view>file-explorer,file-tabs etc
 Load last settings when starting the editor. eg. if discovery bar was hidden, make it hidden when reopening the editor
