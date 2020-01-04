@@ -152,7 +152,7 @@ exec("apt-get install python-certbot-nginx -y");
 
 console.log("Installing archive extractor utilities");
 exec("apt-add-repository multiverse && apt-get update");
-exec("apt-get install unzip unrar -y");
+exec("apt-get install zip unzip unrar -y");
 
 console.log("Installing CGSF dependencies");
 exec("apt-get install fuse -y");
