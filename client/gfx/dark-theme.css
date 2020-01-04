@@ -504,6 +504,13 @@ a:visited {
 	
 }
 
+.discoveryBar button.hide {
+	background-color: transparent;
+	color: #787878;
+	border: 0px solid red;
+	width: 100%;
+	text-align: center;
+}
 
 
 /* Color of table scrollbar (color *behind* table) */

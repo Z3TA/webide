@@ -89,8 +89,6 @@ add custom buttons to the discovery bar
 
 Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
-todo: Also remember discovery bar captions
-
 issue: parser doesn't detect HTML when there is a line break after for example <a 
 
 todo: Remember view>file-explorer,file-tabs etc
