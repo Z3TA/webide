@@ -78,16 +78,6 @@ Do you want to merge them ?
 
 
 
-
-When running a HTML file with Node.JS !?
-Stacktrace:
-Error: Unable to determine formatting of errorString=SyntaxError: Invalid or unexpected token
-    at Object.parseJavaScriptErrorMessage [as parseErrorMessage] (https://webide.se/:4:11591)
-    at Object.showMessageFromStackTrace (https://webide.se/:12:106123)
-    at WysiwygEditor.error (https://webide.se/:74:30723)
-    at captureError (https://webide.se/:74:27750) 
-
-
 Release new semver MAJOR!
 
 todo: Amazon S3 Support!
@@ -119,7 +109,6 @@ whith option to create new site
 bug: Sometimes when clicking to close a file on the file tabs it opens a new browser tab! (when we get the confirm box?)
 
 
-Chromebooks doesn't seem to give an error stack when you get an error while in live preview (WysiwygEditor)
 
 
 
