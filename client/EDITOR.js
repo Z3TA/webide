@@ -3113,6 +3113,9 @@ if(elements[i].style.display != "none") {
 		},
 		toggleCaptions: function toggleDiscoveryBarCaptions(wantedState) {
 			
+			if(wantedState=="true") wantedState = true;
+			else if(wantedState=="false") wantedState = false;
+			
 			if(wantedState === true && EDITOR.discoveryBar.captions) return;
 			if(wantedState === false && !EDITOR.discoveryBar.captions) return;
 			
@@ -3125,14 +3128,18 @@ if(elements[i].style.display != "none") {
 				
 				EDITOR.discoveryBar.captions = false;
 				if(showDisoveryBarCaptions) showDisoveryBarCaptions.deactivate();
+				if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBarCaptions") != "false") EDITOR.storage.setItem("showDiscoveryBarCaptions", "false");
 			}
 			else {
 				
 				for(var i=0; i<elList.length; i++) {
 					elList[i].classList.remove("hidden");
 				}
-				if(showDisoveryBarCaptions) showDisoveryBarCaptions.activate();
+				
 				EDITOR.discoveryBar.captions = true;
+				if(showDisoveryBarCaptions) showDisoveryBarCaptions.activate();
+				if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBarCaptions") != "true") EDITOR.storage.setItem("showDiscoveryBarCaptions", "true");
+				
 			}
 			
 			
@@ -8598,6 +8605,9 @@ else if(_serverStorage.showDiscoveryBar == "true") {
 EDITOR.discoveryBar.show();
 }
 				
+				if(_serverStorage.showDiscoveryBarCaptions) EDITOR.discoveryBar.toggleCaptions(_serverStorage.showDiscoveryBarCaptions);
+				
+				
 			// Many plugins depend on the storage being available ...
 			// They need to be refactored to start on EDITOR.on("storageReady" ... !!
 				// Treat EDITOR.storage like window.localStorage! Eg. It's all strings so you have to JSON.parse !
@@ -8770,6 +8780,13 @@ EDITOR.discoveryBar.show();
 		hideDiscoveryBarButton.innerText = "Hide";
 		hideDiscoveryBarButton.onclick = EDITOR.discoveryBar.hide;
 		EDITOR.discoveryBar.add(hideDiscoveryBarButton, 1000)
+		
+		/*
+			Always show the discovery bar! Even if it will be hidden later when user settings is loaded
+			This will make it "blink".
+			But we want to show the discovery bar by default if the user has not logged in (for a first time user)
+		*/
+		EDITOR.discoveryBar.show();
 		
 		sendStatistics();
 		
