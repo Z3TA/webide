@@ -49,6 +49,33 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+When trying to run pull && up:
+how to unfuck!?
+
+There are multiple heads:
+[
+{
+"changeset": "5263:5315e8cf7d94",
+"tag": "tip",
+"user": "admin",
+"date": "Sat Jan 04 00:59:02 2020 +0100",
+"summary": "\"todo\""
+},
+{
+"changeset": "5133:04618d6de155",
+"user": "johan",
+"date": "Sun Dec 01 13:22:08 2019 +0000",
+"summary": "\"Merge conflict\""
+}
+]
+
+Do you want to merge them ?
+
+
+
+
+
+
 When running a HTML file with Node.JS !?
 Stacktrace:
 Error: Unable to determine formatting of errorString=SyntaxError: Invalid or unexpected token
@@ -57,7 +84,6 @@ Error: Unable to determine formatting of errorString=SyntaxError: Invalid or une
     at WysiwygEditor.error (https://webide.se/:74:30723)
     at captureError (https://webide.se/:74:27750) 
 
-todo: When adding discovery icons to header, add them before file tabs! (file tabs should always be last due to styling)
 
 Release new semver MAJOR!
 

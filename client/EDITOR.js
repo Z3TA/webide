@@ -3055,7 +3055,10 @@ if(elements[i].style.display != "none") {
 					if(tabList) setHeight();
 					else setTimeout(setHeight, 1000);
 					
-					parent.appendChild(discoveryBar);
+					// Make sure it's above file tabs
+					var fileTabs = document.getElementById("tabList");
+					if(fileTabs) parent.insertBefore(discoveryBar, fileTabs);
+					else parent.appendChild(discoveryBar);
 				}
 				
 				
@@ -8761,6 +8764,7 @@ EDITOR.discoveryBar.show();
 		showDisoveryBarCaptions.activate();
 		
 		var hideDiscoveryBarButton = document.createElement("button");
+		hideDiscoveryBarButton.title = "Hide discovery bar icons";
 		hideDiscoveryBarButton.classList.add("hide");
 		hideDiscoveryBarButton.innerText = "Hide";
 		hideDiscoveryBarButton.onclick = EDITOR.discoveryBar.hide;

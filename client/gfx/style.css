@@ -1947,6 +1947,12 @@ margin-left: 5px;
 padding: 0;
 }
 
+
+.header .discoveryBar button.hide {
+	margin-top: 10px;
+}
+
+
 .discoveryBar .discoveryItem {
 	bacgkround-color: blue;
 	margin: 0px;
@@ -1971,9 +1977,6 @@ padding: 0;
 margin-top: 20px;
 }
 
-.discoveryBar button.hide {
-
-}
 
 
 
@@ -2215,6 +2218,10 @@ margin-top: 20px;
 	
 	.header .discoveryBar .discoveryItem img {
 		height: 18px;
+	}
+	
+	.header .discoveryBar button.hide {
+		margin-top: 6px;
 	}
 	
 	.windowMenu .menu.vertical.pulloutbottom {
