@@ -49,6 +49,7 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+Release new semver MAJOR!
 
 
 
@@ -78,7 +79,7 @@ Do you want to merge them ?
 
 
 
-Release new semver MAJOR!
+
 
 todo: Amazon S3 Support!
 

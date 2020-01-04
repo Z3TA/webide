@@ -26,7 +26,7 @@
 			
 			CLIENT.on("loginSuccess", checkIfDropboxIsRunning);
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/icon/dropbox.svg", 70, "Dropbox", "Dropbox", dropboxDiscoveryClicked, dropboxDiscoveryContextMenuActivated);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/icon/dropbox.svg", 70, "Dropbox", "DRBOX", dropboxDiscoveryClicked, dropboxDiscoveryContextMenuActivated);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			

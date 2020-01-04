@@ -1914,11 +1914,16 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	font-size:10px;
 	line-height: 10px;
 	
+	color: #333;
 	background-color: rgba(255,255,255, .75);
 }
 
 .discoveryItem figcaption.hidden {
 display: none;
+}
+
+.discoveryItem .active figcaption, .discoveryItem:hover figcaption {
+	color: #000;
 }
 
 .header .discoveryBar {
@@ -2258,7 +2263,7 @@ margin-top: 20px;
 }
 	
 	.leftColumn .discoveryBar {
-		margin-top: 5px;
+		padding-top: 5px;
 	}
 	
 	.leftColumn .discoveryBar .discoveryItem {
@@ -2318,7 +2323,7 @@ margin-top: 20px;
 	}
 	
 	.leftColumn .discoveryBar {
-		margin-top: 5px;
+		padding-top: 5px;
 	}
 	
 	.leftColumn .discoveryBar .discoveryItem {
