@@ -680,6 +680,29 @@ return;
 				
 				return false;
 			}
+			
+			var optZipFolder = document.createElement("li");
+			optZipFolder.innerText = "Zip folder";
+			fileItemMenu.appendChild(optZipFolder);
+			optZipFolder.onclick = function zipFolder(clickEvent) {
+
+				var filename = UTIL.getFolderName(path) + ".zip";
+				
+				promptBox("Where to save " + filename + " ?", {defaultValue: path}, function(answer) {
+					if(!answer) return;
+					
+					CLIENT.cmd("zip", {source: path, destination: answer, filename: filename}, function(err, json) {
+						if(err) alertBox(err.message);
+						else {
+							exploreDir(json.destination);
+						}
+					});
+					
+				});
+				
+				return false;
+			};
+			
 		}
 		
 		var optDelete = document.createElement("li");

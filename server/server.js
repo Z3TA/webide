@@ -2582,6 +2582,7 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
 				foldersToMount++;module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/zip", homeDir + "usr/bin/zip", folderMounted); // Create .zip files (zip folders)
 				foldersToMount++;module_mount("/usr/bin/make", homeDir + "usr/bin/make", folderMounted); // Needed by some npm modules to install
 				foldersToMount++;module_mount("/usr/bin/printf", homeDir + "usr/bin/printf", folderMounted); // Needed by some make scripts
 				foldersToMount++;module_mount("/usr/bin/g++", homeDir + "usr/bin/g++", folderMounted); // Needed by some make scripts

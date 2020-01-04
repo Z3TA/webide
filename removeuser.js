@@ -150,6 +150,7 @@ umount("/home/" + username + "/usr/bin/ssh");
 umount("/home/" + username + "/usr/bin/ssh-keygen");
 umount("/home/" + username + "/usr/bin/unrar");
 umount("/home/" + username + "/usr/bin/unzip");
+umount("/home/" + username + "/usr/bin/zip");
 	umount("/home/" + username + "/usr/bin/make");
 	umount("/home/" + username + "/usr/bin/printf");
 	umount("/home/" + username + "/usr/bin/g++");

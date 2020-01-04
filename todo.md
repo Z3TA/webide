@@ -49,6 +49,9 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+
+
+
 When trying to run pull && up:
 how to unfuck!?
 

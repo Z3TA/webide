@@ -35,6 +35,39 @@ API.countLines = function countLines(user, json, callback) {
 	
 }
 
+API.zip = function zipFolder(user, json, callback) {
+	
+	var folder = json.source;
+	var destinationFolder = json.destination;
+	var filename = json.filename;
+	
+	if(folder == undefined) return callback(new Error("No source specified!"));
+	if(destinationFolder == undefined) destinationFolder = folder;
+	if(filename == undefined) filename = UTIL.getFolderName(folder) + ".zip";
+	
+	var execFile = require('child_process').execFile;
+	var execFileOptions = {cwd: folder, env: {HOME: "/", PATH:"/bin/:/usr/bin/"}};
+	
+	console.log("Creating zip archive: folder=" + folder + " destinationFolder=" + destinationFolder + " filename=" + filename);
+	
+	var exe = "/usr/bin/zip";
+	var args =  ["-r", UTIL.joinPaths(destinationFolder, filename), folder];
+	
+	execFile(exe, args, execFileOptions, function (err, stdout, stderr) {
+		
+		console.log(exe + " args=" + JSON.stringify(args) + " stderr=" + stderr + " stdout=" + stdout + " ");
+		
+		if(err) return callback(err);
+		else if(stderr) return callback(stderr);
+		else {
+			
+			return callback(null, {source: folder, destination: destinationFolder});
+			
+		}
+	});
+	
+}
+
 API.extract = function extract(user, json, callback) {
 	
 	var supportedFileTypes = ["zip", "rar", "gz", "tar.gz", "tgz"];
