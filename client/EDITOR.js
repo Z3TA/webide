@@ -4035,7 +4035,8 @@ if(elements[i].style.display != "none") {
 				}
 			}
 			
-			var keyCombo = EDITOR.getKeyFor(keyComboFunction || whenClicked);
+			if(menu == dropdownMenuRoot) var keyCombo = null; // Don't show key combos in top level menus
+			else var keyCombo = EDITOR.getKeyFor(keyComboFunction || whenClicked);
 			
 			
 			var action = function menuItemClick(clickEvent) {

@@ -87,6 +87,11 @@ Error: Unable to determine formatting of errorString=SyntaxError: Invalid or une
 
 Release new semver MAJOR!
 
+todo: Amazon S3 Support!
+
+idea: Configurative buttons. Eg when you press a button you can set what function to run!
+add custom buttons to the discovery bar
+
 
 Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
