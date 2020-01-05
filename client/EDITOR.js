@@ -743,7 +743,7 @@ usePseudoClipboard = false;
 			options = {};
 		}
 		
-		if(typeof callback != "function") throw new Error("First argument needs to be a callback function!");
+		if(typeof callback != "function") throw new Error("No callback function found in arguments to EDITOR.getClipboardContent!");
 		
 		if(navigator.clipboard && typeof navigator.clipboard.readText == "function") {
 			console.log("getClipboardContent: Trying navigator.clipboard ...");
@@ -8107,7 +8107,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 			}
 			else {
 				alertBox('Thanks for your invaluable feedback! ' + 
-' Dont hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
+' Don\'t hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
 ' ');
 			}
 		});
@@ -9941,14 +9941,33 @@ function paste(pasteEvent) {
 			file.insertText(text);
 			
 			//file.fixCaret();
+				
+				
+				/*
+					In Chrome pressing Ctrl+Shift+V will paste.
+					But keydown is called before paste event!
+					So if you have something bound to Ctrl+Shift+V nothing will be pasted!
+					
+					After pasting, Chrome will call keyPressed. 
+					And there seem to be no way to prevent Chrome from calling keyPressed. 
+					eg. preventDefault doesn't work.
+					Resulting in a dialog asking the user what to do as keyPressed thinkgs a Control character was inserted.
+					
+					In Safari and Firefox Ctrl/Cmd+Shift+V will do nothing
+					
+					Ctrl+Shift+V in Chrome means "paste as plain text".
+					But the editor already does that for Ctrl+V
+					(There doesn't seem to be a way to get the "richtext" from the clipboard, just the plain text)
+				*/
+				
 		}
 	}
 	else {
-		console.log("paste: EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
+			// Do the default action (enable pasting outside the canvas)
+		console.log("paste: Outside canvas! EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
 	}
 	
-	// else: Do the default action (enable pasting outside the canvas)
-	
+		
 	EDITOR.interact("paste", pasteEvent);
 	
 }
@@ -9986,7 +10005,7 @@ function keyPressed(keyPressEvent) {
 	var preventDefault = false;
 	var funReturn = true;
 	
-	console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		console.warn("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 	
 	// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
 	if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
@@ -10069,7 +10088,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				function(answer) {
 					if(!answer) return;
 					
-					var message = answer + "\nkey=" + keyPressEvent.key + " combo=" + JSON.stringify(combo) + " comboStr=" + comboStr;
+					var message = answer + "\nkey=" + keyPressEvent.key + "\ncombo=" + JSON.stringify(combo) + "\ncomboStr=" + comboStr + "\nBROWSER=" + BROWSER;
 					EDITOR.sendFeedback(message, "Keybinding wanted");
 				});
 				

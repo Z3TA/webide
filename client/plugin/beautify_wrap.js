@@ -12,8 +12,9 @@
 (function() {
 	"use strict";
 
-	var deps = ["../js-beautify.1.10.2/beautify.js", "../js-beautify.1.10.2/beautify-html.js"];
-	var dependenciesLoaded = false;
+	var DEPS = ["../js-beautify.1.10.2/beautify.js", "../js-beautify.1.10.2/beautify-html.js"];
+	var DEPENDENCIES_LOADED = false;
+	
 	var winMenuBeautify;
 	
 	var defaultSettings = {
@@ -49,6 +50,8 @@
 		load: function loadJSbeautifyTextWrapper() {
 			
 			EDITOR.bindKey({desc: S("save_current_file"), key: "B", combo: CTRL + SHIFT, fun: beautify});
+			
+			//EDITOR.bindKey({desc: "Paste beautified", key: "V", combo: CTRL + SHIFT, fun: pasteBeautified});
 			
 			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
 			
@@ -144,7 +147,7 @@
 			end_with_newline: false, // When wrapping, the last row can not be empty!
 			wrap_line_length: EDITOR.view.visibleColumns - 1, // Where to break line
 			unescape_strings: true
-		}
+		};
 		
 		var rowsBefore = endRow - startRow + 1;
 		var indentationStart = file.grid[startRow].indentation;
@@ -171,9 +174,9 @@
 		
 		var text = file.text.slice(startIndex, endIndex+1);
 		
-		if(dependenciesLoaded) return jsBeautifyLoaded(null);
+		if(DEPENDENCIES_LOADED) return jsBeautifyLoaded(null);
 		
-		loadDependencies(deps, jsBeautifyLoaded);
+		loadDependencies(DEPS, jsBeautifyLoaded);
 		
 		function jsBeautifyLoaded(err) {
 			if(err) {
@@ -201,6 +204,64 @@
 		}
 	}
 	
+	function pasteBeautified(file) {
+		
+		if(!file) return ALLOW_DEFAULT;
+		if(!EDITOR.input) return ALLOW_DEFAULT;
+		
+		// Chrome users probably want "paste as plain text". And that's what they will get (plus formatting)
+		// https://defkey.com/what-means/ctrl-shift-v
+
+		var text;
+		
+		EDITOR.getClipboardContent(function gotClipboardDate(err, data, usingPseudoClipboard) {
+			if(err) return alertBox(err.message);
+			
+			text = data;
+			
+			if(DEPENDENCIES_LOADED) return pasteAfterBeautifyLoaded(null);
+			
+			loadDependencies(DEPS, pasteAfterBeautifyLoaded);
+		});
+		
+		return PREVENT_DEFAULT;
+		
+		function pasteAfterBeautifyLoaded(err) {
+			if(err) {
+				alertBox("Failed to load formatting dependencies: " + err.message);
+				return;
+			}
+			
+			console.log("beautify: pasteBeautified: before:\n" + text);
+			
+			var settings = {
+				indent_size: 0, // file.indentation.length,
+				indent_char: file.indentation.charAt(0),
+				indent_with_tabs: (file.indentation == "\t"),
+				eol: file.lineBreak,
+				end_with_newline: false,
+				wrap_line_length: EDITOR.view.visibleColumns - 1, // Where to break line
+				unescape_strings: true
+			};
+			
+			if(isHTML(file)) {
+				console.log("beautify: pasteBeautified: using html_beautify for file.path=" + file.path)
+				text = html_beautify(text, settings);
+			}
+			else if(isJS(file)) {
+				console.log("beautify: pasteBeautified: using js_beautify for file.path=" + file.path)
+				text = js_beautify(text, settings);
+			}
+			else {
+				console.warn("beautify: pasteBeautified: File type not supported: " + file.path);
+			}
+			
+			console.log("beautify: pasteBeautified: after:\n" + text);
+			
+			file.insertText(text);
+			
+		}
+	}
 	
 	function beautify() {
 		
@@ -219,10 +280,10 @@
 		
 		var htmlSettings = undefined;
 		
-		//console.log("beautify: dependenciesLoaded=" + dependenciesLoaded + " file.path=" + file.path);
+		//console.log("beautify: DEPENDENCIES_LOADED=" + DEPENDENCIES_LOADED + " file.path=" + file.path);
 		
-		if(dependenciesLoaded) jsBeautifyLoaded(null);
-		else loadDependencies(deps, jsBeautifyLoaded);
+		if(DEPENDENCIES_LOADED) jsBeautifyLoaded(null);
+		else loadDependencies(DEPS, jsBeautifyLoaded);
 		
 		return PREVENT_DEFAULT;
 		
@@ -234,7 +295,7 @@ alertBox("Failed to load dependencies: " + err.message);
 				return;
 			}
 			
-			dependenciesLoaded = true;
+			DEPENDENCIES_LOADED = true;
 			
 			var text = file.text;
 			

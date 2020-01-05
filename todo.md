@@ -49,7 +49,9 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-Release new semver MAJOR!
+It does paste when running in app mode. But you get the missing keybind dialog!!
+
+Firefox does nothing with Ctrl+Shift+V (not even asking for missing keybind)
 
 
 

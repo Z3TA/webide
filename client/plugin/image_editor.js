@@ -89,7 +89,7 @@ unload: function unloadImageEditor() {
 		}
 		
 		if(items) {
-			console.log("image_editor: Pasted " + items.length + " items ...");
+			console.log("image_editor: Pasted " + items.length + " items. Checking if it's an image ...");
 			for (var i = 0; i < items.length; i++) {
 				if (items[i].type.indexOf("image") !== -1) {
 					openImage(items[i]);
