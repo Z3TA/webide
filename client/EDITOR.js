@@ -763,6 +763,7 @@ usePseudoClipboard = false;
 			catch(err) {
 				var error = err;
 			}
+
 			if(error) {
 				console.log("getClipboardContent: window.clipboardData.getData failed!");
 				readFail(error);
