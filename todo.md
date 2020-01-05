@@ -49,9 +49,13 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-It does paste when running in app mode. But you get the missing keybind dialog!!
+Don't clear the clipboard with empty text
 
-Firefox does nothing with Ctrl+Shift+V (not even asking for missing keybind)
+Copy selected text if middle mouse button is pressed.
+
+
+
+
 
 
 

@@ -9731,8 +9731,12 @@ function copy(copyEvent) {
 				if(EDITOR.currentFile instanceof File) textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
 		}
 		
-		if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
-		
+		if(textToPutOnClipboard == "") {
+
+console.warn("Prevented clearing the clipboard!");
+
+		}
+else {
 		if (BROWSER.indexOf("MSIE") == 0) {
 			window.clipboardData.setData('Text', textToPutOnClipboard);    
 		} else {
@@ -9749,7 +9753,7 @@ function copy(copyEvent) {
 			
 			EDITOR.pseudoClipboard = textToPutOnClipboard;
 			console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
-			
+			}
 	}
 		else {
 			// Do the default action (enable copying outside the canvas)
