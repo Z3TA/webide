@@ -4175,29 +4175,29 @@ if(menuItem.parentMenu) {
 			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 			
 			if(callback) {
-				var character = null;
-				var charCode = 0;
-				var direction = "down";
-li.onclick = function(clickEvent) {
-				// Give the same function parameters as key bound events
-				var file = EDITOR.currentFile;
-				var combo = getCombo(clickEvent);
-				callback(file, combo, character, charCode, direction, clickEvent);
-			}
+				
+				li.onclick = clickOnCtxItem;
+				li.onmouseup = clickOnCtxItem;
+				
 				li.addEventListener("keyup", function(keyEvent) {
 					// Number 13 is the "Enter" key on the keyboard
 					if (keyEvent.keyCode === 13) {
 						// Cancel the default action, if needed
 						keyEvent.preventDefault();
 						
-						var file = EDITOR.currentFile;
-						var combo = getCombo(keyEvent);
-						callback(file, combo, character, charCode, direction, keyEvent);
+						EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
+
+						callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
 						
-						EDITOR.ctxMenu.hide()
 					}
 				});
 				
+			}
+			
+			function clickOnCtxItem(clickEvent) {
+				// Give the same function parameters as key bound events
+				callback(EDITOR.currentFile, getCombo(clickEvent), null, 0, "down", clickEvent);
+				callback == null; // Prevent double action
 			}
 			
 			if(position) {
@@ -4366,14 +4366,30 @@ li.onclick = function(clickEvent) {
 			var separator =  document.createElement("li");
 			separator.setAttribute("class", "sep");
 			
-			if(callback) li.onclick = function(clickEvent) {
+			if(callback) {
+				
+				li.onclick = clickOnCtxItem;
+				li.onmouseup = clickOnCtxItem;
+				
+				li.addEventListener("keyup", function(keyEvent) {
+					// Number 13 is the "Enter" key on the keyboard
+					if (keyEvent.keyCode === 13) {
+						// Cancel the default action, if needed
+						keyEvent.preventDefault();
+						
+						EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
+						
+						callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
+						
+					}
+				});
+				
+			}
+			
+			function clickOnCtxItem(clickEvent) {
 				// Give the same function parameters as key bound events
-				var file = EDITOR.currentFile;
-				var combo = getCombo(clickEvent);
-				var character = null;
-				var charCode = 0;
-				var direction = "down";
-				callback(file, combo, character, charCode, direction, clickEvent);
+				callback(EDITOR.currentFile, getCombo(clickEvent), null, 0, "down", clickEvent);
+				callback == null; // Prevent double action
 			}
 			
 			tempItems.appendChild(li);
