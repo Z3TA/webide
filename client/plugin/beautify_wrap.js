@@ -51,7 +51,7 @@
 			
 			EDITOR.bindKey({desc: S("save_current_file"), key: "B", combo: CTRL + SHIFT, fun: beautify});
 			
-			//EDITOR.bindKey({desc: "Paste beautified", key: "V", combo: CTRL + SHIFT, fun: pasteBeautified});
+			EDITOR.bindKey({desc: "Paste beautified", key: "V", combo: CTRL + SHIFT, fun: pasteBeautified});
 			
 			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
 			
@@ -63,7 +63,8 @@
 		unload: function unloadJSbeautifyTextWrapper() {
 			
 			EDITOR.unbindKey(beautify);
-			
+			EDITOR.unbindKey(pasteBeautified);
+
 			EDITOR.windowMenu.remove(winMenuBeautify);
 			
 			EDITOR.removeEvent("ctxMenu", wrapJsMaybe);

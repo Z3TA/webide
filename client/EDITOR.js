@@ -9733,11 +9733,11 @@ function copy(copyEvent) {
 		
 		if(textToPutOnClipboard == "") {
 
-console.warn("Prevented clearing the clipboard!");
-
-		}
-else {
-		if (BROWSER.indexOf("MSIE") == 0) {
+				console.warn("Prevented clearing the clipboard!");
+				
+			}
+			else {
+				if (BROWSER.indexOf("MSIE") == 0) {
 			window.clipboardData.setData('Text', textToPutOnClipboard);    
 		} else {
 			copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
@@ -9754,7 +9754,7 @@ else {
 			EDITOR.pseudoClipboard = textToPutOnClipboard;
 			console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
 			}
-	}
+		}
 		else {
 			// Do the default action (enable copying outside the canvas)
 			console.warn("Copying outside the canvas! EDITOR.input=" + EDITOR.input);
@@ -9968,7 +9968,7 @@ function paste(pasteEvent) {
 	}
 	else {
 			// Do the default action (enable pasting outside the canvas)
-		console.log("paste: Outside canvas! EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
+			console.log("paste: Not inserting text because EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
 	}
 	
 		
@@ -10902,19 +10902,10 @@ function mouseDown(mouseDownEvent) {
 				console.log("REFOCUS!");
 			*/
 		}
-		else if(button !== leftMouseButton) {
-			
-			// No current file. Or not the left button.
-			
-			EDITOR.input = false;
-			
-			EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
 			
 		}
-		
-	}
-	else{
-		
+		else{
+			
 		console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
 		EDITOR.input = false;
 		
@@ -11015,6 +11006,12 @@ function mouseDown(mouseDownEvent) {
 		mouseDownEvent.stopPropagation();
 		return false;
 	}
+		else if(button !== leftMouseButton) {
+			
+			EDITOR.input = false;
+			EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+			
+		}
 	
 	//return true;
 	

@@ -49,10 +49,6 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
-Don't clear the clipboard with empty text
-
-Copy selected text if middle mouse button is pressed.
-
 
 
 
@@ -114,7 +110,9 @@ whith option to create new site
 bug: Sometimes when clicking to close a file on the file tabs it opens a new browser tab! (when we get the confirm box?)
 
 
-
+todo: Allow using the editor without a mouse!
+Support standard key bindgings: https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
+https://defkey.com/what-means/ctrl-shift-v
 
 
 
