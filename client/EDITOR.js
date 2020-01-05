@@ -745,7 +745,7 @@ usePseudoClipboard = false;
 		
 		if(typeof callback != "function") throw new Error("First argument needs to be a callback function!");
 		
-		if(navigator.clipboard) {
+		if(navigator.clipboard && typeof navigator.clipboard.readText == "function") {
 			console.log("getClipboardContent: Trying navigator.clipboard ...");
 			navigator.clipboard.readText().then(function(data) {
 				console.log("getClipboardContent: navigator.clipboard.readText succeeded!");
