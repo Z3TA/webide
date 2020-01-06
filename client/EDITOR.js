@@ -4473,12 +4473,10 @@ if(menuItem.parentMenu) {
 			if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
 			
 		},
-		show: function showCtxMenu(posX, posY, clickEvent) {
+		show: function showCtxMenu(clickEvent) {
 			
-			if(typeof posX != "number") posX = undefined;
-			if(typeof posY != "number") posY = undefined;
+			console.log("showCtxMenu: Showing context menu! clickEvent=" + clickEvent + " callStack:" + UTIL.getStack("showCtxMenu"));
 			
-			console.log("Showing context menu!");
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
@@ -4488,9 +4486,12 @@ if(menuItem.parentMenu) {
 			EDITOR.input = false;
 			
 			clearSelection();
+			
 			if(ctxMenuVisibleOnce == false) EDITOR.renderNeeded();
 			ctxMenuVisibleOnce = true;
+			
 			var menu = document.getElementById("canvasContextmenu");
+			
 			var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 			var menuDownABit = 10;
 			
@@ -4499,9 +4500,8 @@ if(menuItem.parentMenu) {
 			var touchX = EDITOR.mouseX;
 			var touchY = EDITOR.mouseY;
 			
-			if(posX === touchX || posX === undefined) posX = touchX + notUpOnMenu;
-			
-			if(posY === undefined) posY = touchY + menuDownABit;
+			var posX = touchX + notUpOnMenu;
+			var posY = touchY + menuDownABit;
 			
 			var f = EDITOR.eventListeners.ctxMenu.map(funMap);
 			for(var i=0, f; i<f.length; i++) {
@@ -4520,23 +4520,24 @@ if(menuItem.parentMenu) {
 			
 			//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
 			
-			console.log("menu: offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
+			console.log("showCtxMenu: menu.offsetHeight=" + offsetHeight + " menu.offsetWidth=" + offsetWidth + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + " EDITOR.mouseX=" + EDITOR.mouseX + " EDITOR.mouseY=" + EDITOR.mouseY);
 			
 			/*
 				When long touching the menu comes up underneath and a menu click is triggered!
 				So bring in the menu outside of the touch, and then correct the position
 			*/
 			
-			var orgX = posX;
+			var orgX = posX; // For debugging info
 			var orgY = posY;
-			
 			
 			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 			if((posX+offsetWidth) > EDITOR.width) {
 posX = EDITOR.width - offsetWidth;
+				console.log("showCtxMenu: Placing the menu inside the screen area (the clicks was far to the right) EDITOR.width=" + EDITOR.width + " menu.offsetWidth=" + menu.offsetWidth + " new posX=" + posX + " orgX=" + orgX + " EDITOR.mouseX=" + EDITOR.mouseX);
 				
 				if(posX <= EDITOR.mouseX) {
 					// Place the menu on the left side
+					console.log("showCtxMenu: Placing the menu on the left side because posX=" + posX + " <= " + EDITOR.mouseX + "");
 					posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
 				}
 			}
@@ -4546,12 +4547,12 @@ posX = EDITOR.width - offsetWidth;
 			
 			var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
 			
+			console.log("showCtxMenu: EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX +
+			" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight +
+			" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height +
+			" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
+			
 			if(EDITOR.touchDown && belowTouch) {
-				
-				console.log("EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX +
-				" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight +
-				" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height +
-				" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
 				
 				menu.style.top = posY + "px";
 				menu.style.left = posX + "px";
@@ -4571,13 +4572,13 @@ posX = EDITOR.width - offsetWidth;
 			
 			//menu.style.height = "100%";
 			
-			console.log("menu.style.visibility=" + menu.style.visibility);
+			console.log("showCtxMenu: menu.style.visibility=" + menu.style.visibility);
 			
-			console.log("menu.childNodes=", menu.childNodes);
-			console.log("menu.children=", menu.children);
+			console.log("showCtxMenu: menu.childNodes=", menu.childNodes);
+			console.log("showCtxMenu: menu.children=", menu.children);
 			
-			console.log("menu=", menu);
-			console.log(menu.childNodes[0]);
+			console.log("showCtxMenu: menu=", menu);
+			console.log("showCtxMenu: menu.childNodes[0]=", menu.childNodes[0]);
 			
 			// First element[0] is the temp-holder
 			menu.children[1].focus();
@@ -4590,7 +4591,7 @@ posX = EDITOR.width - offsetWidth;
 			
 			
 			function waitForTouchUp() {
-				console.log("waitForTouchUp:");
+				console.log("showCtxMenu: waitForTouchUp:");
 				if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 				if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 				clearSelection();
@@ -4599,12 +4600,12 @@ posX = EDITOR.width - offsetWidth;
 				//if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 				
 				if(!EDITOR.touchDown) {
-					console.log("There where no touch down!");
+					console.log("TshowCtxMenu: here where no touch down!");
 					giveUp();
 					fullScreenMenuMaybe();
 				}
 				else {
-					console.log("There was a touch down!");
+					console.log("showCtxMenu: There was a touch down!");
 					//menu.style.top = posY + "px";
 					//menu.style.left = posX + "px";
 				}
@@ -4618,14 +4619,14 @@ posX = EDITOR.width - offsetWidth;
 			function fullScreenMenuMaybe() {
 				
 				var offsetHeight = parseInt(menu.offsetHeight);
-				console.log("fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
+				console.log("showCtxMenu: fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
 				if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
 					// Hide everything besides the menu
-					console.log("Entering full screen menu ...");
+					console.log("showCtxMenu: fullScreenMenuMaybe: Entering full screen menu ...");
 					fullScreenMenu(menu);
 				}
 				else {
-					console.log("No need to enter full screen menu");
+					console.log("showCtxMenu: fullScreenMenuMaybe: No need to enter full screen menu");
 					menu.style.top = posY + "px";
 					menu.style.left = posX + "px";
 				}
@@ -10932,7 +10933,7 @@ function mouseDown(mouseDownEvent) {
 				EDITOR.ctxMenu.hide();
 			}
 			else {
-				EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+					EDITOR.ctxMenu.show(mouseDownEvent);
 			}
 		}
 		
@@ -11027,7 +11028,7 @@ function mouseDown(mouseDownEvent) {
 		else if(button !== leftMouseButton) {
 			
 			EDITOR.input = false;
-			EDITOR.ctxMenu.show(mouseX, mouseY, mouseDownEvent);
+			EDITOR.ctxMenu.show(mouseDownEvent);
 			
 		}
 	
