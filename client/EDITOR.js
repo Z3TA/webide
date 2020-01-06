@@ -4186,7 +4186,7 @@ if(menuItem.parentMenu) {
 						keyEvent.preventDefault();
 						
 						EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
-
+						
 						callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
 						
 					}
@@ -4532,11 +4532,13 @@ if(menuItem.parentMenu) {
 			
 			
 			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
-			if((posX+offsetWidth) > EDITOR.width) posX = EDITOR.width - offsetWidth;
-			
-			if(posX <= EDITOR.mouseX) {
-				// Place the menu on the left side
-				posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
+			if((posX+offsetWidth) > EDITOR.width) {
+posX = EDITOR.width - offsetWidth;
+				
+				if(posX <= EDITOR.mouseX) {
+					// Place the menu on the left side
+					posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
+				}
 			}
 			
 			if(posX < 0) posX = 0;
@@ -4551,8 +4553,8 @@ if(menuItem.parentMenu) {
 				" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height +
 				" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
 				
-				menu.style.top = orgY + "px";
-				menu.style.left = orgX + "px";
+				menu.style.top = posY + "px";
+				menu.style.left = posX + "px";
 				
 				var interval = setInterval(waitForTouchUp, 50);
 				var timeout = setTimeout(giveUp, 1500);
