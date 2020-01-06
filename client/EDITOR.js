@@ -4129,6 +4129,9 @@ if(menuItem.parentMenu) {
 	
 	EDITOR.ctxMenu = {
 		add: function addCtxMenuItem(htmlText, position, callback, keyboardFunction) {
+			
+			// When modifying this function, also remember to modify addTemp if needed!
+			
 			if(typeof position == "function" && typeof callback == "number") {
 				var posTemp = callback;
 				callback = position;
@@ -4172,16 +4175,17 @@ if(menuItem.parentMenu) {
 			
 			li.setAttribute("aria-label", htmlText + (keyCombo ? " " + keyCombo : ""));
 			
-			console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
+			console.warn("EDITOR.ctxMenu.add: Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 			
 			if(callback) {
-				
 				li.onclick = clickOnCtxItem;
-				li.onmouseup = clickOnCtxItem;
+				li.onmouseup = mouseupOnCtxItem;
 				
 				li.addEventListener("keyup", function(keyEvent) {
 					// Number 13 is the "Enter" key on the keyboard
 					if (keyEvent.keyCode === 13) {
+						console.log("EDITOR.ctxMenu.add: Pressed enter on item!");
+						
 						// Cancel the default action, if needed
 						keyEvent.preventDefault();
 						
@@ -4191,14 +4195,32 @@ if(menuItem.parentMenu) {
 						
 					}
 				});
-				
+			}
+			
+			var preventClick = false;
+			
+			function mouseupOnCtxItem(mouseUpEvent) {
+				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
+				console.log("EDITOR.ctxMenu.add: mouseupOnCtxItem! preventClick=" + preventClick);
+				ctxItemClickAction(mouseUpEvent);
 			}
 			
 			function clickOnCtxItem(clickEvent) {
-				// Give the same function parameters as key bound events
-				callback(EDITOR.currentFile, getCombo(clickEvent), null, 0, "down", clickEvent);
-				callback == null; // Prevent double action
+if(preventClick) {
+					console.log("EDITOR.ctxMenu.add: clickOnCtxItem prevented!");
+					preventClick = false;
+					return false;
+				}
+				console.log("EDITOR.ctxMenu.add: clickOnCtxItem! preventClick=" + preventClick);
+				ctxItemClickAction(clickEvent);
 			}
+			
+			function ctxItemClickAction(someEvent) {
+				console.log("EDITOR.ctxMenu.add: ctxItemClickAction!");
+				// Give the same function parameters as key bound events
+				callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
+			}
+			
 			
 			if(position) {
 				li.setAttribute("position", position);
@@ -4366,14 +4388,16 @@ if(menuItem.parentMenu) {
 			var separator =  document.createElement("li");
 			separator.setAttribute("class", "sep");
 			
+			
 			if(callback) {
-				
 				li.onclick = clickOnCtxItem;
-				li.onmouseup = clickOnCtxItem;
+				li.onmouseup = mouseupOnCtxItem;
 				
 				li.addEventListener("keyup", function(keyEvent) {
 					// Number 13 is the "Enter" key on the keyboard
 					if (keyEvent.keyCode === 13) {
+						console.log("EDITOR.ctxMenu.addTemp: Pressed enter on item!");
+						
 						// Cancel the default action, if needed
 						keyEvent.preventDefault();
 						
@@ -4383,14 +4407,32 @@ if(menuItem.parentMenu) {
 						
 					}
 				});
-				
+			}
+			
+			var preventClick = false;
+			
+			function mouseupOnCtxItem(mouseUpEvent) {
+				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
+				console.log("EDITOR.ctxMenu.addTemp: mouseupOnCtxItem! preventClick=" + preventClick);
+				ctxItemClickAction(mouseUpEvent);
 			}
 			
 			function clickOnCtxItem(clickEvent) {
-				// Give the same function parameters as key bound events
-				callback(EDITOR.currentFile, getCombo(clickEvent), null, 0, "down", clickEvent);
-				callback == null; // Prevent double action
+				if(preventClick) {
+					console.log("EDITOR.ctxMenu.addTemp: clickOnCtxItem prevented!");
+					preventClick = false;
+					return false;
+				}
+				console.log("EDITOR.ctxMenu.addTemp: clickOnCtxItem! preventClick=" + preventClick);
+				ctxItemClickAction(clickEvent);
 			}
+			
+			function ctxItemClickAction(someEvent) {
+				console.log("EDITOR.ctxMenu.addTemp: ctxItemClickAction!");
+				// Give the same function parameters as key bound events
+				callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
+			}
+			
 			
 			tempItems.appendChild(li);
 			

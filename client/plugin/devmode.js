@@ -232,7 +232,7 @@ console.time = console.timeEnd = function() {};
 	function toggleDevMode() {
 		
 		EDITOR.settings.devMode = EDITOR.settings.devMode ? false : true;
-		console.warn("Toggling devMode = " + EDITOR.settings.devMode);
+		console.warn("Toggling devMode = " + EDITOR.settings.devMode + " callstack: " + UTIL.getStack("toggleDevMode"));
 		
 		if(EDITOR.settings.devMode) {
 			enableDevMode();

@@ -632,8 +632,9 @@ if(!EDITOR.currentFile || !caret) return true;
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(2, function popWhenShiftSelectingRight(callback) {
+	EDITOR.addTest(1, function popWhenShiftSelectingRight(callback) {
 		EDITOR.openFile("popWhenShiftSelectingRight.txt", 'abcdef\n', function(err, file) {
+			if(err) throw err;
 			
 			// Note: Mouse selection is done by mouseMove! (continous selection while the mouse is moving)
 			// So we have to use SHIFT to select
