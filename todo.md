@@ -52,9 +52,6 @@ What I'm working on
 
 
 
-regression: test fails
-
-
 When trying to run pull && up:
 how to unfuck!?
 
@@ -79,11 +76,18 @@ Do you want to merge them ?
 
 
 
-
+make minor relase!
 
 
 
 todo: Amazon S3 Support!
+
+
+
+I sometimes slip on the shift key when pressing Ctrl+S which asks if I want to send a bug report, which is a bit annoying...
+Should we try to ignore shift combos? Or only allow then if they do roughly the same!? (same as Ctrl+key without shift)
+The shift key is above the Ctrl key on most keyboard, making it likely for phat fingering
+
 
 idea: Configurative buttons. Eg when you press a button you can set what function to run!
 add custom buttons to the discovery bar
