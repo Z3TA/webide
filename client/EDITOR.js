@@ -11067,7 +11067,7 @@ function mouseDown(mouseDownEvent) {
 		mouseDownEvent.stopPropagation();
 		return false;
 	}
-		else if(button !== leftMouseButton) {
+		else if(button !== leftMouseButton && (target.className == "fileCanvas" || target.className == "content centerColumn")) {
 			
 			EDITOR.input = false;
 			EDITOR.ctxMenu.show(mouseDownEvent);

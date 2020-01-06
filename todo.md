@@ -76,8 +76,11 @@ Do you want to merge them ?
 
 
 
-make minor relase!
-
+regression:
+The context menu now also comes up outside the center column / canvas...
+But maybe we can reuse it? For example right clicking to move tabs.
+And also use it for the file explorer !?
+instead of using oncontextmenu, use the add stuff to the temp ctxMenu!?
 
 
 todo: Amazon S3 Support!
