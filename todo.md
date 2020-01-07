@@ -87,6 +87,10 @@ The WebIDE repo seems nuuked in the cloud ide ...
 
 Start working full time using the cloud IDE!
 
+todo: Save "reopen files" on the server! Use localStorage for backup if you are offline
+possible issue: "reopen files" periodly saves a backup of the file in case of a major issue, like for example laptop power loss.
+
+
 
 I found myself looking for undo in context menu
 It should say "undo #what was changed#" eg. undo deletion or undo insert.
