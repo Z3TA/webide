@@ -51,8 +51,13 @@ API.zip = function zipFolder(user, json, callback) {
 	console.log("Creating zip archive: folder=" + folder + " destinationFolder=" + destinationFolder + " filename=" + filename);
 	
 	var exe = "/usr/bin/zip";
-	var args =  ["-r", UTIL.joinPaths(destinationFolder, filename), folder];
+	var args =  ["-r", UTIL.joinPaths(destinationFolder, filename), folder, "--quiet"];
 	
+/*
+todo: when zipping, first count the files in the folder,
+then show a progress bar that is incremented for each stdout message from zip
+*/
+
 	execFile(exe, args, execFileOptions, function (err, stdout, stderr) {
 		
 		console.log(exe + " args=" + JSON.stringify(args) + " stderr=" + stderr + " stdout=" + stdout + " ");
