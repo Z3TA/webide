@@ -56,7 +56,24 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+prio: Able to work on the editor via the cloud IDE (I've only worked via the desktop version so far)
+fix nuked repo
+
+
+able to right click on a file in file explorer to see info like size, last modified etc...
+
+when a file has been modified, highlight the save icon in discovery bar
+
 terminal colors are ugly in night mode
+
+how to quicly go to end of row in Mac? There is no End key!
+
+when opening two terminals, then closing terminal1 and opening
+a new terminal, we land in terminal2, expected it to create terminal3!
+
+when terminal reaches end of line, it continues at the start of the same lime
+it should probably continue on a new line! check what commands the terminal serve sends...
+
 
 when indenting plain text using tab I expected the caret to move right, not stay on col 0
 

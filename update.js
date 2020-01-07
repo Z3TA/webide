@@ -40,7 +40,7 @@ else {
 function startUpdate() {
 	
 // Update services
-	copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
+	//copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
 	//copyFileSync("./etc/systemd/webide_signup.service", "/etc/systemd/system/webide_signup.service");
 	//copyFileSync("./etc/systemd/webide_nodejs_init.service", "/etc/systemd/system/webide_nodejs_init.service");
 
