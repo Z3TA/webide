@@ -83,23 +83,25 @@
 		return ext.toLowerCase().slice(0,3) == "htm";
 	}
 	
-	function wrapJsMaybe(file, posX, posY, clickEvent) {
-		
+	function wrapJsMaybe(file, combo, caret, target) {
 		if(!file) return;
-		
 		if(file.text == undefined) return;
-		
-		var pos = file.rowColFromMouse(posX, posY);
-		var row = pos.row;
+		if(target.className != "fileCanvas") return;
+if(!isJS(file)) return;
+
+		var row = caret.row;
 		
 		if(row < 0) return;
 		if(row >= file.grid.length) return;
 		
-		//console.log("beautify: posX=" + posX + " posY=" + posY + " pos.row=" + pos.row + " pos.col=" + pos.col + " file.grid[" + row + "].length=" + file.grid[row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		console.log("beautify: row=" + row + " file.grid[" + row + "].length=" + file.grid[row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		
 		if(file.grid[row].length < EDITOR.view.visibleColumns) return;
+		else {
+console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		}
 		
-		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Wrap", true, wrapJsAt);
+		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Wrap code block", true, wrapJsAt);
 		
 		function wrapJsAt() {
 			jsWrap(file, row);
@@ -109,13 +111,15 @@
 	}
 	
 	function wrapJavaScriptTool(file, combo) {
+		console.log("beautify: wrapJavaScriptTool: file=" + file.path);
 		var allowDefault = jsWrap(file, file.caret.row);
 		if(allowDefault) return false;
 		else return true; // Prevents other wrap tools
 	}
 	
 	function jsWrap(file, initRow) {
-		
+		console.log("beautify: jsWrap: file=" + file.path);
+
 		if(!isJS(file)) {
 			console.log("beautify: Not a JavaScript file: " + file.path);
 			return true;

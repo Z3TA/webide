@@ -56,10 +56,9 @@
 		EDITOR.windowMenu.remove(winMenuBugreport);
 	}
 	
-	function showSendBugReportMenuItem() {
-		var file = EDITOR.currentFile;
-		
+	function showSendBugReportMenuItem(file, combo, caret, target) {
 		if(!file) return true;
+if(target.className != "fileCanvas") return;
 		
 		if(file.name.indexOf("bugreport") != -1) {
 			var addSeparator = true;

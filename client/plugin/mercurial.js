@@ -321,17 +321,14 @@
 		}
 	}
 	
-	function showScmMenuItemsMaybe() {
-		var file = EDITOR.currentFile;
+	function showScmMenuItemsMaybe(file, combo, caret, target) {
 		
-		if(!file) return true;
-		
-		if(file.savedAs) {
-			var directory = UTIL.getDirectoryFromPath(file.path);
+		if(target.path) var directory = UTIL.getDirectoryFromPath(target.path);
+		else if(file && target.className == "fileCanvas") {
+			if(file.savedAs) var directory = UTIL.getDirectoryFromPath(file.path);
+else var directory = EDITOR.workingDirectory;
 		}
-		else {
-			var directory = EDITOR.workingDirectory;
-		}
+		else return;
 		
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
 			if(err) {

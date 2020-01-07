@@ -190,8 +190,9 @@
 		runSpellCheck(file);
 	}
 	
-	function showSpellSuggestion(file, posX, posY, clickEvent) {
+	function showSpellSuggestion(file, combo, caret, target) {
 		
+if(target.className != "fileCanvas") return;
 		
 		var caret = EDITOR.mousePositionToCaret(posX, posY);
 		

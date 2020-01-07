@@ -85,7 +85,7 @@ var UTIL = {
 		}
 		
 		if(typeof path != "string") throw new Error("Unable to get directory from path=" + path);
-		
+
 		var lastSlash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
 		
 		if(lastSlash == -1) {

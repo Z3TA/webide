@@ -1747,7 +1747,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				var RIGHT_CLICK = 2;
 				if(mouseEvent.mouseButton != LEFT_CLICK) {
 					// Editor is hard coded to show the context meny when you click with anything but the main mouse button
-					EDITOR.ctxMenu.show(mouseX, mouseY);
+					EDITOR.ctxMenu.show(targetElement);
 				}
 				else {
 					EDITOR.ctxMenu.hide();

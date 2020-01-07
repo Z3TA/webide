@@ -51,7 +51,6 @@ What I'm working on
 
 
 
-
 When trying to run pull && up:
 how to unfuck!?
 
@@ -74,6 +73,9 @@ There are multiple heads:
 
 Do you want to merge them ?
 
+
+I found myself looking for undo in context menu
+It should say "undo #what was changed#" eg. undo deletion or undo insert.
 
 
 regression:

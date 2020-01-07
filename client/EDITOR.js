@@ -4515,15 +4515,29 @@ if(preventClick) {
 			if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
 			
 		},
-		show: function showCtxMenu(clickEvent) {
+		show: function showCtxMenu(clickEventOrTargetElement) {
 			
-			console.log("showCtxMenu: Showing context menu! clickEvent=" + clickEvent + " callStack:" + UTIL.getStack("showCtxMenu"));
+			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
+			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
 			
+			console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " callStack:" + UTIL.getStack("showCtxMenu"));
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
 			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
-			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
+			if(typeof clickEventOrTargetElement.preventDefault == "function") clickEventOrTargetElement.preventDefault();
+			
+			if(clickEventOrTargetElement.target) {
+				// It's a click event
+				var target = clickEventOrTargetElement.target;
+				var combo = getCombo(clickEventOrTargetElement);
+			}
+			else {
+				// It's a DOM element
+				var target = clickEventOrTargetElement;
+				var combo = getCombo(undefined); // assume no alt,ctrl,shift was pressed
+			}
+			
 			
 			EDITOR.input = false;
 			
@@ -4542,12 +4556,16 @@ if(preventClick) {
 			var touchX = EDITOR.mouseX;
 			var touchY = EDITOR.mouseY;
 			
+			var caret = EDITOR.mousePositionToCaret();
+			
+			console.log("showCtxMenu: caret=" + JSON.stringify(caret));
+			
 			var posX = touchX + notUpOnMenu;
 			var posY = touchY + menuDownABit;
 			
 			var f = EDITOR.eventListeners.ctxMenu.map(funMap);
 			for(var i=0, f; i<f.length; i++) {
-				f[i](EDITOR.currentFile, posX, posY, clickEvent);
+				f[i](EDITOR.currentFile, combo, caret, target);
 			}
 			
 			
@@ -5215,9 +5233,11 @@ EDITOR.fireEvent("btk");
 		return removeFrom(EDITOR.preRenderFunctions, fun);
 	}
 	
-	EDITOR.mousePositionToCaret = function (mouseX, mouseY, clickFeel) {
+	EDITOR.mousePositionToCaret = function (paramMouseX, paramMouseY, clickFeel) {
 		/*
 			Returns a caret on the file.grid
+			
+			---
 			
 			We need to know row indentation to know what column!
 			
@@ -5228,8 +5248,16 @@ EDITOR.fireEvent("btk");
 			
 		*/
 		
+		var mouseX = paramMouseX;
+		var mouseY = paramMouseY;
+		
 		if(mouseX == undefined) mouseX = EDITOR.canvasMouseX;
-		if(mouseY == undefined) mouseX = EDITOR.canvasMouseY;
+		if(mouseY == undefined) mouseY = EDITOR.canvasMouseY;
+		
+		if(mouseX == undefined || mouseY == undefined) {
+			
+			throw new Error("Unable to get mouse position from: paramMouseX=" + paramMouseX + " paramMouseY=" + paramMouseY + " EDITOR.canvasMouseX=" + EDITOR.canvasMouseX + " EDITOR.canvasMouseY=" + EDITOR.canvasMouseY + "");
+		}
 		
 		if(EDITOR.currentFile) {
 			
@@ -5241,6 +5269,8 @@ EDITOR.fireEvent("btk");
 			if(clickFeel == undefined) clickFeel = EDITOR.settings.gridWidth / 2;
 			
 			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
+			
+			if(isNaN(mouseRow)) throw new Error("mouseRow=" + mouseRow + " mouseY=" + mouseY + " EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight + " file.startRow=" + file.startRow + " ");
 			
 			//console.log("mouseRow=" + mouseRow);
 			
@@ -8534,9 +8564,9 @@ function main() {
 	EDITOR.windowMenu.add(S("Autocomplete"), [S("Edit"), 2], EDITOR.autoComplete);
 	
 	EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
-		fun: function showContextMenu() {
+			fun: function showContextMenu(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
 			EDITOR.input = false;
-			EDITOR.ctxMenu.show();
+				EDITOR.ctxMenu.show(keyDownEvent);
 			return PREVENT_DEFAULT;
 		}
 	});
@@ -10731,6 +10761,11 @@ function getCombo(eventObject) {
 	
 	var combo = {shift: false, alt: false, ctrl: false, sum: 0};
 	
+		if(eventObject == undefined) {
+			console.warn("getCombo: eventObject=" + eventObject + " returning zeroed combo!");
+			return combo;
+		}
+		
 	if(eventObject.shiftKey) {
 		combo.shift = true;
 		combo.sum += SHIFT;

@@ -35,7 +35,7 @@
 	
 	function loadKaiOsSupport() {
 		EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
-		EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiTogglewMenu});
+		EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiTogglewMenuOnKeyPress});
 		EDITOR.bindKey({desc: "Show context menu", key: "Call", fun: kaiToggleMode});
 		
 		EDITOR.addMode(INSERT);
@@ -98,8 +98,8 @@
 		return PREVENT_DEFAULT;
 	}
 	
-	function kaiTogglewMenu() {
-		EDITOR.ctxMenu.show();
+	function kaiTogglewMenuOnKeyPress(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
+		EDITOR.ctxMenu.show(keyDownEvent);
 		
 		EDITOR.input = false; // Prevent inserting control character to file 
 		

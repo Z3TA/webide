@@ -57,11 +57,10 @@
 		order: 200 // run after keyboard_enter.js
 	});
 
-	function showWhiteSpaceMaybe() {
-		var file = EDITOR.currentFile;
+	function showWhiteSpaceMaybe(file, combo, caret, target) {
+console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.className=" + (target && target.className));
 		
-		console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode));
-		
+		if(target.className != "fileCanvas") return;
 		if(!file) return;
 		if(file.mode!="text") return;
 		

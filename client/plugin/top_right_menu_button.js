@@ -30,7 +30,7 @@ load: function loadTopRightMenuButton() {
 			
 			button.onclick = function(clickEvent) {
 				EDITOR.ctxMenu.hide();
-				EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
+				EDITOR.ctxMenu.show(clickEvent);
 			};
 			
 			var header = document.getElementById("header");
@@ -48,7 +48,7 @@ unload: function unloadTopRightMenuButton() {
 	
 	function showContextMenu(file, combo, character, charCode, direction, clickEvent) {
 		EDITOR.ctxMenu.hide();
-		EDITOR.ctxMenu.show(undefined, undefined, clickEvent);
+		EDITOR.ctxMenu.show(clickEvent);
 	}
 	
 })();

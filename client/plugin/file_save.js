@@ -543,10 +543,11 @@ console.warn("The save was canceled: " + err.message);
 		return false;
 	}
 	
-	function showSaveOption(file, x, y, ev) {
+	function showSaveOption(file, combo, caret, target) {
 		if(!file) return true;
 		if(file.isSaved) return true;
 		if(!file.savedAs) return true;
+if(target.className != "fileCanvas") return;
 		
 		EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu, saveFileFromKeyboardCombo);
 		

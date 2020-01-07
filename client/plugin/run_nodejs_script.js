@@ -228,10 +228,10 @@ saveAndRun(file);
 		else throw new Error("Unknown nodejsDebugMsg: json=" + JSON.stringify(json));
 	}
 	
-	function showRunNodejsScriptMenuItem() {
-		var file = EDITOR.currentFile;
-		
+	function showRunNodejsScriptMenuItem(file, combo, caret, target) {
 		if(!file) return true;
+		
+		// idea: Also check target.path, for example when right clicking on a file tab, or a file in the file explorer!
 		
 		var isStdoutFile = false;
 		var filePath = file.path;

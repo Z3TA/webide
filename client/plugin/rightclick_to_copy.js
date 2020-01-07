@@ -27,9 +27,9 @@
 		EDITOR.removeEvent("copy", contextCopy); 
 	}
 	
-	function contextCopyShowOptions(file, posX, posY, clickEvent) {
+	function contextCopyShowOptions(file, combo, caret, target) {
 		if(!file) return; // No file open
-		
+		if(target.className != "fileCanvas") return;
 		if(file.selected == undefined) return;
 		
 		if(file.selected.length == 0) {
