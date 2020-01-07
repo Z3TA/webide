@@ -49,6 +49,13 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+Error: First argument to lbChars needs to be a string! txt=undefined is not a string!
+    at Object.lbChars (http://192.168.0.3:8099/UTIL.js:646:36)
+    at insertIndentation (http://192.168.0.3:8099/plugin/text-mode-indentation.js:380:108)
+    at indent (http://192.168.0.3:8099/plugin/text-mode-indentation.js:358:5)
+    at Array.indentate (http://192.168.0.3:8099/plugin/text-mode-indentation.js:291:10)
+    at keyIsDown (http://192.168.0.3:8099/EDITOR.js:10603:20)
+    
 Getting error when tabbing in order to indent in a plain text file
 
 Getting "Server: API error: kill EACCES" when zipping a folder
