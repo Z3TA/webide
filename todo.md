@@ -2,7 +2,8 @@
 WRITE TESTS FOR EACH BUG YOU FIX!! 
 AND REGRESSION TESTS FOR ALL NEW FEATURES!
 
-Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
+Commit messages should explain WHY you did the change, we can already see what you did
+by looking at the diff. We want to know WHY you did it.
 
 
 Note to myself
@@ -55,19 +56,10 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
-Unable to see line numbers on LCD monitor due to lack of contrast
-quote color is also weak
+terminal colors are ugly in night mode
 
-Error: First argument to lbChars needs to be a string! txt=undefined is not a string!
-    at Object.lbChars (http://192.168.0.3:8099/UTIL.js:646:36)
-    at insertIndentation (http://192.168.0.3:8099/plugin/text-mode-indentation.js:380:108)
-    at indent (http://192.168.0.3:8099/plugin/text-mode-indentation.js:358:5)
-    at Array.indentate (http://192.168.0.3:8099/plugin/text-mode-indentation.js:291:10)
-    at keyIsDown (http://192.168.0.3:8099/EDITOR.js:10603:20)
-    
-Getting error when tabbing in order to indent in a plain text file
+when indenting plain text using tab I expected the caret to move right, not stay on col 0
 
-Getting "Server: API error: kill EACCES" when zipping a folder
 
 move the nuked repo to local dev to debug and fix issues
 
@@ -112,9 +104,14 @@ And also use it for the file explorer !?
 instead of using oncontextmenu, use the add stuff to the temp ctxMenu!?
 
 
+
+
 todo: Amazon S3 Support!
 
 
+
+touchpad scrolling issues on Safari
+Smooth scrolling !? :)
 
 I sometimes slip on the shift key when pressing Ctrl+S which asks if I want to send a bug report, which is a bit annoying...
 Should we try to ignore shift combos? Or only allow then if they do roughly the same!? (same as Ctrl+key without shift)
@@ -138,6 +135,10 @@ bug: Dropbox deamon keeps lingering after user is gone, and use a shitload of CP
 
 Adopt design for first time users, and computer noobs!
 
+
+
+Unable to see line numbers on LCD monitor due to lack of contrast
+quote color is also weak
 
 
 A file explorer (on dashboard?) that shows screenshot of .htm files!? like in MS Office for SSG sites
