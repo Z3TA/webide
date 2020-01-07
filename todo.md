@@ -45,9 +45,18 @@ Cloud functions are stupid, they are hard to debug. And the latency is terrible.
 
 When a program can't find a lib, try export LD_LIBRARY_PATH
 
+About design: We had a VHS video that for some reason was black and white, I don't know if it was the cassette, cable or the video player that was making the video black and white,
+I had tried everything. Then one day suddenly the video had color! This was my sons favorite video, but now that it had color HE HATED IT!
+The video was displayed as origionally intendens, it had been improved with colors. But by son felt the colors was now wrong and the movie was thus ruined.
+
+The user might have a picture in their head how they want the program to look and behave, if possibe, we should make it possible for the user to tweak the 
+program so that it looks like the picture in their head!?
 
 What I'm working on
 -------------------
+
+Unable to see line numbers on LCD monitor due to lack of contrast
+quote color is also weak
 
 Error: First argument to lbChars needs to be a string! txt=undefined is not a string!
     at Object.lbChars (http://192.168.0.3:8099/UTIL.js:646:36)
@@ -90,7 +99,7 @@ Start working full time using the cloud IDE!
 todo: Save "reopen files" on the server! Use localStorage for backup if you are offline
 possible issue: "reopen files" periodly saves a backup of the file in case of a major issue, like for example laptop power loss.
 
-
+I'm missing bracket highlightning when I have the caret right of the bracket
 
 I found myself looking for undo in context menu
 It should say "undo #what was changed#" eg. undo deletion or undo insert.
