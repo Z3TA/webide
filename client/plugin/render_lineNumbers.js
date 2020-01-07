@@ -29,7 +29,7 @@
 			EDITOR.on("afterResize", linerNumbersAfterResize);
 			
 			// Add new item for lineNumberColor to EDITOR.settings if it's not already added
-			EDITOR.settings.style.lineNumberColor = EDITOR.settings.style.lineNumberColor ? EDITOR.settings.style.lineNumberColor : "rgb(200,200,200)";
+			EDITOR.settings.style.lineNumberColor = EDITOR.settings.style.lineNumberColor ? EDITOR.settings.style.lineNumberColor : "rgb(163, 163, 163)";
 			
 			if(!cacheCanvas) {
 				cacheCanvas = document.createElement('canvas');
