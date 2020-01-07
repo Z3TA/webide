@@ -49,7 +49,11 @@ When a program can't find a lib, try export LD_LIBRARY_PATH
 What I'm working on
 -------------------
 
+Getting error when tabbing in order to indent in a plain text file
 
+Getting "Server: API error: kill EACCES" when zipping a folder
+
+move the nuked repo to local dev to debug and fix issues
 
 When trying to run pull && up:
 how to unfuck!?
@@ -70,8 +74,11 @@ There are multiple heads:
 "summary": "\"Merge conflict\""
 }
 ]
-
 Do you want to merge them ?
+
+The WebIDE repo seems nuuked in the cloud ide ...
+
+Start working full time using the cloud IDE!
 
 
 I found myself looking for undo in context menu
