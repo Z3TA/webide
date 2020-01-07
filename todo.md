@@ -154,8 +154,6 @@ Adopt design for first time users, and computer noobs!
 
 
 
-Unable to see line numbers on LCD monitor due to lack of contrast
-quote color is also weak
 
 
 A file explorer (on dashboard?) that shows screenshot of .htm files!? like in MS Office for SSG sites
