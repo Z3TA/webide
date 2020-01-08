@@ -54,6 +54,7 @@ body {
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial, Helvetica, sans-serif;
+	font-family: Verdana, Geneva, sans-serif;
 	-webkit-transform: scale(1.00); /* Prevents the browser from "accidently" zooming out when switching orientation */
 }
 
@@ -805,7 +806,7 @@ ul#tabList li.tabFileItem {
 	padding-bottom: 5px;
 	padding-left: 30px;
 	
-	font-size: 12px;
+	font-size: 13px;
 	cursor: pointer;
 	
 	background: linear-gradient(#f2f2f2, #ffffff);

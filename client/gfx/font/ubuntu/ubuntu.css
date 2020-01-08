@@ -1,0 +1,24 @@
+@font-face {
+font-family: 'ubuntu';
+font-weight: bold;
+font-style: italic;
+	src: url('UbuntuMono-BI.ttf');
+}
+@font-face {
+	font-family: 'ubuntu';
+	font-weight: bold;
+	font-style: normal;
+	src: url('UbuntuMono-B.ttf');
+}
+@font-face {
+	font-family: 'ubuntu';
+	font-weight: normal;
+	font-style: italic;
+	src: url('UbuntuMono-RI.ttf');
+}
+@font-face {
+	font-family: 'ubuntu';
+	font-weight: normal;
+	font-style: normal;
+	src: url('UbuntuMono-R.ttf');
+}

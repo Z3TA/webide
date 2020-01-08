@@ -243,8 +243,8 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
-
-
+		
+		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
@@ -265,6 +265,34 @@ EDITOR.settings.style.font = "LiberationMono";
 
 		else {
 			
+			// We choose Ubuntu Mono as standard because it loogs good with both CLD, GrayScale, *and* without Antialias! 
+			
+			webFontLoading = "ubuntu";
+			loadFont = function() {
+				try {
+					UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css");
+				}
+				catch(err) {
+					if(err) {
+						debug("Failed to load font: " + err.message);
+					}
+				}
+			};
+			whenFontLoaded = function() {
+				if(webFontLoading == "ubuntu") {
+					EDITOR.settings.style.font = "ubuntu";
+					EDITOR.settings.style.highlightMatchFont = "bold 15px ubuntu";
+					EDITOR.settings.style.fontSize = 15;
+					EDITOR.settings.gridHeight = 22;
+					EDITOR.settings.gridWidth = 8;
+					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
+				}
+			};
+			
+			
+			/*
+				
+				
 webFontLoading = "DejaVuSansMono";
 			loadFont = function() {
 			try {
@@ -292,6 +320,8 @@ UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 			}
 			}
 			};
+				
+			*/
 
 		}
 		
