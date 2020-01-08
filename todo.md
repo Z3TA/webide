@@ -56,6 +56,7 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+todo: When updating subpixel-antialias also update the DOM!
 
 able to set subpixel-antialias in view menu!
 
