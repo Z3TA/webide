@@ -6,11 +6,12 @@
 	Note: Induvidual users can change their settings using Customization Scripts (webide_js_overload.js)
 	
 	
-	1l0Oo[]{}.,   These characters should look different using a good programmin font
+	1l0Oo[]{}.,   These characters should look different using a good programming font
 	
 	Gotchas:
 	Some fonts are made for "LCD text" (Sub pixel antialias): Consolas
-	Some browsers doesn't support web fonts (can't load custom fonts from css)
+	Some browsers however don't support LCD text in the canvas.
+	And some browsers doesn't support web fonts (can't load custom fonts from css)
 	
 	Browser                Fonts LCD 
 	IE11 on Windows 7      No¹   No 
@@ -30,6 +31,9 @@
 	2) Firefox on Ubuntu 16 renders font differently!
 	3) If you have a high pixel density screen you can turn off LCD-sub-pixel-antialias as it's no longer needed
 	
+
+	Optimizatons
+	------------
 	problem: Chrome will wait until the font has loaded before running code ...
 	If the browser/connection is fast we want to load the font right away,
 	but if it's slow we want to wait or even skip loading the font.

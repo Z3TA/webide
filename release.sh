@@ -120,7 +120,8 @@ rm temp/release/linux/server/fullchain.pem
 rm temp/release/linux/client/count_1w.txt
 
 echo "Removing unused fonts"
-find temp/release/linux/client/gfx/font/ ! -name 'liberationMono.css' ! -name 'LiberationMono-Regular.ttf' ! -name 'LiberationMono-Bold.ttf' ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
+# Delete the files in the font folder, except the ones listed below:
+find temp/release/linux/client/gfx/font/ ! -name 'UbuntuMono-BI.ttf' ! -name 'UbuntuMono-B.ttf' ! -name 'buntuMono-RI.ttf' ! -name 'UbuntuMono-R.ttf' ! -name 'ubuntu.css' ! -name 'liberationMono.css' ! -name 'LiberationMono-Regular.ttf' ! -name 'LiberationMono-Bold.ttf' ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
 find temp/release/linux/client/gfx/font/ -type d -empty -delete
 
 
