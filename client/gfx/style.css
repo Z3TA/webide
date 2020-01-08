@@ -25,20 +25,6 @@
 	padding: 0px;
 	margin: 0px;
 	border: 0;
-	/*-webkit-font-smoothing: none;*/
-	/*border: 1px solid pink!important;*/
-	
-	/*
-	-webkit-font-smoothing: none;
-	-webkit-font-smoothing: antialiased;
-	-webkit-font-smoothing: subpixel-antialiased;
-	// -webkit-text-stroke: 0.015em;
-	text-rendering: auto;
-	text-rendering: optimizeSpeed;
-	text-rendering: optimizeLegibility;
-	text-rendering: geometricPrecision;
-	*/
-	
 }
 
 html {
@@ -329,10 +315,6 @@ canvas {
 	z-index: 2; /* Try not to cover the canvas as it might impact performance */
 	outline: none;
 	
-	/* hide annoying blinking cursor because of contenteditable=true */
-	cursor: none;
-	caret-color: transparent;
-	
 	/* try to disable mobile zoom when keyboard is on */
 	font-size: 21px; 
 	max-width:100%;
@@ -347,6 +329,13 @@ image-rendering: -webkit-optimize-contrast; // Webkit (non standard naming)
 image-rendering: -o-crisp-edges;            // OS X & Windows Opera (12.02+)
 image-rendering: crisp-edges;               // Possible future browsers.
 -ms-interpolation-mode: nearest-neighbor;   // IE (non standard naming)
+}
+
+/* Only want cursor: none on the file canvas, or it will be annoying when the mouse pointer compleatly disappears */
+canvas.fileCanvas {
+	/* hide annoying blinking cursor because of contenteditable=true */
+	cursor: none;
+	caret-color: transparent;
 }
 
 .wireframe {
