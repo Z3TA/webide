@@ -239,10 +239,12 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 */
 		
-		if(window.devicePixelRatio == 1 && MSWIN) EDITOR.settings.sub_pixel_antialias = true;
+		if(window.devicePixelRatio == 1) EDITOR.settings.sub_pixel_antialias = true;
 		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
+
+
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			

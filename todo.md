@@ -59,6 +59,10 @@ What I'm working on
 Detect no-antialias and pick a font that looks good without antialias:
 Luculent, Envy Code R, Proggy Clean,  PT Mono, 
 
+Middle mouse to copy doesn't work in terminal!
+
+Able to select many files and folders in file explorer by holding down Ctrl
+then right click and "move to..."
 
 issue: When restarting editor, terminalX files get parsed as code! They should be plain text!
 
