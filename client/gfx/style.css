@@ -322,6 +322,9 @@ canvas {
 	line-height:40px;
 	zoom: reset;
 	
+/* hide annoying blinking cursor because of contenteditable=true */
+caret-color: transparent;
+
 	/* pixelated images */
 image-rendering: optimizeSpeed;             // Older versions of FF
 image-rendering: -moz-crisp-edges;          // FF 6.0+
@@ -331,12 +334,6 @@ image-rendering: crisp-edges;               // Possible future browsers.
 -ms-interpolation-mode: nearest-neighbor;   // IE (non standard naming)
 }
 
-/* Only want cursor: none on the file canvas, or it will be annoying when the mouse pointer compleatly disappears */
-canvas.fileCanvas {
-	/* hide annoying blinking cursor because of contenteditable=true */
-	cursor: none;
-	caret-color: transparent;
-}
 
 .wireframe {
 	user-select: none;
