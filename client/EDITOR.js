@@ -83,7 +83,7 @@ EDITOR.settings = {
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
-	sub_pixel_antialias: false, // For the main text area (canvas) only.
+	sub_pixel_antialias: true, // For the main text area (canvas) only.
 	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
@@ -9522,7 +9522,10 @@ function fileDrop(fileDropEvent) {
 	
 	function traverseFileTree(item, path) {
 		console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
-		path = path || "/upload/";
+
+if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
+
+			path = path || UTIL.joinPaths(EDITOR.user.home, "/upload/");
 		if (item.isFile) {
 			// Get file
 			filesToSave++;

@@ -56,9 +56,17 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+Detect no-antialias and pick a font that looks good without antialias:
+Luculent, Envy Code R, Proggy Clean,  PT Mono, 
+
+
+issue: When restarting editor, terminalX files get parsed as code! They should be plain text!
+
 prio: Able to work on the editor via the cloud IDE (I've only worked via the desktop version so far)
 fix nuked repo
 
+
+issue with dark theme after changing comment and quote colors!?
 
 able to right click on a file in file explorer to see info like size, last modified etc...
 
