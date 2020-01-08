@@ -56,8 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
-Detect no-antialias and pick a font that looks good without antialias:
-Luculent, Envy Code R, Proggy Clean,  PT Mono, 
+Why is not the editor body text anitaliased!?
+
 
 Middle mouse to copy doesn't work in terminal!
 

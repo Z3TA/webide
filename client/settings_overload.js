@@ -289,6 +289,15 @@ EDITOR.settings.style.font = "LiberationMono";
 					EDITOR.settings.style.fontSize = 15;
 					EDITOR.settings.gridHeight = 22;
 					EDITOR.settings.gridWidth = 8;
+					
+					
+					// Text has a different width if it's antialiased!
+					var antialias = detectAntialias();
+if(antialias) {
+debug("Antialias detected! Updating grid width");
+EDITOR.settings.gridWidth = 7.5;
+}
+					
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 				}
 			};
@@ -388,5 +397,43 @@ UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		
 	}
 	
+	
+	function detectAntialias() {
+var canvasNode = document.createElement("canvas");
+		canvasNode.width = "35";
+		canvasNode.height = "35";
+		
+		// We must put this node into the body, otherwise
+		// Safari Windows does not report correctly.
+		canvasNode.style.display = "none";
+		document.body.appendChild(canvasNode);
+		var ctx = canvasNode.getContext("2d");
+		
+		// draw a black letter "O", 32px Arial.
+		ctx.textBaseline = "top";
+		ctx.font = "32px Arial";
+		ctx.fillStyle = "black";
+		ctx.strokeStyle = "black";
+		
+		ctx.fillText("O", 0, 0);
+		
+		// start at (8,1) and search the canvas from left to right,
+		// top to bottom to see if we can find a non-black pixel.  If
+		// so we return true.
+		for (var j = 8; j <= 32; j++) {
+			for (var i = 1; i <= 32; i++) {
+				var imageData = ctx.getImageData(i, j, 1, 1).data
+				var alpha = imageData[3];
+				
+				if (alpha != 255 && alpha != 0 && alpha > 180) {
+					return true; // font-smoothing must be on.
+				}
+			}
+			
+		}
+		
+		// didn't find any non-black pixels - return false.
+		return false;
+	}
 	
 })();
