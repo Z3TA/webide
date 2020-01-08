@@ -98,7 +98,7 @@ EDITOR.settings = {
 		textColor: "rgb(0,0,0)", // Should be in rgb(0,0,0) format because some functions like to convert and make darker/lighter/transparent
 		bgColor: "rgb(255,255,255)", // Studies say that black on white is the best for readability. todo: themes
 		altColors: ["pink", "green", "orange", "magenta", "cyan", "blue", "levander", "brown", "purple", "mint", "red", "olive", "teal"], // Colors that look good on the background, and are different
-		commentColor: "rgb(0, 119, 14)",
+		commentColor: "rgb(0, 119, 14)", // Please check on a LCD without IPS before changing these!
 		quoteColor: "rgb(0, 91, 91)",
 		xmlTagColor: "rgb(0, 21, 162)",
 		removedTextColor: "#3a7f3a",
@@ -10173,6 +10173,8 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 			Different modes need to preventDefault (have a keyPressed event listener that returns false)
 			in order to prevent characters from being inserted to the document. 
 		*/
+		
+		//console.log("keyPressed: file?" + !!file + " EDITOR.input=" + EDITOR.input + " preventDefault=" + preventDefault + " charCode=" + character.charCodeAt(0) + " ");
 		
 		if(file && EDITOR.input && !preventDefault) {
 			// Put character at current caret position:

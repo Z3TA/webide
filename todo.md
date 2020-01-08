@@ -56,7 +56,11 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
-Why is not the editor body text anitaliased!?
+
+able to set subpixel-antialias in view menu!
+
+
+Why is not the editor body text anitaliased!? Seems only in Chrome
 
 
 Middle mouse to copy doesn't work in terminal!

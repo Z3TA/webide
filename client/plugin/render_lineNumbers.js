@@ -29,6 +29,7 @@
 			EDITOR.on("afterResize", linerNumbersAfterResize);
 			
 			// Add new item for lineNumberColor to EDITOR.settings if it's not already added
+			// Please check on a LCD monitor without IPS before changing (contrast need to be high)
 			EDITOR.settings.style.lineNumberColor = EDITOR.settings.style.lineNumberColor ? EDITOR.settings.style.lineNumberColor : "rgb(163, 163, 163)";
 			
 			if(!cacheCanvas) {
