@@ -83,7 +83,7 @@ EDITOR.settings = {
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
-	sub_pixel_antialias: true, // For the main text area (canvas) only.
+	sub_pixel_antialias: false, // For the main text area (canvas) only.
 	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
@@ -235,6 +235,7 @@ EDITOR.soundAssist = false; // If set to true, widgets should make sounds (EDITO
 EDITOR.speechRate = 1; // // 0.1 to 10
 
 (function() { // Non global editor code ...
+	"use strict";
 	
 	// These variables and functions are private ...
 	// We only expose methods that are in the EDITOR object.
@@ -260,8 +261,6 @@ EDITOR.speechRate = 1; // // 0.1 to 10
 	var renderCaretTimer;
 	
 	var pressCtrlCount = 0; // When pressed 5 times, soundAssist will be activated!
-	
-	var canvas, ctx; 
 	
 	var fileOpenHtmlElement;
 	
@@ -1945,6 +1944,123 @@ usePseudoClipboard = false;
 		EDITOR.shouldResize = true;
 	}
 	
+	EDITOR.initCanvas = function init(canvas) {
+		canvas.style.display="block";
+		
+		//canvas.onpaste = function() {};
+		// canvas.onpaste only trigger in Firefox when you tab away, then tab back to Firefox and paste
+		
+		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
+		// Also make sure there are no drop or dragover events on window, document or parent elements!
+		
+		/*
+			canvas.addEventListener("drop", function(e) {
+			e.preventDefault();
+			console.log(e.target.className + " drop");
+			
+			console.log(e.dataTransfer.files[0]);
+			console.log(e.dataTransfer.files[0].name);
+			console.log(e.dataTransfer.files[0].size + " bytes");
+			
+			return false;
+			}, false);
+			
+			canvas.addEventListener("dragdrop", function(e) {
+			e.preventDefault();
+			console.log(e.target.className + " dragdrop");
+			return false;
+			}, false);
+			
+			canvas.addEventListener("dragenter", function(e) {
+			e.preventDefault();
+			console.log(e.target.className + " dragenter");
+			e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+			console.log(e);
+			
+			return false;
+			}, false);
+			
+			canvas.addEventListener("dragleave", function(e) {
+			e.preventDefault();
+			console.log(e.target.className + " dragleave");
+			
+			return false;
+			}, false);
+			
+			
+			
+			document.addEventListener("dragstart", function(event) {
+			
+			console.log(e.target.className + " dragstart");
+			
+			// The dataTransfer.setData() method sets the data type and the value of the dragged data
+			event.dataTransfer.setData("Text", event.target.id);
+			
+			// Output some text when starting to drag the p element
+			document.getElementById("demo").innerHTML = "Started to drag the p element.";
+			
+			// Change the opacity of the draggable element
+			event.target.style.opacity = "0.4";
+			});
+		*/
+		
+		canvas.addEventListener("dragover", function(dragOverEvent) {
+			dragOverEvent.preventDefault();
+			console.log(dragOverEvent.target.className + " dragover");
+			
+			//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+			return false;
+		}, false);
+		
+		canvas.ondrop = fileDrop;
+		
+		return canvas;
+	}
+	
+	EDITOR.getCanvasContext = function getContext(canvas) {
+		
+		/*
+			It seems it's not possible to change the context settings if we have already got the context ...
+			So we need to re-create the canvas element to update the context settings.
+			
+			This functions is still usable for DRY-ness though.
+			
+		*/
+		
+		if(!EDITOR.canvas) throw new Error("EDITOR.canvas not yet set!");
+		
+		if(canvas == undefined) canvas = EDITOR.canvas;
+		
+		var ctxSettings = {
+			lowLatency:  EDITOR.settings.lowLatencyCanvas, 
+			desynchronized: true,
+			willReadFrequently: false
+		}
+		
+		if(EDITOR.settings.sub_pixel_antialias == false) {
+			ctxSettings.antialias = false;
+			ctxSettings.alpha = true;
+			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
+		}
+		else {
+			ctxSettings.antialias = true;
+			ctxSettings.alpha = false; // {alpha: false} allows sub pixel anti-alias (LCD-text).
+		}
+		
+		console.log("EDITOR.getCanvasContext: EDITOR.canvas?" + (canvas == EDITOR.canvas) + " EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias + " ctxSettings=" + JSON.stringify(ctxSettings));
+		
+		var ctx = canvas.getContext("2d", ctxSettings);
+		
+		if( canvas == EDITOR.canvas ) {
+EDITOR.canvasContext = ctx;
+			console.warn("EDITOR.getCanvasContext: ctx set as EDITOR.canvasContext!");
+		}
+		
+		//canvasContextReset(ctx);
+		
+		return ctx;
+	}
+	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
 		console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas));
@@ -1987,9 +2103,9 @@ usePseudoClipboard = false;
 			return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined, or can ot get canvas.width of undefined)
 		}
 		
-		if(canvas.width <= 0 || canvas.height <= 0) {
+		if(EDITOR.canvas.width <= 0 || EDITOR.canvas.height <= 0) {
 			EDITOR.shouldRender = false;
-			console.warn("Not rendering because the canvas is too small! canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " ");
+			console.warn("Not rendering because the canvas is too small! EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " ");
 			return;
 		}
 		
@@ -2041,8 +2157,8 @@ usePseudoClipboard = false;
 				// Just paint the background
 				ctx.fillStyle = EDITOR.settings.style.bgColor;
 				
-				//ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				//ctx.clearRect(0, 0, EDITOR.canvas.width, EDITOR.canvas.height);
+				ctx.fillRect(0, 0, EDITOR.canvas.width, EDITOR.canvas.height);
 				
 				return;
 			}
@@ -2158,7 +2274,7 @@ usePseudoClipboard = false;
 			// Show some useful info for new users ...
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(0, 0, EDITOR.canvas.width, EDITOR.canvas.height);
 			
 			ctx.fillStyle = EDITOR.settings.style.textColor;
 			
@@ -2262,12 +2378,14 @@ usePseudoClipboard = false;
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
+			var ctx = EDITOR.canvasContext;
+			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
 			var top = EDITOR.settings.topMargin + screenStartRow * EDITOR.settings.gridHeight;
 			
 			// Clear only that row
-			ctx.fillRect(0, top, canvas.width, EDITOR.settings.gridHeight);
+			ctx.fillRect(0, top, EDITOR.canvas.width, EDITOR.settings.gridHeight);
 			
 			/*
 				ctx.fillStyle = "#FF0000";
@@ -2301,6 +2419,8 @@ usePseudoClipboard = false;
 		var middle = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 		var left = EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth;
 		
+		var ctx = EDITOR.canvasContext;
+		
 		ctx.fillStyle = textColor;
 		
 		//ctx.fillStyle = "rgb(0,0,0)";
@@ -2315,6 +2435,8 @@ usePseudoClipboard = false;
 		
 		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth); // -0.5 to clear sub pixels (caret)
+		
+		var ctx = EDITOR.canvasContext;
 		
 		if(row == file.caret.row) {
 			ctx.fillStyle = EDITOR.settings.style.currentLineColor;
@@ -2347,6 +2469,8 @@ usePseudoClipboard = false;
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
+		var ctx = EDITOR.canvasContext;
+		
 		ctx.fillStyle = fillStyle;
 		
 		ctx.fillRect(left, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight);
@@ -2372,14 +2496,15 @@ usePseudoClipboard = false;
 		}
 	}
 	
-	function canvasContextReset() {
+	function canvasContextReset(ctx) {
 		
-		var ctx = EDITOR.canvasContext;
+		// note: The editor is resized as least once when the page loads, which calls this function
+		
+		if(ctx == undefined) ctx = EDITOR.canvasContext;
 		
 		// Do not "smooth" the image, keep it sharp!
 		ctx.imageSmoothingEnabled = false;
 		ctx.webkitImageSmoothingEnabled = false;
-		ctx.mozImageSmoothingEnabled = false;
 		
 		
 		// Set the font only once for performance
@@ -2622,15 +2747,15 @@ usePseudoClipboard = false;
 		
 		console.log("pixelRatio=" + pixelRatio + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
 		
-		if( canvas && (canvas.width != canvasWidth || canvas.height != canvasHeight || resizeOverride) ) {
+		if( EDITOR.canvas && (EDITOR.canvas.width != canvasWidth || EDITOR.canvas.height != canvasHeight || resizeOverride) ) {
 			
 			console.log("DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
-			canvas.style.width = EDITOR.view.canvasWidth + "px";
-			canvas.style.height = EDITOR.view.canvasHeight + "px";
+			EDITOR.canvas.style.width = EDITOR.view.canvasWidth + "px";
+			EDITOR.canvas.style.height = EDITOR.view.canvasHeight + "px";
 			
-			canvas.width  = canvasWidth;
-			canvas.height = canvasHeight;
+			EDITOR.canvas.width  = canvasWidth;
+			EDITOR.canvas.height = canvasHeight;
 			
 			console.log("DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
@@ -2650,7 +2775,7 @@ usePseudoClipboard = false;
 			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
 			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
 			
-			console.log("Set canvas: canvas.width=" + canvas.width + " canvas.height=" + canvas.height + " canvas.style.width=" + canvas.style.width + " canvas.style.height=" + canvas.style.height);
+			console.log("Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
 			
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.width = EDITOR.view.canvasWidth + "px";
@@ -2662,8 +2787,8 @@ usePseudoClipboard = false;
 			EDITOR.shouldRender = true;
 			
 		}
-		else if(canvas) {
-			console.log("Not resetting canvas dimensions. It's already at canvas.width=" + canvas.width + " canvas.height=" + canvas.height);
+		else if(EDITOR.canvas) {
+			console.log("Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		}
 		
 		if(EDITOR.currentFile) {
@@ -2856,7 +2981,7 @@ if(elements[i].style.display != "none") {
 		}
 		else if(eventName == "storageReady" && _serverStorage != null) {
 			console.warn("Editor's storageReady event has already been fired! " + funName + " will run right away!");
-			options.fun();
+			options.fun(_serverStorage);
 		}
 		
 		
@@ -3024,8 +3149,8 @@ if(elements[i].style.display != "none") {
 			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
 			if(!discoveryBar.parentElement) {
-				var editorWidth = window.innerWidth || parseInt(canvas.width);
-				var editorHeight = window.innerHeight || parseInt(canvas.height);
+				var editorWidth = window.innerWidth || parseInt(EDITOR.canvas.width);
+				var editorHeight = window.innerHeight || parseInt(EDITOR.canvas.height);
 				if(editorWidth > editorHeight) {
 					/*
 						Right or left side ?
@@ -7123,7 +7248,7 @@ EDITOR.dashboard = {
 		var dashboard = document.getElementById("dashboard");
 		
 		dashboard.style.display = "none";
-		canvas.style.display = "block";
+			EDITOR.canvas.style.display = "block";
 		
 		EDITOR.dashboard.isVisible = false;
 		EDITOR.fireEvent("hideDashboard");
@@ -7138,7 +7263,7 @@ EDITOR.dashboard = {
 		
 		var dashboard = document.getElementById("dashboard");
 		
-		canvas.style.display = "none";
+			EDITOR.canvas.style.display = "none";
 		dashboard.style.display = "block";
 		
 		if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
@@ -8462,86 +8587,13 @@ function main() {
 	
 	bootstrap();
 	
-	canvas = document.getElementById("canvas");
-	canvas.style.display="block";
+		var canvas = EDITOR.canvas = document.getElementById("editorCanvas");
+		
+		EDITOR.initCanvas(canvas);
 	
-		//canvas.onpaste = function() {};
-		// canvas.onpaste only trigger in Firefox when you tab away, then tab back to Firefox and paste
-		
-	// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
-	// Also make sure there are no drop or dragover events on window, document or parent elements!
-	
-	/*
-		canvas.addEventListener("drop", function(e) {
-		e.preventDefault();
-		console.log(e.target.className + " drop");
-		
-		console.log(e.dataTransfer.files[0]);
-		console.log(e.dataTransfer.files[0].name);
-		console.log(e.dataTransfer.files[0].size + " bytes");
-		
-		return false;
-		}, false);
-		
-		canvas.addEventListener("dragdrop", function(e) {
-		e.preventDefault();
-		console.log(e.target.className + " dragdrop");
-		return false;
-		}, false);
-		
-		canvas.addEventListener("dragenter", function(e) {
-		e.preventDefault();
-		console.log(e.target.className + " dragenter");
-		e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
-		console.log(e);
-		
-		return false;
-		}, false);
-		
-		canvas.addEventListener("dragleave", function(e) {
-		e.preventDefault();
-		console.log(e.target.className + " dragleave");
-		
-		return false;
-		}, false);
+		var ctx = EDITOR.getCanvasContext(canvas);
 		
 		
-		
-		document.addEventListener("dragstart", function(event) {
-		
-		console.log(e.target.className + " dragstart");
-		
-		// The dataTransfer.setData() method sets the data type and the value of the dragged data
-		event.dataTransfer.setData("Text", event.target.id);
-		
-		// Output some text when starting to drag the p element
-		document.getElementById("demo").innerHTML = "Started to drag the p element.";
-		
-		// Change the opacity of the draggable element
-		event.target.style.opacity = "0.4";
-		});
-	*/
-	
-	canvas.addEventListener("dragover", function(dragOverEvent) {
-		dragOverEvent.preventDefault();
-		console.log(dragOverEvent.target.className + " dragover");
-		
-		//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
-		return false;
-	}, false);
-	
-	canvas.ondrop = fileDrop;
-	
-	if(EDITOR.settings.sub_pixel_antialias == false) {
-		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, antialias: false});
-		//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
-	}
-	else {
-		ctx = canvas.getContext("2d", {lowLatency:  EDITOR.settings.lowLatencyCanvas, alpha: false, antialias: true}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
-	}
-	
-		EDITOR.canvas = canvas;
-	EDITOR.canvasContext = ctx;
 		
 		// Don't bother resetting the canvas context here, wait for the resize!
 	
@@ -9813,7 +9865,7 @@ function copy(copyEvent) {
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
-		canvas.focus();
+			EDITOR.canvas.focus();
 		giveBackFocusAfterClipboardEvent = false;
 	}
 	
@@ -9868,7 +9920,7 @@ function cut(cutEvent) {
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
-		canvas.focus();
+			EDITOR.canvas.focus();
 		giveBackFocusAfterClipboardEvent = false;
 	}
 	
@@ -9982,7 +10034,7 @@ function paste(pasteEvent) {
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
-		canvas.focus();
+			EDITOR.canvas.focus();
 		giveBackFocusAfterClipboardEvent = false;
 	}
 	
@@ -10145,11 +10197,11 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 			var middle = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight + Math.floor(EDITOR.settings.gridHeight/2);
 			var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 			//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-			ctx.fillStyle = "rgb(0,0,0)";
-			ctx.fillText(benchmarkCharacter, left, middle);
+			EDITOR.canvasContext.fillStyle = "rgb(0,0,0)";
+			EDITOR.canvasContext.fillText(benchmarkCharacter, left, middle);
 			tempTest++;
 			return;
-			//ctx.fillText(character, 0, Math.floor(EDITOR.settings.gridHeight/2));
+			//EDITOR.canvasContext.fillText(character, 0, Math.floor(EDITOR.settings.gridHeight/2));
 			// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
 			//});
 			
@@ -10357,7 +10409,7 @@ function resizeAndRender(afterResize) {
 			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
 			try {
-				ctx.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+					EDITOR.canvasContext.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
 			}
 			catch(err) {
 				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
@@ -10371,7 +10423,7 @@ function resizeAndRender(afterResize) {
 		if(EDITOR.shouldRender) {
 			console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
 			
-			EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx);
+				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, EDITOR.canvas, EDITOR.canvasContext);
 		}
 		
 		if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
@@ -10498,9 +10550,9 @@ function keyIsDown(keyDownEvent) {
 		var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
 		//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 		var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
-		ctx.fillStyle = EDITOR.settings.style.bgColor;
-		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
-		ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+			EDITOR.canvasContext.fillStyle = EDITOR.settings.style.bgColor;
+			//EDITOR.canvasContext.fillStyle = "rgba(255,0,0, 0.5)";
+			EDITOR.canvasContext.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 		return;
 		
 		}
@@ -10930,7 +10982,7 @@ function mouseDown(mouseDownEvent) {
 					The Android screenreader is not supported atm. Blind people would need to use a PC,
 					as text input would be an issue - and Google has deprecated Speech to text in Chrome :(
 				*/
-				canvas.contentEditable = false;
+				EDITOR.canvas.contentEditable = false;
 			}
 			EDITOR.touchScreen = true;
 		}
@@ -10985,7 +11037,7 @@ function mouseDown(mouseDownEvent) {
 			if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
 			else console.log("mouseDown: Unable to blur active element!:");
 			
-			canvas.focus();
+				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
 			window.getSelection().removeAllRanges();
@@ -11234,7 +11286,7 @@ function getMousePosition(mouseEvent) {
 	
 	//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
 	
-	if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
+	if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == EDITOR.canvas) {
 		EDITOR.canvasMouseX = mouseX;
 		EDITOR.canvasMouseY = mouseY;
 	}
@@ -11264,7 +11316,7 @@ function getMousePosition(mouseEvent) {
 		
 		// Touch events only have pageX which is the whole page. We only want the position on the canvas !?
 		if(mouseEvent.target == canvas) {
-			var rect = canvas.getBoundingClientRect();
+				var rect = EDITOR.canvas.getBoundingClientRect();
 			//console.log(rect.top, rect.right, rect.bottom, rect.left);
 			mouseX = mouseX - rect.left;
 			mouseY = mouseY - rect.top;
@@ -11391,7 +11443,7 @@ function dblclick(dblClickEvent) {
 			
 			// Give focus
 			EDITOR.input = true;
-			canvas.focus();
+				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
 			window.getSelection().removeAllRanges();

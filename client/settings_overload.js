@@ -182,7 +182,7 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		// Tested in Firefox on Windows 10
 		
-		EDITOR.settings.sub_pixel_antialias = true;
+		EDITOR.settings.sub_pixel_antialias = true; // Consolas requires LCD text or it will look ugly!
 	EDITOR.settings.style.font = "Consolas";
 	EDITOR.settings.style.highlightMatchFont = "bold 15px Consolas";
 	EDITOR.settings.style.fontSize = 15;
@@ -243,7 +243,7 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 */
 		
-		if(window.devicePixelRatio == 1) EDITOR.settings.sub_pixel_antialias = true;
+
 		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
