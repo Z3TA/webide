@@ -56,10 +56,11 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
-todo: When updating subpixel-antialias also update the DOM!
 
-able to set subpixel-antialias in view menu!
+regression: Dialog buttons looks ugly due to font
+todo: test the editor with font smoothing off in OS settings
 
+I'm fat fingering Ctrl+Shift+S a lot. Show a warning when you make a Ctrl+Shift+X keybinding when there already exist a keybinding for Ctrl+X where X is the same
 
 Why is not the editor body text anitaliased!? Seems only in Chrome
 

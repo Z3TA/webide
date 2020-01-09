@@ -83,7 +83,7 @@ EDITOR.settings = {
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
 	gridWidth: 9, // Needs to be the same as font's character width!
-	sub_pixel_antialias: false, // For the main text area (canvas) only.
+	sub_pixel_antialias: ((window.devicePixelRatio == 1 || window.devicePixelRatio == undefined) ? true : false), // For the main text area (canvas) only.
 	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
@@ -10291,14 +10291,14 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
 				
 				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
-					document.getElementById('canvas').style.cursor = 'none'; // Hide mouse pointer while typing
+						EDITOR.canvas.style.cursor = 'none'; // Hide mouse pointer while typing
 						cursorHidden = true;
 				}
 				
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
-					document.getElementById('canvas').style.cursor = 'text';
+					EDITOR.canvas.style.cursor = 'text';
 						cursorHidden = false;
 				}, 3000);
 			}
