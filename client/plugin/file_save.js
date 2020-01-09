@@ -9,7 +9,6 @@
 	var saveDialog;
 	var inputPath;
 	var inputPathMinSize = 50;
-	var menu;
 	var folderPicker;
 	var suggestedFolderButtons = {};
 	var windowMenuSave, windowMenuSaveAs;
@@ -47,9 +46,6 @@
 		// todo: use inpout.keyup instead of global listener!
 		EDITOR.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
-		// Add items to the canvas context meny
-		menu = EDITOR.ctxMenu.add(S("save_as"), saveAs, 2);
-		
 		windowMenuSave = EDITOR.windowMenu.add(S("save"), [S("File"), 1], saveFileFromWindowMenu, saveFileFromKeyboardCombo);
 		windowMenuSaveAs = EDITOR.windowMenu.add(S("save_as"), [S("File"), 2], saveAs);
 		
@@ -67,8 +63,6 @@
 		EDITOR.unbindKey(saveFileFromKeyboardCombo);
 		EDITOR.unbindKey(hideSaveDialog);
 		EDITOR.unbindKey(enter);
-		
-		EDITOR.ctxMenu.remove(menu);
 		
 		EDITOR.windowMenu.remove(windowMenuSave);
 		EDITOR.windowMenu.remove(windowMenuSaveAs);
@@ -92,11 +86,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		return saveCurrentFile(file, combo);
 	}
 	
-	function saveFileFromContextMenu(file, combo) {
-		EDITOR.stat("saveFileFromContextMenu");
-		EDITOR.ctxMenu.hide();
-		return saveCurrentFile(file, combo);
-	}
+	
 	
 	function saveFileFromWindowMenu(file, combo) {
 		EDITOR.stat("saveFileFromWindowMenu");
@@ -498,25 +488,22 @@ console.warn("The save was canceled: " + err.message);
 	}
 	
 	
-	function saveAs(e) {
-		var file = EDITOR.currentFile;
-		var defaultPath;
+	function saveAs(originalFilePath) {
 		
-		if(!file) throw new Error("No file open!?");
+		if(originalFilePath == undefined) throw new Error("originalFilePath=" + originalFilePath);
+		else if(typeof originalFilePath == "object" && originalFilePath.hasOwnProperty("path")) originalFilePath = originalFilePath.path;
 		
 		EDITOR.ctxMenu.hide(); // This will bring focus to the editor input
 		
-		showSaveDialog();
+		showSaveDialog(); // This will remove focus from the editor input
 		
-		var path = "";
+		// Sometimes files does not have full path because they are not saved
+		// hmm, how does windows paths look like?
+		if(originalFilePath.charAt(0) != "/" && originalFilePath.indexOf("\\") == -1 && originalFilePath.match(/^.*:\/\/.*/) == null) {
+originalFilePath = EDITOR.workingDirectory + originalFilePath;
+		}
 		
-		if(file.savedAs) path = file.path;
-		// Why use the lastFileShowed.path !?
-		// else if(EDITOR.lastFileShowed) path = UTIL.getDirectoryFromPath(EDITOR.lastFileShowed.path);
-		else if(file.path.charAt(0) == "/" || file.path.indexOf("\\") != -1) path = file.path;
-		else path = EDITOR.workingDirectory + file.path;
-		
-		inputPath.value = path;
+		inputPath.value = originalFilePath;
 		
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
 		
@@ -526,7 +513,7 @@ console.warn("The save was canceled: " + err.message);
 		
 		inputPath.setAttribute("size", size);
 		
-		var folder = UTIL.getDirectoryFromPath(path);
+		var folder = UTIL.getDirectoryFromPath(originalFilePath);
 		
 		suggestFolders(folder);
 	}
@@ -534,7 +521,7 @@ console.warn("The save was canceled: " + err.message);
 	
 	function saveCurrentFile(file, combo) {
 		if(file.savedAs === false || combo.sum == CTRL + SHIFT) {
-			saveAs();
+			saveAs(file.path);
 		}
 		else {
 			EDITOR.saveFile(file);
@@ -544,13 +531,39 @@ console.warn("The save was canceled: " + err.message);
 	}
 	
 	function showSaveOption(file, combo, caret, target) {
-		if(!file) return true;
-		if(file.isSaved) return true;
-		if(!file.savedAs) return true;
-if(target.className != "fileCanvas") return;
 		
-		EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu, saveFileFromKeyboardCombo);
+		if(target.className=="fileCanvas") {
+			var filePathToBeSaved = file.path;
+		}
+		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+			var filePathToBeSaved = target.getAttribute("path");
+		}
 		
+		if(!filePathToBeSaved) return;
+		
+		if(!EDITOR.files.hasOwnProperty(filePathToBeSaved)) {
+			// File is not opened
+			// Can not call saveAs() here, as it will save the file currenctly opened! We might be clicking on an item outside the file canvas!
+			return;
+		}
+		
+		var fileToBeSaved = EDITOR.files[filePathToBeSaved];
+		if(!fileToBeSaved.isSaved) EDITOR.ctxMenu.addTemp("Save file", saveFileFromContextMenu, saveFileFromKeyboardCombo);
+		
+		EDITOR.ctxMenu.addTemp(S("save_as"), saveAsFromContextMenu);
+		
+		function saveFileFromContextMenu() {
+			
+			EDITOR.stat("saveFileFromContextMenu");
+			EDITOR.ctxMenu.hide();
+			return saveCurrentFile(fileToBeSaved, combo);
+		}
+		
+		function saveAsFromContextMenu() {
+			EDITOR.stat("saveAsFromContextMenu");
+			EDITOR.ctxMenu.hide();
+			return saveAs(filePathToBeSaved)
+		}
 	}
 	
 })();

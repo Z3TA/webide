@@ -4484,6 +4484,8 @@ if(preventClick) {
 				addSeparator = true;
 			}
 			
+if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
+
 			if(addSeparator == undefined) addSeparator = true;
 			
 			
@@ -4553,7 +4555,7 @@ if(preventClick) {
 			}
 			
 			function ctxItemClickAction(someEvent) {
-				console.log("EDITOR.ctxMenu.addTemp: ctxItemClickAction!");
+				console.log("EDITOR.ctxMenu.addTemp: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
 				// Give the same function parameters as key bound events
 				callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
@@ -4645,7 +4647,7 @@ if(preventClick) {
 			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
 			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
 			
-			console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " callStack:" + UTIL.getStack("showCtxMenu"));
+			console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " ctrl?" + clickEventOrTargetElement.ctrlKey + " callStack:" + UTIL.getStack("showCtxMenu"));
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
@@ -4668,10 +4670,17 @@ if(preventClick) {
 			
 			clearSelection();
 			
+			// Clear temorary menu items
+			var tempItems = document.getElementById("canvasContextmenuTemp");
+			while(tempItems.firstChild){
+				tempItems.removeChild(tempItems.firstChild);
+			}
+			
 			if(ctxMenuVisibleOnce == false) EDITOR.renderNeeded();
 			ctxMenuVisibleOnce = true;
 			
 			var menu = document.getElementById("canvasContextmenu");
+			
 			
 			var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 			var menuDownABit = 10;
@@ -4681,7 +4690,9 @@ if(preventClick) {
 			var touchX = EDITOR.mouseX;
 			var touchY = EDITOR.mouseY;
 			
-			var caret = EDITOR.mousePositionToCaret();
+// We only care about the caret if it's the file canvas context menu
+			if(target.className=="fileCanvas") var caret = EDITOR.mousePositionToCaret();
+			else var caret = null;
 			
 			console.log("showCtxMenu: caret=" + JSON.stringify(caret));
 			
@@ -4765,8 +4776,8 @@ posX = EDITOR.width - offsetWidth;
 			console.log("showCtxMenu: menu=", menu);
 			console.log("showCtxMenu: menu.childNodes[0]=", menu.childNodes[0]);
 			
-			// First element[0] is the temp-holder
-			menu.children[1].focus();
+			// element[0] is the temp-holder
+			menu.children[1].focus(); // Focus the first element
 			
 			menu.onmouseover = function() {
 				menu.children[1].blur(); // Don't focus child elements if we have a mouse'

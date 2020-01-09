@@ -57,6 +57,8 @@ What I'm working on
 -------------------
 
 
+todo: fix issue where a new browser tab is opened when you click somewhere on the file tab
+
 regression: Dialog buttons looks ugly due to font
 todo: test the editor with font smoothing off in OS settings
 
@@ -64,6 +66,7 @@ I'm fat fingering Ctrl+Shift+S a lot. Show a warning when you make a Ctrl+Shift+
 
 Why is not the editor body text anitaliased!? Seems only in Chrome
 
+todo: Rename jzedit repo to webide
 
 Middle mouse to copy doesn't work in terminal!
 

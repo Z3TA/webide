@@ -9,7 +9,8 @@
 	EDITOR.plugin({
 		desc: 'Adds "Close file" and "Close the editor" key combos and a "Close file" context menu item',
 		load: closeFileKeyCombo,
-		unload: closeFileKeyComboUnload
+		unload: closeFileKeyComboUnload,
+		order: 5000 // Want the "close" option in context menu to be far down
 	});
 	
 	function closeFileKeyCombo() {
@@ -22,7 +23,8 @@
 		EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: CTRL, fun: closeFile});
 		EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
-		menuItem = EDITOR.ctxMenu.add(S("close_file"), closeFile, 3);
+		//menuItem = EDITOR.ctxMenu.add(S("close_file"), closeFile, 3);
+		EDITOR.on("ctxMenu", showCloseFileOptionMaybe);
 		
 		windowMenuClose = EDITOR.windowMenu.add(S("close"), [S("File"), 3], closeFile);
 		windowMenuQuit = EDITOR.windowMenu.add(S("Quit"), [S("Editor"), 20], closeEditor);
@@ -36,7 +38,8 @@
 		EDITOR.unbindKey(closeFile);
 		EDITOR.unbindKey(closeEditor);
 		
-		EDITOR.ctxMenu.remove(menuItem);
+		//EDITOR.ctxMenu.remove(menuItem);
+		
 		EDITOR.windowMenu.remove(windowMenuClose);
 		EDITOR.windowMenu.remove(windowMenuQuit);
 		
@@ -64,15 +67,28 @@
 		return false;
 	}
 	
-	function closeFile() {
+	function showCloseFileOptionMaybe(file, combo, caret, target) {
 		
-		var file = EDITOR.currentFile;
+		console.log("file_close: target=", target, " target.path=" + target.path + " target.getAttribute('path')=" + target.getAttribute('path') + " target.id=" + target.id);
 		
-		if(file) {
-			
-			console.log(file);
-			
-			var close = true;
+		if(target.className=="fileCanvas") {
+			var fileToBeClosed = file;
+		}
+		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+			var fileToBeClosed = EDITOR.files[target.getAttribute("path")];
+		}
+		
+		if(!fileToBeClosed) return;
+		
+		EDITOR.ctxMenu.addTemp("Close file", false, function closeFileMenuItemClicked() {
+			closeFile(fileToBeClosed);
+		});
+		
+	}
+	
+	function closeFile(file) {
+		
+		if(file == undefined) throw new Error("file=" + file);
 			
 			// Check if it's saved first!
 			if(!file.isSaved) {
@@ -88,12 +104,6 @@
 				// Close it right away if it's saved
 				EDITOR.closeFile(EDITOR.currentFile.path);
 			}
-			
-		}
-		else {
-			// Close the editor!?
-			EDITOR.exit();
-		}
 		
 		return false;
 		
