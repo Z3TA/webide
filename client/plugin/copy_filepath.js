@@ -1,69 +1,59 @@
 (function() {
 	"use strict";
 	
-	var menuItem;
 	var winMenuCopyFilePath;
 	
 	EDITOR.plugin({
 		desc: 'Adds "Copy file path" to the context menu',
 		load: function loadCopyFilePath() {
 			
-			menuItem = EDITOR.ctxMenu.add(S("copy_file_path"), copyFilePath, 5);
+			EDITOR.on("ctxMenu", copyFilePathCtxmenuOption);
+			
 			winMenuCopyFilePath = EDITOR.windowMenu.add(S("copy_file_path"), [S("File"), 5], copyFilePath);
 			
 			EDITOR.registerAltKey({char: "d", alt:1, label: S("copy_file_path"), fun: copyFilePath});
 			
 		},
 		unload: function unloadCopyFilePath() {
-			EDITOR.ctxMenu.remove(menuItem);
+			EDITOR.removeEvent("ctxMenu", copyFilePathCtxmenuOption);
 			EDITOR.windowMenu.remove(winMenuCopyFilePath);
 			}
 		});
 	
-	function copyFilePath() {
+	function copyFilePathCtxmenuOption(file, combo, caret, target) {
+		if(target.className=="fileCanvas" && file) {
+			var filePath = file.path;
+		}
+		else if(target.getAttribute("path")) {
+			var filePath = target.getAttribute("path");
+		}
 		
-		// Puts the current file path into the clipboard
+		console.log("copy_filepath: filePath=" + filePath);
 		
-		if(EDITOR.currentFile) {
-			
-			var text = EDITOR.currentFile.path;
-			
-			if(RUNTIME == "nw.js") {
-				
-				// Load native UI library
-				var gui = require('nw.gui');
-				
-				// We can not create a clipboard, we have to receive the system clipboard
-				var clipboard = gui.Clipboard.get();
-				
-				// Read from clipboard
-				//var text = clipboard.get('text');
-				//console.log(text);
-				
-				// Or write something
-				clipboard.set(text, 'text');
-				
-				// And clear it!
-				//clipboard.clear();
-			}
-			else {
-				//window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+		if(!filePath) return;
+		
+		EDITOR.ctxMenu.addTemp(S("copy_file_path"), function copyFilePathViaCtxMenu() {
+			copyFilePath(filePath);
+		});
+		
+	}
+	
+	function copyFilePath(filePath) {
+		// Puts the text into the clipboard
+		
+		if(filePath.hasOwnproperty("path")) filePath = filePath.path; // Can be a File object
+		
 				EDITOR.putIntoClipboard(text, function(err) {
 					if(err) alertBox(err.message);
 					else {
 						winMenuCopyFilePath.hide();
+				EDITOR.ctxMenu.hide();
+				
 						EDITOR.input = true;
 					}
 				});
-			}
 			
 			EDITOR.stat("copy_file_path");
-		}
-		else {
-			alertBox("No file open!");
-		}
-		
-		EDITOR.ctxMenu.hide();
 		
 	}
 	

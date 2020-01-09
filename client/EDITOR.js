@@ -622,6 +622,27 @@ EDITOR.bindKey(b);
 			description = undefined;
 		}
 		
+		if(RUNTIME == "nw.js") {
+			
+			// Load native UI library
+			var gui = require('nw.gui');
+			
+			// Get the system clipboard
+			var clipboard = gui.Clipboard.get();
+			
+			// Read from clipboard
+			//var text = clipboard.get('text');
+			//console.log(text);
+			
+			// Or write something
+			clipboard.set(text, 'text');
+			
+			// And clear it!
+			//clipboard.clear();
+			
+			return done(null, true, false);
+		}
+		
 		EDITOR.pseudoClipboard = text;
 		console.log("EDITOR.putIntoClipboard: Put " + text.length + " characters into EDITOR.pseudoClipboard");
 		
