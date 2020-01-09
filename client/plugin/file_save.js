@@ -532,7 +532,7 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 	
 	function showSaveOption(file, combo, caret, target) {
 		
-		if(target.className=="fileCanvas") {
+		if(target.className=="fileCanvas" && file) {
 			var filePathToBeSaved = file.path;
 		}
 		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements

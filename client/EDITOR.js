@@ -4273,9 +4273,9 @@ if(menuItem.parentMenu) {
 			}
 			
 			if(typeof htmlText != "string") throw new Error("EDITOR.ctxMenu.add: First argument htmlText need to be a (HTML) string!");
+			if(typeof callback != "function") throw new Error("Menu item htmlText=" + htmlText + " has to callback (click) function!");
 			
-			
-			var menu = document.getElementById("canvasContextmenu");
+			var menu = document.getElementById("contextmenuGeneral");
 			
 			var li = document.createElement("li");
 			li.setAttribute("class", "item");
@@ -4320,6 +4320,13 @@ if(menuItem.parentMenu) {
 						
 					}
 				});
+				
+				// An id is needed so that the menu item can be targeted while recording
+				var fName = UTIL.getFunctionName(callback);
+				var liId = "ctxMenu_" + fName;
+				if(document.getElementById(liId)) throw new Error("fName=" + fName + " is not a unique function name among context menu items!");
+				li.id = liId;
+				
 			}
 			
 			var preventClick = false;
@@ -4379,9 +4386,6 @@ if(preventClick) {
 				// tabindex is needed in order for tab navigating to work (in Chrome)
 				li.setAttribute("tabindex", itemCount);
 				
-				// An id is needed so that the menu item can be targeted while recording
-				li.id = "ctxMenuItem" + itemCount;
-				
 			});
 			
 			// Don't forget to call EDITOR.ctxMenu.hide() after the item has been clicked!
@@ -4391,27 +4395,32 @@ if(preventClick) {
 		remove: function removeCtxMenuItem(menuElement) {
 			
 			if(!menuElement) throw new Error("EDITOR.ctxMenu.remove was called with no function parameters! menuElement=" + menuElement);
-			if(!menuElement.tagName) throw new Error("EDITOR.ctxMenu.remove argument menuElement is not a HTML node!");
-			
-			var menu = document.getElementById("canvasContextmenu");
-			
-			var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
+			if(!menuElement.tagName) throw new Error("EDITOR.ctxMenu.remove argument menuElement is not a HTML node!")
 			
 			if(menuElement.parentNode == undefined) {
 				console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
 				return;
 			}
 			
-			if(menuElement.parentNode == menu) menu.removeChild(menuElement);
-			else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
+			var menu = menuElement.parentNode;
+			
+			var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
+			
+			/*
+				Problem: The item will still linger in memory and be accessible by calling document.getElementById
+			*/
+			
+			menuElement.onclick = null;
+			menuElement.onmouseup = null;
+			menuElement.onkeyup = null;
+			
+			console.log("EDITOR.ctxMenu.remove: id=" + menuElement.id);
+			
+			menuElement.id = "removeMe";
+			
+			menu.removeChild(menuElement);
 			
 			return positionIndex; // So another node can be inserted at this position
-			
-			function getItemPosition(child) {
-				var i = 0;
-				while( (child = child.previousSibling) != null ) i++;
-				return i;
-			}
 			
 		},
 		activate: function activateContextMenuItem(menuElement) {
@@ -4484,13 +4493,14 @@ if(preventClick) {
 				addSeparator = true;
 			}
 			
-if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
-
+			if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
+			
 			if(addSeparator == undefined) addSeparator = true;
 			
 			
-			//var menu = document.getElementById("canvasContextmenu");
-			var tempItems = document.getElementById("canvasContextmenuTemp");
+			var tempItems = document.getElementById("contextmenuTemp");
+			console.log("EDITOR.ctxMenu.addTemp: htmlText=" + htmlText + " tempItems=", tempItems);
+			
 			
 			var li = document.createElement("li");
 			li.setAttribute("class", "item");
@@ -4519,24 +4529,36 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 			if(callback) {
 				li.onclick = clickOnCtxItem;
 				li.onmouseup = mouseupOnCtxItem;
+				li.onkeyup = keyupOnCtxItem;
 				
-				li.addEventListener("keyup", function(keyEvent) {
-					// Number 13 is the "Enter" key on the keyboard
-					if (keyEvent.keyCode === 13) {
-						console.log("EDITOR.ctxMenu.addTemp: Pressed enter on item!");
-						
-						// Cancel the default action, if needed
-						keyEvent.preventDefault();
-						
-						EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
-						
-						callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
-						
-					}
-				});
+				// An id is needed so that the menu item can be targeted while recording
+				var fName = UTIL.getFunctionName(callback);
+if(fName.length == 0) throw new Error("Callback function has no name!");
+				var liId = "ctxMenu_" + fName;
+				if(document.getElementById(liId) && document.getElementById(liId).parentElement==tempItems) {
+throw new Error("fName=" + fName + " is not a unique function name among temporary context menu items! Or there is still a reference to an old element!");
+				}
+				li.id = liId
 			}
 			
+			console.log("EDITOR.ctxMenu.addTemp: li.id=" + li.id);
+			
 			var preventClick = false;
+			
+			function keyupOnCtxItem(keyEvent) {
+				// Number 13 is the "Enter" key on the keyboard
+				if (keyEvent.keyCode === 13) {
+					console.log("EDITOR.ctxMenu.addTemp: Pressed enter on item!");
+					
+					// Cancel the default action, if needed
+					keyEvent.preventDefault();
+					
+					EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
+					
+					callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
+					
+				}
+			}
 			
 			function mouseupOnCtxItem(mouseUpEvent) {
 				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
@@ -4577,8 +4599,6 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 					// tabindex is needed in order for tab navigating to work (in Chrome)
 					li.setAttribute("tabindex", itemCount);
 					
-					// An id is needed so that the menu item can be targeted while recording
-					li.id = "ctxMenuItem" + itemCount;
 				}
 				
 			}
@@ -4592,7 +4612,7 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 			
 			if(!menuIsFullScreen) {
 				// Resize the menu
-				var menu = document.getElementById("canvasContextmenu");
+				var menu = document.getElementById("contextmenuGeneral");
 				var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
 				var offsetWidth = parseInt(menu.offsetWidth);
 				var itemHeight = parseInt(li.offsetHeight);
@@ -4613,7 +4633,7 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 			
 			console.log(UTIL.getStack("Hide context menu"));
 			
-			var menu = document.getElementById("canvasContextmenu");
+			var menu = document.getElementById("contextmenu");
 			
 			if(!menu.classList.contains("visible")) {
 				console.warn("Context menu already hidden. No need to hide it!");
@@ -4631,9 +4651,9 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 			menu.style.left = -1000 + "px";
 			
 			// Clear temorary menu items
-			var tempItems = document.getElementById("canvasContextmenuTemp");
+			var tempItems = document.getElementById("contextmenuTemp");
 			while(tempItems.firstChild){
-				tempItems.removeChild(tempItems.firstChild);
+				EDITOR.ctxMenu.remove(tempItems.firstChild);
 			}
 			
 			// Blur selected item
@@ -4671,15 +4691,17 @@ if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "functio
 			clearSelection();
 			
 			// Clear temorary menu items
-			var tempItems = document.getElementById("canvasContextmenuTemp");
+			var tempItems = document.getElementById("contextmenuTemp");
+			console.log("showCtxMenu: tempItems=", tempItems);
 			while(tempItems.firstChild){
-				tempItems.removeChild(tempItems.firstChild);
+				EDITOR.ctxMenu.remove(tempItems.firstChild);
 			}
+			
 			
 			if(ctxMenuVisibleOnce == false) EDITOR.renderNeeded();
 			ctxMenuVisibleOnce = true;
 			
-			var menu = document.getElementById("canvasContextmenu");
+			var menu = document.getElementById("contextmenu");
 			
 			
 			var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
@@ -11026,7 +11048,7 @@ function mouseDown(mouseDownEvent) {
 	
 	if(button == undefined) button = leftMouseButton; // For like touch events
 	
-	var menu = document.getElementById("canvasContextmenu");
+		var menu = document.getElementById("contextmenu");
 	
 	console.log("mouseDown on target.className=" + target.className);
 	

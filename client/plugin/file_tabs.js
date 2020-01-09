@@ -584,7 +584,7 @@ tabFileText.setAttribute("path", path);
 		function contextmenu(ev) {
 			console.log("file_tabs: Showing context menu...");
 			EDITOR.ctxMenu.show(ev || event);
-			EDITOR.ctxMenu.addTemp("Close all files except this one", true, function whenClicked(currentFile, combo) {
+			EDITOR.ctxMenu.addTemp("Close all files except this one", true, function closeAllOtherFiles(currentFile, combo) {
 				
 				console.log("file_tabs: contextmenu: combo=" + JSON.stringify(combo) + " path=" + path);
 				

@@ -8,7 +8,6 @@
 (function() {
 	"use strict";
 	
-	var ctxMenuNewWindow;
 	var windowMenuNewWindow, windowMenuSplitScreen;
 	var discoveryBarIcon;
 	
@@ -16,7 +15,8 @@
 		desc: "Open file in new window",
 		load: function loadFloatingWindow() {
 			
-			ctxMenuNewWindow = EDITOR.ctxMenu.add(S("open_in_new_window"), openInNewWindow, 4);
+			EDITOR.on("ctxMenu", openInNewWindowCtxmenuOption);
+			
 			windowMenuNewWindow = EDITOR.windowMenu.add(S("open_in_new_window"), [S("File"), 9], openInNewWindow);
 			windowMenuSplitScreen = EDITOR.windowMenu.add(S("split_screen_new_window"), [S("View"), 50], splitScreen);
 			
@@ -25,12 +25,30 @@
 			
 		},
 		unload: function unloadFloatingWindow() {
-			EDITOR.ctxMenu.remove(ctxMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuSplitScreen);
 			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			EDITOR.removeEvent("ctxMenu", openInNewWindowCtxmenuOption);
 		},
+order: 6000 // Want option to appear low in the context menu
 	});
+	
+	function openInNewWindowCtxmenuOption(file, combo, caret, target) {
+		if(target.className=="fileCanvas" && file) {
+			var filePath = file.path;
+		}
+		else if(target.getAttribute("path")) {
+			var filePath = target.getAttribute("path");
+		}
+		
+		if(!filePath) return;
+		
+		EDITOR.ctxMenu.addTemp(S("open_in_new_window"), openInNewWindowFromCtxmenu);
+		
+		function openInNewWindowFromCtxmenu() {
+			openInNewWindow(filePath);
+		}
+	}
 	
 	function openWindowFromMenu() {
 		openInNewWindow(EDITOR.currentFile);
@@ -88,7 +106,7 @@
 		
 	}
 	
-	function openInNewWindow(file, browserWindowOptions, callback) {
+	function openInNewWindow(filePath, browserWindowOptions, callback) {
 		
 		if(typeof browserWindowOptions == "function" && callback == undefined) {
 			callback = browserWindowOptions;
@@ -97,6 +115,15 @@
 		
 		if(typeof browserWindowOptions != "object") {
 			browserWindowOptions = {};
+		}
+		
+		
+		if(filePath.hasOwnProperty("path")) {
+			var text = filePath.text;
+			var openFileOptions = {isSaved: file.isSaved, savedAs: file.savedAs, changed: file.changed};
+			var line = file.caret.row + file.partStartRow + 1;
+			
+			filePath = filePath.path;
 		}
 		
 		EDITOR.ctxMenu.hide();
@@ -117,12 +144,10 @@
 			var otherEditor = browserWindow.window.EDITOR;
 			
 			
-			otherEditor.openFile(file.path, file.text, {isSaved: file.isSaved, savedAs: file.savedAs, changed: file.changed}, function(err, fileInOtherWindow) {
+			otherEditor.openFile(filePath, text, openFileOptions, function(err, fileInOtherWindow) {
 				if(err) throw err;
 				
-				var line = file.caret.row + file.partStartRow + 1;
-				
-				fileInOtherWindow.gotoLine(line);
+				if(line) fileInOtherWindow.gotoLine(line);
 				
 				otherEditor.on("fileClose", function fileClosed(closedFile) {
 					var openedFiles = Object.keys(otherEditor.files);
