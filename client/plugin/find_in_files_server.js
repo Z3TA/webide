@@ -395,6 +395,10 @@ if(err) console.error(err);
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
 		}
+		
+		CLIENT.cmd("abortFindInFiles", function(err) {
+			if(err) alertBox("Failed to cancel find in files: " + err.message, "CMD_FAIL", "error");
+		});
 	}
 	
 	function buildDiv() {
