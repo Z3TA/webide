@@ -2053,8 +2053,8 @@ usePseudoClipboard = false;
 		if(canvas == undefined) canvas = EDITOR.canvas;
 		
 		var ctxSettings = {
-			lowLatency:  EDITOR.settings.lowLatencyCanvas, 
-			desynchronized: true,
+			lowLatency: EDITOR.settings.lowLatencyCanvas, 
+			//desynchronized: true, // This will laterally reverse the canvas in Opera on Android :P
 			willReadFrequently: false
 		}
 		
@@ -2077,9 +2077,38 @@ EDITOR.canvasContext = ctx;
 			console.warn("EDITOR.getCanvasContext: ctx set as EDITOR.canvasContext!");
 		}
 		
+		if(typeof ctx.getContextAttributes == "function") {
+			console.log( "EDITOR.getCanvasContext: getContextAttributes=" + JSON.stringify(ctx.getContextAttributes()) );
+		}
+		
 		//canvasContextReset(ctx);
 		
 		return ctx;
+	}
+	
+	function canvasContextReset(ctx) {
+		
+		// note: The editor is resized as least once when the page loads, which calls this function
+		
+		if(ctx == undefined) ctx = EDITOR.canvasContext;
+		
+		// Do not "smooth" the image, keep it sharp!
+		ctx.imageSmoothingEnabled = false;
+		ctx.webkitImageSmoothingEnabled = false;
+		
+		
+		// Set the font only once for performance
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		ctx.textBaseline = "middle";
+		
+		// Just in case the matrix is inverted (Opera on Android)
+		//ctx.scale(1,1);
+		//ctx.translate(0, 500);
+		
+		ctx.save();
+		
+		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		
 	}
 	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
@@ -2137,9 +2166,9 @@ EDITOR.canvasContext = ctx;
 		// Used for only rendering some rows for optimization. 
 		// Default is to render all rows, so screenStartRow = 0
 		
-		
 		// Fix blurryness for screens with high pixel ratio
 		if(pixelRatio !== 1) {
+			//alertBox("pixelRatio=" + pixelRatio);
 			ctx.restore();
 			ctx.save();
 			ctx.scale(pixelRatio,pixelRatio);
@@ -2517,26 +2546,7 @@ EDITOR.canvasContext = ctx;
 		}
 	}
 	
-	function canvasContextReset(ctx) {
-		
-		// note: The editor is resized as least once when the page loads, which calls this function
-		
-		if(ctx == undefined) ctx = EDITOR.canvasContext;
-		
-		// Do not "smooth" the image, keep it sharp!
-		ctx.imageSmoothingEnabled = false;
-		ctx.webkitImageSmoothingEnabled = false;
-		
-		
-		// Set the font only once for performance
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "middle";
-		
-		ctx.save();
-		
-		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
-		
-	}
+	
 	
 	EDITOR.resize = function(resizeOverride) {
 		/*
@@ -4318,12 +4328,12 @@ if(menuItem.parentMenu) {
 			
 			if(typeof addSeparator == "function" && callback == undefined) {
 				callback = addSeparator;
-				addSeparator = true;
+				addSeparator = false;
 			}
 			else if(typeof addSeparator == "function" && typeof callback == "function") {
 				keyboardFunction = callback;
 				callback = addSeparator;
-				addSeparator = true;
+				addSeparator = false;
 			}
 			
 			if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
@@ -4360,7 +4370,7 @@ if(menuItem.parentMenu) {
 			if(typeof options.callback != "function") throw new Error("option callback needs to be a function!");
 			if(options.keybindFunction != undefined && typeof options.keybindFunction != "function") throw new Error("option keybindFunction needs to be a function!");
 			
-			if(options.temp && options.separator == undefined) options.separator = true;
+			//if(options.temp && options.separator == undefined) options.separator = true;
 			
 			if(options.temp) {
 				var menu = document.getElementById("contextmenuTemp");
@@ -4700,6 +4710,19 @@ if(menuItem.parentMenu) {
 			}
 			
 			
+			// Make sure there is a separator between temp and regular menu items
+			// But don't show a separator if the last item in temp already has a separator
+			
+			var tempMenu = document.getElementById("contextmenuTemp");
+			var lastTempItem = tempMenu.lastChild;
+			if(lastTempItem && !lastTempItem.classList.contains("sep")) {
+				var separator = document.createElement("li");
+				separator.classList.add("sep");
+				tempMenu.appendChild(separator);
+			}
+			
+			
+			
 			// Make sure it fits on the screen!!
 			/*
 				setTimeout(function() { // Wait for div content to load
@@ -4776,7 +4799,7 @@ posX = EDITOR.width - offsetWidth;
 			menu.children[1].focus(); // Focus the first element
 			
 			menu.onmouseover = function() {
-				menu.children[1].blur(); // Don't focus child elements if we have a mouse'
+				menu.children[1].blur(); // Don't focus child elements if we have a mouse
 			}
 			
 			return true;
@@ -10418,7 +10441,7 @@ function resizeAndRender(afterResize) {
 			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
 			try {
-					EDITOR.canvasContext.drawImage(canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+					//EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
 			}
 			catch(err) {
 				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
@@ -11324,7 +11347,7 @@ function getMousePosition(mouseEvent) {
 		// The editor doesn't allow scrolling, so pageX is thus the same as clientX !
 		
 		// Touch events only have pageX which is the whole page. We only want the position on the canvas !?
-		if(mouseEvent.target == canvas) {
+		if(mouseEvent.target == EDITOR.canvas) {
 				var rect = EDITOR.canvas.getBoundingClientRect();
 			//console.log(rect.top, rect.right, rect.bottom, rect.left);
 			mouseX = mouseX - rect.left;

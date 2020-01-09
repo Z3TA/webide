@@ -498,7 +498,7 @@ console.warn("The save was canceled: " + err.message);
 		showSaveDialog(); // This will remove focus from the editor input
 		
 		// Sometimes files does not have full path because they are not saved
-		// hmm, how does windows paths look like?
+		// todo: hmm, how does windows paths look like?
 		if(originalFilePath.charAt(0) != "/" && originalFilePath.indexOf("\\") == -1 && originalFilePath.match(/^.*:\/\/.*/) == null) {
 originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		}

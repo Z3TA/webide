@@ -56,6 +56,11 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+how does file paths looks on Windows ? file_save.js wants to know!
+
+bug: Can not move or rename uploaded file! (it's owned by root, but should be owned by the user!)
+EACCES: permission denied, unlink '/upload/file'
+
 todo: Don't scroll when in colab move and the other (window) removes a row
 
 Also make "reopen file" and "copy file path" temorary context menu items!

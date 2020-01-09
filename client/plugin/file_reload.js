@@ -2,7 +2,6 @@
 	
 	"use strict";
 	
-	var menuItem;
 	var winMenuReloadFromDisk;
 	
 	EDITOR.plugin({
@@ -15,7 +14,8 @@
 		
 		EDITOR.bindKey({desc: S("save_current_file"), key: "R", combo: CTRL+SHIFT, fun: reloadFile});
 		
-		menuItem = EDITOR.ctxMenu.add(S("reload_from_disk"), reloadFile, 6);
+		EDITOR.on("ctxMenu", reloadFileCtxOption);
+		
 		winMenuReloadFromDisk = EDITOR.windowMenu.add(S("reload_from_disk"), [S("Edit"), 4], reloadFile);
 		
 		EDITOR.registerAltKey({char: "back", alt:1, label: S("reload_from_disk"), fun: reloadFile});
@@ -25,13 +25,37 @@
 	function unloadFileReload() {
 		EDITOR.unbindKey(reloadFile);
 		
-		EDITOR.ctxMenu.remove(menuItem);
+		EDITOR.removeEvent("ctxMenu", reloadFileCtxOption);
 		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
 		EDITOR.unregisterAltKey(reloadFile);
 	}
 	
-	function reloadFile() {
-		var file = EDITOR.currentFile;
+	function reloadFileCtxOption(file, combo, caret, target) {
+		if(target.className=="fileCanvas" && file) {
+			var filePath = file.path;
+		}
+		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+			var filePath = target.getAttribute("path");
+		}
+		
+		if(!filePath) return;
+		
+		// File need to be opened!
+		if(!EDITOR.files.hasOwnProperty(filePath)) return;
+		
+		var fileToBeReloaded = EDITOR.files[filePath];
+		
+		EDITOR.ctxMenu.addItem({
+			temp: true, 
+text: S("reload_from_disk"), 
+keybindFunction: reloadFile, 
+callback: function reloadFileFromCtxmenu() {
+				reloadFile(fileToBeReloaded);
+			}
+		});
+	}
+	
+	function reloadFile(file) {
 		
 if(!file) return true;
 
