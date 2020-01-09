@@ -18,7 +18,7 @@ var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
 var ctxMenuVisibleOnce = false;
-var menuIsFullScreen = false;
+var CONTEXT_MENU_IS_FULL_SCREEN = false;
 var usePseudoClipboard = undefined;
 var lastBufferStartRow = -1; // 
 var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
@@ -4277,7 +4277,7 @@ if(menuItem.parentMenu) {
 	EDITOR.ctxMenu = {
 		add: function addCtxMenuItem(htmlText, position, callback, keyboardFunction) {
 			
-			// When modifying this function, also remember to modify addTemp if needed!
+			// USE EDITOR.ctxMenu.addItem instead!!
 			
 			if(typeof position == "function" && typeof callback == "number") {
 				var posTemp = callback;
@@ -4297,11 +4297,82 @@ if(menuItem.parentMenu) {
 			if(typeof htmlText != "string") throw new Error("EDITOR.ctxMenu.add: First argument htmlText need to be a (HTML) string!");
 			if(typeof callback != "function") throw new Error("Menu item htmlText=" + htmlText + " has to callback (click) function!");
 			
-			var menu = document.getElementById("contextmenuGeneral");
+			return EDITOR.ctxMenu.addItem({
+				text: htmlText,
+				order: position,
+				callback: callback,
+				keybindFunction: keyboardFunction,
+				temp: false
+			});
+				
+			
+			
+			
+		},
+		addTemp: function addTempCtxMenuItem(htmlText, addSeparator, callback, keyboardFunction) {
+			/*
+				These items are removed when the menu is hidden
+				
+				USE EDITOR.ctxMenu.addItem with option.temp=true !
+			*/
+			
+			if(typeof addSeparator == "function" && callback == undefined) {
+				callback = addSeparator;
+				addSeparator = true;
+			}
+			else if(typeof addSeparator == "function" && typeof callback == "function") {
+				keyboardFunction = callback;
+				callback = addSeparator;
+				addSeparator = true;
+			}
+			
+			if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
+			
+			return EDITOR.ctxMenu.addItem({
+				temp: true,
+				text: htmlText,
+				callback: callback,
+				keybindFunction: keyboardFunction,
+				separator: addSeparator
+			});
+			
+		},
+		addItem: function addItem(options, trap) {
+			
+			/*
+				Adds an item to the context menu.
+				Items can be temporary (options.temp) or "general" (always show up no matter where you click)
+				
+				Don't forget to call EDITOR.ctxMenu.hide() after the item has been clicked!
+				
+			*/
+			
+			if(typeof options != "object") throw new Error("First argument to EDITOR.ctxMenu.addItem need to be an options object!");
+			if(trap != undefined) throw new Error("EDITOR.ctxMenu.addItem only takes one argument (an options object)!");
+			
+			var allowedOptions = ["text", "temp", "callback", "keybindFunction", "order", "separator"];
+			
+			for(var key in options) {
+				if(allowedOptions.indexOf(key) == -1) throw new Error("Unrecognized option: " + key);
+			}
+			
+			if(options.text == undefined) throw new Error("option text is requred!");
+			if(typeof options.callback != "function") throw new Error("option callback needs to be a function!");
+			if(options.keybindFunction != undefined && typeof options.keybindFunction != "function") throw new Error("option keybindFunction needs to be a function!");
+			
+			if(options.temp && options.separator == undefined) options.separator = true;
+			
+			if(options.temp) {
+				var menu = document.getElementById("contextmenuTemp");
+			}
+			else {
+				var menu = document.getElementById("contextmenuGeneral");
+			}
+			
+			console.log("EDITOR.ctxMenu.addItem: text=" + options.text + " menu=", menu);
 			
 			var li = document.createElement("li");
 			li.setAttribute("class", "item");
-			
 			
 			var bullet = document.createElement("span");
 			bullet.setAttribute("class", "bullet inactive");
@@ -4310,87 +4381,89 @@ if(menuItem.parentMenu) {
 			
 			var menuText = document.createElement("span");
 			menuText.setAttribute("class", "text");
-			menuText.innerHTML = htmlText;
+			menuText.innerHTML = options.text;
 			
 			li.appendChild(menuText);
 			
-			var keyCombo = EDITOR.getKeyFor(keyboardFunction || callback);
+			var keyCombo = EDITOR.getKeyFor(options.keybindFunction || options.callback);
 			var keyComboEl = document.createElement("span");
 			keyComboEl.setAttribute("class", "key");
 			if(keyCombo) keyComboEl.innerText = keyCombo;
 			li.appendChild(keyComboEl);
 			
-			li.setAttribute("aria-label", htmlText + (keyCombo ? " " + keyCombo : ""));
 			
-			console.warn("EDITOR.ctxMenu.add: Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
+			li.setAttribute("aria-label", options.text + (keyCombo ? " " + keyCombo : ""));
 			
-			if(callback) {
+			console.warn("EDITOR.ctxMenu.addItem: Adding menu item: " + options.text + " keyCombo=" + keyCombo);
+			
+			if(options.callback) {
 				li.onclick = clickOnCtxItem;
 				li.onmouseup = mouseupOnCtxItem;
-				
-				li.addEventListener("keyup", function(keyEvent) {
-					// Number 13 is the "Enter" key on the keyboard
-					if (keyEvent.keyCode === 13) {
-						console.log("EDITOR.ctxMenu.add: Pressed enter on item!");
-						
-						// Cancel the default action, if needed
-						keyEvent.preventDefault();
-						
-						EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
-						
-						callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
-						
-					}
-				});
+				li.onkeyup = keyupOnCtxItem;
 				
 				// An id is needed so that the menu item can be targeted while recording
-				var fName = UTIL.getFunctionName(callback);
+				var fName = UTIL.getFunctionName(options.callback);
+				if(fName.length == 0) throw new Error("callback function has no name!");
 				var liId = "ctxMenu_" + fName;
-				if(document.getElementById(liId)) throw new Error("fName=" + fName + " is not a unique function name among context menu items!");
+				if(document.getElementById(liId)) {
+					throw new Error("fName=" + fName + " is not a unique function name among context menu items! Or there is still a reference to an old element!");
+				}
 				li.id = liId;
-				
 			}
+			
+			console.log("EDITOR.ctxMenu.addItem: li.id=" + li.id);
 			
 			var preventClick = false;
 			
+			function keyupOnCtxItem(keyEvent) {
+				// Number 13 is the "Enter" key on the keyboard
+				if (keyEvent.keyCode === 13) {
+					console.log("EDITOR.ctxMenu.addItem: Pressed enter on item!");
+					
+					// Cancel the default action, if needed
+					keyEvent.preventDefault();
+					
+					EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
+					
+					options.callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
+					
+				}
+			}
+			
 			function mouseupOnCtxItem(mouseUpEvent) {
 				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
-				console.log("EDITOR.ctxMenu.add: mouseupOnCtxItem! preventClick=" + preventClick);
+				console.log("EDITOR.ctxMenu.addItem: mouseupOnCtxItem! preventClick=" + preventClick);
 				ctxItemClickAction(mouseUpEvent);
 			}
 			
 			function clickOnCtxItem(clickEvent) {
-if(preventClick) {
-					console.log("EDITOR.ctxMenu.add: clickOnCtxItem prevented!");
+				if(preventClick) {
+					console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem prevented!");
 					preventClick = false;
 					return false;
 				}
-				console.log("EDITOR.ctxMenu.add: clickOnCtxItem! preventClick=" + preventClick);
+				console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem! preventClick=" + preventClick);
 				ctxItemClickAction(clickEvent);
 			}
 			
 			function ctxItemClickAction(someEvent) {
-				console.log("EDITOR.ctxMenu.add: ctxItemClickAction!");
+				console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
 				// Give the same function parameters as key bound events
-				callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
+				options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
 			
-			
-			if(position) {
-				li.setAttribute("position", position);
-				//menu.insertBefore(li, menu.children[position]);
+			if(options.order) {
+				li.setAttribute("position", options.order);
 			}
 			else {
 				li.setAttribute("position", "10");
-				//menu.insertBefore(li, menu.children[position]);
 			}
-			
 			
 			menu.appendChild(li);
 			
-			// Re-order the menu items
-			var itemCount = 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200 
-			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 );
+			// Re-order positions of the menu items
+			var itemCount = options.temp ? 100 : 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200
+			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 ); // Convert DOM array to normal array for convenience
 			items.sort(function(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
 				var pB = parseInt(b.getAttribute("position"));
@@ -4410,9 +4483,38 @@ if(preventClick) {
 				
 			});
 			
-			// Don't forget to call EDITOR.ctxMenu.hide() after the item has been clicked!
+			if(options.separator) {
+				var separator =  document.createElement("li");
+				separator.setAttribute("class", "sep");
+				menu.appendChild(separator);
+			}
+			
+			if(!CONTEXT_MENU_IS_FULL_SCREEN && options.temp) {
+				/*
+					Adding more items makes the menu higher
+					Make sure no part is hidden below the view
+					
+					EDITOR.ctxMenu.show() should take care of this beause it waits some time before moving the mnu. But just in case...
+				*/
+				
+				var contextmenu = document.getElementById("contextmenu");
+				var offsetHeight = parseInt(contextmenu.offsetHeight); // height of the element including vertical padding and borders
+				var offsetWidth = parseInt(contextmenu.offsetWidth);
+				var itemHeight = parseInt(li.offsetHeight);
+				var posY = parseInt(contextmenu.style.top);
+				var borderOrSomething = 3;
+				
+				console.log("EDITOR.ctxMenu.addItem: itemHeight=" + itemHeight + " contextmenu.style.top=" + contextmenu.style.top + " contextmenu.style.bottom=" + contextmenu.style.bottom + " EDITOR.height=" + EDITOR.height + " offsetHeight=" + offsetHeight);
+				
+				if(posY > (EDITOR.height - offsetHeight)) {
+					posY = EDITOR.height - offsetHeight - borderOrSomething;
+					console.log("EDITOR.ctxMenu.addItem: Updating posY=" + posY);
+					contextmenu.style.top = posY + "px";
+				}
+			}
 			
 			return li;
+			
 		},
 		remove: function removeCtxMenuItem(menuElement) {
 			
@@ -4498,157 +4600,6 @@ if(preventClick) {
 					callback(file, combo, character, charCode, direction);
 				}
 			}
-			
-		},
-		addTemp: function addTempCtxMenuItem(htmlText, addSeparator, callback, keyboardFunction) {
-			/*
-				These items are removed when the menu is hidden
-			*/
-			
-			if(typeof addSeparator == "function" && callback == undefined) {
-				callback = addSeparator;
-				addSeparator = true;
-			}
-			else if(typeof addSeparator == "function" && typeof callback == "function") {
-				keyboardFunction = callback;
-				callback = addSeparator;
-				addSeparator = true;
-			}
-			
-			if(typeof keyboardFunction != "undefined" && typeof keyboardFunction != "function") throw new Error("keyboardFunction=" + keyboardFunction + " should be undefined or a function!");
-			
-			if(addSeparator == undefined) addSeparator = true;
-			
-			
-			var tempItems = document.getElementById("contextmenuTemp");
-			console.log("EDITOR.ctxMenu.addTemp: htmlText=" + htmlText + " tempItems=", tempItems);
-			
-			
-			var li = document.createElement("li");
-			li.setAttribute("class", "item");
-			
-			var bullet = document.createElement("span");
-			bullet.setAttribute("class", "bullet inactive");
-			
-			li.appendChild(bullet);
-			
-			var menuText = document.createElement("span");
-			menuText.setAttribute("class", "text");
-			menuText.innerHTML = htmlText;
-			
-			li.appendChild(menuText);
-			
-			var keyCombo = EDITOR.getKeyFor(keyboardFunction || callback);
-			var keyComboEl = document.createElement("span");
-			keyComboEl.setAttribute("class", "key");
-			if(keyCombo) keyComboEl.innerText = keyCombo;
-			li.appendChild(keyComboEl);
-			
-			var separator =  document.createElement("li");
-			separator.setAttribute("class", "sep");
-			
-			
-			if(callback) {
-				li.onclick = clickOnCtxItem;
-				li.onmouseup = mouseupOnCtxItem;
-				li.onkeyup = keyupOnCtxItem;
-				
-				// An id is needed so that the menu item can be targeted while recording
-				var fName = UTIL.getFunctionName(callback);
-				if(fName.length == 0) throw new Error("Callback function has no name!");
-				var liId = "ctxMenu_" + fName;
-				if(document.getElementById(liId) && document.getElementById(liId).parentElement==tempItems) {
-throw new Error("fName=" + fName + " is not a unique function name among temporary context menu items! Or there is still a reference to an old element!");
-				}
-				li.id = liId
-			}
-			
-			console.log("EDITOR.ctxMenu.addTemp: li.id=" + li.id);
-			
-			var preventClick = false;
-			
-			function keyupOnCtxItem(keyEvent) {
-				// Number 13 is the "Enter" key on the keyboard
-				if (keyEvent.keyCode === 13) {
-					console.log("EDITOR.ctxMenu.addTemp: Pressed enter on item!");
-					
-					// Cancel the default action, if needed
-					keyEvent.preventDefault();
-					
-					EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
-					
-					callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
-					
-				}
-			}
-			
-			function mouseupOnCtxItem(mouseUpEvent) {
-				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
-				console.log("EDITOR.ctxMenu.addTemp: mouseupOnCtxItem! preventClick=" + preventClick);
-				ctxItemClickAction(mouseUpEvent);
-			}
-			
-			function clickOnCtxItem(clickEvent) {
-				if(preventClick) {
-					console.log("EDITOR.ctxMenu.addTemp: clickOnCtxItem prevented!");
-					preventClick = false;
-					return false;
-				}
-				console.log("EDITOR.ctxMenu.addTemp: clickOnCtxItem! preventClick=" + preventClick);
-				ctxItemClickAction(clickEvent);
-			}
-			
-			function ctxItemClickAction(someEvent) {
-				console.log("EDITOR.ctxMenu.addTemp: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
-				// Give the same function parameters as key bound events
-				callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
-			}
-			
-			
-			tempItems.appendChild(li);
-			
-			var items = tempItems.childNodes;
-			var itemCount = 100; // Temporary items in the context meny start with tabindex 100
-			
-			// items is not a proper array, so we can not use array methods! (at least not in older browsers, IE)
-			for (var i=0; i<items.length; i++) setIndex(items[i]);
-			
-			function setIndex(li) {
-				if(li.tagName == "LI") {
-					
-					itemCount++;
-					
-					// tabindex is needed in order for tab navigating to work (in Chrome)
-					li.setAttribute("tabindex", itemCount);
-					
-				}
-				
-			}
-			
-			
-			// Add many: accept array?
-			
-			if(addSeparator) tempItems.appendChild(separator);
-			
-			//tempItems.insertBefore(menuElement, tempItems.firstChild);
-			
-			if(!menuIsFullScreen) {
-				// Resize the menu
-				var menu = document.getElementById("contextmenuGeneral");
-				var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
-				var offsetWidth = parseInt(menu.offsetWidth);
-				var itemHeight = parseInt(li.offsetHeight);
-				var posY = parseInt(menu.style.top);
-				
-				console.log("itemHeight=" + itemHeight);
-				
-				if(posY > (EDITOR.height - offsetHeight)) {
-					posY = EDITOR.height - offsetHeight;
-					menu.style.top = posY + "px";
-				}
-			}
-			
-			return li;
 			
 		},
 		hide: function hideCtxMenu() {
@@ -4770,7 +4721,8 @@ throw new Error("fName=" + fName + " is not a unique function name among tempora
 			var orgX = posX; // For debugging info
 			var orgY = posY;
 			
-			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+			var borderOrSomething = 3;
+			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight - borderOrSomething;
 			if((posX+offsetWidth) > EDITOR.width) {
 posX = EDITOR.width - offsetWidth;
 				console.log("showCtxMenu: Placing the menu inside the screen area (the clicks was far to the right) EDITOR.width=" + EDITOR.width + " menu.offsetWidth=" + menu.offsetWidth + " new posX=" + posX + " orgX=" + orgX + " EDITOR.mouseX=" + EDITOR.mouseX);
@@ -11824,7 +11776,7 @@ if(BROWSER != "Firefox") {
 		menu.style.overflow="auto";
 		EDITOR.scrollingEnabled = true;
 		
-		menuIsFullScreen = true;
+		CONTEXT_MENU_IS_FULL_SCREEN = true;
 		
 		EDITOR.ctxMenu.addTemp("Hide menu", function() {
 			EDITOR.ctxMenu.hide();
@@ -11844,7 +11796,7 @@ if(BROWSER != "Firefox") {
 		menu.style.height="";
 		menu.style.overflow="";
 		EDITOR.scrollingEnabled = false;
-		menuIsFullScreen = false;
+		CONTEXT_MENU_IS_FULL_SCREEN = false;
 		EDITOR.resizeNeeded();
 	}
 	

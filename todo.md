@@ -56,6 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+todo: Don't scroll when in colab move and the other (window) removes a row
+
 Also make "reopen file" and "copy file path" temorary context menu items!
 
 todo: test if you can press enter on temp menu item
