@@ -117,14 +117,27 @@
 			browserWindowOptions = {};
 		}
 		
-		
 		if(filePath.hasOwnProperty("path")) {
-			var text = filePath.text;
+			filePath = filePath.path;
+		}
+		
+		if(EDITOR.files.hasOwnProperty(filePath)) {
+			var file = EDITOR.files[filePath];
+			
+			if(!file.hasOwnProperty("text")) {
+				var msg = "Can currently only open text files in new window!";
+				if(callback) callback(new Error(msg));
+				else alertBox(msg);
+				return;
+			}
+			
+			var text = file.text;
 			var openFileOptions = {isSaved: file.isSaved, savedAs: file.savedAs, changed: file.changed};
 			var line = file.caret.row + file.partStartRow + 1;
 			
-			filePath = filePath.path;
 		}
+		
+		
 		
 		EDITOR.ctxMenu.hide();
 		windowMenuNewWindow.hide();
@@ -140,7 +153,7 @@
 			if(err) throw err;
 			
 			// Load the file in the other window
-			console.log(browserWindow.window);
+			console.log("openInNewWindow: browserWindow.window=", browserWindow.window);
 			var otherEditor = browserWindow.window.EDITOR;
 			
 			// Wait until logged in

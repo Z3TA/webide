@@ -56,7 +56,7 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
-issue: Text doesn't get copied over when you open file in new window!
+Also make "reopen file" and "copy file path" temorary context menu items!
 
 todo: test if you can press enter on temp menu item
 
