@@ -3146,6 +3146,8 @@ if(elements[i].style.display != "none") {
 				return;
 			}
 			
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) throw new Error("discovery bar disabled via query string!");
+			
 			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
 			if(!discoveryBar.parentElement) {
@@ -3274,7 +3276,6 @@ if(elements[i].style.display != "none") {
 			// Disables the entire discovery bar
 			EDITOR.discoveryBar.hide();
 			EDITOR.discoveryBar.enabled = false;
-			EDITOR.stat("disable_discoveryBar");
 		},
 		isVisible: true,
 		enabled: true,
@@ -4533,7 +4534,7 @@ if(preventClick) {
 				
 				// An id is needed so that the menu item can be targeted while recording
 				var fName = UTIL.getFunctionName(callback);
-if(fName.length == 0) throw new Error("Callback function has no name!");
+				if(fName.length == 0) throw new Error("Callback function has no name!");
 				var liId = "ctxMenu_" + fName;
 				if(document.getElementById(liId) && document.getElementById(liId).parentElement==tempItems) {
 throw new Error("fName=" + fName + " is not a unique function name among temporary context menu items! Or there is still a reference to an old element!");
@@ -7294,6 +7295,8 @@ EDITOR.dashboard = {
 		
 		console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 		
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
+			
 		var dashboard = document.getElementById("dashboard");
 		
 			EDITOR.canvas.style.display = "none";
@@ -8963,7 +8966,7 @@ EDITOR.discoveryBar.show();
 			This will make it "blink".
 			But we want to show the discovery bar by default if the user has not logged in (for a first time user)
 		*/
-		EDITOR.discoveryBar.show();
+		if(EDITOR.discoveryBar.enabled && !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) EDITOR.discoveryBar.show();
 		
 		sendStatistics();
 		

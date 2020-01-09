@@ -30,7 +30,7 @@
 			EDITOR.discoveryBar.remove(discoveryBarIcon);
 			EDITOR.removeEvent("ctxMenu", openInNewWindowCtxmenuOption);
 		},
-order: 6000 // Want option to appear low in the context menu
+		order: 6000 // Want option to appear low in the context menu
 	});
 	
 	function openInNewWindowCtxmenuOption(file, combo, caret, target) {
@@ -129,7 +129,7 @@ order: 6000 // Want option to appear low in the context menu
 		EDITOR.ctxMenu.hide();
 		windowMenuNewWindow.hide();
 		
-		if(!browserWindowOptions.url) browserWindowOptions.url = "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar";
+		if(!browserWindowOptions.url) browserWindowOptions.url = "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar,dashboard";
 		if(!browserWindowOptions.waitUntilLoaded) browserWindowOptions.waitUntilLoaded = true;
 		
 		if(QUERY_STRING["theme"]) browserWindowOptions.url += "&theme=" + QUERY_STRING["theme"];
@@ -143,11 +143,13 @@ order: 6000 // Want option to appear low in the context menu
 			console.log(browserWindow.window);
 			var otherEditor = browserWindow.window.EDITOR;
 			
-			
-			otherEditor.openFile(filePath, text, openFileOptions, function(err, fileInOtherWindow) {
+			// Wait until logged in
+			otherEditor.on("storageReady", function openFileOnceConnected() {
+				
+				otherEditor.openFile(filePath, text, openFileOptions, function(err, fileInOtherWindow) {
 				if(err) throw err;
 				
-				if(line) fileInOtherWindow.gotoLine(line);
+					if(line) fileInOtherWindow.gotoLine(line);
 				
 				otherEditor.on("fileClose", function fileClosed(closedFile) {
 					var openedFiles = Object.keys(otherEditor.files);
@@ -202,6 +204,7 @@ order: 6000 // Want option to appear low in the context menu
 					}
 				
 				
+			});
 			});
 			
 			function closeCollabDialogs() {
