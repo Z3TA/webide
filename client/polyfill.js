@@ -2,6 +2,7 @@
 	
 	Make sure the client (browser) supports these ...
 	
+note: This file can't depend on global.js because global.js might depend on this file!
 */
 
 if(typeof console == "undefined") console = {};
@@ -186,7 +187,7 @@ if (!String.prototype.repeat) {
 (function() {
 	
 	if(typeof Promise == "undefined") {
-		console.warn("Promises not supported in BROWSER=" + BROWSER);
+		console.warn("Promises not supported in this browser!");
 		return;
 	}
 	

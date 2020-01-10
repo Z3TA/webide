@@ -56,6 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+IE doesn't seem to save session count, because we are always greeted by the welcome dialog
+
 can't see tab close-button in IE!
 
 todo: test local-desktop on Windows for regressions
