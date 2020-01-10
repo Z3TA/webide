@@ -202,7 +202,8 @@ user.identify = function identify(info) {
 	
 	user.storageDir = user.translatePath( module_path.join(user.homeDir, ".webide/",  "storage/") ) ;
 	
-	console.log("Identified as user.name=" + user.name + " workingDirectory=" + user.workingDirectory);
+	
+	console.log("Identified as user.name=" + user.name + " USE_CHROOT=" + USE_CHROOT + " rootPath=" + user.rootPath + " homeDir=" + user.homeDir + " storageDir=" + user.storageDir + " workingDirectory=" + user.workingDirectory);
 	
 }
 
@@ -272,7 +273,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	if(pathToFileOrDir == undefined) throw new Error("pathToFileOrDir=" + pathToFileOrDir);
 	
-	//console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
+	console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 	
@@ -331,7 +332,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		
 		if(isDirectory) translatedPath = UTIL.trailingSlash(translatedPath);
 		
-		//console.log("translatedPath=" + translatedPath);
+		console.log("translatedPath=" + translatedPath);
 		
 		// Make sure virutal path is in user.rootPath
 		if(translatedPath.indexOf(user.rootPath) != 0) {
