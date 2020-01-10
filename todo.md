@@ -56,6 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+regression: Couln't find "CLIENT.js" in goto_file.js WTF!
+
 IE doesn't seem to save session count, because we are always greeted by the welcome dialog
 
 can't see tab close-button in IE!
@@ -100,6 +102,8 @@ when a file has been modified, highlight the save icon in discovery bar
 terminal colors are ugly in night mode
 
 how to quicly go to end of row in Mac? There is no End key!
+
+todo: Order the temp ctx menu items!
 
 when opening two terminals, then closing terminal1 and opening
 a new terminal, we land in terminal2, expected it to create terminal3!

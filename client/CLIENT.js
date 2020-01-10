@@ -184,6 +184,12 @@ console.log("CLIENT: connSend error: "+ err);
 	
 	
 	CLIENT.on = function addEventListener(ev, cb) {
+		
+		/*
+			todo: Have a list of available events, in order to throw an error if an event is misspelled
+			
+		*/
+		
 		if(!eventListeners.hasOwnProperty(ev)) {
 			console.warn("CLIENT: Creating new event (listener): " + ev);
 			eventListeners[ev] = [];

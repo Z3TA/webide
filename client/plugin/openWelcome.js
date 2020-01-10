@@ -7,25 +7,22 @@
 	
 	if(QUERY_STRING["embed"]) return;
 	
-	// The file is not available until the user has logged in
-	// (we could cheat and serve it with the editor itself)
+	if(window.location.search) {
+		console.log("Not opening welcome file because window.location.search=" + window.location.search);
+		return;
+	}
 	
-	CLIENT.on("loginSuccess", openWelcome, 2000);
+	var host = window.location.hostname;
+	if(host == "127.0.0.1" || host.indexOf("192.168") != -1) {
+		console.log("Not opening welcome file because window.location.hostname=" + host);
+		return;
+	}
 	
-	function openWelcome(login) {
+	CLIENT.on("loginCounter", openWelcome, 2000);
+	
+	function openWelcome(loginCounter) {
 		
-		if(window.location.search) {
-			console.log("Not opening welcome file because window.location.search=" + window.location.search);
-			return;
-		}
-		
-		var host = window.location.hostname;
-		if(host == "127.0.0.1" || host.indexOf("192.168") != -1) {
-			console.log("Not opening welcome file because window.location.hostname=" + host);
-			return;
-		}
-		
-		if(EDITOR.startedCounter == 1) {
+		if(loginCounter == 1) {
 			// First time the editor is started. And nothing in query string (eg no repos to download) Open the welcome right away
 			openWelcomeFile();
 		}

@@ -55,15 +55,6 @@
 					url = url.replace(/jzedit/i, "webide"); // Automatically login after rebranding from jzedit to webide
 					server = {url: url};
 				}
-				/*
-					if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" &&
-					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
-					console.log("First time we run the editor!");
-					console.log("Go directly to signup page.");
-					window.onbeforeunload = null;
-					document.location = "/signup/signup.htm" + window.location.search;
-					}
-				*/
 				
 				if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
 			});

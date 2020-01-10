@@ -5,7 +5,7 @@
 	*/
 	"use strict";
 	
-	var windowMenFeedbackPositive, windowMenFeedbackNegative;
+	var windowMenFeedbackPositive, windowMenFeedbackNegative, rootMenuItem;
 	var alreadySentFeedback = false;
 
 	EDITOR.plugin({
@@ -15,9 +15,9 @@
 			windowMenFeedbackPositive = EDITOR.windowMenu.add("☺", ["☺", 1], positive);
 			windowMenFeedbackNegative = EDITOR.windowMenu.add("☹", ["☺", 2], negative);
 			
-			windowMenFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
+			//windowMenFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
 			
-			var rootMenuItem = windowMenFeedbackPositive.parentMenu.parentMenuItem;
+			rootMenuItem = windowMenFeedbackPositive.parentMenu.parentMenuItem;
 			var label = rootMenuItem.domElement.getElementsByTagName("a")[0];
 			label.setAttribute("title", "Send feedback");
 			
@@ -25,11 +25,16 @@
 			
 			if(QUERY_STRING["embed"]) return;
 			
-			CLIENT.on("loginSuccess", expectations, 2000);
+			CLIENT.on("loginCounter", expectations, 2000);
 			
 		},
 		unload: function unloadUserFeedback() {
 			
+			CLIENT.removeEvent("loginCounter", expectations);
+			
+			EDITOR.windowMenu.remove(windowMenFeedbackPositive);
+			EDITOR.windowMenu.remove(windowMenFeedbackNegative);
+			EDITOR.windowMenu.remove(rootMenuItem);
 		}
 	});
 	
@@ -46,7 +51,9 @@
 	}
 	
 	
-	function expectations(login) {
+	function expectations(loginCounter) {
+		
+		//alert("loginCounter=" + loginCounter);
 		
 		if(window.location.search) {
 			console.log("Not asking for feedback because window.location.search=" + window.location.search);
@@ -54,8 +61,9 @@
 		}
 		
 		if(EDITOR.startedCounter && EDITOR.startedCounter > 2) return;
+		if(loginCounter > 2) return;
 		
-if(alreadySentFeedback) return;
+		if(alreadySentFeedback) return;
 
 		// 99% of new users close down the editor/IDE after 3 seconds, try get get some feedback
 		// Tried before to ask users to write feedback in the welcome.htm file, but no one did.

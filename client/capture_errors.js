@@ -10,6 +10,8 @@ var JAVASCRIPT_ERRORS = [];
 	
 	window.onerror = function captureError(message, source, lineno, colno, error) {
 		
+		//alert("Error: " + message);
+		
 		JAVASCRIPT_ERRORS.push({
 			message: message,
 			source: source,

@@ -343,7 +343,9 @@ EDITOR.speechRate = 1; // // 0.1 to 10
 	EDITOR.hasKeyboard = false; // true if keyup is detected
 	
 	// Keep track of how many times the editor has been started, so we can know if it's the first time the editor runs
-	EDITOR.startedCounter = parseInt(UTIL.getCookie("startedCounter")); 
+	// Note: This only keeps track on how many times the eidtor has started on the client.
+	// Use CLIENT.on("loginCounter", fun) to get how many times the user has logged in to the server!
+	EDITOR.startedCounter = parseInt(UTIL.getCookie("startedCounter"));
 	if(isNaN(EDITOR.startedCounter)) EDITOR.startedCounter = 0;
 	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
 	

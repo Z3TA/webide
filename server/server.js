@@ -1929,33 +1929,29 @@ function sockJsConnection(connection) {
 							
 							if(userConnectionName == USERNAME) {
 								if(stdinChannelBuffer) {
-									var data = JSON.stringify({stdin: stdinChannelBuffer});
-									connection.write(data);
+send({stdin: stdinChannelBuffer, id: 0});
 									stdinChannelBuffer = "";
 								}
 								
 								if(editorProcessArguments) {
-									var data = JSON.stringify({arguments: editorProcessArguments});
-									connection.write(data);
+									send({arguments: editorProcessArguments, id: 0});
 									editorProcessArguments = "";
 								}
 							}
 							else {
-								// Save last login
+								// Save last login date and update loginCounter
 							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function createLastLoginFile(err) {
 								if(err && err.code == "ENOENT") {
 									// .webide/storage/ probably doesn't exist in the home dir!
-										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
+										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"], {recursive: true}), function(err) {
 											if(err && err.code != "EEXIST") throw err;
 											
-											module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"]), function(err) {
-												if(err && err.code != "EEXIST") throw err;
-												// Try again
-												module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
-													if(err) throw err;
-													else lastLoginFileUpdated()
-												});
+											// Try again
+											module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
+												if(err) throw err;
+												else lastLoginFileUpdated()
 											});
+											
 										});
 										
 									return;
@@ -1964,10 +1960,38 @@ function sockJsConnection(connection) {
 								else lastLoginFileUpdated();
 								
 								function lastLoginFileUpdated() {
-									console.timeEnd("Login " + IP);
-									console.log(IP + " logged in as " + username + "");
-									
-									checkingUser = false;
+										// Update loginCounter
+										module_fs.readFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "loginCounter"]), function readLoginCounter(err, data) {
+											if(err) {
+if(err.code != "ENOENT") throw err;
+var loginCounter = 0;
+}
+											else {
+												var loginCounter = parseInt(data);
+											}
+											
+											loginCounter++;
+											
+											send({loginCounter: loginCounter, id: 0});
+											
+											//var data = JSON.stringify();
+											//connection.write(data);
+											
+											module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "loginCounter"]), loginCounter.toString(), function readLoginCounter(err) {
+												if(err) throw err;
+												
+												
+												console.timeEnd("Login " + IP);
+												console.log(IP + " logged in as " + username + "");
+												
+												checkingUser = false;
+												
+												
+});
+
+										});
+										
+										
 								}
 								
 							});
