@@ -57,27 +57,9 @@ var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 
 var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 
+var USERNAME = getArg(["user", "username"])
+var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
-if(USE_CHROOT) {
-	var npmOptions = {
-	env: {
-			HOME: "/",
-		PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
-		NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
-		dev: true // So that scripts know we're in "development"
-	},
-};
-}
-else {
-	var npmOptions = {
-		env: process.env
-	}
-}
-
-
-if(parseInt(process.env.uid)) {
-	USE_CHROOT = true;
-	}
 
 if(USE_CHROOT) {
 	/* Change root ...
@@ -93,13 +75,16 @@ if(USE_CHROOT) {
 	// The posix module is not optional if you want to chroot.
 	// Use the -nochroot flag to run the server without chroot!
 	
-	var username = process.env.username; // getArg(["u", "user", "username"]);
-	var uid = parseInt(process.env.uid); // getArg(["uid", "uid"])
-	var gid = parseInt(process.env.gid); // getArg(["gid", "gid"])
-	posix.chroot('/home/' + username);
+	var username = process.env.username;
+	var uid = parseInt(process.env.uid);
+	var gid = parseInt(process.env.gid);
+	
+	if(HOME=="/") throw new Error("Unncessasary to chroot into /");
+	
+	posix.chroot(HOME);
+	
 	//posix.setegid(gid);
 	//posix.seteuid(uid);
-	
 	process.setgid(gid);
 	process.setuid(uid);
 	
@@ -121,12 +106,33 @@ if(USE_CHROOT) {
 	
 	process.env.HOME = "/";
 	
+	var npmOptions = {
+		env: {
+			HOME: "/",
+			PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
+			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
+			dev: true // So that scripts know we're in "development"
+		},
+	};
 }
 else {
-	var isRoot = process.getuid && process.getuid() === 0;
-	if(isRoot && !USE_CHROOT) log("It's strongly adviced not to run worker process as superuser unless chroot flag is used!")
-	//if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
+	
+	
+	var npmOptions = {
+		env: process.env
+	}
 }
+
+if(parseInt(process.env.uid)) {
+	
+}
+
+
+var isRoot = process.getuid && process.getuid() === 0;
+//if(isRoot && !USE_CHROOT) log("It's strongly adviced not to run worker process as superuser unless chroot flag is used!", WARN)
+if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
+
+
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
 
@@ -191,9 +197,12 @@ user.identify = function identify(info) {
 	
 	if(USE_CHROOT) {
 		user.rootPath = null;
+	}
+
+if(USE_CHROOT || VIRTUAL_ROOT) {
 		user.defaultWorkingDirectory = "/";
 		user.homeDir = "/";
-		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + ")");
+		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + "  )");
 	}
 	
 	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);

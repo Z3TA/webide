@@ -3933,7 +3933,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
-	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--chroot=" + !NO_CHROOT, "--virtualroot=" + VIRTUAL_ROOT];
+	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
 	
 	options.env = {
 		username: name,
