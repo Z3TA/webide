@@ -11177,23 +11177,23 @@ function mouseDown(mouseDownEvent) {
 		if(!!el) { // Edge and IE11 throws a InvalidStateError on some elements unless we bang-bang it!?
 	// selectionStart etc seem to get lost when the element lose focus, so save it!
 	// mouse up event sometime doesn't fire, so save selectionStart on both down and up event
-try { // Might throw a InvalidStateError in IE
+			try { // Might throw a InvalidStateError in IE
 	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
 	if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
 	if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
+			}
+			catch(err) {
+				console.error(err);
+			}
 		}
-catch(err) {
-console.error(err);
-}
-}
 		
-	EDITOR.interact("mouseDown", mouseDownEvent);
-	
+		EDITOR.interact("mouseDown", mouseDownEvent);
+		
 		if(mouseDownEvent.type == "touchstart") EDITOR.stat("touch_down");
 		else EDITOR.stat("mouse_down");
 		
-	if(preventDefault) {
-		console.log("mouseDown:Preventing default!");
+		if(preventDefault) {
+			console.log("mouseDown:Preventing default!");
 		mouseDownEvent.preventDefault(); // To prevent the annoying menus
 		mouseDownEvent.stopPropagation();
 		return false;
@@ -11296,10 +11296,15 @@ function mouseUp(mouseUpEvent) {
 	
 	var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
 	// selectionStart etc seem to get lost when the element lose focus, so save it!
+try { // This might throw a InvalidStateError in IE!
 	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
 	if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
 	if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
-	
+	}
+catch(err) {
+console.error(err);
+}
+
 	EDITOR.interact("mouseUp", mouseUpEvent);
 	
 	if(preventDefault) {
