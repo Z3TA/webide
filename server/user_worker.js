@@ -76,17 +76,19 @@ else {
 
 
 if(parseInt(process.env.uid)) {
-	
 	USE_CHROOT = true;
+	}
+
+if(USE_CHROOT) {
 	/* Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
 		npm rebuild
 		
 		The idea with chroot is that we do not have to translate paths to virtual root.
-		But when running with chroot we are not able to spawn any processes!!
 		
 	*/
+	
 	var posix = require("posix"); // Very much needed for chroot to work. 
 	// The posix module is not optional if you want to chroot.
 	// Use the -nochroot flag to run the server without chroot!
@@ -203,7 +205,7 @@ user.identify = function identify(info) {
 	user.storageDir = user.translatePath( module_path.join(user.homeDir, ".webide/",  "storage/") ) ;
 	
 	
-	console.log("Identified as user.name=" + user.name + " USE_CHROOT=" + USE_CHROOT + " rootPath=" + user.rootPath + " homeDir=" + user.homeDir + " storageDir=" + user.storageDir + " workingDirectory=" + user.workingDirectory);
+	console.log("Identified as user.name=" + user.name + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + user.rootPath + " homeDir=" + user.homeDir + " storageDir=" + user.storageDir + " workingDirectory=" + user.workingDirectory);
 	
 }
 
