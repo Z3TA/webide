@@ -62,9 +62,6 @@ Move all development to the cloud IDE
 
 
 
-
-regression: Couln't find "CLIENT.js" in goto_file.js WTF!
-
 todo: test local-desktop on Windows for regressions
 
 bug: Can not move or rename uploaded file! (it's owned by root, but should be owned by the user!)
@@ -3382,6 +3379,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Sometimes when searching for files (goto_file.js) it can't find a file, for example today it couln't find CLIENT.js ...
 
 Get spawn EACCESS error when running NPM install (due to npm checking for updates)
 

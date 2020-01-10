@@ -3158,7 +3158,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 		var reName = new RegExp(findFile, "ig");
 		
 		var maxResults = json.maxResults || 20;
-		var maxConcurrency = 200;
+	var maxConcurrency = 4; // 200
 		var filesFound = 0;
 		var foldersToSearch = [];
 		var searchQueue = [];

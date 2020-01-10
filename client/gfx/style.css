@@ -1046,6 +1046,10 @@ div.gotoFile {
 	margin-top: 4px;
 }
 
+div.gotoFile .gotoList {
+max-height: 50vh;
+overflow-y: scroll;
+}
 
 div.gotoFile li {
 	font-size: 13px;
@@ -1081,6 +1085,9 @@ div.gotoFile li:hover {
 	color: black;
 	cursor: pointer;
 }
+
+
+
 
 .blink {
 	-webkit-animation-name: blinker; /* Chrome, Safari, Opera */

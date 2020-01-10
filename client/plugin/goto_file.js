@@ -22,7 +22,7 @@
 	var workingDir;
 	var progressBar;
 	var fileCache = [];
-	var defaultMaxResults = 20;
+	var defaultMaxResults = 24;
 	var maxResults = defaultMaxResults;
 	var lastSearchText = "";
 	var lastTypedText = "";
@@ -31,6 +31,7 @@
 	var winMenuGotoFile;
 	var gotoLine = null;
 	var discoveryBarIcon;
+	var selectedItem;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -298,6 +299,7 @@
 		
 		gotoList = document.createElement("ul");
 		gotoList.setAttribute("id", "gotoList");
+		gotoList.classList.add("gotoList");
 		gotoList.setAttribute("title", "Use keyboard up/down arrow to select a file from the list");
 		
 		//var li = document.createElement("li");
@@ -519,7 +521,7 @@
 						console.log("goto_file: abortFindFiles because: Max results found via cache and isSearching=" + isSearching + " (is true)!");
 						abortFindFiles();
 					}
-					return;
+					break;
 				}
 			}
 			console.log("goto_file: i=" + i + " " + fileCache[i] + " text=" + text + " match=" + match);
@@ -554,10 +556,16 @@
 	}
 	
 	function search(searchString, ignore) {
+
+if(maxResults <= 0) {
+			console.log("goto_file: Not searching because maxResults=" + maxResults);
+			return;
+		}
+		
 		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 		isSearching = true;
 		console.time("goto_file: findFiles"); // Edit server's cuncurrencty setting to fine tune!
-		console.log("goto_file: Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + ignore);
+		console.log("goto_file: Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + JSON.stringify(ignore));
 		lastSearchText = searchString;
 		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
 			
@@ -605,9 +613,12 @@
 		if(matchesFound == 1) {
 			// Mark it as the selected
 			li.setAttribute("class", "selected");
+			selectedItem = li;
 		}
 		
 		li.onclick = gotoFile;
+		
+		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		EDITOR.resizeNeeded();
 		EDITOR.resize();
@@ -708,7 +719,7 @@ folderToSearchIn = EDITOR.workingDirectory;
 				var folders = UTIL.getFolders(folderToSearchIn);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				folderToSearchIn = folders.pop();
-				console.log("goto_file: folderToSearchIn=" + folderToSearchIn);
+					console.log("goto_file: folderToSearchIn=" + folderToSearchIn);
 			}
 		}
 			
@@ -780,7 +791,7 @@ folderToSearchIn = EDITOR.workingDirectory;
 		
 /*
 if(isSearching) {
-console.log("goto_file: abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
+			console.log("goto_file: abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
 abortFindFiles();
 }
 */
@@ -837,10 +848,13 @@ abortFindFiles();
 				if(i < listItems.length && i > 0) {
 					listItems[i].setAttribute("class", "notselected");
 					listItems[i-1].setAttribute("class", "selected");
+					selectedItem = listItems[i-1];
 				}
 				break;
 			}
 		}
+		
+		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		setTimeout(function() { // Can't focus right away or it will be a keyup!
 			//inputGoto.focus();
@@ -866,11 +880,14 @@ abortFindFiles();
 				if(i < (listItems.length-1)) { // Not last
 					listItems[i].setAttribute("class", "notselected");
 					listItems[i+1].setAttribute("class", "selected");
+					selectedItem = listItems[i+1];
 				}
 				
 				break;
 			}
 		}
+		
+		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		//console.log("goto_file: yoyo i=" + i + " listItems.length=" + listItems.length);
 		
@@ -997,7 +1014,7 @@ abortFindFiles();
 		console.log("goto_file: gotoFileProgressStatus: " + JSON.stringify(status));
 		
 		if(!progressBar) {
-console.warn("goto_file: Progress bar not loaded!");
+			console.warn("goto_file: Progress bar not loaded!");
 		return;
 		}
 		
@@ -1031,9 +1048,7 @@ console.warn("goto_file: Progress bar not loaded!");
 			console.log("goto_file: Added to cache: " + file.path);
 		}
 		else {
-			console.log("goto_file: fileCache:" + JSON.stringify(fileCache, null, 2));
-			console.warn("goto_file: We should not find files already in cache as they should have been ignored! path=" + file.path);
-			// todo: fix this bug! Had to make it a warn as it was too common
+			console.log("goto_file: Already in cache: " + file.path);
 		}
 		appendResult(file.path, file.match);
 		gotoFileProgressStatus(file);
