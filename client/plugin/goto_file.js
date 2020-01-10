@@ -778,10 +778,15 @@ folderToSearchIn = EDITOR.workingDirectory;
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
-		if(isSearching) {
-			console.log("abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
-			abortFindFiles();
-		}
+/*
+if(isSearching) {
+console.log("abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
+abortFindFiles();
+}
+*/
+		
+		// Always abort just in case. There is a very annyoing bug that keeps the search going ...
+		abortFindFiles()
 		
 		ignoreSelection = false;
 		
@@ -1040,16 +1045,19 @@ console.warn("Progress bar not loaded!");
 	}
 	
 	function abortFindFiles() {
-		CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
-			if(err) throw err;
-			
-			if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
-			
-			if(resp.foldersBeingSearched == 0) isSearching = false;
-			
-			console.log("Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
-			
-		});
+		
+		if(CLIENT.connected) {
+			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+				if(err) throw err;
+				
+				if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
+				
+				if(resp.foldersBeingSearched == 0) isSearching = false;
+				
+				console.log("Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
+				
+			});
+		}
 	}
 	
 })();

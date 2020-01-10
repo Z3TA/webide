@@ -10,8 +10,6 @@ var JAVASCRIPT_ERRORS = [];
 	
 	window.onerror = function captureError(message, source, lineno, colno, error) {
 		
-		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + "");
-		
 		JAVASCRIPT_ERRORS.push({
 			message: message,
 			source: source,
@@ -20,7 +18,12 @@ var JAVASCRIPT_ERRORS = [];
 			error: error
 		});
 		
-		//alert("Error: " + message);
+		if(typeof console == "object") {
+			if(typeof console.warn == "function") console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + "");
+			if(typeof console.error == "function") console.error(error);
+			else alert("Error: " + message);
+		}
+		
 	}
 	
 })();
