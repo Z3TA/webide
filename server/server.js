@@ -697,17 +697,18 @@ function main() {
 	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
 	if(info.uid < 0) {
-		log("Warning: Your system do not support setuid and chroot. All users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
+		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
 	
 	if(!NO_CHROOT) {
+		// Make sure we can load the posix module before continuing with chroot
 		try {
 			require("posix");
 		}
 		catch(err) {
 			log(err.message);
 			log("posix module needed for chroot! Try with -nochroot flag!", NOTICE);
-process.exit(1);
+			process.exit(1);
 		}
 	}
 	
