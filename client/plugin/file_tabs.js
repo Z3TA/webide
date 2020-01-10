@@ -404,7 +404,7 @@
 		closeFileButton.setAttribute("class", "closeFileTab");
 		closeFileButton.setAttribute("title", "Close file: " + fileName + ""); // + fileName
 		closeFileButton.setAttribute("id", "close_" + path);
-		if(BROWSER == "MSIE") closeFileButton.innerHTML = "&times;"; // x  (IE doesn't support CSS content and emoji)
+		//if(BROWSER == "MSIE") closeFileButton.innerHTML = "&times;"; // x  (IE actually support CSS content and emoji! But for browsers that don't we can use this)
 		closeFileButton.addEventListener("click", closeTab, true); // Stop propagation so that we do not switch to this file.
 		// The click goes through anyway for some weird reason ...
 		
