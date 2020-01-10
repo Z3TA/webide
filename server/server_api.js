@@ -24,6 +24,8 @@ var FIND_FILES_IN_FLIGHT = 0;
 var FIND_IN_FILES_ABORTED = false;
 var ECHO_COUNTER = 0;
 
+var EXEC_OPTIONS = {shell: "/bin/dash"};
+
 API.countLines = function countLines(user, json, callback) {
 
 	API.readLines(user, json, function linesRead(err, json) {
@@ -3330,7 +3332,8 @@ API.run = function run(user, json, callback) {
 	var options = {
 		encoding: 'utf8',
 		maxBuffer: 200*1024,
-		env: process.env
+		env: process.env,
+		shell: EXEC_OPTIONS.shell
 	};
 	
 	/*
@@ -3383,7 +3386,8 @@ API.run = function run(user, json, callback) {
 		maxBuffer: 200*1024,
 		killSignal: 'SIGTERM',
 		cwd: null,
-		env: null
+		env: null,
+shell: EXEC_OPTIONS.shell
 	}
 	
 	exec(commandToRun, execOptions, function(err, stdout, stderr) {

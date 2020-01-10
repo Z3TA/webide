@@ -104,7 +104,7 @@ var INVITATIONS = {}; // Users can invite other users, which allows them to logi
 
 var PROXY = {}; // id: {proxy: http-proxy, startedBy: username}
 
-
+var EXEC_OPTIONS = {shell: "/bin/dash"};
 
 
 (function() {
@@ -623,7 +623,8 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		var exec = module_child_process.exec;
 		
 		var options = {
-			cwd: module_path.join(__dirname, "../") // Run in webide folder where removeuser.js is located
+			cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
+			shell: EXEC_OPTIONS.shell
 		}
 		//console.log("Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
@@ -727,7 +728,7 @@ function main() {
 	if(EDITOR_VERSION == 0) {
 		var exec = module_child_process.exec;
 		var getLatestCommitId = "hg log -l 1"
-		exec(getLatestCommitId, function(error, stdout, stderr) {
+		exec(getLatestCommitId, EXEC_OPTIONS, function(error, stdout, stderr) {
 			//console.log("stdout: " + stdout);
 			//console.log("stderr: " + stderr);
 			if (error !== null) {
@@ -1220,7 +1221,8 @@ function createGuestUser(id, callback) {
 		
 		
 		var options = {
-			cwd: module_path.join(__dirname, "../") // Run in webide folder where adduser.js is located
+			cwd: module_path.join(__dirname, "../"), // Run in webide folder where adduser.js is located
+			shell: EXEC_OPTIONS.shell
 		}
 		console.log("Create " + username + ": Running in options.cwd=" + options.cwd);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
@@ -2872,7 +2874,7 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 								if(err && err.code != "EEXIST") throw err;
 								
 								var exec = module_child_process.exec;
-								exec("service nginx reload", function(error, stdout, stderr) {
+								exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
 									if(error) throw(error);
 									if(stderr) throw new Error(stderr);
 									if(stdout) throw new Error(stdout);
@@ -3028,7 +3030,7 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 				apparmorReloadCommand += " " + apparmorProfiles[i];
 			}
 			console.log("exec: " + apparmorReloadCommand);
-			exec(apparmorReloadCommand, function(error, stdout, stderr) {
+			exec(apparmorReloadCommand, EXEC_OPTIONS, function(error, stdout, stderr) {
 				console.timeEnd(username + " Reloading apparmor");
 				if(error) throw(error);
 				if(stderr) throw new Error(stderr);
@@ -3237,7 +3239,7 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 					
 					console.time(username + " nginx reload");
 					var exec = module_child_process.exec;
-					exec("service nginx reload", function(error, stdout, stderr) {
+					exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
 						console.timeEnd(username + " nginx reload");
 						
 						if(error) throw(error);
@@ -4631,7 +4633,7 @@ function umount(path, callback) {
 	
 	var exec = module_child_process.exec;
 	
-	exec("umount " + path + " --force --lazy" , function(error, stdout, stderr) {
+	exec("umount " + path + " --force --lazy", EXEC_OPTIONS, function(error, stdout, stderr) {
 		
 		console.log("umount: path=" + path + " error=" + error + " stdout=" + stdout + " stderr=" + stderr);
 		
@@ -5026,7 +5028,7 @@ function gcsfUmount(username, callback) {
 	
 	gcsfCleanup(username);
 	
-	exec(command,function fusermount(error, stdout, stderr) {
+	exec(command, EXEC_OPTIONS, function fusermount(error, stdout, stderr) {
 		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
 		
 		/*
@@ -5050,7 +5052,8 @@ function gcsfLogout(username, callback) {
 	var mountDir = HOME_DIR + username + "/googleDrive";
 	var command = "./gcsf logout " + username;
 	var options = {
-		cwd: module_path.join(__dirname, "../") // Run in webide folder where removeuser.js is located
+		cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
+shell: EXEC_OPTIONS.shell
 	}
 	
 	gcsfCleanup(username);
