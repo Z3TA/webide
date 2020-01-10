@@ -32,15 +32,35 @@ var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows use
 var UTIL = require("../client/UTIL.js");
 
 var HTTP_ENDPOINTS = {};
+
 var defaultHomeDir = DEFAULT.home_dir;
-var HOME_DIR = UTIL.trailingSlash(getArg(["home", "homedir", "home"]) || defaultHomeDir);
+var HOME_DIR = UTIL.trailingSlash(getArg(["home", "homedir", "home"]) || defaultHomeDir); // Not including the user name!
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
+else (function getHomeDir() {
+	if(process.platform === "win32") {
+		var homeDir = process.env["USERPROFILE"] || (process.env["HOMEDRIVE"] + process.env["HOMEPATH"]);
+		if(homeDir) HOME_DIR= getUserDirFromHomeDir(homeDir);
+	}
+	else { // Assume unix like
+		var homeDir = process.env["HOME"]
+		if(homeDir) HOME_DIR= getUserDirFromHomeDir(homeDir);
+	}
+	
+	if(HOME_DIR != defaultHomeDir) log("Set HOME_DIR=" + HOME_DIR, DEBUG);
+	
+	function getUserDirFromHomeDir(homeDir) {
+		var lastChar = homeDir.slice(-1);
+		if(lastChar == "/" || lastChar == "\\") homeDir = homeDir.slice(0, -1); // Remove last slash if it ends with a slash, so that we will get the parent directory below
+		return UTIL.getDirectoryFromPath(homeDir);
+	}
+})();
 
-
-// DEBUG_CHROOT has to be set manually!
-// When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
-// Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
-// Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
+/*
+DEBUG_CHROOT has to be set manually!
+When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
+Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
+Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
+*/
 var DEBUG_CHROOT = false; // Mounts everyhing into the chroot if set to true
 var MOUNT_BINS = false; // Mounts /bin and /usr/bin
 if(MOUNT_BINS == true && DEBUG_CHROOT == true) throw new Error("Not both DEBUG_CHROOT and MOUNT_BINS can be true, choose one!");
@@ -478,7 +498,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				}
 			}
 			
-			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd");
+			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT);
 			
 			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
 			error.code = "USER_NOT_FOUND";
@@ -3939,7 +3959,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		}
 	}
 	
-	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options) + " NO_CHROOT=" + NO_CHROOT + " process.env=" + JSON.stringify(process.env) + "", DEBUG);
 	
 	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
 	

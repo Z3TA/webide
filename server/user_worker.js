@@ -173,16 +173,16 @@ user.identify = function identify(info) {
 	
 	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
-	var path = require("path");
+	var module_path = require("path");
 	
 	if(user.rootPath) { // Use "true" path
-		user.rootPath = path.resolve(user.rootPath);
+		user.rootPath = module_path.resolve(user.rootPath);
 		user.rootPath = UTIL.trailingSlash(user.rootPath);
 		user.defaultWorkingDirectory = "/";
 		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user.rootPath=" + user.rootPath + ")");
 	}
 	else if(!user.defaultWorkingDirectory) {
-		var editorDir = path.resolve("./../");
+		var editorDir = module_path.resolve("./../");
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
 		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
 	}
@@ -200,7 +200,7 @@ user.identify = function identify(info) {
 	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
-	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".webide/storage" + path.sep) ;
+	user.storageDir = user.translatePath( module_path.join(user.homeDir, ".webide/",  "storage/") ) ;
 	
 	console.log("Identified as user.name=" + user.name + " workingDirectory=" + user.workingDirectory);
 	
