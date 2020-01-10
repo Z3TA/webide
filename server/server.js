@@ -15,6 +15,19 @@ var DEFAULT = require("./default_settings.js");
 var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
+var log; // Using small caps because it looks and feels better
+(function setLogginModule() { // Self calling function to not clutter script scope
+	// Enhanced console.log ...
+	var logModule = require("../shared/log.js");
+	
+	logModule.setLogLevel(LOGLEVEL);
+	log = logModule.log;
+	
+	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout, if specified write to a file
+	
+	if(logFile) logModule.setLogFile(logFile);
+	
+})();
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
@@ -56,10 +69,10 @@ else (function getHomeDir() {
 })();
 
 /*
-DEBUG_CHROOT has to be set manually!
-When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
-Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
-Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
+	DEBUG_CHROOT has to be set manually!
+	When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
+	Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
+	Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
 */
 var DEBUG_CHROOT = false; // Mounts everyhing into the chroot if set to true
 var MOUNT_BINS = false; // Mounts /bin and /usr/bin
@@ -95,19 +108,7 @@ var INVITATIONS = {}; // Users can invite other users, which allows them to logi
 
 var PROXY = {}; // id: {proxy: http-proxy, startedBy: username}
 
-var log; // Using small caps because it looks and feels better
-(function setLogginModule() { // Self calling function to not clutter script scope
-	// Enhanced console.log ...
-	var logModule = require("../shared/log.js");
-	
-	logModule.setLogLevel(LOGLEVEL);
-	log = logModule.log;
-	
-	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout, if specified write to a file
-	
-	if(logFile) logModule.setLogFile(logFile);
-	
-})();
+
 
 
 (function() {
