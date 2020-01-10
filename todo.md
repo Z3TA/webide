@@ -58,6 +58,8 @@ What I'm working on
 
 how does file paths looks on Windows ? file_save.js wants to know!
 
+todo: test local-desktop on Windows for regressions
+
 bug: Can not move or rename uploaded file! (it's owned by root, but should be owned by the user!)
 EACCES: permission denied, unlink '/upload/file'
 
