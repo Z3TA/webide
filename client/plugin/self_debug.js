@@ -27,8 +27,6 @@
 	
 	var winMenuBugreport;
 	
-	window.onerror = windowError;
-	
 	EDITOR.plugin({
 		desc: "Send bug reports",
 		load: bugReportLoad,
@@ -45,6 +43,7 @@
 		EDITOR.on("error", windowError);
 		EDITOR.on("ctxMenu", showSendBugReportMenuItem);
 		
+		setTimeout(handleEarlyErrors, 1000);
 	}
 	
 	function bugReportUnload() {
@@ -54,6 +53,22 @@
 		EDITOR.removeEvent("ctxMenu", showSendBugReportMenuItem);
 	
 		EDITOR.windowMenu.remove(winMenuBugreport);
+	}
+	
+	function handleEarlyErrors() {
+		
+		while(JAVASCRIPT_ERRORS.length > 0) {
+			registerError(JAVASCRIPT_ERRORS.shift());
+		}
+		
+		// We can now take over from capture_errors.js
+		window.onerror = windowError;
+		JAVASCRIPT_ERRORS = null;
+		
+		function registerError(e) {
+			windowError.call(window, e.message, e.source, e.lineno, e.colno, e.error);
+		}
+		
 	}
 	
 	function showSendBugReportMenuItem(file, combo, caret, target) {
@@ -148,9 +163,7 @@ sendit();
 	
 	function windowError(message, source, lineno, colno, error) {
 		
-		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
-		
-		console.log("EDITOR.platform=" + EDITOR.platform);
+		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + " EDITOR.platform=" + EDITOR.platform + "");
 		
 		findSourcePath(source, function(err, source) {
 			if(err) alertBox(err);

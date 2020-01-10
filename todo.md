@@ -56,6 +56,11 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+Early errors are silent in Firefox!
+
+
+can't see tab close-button in IE!
+
 how does file paths looks on Windows ? file_save.js wants to know!
 
 todo: test local-desktop on Windows for regressions
