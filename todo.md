@@ -4514,6 +4514,9 @@ Use node-inspect instead of "nodejs debug"
 Optimization
 ============
 
+A battery saving mode!? (turn off parser?)
+Monitor CPU usage while using the editor to see if there is anything we can optimize to save battery
+
 
 Waiting until connected before showing welcome and login dialog gives a low score on Google pagespeed,
 so should probably load the dialog right away (then hide it after auto-login or whatever !?)
