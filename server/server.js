@@ -3537,7 +3537,7 @@ function handleHttpRequest(request, response) {
 	}
 	else if(firstDir == "proxy") {
 		if(PROXY.hasOwnProperty(secondDir)) {
-			console.log("Proxying request to proxy " + secondDir);
+			log("Proxying request to proxy " + secondDir, INFO);
 			//request.url = request.url.replace("/proxy/secondDir", "");
 			PROXY[secondDir].proxy.web(request, response);
 		}
@@ -3560,8 +3560,16 @@ function handleHttpRequest(request, response) {
 		var sendToUser = "";
 		var files = [];
 		if (request.method === 'POST') {
-			// Figure out what user should get the file
-			// Probably the user with the same IP !?
+			/*
+				Figure out what user should get the file
+				Probably the user with the same IP !?
+				
+				What if there are manu users with the same IP!?
+				todo: Make the service worker handle the request!
+				Then "upload" the file from the service worker cache!?
+				https://glitch.com/~web-share-offline
+			*/
+			
 			var conn, ip;
 			conns: for(var username in USER_CONNECTIONS) {
 				for(var i=0; i<USER_CONNECTIONS[username].connections.length; i++) {
@@ -3569,22 +3577,22 @@ function handleHttpRequest(request, response) {
 					ip = conn.headers["x-real-ip"] || conn.remoteAddress;
 					if(ip == IP) {
 						sendToUser = username;
-						console.log("User found: " + sendToUser);
+						log("User found: " + sendToUser, INFO);
 						break conns;
 					}
-					//console.log(UTIL.objInfo(conn));
+					//log(UTIL.objInfo(conn), INFO);
 				}
 			}
 			
 			var busboy = new Busboy({ headers: request.headers });
 			busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-				console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+				log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype, DEBUG);
 				file.on('data', function(data) {
-					console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+					log('File [' + fieldname + '] got ' + data.length + ' bytes', DEBUG);
 					
 				});
 				file.on('end', function() {
-					console.log('File [' + fieldname + '] Finished');
+					log('File [' + fieldname + '] Finished', DEBUG);
 				});
 				
 				// Save file in temp dir, then move it to the user home dir.
@@ -3594,12 +3602,12 @@ function handleHttpRequest(request, response) {
 							
 			});
 			busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-				console.log('Field [' + fieldname + ']: value: ', val);
+				log('Field [' + fieldname + ']: value: ', val, DEBUG);
 				
 				if(fieldname == "user") sendToUser = val;
 			});
 			busboy.on('finish', function() {
-				console.log('Done parsing form!');
+				log('Done parsing form!', DEBUG);
 				
 				var done = function(uploadMessage) {
 					response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
@@ -3616,10 +3624,10 @@ function handleHttpRequest(request, response) {
 					var copyFile = function copyFile(fromPath, username, fileName) {
 						
 						var uploadFolder = HOME_DIR + username + "/upload/";
-						var toPath =  uploadFolder + fileName;
+						var toPath = uploadFolder + fileName;
 						
 						// First create the upload dir if it doesn't already exist
-						console.log("Checking folder: " + uploadFolder);
+						log("Checking folder: " + uploadFolder, DEBUG);
 						module_fs.stat(uploadFolder, function(err, stats) {
 							if(err) {
 								if(err.code == "ENOENT") {
@@ -3636,11 +3644,11 @@ console.error(err);
 								else throw err;
 							}
 							else if(stats.isDirectory()) {
-								console.log("Folder exist: " + uploadFolder);
+								log("Folder exist: " + uploadFolder, DEBUG);
 								folderCreated(uploadFolder);
 							}
 							else {
-								console.log("Not a directory: " + uploadFolder);
+								log("Not a directory: " + uploadFolder, DEBUG);
 								filesFailed.push(fileName, " Error: Problem with upload folder");
 								filesMovedCount++;
 								doneMaybe();
@@ -3649,7 +3657,7 @@ console.error(err);
 						
 						function folderCreated(uploadFolder) {
 							
-							console.log("Copying file: " + fromPath + " to " + toPath);
+							log("Copying file: " + fromPath + " to " + toPath, DEBUG);
 							module_fs.copyFile(fromPath, toPath, fileCopied);
 						}
 						
@@ -3674,7 +3682,7 @@ console.error(err);
 										uploadedFiles: uploadedFiles
 									});
 									
-									console.log("Notifying user " + username + " (" + user_connections.connections.length + " connections): data: " + data);
+									log("Notifying user " + username + " (" + user_connections.connections.length + " connections): data: " + data, DEBUG);
 									
 									for (var i=0; i<user_connections.connections.length; i++) {
 										user_connections.connections[i].write(data);
@@ -3682,7 +3690,7 @@ console.error(err);
 								}
 								else {
 									uploadMessage += "Warning: " + username + " is not online!";
-									console.log("User " + username + " not online!");
+									log("User " + username + " not online!", INFO);
 								}
 								
 								done(uploadMessage);
@@ -3696,12 +3704,24 @@ console.error(err);
 								filesFailed.push(fileName, " Error: " + err.message);
 							}
 							else {
-								console.log("Copied file to " + toPath);
+								log("Copied file to " + toPath, DEBUG);
 								uploadedFiles.push(fileName);
 								module_fs.unlink(fromPath, function(err) {
 									if(err) console.error(err);
-									else console.log("Deleted " + fromPath);
+									else log("Deleted " + fromPath, DEBUG);
 								});
+								
+								readEtcPasswd(username, function(err, user) {
+									if(err) {
+										console.error(err);
+										return;
+									}
+									module_fs.chown(toPath, user.uid, user.gid, function(err) {
+										if(err) console.error(err);
+										else log("Changed ownership of " + toPath + " to " + username, DEBUG);
+									});
+								});
+								
 							}
 							
 							doneMaybe();
@@ -3715,14 +3735,14 @@ console.error(err);
 					
 					// Does user exist ?
 					var homeDir = HOME_DIR + sendToUser;
-					console.log("Checking folder: " + homeDir);
+					log("Checking folder: " + homeDir, DEBUG);
 					module_fs.stat(homeDir, function(err, stats) {
 						if(err) {
-							console.log("Folder not found: " + homeDir + " Assuming user doesnt exist.");
+							log("Folder not found: " + homeDir + " Assuming user doesnt exist.", DEBUG);
 							done("Error: User does not exist:" + sendToUser);
 						}
 						else if(stats.isDirectory()) {
-							console.log("Folder exist: " + homeDir + "");
+							log("Folder exist: " + homeDir + "", DEBUG);
 							
 							var fileName;
 							for (var i=0; i<files.length; i++) {
@@ -3759,7 +3779,7 @@ console.error(err);
 		
 		responseHeaders['Cache-Control'] = 'no-cache';
 		
-		console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "");
+		log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "", INFO);
 		
 	}
 	else {

@@ -60,12 +60,8 @@ Focus on the cloud IDE (not desktop)
 
 Move all development to the cloud IDE
 
+todo: Test web share
 
-
-todo: test local-desktop on Windows for regressions
-
-bug: Can not move or rename uploaded file! (it's owned by root, but should be owned by the user!)
-EACCES: permission denied, unlink '/upload/file'
 
 todo: Don't scroll when in colab move and the other (window) removes a row
 
