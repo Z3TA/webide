@@ -3,15 +3,6 @@
 
 "use strict";
 
-var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
-var testedNodeVersions = [0,4,6,8,10];
-if(testedNodeVersions.indexOf(nodeVersion) == -1) console.warn("The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version);
-
-var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
-var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
-
-var DEFAULT = require("./default_settings.js");
-
 var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
@@ -28,6 +19,16 @@ var log; // Using small caps because it looks and feels better
 	if(logFile) logModule.setLogFile(logFile);
 	
 })();
+
+var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
+var testedNodeVersions = [0,4,6,8,10];
+if(testedNodeVersions.indexOf(nodeVersion) == -1) log("The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version, WARN);
+
+var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
+var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
+
+var DEFAULT = require("./default_settings.js");
+
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
@@ -430,7 +431,7 @@ function fillGuestPool(id, callback) {
 					}
 else if(err) throw err;
 					else {
-				console.warn("Existing user " + passwd.username + " will be added to the guest pool!..");
+						log("Existing user " + passwd.username + " will be added to the guest pool!..", WARN);
 				guestUserCreatedMaybe(null, passwd);
 					}
 				});
@@ -445,7 +446,7 @@ else if(err) throw err;
 		if(err) {
 			if(callback) return callback(err);
 			else if(err.code == "LOCK") {
-				console.warn("An account is already being created!");
+				log("An account is already being created!", WARN);
 			}
 			else throw err;
 		}
@@ -468,7 +469,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 	//console.log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...");
 	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
 		if(err) {
-			console.warn("readEtcPasswd: Unable to read /etc/passwd !");
+			log("readEtcPasswd: Unable to read /etc/passwd !", WARN);
 			return readEtcPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
 		}
 		else {
@@ -501,7 +502,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 			
 			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT);
 			
-			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
+			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
 			readEtcPasswdCallback(error);
 			// Add user account: sudo useradd -r -s /bin/false nameofuser
@@ -873,7 +874,7 @@ function openStdinChannel() {
 	});
 	
 	stdinServer.on("error", function stdSocketError(err) {
-		console.warn("stdin channel error: " + err.message);
+		log("stdin channel error: " + err.message, WARN);
 	});
 	
 	stdinServer.listen(STDIN_PORT, "127.0.0.1");
@@ -1116,7 +1117,7 @@ clients = USER_CONNECTIONS["admin"];
 	
 	
 	remoteFileServer.on("error", function stdSocketError(err) {
-		console.warn("Remote file server error: " + err.message);
+		log("Remote file server error: " + err.message, WARN);
 	});
 	
 	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
@@ -1532,7 +1533,7 @@ function sockJsConnection(connection) {
 			toUnmount--;
 			if(err) {
 				if(callback) callback(err);
-				else console.warn(err.message);
+				else log(err.message, WARN);
 				callback = null;
 			}
 			else if(toUnmount == 0) {
@@ -2439,11 +2440,11 @@ function checkMounts(options, checkMountsCallback) {
 			if(err) {
 				
 				if(err.code == "ENOENT") {
-					console.warn("MySQL socket does not exist: " + MYSQL_PORT);
+					log("MySQL socket does not exist: " + MYSQL_PORT, WARN);
 				}
 				else {
 					// Sometimes we get 32 mount failure...
-					console.warn("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code);
+					log("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code, WARN);
 				}
 				
 				console.error(err);
@@ -3152,10 +3153,10 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 						if(FAILED_SSL_REG.hasOwnProperty(userDomain)) FAILED_SSL_REG[userDomain]++;
 						else FAILED_SSL_REG[userDomain] = 1;
 						
-						if(err.code == "ENOENT") console.warn("certbot not installed!");
-						else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
+						if(err.code == "ENOENT") log("certbot not installed!", WARN);
+						else if(err.code == "RATE_LIMIT") log("Unable to create letsencrypt cert because of rate limit!", WARN);
 						else {
-							console.warn(err.message);
+							log(err.message, WARN);
 						}
 						sslCertChecked = true;
 						console.timeEnd("Check " + username + " SSL Cert");
@@ -3772,7 +3773,7 @@ console.error(err);
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 		response.end("Bad file type: '" + fileExtension + "'");
 		
-		console.warn("Unknown mime type: fileExtension=" + fileExtension);
+		log("Unknown mime type: fileExtension=" + fileExtension, WARN);
 		
 		return;
 	}
@@ -3790,7 +3791,7 @@ console.error(err);
 				
 				response.end("File not found: " + filePath);
 				
-				console.warn("HTTP Server: File not found: " + filePath);
+				log("HTTP Server: File not found: " + filePath, WARN);
 				
 			}
 			else {
@@ -3921,7 +3922,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 	options.env = {
 		username: name,
 		loglevel: LOGLEVEL,
-		HOME: NO_CHROOT ? homeDir : "/",
+		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
 		USER: name,
 		LOGNAME: name,
 		USER_NAME: name
@@ -3960,7 +3961,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 		}
 	}
 	
-	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options) + " NO_CHROOT=" + NO_CHROOT + " process.env=" + JSON.stringify(process.env) + "", DEBUG);
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " NO_CHROOT=" + NO_CHROOT + " options=" + JSON.stringify(options) + " process.env=" + JSON.stringify(process.env) + "", DEBUG);
 	
 	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
 	
@@ -4578,13 +4579,13 @@ function umount(path, callback) {
 		
 		if(error) {
 			if(error.message.indexOf("umount: " + path + ": not mounted") != -1) {
-				console.warn("not mounted: path=" + path);
+				log("not mounted: path=" + path, WARN);
 			}
 			else if(error.message.indexOf("umount: " + path + ": mountpoint not found") != -1) {
-				console.warn("mountpoint not found: path=" + path);
+				log("mountpoint not found: path=" + path, WARN);
 			}
 			else if(error.message.indexOf("umount: " + path + ": No such file or directory") != -1) {
-				console.warn("No such file or directory: path=" + path);
+				log("No such file or directory: path=" + path, WARN);
 			}
 			else return callback(error);
 		}
@@ -4626,7 +4627,7 @@ function sendMail(from, to, subject, text) {
 	}, function(err, info){
 		if(err) {
 			//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
-			console.warn("Unable to send e-mail (" + subject + "): " + err.message);
+			log("Unable to send e-mail (" + subject + "): " + err.message, WARN);
 			//}
 			//else throw new Error(err);
 		}
