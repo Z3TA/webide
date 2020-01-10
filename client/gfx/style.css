@@ -896,6 +896,7 @@ ul#tabList button.closeFileTab:before {
 	font-size: 8px;
 	position: relative;
 	top: -4px;
+
 	/* colorize */
 	color: transparent;
 	text-shadow: 0 0 0 #85919e;
