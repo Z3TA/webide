@@ -406,7 +406,6 @@
 		closeFileButton.setAttribute("id", "close_" + path);
 		//if(BROWSER == "MSIE") closeFileButton.innerHTML = "&times;"; // x  (IE actually support CSS content and emoji! But for browsers that don't we can use this)
 		closeFileButton.addEventListener("click", closeTab, true); // Stop propagation so that we do not switch to this file.
-		// The click goes through anyway for some weird reason ...
 		
 		tabFileItem.appendChild(closeFileButton);
 		
@@ -555,7 +554,7 @@ tabFileText.setAttribute("path", path);
 			
 		}
 		
-		function clickTab() {
+		function clickTab(clickEvent) {
 			/*
 				Issue: When closing a file via the close file button, the event bubbles down to a click on the file tab ...
 				Solution: Don't switch to a closed file
@@ -563,6 +562,8 @@ tabFileText.setAttribute("path", path);
 			
 			if(EDITOR.files.hasOwnProperty(path)) switchToFile(path);
 			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+			
+			clickEvent.preventDefault();
 			
 			return false; // Prevent browser navigation
 		}

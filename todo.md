@@ -71,8 +71,6 @@ Also make "reopen file" and "copy file path" temorary context menu items!
 
 todo: test if you can press enter on temp menu item
 
-todo: fix issue where a new browser tab is opened when you click somewhere on the file tab
-
 regression: Dialog buttons looks ugly due to font
 todo: test the editor with font smoothing off in OS settings
 
