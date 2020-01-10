@@ -1812,7 +1812,13 @@ function sockJsConnection(connection) {
 										acceptUser();
 										return;
 									}
+									else {
+										send({error: err.message});
 									throw err;
+										return;
+									}
+									
+									return;
 								}
 								
 								homeDir = passwd.homeDir;
