@@ -50,15 +50,10 @@ var HTTP_ENDPOINTS = {};
 var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = UTIL.trailingSlash(getArg(["home", "homedir", "home"]) || defaultHomeDir); // Not including the user name!
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
-else (function getHomeDir() {
-	if(process.platform === "win32") {
+else if(HOME_DIR == "/home/" && process.platform === "win32") (function getWindowsHomeDir() {
+	// Only use this on Windows, or we would end up with / because HOME=/root
 		var homeDir = process.env["USERPROFILE"] || (process.env["HOMEDRIVE"] + process.env["HOMEPATH"]);
 		if(homeDir) HOME_DIR= getUserDirFromHomeDir(homeDir);
-	}
-	else { // Assume unix like
-		var homeDir = process.env["HOME"]
-		if(homeDir) HOME_DIR= getUserDirFromHomeDir(homeDir);
-	}
 	
 	if(HOME_DIR != defaultHomeDir) log("Set HOME_DIR=" + HOME_DIR, DEBUG);
 	

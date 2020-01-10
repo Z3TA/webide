@@ -4,6 +4,10 @@ var module_fs = require("fs");
 var module_child_process = require("child_process");
 var UTIL = require("../client/UTIL.js");
 
+var execOptions = {
+	shell: "/bin/dash"
+}
+
 function makeDirP(path, callback) {
 	
 	var folders = UTIL.getFolders(path);
@@ -100,7 +104,7 @@ var abort = false;
 			// Give a warning if we are mounting a non-default bin
 			var exec = module_child_process.exec;
 			var binName = UTIL.getFilenameFromPath(sourcePath);
-			exec("which " + binName, function(error, stdout, stderr) {
+			exec("which " + binName, execOptions, function(error, stdout, stderr) {
 				if(error) return console.error(error);
 				if(stderr) return console.error(new Error(stderr));
 				
@@ -290,7 +294,7 @@ console.log("Folder exist: " + sourcePath);
 		
 		//console.log("Running mount command=" + command);
 		
-		exec(command, function(error, stdout, stderr) {
+		exec(command, execOptions, function(error, stdout, stderr) {
 			if(error) return mountDone(error);
 			if(stderr) return mountDone(new Error(stderr));
 			if(stdout) return mountDone(new Error(stdout));
@@ -334,7 +338,7 @@ if(mountResult != "") throw mountResult;
 function umount(path, callback) {
 	var child_process = require("child_process");
 	var command1 = "umount " + path + " --force";
-	child_process.exec(command1, function(error, stdout, stderr) {
+	child_process.exec(command1, execOptions, function(error, stdout, stderr) {
 		
 		console.log(command1 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
 		
@@ -352,7 +356,7 @@ function umount(path, callback) {
 			var command2 = "umount -lf " + path + " && sleep 1"
 			console.log("umount " + path + ". Target is busy! Doing lazy umount -lf");
 			// we want to throw if this fails ...
-			child_process.exec(command, function(error, stdout, stderr) {
+			child_process.exec(command2, execOptions, function(error, stdout, stderr) {
 				console.log(command2 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
 
 				var str2 = "";
@@ -363,7 +367,7 @@ function umount(path, callback) {
 				if(error || stderr) return callback(error ? error : new Error(stderr));
 				
 				var command3 = "umount -f " + path + "";
-				child_process.exec(command3, function(error, stdout, stderr) {
+				child_process.exec(command3, execOptions, function(error, stdout, stderr) {
 
 					console.log(command3 + " ... error=" + error + " stdout=" + stdout + " stderr=" + stderr + "");
 					

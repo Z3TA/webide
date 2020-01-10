@@ -56,6 +56,18 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+ errno: 'EMFILE',
+  code: 'EMFILE',
+  syscall: 'spawn /bin/sh',
+  path: '/bin/sh',
+  spawnargs: [ '-c', 'which node' ],
+  cmd: 'which node' }
+
+
+server error:
+Error: EMFILE: too many open files, open '
+
+
 Focus on the cloud IDE (not desktop)
 
 Move all development to the cloud IDE
