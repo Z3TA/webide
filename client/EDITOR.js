@@ -2314,6 +2314,8 @@ EDITOR.canvasContext = ctx;
 			
 		}
 		else {
+			// No file open ...
+			
 			
 			setTimeout(function showDashboardMaybe() {
 				if(!EDITOR.currentFile && !EDITOR.dashboard.stayHidden && EDITOR.user && !(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1))) {
@@ -2329,6 +2331,8 @@ EDITOR.canvasContext = ctx;
 			ctx.fillRect(0, 0, EDITOR.canvas.width, EDITOR.canvas.height);
 			
 			ctx.fillStyle = EDITOR.settings.style.textColor;
+			
+			//canvasContextReset(ctx);
 			
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			ctx.textBaseline = "middle";
@@ -2353,6 +2357,7 @@ EDITOR.canvasContext = ctx;
 				"",
 				"Upload files and folders",
 				" by draging them here."
+				//"font=" + EDITOR.settings.style.font + " size=" + EDITOR.settings.style.fontSize
 			];
 			
 			if(friendlyString.length > 0) {
@@ -2367,8 +2372,9 @@ EDITOR.canvasContext = ctx;
 				}
 				
 				var textMeasure = ctx.measureText(longestString);
-				var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
-				var top =  EDITOR.view.canvasHeight / 2 - 20*friendlyString.length;
+				// Note: Always round numbers when writing text to the canvas or the text might be broken/blurry!
+				var left = Math.round(EDITOR.view.canvasWidth / 2 - textMeasure.width / 2);
+				var top =  Math.round(EDITOR.view.canvasHeight / 2 - 20*friendlyString.length);
 				
 				ctx.beginPath(); // Reset all the paths!
 				for (var i=0; i<friendlyString.length; i++) {
@@ -11296,16 +11302,16 @@ function mouseUp(mouseUpEvent) {
 	
 	var el = EDITOR.lastElementWithFocus || mouseUpEvent.target;
 	// selectionStart etc seem to get lost when the element lose focus, so save it!
-try { // This might throw a InvalidStateError in IE!
+		try { // This might throw a InvalidStateError in IE!
 	if(el.scrollTop != undefined) el.setAttribute("sTop", el.scrollTop);
 	if(el.selectionStart != undefined) el.setAttribute("selStart", el.selectionStart);
 	if(el.selectionEnd != undefined) el.setAttribute("selEnd", el.selectionEnd);
-	}
-catch(err) {
-console.error(err);
-}
-
-	EDITOR.interact("mouseUp", mouseUpEvent);
+		}
+		catch(err) {
+			console.error(err);
+		}
+		
+		EDITOR.interact("mouseUp", mouseUpEvent);
 	
 	if(preventDefault) {
 		console.log("mouseUp: Preventing default!");
