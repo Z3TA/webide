@@ -879,7 +879,7 @@ ul#tabList button.closeFileTab {
 	
 	display: none;
 	font-size: 16px;
-	line-hieght: 10px;
+	line-height: 10px;
 	font-weight: bold;
 	vertical-align: text-top;
 	margin-left: -15px;
@@ -896,7 +896,7 @@ ul#tabList button.closeFileTab:before {
 	font-size: 8px;
 	position: relative;
 	top: -4px;
-
+	
 	/* colorize */
 	color: transparent;
 	text-shadow: 0 0 0 #85919e;
