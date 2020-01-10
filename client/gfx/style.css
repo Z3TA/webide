@@ -1479,11 +1479,15 @@ div.gotoFile li:hover {
 	padding: 4px;
 	margin: 4px;
 	font-size: 12px;
+	font-family: Segoe UI, sans-serif;
 }
 
 .dialog button:focus {
-	font-weight: bold;
-	
+	/* bold looks bad if system font is set to no-antialias */
+	/*text-decoration: underline;*/
+}
+.dialog button:focus:after {
+	content: " ↵";
 }
 
 .dialog button.alert {

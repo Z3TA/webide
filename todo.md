@@ -56,11 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+
 regression: Couln't find "CLIENT.js" in goto_file.js WTF!
-
-IE doesn't seem to save session count, because we are always greeted by the welcome dialog
-
-can't see tab close-button in IE!
 
 todo: test local-desktop on Windows for regressions
 
@@ -69,16 +66,9 @@ EACCES: permission denied, unlink '/upload/file'
 
 todo: Don't scroll when in colab move and the other (window) removes a row
 
-Also make "reopen file" and "copy file path" temorary context menu items!
-
 todo: test if you can press enter on temp menu item
 
-regression: Dialog buttons looks ugly due to font
-todo: test the editor with font smoothing off in OS settings
-
-I'm fat fingering Ctrl+Shift+S a lot. Show a warning when you make a Ctrl+Shift+X keybinding when there already exist a keybinding for Ctrl+X where X is the same
-
-Why is not the editor body text anitaliased!? Seems only in Chrome
+I'm fat fingering Ctrl+Shift+S a lot. Show a warning (or throw an error) when you make a Ctrl+Shift+X keybinding when there already exist a keybinding for Ctrl+X where X is the same
 
 todo: Rename jzedit repo to webide
 
@@ -89,11 +79,18 @@ then right click and "move to..."
 
 issue: When restarting editor, terminalX files get parsed as code! They should be plain text!
 
+
 prio: Able to work on the editor via the cloud IDE (I've only worked via the desktop version so far)
 fix nuked repo
 
 
-issue with dark theme after changing comment and quote colors!?
+todo: test for issues with dark theme after changing comment and quote colors!?
+
+Discovery bar icons doesn't show up in IE when using dark theme, and there is a big white scrollbar!
+
+regression: Copy&Paste doesn't work in IE
+regression: Some tests fail in IE!
+
 
 able to right click on a file in file explorer to see info like size, last modified etc...
 
