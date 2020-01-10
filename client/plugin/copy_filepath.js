@@ -43,9 +43,7 @@
 		
 		if(typeof filePath == "object" && filePath.hasOwnProperty("path")) filePath = filePath.path; // Can be a File object
 		
-work in progress!
-
-				EDITOR.putIntoClipboard(text, function(err) {
+				EDITOR.putIntoClipboard(filePath, function(err) {
 					if(err) alertBox(err.message);
 					else {
 						winMenuCopyFilePath.hide();
