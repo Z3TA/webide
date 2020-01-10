@@ -707,7 +707,7 @@ function main() {
 		}
 		catch(err) {
 			log(err.message);
-			log("posix module needed for chroot! Try with -nochroot flag!", NOTICE);
+			log("posix module needed for chroot! Try with -nochroot flag!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
 			process.exit(1);
 		}
 	}
@@ -1784,7 +1784,7 @@ function sockJsConnection(connection) {
 					
 					function idSuccess(alreadyCheckedMounts) {
 						
-						var rootPath; // The path to chroot into (currently same as home dir)
+						var rootPath; // The path to chroot into
 						var uid, gid; // System user-id and group-id
 						var homeDir; // User's home dir
 						var shell; // User's shell (currently disabled/not implemented)
@@ -1795,6 +1795,7 @@ function sockJsConnection(connection) {
 							// Running as standalone desktop app
 							homeDir = process.env.HOME || process.env.USERPROFILE;
 							if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
+							rootPath = VIRTUAL_ROOT ? homeDir : module_path.parse(homeDir).root;
 							acceptUser();
 						}
 						else {
@@ -1807,7 +1808,7 @@ function sockJsConnection(connection) {
 										shell = false;
 										uid = undefined;
 										gid = undefined;
-										rootPath = homeDir;
+										rootPath = VIRTUAL_ROOT ? homeDir : module_path.parse(homeDir).root;
 										acceptUser();
 										return;
 									}
