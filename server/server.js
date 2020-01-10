@@ -1890,15 +1890,12 @@ function sockJsConnection(connection) {
 								cId: userConnectionId,
 								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
 								editorVersion: EDITOR_VERSION,
-								platform: process.platform
+								platform: process.platform,
+								homeDir: (!NO_CHROOT || VIRTUAL_ROOT) ? "/" : homeDir
 							};
 							
 							if(NO_CHROOT) {
-								userInfo.homeDir = homeDir;
 								userInfo.installDirectory = __dirname.replace(/server$/, "");
-							}
-							else {
-								userInfo.homeDir = "/";
 							}
 							
 							send({resp: {loginSuccess: userInfo}});
