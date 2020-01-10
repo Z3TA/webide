@@ -1848,7 +1848,7 @@ function sockJsConnection(connection) {
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
-							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
+							log("User userConnectionName=" + userConnectionName + " logged in! NO_CHROOT=" + NO_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
 							
 							userWorker.send({identify: userInfo});
 							userWorker.on("message", messageFromWorker);
