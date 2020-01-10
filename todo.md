@@ -65,8 +65,6 @@ todo: Test web share
 
 todo: Don't scroll when in colab move and the other (window) removes a row
 
-todo: test if you can press enter on temp menu item
-
 I'm fat fingering Ctrl+Shift+S a lot. Show a warning (or throw an error) when you make a Ctrl+Shift+X keybinding when there already exist a keybinding for Ctrl+X where X is the same
 
 todo: Rename jzedit repo to webide

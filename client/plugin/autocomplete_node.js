@@ -381,7 +381,7 @@ console.log("autoCompleteNode: Not inside a function call!");
 
 // TEST-CODE-START
 
-	EDITOR.addTest(function autocomplete_node_modules(callback) {
+	EDITOR.addTest(true, function autocomplete_node_modules(callback) {
 		EDITOR.openFile("autocomplete_node.js", 'var http = re\n', function(err, file) {
 			var atCaret = autoComplete(file, 13);
 			UTIL.assert(file.rowText(0), "var http = require()");

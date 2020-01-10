@@ -52,6 +52,8 @@
 	}
 	
 	function deleteRightCharacter(file) {
+if(!file) return true;
+
 		file.deleteCharacter();
 		EDITOR.renderNeeded();
 		return false;

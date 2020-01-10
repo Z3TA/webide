@@ -10312,7 +10312,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
 				//console.log("Rendering caret");
 				EDITOR.renderCaret(file.caret);
-				document.getElementById('canvas').style.cursor = 'text';
+				EDITOR.canvas.style.cursor = 'text';
 					cursorHidden = false;
 			}
 			else {
