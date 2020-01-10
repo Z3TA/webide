@@ -78,7 +78,7 @@
 			logsToCheck++;
 			var nr = "";
 			if(n > 0) nr = nr + n;
-			CLIENT.cmd("readLines", {start: 1, end: 1, path: "/log/access.log" + (nr ? "." + nr : "")}, readLines);
+			CLIENT.cmd("readLines", {start: 1, end: 1, path: UTIL.joinPaths(EDITOR.user.home, "log/access.log" + (nr ? "." + nr : ""))}, readLines);
 			function readLines(err, resp) {
 				logsChecked++;
 				if(err) {
