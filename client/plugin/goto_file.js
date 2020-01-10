@@ -119,7 +119,7 @@
 		
 		EDITOR.ctxMenu.hide();
 		
-		console.log("Opening file ...");
+		console.log("goto_file: Opening file ...");
 		
 		var defaultPath = "";
 		var file = EDITOR.currentFile;
@@ -162,7 +162,7 @@
 				var folders = UTIL.getFolders(file.path);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				defaultPath = folders.pop();
-				console.log("defaultPath=" + defaultPath);
+				console.log("goto_file: defaultPath=" + defaultPath);
 			}
 			
 		}
@@ -180,13 +180,13 @@
 	}
 	
 	function openLocalFile(directory) {
-		console.log("Telling the editor to open the file dialog window ...");
+		console.log("goto_file: Telling the editor to open the file dialog window ...");
 		EDITOR.localFileDialog(directory, function after_dialog_open_file(filePath, content, fileHandle) {
 			
-			//console.log("filePath=" + filePath);
-			//console.log("content=" + content);
+			//console.log("goto_file: filePath=" + filePath);
+			//console.log("goto_file: content=" + content);
 			
-			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
+			console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
 			EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
 				
@@ -201,7 +201,7 @@
 				
 				EDITOR.renderNeeded();
 				EDITOR.render();
-				console.log("File ready for editing");
+				console.log("goto_file: File ready for editing");
 				
 			});
 		});
@@ -338,7 +338,7 @@
 		
 		gotoInputIsVisible = true;
 		
-		console.log("built gotoInput!");
+		console.log("goto_file: built gotoInput!");
 		
 	}
 	
@@ -352,13 +352,13 @@
 			if(text.length == 0) return ALLOW_DEFAULT;
 			
 			EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path, options) {
-				console.log("autoCompletePath text=" + text + " path=" + path + " err=" + err + " options=" + JSON.stringify(options));
+				console.log("goto_file: autoCompletePath text=" + text + " path=" + path + " err=" + err + " options=" + JSON.stringify(options));
 				if(err && err.code != "ENOENT") return alertBox(err.message);
 				else if(!err && path != inputGoto.value) {
 					inputGoto.value = path;
 				typing();
 				}
-				console.log("autoCompletePath path=" + text + " options.length=" + (options && options.length) + " options=" + JSON.stringify(options));
+				console.log("goto_file: autoCompletePath path=" + text + " options.length=" + (options && options.length) + " options=" + JSON.stringify(options));
 				if(options && options.length > 1) {
 					options.forEach(addFolderOption);
 					EDITOR.resizeNeeded();
@@ -423,7 +423,7 @@
 			
 			var code = UTIL.code(keyUpEvent);
 			
-			console.log("typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+			console.log("goto_file: typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 			
 			keyUpEvent.preventDefault();
 			
@@ -465,12 +465,12 @@
 		if(text.length > 0) {
 			// If using shift and other combo key, this will be called twice without the text changing
 			if(text == lastTypedText && lastTypedText == lastSearchText) {
-				console.warn("typing same: text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+				console.warn("goto_file: typing same: text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 				return;
 			}
 			lastTypedText = text;
 			if(isSearching) {
-				console.log("abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
+				console.log("goto_file: abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
 				inputFolder.value = inputFolder.getAttribute("default");
 			}
@@ -487,7 +487,7 @@
 		
 		var text = inputGoto.value;
 		
-		console.log("trySearch: isSearching=" + isSearching + " text=" + text);
+		console.log("goto_file: trySearch: isSearching=" + isSearching + " text=" + text);
 		
 		if(lastSearchText == text) {
 			UTIL.getStack("trySearch repeated! text=" + text + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching);
@@ -516,30 +516,30 @@
 				toIgnore.push(fileCache[i]);
 				if(matchesFound >= defaultMaxResults) {
 					if(isSearching) {
-						console.log("abortFindFiles because: Max results found via cache and isSearching=" + isSearching + " (is true)!");
+						console.log("goto_file: abortFindFiles because: Max results found via cache and isSearching=" + isSearching + " (is true)!");
 						abortFindFiles();
 					}
 					return;
 				}
 			}
-			console.log("i=" + i + " " + fileCache[i] + " text=" + text + " match=" + match);
+			console.log("goto_file: i=" + i + " " + fileCache[i] + " text=" + text + " match=" + match);
 		}
 		
 		maxResults = defaultMaxResults - matchesFound;
 		
-		console.log("Found " + matchesFound + " in cache (" + fileCache.length + "), will try to find " + maxResults + " more from disk");
+		console.log("goto_file: Found " + matchesFound + " in cache (" + fileCache.length + "), will try to find " + maxResults + " more from disk");
 		
-		console.log("isSearching=" + isSearching) 
+		console.log("goto_file: isSearching=" + isSearching) 
 		
 		if(!isSearching) {
 			search(text, toIgnore);
 		}
 		else {
-			console.log("abortFindFiles because: trySearch() isSearching=" + isSearching + " (is true)");
+			console.log("goto_file: abortFindFiles because: trySearch() isSearching=" + isSearching + " (is true)");
 			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
 				if(err) throw err;
 				
-				console.log("Trying search because resp.foldersBeingSearched=" + resp.foldersBeingSearched);
+				console.log("goto_file: Trying search because resp.foldersBeingSearched=" + resp.foldersBeingSearched);
 				
 				if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
 				
@@ -556,16 +556,16 @@
 	function search(searchString, ignore) {
 		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 		isSearching = true;
-		console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
-		console.log("Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + ignore);
+		console.time("goto_file: findFiles"); // Edit server's cuncurrencty setting to fine tune!
+		console.log("goto_file: Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + ignore);
 		lastSearchText = searchString;
 		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
 			
 			if(err) throw err;
 			
-			console.timeEnd("findFiles");
+			console.timeEnd("goto_file: findFiles");
 			
-			console.log("Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
+			console.log("goto_file: Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
 			
 			if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
 			else isSearching = false;
@@ -581,7 +581,7 @@
 		//if(lineNr == undefined) lineNr = 0;
 		
 		if(!gotoList) {
-console.warn("gotoList not available!");
+			console.warn("goto_file: gotoList not available!");
 		return;
 		}
 		
@@ -622,7 +622,7 @@ console.warn("gotoList not available!");
 	}
 	
 	function gotoFileFromDiscoveryBar(file, combo) {
-		console.log("gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
+		console.log("goto_file: gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
 		if(!gotoInputIsVisible) show_gotoFileInput(file, combo);
 		else hide_gotoFileInput();
 	}
@@ -645,7 +645,7 @@ console.warn("gotoList not available!");
 			if(UTIL.isFilePath(selectedText)) {
 					return EDITOR.openFile(selectedText, function(err) {
 					if(err) {
-						console.error(err);
+							console.error(err);
 							ignoreSelection = true;
 						show_gotoFileInput(file, combo);
 						}
@@ -667,7 +667,7 @@ console.warn("gotoList not available!");
 				if(notaPath.indexOf(c) != -1) break;
 				filePath = filePath + c;
 			}
-			console.log("Caret on a file/path? filePath=" + filePath);
+			console.log("goto_file: Caret on a file/path? filePath=" + filePath);
 			
 			var reFileNameAndLineMaybe = /[^\\\/]*\.\w{1,4}$/;
 			var matchFile = filePath.match(reFileNameAndLineMaybe);
@@ -677,14 +677,14 @@ console.warn("gotoList not available!");
 				// Find line number
 				var rowStr = file.rowText(file.caret.row, false);
 				var i = rowStr.indexOf(filePath) + filePath.length;
-				console.log("Line number? " + rowStr[i] + rowStr[i+1] + " ( " + (rowStr[i] == ":") + ", " + UTIL.isNumeric(rowStr[i+1]) + ")");
+				console.log("goto_file: Line number? " + rowStr[i] + rowStr[i+1] + " ( " + (rowStr[i] == ":") + ", " + UTIL.isNumeric(rowStr[i+1]) + ")");
 				if(rowStr[i] == ":" && UTIL.isNumeric(rowStr[i+1])) {
 					var nr = "";
 					for (++i; i<rowStr.length; i++) {
 						if( UTIL.isNumeric(rowStr[i]) ) nr += rowStr[i];
 						else break;
 					}
-					console.log("Line number? nr=" + nr);
+					console.log("goto_file: Line number? nr=" + nr);
 					gotoLine = parseInt(nr);
 					if(isNaN(gotoLine)) gotoLine = null;
 				}
@@ -708,20 +708,20 @@ folderToSearchIn = EDITOR.workingDirectory;
 				var folders = UTIL.getFolders(folderToSearchIn);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				folderToSearchIn = folders.pop();
-				console.log("folderToSearchIn=" + folderToSearchIn);
+				console.log("goto_file: folderToSearchIn=" + folderToSearchIn);
 			}
 		}
 			
 		}
 		
 		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
+		console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 		
 		if(!gotoInputIsVisible) {
 			
-			console.log("gotoDiv=" + gotoDiv);
+			console.log("goto_file: gotoDiv=" + gotoDiv);
 			
-			if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
+			if(gotoDiv) console.log("goto_file: gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
 			
 			//if(!gotoDiv) build_gotoInput();
 			build_gotoInput(folderToSearchIn); // Always build!
@@ -730,13 +730,13 @@ folderToSearchIn = EDITOR.workingDirectory;
 			//var heightNeeded = 45;
 			// The div function will take up as much place as it needs!
 			
-			console.log("show_gotoFileInput: footerHeight=" + footerHeight + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + " defaultMaxResults=" + defaultMaxResults);
+			console.log("goto_file: show_gotoFileInput: footerHeight=" + footerHeight + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + " defaultMaxResults=" + defaultMaxResults);
 			
 			defaultMaxResults = Math.min(defaultMaxResults, Math.ceil(EDITOR.view.canvasHeight / 29));
 			
-			console.log("show_gotoFileInput: defaultMaxResults=" + defaultMaxResults);
+			console.log("goto_file: show_gotoFileInput: defaultMaxResults=" + defaultMaxResults);
 			if(defaultMaxResults < 5) {
-				console.warn("show_gotoFileInput: Screen too small! adjusting defaultMaxResults=" + defaultMaxResults + " to 5");
+				console.warn("goto_file: show_gotoFileInput: Screen too small! adjusting defaultMaxResults=" + defaultMaxResults + " to 5");
 				defaultMaxResults = 5;
 			}
 			
@@ -776,11 +776,11 @@ folderToSearchIn = EDITOR.workingDirectory;
 	
 	function hide_gotoFileInput() {
 		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
+		console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
 /*
 if(isSearching) {
-console.log("abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
+console.log("goto_file: abortFindFiles because: hide_gotoFileInput() and isSearching=" + isSearching + " (is true)");
 abortFindFiles();
 }
 */
@@ -824,7 +824,7 @@ abortFindFiles();
 		if(!gotoInputIsVisible) return true;
 		if(!gotoList) return true;
 		
-		console.log("Moving up ...");
+		console.log("goto_file: Moving up ...");
 		
 		var listItems = gotoList.childNodes;
 		
@@ -872,7 +872,7 @@ abortFindFiles();
 			}
 		}
 		
-		//console.log("yoyo i=" + i + " listItems.length=" + listItems.length);
+		//console.log("goto_file: yoyo i=" + i + " listItems.length=" + listItems.length);
 		
 		if(i == (listItems.length-1)) {
 			inputGoto.focus();
@@ -883,10 +883,10 @@ abortFindFiles();
 	
 	function gotoFile(clickEventMaybe) {
 		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
+		console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 		
 		if(isSearching) {
-			console.log("abortFindFiles because: gotoFile() and isSearching=" + isSearching + " (is true)");
+			console.log("goto_file: abortFindFiles because: gotoFile() and isSearching=" + isSearching + " (is true)");
 			abortFindFiles();
 		}
 		
@@ -904,7 +904,7 @@ abortFindFiles();
 				}
 				
 				if(selectedItem.tagName != "LI") {
-					console.warn("Not a list item: ", selectedItem);
+					console.warn("goto_file: Not a list item: ", selectedItem);
 					selectedItem = undefined;
 				}
 			}
@@ -928,8 +928,8 @@ abortFindFiles();
 				var lineNr = selectedItem.getAttribute("lineNr");
 				
 				if(!path) {
-					console.log("selectedItem:");
-					console.log(selectedItem);
+					console.log("goto_file: selectedItem: ", selectedItem);
+					
 					var attributes = {}; // For debugging
 					for (var att, i = 0, atts = selectedItem.attributes, n = atts.length; i < n; i++){
 						att = atts[i];
@@ -938,9 +938,9 @@ abortFindFiles();
 					throw new Error("path=" + path + " selectedItem: tagName=" + selectedItem.tagName + " (" + JSON.stringify(attributes) + ")");
 				}
 				
-				console.log("Opening " + path);
+				console.log("goto_file: Opening " + path);
 				
-				console.log("abortFindFiles because: We are opening " + path + "...");
+				console.log("goto_file: abortFindFiles because: We are opening " + path + "...");
 				abortFindFiles();
 				
 				EDITOR.openFile(path, undefined, function(err, file) {
@@ -952,7 +952,7 @@ abortFindFiles();
 					
 					EDITOR.dashboard.hide();
 					
-					//console.log("Going to line " + lineNr);
+					//console.log("goto_file: Going to line " + lineNr);
 					EDITOR.renderNeeded();
 					
 					var dir = UTIL.getDirectoryFromPath(path);
@@ -975,7 +975,7 @@ abortFindFiles();
 			
 			/*
 				
-				console.log("Going to line " + line + ".");
+				console.log("goto_file: Going to line " + line + ".");
 				
 				file.caret.row = line-1;
 				//file.caret.col = 0;
@@ -994,10 +994,10 @@ abortFindFiles();
 	
 	
 	function gotoFileProgressStatus(status) {
-		console.log("gotoFileProgressStatus: " + JSON.stringify(status));
+		console.log("goto_file: gotoFileProgressStatus: " + JSON.stringify(status));
 		
 		if(!progressBar) {
-console.warn("Progress bar not loaded!");
+console.warn("goto_file: Progress bar not loaded!");
 		return;
 		}
 		
@@ -1025,14 +1025,14 @@ console.warn("Progress bar not loaded!");
 	}
 	
 	function gotoFileFileFound(file) {
-		console.log("File found: " + file.path);
+		console.log("goto_file: File found: " + file.path);
 		if(fileCache.indexOf(file.path) == -1) {
 			fileCache.push(file.path);
-			console.log("Added to cache: " + file.path);
+			console.log("goto_file: Added to cache: " + file.path);
 		}
 		else {
-			console.log("fileCache:" + JSON.stringify(fileCache, null, 2));
-			console.warn("We should not find files already in cache as they should have been ignored! path=" + file.path);
+			console.log("goto_file: fileCache:" + JSON.stringify(fileCache, null, 2));
+			console.warn("goto_file: We should not find files already in cache as they should have been ignored! path=" + file.path);
 			// todo: fix this bug! Had to make it a warn as it was too common
 		}
 		appendResult(file.path, file.match);
@@ -1040,7 +1040,7 @@ console.warn("Progress bar not loaded!");
 	}
 	
 	function gotoFilePathGlob(folder) {
-		console.log("gotoFilePathGlob: folder=" + folder);
+		console.log("goto_file: gotoFilePathGlob: folder=" + folder);
 		if(inputFolder) inputFolder.value = folder;
 	}
 	
@@ -1054,7 +1054,7 @@ console.warn("Progress bar not loaded!");
 				
 				if(resp.foldersBeingSearched == 0) isSearching = false;
 				
-				console.log("Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
+				console.log("goto_file: Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
 				
 			});
 		}

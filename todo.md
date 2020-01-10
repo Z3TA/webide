@@ -56,6 +56,12 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+Focus on the cloud IDE (not desktop)
+
+Move all development to the cloud IDE
+
+
+
 
 regression: Couln't find "CLIENT.js" in goto_file.js WTF!
 
