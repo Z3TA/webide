@@ -1,5 +1,6 @@
 (function() {
-	
+	"use strict";
+
 	/*
 		
 		Indentation in text mode:
@@ -66,7 +67,7 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 		if(!file) return;
 		if(file.mode!="text") return;
 		
-		menuItem = EDITOR.ctxMenu.addTemp("Show white space", false, toggleShowWhiteSpace);
+		var menuItem = EDITOR.ctxMenu.addTemp("Show white space", false, toggleShowWhiteSpace);
 		EDITOR.ctxMenu.update(menuItem, SHOW_WHITE_SPACE, "Show white space");
 	}
 	
