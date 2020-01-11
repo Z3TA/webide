@@ -56,6 +56,16 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+todo: Uncomment log spam from server.js
+
+Still getting error when trying to rename shared/uploaded file
+Jan 11 13:02:22 webide.se nodejs[4988]: 2020-01-11 (13:02:22) HTTP-req 155.4.8.162: /share/ (server.js:3488:2))
+Jan 11 13:02:22 webide.se nodejs[4988]: 2020-01-11 (13:02:22) File [file]: filename: 20200107_205900.jpg, encoding: 7bit, mimetype: image/jpeg (server.js:3608:5))
+Jan 11 13:02:22 webide.se nodejs[4988]: 2020-01-11 (13:02:22) File [file] Finished (server.js:3614:6))
+Jan 11 13:02:22 webide.se nodejs[4988]: 2020-01-11 (13:02:22) Done parsing form! (server.js:3629:5))
+Then nothing
+
+
 I just did a very bad deploy, ended up with an hour of downtime and many issues!
 how to not repeat that?
 it was basically a ticking bomb, with 500+ guest users all being reset at the same time when server started
