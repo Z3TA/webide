@@ -56,6 +56,9 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+able to reset nuked accounts...
+
+issue with lingering g++ !? it's an empty file
 
 todo: Test what happens to the Dropbox when a user is deleted (does the dropbox folder get cleared!?)
 
