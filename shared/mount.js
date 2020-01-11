@@ -95,13 +95,24 @@ var abort = false;
 	else module_fs.stat(sourcePath, function(err, stats) {
 		if(err) return mountDone(err);
 
-		// Give a warning if we are mounting a symlink
+		/*
+			We should not mount symlinks!
+			Instead use mountFollowSymlink or mount the real file
+			And make sure you update removeuser.js!!
+		*/
 		module_fs.readlink(sourcePath, function(err, linkString) {
-			if(!err) console.log("Source is a symlink: " + sourcePath + " -> " + linkString);
+			if(!err && sourcePath != "/proc/self/exe") {
+				throw new Error("Source is a symlink: " + sourcePath + " -> " + linkString);
+				/*
+					It works as long as it links to a file in the same folder. But there is /usr/bin/unrar -> /etc/alternatives/unrar
+					And then it's /proc/self/exe -> /usr/bin/node
+					So it's probably NOT safe to let mount.js do it. We should do it manually!
+				*/
+			}
 		});
 		
 		if( !UTIL.isDirectory(sourcePath) && sourcePath.indexOf("bin") != -1 ) {
-			// Give a warning if we are mounting a non-default bin
+			
 			var exec = module_child_process.exec;
 			var binName = UTIL.getFilenameFromPath(sourcePath);
 			exec("which " + binName, execOptions, function(error, stdout, stderr) {
@@ -110,18 +121,20 @@ var abort = false;
 				
 				var defaultBin = stdout.trim();
 				
-				if(defaultBin != sourcePath) return console.warn("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
+				if(defaultBin != sourcePath) {
+					throw new Error("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
+				}
 			});
 		}
 		
 		
 		sourceStats = stats;
 		
-//console.log("Folder exist: " + sourcePath);
-
+		//console.log("Folder exist: " + sourcePath);
+		
 		statTarget();
-});
-
+	});
+	
 	function statTarget() {
 		// We should *always* check the target to make sure it's not already mounted
 		module_fs.stat(targetPath, function targetStat(err, targetStats) {

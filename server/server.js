@@ -682,7 +682,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 	function processedGuestId(id, debugComment) {
 		countLeft--;
 		currentConcurrency--;
-
+		
 		console.log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft);
 		
 		if(countLeft == 0) {
@@ -2588,8 +2588,8 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
-				// gunzip will give ENOENT error without /bin/sh
-				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted);
+				
+				
 				
 				// Some python scripts (Mercurial) need /usr/share
 				foldersToMount++;module_mount("/usr/share/", homeDir + "usr/share", folderMounted);
@@ -2647,6 +2647,12 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
+				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted); // gunzip will give ENOENT error without /bin/sh
+				foldersToMount++;mountFollowSymlink("/usr/bin/g++", homeDir, folderMounted); // Needed by some make scripts
+				foldersToMount++;mountFollowSymlink("/usr/bin/as", homeDir, folderMounted); // Needed by g++
+				foldersToMount++;mountFollowSymlink("/usr/bin/ld", homeDir, folderMounted); // Needed by make scripts
+				foldersToMount++;mountFollowSymlink("/usr/bin/ar", homeDir, folderMounted); // Needed to compile Node.js!?
+				foldersToMount++;mountFollowSymlink("/usr/bin/ranlib", homeDir, folderMounted); // Needed to compile Node.js!?
 				
 				
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
@@ -2655,37 +2661,36 @@ function checkMounts(options, checkMountsCallback) {
 				
 				foldersToMount++;module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
 				foldersToMount++;module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
-				foldersToMount++;module_mount("/usr/bin/unrar", homeDir + "usr/bin/unrar", folderMounted);
+				foldersToMount++;module_mount("/usr/bin/unrar-nonfree", homeDir + "usr/bin/unrar", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/zip", homeDir + "usr/bin/zip", folderMounted); // Create .zip files (zip folders)
 				foldersToMount++;module_mount("/usr/bin/make", homeDir + "usr/bin/make", folderMounted); // Needed by some npm modules to install
 				foldersToMount++;module_mount("/usr/bin/printf", homeDir + "usr/bin/printf", folderMounted); // Needed by some make scripts
-				foldersToMount++;module_mount("/usr/bin/g++", homeDir + "usr/bin/g++", folderMounted); // Needed by some make scripts
-				foldersToMount++;module_mount("/usr/bin/as", homeDir + "usr/bin/as", folderMounted); // Needed by g++
-				foldersToMount++;module_mount("/usr/bin/cc", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
-				foldersToMount++;module_mount("/usr/bin/touch", homeDir + "usr/bin/touch", folderMounted); // Needed by make scripts
-				foldersToMount++;module_mount("/usr/bin/ld", homeDir + "usr/bin/ld", folderMounted); // Needed by make scripts
+				
+				foldersToMount++;module_mount("/usr/bin/x86_64-linux-gnu-gcc-7", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
+				foldersToMount++;module_mount("/bin/touch", homeDir + "usr/bin/touch", folderMounted); // Needed by make scripts
+				
 				foldersToMount++;module_mount("/usr/bin/tr", homeDir + "usr/bin/tr", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/tail", homeDir + "usr/bin/tail", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/awk", homeDir + "usr/bin/awk", folderMounted); // Used by nvm
+				foldersToMount++;module_mount("/usr/bin/gawk", homeDir + "usr/bin/awk", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/sort", homeDir + "usr/bin/sort", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/sha256sum", homeDir + "usr/bin/sha256sum", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/dirname", homeDir + "usr/bin/dirname", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/ar", homeDir + "usr/bin/ar", folderMounted); // Needed to compile Node.js!?
-				foldersToMount++;module_mount("/usr/bin/ranlib", homeDir + "usr/bin/ranlib", folderMounted); // Needed to compile Node.js!?
+				
+				
 				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
 				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (Docker) eg. curl | sh
 				foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/usr/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/usr/bin/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
+				foldersToMount++;module_mount("/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
+				foldersToMount++;module_mount("/usr/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
 				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
 				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
 				
 				
-				foldersToMount++;module_mount("/sbin/iptables", homeDir + "sbin/iptables", folderMounted); // Needed by docker
-				foldersToMount++;module_mount("/sbin/lsmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
+				foldersToMount++;module_mount("/sbin/xtables-multi", homeDir + "sbin/iptables", folderMounted); // Needed by docker
+				foldersToMount++;module_mount("/sbin/kmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
 				
 				
 				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++

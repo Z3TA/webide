@@ -160,7 +160,6 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/hg");
 	umount(HOME + username + "/usr/bin/git");
 	umount(HOME + username + "/usr/bin/node");
-	umount(HOME + username + "/usr/bin/python");
 	umount(HOME + username + "/usr/bin/ssh");
 	umount(HOME + username + "/usr/bin/ssh-keygen");
 	umount(HOME + username + "/usr/bin/unrar");
@@ -168,19 +167,14 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/zip");
 	umount(HOME + username + "/usr/bin/make");
 	umount(HOME + username + "/usr/bin/printf");
-	umount(HOME + username + "/usr/bin/g++");
-	umount(HOME + username + "/usr/bin/as");
 	umount(HOME + username + "/usr/bin/cc");
 	umount(HOME + username + "/usr/bin/touch");
-	umount(HOME + username + "/usr/bin/ld");
 	umount(HOME + username + "/usr/bin/tr");
 	umount(HOME + username + "/usr/bin/tail");
 	umount(HOME + username + "/usr/bin/awk");
 	umount(HOME + username + "/usr/bin/sort");
 	umount(HOME + username + "/usr/bin/sha256sum");
 	umount(HOME + username + "/usr/bin/dirname");
-	umount(HOME + username + "/usr/bin/ar");
-	umount(HOME + username + "/usr/bin/ranlib");
 	umount(HOME + username + "/usr/bin/openssl");
 	umount(HOME + username + "/usr/bin/pkg-config");
 	umount(HOME + username + "/usr/bin/curl");
@@ -225,7 +219,6 @@ if(ps) {
 	umount(HOME + username + "/bin/mv");
 	umount(HOME + username + "/bin/rm");
 	umount(HOME + username + "/bin/rmdir");
-	umount(HOME + username + "/bin/sh");
 	umount(HOME + username + "/bin/tar");
 	umount(HOME + username + "/bin/sed");
 	umount(HOME + username + "/bin/grep");
@@ -244,6 +237,35 @@ if(ps) {
 	umount(HOME + username + "/proc/", true);
 	umount(HOME + username + "/dev/pts", true);
 	umount(HOME + username + "/dev/", true);
+	
+	
+	// Mounts with links. Created by mountFollowSymlink(). Also attemp umount on the links just in case!
+	umount(HOME + username + "/usr/bin/python");
+	umount(HOME + username + "/usr/bin/python2.7");
+	umount(HOME + username + "/usr/bin/python2");
+
+	umount(HOME + username + "/bin/sh");
+	umount(HOME + username + "/bin/dash");
+	
+	umount(HOME + username + "/usr/bin/g++");
+	umount(HOME + username + "/usr/bin/g++-7");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-g++-7");
+	
+	umount(HOME + username + "/usr/bin/as");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-as");
+	
+	umount(HOME + username + "/usr/bin/ld");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ld");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ld.bfd");
+	
+	umount(HOME + username + "/usr/bin/ar");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ar");
+	
+	umount(HOME + username + "/usr/bin/ranlib");
+	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ranlib");
+	
+	
+	
 	
 	// Just in case
 	umount(HOME + username + "/run/", true);
