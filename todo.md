@@ -56,6 +56,8 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+todo: Test what happens to the Dropbox when a user is deleted (does the dropbox folder get cleared!?)
+
 
 todo: Need to do something about the ever growing guest pool!
 

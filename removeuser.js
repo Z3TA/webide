@@ -56,6 +56,10 @@ catch(err) {
 
 function startDelete() {
 	
+	// First empty the prod folder so that processes wont respawn when killed
+	var prodDir = UTIL.joinPaths([HOME, username, ".prod/"]);
+	child_process.execSync("rm -rf " + prodDir);
+	
 // Kill all processes owned by this user (for example scripts "in production")
 var ps = child_process.execSync("ps aux | grep ^" + username + " || true").toString(ENCODING).trim();
 if(ps) {
@@ -64,16 +68,27 @@ if(ps) {
 		// The first number after the user name is the pid
 		console.log("ps[" + i + "]=" + ps[i]);
 		pid = ps[i].match(/ \d+ /)[0].trim();
+			try {
 		child_process.execSync("kill " + pid);
+			}
+			catch(err) {
+				console.log("Unable to kill process " + pid + " owned by username. Trying killing it as the user...");
+				try {
+					child_process.execSync("sudo -u " + username + " kill " + pid);
+				}
+				catch(err) {
+					throw new Error("Failed to kill pid=" + pid + " as " + username + ". You have to do it manually!");
+				}
+			}
+		}
 	}
-}
-// Note: nodejs_init_worker.js might restart the scripts before they have been deleted !
-
-
-// Remove nginx profile
-var url_user = UTIL.urlFriendly(username);
-var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
-var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
+	// Note: nodejs_init_worker.js might restart the scripts before they have been deleted !
+	
+	
+	// Remove nginx profile
+	var url_user = UTIL.urlFriendly(username);
+	var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+	var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
 	try {
 		fs.unlinkSync(nginxProfileSymlink);
 		fs.unlinkSync(nginxProfile);
@@ -85,72 +100,72 @@ var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN 
 	
 	// Reload nginx to remove descriptors to files in user home dir
 	try {
-	var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 1");
+		var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 1");
 	}
 	catch(err) {
 		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1 &&
-	err.message.indexOf("unrecognized service") == -1) throw err;
+		err.message.indexOf("unrecognized service") == -1) throw err;
 	}
 	
 	// Remove apparmor profiles
 	unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
-unlink("/etc/apparmor.d/home." + username + ".bin.bash");
+	unlink("/etc/apparmor.d/home." + username + ".bin.bash");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.node");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
-unlink("/etc/apparmor.d/home." + username + ".usr.bin.git");
-unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");
-unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-cli.js");
-
+	unlink("/etc/apparmor.d/home." + username + ".usr.bin.git");
+	unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");
+	unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npx-cli.js");
+	
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
-/*
-	What if the user is logged in ? We wont be able to umount nodejs_username !
-	If we restart the server the user will auto-relogion (and re-create the mount-points).
-	It's probably *not* a good idea to delete a user while he/she is using the system.
-	But here's how to do it:
-	1. Delete the system account so the user can't re-login: userdel username
+	/*
+		What if the user is logged in ? We wont be able to umount nodejs_username !
+		If we restart the server the user will auto-relogion (and re-create the mount-points).
+		It's probably *not* a good idea to delete a user while he/she is using the system.
+		But here's how to do it:
+		1. Delete the system account so the user can't re-login: userdel username
 		2. Restart the webide.service to force a logout: systemctl restart webide
-	3. Do the unmounting and deletion of data : ./removeuser.js username
+		3. Do the unmounting and deletion of data : ./removeuser.js username
+		
+		Unmounting nodejs_username will fail if the user is still logged in!
+		
+		If umount fails, try:
+		sudo lsof | grep '/home/username'
+		sudo lsof | grep '/bin/file'
+		
+		
+		sudo mount | grep '/home/ltest4/bin/bash'
+		sudo lsof | grep '/bin/bash'
+		sudo umount -lf /home/ltest4/bin/bash
+		
+		
+	*/
 	
-	Unmounting nodejs_username will fail if the user is still logged in!
+	// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
+	// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
 	
-	If umount fails, try:
-	sudo lsof | grep '/home/username'
-	sudo lsof | grep '/bin/file'
+	// We don't want to accidently mess with any of these, so just in case we are doing some debugging
 	
-	
-	sudo mount | grep '/home/ltest4/bin/bash'
-	sudo lsof | grep '/bin/bash'
-	sudo umount -lf /home/ltest4/bin/bash
-	
-	
-*/
-
-// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
-// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
-
-// We don't want to accidently mess with any of these, so just in case we are doing some debugging
-
 	// Same order as in server.js to make it easier to spot what is missing
-
+	
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
-
+	
 	
 	umount("/home/" + username + "/etc/ssl/certs");
 	
-umount("/home/" + username + "/usr/bin/env");
-umount("/home/" + username + "/usr/bin/hg");
+	umount("/home/" + username + "/usr/bin/env");
+	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/git");
-umount("/home/" + username + "/usr/bin/node");
-umount("/home/" + username + "/usr/bin/python");
-umount("/home/" + username + "/usr/bin/ssh");
-umount("/home/" + username + "/usr/bin/ssh-keygen");
-umount("/home/" + username + "/usr/bin/unrar");
-umount("/home/" + username + "/usr/bin/unzip");
-umount("/home/" + username + "/usr/bin/zip");
+	umount("/home/" + username + "/usr/bin/node");
+	umount("/home/" + username + "/usr/bin/python");
+	umount("/home/" + username + "/usr/bin/ssh");
+	umount("/home/" + username + "/usr/bin/ssh-keygen");
+	umount("/home/" + username + "/usr/bin/unrar");
+	umount("/home/" + username + "/usr/bin/unzip");
+	umount("/home/" + username + "/usr/bin/zip");
 	umount("/home/" + username + "/usr/bin/make");
 	umount("/home/" + username + "/usr/bin/printf");
 	umount("/home/" + username + "/usr/bin/g++");
@@ -167,8 +182,8 @@ umount("/home/" + username + "/usr/bin/zip");
 	umount("/home/" + username + "/usr/bin/ar");
 	umount("/home/" + username + "/usr/bin/ranlib");
 	umount("/home/" + username + "/usr/bin/openssl");
-umount("/home/" + username + "/usr/bin/pkg-config");
-umount("/home/" + username + "/usr/bin/curl");
+	umount("/home/" + username + "/usr/bin/pkg-config");
+	umount("/home/" + username + "/usr/bin/curl");
 	umount("/home/" + username + "/usr/bin/id");
 	umount("/home/" + username + "/usr/bin/newuidmap");
 	umount("/home/" + username + "/usr/bin/which");
@@ -198,20 +213,20 @@ umount("/home/" + username + "/usr/bin/curl");
 	
 	//umount("/home/" + username + "/dev/tty");
 	
-
-umount("/home/" + username + "/bin/mktemp");
-umount("/home/" + username + "/bin/cat");
-umount("/home/" + username + "/bin/bash");
-umount("/home/" + username + "/bin/gunzip");
-umount("/home/" + username + "/bin/gzip");
-umount("/home/" + username + "/bin/ln");
-umount("/home/" + username + "/bin/ls");
-umount("/home/" + username + "/bin/mkdir");
-umount("/home/" + username + "/bin/mv");
-umount("/home/" + username + "/bin/rm");
-umount("/home/" + username + "/bin/rmdir");
-umount("/home/" + username + "/bin/sh");
-umount("/home/" + username + "/bin/tar");
+	
+	umount("/home/" + username + "/bin/mktemp");
+	umount("/home/" + username + "/bin/cat");
+	umount("/home/" + username + "/bin/bash");
+	umount("/home/" + username + "/bin/gunzip");
+	umount("/home/" + username + "/bin/gzip");
+	umount("/home/" + username + "/bin/ln");
+	umount("/home/" + username + "/bin/ls");
+	umount("/home/" + username + "/bin/mkdir");
+	umount("/home/" + username + "/bin/mv");
+	umount("/home/" + username + "/bin/rm");
+	umount("/home/" + username + "/bin/rmdir");
+	umount("/home/" + username + "/bin/sh");
+	umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/bin/sed");
 	umount("/home/" + username + "/bin/grep");
 	umount("/home/" + username + "/bin/cp");
@@ -219,10 +234,10 @@ umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/bin/bzip2");
 	umount("/home/" + username + "/bin/readlink");
 	
-
+	
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
-
+	
 	
 	umount("/home/" + username + "/usr/", true);
 	umount("/home/" + username + "/etc/", true);
@@ -235,17 +250,15 @@ umount("/home/" + username + "/bin/tar");
 	umount("/home/" + username + "/bin/", true);
 	
 	
-fuseUmount("/home/" + username + "/googleDrive");
-
+	fuseUmount("/home/" + username + "/googleDrive");
 	
 	
 	
+	// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
+	umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
+	unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 	
-// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
-umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
-unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
-
-
+	
 	if(!NOZFS) {
 		// Need to get the zfs pool
 		// todo: Check why this just hangs if you do not have zfs and not using -nozfs flag!
@@ -254,7 +267,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 			
 			if(stderr.indexOf("zfs: not found") != -1 || 
 			stderr.indexOf("The program 'zfs' can be found in the following packages") != -1) {
-NOZFS = true;
+				NOZFS = true;
 				userdel();
 			}
 			else if(err) throw err;
