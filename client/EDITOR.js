@@ -10404,7 +10404,7 @@ function resizeAndRender(afterResize) {
 		
 		// The canvas is reset after a resize, so we need to make a full render!
 		
-		if(EDITOR.isScrolling && file && !afterResize && 1 == 1) {
+			if(EDITOR.isScrolling && file && !afterResize && 1 == 1) {
 			
 			// Only render what is not already rendered.
 			
@@ -10449,7 +10449,7 @@ function resizeAndRender(afterResize) {
 			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
 			try {
-					//EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+					EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
 			}
 			catch(err) {
 				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
