@@ -117,7 +117,7 @@ var abort = false;
 		
 		sourceStats = stats;
 		
-console.log("Folder exist: " + sourcePath);
+//console.log("Folder exist: " + sourcePath);
 
 		statTarget();
 });
