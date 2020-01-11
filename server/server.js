@@ -511,10 +511,21 @@ function recycleGuestAccounts(callback) {
 	
 	var currentTime = unixTimeStamp();
 	var countLeft = GUEST_COUNTER-1;
+	var maxConcurrency = 1;
+	var currentConcurrency = 0;
+	var currentlyRecuclingId = 0;
 	
-	for (var i=1; i<GUEST_COUNTER; i++) tryRecycle(i);
+	continueRecycling();
+	
+	function continueRecycling() {
+		log("continueRecycling: currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency);
+		for (var i=currentlyRecuclingId+1; i<GUEST_COUNTER && currentConcurrency < maxConcurrency; i++) tryRecycle(i);
+		if(i==GUEST_COUNTER) log("Done recycling guest accounts!", NOTICE);
+	}
 	
 	function tryRecycle(id) {
+		currentConcurrency++;
+		currentlyRecuclingId = id;
 		console.log("tryRecycle: guest" + id);
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 		module_fs.stat(homeDir, function dir(err, homeDirStat) {
@@ -670,13 +681,15 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 	
 	function processedGuestId(id, debugComment) {
 		countLeft--;
-		
+		currentConcurrency--;
+
 		console.log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft);
 		
 		if(countLeft == 0) {
 			callback(null);
 			callback = null;
 		}
+		else continueRecycling();
 	}
 	
 }
@@ -5053,7 +5066,7 @@ function gcsfLogout(username, callback) {
 	var command = "./gcsf logout " + username;
 	var options = {
 		cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
-shell: EXEC_OPTIONS.shell
+		shell: EXEC_OPTIONS.shell
 	}
 	
 	gcsfCleanup(username);
