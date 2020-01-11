@@ -154,103 +154,103 @@ if(ps) {
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
 	
 	
-	umount("/home/" + username + "/etc/ssl/certs");
+	umount(HOME + username + "/etc/ssl/certs");
 	
-	umount("/home/" + username + "/usr/bin/env");
-	umount("/home/" + username + "/usr/bin/hg");
-	umount("/home/" + username + "/usr/bin/git");
-	umount("/home/" + username + "/usr/bin/node");
-	umount("/home/" + username + "/usr/bin/python");
-	umount("/home/" + username + "/usr/bin/ssh");
-	umount("/home/" + username + "/usr/bin/ssh-keygen");
-	umount("/home/" + username + "/usr/bin/unrar");
-	umount("/home/" + username + "/usr/bin/unzip");
-	umount("/home/" + username + "/usr/bin/zip");
-	umount("/home/" + username + "/usr/bin/make");
-	umount("/home/" + username + "/usr/bin/printf");
-	umount("/home/" + username + "/usr/bin/g++");
-	umount("/home/" + username + "/usr/bin/as");
-	umount("/home/" + username + "/usr/bin/cc");
-	umount("/home/" + username + "/usr/bin/touch");
-	umount("/home/" + username + "/usr/bin/ld");
-	umount("/home/" + username + "/usr/bin/tr");
-	umount("/home/" + username + "/usr/bin/tail");
-	umount("/home/" + username + "/usr/bin/awk");
-	umount("/home/" + username + "/usr/bin/sort");
-	umount("/home/" + username + "/usr/bin/sha256sum");
-	umount("/home/" + username + "/usr/bin/dirname");
-	umount("/home/" + username + "/usr/bin/ar");
-	umount("/home/" + username + "/usr/bin/ranlib");
-	umount("/home/" + username + "/usr/bin/openssl");
-	umount("/home/" + username + "/usr/bin/pkg-config");
-	umount("/home/" + username + "/usr/bin/curl");
-	umount("/home/" + username + "/usr/bin/id");
-	umount("/home/" + username + "/usr/bin/newuidmap");
-	umount("/home/" + username + "/usr/bin/which");
-	umount("/home/" + username + "/usr/bin/less");
-	umount("/home/" + username + "/usr/bin/head");
-	umount("/home/" + username + "/usr/bin/expr");
-	
-	
-	umount("/home/" + username + "/sbin/iptables");
-	umount("/home/" + username + "/sbin/lsmod");
-	
-	umount("/home/" + username + "/usr/include");
-	umount("/home/" + username + "/usr/lib");
-	umount("/home/" + username + "/usr/local/lib");
-	umount("/home/" + username + "/usr/share");
-	
-	umount("/home/" + username + "/proc/cpuinfo");
-	umount("/home/" + username + "/proc/stat");
-	umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
-	umount("/home/" + username + "/proc/modules");
-	umount("/home/" + username + "/proc/self/exe");
-	
-	umount("/home/" + username + "/dev/urandom");
-	umount("/home/" + username + "/dev/null");
-	umount("/home/" + username + "/dev/ptmx");
-	umount("/home/" + username + "/dev/pts");
-	
-	//umount("/home/" + username + "/dev/tty");
+	umount(HOME + username + "/usr/bin/env");
+	umount(HOME + username + "/usr/bin/hg");
+	umount(HOME + username + "/usr/bin/git");
+	umount(HOME + username + "/usr/bin/node");
+	umount(HOME + username + "/usr/bin/python");
+	umount(HOME + username + "/usr/bin/ssh");
+	umount(HOME + username + "/usr/bin/ssh-keygen");
+	umount(HOME + username + "/usr/bin/unrar");
+	umount(HOME + username + "/usr/bin/unzip");
+	umount(HOME + username + "/usr/bin/zip");
+	umount(HOME + username + "/usr/bin/make");
+	umount(HOME + username + "/usr/bin/printf");
+	umount(HOME + username + "/usr/bin/g++");
+	umount(HOME + username + "/usr/bin/as");
+	umount(HOME + username + "/usr/bin/cc");
+	umount(HOME + username + "/usr/bin/touch");
+	umount(HOME + username + "/usr/bin/ld");
+	umount(HOME + username + "/usr/bin/tr");
+	umount(HOME + username + "/usr/bin/tail");
+	umount(HOME + username + "/usr/bin/awk");
+	umount(HOME + username + "/usr/bin/sort");
+	umount(HOME + username + "/usr/bin/sha256sum");
+	umount(HOME + username + "/usr/bin/dirname");
+	umount(HOME + username + "/usr/bin/ar");
+	umount(HOME + username + "/usr/bin/ranlib");
+	umount(HOME + username + "/usr/bin/openssl");
+	umount(HOME + username + "/usr/bin/pkg-config");
+	umount(HOME + username + "/usr/bin/curl");
+	umount(HOME + username + "/usr/bin/id");
+	umount(HOME + username + "/usr/bin/newuidmap");
+	umount(HOME + username + "/usr/bin/which");
+	umount(HOME + username + "/usr/bin/less");
+	umount(HOME + username + "/usr/bin/head");
+	umount(HOME + username + "/usr/bin/expr");
 	
 	
-	umount("/home/" + username + "/bin/mktemp");
-	umount("/home/" + username + "/bin/cat");
-	umount("/home/" + username + "/bin/bash");
-	umount("/home/" + username + "/bin/gunzip");
-	umount("/home/" + username + "/bin/gzip");
-	umount("/home/" + username + "/bin/ln");
-	umount("/home/" + username + "/bin/ls");
-	umount("/home/" + username + "/bin/mkdir");
-	umount("/home/" + username + "/bin/mv");
-	umount("/home/" + username + "/bin/rm");
-	umount("/home/" + username + "/bin/rmdir");
-	umount("/home/" + username + "/bin/sh");
-	umount("/home/" + username + "/bin/tar");
-	umount("/home/" + username + "/bin/sed");
-	umount("/home/" + username + "/bin/grep");
-	umount("/home/" + username + "/bin/cp");
-	umount("/home/" + username + "/bin/uname");
-	umount("/home/" + username + "/bin/bzip2");
-	umount("/home/" + username + "/bin/readlink");
+	umount(HOME + username + "/sbin/iptables");
+	umount(HOME + username + "/sbin/lsmod");
+	
+	umount(HOME + username + "/usr/include");
+	umount(HOME + username + "/usr/lib");
+	umount(HOME + username + "/usr/local/lib");
+	umount(HOME + username + "/usr/share");
+	
+	umount(HOME + username + "/proc/cpuinfo");
+	umount(HOME + username + "/proc/stat");
+	umount(HOME + username + "/proc/sys/vm/overcommit_memory");
+	umount(HOME + username + "/proc/modules");
+	umount(HOME + username + "/proc/self/exe");
+	
+	umount(HOME + username + "/dev/urandom");
+	umount(HOME + username + "/dev/null");
+	umount(HOME + username + "/dev/ptmx");
+	umount(HOME + username + "/dev/pts");
+	
+	//umount(HOME + username + "/dev/tty");
 	
 	
-	umount("/home/" + username + "/lib");
-	umount("/home/" + username + "/lib64");
+	umount(HOME + username + "/bin/mktemp");
+	umount(HOME + username + "/bin/cat");
+	umount(HOME + username + "/bin/bash");
+	umount(HOME + username + "/bin/gunzip");
+	umount(HOME + username + "/bin/gzip");
+	umount(HOME + username + "/bin/ln");
+	umount(HOME + username + "/bin/ls");
+	umount(HOME + username + "/bin/mkdir");
+	umount(HOME + username + "/bin/mv");
+	umount(HOME + username + "/bin/rm");
+	umount(HOME + username + "/bin/rmdir");
+	umount(HOME + username + "/bin/sh");
+	umount(HOME + username + "/bin/tar");
+	umount(HOME + username + "/bin/sed");
+	umount(HOME + username + "/bin/grep");
+	umount(HOME + username + "/bin/cp");
+	umount(HOME + username + "/bin/uname");
+	umount(HOME + username + "/bin/bzip2");
+	umount(HOME + username + "/bin/readlink");
 	
 	
-	umount("/home/" + username + "/usr/", true);
-	umount("/home/" + username + "/etc/", true);
-	umount("/home/" + username + "/proc/", true);
-	umount("/home/" + username + "/dev/pts", true);
-	umount("/home/" + username + "/dev/", true);
+	umount(HOME + username + "/lib");
+	umount(HOME + username + "/lib64");
+	
+	
+	umount(HOME + username + "/usr/", true);
+	umount(HOME + username + "/etc/", true);
+	umount(HOME + username + "/proc/", true);
+	umount(HOME + username + "/dev/pts", true);
+	umount(HOME + username + "/dev/", true);
 	
 	// Just in case
-	umount("/home/" + username + "/run/", true);
-	umount("/home/" + username + "/bin/", true);
+	umount(HOME + username + "/run/", true);
+	umount(HOME + username + "/bin/", true);
 	
 	
-	fuseUmount("/home/" + username + "/googleDrive");
+	fuseUmount(HOME + username + "/googleDrive");
 	
 	
 	
@@ -399,12 +399,17 @@ function unlink(path) {
 }
 
 function umount(path, ignoreErrors) {
+	var failed = false;
+	
 	var child_process = require("child_process");
 	try {
 		child_process.execSync("umount " + path + " --force"); // .toString(ENCODING)
 	}
 	catch(err) {
-		if(!ignoreErrors) {
+		if(ignoreErrors) {
+			failed = true;
+		}
+		else {
 			if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
 			&& err.message.indexOf("umount: " + path + ": no mount point specified") == -1
@@ -414,6 +419,7 @@ function umount(path, ignoreErrors) {
 					// Sometimes you can not umount because there are other mounts to the target!
 					// A lazy umount might be able to get rid of those mounts!
 					console.log("umount " + path + ". Target is busy! Doing lazy umount -lf");
+					
 					child_process.execSync("umount -lf " + path + " && sleep 1"); // we want to throw if this fails
 					// We want to sleep to make it sync
 					// can't use setTimeout because it would made the script continue
@@ -421,21 +427,32 @@ function umount(path, ignoreErrors) {
 						child_process.execSync("umount -f " + path + "");
 					}
 					catch(err) {
+						
 if( err.message.indexOf("umount: " + path + ": not mounted") == -1
 						&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
 						&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) {
+							failed = true;
 							throw new Error("Lazy umount failed: " + err.message);
 						}
-						else console.log("hmm? Lazy umount gave: " + err.message);
+						else {
+							failed = true;
+							console.log("hmm? Lazy umount gave: " + err.message);
+						}
 					}
 					
 					
 				}
 				else {
+					failed = true;
 					throw err;
 					// stderr message are already shown in the shell, no need to repeat them
 				}
 			}
+			
+		}
+		
+		if(!failed) {
+			// If the umount succeeded it should be safe to unlink the dummy file!?
 			
 		}
 	}
