@@ -56,6 +56,23 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+I just did a very bad deploy, ended up with an hour of downtime and many issues!
+how to not repeat that?
+it was basically a ticking bomb, with 500+ guest users all being reset at the same time when server started
+with lots of files to be mounted
+resulting in max read error
+
+
+Deleting guest accounts in prod ...
+Getting target is busy when trying to delete their home folder.
+Could it be the nodejs_init service that is reading from the folders !? 
+Delete guest accounts backwards, and also decrement GUEST_COUNTER !?
+
+We are hiting letsencrypt limits! (need to be more reservive? 
+could we keep the cert when we delete guest user?)
+do we have to stop letsencrypt renewal when we delete a user !?
+
+
 able to reset nuked accounts...
 
 issue with lingering g++ !? it's an empty file
@@ -74,6 +91,8 @@ Move all development to the cloud IDE
 
 todo: Test web share
 
+
+regression: when hitting commit from ctx menu, the text box for commit message doesn't get focused!
 
 todo: Don't scroll when in colab move and the other (window) removes a row
 
