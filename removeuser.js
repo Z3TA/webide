@@ -168,7 +168,6 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/make");
 	umount(HOME + username + "/usr/bin/printf");
 	umount(HOME + username + "/usr/bin/cc");
-	umount(HOME + username + "/usr/bin/touch");
 	umount(HOME + username + "/usr/bin/tr");
 	umount(HOME + username + "/usr/bin/tail");
 	umount(HOME + username + "/usr/bin/awk");
@@ -180,14 +179,8 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/curl");
 	umount(HOME + username + "/usr/bin/id");
 	umount(HOME + username + "/usr/bin/newuidmap");
-	umount(HOME + username + "/usr/bin/which");
-	umount(HOME + username + "/usr/bin/less");
 	umount(HOME + username + "/usr/bin/head");
 	umount(HOME + username + "/usr/bin/expr");
-	
-	
-	umount(HOME + username + "/sbin/iptables");
-	umount(HOME + username + "/sbin/lsmod");
 	
 	umount(HOME + username + "/usr/include");
 	umount(HOME + username + "/usr/lib");
@@ -264,8 +257,23 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/ranlib");
 	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ranlib");
 	
+	umount(HOME + username + "/usr/bin/which");
+	umount(HOME + username + "/bin/which");
 	
+	umount(HOME + username + "/usr/bin/touch");
+	umount(HOME + username + "/bin/touch");
 	
+	umount(HOME + username + "/usr/bin/less");
+	umount(HOME + username + "/bin/less");
+	
+	umount(HOME + username + "/sbin/iptables");
+	umount(HOME + username + "/sbin/xtables-multi");
+	
+	umount(HOME + username + "/sbin/lsmod");
+	umount(HOME + username + "/bin/kmod");
+	
+
+
 	
 	// Just in case
 	umount(HOME + username + "/run/", true);

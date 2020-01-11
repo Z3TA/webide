@@ -122,7 +122,8 @@ var abort = false;
 				var defaultBin = stdout.trim();
 				
 				if(defaultBin != sourcePath) {
-					throw new Error("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
+
+					console.warn("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
 				}
 			});
 		}

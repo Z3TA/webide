@@ -2636,6 +2636,7 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
+				// Don't forget to investigate all links and add umount to removeuser.js!!!
 				foldersToMount++;mountFollowSymlink("/usr/bin/python", homeDir, function(err, targetRelative) {
 					if(err) throw err;
 					
@@ -2647,12 +2648,19 @@ function checkMounts(options, checkMountsCallback) {
 					});
 				});
 				
+				// Don't forget to investigate all links and add umount to removeuser.js!!!
 				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted); // gunzip will give ENOENT error without /bin/sh
 				foldersToMount++;mountFollowSymlink("/usr/bin/g++", homeDir, folderMounted); // Needed by some make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/as", homeDir, folderMounted); // Needed by g++
 				foldersToMount++;mountFollowSymlink("/usr/bin/ld", homeDir, folderMounted); // Needed by make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/ar", homeDir, folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;mountFollowSymlink("/usr/bin/ranlib", homeDir, folderMounted); // Needed to compile Node.js!?
+				foldersToMount++;mountFollowSymlink("/usr/bin/which", homeDir, folderMounted); // Needed by docker install script
+				foldersToMount++;mountFollowSymlink("/usr/bin/touch", homeDir, folderMounted); // Needed by make scripts
+				foldersToMount++;mountFollowSymlink("/usr/bin/less", homeDir, folderMounted); // Wanted by Mercurial
+				foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
+				foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
+				
 				
 				
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
@@ -2668,7 +2676,6 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/printf", homeDir + "usr/bin/printf", folderMounted); // Needed by some make scripts
 				
 				foldersToMount++;module_mount("/usr/bin/x86_64-linux-gnu-gcc-7", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
-				foldersToMount++;module_mount("/bin/touch", homeDir + "usr/bin/touch", folderMounted); // Needed by make scripts
 				
 				foldersToMount++;module_mount("/usr/bin/tr", homeDir + "usr/bin/tr", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/tail", homeDir + "usr/bin/tail", folderMounted); // Used by nvm
@@ -2683,14 +2690,11 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (Docker) eg. curl | sh
 				foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/bin/which", homeDir + "usr/bin/which", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/usr/less", homeDir + "usr/bin/less", folderMounted); // Wanted by Mercurial
 				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
 				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
 				
 				
-				foldersToMount++;module_mount("/sbin/xtables-multi", homeDir + "sbin/iptables", folderMounted); // Needed by docker
-				foldersToMount++;module_mount("/sbin/kmod", homeDir + "sbin/lsmod", folderMounted); // Needed by docker
+				
 				
 				
 				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
