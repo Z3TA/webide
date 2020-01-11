@@ -104,6 +104,8 @@
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,
+  /etc/ssl/openssl.cnf r,
+  
   /lib/** mr,
   /run/resolvconf/resolv.conf r,
   /usr/lib/** mr,
