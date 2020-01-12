@@ -53,8 +53,20 @@ The video was displayed as origionally intendens, it had been improved with colo
 The user might have a picture in their head how they want the program to look and behave, if possibe, we should make it possible for the user to tweak the 
 program so that it looks like the picture in their head!?
 
+
 What I'm working on
 -------------------
+
+In Safari (dark theme) the context menu is indented after "Version control..."
+
+the contrast of the function list is a bit too high in dark mode, stealing focus from the text area
+
+when switching to another coputer/device, open the same files, with the same state as the last computers
+
+keyboard shortcut to go to definition
+
+when a folder is expanded in file explorer, scroll the content into view!
+refactor buildList to always callback! with err, listItem
 
 page down /up doesnt work in journalctl!
 

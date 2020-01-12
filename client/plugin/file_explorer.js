@@ -877,8 +877,9 @@ return;
 			
 			lastPathExplored = path;
 			
-			buildList(path, item, function() {
-				
+			buildList(path, item, function(item) {
+console.log("File explorer: item=", item);
+				if(item) item.scrollIntoView(true);
 			});
 			
 			box.removeChild(box.firstChild);
