@@ -79,7 +79,7 @@ function newTerminal(user, json, callback) {
 		if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;
 		
 		TERMINALS[termId] = module_pty.spawn(exec, [], {
-			name: 'xterm-color',
+			name: 'xterm-color', // hmm, does it matter what we put here ? xterm-color (if we put vt we get no colors, but otherwise it works like xterm-color)
 			cols: cols,
 			rows: rows,
 			cwd: cwd,

@@ -56,6 +56,13 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+
+
+Step 1: Move development to the cloud, fix pain points
+Step 2: Use a Chromebook to develop, without using a mouse, fix pain points
+
+
+
 todo: Uncomment log spam from server.js
 
 Still getting error when trying to rename shared/uploaded file

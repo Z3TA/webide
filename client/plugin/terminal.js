@@ -6,6 +6,9 @@
 	Problem: The terminal's shell have it's own key-bindings which overlaps the editor's key bindings! Example Ctrl+C to copy, is used to exit a program in bash shell.
 	Solution 1: Use Alt for Ctrl and Shift+Alt for Alt !?  (AltGr doesn't seem to work)
 	
+What terminal should we emulate ?
+
+todo: Run vttest
 	
 	todo: color codes need to be in rgb format!! (chars in margin)
 	
@@ -1222,7 +1225,7 @@ file.insertLineBreak();
 		}
 	}
 	
-	function terminalKeyPressed(file, character, combo) {
+	function terminalKeyPressed(file, character, combo, keyPressEvent) {
 		
 		var isTerminal = terminalFiles.indexOf(file) != -1;
 		
@@ -1230,7 +1233,7 @@ file.insertLineBreak();
 		
 		var terminalId = file.path.match(reTerm)[1];
 		
-		console.log("terminalKeyPressed: " + character);
+		console.log("terminalKeyPressed: character=" + character + " combo=" + JSON.stringify(combo) + " keyPressEvent.key=" + keyPressEvent.key);
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
@@ -1267,7 +1270,7 @@ file.insertLineBreak();
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
-		console.log("terminalKeyDown: character=" + character + " (" + code + ") combo=" + JSON.stringify(combo));
+		console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
@@ -1318,6 +1321,12 @@ file.insertLineBreak();
 			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
 			
 		}
+		else if(code == 35 && combo.sum == 0) { // End
+			data = ESC + "[F";
+		}
+		else if(code == 36 && combo.sum == 0) { // Home
+			data = ESC + "[H";
+		}
 		else if(code == 37 && combo.sum == 0) { // arrow left
 			data = ESC + "[D";
 		}
@@ -1333,6 +1342,20 @@ file.insertLineBreak();
 		else if(code == 46 && combo.sum == 0) { // Delete
 			// ab|c => We will get \b\u001b[1Pc\b (BACK DEL1 c BACK
 			data = ESC + "[C" + String.fromCharCode(127); // Move right then delete
+		}
+		
+		// I'm not sure the F keys does anything (they print PQRS in bash), but include them anyway
+		else if(code == 112 && combo.sum == 0) { // F1
+			data = ESC + "[1P";
+		}
+		else if(code == 113 && combo.sum == 0) { // F2
+			data = ESC + "[1Q";
+		}
+		else if(code == 114 && combo.sum == 0) { // F3
+			data = ESC + "[1R";
+		}
+		else if(code == 115 && combo.sum == 0) { // F4
+			data = ESC + "[1S";
 		}
 		
 		// CTRL+ (we'll use ALT instead)
