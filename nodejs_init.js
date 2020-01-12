@@ -260,6 +260,7 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		// Check the .prod folder
 		var prodFolder = homeDir + ".prod";
 		var fs = require("fs");
+		log("Reading " + prodFolder + " ...");
 		fs.readdir(prodFolder, function(err, filesInProdDir) {
 			if(err) {
 				log(err.message, NOTICE);

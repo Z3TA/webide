@@ -92,7 +92,6 @@ catch(err) {
 process.setgid(parseInt(GID));
 process.setuid(parseInt(UID));
 
-// We are not in chroot!
 var initLogFilePath = "/log/nodejs_init_worker.log";
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
@@ -109,7 +108,7 @@ else {
 		if(scripts.length == 0) {
 			log("No nodejs services found!");
 			// Make sure there's nothing to do and gracefully exit
-			initLogStream.end();
+			initLogStream.end(0);
 			process.disconnect();
 		}
 		
