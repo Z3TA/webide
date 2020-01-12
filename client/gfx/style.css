@@ -600,8 +600,9 @@ input[type=button], button.button, input[type=submit] {
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
-	font-size: 13px;
+	font-size: 12px;
 	vertical-align: middle;
+	font-family: Segoe UI, sans-serif;
 }
 
 input[type=button].half, input[type=submit].half, button.half {
