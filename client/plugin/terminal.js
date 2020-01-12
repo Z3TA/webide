@@ -1321,6 +1321,10 @@ file.insertLineBreak();
 			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
 			
 		}
+		
+		else if(code == 34 && combo.sum == 0) { // Page down
+			data = ESC + String.fromCharCode(81); // hmm?
+		}
 		else if(code == 35 && combo.sum == 0) { // End
 			data = ESC + "[F";
 		}

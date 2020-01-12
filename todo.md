@@ -56,7 +56,15 @@ program so that it looks like the picture in their head!?
 What I'm working on
 -------------------
 
+page down /up doesnt work in journalctl!
 
+
+Try to find out why home dirs are busy...
+
+hide virtual keyboard when focus is on an input element, as the smartphone will show a keyboard anyway!?
+
+
+find input box very small
 
 Step 1: Move development to the cloud, fix pain points
 Step 2: Use a Chromebook to develop, without using a mouse, fix pain points
