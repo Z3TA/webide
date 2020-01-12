@@ -3759,6 +3759,17 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			startColumn -= delta;
 		}
 		
+		// We want to see the whole line if possible
+		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
+			// If possible we would also like to see the start of all lines on the screen
+			
+			// todo: Scroll enough to the left so that we can see the start of each line
+// but we also want to see the whole line of the line we are currently on.
+// If we need to scroll, we might just as well scroll a lot,
+// so that we need to scroll less.
+		} 
+		
+		
 		console.log("startColumn=" + startColumn + " columnStart=" + columnStart + " columnEnd=" + columnEnd + " delta=" + delta);
 		
 		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);

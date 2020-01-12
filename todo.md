@@ -53,9 +53,41 @@ The video was displayed as origionally intendens, it had been improved with colo
 The user might have a picture in their head how they want the program to look and behave, if possibe, we should make it possible for the user to tweak the 
 program so that it looks like the picture in their head!?
 
+It seems that if I use a device (and or keyboard) that I'm not used to,
+so that I need to spend extra kognetive load, I get more annoyed by small details,
+like the editor not scrolling to the right place, me having to scroll down to see something, etc.
+Because those extra things, that I otherwise use muscle memory to fix, now becomes more work!
+So when polishing design and small details, use a device that you are not used to - in order to discover those small annoyances!
+
 
 What I'm working on
 -------------------
+
+when right clicking on a word, and spellchecking is off, spellcheck only that word, and give suggestions in the ctx menu.
+
+when using dark theme and (re)loading the screen flashes light, almost blinding you!
+
+it should be possible to scroll horizontally using the touchpad (in Safari, using 2 fingers)
+
+whe scrolling in Safari using the touchpad it sometimes jumps up when you scroll down
+
+there is a lot of wasted space with indentation ...
+There is already a plugin that will automatically scroll to the indentation level
+so there is no large white space,
+if there are hidden characters to the right, but it doesn't seem to work ...
+
+the goto_files plugin is a bit laggy...
+
+When you use find/replace and are scrolled to the right,
+and do a search you should see the whole row, it currently is scrolled
+too far to the right.
+
+
+When you come back after closing down the computer and you was in a terminal session
+you get a message that the terminal was closed at that date... which is wrong!
+It closed sometime after you closed the computer and got disconnected from the server
+
+
 
 In Safari (dark theme) the context menu is indented after "Version control..."
 
