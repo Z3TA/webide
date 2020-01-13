@@ -718,15 +718,16 @@ if(err) console.error(err);
 		
 		// File extension (.tmp) so that it's not formatted by the JS parser
 		var content = "";
-		EDITOR.openFile(reportFilePath, content, function(err, file) {
+var stateProps = {
+isSaved: false,
+savedAs: false,
+parse: false
+};
+		EDITOR.openFile(reportFilePath, content, {props: stateProps}, function(err, file) {
 			
 			if(err) throw err;
 			
 			reportFile = file;
-			
-			file.isSaved = false;
-			file.savedAs = false;
-			file.parse = false;
 			
 			EDITOR.renderNeeded();
 			
