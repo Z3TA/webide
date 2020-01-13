@@ -11,11 +11,9 @@
 	});
 	
 	function loadWordWrap() {
-		EDITOR.bindKey({
-			charCode: 87,
-			combo: CTRL,
-			fun: callWordWrapTool
-		});
+var W = 87;
+		// Ctrl+W and Ctrl+W can not preventDefault()
+		EDITOR.bindKey({ charCode: W, combo: ALT, fun: callWordWrapTool });
 		
 		EDITOR.on("wrapText", wrapTextParagraph);
 		
