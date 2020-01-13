@@ -4360,6 +4360,8 @@ if(menuItem.parentMenu) {
 				USE EDITOR.ctxMenu.addItem with option.temp=true !
 			*/
 			
+			if(typeof htmlText == "object") throw new Error("First argument to EDITOR.ctxMenu.addTemp should be a HTML or plain string. Did you mean to use EDITOR.ctxMenu.addItem ?");
+			
 			if(typeof addSeparator == "function" && callback == undefined) {
 				callback = addSeparator;
 				addSeparator = false;
@@ -4496,21 +4498,46 @@ if(menuItem.parentMenu) {
 				options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
 			
+			var defaultPosition = 10;
+			
 			if(options.order) {
 				li.setAttribute("position", options.order);
 			}
 			else {
-				li.setAttribute("position", "10");
+				li.setAttribute("position", defaultPosition);
 			}
 			
 			menu.appendChild(li);
 			
+
+if(options.separator) {
+var separator =  document.createElement("li");
+separator.classList.add("sep");
+separator.setAttribute("addedby", fName);
+
+if(options.order) {
+separator.setAttribute("position", options.order);
+}
+else {
+separator.setAttribute("position", defaultPosition);
+}
+console.log("EDITOR.ctxMenu.addItem: Added separator=", separator);
+
+menu.appendChild(separator);
+}
+
 			// Re-order positions of the menu items
 			var itemCount = options.temp ? 100 : 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200
 			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 ); // Convert DOM array to normal array for convenience
+			console.log("EDITOR.ctxMenu.addItem: items=", items);
 			items.sort(function(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
 				var pB = parseInt(b.getAttribute("position"));
+				
+				console.log("EDITOR.ctxMenu.addItem: Sorting a=", a, " b=", b, " pA=" + pA + " vs pB=" + pB + "  " + pA + ">" + pB + "?" + (pA> pB));
+				
+				if(isNaN(pA)) throw new Error("NaN: No position attribute in a=" + (a.innerHTML ? a.innerHTML : a) );
+				if(isNaN(pB)) throw new Error("NaN: No position attribute in b=" + b + " b.innerHTML=" + b.innerHTML + " b.innerText=" + b.innerText );
 				
 				if(pA > pB) return 1;
 				else if(pB > pA) return -1;
@@ -4518,20 +4545,17 @@ if(menuItem.parentMenu) {
 				
 			});
 			items.forEach(function (li) {
-				menu.appendChild(li);
-				
 				itemCount++;
+				
+				console.log("EDITOR.ctxMenu.addItem: itemCount=" + itemCount + " Reappening li=", li);
+				menu.appendChild(li);
 				
 				// tabindex is needed in order for tab navigating to work (in Chrome)
 				li.setAttribute("tabindex", itemCount);
 				
 			});
 			
-			if(options.separator) {
-				var separator =  document.createElement("li");
-				separator.setAttribute("class", "sep");
-				menu.appendChild(separator);
-			}
+			
 			
 			if(!CONTEXT_MENU_IS_FULL_SCREEN && options.temp) {
 				/*

@@ -96,7 +96,37 @@
 		EDITOR.removeEvent("ctxMenu", spellcheckWordOnCaret);
 	}
 	
-	function spellcheckWordOnCaret() {
+	function spellcheckWordOnCaret(file, combo, caret, target) {
+		if(!file) return ALLOW_DEFAULT;
+		
+		var caretAt = file.wordAtCaret(caret);
+		var word = caretAt.word;
+		
+		if(word.length == 0) return ALLOW_DEFAULT;
+		
+		CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
+			if(err) {
+				alertBox(err.message);
+				return;
+			}
+			
+			if(spell.suggestion) {
+				var li = EDITOR.ctxMenu.addItem({text: spell.suggestion, temp: true, callback: insertSpellSuggestion, separator: true, order: 2});
+				//alertBox(li.getAttribute("position"));
+			}
+			
+			
+			function insertSpellSuggestion() {
+				var start = caret.index - caretAt.left.length;
+				var end = caret.index + caretAt.right.length;
+				
+				file.deleteTextRange(start, end);
+				file.moveCaretToIndex(start, caret);
+				file.insertText(caret, spell.suggestion);
+				
+			}
+		});
+		
 		
 	}
 	

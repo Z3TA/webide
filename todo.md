@@ -63,6 +63,10 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+Having problems with ordering context menu items!
+
+Working on spel suggestion when right clicking word
+
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?
 Sometimes I for example search for a file and get the file that is in the release/ folder, make some changes, only to discover I changed the wrong file!
@@ -192,6 +196,14 @@ todo: Test web share
 regression: when hitting commit from ctx menu, the text box for commit message doesn't get focused!
 
 todo: Don't scroll when in colab mode and the other (window) removes a row
+
+
+---
+function spellcheckWordOnCaret(file, combo, caret, target) {
+		if(!file) return ALLOW_DEFAULT;
+		
+var word = file.getW| (should autocomplete getWordOnCaret
+---
 
 
 todo: Rename jzedit repo to webide
