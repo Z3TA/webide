@@ -642,9 +642,12 @@ originalRow.push("");
 
 
 
-	lbChars: function lbChars(txt) {
-		if(typeof txt != "string") throw new Error("First argument to lbChars needs to be a string! txt=" + txt + " is not a string!");
+	lbChars: function lbChars(txt, trap) {
 		// Shows white space. Useful for debugging
+		
+		if(typeof txt != "string") throw new Error("First argument to lbChars needs to be a string! txt=" + txt + " is not a string!");
+		if(trap != undefined) throw new Error("Did not expect anything in the second argument (" + trap + ") to UTIL.lbChars! You probably meant to do something else!");
+		
 		txt = txt.replace(/\r/g, "CR");
 		txt = txt.replace(/\n/g, "LF");
 		txt = txt.replace(/\t/g, "TAB");
@@ -2915,8 +2918,137 @@ b = b.slice(8);
 		}
 		
 		return diff;
-	}
+	},
 	
+	determineIndentationConvention: function determineIndentationConvention(text, lineBreak) {
+		/*
+			Find out the indentation convention for the text string
+			Is it tabs? Or spaces, and how many?
+			Returns a string with the indentation convention (tab or spaces)
+			
+		*/
+		
+		console.log("determineIndentationConvention: text.length=" + text.length + " lineBreak=" + UTIL.lbChars(lineBreak));
+		
+		var maxCheckLength = 500,
+		char = "",
+		lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
+		voteTabs = 0,
+		voteSpaces = 0,
+		spaceCount = [],
+		codeBlockStartCharacter = "{",
+		codeBlockEndCharacter = "}",
+		codeBlockDepth = 0,
+		returnString = "",
+		lastChar = "",
+		identation = false,
+		spaces = 0,
+		tabs = 0;
+		
+		for(var i=0; i<text.length; i++) {
+			
+			lastChar = char;
+			
+			char = text.charAt(i);
+			
+			if(char == codeBlockStartCharacter) {
+				codeBlockDepth++;
+			}
+			else if(char == codeBlockEndCharacter) {
+				codeBlockDepth--;
+			}
+			
+			if(char == lastLineBreakCharacter && codeBlockDepth) {
+				identation = true;
+			}
+			else if(char == " " && identation) {
+				spaces++;
+			}
+			else if(char == "\t" && identation) {
+				tabs++;
+			}
+			else {
+				// End of indentation
+				
+				if(identation && codeBlockDepth) {
+					if(tabs > 0) {
+						voteTabs++;
+					}
+					else if(spaces > 0) {
+						voteSpaces++;
+						spaceCount.push(spaces / codeBlockDepth);
+					}
+					
+					spaces = 0;
+					tabs = 0;
+				}
+				
+				identation = false;
+			}
+			
+			//console.log("determineIndentationConvention: char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
+			
+		}
+		
+		console.log("determineIndentationConvention: voteTabs:" + voteTabs);
+		console.log("determineIndentationConvention: voteSpaces:" + voteSpaces);
+		
+		
+		if(voteTabs >= voteSpaces) {
+			returnString = "\t";
+		}
+		else {
+			// Use spaces for indentation, but how many?
+			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
+			
+			//console.log("determineIndentationConvention: spaces count:" + spaces);
+			
+			for(var i=0; i<spaces; i++) {
+				returnString += " ";
+			}
+			
+			//console.log("determineIndentationConvention: indentation-string: '" + returnString + "'");
+			
+		}
+		
+		console.log("determineIndentationConvention: returnString=" + UTIL.lbChars(returnString));
+		
+		return returnString;
+		
+		
+		function sortByFrequencyAndRemoveDuplicates(array) {
+			//console.log("determineIndentationConvention: sortByFrequencyAndRemoveDuplicates: sorting array=" + JSON.stringify(array));
+			var frequency = {}, value;
+			
+			// compute frequencies of each value
+			for(var i = 0; i < array.length; i++) {
+				value = array[i];
+				if(value in frequency) {
+					frequency[value]++;
+				}
+				else {
+					frequency[value] = 1;
+				}
+				//console.log("determineIndentationConvention: sortByFrequencyAndRemoveDuplicates: " + i);
+			}
+			
+			// make array from the frequency object to de-duplicate
+			var uniques = [];
+			for(value in frequency) {
+				uniques.push(value);
+				//console.log("determineIndentationConvention: sortByFrequencyAndRemoveDuplicates: " + value);
+			}
+			
+			// sort the uniques array in descending order by frequency
+			function compareFrequency(a, b) {
+				return frequency[b] - frequency[a];
+			}
+			
+			return uniques.sort(compareFrequency);
+			
+		}
+		
+	}
 }
 
 // Try catch threw an exception in Opera Mobile using Dragonly debugger

@@ -67,6 +67,8 @@
 		
 		EDITOR.registerAltKey({char: "0", alt:2, label: S("Spellcheck"), fun: toggleSpellCheck});
 		
+		EDITOR.on("ctxMenu", spellcheckWordOnCaret);
+		
 	}
 	
 	function loadDictionaries(login) {
@@ -86,10 +88,16 @@
 	}
 	
 	function unloadSpellchecker() {
-		disable();
+		disable(true);
 		EDITOR.ctxMenu.remove(menuItem);
 		EDITOR.windowMenu.remove(windowMenuSpellcheck);
 		EDITOR.unregisterAltKey(toggleSpellCheck);
+		
+		EDITOR.removeEvent("ctxMenu", spellcheckWordOnCaret);
+	}
+	
+	function spellcheckWordOnCaret() {
+		
 	}
 	
 	function toggleSpellCheck() {
@@ -111,6 +119,9 @@
 	}
 	
 	function enable() {
+		
+		EDITOR.removeEvent("ctxMenu", spellcheckWordOnCaret);
+		
 		// Begin spell-checking all opened files
 		
 		var change = "toggleSpellcheckerOn"
@@ -136,8 +147,10 @@
 		
 	}
 	
-	function disable() {
+	function disable(unloading) {
 		enabled = false;
+		
+		if(!unloading) EDITOR.on("ctxMenu", spellcheckWordOnCaret);
 		
 		EDITOR.removeEvent("fileChange", runSpellCheck);
 		EDITOR.removeEvent("fileOpen", spellCheckFile);

@@ -1166,7 +1166,9 @@ usePseudoClipboard = false;
 				if(state.changed != undefined) newFile.changed = state.changed;
 			}
 			
-			// Able to set file properties when opening the file, before openFile listers fire!?
+			// Able to set file properties when opening the file, before openFile listers fire...
+			// fileOpen listeners need to be called before the callback because the callback might change the file content - triggering file.change events
+			// and other plugins listening to fileOpen and fileChange events might get confused when they see a file change event before a file open event.
 			if(state && state.props) {
 				for(var prop in state.props) {
 					newFile[prop] = state.props[prop];
@@ -1179,20 +1181,25 @@ usePseudoClipboard = false;
 				
 				/*
 					
-					Dilemma1: Should file open even listeners be called before or after the callback!??
-					answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
+					Dilemma1: Should file open even listeners be called before or after the callback!?
+					wrong answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
 					
 					Dilemma 2: Should fileOpen events fire before or after fileShow events?
 					answer: Does it matter? I forgot why ...
 					
-					problem1: The callback might change the file, triggering file.change() then plugins will go nuts because they have not seen the file (being opened) yet!
-					sultion: The file open event listeners need to be called before the file open callback(s)!
+					problem1: The callback might change the file, triggering file.change() 
+					then plugins will go nuts because they have not seen the file (being opened) yet!
+					solution: The file open event listeners need to be called before the file open callback(s)!
 					
 					problem1.5: The callback might close the file!
 					solution: Same solution as problem 1. callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
 					
 					problem 2: You want to set properties to the file, that should be available when open-file-listeners are called
 					solution: Use state and state.props in parameters to populate state and properties
+					
+					problem 3: We keep forgetting about problem 2 and set file.mode etc after the file has been opened, 
+					resulting in files being parsed because the default mode is code
+					solution: Add traps that will throw an error if some parameters are modified in the callback
 					
 				*/
 				
@@ -1231,8 +1238,21 @@ usePseudoClipboard = false;
 				
 				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.', "BIG_FILE");
 				
+				// Add bug traps
+var fileMode = file.mode;
+				Object.defineProperty(file, "mode", {
+					get: function get() { return fileMode; },
+					set: function trap(newValue) {
+						throw new Error("Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!");
+}
+				});
+
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);
+				
+				// Remove bug traps
+				delete file.mode;
+				file.mode = fileMode;
 				
 			}
 		}

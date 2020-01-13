@@ -48,7 +48,7 @@ var File; // File object is global
 		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak); // Many functions count on the linebreak character being consistent
-		file.indentation = determineIndentationConvention(text, file.lineBreak);
+		file.indentation = UTIL.determineIndentationConvention(text, file.lineBreak);
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
 		file.head = false, // We are on the first part of the stream if true
@@ -72,7 +72,6 @@ var File; // File object is global
 			while(file.text.charAt(file.text.length-1) == "\t") file.text = file.text.slice(0, file.text.length-1);
 		}
 		
-		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
 		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
 		
@@ -3228,7 +3227,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		endColIndentCharCount = file.grid[endRowBeforeChange].indentationCharacters.length;
 		
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
-		file.indentation = determineIndentationConvention(text, file.lineBreak);
+		file.indentation = UTIL.determineIndentationConvention(text, file.lineBreak);
 		file.text = UTIL.fixInconsistentLineBreaks(text, file.lineBreak);
 		
 		file.grid = file.createGrid(); 
@@ -3767,6 +3766,9 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 // but we also want to see the whole line of the line we are currently on.
 // If we need to scroll, we might just as well scroll a lot,
 // so that we need to scroll less.
+			
+			// We prefer seeing the start of each line, it's OK if we don't see the end of some lines
+			// We however want to see as much as possible of the line the caret is currently on
 		} 
 		
 		
@@ -4382,7 +4384,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				
 				//file.debugGrid();
 				
-				file.indentation = determineIndentationConvention(file.text, file.lineBreak);
+				file.indentation = UTIL.determineIndentationConvention(file.text, file.lineBreak);
 				
 				file.grid = file.createGrid();
 				
@@ -4636,134 +4638,6 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		box.bgColor = null;
 		box.quote = false; // part of a quote
 		box.comment = false; // part of a comment
-	}
-	
-	
-	function determineIndentationConvention(text, lineBreak) {
-		/*
-			Find out the indentation convention for this file
-			Is it tabs? Or spaces, and how many?
-			
-		*/
-		
-		console.log("Determining what line indention convention to use ...");
-		
-		var maxCheckLength = 500,
-		char = "",
-		lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
-		voteTabs = 0,
-		voteSpaces = 0,
-		spaceCount = [],
-		codeBlockStartCharacter = "{",
-		codeBlockEndCharacter = "}",
-		codeBlockDepth = 0,
-		returnString = "",
-		lastChar = "",
-		identation = false,
-		spaces = 0,
-		tabs = 0;
-		
-		for(var i=0; i<text.length; i++) {
-			
-			lastChar = char;
-			
-			char = text.charAt(i);
-			
-			if(char == codeBlockStartCharacter) {
-				codeBlockDepth++;
-			}
-			else if(char == codeBlockEndCharacter) {
-				codeBlockDepth--;
-			}
-			
-			if(char == lastLineBreakCharacter && codeBlockDepth) {
-				identation = true;
-			}
-			else if(char == " " && identation) {
-				spaces++;
-			}
-			else if(char == "\t" && identation) {
-				tabs++;
-			}
-			else {
-				// End of indentation
-				
-				if(identation && codeBlockDepth) {
-					if(tabs > 0) {
-						voteTabs++;
-					}
-					else if(spaces > 0) {
-						voteSpaces++;
-						spaceCount.push(spaces / codeBlockDepth);
-					}
-					
-					spaces = 0;
-					tabs = 0;
-				}
-				
-				identation = false;
-			}
-			
-			//console.log("char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
-			
-		}
-		
-		console.log("voteTabs:" + voteTabs);
-		console.log("voteSpaces:" + voteSpaces);
-		
-		
-		if(voteTabs >= voteSpaces) {
-			return "\t";
-		}
-		else {
-			// Use spaces for indentation, but how many?
-			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
-			
-			//console.log("spaces count:" + spaces);
-			
-			for(var i=0; i<spaces; i++) {
-				returnString += " ";
-			}
-			
-			//console.log("indentation-string: '" + returnString + "'");
-			
-			return returnString;
-		}
-		
-		
-		
-		function sortByFrequencyAndRemoveDuplicates(array) {
-			//console.log("sorting array=" + JSON.stringify(array));
-			var frequency = {}, value;
-			
-			// compute frequencies of each value
-			for(var i = 0; i < array.length; i++) {
-				value = array[i];
-				if(value in frequency) {
-					frequency[value]++;
-				}
-				else {
-					frequency[value] = 1;
-				}
-				//console.log(i);
-			}
-			
-			// make array from the frequency object to de-duplicate
-			var uniques = [];
-			for(value in frequency) {
-				uniques.push(value);
-				//console.log(value);
-			}
-			
-			// sort the uniques array in descending order by frequency
-			function compareFrequency(a, b) {
-				return frequency[b] - frequency[a];
-			}
-			
-			return uniques.sort(compareFrequency);
-			
-		}
-		
 	}
 	
 	function deletePart(txt, start, end) {

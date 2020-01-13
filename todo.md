@@ -63,6 +63,26 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+When clicking to place the mouse caret at eol on a long line,
+after ca one second, it scrolls to the left, and the last few characters of the line goes blank
+After pressing right to move from eol to the next line,
+afte ca 1 second, the last few characters of the line we moved from dissappears,
+and the function list options also get deselected!
+...but don't want to repeat itself when the dev tools console is open!
+(we did however get an error that the view was off, it didn't add up)
+
+I want to see parantheses matching when I'm on the right side of a paranthesis!
+(doable if there is not also a paranthesis right side of the caret, or highlight both!?)
+
+Got an error that todo.md did not have a key in INDENTATION object.
+indentation characters are however calculated in File.js so we don't have to do the double effort
+Moved determineIndentationConvention to UTIL anyway, it might be used server side.
+
+progress bar takes up space in goto_file !?
+
+Ctrl+tab to swtich tab doesn't work in Browsers, it switches browser tab (can't be overruled)
+Alt+Tab used by OS
+
 when right clicking on a word, and spellchecking is off, spellcheck only that word, and give suggestions in the ctx menu.
 
 when using dark theme and (re)loading the screen flashes light, almost blinding you!

@@ -209,40 +209,29 @@
 	}
 	
 	function onFileOpen(file) {
-		//console.log("jsParser.js");
-		
 		if(shouldParse(file)) {
-			
-			console.log("Parsing " + file.path);
-			
 			var js = parseJavaScript(file, {jsx: EDITOR.settings.jsx});
-			
-			
 			file.haveParsed(js); // Tell the file that it has been parsed so that functions depending on the parsed data can update
-			
 		}
-		else {
-			console.warn(file.path + " didn't want to be parsed by the JavaScript parser");			
-		}
-		
 	}
-	
-	
 	
 	function shouldParse(file) {
 		
-		//console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
-		
-		if(file.parse === false) return false;
-		if(file.isBig) return false;
-		
+		if(file.parse === false) {
+			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.parse=" + file.parse);
+			return false;
+		}
+		if(file.isBig) {
+			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.isBig=" + file.isBig);
+			return false;
+		}
 		/* 
 			Dilemma: Should we also parse ASP and PHP here!? (Go into vbScript PHP , etc mode when encontering <% or <?PHP)
 			Yes, this is the easiest solution, and we do not have to redo xmlParsing (like we would have to if we had separate plugins)
 			We could argue that PHP scripts should not include html, or JS, but most php scripts probably does.
 		*/
 		
-		if( file.fileExtension=="" || 
+		if( (file.fileExtension=="" && file.mode=="code") || 
 		file.fileExtension=="js" || 
 		file.fileExtension=="php" || 
 		file.fileExtension=="asp" || 
@@ -254,13 +243,15 @@
 		file.fileExtension=="htm" || 
 		file.fileExtension=="html" || 
 		file.fileExtension=="java") {
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and file.mode=" + file.mode);
 			return true;
 		}
 		else if(file.fileExtension=="xml" && (file.text.indexOf("<?JS") != -1)) {
 			return true;
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and it contains <?JS ");
 		}
 		else {
-			console.warn(file.name + " will not be parsed by the JavaScript parser!");
+			console.log("js_parser: shouldParse? Not parsing " + file.path + " because else");
 			return false;
 		}
 	}

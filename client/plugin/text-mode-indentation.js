@@ -19,9 +19,6 @@
 	var TAB = 9;
 	var ENTER = 13;
 	
-	var INDENTATION = {}; // file: \t or space
-	var debugOpenedFiles = []; // To help discover why file did not get set in INDENTATION object
-	
 	var winMenuShowIndentation;
 	
 	EDITOR.plugin({
@@ -31,9 +28,6 @@
 			EDITOR.bindKey({desc: "Indentate in a plain text file", fun: indentate, charCode: TAB, combo: 0});
 			EDITOR.bindKey({desc: "de-Indentate in a plain text file", fun: deindentate, charCode: TAB, combo: SHIFT});
 			EDITOR.bindKey({desc: "Add indentation in a plain text file", fun: addindentation, charCode: ENTER, combo: 0});
-			
-			EDITOR.on("fileOpen", detectIndentation);
-			EDITOR.on("fileClose", cleanupIndentation);
 			
 			EDITOR.on("ctxMenu", showWhiteSpaceMaybe);
 			
@@ -47,9 +41,6 @@
 			EDITOR.unbindKey(indentate);
 			EDITOR.unbindKey(deindentate);
 			EDITOR.unbindKey(addindentation);
-			
-			EDITOR.removeEvent("fileOpen", detectIndentation);
-			EDITOR.removeEvent("fileClose", cleanupIndentation);
 			
 			EDITOR.removeEvent("ctxMenu", showWhiteSpaceMaybe);
 			
@@ -253,7 +244,7 @@ else {
 		var shouldHaveIndentation = indentationRowAbove;
 		
 		if(lastRowEndWithLeftBracket) {
-			shouldHaveIndentation = indentationRowAbove + INDENTATION[file];
+			shouldHaveIndentation = indentationRowAbove + file.indentation;
 		}
 		
 		console.log("indentate:addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
@@ -303,10 +294,6 @@ else {
 		if(file.mode!="text") {
 			console.log("indentate: Not indentating because not plain text! file.mode=" + file.mode);
 			return ALLOW_DEFAULT;
-		}
-		
-		if(!INDENTATION.hasOwnProperty(file)) {
-			throw new Error("indentate: Indentation has not yet been detected in file.path=" + file.path + " WHY NOT!? debugOpenedFiles=" + JSON.stringify(debugOpenedFiles));
 		}
 		
 		var caret = file.caret;
@@ -381,7 +368,7 @@ else {
 	function insertIndentation(file, index) {
 		if(index == undefined) throw new Error("index=" + index);
 		
-		var characters = INDENTATION[file];
+		var characters = file.indentation;
 		var caret = file.createCaret(index);
 		
 		console.warn("indentate: insertIndentation: row=" + caret.row + " index=" + index + " characters=" + UTIL.lbChars(characters));
@@ -393,7 +380,7 @@ else {
 	function removeIndentation(file, rowStartIndex) {
 		if(rowStartIndex == undefined) throw new Error("index=" + index);
 		
-		var characters = INDENTATION[file];
+		var characters = file.indentation;
 		var caret = file.createCaret(rowStartIndex);
 		
 		console.log("indentate:removeIndentation: row=" + caret.row + " index=" + rowStartIndex + " characters=" + UTIL.lbChars(characters));
@@ -435,35 +422,6 @@ else {
 		
 		return rows;
 	}
-	
-	
-	function detectIndentation(file) {
-		
-		debugOpenedFiles.push(file.path + " mode=" + file.mode);
-		
-		if(file.mode!="text") return; // We only want to work with plain text, code will be automatically indented
-		
-		var countSpaces = UTIL.occurrences(file.text, "\n  ", false);
-		var countTabs = UTIL.occurrences(file.text, "\n\t", false);
-		var indent = "\t";
-		
-		if( countSpaces >= countTabs ) {
-			// How many spaces ?
-			var count4 = UTIL.occurrences(file.text, "\n    ", false);
-			if(count4 > 0 && count4 > countSpaces*.9-1) indent = "    ";
-			else indent = "  ";
-		}
-		
-		INDENTATION[file] = indent;
-		console.log("indentate: detectIndentation: countSpaces=" + countSpaces + " countTabs=" + countTabs + " count4=" + count4 + " indent=" + UTIL.lbChars(indent));
-		
-	}
-	
-	function cleanupIndentation(file) {
-		console.log("indentate: cleanupIndentation: file.path=" + file.path);
-		delete INDENTATION[file];
-	}
-	
 	
 	// TEST-CODE-START
 	
