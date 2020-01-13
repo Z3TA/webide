@@ -372,8 +372,8 @@ sendit();
 		'\n' + 
 		'\n' + 
 		'\n' + 
-		'How to send: Use keboard ' + EDITOR.getKeyFor(sendBugReport) + ',\n' + 
-		'or "Send bug report" via the menu.\n' + 
+		'How to send: Use keybord shortcut: ' + EDITOR.getKeyFor(sendBugReport) + ',\n' + 
+		'or right click and choose "Send bug report" via the context menu.\n' + 
 		'(this only works if "bugreport" is in the file-name)\n' + 
 		'Or send the bug report via e-mail (to the e-mail address at the top)\n';
 		
