@@ -19,9 +19,10 @@
 		var charW = 119;
 		
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
+// Some keys are protected by Firefox and Chrome, Ctrl+Q is one of them
+EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: CTRL+SHIFT, fun: closeFile});
+EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT + SHIFT, fun: closeEditor});
 		
-		EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: CTRL, fun: closeFile});
-		EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
 		//menuItem = EDITOR.ctxMenu.add(S("close_file"), closeFile, 3);
 		EDITOR.on("ctxMenu", showCloseFileOptionMaybe);

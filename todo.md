@@ -63,6 +63,14 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
+Group it differently!?
+Sometimes I for example search for a file and get the file that is in the release/ folder, make some changes, only to discover I changed the wrong file!
+
+
+When double clicking in a search result in order to copy the string, I did not expect to be taken to the file,
+I epxted to select the word!
+
 Should see from what channel people visiting from the editor comes from, eg. chrome web store? Or at least say what browser they are using
 
 Detect A2HS mode and use different keybindings for reserved browser keybindings!
@@ -82,9 +90,6 @@ I want to see parantheses matching when I'm on the right side of a paranthesis!
 
 
 progress bar takes up space in goto_file !?
-
-Ctrl+tab to swtich tab doesn't work in Browsers, it switches browser tab (can't be overruled)
-Alt+Tab used by OS
 
 when right clicking on a word, and spellchecking is off, spellcheck only that word, and give suggestions in the ctx menu.
 
@@ -290,8 +295,6 @@ The shift key is above the Ctrl key on most keyboard, making it likely for phat 
 idea: Configurative buttons. Eg when you press a button you can set what function to run!
 add custom buttons to the discovery bar
 
-
-Detect if running as PWA on desktop, or in "browser" so we know if we can use Ctrl+N, Ctrl+R etc, or need to use Ctrl+Shift+
 
 issue: parser doesn't detect HTML when there is a line break after for example <a 
 

@@ -12,7 +12,7 @@
 	
 	function loadFileReload() {
 		
-		EDITOR.bindKey({desc: S("save_current_file"), key: "R", combo: CTRL+SHIFT, fun: reloadFile});
+		EDITOR.bindKey({desc: S("reload_from_disk"), key: "R", combo: CTRL+SHIFT, fun: reloadFile});
 		
 		EDITOR.on("ctxMenu", reloadFileCtxOption);
 		

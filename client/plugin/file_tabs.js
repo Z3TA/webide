@@ -53,7 +53,16 @@
 		var key_pageUP = 33;
 		var key_pageDown = 34;
 		
+		if(DISPLAY_MODE == "standalone") {
+			// We can bind to Ctrl + Tab when the app was launched from the desktop or home screen
 		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
+		}
+		else if(DISPLAY_MODE == "browser") {
+			// Can not bind to Ctrl + Tab when in the browser
+			// Ctrl+Shift+Tab is a bit awkward to hit, but we should use it for consistence for keybindings we can't call preventDefault() on.
+			// and Shift+Tab is often used to deindent
+			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: 9, combo: CTRL+SHIFT, fun: switchTab});
+		}
 		
 		EDITOR.bindKey({desc: S("move_tab_left"), charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
 		EDITOR.bindKey({desc: S("move_tab_right"), charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
