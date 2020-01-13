@@ -64,7 +64,7 @@
 			// Ctrl+Shift+Tab doesn't work in Firefox
 			// Shift+Tab is used for deindention
 			
-			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: CTRL, fun: switchTab});
+			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: ALT, fun: switchTab});
 		}
 		
 		EDITOR.bindKey({desc: S("move_tab_left"), charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
