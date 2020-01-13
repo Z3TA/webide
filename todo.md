@@ -63,6 +63,12 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+Should see from what channel people visiting from the editor comes from, eg. chrome web store? Or at least say what browser they are using
+
+Detect A2HS mode and use different keybindings for reserved browser keybindings!
+
+When selecting text an we get to the end of the screen (right or bottom) keep scrolling in order to select more!
+
 When clicking to place the mouse caret at eol on a long line,
 after ca one second, it scrolls to the left, and the last few characters of the line goes blank
 After pressing right to move from eol to the next line,
@@ -74,9 +80,6 @@ and the function list options also get deselected!
 I want to see parantheses matching when I'm on the right side of a paranthesis!
 (doable if there is not also a paranthesis right side of the caret, or highlight both!?)
 
-Got an error that todo.md did not have a key in INDENTATION object.
-indentation characters are however calculated in File.js so we don't have to do the double effort
-Moved determineIndentationConvention to UTIL anyway, it might be used server side.
 
 progress bar takes up space in goto_file !?
 
@@ -193,8 +196,6 @@ Middle mouse to copy doesn't work in terminal!
 
 Able to select many files and folders in file explorer by holding down Ctrl
 then right click and "move to..."
-
-issue: When restarting editor, terminalX files get parsed as code! They should be plain text!
 
 
 prio: Able to work on the editor via the cloud IDE (I've only worked via the desktop version so far)

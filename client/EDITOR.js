@@ -920,6 +920,9 @@ usePseudoClipboard = false;
 			solution2: A list of files that are beaing opened
 		*/
 		
+// Have the bug trap error created here in order to get a proper call stack for stached callbaks
+var trapError = new Error("Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!");
+
 		var file = null;
 		
 		if(path == undefined) path = "new file";
@@ -1239,14 +1242,17 @@ usePseudoClipboard = false;
 				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.', "BIG_FILE");
 				
 				// Add bug traps
-var fileMode = file.mode;
-				Object.defineProperty(file, "mode", {
-					get: function get() { return fileMode; },
-					set: function trap(newValue) {
-						throw new Error("Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!");
-}
-				});
+				// We only have to do this for properties that fileOpen listeners might be particular interested in
+				// example: js_parser listens to fileOpen, but reopen_files used to set file.mode state in the EDITOR.openFile callback, resulting in js_parser parsing files that should not be parsed
+				
+				
+				var fileMode = file.mode;
+				Object.defineProperty(file, "mode", {get: function get() { return fileMode; }, set: function trap() { throw trapError }});
+				
+				var fileParse = file.parse;
+				Object.defineProperty(file, "parse", {get: function get() { return fileParse; }, set: function trap() { throw trapError }});
 
+				
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);
 				

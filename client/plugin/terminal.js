@@ -328,18 +328,19 @@ console.warn("Terminal events already active!");
 			return;
 		}
 		
-		EDITOR.openFile(name, "", {show: true}, function fileOpened(err, file) {
+var stateProps = {
+mode: "text",
+lineBreak: "\n",
+parse: false,
+noChangeEvents: true,
+noCollaboration: true
+}
+
+		EDITOR.openFile(name, "", {show: true, props: stateProps}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
 				else return alertBox(err.message);
 			}
-			
-			file.mode = "text";
-			file.lineBreak = "\n";
-			file.parse = false;
-			file.parsed = null;
-			file.noChangeEvents = true;
-			file.noCollaboration = true;
 			
 			terminalFiles.push(file);
 			

@@ -281,7 +281,7 @@
 			var file;
 			var lastFileState;
 			
-			// Check if the file size and if it exist
+			// Check the file size and if it exist
 			EDITOR.getFileSizeOnDisk(path, gotFileSize);
 			
 			function gotFileSize(getFileSizeError, fileSizeOnDisk) {
@@ -306,6 +306,7 @@
 						
 						if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 							// Only ask if we actually have the last state, otherwise just ignore that it's gone.
+							
 							// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
 							if(lastFileState.isSaved != false) {
 								
@@ -318,8 +319,6 @@
 									open();
 									
 								});
-								
-								//loadLastState = confirm("File not found! Load last saved state?\npath=: " + path + "\n(" + getFileSizeError.message + ")");
 							}
 							else open();
 						}
@@ -349,9 +348,25 @@
 					
 					console.log("reopenFiles: open file path=" + path);
 					
+					var stateprops = {};
+					
 					if(lastFileState) {
 					
 						if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
+						
+						// Some state need to be set when opening the file (not after)
+						if(lastFileState.order !== undefined) stateprops.order = lastFileState.order;
+						if(lastFileState.mode !== undefined) stateprops.mode = lastFileState.mode;
+						if(lastFileState.savedAs !== undefined) stateprops.savedAs = lastFileState.savedAs;
+						if(lastFileState.hash !== undefined) stateprops.hash = lastFileState.hash;
+						
+						if(lastFileState.isBig !== undefined) stateprops.isBig = lastFileState.isBig;
+						if(lastFileState.totalRows !== undefined) stateprops.totalRows = lastFileState.totalRows;
+						if(lastFileState.partStartRow !== undefined) stateprops.partStartRow = lastFileState.partStartRow;
+						
+						if(lastFileState.isSaved !== undefined && lastFileState.text) {
+							stateprops.isSaved = lastFileState.isSaved;
+						}
 						
 						if( loadLastState || lastFileState.isSaved === false ) {
 							// Open from temp
@@ -391,7 +406,7 @@
 									content = lastFileState.text;
 								}
 								
-								EDITOR.openFile(path, content, fileReopened); 
+								EDITOR.openFile(path, content, {props: stateprops}, fileReopened); 
 								
 							});
 							
@@ -399,9 +414,15 @@
 						}
 						
 					}
+					else {
+						// If there is no last state: Assume the file is saved.
+// EDITOR.openFile() already do this
+						//file.isSaved = true;
+						//file.savedAs = true;
+					}
 					console.log("reopenFiles: Reopening file path=" + path +" typeof content=" + typeof content);
 					
-					EDITOR.openFile(path, content, fileReopened); 
+					EDITOR.openFile(path, content, {props: stateprops}, fileReopened); 
 				}
 				
 				
@@ -472,41 +493,14 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 				
 				function updateLastState() {
 					console.log("reopenFiles: updateLastState path=" + path);
-					setLastState();
 					
-					//console.log("reopenFiles: file.partStartRow=" + file.partStartRow + " content=" + content);
-					
-					if(file.partStartRow > 0 && content == undefined) {
-						/*
-							If the file was re-loaded from disk, it started at first line.
-							But if it was loaded from state, just leave it as is.
-						*/
-						file.gotoLine(file.partStartRow+file.caret.row+1, function(err) {
-							callback(err, file, fileWasCurrentfile);
-						});
-					}
-					else callback(null, file, fileWasCurrentfile);
-				}
-				
-				function setLastState() {
+					// Set last state
+					// Note that some state need to be set when opening the file!
 					
 					if(lastFileState) { // <-- This is needed because we can't check a property of a undefined variable
 						
 						if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
 							file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
-						}
-						
-						if(lastFileState.order !== undefined) file.order = lastFileState.order;
-						if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
-						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
-						if(lastFileState.hash !== undefined) file.hash = lastFileState.hash;
-
-						if(lastFileState.isBig !== undefined) file.isBig = lastFileState.isBig;
-						if(lastFileState.totalRows !== undefined) file.totalRows = lastFileState.totalRows;
-						if(lastFileState.partStartRow !== undefined) file.partStartRow = lastFileState.partStartRow;
-						
-						if(lastFileState.isSaved !== undefined && content) {
-							file.isSaved = lastFileState.isSaved;
 						}
 						
 						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
@@ -529,14 +523,23 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 						console.log("reopenFiles: Loaded old state for " + path + " file.startRow=" + file.startRow);
 						
 					}
-					else {
-						// If there is no last state: Assume the file is saved.
-						file.isSaved = true;
-						file.savedAs = true;
+					
+					
+					//console.log("reopenFiles: file.partStartRow=" + file.partStartRow + " content=" + content);
+					
+					if(file.partStartRow > 0 && content == undefined) {
+						/*
+							If the file was re-loaded from disk, it started at first line.
+							But if it was loaded from state, just leave it as is.
+						*/
+						file.gotoLine(file.partStartRow+file.caret.row+1, function(err) {
+							callback(err, file, fileWasCurrentfile);
+						});
 					}
+					else callback(null, file, fileWasCurrentfile);
+				}
+				
 					
-					
-				}				
 				
 			}
 		}
