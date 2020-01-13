@@ -17,7 +17,7 @@ var W = 87;
 		
 		EDITOR.on("wrapText", wrapTextParagraph);
 		
-		winMenuWrap = EDITOR.windowMenu.add(S("wrap_paragraph"), [S("Edit"), 5], wordWrap);
+		winMenuWrap = EDITOR.windowMenu.add(S("wrap_paragraph"), [S("Edit"), 5], wordWrap, callWordWrapTool);
 	}
 	
 	function unloadWordWrap() {
