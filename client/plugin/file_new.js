@@ -15,16 +15,17 @@
 		desc: "Create new file option to context menu and bound to Ctrl + N",
 		load: function loadNewFilePlugin() {
 			
-			// Bind to ctrl + N
+			var key_N = 78;
+			var key_Enter = 13;
+			
 			if(DISPLAY_MODE == "standalone") {
-			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: newFileFromKeyboardCombo});
+				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardCombo});
 			}
 			else {
 				// Ctrl+N is however protected by the browser
 				// What should we use isntead?
 				// https://defkey.com/search?irq=new+file
-				// We should use Ctrl+Shift for consistency!
-				EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL+SHIFT, fun: newFileFromKeyboardCombo});
+				EDITOR.bindKey({desc: "Create new file", charCode: key_Enter, combo: CTRL, fun: newFileFromKeyboardCombo});
 			}
 			
 			menuItem = EDITOR.ctxMenu.add("New file", newFileFromContextMenu, 1, newFileFromKeyboardCombo);
