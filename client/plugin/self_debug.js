@@ -36,7 +36,7 @@
 	
 	function bugReportLoad() {
 		var key_S = 83;
-		EDITOR.bindKey({desc: S("send_bug_report"), charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: S("send_bug_report"), charCode: key_S, fun: sendBugReport, combo: ALT + SHIFT});
 		
 		winMenuBugreport = EDITOR.windowMenu.add(S("send_bug_report"), [S("Editor"), 8], sendBugReport);
 		
@@ -109,7 +109,7 @@ if(target.className != "fileCanvas") return;
 sendit();
 		}
 		
-		return true;
+		return PREVENT_DEFAULT;
 		
 		function sendit() {
 			var message = file.text;
@@ -372,7 +372,7 @@ sendit();
 		'\n' + 
 		'\n' + 
 		'\n' + 
-		'How to send: Use keboard Ctrl + Shift + S,\n' + 
+		'How to send: Use keboard ' + EDITOR.getKeyFor(sendBugReport) + ',\n' + 
 		'or "Send bug report" via the menu.\n' + 
 		'(this only works if "bugreport" is in the file-name)\n' + 
 		'Or send the bug report via e-mail (to the e-mail address at the top)\n';

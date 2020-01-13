@@ -191,9 +191,8 @@ todo: Test web share
 
 regression: when hitting commit from ctx menu, the text box for commit message doesn't get focused!
 
-todo: Don't scroll when in colab move and the other (window) removes a row
+todo: Don't scroll when in colab mode and the other (window) removes a row
 
-I'm fat fingering Ctrl+Shift+S a lot. Show a warning (or throw an error) when you make a Ctrl+Shift+X keybinding when there already exist a keybinding for Ctrl+X where X is the same
 
 todo: Rename jzedit repo to webide
 

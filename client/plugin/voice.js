@@ -24,6 +24,7 @@
 	var aboutToSayTimer;
 	var sayingTimer;
 	var winMenuSpeech;
+	var wasActivated = false;
 	
 	EDITOR.plugin({
 		desc: "Speech Synthesis assistant",
@@ -104,10 +105,16 @@ console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 		
 		winMenuSpeech.activate();
 		
+		wasActivated = true;
+		
 		EDITOR.stat("speech_assistant");
 	}
 	
 	function disableSpeechAssistant() {
+		if(wasActivated) EDITOR.say("Now deactivating speech assitant!");
+		
+		wasActivated = false;
+		
 		EDITOR.removeEvent("moveCaret", speakMoveCaret);
 		
 		winMenuSpeech.deactivate();
