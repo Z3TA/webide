@@ -12,6 +12,7 @@
 	
 	function loadFileReload() {
 		
+		// Both Ctrl+R and Alt+R are protected by Firefox
 		EDITOR.bindKey({desc: S("reload_from_disk"), key: "R", combo: CTRL+SHIFT, fun: reloadFile});
 		
 		EDITOR.on("ctxMenu", reloadFileCtxOption);
@@ -59,6 +60,11 @@ callback: function reloadFileFromCtxmenu() {
 		
 if(!file) return true;
 
+		if(!file.savedAs) {
+			alertBox("Can not reload " + file.path + " because it has not been saved!");
+			return PREVENT_DEFAULT;
+		}
+		
 		if(file.changed) {
 			
 			var yes = "Yes, discard changes";
