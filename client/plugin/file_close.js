@@ -20,8 +20,10 @@
 		
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
 // Some keys are protected by Firefox and Chrome, Ctrl+Q is one of them
-EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: CTRL+SHIFT, fun: closeFile});
-EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT + SHIFT, fun: closeEditor});
+		EDITOR.bindKey({desc: S("close_current_file"), charCode: charQ, combo: ALT, fun: closeFile});
+		EDITOR.bindKey({desc: S("close_current_file_discard_changes"), charCode: charQ, combo: SHIFT+ALT, fun: closeFileAndDiscardChanges});
+		
+		EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT, fun: closeEditor});
 		
 		
 		//menuItem = EDITOR.ctxMenu.add(S("close_file"), closeFile, 3);
@@ -46,6 +48,10 @@ EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT + SHIF
 		
 		EDITOR.unregisterAltKey(closeFile);
 		
+	}
+	
+	function closeFileAndDiscardChanges(file, combo) {
+		return closeFile(file, combo);
 	}
 	
 	function closeEditor(file, combo) {
@@ -87,12 +93,17 @@ EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT + SHIF
 		
 	}
 	
-	function closeFile(file) {
+	function closeFile(file, combo) {
 		
+if(file == undefined) {
+alertBox("There are no (more) files open!");
+return ALLOW_DEFAULT;
+}
+
 		if(file == undefined) throw new Error("file=" + file);
 			
 			// Check if it's saved first!
-			if(!file.isSaved) {
+			if(!file.isSaved && !combo.shift && !combo.ctrl) {
 				// Language?
 				var yes = "Yes, close it";
 				var no = "No, keep it open";
@@ -102,7 +113,7 @@ EDITOR.bindKey({desc: S("close_editor"), charCode: charQ, combo: CTRL+ALT + SHIF
 				});
 			}
 			else {
-				// Close it right away if it's saved
+			// Close it right away
 				EDITOR.closeFile(EDITOR.currentFile.path);
 			}
 		
