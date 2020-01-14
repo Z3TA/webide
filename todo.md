@@ -63,8 +63,6 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-regression: reopen_files didn't mark file as unsaved when it had changed on disk!
-
 some text on virt keyb is hard to read.
 when pressing alt buttons.
 

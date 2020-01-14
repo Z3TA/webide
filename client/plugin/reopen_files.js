@@ -403,6 +403,7 @@
 								if(hash != lastFileState.hash) {
 									console.warn("reopenFiles: The file on disk has changed! hash=" + hash + " lastFileState.hash=" + lastFileState.hash);
 									lastFileState.isSaved = false;
+stateprops.isSaved = false;
 									content = lastFileState.text;
 								}
 								
