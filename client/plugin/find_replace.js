@@ -115,7 +115,9 @@
 		
 		// Build the input stuff ...
 		
-		var size = UTIL.getDirectoryFromPath(undefined).length;
+		var size = 30;
+		if(window.innerWidth < 640) size = 20;
+		if(window.innerWidth < 570) size = 10;
 		
 		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");

@@ -2248,7 +2248,9 @@ margin-top: 20px;
 
 
 
-
+/*
+	## max-width: 1315px
+*/
 @media (max-width: 1315px) {
 	div.group, .repoCommit .group.buttons {
 	border: 0px solid yellow;
@@ -2268,6 +2270,9 @@ margin-top: 20px;
 	
 }
 
+/*
+	## max-width: 600px
+*/
 @media (max-width: 600px) {
 	
 	.windowMenu .label {
@@ -2325,14 +2330,32 @@ margin-top: 20px;
 		margin: 4px;
 		margin-left: 2px;
 	}
-
-}
-
-@media (max-width: 350px) {
 	
 	input[type=button], button.button, input[type=submit] {
 		min-width: 80px;
 	}
+	
+	input[type=button].half, input[type=submit].half, button.half {
+		min-width: 34px;
+	}
+
+	td input[type=text] {
+		
+		max-width: 15vw;
+		background-color: green;
+	}
+	
+	.footer label, .footer span, .footer p, .footer legend {
+		
+		font-stretch: ultra-condensed;
+		letter-spacing: 0px;
+}
+	
+}
+/*
+	## max-width: 350px
+*/
+@media (max-width: 350px) {
 	
 	.windowMenu .root .label {
 		

@@ -63,6 +63,7 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+Working on making widgets button and input element fit on small screens
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?
@@ -117,8 +118,6 @@ page down /up doesnt work in journalctl! via editors terminal
 
 
 Try to find out why home dirs are busy...
-
-hide virtual keyboard when focus is on an input element, as the smartphone will show a keyboard anyway!?
 
 
 find input box very small
