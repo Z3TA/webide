@@ -124,7 +124,7 @@ find input box very small
 
 Step 1: Move development to the cloud, fix pain points
 Step 2: Use a Chromebook to develop, without using a mouse, fix pain points
-
+Step 3: Integrate cloud services (mongoDB Atlas, VPS providers, etc)
 
 
 todo: Uncomment log spam from server.js

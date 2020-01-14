@@ -382,11 +382,9 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		checkDefUrl.onclick = checkDefaultUrl;
 		checkDefUrl.checked = (url.value == defaultUrl);
 		checkDefUrl.setAttribute("id", "checkDefUrl");
-		form.appendChild(checkDefUrl);
-		
-		
 		var labelCheckDefUrl = document.createElement("label");
 		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
+		labelCheckDefUrl.appendChild(checkDefUrl);
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
 		form.appendChild(labelCheckDefUrl);
 		

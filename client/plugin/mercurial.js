@@ -1383,12 +1383,12 @@ if(matchRepoName && matchRepoName[1]) {
 		savePassword.setAttribute("type", "checkbox");
 		savePassword.setAttribute("id", "savePassword");
 		savePassword.setAttribute("title", "Save user and password under [auth] in hgrc");
-		form.appendChild(savePassword);
-		
 		var labelSavePassword = document.createElement("label");
-		labelSavePassword.setAttribute("for", "savePassword");
-		labelSavePassword.appendChild(document.createTextNode("Save credentials"));
-		form.appendChild(labelSavePassword);
+labelSavePassword.setAttribute("for", "savePassword");
+labelSavePassword.appendChild(savePassword);
+labelSavePassword.appendChild(document.createTextNode("Save credentials"));
+form.appendChild(labelSavePassword);
+		
 		
 		// ### SSH key button
 		var sshButton = document.createElement("input");

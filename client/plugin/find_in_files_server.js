@@ -550,34 +550,39 @@ if(err) console.error(err);
 		closeDialogButton.appendChild(closeDialogKeyBind);
 		
 		
-		var labelRegexOption = document.createElement("label");
-		labelRegexOption.setAttribute("for", "regexOption");
-		labelRegexOption.appendChild(document.createTextNode("Use regex")); // Language settings!?
-		
-		var labelCaseSensitive = document.createElement("label");
-		labelCaseSensitive.setAttribute("for", "optionCaseSensitive");
-		labelCaseSensitive.appendChild(document.createTextNode("Case-sensitive")); // Language settings!?
 		
 		
-		var labelSubFolderOption = document.createElement("label");
-		labelSubFolderOption.setAttribute("for", "subfolderOption");
-		labelSubFolderOption.appendChild(document.createTextNode("Search subfolders")); // Language settings!?
+		
 		
 		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
 		regexOption.setAttribute("class", "option regex");
+		var labelRegexOption = document.createElement("label");
+		labelRegexOption.setAttribute("for", "regexOption");
+		labelRegexOption.appendChild(regexOption);
+		labelRegexOption.appendChild(document.createTextNode("Use regex")); // Language settings!?
+		
+		
 		
 		optionCaseSensitive = document.createElement("input");
 		optionCaseSensitive.setAttribute("type", "checkbox");
 		optionCaseSensitive.setAttribute("id", "optionCaseSensitive");
 		optionCaseSensitive.setAttribute("class", "option optionCaseSensitive");
+		var labelCaseSensitive = document.createElement("label");
+		labelCaseSensitive.setAttribute("for", "optionCaseSensitive");
+		labelCaseSensitive.appendChild(optionCaseSensitive);
+		labelCaseSensitive.appendChild(document.createTextNode("Case-sensitive")); // Language settings!?
+		
 		
 		subfolderOption = document.createElement("input");
 		subfolderOption.setAttribute("type", "checkbox");
 		subfolderOption.setAttribute("id", "subfolderOption");
 		subfolderOption.setAttribute("class", "option subfolder");
-		
+		var labelSubFolderOption = document.createElement("label");
+		labelSubFolderOption.setAttribute("for", "subfolderOption");
+		labelSubFolderOption.appendChild(subfolderOption);
+		labelSubFolderOption.appendChild(document.createTextNode("Search subfolders")); // Language settings!?
 		
 		
 		
@@ -602,12 +607,10 @@ if(err) console.error(err);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(regexOption);
 		td.appendChild(labelRegexOption);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(optionCaseSensitive);
 		td.appendChild(labelCaseSensitive);
 		tr.appendChild(td);
 		
@@ -651,7 +654,6 @@ if(err) console.error(err);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(subfolderOption);
 		td.appendChild(labelSubFolderOption);
 		tr.appendChild(td);
 		

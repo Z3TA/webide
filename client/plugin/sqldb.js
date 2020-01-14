@@ -713,11 +713,12 @@ return wrap;
 		var inputNotNull = document.createElement("input");
 		inputNotNull.setAttribute("id", "inputNotNull");
 		inputNotNull.setAttribute("type", "checkbox");
-		wrap.appendChild(inputNotNull);
+		
 		
 		var labelNotNull = document.createElement("label");
 		labelNotNull.setAttribute("for", "inputNotNull");
-		labelNotNull.innerText = "Not null";
+		labelNotNull.appendChild(inputNotNull);
+		labelNotNull.appendChild(document.createTextNode("Not null"));
 		labelNotNull.classList.add("checkbox");
 		wrap.appendChild(labelNotNull);
 		
@@ -725,11 +726,11 @@ return wrap;
 		var inputAutoInc = document.createElement("input");
 		inputAutoInc.setAttribute("id", "inputAutoInc");
 		inputAutoInc.setAttribute("type", "checkbox");
-		wrap.appendChild(inputAutoInc);
 		
 		var labelAutoInc = document.createElement("label");
 		labelAutoInc.setAttribute("for", "inputAutoInc");
-		labelAutoInc.innerText = "Auto inc";
+labelAutoInc.appendChild(inputAutoInc);
+		labelAutoInc.appendChild(document.createTextNode("Auto inc"));
 		labelAutoInc.classList.add("checkbox");
 		wrap.appendChild(labelAutoInc);
 		

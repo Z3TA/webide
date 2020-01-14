@@ -248,7 +248,8 @@ inputReplace.setAttribute("autocomplete", "off");
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(ignoreCaseOption);
+		ignoreCaseLabel.insertBefore(ignoreCaseOption, ignoreCaseLabel.firstChild);
+		//td.appendChild(ignoreCaseOption);
 		td.appendChild(ignoreCaseLabel);
 		tr.appendChild(td);
 		
@@ -280,7 +281,8 @@ inputReplace.setAttribute("autocomplete", "off");
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(regexOption);
+regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
+		//td.appendChild(regexOption);
 		td.appendChild(regexOptionLabel);
 		tr.appendChild(td);
 		
