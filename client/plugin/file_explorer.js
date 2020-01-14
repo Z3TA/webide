@@ -88,7 +88,7 @@
 			});
 		*/
 		
-
+		
 		loadingSpinner = document.createElement("div");
 		loadingSpinner.setAttribute("class", "spinner fileExplorer loaderSpinner");
 		
@@ -96,7 +96,7 @@
 		fileExplorerWrap.appendChild(fileExplorerHeader);
 		
 		fileExplorerWrap.appendChild(loadingSpinner);
-
+		
 		fileExplorerWrap.appendChild(fileExplorerFolders);
 		rightColumn.appendChild(fileExplorerWrap);
 		
@@ -127,7 +127,7 @@
 		EDITOR.removeEvent("move", fileExplorerFileMoved);
 		
 		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
-gapi.auth2.getAuthInstance().signOut();
+			gapi.auth2.getAuthInstance().signOut();
 		}
 		
 		EDITOR.discoveryBar.remove(discoveryBarIcon);
@@ -185,8 +185,8 @@ gapi.auth2.getAuthInstance().signOut();
 		console.log("File explorer: openFileExplorerTool: directory=" + directory);
 		
 		if(typeof directory == "string") {
-EDITOR.changeWorkingDir(directory);
-		
+			EDITOR.changeWorkingDir(directory);
+			
 		}
 		toggleFileExplorer(true, directory);
 		return true; 
@@ -234,16 +234,16 @@ EDITOR.changeWorkingDir(directory);
 			// Hight pixel density screens will report a bigger screen area then they actually have.
 			var windowWidth = window.innerWidth / pixelRatio;
 			if(windowWidth < 350) {
-EDITOR.fullScreenWidget(fileExplorerWrap);
+				EDITOR.fullScreenWidget(fileExplorerWrap);
 				if(!hideButton) {
 					hideButton = document.createElement("button");
 					hideButton.setAttribute("class", "fileExplorer hide");
-
+					
 					hideButton.onclick = function hideFileExplorer() {
 						toggleFileExplorer(false);
 					};
 					hideButton.innerText = "Hide file explorer";
-
+					
 					fileExplorerHeader.insertBefore(hideButton, fileExplorerHeader.firstChild);
 				}
 			}
@@ -342,7 +342,11 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 			console.log("File explorer: Looking up path dir=" + dir);
 			var findDir = index < (folders.length-1) ? folders[index+1] : null;
 			
-			buildList(dir, parent, findDir, function listBuilt(parent) {
+			buildList(dir, parent, findDir, function listBuilt(err, parent) {
+				if(err) {
+					console.error(err);
+					return;
+				}
 				
 				index++;
 				
@@ -465,20 +469,29 @@ EDITOR.fullScreenWidget(fileExplorerWrap);
 				// The Google Drive folder can give a bunch of wierd errors when it's not connected
 				if(dir.indexOf("/googleDrive") == 0 && openFolders.indexOf(dir) != -1) {
 					openFolders.splice(openFolders.indexOf(dir), 1);
-					return alertBox("Google Drive error: " + err.message);
+					var errMsg = "Google Drive error: " + err.message;
+					if(callback) callback(new Error(errMsg));
+					else alertBox(errMsg);
+					return;
 				}
 				else if(err.code == "EACCES") {
-					console.warn("File explorer: Unable to access " + dir);
-					if(callback) callback(dirFound);
-return;
+					var errMsg = "File explorer: Unable to access " + dir;
+					if(callback) callback(new Error(errMsg));
+					else {
+						console.warn(errMsg);
+					}
+					return;
 				}
 				else if(err.code == "LOGIN_NEEDED") {
-					alertBox("You need to identify (login) to the server in order to see files.");
+					var errMsg = "You need to identify (login) to the server in order to see files.";
+					if(callback) callback(new Error(errMsg));
+					else alertBox(errMsg);
 					return;
 				}
 				else {
 					console.log("File explorer: err.code=" + err.code);
-					throw err;
+					if(callback) callback(err);
+					else throw err;
 				}
 			}
 			
@@ -492,7 +505,11 @@ return;
 			//EDITOR.resize();
 			
 			
-			if(callback) callback(dirFound);
+			if(callback) callback(null, dirFound, ul);
+			else {
+				console.log("File explorer: buildList complete!");
+			}
+			
 		});
 		
 		function showItem(item) {
@@ -594,7 +611,7 @@ return;
 			};
 			
 			li.classList.add("notranslate");
-
+			
 			var displayName = item.name;
 			if(displayName.length > maxNameLength) {
 				li.setAttribute("title", displayName);
@@ -668,7 +685,7 @@ return;
 			optCreateFolder.onclick = function createFolder(clickEvent) {
 				clickEvent.preventDefault();
 				clickEvent.stopPropagation();
-
+				
 				promptBox("Create new folder (path):", {defaultValue: path}, function(newFolderPath) {
 					if(newFolderPath == path) return;
 					newFolderPath = UTIL.trailingSlash(newFolderPath);
@@ -685,7 +702,7 @@ return;
 			optZipFolder.innerText = "Zip folder";
 			fileItemMenu.appendChild(optZipFolder);
 			optZipFolder.onclick = function zipFolder(clickEvent) {
-
+				
 				var filename = UTIL.getFolderName(path) + ".zip";
 				
 				promptBox("Where to save " + filename + " ?", {defaultValue: path}, function(answer) {
@@ -877,9 +894,12 @@ return;
 			
 			lastPathExplored = path;
 			
-			buildList(path, item, function(item) {
-console.log("File explorer: item=", item);
-				if(item) item.scrollIntoView(true);
+			buildList(path, item, null, function(err, found, ul) {
+				if(err) console.error(err);
+				else {
+					console.log("File explorer: ul=", ul);
+					if(ul) ul.scrollIntoView({block: "nearest"});
+				}
 			});
 			
 			box.removeChild(box.firstChild);
@@ -960,7 +980,7 @@ console.log("File explorer: item=", item);
 		// For some reason the drop event is called many times ... Ignore repeated moves
 		if(fromPath == lastMovedFrom && toFolder == lastMovedTo) {
 			console.warn("File explorer: Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
-		return;
+			return;
 		}
 		lastMovedFrom = fromPath;
 		lastMovedTo = toFolder;
@@ -976,11 +996,11 @@ console.log("File explorer: item=", item);
 		var fromFolder = UTIL.getDirectoryFromPath(fromPath);
 		if(fromPath == dropOnPath) {
 			console.warn("File explorer: Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
-		return;
+			return;
 		}
 		if(fromFolder == toFolder) {
 			console.warn("File explorer: Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
-		return;
+			return;
 		}
 		
 		var droppedOnFile = dropOnPath != toFolder;

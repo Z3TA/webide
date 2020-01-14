@@ -112,10 +112,8 @@ when switching to another coputer/device, open the same files, with the same sta
 
 keyboard shortcut to go to definition
 
-when a folder is expanded in file explorer, scroll the content into view!
-refactor buildList to always callback! with err, listItem
 
-page down /up doesnt work in journalctl!
+page down /up doesnt work in journalctl! via editors terminal
 
 
 Try to find out why home dirs are busy...
