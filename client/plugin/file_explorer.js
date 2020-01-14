@@ -60,7 +60,7 @@
 		
 		winMenuFileExplorer = EDITOR.windowMenu.add(S("file_explorer"), [S("View"), 70], toggleFileExplorerFromWindowMenu, toggleFileExplorerFromKeyboardCombo);
 		
-		EDITOR.registerAltKey({char: "0", alt:1, label: "dir", fun: toggleFileExplorerFromVirtualKeyboard});
+		EDITOR.registerAltKey({char: ",", alt:2, label: "explore", fun: toggleFileExplorerFromVirtualKeyboard});
 		
 		
 		leftColumn = document.getElementById("leftColumn");
