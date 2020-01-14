@@ -2370,6 +2370,10 @@ margin-top: 20px;
 	.footer td input[type=text], .footer td input[type=password], .footer td select.select {
 		margin: 0;
 }
+
+span.key.inline {
+display: none;
+}
 	
 }
 
