@@ -11,7 +11,7 @@
 			
 			winMenuCopyFilePath = EDITOR.windowMenu.add(S("copy_file_path"), [S("File"), 5], copyFilePath);
 			
-			EDITOR.registerAltKey({char: "d", alt:1, label: S("copy_file_path"), fun: copyFilePath});
+			EDITOR.registerAltKey({char: "d", alt:1, label: S("copy_path"), fun: copyFilePath});
 			
 		},
 		unload: function unloadCopyFilePath() {

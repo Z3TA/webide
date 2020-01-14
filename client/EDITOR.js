@@ -8716,7 +8716,7 @@ function main() {
 		}
 	});
 		
-	EDITOR.registerAltKey({char: ";", alt:1, label: "Context Menu", fun:  EDITOR.ctxMenu.show});
+		EDITOR.registerAltKey({char: ";", alt:1, label: "☰ctx", fun:  EDITOR.ctxMenu.show});
 	
 	EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
@@ -8726,13 +8726,13 @@ function main() {
 	
 		EDITOR.windowMenu.add(S("live_preview"), [S("Tools"), 1], EDITOR.previewTool);
 	
-		EDITOR.registerAltKey({char: "Enter", alt:1, label: S("run_nodejs_script"), fun:
+		EDITOR.registerAltKey({char: "Enter", alt:1, label: S("run"), fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 			EDITOR.runScript(file, someEvent);
 		}
 	});
 	
-	EDITOR.registerAltKey({char: "Enter", alt:2, label: "Stop script", fun:
+	EDITOR.registerAltKey({char: "Enter", alt:2, label: S("stop"), fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 			EDITOR.stopScript(file, someEvent);
 		}

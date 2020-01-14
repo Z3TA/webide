@@ -95,7 +95,7 @@
 		
 		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
-		EDITOR.registerAltKey({char: ",", alt:1, label: "version control", fun: showVersionControlWidget});
+		EDITOR.registerAltKey({char: ",", alt:1, label: "revision", fun: showVersionControlWidget});
 		
 		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/share.svg", 110, "Version control", "SCM", toggleVersionControlWidget);
 		

@@ -65,7 +65,7 @@
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		
-		EDITOR.registerAltKey({char: "0", alt:2, label: S("Spellcheck"), fun: toggleSpellCheck});
+		EDITOR.registerAltKey({char: "0", alt:2, label: S("Spell"), fun: toggleSpellCheck});
 		
 		EDITOR.on("ctxMenu", spellcheckWordOnCaret);
 		

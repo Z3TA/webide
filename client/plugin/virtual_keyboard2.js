@@ -766,8 +766,8 @@ return false;
 			// Make sure the text fits
 			var textWidth = ctx.measureText(text).width;
 			var maxWidth = (buttonWidth*buttons[i].width+margin*2);
-			if(textWidth > maxWidth) {
-				console.warn("text=" + text + " fontSize=" + fontSize + " textWidth=" + textWidth + " buttonWidth=" + buttonWidth);
+			if(textWidth > maxWidth || fontSize < 10) {
+				console.warn("printText: text=" + text + " fontSize=" + fontSize + " textWidth=" + textWidth + " buttonWidth=" + buttonWidth + " noSplit=" + noSplit);
 				
 				if(!noSplit) {
 					// Attempt to split it

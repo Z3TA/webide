@@ -63,8 +63,6 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-some text on virt keyb is hard to read.
-when pressing alt buttons.
 
 should be able to turn off vibration in virt keyb.
 

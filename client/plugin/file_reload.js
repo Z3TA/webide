@@ -19,7 +19,7 @@
 		
 		winMenuReloadFromDisk = EDITOR.windowMenu.add(S("reload_from_disk"), [S("Edit"), 4], reloadFile);
 		
-		EDITOR.registerAltKey({char: "back", alt:1, label: S("reload_from_disk"), fun: reloadFile});
+		EDITOR.registerAltKey({char: "back", alt:1, label: S("reload"), fun: reloadFile});
 		
 	}
 	

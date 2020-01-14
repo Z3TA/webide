@@ -63,7 +63,7 @@
 			var char_Esc = 27;
 			EDITOR.bindKey({desc: "Hide SQL db manager widget", charCode: char_Esc, fun: hideDbManager});
 			
-			EDITOR.registerAltKey({char: "l", alt:2, label: S("db_sql"), fun: showDbManager});
+			EDITOR.registerAltKey({char: "l", alt:2, label: "SQL db", fun: showDbManager});
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/database.svg", 120, S("sql_database"), "DB", toggleDbManager);
 			// Icon created by: https://www.flaticon.com/authors/phatplus

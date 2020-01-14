@@ -85,7 +85,7 @@
 			
 			winMenuServerManager = EDITOR.windowMenu.add("FTP/SSH", [S("Editor"), S("remote_fs"), 1], showServerManger);
 			
-			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP/SFTP", fun: showServerManger});
+			EDITOR.registerAltKey({char: "&", alt:1, label: "FTP", fun: showServerManger});
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/cloud.svg", 80, "FTP/SFTP (" + EDITOR.getKeyFor(showServerManger) + ")", "FTP", toggleShowServerManger);
 			// Icon created by: https://www.flaticon.com/authors/phatplus

@@ -67,7 +67,7 @@
 		
 		winMenuGotoLine = EDITOR.windowMenu.add(S("goto_line"), [S("Navigate"), 11], gotoLineFromWindowMenu, gotoLineFromKeyboardComboG);
 		
-		EDITOR.registerAltKey({char: "g", alt:1, label: S("goto_line"), fun: gotoLineFromVirtualKeyboard});
+		EDITOR.registerAltKey({char: "g", alt:1, label: S("goto"), fun: gotoLineFromVirtualKeyboard});
 		
 		}
 	

@@ -80,7 +80,7 @@
 		winMenuTabLeft = EDITOR.windowMenu.add(S("switch_to_left_tab"), [S("Edit"), 10], switchTabLeft);
 		winMenuTabRight = EDITOR.windowMenu.add(S("switch_to_right_tab"), [S("Edit"), 10], switchTabRight, "bottom");
 		
-		EDITOR.registerAltKey({char: "space", alt:1, label: S("previous_filetab"), fun: switchTab});
+		EDITOR.registerAltKey({char: "space", alt:1, label: S("last_tab"), fun: switchTab});
 		
 		setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {

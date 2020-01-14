@@ -71,7 +71,7 @@
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyDown, fun: gotoFile_moveDown});
 		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openFile});
 		
-		EDITOR.registerAltKey({char: "o", alt:2, label: S("open_search_file"), fun: show_gotoFileInput});
+		EDITOR.registerAltKey({char: "o", alt:2, label: S("open"), fun: show_gotoFileInput});
 		
 		EDITOR.on("openFileTool", openLocalFileTool);
 		EDITOR.on("openFileTool", openAnyFileTool);

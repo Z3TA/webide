@@ -31,7 +31,7 @@
 			menuItem = EDITOR.ctxMenu.add("New file", newFileFromContextMenu, 1, newFileFromKeyboardCombo);
 			winMenuNewFile = EDITOR.windowMenu.add("New file", [S("File"), 2], newFileFromWindowMenu, newFileFromKeyboardCombo);
 			
-			EDITOR.registerAltKey({char: "n", alt:1, label: "New file", fun: newFileFromVirtualKeyboard});
+			EDITOR.registerAltKey({char: "n", alt:1, label: S("new"), fun: newFileFromVirtualKeyboard});
 			
 			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			

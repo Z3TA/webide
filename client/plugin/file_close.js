@@ -32,7 +32,7 @@
 		windowMenuClose = EDITOR.windowMenu.add(S("close"), [S("File"), 3], closeFile);
 		windowMenuQuit = EDITOR.windowMenu.add(S("Quit"), [S("Editor"), 20], closeEditor);
 		
-		EDITOR.registerAltKey({char: "x", alt:2, label: S("close_file"), fun: closeFile});
+		EDITOR.registerAltKey({char: "x", alt:2, label: S("close"), fun: closeFile});
 		
 	}
 	
