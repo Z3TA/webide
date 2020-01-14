@@ -94,16 +94,8 @@ it should be possible to scroll horizontally using the touchpad (in Safari, usin
 
 whe scrolling in Safari using the touchpad it sometimes jumps up when you scroll down
 
-there is a lot of wasted space with indentation ...
-There is already a plugin that will automatically scroll to the indentation level
-so there is no large white space,
-if there are hidden characters to the right, but it doesn't seem to work ...
 
 the goto_files plugin is a bit laggy...
-
-When you use find/replace and are scrolled to the right,
-and do a search you should see the whole row, it currently is scrolled
-too far to the right.
 
 
 When you come back after closing down the computer and you was in a terminal session

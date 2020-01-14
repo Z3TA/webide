@@ -3687,14 +3687,14 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		file.checkCaret(caret);
 		
-		console.log("scrolling to caret:" + JSON.stringify(caret) + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+		console.log("scrollToCaret: scrolling to caret:" + JSON.stringify(caret) + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 		
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
 		
-		//console.log("visibleRows=" + EDITOR.view.visibleRows);
-		//console.log("caret.row=" + caret.row + " < file.startRow=" + file.startRow + " ? " + (caret.row < file.startRow))
-		//console.log("caret.row=" + caret.row + " > file.startRow=" + file.startRow + " + EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " (" + (file.startRow + EDITOR.view.visibleRows) + ")? " + (caret.row > file.startRow + EDITOR.view.visibleRows))
+		//console.log("scrollToCaret: visibleRows=" + EDITOR.view.visibleRows);
+		//console.log("scrollToCaret: caret.row=" + caret.row + " < file.startRow=" + file.startRow + " ? " + (caret.row < file.startRow))
+		//console.log("scrollToCaret: caret.row=" + caret.row + " > file.startRow=" + file.startRow + " + EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " (" + (file.startRow + EDITOR.view.visibleRows) + ")? " + (caret.row > file.startRow + EDITOR.view.visibleRows))
 		
 		if(caret.row < file.startRow) {
 			// Caret is above the visible space. 
@@ -3709,7 +3709,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		*/
 		
 		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows - 1)) {
-			console.log("Caret is below the visible space");
+			console.log("scrollToCaret: Caret is below the visible space");
 			
 			startRow = caret.row - EDITOR.view.visibleRows + 2;
 		}
@@ -3718,7 +3718,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		
 		if(file.grid.length == 0) {
-			console.warn("The grid is zero");
+			console.warn("scrollToCaret: The grid is zero");
 			if(caret.row != 0) throw new Error("Can't scroll to caret.row=" + caret.row + " because zero grid");
 			return file.scrollTo(0, 0);
 		}
@@ -3726,48 +3726,54 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		if(caret.row >= file.grid.length) throw new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length);
 		
 		
-		// Left & Right
+		
+		// ##########################################
+		// #            Left & Right                #
+		// ##########################################
 		var delta = 0;
 		var startColumn = file.startColumn;
 		
-		//console.log("caret.col=" + caret.col + " > EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " ? " + (caret.col > EDITOR.view.endingColumn));
-		//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
+		//console.log("scrollToCaret: caret.col=" + caret.col + " > EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " ? " + (caret.col > EDITOR.view.endingColumn));
+		//console.log("scrollToCaret: caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
 		
 		
 		
 		var indentationWidth = file.grid[caret.row].indentation * EDITOR.settings.tabSpace;
-		var columnEnd = EDITOR.view.endingColumn - indentationWidth;
-		var columnStart = file.startColumn - indentationWidth; // Intentional: Omitting indentation here. WHY!??? Why did we use to omit indentation ? Why was it intentional !?
 		
-		console.log("indentationWidth=" + indentationWidth + " startColumn=" + startColumn + " columnStart=" + columnStart + " caret.col=" + caret.col + " columnEnd=" + columnEnd + "");
+		console.warn("scrollToCaret: indentationWidth=" + indentationWidth + " startColumn=" + startColumn + " caret.col=" + caret.col + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + "");
 		
 		/*
 			
-			Note: caret.col does not take indentation into account. But startColumn does!
+			Note: caret.col does not take indentation into account! But startColumn does!
 			
 		*/
 		
-		if(caret.col > columnEnd) {
+		if((caret.col+indentationWidth) > EDITOR.view.endingColumn) {
 			// Caret is after the visible space
-			// We want to see a bit forward, but not more then to eol
-			delta = caret.col - columnEnd + Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col);
+			// We want to see a bit forward, but not more then to eol ? No, it's actually easier to read if we do not make a big jump!
+			delta = ((caret.col+indentationWidth) - EDITOR.view.endingColumn) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
 			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}
-		else if(caret.col < columnStart) {
+		else if(caret.col < (file.startColumn-indentationWidth)) {
 			// Caret is infront of the visible space
-			delta = columnStart - caret.col;
+			delta = (file.startColumn-indentationWidth) - caret.col;
 			
 			//EDITOR.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
 			startColumn -= delta;
+			
+			if((startColumn-indentationWidth) > 0) {
+				// We would prefer if the startColumn was 0
+				// But we don't need to see the indentation
+				// it's annoying if it jumps while reading, but we usually don't read from right to left
+				var minIndentation = file.grid[caret.row].indentation;
+				for(var row=file.startRow; row<(file.startRow+EDITOR.view.visibleRows) && row<file.grid.length; row++) {
+					console.log("scrollToCaret: row=" + row + " indentation=" + file.grid[row].indentation + " minIndentation=" + minIndentation);
+					if(file.grid[row].indentation < minIndentation) minIndentation = file.grid[row].indentation;
+				}
+				if((caret.col+indentationWidth) < EDITOR.view.visibleColumns) startColumn = minIndentation*EDITOR.settings.tabSpace;
+			}
 		}
-		
-		
-		if(startColumn > 0) {
-			// We would prefer if the startColumn was 0
-			if(caret.col < EDITOR.view.visibleColumns) startColumn = 0;
-		}
-		
 		
 		// We want to see the whole line if possible
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
@@ -3783,9 +3789,9 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		} 
 		
 		
-		console.log("startColumn=" + startColumn + " columnStart=" + columnStart + " columnEnd=" + columnEnd + " delta=" + delta);
+		console.log("scrollToCaret: startColumn=" + startColumn + " minIndentation=" + minIndentation + " delta=" + delta);
 		
-		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		//console.log("scrollToCaret: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		
 		file.scrollTo(startColumn, startRow);
