@@ -63,6 +63,7 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+cars in margin dissappears after column 200
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?
@@ -70,8 +71,6 @@ Sometimes I for example search for a file and get the file that is in the releas
 
 
 Should see from what channel people visiting from the editor comes from, eg. chrome web store? Or at least say what browser they are using
-
-Detect A2HS mode and use different keybindings for reserved browser keybindings!
 
 When selecting text an we get to the end of the screen (right or bottom) keep scrolling in order to select more!
 

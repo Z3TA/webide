@@ -3761,6 +3761,13 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			startColumn -= delta;
 		}
 		
+		
+		if(startColumn > 0) {
+			// We would prefer if the startColumn was 0
+			if(caret.col < EDITOR.view.visibleColumns) startColumn = 0;
+		}
+		
+		
 		// We want to see the whole line if possible
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
 			// If possible we would also like to see the start of all lines on the screen
