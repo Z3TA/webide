@@ -1140,6 +1140,9 @@ file.mode = "text";
 		if(text == undefined) {
 			throw new Error("No text to insert! text is undefined!");
 		}
+		else if(typeof text == "object") {
+			throw new Error("First argument to file.insertText should be the text string. The second argument should be the caret (or undefined to use the file caret)");
+		}
 		else if(!UTIL.isString(text)) {
 			throw new Error("text=" + text + " need to be a string!\n" + text);
 		}
@@ -4264,6 +4267,9 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		var file = this;
 		
 		if(caret === undefined) caret = file.caret;
+		else if(caret == null || typeof caret != "object") throw new Error("First argument to file.wordAtCaret: caret=" + caret + " need to be a file caret. Or undefined to use the file caret.");
+		else if(typeof caret.index != "number") throw new Error("First argument to file.wordAtCaret: caret=" + caret + " doesn't appear to be a file caret!");
+		
 		if(wordDelimiters === undefined) wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_";
 		
 		var word = "";
@@ -4294,7 +4300,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				break;
 			}
 		}
-		var rightSide = file.text.substring(caret.index, i+1);
+		var rightSide = file.text.substring(caret.index, i);
 		var end = i-1;
 		
 		/*

@@ -63,7 +63,7 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-
+regression: reopen_files didn't mark file as unsaved when it had changed on disk!
 
 some text on virt keyb is hard to read.
 when pressing alt buttons.
@@ -73,11 +73,6 @@ should be able to turn off vibration in virt keyb.
 hide virt keyb. when input boxes has focus. as the 
 native keyb will come up.
 
-
-
-Having problems with ordering context menu items!
-
-Working on spel suggestion when right clicking word
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?
@@ -107,7 +102,6 @@ I want to see parantheses matching when I'm on the right side of a paranthesis!
 
 progress bar takes up space in goto_file !?
 
-when right clicking on a word, and spellchecking is off, spellcheck only that word, and give suggestions in the ctx menu.
 
 when using dark theme and (re)loading the screen flashes light, almost blinding you!
 

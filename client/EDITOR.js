@@ -4514,14 +4514,15 @@ if(options.separator) {
 var separator =  document.createElement("li");
 separator.classList.add("sep");
 separator.setAttribute("addedby", fName);
-
+				separator.setAttribute("foo", "bar");
+				
 if(options.order) {
 separator.setAttribute("position", options.order);
 }
 else {
 separator.setAttribute("position", defaultPosition);
 }
-console.log("EDITOR.ctxMenu.addItem: Added separator=", separator);
+				console.log("EDITOR.ctxMenu.addItem: Added separator=", separator, " fName=" + fName + " options.order=" + options.order);
 
 menu.appendChild(separator);
 }
@@ -4537,7 +4538,7 @@ menu.appendChild(separator);
 				console.log("EDITOR.ctxMenu.addItem: Sorting a=", a, " b=", b, " pA=" + pA + " vs pB=" + pB + "  " + pA + ">" + pB + "?" + (pA> pB));
 				
 				if(isNaN(pA)) throw new Error("NaN: No position attribute in a=" + (a.innerHTML ? a.innerHTML : a) );
-				if(isNaN(pB)) throw new Error("NaN: No position attribute in b=" + b + " b.innerHTML=" + b.innerHTML + " b.innerText=" + b.innerText );
+				if(isNaN(pB)) throw new Error("NaN: No position attribute in b=" + b + " b.outerHTML=" + b.outerHTML + " " );
 				
 				if(pA > pB) return 1;
 				else if(pB > pA) return -1;
@@ -4776,6 +4777,8 @@ menu.appendChild(separator);
 			if(lastTempItem && !lastTempItem.classList.contains("sep")) {
 				var separator = document.createElement("li");
 				separator.classList.add("sep");
+				separator.setAttribute("position", "100");
+				separator.setAttribute("addedby", "EDITOR.ctxMenu.show: separator between temp and regular");
 				tempMenu.appendChild(separator);
 			}
 			

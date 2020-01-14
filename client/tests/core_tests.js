@@ -40,6 +40,34 @@
 		
 	}
 	
+	EDITOR.addTest(1, function testWordAtCaret(callback) {
+		EDITOR.openFile("testWordAtCaret.js", 'foo bar baz\n', function(err, file) {
+			
+			var caret = file.createCaret(0);
+			var at = file.wordAtCaret(caret);
+			UTIL.assert(at.word, "foo");
+			UTIL.assert(at.left, "");
+			UTIL.assert(at.right, "foo");
+			
+			
+			var caret = file.createCaret(5);
+			var at = file.wordAtCaret(caret);
+			UTIL.assert(at.word, "bar");
+			UTIL.assert(at.left, "b");
+			UTIL.assert(at.right, "ar");
+			
+var caret = file.createCaret(9);
+var at = file.wordAtCaret(caret);
+UTIL.assert(at.word, "baz");
+UTIL.assert(at.left, "b");
+UTIL.assert(at.right, "az");
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
+	
 	EDITOR.addTest(function testPrependDir(callback) {
 		
 		UTIL.assert(UTIL.prependDir("c:\\Users\\zetaf\\test\\test.js", "playback", "c:\\Users\\zetaf\\"), "c:\\Users\\zetaf\\playback\\test\\test.js");

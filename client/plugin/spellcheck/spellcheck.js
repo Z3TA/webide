@@ -99,6 +99,8 @@
 	function spellcheckWordOnCaret(file, combo, caret, target) {
 		if(!file) return ALLOW_DEFAULT;
 		
+		if(target.id != "editorCanvas") return;
+		
 		var caretAt = file.wordAtCaret(caret);
 		var word = caretAt.word;
 		
@@ -118,11 +120,15 @@
 			
 			function insertSpellSuggestion() {
 				var start = caret.index - caretAt.left.length;
-				var end = caret.index + caretAt.right.length;
+				var end = caret.index + caretAt.right.length - 1;
 				
-				file.deleteTextRange(start, end);
+				console.log("spellcheckWordOnCaret: start=" + start + " end=" + end + " caretAt.left=" + caretAt.left + " caretAt.right=" + caretAt.right);
+				
+				var deletedStr = file.deleteTextRange(start, end);
+				console.log("spellcheckWordOnCaret: deletedStr=" + UTIL.lbChars(deletedStr));
+				
 				file.moveCaretToIndex(start, caret);
-				file.insertText(caret, spell.suggestion);
+				file.insertText(spell.suggestion, caret);
 				
 			}
 		});
