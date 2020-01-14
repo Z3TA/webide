@@ -24,6 +24,8 @@
 	var progressBar;
 	var winMenuFindInFiles;
 	
+	var reFifLine = /Line\s*?(\d*):/;
+	
 	EDITOR.on("start", function find_in_files_main() {
 		
 		var keyF = 70;
@@ -48,6 +50,9 @@
 		EDITOR.on("dblclick", fifdblclick);
 		
 		EDITOR.on("findInFiles", findInFilesTool);
+		
+		EDITOR.on("fileShow", fiffileshow);
+		
 		
 		CLIENT.on("foundInFile", foundInFile);
 		CLIENT.on("findInFilesStatus", findInFilesProgressStatus);
@@ -182,6 +187,43 @@
 		
 	}
 	
+	function fifmousemove(mouseX, mouseY, target, mouseMoveEvent) {
+		var file = EDITOR.currentFile;
+		
+		var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+		var row = caret.row;
+		var rowText = file.rowText(row);
+		
+		var matchFifLine = rowText.match(reFifLine);
+		
+		//console.log("fifmousemove: caret.row=" + caret.row + " rowText=" + rowText + " matchFifLine=" + matchFifLine);
+		
+		if(matchFifLine && matchFifLine.length == 2) {
+			// Indicate that the line can be clicked
+			EDITOR.canvas.style.cursor = 'default';
+			var lineNr = matchFifLine[1];
+			// Get the file path
+			
+			while(row > 0 && file.grid[row][0].char != "-") row--; // Search up for a row that starts with "--------" (below a path)
+			var path = file.rowText(row-1);
+			EDITOR.canvas.title = "Double click to go to line " + lineNr + " in " + path;
+		}
+		else {
+			EDITOR.canvas.style.cursor = 'text';
+			EDITOR.canvas.title = "";
+		}
+		
+	}
+	
+	function fiffileshow(file) {
+		if(isSearchReport(file)) {
+			EDITOR.on("mouseMove", fifmousemove);
+		}
+		else {
+			EDITOR.removeEvent("mouseMove", fifmousemove);
+		}
+	}
+	
 	function fifdblclick(mouseX, mouseY, caret, button, target, keyboardCombo) {
 		var file = EDITOR.currentFile;
 		
@@ -190,7 +232,7 @@
 			// Get the line number
 			var clickedRowText = file.rowText(caret.row);
 			
-			var arr = clickedRowText.match(/Line\s*?(\d*):/);
+			var arr = clickedRowText.match(reFifLine);
 			
 			if(arr == null) {
 				console.warn("Doesn't seem to be a line: " + clickedRowText);

@@ -2963,7 +2963,9 @@ if(elements[i].style.display != "none") {
 			lowest order nr will execute first!
 		*/
 		
-		if(typeof callback !== "function") throw new Error("Second argument: callback needs to be a function! Did you mean EDITOR.addEvent ?");
+		if(typeof callback != "function") {
+throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (typeof callback) + ") needs to be a function! Did you mean EDITOR.addEvent ?");
+		}
 		
 		var options = {fun: callback};
 		
@@ -2981,7 +2983,7 @@ if(elements[i].style.display != "none") {
 	EDITOR.addEvent = function(eventName, options) {
 		
 		if(!(eventName in EDITOR.eventListeners)) {
-			var errorMsg = "eventName=" + eventName + " does not exist in EDITOR.eventListeners!";
+			var errorMsg = "eventName=" + eventName + " does not exist in EDITOR.eventListeners! (event name is case sensetive)";
 			if(eventName == "fileSave") errorMsg += " Did you mean afterSave ?";
 			throw new Error(errorMsg);
 		}
@@ -8732,7 +8734,7 @@ function main() {
 		}
 	});
 	
-	EDITOR.registerAltKey({char: "Enter", alt:2, label: S("stop"), fun:
+		EDITOR.registerAltKey({char: "Enter", alt:2, label: S("stop"), fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 			EDITOR.stopScript(file, someEvent);
 		}

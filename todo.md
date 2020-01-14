@@ -69,9 +69,6 @@ Group it differently!?
 Sometimes I for example search for a file and get the file that is in the release/ folder, make some changes, only to discover I changed the wrong file!
 
 
-When double clicking in a search result in order to copy the string, I did not expect to be taken to the file,
-I epxted to select the word!
-
 Should see from what channel people visiting from the editor comes from, eg. chrome web store? Or at least say what browser they are using
 
 Detect A2HS mode and use different keybindings for reserved browser keybindings!
