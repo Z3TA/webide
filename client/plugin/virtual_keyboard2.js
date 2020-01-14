@@ -120,6 +120,7 @@
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
+	var checkActiveElementInterval;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -141,6 +142,7 @@
 			// Wait for touch events before showing the virtual keyboard
 			EDITOR.addEvent( "mouseClick", {dir: "down", fun: vrkeyboardMouseDown, targetClass:"fileCanvas", order: 1000} );
 			EDITOR.addEvent( "mouseClick", {dir: "up", fun: vrkeyboardMouseUp, targetClass:"fileCanvas", order: 1000} );
+			EDITOR.addEvent( "mouseClick", {dir: "up", fun: vrkeyboardDetectElement, order: 1000} );
 			
 			EDITOR.on("beforeResize", virtualKeyboardClaimHeight);
 			EDITOR.on("afterResize", resizeVirtualKeyboard);
@@ -204,6 +206,34 @@
 			
 		}
 	});
+	
+	function vrkeyboardDetectElement(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
+		
+		/*
+			This will pull up the native onscreen keyboard.
+			We don't want both.
+			It's easier to hide our keyboard then the native keyboard.
+		*/
+		
+		hideVirtualKeyboardIfTextElementIsFocused(target);
+		
+		return ALLOW_DEFAULT;
+	}
+	
+	function hideVirtualKeyboardIfTextElementIsFocused(el) {
+		if(el == undefined) el = document.activeElement;
+		if(isTextBox(el)) hideBuiltinKeyboard();
+	}
+	
+	function isTextBox(element) {
+		var tagName = element.tagName.toLowerCase();
+		if (tagName === 'textarea') return true;
+		if (tagName !== 'input') return false;
+		var type = element.getAttribute('type').toLowerCase(),
+		// if any of these input types is not supported by a browser, it will behave as input type text.
+		inputTypes = ['text', 'password', 'number', 'email', 'tel', 'url', 'search', 'date', 'datetime', 'datetime-local', 'time', 'month', 'week']
+		return inputTypes.indexOf(type) >= 0;
+	}
 	
 	function loadVirtualKeyboardSettings() {
 		
@@ -366,6 +396,8 @@
 		
 		EDITOR.resizeNeeded();
 		
+		checkActiveElementInterval = setInterval(hideVirtualKeyboardIfTextElementIsFocused, 1000);
+		
 		EDITOR.stat("virtual_keyboard");
 	}
 	
@@ -375,6 +407,8 @@
 		wrapper.style.display="none";
 		EDITOR.resizeNeeded();
 		useBuiltin = false;
+		
+		clearInterval(checkActiveElementInterval);
 	}
 	
 	function showNativeKeyboard() {
