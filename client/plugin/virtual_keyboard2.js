@@ -119,6 +119,7 @@
 	var lastUsedKeyboard = "builtin"; // builtin, native or physical
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
+	var winMenuVibration, vibrationEnabled = true;
 	
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -156,9 +157,11 @@
 			winMenuVirtual = EDITOR.windowMenu.add(S("virtual"), [S("Editor"), S("keyboard_input")], menuPickVirtual);
 			winMenuOnScreen = EDITOR.windowMenu.add(S("native_onscreen"), [S("Editor"), S("keyboard_input")], menuPickOnScreen);
 			winMenuPhysical = EDITOR.windowMenu.add(S("physical_keyboard"), [S("Editor"), S("keyboard_input")], menuPickPhysical);
+			winMenuVibration = EDITOR.windowMenu.add(S("vibration"), [S("Editor"), S("keyboard_input")], toggleVibration);
 			
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
+			EDITOR.on("storageReady", loadVirtualKeyboardSettings);
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
@@ -183,6 +186,7 @@
 			EDITOR.removeEvent("fileOpen", showVirtualKeyboardMaybe);
 			
 			EDITOR.removeEvent("registerAltKey", updateAltKey);
+			EDITOR.removeEvent("storageReady", loadVirtualKeyboardSettings);
 			
 			hideBuiltinKeyboard();
 			hideNativeKeyboard();
@@ -193,12 +197,34 @@
 			EDITOR.windowMenu.remove(winMenuVirtual);
 			EDITOR.windowMenu.remove(winMenuOnScreen);
 			EDITOR.windowMenu.remove(winMenuPhysical);
+			EDITOR.windowMenu.remove(winMenuVibration);
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.removeChild(canvas);
 			
 		}
 	});
+	
+	function loadVirtualKeyboardSettings() {
+		
+		var storageVibration = EDITOR.storage.getItem("virtual_keyboard_vibration");
+		if(storageVibration=="1") vibrationEnabled = true;
+		else if(storageVibration)  vibrationEnabled = false;
+		
+		if( vibrationEnabled ) winMenuVibration.activate();
+		else winMenuVibration.deactivate();
+	}
+	
+	function toggleVibration() {
+		vibrationEnabled = !vibrationEnabled;
+		
+		if(EDITOR.storage.ready()) EDITOR.storage.setItem("virtual_keyboard_vibration", (vibrationEnabled?"1":"0"));
+		
+		if( vibrationEnabled ) winMenuVibration.activate();
+		else winMenuVibration.deactivate();
+		
+		winMenuVibration.hide();
+	}
 	
 	function menuPickVirtual() {
 		if(useBuiltin) {
@@ -801,12 +827,12 @@ return false;
 		mouseDownEvent.preventDefault();
 		mouseDownEvent.stopPropagation();
 		
-		if (navigator.vibrate) {
+		if (vibrationEnabled && navigator.vibrate) {
 			// vibration API supported
 			var vibrateSuccess = navigator.vibrate([1]);
 		}
 		
-		if(!vibrateSuccess) EDITOR.beep(0.1, 120, "sine", 39);
+		if(vibrationEnabled && !vibrateSuccess) EDITOR.beep(0.1, 120, "sine", 39);
 		
 		return false;
 	}
