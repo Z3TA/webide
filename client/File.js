@@ -3749,7 +3749,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		if(caret.col > columnEnd) {
 			// Caret is after the visible space
-			delta = caret.col - columnEnd;
+			// We want to see a bit forward, but not more then to eol
+			delta = caret.col - columnEnd + Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col);
 			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}

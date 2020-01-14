@@ -63,7 +63,6 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-cars in margin dissappears after column 200
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?

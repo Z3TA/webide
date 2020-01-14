@@ -160,6 +160,7 @@
 		var col = file.grid[caret.row].length;
 		
 			file.moveCaret(index, row, col, caret);
+		file.scrollToCaret();
 		
 		EDITOR.renderNeeded();
 		
@@ -176,7 +177,8 @@
 		var col = 0;
 		
 		file.moveCaret(index, row, col, caret);
-		
+		file.scrollToCaret();
+
 		EDITOR.renderNeeded();
 		
 		return false;
