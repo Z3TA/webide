@@ -63,6 +63,18 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+
+
+some text on virt keyb is hard to read.
+when pressing alt buttons.
+
+should be able to turn off vibration in virt keyb.
+
+hide virt keyb. when input boxes has focus. as the 
+native keyb will come up.
+
+
+
 Having problems with ordering context menu items!
 
 Working on spel suggestion when right clicking word

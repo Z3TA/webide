@@ -18,15 +18,15 @@
 			var key_N = 78;
 			var key_Enter = 13;
 			
-			if(DISPLAY_MODE == "standalone") {
-				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardCombo});
-			}
-			else {
 				// Ctrl+N is however protected by the browser
 				// What should we use isntead?
 				// https://defkey.com/search?irq=new+file
 				EDITOR.bindKey({desc: "Create new file", charCode: key_Enter, combo: CTRL, fun: newFileFromKeyboardCombo});
+			
+			if(DISPLAY_MODE == "standalone") {
+				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardComboOnStandalone});
 			}
+			
 			
 			menuItem = EDITOR.ctxMenu.add("New file", newFileFromContextMenu, 1, newFileFromKeyboardCombo);
 			winMenuNewFile = EDITOR.windowMenu.add("New file", [S("File"), 2], newFileFromWindowMenu, newFileFromKeyboardCombo);
@@ -46,7 +46,8 @@
 			EDITOR.windowMenu.remove(winMenuNewFile);
 			
 			EDITOR.unbindKey(newFileFromKeyboardCombo);
-			
+			EDITOR.unbindKey(newFileFromKeyboardComboOnStandalone);
+
 			EDITOR.unregisterAltKey(newFileFromVirtualKeyboard);
 			
 			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
@@ -58,6 +59,11 @@
 	
 	function newFileFromDiscoveryBar() {
 		EDITOR.stat("newFileFromDiscoveryBar");
+		return keyboardNewFile();
+	}
+	
+	function newFileFromKeyboardComboOnStandalone() {
+		EDITOR.stat("newFileFromKeyboardComboOnStandalone");
 		return keyboardNewFile();
 	}
 	

@@ -55,17 +55,17 @@
 		var key_tab = 9;
 		var key_backspace = 8;
 		
-		if(DISPLAY_MODE == "standalone") {
-			// We can bind to Ctrl + Tab when the app was launched from the desktop or home screen
-			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL, fun: switchTab}); // Ctrl + tab
-		}
-		else if(DISPLAY_MODE == "browser") {
-			// Can not bind to Ctrl + Tab when in the browser
+		// Can not bind to Ctrl + Tab when in the browser
 			// Ctrl+Shift+Tab doesn't work in Firefox
 			// Shift+Tab is used for deindention
 			
 			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: ALT, fun: switchTab});
+		
+		if(DISPLAY_MODE == "standalone") {
+			// We can bind to Ctrl + Tab when the app was launched from the desktop or home screen
+			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL, fun: switchTabInStandaloneMode}); // Ctrl + tab
 		}
+		
 		
 		EDITOR.bindKey({desc: S("move_tab_left"), charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
 		EDITOR.bindKey({desc: S("move_tab_right"), charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
@@ -237,6 +237,10 @@
 	
 	
 	
+function switchTabInStandaloneMode() {
+return switchTab();
+}
+
 	function switchTab() {
 		// Open last file
 		
