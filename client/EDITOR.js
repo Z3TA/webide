@@ -87,6 +87,7 @@ EDITOR.settings = {
 	lowLatencyCanvas: false,
 	verticalScrollZone: 80, // Will be recalculated on resize to match grid with
 	horizontalScrollZone: 80, // Scrollbar zone, bottom. When touching down in the zone we should scroll
+	leftVerticalScrollZone: 16, // Scrolling in the edge of the left screen (line numbers)
 	style: {
 		// These are the default/fallback styles. Over-ride them in settings_overload.js !
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!

@@ -60,7 +60,8 @@
 		
 		if( mouseDownEvent.type != "touch" && mouseDownEvent.type != "touchstart") return true;
 		
-		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone) && x > EDITOR.settings.leftVerticalScrollZone  
+		 &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
 		
 		stopHorizontalScrolling();
 		verticalScrolling = false;
@@ -87,7 +88,7 @@
 		
 		if( mouseUpEvent.type != "touch" && mouseUpEvent.type != "touchend") return true;
 		
-		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)  &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
+		if( x < (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone) && x > EDITOR.settings.leftVerticalScrollZone &&  y < (EDITOR.view.canvasHeight - EDITOR.settings.horizontalScrollZone)  ) return true;
 		
 		//if(virtualKeyboardWasVisible && verticalScrolling) EDITOR.showVirtualKeyboard(virtualKeyboardWasVisible);
 		
@@ -148,7 +149,11 @@
 					}
 					// else: Unable to determine if the user is scrolling horizontally or vertical
 				}
-				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)) {
+		else if(x < EDITOR.settings.leftVerticalScrollZone) {
+			// Inside left vertical scroll zoon
+			verticalScrolling = true;
+		}
+		else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone)) {
 					// Inside vertical (row) scroll area
 			//if(!verticalScrolling) EDITOR.addRender(verticalScrollingRender, renderOrder);
 					verticalScrolling = true;
@@ -313,8 +318,26 @@
 	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		if(!verticalScrolling) return;
 		
+		// Show a line that indicated where the scroll zone ends
 		ctx.fillStyle="rgb(210, 210, 210)";
 		ctx.fillRect(EDITOR.view.canvasWidth - EDITOR.settings.verticalScrollZone,0,1,EDITOR.view.canvasHeight);
+		
+		
+		
+		
+		// Show where in the file we are, like a traditional scroll-bar
+		var width = 2; // EDITOR.settings.leftVerticalScrollZone;
+		var height = Math.max(30,Math.ceil(EDITOR.view.visibleRows / file.grid.length * EDITOR.view.canvasHeight));
+		var x = 0;
+		var y = Math.min(EDITOR.view.canvasHeight-height, Math.max(0,Math.ceil(file.startRow / file.grid.length * EDITOR.view.canvasHeight)));
+		
+		// First clear
+		ctx.fillStyle=EDITOR.settings.style.bgColor;
+		ctx.fillRect(x,0, width,EDITOR.view.canvasHeight);
+		// Paint line (scrollbar)
+		ctx.fillStyle=EDITOR.settings.style.textColor; //EDITOR.settings.style.highlightTextBg;
+		ctx.fillRect(x,y, width,height);
+		
 		}
 	
 	function horizontalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
