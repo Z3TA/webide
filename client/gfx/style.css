@@ -528,20 +528,6 @@ li ul {
 	font-family: caption;
 	}
 
-label {
-	break-after: avoid;
-	white-space:nowrap;
-}
-
-input + label, select + label {
-	margin-left: 1em;
-}
-
-input + label.checkbox {
-	margin-left: 0;
-	margin-right: 1em;
-}
-
 a.signup {
 	padding: 3px;
 	border-radius: 3px;
@@ -581,6 +567,15 @@ input[type=checkbox] {
 	margin: 3px;
 	width: 16px;
 	height: 16px;
+}
+
+input + label {
+	/* todo: Wrap all inputs inside the labels to prevent line breaks! */
+	color: yellow;
+}
+
+label {
+	white-space: nowrap;
 }
 
 .button.active {
@@ -2273,7 +2268,7 @@ margin-top: 20px;
 /*
 	## max-width: 600px
 */
-@media (max-width: 600px) {
+@media (max-width: 660px) {
 	
 	.windowMenu .label {
 		padding: 0;
@@ -2332,26 +2327,55 @@ margin-top: 20px;
 	}
 	
 	input[type=button], button.button, input[type=submit] {
-		min-width: 80px;
+		min-width: 90px;
+		margin: 2px;
 	}
 	
 	input[type=button].half, input[type=submit].half, button.half {
-		min-width: 34px;
+		min-width: 44px;
+		margin: 2px;
 	}
 
 	td input[type=text] {
-		
-		max-width: 15vw;
-		background-color: green;
+		max-width: 20vw;
 	}
 	
-	.footer label, .footer span, .footer p, .footer legend {
+	.footer label, .footer legend {
+		
+		font-size: 13px;
 		
 		font-stretch: ultra-condensed;
+		font-stretch: 50%;
 		letter-spacing: 0px;
 }
 	
+	.footer div {
+		padding-left: 1px;
+		padding-right: 1px;
+	}
+	
+	.footer td {
+		padding: 1px;
+	}
+	
+	.footer td .button {
+		margin: 0;
+	}
+	
+	.footer td .button + .button {
+		margin: 0;
+		margin-left: 2px;
+	}
+	
+	.footer td input[type=text], .footer td input[type=password], .footer td select.select {
+		margin: 0;
 }
+	
+}
+
+
+
+
 /*
 	## max-width: 350px
 */
