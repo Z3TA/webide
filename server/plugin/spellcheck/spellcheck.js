@@ -35,7 +35,7 @@ var langFolder = __dirname + "/languages/";
 var folders = fs.readdirSync(langFolder);
 for (var i=0, name=""; i<folders.length; i++) {
 		name = folders[i];
-		log("Found spellcheck dictionary for language " + name, logModule.INFO);
+		log("Found spellcheck dictionary for language " + name, logModule.DEBUG);
 		dictFiles[name] = {};
 		dictFiles[name].aff = fs.readFileSync(langFolder + name + "/" + name + ".aff");
 	dictFiles[name].dic = fs.readFileSync(langFolder + name + "/" + name + ".dic");

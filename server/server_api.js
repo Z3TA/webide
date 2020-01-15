@@ -404,7 +404,7 @@ API.readLines = function readLines(user, json, callback) {
 		
 	*/
 	
-	console.log("readLines: json=" + JSON.stringify(json)); 
+	//console.log("readLines: json=" + JSON.stringify(json)); 
 	
 	if(json.path == undefined) return callback(new Error("No path property in options: " + JSON.stringify(json)));
 	
@@ -534,7 +534,7 @@ API.readLines = function readLines(user, json, callback) {
 		
 		// Functions to handle NodeJS ReadableStream's
 		function streamClose() {
-			console.log("Stream closed! path=" + path);
+			//console.log("Stream closed! path=" + path);
 		
 		if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines, lineBreak: lb});
 		callback = null;
@@ -547,7 +547,7 @@ API.readLines = function readLines(user, json, callback) {
 		}
 		
 		function streamEnded() {
-		console.log("Stream ended! path=" + path + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " textHead.length=" + textHead.length + " text.length=" + text.length );
+		//console.log("Stream ended! path=" + path + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " textHead.length=" + textHead.length + " text.length=" + text.length );
 		doneReading = true;
 		
 		if(text) readRows();
@@ -556,7 +556,7 @@ API.readLines = function readLines(user, json, callback) {
 	function streamReadable() {
 		// The 'readable' event is emitted when there is data available to be read from the stream
 		// note: It will be called many times!
-		console.log("stream readable!");
+		//console.log("stream readable!");
 		if(readWhenReady) read();
 	}
 		
@@ -579,7 +579,7 @@ API.readLines = function readLines(user, json, callback) {
 			text += decoder.write(chunk);
 			
 			//console.log("text=" + UTIL.lbChars(text));
-			console.log("text.length=" + text.length);
+			//console.log("text.length=" + text.length);
 			
 			if(!lb) lb = UTIL.determineLineBreakCharacters(text);
 			
@@ -601,7 +601,7 @@ API.readLines = function readLines(user, json, callback) {
 			
 			// As the ending line-break was removed above - one single linebreak actually means two empty rows!
 			
-			console.log("Read " + chunk.length + " bytes from " + path);
+			//console.log("Read " + chunk.length + " bytes from " + path);
 			
 			readRows();
 			
@@ -610,7 +610,7 @@ API.readLines = function readLines(user, json, callback) {
 		if(!doneReading) {
 			//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
 			readWhenReady = true;
-			console.log("Waiting for stream readable ...");
+			//console.log("Waiting for stream readable ...");
 		}
 	}
 	
@@ -638,7 +638,7 @@ API.readLines = function readLines(user, json, callback) {
 		
 		totalLines += rows.length;
 		
-		console.log("rows.length=" + rows.length + " lb=" + UTIL.lbChars(lb) + " text.length=" + text.length);
+		//console.log("rows.length=" + rows.length + " lb=" + UTIL.lbChars(lb) + " text.length=" + text.length);
 		
 		text = "";
 		
@@ -647,15 +647,14 @@ API.readLines = function readLines(user, json, callback) {
 		
 		var rowsToAdd = rowsWanted - lines.length;
 		
-		console.log("rows.length=" + rows.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + 
-		" lines.length=" + lines.length + " rowsWanted=" + rowsWanted + " start=" + start + " rowsToAdd=" + rowsToAdd);
+		//console.log("rows.length=" + rows.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + " lines.length=" + lines.length + " rowsWanted=" + rowsWanted + " start=" + start + " rowsToAdd=" + rowsToAdd);
 		
 		//console.log(rows);
 		
 		if(totalLines >= startLine && lines.length < rowsWanted) {
 			if( rowsToAdd < rows.length || start > 0) rows = rows.splice(start, rowsToAdd);
 			lines = lines.concat(rows);
-			console.log(" Added " + rows.length + " rows.");
+			//console.log(" Added " + rows.length + " rows.");
 			//console.log(rows);
 		}
 	}

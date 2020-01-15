@@ -4127,7 +4127,10 @@ function createUserWorker(name, uid, gid, homeDir) {
 		}
 	}
 	
-	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " NO_CHROOT=" + NO_CHROOT + " options=" + JSON.stringify(options) + " process.env=" + JSON.stringify(process.env) + "", DEBUG);
+	log("Spawning user worker process as username=" + name + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT), INFO);
+	log("Forking with options=" + JSON.stringify(options) + "", DEBUG);
+	
+	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
 	
 	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
 	

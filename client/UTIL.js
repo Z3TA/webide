@@ -706,7 +706,7 @@ console.warn("fun=" + fun);
 			
 		*/
 		
-		console.log("determineLineBreakCharacters: " + UTIL.getStack("Determining what line break characters to use"));
+		//console.log("determineLineBreakCharacters: " + UTIL.getStack("Determining what line break characters to use"));
 		
 		//console.log("determineLineBreakCharacters text=" + text);
 		
@@ -719,18 +719,18 @@ console.warn("fun=" + fun);
 		var nr = UTIL.occurrences(text, "\n\r", true),
 		rn = UTIL.occurrences(text, "\r\n", true)
 		
-		console.log("determineLineBreakCharacters: Line break? nr=" + nr + " rn=" + rn + " text.length=" + text.length);
+		//console.log("determineLineBreakCharacters: Line break? nr=" + nr + " rn=" + rn + " text.length=" + text.length);
 		
 		if(rn > nr) {
-			console.log("determineLineBreakCharacters: Using CRLF");
+			//console.log("determineLineBreakCharacters: Using CRLF");
 			return "\r\n";
 		}
 		else if(nr > rn && nr > 1) {
-			console.warn("determineLineBreakCharacters: Using LFCR");
+			//console.warn("determineLineBreakCharacters: Using LFCR");
 			return "\n\r";
 		}
 		else if(text.indexOf("\n") > -1) {
-			console.log("determineLineBreakCharacters: Using LF (text has LF but no CRLF or LFCR)");
+			//console.log("determineLineBreakCharacters: Using LF (text has LF but no CRLF or LFCR)");
 			return "\n";
 		}
 		else {
@@ -741,7 +741,7 @@ console.warn("fun=" + fun);
 				return "\r\n";
 			}
 			else {
-				console.log("determineLineBreakCharacters: Using LF (Because it's Not Windows)");
+				console.log("determineLineBreakCharacters: Using LF (Assuming it's Not Windows)");
 				return "\n";
 			}
 		}

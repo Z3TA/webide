@@ -63,6 +63,10 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+Trying to decrease the amount of zombie guest accounts
+
+regression: Info messages are blurry!
+
 Working on making widgets button and input element fit on small screens
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...

@@ -123,7 +123,7 @@ var abort = false;
 				
 				if(defaultBin != sourcePath) {
 
-					console.warn("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin);
+					console.warn("sourcePath=" + sourcePath +" is not defaultBin=" + defaultBin + " (checked using which)");
 				}
 			});
 		}
@@ -193,7 +193,7 @@ var abort = false;
 			}
 			else {
 				
-				console.log("Target exist: " + targetPath);
+				//console.log("Target exist: " + targetPath);
 				/*
 					
 					Problem: If no source is given, how to determen if target is already mounted or not !?
@@ -241,13 +241,13 @@ var abort = false;
 				*/
 				
 				if(!sourcePath) {
-					console.log("targetParentStats.dev=" + targetParentStats.dev + " targetStats.dev=" + targetStats.dev + "");
+					//console.log("targetParentStats.dev=" + targetParentStats.dev + " targetStats.dev=" + targetStats.dev + "");
 					if(targetParentStats.dev != targetStats.dev) {
 						return mountDone(null); // Already mounted!
 					}
 				}
 				else {
-					console.log("sourceStats.dev=" + sourceStats.dev + " targetStats.dev=" + targetStats.dev + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "  ");
+					//console.log("sourceStats.dev=" + sourceStats.dev + " targetStats.dev=" + targetStats.dev + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + "  ");
 					if(sourceStats.ino == targetStats.ino) {
 						//console.timeEnd("mounting " + targetPath);
 						return mountDone(null); // Already mounted!

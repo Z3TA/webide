@@ -88,7 +88,7 @@ if(USE_CHROOT) {
 	process.setgid(gid);
 	process.setuid(uid);
 	
-	log(username + " worker process uid=" + uid + " gid=" + gid);
+	//log(username + " worker process uid=" + uid + " gid=" + gid);
 	
 	if(uid === 0) log(username + " RUNNING AS ROOT!!!", WARN);
 	
@@ -136,8 +136,8 @@ if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superus
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
 
-if(process.getuid) log("Running user worker process with uid=" + process.getuid() + " (" + processUser + ")");
-else log("Unable to get process uid!", 4);
+if(process.getuid) log("User worker process is running with uid=" + process.getuid() + " (" + processUser + ") and gid=" +  process.getgid());
+else log("Unable to get process uid!", logModule.WARN);
 
 // Set default file permissions
 //var newmask = parseInt("0022", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
