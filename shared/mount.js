@@ -101,11 +101,10 @@ var abort = false;
 			And make sure you update removeuser.js!!
 		*/
 		module_fs.readlink(sourcePath, function(err, linkString) {
-			if(!err && sourcePath != "/proc/self/exe") {
+			if(!err) {
 				throw new Error("Source is a symlink: " + sourcePath + " -> " + linkString);
 				/*
 					It works as long as it links to a file in the same folder. But there is /usr/bin/unrar -> /etc/alternatives/unrar
-					And then it's /proc/self/exe -> /usr/bin/node
 					So it's probably NOT safe to let mount.js do it. We should do it manually!
 				*/
 			}
@@ -306,8 +305,7 @@ var abort = false;
 		
 		if(!command) command = "mount --bind " + sourcePath + " " + targetPath;
 		
-		//console.log("Running mount command=" + command);
-		
+		console.log("exec: " + command);
 		exec(command, execOptions, function(error, stdout, stderr) {
 			if(error) return mountDone(error);
 			if(stderr) return mountDone(new Error(stderr));
