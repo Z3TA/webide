@@ -2735,7 +2735,7 @@ function checkMounts(options, checkMountsCallback) {
 			foldersToMount++;module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 			foldersToMount++;module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 			foldersToMount++;module_mount("/proc/modules", homeDir + "proc/modules", folderMounted); // Needed by lsmod (Docker dep)
-			foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed by Docker
+			foldersToMount++;module_mount("/proc/self/", homeDir + "proc/self/", folderMounted); // Needed by Docker
 
 
 			foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
