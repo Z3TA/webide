@@ -227,7 +227,7 @@
 	}
 	
 	function isTextBox(element) {
-		if(!el.tagName) return false;
+		if(!element.tagName) return false;
 		
 		var tagName = element.tagName.toLowerCase();
 		if (tagName === 'textarea') return true;
