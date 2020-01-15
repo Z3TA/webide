@@ -63,7 +63,12 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-Trying to decrease the amount of zombie guest accounts
+Trying to restrict access to /proc for chrooted users, using hidepid=2,
+but while I can not see other pids when running sudo -u ltest1 ls /proc/
+I *can* see other pid when running ls /proc/ in the editor!
+
+
+
 
 regression: Info messages are blurry!
 

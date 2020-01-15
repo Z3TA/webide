@@ -390,17 +390,21 @@ function unixTimeStamp(date) {
 	else return Math.floor(Date.now() / 1000);
 }
 
-function fillGuestPool(id, callback) {
+function fillGuestPool(id, fromRecycler, callback) {
 	/*
 		Increase the guest pool ...
 		If id is specified, and guest#id exist, that guest user will be added to the guest pool
 		Otherwise if id is undefined or the guest#id user does not exist, a *new* user is created and added to the guest pool
 	*/
 	
-	
 	if(typeof id == "function") {
 		callback = id;
 		id = undefined;
+	}
+	
+	if(typeof fromRecycler == "function") {
+		callback = fromRecycler;
+		fromRecycler = undefined;
 	}
 	
 	if(GUEST_POOL.length >= GUEST_POOL_MAX_LENGTH) {
@@ -411,7 +415,7 @@ function fillGuestPool(id, callback) {
 	}
 	
 	if(id == undefined) {
-		createGuestUser(undefined, guestUserCreatedMaybe);
+		createGuestUser(undefined, fromRecycler, guestUserCreatedMaybe);
 	}
 	else if(typeof id == "number") {
 		var username = "guest" + id;
@@ -421,7 +425,7 @@ function fillGuestPool(id, callback) {
 		readEtcPasswd(username, function(err, passwd) {
 			if(err) {
 				if(err.code == "USER_NOT_FOUND") {
-					createGuestUser(id, guestUserCreatedMaybe);
+					createGuestUser(id, fromRecycler, guestUserCreatedMaybe);
 				}
 				else throw err;
 			}
@@ -463,7 +467,7 @@ else if(err) throw err;
 			checkMounts({username: userInfo.username, homeDir: userInfo.homeDir, uid: userInfo.uid, gid: userInfo.gid, waitForSSL: true}, function checkedMounts(err) {
 				
 				GUEST_POOL.push(userInfo.username);
-				console.log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH);
+				log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH);
 				if(callback) callback(null);
 				
 			});
@@ -525,17 +529,19 @@ function recycleGuestAccounts(callback) {
 	var countLeft = GUEST_COUNTER;
 	var maxConcurrency = 1;
 	var currentConcurrency = 0;
-	var currentlyRecuclingId = 0;
+	var currentlyRecyclingId = -1;
+	var lastRecycledId = -1;
 	
 	// We don't want to create any new guest users while we are recycling'
 	IS_GUEST_USER_RECYCLING = true;
 	
-	continueRecycling();3347
-	
+	continueRecycling();
 	
 	function continueRecycling() {
-		log("continueRecycling: currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency);
-		for (var i=GUEST_COUNTER; i>0 && currentConcurrency < maxConcurrency; i--) tryRecycle(i);
+		log("continueRecycling: currentlyRecyclingId=" + currentlyRecyclingId + " lastRecycledId=" + lastRecycledId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency);
+		if(currentlyRecyclingId==-1) currentlyRecyclingId = GUEST_COUNTER+1;
+		// Go backwards to make it possible to decrement GUEST_COUNTER
+		for (var i=currentlyRecyclingId-1; i>0 && currentConcurrency < maxConcurrency; i--) tryRecycle(i);
 		if(i===0) {
 			IS_GUEST_USER_RECYCLING = false;
 			log("Done recycling guest accounts!", NOTICE);
@@ -544,7 +550,8 @@ function recycleGuestAccounts(callback) {
 	
 	function tryRecycle(id) {
 		currentConcurrency++;
-		currentlyRecuclingId = id;
+		if(id == lastRecycledId || id == currentlyRecyclingId) throw new Error("id=" + id + " lastRecycledId=" + lastRecycledId + " currentlyRecyclingId=" + currentlyRecyclingId + " currentConcurrency=" + currentConcurrency);
+		currentlyRecyclingId = id;
 		log("tryRecycle: guest" + id, DEBUG);
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 		module_fs.stat(homeDir, function dir(err, homeDirStat) {
@@ -560,7 +567,7 @@ function recycleGuestAccounts(callback) {
 				*/
 				
 				// We want to decrease the GUEST_COUNTER if possible
-				if(currentlyRecuclingId == GUEST_COUNTER && GUEST_COUNTER > GUEST_POOL_MAX_LENGTH) {
+				if(currentlyRecyclingId == GUEST_COUNTER && GUEST_COUNTER > GUEST_POOL_MAX_LENGTH) {
 					deleteGuest(id, function(err) {
 						if(err) {
 							// If we get an error here it means the GUEST_COUNTER will keep increasing, which need attention
@@ -583,7 +590,7 @@ function recycleGuestAccounts(callback) {
 				}
 				else if(GUEST_POOL.length < GUEST_POOL_MAX_LENGTH) {
 					
-					fillGuestPool(id, function guestPoolFilledMaybe(err) {
+					fillGuestPool(id, true, function guestPoolFilledMaybe(err) {
 						if(err) {
 							log("User account recycling error after fillGuestPool: " + err.message);
 						
@@ -606,7 +613,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 				});
 				}
 				else {
-					log("currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH + " GUEST_POOL.length=" + GUEST_POOL.length, DEBUG);
+					log("currentlyRecyclingId=" + currentlyRecyclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH + " GUEST_POOL.length=" + GUEST_POOL.length, DEBUG);
 					processedGuestId(id, "Did nothing because guest pool already full");
 				}
 			}
@@ -641,7 +648,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 							
 							if(homeDirLastModified - skeletonDirLastModified > 0 && daysSinceLastChanged < 5) {
 								// Home dir is fresh
-								fillGuestPool(id, function(err) {
+								fillGuestPool(id, true, function(err) {
 									if(err) {
 										console.error(err);
 										processedGuestId(id, "Attempted to add to guest pool because the home dir is fresh - but failed!");
@@ -753,14 +760,18 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		countLeft--;
 		currentConcurrency--;
 		
-		log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft, INFO);
+		log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft + " lastRecycledId=" + lastRecycledId + " currentlyRecyclingId=" + currentlyRecyclingId, INFO);
+		
+		lastRecycledId = id;
+		
+		
 		
 		if(countLeft == 0) {
 			callback(null);
 			callback = null;
 		}
 		else if(countLeft < 0) {
-			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER);
+			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecyclingId=" + currentlyRecyclingId + " GUEST_COUNTER=" + GUEST_COUNTER);
 		}
 		else continueRecycling();
 	}
@@ -1243,19 +1254,25 @@ function openRemoteFileServer() {
 	
 }
 
-function createGuestUser(id, callback, theRecycler) {
+function createGuestUser(id, fromRecycler, callback) {
 	
 	if(typeof id == "function") {
 		callback = id;
 		id = undefined;
 	}
-	else if(typeof id != "number" && typeof id != "undefined") {
+	
+	if(typeof fromRecycler == "function") {
+		callback = fromRecycler;
+		fromRecycler = undefined;
+	}
+	
+	if(typeof id != "number" && typeof id != "undefined") {
 		throw new Error("id=" + id + " needs to be a number or undefined!");
 	}
 	
 	if(typeof callback != "function") throw new Error("createGuestUser must have a callback function!");
 	
-	if(!theRecycler && IS_GUEST_USER_RECYCLING) {
+	if(!fromRecycler && IS_GUEST_USER_RECYCLING) {
 		var err = new Error("Can not create a new guest user while guest users are being recycled!");
 		err.code = "LOCK";
 		return callback(err);
@@ -1768,25 +1785,33 @@ function sockJsConnection(connection) {
 						// Assign a user from the guest pool
 						if(GUEST_POOL.length == 0) {
 							// Need to wait until a new guest account is created
-							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
-							createGuestUser(function guestUserCreated(err, createdUser) {
-								if(err) {
-									if(err.code != "LOCK") throw err;
-									if(++createUserRetries > 3) {
-										return idFail(new Error("Unable to create guest account. Try again later. Or login with existing account."));
+							if(IS_GUEST_USER_RECYCLING) {
+								return idFail(new Error("The server is currenctly recycling guest users. Try again later. Or login with an existing account."));
+							}
+							else {
+								console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
+								createGuestUser(function guestUserCreated(err, createdUser) {
+									if(err) {
+										if(err.code != "LOCK") {
+											return idFail(new Error("A fatal error (" + err.code + ") occured during guest account creation. Try again later. Or login with an existing account."));
+throw err;
+										}
+										else if(++createUserRetries > 3) {
+											return idFail(new Error("Could not create a guest user because new guest accounts are currently locked. Try again later. Or login with an existing account."));
+										}
+										
+										return setTimeout(function retryCreateAccount() {
+											console.log("Retrying guest login ...");
+											checkUser(username, password);
+										}, 1000);
 									}
-									
-									return setTimeout(function retryCreateAccount() {
-										console.log("Retrying guest login ...");
-										checkUser(username, password);
-									}, 1000);
-								}
-								else loginAsGuest(createdUser.username, createdUser.password, false);
-							});
+									else loginAsGuest(createdUser.username, createdUser.password, false);
+								});
+							}
 						}
 						else {
 							var guestUser = GUEST_POOL.shift();
-							console.log("Using guest account " + guestUser + " from GUEST_POOL (new length=" + GUEST_POOL.length + ")");
+							log("Using guest account " + guestUser + " from GUEST_POOL (new length=" + GUEST_POOL.length + ")");
 							var guestPw = module_generator.generate({
 								length: 10,
 								numbers: true
@@ -2659,7 +2684,7 @@ function checkMounts(options, checkMountsCallback) {
 				
 			}
 			else {
-				// Only pick some of the programs
+				// Only pick some of the programs from /usr/bin/ and /bin/
 				
 				foldersToMount++;
 				module_mount(process.argv[0], homeDir + "usr/bin/node", function(err) {
@@ -2669,54 +2694,6 @@ function checkMounts(options, checkMountsCallback) {
 						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
 						foldersMounted++;
 						checkMountsReadyMaybe();
-					});
-				});
-				
-				
-				
-				
-				// Some python scripts (Mercurial) need /usr/share
-				foldersToMount++;module_mount("/usr/share/", homeDir + "usr/share", folderMounted);
-				
-				
-				// npm
-				foldersToMount++;module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
-					if(err) throw err;
-						/*
-							npm creastes a symlink in /usr/bin/
-							npm can be installed on different places depending on OS and distro and package maintainer ...
-							In Ubuntu run: dpkg -L npm
-							
-							Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
-							Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
-						Arch Linux puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
-
-						So we'll force everyone to have it in /usr/lib/node_modules/npm/bin/ (sorry Ubuntu)
-						You need nodejs v10 to support Ubuntu-18 meanwhile Ubuntu-18 comes with nodejs v8 !
-						So Ubuntu server admins need to uninstall nodejs and npm and install it from nodesource
-						(see instructions in README.txt)
-						
-						*/
-						
-					var npmBin = "/usr/lib/node_modules/npm/bin/";
-					module_fs.stat(npmBin, function(err, stats) {
-						if(err && err.code == "ENOENT") {
-							throw new Error("npm-cli.js needs to be installed in " + npmBin + "\nUninstall nodejs and npm, then install nodejs from nodesource! See instructions in README");
-						}
-						else if(err) throw err;
-						
-						var usrBinRelativeNpmBinDir = npmBin
-						usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
-						
-						module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-							
-							module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
-								if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-								foldersMounted++;
-								checkMountsReadyMaybe();
-							});
-							});
 					});
 				});
 				
@@ -2733,6 +2710,7 @@ function checkMounts(options, checkMountsCallback) {
 				});
 				
 				// Don't forget to investigate all links and add umount to removeuser.js!!!
+				
 				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted); // gunzip will give ENOENT error without /bin/sh
 				foldersToMount++;mountFollowSymlink("/usr/bin/g++", homeDir, folderMounted); // Needed by some make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/as", homeDir, folderMounted); // Needed by g++
@@ -2742,9 +2720,6 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;mountFollowSymlink("/usr/bin/which", homeDir, folderMounted); // Needed by docker install script
 				foldersToMount++;mountFollowSymlink("/usr/bin/touch", homeDir, folderMounted); // Needed by make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/less", homeDir, folderMounted); // Wanted by Mercurial
-				foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
-				foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
-				
 				
 				
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
@@ -2768,7 +2743,6 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/sha256sum", homeDir + "usr/bin/sha256sum", folderMounted); // Used by nvm
 				foldersToMount++;module_mount("/usr/bin/dirname", homeDir + "usr/bin/dirname", folderMounted); // Used by nvm
 				
-				
 				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
 				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (Docker) eg. curl | sh
@@ -2776,15 +2750,7 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
 				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
-				
-				
-				
-				
-				
-				foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
-				
-				foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-				
+				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				
 				foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/bin/cat", homeDir + "bin/cat", folderMounted); // Needed by docker install script
@@ -2805,27 +2771,90 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/bin/bzip2", homeDir + "bin/bzip2", folderMounted); // Needed by tar
 				foldersToMount++;module_mount("/bin/readlink", homeDir + "bin/readlink", folderMounted); // Needed by Dropbox client
 				
-				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
-				
-				
 			}
+			
+			// Put programs outside /bin/ and /usr/bin here
+			
+			foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
+			foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
+			
+			foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
+			
+			foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+			
+			
 			
 			// ALSO UPDATE removeuser.js !!!
 			
 			
 			foldersToMount++;module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 			
-			foldersToMount++;module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
-			foldersToMount++;module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
-			foldersToMount++;module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
-			foldersToMount++;module_mount("/proc/modules", homeDir + "proc/modules", folderMounted); // Needed by lsmod (Docker dep)
-			foldersToMount++;module_mount("/proc/self/", homeDir + "proc/self/", folderMounted); // Needed by Docker
+			
+			
 
 
 			foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
 			
 			
-			//foldersToMount++;module_mount("/proc/self/exe", homeDir + "proc/self/exe", folderMounted); // Needed for pty maybe
+			
+			// Some python scripts (Mercurial) need /usr/share
+			foldersToMount++;module_mount("/usr/share/", homeDir + "usr/share", folderMounted);
+			
+			
+			// npm
+			foldersToMount++;module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
+				if(err) throw err;
+				/*
+					npm creastes a symlink in /usr/bin/
+					npm can be installed on different places depending on OS and distro and package maintainer ...
+					In Ubuntu run: dpkg -L npm
+					
+					Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
+					Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
+					Arch Linux puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
+					
+					So we'll force everyone to have it in /usr/lib/node_modules/npm/bin/ (sorry Ubuntu)
+					You need nodejs v10 to support Ubuntu-18 meanwhile Ubuntu-18 comes with nodejs v8 !
+					So Ubuntu server admins need to uninstall nodejs and npm and install it from nodesource
+					(see instructions in README.txt)
+					
+				*/
+				
+				var npmBin = "/usr/lib/node_modules/npm/bin/";
+				module_fs.stat(npmBin, function(err, stats) {
+					if(err && err.code == "ENOENT") {
+						throw new Error("npm-cli.js needs to be installed in " + npmBin + "\nUninstall nodejs and npm, then install nodejs from nodesource! See instructions in README");
+					}
+					else if(err) throw err;
+					
+					var usrBinRelativeNpmBinDir = npmBin
+					usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
+					
+					module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+						
+						module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
+							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+							foldersMounted++;
+							checkMountsReadyMaybe();
+						});
+					});
+				});
+			});
+			
+			// ## mount proc
+			// http://man7.org/linux/man-pages/man5/proc.5.html
+			/*
+				foldersToMount++;module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
+				foldersToMount++;module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
+				foldersToMount++;module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+				foldersToMount++;module_mount("/proc/modules", homeDir + "proc/modules", folderMounted); // Needed by lsmod (Docker dep)
+				foldersToMount++;module_mount("/proc/self/", homeDir + "proc/self/", folderMounted); // Needed by Docker (and maybe also pty?)
+			*/
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc none "' + homeDir + 'proc/" -o hidepid=2', folderMounted); // Needed by Docker (and maybe also pty?)
+			// must make a remount in order to hidepid to take effect!
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc none "' + homeDir + 'proc/" -o remount,hidepid=2', folderMounted); // Needed by Docker (and maybe also pty?)
+			
 			
 			// ## mount dev
 			// Need to create the dev and dev/pts folder first because mount devpts wont create it
@@ -3135,7 +3164,8 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 				//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
 				apparmorReloadCommand += " " + apparmorProfiles[i];
 			}
-			console.log("exec: " + apparmorReloadCommand);
+			// Note: Need to have a debug message infront of all spawn and exec because they do not get proper call stacks
+			log("exec: " + apparmorReloadCommand, DEBUG);
 			exec(apparmorReloadCommand, EXEC_OPTIONS, function(error, stdout, stderr) {
 				console.timeEnd(username + " Reloading apparmor");
 				if(error) throw(error);

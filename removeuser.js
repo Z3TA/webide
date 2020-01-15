@@ -191,7 +191,7 @@ if(ps) {
 	umount(HOME + username + "/proc/stat");
 	umount(HOME + username + "/proc/sys/vm/overcommit_memory");
 	umount(HOME + username + "/proc/modules");
-	umount(HOME + username + "/proc/self/exe");
+	umount(HOME + username + "/proc/");
 	
 	umount(HOME + username + "/dev/urandom");
 	umount(HOME + username + "/dev/null");
