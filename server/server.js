@@ -178,6 +178,8 @@ var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
 var GUEST_POOL = []; // Because it's a bit slow to create new users
 var CREATE_USER_LOCK = false; // Can only create one user at a time
 var ALLOW_GUESTS = true;
+var GUEST_POOL_MAX_LENGTH = 3;
+var IS_GUEST_USER_RECYCLING = false;
 
 if(getArg(["noguest", "noguests"])) ALLOW_GUESTS = false;
 if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
@@ -393,7 +395,7 @@ function fillGuestPool(id, callback) {
 		Increase the guest pool ...
 		If id is specified, and guest#id exist, that guest user will be added to the guest pool
 		Otherwise if id is undefined or the guest#id user does not exist, a *new* user is created and added to the guest pool
-	*/ 
+	*/
 	
 	
 	if(typeof id == "function") {
@@ -401,11 +403,21 @@ function fillGuestPool(id, callback) {
 		id = undefined;
 	}
 	
+	if(GUEST_POOL.length >= GUEST_POOL_MAX_LENGTH) {
+		var msg = "GUEST_POOL.length=" + GUEST_POOL.length + " already at GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH;
+		if(callback) callback(new Error(msg));
+		else msg(msg, NOTICE);
+		return;
+	}
+	
 	if(id == undefined) {
 		createGuestUser(undefined, guestUserCreatedMaybe);
 	}
 	else if(typeof id == "number") {
 		var username = "guest" + id;
+		
+		if(GUEST_POOL.indexOf(username) != -1) throw new Error(username + " is already in the GUEST_POOL=" + JSON.stringify(GUEST_POOL));
+		
 		readEtcPasswd(username, function(err, passwd) {
 			if(err) {
 				if(err.code == "USER_NOT_FOUND") {
@@ -426,7 +438,7 @@ function fillGuestPool(id, callback) {
 					}
 else if(err) throw err;
 					else {
-						log("Existing user " + passwd.username + " will be added to the guest pool!..", WARN);
+						log("Existing user " + passwd.username + " will be added to the guest pool!..", INFO);
 				guestUserCreatedMaybe(null, passwd);
 					}
 				});
@@ -441,7 +453,7 @@ else if(err) throw err;
 		if(err) {
 			if(callback) return callback(err);
 			else if(err.code == "LOCK") {
-				log("An account is already being created!", WARN);
+				log("Unable to fill the guest pool with id=" + id + " because an account is already being created!", WARN);
 			}
 			else throw err;
 		}
@@ -451,7 +463,7 @@ else if(err) throw err;
 			checkMounts({username: userInfo.username, homeDir: userInfo.homeDir, uid: userInfo.uid, gid: userInfo.gid, waitForSSL: true}, function checkedMounts(err) {
 				
 				GUEST_POOL.push(userInfo.username);
-				console.log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length);
+				console.log("Guest account " + userInfo.username + " added to GUEST_POOL.length=" + GUEST_POOL.length + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH);
 				if(callback) callback(null);
 				
 			});
@@ -510,39 +522,70 @@ function recycleGuestAccounts(callback) {
 	log("Recycling guest accounts ...");
 	
 	var currentTime = unixTimeStamp();
-	var countLeft = GUEST_COUNTER-1;
+	var countLeft = GUEST_COUNTER;
 	var maxConcurrency = 1;
 	var currentConcurrency = 0;
 	var currentlyRecuclingId = 0;
 	
-	continueRecycling();
+	// We don't want to create any new guest users while we are recycling'
+	IS_GUEST_USER_RECYCLING = true;
+	
+	continueRecycling();3347
+	
 	
 	function continueRecycling() {
 		log("continueRecycling: currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency);
-		for (var i=currentlyRecuclingId+1; i<GUEST_COUNTER && currentConcurrency < maxConcurrency; i++) tryRecycle(i);
-		if(i==GUEST_COUNTER) log("Done recycling guest accounts!", NOTICE);
+		for (var i=GUEST_COUNTER; i>0 && currentConcurrency < maxConcurrency; i--) tryRecycle(i);
+		if(i===0) {
+			IS_GUEST_USER_RECYCLING = false;
+			log("Done recycling guest accounts!", NOTICE);
+		}
 	}
 	
 	function tryRecycle(id) {
 		currentConcurrency++;
 		currentlyRecuclingId = id;
-		console.log("tryRecycle: guest" + id);
+		log("tryRecycle: guest" + id, DEBUG);
 		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 		module_fs.stat(homeDir, function dir(err, homeDirStat) {
 			if(err && err.code == "ENOENT") {
-				console.log(homeDir + " doesn't exist!");
+				log(homeDir + " doesn't exist!", DEBUG);
 				/*
 					No home dir probably means the user does not exist.
 					But it can also mean that the user exist in /etc/passwd but has no home dir!
 					We want to re-create that user in order to fill the gap in GUEST_COUNTER
 					
-					(If the GUEST_COUNTER is very hight we do not want to fill the system with hundrends of zombie accounts ...
-					We don't have to worry though, as only one new account can be created at a time.)
+					We however don't want to fill the system with hundreds of zombie accounts ...
 					
 				*/
-				fillGuestPool(id, function guestPoolFilledMaybe(err) {
-					if(err) {
-						log("User account recycling error: " + err.message);
+				
+				// We want to decrease the GUEST_COUNTER if possible
+				if(currentlyRecuclingId == GUEST_COUNTER && GUEST_COUNTER > GUEST_POOL_MAX_LENGTH) {
+					deleteGuest(id, function(err) {
+						if(err) {
+							// If we get an error here it means the GUEST_COUNTER will keep increasing, which need attention
+							reportError(err);
+							processedGuestId(id, "Was unable to delete the user");
+						}
+						else {
+							// Account successfully deleted. We can now decrement GUEST_COUNTER 
+							log("Decrementing GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+							module_fs.writeFile(__dirname + "/GUEST_COUNTER", --GUEST_COUNTER, function(err) {
+								if(err) {
+									log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+									throw err;
+								}
+								log("Saved GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+								processedGuestId(id, "Successfully deleted");
+							});
+						}
+					});
+				}
+				else if(GUEST_POOL.length < GUEST_POOL_MAX_LENGTH) {
+					
+					fillGuestPool(id, function guestPoolFilledMaybe(err) {
+						if(err) {
+							log("User account recycling error after fillGuestPool: " + err.message);
 						
 						if(err.code == "NO_HOME_DIR") {
 							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
@@ -561,21 +604,26 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 					}
 					else processedGuestId(id, "Added to guest pool");
 				});
+				}
+				else {
+					log("currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " GUEST_POOL_MAX_LENGTH=" + GUEST_POOL_MAX_LENGTH + " GUEST_POOL.length=" + GUEST_POOL.length, DEBUG);
+					processedGuestId(id, "Did nothing because guest pool already full");
+				}
 			}
 			else if(err) throw err;
 			else {
 				// Sometimes the home dir doesn't exist! wtf!?
-				console.log("id=" + id + " homeDir=" + homeDir + " homeDirStat=" + JSON.stringify(homeDirStat));
+				log("id=" + id + " homeDir=" + homeDir + " homeDirStat=" + JSON.stringify(homeDirStat), DEBUG);
 				
 				var lastLoginFile = UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]);
 				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
-						console.log("guest" + id + ": " + err.code + " " + lastLoginFile);
+						log("guest" + id + ": " + err.code + " " + lastLoginFile, DEBUG);
 						
 						/*
 							Problem: We don't want to add old users to the guest pool as they will have outdated example files and settings
-							Solution: Check when the home dir was created, and only add it to the guest pool if it's fresh, otherwise deleted it
+							Solution: Check when the home dir was created, and only add it to the guest pool if it's fresh, otherwise delete it
 							Solution 2: Check if the skeleton files (examples, etc) have been updated after the home dir was made
 						*/
 						
@@ -589,15 +637,23 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 							var skeletonDirLastModified = unixTimeStamp(skeletonDirStat.mtime);
 							var daysSinceSkeleton = Math.floor( ( currentTime - skeletonDirLastModified ) / (60 * 60 * 24) );
 							
-							console.log("id=" + id + " homeDirLastModified=" + homeDirLastModified + " skeletonDirLastModified=" + skeletonDirLastModified + " currentTime=" + currentTime + " LAST_RELEASE_TIME=" + LAST_RELEASE_TIME);
+							log("id=" + id + " homeDirLastModified=" + homeDirLastModified + " skeletonDirLastModified=" + skeletonDirLastModified + " currentTime=" + currentTime + " LAST_RELEASE_TIME=" + LAST_RELEASE_TIME, DEBUG);
 							
 							if(homeDirLastModified - skeletonDirLastModified > 0 && daysSinceLastChanged < 5) {
 								// Home dir is fresh
-								fillGuestPool(id);
-								processedGuestId(id, "Are going to be added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
+								fillGuestPool(id, function(err) {
+									if(err) {
+										console.error(err);
+										processedGuestId(id, "Attempted to add to guest pool because the home dir is fresh - but failed!");
+									}
+									else {
+										processedGuestId(id, "Added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
+									}
+								});
+								
 							}
 							else {
-								console.log("id=" + id + ": Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "");
+								log("id=" + id + ": Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "", DEBUG);
 								resetGuest(id);
 							}
 						});
@@ -607,12 +663,12 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 					}
 					else if(err) throw err;
 					else {
-						console.log("id=" + id + " lastLoginFile=" + lastLoginFile + " data=" + data);
+						log("id=" + id + " lastLoginFile=" + lastLoginFile + " data=" + data, DEBUG);
 						var lastLogin = parseInt(data);
 						var timeDiff = currentTime - lastLogin; // In seconds
 						var daysSinceLastLogin = Math.floor(timeDiff / (60 * 60 * 24));
 						if(daysSinceLastLogin > 14) {
-							console.log("guest" + id + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin);
+							log("guest" + id + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin, DEBUG);
 							return resetGuest(id);
 						}
 						else return processedGuestId(id, "Not inactive: daysSinceLastLogin=" + daysSinceLastLogin);
@@ -622,12 +678,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		});
 	}
 	
-	function resetGuest(id) {
-		/*
-			Just delete the user instead of trying to reset.
-			We could use ZFS to restore, but then the account might not get all the latest features
-		*/
-		
+	function deleteGuest(id, callback) {
 		var username = "guest" + id;
 		log("Removing guest user: " + username);
 		
@@ -637,19 +688,19 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 			cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
 			shell: EXEC_OPTIONS.shell
 		}
-		//console.log("Running in options.cwd=" + options.cwd);
+		//log("Running in options.cwd=" + options.cwd, DEBUG);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "removeuser.js";
 		
-		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
 		var command = scriptPath + " " + username + " -unattended -force";
-		//console.log("command=" + command);
+		//log("command=" + command, DEBUG);
 		
 		exec(command, options, function removeuser(error, stdout, stderr) {
 			
 			if(error) {
 				log("Error when removing user: (error is probably in " + scriptPath + ")");
 				console.error(error);
-				processedGuestId(id, "Failed to delete account! Error: " + error.message);
+				
+				callback(new Error("Failed to delete " + username + "! Error: " + error.message));
 				return;
 			}
 			
@@ -660,7 +711,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 			
 			if(!stdout) throw new Error("Problem when removing username=" + username + "! Exec command=" + command + " did not return anyting!");
 			
-			log("stdout=" + stdout, DEBUG);
+			log("command=" + command + " stdout=" + stdout, DEBUG);
 			
 			var checkre = /User (.*) deleted!/g;
 			var check = checkre.exec(stdout);
@@ -670,24 +721,46 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 			
 			if(reG1User != username) throw new Error("Wrong user deleted !? reG1User=" + reG1User + " username=" + username);
 			
-			// Do not re-create the user right away. Wait for next call to recycleGuestAccounts.
-			// WHY ?
 			
-			processedGuestId(id, "Account was successfully deleted");
+			callback(null);
 			
 		});
+	}
+	
+	function resetGuest(id) {
+		/*
+			Just delete the user instead of trying to reset.
+			We could use ZFS to restore, but then the account might not get all the latest features
+			
+			Don't re-creating the user. Next time the editor is started or recycleGuestAccounts() is run,
+			the GUEST_COUNTER will either be decremented and the guest account deleted,
+			or it will be re-created and added to the guest pool,
+			or deleted again
+		*/
 		
+		deleteGuest(id, function(err) {
+			if(err) {
+				processedGuestId(id, err.message);
+				return;
+			}
+			else {
+				processedGuestId(id, "Account was successfully deleted");
+			}
+		});
 	}
 	
 	function processedGuestId(id, debugComment) {
 		countLeft--;
 		currentConcurrency--;
 		
-		console.log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft);
+		log("Done recycling guest" + id + " (" + debugComment + ") countLeft=" + countLeft, INFO);
 		
 		if(countLeft == 0) {
 			callback(null);
 			callback = null;
+		}
+		else if(countLeft < 0) {
+			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecuclingId=" + currentlyRecuclingId + " GUEST_COUNTER=" + GUEST_COUNTER);
 		}
 		else continueRecycling();
 	}
@@ -983,7 +1056,7 @@ function openRemoteFileServer() {
 		
 		var decoder = new StringDecoder('utf8');
 		var username; // username for this socket
-var fileName; // File name for this socket
+		var fileName; // File name for this socket
 		var strBuffer = "";
 		var content = "";
 		var client_connections; // Client connections for this file transfer session
@@ -1094,7 +1167,7 @@ var fileName; // File name for this socket
 		
 		function remoteFileSocketEnd(endData) {
 			if(endData && endData.length > 0) {
-strBuffer += decoder.write(endData);
+				strBuffer += decoder.write(endData);
 				if(pipeId) sendToStdin();
 			}
 			console.log("remoteFileSocketEnd: endData.length=" + (endData && endData.length) );
@@ -1107,7 +1180,7 @@ strBuffer += decoder.write(endData);
 		function remoteFileSocketClose(hadError) {
 			console.log("Remote file socket closed. hadError=" + hadError);
 			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
-		
+			
 			if(pipeId) {
 				sendToAll(client_connections, JSON.stringify({remotePipe: {host: remoteHost, end: true, id: pipeId}}));
 			}
@@ -1116,9 +1189,9 @@ strBuffer += decoder.write(endData);
 		function findClients(name) {
 			var clients = USER_CONNECTIONS[name];
 			var users = Object.keys(USER_CONNECTIONS);
-
+			
 			if(!clients && name == "root" && USER_CONNECTIONS.hasOwnProperty("admin")) {
-clients = USER_CONNECTIONS["admin"];
+				clients = USER_CONNECTIONS["admin"];
 				username = "admin";
 			}
 			
@@ -1170,7 +1243,7 @@ clients = USER_CONNECTIONS["admin"];
 	
 }
 
-function createGuestUser(id, callback) {
+function createGuestUser(id, callback, theRecycler) {
 	
 	if(typeof id == "function") {
 		callback = id;
@@ -1181,6 +1254,12 @@ function createGuestUser(id, callback) {
 	}
 	
 	if(typeof callback != "function") throw new Error("createGuestUser must have a callback function!");
+	
+	if(!theRecycler && IS_GUEST_USER_RECYCLING) {
+		var err = new Error("Can not create a new guest user while guest users are being recycled!");
+		err.code = "LOCK";
+		return callback(err);
+	}
 	
 	if(CREATE_USER_LOCK) {
 		var err = new Error("A user is already about the be created!");
@@ -1196,6 +1275,7 @@ function createGuestUser(id, callback) {
 		guestCounterSaved(null);
 	}
 	else {
+		log("Incrementing GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
 		var guestId = ++GUEST_COUNTER;
 		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
@@ -1207,7 +1287,11 @@ function createGuestUser(id, callback) {
 	}
 	
 	function guestCounterSaved(err) {
-		if(err) return callback(err);
+		if(err) {
+			log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
+			return callback(err);
+		}
+		log("Saved GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
 		
 		if(username == undefined || username == "guestundefined" || username == "[object Object]") {
 			throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
@@ -1447,7 +1531,7 @@ function sockJsConnection(connection) {
 	function sockJsMessage(message) {
 		log(UTIL.shortString(IP + " => " + message));
 		handleUserMessage(message);
-		}
+	}
 	
 	function sockJsClose() {
 		
@@ -3282,7 +3366,7 @@ reportError("Did not find username=" + username + " in /etc/subgid data=" + data
 } // checkMounts
 
 function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallback) {
-	log("mountFollowSymlink: binaryFile=" + binaryFile + " homeDir=" + homeDir + " ", DEBUG);
+	//log("mountFollowSymlink: binaryFile=" + binaryFile + " homeDir=" + homeDir + " ", DEBUG);
 	 
 	// Check if binaryFile is a symlink, follows the symlinks,
 	// mounts the actual binary file, then creates the symlinks
@@ -3293,7 +3377,7 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 
 		var targetInHomeDir = UTIL.joinPaths(homeDir, targetBinary);
 		
-		log("mountFollowSymlink: targetBinary=" + binaryFile + " targetInHomeDir=" + targetInHomeDir + " links=" + JSON.stringify(links) + " ", DEBUG);
+		//log("mountFollowSymlink: targetBinary=" + binaryFile + " targetInHomeDir=" + targetInHomeDir + " links=" + JSON.stringify(links) + " ", DEBUG);
 		
 		module_mount(targetBinary, targetInHomeDir, function(err) {
 			if(err) return mountFollowSymlinkCallback(err);
