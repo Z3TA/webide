@@ -63,23 +63,9 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-sudo mount | grep proc
 
 
-sudo ls -liad /home/ltest1/proc
-
-they all ave inode 1
-
-what about pts
-
-
-
-
-Trying to restrict access to /proc for chrooted users, using hidepid=2,
-but while I can not see other pids when running sudo -u ltest1 ls /proc/
-I *can* see other pid when running ls /proc/ in the editor!
-
-
+read node_modules when auto-completing inside requre("|")
 
 when opening the context menu, it should be possible to focus an item by typing part of it's name!?
 

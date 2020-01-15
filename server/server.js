@@ -2855,9 +2855,10 @@ function checkMounts(options, checkMountsCallback) {
 			// What's the difference between -t proc none and -t proc proc !? 
 			// The proc filesystem is not associated with a special device, and when mounting it, an arbitrary keyword, such as proc can be used instead of a device specification
 			// ref: https://linux.die.net/man/8/mount
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc-temp "' + homeDir + 'proc/" -o hidepid=2', folderMounted); // Needed by Docker (and maybe also pty?)
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc-temp "' + homeDir + 'proc/" -o hidepid=2,gid=2', folderMounted); // Needed by Docker (and maybe also pty?)
 			// must make a remount in order to hidepid to take effect!
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc "' + homeDir + 'proc/" -o remount,hidepid=2', folderMounted); // Needed by Docker (and maybe also pty?)
+			// must also use gid=1 (a number other then 0) in order to hidepid to take effect!
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc "' + homeDir + 'proc/" -o remount,hidepid=2,gid=2', folderMounted); // Needed by Docker (and maybe also pty?)
 			
 			
 			// ## mount dev
