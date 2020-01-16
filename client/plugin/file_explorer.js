@@ -520,14 +520,18 @@
 			var icon = document.createElement("img");
 			var type = "";
 			var filetype = UTIL.getFileExtension(item.path) || UTIL.getFileExtension(item.name);
+			var iconLoadError = false;
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
 			icon.setAttribute("draggable", "false");
 			
 			icon.onerror = function() {
+if(!iconLoadError) {
 				icon.src = 'gfx/icon/doc.svg';
-			}
+			iconLoadError = true;
+}
+}
 			
 			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			if(item.type == "d") type = "folder";
