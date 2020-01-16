@@ -88,7 +88,7 @@
 		
 		function update() {
 			
-			CLIENT.cmd("cpu", function(err, cpus) {
+			CLIENT.cmd("cpu", function cpuInfo(err, cpus) {
 				
 				if(err) return;
 				
@@ -96,6 +96,8 @@
 				
 				// Times are the cummulated number of milliseconds (from boot) the CPU has spent in that mode. (One second has 1000 milli-seconds)
 				
+if(!Array.isArray(cpus)) throw new Error("Not an array: cpus=" + JSON.stringify(cpus));
+
 				var times = cpus.map(function(cpu) {
 					return cpu.times["user"] + cpu.times["nice"] + cpu.times["sys"] + cpu.times["irq"];
 				});
