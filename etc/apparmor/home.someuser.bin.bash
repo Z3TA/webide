@@ -123,31 +123,35 @@
  
   }
 
-}
+  # Restrictive, but allow network
+  profile networkTool {
+    deny %HOME%%USERNAME%/usr/** wl,
+    deny %HOME%%USERNAME%/bin/** wl,
+    deny %HOME%%USERNAME%/proc/** wl,
+    deny %HOME%%USERNAME%/lib/** wl,
+    deny %HOME%%USERNAME%/lib64/** wl,
 
-# Restrictive, but allow network
-profile networkTool {
-  deny %HOME%%USERNAME%/usr/** wl,
-  deny %HOME%%USERNAME%/bin/** wl,
-  deny %HOME%%USERNAME%/proc/** wl,
-  deny %HOME%%USERNAME%/lib/** wl,
-  deny %HOME%%USERNAME%/lib64/** wl,
-
-  %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** mr,
+    %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** mr,
     
-  owner %HOME%%USERNAME%/** wl,
+    owner %HOME%%USERNAME%/** wl,
     
-  %HOME%%USERNAME%/lib/** mr,
-  %HOME%%USERNAME%/lib64/** mr,
-  %HOME%%USERNAME%/usr/** mr,
-  %HOME%%USERNAME%/bin/** mr,
+    %HOME%%USERNAME%/lib/** mr,
+    %HOME%%USERNAME%/lib64/** mr,
+    %HOME%%USERNAME%/usr/** mr,
+    %HOME%%USERNAME%/bin/** mr,
     
     
-  %HOME%%USERNAME%/dev/null rw,
-  /dev/urandom r,
+    %HOME%%USERNAME%/dev/null rw,
+    /dev/urandom r,
     
-  network,
+    network,
       
-  signal receive set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
+    signal receive set=kill peer=%HOME%%USERNAME%/bin/bash//scripts,
+  }
+
+
+
 }
+
+
