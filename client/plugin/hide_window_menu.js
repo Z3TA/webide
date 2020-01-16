@@ -8,7 +8,9 @@ var winMenuHide;
 		desc: "Hide the window menu",
 		load: function loadHideWindowMenu() {
 
-			winMenuHide = EDITOR.windowMenu.add(S("window_menu"), [S("View"), 140], hideWindowMenu);
+			EDITOR.on("storageReady", hideWindowMenuMaybe);
+			
+			winMenuHide = EDITOR.windowMenu.add(S("window_menu"), [S("View"), 140], hideWindowMenuFromWindowMenu);
 winMenuHide.activate();
 
 },
@@ -18,17 +20,31 @@ winMenuHide.activate();
 			
 			EDITOR.windowMenu.remove(winMenuHide);
 			
+EDITOR.removeEvent.remove(hideWindowMenuMaybe);
 		}
 });
+	
+	function hideWindowMenuFromWindowMenu() {
+		hideWindowMenu();
+		
+		alertBox('To show the window menu again: <b>Right click</b> (or long touch) to bring up the context menu ,and click <i>"Show window menu</i>"');
+	}
+	
+	function hideWindowMenuMaybe() {
+	
+		var hide = EDITOR.storage.getItem("hide_window_menu");
+		
+		if(hide == "true") hideWindowMenu();
+		
+	}
 	
 	function hideWindowMenu() {
 		EDITOR.windowMenu.disable();
 		
 		ctxWinMenuShow = EDITOR.ctxMenu.add("Show window menu", showWindowMenu, 20);
 		EDITOR.ctxMenu.activate(ctxWinMenuShow);
-		
-		alertBox('To show the window menu again: <b>Right click</b> (or long touch) to bring up the context menu ,and click <i>"Show window menu</i>"');
-		
+
+if(EDITOR.storage.ready()) EDITOR.storage.setItem("hide_window_menu", "true");
 	}
 	
 	function showWindowMenu() {
@@ -36,6 +52,8 @@ winMenuHide.activate();
 		EDITOR.ctxMenu.hide();
 		EDITOR.ctxMenu.remove(ctxWinMenuShow);
 		ctxWinMenuShow = undefined;
+
+if(EDITOR.storage.ready()) EDITOR.storage.setItem("hide_window_menu", "false");
 	}
 
 })();

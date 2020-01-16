@@ -59,6 +59,7 @@
 	var loadFont = [];
 	var whenFontLoaded = [];
 
+	// These timers are cleared in the window.onload event...
 	var slowLoad = window.setTimeout( function() {
 		slowBrowser = true;
 		console.warn("settings_overload: browser is slow");
@@ -70,6 +71,7 @@
 	}, 1000 );
 	
 	
+	// note: The css file is loaded in the window.onload event.
 	function cssLoadedMaybe(err) {
 		
 		if(err) return;

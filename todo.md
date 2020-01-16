@@ -25,10 +25,6 @@ Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
 sudo zfs snapshot ben/ROOT/ubuntu@upgrade
 
-Happy path: (manually check on prod after each release)
-1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
-2. WYSIWYG edit said page
-3. Publish changes
 
 Meego browser silently exit any function that tries to access a member on a undefined object!
 Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
@@ -59,11 +55,27 @@ like the editor not scrolling to the right place, me having to scroll down to se
 Because those extra things, that I otherwise use muscle memory to fix, now becomes more work!
 So when polishing design and small details, use a device that you are not used to - in order to discover those small annoyances!
 
+Happy path: (manually check on prod after each release)
+1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
+2. WYSIWYG edit said page
+3. Publish changes
+
+Prio:
+Step 1: Move development to the cloud, fix pain points
+Step 2: Use a Chromebook to develop, fix pain points, 
+Step 3: Use device X, fix pain points
+
 
 What I'm working on
 -------------------
 
-detect error when loading font and only switch to the fond it loading succeeded!
+Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
+but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned
+couln't load the file explorer
+
+
+
+able to unfuck repo via the editor (can't pull && update)
 
 
 read node_modules when auto-completing inside requre("|")
@@ -72,7 +84,6 @@ when opening the context menu, it should be possible to focus an item by typing 
 
 regression: Info messages are blurry! but sometimes its sharp. Does it get rendered many times!? non integers in position!?
 
-Working on making widgets button and input element fit on small screens
 
 Have an indication or warning when a file is opened that has the same parent folder as others, but not the same parent path...
 Group it differently!?
@@ -131,9 +142,7 @@ Try to find out why home dirs are busy...
 
 find input box very small
 
-Step 1: Move development to the cloud, fix pain points
-Step 2: Use a Chromebook to develop, without using a mouse, fix pain points
-Step 3: Integrate cloud services (mongoDB Atlas, VPS providers, etc)
+
 
 
 todo: Uncomment log spam from server.js
