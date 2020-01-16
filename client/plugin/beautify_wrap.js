@@ -324,7 +324,7 @@ text = js_beautify(text, jsSettings);
 			
 			file.reload(text);
 			
-			alertBox(file.path + ' was re-formatted/styled by js-beautify!\n<a title="' + EDITOR.getKeyFor("reloadFile") + '">Reload from disk</a> to undo. Or <a title="' + EDITOR.getKeyFor("saveFileFromKeyboardCombo") + '">save</a> to apply.');
+			alertBox(file.path + ' was re-formatted/styled by js-beautify!\n<a title="' + EDITOR.getKeyFor("reloadFileFromKeyCombo") + '">Reload from disk</a> to undo. Or <a title="' + EDITOR.getKeyFor("saveFileFromKeyboardCombo") + '">save</a> to apply.');
 			
 		}
 	}

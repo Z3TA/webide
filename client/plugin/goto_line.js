@@ -116,7 +116,8 @@ file.gotoLine(line);
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
-		
+		inputGoto.title = "line:column";
+
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
 		labelGoto.appendChild(document.createTextNode("Goto line:")); // Language settings!?
@@ -261,16 +262,25 @@ file.gotoLine(line);
 		
 		if(gotoInputIsVisible) {
 			
-			var line = parseInt(inputGoto.value);
+			var lineStr = inputGoto.value;
+			if(lineStr.indexOf(":") > 0) {
+				var lineCol = lineStr.split(":");
+				var line = parseInt(lineCol[0]);
+				var col = parseInt(lineCol[1]);
+			}
+			else {
+				var line = parseInt(inputGoto.value);
+			}
+			
 			var file = EDITOR.currentFile;
 			
 			if(!file) throw new Error("No current file!");
 			
 			if(isNaN(line)) {
-				alert("Enter line number!");
+				alertBox("Enter line number!");
 			}
 			else if(!file) {
-				alert("No file open!");
+				alertBox("No file open!");
 			}
 			else {
 				
@@ -284,7 +294,17 @@ file.gotoLine(line);
 				
 				console.log("Going to line " + line + ".");
 				
-				file.gotoLine(line);
+				file.gotoLine(line, function(err) {
+					if(err) return alertBox("Unable to go to line " + line + " Error: " + err.message);
+					else if(col) {
+						file.moveCaret(undefined, file.caret.row, col);
+						var lookAhead = Math.floor(EDITOR.view.visibleColumns/2);
+						file.scrollToCaret(file.caret, lookAhead);
+					}
+					
+				});
+				
+				
 				
 				hide_gotoLineInput();
 				

@@ -3217,12 +3217,17 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 	}
 	
-	File.prototype.reload = function(text) {
+	File.prototype.reload = function(text, options) {
 		// Used for example in reopening the file in another encoding
 		
 		var file = this;
 		
 		if(text == undefined) throw new Error("No text!");
+		
+		for(var prop in options) {
+			if(file.hasOwnProperty(prop)) file[prop] = options[prop];
+			else throw new Error("Unknown file property: " + prop);
+		}
 		
 		var index = 0, row = 0, col = 0, startColIndentationCharCount = 0, 
 		endRowBeforeChange =  file.grid.length-1, 
@@ -3235,6 +3240,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);
+		
+		
 		
 		file.checkGrid();
 		
@@ -3676,14 +3683,17 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		return caret;
 		}
 	
-	File.prototype.scrollToCaret = function(caret) {
+	File.prototype.scrollToCaret = function(caret, lookAhead) {
 		var file = this;
 		/*
 			note: Caret is bound to the grid! And caret.index is the index in file.text
 			This function only scrolls the grid (not the whole file)
+			
+			lookAhead: How much you want to see on the right side of the caret
 		*/
 		
 		if(caret == undefined) caret = file.caret;
+		if(lookAhead == undefined) lookAhead = 0;
 		
 		file.checkCaret(caret);
 		
@@ -3748,10 +3758,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 		*/
 		
-		if((caret.col+indentationWidth) > EDITOR.view.endingColumn) {
+		if((caret.col+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
 			// Caret is after the visible space
 			// We want to see a bit forward, but not more then to eol ? No, it's actually easier to read if we do not make a big jump!
-			delta = ((caret.col+indentationWidth) - EDITOR.view.endingColumn) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
+			delta = ((caret.col+indentationWidth) - (EDITOR.view.endingColumn-lookAhead)) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
 			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}
@@ -3789,7 +3799,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		} 
 		
 		
-		console.log("scrollToCaret: startColumn=" + startColumn + " minIndentation=" + minIndentation + " delta=" + delta);
+		console.log("scrollToCaret: startColumn=" + startColumn + " minIndentation=" + minIndentation + " lookAhead=" + lookAhead + " delta=" + delta);
 		
 		//console.log("scrollToCaret: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
@@ -3981,7 +3991,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			EDITOR.fireEvent("moveCaret", [file, file.caret]); // Always fire an event when we move the file caret!
 			
 			EDITOR.renderNeeded();
-			if(callback) callback();
+			if(callback) callback(null);
 		}
 		else if(file.isBig) {
 			// It's a big file and we'll have to load another part of the file ...
@@ -3992,7 +4002,12 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			if(file.totalRows == 0) throw new Error("File.gotoLine: Problem in large file: file.totalRows=" + file.totalRows + " file.path=" + file.path + " file.grid.length=" + file.grid.length);
 			
-			file.loadFilePart(partStartRow, function placeCaretAfterLoadingPart() {
+			file.loadFilePart(partStartRow, function placeCaretAfterLoadingPart(err) {
+				
+				if(err) {
+					if(callback) return callback(err);
+					else throw err;
+				}
 				
 				var gridRow = fileRow - file.partStartRow; // This is the line we want to go to, translated to the new file part
 				
@@ -4003,7 +4018,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				
 				EDITOR.renderNeeded();
 				
-				if(callback) callback();
+				if(callback) callback(null);
 				
 			});
 		} 

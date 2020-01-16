@@ -1198,7 +1198,7 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 					problem1.5: The callback might close the file!
 					solution: Same solution as problem 1. callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
 					
-					problem 2: You want to set properties to the file, that should be available when open-file-listeners are called
+					problem 2: You might want to set properties to the file, that should be available when open-file-listeners are called
 					solution: Use state and state.props in parameters to populate state and properties
 					
 					problem 3: We keep forgetting about problem 2 and set file.mode etc after the file has been opened, 
@@ -1207,6 +1207,8 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 					
 				*/
 				
+if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+
 				EDITOR.files[path] = newFile;
 				file = EDITOR.files[path];
 				
@@ -1260,6 +1262,9 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 				// Remove bug traps
 				delete file.mode;
 				file.mode = fileMode;
+				
+				delete file.parse;
+				file.parse = fileParse;
 				
 			}
 		}

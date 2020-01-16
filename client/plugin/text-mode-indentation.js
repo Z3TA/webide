@@ -230,8 +230,8 @@ else {
 	function addindentation(file) {
 		if(file == undefined) return ALLOW_DEFAULT;
 		
-		if(file.mode!="text" || !EDITOR.input) {
-			console.log("indentate:addindentation Not indentating! file.mode=" + file.mode + " EDITOR.input=" + EDITOR.input + " file?" + (!!file) + " ");
+		if(file.mode!="text" || !EDITOR.input || file.parse===true) {
+			console.log("indentate:addindentation Not indentating! file.mode=" + file.mode + " EDITOR.input=" + EDITOR.input + " file.parse=" + file.parse + " file?" + (!!file) + " ");
 			return ALLOW_DEFAULT;
 		}
 		

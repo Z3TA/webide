@@ -590,7 +590,7 @@
 				//icon.setAttribute("width", "22");
 				//icon.setAttribute("height", "22");
 				
-				li.addEventListener("click", function(e) {
+				li.addEventListener("click", function clickOnFile(e) {
 					openFile(li);
 					
 					e = window.event || e;
