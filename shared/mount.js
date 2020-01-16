@@ -2,6 +2,7 @@
 
 var module_fs = require("fs");
 var module_child_process = require("child_process");
+var module_path = require("path");
 var UTIL = require("../client/UTIL.js");
 
 var execOptions = {
@@ -263,7 +264,11 @@ var abort = false;
 						if(err) return mountDone(err);
 						
 						if(files.length > 0) {
-							return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
+							console.log("Calling recursiveDeleteContentWithZeroSize on targetPath=" + targetPath);
+							recursiveDeleteContentWithZeroSize(targetPath, function(err) {
+								if(err) mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
+								else targetCreated();
+							});
 						}
 						else targetCreated();
 						
@@ -427,5 +432,95 @@ return false;
 	}
 	
 }
+
+function recursiveDeleteContentWithZeroSize(folder, callback) {
+	if(typeof callback != "function") throw new Error("Second argument to recursiveDeleteContentWithZeroSize need to be a callback function!");
+	
+	// note: this might run in parallel on the same folder!
+	
+	var module_path = require("path");
+	var module_fs = require("fs");
+	
+	var filesToStat = 0;
+	var filesToDelete = 0;
+	var subfoldersToCheck = 0;
+	var foldersToDelete = 0;
+	
+	var abort = false;
+	
+	console.log("recursiveDeleteContentWithZeroSize: Checking folder=" + folder);
+	
+	module_fs.readdir(folder, function(err, folderContent) {
+		if(err) return done(err);
+		
+		if(folderContent.length == 0) return done(null);
+		else folderContent.forEach(stat);
+	});
+	
+	function stat(something) {
+		if(abort) return;
+		
+		filesToStat++;
+		var path = module_path.join(folder, something);
+		console.log("recursiveDeleteContentWithZeroSize: stat: folder=" + folder + " something=" + something + " path=" + path);
+		module_fs.stat(path, function(err, stats) {
+			filesToStat--;
+			
+			if(abort) return;
+			if(err && err.code == "ENOENT") return doneMaybe(null);
+			if(err) return done(err);
+			
+			if(stats.isDirectory()) {
+				subfoldersToCheck++;
+				recursiveDeleteContentWithZeroSize(path, function(err) {
+					subfoldersToCheck--;
+					
+					if(abort) return;
+					if(err && err.code == "ENOENT") return doneMaybe(null);
+					if(err) return done(err);
+					
+					foldersToDelete++;
+					console.log("recursiveDeleteContentWithZeroSize: rmdir: path=" + path);
+					module_fs.rmdir(path, function(err) {
+						foldersToDelete--;
+						doneMaybe(err);
+					});
+					
+				});
+			}
+			else if(stats.size==0) {
+				filesToDelete++;
+				console.log("recursiveDeleteContentWithZeroSize: rm: path=" + path);
+				module_fs.unlink(path, function(err) {
+					filesToDelete--;
+					doneMaybe(err);
+				});
+			}
+			else {
+				done(new Error("path=" + path + " stats.size=" + stats.size));
+			}
+		});
+	}
+	
+	function doneMaybe(err) {
+		
+		if(err && err.code != "ENOENT") return done(err);
+		else if(filesToDelete===0 && filesToStat===0 && subfoldersToCheck===0 && foldersToDelete===0 && !abort) done(null);
+		else {
+			console.log("recursiveDeleteContentWithZeroSize: doneMaybe: abort=" + abort + " folder=" + folder + " filesToDelete=" + filesToDelete + " filesToStat=" + filesToStat + " subfoldersToCheck=" + subfoldersToCheck + " foldersToDelete=" + foldersToDelete);
+		}
+	}
+	
+	function done(err) {
+		console.log("recursiveDeleteContentWithZeroSize: done: err=" + (err && err.message) + " abort=" + abort + " folder=" + folder + " filesToDelete=" + filesToDelete + " filesToStat=" + filesToStat + " subfoldersToCheck=" + subfoldersToCheck + " foldersToDelete=" + foldersToDelete);
+		
+		if(!abort) callback(err);
+		
+if(err) abort = true;
+		
+		callback = null;
+	}
+}
+
 
 module.exports = mount;
