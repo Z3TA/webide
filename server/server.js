@@ -3441,10 +3441,54 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 			var pathInHomeDir = UTIL.joinPaths(homeDir, link.path);
 			
 			module_fs.symlink(link.target, pathInHomeDir, function (err) {
-				if(err && err.code != "EEXIST") return callback(err); // It's allright if the link already exist
+				if(err) {
+					if(err.code == "EEXIST") {
+						// Make sure it links to the correct target
+						module_fs.readlink(pathInHomeDir, function(err, linkStr) {
+							if(err) {
+								// It's probably not a link!
+								module_fs.stat(pathInHomeDir, function(err, stats) {
+									if(err) throw err; // We should not fail to stat, because it exist
+									
+									if(stats.size == 0) {
+										// It's emty, so we can delete it
+										module_fs.unlink(pathInHomeDir, function(err) {
+											if(err) throw err; // Should not result in an error
+											
+											// Now attempt to create the link again
+											// Not recursive to prevent loop
+											module_fs.symlink(link.target, pathInHomeDir, function (err) {
+												if(err) return callback(err); // We give up (this should not result in an error)
+												else makeAnotherLink();
+											});
+											
+										});
+									}
+									else {
+										// We don't know what to do
+										return callback(new Error(pathInHomeDir + " is not a link and it's not empty! Unable to link it to " + link.target)); 
+									}
+								});
+							}
+							else {
+								if(linkStr == link.target) makeAnotherLink();
+								else {
+									throw new Error("linkStr=" + linkStr + " link.target=" + link.target);
+								}
+							}
+						});
+					}
+					else return callback(err); 
+				}
+				else {
+					makeAnotherLink();
+				}
 				
-				if(linksToCreate.length > 0) createLink(linksToCreate.pop());
-				else callback(null);
+				function makeAnotherLink() {
+					if(linksToCreate.length > 0) createLink(linksToCreate.pop());
+					else callback(null);
+				}
+				
 			});
 		}
 	}
@@ -3471,7 +3515,7 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 					// Check if it's a symbolic link
 					checkLink(targetAbsolutePath, linkString);
 				}
-else if(err.code == "EINVAL") {
+				else if(err.code == "EINVAL") {
 					// We found the actually a binary!
 					
 					if(links.length > 0) {
@@ -3482,11 +3526,11 @@ else if(err.code == "EINVAL") {
 					}
 					
 					callback(null, links, binaryFile, targetRelative);
-}
+				}
 				else callback(err);
-});
+			});
 		}
-}
+	}
 }
 
 
@@ -3737,7 +3781,7 @@ function handleHttpRequest(request, response) {
 				var saveTo = module_path.join(module_os.tmpDir(), module_path.basename(fieldname));
 				file.pipe(module_fs.createWriteStream(saveTo));
 				files.push(saveTo);
-							
+				
 			});
 			busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
 				log('Field [' + fieldname + ']: value: ', val, DEBUG);

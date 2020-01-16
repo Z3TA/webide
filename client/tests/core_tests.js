@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(1, function testWordAtCaret(callback) {
+	EDITOR.addTest(function testWordAtCaret(callback) {
 		EDITOR.openFile("testWordAtCaret.js", 'foo bar baz\n', function(err, file) {
 			
 			var caret = file.createCaret(0);

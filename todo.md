@@ -63,6 +63,8 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
+fix tests
+release
 
 
 read node_modules when auto-completing inside requre("|")
