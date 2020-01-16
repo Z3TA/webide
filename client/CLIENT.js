@@ -28,6 +28,7 @@ var CLIENT = {}; // Client object is global
 	var properCallStackError = {};
 	var sendingPings = false;
 	var pingCounter = 0;
+	var nextPingTimer;
 	var pingTimeout;
 	var timer = (function() {
 		if(typeof window.performance == "object" && typeof window.performance.now == "function") return function() {
@@ -42,6 +43,7 @@ var CLIENT = {}; // Client object is global
 	var WEBSOCK_OPEN = 1;
 	
 	CLIENT.connected = false;
+	CLIENT.ping = 0;
 	
 	var checkEditorInterval = setInterval(checkEditor);
 	
@@ -153,6 +155,7 @@ var CLIENT = {}; // Client object is global
 		
 		if(!CLIENT.connected) {
 			var error = new Error("Not connected to a webide server!");
+			error.code = "ENETDOWN";
 			if(callback) callback(error);
 			else alertBox(err.message);
 			return;
@@ -212,7 +215,7 @@ console.log("CLIENT: connSend error: "+ err);
 			if(!gotResponse) {
 				if(!CLIENT.connected) {
 					var error = new Error("Connection failed while sending " + req + " command to server! The command might not have reached the server.");
-					error.code = "DISCONNECTED_IN_TRANSIT";
+					error.code = "ENETRESET";
 					
 					if(callback) {
 callback(error);
@@ -540,13 +543,14 @@ reconnectTimeoutTime += 10000;
 			return;
 		}
 		
-		pingTimeout = setTimeout(sendPing, 1000);
+		nextPingTimer = setTimeout(sendPing, 1000);
 		
 	}
 	
 	function stopPing() {
 		console.log("CLIENT: ping! stop sendingPings=" + sendingPings);
 		sendingPings = false;
+		clearTimeout(nextPingTimer);
 		clearTimeout(pingTimeout);
 	}
 	
@@ -555,12 +559,28 @@ reconnectTimeoutTime += 10000;
 		var start = timer();
 		console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
 		CLIENT.cmd("ping", {data: ++pingCounter}, function(err, resp) {
+			if(err) {
+				console.log("CLIENT: ping! err.code=" + err.code);
+				stopPing();
+				return;
+				//throw err;
+			}
 			var end = timer();
-			var ping = end-start;
-			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + ping);
+			var ping = Math.round(end-start);
+			if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
+			CLIENT.ping = ping;
+			clearTimeout(pingTimeout);
 			
-			pingTimeout = setTimeout(sendPing, 1000);
+			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
+			
+			if(resp != pingCounter) throw new Error("resp=" + resp + " pingCounter=" + pingCounter + "");
+			
+			nextPingTimer = setTimeout(sendPing, 1000);
 		});
+		var pingTimeout = setTimeout(function() {
+			CLIENT.ping = -1;
+			CLIENT.fireEvent("pingTimeout");
+		}, 1000);
 		
 	}
 	

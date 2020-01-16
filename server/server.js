@@ -1751,7 +1751,7 @@ function sockJsConnection(connection) {
 			return false;
 		}
 else if(command == "ping") {
-send({pong: json.data});
+send({resp: json.data});
 
 return false;
 }

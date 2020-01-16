@@ -70,15 +70,11 @@ What I'm working on
 -------------------
 
 
-
-Manage indentation should also work on plain text files!
-
-
 Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
 but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned
 couln't load the file explorer
 
-
+Manage indentation should also work on plain text files!
 
 able to unfuck repo via the editor (can't pull && update)
 
