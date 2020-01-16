@@ -82,7 +82,6 @@ if(ps) {
 			}
 		}
 	}
-	// Note: nodejs_init_worker.js might restart the scripts before they have been deleted !
 	
 	
 	// Remove nginx profile
@@ -335,6 +334,7 @@ if(ps) {
 				catch(zfsDestroyErr) {
 					if(zfsDestroyErr.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
 						console.log("zfsDestroyErr: " + zfsDestroyErr.message);
+// fall through...
 					}
 					else if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
 						// If you get umount: target is busy, try: sudo lsof | grep '/home/username'

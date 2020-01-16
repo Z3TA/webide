@@ -415,23 +415,50 @@ function fillGuestPool(id, fromRecycler, callback) {
 	}
 	
 	if(id == undefined) {
+		log("fillGuestPool: Creating a new guest user because id=" + id, DEBUG);
 		createGuestUser(undefined, fromRecycler, guestUserCreatedMaybe);
 	}
 	else if(typeof id == "number") {
 		var username = "guest" + id;
+		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
 		
 		if(GUEST_POOL.indexOf(username) != -1) throw new Error(username + " is already in the GUEST_POOL=" + JSON.stringify(GUEST_POOL));
 		
 		readEtcPasswd(username, function(err, passwd) {
 			if(err) {
 				if(err.code == "USER_NOT_FOUND") {
-					createGuestUser(id, fromRecycler, guestUserCreatedMaybe);
+					/*
+						Problem: The home dir might exist, but the user doesn't
+						If neither the home dir nor the user account exist, create the guest user,
+						
+						Another problem: user might exist in /etc/passwd but not in /etc/group or /etc/shadow
+						Then we have to deal with it manually.
+					*/
+					module_fs.stat(homeDir, function dir(err, homeDirStat) {
+						if(err && err.code == "ENOENT") {
+							// The user has no home dir and no user account. So create it!
+							
+							log("fillGuestPool: Creating a new guest with id=" + id + " because username=" + username + " was not found in /etc/passwd and home dir don't exist", DEBUG);
+							createGuestUser(id, fromRecycler, guestUserCreatedMaybe);
+							
+						}
+						else if(err) throw err;
+						else {
+							var error = new Error("Can not add " + username + " to guest pool because the user has a home dir, but no system account!");
+							error.code = "USER_NOT_FOUND";
+							if(callback) callback(error);
+							else console.error(error);
+							return;
+						}
+					});
+					
 				}
 				else throw err;
 			}
 			else {
+				// An user account exist
 				// Check if home dir exist before adding the user to the guest pool
-				var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
+				
 				module_fs.stat(homeDir, function dir(err, homeDirStat) {
 					if(err && err.code == "ENOENT") {
 						// The user exist in /etc/passwd but has no home dir ...
@@ -497,7 +524,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				var pShell = row[6];
 				
 				if(pName == username) {
-					console.log("readEtcPasswd: Found username=" + username + " in /etc/passwd");
+					log("readEtcPasswd: Found username=" + username + " in /etc/passwd", DEBUG);
 					
 					readEtcPasswdCallback(null, {
 						username: username,
@@ -542,18 +569,15 @@ function recycleGuestAccounts(callback) {
 		if(currentlyRecyclingId==-1) currentlyRecyclingId = GUEST_COUNTER+1;
 		// Go backwards to make it possible to decrement GUEST_COUNTER
 		for (var i=currentlyRecyclingId-1; i>0 && currentConcurrency < maxConcurrency; i--) tryRecycle(i);
-		if(i===0) {
-			IS_GUEST_USER_RECYCLING = false;
-			log("Done recycling guest accounts!", NOTICE);
-		}
 	}
 	
 	function tryRecycle(id) {
 		currentConcurrency++;
 		if(id == lastRecycledId || id == currentlyRecyclingId) throw new Error("id=" + id + " lastRecycledId=" + lastRecycledId + " currentlyRecyclingId=" + currentlyRecyclingId + " currentConcurrency=" + currentConcurrency);
 		currentlyRecyclingId = id;
-		log("tryRecycle: guest" + id, DEBUG);
-		var homeDir = UTIL.joinPaths([HOME_DIR, "guest" + id]);
+		var username = "guest" + id;
+		log("tryRecycle: " + username, DEBUG);
+		var homeDir = UTIL.joinPaths([HOME_DIR, username]);
 		module_fs.stat(homeDir, function dir(err, homeDirStat) {
 			if(err && err.code == "ENOENT") {
 				log(homeDir + " doesn't exist!", DEBUG);
@@ -576,13 +600,13 @@ function recycleGuestAccounts(callback) {
 						}
 						else {
 							// Account successfully deleted. We can now decrement GUEST_COUNTER 
-							log("Decrementing GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+							log("Decrementing GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of " + username);
 							module_fs.writeFile(__dirname + "/GUEST_COUNTER", --GUEST_COUNTER, function(err) {
 								if(err) {
-									log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+									log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of " + username);
 									throw err;
 								}
-								log("Saved GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of guest" + id);
+								log("Saved GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of " + username);
 								processedGuestId(id, "Successfully deleted");
 							});
 						}
@@ -605,7 +629,7 @@ function recycleGuestAccounts(callback) {
 						}
 						else {
 							// We got an unknown error ... We however don't want the server to restart, or it would go into a restart loop
-							sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Error recycling guest" + id, "Error: " + err.message + "\n\n" + err.stack);
+								reportError(err);
 processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err.message=" + err.message);
 						}
 					}
@@ -626,7 +650,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 				module_fs.readFile(lastLoginFile, "utf8", function readLastLoginFile(err, data) {
 					if(err && err.code == "ENOENT") {
 						// If no lastLogin file exist should mean the user has *never* logged in
-						log("guest" + id + ": " + err.code + " " + lastLoginFile, DEBUG);
+						log(username + ": " + err.code + " " + lastLoginFile, DEBUG);
 						
 						/*
 							Problem: We don't want to add old users to the guest pool as they will have outdated example files and settings
@@ -648,16 +672,31 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 							
 							if(homeDirLastModified - skeletonDirLastModified > 0 && daysSinceLastChanged < 5) {
 								// Home dir is fresh
-								fillGuestPool(id, true, function(err) {
+								// Check if a user account exist
+								readEtcPasswd(username, function(err, passwd) {
 									if(err) {
-										console.error(err);
-										processedGuestId(id, "Attempted to add to guest pool because the home dir is fresh - but failed!");
-									}
+										if(err.code == "USER_NOT_FOUND") {
+											log("Resetting " + username + " because no system account.", DEBUG);
+											resetGuest(id);
+}
+										else {
+											reportError(err);
+											processedGuestId(id, "Attempted fill guest pool because the home dir is fresh - but got an unknown error when checking if user exist");
+										}
+}
 									else {
-										processedGuestId(id, "Added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
+										// A system account exist!
+										fillGuestPool(id, true, function(err) {
+											if(err) {
+												console.error(err);
+												processedGuestId(id, "Attempted fill guest pool because the home dir is fresh - but failed!");
+											}
+											else {
+												processedGuestId(id, "Added to guest pool because the home dir is fresh. (daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + ")");
+											}
+										});
 									}
 								});
-								
 							}
 							else {
 								log("id=" + id + ": Example files etc for " + homeDir + " need to be updated: daysSinceRelease=" + daysSinceRelease + " daysSinceLastChanged=" + daysSinceLastChanged + " daysSinceSkeleton=" + daysSinceSkeleton + "", DEBUG);
@@ -675,7 +714,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 						var timeDiff = currentTime - lastLogin; // In seconds
 						var daysSinceLastLogin = Math.floor(timeDiff / (60 * 60 * 24));
 						if(daysSinceLastLogin > 14) {
-							log("guest" + id + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin, DEBUG);
+							log(username + ": lastLogin=" + lastLogin + " currentTime=" + currentTime + " timeDiff=" + timeDiff + " daysSinceLastLogin=" + daysSinceLastLogin, DEBUG);
 							return resetGuest(id);
 						}
 						else return processedGuestId(id, "Not inactive: daysSinceLastLogin=" + daysSinceLastLogin);
@@ -767,8 +806,10 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		
 		
 		if(countLeft == 0) {
+			IS_GUEST_USER_RECYCLING = false;
 			callback(null);
 			callback = null;
+			log("Done recycling guest accounts!");
 		}
 		else if(countLeft < 0) {
 			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecyclingId=" + currentlyRecyclingId + " GUEST_COUNTER=" + GUEST_COUNTER);
@@ -5268,10 +5309,17 @@ function gcsfCleanup(username) {
 	return false;
 }
 
-function reportError(errorMessage) {
+function reportError(errorOrMessage) {
 	// A more soft error to prevent the server from restarting
-	console.error(errorMessage);
-	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + errorMessage.split("\n")[0].slice(0, 100) , errorMessage); // from, to, subject, text
+	console.error(errorOrMessage);
+	if(errorOrMessage instanceof Error) {
+		var msg = errorOrMessage.message;
+	}
+	else {
+		var msg = errorOrMessage;
+	}
+	
+	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
 }
 
 function startDropboxDaemon(username, uid, gid, homeDir, callback) {

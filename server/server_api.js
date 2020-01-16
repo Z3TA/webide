@@ -2745,7 +2745,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 				if(stats) {
 					
 					if(stats.isFile()) {
-						console.log("It's a file! path=" + path);
+						//console.log("It's a file! path=" + path);
 						filesToBeDeleted++;
 						fs.unlink(path, function localFileDeleted(err) {
 							filesToBeDeleted--;
@@ -2753,7 +2753,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 						});
 					}
 					else if(stats.isDirectory()) {
-						console.log("It's a folder! path=" + path);
+						//console.log("It's a folder! path=" + path);
 						foldersToBeDeleted++;
 						path = UTIL.trailingSlash(path);
 						recursiveDeleteLocalDir(path, function (err) {
@@ -2771,7 +2771,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	
 		function allFilesAndFoldersDeletedMaybe(err) {
 			
-			console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " pathsToStat=" + pathsToStat + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
+			//console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " pathsToStat=" + pathsToStat + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
 			
 			if(gotError) return; // If we have got an error, it means we have already called the callback
 			
