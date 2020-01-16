@@ -20,7 +20,7 @@ winMenuHide.activate();
 			
 			EDITOR.windowMenu.remove(winMenuHide);
 			
-EDITOR.removeEvent.remove(hideWindowMenuMaybe);
+			EDITOR.removeEvent("storageReady", hideWindowMenuMaybe);
 		}
 });
 	

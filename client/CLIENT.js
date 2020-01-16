@@ -26,6 +26,20 @@ var CLIENT = {}; // Client object is global
 	var reconnectTimeout;
 	var lastUsedserver = null;
 	var properCallStackError = {};
+	var sendingPings = false;
+	var pingCounter = 0;
+	var pingTimeout;
+	var timer = (function() {
+		if(typeof window.performance == "object" && typeof window.performance.now == "function") return function() {
+			return window.performance.now();
+		}
+		else return function() {
+			return (new Date()).getTime();
+		}
+	})();
+	
+	
+	var WEBSOCK_OPEN = 1;
 	
 	CLIENT.connected = false;
 	
@@ -83,6 +97,8 @@ var CLIENT = {}; // Client object is global
 			console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
 			reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 			
+			startPing();
+			
 		}
 		
 		connection.onmessage = serverMessage;
@@ -123,6 +139,7 @@ var CLIENT = {}; // Client object is global
 		console.log("CLIENT: Disconnecting from editor server url=" + CLIENT.url);
 		connection.close();
 		CLIENT.connected = false;
+		stopPing();
 	}
 	
 	CLIENT.cmd = function cmd(req, json, callback) {
@@ -134,11 +151,20 @@ var CLIENT = {}; // Client object is global
 		}
 		else if(typeof json != "object") throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
 		
+		if(!CLIENT.connected) {
+			var error = new Error("Not connected to a webide server!");
+			if(callback) callback(error);
+			else alertBox(err.message);
+			return;
+		}
+		
 		var GS = String.fromCharCode(29);
 		
 		var id = ++idCounter;
 		
 		var string = id + GS + req;
+		
+		var gotResponse = false;
 		
 		// console.warn so we get a stack trace and can find out where the request was made while debugging
 		if(req != "log") {
@@ -169,6 +195,7 @@ callbackWaitList[id] = callback;
 		}
 		
 		connSend(string, function sendMessageToServer(err) {
+			gotResponse = true;
 			if(err) {
 				if(req != "log") {
 console.log("CLIENT: connSend error: "+ err);
@@ -180,6 +207,23 @@ console.log("CLIENT: connSend error: "+ err);
 				}
 			}
 		});
+		
+		setTimeout(function () {
+			if(!gotResponse) {
+				if(!CLIENT.connected) {
+					var error = new Error("Connection failed while sending " + req + " command to server! The command might not have reached the server.");
+					error.code = "DISCONNECTED_IN_TRANSIT";
+					
+					if(callback) {
+callback(error);
+						// note: If the message did get through, we might get the answer after re-connecting!
+						// if we do get an answer, it will result in a double callback!
+					}
+					else alertBox(error.message, error.code, "warning");
+				}
+			}
+		}, 3000);
+		
 	}
 	
 	
@@ -214,7 +258,7 @@ console.log("CLIENT: connSend error: "+ err);
 		console.log("CLIENT: firing client event '" + ev + "' data=" + data + "");
 		
 		if(!eventListeners.hasOwnProperty(ev)) {
-console.warn("CLIENT: No registered event listener for ev=" + ev)
+			console.warn("CLIENT: No registered event listener for ev=" + ev)
 		}
 		else {
 			// Call all event listeners
@@ -345,9 +389,8 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 	});
 	
 	function connSend(msg, callback) {
-		var websockOpen = 1;
 		
-		if(connection.readyState==websockOpen) {
+		if(connection.readyState==WEBSOCK_OPEN) {
 			console.log("CLIENT: Sending: " + UTIL.shortString(msg) + " to server ...");
 			
 			connection.send(msg);
@@ -376,6 +419,7 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 reconnectTimeoutTime += 10000;
 					console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
 				}
+				stopPing();
 				return true;
 			});
 			
@@ -386,6 +430,9 @@ reconnectTimeoutTime += 10000;
 					clearTimeout(reconnectTimeout);
 					console.log("CLIENT: Attempting connect after btk");
 					CLIENT.connect(lastUsedserver);
+				}
+				else {
+					startPing();
 				}
 				return true;
 			});
@@ -485,6 +532,37 @@ reconnectTimeoutTime += 10000;
 		}
 	}
 	
+	function startPing() {
+		console.log("CLIENT: ping! start sendingPings=" + sendingPings);
+		
+		if(sendingPings) {
+			console.warn("CLIENT: ping! Already sending pings!");
+			return;
+		}
+		
+		pingTimeout = setTimeout(sendPing, 1000);
+		
+	}
+	
+	function stopPing() {
+		console.log("CLIENT: ping! stop sendingPings=" + sendingPings);
+		sendingPings = false;
+		clearTimeout(pingTimeout);
+	}
+	
+	function sendPing() {
+		
+		var start = timer();
+		console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
+		CLIENT.cmd("ping", {data: ++pingCounter}, function(err, resp) {
+			var end = timer();
+			var ping = end-start;
+			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + ping);
+			
+			pingTimeout = setTimeout(sendPing, 1000);
+		});
+		
+	}
 	
 	console.log("CLIENT: End of CLIENT.js");
 	

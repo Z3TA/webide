@@ -1750,6 +1750,11 @@ function sockJsConnection(connection) {
 			
 			return false;
 		}
+else if(command == "ping") {
+send({pong: json.data});
+
+return false;
+}
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
@@ -2452,6 +2457,7 @@ var loginCounter = 0;
 			}
 		}
 		else {
+			// We got a user worker!
 			
 			if(command == "echo") {
 				// Send the data to all other connected client, except the client that sent the echo msg

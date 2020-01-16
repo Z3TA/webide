@@ -93,7 +93,7 @@ else {
 		},
 		unload: function unloadSqldb() {
 			
-			EDITOR.removeEvent("storageReady", getDefaultValuesForDbConnection);
+			if(getDefaultValuesForDbConnection) EDITOR.removeEvent("storageReady", getDefaultValuesForDbConnection);
 			
 			EDITOR.ctxMenu.remove(menuItem);
 			

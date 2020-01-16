@@ -3089,6 +3089,9 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 			
 		*/
 		
+		if(typeof eventName == "function") throw new Error("First argument to EDITOR.removeEvent should be the event name! eventName=" + eventName);
+		if(typeof fun != "function") throw new Error("Second argument to EDITOR.removeEvent should be the event callback function! fun=" + fun);
+		
 		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) throw new Error("Unknown editor event: " + eventName);
 		
 		var fname = UTIL.getFunctionName(fun);
