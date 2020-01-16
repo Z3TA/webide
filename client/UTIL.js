@@ -2090,9 +2090,17 @@ else {
 		return -1;
 	},
 	
-	loadCSS: function loadCSS(url) {
+	loadCSS: function loadCSS(url, callback) {
 		var head  = document.getElementsByTagName('head')[0];
 		var link  = document.createElement('link');
+		link.onerror = function() {
+			// It seems we can't get the real error event from the browser
+			var error = new Error(url + " failed to load! Check the dev tools console for info.");
+			if(callback) callback(error);
+		};
+		link.onload = function() {
+			if(callback) callback(null);
+		};
 		//link.id   = cssId;
 		link.rel  = 'stylesheet';
 		link.type = 'text/css';

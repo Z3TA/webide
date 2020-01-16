@@ -69,6 +69,47 @@
 		console.warn("settings_overload: Browser is VERY slow");
 	}, 1000 );
 	
+	
+	function cssLoadedMaybe(err) {
+		
+		if(err) return;
+		
+		if(typeof whenFontLoaded != "function") return;
+		
+		if(document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(function () {
+				
+				console.log("settings_overload: All fonts ready!");
+				
+				whenFontLoaded();
+				
+				// Re-render with the new font
+				EDITOR.renderNeeded();
+				EDITOR.render();
+				
+			});
+		}
+		else {
+			// Re-render after the font have fully loaded (we never know when)
+			
+			var time = 300;
+			if(slowBrowser) time = 1000;
+			if(verySlowBrowser) time = 5000;
+			
+			setTimeout(function renderAfterFontLoad() {
+				
+				console.log("settings_overload: All fonts ready maybe!?");
+				
+				whenFontLoaded();
+				
+				EDITOR.renderNeeded();
+				EDITOR.render();
+				
+			}, time);
+		}
+	}
+	
+	
 	window.addEventListener( 'load', function() {
 		window.clearTimeout(slowLoad);
 		window.clearTimeout(verySlowLoad);
@@ -83,33 +124,7 @@
 			return;
 		}
 		
-		loadFont();
-		
-		if(document.fonts && document.fonts.ready) {
-			document.fonts.ready.then(function () {
-				
-				console.log("settings_overload: All fonts ready!");
-				
-				if(typeof whenFontLoaded == "function") whenFontLoaded();
-
-				// Re-render with the new font
-				EDITOR.renderNeeded();
-				EDITOR.render();
-			});
-		}
-		else {
-			// Re-render after the font have fully loaded (we never know when)
-			setTimeout(function renderAfterFontLoad() {
-
-				console.log("settings_overload: All fonts ready maybe!?");
-				
-				if(typeof whenFontLoaded == "function") whenFontLoaded();
-				
-				EDITOR.renderNeeded();
-				EDITOR.render();
-			}, slowLoad ? 5000 : 1000);
-		}
-		
+		loadFont(); // Loads the css file containing the font
 		
 	}, false );
 	
@@ -137,7 +152,7 @@
 debug("Using ligatures with FiraCode");
 		webFontLoading = "FiraCode";
 		loadFont = function() {
-			UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
+			UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css", cssLoadedMaybe);
 		};
 		whenFontLoaded = function() {
 EDITOR.settings.style.font = "Fira Code";
@@ -255,7 +270,7 @@ EDITOR.settings.style.font = "Fira Code";
 			// LiberationMono looks nice in Edge!
 webFontLoading = "liberationMono";
 			loadFont = function() {
-				UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css");
+				UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css", cssLoadedMaybe);
 			};
 			whenFontLoaded = function() {
 EDITOR.settings.style.font = "LiberationMono";
@@ -274,7 +289,7 @@ EDITOR.settings.style.font = "LiberationMono";
 			webFontLoading = "ubuntu";
 			loadFont = function() {
 				try {
-					UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css");
+					UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css", cssLoadedMaybe);
 				}
 				catch(err) {
 					if(err) {
@@ -309,7 +324,7 @@ EDITOR.settings.gridWidth = 7.5;
 webFontLoading = "DejaVuSansMono";
 			loadFont = function() {
 			try {
-UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+				UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css", cssLoadedMaybe);
 			}
 			catch(err) {
 				if(err) {

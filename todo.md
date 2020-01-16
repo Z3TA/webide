@@ -63,15 +63,14 @@ So when polishing design and small details, use a device that you are not used t
 What I'm working on
 -------------------
 
-fix tests
-release
+detect error when loading font and only switch to the fond it loading succeeded!
 
 
 read node_modules when auto-completing inside requre("|")
 
 when opening the context menu, it should be possible to focus an item by typing part of it's name!?
 
-regression: Info messages are blurry!
+regression: Info messages are blurry! but sometimes its sharp. Does it get rendered many times!? non integers in position!?
 
 Working on making widgets button and input element fit on small screens
 
