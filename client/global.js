@@ -35,6 +35,13 @@ if (window.navigator.standalone === true) {
 }
 
 
+if('connection' in navigator && navigator.connection.saveData) {
+		var SAVE_BANDWIDTH = true;
+}
+else {
+var SAVE_BANDWIDTH = false;
+}
+
 var __dirname;
 if(RUNTIME != "nw.js") {
 	//alert("RUNTIME=" + RUNTIME);

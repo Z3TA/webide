@@ -69,6 +69,7 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+What about users with pay $10 per/mb connection!?
 
 Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
 but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned

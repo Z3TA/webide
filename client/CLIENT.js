@@ -575,7 +575,7 @@ reconnectTimeoutTime += 10000;
 			
 			if(resp != pingCounter) throw new Error("resp=" + resp + " pingCounter=" + pingCounter + "");
 			
-			nextPingTimer = setTimeout(sendPing, 1000);
+			nextPingTimer = setTimeout(sendPing, 5000);
 		});
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = -1;
