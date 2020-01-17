@@ -87,8 +87,8 @@
 		
 		if(!fileToBeClosed) return;
 		
-		EDITOR.ctxMenu.addTemp("Close file", false, function closeFileMenuItemClicked() {
-			closeFile(fileToBeClosed);
+		EDITOR.ctxMenu.addTemp("Close file", false, function closeFileMenuItemClicked(file, combo) {
+			closeFile(fileToBeClosed, combo);
 		});
 		
 	}

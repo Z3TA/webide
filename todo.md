@@ -69,6 +69,17 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+Using combination keys like Ctrl+ ALt+ Ctrl+Shift+ etc requires serious bending of hands/fingers
+example? Ctrl+S
+should there be a command mode, where double tapping ss would save !?
+
+
+I want to reorder tabs ... right click and choose move to the far left !?
+
+keybinding for close file!?
+
+double clicking on a common world in a large file is very slow!! "file" in EDITOR.js
+
 What about users with pay $10 per/mb connection!?
 
 Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
