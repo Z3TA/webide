@@ -492,6 +492,7 @@
 					console.log("File explorer: err.code=" + err.code);
 					if(callback) callback(err);
 					else throw err;
+return;
 				}
 			}
 			
