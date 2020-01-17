@@ -4357,7 +4357,7 @@ if(menuItem.parentMenu) {
 				text: htmlText,
 				order: position,
 				callback: callback,
-				keybindFunction: keyboardFunction,
+				keyCombo: keyboardFunction,
 				temp: false
 			});
 				
@@ -4390,7 +4390,7 @@ if(menuItem.parentMenu) {
 				temp: true,
 				text: htmlText,
 				callback: callback,
-				keybindFunction: keyboardFunction,
+				keyCombo: keyboardFunction,
 				separator: addSeparator
 			});
 			
@@ -4408,7 +4408,7 @@ if(menuItem.parentMenu) {
 			if(typeof options != "object") throw new Error("First argument to EDITOR.ctxMenu.addItem need to be an options object!");
 			if(trap != undefined) throw new Error("EDITOR.ctxMenu.addItem only takes one argument (an options object)!");
 			
-			var allowedOptions = ["text", "temp", "callback", "keybindFunction", "order", "separator"];
+			var allowedOptions = ["text", "temp", "callback", "keyCombo", "order", "separator"];
 			
 			for(var key in options) {
 				if(allowedOptions.indexOf(key) == -1) throw new Error("Unrecognized option: " + key);
@@ -4416,7 +4416,7 @@ if(menuItem.parentMenu) {
 			
 			if(options.text == undefined) throw new Error("option text is requred!");
 			if(typeof options.callback != "function") throw new Error("option callback needs to be a function!");
-			if(options.keybindFunction != undefined && typeof options.keybindFunction != "function") throw new Error("option keybindFunction needs to be a function!");
+			if(options.keyCombo != undefined && typeof options.keyCombo != "function") throw new Error("option keyCombo needs to be a function!");
 			
 			//if(options.temp && options.separator == undefined) options.separator = true;
 			
@@ -4443,7 +4443,7 @@ if(menuItem.parentMenu) {
 			
 			li.appendChild(menuText);
 			
-			var keyCombo = EDITOR.getKeyFor(options.keybindFunction || options.callback);
+			var keyCombo = EDITOR.getKeyFor(options.keyCombo || options.callback);
 			var keyComboEl = document.createElement("span");
 			keyComboEl.setAttribute("class", "key");
 			if(keyCombo) keyComboEl.innerText = keyCombo;

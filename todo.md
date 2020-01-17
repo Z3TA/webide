@@ -69,6 +69,16 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+can the special keyboard keys on the chromebook be captured!?
+magnifying glass = key=Meta charCode=91
+left f arrow = keyIsDown: key=BrowserBack charCode=166
+right f arrow = ey=BrowserForward charCode=167
+reload icon = keyIsDown: key=BrowserRefresh charCode=168
+
+Can they the used ? yes!
+
+
+
 
 Solve Chromebook disconnect issue before making another release!
 
@@ -84,7 +94,7 @@ so that for example a terminal session will stay alive if one client disconnects
 Using combination keys like Ctrl+ ALt+ Ctrl+Shift+ etc requires serious bending of hands/fingers
 example? Ctrl+S
 should there be a command mode, where double tapping ss would save !?
-
+There is no Home key on Chromebook keyboard...
 
 I want to reorder tabs ... right click and choose move to the far left !?
 
