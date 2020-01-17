@@ -77,7 +77,7 @@ reload icon = keyIsDown: key=BrowserRefresh charCode=168
 
 Can they the used ? yes!
 
-
+magnifying glass to search and open files ? :)
 
 
 Solve Chromebook disconnect issue before making another release!
