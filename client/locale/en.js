@@ -122,6 +122,7 @@ network_problem: "network problem",
 	
 	quit: "quit",
 	
+reconnecting: "reconnecting...",
 	redo: "redo",
 	refresh_css: "Refresh CSS/theme",
 	reload: "reload",

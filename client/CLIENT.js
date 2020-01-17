@@ -54,7 +54,7 @@ var CLIENT = {}; // Client object is global
 		
 		if(!protocol) throw new Error("Unable to get protocol from window.location.href=" + window.location.href);
 
-		console.log("CLIENT: protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
+		console.log("CLIENT: Connecting... protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
 		var defaultURL = loc.protocol + "://" + loc.host + "/webide"; // loc.host includes port!
 		
@@ -115,17 +115,21 @@ var CLIENT = {}; // Client object is global
 				var err = new Error("Connection closed");
 				err.code = "CONNECTION_CLOSED";
 				callback(err);
+				callback = null;
 			}
 			
 			CLIENT.fireEvent("connectionLost");
 			
 			
 			// Attempt to reconnect ...
-			
 			reconnectTimeout = setTimeout(function reconnect() {
-				if(CLIENT.connected) return;
+				console.log("CLIENT: reconnect: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
 				
-				console.log("CLIENT: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
+				if(CLIENT.connected) {
+					console.log("CLIENT: reconnect: Already connected! CLIENT.connected=" + CLIENT.connected);
+					return;
+				}
+				
 				CLIENT.connect(server);
 				
 			}, reconnectTimeoutTime);
@@ -544,7 +548,9 @@ reconnectTimeoutTime += 10000;
 		}
 		
 		// Wait some time before sending first ping or we would get a very high ping (because the server is busy?)
-		nextPingTimer = setTimeout(sendPing, 2000);
+		// No! Make the ping request right away so that the user doesn't think we are lagging...
+		//nextPingTimer = setTimeout(sendPing, 2000);
+		sendPing();
 	}
 	
 	function stopPing() {
@@ -552,6 +558,7 @@ reconnectTimeoutTime += 10000;
 		sendingPings = false;
 		clearTimeout(nextPingTimer);
 		clearTimeout(pingTimeout);
+CLIENT.ping = -1;
 	}
 	
 	function sendPing() {

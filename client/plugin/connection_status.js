@@ -58,11 +58,16 @@
 	
 	function renderConnectionStatus(ctx) {
 		
-if(CLIENT.connected && CLIENT.ping == Infinity) {
-var text = S("network_problem");
-var bgColor = "yellow";
-var textColor = "black";
-}
+		if(CLIENT.connected && CLIENT.ping == Infinity) {
+			var text = S("network_problem");
+			var bgColor = "yellow";
+			var textColor = "black";
+		}
+		else if(CLIENT.connected && CLIENT.ping == -1) {
+			var text = S("reconnecting");
+			var bgColor = "green";
+			var textColor = "black";
+		}
 		else if(CLIENT.connected && CLIENT.ping > -1) { 
 			var text = "ping: " + CLIENT.ping;
 			if(CLIENT.ping < 100) {
@@ -79,9 +84,9 @@ var textColor = "black";
 			var bgColor = "red";
 			var textColor = "white";
 		}
-else {
-console.warn("renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
-}
+		else {
+			console.warn("renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
+		}
 		
 		var width = Math.ceil(ctx.measureText(text).width);
 		var height = 20;
@@ -93,9 +98,9 @@ console.warn("renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " 
 		
 		if(text == undefined) return;
 		
-		//ctx.beginPath();
+		// Clear the screen
 		ctx.fillStyle = bgColor;
-		ctx.fillRect(lastX, Math.ceil(y-height/2), lastWidth, height);
+		ctx.fillRect(lastX, Math.ceil(y-height/2), lastWidth+rightPadding, height);
 		
 		ctx.fillStyle = textColor;
 		ctx.fillText(text, x, y);
