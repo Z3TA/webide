@@ -69,6 +69,15 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+I get ping: Infinity on Chromebook, 
+Server log: Client connection (websocket) was closed
+But client doesn't attempt to reconnect!
+But I can reconnect just fine if I open the editor in another tab...
+
+
+When logged in with the same user, you should share worker process!?
+so that for example a terminal session will stay alive if one client disconnects!?
+
 Using combination keys like Ctrl+ ALt+ Ctrl+Shift+ etc requires serious bending of hands/fingers
 example? Ctrl+S
 should there be a command mode, where double tapping ss would save !?

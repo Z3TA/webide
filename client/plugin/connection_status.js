@@ -58,7 +58,12 @@
 	
 	function renderConnectionStatus(ctx) {
 		
-		if(CLIENT.connected && CLIENT.ping > -1) { 
+if(CLIENT.connected && CLIENT.ping == Infinity) {
+var text = S("network_problem");
+var bgColor = "yellow";
+var textColor = "black";
+}
+		else if(CLIENT.connected && CLIENT.ping > -1) { 
 			var text = "ping: " + CLIENT.ping;
 			if(CLIENT.ping < 100) {
 				var bgColor = EDITOR.settings.style.bgColor;
@@ -69,16 +74,14 @@
 				var textColor = "black";
 			}
 		}
-		else if(CLIENT.connected && CLIENT.ping == Infinity) {
-			var text = S("network_problem");
-			var bgColor = "yellow";
-			var textColor = "black";
-		}
 		else if(!CLIENT.connected) {
 			var text = S("disconnected");
 			var bgColor = "red";
 			var textColor = "white";
 		}
+else {
+console.warn("renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
+}
 		
 		var width = Math.ceil(ctx.measureText(text).width);
 		var height = 20;
