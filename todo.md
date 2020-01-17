@@ -69,6 +69,9 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+
+Solve Chromebook disconnect issue before making another release!
+
 I get ping: Infinity on Chromebook, 
 Server log: Client connection (websocket) was closed
 But client doesn't attempt to reconnect!

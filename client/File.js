@@ -3758,6 +3758,12 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 		*/
 		
+		var minIndentation = file.grid[caret.row].indentation;
+		for(var row=file.startRow; row<(file.startRow+EDITOR.view.visibleRows) && row<file.grid.length; row++) {
+			console.log("scrollToCaret: row=" + row + " indentation=" + file.grid[row].indentation + " minIndentation=" + minIndentation);
+			if(file.grid[row].indentation < minIndentation) minIndentation = file.grid[row].indentation;
+		}
+		
 		if((caret.col+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
 			// Caret is after the visible space
 			// We want to see a bit forward, but not more then to eol ? No, it's actually easier to read if we do not make a big jump!
@@ -3766,7 +3772,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			startColumn += delta;
 		}
 		else if(caret.col < (file.startColumn-indentationWidth)) {
-			// Caret is infront of the visible space
+			// Caret is left of the visible space
 			delta = (file.startColumn-indentationWidth) - caret.col;
 			
 			//EDITOR.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
@@ -3776,21 +3782,19 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				// We would prefer if the startColumn was 0
 				// But we don't need to see the indentation
 				// it's annoying if it jumps while reading, but we usually don't read from right to left
-				var minIndentation = file.grid[caret.row].indentation;
-				for(var row=file.startRow; row<(file.startRow+EDITOR.view.visibleRows) && row<file.grid.length; row++) {
-					console.log("scrollToCaret: row=" + row + " indentation=" + file.grid[row].indentation + " minIndentation=" + minIndentation);
-					if(file.grid[row].indentation < minIndentation) minIndentation = file.grid[row].indentation;
-				}
+				
 				if((caret.col+indentationWidth) < EDITOR.view.visibleColumns) startColumn = minIndentation*EDITOR.settings.tabSpace;
 			}
 		}
 		
 		// We want to see the whole line if possible
+// but we also want to see the whole line of the line we are currently on.
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
 			// If possible we would also like to see the start of all lines on the screen
+			if(startColumn > minIndentation) {
+				startColumn = minIndentation;
+			}
 			
-			// todo: Scroll enough to the left so that we can see the start of each line
-// but we also want to see the whole line of the line we are currently on.
 // If we need to scroll, we might just as well scroll a lot,
 // so that we need to scroll less.
 			
