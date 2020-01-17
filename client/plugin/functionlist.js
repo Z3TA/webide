@@ -111,9 +111,9 @@
 	
 	function mobileFubarDetected() {
 		/*
-			Some mobile browser does not allow multi row select box.
+			Some mobile browser's does not allow multi row select box.
 			Meaning there will be unneccesary empty space
-			So place the function list where it doesn't take up space
+			So place the function list in the menu where it doesn't take up space
 			
 		*/
 		
@@ -506,6 +506,9 @@ leftColumn.removeChild(functionListWrap);
 				domModel = makeDomModel(file.parsed.functions);
 				
 				buildFunctionList(domModel);
+
+functionListSelect.setAttribute("filePath", file.path);
+
 				
 				setTimeout(highlightCurrentFunction, 10); // Does not scroll unless we set it in the future ...
 				
@@ -605,9 +608,16 @@ console.warn("functionListWrap not available!");
 			functionListSelect.setAttribute("multiple", "multiple");
 			
 			functionListSelect.onchange = function(e) {
+				var filePath = functionListSelect.getAttribute("filePath");
+				var file = EDITOR.files[filePath];
+				
+				if(!file) return;
+				
 				var line = functionListSelect.options[functionListSelect.selectedIndex].value;
 				if(isNaN(line)) throw new Error("line=" + line + " options=" + JSON.stringify(functionListSelect.options) + " selectedIndex=" + functionListSelect.selectedIndex);
-				EDITOR.currentFile.scrollToLine(line);
+				
+				if(EDITOR.currentFile != file) EDITOR.showFile(file);
+				file.scrollToLine(line);
 				EDITOR.dashboard.hide();
 			}
 			functionListSelect.onfocus = function(e) {
