@@ -4521,23 +4521,22 @@ if(menuItem.parentMenu) {
 			
 			menu.appendChild(li);
 			
-
-if(options.separator) {
-var separator =  document.createElement("li");
-separator.classList.add("sep");
-separator.setAttribute("addedby", fName);
-				separator.setAttribute("foo", "bar");
+			// Add the separator before reordering, because it also needs to be ordered
+			if(options.separator) {
+				var separator =  document.createElement("li");
+				separator.classList.add("sep");
+				separator.setAttribute("addedby", fName);
 				
-if(options.order) {
-separator.setAttribute("position", options.order);
-}
-else {
-separator.setAttribute("position", defaultPosition);
-}
+				if(options.order) {
+					separator.setAttribute("position", options.order);
+				}
+				else {
+					separator.setAttribute("position", defaultPosition);
+				}
 				console.log("EDITOR.ctxMenu.addItem: Added separator=", separator, " fName=" + fName + " options.order=" + options.order);
-
-menu.appendChild(separator);
-}
+				
+				menu.appendChild(separator);
+			}
 
 			// Re-order positions of the menu items
 			var itemCount = options.temp ? 100 : 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200
@@ -4568,6 +4567,9 @@ menu.appendChild(separator);
 				
 			});
 			
+			
+			// Prevent double separators
+			if(separator && menu.lastChild.className == "sep" && menu.lastChild != separator) menu.removeChild(separator);
 			
 			
 			if(!CONTEXT_MENU_IS_FULL_SCREEN && options.temp) {
