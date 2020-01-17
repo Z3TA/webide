@@ -1,7 +1,9 @@
 (function() {
 "use strict";
 
-	var hasProblem = false;
+	var lastX = 0;
+	var lastWidth = 10;
+	var rightPadding = 5;
 	
 	EDITOR.plugin({
 		desc: "Show connection status",
@@ -14,6 +16,9 @@
 			CLIENT.on("workerClose", workerClose);
 			
 			EDITOR.addRender(renderConnectionStatus, 4900);
+			
+			lastWidth = 50;
+			lastX = EDITOR.canvas.width - lastWidth - rightPadding;
 			
 		},
 		unload: function unloadConnectionStatus() {
@@ -29,24 +34,27 @@
 	});
 
 	function connectionConnected() {
-		EDITOR.renderNeeded();
+		renderConnectionStatus(EDITOR.canvasContext);
 	}
 	
 	function connectionLost() {
-		EDITOR.renderNeeded();
+		renderConnectionStatus(EDITOR.canvasContext);
 	}
 	
 	function workerClose() {
-		EDITOR.renderNeeded();
+		renderConnectionStatus(EDITOR.canvasContext);
 	}
 	
 	function pingChange(ping) {
-		EDITOR.renderNeeded();
+		renderConnectionStatus(EDITOR.canvasContext);
 	}
 	
 	function pingTimeout() {
-		EDITOR.renderNeeded();
+		renderConnectionStatus(EDITOR.canvasContext);
 	}
+	
+	
+	
 	
 	function renderConnectionStatus(ctx) {
 		
@@ -61,7 +69,7 @@
 				var textColor = "black";
 			}
 		}
-		else if(CLIENT.connected && CLIENT.ping == -1) {
+		else if(CLIENT.connected && CLIENT.ping == Infinity) {
 			var text = S("network_problem");
 			var bgColor = "yellow";
 			var textColor = "black";
@@ -75,18 +83,22 @@
 		var width = Math.ceil(ctx.measureText(text).width);
 		var height = 20;
 		
-		var x = EDITOR.canvas.width - width - 5;
+		var x = EDITOR.canvas.width - width - rightPadding;
 		var y = 20;
 		
+		console.log("renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
+		
+		if(text == undefined) return;
 		
 		//ctx.beginPath();
 		ctx.fillStyle = bgColor;
-		ctx.fillRect(x, Math.ceil(y-height/2), width, height);
+		ctx.fillRect(lastX, Math.ceil(y-height/2), lastWidth, height);
 		
 		ctx.fillStyle = textColor;
 		ctx.fillText(text, x, y);
 		
-		console.log("renderConnectionStatus: text=" + text + " x=" + x + " y=" + y);
+		lastX = x;
+		lastWidth = width;
 		
 	}
 	

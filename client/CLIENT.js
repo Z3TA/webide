@@ -43,7 +43,7 @@ var CLIENT = {}; // Client object is global
 	var WEBSOCK_OPEN = 1;
 	
 	CLIENT.connected = false;
-	CLIENT.ping = 0;
+	CLIENT.ping = -1;
 	
 	var checkEditorInterval = setInterval(checkEditor);
 	
@@ -543,8 +543,8 @@ reconnectTimeoutTime += 10000;
 			return;
 		}
 		
-		nextPingTimer = setTimeout(sendPing, 1000);
-		
+		// Wait some time before sending first ping or we would get a very high ping (because the server is busy?)
+		nextPingTimer = setTimeout(sendPing, 2000);
 	}
 	
 	function stopPing() {
@@ -555,7 +555,6 @@ reconnectTimeoutTime += 10000;
 	}
 	
 	function sendPing() {
-		
 		var start = timer();
 		console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
 		CLIENT.cmd("ping", {data: ++pingCounter}, function(err, resp) {
@@ -567,21 +566,21 @@ reconnectTimeoutTime += 10000;
 			}
 			var end = timer();
 			var ping = Math.round(end-start);
+			//var ping = Math.round((end-start)*10) / 10;
 			if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
 			CLIENT.ping = ping;
 			clearTimeout(pingTimeout);
 			
 			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 			
-			if(resp != pingCounter) throw new Error("resp=" + resp + " pingCounter=" + pingCounter + "");
+			if(resp != pingCounter) throw new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
 			
 			nextPingTimer = setTimeout(sendPing, 5000);
 		});
 		var pingTimeout = setTimeout(function() {
-			CLIENT.ping = -1;
+			CLIENT.ping = Infinity;
 			CLIENT.fireEvent("pingTimeout");
 		}, 1000);
-		
 	}
 	
 	console.log("CLIENT: End of CLIENT.js");
