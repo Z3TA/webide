@@ -1,14 +1,12 @@
 (function() {
 	"use strict";
 	
-/*
-
-todo: Refactor file_explorer.js to use this, where file_exporer and also other plugins need to listen for move event
-
-*/
-
-	EDITOR.on("ctxMenu", copyFilePathCtxmenuOption);
-
+	/*
+		
+		todo: Refactor file_explorer.js to use this, where file_exporer and also other plugins need to listen for move event
+		
+	*/
+	
 	var winMenuItem;
 	
 	EDITOR.plugin({
@@ -47,6 +45,25 @@ todo: Refactor file_explorer.js to use this, where file_exporer and also other p
 	}
 	
 	function renameFile(filePath) {
+
+		var dialog = promptBox("Rename file:", {defaultValue: filePath}, pickedNewPath);
+		var inputElement = dialog.input;
+		var folderPicker = makeFolderPicker(inputElement);
+		
+		dialog.div.classList.add("wide");
+		
+		// Insert the folder picker buttons directly after the input element
+		inputElement.parentNode.insertBefore( folderPicker, inputElement.nextSibling );
+		
+EDITOR.ctxMenu.hide();
+		
+		function pickedNewPath(newPath) {
+			if(!newPath) return;
+			
+			EDITOR.move(filePath, newPath, function fileRenamed(err, newPath) {
+				if(err) alertBox(err.message);
+			});
+		}
 		
 	}
 	

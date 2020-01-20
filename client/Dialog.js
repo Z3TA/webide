@@ -494,6 +494,8 @@ function promptBox(msg, options, callback, recursionCount) {
 	dialog.div.appendChild(cancel);
 	dialog.div.appendChild(ok);
 	
+dialog.input = input; // For easy access
+
 	if(dialogDelay === 0) {
 		document.activeElement.blur();
 		if(typeof EDITOR != "undefined") {

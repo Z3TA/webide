@@ -1454,6 +1454,16 @@ div.gotoFile li:hover {
 	word-wrap: break-word;
 }
 
+.dialog.wide {
+	max-width: 800px;
+	max-width: 90vw;
+	
+	left: 0!important;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .dialog .message {
 	min-width: 360px;
 	min-height: 32px;
@@ -1855,7 +1865,7 @@ div.group {
 	max-width: 260px; /* many rows */
 }
 
-.folderPicker button, .filePicker button {
+.folderPicker button, .filePicker button, .folderPicker button.folder {
 	font-size: 1em;
 	padding: 2px;
 	margin: 2px;
@@ -1869,6 +1879,35 @@ div.group {
 .folderPicker button:focus {
 	background-color: #ffffff;
 }
+
+div.folderPicker {
+	margin: 7px;
+	margin-top: 0;
+	display: block;
+}
+
+div.folderPicker button.folder {
+	font-size: 1em;
+	padding: 2px;
+	margin: 2px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+	border: none;
+	border-radius: 5px;
+	min-width: 2em;
+	background: none;
+	background-color: #dcdcdc;
+	
+	
+	box-shadow: none;
+	color: black;
+	min-width: none;
+	cursor: default;
+	text-shadow: none;
+	
+	font-family: Segoe UI, sans-serif;
+}
+
 
 
 /* 
