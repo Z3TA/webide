@@ -9,16 +9,21 @@
 		desc: "Show connection status",
 		load: function loadConnectionStatus() {
 			
-			CLIENT.on("pingChange", pingChange);
-			CLIENT.on("pingTimeout", pingTimeout);
-			CLIENT.on("connectionConnected", connectionConnected);
-			CLIENT.on("connectionLost", connectionLost);
-			CLIENT.on("workerClose", workerClose);
-			
-			EDITOR.addRender(renderConnectionStatus, 4900);
-			
-			lastWidth = 50;
-			lastX = EDITOR.canvas.width - lastWidth - rightPadding;
+			setTimeout(function waitUntilFirstResize() {
+				EDITOR.addRender(renderConnectionStatus, 4900);
+				
+				CLIENT.on("pingChange", pingChange);
+				CLIENT.on("pingTimeout", pingTimeout);
+				CLIENT.on("connectionConnected", connectionConnected);
+				CLIENT.on("connectionLost", connectionLost);
+				CLIENT.on("workerClose", workerClose);
+				
+				lastWidth = 50;
+				lastX = EDITOR.canvas.width - lastWidth - rightPadding;
+				
+				renderConnectionStatus(EDITOR.canvasContext);
+				
+			}, 1000);
 			
 		},
 		unload: function unloadConnectionStatus() {
