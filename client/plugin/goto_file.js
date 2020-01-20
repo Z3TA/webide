@@ -27,7 +27,6 @@
 	var lastSearchText = "";
 	var lastTypedText = "";
 	var menuItem;
-	var folderPicker;
 	var winMenuGotoFile;
 	var gotoLine = null;
 	var discoveryBarIcon;
@@ -326,20 +325,27 @@ if(CHROMEBOOK) {
 		gotoDiv.appendChild(cancelButton);
 		
 		
-		
-		folderPicker = document.createElement("div");
-		folderPicker.setAttribute("class", "folderPicker");
+		var folderPicker = makeFolderPicker(inputFolder, {
+			focus: false
+			
+		});
 		gotoDiv.appendChild(folderPicker);
 		
+		
 		footer.appendChild(gotoDiv);
+		
 		
 		gotoButton.addEventListener("click", gotoFile, false);
 		
 		cancelButton.addEventListener("click", hide_gotoFileInput, false);
 		
 		inputGoto.addEventListener("keyup", typing, false);
-		inputGoto.addEventListener("keydown", keydown, false);
+		
 		inputGoto.addEventListener('paste', paste, false);
+		
+		
+		inputFolder.addEventListener("input", folderChange);
+		inputFolder.addEventListener("change", folderChange);
 		
 		//inputFolder.addEventListener("keyup", chandingDir, false);
 		
@@ -349,48 +355,22 @@ if(CHROMEBOOK) {
 		
 	}
 	
-	function keydown(keyDownEvent) {
-		while(folderPicker.firstChild) folderPicker.removeChild(folderPicker.firstChild); // Clear options
+	function folderChange() {
+		var directory = inputFolder.value;
+		var isDirectory = UTIL.isDirectory(directory);
+		console.log("goto_file: folderChange: directory=" + directory + " isDirectory=" + isDirectory);
 		
-		var code = UTIL.code(keyDownEvent);
-		
-		if(code == keyTab) {
-			var text = inputGoto.value;
-			if(text.length == 0) return ALLOW_DEFAULT;
+		if(isDirectory) {
+			lastSearchText = ""; // Force another search in the new folder
 			
-			EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path, options) {
-				console.log("goto_file: autoCompletePath text=" + text + " path=" + path + " err=" + err + " options=" + JSON.stringify(options));
-				if(err && err.code != "ENOENT") return alertBox(err.message);
-				else if(!err && path != inputGoto.value) {
-					inputGoto.value = path;
-				typing();
-				}
-				console.log("goto_file: autoCompletePath path=" + text + " options.length=" + (options && options.length) + " options=" + JSON.stringify(options));
-				if(options && options.length > 1) {
-					options.forEach(addFolderOption);
-					EDITOR.resizeNeeded();
-				}
-			});
-			keyDownEvent.preventDefault();
-			return PREVENT_DEFAULT;
-		}
-		else return ALLOW_DEFAULT;
-	}
-	
-	function addFolderOption(path) {
-		var button = document.createElement("button");
-		var name = UTIL.getFolderName(path);
-		button.innerText = name;
-		button.onclick = function clickButton() {
-			inputGoto.value = path;
-			inputGoto.focus();
 			typing();
 		}
-		folderPicker.appendChild(button);
 	}
 	
 	function paste(pasteEvent) {
 		// Pasting into inputGoto
+		
+		// The paste event only seem to trigger if the input is empty! (not when text is selected!)
 		
 		if(inputGoto.value) return true; // There's already text, don't mess it up
 		
@@ -402,6 +382,8 @@ if(CHROMEBOOK) {
 		
 		text = text.trim();
 		
+		console.log("goto_file: paste: text=" + text);
+		
 		if(text.indexOf("/") != -1 || text.indexOf("\\") != -1) {
 			// It's probably a path.
 			
@@ -412,6 +394,8 @@ if(CHROMEBOOK) {
 			
 			inputGoto.value = file;
 			inputFolder.value = dir;
+			inputFolder.dispatchEvent(new Event('input'));
+			
 			
 			pasteEvent.preventDefault();
 			typing();
@@ -423,6 +407,7 @@ if(CHROMEBOOK) {
 	}
 	
 	function typing(keyUpEvent) {
+		console.log("goto_file: typing...");
 		
 		var text = inputGoto.value;
 		
@@ -476,7 +461,8 @@ if(CHROMEBOOK) {
 				return;
 			}
 			lastTypedText = text;
-			if(isSearching) {
+			
+			if(isSearching && 1==2) {
 				console.log("goto_file: abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
 				inputFolder.value = inputFolder.getAttribute("default");
@@ -1065,7 +1051,10 @@ abortFindFiles();
 	
 	function gotoFilePathGlob(folder) {
 		console.log("goto_file: gotoFilePathGlob: folder=" + folder);
-		if(inputFolder) inputFolder.value = folder;
+		if(inputFolder) {
+inputFolder.value = folder;
+			inputFolder.dispatchEvent(new Event('input'));
+		}
 	}
 	
 	function abortFindFiles() {

@@ -1,13 +1,15 @@
 
-function makeFolderPicker(inputPath) {
+function makeFolderPicker(inputPath, options) {
  // Returns a new div where folder suggestions will show
  
  var suggestedFolderButtons = {};
- 
+ var lastKeyDownCode = 0;
  
  if(typeof inputPath.nodeName == "undefined") throw new Error("First argument to makeFolderPicker needs to be a input element!"); 
  if(inputPath.nodeName != "INPUT" && inputPath.nodeName != "TEXTAREA") throw new Error("First argument to makeFolderPicker needs to be either an input or textarea element!"); 
  // Are there any other elements that allows text input !?
+ 
+ if(options == undefined) options = {};
  
  inputPath.addEventListener("keydown", pathKeyDown); // input value has not been updated
  inputPath.addEventListener("input", pathKeyInput); // input value HAS been updated! Also captures most changes.
@@ -56,10 +58,14 @@ function makeFolderPicker(inputPath) {
  }
  
  function pathKeyDown(keyDownEvent) {
-  console.log("pathKeyDown: inputPath.value=" + inputPath.value);
+  console.log("makeFolderPicker: pathKeyDown: inputPath.value=" + inputPath.value);
   var keyTab = 9;
   // Autocomplete the path when pressing tab
-  if(keyDownEvent.keyCode == keyTab) {
+  // Allow user to go to previous input element using shift+tab,
+  // But he/she needs to press tab two times in a row to go to the next element
+  if(keyDownEvent.keyCode == keyTab && !keyDownEvent.shiftKey && lastKeyDownCode != keyTab) {
+   lastKeyDownCode = keyTab;
+   
    var text = inputPath.value;
    if(text.length == 0) return ALLOW_DEFAULT;
    
@@ -68,9 +74,11 @@ function makeFolderPicker(inputPath) {
    if(caretPos != text.length) {
     var afterCaret = text.slice(caretPos);
     text = text.slice(0, caretPos);
-    console.log("afterCaret=" + afterCaret);
-    console.log("text=" + text);
+    console.log("makeFolderPicker: pathKeyDown: afterCaret=" + afterCaret);
+    console.log("makeFolderPicker: pathKeyDown: text=" + text);
    }
+   
+   if(text == "") return ALLOW_DEFAULT;
    
    EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path) {
     if(err && err.code != "ENOENT") return alertBox(err.message);
@@ -80,7 +88,11 @@ function makeFolderPicker(inputPath) {
       inputPath.value = path + afterCaret;
       setCaretPosition(inputPath, path.length);
      }
-     else inputPath.value = path;
+     else {
+inputPath.value = path;
+     }
+     
+     inputPath.dispatchEvent(new Event('change'));
      
      if(UTIL.isDirectory(path)) suggestFolders(path);
     }
@@ -88,11 +100,14 @@ function makeFolderPicker(inputPath) {
    keyDownEvent.preventDefault();
    return PREVENT_DEFAULT;
   }
-  else return ALLOW_DEFAULT;
+  
+  lastKeyDownCode = keyDownEvent.keyCode;
+  
+  return ALLOW_DEFAULT;
  }
  
  function pathKeyInput(inputEvent) {
-  console.log("pathKeyInput: inputPath.value=" + inputPath.value);
+  console.log("makeFolderPicker: pathKeyInput: inputPath.value=" + inputPath.value);
   
   suggestFolders(inputPath.value);
   return ALLOW_DEFAULT;
@@ -102,9 +117,9 @@ function makeFolderPicker(inputPath) {
  function suggestFolders(pathValue) {
   // Does the path match any of the path-pickers ?
   
-  console.log("pathValue=" + pathValue);
+  console.log("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
   if(!pathValue) {
-   console.warn("pathValue=" + pathValue);
+   console.warn("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
    return;
   }
   
@@ -141,9 +156,9 @@ function makeFolderPicker(inputPath) {
    
    for (var i=0, part; i<suggestedFolders.length; i++) {
     part = suggestedFolders[i].slice(0, pathValue.length)
-    console.log("(" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
+    console.log("makeFolderPicker: highLight: (" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
     if(part == pathValue) {
-     console.log("Highlight: " + suggestedFolders[i]);
+     console.log("makeFolderPicker: highLight: Highlight: " + suggestedFolders[i]);
      suggestedFolderButtons[suggestedFolders[i]].classList.add("highlighted");
     }
     else {
@@ -182,7 +197,7 @@ function makeFolderPicker(inputPath) {
   return ALLOW_DEFAULT;
   
   function addFolder(name) {
-   console.log("Adding folder button name=" + name);
+   console.log("makeFolderPicker: addFolder: Adding folder button name=" + name);
    
    var fullPath = UTIL.resolvePath(pathToFolder, name);
    fullPath = UTIL.trailingSlash(fullPath);
@@ -193,7 +208,9 @@ function makeFolderPicker(inputPath) {
    button.onclick = function clickButton() {
     inputPath.value = fullPath;
     suggestFolders(fullPath);
-    inputPath.focus();
+    if(options.focus !== false) inputPath.focus();
+    
+    inputPath.dispatchEvent(new Event('change'));
    }
    
    suggestedFolderButtons[fullPath] = button;

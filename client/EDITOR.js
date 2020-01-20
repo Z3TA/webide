@@ -8901,7 +8901,7 @@ EDITOR.discoveryBar.show();
 			progressMax = 1;
 		}
 		
-		if(increment.length == 0) {
+			if(increment.length == 0) {
 			// Finish
 			progress.style.display="none";
 			EDITOR.resizeNeeded();

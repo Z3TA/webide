@@ -3150,6 +3150,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 	var findFile = json.name;
 	var useRegexp = json.useRegexp || false;
 	var ignore = json.ignore || [];
+	var allowGlobbing = json.allowGlob; // If set to true it will automatically search parent folders
 	
 		if(startFolder == undefined) return finish(new Error("startFolder=" + startFolder));
 		if(findFile == undefined) return finish(new Error("findFile=" + findFile));
@@ -3250,12 +3251,12 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 			else if(FIND_FILES_IN_FLIGHT < maxConcurrency && searchQueue.length > 0) {
 				for (var i=FIND_FILES_IN_FLIGHT; i<maxConcurrency && searchQueue.length > 0; i++) searchFolder(searchQueue.pop());
 			}
-				else if(FIND_FILES_IN_FLIGHT == 0 && searchQueue.length == 0 && folders.length > 0) {
+			else if(allowGlobbing && FIND_FILES_IN_FLIGHT == 0 && searchQueue.length == 0 && folders.length > 0) {
 					currentFolder = folders.pop();
 					user.send({pathGlob: currentFolder});
 					searchFolder(currentFolder);
 				}
-				else if(FIND_FILES_IN_FLIGHT == 0 && searchQueue.length == 0 && folders.length == 0) {
+				else if(FIND_FILES_IN_FLIGHT == 0 && searchQueue.length == 0) {
 					finish(null);
 				}
 				else if(FIND_FILES_IN_FLIGHT == 0) throw new Error("Unexpected: FIND_FILES_IN_FLIGHT=" + FIND_FILES_IN_FLIGHT + " folders=" + JSON.stringify(folders) +
