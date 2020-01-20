@@ -200,6 +200,8 @@ console.time = console.timeEnd = function() {};
 		
 		console.log = console.warn = log;
 		
+alert("Debug mode enabled!");
+
 		//CLIENT.cmd("log", {data: "Debug mode enabled"});
 		
 		function log() {
