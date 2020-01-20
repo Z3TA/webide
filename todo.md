@@ -69,14 +69,16 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+Alt+Backspace doesn't work on chromebook
+
 Sometimes the editor gets into a state where:
 * It doesn't scroll to caret at eol when you hit keyboard up to a long line
 * Last part of the line disappears when you scroll to the right
 * Throws sanity check errors where  EDITOR.view.endingColumn=111 file.startColumn=2 EDITOR.view.visibleColumns=111 
+* Funcion list jumps between different functions even though we are moving the mouse inside the same functions! (in EDITOR.js keyisup)
+* Doesn't automatically scroll when you click to place mouse caret
 
-Funcion list is jumps between different functions even though we are moving the mouse inside the same functions!
-EDITOR.js keyisup
-
+Resizing fixes it!
 
 can we capture meta key and prevent default ? DOes it work in A2D mode?
 
