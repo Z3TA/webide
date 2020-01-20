@@ -3,37 +3,65 @@
 
 	var lastWidth = 50;
 	var rightPadding = 5;
+	var winMenuItem;
+	var enabled = false;
 	
 	EDITOR.plugin({
 		desc: "Show connection status",
 		load: function loadConnectionStatus() {
 			
-			setTimeout(function waitUntilFirstResize() {
-				EDITOR.addRender(renderConnectionStatus, 4900);
-				
-				CLIENT.on("pingChange", pingChange);
-				CLIENT.on("pingTimeout", pingTimeout);
-				CLIENT.on("connectionConnected", connectionConnected);
-				CLIENT.on("connectionLost", connectionLost);
-				CLIENT.on("workerClose", workerClose);
-				
-				renderConnectionStatus(EDITOR.canvasContext);
-				
-			}, 1000);
+			winMenuItem = EDITOR.windowMenu.add(S("ping_and_network_status"), [S("View"), 70], toggleNetworkStatus);
+			
+			if(enabled) {
+				// Wait for first resize...
+				setTimeout(enable, 1000);
+			}
 			
 		},
 		unload: function unloadConnectionStatus() {
 			
-			CLIENT.removeEvent("pingChange", pingChange);
-			CLIENT.removeEvent("pingTimeout", pingTimeout);
-			CLIENT.removeEvent("connectionConnected", connectionConnected);
-			CLIENT.removeEvent("connectionLost", connectionLost);
-			CLIENT.removeEvent("workerClose", workerClose);
+			disable();
 			
-			EDITOR.removeRender(renderConnectionStatus);
+			EDITOR.windowMenu.remove(winMenuItem);
+			
 		}
 	});
 
+	function enable() {
+		EDITOR.addRender(renderConnectionStatus, 4900);
+		
+		CLIENT.on("pingChange", pingChange);
+		CLIENT.on("pingTimeout", pingTimeout);
+		CLIENT.on("connectionConnected", connectionConnected);
+		CLIENT.on("connectionLost", connectionLost);
+		CLIENT.on("workerClose", workerClose);
+		
+		renderConnectionStatus(EDITOR.canvasContext);
+		
+		winMenuItem.activate();
+	}
+	
+	function disable() {
+		CLIENT.removeEvent("pingChange", pingChange);
+		CLIENT.removeEvent("pingTimeout", pingTimeout);
+		CLIENT.removeEvent("connectionConnected", connectionConnected);
+		CLIENT.removeEvent("connectionLost", connectionLost);
+		CLIENT.removeEvent("workerClose", workerClose);
+		
+		EDITOR.removeRender(renderConnectionStatus);
+		
+		EDITOR.renderNeeded();
+		
+		winMenuItem.deactivate();
+	}
+	
+	function toggleNetworkStatus() {
+		enabled = !enabled;
+		
+		if(enabled) enable();
+		else disable();
+	}
+	
 	function connectionConnected() {
 		renderConnectionStatus(EDITOR.canvasContext);
 	}
