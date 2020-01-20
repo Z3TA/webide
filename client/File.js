@@ -3791,8 +3791,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 // but we also want to see the whole line of the line we are currently on.
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
 			// If possible we would also like to see the start of all lines on the screen
-			if(startColumn > minIndentation) {
-				startColumn = minIndentation;
+			if(startColumn > minIndentation*EDITOR.settings.tabSpace) {
+				startColumn = minIndentation*EDITOR.settings.tabSpace;
 			}
 			
 // If we need to scroll, we might just as well scroll a lot,
