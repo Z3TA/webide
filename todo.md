@@ -69,6 +69,18 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+Able to right click on a file tab and rename file
+
+When using  the up/down arrow keys when Open-file dialog is open, we get errors...
+
+DirectoryPicker(inputElement) use it for picking a folder when opening a file
+
+
+when opening a file, and changing dir while searching,
+it changes back to old dir.
+dir autocomplete would also be nice.
+
+
 lack of home key on CHromebooks, how to quickly scroll up!?
 
 Implementing standard keyboard shortcuts:
