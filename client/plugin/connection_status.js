@@ -1,8 +1,7 @@
 (function() {
 "use strict";
 
-	var lastX = 0;
-	var lastWidth = 10;
+	var lastWidth = 50;
 	var rightPadding = 5;
 	
 	EDITOR.plugin({
@@ -17,9 +16,6 @@
 				CLIENT.on("connectionConnected", connectionConnected);
 				CLIENT.on("connectionLost", connectionLost);
 				CLIENT.on("workerClose", workerClose);
-				
-				lastWidth = 50;
-				lastX = EDITOR.canvas.width - lastWidth - rightPadding;
 				
 				renderConnectionStatus(EDITOR.canvasContext);
 				
@@ -99,18 +95,23 @@
 		var x = EDITOR.canvas.width - width - rightPadding;
 		var y = 20;
 		
+		var lastX = EDITOR.canvas.width - lastWidth - rightPadding;
+		
 		console.log("renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
 		
 		if(text == undefined) return;
 		
-		// Clear the screen
-		ctx.fillStyle = bgColor;
+		// Clear the screen from last message
+		ctx.fillStyle = EDITOR.settings.style.bgColor;
 		ctx.fillRect(lastX, Math.ceil(y-height/2), lastWidth+rightPadding, height);
+		
+// Fill background for new message
+		ctx.fillStyle = bgColor;
+		ctx.fillRect(x, Math.ceil(y-height/2), width+rightPadding, height);
 		
 		ctx.fillStyle = textColor;
 		ctx.fillText(text, x, y);
 		
-		lastX = x;
 		lastWidth = width;
 		
 	}
