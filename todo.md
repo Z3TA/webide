@@ -69,6 +69,13 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+lack of home key on CHromebooks, how to quickly scroll up!?
+
+Implementing standard keyboard shortcuts:
+https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
+
+https://defkey.com/what-means/alt-space
+
 Alt+Backspace doesn't work on chromebook
 
 Sometimes the editor gets into a state where:
@@ -80,7 +87,7 @@ Sometimes the editor gets into a state where:
 
 Resizing fixes it!
 
-can we capture meta key and prevent default ? DOes it work in A2D mode?
+can we capture meta key and prevent default ? DOes it work in A2D mode? nope and nope
 
 can the special keyboard keys on the chromebook be captured!?
 magnifying glass = key=Meta charCode=91

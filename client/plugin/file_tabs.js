@@ -54,14 +54,19 @@
 		var key_pageDown = 34;
 		var key_tab = 9;
 		var key_backspace = 8;
+		var key_ArrowLeft = 37;
 		
 		// Can not bind to Ctrl + Tab when in the browser
 			// Ctrl+Shift+Tab doesn't work in Firefox
 			// Shift+Tab is used for deindention
-			
-			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: ALT, fun: switchTab});
+		// Alt+Backspace is the Del button on most programs
 		
-		if(DISPLAY_MODE == "standalone") {
+		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL+SHIFT, fun: switchTab});
+		
+		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_ArrowLeft, combo: CTRL+SHIFT, fun: switchTab2});
+		
+		
+		if(DISPLAY_MODE == "standalone" || CHROMEBOOK) {
 			// We can bind to Ctrl + Tab when the app was launched from the desktop or home screen
 			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL, fun: switchTabInStandaloneMode}); // Ctrl + tab
 		}
@@ -238,6 +243,10 @@
 	
 	
 function switchTabInStandaloneMode() {
+return switchTab();
+}
+
+function switchTab2() {
 return switchTab();
 }
 

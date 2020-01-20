@@ -66,6 +66,11 @@
 		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
 		EDITOR.bindKey({desc: S("hide_goto_file_widget"), charCode: charEscape, fun: hide_gotoFileInput});
 		
+if(CHROMEBOOK) {
+		// On Chromebooks Alt+Search activates caps lock, Shift+Search shows the app menu in full screen.
+		EDITOR.bindKey({desc: S("open_file_by_searching"), key: "Meta", combo: CTRL+ALT, fun: openFileViaChromebookSearch});
+		}
+
 		//  hmm, can I move these to keyup on the input box? probably not
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyUp, fun: gotoFile_moveUp});
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyDown, fun: gotoFile_moveDown});
@@ -629,6 +634,10 @@ if(maxResults <= 0) {
 	
 	// Can't have event listeners with the same name
 	function show_gotoFileInput2(file, combo) {
+		return show_gotoFileInput(file, combo);
+	}
+	
+	function openFileViaChromebookSearch(file, combo) {
 		return show_gotoFileInput(file, combo);
 	}
 	

@@ -35,6 +35,10 @@
 		// Pressing Ctrl + shift + F should hide or show the search window
 		EDITOR.bindKey({desc: S("find_in_files"), charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + Shift + F
 		
+if(CHROMEBOOK) {
+		EDITOR.bindKey({desc: S("find_in_files"), key: "Meta", combo: CTRL+SHIFT, fun: findInFilesViaChromebookSearch});
+		}
+
 		EDITOR.bindKey({desc: S("hide_find_in_files_widget"), charCode: keyEscape, fun: hideFindInFilesGui});
 		
 		winMenuFindInFiles = EDITOR.windowMenu.add(S("find_in_files"), [S("File"), 8], findInFiles);
@@ -364,6 +368,10 @@ console.warn("Could not find the search string that was used!");
 function findInFilesTool(file) {
 findInFiles(file);
 return true;
+}
+
+function findInFilesViaChromebookSearch(file) {
+return findInFiles(file);
 }
 
 	function findInFiles(file) {

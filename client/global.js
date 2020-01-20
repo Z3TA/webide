@@ -109,7 +109,8 @@ var MSIE = (BROWSER.indexOf("MSIE") == 0); // If we are on Internet Explorer
 var MSWIN = (process.platform == "win32"); // If we are on Windows (any version)
 var LINUX = (process.platform == "linux"); // If we are on Linux
 var MAC = (navigator.platform.indexOf("Mac") != -1); // If we are on a Mac(book)
-
+var CHROMEBOOK = (navigator.userAgent.indexOf("CrOS") != -1);
+var FIREFOX = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);
 
 // Global constants, note that const is block scoped!! (can't if(foo) const bar =1)
 // Don't use const just yet (not all browsers support it)'

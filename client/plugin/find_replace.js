@@ -31,8 +31,9 @@
 		
 		EDITOR.bindKey({desc: S("hide_find_replace_widget"), charCode: char_Esc, fun: hideFindReplaceGui});
 		
-		EDITOR.bindKey({desc: S("find_replace"), key: "Meta", combo: 0, fun: findReplaceViaChromebookSearch});
-		
+if(CHROMEBOOK) {
+		EDITOR.bindKey({desc: S("find_replace"), key: "Meta", combo: CTRL, fun: findReplaceViaChromebookSearch});
+		}
 		
 		EDITOR.on("moveCaret", resetLastSearchStrLength);
 		
@@ -472,7 +473,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 	}
 	
 	function findReplaceViaChromebookSearch(file, combo, char, charCode, direction, targetClass, keyDownEvent) {
-		keyDownEvent.preventDefault();
+		//keyDownEvent.preventDefault();
 		return findReplace(file);
 	}
 	
