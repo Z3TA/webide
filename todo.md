@@ -69,6 +69,17 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
+Sometimes the editor gets into a state where:
+* It doesn't scroll to caret at eol when you hit keyboard up to a long line
+* Last part of the line disappears when you scroll to the right
+* Throws sanity check errors where  EDITOR.view.endingColumn=111 file.startColumn=2 EDITOR.view.visibleColumns=111 
+
+Funcion list is jumps between different functions even though we are moving the mouse inside the same functions!
+EDITOR.js keyisup
+
+
+can we capture meta key and prevent default ? DOes it work in A2D mode?
+
 can the special keyboard keys on the chromebook be captured!?
 magnifying glass = key=Meta charCode=91
 left f arrow = keyIsDown: key=BrowserBack charCode=166

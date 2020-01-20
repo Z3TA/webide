@@ -235,6 +235,8 @@ leftColumn.removeChild(functionListWrap);
 		var scrollTo;
 		for(var i=0; i<domModel.length; i++) {
 			if(domModel[i].option && domModel[i].start <= caret.index && domModel[i].end >= caret.index) {
+				//console.log("highlightCurrentFunction: caret.index=" + caret.index + " start=" + domModel[i].start + " end= ");
+				
 				domModel[i].option.selected = true;
 				
 				// Make sure parent is deselected
