@@ -10,7 +10,7 @@
 	
 EDITOR.plugin({
 		desc: "Able to toggle sub pixel antialias",
-		load: function loadExploadingCharacters() {
+		load: function loadSubpixelConfig() {
 			
 			/*
 				if(window.devicePixelRatio > 1) {
@@ -86,7 +86,7 @@ EDITOR.ctxMenu.hide();
 			
 			
 		},
-		unload: function unloadExploadingCharacters() {
+		unload: function unloadSubpixelConfig() {
 			
 			setSubpixelAntialias(defaultSubpixelAntialias, true)
 			
