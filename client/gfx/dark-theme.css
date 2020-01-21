@@ -118,6 +118,14 @@ ul#tabList li.tabFileItem a:visited {
 ul#tabList li.tabFileItem.active a {
 	padding-bottom: 1px;
 	border-bottom: 1px solid orange;
+
+	/* text appears to be bold on Macbook due to leaking sub pixels, making you beleave the file is not saved, fixed by disabling supbixel-antialias */
+	font-smooth: never! important;
+	font-smoothing: antialiased !important;
+	-webkit-font-smoothing: antialiased !important;
+	-moz-font-smoothing: grayscale !important;
+	-moz-osx-font-smoothing: grayscale !important;
+	
 	color: #f2f2f2;
 }
 
