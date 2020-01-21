@@ -69,12 +69,20 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
-todo: Hide the "run node.js script" widget when a file that is not a nodejs file is in view!
+EDITOR.once not working !?
 
-When using  the up/down arrow keys when Open-file dialog is open, we get errors...
+Working on a less verbose way to get and set settings that will 
+be unique for each user
+
+todo: EDITOR.save|load settings: fallback to localstorage if offline!
+
+regression: Issues with scrolltocaret and function list if you are scrolled to the right and 
+go to a function... !?
+
+remember show ping option!
 
 
-lack of home key on CHromebooks, how to quickly scroll up!?
+Making sure common keyboard shortcuts work on Chromebooks
 
 Implementing standard keyboard shortcuts:
 https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
@@ -83,7 +91,15 @@ https://defkey.com/what-means/alt-space
 
 Alt+Backspace doesn't work on chromebook
 
-Sometimes the editor gets into a state where:
+lack of home key on CHromebooks, how to quickly scroll up!?
+
+
+todo: Replace the folder autocomplete in file_save witht the folderPicker component because we copied the code from there and to make the bundle smaller (remove dublicate code)
+
+bug: When using  the up/down arrow keys when Open-file dialog is open, we get errors...
+
+
+Sometimes the editor gets into a state (on Chromebook) where:
 * It doesn't scroll to caret at eol when you hit keyboard up to a long line
 * Last part of the line disappears when you scroll to the right
 * Throws sanity check errors where  EDITOR.view.endingColumn=111 file.startColumn=2 EDITOR.view.visibleColumns=111 

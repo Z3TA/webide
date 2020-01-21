@@ -592,6 +592,58 @@ callback = value;
 		console.warn("window.localStorage not available!");
 	}
 	
+	EDITOR.loadSettings = function loadSettings(settings, defaults, callback) {
+		console.log("settings: load: settings=" + settings + " ...");
+		if(EDITOR.storage.ready()) loadSettingOnceStorageReady();
+		else EDITOR.once("storageReady", loadSettingOnceStorageReady);
+		
+		function loadSettingOnceStorageReady() {
+			
+			var value = EDITOR.storage.getItem(settings);
+
+console.log("settings: load: settings=" + settings + " value=" + value + "");
+
+			if(value == null && defaults !== undefined) {
+				callback(defaults);
+			}
+			else if(value === null && defaults === undefined) {
+				var error = new Error("Could not find " + settings + " in EDITOR.storage!");
+				error.code == "ENOENT";
+				throw error;
+}
+			else if(value !== null) {
+				try {
+					var obj = JSON.parse(value);
+				}
+				catch(err) {
+					var error = new Error("Failed to parse value=" + value + " Error: " + err.message);
+					throw error;
+				}
+				console.log("settings: load: settings=" + settings + " obj=", obj);
+				callback(obj);
+			}
+			else throw new Error("Unsuspected: value=" + value + " defaults=" + defaults);
+			
+		}
+	}
+	
+	EDITOR.saveSettings = function saveSettings(settings, value) {
+		if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
+		else EDITOR.once("storageReady", saveSettingOnceStorageReady);
+		
+		var str = JSON.stringify(value);
+		
+		function saveSettingOnceStorageReady() {
+			console.log("settings: save: settings=" + settings + " str=" + str);
+			EDITOR.settings.setItem(settings, str);
+		}
+	}
+	
+	EDITOR.saveSettings = function saveSetting(setting, value, callback) {
+		
+		
+	}
+	
 	EDITOR.addMode = function addMode(modeName, inheritKeyBindingsFrom) {
 		if(EDITOR.modes.indexOf(modeName) != -1) throw new Error(modeName + " mode is already registered!");
 		EDITOR.modes.push(modeName);
@@ -2986,6 +3038,29 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 		
 		return EDITOR.addEvent(eventName, options);
 	}
+	
+	
+	var runOnceCounter = 0;
+	EDITOR.once = function runonce(eventName, fun) {
+		// Runs the function one time when the event fires, then removes the event listener
+		
+		var fName = "_runonce" + (++runOnceCounter) + UTIL.getFunctionName(fun);
+		
+		var cb = function() {
+			fun.apply(null, arguments);
+			removeEvent();
+		}
+		
+		var fEv = UTIL.nameFunction(cb, fName, 15);
+		
+		EDITOR.on(eventName, fEv);
+		
+		function removeEvent() {
+			EDITOR.removeEvent(eventName, fEv);
+		}
+		
+	}
+	
 	
 	EDITOR.addEvent = function(eventName, options) {
 		

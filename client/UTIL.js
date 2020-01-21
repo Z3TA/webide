@@ -689,6 +689,35 @@ console.warn("fun=" + fun);
 		return ret;
 	},
 
+	nameFunction: function createFunctionWidthName(fun, name, parameterCount) {
+		// Returns a new function, which calls fun, but has the name specified in secondn argument
+		if(typeof fun != "function") throw new Error("First argument to UTIL.nameFunction should be a function!");
+		if(typeof name != "string" || name.length == 0) throw new Error("Second argument to UTIL.nameFunction should be a name");
+		
+		// First try just giving the function the name, to avoid Content-Security-Policy errors
+		try {
+			Object.defineProperty(fun, "name", { value: name }); // Give function an unique name
+		}
+		catch(err) {
+			console.error(err);
+			
+			// If the browser does not support Object.defineProperty it probably doesn't support SCP either
+			
+			if(parameterCount == undefined) parameterCount = 1;
+			else if(typeof parameterCount != "number") throw new Error("Third argument to UTIL.nameFunction should be the number of parameters to pass to fun");
+			
+			// parameters are just a plain string, like: a, b, c
+			var parameters = "p0";
+			for (var i=0; i<parameterCount; i++) {
+				parameters = parameters + ", p" + i;
+			}
+			
+			return new Function("run_" + name, "return function " + name + "(" + parameters + "){ run" + name + "(" + parameters + ") };")(fun);
+		}
+		
+		return fun;
+	},
+	
 	determineLineBreakCharacters: function determineLineBreakCharacters(text) {
 		/*
 			What line break character is used !??

@@ -12,10 +12,15 @@
 			
 			winMenuItem = EDITOR.windowMenu.add(S("ping_and_network_status"), [S("View"), 70], toggleNetworkStatus);
 			
-			if(enabled) {
-				// Wait for first resize...
-				setTimeout(enable, 1000);
-			}
+			EDITOR.loadSettings("show_ping", enabled, function(setting) {
+				
+enabled = setting;
+
+				if(enabled) {
+					// Wait for first resize...
+					setTimeout(enable, 1000);
+				}
+			});
 			
 		},
 		unload: function unloadConnectionStatus() {
@@ -57,6 +62,8 @@
 	
 	function toggleNetworkStatus() {
 		enabled = !enabled;
+		
+		EDITOR.saveSettings("show_ping", enabled);
 		
 		if(enabled) enable();
 		else disable();

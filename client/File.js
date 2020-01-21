@@ -3760,7 +3760,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		var minIndentation = file.grid[caret.row].indentation;
 		for(var row=file.startRow; row<(file.startRow+EDITOR.view.visibleRows) && row<file.grid.length; row++) {
-			console.log("scrollToCaret: row=" + row + " indentation=" + file.grid[row].indentation + " minIndentation=" + minIndentation);
+			//console.log("scrollToCaret: row=" + row + " indentation=" + file.grid[row].indentation + " minIndentation=" + minIndentation);
 			if(file.grid[row].indentation < minIndentation) minIndentation = file.grid[row].indentation;
 		}
 		
@@ -3791,8 +3791,9 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 // but we also want to see the whole line of the line we are currently on.
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
 			// If possible we would also like to see the start of all lines on the screen
-			if(startColumn > minIndentation*EDITOR.settings.tabSpace) {
-				startColumn = minIndentation*EDITOR.settings.tabSpace;
+			// just make sure we cansee the caret on the line we are on!
+if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
+				startColumn = minIndentation*EDITOR.settings.tabSpace + indentationWidth;
 			}
 			
 // If we need to scroll, we might just as well scroll a lot,
