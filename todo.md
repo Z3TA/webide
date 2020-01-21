@@ -69,7 +69,10 @@ Step 3: Use device X, fix pain points
 What I'm working on
 -------------------
 
-EDITOR.once not working !?
+annoying thing with function list... 
+startingColumn doesn't seem to update!?
+
+Doesn't seem to save settings
 
 Working on a less verbose way to get and set settings that will 
 be unique for each user
@@ -105,6 +108,9 @@ Sometimes the editor gets into a state (on Chromebook) where:
 * Throws sanity check errors where  EDITOR.view.endingColumn=111 file.startColumn=2 EDITOR.view.visibleColumns=111 
 * Funcion list jumps between different functions even though we are moving the mouse inside the same functions! (in EDITOR.js keyisup)
 * Doesn't automatically scroll when you click to place mouse caret
+
+file grid sanity check error: Scrolling bug: EDITOR.currentFile.path=/zpcdata/projects/webide/client/EDITOR.js EDITOR.view.endingColumn=62 file.startColumn=12 EDITOR.view.visibleColumns=62 path=/zpcdata/projects/webide/client/EDITOR.js
+
 
 Resizing fixes it!
 

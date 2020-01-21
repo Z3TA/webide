@@ -601,12 +601,19 @@ callback = value;
 			
 			var value = EDITOR.storage.getItem(settings);
 
-console.log("settings: load: settings=" + settings + " value=" + value + "");
+			// note: value is either null or a string!! eg. it can be "null" and "undefined" or null
+			// also note: We can not JSON.parse("undefined") (string "undefined")
+			
+			if(value=="undefined") {
+				console.warn("settings: load: settings=" + settings + " value=" + value + " (something probably went wrong when saving the settings)");
+			}
+			
+			console.log("settings: load: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
 
-			if(value == null && defaults !== undefined) {
+			if((value === null || value=="undefined") && defaults !== undefined) {
 				callback(defaults);
 			}
-			else if(value === null && defaults === undefined) {
+			else if((value === null || value=="undefined") && defaults === undefined) { // Cant parse "undefined"!
 				var error = new Error("Could not find " + settings + " in EDITOR.storage!");
 				error.code == "ENOENT";
 				throw error;
@@ -628,20 +635,24 @@ console.log("settings: load: settings=" + settings + " value=" + value + "");
 	}
 	
 	EDITOR.saveSettings = function saveSettings(settings, value) {
-		if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
-		else EDITOR.once("storageReady", saveSettingOnceStorageReady);
+		console.log("settings: save: settings=" + settings + " value=" + value);
+		
+		if(value === undefined) throw new Error("Can not save settings=" + settings + " because value=" + value);
+		if(value == "undefined") throw new Error("Can not save settings=" + settings + " because value=" + value + " cannot be parsed");
 		
 		var str = JSON.stringify(value);
 		
+		if(str == undefined || str == "undefined" || typeof str != "string") throw new Error("Error when stringifying value=" + value + " str=" + str);
+		
+		console.log("settings: save: settings=" + settings + " str=" + str + " ...");
+		
+if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
+else EDITOR.once("storageReady", saveSettingOnceStorageReady);
+
 		function saveSettingOnceStorageReady() {
-			console.log("settings: save: settings=" + settings + " str=" + str);
-			EDITOR.settings.setItem(settings, str);
+			console.log("settings: save: settings=" + settings + " str=" + str + " !");
+			EDITOR.storage.setItem(settings, str);
 		}
-	}
-	
-	EDITOR.saveSettings = function saveSetting(setting, value, callback) {
-		
-		
 	}
 	
 	EDITOR.addMode = function addMode(modeName, inheritKeyBindingsFrom) {

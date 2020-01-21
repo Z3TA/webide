@@ -63,6 +63,8 @@ enabled = setting;
 	function toggleNetworkStatus() {
 		enabled = !enabled;
 		
+		console.log("toggleNetworkStatus: enabled=" + enabled + " Calling EDITOR.saveSettings...");
+		
 		EDITOR.saveSettings("show_ping", enabled);
 		
 		if(enabled) enable();
