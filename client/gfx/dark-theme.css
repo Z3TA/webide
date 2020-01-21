@@ -352,6 +352,13 @@ input[type=button], button.button, input[type=submit] {
 	padding: 2px;
 }
 
+input[type=button]:active, button.button:active, input[type=submit]:active {
+color: rgb(223, 235, 253);
+	background-color: rgb(31, 117, 235);
+	border-top: 1px solid rgb(102, 162, 248);
+}
+
+
 /* seems you can't style check-boxes... */
 
 
