@@ -55,6 +55,10 @@ like the editor not scrolling to the right place, me having to scroll down to se
 Because those extra things, that I otherwise use muscle memory to fix, now becomes more work!
 So when polishing design and small details, use a device that you are not used to - in order to discover those small annoyances!
 
+It seems that in a market where each program is low cost of free and you got a lot to choose from,
+you want simple apps, that does not have a learning curve. While in a market with expensive apps and little to choose from you want more depth
+and are willing to invest more of your time to learn it.
+
 Happy path: (manually check on prod after each release)
 1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
 2. WYSIWYG edit said page
@@ -68,6 +72,20 @@ Step 3: Use device X, fix pain points
 
 What I'm working on
 -------------------
+An editor that you can connect to from anywhere
+Dropped your laptop in the ocean? Just get a new one and continue where you left off.
+
+prio: Reopen last open files, even when switching to another computer!
+
+when searching left or right, show an indication that there is no more to find!
+
+regression: It takes a very long time to open files via goto_files.js
+
+Show an error when trying to save a file while offline!?
+"Can not save at this time, no network connection to the server"
+Save in a temporary storage that will be synced once the server/editor comes online!?
+
+Weird scrolling on Safari when it scrolls up, then down and vice versa...
 
 annoying thing with function list... 
 startingColumn doesn't seem to update!?
