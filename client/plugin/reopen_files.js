@@ -63,9 +63,9 @@
 				So we need to be connected to the editor server for this plugin to work.
 				
 				Solution: Close all unsaved files when connected to a different url or user
-			*/
-			
-			/*
+				
+				...
+				
 				Swithing back to using localStorage
 				* Too much spam to server
 				* Don't have to depend on the server
@@ -73,6 +73,9 @@
 				
 				We still need to wait until we are connected to the server though (in order to get the files)
 			
+				Middle ground:
+				Save state locally, but the list of opened files on the server!?
+				
 			*/
 			
 		},
@@ -716,7 +719,7 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 	}
 	
 	function saveStateOfFile(file, callback) {
-		saveSate(file.path, function stateSaved(err) {
+		saveState(file.path, function stateSaved(err) {
 			if(err) {
 				// Don't let the user leave 
 				window.onbeforeunload = function() {
@@ -757,7 +760,7 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 						//console.log("reopenFiles: openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
 							//console.log("reopenFiles: Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
-							saveSate(openFiles[i], stateSaved);
+							saveState(openFiles[i], stateSaved);
 						}
 					}
 					else if(callback) callback(null);
@@ -780,7 +783,7 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		});
 	}
 	
-	function saveSate(path, callback) {
+	function saveState(path, callback) {
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
