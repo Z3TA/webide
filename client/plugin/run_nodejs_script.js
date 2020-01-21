@@ -35,7 +35,9 @@
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
 		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
 		
-		if(!UTIL.isPrivateIp(window.location.hostname) || EDITOR.settings.devMode) EDITOR.on("fileOpen", nodejsScriptFileOpenedMaybe); // Show banner with endpoint
+		if(!UTIL.isPrivateIp(window.location.hostname) || EDITOR.settings.devMode) {
+			EDITOR.on("fileShow", nodejsScriptFileOpenedMaybe); // Show banner with endpoint
+		}
 		
 		CLIENT.on("nodejsMessage", nodejsMessage);
 		CLIENT.on("loginSuccess", updateRunMsg);
@@ -56,7 +58,7 @@
 		EDITOR.removeEvent("ctxMenu", showRunNodejsScriptMenuItem);
 		EDITOR.removeEvent("runScript", runNodeJsScriptMaybe);
 		EDITOR.removeEvent("previewTool", runNodeJsScriptMaybe);
-		EDITOR.removeEvent("fileOpen", nodejsScriptFileOpenedMaybe);
+		EDITOR.removeEvent("fileShow", nodejsScriptFileOpenedMaybe);
 		
 		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
 		CLIENT.removeEvent("loginSuccess", updateRunMsg); 
@@ -68,11 +70,16 @@
 	
 	function nodejsScriptFileOpenedMaybe(file) {
 		
-		if(!(file instanceof File)) return;
+		if(!(file instanceof File)) {
+			console.log("nodejsScriptFileOpenedMaybe: Not a File (text or code) file.path=" + file.path);
+return;
+		}
 		
 		var ext = UTIL.getFileExtension(file.path);
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);
+		
+		console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
 		
 		if((ext == "js" || ext == "stdout") && match && EDITOR.user) {
 			var name = match[1].trim();
@@ -87,7 +94,9 @@
 saveAndRun(file);
 			}
 		}
-		else nodeJsBanner.hide();
+		else {
+nodeJsBanner.hide();
+		}
 	}
 	
 	function saveAndRun(file) {
