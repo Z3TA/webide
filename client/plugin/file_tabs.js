@@ -31,6 +31,8 @@
 	
 	var tabindex = 300; // See tabindex.txt
 	
+	var closedTabs = [];
+	
 	EDITOR.on("start", file_tabs);
 	
 	function file_tabs() {
@@ -322,6 +324,8 @@ return switchTab();
 		if(hiddenBecauseEmty) return showFileTabs(file);
 		if(!fileTabsActive) return;
 		
+		closedTabs.push(file.path);
+		
 		buildTabs(file);
 		
 		EDITOR.renderNeeded();
@@ -610,7 +614,21 @@ tabFileText.setAttribute("path", path);
 		function contextmenu(ev) {
 			console.log("file_tabs: Showing context menu...");
 			EDITOR.ctxMenu.show(ev || event);
-			EDITOR.ctxMenu.addTemp("Close all files except this one", true, function closeAllOtherFiles(currentFile, combo) {
+			EDITOR.ctxMenu.addTemp("Close all files except this one", true, closeAllOtherFiles);
+			EDITOR.ctxMenu.addTemp("Reopen last closed file", true, reopenFileTab);
+			
+			function reopenFileTab() {
+				var filePath = closedTabs.pop();
+				
+				console.log("file_tabs: reopenFileTab: filePath=" + filePath);
+				
+				EDITOR.openFile(filePath, function(err, file) {
+if(err) alertBox(err.message);
+					EDITOR.ctxMenu.hide();
+				});
+			}
+			
+			function closeAllOtherFiles(currentFile, combo) {
 				
 				console.log("file_tabs: contextmenu: combo=" + JSON.stringify(combo) + " path=" + path);
 				
@@ -623,7 +641,7 @@ tabFileText.setAttribute("path", path);
 					else EDITOR.closeFile(filePath);
 				}
 				
-			});
+			}
 			
 			function askBeforeClosing(path) {
 				var yes = "Ignore changes";
