@@ -26,6 +26,8 @@
 	
 	var reFifLine = /Line\s*?(\d*):/;
 	
+	var mouseMoveEventRegistered = false;
+	
 	EDITOR.on("start", function find_in_files_main() {
 		
 		var keyF = 70;
@@ -220,11 +222,17 @@ if(CHROMEBOOK) {
 	}
 	
 	function fiffileshow(file) {
+		
 		if(isSearchReport(file)) {
-			EDITOR.on("mouseMove", fifmousemove);
+// Prevent adding another mouseMove listener when we go from one search report to another search report
+			if(!mouseMoveEventRegistered) {
+EDITOR.on("mouseMove", fifmousemove);
+				mouseMoveEventRegistered = true;
+			}
 		}
 		else {
 			EDITOR.removeEvent("mouseMove", fifmousemove);
+			mouseMoveEventRegistered = false;
 		}
 	}
 	
