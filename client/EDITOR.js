@@ -211,7 +211,7 @@ EDITOR.view = {
 	visibleRows: 0, 
 	canvasWidth: 0,
 	canvasHeight: 0,
-	startingColumn: 0,
+	startingColumn: 0, // doesn't seem to be used!?
 	endingColumn: 0
 };
 
@@ -11972,7 +11972,7 @@ if(BROWSER != "Firefox") {
 		
 		CONTEXT_MENU_IS_FULL_SCREEN = true;
 		
-		EDITOR.ctxMenu.addTemp("Hide menu", function() {
+		EDITOR.ctxMenu.addTemp("Hide menu", function exitFullscreenMenu() {
 			EDITOR.ctxMenu.hide();
 		});
 		
