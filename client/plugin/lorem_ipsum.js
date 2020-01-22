@@ -26,6 +26,8 @@
 		var words = visibleColumns / 8;
 		var length = Math.ceil(words/4) + Math.floor(Math.random()*words);
 		
+if(file.caret.index > 0 && file.text.charAt(file.caret.index-1) == ".") text = " " + text;
+
 		for(var i=0; i<length; i++) {
 			text = text + " " + randomWord();
 		}
