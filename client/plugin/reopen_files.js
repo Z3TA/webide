@@ -169,35 +169,86 @@
 		*/
 		
 		var setCurrent = "";
-		var files;
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			
 			if(openedFilesString == null) openedFilesString = "";
 			
-			openedFilesString = removeDublicates(openedFilesString);
-			
-			findBugs(false, function(err, openedFilesString) {
-				if(err) throw err;
-				files = openedFilesString.split(fileDelimiter);
-				console.log("reopenFiles: files=" + JSON.stringify(files));
+			/*
+				We only want to use the openedFilesString from localStorage as a backup.
+				So first get the list of opened files from server storage, 
+				then check the list from localStorage to see if any files are missing
 				
-				if(openedFilesString.length > 0) { // openedFilesString is a string with path's separated by fileDelimiter
-					console.log("reopenFiles:Opening " + files.length + " files ...");
+			*/
+			
+			EDITOR.once("storageReady", function combineOpenedFilesString() {
+				
+				var server = [];
+				var path = ""
+				var i = 0;
+				var key = "__openFile" + i
+				while(path = EDITOR.storage.getItem(key)) {
 					
-					// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
-					for(var i=0; i<files.length; i++) {
-						// Problem: The editor might already have the file open, and we are here because of a server reconnect
-						if(!EDITOR.files.hasOwnProperty(files[i])) {
-							console.log("reopenFiles: gonna open files[" + i + "]=" + files[i]);
-							openFile(files[i], fileInListOpened);
-						}
+					server.push(path);
+					i++;
+					key = "__openFile" + i;
+					
+				}
+				
+				console.warn("reopenFiles: From Server storage: " + server.join(fileDelimiter));
+				
+				var local = openedFilesString.split(fileDelimiter);
+				if(local[0] == "") local.shift();
+				
+				console.warn("reopenFiles: From Local storage: " + local.join(fileDelimiter));
+				
+				// Add missing files
+				for(var i=0; i<local.length; i++) {
+					if(server.indexOf(local[i]) == -1) {
+server.push(local[i]);
+						console.warn("reopenFiles: " + local[i] + " was missing from server storage!");
 					}
 				}
-				else {
-					allFilesOpened();
-				}
+				
+				// Convert back to string
+				openedFilesString = server.join(fileDelimiter);
+				
+				console.warn("reopenFiles: Combined server and local: " + openedFilesString);
+				
+				// Just in case
+				openedFilesString = removeDublicates(openedFilesString);
+				
+				// Save this list locally so that the old code doesn't go nutz
+				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+					if(err) throw err;
+
+					findBugs(false, function(err, openedFilesString) {
+						if(err) throw err;
+						
+						var files = openedFilesString.split(fileDelimiter);
+						console.log("reopenFiles: files=" + JSON.stringify(files));
+						
+						if(openedFilesString.length > 0) { // openedFilesString is a string with path's separated by fileDelimiter
+							console.log("reopenFiles:Opening " + files.length + " files ...");
+							
+							// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
+							for(var i=0; i<files.length; i++) {
+								// Problem: The editor might already have the file open, and we are here because of a server reconnect
+								if(!EDITOR.files.hasOwnProperty(files[i])) {
+									console.log("reopenFiles: gonna open files[" + i + "]=" + files[i]);
+									openFile(files[i], fileInListOpened);
+								}
+							}
+						}
+						else {
+							allFilesOpened();
+						}
+						
+					});
+				});
+				
+				
 			});
 			
 		});
@@ -735,6 +786,26 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		// Called when the editor closes, and at an time interval
 		//console.log("reopenFiles: saveStateOfOpenFiles!");
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
+		
+		
+		if(CLIENT.connected && EDITOR.storage.ready()) {
+			var list = EDITOR.sortFileList(); // Array sorted by file.order
+			var key = "";
+			var filePath = "";
+			// Pnly save the positions that has changed to save bandwith
+			for(var i=0; i<list.length; i++) {
+				key = "__openFile" + i;
+				filePath = list[i].path;
+				if( EDITOR.storage.getItem(key) != filePath ) EDITOR.storage.setItem(key, filePath);
+			}
+			// Mark next key as null so we know how many files to open
+			key = "__openFile" + i;
+			if( EDITOR.storage.getItem(key) != null ) EDITOR.storage.removeItem(key);
+		}
+		else {
+			console.warn("reopenFiles: Unable to save opened files to server! CLIENT.connected=" + CLIENT.connected + "  EDITOR.storage.ready()=" + EDITOR.storage.ready());
+		}
+		
 		
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
