@@ -131,15 +131,25 @@ dropboxDaemonWasKilled();
 			
 			EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
 			
-			if(authWindow) authWindow.close();
+			if(authWindow) {
+authWindow.close();
+				authWindow = null;
+			}
 			
 			alertBox("Dropbox linked!");
 			
 			dropboxDaemonIsRunning();
 			
-		}
-		
+// First time we opened the file explorer the Dropbox folder was probably empty
+EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
 
+		}
+		else if(resp.url) {
+			auth(resp.url);
+		}
+		else throw new Error("Unable to handle Dropbox message: resp=" + JSON.stringify(resp));
+		
+		
 	}
 	
 	function startDropbox() {
@@ -152,13 +162,7 @@ alertBox(err.message);
 			}
 			
 			if(resp.url) {
-				// The auth page is not responsive!
-				EDITOR.createWindow({url: resp.url, width: 1010, height: 610}, function(err, win) {
-					// Ignore error because we shouln't be able to access this window
-					
-					authWindow = win;
-					
-				});
+				auth(resp.url);
 				
 			}
 			else if(resp.timeout) {
@@ -169,6 +173,23 @@ alertBox(err.message);
 		});
 	}
 	
+	function auth(url) {
+		
+		//console.log("Dropbox: authWindow=" + authWindow);
+		
+		if(authWindow) {
+			console.warn("Dropbox: Already got an authWindow!");
+			return;
+		}
+		
+		// The auth page has a static width and height (eg it does not adapt to window size)!
+		EDITOR.createWindow({url: url, width: 1010, height: 610}, function(err, win) {
+			// Ignore error because we shouln't be able to access this window
+			
+			authWindow = win;
+			
+		});
+	}
 	
 	
 })();

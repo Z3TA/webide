@@ -1030,6 +1030,7 @@ function openStdinChannel() {
 	
 	function sendToAll(user_connections, data) {
 		for (var i=0, conn; i<user_connections.connections.length; i++) {
+			if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
 			user_connections.connections[i].write(data);
 		}
 	}
@@ -1274,6 +1275,7 @@ function openRemoteFileServer() {
 	
 	function sendToAll(user_connections, data) {
 		for (var i=0, conn; i<user_connections.connections.length; i++) {
+			if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
 			user_connections.connections[i].write(data);
 		}
 	}
@@ -1543,13 +1545,18 @@ function isPrivatev4IP(ip) {
 	(parts[0] === '192' && parts[1] === '168');
 }
 
+function getIp(connection) {
+	var IP = connection.remoteAddress;
+	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
+	return IP;
+}
 
 function sockJsConnection(connection) {
 	
 	var userWorker = null;
 	var userConnectionName = null;
 	var userConnectionId = -1;
-	var IP = connection.remoteAddress;
+	var IP = getIp(connection);
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
 	var commandQueue = [];
@@ -1560,11 +1567,7 @@ function sockJsConnection(connection) {
 	var clientSessionId = "";
 	var checkingUser = false;
 	
-	console.log("connection.remoteAddress=" + connection.remoteAddress + " browser=" + userBrowser);
 	
-	//console.log(connection);
-	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
-	else console.log("connection.headers=" + JSON.stringify(connection.headers));
 	
 	var userAlias = userBrowser + "(" + IP + ")";
 	
@@ -1584,7 +1587,9 @@ function sockJsConnection(connection) {
 	
 	connection.on("close", sockJsClose);
 	
-	connection.write('{"editorVersion": ' + EDITOR_VERSION + '}');
+	var data = '{"editorVersion": ' + EDITOR_VERSION + '}';
+	if(LOGLEVEL >= DEBUG) log(IP + " <= " + UTIL.shortString(data, 256));
+	connection.write(data);
 	
 	function sockJsMessage(message) {
 		log(UTIL.shortString(IP + " => " + message));
@@ -1620,7 +1625,10 @@ function sockJsConnection(connection) {
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
 				
-				//stopDropboxDaemon(userConnectionName);
+				if(DROPBOX.hasOwnProperty(userConnectionName)) {
+					if(!DROPBOX[userConnectionName].linked) stopDropboxDaemon(userConnectionName);
+					// else: Keep it running so that it will be synced once the user logs back in
+				}
 				
 			}
 			else {
@@ -1638,6 +1646,7 @@ function sockJsConnection(connection) {
 				var data = JSON.stringify(disconnectMsg);
 				
 				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+					if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(data, 256));
 					USER_CONNECTIONS[userConnectionName].connections[i].write(data);
 				}
 			}
@@ -2528,7 +2537,6 @@ var loginCounter = 0;
 			var str = JSON.stringify(answer);
 			
 			log(IP + " <= " + (answer.id ? answer.id : "") + UTIL.shortString(str, 256));
-			
 			conn.write(str);
 		}
 	}
@@ -3914,6 +3922,7 @@ console.error(err);
 									log("Notifying user " + username + " (" + user_connections.connections.length + " connections): data: " + data, DEBUG);
 									
 									for (var i=0; i<user_connections.connections.length; i++) {
+										if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
 										user_connections.connections[i].write(data);
 									}
 								}
@@ -5487,29 +5496,33 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 		
 		if(str.match(reLinked)) {
 			sendToClient(username, "dropbox", {linked: true});
+				DROPBOX[username].linked = true;
 		}
-		
-		if(!callback) return;
-		
 		
 		
 		var matchBrowserUrl = str.match(reBrowserUrl);
 		
 		if(matchBrowserUrl) {
+				DROPBOX[username].linked = false;
 			log("" + username + " Dropbox daemon needs authorization from Dropbox ...", DEBUG);
 			var authUrl = matchBrowserUrl[1];
+				if(callback) {
 			callback(null, {url: authUrl});
 			callback = null;
-		}
-	});
-	
-	dropboxDaemon.stderr.on("data", function (data) {
-		log(username + "  Dropbox daemon stderr: " + data, DEBUG);
+				}
+				else {
+					sendToClient(username, "dropbox", {url: authUrl});
+				}
+			}
+		});
 		
-var str = data.toString();
-
-		if(str.match(reLastLibLoaded)) {
-			/*
+		dropboxDaemon.stderr.on("data", function (data) {
+			log(username + "  Dropbox daemon stderr: " + data, DEBUG);
+			
+			var str = data.toString();
+			
+			if(str.match(reLastLibLoaded)) {
+				/*
 				The last library has loaded and Dropbox is soon fully started...
 				If we are not authorized we will get a browser url to stdout
 				-- And once authorized we will get a "This computer is now linked" message to stdout
@@ -5657,8 +5670,11 @@ function stopDropboxDaemon(username, callback) {
 	if(!DROPBOX.hasOwnProperty(username)) {
 		var error = new Error("No Dropbox deamon registered for " + username);
 		error.code = "DEAD";
+		if(callback) {
 		callback(error);
 		callback = null;
+		}
+		else console.error(error);
 		return;
 	}
 	
@@ -5672,8 +5688,12 @@ function stopDropboxDaemon(username, callback) {
 		catch(err) {
 			console.error(err);
 			log(username + " Failed to kill Dropbox daemon", WARN);
+			if(callback) {
 			callback(err);
 			callback = null;
+			}
+			else console.error(err);
+			
 			return;
 		}
 		
@@ -5701,14 +5721,34 @@ function stopDropboxDaemon(username, callback) {
 					var errMsg = "There appears to be more Dropbox deamons that we did not know about...";
 				}
 				var error = new Error(errMsg);
-				return callback(error);
+				
+				if(callback) {
+					callback(error);
+					callback = null;
+				}
+				else {
+					console.error(error);
+				}
+				
+				return;
 				
 			}
 			else {
-				callback(null);
+				if(callback) {
+					callback(null);
+					callback = null;
+				}
+				else {
+					if(killed) {
+						log("Successfully killed the Dropbox deamon for username=" + username);
+					}
+					else {
+						log("Found no Dropbox deamon for username=" + username);
+					}
+				}
 			}
-
-});
+			
+		});
 		
 	}
 }
@@ -5746,19 +5786,17 @@ function checkForOtherDropboxDaemons(username, callback) {
 function sendToClient(userConnectionName, cmd, obj) {
 	if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 		
-		var json = {id: 0};
+		//var json = {id: 0};
+		var json = {};
 		json[cmd] = obj;
 		
 		var str = JSON.stringify(json);
 		
-		//log(IP + " <= " + UTIL.shortString(str, 256));
-		
-		conn.write(str);
-		
 		for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+			if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(str, 256));
 			USER_CONNECTIONS[userConnectionName].connections[i].write(str);
 		}
-		return true;
+		return i>0;
 	}
 	else return false;
 }
