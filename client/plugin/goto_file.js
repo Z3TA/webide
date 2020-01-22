@@ -258,7 +258,7 @@ if(CHROMEBOOK) {
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
-		inputGoto.setAttribute("placeholder", "Filename (regexp)");
+		inputGoto.setAttribute("placeholder", "file path (regexp)");
 		
 		inputFolder = document.createElement("input");
 		inputFolder.setAttribute("type", "text");
@@ -267,7 +267,7 @@ if(CHROMEBOOK) {
 		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
 		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		inputFolder.setAttribute("default", folderToSearchIn || EDITOR.workingDirectory);
-		
+		inputFolder.setAttribute("placeholder", "folder path");
 		
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
@@ -420,7 +420,14 @@ if(CHROMEBOOK) {
 			keyUpEvent.preventDefault();
 			
 			if (code == charEnter) {
-				gotoFile();
+				if(text == "..") {
+					
+					inputFolder.value = UTIL.parentFolder(inputFolder.value);
+					inputGoto.value = "";
+					inputFolder.dispatchEvent(new Event('input'));
+					
+				}
+				else gotoFile();
 			return;
 		}
 			else if(code == charEscape) {
@@ -830,6 +837,8 @@ abortFindFiles();
 		if(!gotoInputIsVisible) return true;
 		if(!gotoList) return true;
 		
+		if(EDITOR.input) return true;
+		
 		console.log("goto_file: Moving up ...");
 		
 		var listItems = gotoList.childNodes;
@@ -863,6 +872,8 @@ abortFindFiles();
 		
 		if(!gotoInputIsVisible) return true;
 		if(!gotoList) return true; // Allow default browser action if the gotoList doesn't exist
+		
+		if(EDITOR.input) return true;
 		
 		var listItems = gotoList.childNodes;
 		
