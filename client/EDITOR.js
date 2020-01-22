@@ -465,6 +465,8 @@ _editorInput = true;
 		
 		removeItem: function storageRemoveItem(id, callback) {
 			
+			if(callback !== undefined && typeof callback != "function") throw new Error("Second argument to EDITOR.storage.removeItem should be a callback function (optional)");
+			
 			// Save the stack in case we get an error
 			var stack = UTIL.getStack("EDITOR.storage.removeItem");
 			
@@ -1313,21 +1315,25 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				
 				var fileMode = file.mode;
-				Object.defineProperty(file, "mode", {get: function get() { return fileMode; }, set: function trap() { throw trapError }});
+				if(fileMode !== undefined) Object.defineProperty(file, "mode", {get: function get() { return fileMode; }, set: function trap() { throw trapError }});
 				
 				var fileParse = file.parse;
-				Object.defineProperty(file, "parse", {get: function get() { return fileParse; }, set: function trap() { throw trapError }});
+				if(fileParse !== undefined) Object.defineProperty(file, "parse", {get: function get() { return fileParse; }, set: function trap() { throw trapError }});
 
 				
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);
 				
 				// Remove bug traps
-				delete file.mode;
+				if(fileMode !== undefined) {
+delete file.mode;
 				file.mode = fileMode;
-				
+				}
+
+if(fileParse !== undefined) {
 				delete file.parse;
 				file.parse = fileParse;
+}
 				
 			}
 		}
