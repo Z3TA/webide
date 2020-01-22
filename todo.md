@@ -70,16 +70,16 @@ Step 2: Use a Chromebook to develop, fix pain points,
 Step 3: Use device X, fix pain points
 
 
-What I'm working on
--------------------
 An editor that you can connect to from anywhere
 Dropped your laptop in the ocean? Just get a new one and continue where you left off.
 
-prio: Reopen last open files, even when switching to another computer!
+What I'm working on
+-------------------
+
 
 when searching left or right, show an indication that there is no more to find!
 
-regression: It takes a very long time to open files via goto_files.js
+regression: It takes a very long time to open files via goto_files.js (not always) ...why!?
 
 Show an error when trying to save a file while offline!?
 "Can not save at this time, no network connection to the server"
@@ -90,17 +90,7 @@ Weird scrolling on Safari when it scrolls up, then down and vice versa...
 annoying thing with function list... 
 startingColumn doesn't seem to update!?
 
-Doesn't seem to save settings
-
-Working on a less verbose way to get and set settings that will 
-be unique for each user
-
-todo: EDITOR.save|load settings: fallback to localstorage if offline!
-
-regression: Issues with scrolltocaret and function list if you are scrolled to the right and 
-go to a function... !?
-
-remember show ping option!
+Should probably refactor EDITOR.view.endColumn. startingColumn is not even used!
 
 
 Making sure common keyboard shortcuts work on Chromebooks
@@ -371,8 +361,6 @@ The WebIDE repo seems nuuked in the cloud ide ...
 
 Start working full time using the cloud IDE!
 
-todo: Save "reopen files" on the server! Use localStorage for backup if you are offline
-possible issue: "reopen files" periodly saves a backup of the file in case of a major issue, like for example laptop power loss.
 
 I'm missing bracket highlightning when I have the caret right of the bracket
 

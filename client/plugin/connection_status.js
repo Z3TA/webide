@@ -12,14 +12,20 @@
 			
 			winMenuItem = EDITOR.windowMenu.add(S("ping_and_network_status"), [S("View"), 70], toggleNetworkStatus);
 			
-			EDITOR.loadSettings("show_ping", enabled, function(setting) {
+			EDITOR.loadSettings("show_ping", enabled, function connectionStatusSettingsLoaded(setting) {
 				
-enabled = setting;
+				console.log("connectionStatus: connectionStatusSettingsLoaded: setting=" + setting);
+				
+enabled = !!setting;
 
 				if(enabled) {
 					// Wait for first resize...
 					setTimeout(enable, 1000);
 				}
+else if(setting === false) {
+disable();
+}
+
 			});
 			
 		},
@@ -33,6 +39,9 @@ enabled = setting;
 	});
 
 	function enable() {
+		
+		console.log("connectionStatus: enable!");
+		
 		EDITOR.addRender(renderConnectionStatus, 4900);
 		
 		CLIENT.on("pingChange", pingChange);
@@ -47,6 +56,8 @@ enabled = setting;
 	}
 	
 	function disable() {
+		console.log("connectionStatus: disable!");
+		
 		CLIENT.removeEvent("pingChange", pingChange);
 		CLIENT.removeEvent("pingTimeout", pingTimeout);
 		CLIENT.removeEvent("connectionConnected", connectionConnected);
@@ -63,7 +74,7 @@ enabled = setting;
 	function toggleNetworkStatus() {
 		enabled = !enabled;
 		
-		console.log("toggleNetworkStatus: enabled=" + enabled + " Calling EDITOR.saveSettings...");
+		console.log("connectionStatus: toggleNetworkStatus: enabled=" + enabled + " Calling EDITOR.saveSettings...");
 		
 		EDITOR.saveSettings("show_ping", enabled);
 		
@@ -123,7 +134,7 @@ enabled = setting;
 			var textColor = "white";
 		}
 		else {
-			console.warn("renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
+			console.warn("connectionStatus: renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
 		}
 		
 		var width = Math.ceil(ctx.measureText(text).width);
@@ -134,7 +145,7 @@ enabled = setting;
 		
 		var lastX = EDITOR.canvas.width - lastWidth - rightPadding;
 		
-		console.log("renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
+		console.log("connectionStatus: renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
 		
 		if(text == undefined) return;
 		
