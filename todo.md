@@ -77,8 +77,6 @@ What I'm working on
 -------------------
 
 
-when searching left or right, show an indication that there is no more to find!
-
 regression: It takes a very long time to open files via goto_files.js (not always) ...why!?
 
 Show an error when trying to save a file while offline!?

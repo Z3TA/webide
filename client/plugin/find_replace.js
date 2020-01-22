@@ -315,11 +315,24 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		}, false);
 		
 		findButtonLeft.addEventListener("click", function() {
-			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
+			var caretIndex = EDITOR.currentFile.caret.index;
+			var start = find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
+			
+			if(EDITOR.currentFile.caret.index == caretIndex) shake(findButtonLeft);
+			
+			console.log("findReplace: findButtonLeft click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonLeft.classList=" + findButtonLeft.classList);
+			
 		}, false);
 		
 		findButtonRight.addEventListener("click", function() {
-			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			var caretIndex = EDITOR.currentFile.caret.index;
+			var start = find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			
+			if(EDITOR.currentFile.caret.index == caretIndex) shake(findButtonRight);
+			
+			
+			console.log("findReplace: findButtonRight click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonRight.classList=" + findButtonRight.classList);
+			// show an indicated that we looped!?
 		}, false);
 		
 		findAllButton.addEventListener("click", function() {
@@ -385,6 +398,27 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		
 	}
 	
+	function shake(el) {
+		EDITOR.beep();
+		
+		
+		var style = getComputedStyle(el);
+		var originalMargin = parseInt(style.marginLeft) || 0;
+		
+		var parentStyle = getComputedStyle(el.parentElement);
+		var originalParentOverflow = parentStyle.overflow;
+		
+		console.log("findReplace: shake: el.style.marginLeft=" + el.style.marginLeft + " style.marginLeft=" + style.marginLeft + " originalMargin=" + originalMargin);
+		
+		el.parentElement.style.overflow = "hidden"; // Prevent screwing with the layout
+		
+		setTimeout(function() {el.style.marginLeft = (originalMargin - 2) + "px" }, 34);
+		setTimeout(function() {el.style.marginLeft = (originalMargin + 2) + "px" }, 68);
+		setTimeout(function() {el.style.marginLeft = (originalMargin) + "px"; el.parentElement.style.overflow = originalParentOverflow;}, 102);
+		
+		
+		
+	}
 	
 	function pressEnter() {
 		
