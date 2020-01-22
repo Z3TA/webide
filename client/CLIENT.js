@@ -30,6 +30,7 @@ var CLIENT = {}; // Client object is global
 	var pingCounter = 0;
 	var nextPingTimer;
 	var pingTimeout;
+	var pingTimeoutTimeMs = 1000;
 	var timer = (function() {
 		if(typeof window.performance == "object" && typeof window.performance.now == "function") return function() {
 			return window.performance.now();
@@ -171,12 +172,11 @@ var CLIENT = {}; // Client object is global
 		
 		var string = id + GS + req;
 		
-		var gotResponse = false;
-		
 		// console.warn so we get a stack trace and can find out where the request was made while debugging
 		if(req != "log") {
 			console.warn("CLIENT: CLIENT.cmd id=" + id + " req=" + req);
 		}
+		
 		if(json) {
 			try {
 				string += GS + JSON.stringify(json);
@@ -189,50 +189,87 @@ var CLIENT = {}; // Client object is global
 			}
 		}
 		
+		var requestThatDontCallBack = ["stdout", "log", "echo"];
+		
+		if(requestThatDontCallBack.indexOf(req) == -1) {
 		properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
 		// The error message will show if you click "bugreport!" (it's in the stack trace!?)
+		}
 		
 		if(callback) {
 callbackWaitList[id] = callback;
 		}
-		else if(req != "stdout" && req != "log" && req != "echo") { // Known commands that doesn't call back
+		else if(requestThatDontCallBack.indexOf(req) == -1) {
 			// This error will be thrown if the server callbacks with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
 			console.warn("CLIENT: No callback defined in req=" + req);
 		}
 		
+var timeoutsBeforeGivingUp = 3;
+
 		connSend(string, function sendMessageToServer(err) {
-			gotResponse = true;
+			console.warn("CLIENT: Message sent! string.length=" + string.length + " err=" + (err && err.message));
+			
 			if(err) {
 				if(req != "log") {
 console.log("CLIENT: connSend error: "+ err);
 				}
 				
-				if(callbackWaitList.hasOwnProperty(id)) {
-					callbackWaitList[id](err);
-					delete callbackWaitList[id];
-				}
+				cleanupRequest(id);
+				if(callback) callback(err);
+				else alertBox(err.message, err.code, "warning");
 			}
+else {
+setTimeout(commandTimeout, pingTimeoutTimeMs*3);
+}
 		});
 		
-		setTimeout(function () {
-			if(!gotResponse) {
-				if(!CLIENT.connected) {
-					var error = new Error("Connection failed while sending " + req + " command to server! The command might not have reached the server.");
-					error.code = "ENETRESET";
-					
-					if(callback) {
-callback(error);
-						// note: If the message did get through, we might get the answer after re-connecting!
-						// if we do get an answer, it will result in a double callback!
-					}
-					else alertBox(error.message, error.code, "warning");
-				}
-			}
-		}, 3000);
 		
+		
+		
+		function commandTimeout() {
+			
+			if(properCallStackError.hasOwnProperty(id)) {
+				
+				if(!CLIENT.connected) {
+					// Connection died before we got an error from the server
+					// The message probably reached the server
+					var error = new Error("Disconnected from server after sending " + req + " command!");
+					error.code = "ENETDOWN";
+				}
+				else if(CLIENT.ping == Infinity) {
+					// We have lost connection with the server
+					// But the socket still think it's connected!
+					var error = new Error("Disconnected from server after sending " + req + " command!");
+					error.code = "ENETUNREACH";
+				}
+				else {
+					// We still have contact to the server
+					// The request is probably just taking a long time...
+					console.warn("req=" + req + " is taking a long time...");
+					if(--timeoutsBeforeGivingUp==0) {
+						var error = new Error(" " + req + " command timeod out!");
+						error.code = "ETIMEDOUT";
+					}
+					else return setTimeout(commandTimeout, pingTimeoutTimeMs*3);
+				}
+				
+				if(callback) {
+					callback(error);
+					// note: If the message did get through, we might get the answer after re-connecting!
+					// if we do get an answer, it will result in a double callback!
+				}
+				//else alertBox(error.message, error.code, "warning");
+				else throw properCallStackError[id];
+			}
+			
+		}
 	}
 	
+	function cleanupRequest(id) {
+		if(callbackWaitList.hasOwnProperty(id)) delete callbackWaitList[id];
+		if(properCallStackError.hasOwnProperty(id)) delete properCallStackError[id];
+	}
 	
 	CLIENT.on = function addEventListener(ev, cb) {
 		
@@ -587,7 +624,7 @@ CLIENT.ping = -1;
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = Infinity;
 			CLIENT.fireEvent("pingTimeout");
-		}, 1000);
+		}, pingTimeoutTimeMs);
 	}
 	
 	console.log("CLIENT: End of CLIENT.js");
