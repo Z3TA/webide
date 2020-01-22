@@ -117,6 +117,7 @@ var FIREFOX = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);
 var SHIFT = 1;
 var CTRL = 2;
 var ALT = 4;
+var META = 8; // Windows key or Command key
 
 // So we can be more explicit and avoid "type" errors
 var SUCCESS = true;

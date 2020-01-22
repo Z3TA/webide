@@ -76,8 +76,13 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+meta kay? (window key) Should it be possibe to capture meta combos, or are they reserved for the OS!?
 
+jump to defenition...
+ctrl+ff (f two times) to search functions!?
 
+in reopen_files server storage, also save where in the file the caret is
+and use that if state is not save in local storage
 
 
 
