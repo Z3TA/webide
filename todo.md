@@ -77,12 +77,8 @@ What I'm working on
 -------------------
 
 
-Weird scrolling on Safari when it scrolls up, then down and vice versa...
 
-annoying thing with function list... 
-startingColumn doesn't seem to update!?
 
-Should probably refactor EDITOR.view.endColumn. startingColumn is not even used!
 
 
 Making sure common keyboard shortcuts work on Chromebooks
@@ -101,7 +97,7 @@ todo: Replace the folder autocomplete in file_save witht the folderPicker compon
 
 bug: When using  the up/down arrow keys when Open-file dialog is open, we get errors...
 
-
+---
 Sometimes the editor gets into a state (on Chromebook) where:
 * It doesn't scroll to caret at eol when you hit keyboard up to a long line
 * Last part of the line disappears when you scroll to the right
@@ -111,8 +107,10 @@ Sometimes the editor gets into a state (on Chromebook) where:
 
 file grid sanity check error: Scrolling bug: EDITOR.currentFile.path=/zpcdata/projects/webide/client/EDITOR.js EDITOR.view.endingColumn=62 file.startColumn=12 EDITOR.view.visibleColumns=62 path=/zpcdata/projects/webide/client/EDITOR.js
 
+Should probably refactor EDITOR.view.endColumn. startingColumn is not even used!
 
 Resizing fixes it!
+---
 
 can we capture meta key and prevent default ? DOes it work in A2D mode? nope and nope
 
@@ -126,7 +124,7 @@ Can they the used ? yes!
 
 magnifying glass to search and open files ? :)
 
-
+---
 Solve Chromebook disconnect issue before making another release!
 
 I get ping: Infinity on Chromebook, 
@@ -134,9 +132,14 @@ Server log: Client connection (websocket) was closed
 But client doesn't attempt to reconnect!
 But I can reconnect just fine if I open the editor in another tab...
 
+Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
+but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned
+couln't load the file explorer
+---
 
 When logged in with the same user, you should share worker process!?
 so that for example a terminal session will stay alive if one client disconnects!?
+yes! It does not!????
 
 Using combination keys like Ctrl+ ALt+ Ctrl+Shift+ etc requires serious bending of hands/fingers
 example? Ctrl+S
@@ -151,9 +154,7 @@ double clicking on a common world in a large file is very slow!! "file" in EDITO
 
 What about users with pay $10 per/mb connection!?
 
-Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
-but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned
-couln't load the file explorer
+
 
 Manage indentation should also work on plain text files!
 
@@ -3586,6 +3587,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Sometimes when using mousepad to scroll on Macbook it first scrolls, then scrolls a few lines in the wrong direction...
 
 It somtimes takes a very long time to open files via goto_files.js ...
 

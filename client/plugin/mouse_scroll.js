@@ -21,12 +21,12 @@
 		
 		var scrollSpeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
-		console.log("scroll dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
+		console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
 		
 		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
 			// It's annoying if we limit scroll speed on most systems
 			// But on Mac it's super fast, so it's more annoying because it's too fast.
-			//console.log("skipped scroll dir!");
+			//console.log("onScroll: skipped scroll dir!");
 			//return; // Fix insane fast scrolling
 		//}
 		
@@ -39,7 +39,7 @@
 		
 		if(combo.sum == CTRL) {
 			// Resize text
-			console.log("yo");
+			console.log("onScroll: Not scrolling because CTRL key was down");
 		}
 		
 		else if(combo.sum == 0) {
@@ -64,11 +64,11 @@ if(file == undefined) return;
 					startRow = maxStartRow;
 				}
 				
-				console.log("file.startRow=" + file.startRow);
-				console.log("maxStartRow=" + maxStartRow);
-				console.log("startRow=" + startRow);
-				console.log("EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
-				console.log("originalTopMargin=" + originalTopMargin);
+				console.log("onScroll: file.startRow=" + file.startRow);
+				console.log("onScroll: maxStartRow=" + maxStartRow);
+				console.log("onScroll: startRow=" + startRow);
+				console.log("onScroll: EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
+				console.log("onScroll: originalTopMargin=" + originalTopMargin);
 				
 				/*
 					if(startRow < 0) {
@@ -97,8 +97,8 @@ if(file == undefined) return;
 				*/
 				EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 
-				console.log("... startRow=" +startRow);
-				console.log("EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
+				console.log("onScroll: ... startRow=" +startRow);
+				console.log("onScroll: EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
 
 				if(startRow < 0) startRow = 0;
 				
@@ -112,7 +112,7 @@ if(file == undefined) return;
 				
 			}
 			else {
-				console.warn("Scrolling, but no currentFile!")
+				console.warn("onScroll: Scrolling, but no currentFile!")
 				
 			}
 		}
