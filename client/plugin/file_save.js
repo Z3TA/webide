@@ -524,7 +524,9 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 			saveAs(file.path);
 		}
 		else {
-			EDITOR.saveFile(file);
+			EDITOR.saveFile(file, function(err) {
+				if(err) alertBox("Unable to save file!\n" + err.message, err.code, "warning");
+			});
 		}
 		
 		return false;

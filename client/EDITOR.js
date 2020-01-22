@@ -1787,7 +1787,8 @@ if(fileParse !== undefined) {
 						});
 					});
 				}).catch(function(err) {
-					callback(err);
+					if(callback) callback(err);
+					else alertBox(err.message); // Can't throw inside a promise chain
 				});
 				
 				return;
@@ -1814,7 +1815,9 @@ if(fileParse !== undefined) {
 							else {
 								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
-								return callback(err);
+								if(callback) callback(err);
+								else throw err;
+								return;
 							}
 						});
 					}
@@ -1826,7 +1829,13 @@ if(fileParse !== undefined) {
 				// Check the hash before saving to prevent over-writing something
 				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
 					if(err) {
-						if(err.code == "ENOENT") console.warn("File did not exist on disk: " + file.path);
+						if(err.code == "ENOENT") {
+console.warn("File did not exist on disk: " + file.path);
+						}
+else if(err.code == "ENETDOWN") {
+							if(callback) return callback(err);
+							else throw err;
+						}
 						else {
 							console.log("err.code=" + err.code);
 							throw err;

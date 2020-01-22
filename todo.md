@@ -77,12 +77,6 @@ What I'm working on
 -------------------
 
 
-regression: It takes a very long time to open files via goto_files.js (not always) ...why!?
-
-Show an error when trying to save a file while offline!?
-"Can not save at this time, no network connection to the server"
-Save in a temporary storage that will be synced once the server/editor comes online!?
-
 Weird scrolling on Safari when it scrolls up, then down and vice versa...
 
 annoying thing with function list... 
@@ -3592,6 +3586,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+It somtimes takes a very long time to open files via goto_files.js ...
 
 Sometimes when searching for files (goto_file.js) it can't find a file, for example today it couln't find CLIENT.js ...
 
