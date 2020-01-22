@@ -27,7 +27,7 @@
 			
 			EDITOR.bindKey({desc: "Indentate in a plain text file", fun: indentate, charCode: TAB, combo: 0});
 			EDITOR.bindKey({desc: "de-Indentate in a plain text file", fun: deindentate, charCode: TAB, combo: SHIFT});
-			EDITOR.bindKey({desc: "Add indentation in a plain text file", fun: addindentation, charCode: ENTER, combo: 0});
+			EDITOR.bindKey({desc: "Add indentation in a plain text file", fun: addindentation, charCode: ENTER, combo: 0, order: 5000});
 			
 			EDITOR.on("ctxMenu", showWhiteSpaceMaybe);
 			
@@ -247,9 +247,9 @@ else {
 			shouldHaveIndentation = indentationRowAbove + file.indentation;
 		}
 		
-		console.log("indentate:addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
+		console.log("indentate: addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
 		
-		if( indentationCurrentRow != shouldHaveIndentation ) {
+		if( indentationCurrentRow != shouldHaveIndentation  && (shouldHaveIndentation.length > 0 || file.caret.col > 0)) {
 			var currentRow = file.grid[row];
 			var caret = file.createCaret(currentRow.startIndex);
 			
@@ -263,7 +263,7 @@ else {
 	}
 	
 	function getIndentationOn(file, row) {
-		if(row < 0) return "";
+		if(row < 0) row = 0;
 		
 		var indentation = "";
 		var gridRow = file.grid[row];
@@ -425,7 +425,7 @@ else {
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(function addIndentationOnEnter(callback) {
+	EDITOR.addTest(1, function addIndentationOnEnter(callback) {
 		EDITOR.openFile("addIndentationOnEnter.txt", '    foo\nbar\n', function(err, file) {
 			
 			file.moveCaretToEndOfLine();
@@ -435,6 +435,14 @@ else {
 			if(file.text != "    foo\n    \nbar\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			if(file.caret.row != 1) throw new Error("Unexpected file.caret.row=" + file.caret.row);
 			if(file.caret.col != 4) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			
+			// When we have the caret at the start of the line and press enter, the indentation should be preserved
+			file.moveCaretToIndex(0);
+			EDITOR.mock("keydown", {charCode: ENTER});
+			if(file.text != "\n    foo\n    \nbar\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+			
+			
 			
 			EDITOR.closeFile(file.path);
 			
