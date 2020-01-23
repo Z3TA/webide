@@ -567,8 +567,12 @@ if(maxResults <= 0) {
 		lastSearchText = searchString;
 		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
 			
-			if(err) throw err;
-			
+			if(err) {
+if(err.code == "ETIMEDOUT") {
+
+}
+else throw err;
+			}
 			console.timeEnd("goto_file: findFiles");
 			
 			console.log("goto_file: Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
