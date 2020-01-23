@@ -587,6 +587,8 @@ reconnectTimeoutTime += 10000;
 			return;
 		}
 		
+sendingPings = true;
+
 		// Wait some time before sending first ping or we would get a very high ping (because the server is busy?)
 		// No! Make the ping request right away so that the user doesn't think we are lagging...
 		//nextPingTimer = setTimeout(sendPing, 2000);
@@ -625,11 +627,11 @@ CLIENT.ping = -1;
 			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 			
 				if(resp != pingCounter) var error = new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
-
-// Don't throw before we have set the next timeout!
+				
+				// Don't throw before we have set the next timeout!
 			}
 			
-
+			
 			nextPingTimer = setTimeout(sendPing, CLIENT.pingInterval);
 			
 			if(error) throw error;
