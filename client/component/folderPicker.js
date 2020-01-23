@@ -146,7 +146,9 @@ inputPath.value = path;
   function highLight(err) {
    
    if(err) {
+// There's something wrong with the path... Unable to list files!
     console.error(err);
+    inputPath.value = EDITOR.workingDirectory;
     return;
    }
    
