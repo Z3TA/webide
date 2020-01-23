@@ -456,10 +456,11 @@ _editorInput = true;
 			// Wait one second before storing the value, in case it gets deleted right away, or we get another change
 			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
 			
-			if(wait) setTimeout(update, 1000);
+			var string = String(val)
+			
+			if(wait) setTimeout(update, 2000);
 			else update();
 			
-			var string = String(val)
 			
 			return string;
 			
@@ -507,19 +508,19 @@ _editorInput = true;
 					if(callback) callback(err, json);
 					if(err) {
 						console.log(stack);
+						console.log("storageRemove err.code=" + err.code)
 					throw err;
 				}
 			});
-return true;
 			}
 			else {
 				console.warn("Server storage had no item with id=" + id);
-			return false;
-}
+			}
 			
 			delete _serverStorage[id];
 			// delete always return true, even if the key did not exist
 			
+			// return void
 		},
 		clear: function storageClear() {
 			throw new Error("Use EDITOR.storage.removeItem() instead!");
