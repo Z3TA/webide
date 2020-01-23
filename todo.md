@@ -76,6 +76,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+todo: More manual testing needed on reopen_files...
+todo: reopen_files should not open files from local storage if they are the same as the files on disk!
 
 Is there anyone depending on CONNECTION_CLOSE code or can we change it?
 
