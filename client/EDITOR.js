@@ -458,6 +458,8 @@ _editorInput = true;
 			
 			var string = String(val)
 			
+			var retryCount = 3;
+			
 			if(wait) setTimeout(update, 2000);
 			else update();
 			
@@ -465,13 +467,17 @@ _editorInput = true;
 			return string;
 			
 			function update() {
+				if(!CLIENT.connected && --retryCount>0) {
+setTimeout(update, 2000);
+return;
+				} 
 				
 				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
 				if(callback) callback(err, json);
 				else if(err) {
 					console.log(stack);
 					//console.warn(err.message);
-						throw err;
+						throw new Error("Unable to save id=" + id + " value=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
 				}
 					
 					if(!err) {
