@@ -76,6 +76,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+ubuntu font is very small on Chromebook compared to Courier new (or whatever is used!?) standard
+
 reopen_files doesn't seem to save text content if file is not saved!
 
 reopen_files using old state instead of opening from disk, even when the file was marked as saved !?

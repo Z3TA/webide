@@ -116,9 +116,19 @@
 		window.clearTimeout(slowLoad);
 		window.clearTimeout(verySlowLoad);
 		
+		if(slowBrowser) {
+			CLIENT.pingTimeout = 3000;
+			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
+		}
+		
 		if(verySlowBrowser) {
+			CLIENT.pingTimeout = 6000;
+			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
+			
+if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will be downloaded by the service worker!
 			console.warn("settings_overload: Not loading font because browser is too slow!");
 			return;
+}
 		}
 		
 		if(typeof loadFont != "function") {

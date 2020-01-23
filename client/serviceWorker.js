@@ -84,10 +84,12 @@ var CACHE_FILES = [
 '/gfx/icon/dropbox.svg',
 	
 	// Cache font
-	'/gfx/font/DejaVuSansMono/DejaVuSansMono.css',
-	'/gfx/font/DejaVuSansMono/ttf/DejaVuSansMono.ttf',
-	'/gfx/font/DejaVuSansMono/ttf/DejaVuSansMono-Bold.ttf',
-	
+'/gfx/font/ubuntu/ubuntu.css',
+	'/gfx/font/ubuntu/UbuntuMono-BI.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-B.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-RI.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-R.ttf',
+
 	// Dialog icons
 	'/gfx/error.svg',
 	'/gfx/warning.svg',
