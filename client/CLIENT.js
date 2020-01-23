@@ -215,7 +215,10 @@ var timeoutsBeforeGivingUp = 3;
 console.log("CLIENT: connSend error: "+ err);
 				}
 				
-				cleanupRequest(id);
+				delete callbackWaitList[id];
+				delete properCallStackError[id];
+				delete noCallbackList[id];
+				
 				if(callback) callback(err);
 				else alertBox(err.message, err.code, "warning");
 			}
@@ -233,42 +236,44 @@ setTimeout(commandTimeout, pingTimeoutTimeMs*3);
 				
 				if(!CLIENT.connected) {
 					// Connection died before we got an error from the server
-					// The message probably reached the server
-					var error = new Error("Disconnected from server after sending " + req + " command!");
-					error.code = "ENETDOWN";
+					
+					var error = UTIL.updateError(properCallStackError[id], "Disconnected from server after sending " + req + " command!", "ENETDOWN");
+					
+					// The message probably reached the server...
+					// The server will buffer the response for a while in case we reconnect!!?
+					
 				}
 				else if(CLIENT.ping == Infinity) {
 					// We have lost connection with the server
 					// But the socket still think it's connected!
-					var error = new Error("Disconnected from server after sending " + req + " command!");
-					error.code = "ENETUNREACH";
+					var error = UTIL.updateError(properCallStackError[id], "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.", "ENETUNREACH");
 				}
 				else {
 					// We still have contact to the server
 					// The request is probably just taking a long time...
 					console.warn("req=" + req + " is taking a long time...");
 					if(--timeoutsBeforeGivingUp==0) {
-						var error = new Error(" " + req + " command timeod out!");
-						error.code = "ETIMEDOUT";
+						var error = UTIL.updateError(properCallStackError[id], " " + req + " command timeod out!", "ETIMEDOUT");
+						// note: If the command do succeed, we will get a second callback with the result!
 					}
-					else return setTimeout(commandTimeout, pingTimeoutTimeMs*3);
+					else {
+return setTimeout(commandTimeout, pingTimeoutTimeMs*3);
+					}
 				}
 				
 				if(callback) {
 					callback(error);
 					// note: If the message did get through, we might get the answer after re-connecting!
 					// if we do get an answer, it will result in a double callback!
+					
 				}
 				//else alertBox(error.message, error.code, "warning");
-				else throw properCallStackError[id];
+				else {
+					throw properCallStackError[id];
+				}
 			}
 			
 		}
-	}
-	
-	function cleanupRequest(id) {
-		if(callbackWaitList.hasOwnProperty(id)) delete callbackWaitList[id];
-		if(properCallStackError.hasOwnProperty(id)) delete properCallStackError[id];
 	}
 	
 	CLIENT.on = function addEventListener(ev, cb) {
@@ -531,28 +536,24 @@ reconnectTimeoutTime += 10000;
 					
 					if(json.error) {
 						var errMsg = "Server: " + json.error;
+						console.error(errMsg + " code=" + json.errorCode);
 						err = properCallStackError[json.id] || new Error(errMsg);
-						err.message = errMsg;
-						// Seems it's not possible to overwrite error.message, but can we overwrite error.stack ?
-						if(err.message != errMsg) {
-							err = new Error(errMsg);
-							err.stack = properCallStackError[json.id].stack;
-							
-							if(err.stack != properCallStackError[json.id].stack) {
-								alertBox("Unable to update " + err.message + " error message in " + BROWSER + ". The error message is: " + errMsg);
-							}
-						}
-						if(json.errorCode) err.code = json.errorCode;
+						err = UTIL.updateError(err, errMsg, json.errorCode);
 					}
 					
 					callbackWaitList[json.id](err, json.resp);
 					delete callbackWaitList[json.id];
 					delete properCallStackError[json.id];
+					delete noCallbackList[json.id]
 				}
 				else if( noCallbackList.hasOwnProperty(json.id)) {
+					delete properCallStackError[json.id];
+					
 					throw noCallbackList[json.id];
 				}
 				else {
+					delete properCallStackError[json.id];
+					
 					throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
 				}

@@ -3085,6 +3085,52 @@ b = b.slice(8);
 			
 		}
 		
+	},
+	updateError: function updateError(oldError, code, message) {
+		/*
+			For example when sending a request to another server,
+			when the response comes back, the call stack will be wrong,
+			we want the call-stack from before the request was sent!
+		*/
+		
+		if(code) {
+			var setCode = set(oldError, "code", code);
+		}
+		
+		if(message) {
+			var setMessage = set(oldError, "message", message);
+		}
+		
+		// setMessage seem to fail in most browsers...
+		// Changing the code however works in most browsers!
+		if(setMessage === false || setCode === false) {
+			var newError = new Error(message ? message : oldError.message);
+			newError.code = code ? code : oldError.code;
+			
+			var setStack = set(newError, "stack", oldError.stack);
+			
+			if(setStack) return newError;
+			else {
+if(setMessage === false) console.error(message); // So we see the error message in the logs
+return oldError;
+			}
+		}
+		else {
+			return oldError;
+		}
+		
+		function set(error, prop, value) {
+			try {
+				error[prop] = value;
+			}
+			catch(err) {
+				console.warn("Unable to set " + prop + "");
+				return false;
+			}
+			
+			if(error[prop] == value) return true;
+			else return false;
+		}
 	}
 }
 
