@@ -437,18 +437,48 @@ _editorInput = true;
 	
 	// # Server Storage (to replace localStorage)
 	var _serverStorage = null; // Will be populated once the data is received from the server
-	
+	var serverStorageWaitingItems = {};
 	EDITOR.storage = {
-		setItem: function storageSetItem(id, val, callback) {
+		setItem: function storageSetItem(id, val, wait, callback) {
 			var stack = UTIL.getStack("EDITOR.storage.setItem");
-			CLIENT.cmd("storageSet", {item: id, value: String(val)}, function(err, json) {
+			
+			if(typeof wait == "function" && callback == undefined) {
+				callback = wait;
+				wait = true;
+			}
+			else if(wait == undefined) {
+				wait = true;
+			}
+			else if(typeof wait != "boolean") {
+				throw new Error("wait=" + wait + " needs to be a Boolean!");
+			}
+			
+			// Wait one second before storing the value, in case it gets deleted right away, or we get another change
+			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
+			
+			if(wait) setTimeout(update, 1000);
+			else update();
+			
+			var string = String(val)
+			
+			return string;
+			
+			function update() {
+				
+				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
 				if(callback) callback(err, json);
 				else if(err) {
 					console.log(stack);
-					console.warn(err.message);
+					//console.warn(err.message);
+						throw err;
 				}
-			});
-			return _serverStorage[id] = String(val); 
+					
+					if(!err) {
+						_serverStorage[id] = string;
+					}
+				});
+			}
+			
 		},
 		getItem: function storageGetItem(id, trap) {
 			if(!this.ready()) throw new Error('Storage is not yet ready. Use EDITOR.on("storageReady", yourFunction)'); 
@@ -470,15 +500,26 @@ _editorInput = true;
 			// Save the stack in case we get an error
 			var stack = UTIL.getStack("EDITOR.storage.removeItem");
 			
-			CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
-				if(callback) callback(err, json);
-				if(err) {
-					console.log(stack);
+			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
+			
+			if(_serverStorage.hasOwnProperty(id)) {
+				CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
+					if(callback) callback(err, json);
+					if(err) {
+						console.log(stack);
 					throw err;
 				}
 			});
+return true;
+			}
+			else {
+				console.warn("Server storage had no item with id=" + id);
+			return false;
+}
 			
-			return delete _serverStorage[id];
+			delete _serverStorage[id];
+			// delete always return true, even if the key did not exist
+			
 		},
 		clear: function storageClear() {
 			throw new Error("Use EDITOR.storage.removeItem() instead!");
