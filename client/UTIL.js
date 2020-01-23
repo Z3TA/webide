@@ -3086,12 +3086,23 @@ b = b.slice(8);
 		}
 		
 	},
+	isAllCaps: function isAllCaps(str) {
+		if(typeof str != "string") throw new Error("str=" + str + " is not a string!");
+		
+		for(var i=0; i<str.length; i++) {
+			if(str[i] != str[i].toUpperCase()) return false;
+		}
+		return true;
+	},
 	updateError: function updateError(oldError, code, message) {
 		/*
 			For example when sending a request to another server,
 			when the response comes back, the call stack will be wrong,
 			we want the call-stack from before the request was sent!
 		*/
+		
+		if(message != undefined && UTIL.isAllCaps(message)) throw new Error("The error message=" + message + " is in all caps, the error code should be in the second argument!");
+		if(code != undefined && !UTIL.isAllCaps(code)) throw new Error("The error code=" + code + " (second argument to UTIL.updateError) should be in ALL_CAPS!");
 		
 		if(code) {
 			var setCode = set(oldError, "code", code);

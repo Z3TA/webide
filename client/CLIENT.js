@@ -237,7 +237,7 @@ setTimeout(commandTimeout, pingTimeoutTimeMs*3);
 				if(!CLIENT.connected) {
 					// Connection died before we got an error from the server
 					
-					var error = UTIL.updateError(properCallStackError[id], "Disconnected from server after sending " + req + " command!", "ENETDOWN");
+					var error = UTIL.updateError(properCallStackError[id], "ENETDOWN", "Disconnected from server after sending " + req + " command!");
 					
 					// The message probably reached the server...
 					// The server will buffer the response for a while in case we reconnect!!?
@@ -246,14 +246,14 @@ setTimeout(commandTimeout, pingTimeoutTimeMs*3);
 				else if(CLIENT.ping == Infinity) {
 					// We have lost connection with the server
 					// But the socket still think it's connected!
-					var error = UTIL.updateError(properCallStackError[id], "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.", "ENETUNREACH");
+					var error = UTIL.updateError(properCallStackError[id], "ENETUNREACH", "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.");
 				}
 				else {
 					// We still have contact to the server
 					// The request is probably just taking a long time...
 					console.warn("req=" + req + " is taking a long time...");
 					if(--timeoutsBeforeGivingUp==0) {
-						var error = UTIL.updateError(properCallStackError[id], " " + req + " command timeod out!", "ETIMEDOUT");
+						var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out!");
 						// note: If the command do succeed, we will get a second callback with the result!
 					}
 					else {
@@ -538,7 +538,7 @@ reconnectTimeoutTime += 10000;
 						var errMsg = "Server: " + json.error;
 						console.error(errMsg + " code=" + json.errorCode);
 						err = properCallStackError[json.id] || new Error(errMsg);
-						err = UTIL.updateError(err, errMsg, json.errorCode);
+						err = UTIL.updateError(err, json.errorCode, errMsg);
 					}
 					
 					callbackWaitList[json.id](err, json.resp);
