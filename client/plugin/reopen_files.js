@@ -890,11 +890,11 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
 		
-		if(CLIENT.connected && EDITOR.storage.ready()) {
+		if(CLIENT.connected && CLIENT.ping < 2000 && EDITOR.storage.ready()) {
 			var list = EDITOR.sortFileList(); // Array sorted by file.order
 			var key = "";
 			var filePath = "";
-			// Pnly save the positions that has changed to save bandwith
+			// Only save the positions that has changed to save bandwidth/data
 			for(var i=0; i<list.length; i++) {
 				key = "__openFile" + i;
 				filePath = list[i].path;
@@ -1045,7 +1045,7 @@ EDITOR.storage.setItem(key, filePath);
 		
 		EDITOR.localStorage.setItem("state_" + path, JSON.stringify(state), function(err) {
 			
-			if(EDITOR.storage.ready() && CLIENT.connected) {
+			if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
 				// Also store some of the state on the server
 				var serverState = state;
 				
