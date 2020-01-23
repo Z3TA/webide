@@ -76,6 +76,15 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+
+Is there anyone depending on CONNECTION_CLOSE code or can we change it?
+
+does exit events work!?
+todo: Refactor exit event, make sure nw.js and browser does the same things
+During an exit event we would like to call storage.setItem with wait=false !!!
+
+
+
 ubuntu font is very small on Chromebook compared to Courier new (or whatever is used!?) standard
 
 reopen_files doesn't seem to save text content if file is not saved!
@@ -137,18 +146,8 @@ Can they the used ? yes!
 
 magnifying glass to search and open files ? :)
 
----
-Solve Chromebook disconnect issue before making another release!
 
-I get ping: Infinity on Chromebook, 
-Server log: Client connection (websocket) was closed
-But client doesn't attempt to reconnect!
-But I can reconnect just fine if I open the editor in another tab...
 
-Suddenly I was disconncted from the test tab, then when going to the editor, there where no indication of something going wrong, 
-but it was unresponsive. When hitting Alt+C in the terminal, nothing happaned
-couln't load the file explorer
----
 
 When logged in with the same user, you should share worker process!?
 so that for example a terminal session will stay alive if one client disconnects!?
