@@ -18,6 +18,7 @@ var CLIENT = {}; // Client object is global
 	var idCounter = 0;
 	var callbackWaitList = {};
 	var noCallbackList = {};
+	var gotResponseForTimedOutRequest = {};
 	var cache = {};
 	var connection = {readyState: 0};
 	var loggedIn = null;
@@ -30,7 +31,10 @@ var CLIENT = {}; // Client object is global
 	var pingCounter = 0;
 	var nextPingTimer;
 	var pingTimeout;
-	var pingTimeoutTimeMs = 1000;
+	var requestThatDontCallBack = ["stdout", "log", "echo", "ping"];
+	var GS = String.fromCharCode(29);
+	var WEBSOCK_OPEN = 1;
+	
 	var timer = (function() {
 		if(typeof window.performance == "object" && typeof window.performance.now == "function") return function() {
 			return window.performance.now();
@@ -40,11 +44,10 @@ var CLIENT = {}; // Client object is global
 		}
 	})();
 	
-	
-	var WEBSOCK_OPEN = 1;
-	
 	CLIENT.connected = false;
 	CLIENT.ping = -1;
+	CLIENT.pingTimeout = 1000;
+	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 	
 	var checkEditorInterval = setInterval(checkEditor);
 	
@@ -149,37 +152,64 @@ var CLIENT = {}; // Client object is global
 		stopPing();
 	}
 	
-	CLIENT.cmd = function cmd(req, json, callback) {
+	CLIENT.cmd = function cmd(req, json, timeout, callback) {
+		// Sends a request to the server.
 		
-		// Second argument is either a callback function or a javascript object
+		if(req != "log") {
+			console.warn("CLIENT: CLIENT.cmd id=" + id + " req=" + req); // So we get a stack trace and can find out where the request was made while debugging
+		}
+		
+		if(typeof timeout == "function" && callback == undefined) {
+			callback = timeout;
+			timeout = CLIENT.cmdTimeout;
+		}
+		else if(timeout == undefined) {
+			timeout = CLIENT.cmdTimeout;
+		}
+		else if(typeof timeout != "number") {
+			throw new Error("timeout=" + timeout + " need to be a number!");
+		}
+		
 		if(typeof json == "function" && callback == undefined) {
 			callback = json;
 			json = null;
 		}
-		else if(typeof json != "object") throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
+		else if(typeof json != "object") {
+throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
+		}
 		
 		if(!CLIENT.connected) {
 			var error = new Error("Not connected to a webide server!");
 			error.code = "ENETDOWN";
-			if(callback) callback(error);
-			else alertBox(err.message);
-			return;
+		}
+		else if(CLIENT.ping == Infinity) {
+			var error = new Error("We might have lost the connection. Or the server is busy!");
+			error.code = "ENETUNREACH";
+		}
+		else if(connection.readyState!=WEBSOCK_OPEN) {
+			console.log("CLIENT: connection.readyState=" + connection.readyState);
+			
+			var error = new Error("Not connected to webide server");
+			error.code = "CONNECTION_CLOSED";
+			
+			CLIENT.fireEvent("connectionLost"); // Why is this here ?
+			
 		}
 		
-		var GS = String.fromCharCode(29);
+		if(error) {
+			if(callback) callback(error);
+			else alertBox(error.message, error.code, "warning");
+			
+			return;
+		}
 		
 		var id = ++idCounter;
 		
 		var string = id + GS + req;
 		
-		// console.warn so we get a stack trace and can find out where the request was made while debugging
-		if(req != "log") {
-			console.warn("CLIENT: CLIENT.cmd id=" + id + " req=" + req);
-		}
-		
 		if(json) {
 			try {
-				string += GS + JSON.stringify(json);
+				string = string + GS + JSON.stringify(json);
 			}
 			catch(err) {
 				if(req != "log") {
@@ -189,93 +219,81 @@ var CLIENT = {}; // Client object is global
 			}
 		}
 		
-		var requestThatDontCallBack = ["stdout", "log", "echo"];
-		
 		if(requestThatDontCallBack.indexOf(req) == -1) {
-		properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
-		// The error message will show if you click "bugreport!" (it's in the stack trace!?)
+			properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
+			// The error message will show if you click "bugreport!" (it's in the stack trace!?)
 		}
 		
 		if(callback) {
-callbackWaitList[id] = callback;
+			callbackWaitList[id] = callback;
 		}
 		else if(requestThatDontCallBack.indexOf(req) == -1) {
-			// This error will be thrown if the server callbacks with this id
+			// The following error will be thrown if the server call back with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
-			console.warn("CLIENT: No callback defined in req=" + req);
+			console.warn("CLIENT: No callback defined for req=" + req);
 		}
 		
-var timeoutsBeforeGivingUp = 3;
-
-		connSend(string, function sendMessageToServer(err) {
-			console.warn("CLIENT: Message sent! string.length=" + string.length + " err=" + (err && err.message));
+		console.log("CLIENT: Sending: " + UTIL.shortString(string) + " to server ...");
+		connection.send(string);
+		
+		/*
 			
-			if(err) {
-				if(req != "log") {
-console.log("CLIENT: connSend error: "+ err);
-				}
-				
-				delete callbackWaitList[id];
-				delete properCallStackError[id];
-				delete noCallbackList[id];
-				
-				if(callback) callback(err);
-				else alertBox(err.message, err.code, "warning");
-			}
-else {
-setTimeout(commandTimeout, pingTimeoutTimeMs*3);
-}
-		});
-		
-		
-		
+			problem: It takes SockJS forever until it gives up on a connection and fires a connection.oncluse event.
+			Meanwhile the user might do stuff that generates requests to the server.
+			And because SockJS optimistically think we are still connected, those requests are sent to the void.
+			Resulting in an unresponsive user interface, eg. you click on buttons, but nothing happens.
+			
+			solution: Ping the server at regular intervals to see if it's responsive.
+			And refuse to send more request if the server don't respond to pings.
+			Also set a timer that calls back with a timeout error, so that the user at least get an error message
+			
+		*/
+		if(requestThatDontCallBack.indexOf(req) == -1) {
+			setTimeout(commandTimeout, timeout || CLIENT.cmdTimeout);
+		}
 		
 		function commandTimeout() {
+			/*
+				We should follow up request's to make sure they return a response.
+				It's very annoying when you do something, and the editor doesn't respond
+				because there is a problem with the connection to the server...
+			*/
 			
-			if(properCallStackError.hasOwnProperty(id)) {
-				
-				if(!CLIENT.connected) {
-					// Connection died before we got an error from the server
-					
-					var error = UTIL.updateError(properCallStackError[id], "ENETDOWN", "Disconnected from server after sending " + req + " command!");
-					
-					// The message probably reached the server...
-					// The server will buffer the response for a while in case we reconnect!!?
-					
-				}
-				else if(CLIENT.ping == Infinity) {
-					// We have lost connection with the server
-					// But the socket still think it's connected!
-					var error = UTIL.updateError(properCallStackError[id], "ENETUNREACH", "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.");
-				}
-				else {
-					// We still have contact to the server
-					// The request is probably just taking a long time...
-					console.warn("req=" + req + " is taking a long time...");
-					if(--timeoutsBeforeGivingUp==0) {
-						var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out!");
-						// note: If the command do succeed, we will get a second callback with the result!
-					}
-					else {
-return setTimeout(commandTimeout, pingTimeoutTimeMs*3);
-					}
-				}
-				
-				if(callback) {
-					callback(error);
-					// note: If the message did get through, we might get the answer after re-connecting!
-					// if we do get an answer, it will result in a double callback!
-					
-				}
-				//else alertBox(error.message, error.code, "warning");
-				else {
-					throw properCallStackError[id];
-				}
+			if(!properCallStackError.hasOwnProperty(id) && !callbackWaitList.hasOwnProperty(id)) return; // We have received the response!
+			else if(!properCallStackError.hasOwnProperty(id)) throw new Error("Request id=" + id + " req=" + req + " timed out, but there is no properCallStackError! timeout=" + timeout);
+			
+			if(!CLIENT.connected) {
+				// Connection died before we got an error from the server
+				var error = UTIL.updateError(properCallStackError[id], "ENETDOWN", "Disconnected from server after sending " + req + " command!");
+				// The message probably reached the server...
+				// The server will buffer the response for a while in case we reconnect!!?
+			}
+			else if(CLIENT.ping == Infinity) {
+				// We have lost connection with the server
+				// But the socket still think it's connected!
+				var error = UTIL.updateError(properCallStackError[id], "ENETUNREACH", "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.");
+			}
+			else {
+				// We still have contact to the server
+				// The request is probably just taking a long time...
+				var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out!");
 			}
 			
+			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + " LIENT.cmdTimeout=" + LIENT.cmdTimeout);
+			
+			// note: If the message did get through, we might get the answer after re-connecting!
+			// we do not however want the answer to result in a double callback!
+			
+			delete callbackWaitList[id];
+			delete properCallStackError[id];
+			delete noCallbackList[id];
+			
+			if(callback) callback(error);
+			else throw error;
+			
 		}
-	}
-	
+		}
+		
 	CLIENT.on = function addEventListener(ev, cb) {
 		
 		/*
@@ -437,26 +455,6 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 		}
 	});
 	
-	function connSend(msg, callback) {
-		
-		if(connection.readyState==WEBSOCK_OPEN) {
-			console.log("CLIENT: Sending: " + UTIL.shortString(msg) + " to server ...");
-			
-			connection.send(msg);
-			if(callback) callback(null);
-		}
-		else {
-			console.log("CLIENT: connection.readyState=" + connection.readyState);
-			if(callback) {
-				var err = new Error("Not connected to webide server");
-				err.code = "CONNECTION_CLOSED";
-				callback(err);
-			}
-			CLIENT.fireEvent("connectionLost");
-			//serverMessage(formatText(currentChannel.name) + GS + formatText(nickName) + GS + formatText(text))
-		}
-		}
-	
 	function checkEditor() {
 		console.log("CLIENT: Wait for editor to load and then attach events for afk");
 		if(typeof EDITOR != "undefined" && typeof EDITOR.on == "function") {
@@ -551,6 +549,9 @@ reconnectTimeoutTime += 10000;
 					
 					throw noCallbackList[json.id];
 				}
+				else if(gotResponseForTimedOutRequest.hasOwnProperty(json.id)) {
+					throw gotResponseForTimedOutRequest[id];
+				}
 				else {
 					delete properCallStackError[json.id];
 					
@@ -625,7 +626,7 @@ CLIENT.ping = -1;
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = Infinity;
 			CLIENT.fireEvent("pingTimeout");
-		}, pingTimeoutTimeMs);
+		}, CLIENT.pingTimeout);
 	}
 	
 	console.log("CLIENT: End of CLIENT.js");
