@@ -460,16 +460,17 @@ _editorInput = true;
 			
 			var retryCount = 3;
 			
-			if(wait) setTimeout(update, 2000);
+			if(wait) serverStorageWaitingItems[id] = setTimeout(update, 2000);
 			else update();
 			
 			
 			return string;
 			
 			function update() {
-				if(!CLIENT.connected && --retryCount>0) {
-setTimeout(update, 2000);
-return;
+				if(wait && !CLIENT.connected && --retryCount>0) {
+					console.warn("Disconnected when trying to save id=" + id + " retrying...");
+					serverStorageWaitingItems[id] = setTimeout(update, 2000);
+					return;
 				} 
 				
 				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
@@ -484,6 +485,8 @@ return;
 						_serverStorage[id] = string;
 					}
 				});
+				
+				delete serverStorageWaitingItems[id];
 			}
 			
 		},
@@ -507,7 +510,11 @@ return;
 			// Save the stack in case we get an error
 			var stack = UTIL.getStack("EDITOR.storage.removeItem");
 			
-			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
+			if(serverStorageWaitingItems.hasOwnProperty(id)) {
+				// No need to save it if it's going to get deleted!
+clearTimeout(serverStorageWaitingItems[id]);
+				delete serverStorageWaitingItems[id];
+			}
 			
 			if(_serverStorage.hasOwnProperty(id)) {
 				CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
