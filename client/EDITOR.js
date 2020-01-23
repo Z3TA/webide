@@ -456,7 +456,7 @@ _editorInput = true;
 			if(trap !== undefined) throw new Error("getItem only takes one argument, did you mean to use setItem ?"); // Error check
 			
 			if(!_serverStorage.hasOwnProperty(id)) {
-				console.warn("Can not find id=" + id + " in EDITOR.storage!");
+				//console.warn("Can not find id=" + id + " in EDITOR.storage!");
 				return null;
 			}
 			else return _serverStorage[id];

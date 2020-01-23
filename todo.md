@@ -76,7 +76,13 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
-meta kay? (window key) Should it be possibe to capture meta combos, or are they reserved for the OS!?
+reopen_files doesn't seem to save text content if file is not saved!
+
+reopen_files using old state instead of opening from disk, even when the file was marked as saved !?
+
+
+
+meta key? (window key) Should it be possibe to capture meta combos, or are they reserved for the OS!?
 
 jump to defenition...
 ctrl+ff (f two times) to search functions!?

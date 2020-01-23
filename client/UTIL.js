@@ -3142,7 +3142,13 @@ return oldError;
 			if(error[prop] == value) return true;
 			else return false;
 		}
-	}
+	},
+	isEmptyString: function isEmpty(str) {
+		if(str == undefined) return true;
+		else if(typeof str != "string") throw new Error("str=" + str + " is not a string!");
+		else if(str.length == 0) return true;
+else return false;
+	} 
 }
 
 // Try catch threw an exception in Opera Mobile using Dragonly debugger
