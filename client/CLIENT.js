@@ -46,6 +46,7 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connected = false;
 	CLIENT.ping = -1;
+	CLIENT.pingInterval = 5000; // How long time to wait until sendng next ping
 	CLIENT.pingTimeout = 1000;
 	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 	
@@ -603,25 +604,36 @@ CLIENT.ping = -1;
 	function sendPing() {
 		var start = timer();
 		console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
-		CLIENT.cmd("ping", {data: ++pingCounter}, function(err, resp) {
-			if(err) {
-				console.log("CLIENT: ping! err.code=" + err.code);
-				stopPing();
-				return;
-				//throw err;
+		CLIENT.cmd("ping", {data: ++pingCounter}, function(pingErr, resp) {
+			
+			clearTimeout(pingTimeout);
+			
+			if(pingErr) {
+				console.log("CLIENT: ping! pingErr.code=" + pingErr.code);
+				CLIENT.ping = Infinity;
+				
+				// Don't stop the ping due to pingErr, because we don't know when to start the ping again
+				
 			}
+			else {
 			var end = timer();
 			var ping = Math.round(end-start);
 			//var ping = Math.round((end-start)*10) / 10;
 			if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
 			CLIENT.ping = ping;
-			clearTimeout(pingTimeout);
-			
+				
 			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 			
-			if(resp != pingCounter) throw new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
+				if(resp != pingCounter) var error = new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
+
+// Don't throw before we have set the next timeout!
+			}
 			
-			nextPingTimer = setTimeout(sendPing, 5000);
+
+			nextPingTimer = setTimeout(sendPing, CLIENT.pingInterval);
+			
+			if(error) throw error;
+
 		});
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = Infinity;
