@@ -13,21 +13,27 @@
 	
 	Note: Certbot currently don't support hooks with automaitcally renewing, so you need to use crontab!
 	Add the following command to crontab on the cloudIDE server (replace path to webide):
-	certbot renew --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	sudo certbot renew --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Update: Certbot seem to be able to handle the renewal!
 	check: https://transparencyreport.google.com/https/certificates?cert_search_auth=&cert_search_cert=&cert_search=include_expired:true;include_subdomains:true;domain:johan.webide.se&lu=cert_search
 	
 	
 	How to test on the cloudIDE server (replace path to webide):
-	certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
+	sudo certbot certonly --staging --manual --manual-public-ip-logging-ok --preferred-challenges dns --noninteractive --agree-tos --email zeta@zetafiles.org -d 'johan.webide.se,*.johan.webide.se' --manual-auth-hook="/srv/webide/letsencrypt/certbot-manual-auth-hook.sh" --manual-cleanup-hook="/srv/webide/letsencrypt/certbot-manual-cleanup-hook.sh" 
 	
 	Remove --staging --dry-run for running in production.
 	And don't forget to delete /etc/letsencrypt/live/domain.tld/ or certbot will create domain.tld-0001/
 	
+	Certbot get updates all the time so the command flags might change. Here's an example how you can create a certificate:
+	sudo certbot  certonly --manual --server https://acme-v02.api.letsencrypt.org/directory --manual-public-ip-logging-ok --preferred-challenges dns --non-interactive --agree-tos --email zeta@zetafiles.org -d 'editor.yourdomain.com' --manual-auth-hook="certbot-manual-auth-hook.sh" --manual-cleanup-hook="certbot-manual-cleanup-hook.sh" --account 6668a1af86a12faa8ba00196a8613299
+	
+	To list your accounts:
+	sudo ls -la /etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory/
+	
 	
 	Delete a cert:
-	certbot delete
+	sudo certbot delete
 	
 	
 	---------------------------------------------------------------------------------------------------
