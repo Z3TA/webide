@@ -9,6 +9,8 @@ by looking at the diff. We want to know WHY you did it.
 Note to myself
 --------------
 
+react app
+
 Solve problems and pains! Do not look for problems that fit a solution!
 
 Before you start working on something new, first describe the problem, 
@@ -75,6 +77,101 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 
 What I'm working on
 -------------------
+
+hmm, can't connect with the netns when using a dummy device. 
+Should I try with a bridge device ?
+It worked when I used a real device for macvlan...
+
+plan: setup a bridge on the host,
+create netns for each user
+
+# Enable packet forwarding
+sysctl -a | grep forward
+sudo sysctl net.ipv4.ip_forward=1
+
+# Create dummy interface
+sudo ip link add share type dummy
+
+# Assign Static IP address
+sudo ip link set up dev share
+sudo ip addr add 10.0.0.1/24 dev share
+
+# Configure firewall
+sudo iptables -t nat -A POSTROUTING -o enp7s0 -j MASQUERADE
+sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i share -o enp7s0 -j ACCEPT
+
+
+# For each user
+## add network namespace
+sudo ip netns add johan
+## create a loopback interface in the network namespace
+sudo ip netns exec johan ip link set lo up
+## Create virtual MAC
+sudo ip link add johan link share type macvlan mode private
+## Move MAC to network namespace
+sudo ip link set johan netns johan
+## Add ip address
+sudo ip netns exec johan ip addr add 10.0.0.2/24 dev johan
+sudo ip netns exec johan ip link set up dev johan
+## Route via host
+sudo ip netns exec johan ip route add default via 10.0.0.1 dev johan
+
+## Forward loopback to ip ?
+sudo ip netns exec iptables -t nat -A PREROUTING -p tcp --dport 1111 -j DNAT --to-destination 10.0.0.2:111
+sudo ip netns exec iptables -t nat -A POSTROUTING -j MASQUERADE
+
+
+# Start dhcp client in network namespace
+sudo ip netns exec pelle dhclient pelle -v
+
+
+
+# Create veth pair
+sudo ip link add veth-host type veth peer name veth-johan
+
+# move one of the veth device's to the network namespace 
+sudo ip link set veth-johan netns johan
+
+# Assigning IP to our veth devices
+sudo ip addr add 10.0.3.1/24 dev veth-host
+sudo ip netns exec johan ip addr add 10.0.3.2/24 dev veth-johan
+
+#  bring them up
+sudo ip link set veth-host up
+sudo ip netns exec johan ip link set veth-johan up
+
+# Delete an interface
+sudo ip netns exec johan ip link delete johan
+
+
+
+ip link set johan1 netns johan up
+ip addr add 10.200.1.1/24 dev east0
+
+
+sudo ip netns exec nstest bash
+
+
+put each user into his/her own ip namespace, then proxy 8080.user.webide.se to their port 8080
+
+Support react (native) development!
+
+
+CLIENT: CLIENT.cmd id=undefined req=ping CLIENT.js:160:12
+CLIENT: ping! pingErr.code=ENETUNREACH CLIENT.js:614:13
+CLIENT: firing client event 'pingTimeout' data=undefined CLIENT.js:326:11
+
+
+Possibly security issue with _vnc nginx that lets you access any port on localhost!
+
+idea: A service that proxy to the editor on your local machine! So you can access your "home" computer while on the move.
+with the -proxy (and -domain) flag, the editor server connects to the service, which will check the public IP, and proxy all request to -domain 
+or create a user.webeditor.se domain, in the editor server stdout it will say "Public url: https://user.webeditor.se/
+
+idea: If the caret jumps more then one screen, it should be possible to go back to it pressing Ctrl+B ?!?
+
+See size and last modified when hovering files in file explorer
 
 todo: More manual testing needed on reopen_files...
 todo: reopen_files should not open files from local storage if they are the same as the files on disk!
