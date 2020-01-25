@@ -28,7 +28,7 @@ if [ -e "/var/run/netns/$1" ] ; then
   exit 1
 fi
 
-## add network namespace
+## add network namespace (guide: https://ops.tips/blog/using-network-namespaces-and-bridge-to-isolate-servers/)
 sudo ip netns add $1
 # create veth pair
 sudo ip link add $1 type veth peer name br-$1

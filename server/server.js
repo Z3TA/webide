@@ -4298,9 +4298,11 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 	
 	var workerScript = module_path.resolve(__dirname, "./user_worker.js");
 	
-	if(netns) {
+	if(netns && uid) {
 		var command = "/sbin/ip";
 		var args = ["netns", "exec", netns, workerNode, workerScript].concat(workerArgs);
+		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+spawnOptions.env.HOST = netnsIP;
 	}
 	else {
 		var command = workerNode;

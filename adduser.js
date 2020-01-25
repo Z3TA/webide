@@ -305,8 +305,7 @@ function adduser() {
 		
 		homeDir = UTIL.trailingSlash(homeDir);
 		
-		var ipInt = 167772162 + uid; // Starts on 10.0.0.1 then adds the uid to get a unique local IP address
-		var netnsIP = int2ip(ipInt);
+		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 		
 		//var gid = getGroupId(groupName);
 		
@@ -705,8 +704,6 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	
 }
 
-function int2ip(ipInt) {
-	return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
-}
+
 
 

@@ -3148,7 +3148,10 @@ return oldError;
 		else if(typeof str != "string") throw new Error("str=" + str + " is not a string!");
 		else if(str.length == 0) return true;
 else return false;
-	} 
+	},
+	int2ip: function int2ip(ipInt) {
+		return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
+	}
 }
 
 // Try catch threw an exception in Opera Mobile using Dragonly debugger
