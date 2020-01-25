@@ -27,6 +27,9 @@ var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 // Note: The file parsers should fill this list!
 EDITOR.parseFileExtensionAsCode = [
 	"js",
+	"ts",
+	"jsx",
+	"tsx",
 	"java", 
 	"htm", 
 	"html", 

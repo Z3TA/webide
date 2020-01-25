@@ -42,7 +42,24 @@ var File; // File object is global
 		file.index = fileIndex;
 		file.order = fileIndex; // For ordering files, in for example a tab list
 		file.name = UTIL.getFilenameFromPath(path);
-		file.mode = "code"; // text, code, or other, ... Not to be confused with EDITOR.mode
+		
+		if(EDITOR.settings.devMode && 1==2) {
+			// Need to figure out where file mode is changed...
+			var _fileMode = "code";
+			Object.defineProperty(file, 'mode', {
+				get: function() { return _fileMode; },
+				set: function(newValue) {
+					console.warn("Set mode=" + newValue + " for file.path=" + file.path);
+					console.log(UTIL.getStack("Set mode=" + newValue + " for file.path=" + file.path + " to " + newValue));
+					_fileMode = newValue;
+				},
+				enumerable: true
+			});
+		}
+		else {
+			file.mode = "code"; // text, code, or other, ... Not to be confused with EDITOR.mode
+		}
+		
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
 		
@@ -121,6 +138,9 @@ var File; // File object is global
 			}, 0);
 			
 		}
+		
+		console.log("new file Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
+		
 	}
 	
 	
@@ -3222,6 +3242,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		var file = this;
 		
+		console.log("Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
+		
 		if(text == undefined) throw new Error("No text!");
 		
 		for(var prop in options) {
@@ -3249,6 +3271,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		file.change("reload", text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount); // Fire events
 		
+		console.log("After Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
 	}
 	
 	File.prototype.addToGrid = function() {
@@ -3284,7 +3307,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " ...");	
+		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " path=" + file.path + "...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;

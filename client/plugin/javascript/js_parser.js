@@ -124,6 +124,9 @@
 			noIndention: true
 		}
 		
+		var ext = UTIL.getFileExtension(path);
+		if(ext == "jsx" || ext == "tsx") options.jsx = true;
+		
 		if(fileOrString instanceof File) {
 			var file = fileOrString;
 		}
@@ -210,7 +213,11 @@
 	
 	function onFileOpen(file) {
 		if(shouldParse(file)) {
-			var js = parseJavaScript(file, {jsx: EDITOR.settings.jsx});
+			var options = {jsx: EDITOR.settings.jsx};
+			var ext = file.fileExtension;
+			if(ext == "jsx" || ext == "tsx") options.jsx = true;
+			
+			var js = parseJavaScript(file, options);
 			file.haveParsed(js); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 		}
 	}
@@ -233,6 +240,9 @@
 		
 		if( (file.fileExtension=="" && file.mode=="code") || 
 		file.fileExtension=="js" || 
+		file.fileExtension=="jsx" || 
+		file.fileExtension=="ts" || 
+		file.fileExtension=="tsx" || 
 		file.fileExtension=="php" || 
 		file.fileExtension=="asp" || 
 		file.fileExtension=="vbs" ||  // Visual Basic Script
@@ -507,7 +517,12 @@
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
 							
-							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow, jsMode: true, jsx: EDITOR.settings.jsx});
+							var options = {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow, jsMode: true, jsx: EDITOR.settings.jsx};
+							
+							var ext = file.fileExtension;
+							if(ext == "jsx" || ext == "tsx") options.jsx = true;
+							
+							var newParse = parseJavaScript(file, options);
 							// The parser will find the first function and only parse that
 							
 							//console.log("newParse=" + JSON.stringify(newParse));
@@ -721,7 +736,13 @@
 								
 								// Make a full parse and compare to see if there are any bugs
 								console.log("fullParse to check for errors:");
-								var fullParse = parseJavaScript(file, {noIndention: true, jsx: EDITOR.settings.jsx});
+								
+								var options = {noIndention: true, jsx: EDITOR.settings.jsx};
+								
+								var ext = file.fileExtension;
+								if(ext == "jsx" || ext == "tsx") options.jsx = true;
+								
+								var fullParse = parseJavaScript(file, options);
 								
 								if(fullParse.comments.length != oldParse.comments.length) {
 									console.log(fullParse.comments);
@@ -779,7 +800,13 @@ throw new Error(    "fullParse.xmlTags.length=" + fullParse.xmlTags.length + " o
 			
 			// Parse the whole file
 			console.log("Parsing whole file");
-			var newParse = parseJavaScript(file, {jsx: EDITOR.settings.jsx});
+
+var options = {jsx: EDITOR.settings.jsx};
+
+var ext = file.fileExtension;
+if(ext == "jsx" || ext == "tsx") options.jsx = true;
+
+			var newParse = parseJavaScript(file, options);
 			
 			
 			
