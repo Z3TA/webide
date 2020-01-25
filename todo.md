@@ -78,6 +78,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+Is it possible to get user.webide.se:123 to proxy to 10.0.x.y:123 !? Would it be more simple then https://3000.user.webide.se !???
+
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
 
