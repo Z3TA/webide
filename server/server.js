@@ -505,10 +505,29 @@ else if(err) throw err;
 function readEtcPasswd(username, readEtcPasswdCallback) {
 	if(username == undefined) throw new Error("username=" + username);
 	//console.log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...");
+	
+	// todo: rename this function because we also check for netns
+	var checked_netns = false;
+	var checked_passwd = false;
+	var error;
+	var info = {};
+	
+	module_fs.stat("/var/run/netns/" + username, function(err, stats) {
+		if(!err) {
+			// No error means the file exist
+			info.netns = username;
+		}
+		checked_netns = true;
+		doneMaybe();
+	});
+	
 	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
+		checked_passwd = true;
+		
 		if(err) {
 			log("readEtcPasswd: Unable to read /etc/passwd !", WARN);
-			return readEtcPasswdCallback(new Error("Unable to read /etc/passwd: " + err.message));
+			error = new Error("Unable to read /etc/passwd: " + err.message);
+			return doneMaybe();
 		}
 		else {
 			// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
@@ -526,26 +545,34 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				if(pName == username) {
 					log("readEtcPasswd: Found username=" + username + " in /etc/passwd", DEBUG);
 					
-					readEtcPasswdCallback(null, {
-						username: username,
-						homeDir: UTIL.trailingSlash(pDir), 
-						uid: parseInt(pUid), 
-						gid: parseInt(pGid),
-						shell: pShell
-					});
+					info.username = username;
+					info.homeDir = UTIL.trailingSlash(pDir);
+					info.uid = parseInt(pUid);
+					info.gid = parseInt(pGid);
+					info.shell = pShell
 					
-					return;
+					return doneMaybe();
 				}
 			}
 			
 			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT);
 			
-			var error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
+			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
-			readEtcPasswdCallback(error);
 			// Add user account: sudo useradd -r -s /bin/false nameofuser
+			
+			doneMaybe();
 		}
+		
+		
+		doneMaybe();
 	});
+	
+	function doneMaybe() {
+		if(checked_passwd && checked_netns) {
+			readEtcPasswdCallback(error, info);
+		}
+	}
 }
 
 function recycleGuestAccounts(callback) {
@@ -1962,6 +1989,7 @@ throw err;
 						var uid, gid; // System user-id and group-id
 						var homeDir; // User's home dir
 						var shell; // User's shell (currently disabled/not implemented)
+						var netns; // Linux network namespace
 						
 						userConnectionName = username;
 						
@@ -1973,7 +2001,7 @@ throw err;
 							acceptUser();
 						}
 						else {
-							// Get home, uid and gid
+							// Get home, uid and gid (and also netns)
 							readEtcPasswd(username, function(err, passwd) {
 								if(err) {
 									if(process.platform === "win32") {
@@ -2000,6 +2028,7 @@ throw err;
 								uid = passwd.uid;
 								gid = passwd.gid;
 								rootPath = passwd.homeDir;
+								netns = passwd.netns;
 								
 								if(alreadyCheckedMounts) acceptUser();
 								else checkMounts({username: username, homeDir: homeDir, uid: uid, gid: gid}, checkedMounts);
@@ -2040,7 +2069,7 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, netns);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
@@ -2445,7 +2474,7 @@ var loginCounter = 0;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
+										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, netns);
 										userWorker.send({identify: userInfo});
 										
 										userWorker.on("message", messageFromWorker);
@@ -4214,13 +4243,18 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(name, uid, gid, homeDir) {
+function createUserWorker(name, uid, gid, homeDir, netns) {
 	
 	// You can have different group and user. Default is the user/group running the node process
-	var forkOptions = {};
-	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
+	var spawnOptions = {};
+	var workerArgs = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
+	var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
-	forkOptions.env = {
+	// Using spawn instead of fork to be able to use Linux network namespaces
+	
+	spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
+	
+	spawnOptions.env = {
 		username: name,
 		loglevel: LOGLEVEL,
 		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
@@ -4231,25 +4265,25 @@ function createUserWorker(name, uid, gid, homeDir) {
 	
 	// For forking when running in the Termux Android app
 	if(module_os.platform()=="android") {
-		forkOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
+		spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
 	if(NO_CHROOT) {
-		if(uid != undefined) forkOptions.uid = parseInt(uid);
-		if(gid != undefined) forkOptions.gid = parseInt(gid);
+		if(uid != undefined) spawnOptions.uid = parseInt(uid);
+		if(gid != undefined) spawnOptions.gid = parseInt(gid);
 		
-		forkOptions.env.PATH =  process.env.PATH;
+		spawnOptions.env.PATH =  process.env.PATH;
 	}
 	else {
-		forkOptions.env.uid = uid;
-		forkOptions.env.gid = gid;
+		spawnOptions.env.uid = uid;
+		spawnOptions.env.gid = gid;
 		
 		// Assume unix like system
-		forkOptions.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
+		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
 		
-		forkOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
+		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		
-		if(uid) forkOptions.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+		if(uid) workerNode = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
 	if((uid == undefined || uid == -1)) {
@@ -4262,15 +4296,25 @@ function createUserWorker(name, uid, gid, homeDir) {
 		}
 	}
 	
-	log("Spawning user worker process as username=" + name + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT), INFO);
-	log("Forking with forkOptions=" + JSON.stringify(forkOptions) + "", DEBUG);
+	var workerScript = module_path.resolve(__dirname, "./user_worker.js");
+	
+	if(netns) {
+		var command = "/sbin/ip";
+		var args = ["netns", "exec", netns, workerNode, workerScript].concat(workerArgs);
+	}
+	else {
+		var command = workerNode;
+		var args = [workerScript].concat(workerArgs);
+	}
+	
+	log("Spawning user worker process as username=" + name + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + " netns=" + netns, INFO);
+	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
 	
-	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
 	
 	try {
-		var worker = module_child_process.fork(scriptPath, args, forkOptions);
+		var worker = module_child_process.spawn(command, args, spawnOptions);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
@@ -4278,7 +4322,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 			throw new Error("Unable to spawn worker! (" + err.message + ")");
 		}
 		else {
-			console.log("args=" + JSON.stringify(args) + " forkOptions=" + JSON.stringify(forkOptions));
+			console.log("args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
 			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
 			// Easiest solution is to remove and re-add the user.
 			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
@@ -4304,20 +4348,6 @@ function createUserWorker(name, uid, gid, homeDir) {
 	
 	log(name + " worker pid=" + worker.pid);
 	
-	// Check if user has a network namespace
-	module_fs.stat("/var/run/netns/" + name, function(err, stats) {
-		if(!err) {
-			// No error means the file exist
-			
-			module_child_process.exec("ip netns attach " + name + " " + worker.pid, function (err, stdout, stderr) {
-				if(err) console.error(err);
-				else if(stderr) console.error(stderr);
-				else if(stdout) log(stdout, WARN);
-				else log(name + " worker attached to net namespace " + nameSpace.netns + "");
-			});
-			
-		}
-	});
 	
 	return worker;
 }

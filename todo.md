@@ -118,6 +118,7 @@ sudo ip netns add johan
 sudo ip link add johan type veth peer name br-johan
 sudo ip link set johan netns johan
 sudo ip link set br-johan up
+sudo ip netns exec johan ip link set lo up
 sudo ip netns exec johan ip link set johan up
 sudo ip netns exec johan ip addr add 10.0.0.2/16 dev johan
 sudo ip link set br-johan master br0
