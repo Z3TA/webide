@@ -21,6 +21,10 @@ ip6tables -P OUTPUT ACCEPT
 iptables -P OUTPUT ACCEPT
 
 
+# Needed so that Linux network namespaces can get responses
+iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+
+
 # Accept already astablished connections
 
 ip6tables -A INPUT -m conntrack -j ACCEPT --ctstate RELATED,ESTABLISHED
