@@ -569,7 +569,10 @@ if(maxResults <= 0) {
 			
 			if(err) {
 if(err.code == "ETIMEDOUT") {
-
+					// Does it matter if we timed out!?
+// Yes, we might not retry the search...
+// But is that imporant!??
+// todo: figure out what to do when search times out!
 }
 else throw err;
 			}
@@ -577,7 +580,7 @@ else throw err;
 			
 			console.log("goto_file: Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
 			
-			if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
+			if(resp && resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
 			else isSearching = false;
 			
 			progressBar.style.display = "none";
