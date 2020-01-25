@@ -4217,10 +4217,10 @@ function randomString(letters) {
 function createUserWorker(name, uid, gid, homeDir) {
 	
 	// You can have different group and user. Default is the user/group running the node process
-	var options = {};
+	var forkOptions = {};
 	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
 	
-	options.env = {
+	forkOptions.env = {
 		username: name,
 		loglevel: LOGLEVEL,
 		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
@@ -4231,25 +4231,25 @@ function createUserWorker(name, uid, gid, homeDir) {
 	
 	// For forking when running in the Termux Android app
 	if(module_os.platform()=="android") {
-		options.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
+		forkOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
 	if(NO_CHROOT) {
-		if(uid != undefined) options.uid = parseInt(uid);
-		if(gid != undefined) options.gid = parseInt(gid);
+		if(uid != undefined) forkOptions.uid = parseInt(uid);
+		if(gid != undefined) forkOptions.gid = parseInt(gid);
 		
-		options.env.PATH =  process.env.PATH;
+		forkOptions.env.PATH =  process.env.PATH;
 	}
 	else {
-		options.env.uid = uid;
-		options.env.gid = gid;
+		forkOptions.env.uid = uid;
+		forkOptions.env.gid = gid;
 		
 		// Assume unix like system
-		options.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
+		forkOptions.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
 		
-		options.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
+		forkOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		
-		if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+		if(uid) forkOptions.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
 	if((uid == undefined || uid == -1)) {
@@ -4263,14 +4263,14 @@ function createUserWorker(name, uid, gid, homeDir) {
 	}
 	
 	log("Spawning user worker process as username=" + name + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT), INFO);
-	log("Forking with options=" + JSON.stringify(options) + "", DEBUG);
+	log("Forking with forkOptions=" + JSON.stringify(forkOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
 	
 	var scriptPath = module_path.resolve(__dirname, "./user_worker.js");
 	
 	try {
-		var worker = module_child_process.fork(scriptPath, args, options);
+		var worker = module_child_process.fork(scriptPath, args, forkOptions);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
@@ -4278,7 +4278,7 @@ function createUserWorker(name, uid, gid, homeDir) {
 			throw new Error("Unable to spawn worker! (" + err.message + ")");
 		}
 		else {
-			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
+			console.log("args=" + JSON.stringify(args) + " forkOptions=" + JSON.stringify(forkOptions));
 			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
 			// Easiest solution is to remove and re-add the user.
 			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
@@ -4302,9 +4302,26 @@ function createUserWorker(name, uid, gid, homeDir) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 	});
 	
-	return worker;
+	log(name + " worker pid=" + worker.pid);
 	
+	// Check if user has a network namespace
+	module_fs.stat("/var/run/netns/" + name, function(err, stats) {
+		if(!err) {
+			// No error means the file exist
+			
+			module_child_process.exec("ip netns attach " + name + " " + worker.pid, function (err, stdout, stderr) {
+				if(err) console.error(err);
+				else if(stderr) console.error(stderr);
+				else if(stdout) log(stdout, WARN);
+				else log(name + " worker attached to net namespace " + nameSpace.netns + "");
+			});
+			
+		}
+	});
+	
+	return worker;
 }
+
 
 function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	

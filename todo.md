@@ -78,6 +78,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+Command "attach" is unknown, try "ip netns help".
+
 https://ops.tips/blog/using-network-namespaces-and-bridge-to-isolate-servers/
 
 plan: setup a bridge on the host,
@@ -85,10 +87,12 @@ create netns for each user
 
 Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
 we will give each user their uid (decimal) as IP! uid=1002 ip=0.0.3.234
-ip= 167772160 + uid
+ip= 167772162 + uid
 function int2ip (ipInt) {
     return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
 }
+
+167772162+1001=167773163 == 10.0.3.235
 
 check if user has a netns /var/run/netns/username
 
@@ -101,15 +105,10 @@ sudo sysctl net.ipv4.ip_forward=1
 # Add a bridge device
 sudo ip link add name br0 type bridge
 sudo ip link set br0 up
-sudo ip addr add 10.0.0.1/24 brd + dev br0
-
-
-# Assign Static IP address
-sudo ip link set up dev share
-sudo ip addr add 10.0.0.1/24 dev share
+sudo ip addr add 10.0.0.1/16 brd + dev br0
 
 # Configure firewall
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 
 
 # For each user
@@ -120,7 +119,7 @@ sudo ip link add johan type veth peer name br-johan
 sudo ip link set johan netns johan
 sudo ip link set br-johan up
 sudo ip netns exec johan ip link set johan up
-sudo ip netns exec johan ip addr add 10.0.0.2/24 dev johan
+sudo ip netns exec johan ip addr add 10.0.0.2/16 dev johan
 sudo ip link set br-johan master br0
 sudo ip netns exec johan ip route add default via 10.0.0.1
 
@@ -146,6 +145,30 @@ put each user into his/her own ip namespace, then proxy 8080.user.webide.se to t
 
 Support react (native) development!
 
+
+---
+
+When for example terminal3 is open and you start a new terminal, the termina3 file get used... very annoying!
+
+Sometimes text disappears from the terminal log file and you can't search for the dissappeared string...
+---
+
+After being away from the editor tab for a while I come back to a lot of:
+/zpcdata/projects/webide/client/CLIENT.js:629
+Uncaught Error: resp=1290 pingCounter=1291
+
+---
+
+If user has hidden the nodejs banner once, don't show it again for the same file!?
+Also change the banner to "Run script name with Node.js"
+
+---
+
+After having the computer in sleep mode for a while,
+and then come back, the editor still thinks it's connected...
+And when we try to login, it says "we are already logged in as user username on server"
+
+---
 
 CLIENT: CLIENT.cmd id=undefined req=ping CLIENT.js:160:12
 CLIENT: ping! pingErr.code=ENETUNREACH CLIENT.js:614:13
