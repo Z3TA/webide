@@ -124,6 +124,9 @@ export PATH="$NPM_PACKAGES/bin:$PATH"
 # Make it use a unix socket instead of tcp port!
 export PORT="/sock/test"
 
+# Other scripts (React app) looks for HOST
+export HOST="%NETNSIP%"
+
 # Able to install (and run?) docker
 #  curl -fsSL https://get.docker.com/rootless | sh
 export DOCKER_BIN="/dockerbin"

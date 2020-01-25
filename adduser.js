@@ -305,6 +305,9 @@ function adduser() {
 		
 		homeDir = UTIL.trailingSlash(homeDir);
 		
+		var ipInt = 167772162 + uid; // Starts on 10.0.0.1 then adds the uid to get a unique local IP address
+		var netnsIP = int2ip(ipInt);
+		
 		//var gid = getGroupId(groupName);
 		
 		
@@ -357,12 +360,12 @@ function adduser() {
 		if(err.code != "ENOENT") throw err;
 	}
 	
-		// Replace %USERNAME% %HOMEDIR% and %DOMAIN%
+		// Replace %USERNAME% %HOMEDIR% and %DOMAIN% and %NETNSIP%
 		updateFile(homeDir + ".webide/storage/cmsjz_sites");
 		updateFile(homeDir + "ssg_blog_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
-		
+		updateFile(homeDir + ".bashrc");
 		
 	// add wwwpub
 		var wwwgid = getGroupId("www-data");
@@ -518,6 +521,7 @@ function adduser() {
 			str = str.replace(/%USERNAME%/g, username);
 			str = str.replace(/%HOMEDIR%/g, homeDir);
 			str = str.replace(/%DOMAIN%/g, DOMAIN);
+			str = str.replace(/%NETNSIP%/g, netnsIP);
 			fs.writeFileSync(path, str);
 		}
 		
@@ -700,3 +704,9 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	fs.writeFileSync(filePath, text, ENCODING);
 	
 }
+
+function int2ip(ipInt) {
+	return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
+}
+
+
