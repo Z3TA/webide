@@ -78,44 +78,53 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
-hmm, can't connect with the netns when using a dummy device. 
-Should I try with a bridge device ?
-It worked when I used a real device for macvlan...
+https://ops.tips/blog/using-network-namespaces-and-bridge-to-isolate-servers/
 
 plan: setup a bridge on the host,
 create netns for each user
+
+Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
+we will give each user their uid (decimal) as IP! uid=1002 ip=0.0.3.234
+ip= 167772160 + uid
+function int2ip (ipInt) {
+    return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
+}
+
+check if user has a netns /var/run/netns/username
+
+export the ip as HOST in bashrc
 
 # Enable packet forwarding
 sysctl -a | grep forward
 sudo sysctl net.ipv4.ip_forward=1
 
-# Create dummy interface
-sudo ip link add share type dummy
+# Add a bridge device
+sudo ip link add name br0 type bridge
+sudo ip link set br0 up
+sudo ip addr add 10.0.0.1/24 brd + dev br0
+
 
 # Assign Static IP address
 sudo ip link set up dev share
 sudo ip addr add 10.0.0.1/24 dev share
 
 # Configure firewall
-sudo iptables -t nat -A POSTROUTING -o enp7s0 -j MASQUERADE
-sudo iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i share -o enp7s0 -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE
 
 
 # For each user
 ## add network namespace
 sudo ip netns add johan
-## create a loopback interface in the network namespace
-sudo ip netns exec johan ip link set lo up
-## Create virtual MAC
-sudo ip link add johan link share type macvlan mode private
-## Move MAC to network namespace
+# create veth pair
+sudo ip link add johan type veth peer name br-johan
 sudo ip link set johan netns johan
-## Add ip address
+sudo ip link set br-johan up
+sudo ip netns exec johan ip link set johan up
 sudo ip netns exec johan ip addr add 10.0.0.2/24 dev johan
-sudo ip netns exec johan ip link set up dev johan
-## Route via host
-sudo ip netns exec johan ip route add default via 10.0.0.1 dev johan
+sudo ip link set br-johan master br0
+sudo ip netns exec johan ip route add default via 10.0.0.1
+
+
 
 ## Forward loopback to ip ?
 sudo ip netns exec iptables -t nat -A PREROUTING -p tcp --dport 1111 -j DNAT --to-destination 10.0.0.2:111
@@ -126,28 +135,8 @@ sudo ip netns exec iptables -t nat -A POSTROUTING -j MASQUERADE
 sudo ip netns exec pelle dhclient pelle -v
 
 
-
-# Create veth pair
-sudo ip link add veth-host type veth peer name veth-johan
-
-# move one of the veth device's to the network namespace 
-sudo ip link set veth-johan netns johan
-
-# Assigning IP to our veth devices
-sudo ip addr add 10.0.3.1/24 dev veth-host
-sudo ip netns exec johan ip addr add 10.0.3.2/24 dev veth-johan
-
-#  bring them up
-sudo ip link set veth-host up
-sudo ip netns exec johan ip link set veth-johan up
-
 # Delete an interface
 sudo ip netns exec johan ip link delete johan
-
-
-
-ip link set johan1 netns johan up
-ip addr add 10.200.1.1/24 dev east0
 
 
 sudo ip netns exec nstest bash
