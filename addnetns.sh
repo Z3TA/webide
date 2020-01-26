@@ -45,5 +45,9 @@ sudo ip netns exec $1 ip addr add $IP/16 dev $1
 sudo ip link set br-$1 master br0
 # Set the routing route inside the namespace to go via the "router"
 sudo ip netns exec $1 ip route add default via 10.0.0.1
+# Configurate resolvers
+mkdir /etc/netns/$1/ -p
+echo nameserver 8.8.8.8 > /etc/netns/$1/resolv.conf
+echo nameserver 8.8.4.4 >> /etc/netns/$1/resolv.conf
 
 echo "Done!"
