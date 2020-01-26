@@ -78,6 +78,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+Replace http://10.0.3.235:3000/ width 3000.user.webide.se in terminal and stdout messages!
+
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
 

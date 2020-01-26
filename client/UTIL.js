@@ -3151,6 +3151,15 @@ else return false;
 	},
 	int2ip: function int2ip(ipInt) {
 		return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
+	},
+	isIP: function isIP(ipaddress) {
+		
+		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+			return true;
+		}
+		
+		return false;
+		
 	}
 }
 

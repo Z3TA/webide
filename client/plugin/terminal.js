@@ -29,6 +29,9 @@ todo: Run vttest
 	var ctrlKeyPressed = false;
 	var terminalActive = false;
 	var discoveryBarIcon;
+	var reNetnsIP;
+	var TLD = window.location.hostname;
+	var username;
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -45,6 +48,8 @@ todo: Run vttest
 			EDITOR.on("fileClose", terminalCloseFile);
 			EDITOR.on("mouseClick", terminalMouseClick);
 			EDITOR.on("exit", exitAllTerminals);
+			
+			CLIENT.on("loginSuccess", getNetnsIP);
 			
 			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
 				CLIENT.on("loginSuccess", startTerminalOnLogin);
@@ -81,6 +86,20 @@ todo: Run vttest
 			
 		}
 	});
+	
+	function getNetnsIP(login) {
+		
+		if(login.netnsIP && !UTIL.isIP(TLD)) {
+			reNetnsIP = new RegExp(UTIL.escapeRegExp(login.netnsIP) + ":(\\d+)", "g");
+			console.log("reNetnsIP=" + reNetnsIP);
+		}
+		else {
+			console.log("login.netnsIP=" + login.netnsIP + " TLD=" + TLD + " isIP=" + UTIL.isIP(TLD)  );
+		}
+		username = login.user;
+		
+		alertBox("getNetnsIP: logn=" + JSON.stringify(login) + " reNetnsIP=" + reNetnsIP + " login.netnsIP=" + login.netnsIP + " TLD=" + TLD + " isIP=" + UTIL.isIP(TLD)  );
+	}
 	
 	function terminalFileShow(file) {
 		var isTerminal = terminalFiles.indexOf(file) != -1;
@@ -390,6 +409,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		console.log("terminal:" + JSON.stringify(term, null, 2));
 		
+		
 		/*
 			
 			http://www.termsys.demon.co.uk/vtansi.htm
@@ -401,6 +421,14 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		function parse(data) {
 			
 			console.log("Parse data=" + data);
+			
+			if(reNetnsIP) {
+				// Show the public endpoint instead of the private IP
+				// wtf regexp!?
+				var match = data.match(reNetnsIP);
+				data = data.replace(reNetnsIP, "$1." + username + "." + TLD);
+				console.log("Replaced data=" + data + " match=" + match + " reNetnsIP=" + reNetnsIP);
+			}
 			
 			var char = "";
 			var code = 0;

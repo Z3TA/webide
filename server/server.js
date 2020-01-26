@@ -2090,6 +2090,8 @@ throw err;
 							
 							//console.log("userConnectionId=" + userConnectionId);
 							
+
+
 							// Respond to the client that the login was successful
 							var userInfo = {
 								user: userConnectionName,
@@ -2107,6 +2109,11 @@ throw err;
 								userInfo.installDirectory = __dirname.replace(/server$/, "");
 							}
 							
+if(uid) {
+var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+userInfo.netnsIP = netnsIP;
+}
+
 							send({resp: {loginSuccess: userInfo}});
 							
 							// Tell all client that a new client has connected

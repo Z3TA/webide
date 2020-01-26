@@ -8982,6 +8982,8 @@ function main() {
 			home: login.homeDir,
 				platform: login.platform
 		};
+
+if(login.netnsIP) EDITOR.user.netnsIP = login.netnsIP;
 		
 			if(login.homeDir != "/") EDITOR.stat("nochroot");
 			

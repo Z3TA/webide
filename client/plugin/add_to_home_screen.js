@@ -69,6 +69,11 @@ console.warn("A2HS: Already got appinstalled event!");
 		EDITOR.windowMenu.remove(windowMenuAdd2HS);
 		windowMenuAdd2HS = null;
 		
+installed = true;
+
+return;
+
+// Most browsers will automatically remove the "chrome", so this question wont make sense.
 		var yes = "OK, I will click on the WebIDE icon";
 		var no = "No, I'll keep using the browser";
 		confirmBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
@@ -78,7 +83,7 @@ console.warn("A2HS: Already got appinstalled event!");
 			}
 		});
 		
-		installed = true;
+		
 	}
 	
 	function beforeinstallprompt(evt) {
