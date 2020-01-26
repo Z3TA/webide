@@ -31,6 +31,7 @@ todo: Run vttest
 	var discoveryBarIcon;
 	var reNetnsIP;
 	var TLD = window.location.hostname;
+	var netnsIP;
 	var username;
 	
 	EDITOR.plugin({
@@ -90,15 +91,15 @@ todo: Run vttest
 	function getNetnsIP(login) {
 		
 		if(login.netnsIP && !UTIL.isIP(TLD)) {
-			reNetnsIP = new RegExp(UTIL.escapeRegExp(login.netnsIP) + ":(\\d+)", "g");
-			console.log("reNetnsIP=" + reNetnsIP);
+			netnsIP = login.netnsIP;
+			// Remember to put double \\ escape backslashes because of new RegExp() !
+			// note: The IP and port might be sprinkled with colors!
+			reNetnsIP = new RegExp(UTIL.escapeRegExp(netnsIP) + ":(\\x1b\\[\\d+m)?(\\d+)(\\x1b\\[\\d+m)?", "g");
 		}
-		else {
-			console.log("login.netnsIP=" + login.netnsIP + " TLD=" + TLD + " isIP=" + UTIL.isIP(TLD)  );
-		}
+		
 		username = login.user;
 		
-		alertBox("getNetnsIP: logn=" + JSON.stringify(login) + " reNetnsIP=" + reNetnsIP + " login.netnsIP=" + login.netnsIP + " TLD=" + TLD + " isIP=" + UTIL.isIP(TLD)  );
+		//alertBox("getNetnsIP: logn=" + JSON.stringify(login) + " reNetnsIP=" + reNetnsIP + " login.netnsIP=" + login.netnsIP + " TLD=" + TLD + " isIP=" + UTIL.isIP(TLD)  );
 	}
 	
 	function terminalFileShow(file) {
@@ -423,12 +424,18 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			console.log("Parse data=" + data);
 			
 			if(reNetnsIP) {
-				// Show the public endpoint instead of the private IP
-				// wtf regexp!?
-				var match = data.match(reNetnsIP);
-				data = data.replace(reNetnsIP, "$1." + username + "." + TLD);
-				console.log("Replaced data=" + data + " match=" + match + " reNetnsIP=" + reNetnsIP);
+				
+				data = data.replace(reNetnsIP, "$1$2$3." + username + "." + TLD);
+				// $1 and $3 might be colors...
+				/*
+					if( data.indexOf(netnsIP) != -1) {
+					for(var i=0; i<data.length; i++) {
+					console.log( i + " = " + data.charAt(i) + " = " + data.charCodeAt(i) );
+					}
+					}
+				*/
 			}
+			
 			
 			var char = "";
 			var code = 0;
