@@ -78,8 +78,6 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
-Is it possible to get user.webide.se:123 to proxy to 10.0.x.y:123 !? Would it be more simple then https://3000.user.webide.se !???
-
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
 
@@ -110,8 +108,24 @@ sudo ip netns exec pelle dhclient pelle -v
 
 Support react (native) development!
 
+Docker support!
 
 regression: Automatic re-login after server re-start no longer works!
+
+
+able to edit the discovery bar...
+edit instead of hide - 
+widget - list with checkboxes to enable
+able to make custom button
+allow third party script: EDITOR.loadScript (fetched by server)
+
+
+reload_files: load from disk if file was saved?!!
+
+virt keyb - switch to last tab via back button!?
+or arrow left
+
+keyb shortcut for last tab AND next tab!?
 
 ---
 
