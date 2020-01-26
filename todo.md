@@ -78,7 +78,17 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
-Replace http://10.0.3.235:3000/ width 3000.user.webide.se in terminal and stdout messages!
+terminal emulator has issues with "expo init AwesomeProject" because it has an interactive menu!
+
+
+perf: Did we slow down the terminal emeulator by adding the ip regexp check to every message !?
+npm install went slow with 100% cpu usage on the editor...
+measure before optimizing!!!
+possible optimization: Check the last screen x rows if file.text contains the IP as a timeout 1s after last terminal message, then if found, replace it!
+
+todo: Clean up netnns when removing a user!
+
+Replace http://10.0.3.235:3000/ with 3000.user.webide.se in terminal and stdout messages!
 
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
