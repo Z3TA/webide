@@ -2446,6 +2446,12 @@ var loginCounter = 0;
 											workerResp(err, resp);
 										});
 									}
+									else if(req.startVpn) {
+										startVpn(userConnectionName, homeDir, req.startVpn, workerResp);
+									}
+									else if(req.stoptVpn) {
+										stopVpn(userConnectionName, homeDir, req.startVpn, workerResp);
+									}
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 									}
@@ -5856,6 +5862,52 @@ function sendToClient(userConnectionName, cmd, obj) {
 	}
 	else return false;
 }
+
+function startVpn(username, homeDir, options, callback) {
+	
+	if(options===true) options = {};
+	
+	if(typeof options != "object") throw new Error("options=" + options + " (" + (typeof options) + ")");
+	
+	var supportedTypes = ["wireguard"];
+	
+	if(options.type == undefined) options.type = supportedTypes[0];
+	else if(supportedTypes.indexOf(options.type) == -1) return callback(new Error(options.type + " not in supportedTypes=" + JSON.stringify(supportedTypes)));
+	
+var exec = module_child_process.exec;
+	var execOptions = {
+		shell: EXEC_OPTIONS.shell
+	}
+	if(options.type == "wireguard") {
+		if(options.conf == undefined) return callback(new Error("wireguard requires a conf options with the path to a wg-quick config file!"));
+		
+		var filePath = module_path.join(homeDir, options.conf);
+		if(filePath.indexOf(homeDir) != 0 || !module_path.isAbsolute(filePath)) return callback(new Error("options.conf=" + options.conf + " needs to be an absolute path in your home directory!"));
+		
+		var command = "ip netns exec " + username + " wg-quick up " + filePath;
+		exec(command, execOptions, function wgQuick(error, stdout, stderr) {
+			
+			console.log(username + " command=" + command + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
+			
+			var err = error || (stderro && new Error(stderr) || null);
+			
+			callback(err);
+			
+		});
+	}
+	else {
+throw new Error("options.type=" + options.type);
+	}
+	
+	
+}
+
+function stoptVpn(username, homeDir, options, callback) {
+	
+	
+	callback(null); 
+}
+
 
 main();
 

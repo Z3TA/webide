@@ -3361,6 +3361,10 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 			
 			//EDITOR.discoveryBar.show();
 			
+			// Work like the windowMenu api
+element.activate = EDITOR.discoveryBar.activate;
+			element.deactivate = EDITOR.discoveryBar.deactivate;
+			
 			return element;
 		},
 		remove: function removeDiscoveryItem(element) {

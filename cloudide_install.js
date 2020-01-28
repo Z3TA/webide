@@ -54,6 +54,19 @@ If you are not using the firewall script, do this manually:
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 */
 
+
+// ### WireGuard / VPN support
+// Ubuntu 19.04 and earlier:
+// Add the WireGuard repository
+console.log("Installing WireGuard for VPN support...");
+exec("add-apt-repository ppa:wireguard/wireguard");
+// Ubuntu 17.10 and earlier:
+// Update the list of available packages
+exec("apt update");
+//Install the tools and kernel module:
+exec("apt install wireguard openresolv");
+
+
 var HOSTNAME = getArg(["host", "host", "hostname", "domain"]); // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]); // E-mail address for letsencrypt
 

@@ -78,6 +78,21 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+VPN support!
+It should be possible to connect to a VPN server via the cloud IDE!
+
+Using algo as vpn test server...
+Using wireguard as vpn client
+
+
+sudo ip netns exec ltest1 wg-quick up /home/ltest1/wireguard/wg0.conf
+
+
+
+
+
+
+
 terminal emulator has issues with "expo init AwesomeProject" because it has an interactive menu!
 
 
@@ -121,6 +136,11 @@ sudo ip netns exec pelle dhclient pelle -v
 Support react (native) development!
 
 Docker support!
+
+
+regression: Doesn't highlight parentheses when you are on EOL!
+
+regression: Ping & network status doesn't show up in Safari!
 
 regression: Automatic re-login after server re-start no longer works!
 
