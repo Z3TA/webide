@@ -4572,7 +4572,7 @@ if(menuItem.parentMenu) {
 			}
 			
 			if(options.text == undefined) throw new Error("option text is requred!");
-			if(typeof options.callback != "function") throw new Error("option callback needs to be a function!");
+			if(options.callback != undefined && typeof options.callback != "function") throw new Error("option callback needs to be a function!");
 			if(options.keyCombo != undefined && typeof options.keyCombo != "function") throw new Error("option keyCombo needs to be a function!");
 			
 			//if(options.temp && options.separator == undefined) options.separator = true;
@@ -4640,7 +4640,7 @@ if(menuItem.parentMenu) {
 					
 					EDITOR.ctxMenu.hide(); // note: it gives input(focus) back to the editor canvas!
 					
-					options.callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
+					if(options.callback) options.callback(EDITOR.currentFile,  getCombo(keyEvent), null, 0, "down", keyEvent);
 					
 				}
 			}
@@ -4664,7 +4664,7 @@ if(menuItem.parentMenu) {
 			function ctxItemClickAction(someEvent) {
 				console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
 				// Give the same function parameters as key bound events
-				options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
+				if(options.callback) options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
 			
 			var defaultPosition = 10;
