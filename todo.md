@@ -144,6 +144,10 @@ regression: Ping & network status doesn't show up in Safari!
 
 regression: Automatic re-login after server re-start no longer works!
 
+todo: When there are two functions with the same name in the same scope, color them red!!
+
+todo: Show a red circle if you have forgot + in string concatenation !?
+
 
 able to edit the discovery bar...
 edit instead of hide - 

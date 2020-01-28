@@ -106,6 +106,7 @@ var PROXY = {}; // id: {proxy: http-proxy, startedBy: username}
 
 var EXEC_OPTIONS = {shell: "/bin/dash"};
 
+var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can stop a connection if the user disconnects)
 
 (function() {
 	// Make sure we are in the server directory
@@ -1657,6 +1658,10 @@ function sockJsConnection(connection) {
 					// else: Keep it running so that it will be synced once the user logs back in
 				}
 				
+				if(VPN.hasOwnProperty(userConnectionName)) vpnCommand(userConnectionName, VPN[userConnectionName].homeDir, VPN[userConnectionName], function() {
+					log("Stopped VPN connection for " + userConnectionName + "");
+				});
+				
 			}
 			else {
 				// Tell all remaining clients that this client disconnected
@@ -2446,12 +2451,10 @@ var loginCounter = 0;
 											workerResp(err, resp);
 										});
 									}
-									else if(req.startVpn) {
-										startVpn(userConnectionName, homeDir, req.startVpn, workerResp);
+									else if(req.vpn) {
+										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
 									}
-									else if(req.stoptVpn) {
-										stopVpn(userConnectionName, homeDir, req.startVpn, workerResp);
-									}
+									
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 									}
@@ -5863,7 +5866,11 @@ function sendToClient(userConnectionName, cmd, obj) {
 	else return false;
 }
 
-function startVpn(username, homeDir, options, callback) {
+function vpnCommand(username, homeDir, options, callback) {
+	var commands = ["start", "stop", "status"];
+	if(commands.indexOf(options.command) == -1) return callback( new Error("options.command=" + options.command + " not a valid VPN command! (" + JSON.stringify(commands) + ")") );
+	
+	log("vpnAction: username=" + username + " homeDir=" + homeDir + " options=" + JSON.stringify(options), DEBUG);
 	
 	if(options===true) options = {};
 	
@@ -5874,38 +5881,58 @@ function startVpn(username, homeDir, options, callback) {
 	if(options.type == undefined) options.type = supportedTypes[0];
 	else if(supportedTypes.indexOf(options.type) == -1) return callback(new Error(options.type + " not in supportedTypes=" + JSON.stringify(supportedTypes)));
 	
-var exec = module_child_process.exec;
+	var exec = module_child_process.exec;
 	var execOptions = {
 		shell: EXEC_OPTIONS.shell
 	}
 	if(options.type == "wireguard") {
 		if(options.conf == undefined) return callback(new Error("wireguard requires a conf options with the path to a wg-quick config file!"));
 		
-		var filePath = module_path.join(homeDir, options.conf);
+		var filePath = UTIL.joinPaths(homeDir, options.conf);
 		if(filePath.indexOf(homeDir) != 0 || !module_path.isAbsolute(filePath)) return callback(new Error("options.conf=" + options.conf + " needs to be an absolute path in your home directory!"));
 		
-		var command = "ip netns exec " + username + " wg-quick up " + filePath;
-		exec(command, execOptions, function wgQuick(error, stdout, stderr) {
+		if(options.command == "start") {
+			var shellCmd = "ip netns exec " + username + " wg-quick up " + filePath;
+		}
+		else if(options.command == "stop") {
+			var shellCmd = "ip netns exec " + username + " wg-quick down " + filePath;
+		}
+		else if(options.command == "status") {
+			var shellCmd = "ip netns exec " + username + " wg";
+		}
+		
+		exec(shellCmd, execOptions, function wgQuick(error, stdout, stderr) {
 			
-			console.log(username + " command=" + command + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
+			console.log(username + " shellCmd=" + shellCmd + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
 			
-			var err = error || (stderro && new Error(stderr) || null);
+			var output = (stderr + "\n" + stdout).trim();
 			
-			callback(err);
+			if(error) return callback(error);
+			
+			
+			if(options.command == "start") {
+				if(output.indexOf("wg setconf") == -1) return callback(new Error("Unexpected output: " + output));
+				
+					VPN[username] = {type: options.type, conf: options.conf, homeDir: homeDir};
+				}
+				else if(options.command == "stop") {
+					delete VPN[username];
+				}
+				else if(options.command == "status") {
+					if(stdout.length == 0) var status = "disconnected";
+					else if(stdout.indexOf("interface") != -1) var status = "connected"
+					else throw new Error("Unexpected output: stdout=" + stdout);
+				}
+			
+			callback(error, status);
 			
 		});
 	}
 	else {
-throw new Error("options.type=" + options.type);
+		throw new Error("options.type=" + options.type);
 	}
 	
 	
-}
-
-function stoptVpn(username, homeDir, options, callback) {
-	
-	
-	callback(null); 
 }
 
 

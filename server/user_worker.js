@@ -1016,12 +1016,10 @@ API.stopDropboxDaemon = function stopDropboxDaemon(user, options, callback) {
 	});
 }
 
-API.startVpn = function startVpn(user, options, callback) {
-	parentRequest({startVpn: options || true}, callback);
+API.vpn = function vpnCommand(user, options, callback) {
+	parentRequest({vpn: options}, callback);
 }
-API.stopVpn = function startVpn(user, options, callback) {
-parentRequest({startVpn: options || true}, callback);
-}
+
 
 function nodejs_init_action(action, prodFolder, pw, callback) {
 	if(action == undefined) throw new Error("action=" + action);
