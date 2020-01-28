@@ -8213,7 +8213,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
 	var pubKeyPath = ".ssh/id_rsa.pub";
 	
-	var homeDir = (EDITOR.user && EDITOR.user.homeDir) || UTIL.homeDir(EDITOR.workingDirectory);
+		var homeDir = (EDITOR.user && EDITOR.user.homeDir) || UTIL.homeDir(EDITOR.workingDirectory);
 	if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
 	
 	EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
@@ -11880,7 +11880,12 @@ function getFile(url, callback) {
 		
 		var domurl = window.URL || window.webkitURL || window;
 		
+		var onloadCalled = false;
+		var onErrorCalled = false;
+		var timeoutOut = false;
+		
 		img.onload = function () {
+			onloadCalled = true;
 			console.log("htmlToImage: SVG image created/loaced! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
 			
 			if(url) {
@@ -11912,37 +11917,41 @@ function getFile(url, callback) {
 		}
 		
 		img.onerror = function imageError(err) {
+			onErrorCalled = true;
+			
 			clearTimeout(timeoutTimer);
 			console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
 			
 			if(!callback) {
-				throw new Error("htmlToImage: Failed to create image. But we have already called back!");
+				throw new Error("htmlToImage: Failed to create image. But we have already called back! BROWSER=" + BROWSER + " domurl.createObjectURL?" + (!!domurl.createObjectURL) + " onloadCalled=" + onloadCalled + " onErrorCalled=" + onErrorCalled + " timeoutOut=" + timeoutOut + "");
 			}
 			
 			// Make sure we do not end up in a recursive loop
 			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html);
 			
 			htmlToImage(html, true, callback);
-		} 
+			callback = null; // JS pass references by-val, so pointing it to null here wont change the value passed into htmlToImage
+		}
 		
 		/*
 			problem 1: Some browsers wont fire img.onload (when data url is used)
-			sultion: Use a timeout
+			solution: Use a timeout
 			
 			problem 2: Some browsers wont show the massage if the timeout is fired before img.onload
-			sultion: Skipp the timeout on browsers where img.onload is confirmed to work
+			solution: Skip the timeout on browsers where img.onload is confirmed to work
 			
 			
 		*/
 		
-if(BROWSER != "Firefox") {
+		if(BROWSER != "Firefox") {
 		var timeoutTimer = setTimeout(function() {
+				timeoutOut = true;
 			console.log("htmlToImage: Callback timeout! callback?" + (!!callback));
 			if(callback) {
 				callback(img);
 				callback = null;
 			}
-		}, 20);
+			}, 500); // Make the timeout long enough so that the image has a chance to be created. If we call back befor it's created we will instead get an error when trying to paint the image!!
 		}
 	}
 	
