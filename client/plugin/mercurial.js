@@ -2302,7 +2302,9 @@ var error = err.message;
 		
 		// todo: The log can be very long, have it paged (many pages, only show 100? at a time) Most of the time you are only interested in the latest's
 		CLIENT.cmd("mercurial.log", options, function resolveList(err, resp) {
-			if(err) throw err;
+			if(err && err.code == "NO_HG_FOLDER") return alertBox(directory + " does not seem to belong to a Mercurial repository! Error: " + err.message);
+			else if(err) throw new Error(err.message + " directory=" + directory + " filePath=" + filePath + " err.code=" + err.code);
+			
 			
 			var changes = resp.revisions;
 			
