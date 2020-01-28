@@ -118,14 +118,16 @@
 			return false;
 		}
 		
+		if(typeof path == "function") {
+			callback = path;
+			path = undefined;
+		}
+		
 		var id = ++parseRequestId;
 		
 		var options = {
 			noIndention: true
 		}
-		
-		var ext = UTIL.getFileExtension(path);
-		if(ext == "jsx" || ext == "tsx") options.jsx = true;
 		
 		if(fileOrString instanceof File) {
 			var file = fileOrString;
@@ -139,6 +141,11 @@
 			}
 		}
 		
+		if(typeof path == "string") {
+			var ext = UTIL.getFileExtension(path);
+			if(ext == "jsx" || ext == "tsx") options.jsx = true;
+		}
+	
 		console.log("parseRequest" + id + " = " + file.path);
 		
 		console.time("parseRequest" + id);
