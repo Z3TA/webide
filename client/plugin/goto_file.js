@@ -214,7 +214,7 @@ if(CHROMEBOOK) {
 	
 	function openLocalFileTool(options) {
 		// Only answer on openFileTool events if we are running locally/"native"
-		if(EDITOR.user.home == "/") return false;
+		if(EDITOR.user.homeDir == "/") return false;
 		
 		var directory = options.directory;
 		

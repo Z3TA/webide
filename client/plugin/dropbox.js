@@ -93,7 +93,7 @@ dropboxDaemonWasKilled();
 		*/
 		
 		if(daemonAlive) {
-			EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
+			EDITOR.fileExplorer(EDITOR.user.homeDir + "Dropbox/");
 		}
 		else startDropbox();
 		
@@ -129,7 +129,7 @@ dropboxDaemonWasKilled();
 		
 		if(resp.linked) {
 			
-			EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
+			EDITOR.fileExplorer(EDITOR.user.homeDir + "Dropbox/");
 			
 			if(authWindow) {
 authWindow.close();
@@ -141,7 +141,7 @@ authWindow.close();
 			dropboxDaemonIsRunning();
 			
 // First time we opened the file explorer the Dropbox folder was probably empty
-EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
+EDITOR.fileExplorer(EDITOR.user.homeDir + "Dropbox/");
 
 		}
 		else if(resp.url) {
@@ -167,7 +167,7 @@ alertBox(err.message);
 			}
 			else if(resp.timeout) {
 				dropboxDaemonIsRunning();
-				EDITOR.fileExplorer(EDITOR.user.home + "Dropbox/");
+				EDITOR.fileExplorer(EDITOR.user.homeDir + "Dropbox/");
 			}
 			
 		});

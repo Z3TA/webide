@@ -263,7 +263,7 @@ console.warn("Terminal events already active!");
 		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 		
 		if(cwd && cwd.indexOf("://") != -1) {
-			if(EDITOR.user && EDITOR.user.home) cwd = EDITOR.user.home;
+			if(EDITOR.user) cwd = EDITOR.user.homeDir;
 		}
 		
 		if(!cwd) cwd = "/";

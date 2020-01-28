@@ -85,6 +85,10 @@ how to give netns to existing users !?
 TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
 
+Entering .. in open file widget should go to parent dir, not open selected file!
+
+
+
 
 terminal emulator has issues with "expo init AwesomeProject" because it has an interactive menu!
 

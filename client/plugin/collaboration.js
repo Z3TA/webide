@@ -2421,9 +2421,9 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(typeof EDITOR == "undefined") return "/";
 		if(!EDITOR.user) return "/";
 		
-		if(typeof EDITOR.user.home != "string") throw new Error("Not a string: " + EDITOR.user.home);
+		if(typeof EDITOR.user.homeDir != "string") throw new Error("Not a string: " + EDITOR.user.homeDir);
 		
-		return EDITOR.user.home;
+		return EDITOR.user.homeDir;
 	}
 	
 	function collabFileChange(file, change, text, index, row, col) {

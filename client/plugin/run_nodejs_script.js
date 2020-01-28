@@ -974,7 +974,7 @@ alertBox("No file open!");
 		
 		for (var i=0; i<callFrames.length; i++) {
 			for(var path in EDITOR.files) {
-				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.home, path), callFrames[i].url) ) {
+				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.homeDir, path), callFrames[i].url) ) {
 return {
 						filePath: path,
 						file: EDITOR.files[path],

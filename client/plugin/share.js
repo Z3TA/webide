@@ -56,7 +56,7 @@ desc: "Allow sharing stuff with other apps",
 			
 			console.log(UTIL.getStack("shareUsingUrl"));
 			
-			var newPath = UTIL.joinPaths(EDITOR.user.home, "/wwwpub/", filePath); 
+			var newPath = UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/", filePath); 
 			
 			var move = "Move the file to wwwpub folder";
 			var copy = "Make a copy of the file ";
@@ -104,7 +104,7 @@ desc: "Allow sharing stuff with other apps",
 			if(filePath instanceof File) filePath = filePath.path;
 			
 			var wwwpub = "/wwwpub/";
-			if(filePath.indexOf(wwwpub) != 0) wwwpub = UTIL.joinPaths(EDITOR.user.home, wwwpub);
+			if(filePath.indexOf(wwwpub) != 0) wwwpub = UTIL.joinPaths(EDITOR.user.homeDir, wwwpub);
 			
 			if(filePath.indexOf(wwwpub) != 0) throw new Error("File is not in " + wwwpub + " ! filePath=" + filePath);
 			

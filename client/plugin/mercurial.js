@@ -1298,7 +1298,7 @@ else var directory = EDITOR.workingDirectory;
 		labelRepo.appendChild(document.createTextNode("Mercurial or Git Repository: "));
 		form.appendChild(labelRepo);
 		
-		var originalLocalDirValue = EDITOR.user ? UTIL.joinPaths(EDITOR.user.home, defaultRepo.into) : defaultRepo.into;
+		var originalLocalDirValue = EDITOR.user ? UTIL.joinPaths(EDITOR.user.homeDir, defaultRepo.into) : defaultRepo.into;
 		
 		var repo = document.createElement("input");
 		repo.setAttribute("type", "text");
@@ -1312,7 +1312,7 @@ else var directory = EDITOR.workingDirectory;
 			if(localDir.value == originalLocalDirValue || localDir.value == "") {
 				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
 if(matchRepoName && matchRepoName[1]) {
-					if(EDITOR.user) localDir.value = UTIL.joinPaths(EDITOR.user.home, "repo/" + matchRepoName[1] + "/")
+					if(EDITOR.user) localDir.value = UTIL.joinPaths(EDITOR.user.homeDir, "repo/" + matchRepoName[1] + "/")
 					else localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";
 }
 			}

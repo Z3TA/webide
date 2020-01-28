@@ -80,7 +80,7 @@ alertBox("Need to be logged in to a editor server in order to connect to a VPN s
 return;
 }
 
-		var homeDir = EDITOR.user.home;
+		var homeDir = EDITOR.user.homeDir;
 		EDITOR.pathPickerTool( {defaultPath: UTIL.joinPaths(homeDir, configPath), instruction: "Path to wg-quick (Wireguard) config: "}, gotoConfPath );
 		
 	}

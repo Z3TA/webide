@@ -8213,7 +8213,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
 	var pubKeyPath = ".ssh/id_rsa.pub";
 	
-	var homeDir = (EDITOR.user && EDITOR.user.home) || UTIL.homeDir(EDITOR.workingDirectory);
+	var homeDir = (EDITOR.user && EDITOR.user.homeDir) || UTIL.homeDir(EDITOR.workingDirectory);
 	if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
 	
 	EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
@@ -8977,7 +8977,7 @@ function main() {
 	CLIENT.on("loginSuccess", function loggedInToServer(login) {
 		EDITOR.user = {
 			name: login.user,
-			home: login.homeDir,
+				homeDir: login.homeDir,
 				platform: login.platform
 		};
 
@@ -9843,7 +9843,7 @@ function fileDrop(fileDropEvent) {
 
 if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 
-			path = path || UTIL.joinPaths(EDITOR.user.home, "/upload/");
+			path = path || UTIL.joinPaths(EDITOR.user.homeDir, "/upload/");
 		if (item.isFile) {
 			// Get file
 			filesToSave++;
