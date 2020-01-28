@@ -1993,6 +1993,7 @@ else {
 		
 		for (var i=0; i<paths.length-1; i++) {
 			if(!paths[i]) throw new Error("joinPaths: Item " + i + "=" + paths[i] + " is emty or undefined!");
+			if(typeof paths[i] != "string") throw new Error("joinPaths: Item " + i + "=" + paths[i] + " is not a string! pathsParameter=" + JSON.stringify(pathsParameter));
 			
 			paths[i] = UTIL.trailingSlash(paths[i]);
 			//if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
@@ -2022,6 +2023,9 @@ else {
 		return path;
 		
 		function flatten(paths, recursion) {
+			
+			console.log("flatten: paths=" + JSON.stringify(paths) + " recursion=" + recursion);
+			
 			// recursion is dangerious!
 			if(typeof recursion != "number") recursion = 0;
 			if(recursion > 100) {
@@ -2047,12 +2051,15 @@ else {
 						return flatten(paths, ++recursion);
 					}
 					else {
-						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
+						console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
 						var first = paths.slice( 0, i );
 						var middle = paths[i];
 						var end = paths.slice( i+1 );
 						return flatten(first.concat(middle, end), ++recursion);
 					}
+				}
+				else if(typeof paths[i] != "string") {
+					throw new Error("UTIL.joinPaths: Not a string: paths[" + i + "]=" + paths[i] + " pathsParameter=" + JSON.stringify(pathsParameter));
 				}
 			}
 			return paths;
@@ -3102,7 +3109,8 @@ b = b.slice(8);
 		*/
 		
 		if(message != undefined && UTIL.isAllCaps(message)) throw new Error("The error message=" + message + " is in all caps, the error code should be in the second argument!");
-		if(code != undefined && !UTIL.isAllCaps(code)) throw new Error("The error code=" + code + " (second argument to UTIL.updateError) should be in ALL_CAPS!");
+		if(code != undefined && typeof code != "string") code = code.toString(); // Can be a number
+		if( code != undefined && !UTIL.isAllCaps(code) ) throw new Error("The error code=" + code + " (second argument to UTIL.updateError) should be in ALL_CAPS or undefined!");
 		
 		if(code) {
 			var setCode = set(oldError, "code", code);
