@@ -78,18 +78,9 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
-VPN support!
-It should be possible to connect to a VPN server via the cloud IDE!
+how to give netns to existing users !?
 
-Using algo as vpn test server...
-Using wireguard as vpn client
-
-
-sudo ip netns exec ltest1 wg-quick up /home/ltest1/wireguard/wg0.conf
-
-
-
-
+TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
 
 
@@ -104,32 +95,19 @@ possible optimization: Check the last screen x rows if file.text contains the IP
 todo: Clean up netnns when removing a user!
 
 Replace http://10.0.3.235:3000/ with 3000.user.webide.se in terminal and stdout messages!
+todo: Also replace in node.js stdout when starting the script from the editor
 
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
 
 Test network namespaces on another server before upgrading prod!!
 
-# Enable packet forwarding
-sysctl -a | grep forward
-sudo sysctl net.ipv4.ip_forward=1
 
-# Add a bridge device
-sudo ip link add name br0 type bridge
-sudo ip link set br0 up
-sudo ip addr add 10.0.0.1/16 brd + dev br0
-
-# Configure firewall
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 
 
 ## Forward loopback to ip !?
 sudo ip netns exec iptables -t nat -A PREROUTING -p tcp --dport 1111 -j DNAT --to-destination 10.0.0.2:111
 sudo ip netns exec iptables -t nat -A POSTROUTING -j MASQUERADE
-
-
-# Start dhcp client in network namespace
-sudo ip netns exec pelle dhclient pelle -v
 
 
 

@@ -5901,9 +5901,10 @@ function vpnCommand(username, homeDir, options, callback) {
 			var shellCmd = "ip netns exec " + username + " wg";
 		}
 		
+		log("vpn: " + username + " options.command=" + options.command + " shellCmd=" + shellCmd + " ...");
 		exec(shellCmd, execOptions, function wgQuick(error, stdout, stderr) {
 			
-			console.log(username + " shellCmd=" + shellCmd + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
+			log(username + " shellCmd=" + shellCmd + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout, DEBUG);
 			
 			var output = (stderr + "\n" + stdout).trim();
 			

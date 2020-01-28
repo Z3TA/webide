@@ -475,6 +475,12 @@ To check for Nginx config problems:
 `nginx -T`
 
 
+Preparing for Linux network namespaces
+---------------------------------------
+Check the source code of cloudide_install.js under "Setup Linux network namespace bridge" ...
+
+
+
 Installing vnc dependencies
 ---------------------------
 ````

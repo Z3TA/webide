@@ -277,7 +277,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			else {
 				// We still have contact to the server
 				// The request is probably just taking a long time...
-				var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out!");
+				var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out! Request: " + UTIL.shortString(string));
 			}
 			
 			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + " LIENT.cmdTimeout=" + CLIENT.cmdTimeout);

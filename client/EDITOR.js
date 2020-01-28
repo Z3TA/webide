@@ -3362,8 +3362,9 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 			//EDITOR.discoveryBar.show();
 			
 			// Work like the windowMenu api
-element.activate = EDITOR.discoveryBar.activate;
-			element.deactivate = EDITOR.discoveryBar.deactivate;
+element.activate = function() {EDITOR.discoveryBar.activate(element)};
+			element.deactivate = function() {EDITOR.discoveryBar.deactivate(element)};
+			element.isActive = function() {EDITOR.discoveryBar.isActive(element)};
 			
 			return element;
 		},
@@ -3378,6 +3379,9 @@ element.activate = EDITOR.discoveryBar.activate;
 		},
 		deactivate: function deactivateDiscoveryBarItem(element) {
 			element.classList.remove("active");
+		},
+		isActive: function isDiscoveryBarItemActive(element) {
+			return element.classList.contains("active");
 		},
 		show: function showDiscoveryBar() {
 			// Shows the whole discovery bar

@@ -1,4 +1,19 @@
-
+/*
+	
+	If you want to run your own VPN server, check out this project:
+	https://github.com/trailofbits/algo
+	
+	There are many VPN protocols, the wireguard protocol seem to be the most popular!
+	There is also openvpn, but it was very complicated to setup...
+	
+	Manual test:
+	sudo ip netns exec USERNAME wg-quick up /home/USERNAME/wireguard/wg0.conf
+	
+	Check IP:
+	sudo ip netns exec USERNAME curl https://www.whatismyip.com/ | grep "IPv4 is:"
+	
+	
+*/
 (function() {
 "use strict";
 	
@@ -32,12 +47,12 @@ unload: function unloadVpnSupport() {
 	function toggleVpnConnection() {
 		if(connected) vpnStop();
 		else vpnConnect();
-	
-return PREVENT_DEFAULT;
-}
+		
+		return PREVENT_DEFAULT;
+	}
 	
 	function checkVpnStatus() {
-		CLIENT.cmd("vpn", {type: "wireguard", command: "status", conf: configPath}, function vpnStartedMaybe(err, status) {
+		CLIENT.cmd("vpn", {type: "wireguard", command: "status", conf: configPath}, function vpnStatus(err, status) {
 			if(err) alertBox(err.message);
 			else {
 				if(status == "connected") {
@@ -82,7 +97,7 @@ return;
 		
 		if(typeof configPath != "string") throw new Error("configPath=" + configPath + " is not a string!");
 		
-		CLIENT.cmd("vpn", {type: "wireguard", command: "start", conf: configPath}, function vpnStartedMaybe(err) {
+		CLIENT.cmd("vpn", {type: "wireguard", command: "start", conf: configPath}, function startedVpn(err) {
 			if(err) alertBox(err.message);
 			else {
 alertBox("Connected to VPN!");
@@ -96,7 +111,7 @@ alertBox("Connected to VPN!");
 		
 		if(typeof pathToConfig != "string") throw new Error("pathToConfig=" + pathToConfig + " is not a string!");
 		
-		CLIENT.cmd("vpn", {type: "wireguard", command: "stop", conf: pathToConfig}, function vpnStoppedMaybe(err) {
+		CLIENT.cmd("vpn", {type: "wireguard", command: "stop", conf: pathToConfig}, function stoppedVpn(err) {
 			if(err) alertBox(err.message);
 			else {
 alertBox("Disconnected from VPN!");
