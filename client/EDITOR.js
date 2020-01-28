@@ -1161,19 +1161,7 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 				
 				fileOpenExtraCallbacks[path].push(callback);
 				
-				/*
-					problem: The server might have restarted and will thus not call back, but the client refuses to open the file because it's still in the open file queue
-					solution: Detect server restarts and clear the queue
-				*/
-				
-				setTimeout(function() {
-					if(fileOpenExtraCallbacks.hasOwnProperty(path)) {
-						console.warn("File still not opened ? path=" + path);
-						// Happens when you open a file, but get disconnected before it opens, server restarts and never calls back.
-						// But cal also be a slow network/drive. 
-						//alertBox("The file is still in the open file queue: " + path + ". Unless you are on a slow network/drive it's best to restart the editor!");
-					}
-				}, 2000);
+				// note: If the server crashes, we will still get a callback! (a timeout error)
 				
 				return; // Don't do anything else
 			}
@@ -1430,7 +1418,12 @@ if(fileParse !== undefined) {
 		}
 		
 		function removeFromQueue(path) {
-			if(EDITOR.openFileQueue.indexOf(path) == -1) throw new Error("File path=" + path + " not in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			if(EDITOR.openFileQueue.indexOf(path) == -1) {
+				// The second request to open the file doesn't add the file path to openFileQueue,
+				// so wehen the first request removes the path, and the second request comes here, it will be removed already!
+				// eg. no need to throw an error
+				return;
+			}
 			
 			var removed = EDITOR.openFileQueue.splice(EDITOR.openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
