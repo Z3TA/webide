@@ -1163,14 +1163,11 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 				
 				// note: If the server crashes, we will still get a callback! (a timeout error)
 				
-				return; // Don't do anything else
 			}
 			else alertBox("Please wait ... Opening file: " + path);
-			/*
-				var err = new Error("File is already in the queue to be opened, please wait!");			
-				err.code = "INQUEUE";
-				return fileOpenError(err);
-			*/
+			
+			
+			return; // Wait for the file to be opened!
 		}
 		else {
 			EDITOR.openFileQueue.push(path);
