@@ -243,7 +243,11 @@
 		
 if(target.className != "fileCanvas") return;
 		
-		var caret = EDITOR.mousePositionToCaret(posX, posY);
+		console.log("showSpellSuggestion: file.path=" + file.path + " caret=" + JSON.stringify(caret) + " ");
+		
+		//var caret = EDITOR.mousePositionToCaret(posX, posY);
+		
+		var markedAsMisspelled = file.grid[caret.row][caret.col].wave;
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
@@ -254,10 +258,10 @@ if(target.className != "fileCanvas") return;
 		function wordOnCaret(word, start, end) {
 			
 			var suggestion = "";
-			console.log("showSpellSuggestion:wordOnCaret: word=" + word + " caret=" + JSON.stringify(caret));
+			console.log("showSpellSuggestion: wordOnCaret: word=" + word + " caret=" + JSON.stringify(caret));
 			
 			if(!word) {
-				console.warn("showSpellSuggestion:wordOnCaret: No word on caret!");
+				console.warn("showSpellSuggestion: wordOnCaret: No word on caret!");
 				return;
 			}
 			
@@ -270,11 +274,11 @@ if(target.className != "fileCanvas") return;
 			
 			if(suggestion) {
 				console.log("showSpellSuggestion:wordOnCaret: suggestion=" + suggestion);
-				EDITOR.ctxMenu.addTemp(suggestion, replaceWord);
+				EDITOR.ctxMenu.addItem({text: suggestion, callback: replaceWord, temp: true, order: 1, separator: true});
 			}
-			else {
+			else if(markedAsMisspelled) {
 				console.log("showSpellSuggestion:wordOnCaret: No spell suggestion found!");
-				EDITOR.ctxMenu.addTemp("No spelling suggestion for <i>" + word + "</i>");
+				EDITOR.ctxMenu.addItem({text: "No spelling suggestion for <i>" + word + "</i>", temp: true, order: 1, separator: true});
 				}
 			
 			

@@ -78,6 +78,8 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+Spellcheck plugin need regression tests! (it stopped working and I did not notice)
+
 Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
 
 how to give netns to existing users !?
@@ -88,7 +90,7 @@ TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 Entering .. in open file widget should go to parent dir, not open selected file!
 
 
-
+Shouln't there be a way to init a Mercurial repo!? ;)
 
 terminal emulator has issues with "expo init AwesomeProject" because it has an interactive menu!
 
