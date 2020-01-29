@@ -4876,6 +4876,8 @@ if(menuItem.parentMenu) {
 			
 		},
 		show: function showCtxMenu(clickEventOrTargetElement) {
+			// First parameter is used to figure out what the user clicked on, eg. to get the context
+// it can be an event, or the element that was clicked on. 
 			
 			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
 			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
@@ -4893,7 +4895,10 @@ if(menuItem.parentMenu) {
 				var combo = getCombo(clickEventOrTargetElement);
 			}
 			else {
-				// It's a DOM element
+				// It's a DOM element!
+				// Check to make sure it *is* a DOM element
+				if( clickEventOrTargetElement.nodeType!=1 || typeof clickEventOrTargetElement.style != "object" ) throw new Error("First parameter (" + clickEventOrTargetElement + ") does not appear to be a DOM element!");
+				
 				var target = clickEventOrTargetElement;
 				var combo = getCombo(undefined); // assume no alt,ctrl,shift was pressed
 			}
@@ -8887,9 +8892,13 @@ function main() {
 		}
 	});
 		
-		EDITOR.registerAltKey({char: ";", alt:1, label: "☰ctx", fun:  EDITOR.ctxMenu.show});
-	
-	EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
+		EDITOR.registerAltKey({
+			char: ";", alt:1, label: "☰", fun: function() {
+				EDITOR.ctxMenu.show(EDITOR.canvas);
+			}
+		});
+		
+		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
 		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
 			EDITOR.previewTool(file, someEvent);
 		}

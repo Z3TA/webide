@@ -929,7 +929,7 @@ return false;
 			var charCode = CAPS ? button.charCodeCaps : button.charCode;
 			var direction = "down";
 			var targetElementClass = someEvent.target.className;
-			customFunction(file, combo, character, charCode, direction, targetElementClass, someEvent);
+			customFunction(file, combo, character, charCode, direction, targetElementClass, someEvent); // Give same parameters as keybindings
 		}
 		else button.fun(); // Need to be button.fun so that the function will get the proper this
 		
