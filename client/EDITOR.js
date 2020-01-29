@@ -4699,7 +4699,7 @@ if(menuItem.parentMenu) {
 			var itemCount = options.temp ? 100 : 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200
 			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 ); // Convert DOM array to normal array for convenience
 			console.log("EDITOR.ctxMenu.addItem: items=", items);
-			items.sort(function(a,b) {
+			items.sort(function sortItemsByPosition(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
 				var pB = parseInt(b.getAttribute("position"));
 				
