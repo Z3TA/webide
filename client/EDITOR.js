@@ -6917,7 +6917,11 @@ callback(err);
 		console.log("createPath: " + directoryPathToCreate);
 		
 		var lastCharOfPath = directoryPathToCreate.substr(directoryPathToCreate.length-1);
-		if(lastCharOfPath != "/" && lastCharOfPath != "\\") throw new Error("Last character is not a file path delimiter: " + directoryPathToCreate);
+		if(lastCharOfPath != "/" && lastCharOfPath != "\\") {
+			var err =  new Error("Last character of a directoryPathToCreate=" + directoryPathToCreate + " needs to have a path delimiter (slash or backslash): " + directoryPathToCreate);
+			if(createPathCallback) return createPathCallback(err);
+			else throw err;
+		}
 		
 		var json = {pathToCreate: directoryPathToCreate};
 		CLIENT.cmd("createPath", json, function pathCreated(err, json) {
