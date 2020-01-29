@@ -196,6 +196,9 @@ if(CHROMEBOOK) {
 	function fifmousemove(mouseX, mouseY, target, mouseMoveEvent) {
 		var file = EDITOR.currentFile;
 		
+		// Prevent this from running in files that are not search reports!
+		if(!isSearchReport(file)) throw new Error("file.path=" + file.path + " is not a search report! This mousemove event should only be triggered on searcg reports! mouseMoveEventRegistered=" + mouseMoveEventRegistered);
+		
 		var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 		var row = caret.row;
 		var rowText = file.rowText(row);
