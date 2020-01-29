@@ -5921,9 +5921,16 @@ function vpnCommand(username, homeDir, options, callback) {
 				}
 				else if(options.command == "status") {
 					if(stdout.length == 0) var status = "disconnected";
-					else if(stdout.indexOf("interface") != -1) var status = "connected"
-					else throw new Error("Unexpected output: stdout=" + stdout);
+					else if(stdout.indexOf("interface") != -1) {
+					var reEndpoint = /endpoint: (.*)/;
+					var matchEndpoint = stdout.match(reEndpoint);
+					var status = "connected"
+					if(matchEndpoint) {
+status = status + " to " + matchEndpoint[1];
+					}
 				}
+				else throw new Error("Unexpected output: stdout=" + stdout);
+			}
 			
 			callback(error, status);
 			

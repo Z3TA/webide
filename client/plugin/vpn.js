@@ -55,7 +55,7 @@ unload: function unloadVpnSupport() {
 		CLIENT.cmd("vpn", {type: "wireguard", command: "status", conf: configPath}, function vpnStatus(err, status) {
 			if(err) alertBox(err.message);
 			else {
-				if(status == "connected") {
+				if(status.indexOf("connected") == 0) {
 					connected = true;
 					discoveryBarIcon.activate();
 				}
@@ -67,11 +67,15 @@ unload: function unloadVpnSupport() {
 					throw new Error("Unexpected answer from server: status=" + status);
 				}
 				
+				updateStatus(status)
 				
 			}
 		});
 	}
 	
+	function updateStatus(status) {
+		discoveryBarIcon.title = "Virtual private network (VPN) IP tunnel " + status;
+	}
 	
 	function vpnConnect() {
 		
@@ -102,6 +106,7 @@ return;
 			else {
 alertBox("Connected to VPN!");
 				discoveryBarIcon.activate();
+				updateStatus("connected!")
 			}
 		});
 	}
@@ -116,6 +121,7 @@ alertBox("Connected to VPN!");
 			else {
 alertBox("Disconnected from VPN!");
 		discoveryBarIcon.deactivate();
+				updateStatus("(not connected)");
 }
 });
 	}
