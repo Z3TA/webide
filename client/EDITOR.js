@@ -4876,8 +4876,8 @@ if(menuItem.parentMenu) {
 			
 		},
 		show: function showCtxMenu(clickEventOrTargetElement) {
-			// First parameter is used to figure out what the user clicked on, eg. to get the context
-// it can be an event, or the element that was clicked on. 
+			// The clickEventOrTargetElement parameter is used to figure out what the user clicked on, 
+			// eg. to get the context. It can be an event, or the element that was supposably clicked on.
 			
 			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
 			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
