@@ -519,7 +519,7 @@
 							
 							if(file.text.charAt(parseEnd-1) != "}") {
 								file.debugGrid();
-								throw new Error("Expected parseEnd-1 = " + (parseEnd-1) + " character=" + UTIL.lbChars(file.text.charAt(parseEnd-1)) + " to be an }");
+								throw new Error("Expected parseEnd-1 = " + (parseEnd-1) + " character=" + UTIL.lbChars(file.text.charAt(parseEnd-1)) + " to be an } when about to parse only f.name=" + f.name + " head: " + file.text.slice(parseStart, parseStart+50) + " tail: " + file.text.slice(Math.max(0,parseEnd-50), parseEnd) );
 							}
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
