@@ -2705,7 +2705,7 @@ function checkMounts(options, checkMountsCallback) {
 					log("MySQL socket does not exist: " + MYSQL_PORT, WARN);
 				}
 				else {
-					// Sometimes we get 32 mount failure...
+					// Sometimes we get code=32 mount failure...
 					log("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code, WARN);
 				}
 				
@@ -2817,11 +2817,11 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;mountFollowSymlink("/usr/bin/ld", homeDir, folderMounted); // Needed by make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/ar", homeDir, folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;mountFollowSymlink("/usr/bin/ranlib", homeDir, folderMounted); // Needed to compile Node.js!?
-				foldersToMount++;mountFollowSymlink("/usr/bin/which", homeDir, folderMounted); // Needed by docker install script
+				//foldersToMount++;mountFollowSymlink("/usr/bin/which", homeDir, folderMounted); // Needed by docker install script
 				foldersToMount++;mountFollowSymlink("/usr/bin/touch", homeDir, folderMounted); // Needed by make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/less", homeDir, folderMounted); // Wanted by Mercurial
 				
-				
+
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 				foldersToMount++;module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
@@ -2845,15 +2845,19 @@ function checkMounts(options, checkMountsCallback) {
 				
 				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
 				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
-				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (Docker) eg. curl | sh
-				foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
+				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (curl | sh) :P
+				//foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
+				//foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
 				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
 				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				
-				foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/bin/cat", homeDir + "bin/cat", folderMounted); // Needed by docker install script
+foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", folderMounted); // Docker
+				foldersToMount++;module_mount("/var/run/docker.sock", homeDir + "sock/docker", folderMounted); // Docker
+				
+				
+				//foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
+				//foldersToMount++;module_mount("/bin/cat", homeDir + "bin/cat", folderMounted); // Needed by docker install script
 				foldersToMount++;module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
 				foldersToMount++;module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
 				foldersToMount++;module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
@@ -2875,8 +2879,8 @@ function checkMounts(options, checkMountsCallback) {
 			
 			// Put programs outside /bin/ and /usr/bin here
 			
-			foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
-			foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
+			//foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
+			//foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
 			
 			foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
 			
@@ -2893,7 +2897,7 @@ function checkMounts(options, checkMountsCallback) {
 			
 
 
-			foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
+			//foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
 			
 			
 			
@@ -2942,23 +2946,23 @@ function checkMounts(options, checkMountsCallback) {
 				});
 			});
 			
-			// ## mount proc
-			// http://man7.org/linux/man-pages/man5/proc.5.html
 			/*
-				foldersToMount++;module_mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for os.cpus()
-				foldersToMount++;module_mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
-				foldersToMount++;module_mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
-				foldersToMount++;module_mount("/proc/modules", homeDir + "proc/modules", folderMounted); // Needed by lsmod (Docker dep)
-				foldersToMount++;module_mount("/proc/self/", homeDir + "proc/self/", folderMounted); // Needed by Docker (and maybe also pty?)
+				## mount proc
+				/proc/ is a psuedo filesystem needed by many apps
+				/proc/cpuinfo - Needed for os.cpus()
+				/proc/stat - Needed for nodejs/npm
+				/proc/sys/vm/overcommit_memory - Needed for nodejs/npm
+				
+				question: What's the difference between -t proc none and -t proc proc !?
+				answer: The proc filesystem is not associated with a special device, and when mounting it, an arbitrary keyword, such as proc can be used instead of a device specification
+				ref: https://linux.die.net/man/8/mount
 			*/
-			
-			// What's the difference between -t proc none and -t proc proc !? 
-			// The proc filesystem is not associated with a special device, and when mounting it, an arbitrary keyword, such as proc can be used instead of a device specification
-			// ref: https://linux.die.net/man/8/mount
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc-temp "' + homeDir + 'proc/" -o hidepid=2,gid=2', folderMounted); // Needed by Docker (and maybe also pty?)
-			// must make a remount in order to hidepid to take effect!
-			// must also use gid=1 (a number other then 0) in order to hidepid to take effect!
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc "' + homeDir + 'proc/" -o remount,hidepid=2,gid=2', folderMounted); // Needed by Docker (and maybe also pty?)
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc-temp "' + homeDir + 'proc/" -o hidepid=2,gid=2', folderMounted);
+			/*
+				must make a remount in order to hidepid to take effect!
+				must also use gid=1 (a number other then 0) in order to hidepid to take effect!
+			*/
+			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc "' + homeDir + 'proc/" -o remount,hidepid=2,gid=2', folderMounted);
 			
 			
 			// ## mount dev
@@ -3006,57 +3010,63 @@ function checkMounts(options, checkMountsCallback) {
 		}
 		else passwdCreated = true;
 		
-		// Docker needs /etc/subuid, but we don't want to show what other users are on the system
-		if(!DEBUG_CHROOT) {
-			module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
-				var rows = data.split("\n");
-				var foundUser = false;
-				for (var i=0, col; i<rows.length; i++) {
-					col = rows[i].split(":");
-					if(col[0]==username) found(rows[i]);
-				}
-				if(!foundUser) {
-					reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
-					subuidCreated = true;
-					checkMountsReadyMaybe();
-					return;
-				}
-				function found(data) {
-					foundUser = true;
-					module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
-						subuidCreated = true;
-						checkMountsReadyMaybe();
-					});
-				}
-			});;
-		}
-		else subuidCreated = true;
+/*
+// Docker needs /etc/subuid, but we don't want to show what other users are on the system
+if(!DEBUG_CHROOT) {
+module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
+var rows = data.split("\n");
+var foundUser = false;
+for (var i=0, col; i<rows.length; i++) {
+col = rows[i].split(":");
+if(col[0]==username) found(rows[i]);
+}
+if(!foundUser) {
+reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
+subuidCreated = true;
+checkMountsReadyMaybe();
+return;
+}
+function found(data) {
+foundUser = true;
+module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
+subuidCreated = true;
+checkMountsReadyMaybe();
+});
+}
+});;
+}
+else subuidCreated = true;
+*/
+		subuidCreated = true;
 		
-		// Docker needs /etc/subgid, but we don't want to show what other users are on the system
-		if(!DEBUG_CHROOT) {
-			module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
-				var rows = data.split("\n");
-				var foundUser = false;
-				for (var i=0, col; i<rows.length; i++) {
-					col = rows[i].split(":");
-					if(col[0]==username) found(rows[i]);
-				}
-				if(!foundUser) {
+/*
+// Docker needs /etc/subgid, but we don't want to show what other users are on the system
+if(!DEBUG_CHROOT) {
+module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
+var rows = data.split("\n");
+var foundUser = false;
+for (var i=0, col; i<rows.length; i++) {
+col = rows[i].split(":");
+if(col[0]==username) found(rows[i]);
+}
+if(!foundUser) {
 reportError("Did not find username=" + username + " in /etc/subgid data=" + data);
-					subgidCreated = true;
-					checkMountsReadyMaybe();
-					return;
-				}
-				function found(data) {
-					foundUser = true;
-					module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
-						subgidCreated = true;
-						checkMountsReadyMaybe();
-					});
-				}
-			});;
-		}
-		else subgidCreated = true;
+subgidCreated = true;
+checkMountsReadyMaybe();
+return;
+}
+function found(data) {
+foundUser = true;
+module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
+subgidCreated = true;
+checkMountsReadyMaybe();
+});
+}
+});;
+}
+else subgidCreated = true;
+*/
+		subgidCreated = true;
 		
 		// Make sure nginx profile exist
 		var nginxSitesAvailable = "/etc/nginx/sites-available/"
@@ -4295,7 +4305,7 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 		spawnOptions.env.gid = gid;
 		
 		// Assume unix like system
-		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/dockerbin:/.npm-packages/bin";
+		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/.npm-packages/bin";
 		
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		
@@ -5867,6 +5877,11 @@ function sendToClient(userConnectionName, cmd, obj) {
 }
 
 function vpnCommand(username, homeDir, options, callback) {
+/*
+
+
+todo:  Check for netns /etc/netns/username/ first and send back an NONETNS error if it doesn't exist
+*/
 	var commands = ["start", "stop", "status"];
 	if(commands.indexOf(options.command) == -1) return callback( new Error("options.command=" + options.command + " not a valid VPN command! (" + JSON.stringify(commands) + ")") );
 	

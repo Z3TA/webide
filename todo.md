@@ -9,8 +9,6 @@ by looking at the diff. We want to know WHY you did it.
 Note to myself
 --------------
 
-react app
-
 Solve problems and pains! Do not look for problems that fit a solution!
 
 Before you start working on something new, first describe the problem, 
@@ -78,6 +76,27 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 What I'm working on
 -------------------
 
+
+export DOCKER_HOST=/sock/docker
+
+
+Gave up on rootless docker... Although there are alternatives like udocker and Podman, they might not support all features users want.
+
+Docker wont allow running commands on the host via a Dockerfile... Se we might be able to use Docker as is!?
+
+
+Podman is broken on my machine.
+
+Run the docker deamon inside a VM !?
+
+docker...
+
+
+
+the automatic spellcheck when clicking on a word is more annoying then useful...
+alternative: something like: "word appears to be spellec correctly: alternative word: "
+but the spelling dictionary is not very helpful for finding replacements for programming keywords, which might be super confusing!
+
 Spellcheck plugin need regression tests! (it stopped working and I did not notice)
 
 Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
@@ -89,6 +108,8 @@ TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
 Entering .. in open file widget should go to parent dir, not open selected file!
 
+
+idea: If there is a number in clipboard when opening the file, goto that line!?
 
 Shouln't there be a way to init a Mercurial repo!? ;)
 
