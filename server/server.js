@@ -2824,6 +2824,9 @@ function checkMounts(options, checkMountsCallback) {
 				
 				// Don't forget to investigate all links and add umount to removeuser.js!!!
 				
+				
+				
+				// For bins that are symlinks
 				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted); // gunzip will give ENOENT error without /bin/sh
 				foldersToMount++;mountFollowSymlink("/usr/bin/g++", homeDir, folderMounted); // Needed by some make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/as", homeDir, folderMounted); // Needed by g++
@@ -2834,7 +2837,11 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;mountFollowSymlink("/usr/bin/touch", homeDir, folderMounted); // Needed by make scripts
 				foldersToMount++;mountFollowSymlink("/usr/bin/less", homeDir, folderMounted); // Wanted by Mercurial
 				
+				
+				// for debugging
+				foldersToMount++;module_mount("/bin/ping", homeDir + "bin/ping", folderMounted);
 
+				
 				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 				foldersToMount++;module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 				foldersToMount++;module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
@@ -4291,7 +4298,7 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 	
 	// Using spawn instead of fork to be able to use Linux network namespaces
 	
-	spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
+	spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 	
 	spawnOptions.env = {
 		username: name,
@@ -4321,11 +4328,12 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/.npm-packages/bin";
 		
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
+		spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker";
 		
 		if(uid) workerNode = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
-	if((uid == undefined || uid == -1)) {
+	if(uid == undefined || uid == -1) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 		
 		if(process.getuid) {
@@ -4387,6 +4395,8 @@ spawnOptions.env.HOST = netnsIP;
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 	});
 	
+
+
 	log(name + " worker pid=" + worker.pid);
 	
 	
