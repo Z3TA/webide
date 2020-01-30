@@ -73,9 +73,13 @@ Step 3: Use device X, fix pain points
 An editor that you can connect to from anywhere
 Dropped your laptop in the ocean? Just get a new one and continue where you left off.
 
+ALWAYS set callback=null after calling back to prevent double callback and also to a call stack to debug the issue
+
 What I'm working on
 -------------------
 
+I get this twice:
+fillGuestPool: Going to create a new guest with id=1 because username=guest1 was not found in /etc/passwd and home dir don't exist (server.js:447:
 
 export DOCKER_HOST=/sock/docker
 

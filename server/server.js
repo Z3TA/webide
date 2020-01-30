@@ -566,10 +566,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
 			// Add user account: sudo useradd -r -s /bin/false nameofuser
-			
-			doneMaybe();
 		}
-		
 		
 		doneMaybe();
 	});
@@ -577,6 +574,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 	function doneMaybe() {
 		if(checked_passwd && checked_netns) {
 			readEtcPasswdCallback(error, info);
+			readEtcPasswdCallback = null;
 		}
 	}
 }
@@ -1366,13 +1364,13 @@ function createGuestUser(id, fromRecycler, callback) {
 		var guestId = id;
 		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
-		guestCounterSaved(null);
+		createUser();
 	}
 	else {
 		log("createGuestUser " + username + ": Incrementing GUEST_COUNTER=" + GUEST_COUNTER + " because id=" + id, DEBUG);
 		
-if(id !== undefined) throw new Error("Expected id=" + id + " to be undefined!");
-
+		if(id !== undefined) throw new Error("Expected id=" + id + " to be undefined!");
+		
 		if(IS_GUEST_USER_RECYCLING) throw new Error("IS_GUEST_USER_RECYCLING=" + IS_GUEST_USER_RECYCLING + " Cannot increment GUEST_COUNTER while guest users are being recycled!");
 		
 		var guestId = ++GUEST_COUNTER;
@@ -1382,23 +1380,25 @@ if(id !== undefined) throw new Error("Expected id=" + id + " to be undefined!");
 		// Save guest counter so that we can continue the number serie after server restarts
 		// It's not that bad if there are holes in the number serie. 
 		// We however don't want to give two people the same guest account!
-		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, guestCounterSaved);
+		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, function guestCounterSaved(err) {
+			if(err) {
+				log("createGuestUser " + username + ": Failed to save GUEST_COUNTER=" + GUEST_COUNTER + "", NOTICE);
+				return callback(err);
+			}
+			else {
+				createUser();
+			}
+		});
 	}
 	
-	function guestCounterSaved(err) {
-		
-		if(LAST_USERADD == username) throw new Error("LAST_USERADD=" + LAST_USERADD);
-		LAST_USERADD = username;
-		
-		if(err) {
-			log("createGuestUser " + username + ": Failed to save GUEST_COUNTER=" + GUEST_COUNTER + "", NOTICE);
-			return callback(err);
-		}
-		log("createGuestUser " + username + ": Saved GUEST_COUNTER=" + GUEST_COUNTER + "", DEBUG);
+	function createUser() {
 		
 		if(username == undefined || username == "guestundefined" || username == "[object Object]") {
 			throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
 		}
+		
+		if(LAST_USERADD == username) throw new Error("LAST_USERADD=" + LAST_USERADD);
+		LAST_USERADD = username;
 		
 		var password = module_generator.generate({
 			length: 10,
