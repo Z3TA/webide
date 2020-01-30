@@ -108,6 +108,8 @@ var EXEC_OPTIONS = {shell: "/bin/dash"};
 
 var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can stop a connection if the user disconnects)
 
+var LAST_USERADD = ""; // For debugging
+
 (function() {
 	// Make sure we are in the server directory
 	var workingDirectory = process.cwd();
@@ -397,6 +399,9 @@ function fillGuestPool(id, fromRecycler, callback) {
 		If id is specified, and guest#id exist, that guest user will be added to the guest pool
 		Otherwise if id is undefined or the guest#id user does not exist, a *new* user is created and added to the guest pool
 	*/
+	log("fillGuestPool: id=" + id + " fromRecycler=" + fromRecycler + "", DEBUG);
+	
+	if(LAST_USERADD == "guest" + id) throw new Error("LAST_USERADD=" + LAST_USERADD);
 	
 	if(typeof id == "function") {
 		callback = id;
@@ -439,7 +444,7 @@ function fillGuestPool(id, fromRecycler, callback) {
 						if(err && err.code == "ENOENT") {
 							// The user has no home dir and no user account. So create it!
 							
-							log("fillGuestPool: Creating a new guest with id=" + id + " because username=" + username + " was not found in /etc/passwd and home dir don't exist", DEBUG);
+							log("fillGuestPool: Going to create a new guest with id=" + id + " because username=" + username + " was not found in /etc/passwd and home dir don't exist", DEBUG);
 							createGuestUser(id, fromRecycler, guestUserCreatedMaybe);
 							
 						}
@@ -593,7 +598,7 @@ function recycleGuestAccounts(callback) {
 	continueRecycling();
 	
 	function continueRecycling() {
-		log("continueRecycling: currentlyRecyclingId=" + currentlyRecyclingId + " lastRecycledId=" + lastRecycledId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency);
+		log("continueRecycling: currentlyRecyclingId=" + currentlyRecyclingId + " lastRecycledId=" + lastRecycledId + " GUEST_COUNTER=" + GUEST_COUNTER + " countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " maxConcurrency=" + maxConcurrency, DEBUG);
 		if(currentlyRecyclingId==-1) currentlyRecyclingId = GUEST_COUNTER+1;
 		// Go backwards to make it possible to decrement GUEST_COUNTER
 		for (var i=currentlyRecyclingId-1; i>0 && currentConcurrency < maxConcurrency; i--) tryRecycle(i);
@@ -644,7 +649,7 @@ function recycleGuestAccounts(callback) {
 					
 					fillGuestPool(id, true, function guestPoolFilledMaybe(err) {
 						if(err) {
-							log("User account recycling error after fillGuestPool: " + err.message);
+							log("User account recycling error after fillGuestPool: " + err.message, DEBUG);
 						
 						if(err.code == "NO_HOME_DIR") {
 							// Some accounts are "nuked" eg there's a group id still lingering after a failed removeuser run.
@@ -831,16 +836,14 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 		
 		lastRecycledId = id;
 		
-		
-		
 		if(countLeft == 0) {
 			IS_GUEST_USER_RECYCLING = false;
 			callback(null);
 			callback = null;
-			log("Done recycling guest accounts!");
+			log("Done recycling all guest accounts!", INFO);
 		}
 		else if(countLeft < 0) {
-			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecyclingId=" + currentlyRecyclingId + " GUEST_COUNTER=" + GUEST_COUNTER);
+			throw new Error("countLeft=" + countLeft + " currentConcurrency=" + currentConcurrency + " currentlyRecyclingId=" + currentlyRecyclingId + " GUEST_COUNTER=" + GUEST_COUNTER + " IS_GUEST_USER_RECYCLING=" + IS_GUEST_USER_RECYCLING);
 		}
 		else continueRecycling();
 	}
@@ -1327,6 +1330,8 @@ function openRemoteFileServer() {
 
 function createGuestUser(id, fromRecycler, callback) {
 	
+	log("createGuestUser id=" + id + " fromRecycler=" + fromRecycler, DEBUG);
+	
 	if(typeof id == "function") {
 		callback = id;
 		id = undefined;
@@ -1349,8 +1354,9 @@ function createGuestUser(id, fromRecycler, callback) {
 		return callback(err);
 	}
 	
+	
 	if(CREATE_USER_LOCK) {
-		var err = new Error("A user is already about the be created!");
+		var err = new Error("A user is already about the be created! current id=" + id + " LAST_USERADD=" + LAST_USERADD);
 		err.code = "LOCK";
 		return callback(err);
 	}
@@ -1363,7 +1369,12 @@ function createGuestUser(id, fromRecycler, callback) {
 		guestCounterSaved(null);
 	}
 	else {
-		log("Incrementing GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
+		log("createGuestUser " + username + ": Incrementing GUEST_COUNTER=" + GUEST_COUNTER + " because id=" + id, DEBUG);
+		
+if(id !== undefined) throw new Error("Expected id=" + id + " to be undefined!");
+
+		if(IS_GUEST_USER_RECYCLING) throw new Error("IS_GUEST_USER_RECYCLING=" + IS_GUEST_USER_RECYCLING + " Cannot increment GUEST_COUNTER while guest users are being recycled!");
+		
 		var guestId = ++GUEST_COUNTER;
 		var username = "guest" + guestId;
 		console.time("Create " + username + " account");
@@ -1375,11 +1386,15 @@ function createGuestUser(id, fromRecycler, callback) {
 	}
 	
 	function guestCounterSaved(err) {
+		
+		if(LAST_USERADD == username) throw new Error("LAST_USERADD=" + LAST_USERADD);
+		LAST_USERADD = username;
+		
 		if(err) {
-			log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
+			log("createGuestUser " + username + ": Failed to save GUEST_COUNTER=" + GUEST_COUNTER + "", NOTICE);
 			return callback(err);
 		}
-		log("Saved GUEST_COUNTER=" + GUEST_COUNTER + " when creating " + username);
+		log("createGuestUser " + username + ": Saved GUEST_COUNTER=" + GUEST_COUNTER + "", DEBUG);
 		
 		if(username == undefined || username == "guestundefined" || username == "[object Object]") {
 			throw new Error("username=" + username + " id=" + id + " guestId=" + guestId);
@@ -1389,8 +1404,6 @@ function createGuestUser(id, fromRecycler, callback) {
 			length: 10,
 			numbers: true
 		});
-		
-		console.log("Creating guest user: " + username);
 		
 		if(!username) throw new Error("username=" + username);
 		
@@ -1409,23 +1422,23 @@ function createGuestUser(id, fromRecycler, callback) {
 			cwd: module_path.join(__dirname, "../"), // Run in webide folder where adduser.js is located
 			shell: EXEC_OPTIONS.shell
 		}
-		console.log("Create " + username + ": Running in options.cwd=" + options.cwd);
+		log("createGuestUser " + username + ": Running in options.cwd=" + options.cwd, DEBUG);
 		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
 		
 		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
 		var command = scriptPath + " '" + JSON.stringify(commandArg) + "'";
-		console.log("Create " + username + ": command=" + command);
+		log("createGuestUser " + username + ": command=" + command, DEBUG);
 		
 		exec(command, options, function adduser(error, stdout, stderr) {
 			CREATE_USER_LOCK = false;
 			
 			if(error) {
-				log("Error when adding username=" + username + " user: (error is probably in " + scriptPath + ")");
+				log("createGuestUser " + username + ": " + error.message + " (error is probably in " + scriptPath + ")", NOTICE);
 				return callback(error);
 			}
 			
-			//console.log("Create " + username + ": stdout=" + UTIL.lbChars(stderr));
-			console.log("Create " + username + ": stderr=" + UTIL.lbChars(stderr));
+			//log("createGuestUser " + username + ": stdout=" + UTIL.lbChars(stderr), DEBUG);
+			//log("createGuestUser " + username + ":  stderr=" + UTIL.lbChars(stderr), DEBUG);
 			
 			stderr = stderr.trim(); // Can be a new line (LF)
 			stdout = stdout.trim();
@@ -1433,7 +1446,7 @@ function createGuestUser(id, fromRecycler, callback) {
 			if(stderr) return callback(new Error("Error when creating username=" + username + "! Exec command=" + command + "\nstderr=" + stderr + " (stderr.length=" + stderr.length + ")\nstdout=" + stdout + " (stdout.length=" + stdout.length + ")"));
 			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
 			
-			log("adduser.js stdout=" + stdout, DEBUG);
+			
 			var checkre = /User with username=(.*), password=(.*), uid=(.*), gid=(.*), homeDir=(.*) successfully added!/g;
 			
 			var check = checkre.exec(stdout);
@@ -1451,7 +1464,7 @@ function createGuestUser(id, fromRecycler, callback) {
 				return callback(new Error("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout));
 			}
 			else if(reG1User == username && reG2Pw == password) {
-				log("Account username='" + username + "' successfully created!");
+				log("createGuestUser " + username + ": Successfully created!");
 				return callback(null, {username: username, password: password, uid: reG3Uid, gid: reG4Gid, homeDir: reG5HomeDir});
 			}
 			else {
@@ -3010,62 +3023,62 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		}
 		else passwdCreated = true;
 		
-/*
-// Docker needs /etc/subuid, but we don't want to show what other users are on the system
-if(!DEBUG_CHROOT) {
-module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
-var rows = data.split("\n");
-var foundUser = false;
-for (var i=0, col; i<rows.length; i++) {
-col = rows[i].split(":");
-if(col[0]==username) found(rows[i]);
-}
-if(!foundUser) {
-reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
-subuidCreated = true;
-checkMountsReadyMaybe();
-return;
-}
-function found(data) {
-foundUser = true;
-module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
-subuidCreated = true;
-checkMountsReadyMaybe();
-});
-}
-});;
-}
-else subuidCreated = true;
-*/
+		/*
+			// Docker needs /etc/subuid, but we don't want to show what other users are on the system
+			if(!DEBUG_CHROOT) {
+			module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
+			var rows = data.split("\n");
+			var foundUser = false;
+			for (var i=0, col; i<rows.length; i++) {
+			col = rows[i].split(":");
+			if(col[0]==username) found(rows[i]);
+			}
+			if(!foundUser) {
+			reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
+			subuidCreated = true;
+			checkMountsReadyMaybe();
+			return;
+			}
+			function found(data) {
+			foundUser = true;
+			module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
+			subuidCreated = true;
+			checkMountsReadyMaybe();
+			});
+			}
+			});;
+			}
+			else subuidCreated = true;
+		*/
 		subuidCreated = true;
 		
-/*
-// Docker needs /etc/subgid, but we don't want to show what other users are on the system
-if(!DEBUG_CHROOT) {
-module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
-var rows = data.split("\n");
-var foundUser = false;
-for (var i=0, col; i<rows.length; i++) {
-col = rows[i].split(":");
-if(col[0]==username) found(rows[i]);
-}
-if(!foundUser) {
-reportError("Did not find username=" + username + " in /etc/subgid data=" + data);
-subgidCreated = true;
-checkMountsReadyMaybe();
-return;
-}
-function found(data) {
-foundUser = true;
-module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
-subgidCreated = true;
-checkMountsReadyMaybe();
-});
-}
-});;
-}
-else subgidCreated = true;
-*/
+		/*
+			// Docker needs /etc/subgid, but we don't want to show what other users are on the system
+			if(!DEBUG_CHROOT) {
+			module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
+			var rows = data.split("\n");
+			var foundUser = false;
+			for (var i=0, col; i<rows.length; i++) {
+			col = rows[i].split(":");
+			if(col[0]==username) found(rows[i]);
+			}
+			if(!foundUser) {
+			reportError("Did not find username=" + username + " in /etc/subgid data=" + data);
+			subgidCreated = true;
+			checkMountsReadyMaybe();
+			return;
+			}
+			function found(data) {
+			foundUser = true;
+			module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
+			subgidCreated = true;
+			checkMountsReadyMaybe();
+			});
+			}
+			});;
+			}
+			else subgidCreated = true;
+		*/
 		subgidCreated = true;
 		
 		// Make sure nginx profile exist

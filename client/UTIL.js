@@ -2024,7 +2024,7 @@ else {
 		
 		function flatten(paths, recursion) {
 			
-			console.log("flatten: paths=" + JSON.stringify(paths) + " recursion=" + recursion);
+			//console.log("flatten: paths=" + JSON.stringify(paths) + " recursion=" + recursion);
 			
 			// recursion is dangerious!
 			if(typeof recursion != "number") recursion = 0;
@@ -2051,7 +2051,7 @@ else {
 						return flatten(paths, ++recursion);
 					}
 					else {
-						console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
+						//console.log(  "concat: " + JSON.stringify( paths.slice( 0, i ) ) + " and " + JSON.stringify( paths[i] ) + " and " + JSON.stringify( paths.slice( i+1 ) )  );
 						var first = paths.slice( 0, i );
 						var middle = paths[i];
 						var end = paths.slice( i+1 );
