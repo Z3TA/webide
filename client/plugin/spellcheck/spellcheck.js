@@ -51,6 +51,8 @@
 	var programmersAbbr = ["onerror", "png", "gfx", "onclick", "onload", "src", "@media", "nowrap", "charset", "lang", "rx", "ry", "cx", "cy", "rgba", "url", "xmlns", "xlink", "&raquo", "&laquo", "&nbsp", "stringify", "str", "num", "refactor", "refactoring", "substr", "substring", "undefined", "href", "async", "chroot"];
 	var regexIgnore = [/^\d+(em|px)$/, /^#?([A-Fa-f0-9]{1,6})$/, /^\d+.{1,6}/];
 	
+var suggestWord = null; // Used to prevent double lookups
+
 	var progressBar = document.createElement("progress");
 	progressBar.setAttribute("title", "spellcheck");
 	var totalRequests = 0;
@@ -106,13 +108,25 @@
 		
 		if(word.length == 0) return ALLOW_DEFAULT;
 		
+		if(suggestWord == word) return; // Prevent double lookups when double clicking
+		
+		suggestWord = word;
+		
 		CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
 			if(err) {
 				alertBox(err.message);
 				return;
 			}
 			
+			if(suggestWord != word) {
+				// The user has clicked again somewhere else. If we add another temp context menu item the Editor will complain
+				return;
+			}
+			
+			suggestWord = null;
+			
 			if(spell.suggestion) {
+				
 				var li = EDITOR.ctxMenu.addItem({text: spell.suggestion, temp: true, callback: insertSpellSuggestion, separator: true, order: 2});
 				//alertBox(li.getAttribute("position"));
 			}
