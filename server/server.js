@@ -92,6 +92,8 @@ var DEBUG = 7;
 
 var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
+var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
+
 var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false); // Translate all paths like if the home dir was the root folder
 
 var DISPLAY_ID = 0; // Counter of visual displays
@@ -862,7 +864,7 @@ function main() {
 			process.exit(1);
 		}
 		
-		if(process.platform=="linux") {
+		if(!NO_NETNS && process.platform=="linux") {
 			// Make sure we have a bridge setup for Linux network namespaces
 			module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
 				if(error) {
@@ -4374,7 +4376,7 @@ function createUserWorker(username, uid, gid, homeDir) {
 	
 	var workerScript = module_path.resolve(__dirname, "./user_worker.js");
 	
-	if(uid && process.platform=="linux") {
+	if(!NO_NETNS && uid && process.platform=="linux") {
 		var command = "/sbin/ip";
 		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
