@@ -78,6 +78,9 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+todo: Give users their own /etc/hosts ...
+nssswitch.conf is needed for /etc/hosts to work!
+
 hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
 What happens if we are in ip netns and the user listens on "localhost", should we map localhost via /etc/hosts to the user netns ip? :)
