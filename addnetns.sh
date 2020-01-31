@@ -1,3 +1,14 @@
+#
+# 
+# note: If custom_iptables.service is not used, you need to manually add the following rule:
+# sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+#
+# Also make sure sysctl net.ipv4.ip_forward is set, or set it:
+# sysctl -w net.ipv4.ip_forward=1
+#
+# Test connectivity:
+# sudo ip netns exec username ping google.com
+#
 
 if [[ $* != *--unattended ]]; then
     echo "This will create a new Linux network namespace for user $1"
