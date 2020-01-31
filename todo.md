@@ -78,71 +78,19 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-todo: Give users their own /etc/hosts ...
-nssswitch.conf is needed for /etc/hosts to work!
-
 hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
-What happens if we are in ip netns and the user listens on "localhost", should we map localhost via /etc/hosts to the user netns ip? :)
-
-/etc/hosts
-
-
-Problem: Apparmor profiles only allows w for files *owned* by the user, not files with a group that the user is member of...
-
-
-Apparmor profile for /home/ltest1/bin/bash need to have access to /run/docker.sock wr
-
-it works when I set rw persmission to /home/ltest1/sock/docker, but not when I add the user to the docker group!!?
-
-
-echo "$(</etc/group)"
-
-sudo gpasswd -d ltest1 docker
-sudo usermod -a -G docker ltest1
-
-groups ltest1
-groups
-
-note: user needs to be in the docker group!
-or else docker needs to be run with root!
-
-export DOCKER_HOST=unix:///sock/docker
-protocol unix:// is needed or docker will try to use localhost:2375...
-
-curl --unix-socket /sock/docker http://localhost/events
-
-https://docs.docker.com/engine/api/v1.27/
-
-
-ERROR: Cannot connect to the Docker daemon at tcp://localhost:2375/sock/docker. Is the docker daemon running?
-
-/etc/hosts issue in chroot !?
-sudo chroot /home/ltest1 /bin/ping pizza -> No address associated with hostname
-sudo chroot /home/ltest1 /bin/ping pizzas -> Name or service not known
-
-it did't work because /etc/nsswitch.conf did not exist in chroot!!!!!!!
-
-
-apparmor="DENIED" operation="create" profile="/home/ltest1/bin/bash//scripts" pid=30930 comm="docker" family="inet" sock_type="stream" protocol=0 requested_mask="create" denied_mask="create"
-
---resolve localhost:2375:127.0.0.1
-
-
-
-
-
-Gave up on rootless docker... Although there are alternatives like udocker and Podman, they might not support all features users want.
+Docker hardening, user namespaces!?
 
 Docker wont allow running commands on the host via a Dockerfile... Se we might be able to use Docker as is!?
 
 
-Podman is broken on my machine.
-
-Run the docker deamon inside a VM !?
+todo: cloudide_install.js instructions for Docker
 
 docker...
 
+
+hide function list if there are no functions. Or it will take up extra annoying space and show an extra scrollbar
 
 regression? when pressing enter in a plain text file (/zpcdata/projects/webide/etc/apparmor/usr.bin.nodejs_someuser) it doesn't auto indent!
 

@@ -26,7 +26,7 @@ IP=$(dec2ip $DECIMAL_IP)
 echo "IP=$IP"
 
 if [ -e "/var/run/netns/$1" ] ; then 
-  echo "Network namespace already exist!"
+  echo "Network namespace for $1 already exist!"
   exit 17
   # 17=EXIST
 fi

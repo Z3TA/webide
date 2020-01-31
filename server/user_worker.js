@@ -114,18 +114,34 @@ if(USE_CHROOT) {
 		
 		todo: ONLY ALLOW DOCKER FOR TRUSTED USERS!!!!!
 
+		add user to docker group:      sudo usermod -a -G docker ltest1
+		remove user from docker group: sudo gpasswd -d ltest1 docker
 	*/
-	log("initgroups(" + username + ", 999)", INFO);
-	try {
-		posix.initgroups(username, 999); // Causes silent crash
+	
+	log("process.env.groups=" + process.env.groups);
+	if(process.env.groups) {
+		try {
+			var groups = JSON.parse(process.env.groups);
+		}
+		catch(err) {
+			throw new Error("Unable to parse process.env.groups=" + process.env.groups + " Error: " + err.message);
+		}
+		
+		for(var group in groups) {
+			log("initgroups(" + username + ", " + groups[group] + ") name=" + group, INFO);
+			try {
+				posix.initgroups(username, parseInt(groups[group])); // Group needs to be an integer (number)
+			}
+			catch(err) {
+				log("initgroups(" + username + ", " + groups[group] + ") name=" + group + " failed: " + err.message, INFO);
+			}
+		}
 	}
-	catch(err) {
-		log("initgroups(" + username + ", 999) failed: " + err.message, INFO);
-	}
+	
 	
 	
 	log("seteuid to " + uid, DEBUG);
-	//posix.seteuid(uid); // Wrapper for process.setuid  (node dies)
+	//posix.seteuid(uid); // Wrapper for process.setuid
 	process.setuid(uid);
 	//posix.seteuid(uid); // Doesn't seem to do anything
 	

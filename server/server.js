@@ -515,8 +515,37 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 	//log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...", DEBUG);
 	
 	var checked_passwd = false;
+	var checked_groups = false;
 	var error;
-	var info = {};
+	var info = {groups: {}};
+	
+	module_fs.readFile("/etc/group", "utf8", function readEtcPasswdFile(err, str) {
+		checked_groups = true;
+		
+		if(err) {
+			log("readEtcPasswd: Unable to read /etc/group !", WARN);
+			error = new Error("Unable to read /etc/group: " + err.message);
+			return doneMaybe();
+		}
+		
+		var groups = str.split("\n");
+		for (var i=0, gName, gId, gUsers; i<groups.length; i++) {
+			
+			groups[i] = groups[i].split(":");
+			gUsers = groups[i][3];
+			
+			log(JSON.stringify(groups[i]), DEBUG);
+			
+			if(gUsers && gUsers.indexOf(username) != -1) {
+				gName = groups[i][0];
+				gId = groups[i][2];
+				info.groups[gName] = gId;
+			}
+		}
+		
+		doneMaybe();
+		
+	});
 	
 	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
 		checked_passwd = true;
@@ -552,7 +581,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				}
 			}
 			
-			console.log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT);
+			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT, INFO);
 			
 			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
@@ -563,7 +592,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 	});
 	
 	function doneMaybe() {
-		if(checked_passwd) {
+		if(checked_passwd && checked_groups) {
 			readEtcPasswdCallback(error, info);
 			readEtcPasswdCallback = null;
 		}
@@ -2022,7 +2051,7 @@ throw err;
 						var uid, gid; // System user-id and group-id
 						var homeDir; // User's home dir
 						var shell; // User's shell (currently disabled/not implemented)
-						var netns; // Linux network namespace
+						var groups; // Object with groupName:groupId
 						
 						userConnectionName = username;
 						
@@ -2034,7 +2063,7 @@ throw err;
 							acceptUser();
 						}
 						else {
-							// Get home, uid and gid (and also netns)
+							// Get home, uid and gid (and also the groups the user belongs to)
 							readEtcPasswd(username, function(err, passwd) {
 								if(err) {
 									if(process.platform === "win32") {
@@ -2056,12 +2085,14 @@ throw err;
 									return;
 								}
 								
+								log(username + " passwd=" + JSON.stringify(passwd), DEBUG);
+								
 								homeDir = passwd.homeDir;
 								shell = passwd.shell;
 								uid = passwd.uid;
 								gid = passwd.gid;
 								rootPath = passwd.homeDir;
-								netns = passwd.netns;
+								groups = passwd.groups;
 								
 								if(alreadyCheckedMounts) acceptUser();
 								else checkMounts({username: username, homeDir: homeDir, uid: uid, gid: gid}, checkedMounts);
@@ -2102,7 +2133,7 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
@@ -2689,8 +2720,22 @@ function checkMounts(options, checkMountsCallback) {
 			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
 				//if(error) log("addnetns error: " + error.message, WARN);
 				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
+				
 				if(stdout) log("addnetns stdout: " + stdout, INFO);
 				if(stderr) log("addnetns stderr: " + stderr, WARN);
+				
+				if(!error) {
+					// No error means the network namespace was created
+					var matchIP = stdout.match(/IP=(.*)/);
+					if(!matchIP) throw new Error("Unable to find IP in stdout=" + stdout);
+					var IP = matchIP[1];
+					// When user launches for example a node.js web server listening on "localhost"
+					// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
+					module_fs.writeFile(UTIL.joinPaths(HOME_DIR, username, "etc/hosts"), IP + "\tlocalhost", function (err) {
+						if (err) throw err;
+					});
+					// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
+				}
 				
 				createdNetworkNamespaces = true;
 				checkMountsReadyMaybe();
@@ -4322,7 +4367,7 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(username, uid, gid, homeDir) {
+function createUserWorker(username, uid, gid, homeDir, groups) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
@@ -4333,11 +4378,15 @@ function createUserWorker(username, uid, gid, homeDir) {
 	
 	spawnOptions.env = {
 		username: username,
-		loglevel: LOGLEVEL,
 		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
 		USER: username,
 		LOGNAME: username,
 		USER_NAME: username
+	}
+	
+	if(groups) {
+		// we have to manually serialize objects!
+		spawnOptions.env.groups = JSON.stringify(groups);
 	}
 	
 	// For forking when running in the Termux Android app
@@ -4392,7 +4441,7 @@ spawnOptions.env.HOST = netnsIP;
 		spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 	}
 	
-	log("Spawning user worker process as username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + "", INFO);
+	log("Spawning user worker process as username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + " groups=" + JSON.stringify(groups), INFO);
 	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
