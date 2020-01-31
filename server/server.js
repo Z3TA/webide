@@ -4434,11 +4434,11 @@ spawnOptions.env.HOST = netnsIP;
 	if(stdioPipe) {
 		
 		worker.stdout.on("data", function workerExit(data) {
-			log(username + " stdout: " + data);
+			log(data.toString());
 		});
 		
 		worker.stderr.on("data", function workerExit(data) {
-			log(username + " stderr: " + data);
+			log(data.toString());
 		});
 
 	}

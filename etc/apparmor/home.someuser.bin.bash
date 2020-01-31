@@ -5,7 +5,7 @@
 
 #include <tunables/global>
 
-%HOME%%USERNAME%/bin/bash {
+%HOME%%USERNAME%/bin/bash flags=(attach_disconnected) {
 
   # Just in case (deny overrides allow)
   deny %HOME%%USERNAME%/usr/** wl,

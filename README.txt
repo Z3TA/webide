@@ -603,6 +603,12 @@ Job for apparmor.service failed because the control process exited with error co
 `service apparmor status` will show the error message and what line the parser error is on
 
 
+When working with Linux namespaces, Apparmor will sometimes complain that some file doesn't have rw access,
+even though it has been defined in the Apparmor profile, but if you look closely that path is missing the /
+root slash. Adding flags=(attach_disconnected) to the profile fixes that problem, and the profile rule will work again.
+example: %HOME%%USERNAME%/bin/bash flags=(attach_disconnected) {
+
+
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 Where is the program ?
