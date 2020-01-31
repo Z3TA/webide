@@ -38,6 +38,11 @@
   # Connect to other servers via ssh
   network,
 
+  # Able to use the docker service
+  # This is probably not a good idea considering Docker has root access,
+  # you can for example mount the host system, then modify it from the container
+  /run/docker.sock wr,
+
   # Many scripts wants to access urandom ... For example when doing a SSL handshake!?
   /dev/urandom r,
 

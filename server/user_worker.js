@@ -60,15 +60,17 @@ var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 var USERNAME = getArg(["user", "username"])
 var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
+console.log("================================== user_worker.js ==================================");
 
 if(USE_CHROOT) {
-	/* Change root ...
+	/* 
+		Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
 		npm rebuild
 		
 		The idea with chroot is that we do not have to translate paths to virtual root.
-		
+		And so that all apps started by the user inherit the uid and gid
 	*/
 	
 	var posix = require("posix"); // Very much needed for chroot to work. 
@@ -81,14 +83,57 @@ if(USE_CHROOT) {
 	
 	if(HOME=="/") throw new Error("Unncessasary to chroot into /");
 	
+	
+	log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
+	
+	
+	log("chroot into " + HOME, DEBUG);
 	posix.chroot(HOME);
 	
-	//posix.setegid(gid);
-	//posix.seteuid(uid);
-	process.setgid(gid);
+	
+	// hmm, using posix.setegid makes the user_worker silenty die...
+	log("setegid to " + gid, DEBUG);
+	posix.setegid(gid); // Wrapper for process.setgid (node dies)
+	//process.setgid(gid);
+	
+	//posix.setegid(gid); // Doesn't seem to do anything
+	posix.setregid(gid, gid); // Doesn't seem to do anything
+	
+	/*
+		problem: Running id in the chroot it doesn't get the correct groups the user is member of
+		$ id =        uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),0(root)
+		$ id ltest1 = uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
+		
+		Using initgroups():
+		$ id =        uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
+		$ id ltest1 = uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
+		
+		without posix.initgroups the user won't have access to the docker group!
+		note: By default the user is only allowed to write to files owned by the user,
+		so write access need to be explicitly set to each file in apparmor profile, eg. /run/docker.sock wr,
+		
+		todo: ONLY ALLOW DOCKER FOR TRUSTED USERS!!!!!
+
+	*/
+	log("initgroups(" + username + ", 999)", INFO);
+	try {
+		posix.initgroups(username, 999); // Causes silent crash
+	}
+	catch(err) {
+		log("initgroups(" + username + ", 999) failed: " + err.message, INFO);
+	}
+	
+	
+	log("seteuid to " + uid, DEBUG);
+	//posix.seteuid(uid); // Wrapper for process.setuid  (node dies)
 	process.setuid(uid);
+	//posix.seteuid(uid); // Doesn't seem to do anything
+	
+	posix.setreuid(uid, uid); // Doesn't seem to do anything
 	
 	//log(username + " worker process uid=" + uid + " gid=" + gid);
+	
+	log("After: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
 	
 	if(uid === 0) log(username + " RUNNING AS ROOT!!!", WARN);
 	
