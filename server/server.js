@@ -510,22 +510,11 @@ else if(err) throw err;
 
 function readEtcPasswd(username, readEtcPasswdCallback) {
 	if(username == undefined) throw new Error("username=" + username);
-	//console.log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...");
+	//log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...", DEBUG);
 	
-	// todo: rename this function because we also check for netns
-	var checked_netns = false;
 	var checked_passwd = false;
 	var error;
 	var info = {};
-	
-	module_fs.stat("/var/run/netns/" + username, function(err, stats) {
-		if(!err) {
-			// No error means the file exist
-			info.netns = username;
-		}
-		checked_netns = true;
-		doneMaybe();
-	});
 	
 	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
 		checked_passwd = true;
@@ -572,7 +561,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 	});
 	
 	function doneMaybe() {
-		if(checked_passwd && checked_netns) {
+		if(checked_passwd) {
 			readEtcPasswdCallback(error, info);
 			readEtcPasswdCallback = null;
 		}
@@ -851,7 +840,6 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 function main() {
 	
 	// Get the current user (who runs this server)
-	
 	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 	var env = process.env;
 	
@@ -873,6 +861,31 @@ function main() {
 			log("posix module needed for chroot! Try with -nochroot flag!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
 			process.exit(1);
 		}
+		
+		if(process.platform=="linux") {
+			// Make sure we have a bridge setup for Linux network namespaces
+			module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
+				if(error) {
+					module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
+						if(error) throw err;
+						if(stdout) log("netnsbridge: stdout=" + stdout, NOTICE);
+						if(stderr) log("netnsbridge: stderr=" + stderr, WARN);
+						/*
+							Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
+							we will give each user their uid (decimal) as IP
+							ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
+							
+							Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
+							
+							If you are not using the firewall script, do this manually:
+							sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+						*/
+						
+					});
+				}
+			});
+		}
+		
 	}
 	
 	if(info.uid > 0 && !USERNAME && !NO_CHROOT) {
@@ -2054,7 +2067,7 @@ throw err;
 							});
 						}
 						
-						function checkedMounts(err) {
+						function checkedMounts(err, mountInfo) {
 							if(err) idFail("Problem creating mounts: " + err.message);
 							else acceptUser();
 						}
@@ -2087,7 +2100,7 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, netns);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
@@ -2127,7 +2140,7 @@ throw err;
 								userInfo.installDirectory = __dirname.replace(/server$/, "");
 							}
 							
-if(uid) {
+							if(uid && process.platform=="linux") {
 var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 userInfo.netnsIP = netnsIP;
 }
@@ -2503,7 +2516,7 @@ var loginCounter = 0;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, netns);
+										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
 										userWorker.send({identify: userInfo});
 										
 										userWorker.on("message", messageFromWorker);
@@ -2603,7 +2616,11 @@ var loginCounter = 0;
 
 
 function checkMounts(options, checkMountsCallback) {
-	"use strict";
+	/*
+		This function will make sure that the user has everything setup.
+		It will create everything the user need to run on the server
+		(to make it easy to move users between servers)
+	*/
 	
 	var username = options.username;
 	var homeDir = options.homeDir;
@@ -2659,11 +2676,25 @@ function checkMounts(options, checkMountsCallback) {
 	var subgidCreated = false;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
+	var createdNetworkNamespaces = (process.platform != "linux");
 	
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
 		
 		//console.log("User rights OK for username=" + username);
+		
+		if(!createdNetworkNamespaces) {
+			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
+				//if(error) log("addnetns error: " + error.message, WARN);
+				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
+				if(stdout) log("addnetns stdout: " + stdout, INFO);
+				if(stderr) log("addnetns stderr: " + stderr, WARN);
+				
+				createdNetworkNamespaces = true;
+				checkMountsReadyMaybe();
+			});
+		}
+		
 		
 		/*
 			// Check if cacerts need to be updated
@@ -3344,7 +3375,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		
 		//console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
-		if(nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		if(createdNetworkNamespaces && nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -4289,24 +4320,22 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(name, uid, gid, homeDir, netns) {
+function createUserWorker(username, uid, gid, homeDir) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
-	var workerArgs = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
+	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
 	var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
 	// Using spawn instead of fork to be able to use Linux network namespaces
 	
-	spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
-	
 	spawnOptions.env = {
-		username: name,
+		username: username,
 		loglevel: LOGLEVEL,
 		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
-		USER: name,
-		LOGNAME: name,
-		USER_NAME: name
+		USER: username,
+		LOGNAME: username,
+		USER_NAME: username
 	}
 	
 	// For forking when running in the Termux Android app
@@ -4328,9 +4357,9 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/.npm-packages/bin";
 		
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
-		spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker";
+		spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker"; // note: the unix:// protocol is needed, because, while it usesd the socket to connect, without the protocol part it will try to run commands via an tpc port on localhost...
 		
-		if(uid) workerNode = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+		if(uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
 	if(uid == undefined || uid == -1) {
@@ -4345,18 +4374,23 @@ function createUserWorker(name, uid, gid, homeDir, netns) {
 	
 	var workerScript = module_path.resolve(__dirname, "./user_worker.js");
 	
-	if(netns && uid) {
+	if(uid && process.platform=="linux") {
 		var command = "/sbin/ip";
-		var args = ["netns", "exec", netns, workerNode, workerScript].concat(workerArgs);
+		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 spawnOptions.env.HOST = netnsIP;
+		
+		spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
+		// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
+		var stdioPipe = true;
 	}
 	else {
 		var command = workerNode;
 		var args = [workerScript].concat(workerArgs);
+		spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 	}
 	
-	log("Spawning user worker process as username=" + name + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + " netns=" + netns, INFO);
+	log("Spawning user worker process as username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + "", INFO);
 	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
@@ -4374,30 +4408,40 @@ spawnOptions.env.HOST = netnsIP;
 			console.log("args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
 			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
 			// Easiest solution is to remove and re-add the user.
-			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
+			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + username + " exist!", NOTICE);
 			throw err;
 		}
 	}
 	
 	worker.on("close", function workerClose(code, signal) {
-		console.log(name + " worker close: code=" + code + " signal=" + signal);
+		console.log(username + " worker close: code=" + code + " signal=" + signal);
 	});
 	
 	worker.on("disconnect", function workerDisconnect() {
-		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+		console.log(username + " worker disconnect: worker.connected=" + worker.connected);
 	});
 	
 	worker.on("error", function workerError(err) {
-		console.log(name + " worker error: err.message=" + err.message);
+		console.log(username + " worker error: err.message=" + err.message);
 	});
 	
 	worker.on("exit", function workerExit(code, signal) {
-		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+		console.log(username + " worker exit: code=" + code + " signal=" + signal);
 	});
 	
+	if(stdioPipe) {
+		
+		worker.stdout.on("data", function workerExit(data) {
+			log(username + " stdout: " + data);
+		});
+		
+		worker.stderr.on("data", function workerExit(data) {
+			log(username + " stderr: " + data);
+		});
 
-
-	log(name + " worker pid=" + worker.pid);
+	}
+	
+	log(username + " worker pid=" + worker.pid);
 	
 	
 	return worker;

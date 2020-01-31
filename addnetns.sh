@@ -1,6 +1,8 @@
 
-echo "This will create a new Linux network namespace for user $1"
-read -p "Press enter to continue"
+if [[ $* != *--unattended ]]; then
+    echo "This will create a new Linux network namespace for user $1"
+    read -p "Press enter to continue"
+fi
 
 USERID=$(id -u $1)
 echo USERID=$USERID
@@ -25,7 +27,8 @@ echo "IP=$IP"
 
 if [ -e "/var/run/netns/$1" ] ; then 
   echo "Network namespace already exist!"
-  exit 1
+  exit 17
+  # 17=EXIST
 fi
 
 ## add network namespace (guide: https://ops.tips/blog/using-network-namespaces-and-bridge-to-isolate-servers/)
@@ -42,7 +45,7 @@ sudo ip netns exec $1 ip link set $1 up
 # Give the device inside the namespace and IP address
 sudo ip netns exec $1 ip addr add $IP/16 dev $1
 # Attach the cable to the "router"
-sudo ip link set br-$1 master br0
+sudo ip link set br-$1 master netnsbridge
 # Set the routing route inside the namespace to go via the "router"
 sudo ip netns exec $1 ip route add default via 10.0.0.1
 # Configurate resolvers

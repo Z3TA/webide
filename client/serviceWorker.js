@@ -82,7 +82,8 @@ var CACHE_FILES = [
 	'/gfx/upload.svg',
 	'/gfx/add-file.svg',
 '/gfx/icon/dropbox.svg',
-	
+	'/gfx/wireguard-vpn.svg',
+
 	// Cache font
 '/gfx/font/ubuntu/ubuntu.css',
 	'/gfx/font/ubuntu/UbuntuMono-BI.ttf',

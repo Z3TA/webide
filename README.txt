@@ -475,11 +475,6 @@ To check for Nginx config problems:
 `nginx -T`
 
 
-Preparing for Linux network namespaces
----------------------------------------
-Check the source code of cloudide_install.js under "Setup Linux network namespace bridge" ...
-
-
 
 Installing vnc dependencies
 ---------------------------
@@ -601,7 +596,7 @@ Try running the command inside/outside the chroot:
 `sudo chroot --userspec=ltest1:ltest1 /home/ltest1/ bash`
 
 Also see: http://manpages.ubuntu.com/manpages/bionic/man5/apparmor.d.5.html
-
+          http://manpages.ubuntu.com/manpages/xenial/man5/apparmor.d.5.html
 
 Job for apparmor.service failed because the control process exited with error code
 & Reload failed for AppArmor initialization.

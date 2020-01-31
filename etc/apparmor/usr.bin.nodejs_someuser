@@ -37,6 +37,10 @@
   
   signal receive set=exists peer=/usr/bin/nodejs_%USERNAME%//util,
   
+
+  signal send set=abrt peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=abrt peer=/usr/bin/nodejs_%USERNAME%,
+
   signal send set=hup peer=%HOME%%USERNAME%/usr/bin/node,
   signal send set=hup peer=%HOME%%USERNAME%/bin/bash,
   

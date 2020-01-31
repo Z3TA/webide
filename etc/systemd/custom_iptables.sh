@@ -127,6 +127,9 @@ ip6tables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 
 
+# Package forwarding, needed for Linux network namespace bridges
+iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+
 
 # Prevent sending spam
 iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT

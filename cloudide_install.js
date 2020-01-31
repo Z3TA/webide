@@ -37,22 +37,9 @@ var exec = require("child_process").execSync;
 exec("chmod +x removeuser.js");
 exec("chmod +x adduser.js");
 
-// Setup Linux network namespace bridge
-exec("sysctl net.ipv4.ip_forward=1"); // Enabled package forwarding
 
-exec("ip link add name br0 type bridge");
-exec("ip link set br0 up");
-exec("ip addr add 10.0.0.1/16 brd + dev br0"); // Using 16 
-/*
-	Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
-	we will give each user their uid (decimal) as IP
-	ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
-	
-	Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
-
-If you are not using the firewall script, do this manually:
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
-*/
+// Enabled package forwarding, needed for Linux network namespace bridges
+exec("sysctl net.ipv4.ip_forward=1"); 
 
 
 // ### WireGuard / VPN support

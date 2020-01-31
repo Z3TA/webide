@@ -73,15 +73,60 @@ Step 3: Use device X, fix pain points
 An editor that you can connect to from anywhere
 Dropped your laptop in the ocean? Just get a new one and continue where you left off.
 
-ALWAYS set callback=null after calling back to prevent double callback and also to a call stack to debug the issue
+Always set callback=null after calling back!!! to prevent double callback and so that we also get an error when actually calling it twice, with a nice call stack that will help debug the error.
 
 What I'm working on
 -------------------
 
-I get this twice:
-fillGuestPool: Going to create a new guest with id=1 because username=guest1 was not found in /etc/passwd and home dir don't exist (server.js:447:
+hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
-export DOCKER_HOST=/sock/docker
+What happens if we are in ip netns and the user listens on "localhost", should we map localhost via /etc/hosts to the user netns ip? :)
+
+/etc/hosts
+
+
+Problem: Apparmor profiles only allows w for files *owned* by the user, not files with a group that the user is member of...
+
+
+Apparmor profile for /home/ltest1/bin/bash need to have access to /run/docker.sock wr
+
+it works when I set rw persmission to /home/ltest1/sock/docker, but not when I add the user to the docker group!!?
+
+
+echo "$(</etc/group)"
+
+sudo gpasswd -d ltest1 docker
+sudo usermod -a -G docker ltest1
+
+groups ltest1
+groups
+
+note: user needs to be in the docker group!
+or else docker needs to be run with root!
+
+export DOCKER_HOST=unix:///sock/docker
+protocol unix:// is needed or docker will try to use localhost:2375...
+
+curl --unix-socket /sock/docker http://localhost/events
+
+https://docs.docker.com/engine/api/v1.27/
+
+
+ERROR: Cannot connect to the Docker daemon at tcp://localhost:2375/sock/docker. Is the docker daemon running?
+
+/etc/hosts issue in chroot !?
+sudo chroot /home/ltest1 /bin/ping pizza -> No address associated with hostname
+sudo chroot /home/ltest1 /bin/ping pizzas -> Name or service not known
+
+it did't work because /etc/nsswitch.conf did not exist in chroot!!!!!!!
+
+
+apparmor="DENIED" operation="create" profile="/home/ltest1/bin/bash//scripts" pid=30930 comm="docker" family="inet" sock_type="stream" protocol=0 requested_mask="create" denied_mask="create"
+
+--resolve localhost:2375:127.0.0.1
+
+
+
 
 
 Gave up on rootless docker... Although there are alternatives like udocker and Podman, they might not support all features users want.
@@ -96,6 +141,8 @@ Run the docker deamon inside a VM !?
 docker...
 
 
+regression? when pressing enter in a plain text file (/zpcdata/projects/webide/etc/apparmor/usr.bin.nodejs_someuser) it doesn't auto indent!
+
 
 the automatic spellcheck when clicking on a word is more annoying then useful...
 alternative: something like: "word appears to be spellec correctly: alternative word: "
@@ -106,6 +153,9 @@ Spellcheck plugin need regression tests! (it stopped working and I did not notic
 Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
 
 how to give netns to existing users !?
+Linux netns is lost at reboot!!
+So they need to created when the user logs in!
+
 
 TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
