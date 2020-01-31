@@ -2951,7 +2951,9 @@ function checkMounts(options, checkMountsCallback) {
 				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
 				
 foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", folderMounted); // Docker
+				foldersToMount++;module_mount("/usr/local/bin/docker-compose", homeDir + "usr/local/bin/docker-compose", folderMounted); // Docker
 				foldersToMount++;module_mount("/var/run/docker.sock", homeDir + "sock/docker", folderMounted); // Docker
+				
 				
 				
 				//foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
@@ -4405,7 +4407,7 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		spawnOptions.env.gid = gid;
 		
 		// Assume unix like system
-		spawnOptions.env.PATH = "/usr/bin:/bin:/sbin:/.npm-packages/bin";
+		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:/.npm-packages/bin";
 		
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
 		spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker"; // note: the unix:// protocol is needed, because, while it usesd the socket to connect, without the protocol part it will try to run commands via an tpc port on localhost...

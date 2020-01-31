@@ -56,6 +56,7 @@
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npx-cli.js Px,
 
   # bins without profile (who needs network)
+  %HOME%%USERNAME%/usr/local/bin/docker-compose ix,
   %HOME%%USERNAME%/usr/bin/npm ix,
   %HOME%%USERNAME%/usr/bin/env ix,
   %HOME%%USERNAME%/usr/bin/ssh ix,

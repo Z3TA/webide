@@ -78,6 +78,31 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Skip chroot and netns and instead give each user an unique IP to listen on !?
+(vpn wont work...)
+Docker only available for pro users !?
+
+problem: Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
+
+export DOCKER_OPTS="--net=ltest1"
+
+problem 2: Docker listens on host system IP's, we want it to listen on the user netns!
+
+problem 1: Issues with docker scripts when chrooted as . relative paths will be wrong!
+
+support for docker-compose
+
+
+Also replace http://localhost:43689 with netns IP in terminal output!
+
+
+https://hackernoon.com/move-over-next-js-and-webpack-ba367f07545
+https://hackernoon.com/a-better-way-to-develop-node-js-with-docker-cd29d3a0093
+
+
+testing docker
+
+
 hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
 Docker hardening, user namespaces!?
@@ -90,9 +115,23 @@ todo: cloudide_install.js instructions for Docker
 docker...
 
 
+Tabs don't show up in the editor (but they are in the source) 
+needed for Makefile because Makefile only support tabs!
+
+when client disconnects from server, it has troubles reconnecting...
+tell user to reload (F5) ?!?
+
+when saving as to a file that already exist, in the warning, also have a button for opening that file!
+
+regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
+
 hide function list if there are no functions. Or it will take up extra annoying space and show an extra scrollbar
 
 regression? when pressing enter in a plain text file (/zpcdata/projects/webide/etc/apparmor/usr.bin.nodejs_someuser) it doesn't auto indent!
+
+little annoying when you save a file for the first time and it says "new file",
+remove the "new file" part if it says "new file(.*)"
+also check the clipboard for a file name, then automatically insert it.
 
 
 the automatic spellcheck when clicking on a word is more annoying then useful...

@@ -152,6 +152,7 @@ if(ps) {
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
 	
+	umount(HOME + username + "/bin/ping");
 	
 	umount(HOME + username + "/etc/ssl/certs");
 	
@@ -176,10 +177,16 @@ if(ps) {
 	umount(HOME + username + "/usr/bin/openssl");
 	umount(HOME + username + "/usr/bin/pkg-config");
 	umount(HOME + username + "/usr/bin/curl");
-	umount(HOME + username + "/usr/bin/id");
-	umount(HOME + username + "/usr/bin/newuidmap");
+	//umount(HOME + username + "/usr/bin/id");
+	//umount(HOME + username + "/usr/bin/newuidmap");
 	umount(HOME + username + "/usr/bin/head");
 	umount(HOME + username + "/usr/bin/expr");
+	umount(HOME + username + "/usr/bin/wget");
+	
+	umount(HOME + username + "/usr/bin/docker");
+	umount(HOME + username + "/usr/local/bin/docker-compose");
+	umount(HOME + username + "/sock/docker");
+	
 	
 	umount(HOME + username + "/usr/include");
 	umount(HOME + username + "/usr/lib");

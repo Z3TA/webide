@@ -46,12 +46,20 @@ exec("sysctl net.ipv4.ip_forward=1");
 // Ubuntu 19.04 and earlier:
 // Add the WireGuard repository
 console.log("Installing WireGuard for VPN support...");
-exec("add-apt-repository ppa:wireguard/wireguard");
+exec("add-apt-repository ppa:wireguard/wireguard -y");
 // Ubuntu 17.10 and earlier:
 // Update the list of available packages
 exec("apt update");
 //Install the tools and kernel module:
-exec("apt install wireguard openresolv");
+exec("apt install wireguard openresolv -y");
+
+
+// Docker support
+exec("apt install docker -y");
+
+exec('curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose');
+exec('chmod +x /usr/local/bin/docker-compose');
+
 
 
 var HOSTNAME = getArg(["host", "host", "hostname", "domain"]); // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
