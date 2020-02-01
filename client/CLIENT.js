@@ -265,7 +265,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			
 			if(!CLIENT.connected) {
 				// Connection died before we got an error from the server
-				var error = UTIL.updateError(properCallStackError[id], "ENETDOWN", "Disconnected from server after sending " + req + " command!");
+				var error = UTIL.updateError(properCallStackError[id], "ENETDOWN", "Disconnected from server after sending " + req + " command!/nData sent: " + UTIL.shortString(string));
 				// The message probably reached the server...
 				// The server will buffer the response for a while in case we reconnect!!?
 			}
