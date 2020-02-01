@@ -78,17 +78,70 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+
+
+expose the docker deamon port in the container
+
+this fixes the unreacable port error:
+sudo iptables -I FORWARD 1 -o virbr1 -i netnsbridge -j ACCEPT
+sudo iptables -I FORWARD 1 -i virbr1 -o netnsbridge -j ACCEPT
+
+I need to add a rule before the reject that will accept packages from the 
+
+Reason for blocking:
+-A FORWARD -o virbr0 -j REJECT --reject-with icmp-port-unreachable
+-A FORWARD -i virbr0 -j REJECT --reject-with icmp-port-unreachable
+
+can ping 192.168.121.138 (user netns) from the VM,
+but can't ping 192.168.121.138 (tue VM) from the user netns!
+
+Run docker deamon in a libvirt KVM...!?
+Will it be possible for the Docker in the VM to bind user folders!?
+
+
+mount -t proc none "${R}/proc"
+mount -t sysfs none "${R}/sys"
+
+ip netns exec remounts /sys which causes the cgroup mounts to disappear from /proc/self/mountinfo.
+
+Run a docker deamon for each user!? :)
+Run the docker deamon in the user netns.
+
+
+Find all containers started by an user,
+use socat to proxy the exposed ip:port to the user netns ip
+or instruct the user to do it...!?
+
+sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:172.17.0.2:6565
+
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fcc438c2e021
+
+Why do all docker tutorials insist on  redirecting a public port to a private port !?!?
+The problem with that is that private means localhost on the *host* which is not reachable by our user because he/she is in a netns!
+
+Trying docker tutorial: https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
+
+
+Start a proxy in the user netns that listens to the netns ip, and make 
+requests to the other Docker netns ip !?
+
+Listen for new netns, then move the host end of the veth to the user netns !?
+still woulnt be able to listen on the netns ip
+
+
 Skip chroot and netns and instead give each user an unique IP to listen on !?
 (vpn wont work...)
 Docker only available for pro users !?
 
-problem: Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
+
 
 export DOCKER_OPTS="--net=ltest1"
 
-problem 2: Docker listens on host system IP's, we want it to listen on the user netns!
+problem: Docker listens on host system IP's, we want it to listen on the user netns!
+Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
 
-problem 1: Issues with docker scripts when chrooted as . relative paths will be wrong!
+problem: Issues with docker scripts when chrooted as . relative paths will be wrong!
+
 
 support for docker-compose
 
@@ -114,6 +167,12 @@ todo: cloudide_install.js instructions for Docker
 
 docker...
 
+terminal sessions should be saved so you can continue where you left off,
+for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
+or switching to another computer.
+
+regression: When connecting it says I'm in collaboration mode with a PC that is shut off... 
+You are in collaboration mode with Safari(192.168.0.158)
 
 Tabs don't show up in the editor (but they are in the source) 
 needed for Makefile because Makefile only support tabs!
