@@ -551,7 +551,7 @@ reconnectTimeoutTime += 10000;
 					throw noCallbackList[json.id];
 				}
 				else if(gotResponseForTimedOutRequest.hasOwnProperty(json.id)) {
-					throw gotResponseForTimedOutRequest[id];
+					throw gotResponseForTimedOutRequest[json.id];
 				}
 				else {
 					delete properCallStackError[json.id];
