@@ -78,7 +78,35 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+VM limit seem to be 8 VM's per CPU core,
+so we should only run the docker VM if the user activates it!
 
+For the docker VM:
+sudo apt install docker.io
+
+/etc/systemd/system/docker.service.d/startup_options.conf
+# /etc/systemd/system/docker.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
+(needs full IP or it will listen on ipv6 by default)
+sudo systemctl daemon-reload
+sudo systemctl start docker
+sudo systemctl enable docker
+
+
+When docker is activated via the discovery bar, 
+the user's docker deamon VM starts...
+iptables are updated so that the user (from the user netns) can access his/her docker deamon.
+The user might have to use socat to expose his/her docker deamon VM to https://####.user.webide.se
+
+
+have the ip of the docker VM in /etc/hosts eg. "docker   192.168.121.138" so you can curl docker:49160
+and also run socat: sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
+
+export DOCKER_HOST=tcp://192.168.121.138:2375
+
+https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd
 
 expose the docker deamon port in the container
 

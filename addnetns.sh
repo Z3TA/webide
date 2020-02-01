@@ -10,6 +10,7 @@
 # sudo ip netns exec username ping google.com
 #
 # For this to work we first need a netnsbridge bridge:
+# (this is automatically done by server.js)
 # ip link add name netnsbridge type bridge
 # ip link set netnsbridge up 
 # ip addr add 10.0.0.1/16 brd + dev netnsbridge
