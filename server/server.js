@@ -90,7 +90,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
+var CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 
 var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
 
@@ -894,12 +894,12 @@ function main() {
 		}
 	}
 	
-	if(!NO_NETNS && process.platform=="linux") {
+	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
 		module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
 			if(error) {
 				module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
-					if(error) throw err;
+					if(error) throw error;
 					if(stdout) log("netnsbridge: stdout=" + stdout, NOTICE);
 					if(stderr) log("netnsbridge: stderr=" + stderr, WARN);
 					/*
@@ -2672,7 +2672,7 @@ function checkMounts(options, checkMountsCallback) {
 	if(gid == undefined) throw new Error("gid=" + gid);
 	if(checkMountsCallback == undefined) throw new Error("checkMountsCallback=" + checkMountsCallback);
 	
-	log("checkMounts: username=" + username, DEBUG);
+	log("checkMounts: username=" + username + " CHROOT=" + CHROOT, DEBUG);
 	
 	// Make sure everything is mounted etc ...
 	
