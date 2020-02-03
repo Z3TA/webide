@@ -62,6 +62,10 @@ var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
 console.log("================================== user_worker.js ==================================");
 
+var username = process.env.username;
+var uid = parseInt(process.env.uid);
+var gid = parseInt(process.env.gid);
+
 if(USE_CHROOT) {
 	/* 
 		Change root ...
@@ -77,9 +81,7 @@ if(USE_CHROOT) {
 	// The posix module is not optional if you want to chroot.
 	// Use the -nochroot flag to run the server without chroot!
 	
-	var username = process.env.username;
-	var uid = parseInt(process.env.uid);
-	var gid = parseInt(process.env.gid);
+	
 	
 	if(HOME=="/") throw new Error("Unncessasary to chroot into /");
 	
@@ -138,8 +140,6 @@ if(USE_CHROOT) {
 		}
 	}
 	
-	
-	
 	log("seteuid to " + uid, DEBUG);
 	//posix.seteuid(uid); // Wrapper for process.setuid
 	process.setuid(uid);
@@ -173,27 +173,27 @@ if(USE_CHROOT) {
 			PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
 			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
 			dev: true // So that scripts know we're in "development"
-		},
+		}
 	};
 }
 else {
 	
+	if(gid) process.setgid(gid);
+	if(uid) process.setuid(uid);
 	
 	var npmOptions = {
-		env: process.env
+		env: {
+			HOME: HOME,
+			PATH: "/usr/bin:/bin:/" + HOME + "/.npm-packages/bin", // npm want node to be inside PATH
+			NPM_CONFIG_PREFIX: HOME + "/.npm-packages", // Help npm figure out where to put global packages
+			dev: true // So that scripts know we're in "development"
+		}
 	}
 }
-
-if(parseInt(process.env.uid)) {
-	
-}
-
 
 var isRoot = process.getuid && process.getuid() === 0;
 //if(isRoot && !USE_CHROOT) log("It's strongly adviced not to run worker process as superuser unless chroot flag is used!", WARN)
 if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
-
-
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
 
@@ -1667,6 +1667,9 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		if(rootFolder && USE_CHROOT) {
 			nodeScriptOptions.env.PORT = "/sock/" + UTIL.getFolderName(rootFolder);
 		}
+		else {
+			nodeScriptOptions.env.PORT = HOME + "/sock/" + UTIL.getFolderName(rootFolder);
+		}
 		
 		start();
 		
@@ -1677,12 +1680,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
-			if(USE_CHROOT) {
+			var watchDir = UTIL.trailingSlash(USE_CHROOT ? '/sock/' : HOME + '/sock/');
+			
 				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
 				var fs = require("fs");
-				var sockWatcher = fs.watch('/sock/', sockEvent);
+			var sockWatcher = fs.watch(watchDir, sockEvent);
 				var createdSockets = [];
-			}
+			
 			
 			nodeScript = child_process.fork(scriptFilePath, nodeScriptArgs, nodeScriptOptions);
 			// The node worker will chroot to user's home dir, setegid and seteuid ????? HUH ?
@@ -1706,7 +1710,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				console.log("sockEvent: eventType=" + eventType + " filename=" + filename);
 				if(!filename) console.warn("sockEvent: eventType=" + eventType + " filename=" + filename);
 				else {
-createdSockets.push("/sock/" + filename);
+					createdSockets.push(watchDir + filename);
 					// Always use http: just in case the SSL registration failed (even though it will result in an additional roundtrip)
 					user.send({nodejsUrl: {url: "http://" + filename + "." + user.name + "." + TLD, scriptName: user.toVirtualPath(filePath)}});
 					

@@ -90,7 +90,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
+var CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
 var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
 
@@ -534,7 +534,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 			groups[i] = groups[i].split(":");
 			gUsers = groups[i][3];
 			
-			log(JSON.stringify(groups[i]), DEBUG);
+			//log(JSON.stringify(groups[i]), DEBUG);
 			
 			if(gUsers && gUsers.indexOf(username) != -1) {
 				gName = groups[i][0];
@@ -581,7 +581,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				}
 			}
 			
-			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd NO_CHROOT=" + NO_CHROOT, INFO);
+			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd CHROOT=" + CHROOT, INFO);
 			
 			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
@@ -882,7 +882,7 @@ function main() {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
 	
-	if(!NO_CHROOT) {
+	if(CHROOT) {
 		// Make sure we can load the posix module before continuing with chroot
 		try {
 			require("posix");
@@ -892,40 +892,39 @@ function main() {
 			log("posix module needed for chroot! Try with -nochroot flag!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
 			process.exit(1);
 		}
-		
-		if(!NO_NETNS && process.platform=="linux") {
-			// Make sure we have a bridge setup for Linux network namespaces
-			module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
-				if(error) {
-					module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
-						if(error) throw err;
-						if(stdout) log("netnsbridge: stdout=" + stdout, NOTICE);
-						if(stderr) log("netnsbridge: stderr=" + stderr, WARN);
-						/*
-							Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
-							we will give each user their uid (decimal) as IP
-							ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
-							
-							Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
-							
-							If you are not using the firewall script, do this manually:
-							sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
-						*/
-						
-					});
-				}
-			});
-		}
-		
 	}
 	
-	if(info.uid > 0 && !USERNAME && !NO_CHROOT) {
+	if(!NO_NETNS && process.platform=="linux") {
+		// Make sure we have a bridge setup for Linux network namespaces
+		module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
+			if(error) {
+				module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
+					if(error) throw err;
+					if(stdout) log("netnsbridge: stdout=" + stdout, NOTICE);
+					if(stderr) log("netnsbridge: stderr=" + stderr, WARN);
+					/*
+						Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
+						we will give each user their uid (decimal) as IP
+						ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
+						
+						Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
+						
+						If you are not using the firewall script, do this manually:
+						sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+					*/
+					
+				});
+			}
+		});
+	}
+	
+	if(info.uid > 0 && !USERNAME && CHROOT) {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
 		log(info);
 		process.exit();
 	}
 	
-	if(NO_CHROOT && !USERNAME && CURRENT_USER) {
+	if(info.uid > 0 && !USERNAME && CURRENT_USER) {
 		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".webide/", "password");
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {
 			if(err && err.code == "ENOENT") {
@@ -964,7 +963,7 @@ function main() {
 		
 		mysqlConnect();
 		
-		if(!USERNAME && !NO_CHROOT && !DEBUG_CHROOT && ALLOW_GUESTS) {
+		if(!USERNAME && !DEBUG_CHROOT && ALLOW_GUESTS) {
 			
 			module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 				if(err) {
@@ -1040,7 +1039,7 @@ function main() {
 		
 		
 		if(HTTP_IP == "127.0.0.1") {
-			if(NO_CHROOT && USERNAME ) {
+			if(!CHROOT && USERNAME ) {
 				openStdinChannel();
 			}
 			
@@ -1924,7 +1923,7 @@ return false;
 						if(USERNAME == username && PASSWORD == password) idSuccess();
 						else idFail("Wong username or password! (Username specified in server arguments)");
 					}
-					else if(username == "guest" && !NO_CHROOT && ALLOW_GUESTS) {
+					else if(username == "guest" && ALLOW_GUESTS) {
 						// ### Login as guest
 						// Assign a user from the guest pool
 						if(GUEST_POOL.length == 0) {
@@ -2047,6 +2046,8 @@ throw err;
 					
 					function idSuccess(alreadyCheckedMounts) {
 						
+						log("idSuccess: " + username, DEBUG);
+						
 						var rootPath; // The path to chroot into
 						var uid, gid; // System user-id and group-id
 						var homeDir; // User's home dir
@@ -2055,7 +2056,7 @@ throw err;
 						
 						userConnectionName = username;
 						
-						if(USERNAME && NO_CHROOT) {
+						if(USERNAME && !CHROOT) {
 							// Running as standalone desktop app
 							homeDir = process.env.HOME || process.env.USERPROFILE;
 							if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
@@ -2064,6 +2065,7 @@ throw err;
 						}
 						else {
 							// Get home, uid and gid (and also the groups the user belongs to)
+							log("readEtcPasswd... username=" + username, DEBUG);
 							readEtcPasswd(username, function(err, passwd) {
 								if(err) {
 									if(process.platform === "win32") {
@@ -2135,9 +2137,9 @@ throw err;
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
 							// Tell the worker process which user
-							var userInfo = {name: userConnectionName, rootPath: (!NO_CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
+							var userInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
-							log("User userConnectionName=" + userConnectionName + " logged in! NO_CHROOT=" + NO_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
+							log("User userConnectionName=" + userConnectionName + " logged in! CHROOT=" + CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
 							
 							userWorker.send({identify: userInfo});
 							userWorker.on("message", messageFromWorker);
@@ -2166,10 +2168,10 @@ throw err;
 								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
 								editorVersion: EDITOR_VERSION,
 								platform: process.platform,
-								homeDir: (!NO_CHROOT || VIRTUAL_ROOT) ? "/" : homeDir
+								homeDir: (CHROOT || VIRTUAL_ROOT) ? "/" : homeDir
 							};
 							
-							if(NO_CHROOT) {
+							if(CHROOT) {
 								userInfo.installDirectory = __dirname.replace(/server$/, "");
 							}
 							
@@ -2312,9 +2314,9 @@ var loginCounter = 0;
 										
 										var folder = req.createHttpEndpoint.folder;
 										
-										if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
+										if(CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 										
-										console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+										console.log("createHttpEndpoint: CHROOT=" + CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
 										
 										createHttpEndpoint(userConnectionName, folder, function(err, url) {
 											if(err) workerResp(err.message);
@@ -2325,7 +2327,7 @@ var loginCounter = 0;
 										
 										var folder = req.removeHttpEndpoint.folder;
 										
-										if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
+										if(CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 										
 										removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
 											//if(err) throw err;
@@ -2670,180 +2672,81 @@ function checkMounts(options, checkMountsCallback) {
 	if(gid == undefined) throw new Error("gid=" + gid);
 	if(checkMountsCallback == undefined) throw new Error("checkMountsCallback=" + checkMountsCallback);
 	
+	log("checkMounts: username=" + username, DEBUG);
+	
 	// Make sure everything is mounted etc ...
 	
-	// When a user have been moved to another server, the user id will be different.
-	// So we have to reset the user permissions!
-	// www-data user id might be the same though, depending on distro
-	
-	if(NO_CHROOT) {
-		console.log("Not checking mounts because -nochroot option in server parameters");
-		return checkMountsCallback(null);
-	}
 	
 	//console.log("Checking mounts for username=" + username + " ...");
 	console.time("check " + username + " mounts");
 	
-	var apparmorProfiles = [
-		"../etc/apparmor/usr.bin.nodejs_someuser",
-		"../etc/apparmor/home.someuser.usr.bin.node",
-		"../etc/apparmor/home.someuser.usr.bin.python",
-		"../etc/apparmor/home.someuser.usr.bin.hg",
-		"../etc/apparmor/home.someuser.usr.bin.git",
-		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
-		"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npx-cli.js",
-		"../etc/apparmor/home.someuser.bin.bash"
-	];
 	
 	var nginxProfileOK = false;
-	var foldersToMount = 3;
+	var foldersToMount = 0;
 	var foldersMounted = 0;
-	var apparmorProfilesToCreate = apparmorProfiles.length;
+	var apparmorProfilesToCreate = 0;
 	var reloadApparmor = false;
 	var reloadedApparmor = false;
 	var checkMountsReady = false;
 	var sslCertChecked = false;
 	var hgrccacertsUptodate = true;
-	var passwdCreated = false;
-	var subuidCreated = false;
-	var subgidCreated = false;
+	var passwdCreated = true;
+	var subuidCreated = true;
+	var subgidCreated = true;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
 	var createdNetworkNamespaces = (process.platform != "linux");
 	
+	// When a user have been moved to another server, the user id will be different.
+	// So we have to reset the user permissions!
+	// www-data user id might be the same though, depending on distro
+	// this means USER NAMES NEED TO BE UNIQUE!
 	checkUserRights(username, function checkedUserRights(err) {
 		if(err) return checkMountsError(err);
 		
 		//console.log("User rights OK for username=" + username);
 		
-		if(!createdNetworkNamespaces) {
-			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
-				//if(error) log("addnetns error: " + error.message, WARN);
-				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
-				
-				if(stdout) log("addnetns stdout: " + stdout, INFO);
-				if(stderr) log("addnetns stderr: " + stderr, WARN);
-				
-				if(!error) {
-					// No error means the network namespace was created
-					var matchIP = stdout.match(/IP=(.*)/);
-					if(!matchIP) throw new Error("Unable to find IP in stdout=" + stdout);
-					var IP = matchIP[1];
-					// When user launches for example a node.js web server listening on "localhost"
-					// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
-					module_fs.writeFile(UTIL.joinPaths(HOME_DIR, username, "etc/hosts"), IP + "\tlocalhost", function (err) {
-						if (err) throw err;
-					});
-					// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
-				}
-				
-				createdNetworkNamespaces = true;
-				checkMountsReadyMaybe();
-			});
-		}
-		
-		
-		/*
-			// Check if cacerts need to be updated
-			var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
-			var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
-			module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
-			if(err) return checkMountsError(err);
-			if(checkMountsAbort) return;
-			module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
-			if(err) return checkMountsError(err);
-			console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
-			console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
-			process.exit();
-			if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
-			// The cacerts.rc file is up to date or have been modified by the user
-			hgrccacertsUptodate = true;
-			checkMountsReadyMaybe();
-			}
-			else {
-			module_copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
-			if(err) return checkMountsError(err);
-			hgrccacertsUptodate = true;
-			checkMountsReadyMaybe();
-			});
-			}
-			});
-			});
-		*/
-		
-		
-		/*
-			Make sure mounts exist
-			----------------------
-			Mount instead of copying to save hdd space
-			
-			Problem: Racing to create folders
-			Solution: Create folder before mounting
-			
-			Each mount takes ca 150ms, so only mount bare minimum for performance!
-			(it's better performance wise to mount a whole folder then many separate files in the same folder)
-			
-			Don't forget to update removeuser.js !
-		*/
-		
 		console.time("Mount " + username + " files and folders");
 		
-		// ### MySQL
-		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
-			if(err) {
-				
-				if(err.code == "ENOENT") {
-					log("MySQL socket does not exist: " + MYSQL_PORT, WARN);
-				}
-				else {
-					// Sometimes we get code=32 mount failure...
-					log("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code, WARN);
-				}
-				
-				console.error(err);
-				mysqlCheck = true;
-				checkMountsReadyMaybe();
-				return;
-			}
+		if(CHROOT) {
 			
-			// Make sure a mysql user exist
-			mysqlConnection.query("SELECT user FROM user WHERE user = ? AND host = 'localhost'", [username], function(err, rows, fields) {
-				if(err) throw err;
+			/*
+				Make sure mounts exist
+				----------------------
+				Mount instead of copying to save hdd space
 				
-				if(rows.length == 0) {
-					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
-						if(err) throw err;
-						
-						mountMysqlClient();
-					});
-				}
-				else mountMysqlClient();
-			});
+				Problem: Racing to create folders
+				Solution: Create folder before mounting
+				
+				Each mount takes ca 150ms, so only mount bare minimum for performance!
+				(it's better performance wise to mount a whole folder then many separate files in the same folder)
+				
+				Don't forget to update removeuser.js !
+			*/
 			
-			function mountMysqlClient() {
-				if(DEBUG_CHROOT || MOUNT_BINS) {
-					// /usr/bin will be mounted anyway
-					mysqlCheck = true;
-					checkMountsReadyMaybe();
-					return;
-				}
-				else  {
-					module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
-						if(err) throw err;
-						
-						mysqlCheck = true;
-						checkMountsReadyMaybe();
-						return;
-					});
-				}
-			}
-		});
-		
-		// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
-		// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
-		
-		// ALSO UPDATE removeuser.js !!!
-		
+			// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
+			// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
+			
+			// ALSO UPDATE removeuser.js !!!
+			
+			var apparmorProfiles = [
+				"../etc/apparmor/usr.bin.nodejs_someuser",
+				"../etc/apparmor/home.someuser.usr.bin.node",
+				"../etc/apparmor/home.someuser.usr.bin.python",
+				"../etc/apparmor/home.someuser.usr.bin.hg",
+				"../etc/apparmor/home.someuser.usr.bin.git",
+				"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
+				"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npx-cli.js",
+				"../etc/apparmor/home.someuser.bin.bash"
+			];
+			
+			var apparmorProfilesToCreate = apparmorProfiles.length;
+			var foldersToMount = 3;
+			
+			var passwdCreated = false;
+			var subuidCreated = false;
+			var subgidCreated = false;
+			
 		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
 		
@@ -3091,8 +2994,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		
 		// ALSO UPDATE removeuser.js !!!
 		
-		
-		
+			
 		// Create apparmor profiles unless they already exist
 		// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
 		console.time("Creating " + username + " apparmor profiles");
@@ -3167,6 +3069,117 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			else subgidCreated = true;
 		*/
 		subgidCreated = true;
+
+
+		} // end if(CHROOT)
+		
+		
+		if(!createdNetworkNamespaces) {
+			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
+				//if(error) log("addnetns error: " + error.message, WARN);
+				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
+				
+				if(stdout) log("addnetns stdout: " + stdout, INFO);
+				if(stderr) log("addnetns stderr: " + stderr, WARN);
+				
+				if(!error) {
+					// No error means the network namespace was created
+					var matchIP = stdout.match(/IP=(.*)/);
+					if(!matchIP) throw new Error("Unable to find IP in stdout=" + stdout);
+					var IP = matchIP[1];
+					// When user launches for example a node.js web server listening on "localhost"
+					// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
+					module_fs.writeFile(UTIL.joinPaths(HOME_DIR, username, "etc/hosts"), IP + "\tlocalhost", function (err) {
+						if (err) throw err;
+					});
+					// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
+				}
+				
+				createdNetworkNamespaces = true;
+				checkMountsReadyMaybe();
+			});
+		}
+		
+		
+		/*
+			// Check if cacerts need to be updated
+			var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
+			var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
+			module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
+			if(err) return checkMountsError(err);
+			if(checkMountsAbort) return;
+			module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
+			if(err) return checkMountsError(err);
+			console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
+			console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
+			process.exit();
+			if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
+			// The cacerts.rc file is up to date or have been modified by the user
+			hgrccacertsUptodate = true;
+			checkMountsReadyMaybe();
+			}
+			else {
+			module_copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
+			if(err) return checkMountsError(err);
+			hgrccacertsUptodate = true;
+			checkMountsReadyMaybe();
+			});
+			}
+			});
+			});
+		*/
+		
+		
+		// ### MySQL
+		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
+			if(err) {
+				
+				if(err.code == "ENOENT") {
+					log("MySQL socket does not exist: " + MYSQL_PORT, WARN);
+				}
+				else {
+					// Sometimes we get code=32 mount failure...
+					log("Problems mounting MySQL socket: " + MYSQL_PORT + " code=" + err.code, WARN);
+				}
+				
+				console.error(err);
+				mysqlCheck = true;
+				checkMountsReadyMaybe();
+				return;
+			}
+			
+			// Make sure a mysql user exist
+			mysqlConnection.query("SELECT user FROM user WHERE user = ? AND host = 'localhost'", [username], function(err, rows, fields) {
+				if(err) throw err;
+				
+				if(rows.length == 0) {
+					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
+						if(err) throw err;
+						
+						mountMysqlClient();
+					});
+				}
+				else mountMysqlClient();
+			});
+			
+			function mountMysqlClient() {
+				if(DEBUG_CHROOT || MOUNT_BINS) {
+					// /usr/bin will be mounted anyway
+					mysqlCheck = true;
+					checkMountsReadyMaybe();
+					return;
+				}
+				else  {
+					module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
+						if(err) throw err;
+						
+						mysqlCheck = true;
+						checkMountsReadyMaybe();
+						return;
+					});
+				}
+			}
+		});
 		
 		// Make sure nginx profile exist
 		var nginxSitesAvailable = "/etc/nginx/sites-available/"
@@ -3177,6 +3190,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 				mountErrorMessages.push(err);
 				nginxProfileOK = true;
 				sslCertChecked = true;
+				checkMountsReadyMaybe();
 				return;
 			}
 			console.time("Check " + username + " nginx profile");
@@ -3252,6 +3266,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 				
 			});
 		});
+		
 	}); // checked user rights
 	
 	function checkUserRights(username, callback) {
@@ -3270,10 +3285,10 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			
 			
 			if(stats.uid != uid || stats.gid != gid) {
+
 				// Reset the fs user rights
 				// Don't chown all dirs though, chowning the mounted files could be disastrous!'
-				
-				// www user needs to have write access to /sock and read access to /wwwpub
+// www user needs to have write access to /sock and read access to /wwwpub
 				// make sure the right www user id
 				getGroupId("www-data", function(err, wwwgid) {
 					if(err) throw err;
@@ -3286,7 +3301,9 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 						}
 						
 					});
+
 					
+
 					toChown++;
 					module_fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
 						toChown--;
@@ -3422,9 +3439,10 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
-		//console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
+		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
-		if(createdNetworkNamespaces && nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		if(createdNetworkNamespaces && nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated 
+		&& ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -3442,6 +3460,20 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 				checkMountsCallback(null);
 			}
 			else throw new Error("checkMounts already callced checkMountsCallback!");
+			
+		}
+		else {
+			
+			if(!createdNetworkNamespaces) log("Waiting for network namespace to be created...", DEBUG);
+			if(!nginxProfileOK) log("Waiting for Nginx profiles to be created...", DEBUG);
+			if(foldersToMount != foldersMounted) log("Waiting for foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " ...", DEBUG);
+			if(apparmorProfilesToCreate != 0) log("Waiting for apparmorProfilesToCreate=" + apparmorProfilesToCreate, DEBUG)
+			if(!passwdCreated) log("Waiting for /etc/passwd to be created...", DEBUG);
+			if(!subuidCreated)  log("Waiting for /etc/subuid to be created...", DEBUG);
+			if(!subgidCreated)  log("Waiting for /etc/subgid to be created...", DEBUG);
+			if((reloadApparmor && !reloadedApparmor) || reloadApparmor ) log("Waiting for apparmor to be reloaded...", DEBUG);
+			if((!sslCertChecked && options.waitForSSL)) log("Waiting for SSL certificates to be created...", DEBUG);
+			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
 			
 		}
 	}
@@ -4373,14 +4405,14 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
-	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (!NO_CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
+	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
 	var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
 	// Using spawn instead of fork to be able to use Linux network namespaces
 	
 	spawnOptions.env = {
 		username: username,
-		HOME: (NO_CHROOT || USERNAME) ? homeDir : "/",
+		HOME: (!CHROOT || USERNAME) ? homeDir : "/",
 		USER: username,
 		LOGNAME: username,
 		USER_NAME: username
@@ -4396,7 +4428,9 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
-	if(NO_CHROOT) {
+	// Need to start the worker as root if network namespaces are used!
+	if(!CHROOT && NO_NETNS) {
+		log("Spawning with uid=" + uid + " and gid=" + gid + " ...", DEBUG);
 		if(uid != undefined) spawnOptions.uid = parseInt(uid);
 		if(gid != undefined) spawnOptions.gid = parseInt(gid);
 		
@@ -4407,12 +4441,18 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		spawnOptions.env.gid = gid;
 		
 		// Assume unix like system
+		if(CHROOT) {
 		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:/.npm-packages/bin";
-		
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
-		spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker"; // note: the unix:// protocol is needed, because, while it usesd the socket to connect, without the protocol part it will try to run commands via an tpc port on localhost...
+		}
+		else {
+			spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin";
+			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + "/.npm-packages";
+		}
 		
-		if(uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
+//spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker"; // note: the unix:// protocol is needed, because, while it usesd the socket to connect, without the protocol part it will try to run commands via an tpc port on localhost...
+		
+		if(CHROOT && uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
 	if(uid == undefined || uid == -1) {
@@ -4443,7 +4483,7 @@ spawnOptions.env.HOST = netnsIP;
 		spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 	}
 	
-	log("Spawning user worker process as username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (!NO_CHROOT) + " groups=" + JSON.stringify(groups), INFO);
+	log("Spawning user worker process... username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (CHROOT) + " groups=" + JSON.stringify(groups), INFO);
 	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)

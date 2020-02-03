@@ -78,6 +78,60 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Reasons for using chroot ?
+Can set specific Apparmor profiles...
+
+
+Holy shit! I got "local" mounts with docker to work by mouting the user dir into the docker VM!
+Only problem is that users are chrooted! So relative directories wont work! eg they need to type /home/username instead of just .
+
+
+sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
+
+(need to have execute permission on the folder to chroot into it!)
+
+sudo chmod 771 /home/ltest1
+sudo usermod -a -G ltest1 libvirt-qemu
+sudo ls -lad /home/ltest1
+
+Must shutdown -h in order to add a new share!!!
+
+
+sudo mount ltest1 /home/ltest1 -t 9p -o trans=virtio
+
+"special device testlabel does not exist"
+
+sudo service kmod start
+
+sudo nano /etc/modules
+loop
+virtio
+9p
+9pnet
+9pnet_virtio
+
+<devices ...>
+    <filesystem type='mount' accessmode='passthrough'>
+      <source dir='/home/ltest1'/>
+      <target dir='home'/>
+    </filesystem>
+  </devices>
+
+
+
+
+
+
+docker-compose -f docker-compose.builder.yml run --rm install
+
+Share user home dir in docker VM ? :)
+
+
+export DOCKER_HOST=tcp://192.168.122.241:2376
+
+sudo virsh define docker.xml
+zfs create -V 10G zpcdata/docker
+
 VM limit seem to be 8 VM's per CPU core,
 so we should only run the docker VM if the user activates it!
 
@@ -89,7 +143,7 @@ sudo apt install docker.io
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
-(needs full IP or it will listen on ipv6 by default)
+
 sudo systemctl daemon-reload
 sudo systemctl start docker
 sudo systemctl enable docker
@@ -104,15 +158,22 @@ The user might have to use socat to expose his/her docker deamon VM to https://#
 have the ip of the docker VM in /etc/hosts eg. "docker   192.168.121.138" so you can curl docker:49160
 and also run socat: sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
 
-export DOCKER_HOST=tcp://192.168.121.138:2375
+export DOCKER_HOST=tcp://192.168.121.138:2376
 
 https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd
 
 expose the docker deamon port in the container
 
 this fixes the unreacable port error:
-sudo iptables -I FORWARD 1 -o virbr1 -i netnsbridge -j ACCEPT
-sudo iptables -I FORWARD 1 -i virbr1 -o netnsbridge -j ACCEPT
+should be more specific, use user netns ip and docker server ip
+sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.241 -j ACCEPT
+sudo iptables -I FORWARD 1 -s 192.168.122.241 -d 10.0.3.235 -j ACCEPT
+doesn't work :(
+
+also block docker server from accessing other user's netns!?
+
+sudo iptables -I FORWARD 1 -o virbr0 -i netnsbridge -j ACCEPT
+sudo iptables -I FORWARD 1 -i virbr0 -o netnsbridge -j ACCEPT
 
 I need to add a rule before the reject that will accept packages from the 
 
@@ -275,6 +336,11 @@ Support react (native) development!
 
 Docker support!
 
+
+
+
+Cant type open to open a file from the command line using ~ for home dir, when running on local desktop.
+hmm, don't seem to be able to open files on a samba share!? ~/userfiles/dokument/anteckningar/linux.txt
 
 regression: Doesn't highlight parentheses when you are on EOL!
 
