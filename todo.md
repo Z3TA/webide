@@ -78,6 +78,8 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Can I create unique /etc/hosts file for each user !? eg. mounting it for only the user...!?
+
 Reasons for using chroot ?
 Can set specific Apparmor profiles...
 
