@@ -79,6 +79,8 @@ What I'm working on
 -------------------
 
 Can I create unique /etc/hosts file for each user !? eg. mounting it for only the user...!?
+yes, put it in /etc/netns/ns1/whatever and ip netns exec will do it
+
 
 Reasons for using chroot ?
 Can set specific Apparmor profiles...
