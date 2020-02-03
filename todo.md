@@ -78,6 +78,12 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+trying to make dns lookups to work when in netns..
+
+cant scroll the function list on macbook using the pad
+
+text on the right side dissappears after 4 seconds on macbook...
+
 Can I create unique /etc/hosts file for each user !? eg. mounting it for only the user...!?
 yes, put it in /etc/netns/ns1/whatever and ip netns exec will do it
 

@@ -2696,6 +2696,8 @@ function checkMounts(options, checkMountsCallback) {
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
 	var createdNetworkNamespaces = (process.platform != "linux");
+	var filesToWrite = 0;
+	var filesWritten = 0;
 	
 	// When a user have been moved to another server, the user id will be different.
 	// So we have to reset the user permissions!
@@ -3075,6 +3077,41 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		
 		
 		if(!createdNetworkNamespaces) {
+			
+			var IP = UTIL.int2ip(167772162 + uid);
+			
+			// When user launches for example a node.js web server listening on "localhost"
+			// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
+			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "hosts"), IP + "\tlocalhost", function (err) {
+				if (err) throw err;
+				filesWritten++; checkMountsReadyMaybe();
+			});
+			// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
+			/*
+				filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "nssswitch.conf"),
+				"", function (err) {
+				if (err) throw err;
+				filesWritten++; checkMountsReadyMaybe();
+				});
+			*/
+			
+			
+			
+			// Make it harder to see other users on the system
+			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "passwd"), username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash", function (err) {
+				if (err) throw err;
+				filesWritten++; checkMountsReadyMaybe();
+			});
+			
+			// todo: Also hide other stuff like group and subuid
+			
+			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "resolv.conf"), "nameserver 8.8.8.8", function (err) {
+				if (err) throw err;
+				filesWritten++; checkMountsReadyMaybe();
+			});
+			
+			
+			
 			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
 				//if(error) log("addnetns error: " + error.message, WARN);
 				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
@@ -3086,18 +3123,17 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 					// No error means the network namespace was created
 					var matchIP = stdout.match(/IP=(.*)/);
 					if(!matchIP) throw new Error("Unable to find IP in stdout=" + stdout);
-					var IP = matchIP[1];
-					// When user launches for example a node.js web server listening on "localhost"
-					// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
-					module_fs.writeFile(UTIL.joinPaths(HOME_DIR, username, "etc/hosts"), IP + "\tlocalhost", function (err) {
-						if (err) throw err;
-					});
-					// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
+					var parsedIP = matchIP[1];
+					if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedID + " IP=" + IP + "  ");
+					
 				}
 				
 				createdNetworkNamespaces = true;
 				checkMountsReadyMaybe();
 			});
+			
+			
+			
 		}
 		
 		
@@ -3442,7 +3478,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
 		
 		if(createdNetworkNamespaces && nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated 
-		&& ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck) {
+		&& ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -3474,6 +3510,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			if((reloadApparmor && !reloadedApparmor) || reloadApparmor ) log("Waiting for apparmor to be reloaded...", DEBUG);
 			if((!sslCertChecked && options.waitForSSL)) log("Waiting for SSL certificates to be created...", DEBUG);
 			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
+			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ");
 			
 		}
 	}
