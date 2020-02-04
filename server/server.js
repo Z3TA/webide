@@ -2533,6 +2533,9 @@ var loginCounter = 0;
 									else if(req.vpn) {
 										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
 									}
+									else if(req.docker) {
+										dockerDaemon(userConnectionName, homeDir, uid, req.docker, workerResp);
+									}
 									
 									
 									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
@@ -2675,6 +2678,8 @@ function checkMounts(options, checkMountsCallback) {
 		(to make it easy to move users between servers)
 	*/
 	
+	if(process.platform != "linux") throw new Error("checkMounts should only run in Linux!");
+	
 	var username = options.username;
 	var homeDir = options.homeDir;
 	var uid = options.uid;
@@ -2716,6 +2721,7 @@ function checkMounts(options, checkMountsCallback) {
 	var createdNetworkNamespaces = (process.platform != "linux");
 	var filesToWrite = 0;
 	var filesWritten = 0;
+	
 	
 	// When a user have been moved to another server, the user id will be different.
 	// So we have to reset the user permissions!
@@ -3092,6 +3098,9 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 
 
 		} // end if(CHROOT)
+		
+		
+		
 		
 		
 		if(!createdNetworkNamespaces) {
@@ -3584,7 +3593,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			if((reloadApparmor && !reloadedApparmor) || reloadApparmor ) log("Waiting for apparmor to be reloaded...", DEBUG);
 			if((!sslCertChecked && options.waitForSSL)) log("Waiting for SSL certificates to be created...", DEBUG);
 			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
-			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ");
+			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
 			
 		}
 	}
@@ -4582,7 +4591,7 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		var command = "/sbin/ip";
 		//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
 		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
-var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 spawnOptions.env.HOST = netnsIP;
 		
 		spawnOptions.shell = EXEC_OPTIONS.shell;
@@ -6232,6 +6241,219 @@ status = status + " to " + matchEndpoint[1];
 	
 }
 
+
+function dockerDaemon(username, homeDir, uid, options, callback) {
+	
+	var libvirtAddedToGroup = false;
+	var abort = false;
+	var dockerSshPubKey;
+	
+	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
+	module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
+		if(err) return error("libvirt not installed on this server");
+		
+		module_child_process.exec("grep -q " + username + ":.*libvirt-qemu /etc/group", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) {
+				log("Adding libvirt-qemu to " + username + " group...", INFO);
+				module_child_process.exec("usermod -a -G " + username + " libvirt-qemu", EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					libvirtAddedToGroup = true;
+				});
+			}
+			else {
+				log("libvirt-qemu already member of " + username + "!?", DEBUG);
+				libvirtAddedToGroup = true;
+			}
+		});
+	});
+	
+	// Do the root account has a dockervm ssh key?!?
+	module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
+		if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
+		// sudo ssh-keygen -f /root/.ssh/dockervm
+		else if(err) return error(err);
+		
+		dockerSshPubKey = pubkey;
+	});
+	
+	
+	
+	module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
+		if(err) return error(err);
+		
+		
+		
+		
+		// Is there a zvol we can copy from?
+		var reDocker = /^(.*)\/docker$/m;
+		var matchDocker = stdout.match(reDocker);
+		if(!matchDocker) {
+			return error("Found no zvol to copy from!");
+		}
+		
+		var zpool = matchDocker[1];
+
+		// Does user have a docker zvol?
+		var reZvol = new RegExp("^(.*)\\/docker_" + username + "$", "m");
+		var matchZvol = stdout.match(reZvol);
+		if(!matchZvol) {
+			log(username + " has no Docker zvol");
+			return createZvol(zpool);
+		}
+		else {
+			var zpool = matchDocker[1];
+			log(username + " has a Docker zvol!");
+			
+			
+		}
+	});
+	
+	function checkVM(zpool) {
+		// Check if a VM is configured
+		module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			
+			var reVM = new RegExp("docker_" + username + "\\s+(.*)");
+			var matchVM = stdout.match(reVM);
+			if(!matchVM) {
+				// User has no VM configured
+				setupVM(zpool);
+			}
+			else {
+				var vmStatus = matchVM[1];
+				
+				if(vmStatus == "online") {
+					
+					if(options.command == "start" || options.command == "status") {
+						return done({started: true});
+					}
+					else if(options.command == "stop") {
+						stopVM();
+					}
+					else throw new Error("Unknown options.command=" + options.command);
+				}
+				else {
+					
+					if(options.command == "start") {
+						startVM();
+}
+					else if(options.command == "status") {
+						return done({stopped: true});
+					}
+					else if(options.command == "stop") {
+						return done({stopped: true});
+					}
+					else throw new Error("Unknown options.command=" + options.command);
+				}
+			}
+		});
+	}
+	
+	function startVM() {
+		
+		// Start the VM
+		module_child_process.exec("virsh start docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			
+			log("Docker VM starting for " + username + " ...");
+			
+			// ssh in and create the mount to user home dir, and set a static IP, set the pub key and disable login with password
+			
+			// todo: Optimize boot time
+			setTimeout(whenBooted, 6000);
+			
+			function whenBooted() {
+				// The base image should use DHCP...
+				
+				
+				module_child_process.exec("ssh " + IP, EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					
+					return done({started: true});
+				});
+				
+			}
+		});
+	}
+	
+	function createZvol(zpool) {
+		if(zpool == undefined) throw new Error("zpool=" + zpool);
+		
+		// Do we have a snapshot!?
+		module_child_process.exec("zfs list -t snapshot", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			
+			var reSnapShot = /docker@(.*)/
+			var matchSnapshot = stdout.match(reSnapShot);
+			if(!matchSnapshot) {
+				return error("Please tell the Admin to create a snaphsot of the Docker VM zvol!");
+			}
+			var snapshotName = matchSnapshot[1];
+			
+			// Clone the snapshot
+			module_child_process.exec("zfs clone -p " + zpool + "/dokcer@" + snapshotName + " " + zpool + "/docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
+				else {
+					log("Docker VM zvol created for " + username);
+					checkVM(zpool);
+				}
+			});
+		});
+	}
+	
+	function setupVM(zpool) {
+		if(zpool == undefined) throw new Error("zpool=" + zpool);
+		// Assuming we already have a zvol!
+		
+		module_fs.readFile("dockervm/docker_user.xml", "utf8", function(err, xml) {
+			xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
+			xml = xml.replace(/<target dir='.*'\/>/, "<target dir='userhome'/>");
+			
+			xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_username'/>");
+			
+			xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
+			
+			module_fs.writeFile("/root/dockervm/docker_" + username + ".xml", xml, function(err) {
+				if(err) return error(err);
+				
+				module_child_process.exec("virsh define /root/dockervm/docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					
+					log(stdout, INFO);
+					log(stderr, WARN);
+					
+					startVM();
+					
+				});
+			});
+		});
+		
+	}
+	
+	function done(resp) {
+		if(abort) return;
+		
+		callback(null, resp);
+		callback = null;
+	}
+	
+	function error(errorOrErrMsg, code) {
+		if(abort) return;
+		
+		if(typeof errorOrErrMsg=="string") {
+			var err = new Error(errorOrErrMsg);
+			if(code) err.code = code;
+		}
+		else var err = errorOrErrMsg;
+		
+		callback(err);
+		callback = null;
+		
+		abort = true;
+	}
+
+
+}
 
 main();
 

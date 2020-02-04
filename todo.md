@@ -79,9 +79,9 @@ What I'm working on
 -------------------
 
 
-sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
 
-(need to have execute permission on the folder to chroot into it!)
+
+sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
 
 sudo chmod 771 /home/ltest1
 sudo usermod -a -G ltest1 libvirt-qemu
@@ -211,16 +211,12 @@ Listen for new netns, then move the host end of the veth to the user netns !?
 still woulnt be able to listen on the netns ip
 
 
-Skip chroot and netns and instead give each user an unique IP to listen on !?
-(vpn wont work...)
-Docker only available for pro users !?
 
 
-
-export DOCKER_OPTS="--net=ltest1"
 
 problem: Docker listens on host system IP's, we want it to listen on the user netns!
 Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
+solution: Nginx proxy to the docker IP same as with user IP
 
 problem: Issues with docker scripts when chrooted as . relative paths will be wrong!
 
@@ -251,7 +247,8 @@ docker...
 
 
 
-
+todo: In order to be able to move users between servers, server.js should take care of everything!
+adduser.js shouln't have to chown folders and set sticky bit!
 
 
 todo: Restrict access to webide_nodejs_init.service !?
