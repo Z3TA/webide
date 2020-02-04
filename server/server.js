@@ -2533,7 +2533,7 @@ var loginCounter = 0;
 									else if(req.vpn) {
 										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
 									}
-									else if(req.docker) {
+									else if(req.dockerDaemon) {
 										dockerDaemon(userConnectionName, homeDir, uid, req.docker, workerResp);
 									}
 									
@@ -6244,9 +6244,14 @@ status = status + " to " + matchEndpoint[1];
 
 function dockerDaemon(username, homeDir, uid, options, callback) {
 	
+	log("##############################################################");
+	log("    " + username + "      DOCKER         uid=" + uid + "      ");
+	log("##############################################################");
+	
 	var libvirtAddedToGroup = false;
 	var abort = false;
 	var dockerSshPubKey;
+	var staticIP = UTIL.int2ip(167772162 + uid + 32000); // Max 31k users per server ought to be enough
 	
 	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
 	module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
@@ -6261,7 +6266,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 				});
 			}
 			else {
-				log("libvirt-qemu already member of " + username + "!?", DEBUG);
+				log("libvirt-qemu already member of group " + username + "", DEBUG);
 				libvirtAddedToGroup = true;
 			}
 		});
@@ -6276,40 +6281,36 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		dockerSshPubKey = pubkey;
 	});
 	
-	
-	
 	module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
 		if(err) return error(err);
 		
-		
-		
-		
 		// Is there a zvol we can copy from?
-		var reDocker = /^(.*)\/docker$/m;
+		var reDocker = /\s*(.*)\/docker/;
 		var matchDocker = stdout.match(reDocker);
 		if(!matchDocker) {
+			log("zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
 			return error("Found no zvol to copy from!");
 		}
 		
 		var zpool = matchDocker[1];
 
 		// Does user have a docker zvol?
-		var reZvol = new RegExp("^(.*)\\/docker_" + username + "$", "m");
+		var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
 		var matchZvol = stdout.match(reZvol);
 		if(!matchZvol) {
-			log(username + " has no Docker zvol");
-			return createZvol(zpool);
+			log(username + " do not have a Docker VM zvol", DEBUG);
+			createZvol(zpool);
 		}
 		else {
 			var zpool = matchDocker[1];
-			log(username + " has a Docker zvol!");
-			
-			
+			log(username + " has a Docker VM zvol!", DEBUG);
+			checkVM(zpool);
 		}
 	});
 	
 	function checkVM(zpool) {
 		// Check if a VM is configured
+		log(username + " checking VM status...", DEBUG);
 		module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
@@ -6349,29 +6350,50 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		});
 	}
 	
-	function startVM() {
+	function startVM(firstTime) {
 		
 		// Start the VM
-		module_child_process.exec("virsh start docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+		var name = "docker_" + username;
+		log(username + " starting " + name + " VM ...", DEBUG);
+		module_child_process.exec("virsh start " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
 			log("Docker VM starting for " + username + " ...");
 			
 			// ssh in and create the mount to user home dir, and set a static IP, set the pub key and disable login with password
 			
-			// todo: Optimize boot time
-			setTimeout(whenBooted, 6000);
+			var IP = "";
 			
-			function whenBooted() {
-				// The base image should use DHCP...
-				
-				
-				module_child_process.exec("ssh " + IP, EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(firstTime) {
+				// Static IP not yet configured
+				log(username + " checking net-dhcp-leases...", DEBUG);
+				module_child_process.exec("virsh net-dhcp-leases default", function(err, stdout, stderr) {
 					if(err) return error(err);
 					
-					return done({started: true});
+					var reIP = new RegExp("(.*)\\/(.*)\\s+docker_" + username);
+					var matchIP = stdout.match(reIP);
+					if(!matchIP) {
+						log("virsh net-dhcp-leases default: stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
+						return error("Unable to find VM dynamic IP!");
+					}
+					
+					IP = matchIP[1];
+					
+					setTimeout(whenBooted, 5000);
 				});
-				
+			}
+			else {
+				IP = staticIP;
+				setTimeout(whenBooted, 6000); // todo: Optimize boot time
+			}
+			
+			function whenBooted() {
+				log(username + " running config script via SSH... IP=" + IP, DEBUG);
+				module_child_process.exec("ssh -i /path/to/id_rsa docker@" + IP + "bash check_config_in_vm.sh", EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					
+					return done({started: true, IP: IP});
+				});
 			}
 		});
 	}
@@ -6380,18 +6402,25 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		if(zpool == undefined) throw new Error("zpool=" + zpool);
 		
 		// Do we have a snapshot!?
+		log(username + " listing zfs snapshots...", DEBUG);
 		module_child_process.exec("zfs list -t snapshot", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
 			var reSnapShot = /docker@(.*)/
 			var matchSnapshot = stdout.match(reSnapShot);
 			if(!matchSnapshot) {
-				return error("Please tell the Admin to create a snaphsot of the Docker VM zvol!");
+				return error("Please tell the Admin to create a snap-shot of the Docker VM zvol!");
+				// First shut down the base Docker VM!
+				// sudo zfs list
+				// sudo zfs snapshot pool/docker@somelabel
 			}
 			var snapshotName = matchSnapshot[1];
 			
 			// Clone the snapshot
-			module_child_process.exec("zfs clone -p " + zpool + "/dokcer@" + snapshotName + " " + zpool + "/docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+			var fullSnapshotName = zpool + "/docker" + snapshotName;
+			var cloneInto = zpool + "/docker_" + username;
+			log(username + " cloning " + fullSnapshotName + " into " + cloneInto + " ...", DEBUG);
+			module_child_process.exec("zfs clone -p " + fullSnapshotName + " " + cloneInto, EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) return error(err);
 				else {
 					log("Docker VM zvol created for " + username);
@@ -6413,10 +6442,14 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			
 			xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
 			
-			module_fs.writeFile("/root/dockervm/docker_" + username + ".xml", xml, function(err) {
+			
+			var vmXmlPath = "/root/dockervm/docker_" + username + ".xml";
+			log(username + " creating " + vmXmlPath + " ...", DEBUG);
+			module_fs.writeFile(vmXmlPath, xml, function(err) {
 				if(err) return error(err);
 				
-				module_child_process.exec("virsh define /root/dockervm/docker_" + username, EXEC_OPTIONS, function(err, stdout, stderr) {
+				log(username + " defining " + vmXmlPath + " ...", DEBUG);
+				module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
 					if(err) return error(err);
 					
 					log(stdout, INFO);

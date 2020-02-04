@@ -78,7 +78,10 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+need to login as root after cloning,
+in order to set static IP 
 
+sudo virsh net-dhcp-leases default
 
 
 sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/

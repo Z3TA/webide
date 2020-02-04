@@ -700,12 +700,12 @@ process.on('message', function commandMessage(message) {
 			send({error: "API error: Unknown command: " + command});
 		}
 		else {
-			funToRun(user, json, function(err, answer) {
+			funToRun(user, json, function ranApi(err, answer) {
 				if(err) {
-					console.log(err);
+					log(err.message);
 					
 					if(!err.stack) console.trace("Stack ...")
-					else console.log(err.stack);
+					else log(err.stack);
 					
 					var msg = {
 						error: "API error: " + (err.message ? err.message : err) + ""
@@ -1073,6 +1073,10 @@ API.stopDropboxDaemon = function stopDropboxDaemon(user, options, callback) {
 
 API.vpn = function vpnCommand(user, options, callback) {
 	parentRequest({vpn: options}, callback);
+}
+
+API.dockerDaemon = function commandDockerDaemon(user, options, callback) {
+	parentRequest({dockerDaemon: options}, callback);
 }
 
 
