@@ -532,6 +532,7 @@ reconnectTimeoutTime += 10000;
 					console.log("CLIENT: Got server response for id=" + json.id);
 					
 					var err = null;
+					var generalError;
 					
 					if(json.error) {
 						var errMsg = "Server: " + json.error;
@@ -540,25 +541,33 @@ reconnectTimeoutTime += 10000;
 						err = UTIL.updateError(err, json.errorCode, errMsg);
 					}
 					
+					// note: If the callback below throws, the timeout error would also throw! (because callbackWaitList[json.id] still exist)
+					try {
 					callbackWaitList[json.id](err, json.resp);
-					delete callbackWaitList[json.id];
-					delete properCallStackError[json.id];
-					delete noCallbackList[json.id]
+					}
+					catch(errorInCallback) {
+						generalError = errorInCallback;
+					}
+					
 				}
 				else if( noCallbackList.hasOwnProperty(json.id)) {
-					delete properCallStackError[json.id];
-					
-					throw noCallbackList[json.id];
+					generalError = noCallbackList[json.id];
 				}
 				else if(gotResponseForTimedOutRequest.hasOwnProperty(json.id)) {
-					throw gotResponseForTimedOutRequest[json.id];
+					generalError = gotResponseForTimedOutRequest[json.id];
 				}
 				else {
-					delete properCallStackError[json.id];
-					
-					throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
+					generalError = new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
 				}
+				
+				delete properCallStackError[json.id];
+				delete noCallbackList[json.id];
+				delete gotResponseForTimedOutRequest[json.id];
+				delete callbackWaitList[json.id];
+				
+				if(generalError) throw generalError;
+				
 			}
 			else if(json.msg) {
 				console.warn("CLIENT: " + json.msg);
