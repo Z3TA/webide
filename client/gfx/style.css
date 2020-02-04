@@ -1401,6 +1401,15 @@ div.gotoFile li:hover {
 	color: black;
 }
 
+/* ::first-lette only works with blocks! */
+.contextmenu .text {
+	display: inline-block;
+}
+.contextmenu .text::first-letter {
+	text-transform: capitalize;
+}
+
+
 .contextmenu li .key {
 	display:inline-block;
 	color: #919191;
