@@ -79,22 +79,6 @@ What I'm working on
 -------------------
 
 
-trying to make dns lookups to work when in netns..
-
-
-
-Can I create unique /etc/hosts file for each user !? eg. mounting it for only the user...!?
-yes, put it in /etc/netns/ns1/whatever and ip netns exec will do it
-
-
-Reasons for using chroot ?
-Can set specific Apparmor profiles...
-
-
-Holy shit! I got "local" mounts with docker to work by mouting the user dir into the docker VM!
-Only problem is that users are chrooted! So relative directories wont work! eg they need to type /home/username instead of just .
-
-
 sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
 
 (need to have execute permission on the folder to chroot into it!)
@@ -267,6 +251,11 @@ docker...
 
 
 
+
+
+
+todo: Restrict access to webide_nodejs_init.service !?
+users are in another namespace, so we shouln't have to do that
 
 unable to insert ^ on swedish keyboard in Firefox
 

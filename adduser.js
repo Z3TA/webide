@@ -311,11 +311,11 @@ function adduser() {
 		
 		
 		// Add skeleton files ...
-	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
+	//copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs_examples", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
+	//copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_blog_example", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 		copyFolderRecursiveSync("etc/userdir_skeleton/.webide/", homeDir);
@@ -344,8 +344,8 @@ function adduser() {
 	fs.chmodSync(homeDir, "751");
 	
 	// For DNS lookups to work !?
-	chmodrSync(homeDir + "etc/", "444");
-	chmodrSync(homeDir + "run/", "444");
+	//chmodrSync(homeDir + "etc/", "444");
+	//chmodrSync(homeDir + "run/", "444");
 	
 		// .ssh folder is secret!
 		chmodrSync(homeDir + ".ssh/", "700");

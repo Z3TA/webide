@@ -60,65 +60,52 @@ var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 var USERNAME = getArg(["user", "username"])
 var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
+var module_os = require("os");
+
+
 console.log("================================== user_worker.js ==================================");
 
 var username = process.env.username;
 var uid = parseInt(process.env.uid);
 var gid = parseInt(process.env.gid);
 
-if(USE_CHROOT) {
 	/* 
-		Change root ...
+	
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
 		npm rebuild
 		
-		The idea with chroot is that we do not have to translate paths to virtual root.
-		And so that all apps started by the user inherit the uid and gid
+	The posix module is needed because user_worker.js needs to be started as root
+	- in order for ip netns exec to work
+	
 	*/
 	
-	var posix = require("posix"); // Very much needed for chroot to work. 
-	// The posix module is not optional if you want to chroot.
-	// Use the -nochroot flag to run the server without chroot!
+var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+
+if(info.uid==0) {
 	
-	
-	
-	if(HOME=="/") throw new Error("Unncessasary to chroot into /");
+	var posix = require("posix");
 	
 	
 	log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
 	
-	
-	log("chroot into " + HOME, DEBUG);
+	if(USE_CHROOT) {
+		if(HOME=="/") throw new Error("Unncessasary to chroot into /");
+		log("chroot into " + HOME, DEBUG);
 	posix.chroot(HOME);
+	}
 	
 	
-	// hmm, using posix.setegid makes the user_worker silenty die...
 	log("setegid to " + gid, DEBUG);
-	posix.setegid(gid); // Wrapper for process.setgid (node dies)
+	posix.setegid(gid);
 	//process.setgid(gid);
 	
 	//posix.setegid(gid); // Doesn't seem to do anything
 	posix.setregid(gid, gid); // Doesn't seem to do anything
 	
-	/*
-		problem: Running id in the chroot it doesn't get the correct groups the user is member of
-		$ id =        uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),0(root)
-		$ id ltest1 = uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
-		
-		Using initgroups():
-		$ id =        uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
-		$ id ltest1 = uid=1001(ltest1) gid=1001(ltest1) groups=1001(ltest1),999(docker)
-		
-		without posix.initgroups the user won't have access to the docker group!
-		note: By default the user is only allowed to write to files owned by the user,
-		so write access need to be explicitly set to each file in apparmor profile, eg. /run/docker.sock wr,
-		
-		todo: ONLY ALLOW DOCKER FOR TRUSTED USERS!!!!!
-
-		add user to docker group:      sudo usermod -a -G docker ltest1
-		remove user from docker group: sudo gpasswd -d ltest1 docker
-	*/
+	
+	// We must init groups or the user will be member of the root group!!
+	posix.initgroups(username, gid);
 	
 	log("process.env.groups=" + process.env.groups);
 	if(process.env.groups) {
@@ -165,6 +152,8 @@ if(USE_CHROOT) {
 		unshare(CLONE_NEWNET);
 	*/
 	
+	
+	if(USE_CHROOT) {
 	process.env.HOME = "/";
 	
 	var npmOptions = {
@@ -178,8 +167,8 @@ if(USE_CHROOT) {
 }
 else {
 	
-	if(gid) process.setgid(gid);
-	if(uid) process.setuid(uid);
+	//if(gid) process.setgid(gid);
+	//if(uid) process.setuid(uid);
 	
 	var npmOptions = {
 		env: {
@@ -190,10 +179,13 @@ else {
 		}
 	}
 }
+}
+
+
 
 var isRoot = process.getuid && process.getuid() === 0;
-//if(isRoot && !USE_CHROOT) log("It's strongly adviced not to run worker process as superuser unless chroot flag is used!", WARN)
-if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
+//if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN)
+if(isRoot) throw new Error("Can not run worker process as superuser!")
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
 
@@ -496,9 +488,10 @@ user.loadStorage = function loadStorage(callback) {
 				});
 			}
 			else {
+				log("user.name=" + user.name + " uid=" + process.getuid() + " gid=" + process.getgid() + " euid=" + process.geteuid() + " egid=" + process.getegid() + "   ");
+				log("readdir err code=" + err.code, WARN);
 				callback(err);
-				console.warn("readdir err code=" + err.code);
-				throw err;
+				//throw err;
 			}
 		}
 		else {
@@ -570,6 +563,7 @@ user.saveStorageItem = function saveStorage(itemName, callback) {
 		if(err) {
 			
 			if(err.code != "ENOENT") {
+				log("user.name=" + user.name + " uid=" + process.getuid() + " gid=" + process.getgid() + " euid=" + process.geteuid() + " egid=" + process.getegid() + "   ");
 				callback(new Error("Not possible to backup " + itemName + " when saving! Error: " + err.message));
 				throw err;
 			}

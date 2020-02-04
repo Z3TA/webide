@@ -90,6 +90,10 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+/*
+	The reason why we are not using CHROOT by default is because of relative paths to work, in for example docker-compose
+	Dealing with chroot's have also been an headache... So we want to avoid chroot if possible!
+*/
 var CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 
 var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
@@ -4576,9 +4580,12 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 	
 	if(!NO_NETNS && uid && process.platform=="linux") {
 		var command = "/sbin/ip";
+		//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
 		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
-		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 spawnOptions.env.HOST = netnsIP;
+		
+		spawnOptions.shell = EXEC_OPTIONS.shell;
 		
 		spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
 		// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
