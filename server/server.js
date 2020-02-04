@@ -909,9 +909,15 @@ function main() {
 						
 						Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
 						
-						If you are not using the firewall script, do this manually:
-						sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 					*/
+					
+					module_child_process.exec("iptables -S -t nat | grep -q -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+						if(error) {
+							module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+								if(error) throw error;
+							});
+						}
+					});
 					
 				});
 			}
@@ -922,6 +928,14 @@ function main() {
 		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
 		log(info);
 		process.exit();
+	}
+	
+	if(info.uid == 0 && process.platform=="linux") {
+		module_child_process.exec("bash linux_harderning_after_reboot.sh", function(error, stdout, stderr) {
+			if(error) throw new Error("Hardening failed: " + error.message);
+			if(stdout) log(stdout, DEBUG);
+			if(stderr) log(stderr, NOTICE);
+		});
 	}
 	
 	if(info.uid > 0 && !USERNAME && CURRENT_USER) {
@@ -3080,53 +3094,109 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			
 			var IP = UTIL.int2ip(167772162 + uid);
 			
+			var createNetnsFile = function createNetnsFile(etcFile, content) {
+				filesToWrite++;
+				
+				var stats = 0;
+				var writes = 0;
+				
+				stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
+					if(err && err.code == "ENOENT") {
+						// ip netns exec wont unshare bind if the file don't exist in /etc/
+						
+						stats++;module_fs.stat(UTIL.joinPaths("/etc/netns/", username, etcFile), function(err) {stats--;
+							if(err && err.code == "ENOENT") return doneMaybe();
+							else if(err) throw err;
+							
+							// Make sure there is no file in /etc/netns/ or mount will throw errors!
+							writes++;module_fs.unlink(UTIL.joinPaths("/etc/netns/", username, etcFile), content, function (err) {writes--;
+								if (err) throw err;
+								doneMaybe();
+							});
+							
+						});
+						
+						return doneMaybe();
+					}
+					else if(err) throw err;
+					
+					writes++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, etcFile), content, function (err) {writes--;
+						if (err) throw err;
+						doneMaybe();
+					});
+				});
+				
+				if(etcFile.charAt(etcFile.length-1) != "-") {
+					// Also unshare mount the backup files!
+					createNetnsFile(etcFile + "-", content)
+				}
+				
+				function doneMaybe() {
+					if(stats==0 && writes==0) {
+						filesWritten++;
+						checkMountsReadyMaybe();
+					}
+				}
+				
+			}
+			
+			var copyEntryFrom = function copyEntryFrom(etcFile) {
+				filesToWrite++;module_fs.readFile("/etc/" + etcFile, "utf8", function(err, text) {filesWritten++;
+					if(err && err.code=="ENOENT") {
+						log("/etc/" + etcFile + " does not exist!", INFO);
+						return;
+					}
+					else if(err) throw err;
+					
+					// Find line beginning with the username
+					var lines = text.split("\n");
+					for (var i=0; i<lines.length; i++) {
+						if(lines[i].indexOf(username+":") == 0) {
+							var line = lines[i];
+							break;
+						}
+					}
+					if(!line) {
+						log("Unable to find " + username + ": in /etc/" + etcFile, INFO);
+						return;
+					}
+					
+					createNetnsFile(etcFile, line);
+				});
+			}
+			
 			// When user launches for example a node.js web server listening on "localhost"
 			// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
-			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "hosts"), IP + "\tlocalhost", function (err) {
-				if (err) throw err;
-				filesWritten++; checkMountsReadyMaybe();
-			});
-			// note: /etc/nssswitch.conf is needed for /etc/hosts to work!!!
-			/*
-				filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "nssswitch.conf"),
-				"", function (err) {
-				if (err) throw err;
-				filesWritten++; checkMountsReadyMaybe();
-				});
-			*/
+			createNetnsFile("hosts", IP + "\tlocalhost");
+			
+			// Override host's resolvers
+			createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
+			
+			
+			// Make it harder to see other users on the system by faking...
+			createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
+			createNetnsFile("group", username + ":x:" + gid + ":");
+			
+			copyEntryFrom("subuid");
+			copyEntryFrom("subgid");
+			
+			createNetnsFile("mtab", "");
 			
 			
 			
-			// Make it harder to see other users on the system
-			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "passwd"), username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash", function (err) {
-				if (err) throw err;
-				filesWritten++; checkMountsReadyMaybe();
-			});
 			
-			// todo: Also hide other stuff like group and subuid
-			
-			filesToWrite++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, "resolv.conf"), "nameserver 8.8.8.8", function (err) {
-				if (err) throw err;
-				filesWritten++; checkMountsReadyMaybe();
-			});
-			
-			
-			
-			module_child_process.exec("bash ../addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
+			module_child_process.exec("bash addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
 				//if(error) log("addnetns error: " + error.message, WARN);
 				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
 				
 				if(stdout) log("addnetns stdout: " + stdout, INFO);
 				if(stderr) log("addnetns stderr: " + stderr, WARN);
 				
-				if(!error) {
-					// No error means the network namespace was created
-					var matchIP = stdout.match(/IP=(.*)/);
-					if(!matchIP) throw new Error("Unable to find IP in stdout=" + stdout);
-					var parsedIP = matchIP[1];
-					if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedID + " IP=" + IP + "  ");
-					
-				}
+				var reIP = /^IP=(.*)/m;
+				var matchIP = stdout.match(reIP);
+				if(!matchIP) throw new Error("Unable to find " + reIP + " in stdout=" + stdout);
+				var parsedIP = matchIP[1];
+				if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedIP + " IP=" + IP + "  ");
 				
 				createdNetworkNamespaces = true;
 				checkMountsReadyMaybe();

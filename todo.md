@@ -78,11 +78,10 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+
 trying to make dns lookups to work when in netns..
 
-cant scroll the function list on macbook using the pad
 
-text on the right side dissappears after 4 seconds on macbook...
 
 Can I create unique /etc/hosts file for each user !? eg. mounting it for only the user...!?
 yes, put it in /etc/netns/ns1/whatever and ip netns exec will do it
@@ -265,6 +264,17 @@ Docker wont allow running commands on the host via a Dockerfile... Se we might b
 todo: cloudide_install.js instructions for Docker
 
 docker...
+
+
+
+
+unable to insert ^ on swedish keyboard in Firefox
+
+cant scroll the function list on macbook using the pad
+
+text on the right side dissappears after 4 seconds on macbook...
+
+todo: Add services running "in production" to user netns!!
 
 terminal sessions should be saved so you can continue where you left off,
 for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
