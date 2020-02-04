@@ -46,7 +46,7 @@
 		</disk>
 		<filesystem type='mount' accessmode='passthrough'>
 			<source dir='/opt/share/'/>
-			<target dir='testlabel'/>
+			<target dir='userhome'/>
 			<address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
 		</filesystem>
 		<interface type='network'>

@@ -6252,6 +6252,8 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	var abort = false;
 	var dockerSshPubKey;
 	var staticIP = UTIL.int2ip(167772162 + uid + 32000); // Max 31k users per server ought to be enough
+	var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
+	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
 	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
 	module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
@@ -6360,12 +6362,36 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			
 			log("Docker VM starting for " + username + " ...");
 			
-			// ssh in and create the mount to user home dir, and set a static IP, set the pub key and disable login with password
-			
 			var IP = "";
 			
 			if(firstTime) {
 				// Static IP not yet configured
+				checkDhcp(true);
+			}
+			else {
+				IP = staticIP;
+				ping(IP);
+			}
+			
+			function ping(ipToPing) {
+				// Make sure the IP is reachable
+				// Retry some times as it takes time for the server to boot!
+				
+				log(username + " pinging " + ipToPing + " is reachable...", DEBUG);
+				module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
+					log("ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
+					
+					if(err) {
+						log("Do something when ping fails...");
+						// if ipToPing==staticIP checkDhcp !?
+					}
+					else {
+						log("Do something when ping is successful...");
+					}
+				});
+			}
+			
+			function checkDhcp(wait) {
 				log(username + " checking net-dhcp-leases...", DEBUG);
 				module_child_process.exec("virsh net-dhcp-leases default", function(err, stdout, stderr) {
 					if(err) return error(err);
@@ -6379,17 +6405,22 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 					
 					IP = matchIP[1];
 					
-					setTimeout(whenBooted, 5000);
+					ping(IP);
 				});
-			}
-			else {
-				IP = staticIP;
-				setTimeout(whenBooted, 6000); // todo: Optimize boot time
 			}
 			
 			function whenBooted() {
+				/*
+					Things to do when booted: (see check_config_in_vm.sh)
+					* Create the mount to user home dir
+					* Set a static IP
+					
+					(.ssh/authorized_keys should already be set in the base image!)
+					
+				*/
+				
 				log(username + " running config script via SSH... IP=" + IP, DEBUG);
-				module_child_process.exec("ssh -i /path/to/id_rsa docker@" + IP + "bash check_config_in_vm.sh", EXEC_OPTIONS, function(err, stdout, stderr) {
+				module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash check_config_in_vm.sh " + username + " " + staticIP + " " + gateway , EXEC_OPTIONS, function(err, stdout, stderr) {
 					if(err) return error(err);
 					
 					return done({started: true, IP: IP});
@@ -6436,12 +6467,10 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		module_fs.readFile("dockervm/docker_user.xml", "utf8", function(err, xml) {
 			xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
-			xml = xml.replace(/<target dir='.*'\/>/, "<target dir='userhome'/>");
 			
 			xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_username'/>");
 			
 			xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
-			
 			
 			var vmXmlPath = "/root/dockervm/docker_" + username + ".xml";
 			log(username + " creating " + vmXmlPath + " ...", DEBUG);
@@ -6455,7 +6484,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 					log(stdout, INFO);
 					log(stderr, WARN);
 					
-					startVM();
+					startVM(true);
 					
 				});
 			});

@@ -77,6 +77,7 @@ Always set callback=null after calling back!!! to prevent double callback and so
 
 What I'm working on
 -------------------
+test dockervm/check_config_in_vm.sh in Docker VM, do we loose network connectivity!? Can we reach the Internet !?
 
 need to login as root after cloning,
 in order to set static IP 
