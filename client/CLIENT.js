@@ -542,6 +542,7 @@ reconnectTimeoutTime += 10000;
 					}
 					
 					// note: If the callback below throws, the timeout error would also throw! (because callbackWaitList[json.id] still exist)
+					// But the problem with try/catch is that they catch all kind of errors, like undefined variables... resulting in the wrong call site in the error message
 					try {
 					callbackWaitList[json.id](err, json.resp);
 					}
