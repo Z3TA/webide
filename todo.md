@@ -78,9 +78,9 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-problem exploring /home/ dir ... can we skip directly to /home/user !?
+bug: self_debug things errors are in CLIENT.js ...
 
-todo: try stopping, starting from UI
+todo: try stopping, starting Docker daemon from UI
 
 testing Docker implementation.
 

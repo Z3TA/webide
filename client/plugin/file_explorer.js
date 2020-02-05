@@ -474,6 +474,18 @@
 					else alertBox(errMsg);
 					return;
 				}
+				else if(err.code == "EACCES" && dir == "/home/" && EDITOR.user && EDITOR.user.homeDir.indexOf("/home/") == 0) {
+					// /home/ dir is 701, we can go into it, but not read it
+					console.warn("Cannot read " + dir);
+					listItems = [{
+							type:"d",
+							name: UTIL.getFolderName(EDITOR.user.homeDir) ,
+							path: EDITOR.user.homeDir,
+							size:7,
+							date: (new Date()).toString(),
+							problem:""
+					}];
+				}
 				else if(err.code == "EACCES") {
 					var errMsg = "File explorer: Unable to access " + dir;
 					if(callback) callback(new Error(errMsg));
@@ -489,7 +501,7 @@
 					return;
 				}
 				else {
-					console.log("File explorer: err.code=" + err.code);
+					console.log("File explorer: dir=" + dir + " err.code=" + err.code);
 					if(callback) callback(err);
 					else throw err;
 return;
@@ -515,6 +527,7 @@ return;
 		
 		function showItem(item) {
 			
+			console.log("File explorer: item=" + JSON.stringify(item));
 			console.log("File explorer: item.type=" + item.type + " item.name=" + item.name);
 			
 			var li = document.createElement("li");
