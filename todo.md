@@ -77,12 +77,24 @@ Always set callback=null after calling back!!! to prevent double callback and so
 
 What I'm working on
 -------------------
+
+sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
+
+Use the libvirt NAT network on the Docker VM for now ...
+
+
+sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 10.0.128.235 -j ACCEPT
+sudo iptables -I FORWARD 1 -s 10.0.128.235 -d 10.0.3.235 -j ACCEPT
+sudo iptables -I FORWARD 1 -s 10.0.128.235 -d 10.0.0.1 -j ACCEPT
+doesn't work :(
+
+also block docker server from accessing other user's netns!?
+
+sudo iptables -I FORWARD 1 -o virbr0 -i netnsbridge -j ACCEPT
+sudo iptables -I FORWARD 1 -i virbr0 -o netnsbridge -j ACCEPT
+
+
 test dockervm/check_config_in_vm.sh in Docker VM, do we loose network connectivity!? Can we reach the Internet !?
-
-need to login as root after cloning,
-in order to set static IP 
-
-sudo virsh net-dhcp-leases default
 
 
 sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
@@ -133,13 +145,8 @@ VM limit seem to be 8 VM's per CPU core,
 so we should only run the docker VM if the user activates it!
 
 For the docker VM:
-sudo apt install docker.io
 
-/etc/systemd/system/docker.service.d/startup_options.conf
-# /etc/systemd/system/docker.service.d/override.conf
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
+
 
 sudo systemctl daemon-reload
 sudo systemctl start docker
@@ -248,6 +255,9 @@ Docker wont allow running commands on the host via a Dockerfile... Se we might b
 todo: cloudide_install.js instructions for Docker
 
 docker...
+
+
+todo: Delete emoty files and folders in user home dirs, because there will be no more chrooting
 
 
 

@@ -279,7 +279,7 @@ console.warn("Terminal events already active!");
 			terminalName = termPrefix + terminalId;
 		}
 		
-		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, function terminalOpened(err, term) {
+		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId, env: EDITOR.env}, function terminalOpened(err, term) {
 			if(err) {
 				// How do I repeat: Open two terminals, then close them, and open a new terminal
 				var reHigher = /Terminal id needs to be (\d+) or higher/;

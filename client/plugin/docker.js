@@ -57,8 +57,12 @@
 			else {
 				if(status.started) {
 					deamonAwake = true;
+					
+					if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
+					json.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
+					
 					discoveryBarIcon.activate();
-					updateStatus("running")
+					updateStatus("running");
 				}
 				else if(status.stopped) {
 					deamonAwake = false;
@@ -77,9 +81,13 @@
 	}
 	
 	function wakeup() {
-		CLIENT.cmd("dockerDaemon", {command: "start"}, function dockerDeamonAwakenMaybe(err) {
+		CLIENT.cmd("dockerDaemon", {command: "start"}, function dockerDeamonAwakenMaybe(err, status) {
 			if(err) alertBox("Unable to start the Docker daemon! Error: " + err.message);
 			else {
+				
+				if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
+				json.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
+				
 				alertBox("The Docker daemon is now awaken! Speak to it using the docker command in the terminal emulator");
 				discoveryBarIcon.activate();
 				updateStatus("running")

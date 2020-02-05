@@ -2534,7 +2534,7 @@ var loginCounter = 0;
 										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
 									}
 									else if(req.dockerDaemon) {
-										dockerDaemon(userConnectionName, homeDir, uid, req.docker, workerResp);
+										dockerDaemon(userConnectionName, homeDir, uid, req.dockerDaemon, workerResp);
 									}
 									
 									
@@ -6243,6 +6243,10 @@ status = status + " to " + matchEndpoint[1];
 
 
 function dockerDaemon(username, homeDir, uid, options, callback) {
+	"use strict";
+	
+	if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
+	
 	
 	log("##############################################################");
 	log("    " + username + "      DOCKER         uid=" + uid + "      ");
@@ -6251,29 +6255,133 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	var libvirtAddedToGroup = false;
 	var abort = false;
 	var dockerSshPubKey;
-	var staticIP = UTIL.int2ip(167772162 + uid + 32000); // Max 31k users per server ought to be enough
-	var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
+	//var staticIP = UTIL.int2ip(167772162 + uid + 32000); // Max 31k users per server ought to be enough
+	//var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
 	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
+	sendToClient(username, "progress", [0,0]);
+	sendToClient(username, "progress", [0,20]);
+	
+	checkLibVirtUser();
+	
+	function checkLibVirtUser() {
 	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
-	module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
+		log(username + " checking if a libvirt-qemu user exist...", DEBUG);
+		module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
 		if(err) return error("libvirt not installed on this server");
 		
+			progress();
+			
+			log(username + " checking if a libvirt-qemu user is part of " + username + " group...", DEBUG);
 		module_child_process.exec("grep -q " + username + ":.*libvirt-qemu /etc/group", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) {
-				log("Adding libvirt-qemu to " + username + " group...", INFO);
+				
+				if(err) {
+					progress();
+					log(username + " adding libvirt-qemu to " + username + " group...", INFO);
 				module_child_process.exec("usermod -a -G " + username + " libvirt-qemu", EXEC_OPTIONS, function(err, stdout, stderr) {
-					if(err) return error(err);
-					libvirtAddedToGroup = true;
+						if(err) return error(err);
+						progress();
+						checkZvol();
 				});
 			}
 			else {
+					progress(2);
 				log("libvirt-qemu already member of group " + username + "", DEBUG);
-				libvirtAddedToGroup = true;
+					checkZvol();
 			}
 		});
 	});
+	}
 	
+	function checkZvol() {
+		log(username + " checking if a zvol exist...", DEBUG);
+		module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			
+			progress();
+			
+			// Is there a zvol we can copy from?
+			var reDocker = /\s*(.*)\/docker/;
+			var matchDocker = stdout.match(reDocker);
+			if(!matchDocker) {
+				log("zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
+				return error("Found no zvol to copy from!");
+			}
+			
+			var zpool = matchDocker[1];
+			
+			if(zpool.indexOf(" ") != -1) throw new Error("zpool=" + zpool + " contains a space!");
+			
+			// Does user have a docker zvol?
+			var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
+			var matchZvol = stdout.match(reZvol);
+			if(!matchZvol) {
+				log(username + " do not have a Docker VM zvol", DEBUG);
+				
+				if(options.command == "status" || options.command=="stop") return done({stopped: true});
+				
+				progress(0,2);
+				createZvol(zpool);
+			}
+			else {
+				var zpool = matchDocker[1];
+				log(username + " has a Docker VM zvol!", DEBUG);
+				checkVM(zpool);
+			}
+		});
+	}
+	
+	function checkVM(zpool) {
+		if(zpool == undefined) throw new Error("zpool=" + zpool);
+		
+		// Check if a VM is configured
+		log(username + " checking VM status...", DEBUG);
+		module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			
+			progress();
+			
+			var reVM = new RegExp("docker_" + username + "\\s+(.*)");
+			var matchVM = stdout.match(reVM);
+			if(!matchVM) {
+				// User has no VM configured
+				
+				if(options.command == "status" || options.command=="stop") return done({stopped: true});
+				
+				setupVM(zpool);
+			}
+			else {
+				progress(12); // Don't have to setup and start the VM
+				
+				var vmStatus = matchVM[1];
+				
+				if(vmStatus == "running") {
+					
+					if(options.command == "start" || options.command == "status") {
+						// We want to know the IP!
+						checkIP();
+					}
+					else if(options.command == "stop") {
+						stopVM();
+					}
+					else throw new Error("Unknown options.command=" + options.command);
+				}
+				else if(vmStatus == "shut off") {
+					
+					if(options.command == "start") {
+						startVM();
+					}
+					else if(options.command == "status" || options.command=="stop") {
+						return done({stopped: true});
+					}
+					else throw new Error("Unknown options.command=" + options.command);
+				}
+				else throw new Error("Unknown vmStatus=" + vmStatus);
+			}
+		});
+	}
+	
+	function checkSSHKey() {
 	// Do the root account has a dockervm ssh key?!?
 	module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
 		if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
@@ -6282,150 +6390,134 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		dockerSshPubKey = pubkey;
 	});
+	}
 	
-	module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
-		if(err) return error(err);
+	function ping(ipToPing, pingFail) {
+		// Make sure the IP is reachable
+		// Retry some times as it takes time for the server to boot!
 		
-		// Is there a zvol we can copy from?
-		var reDocker = /\s*(.*)\/docker/;
-		var matchDocker = stdout.match(reDocker);
-		if(!matchDocker) {
-			log("zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
-			return error("Found no zvol to copy from!");
-		}
+		var maxTry = 10;
 		
-		var zpool = matchDocker[1];
-
-		// Does user have a docker zvol?
-		var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
-		var matchZvol = stdout.match(reZvol);
-		if(!matchZvol) {
-			log(username + " do not have a Docker VM zvol", DEBUG);
-			createZvol(zpool);
-		}
-		else {
-			var zpool = matchDocker[1];
-			log(username + " has a Docker VM zvol!", DEBUG);
-			checkVM(zpool);
-		}
-	});
-	
-	function checkVM(zpool) {
-		// Check if a VM is configured
-		log(username + " checking VM status...", DEBUG);
-		module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
+		if(!ipToPing) throw new Error("ipToPing=" + ipToPing + " IP=" + IP);
+		
+		if(pingFail == undefined) pingFail = 0;
+		
+		log(username + " pinging " + ipToPing + " is reachable...", DEBUG);
+		module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
+			log("ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
 			
-			var reVM = new RegExp("docker_" + username + "\\s+(.*)");
-			var matchVM = stdout.match(reVM);
-			if(!matchVM) {
-				// User has no VM configured
-				setupVM(zpool);
+			progress();
+			
+			if(err) {
+				log("Do something when ping fails...");
+				
+				if(++pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
+				
+				ping(ipToPing, pingFail);
 			}
 			else {
-				var vmStatus = matchVM[1];
+				log("Do something when ping is successful...");
 				
-				if(vmStatus == "online") {
-					
-					if(options.command == "start" || options.command == "status") {
-						return done({started: true});
-					}
-					else if(options.command == "stop") {
-						stopVM();
-					}
-					else throw new Error("Unknown options.command=" + options.command);
-				}
-				else {
-					
-					if(options.command == "start") {
-						startVM();
-}
-					else if(options.command == "status") {
-						return done({stopped: true});
-					}
-					else if(options.command == "stop") {
-						return done({stopped: true});
-					}
-					else throw new Error("Unknown options.command=" + options.command);
-				}
+				configure(ipToPing);
+				
 			}
 		});
 	}
 	
-	function startVM(firstTime) {
-		
+	function startVM() {
 		// Start the VM
 		var name = "docker_" + username;
 		log(username + " starting " + name + " VM ...", DEBUG);
 		module_child_process.exec("virsh start " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
+			progress();
+			
 			log("Docker VM starting for " + username + " ...");
 			
-			var IP = "";
+			checkIP();
+		});
+	}
+	
+	function stopVM() {
+		var name = "docker_" + username;
+		log(username + " stopping " + name + " VM ...", DEBUG);
+		module_child_process.exec("virsh stop " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
 			
-			if(firstTime) {
-				// Static IP not yet configured
-				checkDhcp(true);
-			}
-			else {
-				IP = staticIP;
-				ping(IP);
-			}
+			progress();
 			
-			function ping(ipToPing) {
-				// Make sure the IP is reachable
-				// Retry some times as it takes time for the server to boot!
+			log(username + " Docker VM is shutting down...");
+			
+			if(options.command == "stop") {
+				return done({stopped: true});
+			}
+			else throw new Error("Unexpected options.command=" + options.command);
+			
+		});
+	}
+	
+	function configure(IP) {
+		/*
+			Things to do when booted: (see check_config_in_vm.sh)
+			* Create the mount to user home dir
+			* Set a static IP
+			
+			(.ssh/authorized_keys should already be set in the base image!)
+			
+		*/
+		
+		if(IP == undefined) throw new Error("IP=" + IP);
+		
+		log(username + " running config script via SSH... IP=" + IP, DEBUG);
+		module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash check_config_in_vm.sh " + username + "" , EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) {
 				
-				log(username + " pinging " + ipToPing + " is reachable...", DEBUG);
-				module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
-					log("ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
-					
-					if(err) {
-						log("Do something when ping fails...");
-						// if ipToPing==staticIP checkDhcp !?
-					}
-					else {
-						log("Do something when ping is successful...");
-					}
-				});
-			}
-			
-			function checkDhcp(wait) {
-				log(username + " checking net-dhcp-leases...", DEBUG);
-				module_child_process.exec("virsh net-dhcp-leases default", function(err, stdout, stderr) {
-					if(err) return error(err);
-					
-					var reIP = new RegExp("(.*)\\/(.*)\\s+docker_" + username);
-					var matchIP = stdout.match(reIP);
-					if(!matchIP) {
-						log("virsh net-dhcp-leases default: stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
-						return error("Unable to find VM dynamic IP!");
-					}
-					
-					IP = matchIP[1];
-					
-					ping(IP);
-				});
-			}
-			
-			function whenBooted() {
-				/*
-					Things to do when booted: (see check_config_in_vm.sh)
-					* Create the mount to user home dir
-					* Set a static IP
-					
-					(.ssh/authorized_keys should already be set in the base image!)
-					
-				*/
+				// We might have been successful anyway!
+				//if(stdout.indexOf("userhome already mounted") != -1) return success();
 				
-				log(username + " running config script via SSH... IP=" + IP, DEBUG);
-				module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash check_config_in_vm.sh " + username + " " + staticIP + " " + gateway , EXEC_OPTIONS, function(err, stdout, stderr) {
-					if(err) return error(err);
-					
+				
+				log("stdout=" + stdout);
+				log("stderr=" + stderr);
+				
+				console.error(err);
+				
+				// Don't want to tell users about our week password :P So use a custom error
+				return error("Unable to configure Docker daemon VM settings!");
+			}
+			
+			function success() {
+				progress();
+				
+				if(options.command == "start" || options.command == "status") {
 					return done({started: true, IP: IP});
-				});
+				}
+				else if(options.command == "stop") {
+					throw new Error("Should not configure when shutting down!");
+				}
+				else throw new Error("Unknown options.command=" + options.command);
 			}
+		});
+	}
+	
+	function checkIP() {
+		log(username + " checking domifaddr...", DEBUG);
+		module_child_process.exec("virsh domifaddr docker_" + username, function(err, stdout, stderr) {
+			// vnet0      52:54:00:12:be:53    ipv4         192.168.122.96/24
+			if(err) return error(err);
+			
+			progress();
+			
+			var reIP = /ipv4\s+(.*)\//;
+			var matchIP = stdout.match(reIP);
+			if(!matchIP) {
+				log("domifaddr: stdout=" + stdout + " stderr=" + stderr + " reIP=" + reIP + " username=" + username, DEBUG);
+				return error("Unable to find Docker daemon VM IP!");
+			}
+			
+			var IP = matchIP[1];
+			
+			ping(IP);
 		});
 	}
 	
@@ -6437,7 +6529,9 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		module_child_process.exec("zfs list -t snapshot", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
-			var reSnapShot = /docker@(.*)/
+			progress();
+			
+			var reSnapShot = new RegExp(zpool + "\\/docker@([^ ]*)");
 			var matchSnapshot = stdout.match(reSnapShot);
 			if(!matchSnapshot) {
 				return error("Please tell the Admin to create a snap-shot of the Docker VM zvol!");
@@ -6447,13 +6541,16 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			}
 			var snapshotName = matchSnapshot[1];
 			
+			if(snapshotName.indexOf(" ") != -1) throw new Error("snapshotName=" + snapshotName + " contains a space! reSnapShot=" + reSnapShot + " matchSnapshot=" + JSON.stringify(matchSnapshot));
+			
 			// Clone the snapshot
-			var fullSnapshotName = zpool + "/docker" + snapshotName;
+			var fullSnapshotName = zpool + "/docker@" + snapshotName;
 			var cloneInto = zpool + "/docker_" + username;
 			log(username + " cloning " + fullSnapshotName + " into " + cloneInto + " ...", DEBUG);
 			module_child_process.exec("zfs clone -p " + fullSnapshotName + " " + cloneInto, EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) return error(err);
 				else {
+					progress();
 					log("Docker VM zvol created for " + username);
 					checkVM(zpool);
 				}
@@ -6465,21 +6562,29 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		if(zpool == undefined) throw new Error("zpool=" + zpool);
 		// Assuming we already have a zvol!
 		
-		module_fs.readFile("dockervm/docker_user.xml", "utf8", function(err, xml) {
+		module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
+			if(err) return error(err);
+			
+			progress();
+			
 			xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
 			
-			xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_username'/>");
+			xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
 			
 			xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
 			
-			var vmXmlPath = "/root/dockervm/docker_" + username + ".xml";
+			var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
 			log(username + " creating " + vmXmlPath + " ...", DEBUG);
 			module_fs.writeFile(vmXmlPath, xml, function(err) {
 				if(err) return error(err);
 				
+				progress();
+				
 				log(username + " defining " + vmXmlPath + " ...", DEBUG);
 				module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
 					if(err) return error(err);
+					
+					progress();
 					
 					log(stdout, INFO);
 					log(stderr, WARN);
@@ -6492,8 +6597,21 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 	}
 	
+	function progress(inc, max) {
+		if(abort) return;
+		if(inc == undefined) inc = 1;
+		
+		if(max) var obj = [inc, max];
+		else var obj = [inc];
+		
+		sendToClient(username, "progress", obj);
+	}
+	
 	function done(resp) {
 		if(abort) return;
+		//if(options.command == "status") return;
+		
+		sendToClient(username, "progress", []);
 		
 		callback(null, resp);
 		callback = null;
@@ -6512,6 +6630,8 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		callback = null;
 		
 		abort = true;
+		
+		sendToClient(username, "progress", []);
 	}
 
 

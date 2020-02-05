@@ -609,6 +609,79 @@ root slash. Adding flags=(attach_disconnected) to the profile fixes that problem
 example: %HOME%%USERNAME%/bin/bash flags=(attach_disconnected) {
 
 
+Creating a Docker daemon base VM
+--------------------------------
+
+Create a zvol
+`sudo zfs create -V 16G tank/docker`
+
+Install libvirt...
+
+Create a VM
+````
+cd dockervm
+sudo virsh define docker.xml
+````
+
+Check the IP of the VM
+`sudo virsh net-dhcp-leases default`
+
+Install Ubuntu OS on the VM...
+
+Follow instructions to install Docker daemon: https://docs.docker.com/install/linux/docker-ce/ubuntu/
+
+Enable TCP access to the docker Daemon (https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd)
+`sudo mkdir -p /etc/systemd/system/docker.service.d/`
+`sudo nano /etc/systemd/system/docker.service.d/startup_options.conf`
+
+````
+# /etc/systemd/system/docker.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
+````
+
+````
+sudo systemctl daemon-reload
+sudo systemctl restart docker.service
+````
+
+Install SSH server and disable password login
+
+Generate a ssh key on the host server
+`ssh-keygen -f /root/.ssh/docker`
+
+Copy generated public key
+`sudo cat /root/.ssh/docker.pub`
+
+Add public key to the VM (copy/paste)
+`nano ~/.ssh/authorized_keys`
+
+Logout and relogin (make sure you can't login with a password)
+`sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96`
+
+
+Make sure the share is working
+`sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/`
+(should have a virtio link to a device)
+
+
+Copy the config script into the VM: 
+nano check_config_in_vm.sh
+
+Make it runable
+sudo chmod + x check_config_in_vm.sh
+
+
+Shutdown the VM
+`sudo shutdown -h now`
+
+Create a snapshot of the zvol (make sure the VM is shut down first!)
+sudo zfs snapshot tank/docker@base
+(don't forget to delete and make another snapshot if you make changes to the base VM!)
+
+
+
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 Where is the program ?

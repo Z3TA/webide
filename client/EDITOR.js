@@ -238,6 +238,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 EDITOR.soundAssist = false; // If set to true, widgets should make sounds (EDITOR.say) to aid the user
 EDITOR.speechRate = 1; // // 0.1 to 10
 
+EDITOR.env = {}; // Plugins can set custom env values that will be passed to terminal
+
 (function() { // Non global editor code ...
 	"use strict";
 	
