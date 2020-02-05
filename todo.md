@@ -78,20 +78,27 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+problem exploring /home/ dir ... can we skip directly to /home/user !?
+
+todo: try stopping, starting from UI
+
+testing Docker implementation.
+
+
+
 sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
 
 Use the libvirt NAT network on the Docker VM for now ...
 
 
-sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 10.0.128.235 -j ACCEPT
-sudo iptables -I FORWARD 1 -s 10.0.128.235 -d 10.0.3.235 -j ACCEPT
-sudo iptables -I FORWARD 1 -s 10.0.128.235 -d 10.0.0.1 -j ACCEPT
-doesn't work :(
+sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.96 -j ACCEPT
+
+
+
 
 also block docker server from accessing other user's netns!?
 
-sudo iptables -I FORWARD 1 -o virbr0 -i netnsbridge -j ACCEPT
-sudo iptables -I FORWARD 1 -i virbr0 -o netnsbridge -j ACCEPT
+
 
 
 test dockervm/check_config_in_vm.sh in Docker VM, do we loose network connectivity!? Can we reach the Internet !?

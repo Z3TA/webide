@@ -59,7 +59,7 @@
 					deamonAwake = true;
 					
 					if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
-					json.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
+					EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 					
 					discoveryBarIcon.activate();
 					updateStatus("running");
@@ -86,7 +86,7 @@
 			else {
 				
 				if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
-				json.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
+				EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 				
 				alertBox("The Docker daemon is now awaken! Speak to it using the docker command in the terminal emulator");
 				discoveryBarIcon.activate();

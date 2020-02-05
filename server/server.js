@@ -6402,21 +6402,23 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		if(pingFail == undefined) pingFail = 0;
 		
-		log(username + " pinging " + ipToPing + " is reachable...", DEBUG);
+		log(username + " pinging " + ipToPing + " ... pingFail=" + pingFail, DEBUG);
 		module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
 			log("ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
 			
 			progress();
 			
 			if(err) {
-				log("Do something when ping fails...");
+				pingFail++;
 				
-				if(++pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
+				log("ping fail! pingFail=" + pingFail, DEBUG);
+				
+				if(pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
 				
 				ping(ipToPing, pingFail);
 			}
 			else {
-				log("Do something when ping is successful...");
+				log("ping success! attempts=" + pingFail, DEBUG);
 				
 				configure(ipToPing);
 				
@@ -6442,7 +6444,8 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	function stopVM() {
 		var name = "docker_" + username;
 		log(username + " stopping " + name + " VM ...", DEBUG);
-		module_child_process.exec("virsh stop " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
+		
+		module_child_process.exec("virsh shutdown " + name + " --mode acpi", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			
 			progress();
@@ -6454,6 +6457,34 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			}
 			else throw new Error("Unexpected options.command=" + options.command);
 			
+		});
+	}
+	
+	function checkIptables(IP) {
+		var userIP =  UTIL.int2ip(167772162 + uid);
+		
+		// Needed so that the user can access the VM from the user netns
+// sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.96 -j ACCEPT
+		// sudo iptables -D FORWARD 1
+		
+		log(username + " checkign iptables...", DEBUG);
+		module_child_process.exec("iptables -S FORWARD | grep -q " + userIP + ".*" + IP, function(err, stdout, stderr) {
+			progress();
+			
+			if(err) {
+				// Rule does not exist
+				log(username + " updating iptables...", DEBUG);
+				module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + " -d " + IP + " -j ACCEPT", function(err, stdout, stderr) {
+					progress();
+					if(err) return error(err);
+					
+					ping(IP);
+				});
+			}
+			else {
+				// Rule exist!
+				ping(IP);
+			}
 		});
 	}
 	
@@ -6474,8 +6505,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			if(err) {
 				
 				// We might have been successful anyway!
-				//if(stdout.indexOf("userhome already mounted") != -1) return success();
-				
+				if(stdout.indexOf("SUCCESS!") != -1) return success();
 				
 				log("stdout=" + stdout);
 				log("stderr=" + stderr);
@@ -6485,6 +6515,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 				// Don't want to tell users about our week password :P So use a custom error
 				return error("Unable to configure Docker daemon VM settings!");
 			}
+			else success();
 			
 			function success() {
 				progress();
@@ -6517,7 +6548,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			
 			var IP = matchIP[1];
 			
-			ping(IP);
+			checkIptables(IP);
 		});
 	}
 	
