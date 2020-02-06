@@ -612,6 +612,7 @@ example: %HOME%%USERNAME%/bin/bash flags=(attach_disconnected) {
 Creating a Docker daemon base VM
 --------------------------------
 
+
 Create a zvol
 `sudo zfs create -V 16G tank/docker`
 
@@ -673,8 +674,9 @@ Make sure the share is working
 `sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/`
 (should have a virtio link to a device)
 
+note: Must shutdown -h in order to edit shares! (eg. reboot wont work)
 
-Copy the config script into the VM: 
+Copy the dockervm/check_config_in_vm.sh script into the VM: 
 nano check_config_in_vm.sh
 
 Make it runable

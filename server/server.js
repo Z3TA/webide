@@ -6246,6 +6246,28 @@ status = status + " to " + matchEndpoint[1];
 function dockerDaemon(username, homeDir, uid, options, callback) {
 	"use strict";
 	
+	/*
+		
+		todo:
+		* Shut down Docker VM when user leaves!
+		* Fix issues with parcel live-reload
+		* *  It doesn't seem to detect changes
+		* * Make the port reachable! ex: d###.user.webide.se should proxy to the docker VM, and the terminal should detect that we are using docker in order to add the d infront of the port!?
+		* * Or users might have to use socat to expose his/her docker deamon VM to https://####.user.webide.se eg. socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
+		* * Or automatically detect open ports on the VM and run socat in the user netns. eg. sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:172.17.0.2:6565
+		* Make the docker VM use the user VPN 
+		* Make VM IP address permanent: 
+		* * virsh net-update default add-last ip-dhcp-host '<host mac="52:54:00:6f:78:f3" ip="192.168.122.222"/>' --live --config --parent-index 0
+		* Block docker VM from accessing other user's netns!?
+		* Use latest snapshot from the Docker base VM when creating the zvol!
+		
+		If you need to debug, you can ssh into the docker VM:
+		sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
+		
+		
+		
+	*/
+	
 	if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
 	
 	
@@ -6263,7 +6285,10 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	sendToClient(username, "progress", [0,0]);
 	sendToClient(username, "progress", [0,30]);
 	
-	checkLibVirtUser();
+	// The user running libvirt need to have access to the user home dir in order to mount it
+	// We however need to run libvirt as root in order to write to the mounted home dir!
+	//checkLibVirtUser();
+	checkZvol();
 	
 	function checkLibVirtUser() {
 	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
@@ -6306,7 +6331,9 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			var matchDocker = stdout.match(reDocker);
 			if(!matchDocker) {
 				log("zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
-				return error("Found no zvol to copy from!");
+				var err = new Error("Found no zvol to copy from!");
+				err.code = "MISSING_BASE_ZVOL";
+				return error(err);
 			}
 			
 			var zpool = matchDocker[1];

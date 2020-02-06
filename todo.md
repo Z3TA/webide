@@ -78,151 +78,22 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-ls -la /home/ltest1/nodedocker/node_modules/.bin/imported-components
+<host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.0.128.235'/>
 
-root@docker_ltest1:/home/ltest1/nodedocker# ls -la node_modules/.bin/imported-components
-ls: cannot read symbolic link 'node_modules/.bin/imported-components': Too many levels of symbolic links
-lrwxrwxrwx 1 1001 1001 51 Jan 31 12:29 node_modules/.bin/imported-components
+<ip address='10.0.121.0' netmask='255.255.0.0'>
+    <dhcp>
+      <range start='10.0.121.2' end='10.0.125.254'/>
+    </dhcp>
+  </ip>
 
 
-todo: try stopping, starting Docker daemon from UI
 
-testing Docker implementation.
+sudo virsh dumpxml docker_ltest1 | grep "mac address" | awk -F\' '{ print $2}'
 
 
+Give the docker a static IP via libvirt DHCP
+Add to user Nginx that it should try the docker IP if it can't reach the user netns
 
-sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
-
-Use the libvirt NAT network on the Docker VM for now ...
-
-
-sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.96 -j ACCEPT
-
-
-
-
-also block docker server from accessing other user's netns!?
-
-
-
-
-test dockervm/check_config_in_vm.sh in Docker VM, do we loose network connectivity!? Can we reach the Internet !?
-
-
-sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/
-
-sudo chmod 771 /home/ltest1
-sudo usermod -a -G ltest1 libvirt-qemu
-sudo ls -lad /home/ltest1
-
-Must shutdown -h in order to add a new share!!!
-
-
-sudo mount ltest1 /home/ltest1 -t 9p -o trans=virtio
-
-"special device testlabel does not exist"
-
-sudo service kmod start
-
-sudo nano /etc/modules
-loop
-virtio
-9p
-9pnet
-9pnet_virtio
-
-<devices ...>
-    <filesystem type='mount' accessmode='passthrough'>
-      <source dir='/home/ltest1'/>
-      <target dir='home'/>
-    </filesystem>
-  </devices>
-
-
-
-
-
-
-docker-compose -f docker-compose.builder.yml run --rm install
-
-Share user home dir in docker VM ? :)
-
-
-export DOCKER_HOST=tcp://192.168.122.241:2376
-
-sudo virsh define docker.xml
-zfs create -V 10G zpcdata/docker
-
-VM limit seem to be 8 VM's per CPU core,
-so we should only run the docker VM if the user activates it!
-
-For the docker VM:
-
-
-
-sudo systemctl daemon-reload
-sudo systemctl start docker
-sudo systemctl enable docker
-
-
-When docker is activated via the discovery bar, 
-the user's docker deamon VM starts...
-iptables are updated so that the user (from the user netns) can access his/her docker deamon.
-The user might have to use socat to expose his/her docker deamon VM to https://####.user.webide.se
-
-
-have the ip of the docker VM in /etc/hosts eg. "docker   192.168.121.138" so you can curl docker:49160
-and also run socat: sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
-
-export DOCKER_HOST=tcp://192.168.121.138:2376
-
-https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd
-
-expose the docker deamon port in the container
-
-this fixes the unreacable port error:
-should be more specific, use user netns ip and docker server ip
-sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.241 -j ACCEPT
-sudo iptables -I FORWARD 1 -s 192.168.122.241 -d 10.0.3.235 -j ACCEPT
-doesn't work :(
-
-also block docker server from accessing other user's netns!?
-
-sudo iptables -I FORWARD 1 -o virbr0 -i netnsbridge -j ACCEPT
-sudo iptables -I FORWARD 1 -i virbr0 -o netnsbridge -j ACCEPT
-
-I need to add a rule before the reject that will accept packages from the 
-
-Reason for blocking:
--A FORWARD -o virbr0 -j REJECT --reject-with icmp-port-unreachable
--A FORWARD -i virbr0 -j REJECT --reject-with icmp-port-unreachable
-
-can ping 192.168.121.138 (user netns) from the VM,
-but can't ping 192.168.121.138 (tue VM) from the user netns!
-
-Run docker deamon in a libvirt KVM...!?
-Will it be possible for the Docker in the VM to bind user folders!?
-
-
-mount -t proc none "${R}/proc"
-mount -t sysfs none "${R}/sys"
-
-ip netns exec remounts /sys which causes the cgroup mounts to disappear from /proc/self/mountinfo.
-
-Run a docker deamon for each user!? :)
-Run the docker deamon in the user netns.
-
-
-Find all containers started by an user,
-use socat to proxy the exposed ip:port to the user netns ip
-or instruct the user to do it...!?
-
-sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:172.17.0.2:6565
-
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' fcc438c2e021
-
-Why do all docker tutorials insist on  redirecting a public port to a private port !?!?
-The problem with that is that private means localhost on the *host* which is not reachable by our user because he/she is in a netns!
 
 Trying docker tutorial: https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
 
@@ -230,26 +101,17 @@ Trying docker tutorial: https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
 Start a proxy in the user netns that listens to the netns ip, and make 
 requests to the other Docker netns ip !?
 
-Listen for new netns, then move the host end of the veth to the user netns !?
-still woulnt be able to listen on the netns ip
-
-
-
-
 
 problem: Docker listens on host system IP's, we want it to listen on the user netns!
 Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
 solution: Nginx proxy to the docker IP same as with user IP
 
-problem: Issues with docker scripts when chrooted as . relative paths will be wrong!
-
-
-support for docker-compose
-
 
 Also replace http://localhost:43689 with netns IP in terminal output!
 
 
+
+Issues with parsel and our Docker VM...
 https://hackernoon.com/move-over-next-js-and-webpack-ba367f07545
 https://hackernoon.com/a-better-way-to-develop-node-js-with-docker-cd29d3a0093
 
@@ -257,21 +119,17 @@ https://hackernoon.com/a-better-way-to-develop-node-js-with-docker-cd29d3a0093
 testing docker
 
 
-hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
-
-Docker hardening, user namespaces!?
-
-Docker wont allow running commands on the host via a Dockerfile... Se we might be able to use Docker as is!?
-
-
-todo: cloudide_install.js instructions for Docker
 
 docker...
 
 
+React Native support!
+Able to use Android emulator
+
+
 todo: Delete emoty files and folders in user home dirs, because there will be no more chrooting
 
-
+hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
 todo: In order to be able to move users between servers, server.js should take care of everything!
 adduser.js shouln't have to chown folders and set sticky bit!
