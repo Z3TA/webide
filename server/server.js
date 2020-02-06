@@ -3178,26 +3178,6 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 				});
 			}
 			
-			// When user launches for example a node.js web server listening on "localhost"
-			// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
-			createNetnsFile("hosts", IP + "\tlocalhost");
-			
-			// Override host's resolvers
-			createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
-			
-			
-			// Make it harder to see other users on the system by faking...
-			createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
-			createNetnsFile("group", username + ":x:" + gid + ":");
-			
-			copyEntryFrom("subuid");
-			copyEntryFrom("subgid");
-			
-			createNetnsFile("mtab", "");
-			
-			
-			
-			
 			module_child_process.exec("bash addnetns.sh " + username + " --unattended", EXEC_OPTIONS, function(error, stdout, stderr) {
 				//if(error) log("addnetns error: " + error.message, WARN);
 				if(error && error.code != 17) throw new Error("Error: " + error.message + " error.code=" + error.code + " stdout=" + stdout + " stderr=" + stderr);
@@ -3210,6 +3190,27 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 				if(!matchIP) throw new Error("Unable to find " + reIP + " in stdout=" + stdout);
 				var parsedIP = matchIP[1];
 				if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedIP + " IP=" + IP + "  ");
+				
+				
+				// When user launches for example a node.js web server listening on "localhost"
+				// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
+				createNetnsFile("hosts", IP + "\tlocalhost");
+				
+				// Override host's resolvers
+				createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
+				
+				
+				// Make it harder to see other users on the system by faking...
+				createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
+				createNetnsFile("group", username + ":x:" + gid + ":");
+				
+				copyEntryFrom("subuid");
+				copyEntryFrom("subgid");
+				
+				createNetnsFile("mtab", ""); // Contains mountpoints and thus other users
+				
+				
+				
 				
 				createdNetworkNamespaces = true;
 				checkMountsReadyMaybe();
@@ -6249,7 +6250,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	
 	
 	log("##############################################################");
-	log("    " + username + "      DOCKER         uid=" + uid + "      ");
+	log(" DOCKER  " + username + "  " + options.command + "  uid=" + uid + "      ");
 	log("##############################################################");
 	
 	var libvirtAddedToGroup = false;
@@ -6260,7 +6261,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
 	sendToClient(username, "progress", [0,0]);
-	sendToClient(username, "progress", [0,20]);
+	sendToClient(username, "progress", [0,30]);
 	
 	checkLibVirtUser();
 	
@@ -6468,11 +6469,23 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		// sudo iptables -D FORWARD 1
 		
 		log(username + " checkign iptables...", DEBUG);
-		module_child_process.exec("iptables -S FORWARD | grep -q " + userIP + ".*" + IP, function(err, stdout, stderr) {
+		module_child_process.exec("iptables -S FORWARD", function(err, stdout, stderr) {
+			if(err) return error(err);
 			progress();
+			/*
+				if libvirt daemons are restarted, the iptable rules will re re-added and we have to re-add aswell
+				
+				-A FORWARD -o virbr0 -j REJECT --reject-with icmp-port-unreachable
+				
+			*/
 			
-			if(err) {
-				// Rule does not exist
+			var reUser = new RegExp(userIP + ".*" + IP);
+			var reBlock = /-o virbr0 -j REJECT/;
+			
+			var matchUser = stdout.match(reUser);
+			var matchBlock = stdout.match(reBlock);
+			
+			if(!matchUser || (matchBlock && matchBlock.index < matchUser.index)) {
 				log(username + " updating iptables...", DEBUG);
 				module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + " -d " + IP + " -j ACCEPT", function(err, stdout, stderr) {
 					progress();
@@ -6506,6 +6519,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 				
 				// We might have been successful anyway!
 				if(stdout.indexOf("SUCCESS!") != -1) return success();
+				if(stdout.indexOf("userhome already mounted") != -1) return success();
 				
 				log("stdout=" + stdout);
 				log("stderr=" + stderr);
@@ -6531,8 +6545,12 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		});
 	}
 	
-	function checkIP() {
-		log(username + " checking domifaddr...", DEBUG);
+	function checkIP(attempts) {
+		
+		// it might take some time for the libvirt dhcp to configure itself...
+		if(attempts==undefined) attempts = 1;
+		
+		log(username + " checking domifaddr... attempts=" + attempts, DEBUG);
 		module_child_process.exec("virsh domifaddr docker_" + username, function(err, stdout, stderr) {
 			// vnet0      52:54:00:12:be:53    ipv4         192.168.122.96/24
 			if(err) return error(err);
@@ -6543,7 +6561,10 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			var matchIP = stdout.match(reIP);
 			if(!matchIP) {
 				log("domifaddr: stdout=" + stdout + " stderr=" + stderr + " reIP=" + reIP + " username=" + username, DEBUG);
-				return error("Unable to find Docker daemon VM IP!");
+				
+				if(attempts < 5) return checkIP(++attempts);
+				
+				return error("Unable to find Docker daemon VM IP! attempts=" + attempts);
 			}
 			
 			var IP = matchIP[1];

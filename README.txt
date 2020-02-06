@@ -617,6 +617,14 @@ Create a zvol
 
 Install libvirt...
 
+libvirt* need to run as root, in order to make it possible for Docker containers to write in the user home dir
+sudo nano /etc/libvirt/qemu.conf
+````
+user = "root"
+group = "root"
+dynamic_ownership = 0
+````
+
 Create a VM
 ````
 cd dockervm
@@ -678,8 +686,16 @@ Shutdown the VM
 
 Create a snapshot of the zvol (make sure the VM is shut down first!)
 sudo zfs snapshot tank/docker@base
-(don't forget to delete and make another snapshot if you make changes to the base VM!)
 
+ZFS will reuse the the snapshot when cloning!
+So if you need to change something in base, you would have to delete all docker zvol's!
+
+sudo zfs destroy zpcdata/docker@base
+sudo zfs snapshot zpcdata/docker@base
+
+
+List snapshots
+zfs list -t snapshot
 
 
 Installing more programs to the users folder (chroot)

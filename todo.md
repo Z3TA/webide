@@ -78,7 +78,12 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-bug: self_debug things errors are in CLIENT.js ...
+ls -la /home/ltest1/nodedocker/node_modules/.bin/imported-components
+
+root@docker_ltest1:/home/ltest1/nodedocker# ls -la node_modules/.bin/imported-components
+ls: cannot read symbolic link 'node_modules/.bin/imported-components': Too many levels of symbolic links
+lrwxrwxrwx 1 1001 1001 51 Jan 31 12:29 node_modules/.bin/imported-components
+
 
 todo: try stopping, starting Docker daemon from UI
 

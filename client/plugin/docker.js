@@ -45,6 +45,7 @@
 	});
 	
 	function toggleDocker() {
+		console.log("deamonAwake=" + deamonAwake);
 		if(deamonAwake) sleep();
 		else wakeup();
 		
@@ -90,7 +91,8 @@
 				
 				alertBox("The Docker daemon is now awaken! Speak to it using the docker command in the terminal emulator");
 				discoveryBarIcon.activate();
-				updateStatus("running")
+				updateStatus("running");
+				deamonAwake = true;
 			}
 		});
 	}
@@ -104,6 +106,7 @@
 				alertBox("The Docker daemon has ben put to sleep!");
 				discoveryBarIcon.deactivate();
 				updateStatus("(shut off)");
+deamonAwake = false;
 			}
 		});
 	}

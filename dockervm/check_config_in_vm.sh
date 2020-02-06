@@ -11,9 +11,9 @@ set -e
 
 
 USERNAME=$1
-HNAME=$
-#IP=$2
-#GW=$3
+HNAME=$2
+#IP=$3
+#GW=$4
 
 # Assuming home directories are in /home
 HOMEDIR="/home/$USERNAME/"
