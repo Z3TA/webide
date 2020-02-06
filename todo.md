@@ -78,15 +78,22 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-<host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.0.128.235'/>
+generate mac and static IP when creating the VM!
 
-<ip address='10.0.121.0' netmask='255.255.0.0'>
+167903234 = "10.2.0.2"
+167903234+uid = docker VM IP
+167903234+1001=167904235=10.2.3.235
+
+<host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+
+<ip address='10.2.0.1' netmask='255.255.0.0'>
     <dhcp>
-      <range start='10.0.121.2' end='10.0.125.254'/>
+      <range start='10.2.121.2' end='10.2.125.254'/>
     </dhcp>
   </ip>
 
 
+todo: Update nginx profle with proxy IP to docker and user netns
 
 sudo virsh dumpxml docker_ltest1 | grep "mac address" | awk -F\' '{ print $2}'
 

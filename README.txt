@@ -700,6 +700,13 @@ List snapshots
 zfs list -t snapshot
 
 
+If you have problems connecting, try 
+sudo iptables -I FORWARD 1 -j ACCEPT
+
+when you are done:
+sudo iptables -D FORWARD 1 -j ACCEPT
+
+
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 Where is the program ?

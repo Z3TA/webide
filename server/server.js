@@ -6512,9 +6512,11 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			var matchUser = stdout.match(reUser);
 			var matchBlock = stdout.match(reBlock);
 			
+			log(username + " iptables: matchUser=" + JSON.stringify(matchUser) + " matchBlock=" + JSON.stringify(matchBlock) + " reUser=" + reUser + " reBlock=" + reBlock, DEBUG);
+			
 			if(!matchUser || (matchBlock && matchBlock.index < matchUser.index)) {
 				log(username + " updating iptables...", DEBUG);
-				module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + " -d " + IP + " -j ACCEPT", function(err, stdout, stderr) {
+				module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + "/32 -d " + IP + "/32 -j ACCEPT", function(err, stdout, stderr) {
 					progress();
 					if(err) return error(err);
 					
@@ -6581,6 +6583,8 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		module_child_process.exec("virsh domifaddr docker_" + username, function(err, stdout, stderr) {
 			// vnet0      52:54:00:12:be:53    ipv4         192.168.122.96/24
 			if(err) return error(err);
+			
+			log(username + " domifaddr: stdout=" + stdout + " stderr=" + stderr, DEBUG);
 			
 			progress();
 			

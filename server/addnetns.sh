@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # 
 # note: If custom_iptables.service is not used, you need to manually add the following rule:
@@ -11,9 +12,9 @@
 #
 # For this to work we first need a netnsbridge bridge:
 # (this is automatically done by server.js)
-# ip link add name netnsbridge type bridge
-# ip link set netnsbridge up 
-# ip addr add 10.0.0.1/16 brd + dev netnsbridge
+# sudo ip link add name netnsbridge type bridge
+# sudo ip link set netnsbridge up 
+# sudo ip addr add 10.0.0.1/16 brd + dev netnsbridge
 #
 #
 
