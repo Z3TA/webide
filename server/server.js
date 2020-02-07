@@ -6528,7 +6528,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			var matchUser = stdout.match(reUser);
 			var matchBlock = stdout.match(reBlock);
 			
-			log(username + " iptables: matchUser=" + JSON.stringify(matchUser) + " matchBlock=" + JSON.stringify(matchBlock) + " reUser=" + reUser + " reBlock=" + reBlock, DEBUG);
+			log(username + " iptables: matchUser=" + JSON.stringify(matchUser) + " matchBlock=" + JSON.stringify(matchBlock) + " reUser=" + reUser + " reBlock=" + reBlock + " matchBlock.index=" + (matchBlock && matchBlock.index) + " matchUser.index=" + (matchUser && matchUser.index) + " ", DEBUG);
 			
 			if(!matchUser || (matchBlock && matchBlock.index < matchUser.index)) {
 				log(username + " updating iptables...", DEBUG);
@@ -6701,14 +6701,45 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		var MAC = generateMAC();
 		
-		module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+		
+		module_child_process.exec('virsh net-dumpxml default', EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
+			else {
+				// <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+				
+				var reIP = new RegExp("<host mac='(.*)' name='(.*)' ip='" + staticIP + "'\\/>");
+				var matchIP = stdout.match(reIP);
+				if(!matchIP) return addIP();
+				else {
+					log("dhcp-host record already exist: " + matchIP[0]);
+					// Should we reuse the MAC!?
+					return removeIP(matchIP[0]);
+				}
+			}
+		});
+		
+		function addIP() {
+			module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
 			else {
 				progress();
 				log(username + " Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
 				defineVM();
 			}
 		});
+		}
+		
+		function removeIP(dhcpHostStr) {
+			// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+			module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
+				else {
+					progress();
+					log(username + " Removed " + dhcpHostStr, INFO);
+					addIP();
+				}
+			});
+		}
 		
 		function defineVM() {
 			module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
