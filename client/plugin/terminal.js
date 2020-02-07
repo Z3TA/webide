@@ -94,7 +94,7 @@ todo: Run vttest
 			netnsIP = login.netnsIP;
 			// Remember to put double \\ escape backslashes because of new RegExp() !
 			// note: The IP and port might be sprinkled with colors!
-			reNetnsIP = new RegExp(UTIL.escapeRegExp(netnsIP) + ":(\\x1b\\[\\d+m)?(\\d+)(\\x1b\\[\\d+m)?", "g");
+			reNetnsIP = new RegExp("(" + UTIL.escapeRegExp(netnsIP) + "|localhost|0\\.0\\.0\\.0):(\\x1b\\[\\d+m)?(\\d+)(\\x1b\\[\\d+m)?", "g");
 		}
 		
 		username = login.user;
@@ -425,7 +425,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			
 			if(reNetnsIP) {
 				
-				data = data.replace(reNetnsIP, "$1$2$3." + username + "." + TLD);
+				data = data.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				// $1 and $3 might be colors...
 				/*
 					if( data.indexOf(netnsIP) != -1) {
