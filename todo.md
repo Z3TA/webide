@@ -132,6 +132,14 @@ testing docker
 
 docker...
 
+Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
+No disconnect option when closing and reopening the ftp/sftp widget
+
+
+Able to quick search the menu itmes (goto anything!?)
+or just start typing...
+
+
 
 React Native support!
 Able to use Android emulator

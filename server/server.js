@@ -3332,7 +3332,7 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 						
 						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN.replace/\./g, "\\.") ); // dots need to be escaped!
+						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN.replace(/\./g, "\\.") ); // dots need to be escaped!
 						nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
 						nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + uid));
 						
@@ -3367,11 +3367,16 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 									if(stderr) error = new Error(stderr);
 									if(stdout) error = new Error(stdout);
 									if(error) {
-										module_fs.unlink(nginxProfileEnabledPath, function(err) {
+										// Get the actual error
+										module_child_process.exec("nginx -T", EXEC_OPTIONS, function(err, stdout, stderr) {
 											if(err) throw err;
+											log(stdout, NOTICE)
+											reportError(stdout);
+											log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
+											module_fs.unlink(nginxProfileEnabledPath, function(err) {
+												if(err) throw err;
+											});
 										});
-										console.error(error);
-										reportError(error);
 									}
 									
 									nginxProfileOK = true;
@@ -6659,9 +6664,42 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		if(zpool == undefined) throw new Error("zpool=" + zpool);
 		// Assuming we already have a zvol!
 		
-		var MAC = "XX:XX:XX:XX:XX:XX".replace(/X/g, function() {
-			return "0123456789ABCDEF".charAt(Math.floor(Math.random() * 16))
-		});
+		function generateMAC() {
+			for(var i=0,arr=[];i<6;i++) {
+				arr[i] = Math.floor(Math.random() * 256);
+			}
+			
+			//log(JSON.stringify(arr));
+			
+			// Last octet should end with a binary 0 to make it unicast (or 1 for multicast). Eg the number should be even
+			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
+			//arr[5] = parseInt(arr[5].toString(2).slice(0,2)+"0",2);
+			arr[5] = roundEven(arr[5]);
+			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
+			
+			// Second last octet should end with a binary 1 to indicate it's locally administered (or 0 for globally unique)
+			//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
+			//arr[4] = parseInt(arr[4].toString(2).slice(0,2)+"1",2);
+			arr[4] = roundOdd(arr[4]);
+			//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
+			
+			for(var i=0;i<6;i++) {
+				arr[i] = arr[i].toString(16);
+				if(arr[i].length<2) arr[i] = "0" + arr[i]; // Zero pad
+				arr[i] = arr[i].toUpperCase();
+			}
+			
+			return arr.join(":");
+			
+			function roundEven(n) {
+				return 2 * Math.round(n / 2);
+			}
+			function roundOdd(n) {
+				return  2* Math.floor(n/2) + 1;
+			}
+		}
+		
+		var MAC = generateMAC();
 		
 		module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
