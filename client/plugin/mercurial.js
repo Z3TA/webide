@@ -1113,7 +1113,7 @@ else var directory = EDITOR.workingDirectory;
 			if(err) {
 				if(callback) callback(err);
 				else {
-					alertBox("Unable to get status!\n" + err.message);
+					alertBox("Mercurial was unable to get status of directory=" + directory + "!\n" + err.message);
 					hideMercurialWidgets();
 				}
 			}
