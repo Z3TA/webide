@@ -78,47 +78,14 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Adding the user to the docker VM with the same uid, then edit /etc/subuid and map it to the same id, then
+start dockerd with --userns-remap ltest1 seem to fix the issues!
+/etc/systemd/system/docker.service.d/startup_options.conf
 
-todo: Test Docker VM creation
+tried mount userhome $HOMEDIR -t 9p -o trans=virtio,umask=0022,gid=1001,uid=1001 but it didn't work
 
-generate mac and static IP when creating the VM!
-
-167903234 = "10.2.0.2"
-167903234+uid = docker VM IP
-167903234+1001=167904235=10.2.3.235
-
-<host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
-
-<ip address='10.2.0.1' netmask='255.255.0.0'>
-    <dhcp>
-      <range start='10.2.121.2' end='10.2.125.254'/>
-    </dhcp>
-  </ip>
-
-
-todo: Update nginx profle with proxy IP to docker and user netns
-
-sudo virsh dumpxml docker_ltest1 | grep "mac address" | awk -F\' '{ print $2}'
-
-
-Give the docker a static IP via libvirt DHCP
-Add to user Nginx that it should try the docker IP if it can't reach the user netns
-
-
-Trying docker tutorial: https://nodejs.org/de/docs/guides/nodejs-docker-webapp/
-
-
-Start a proxy in the user netns that listens to the netns ip, and make 
-requests to the other Docker netns ip !?
-
-
-problem: Docker listens on host system IP's, we want it to listen on the user netns!
-Can't proxy traffic to the docker image eg 1234.user.webide.se -> netns ip
-solution: Nginx proxy to the docker IP same as with user IP
-
-
-Also replace http://localhost:43689 with netns IP in terminal output!
-
+When home dir is shared with Docke VM,
+all files created by Docker images will get root as owner...
 
 
 Issues with parsel and our Docker VM...
