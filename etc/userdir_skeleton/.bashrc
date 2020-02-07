@@ -115,22 +115,3 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-#  Ensure npm will find installed binaries and man pages.
-NPM_PACKAGES="/.npm-packages"
-export PATH="$NPM_PACKAGES/bin:$PATH"
-
-# Some Node.JS scripts read port from PORT by default
-# Make it use a unix socket instead of tcp port!
-export PORT="/sock/test"
-
-# Other scripts (React app) looks for HOST
-export HOST="%NETNSIP%"
-
-# Able to install (and run?) docker
-#  curl -fsSL https://get.docker.com/rootless | sh
-export DOCKER_BIN="/dockerbin"
-export XDG_RUNTIME_DIR="/tmp/docker-1001"
-export DOCKER_HOST="unix:///tmp/docker-1001/docker.sock"
-
-

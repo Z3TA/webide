@@ -905,28 +905,34 @@ function main() {
 		// Make sure we have a bridge setup for Linux network namespaces
 		module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
 			if(error) {
+				/*
+					Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
+					we will give each user their uid (decimal) as IP
+					ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
+					
+					Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
+					
+				*/
 				module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
 					if(error) throw error;
 					if(stdout) log("netnsbridge: stdout=" + stdout, NOTICE);
 					if(stderr) log("netnsbridge: stderr=" + stderr, WARN);
-					/*
-						Use a submask of 16 (255.255.0.0) instead of 24 (255.255.255.0) because
-						we will give each user their uid (decimal) as IP
-						ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
-						
-						Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
-						
-					*/
-					
-					module_child_process.exec("iptables -S -t nat | grep -q -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
-						if(error) {
-							module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
-								if(error) throw error;
-							});
-						}
-					});
 					
 				});
+			}
+		});
+		
+		// Some other process might reset iptables, so also check if the nat:ing is enabled for user netns
+		module_child_process.exec("iptables -S -t nat | grep -q -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+			if(error) {
+				log("nat POSTROUTING does Not exist for user netns. Adding it...", DEBUG);
+				module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+					if(error) throw error;
+					log("nat POSTROUTING added for user netns", INFO);
+				});
+			}
+			else {
+				log("nat POSTROUTING exist for user netns", DEBUG);
 			}
 		});
 	}
@@ -4574,6 +4580,7 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		spawnOptions.env.PATH =  process.env.PATH;
 	}
 	else {
+		// Spawning as root
 		spawnOptions.env.uid = uid;
 		spawnOptions.env.gid = gid;
 		
@@ -4581,13 +4588,19 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 		if(CHROOT) {
 		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:/.npm-packages/bin";
 		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
+			spawnOptions.env.PORT = "/sock/test";
+			spawnOptions.env.NPM_PACKAGES = "/.npm-packages";
 		}
 		else {
-			spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin";
+			spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:";
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + "/.npm-packages";
+			spawnOptions.env.PORT = homeDir + "/sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
+			spawnOptions.env.NPM_PACKAGES = homeDir + "/.npm-packages";
 		}
 		
 		spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
+		
+		
 		
 		if(CHROOT && uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
