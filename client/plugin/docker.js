@@ -63,7 +63,7 @@
 					EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 					
 					discoveryBarIcon.activate();
-					updateStatus("running");
+					updateStatus("running", status.IP);
 				}
 				else if(status.stopped) {
 					deamonAwake = false;
@@ -77,8 +77,8 @@
 		});
 	}
 	
-	function updateStatus(status) {
-		discoveryBarIcon.title = "Docker deamon " + status;
+	function updateStatus(status, IP) {
+		discoveryBarIcon.title = "Docker deamon " + status + " on " + IP;
 	}
 	
 	function wakeup() {
@@ -91,7 +91,7 @@
 				
 				alertBox("The Docker daemon is now awaken! Speak to it using the docker command in the terminal emulator");
 				discoveryBarIcon.activate();
-				updateStatus("running");
+				updateStatus("running", status.IP);
 				deamonAwake = true;
 			}
 		});
