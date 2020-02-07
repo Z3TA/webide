@@ -22,7 +22,8 @@ function getArg(word) {
 	
 	var regexStr = "( -" + word[0];
 	for(var i=1; i<word.length; i++) regexStr += "| --" + word[i] + "=";
-	regexStr += ")\\s?([^-\\s]+)?"
+	regexStr += ")\\s?([^\\s\"']+|\"([^\"]*)\"|'([^']*)')?"
+	// https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
 	
 	//console.log("regexStr=" + regexStr);
 	
@@ -31,9 +32,16 @@ function getArg(word) {
 	var match = args.match(argReg);
 	//console.log("match=" + JSON.stringify(match));
 	if(match !== null) {
+		var value;
 		//console.log("match.length=" + match.length);
-		var value = match[match.length-1];
-		//console.log("value=" + value);
+		for(var i=match.length; i>-1; i--) {
+			//console.log("i=" + i + " => " + match[i]);
+			if( match[i] !== undefined ) {
+				value = match[i];
+				break;
+			}
+		}
+		console.log("value=" + value);
 		if(value === undefined) return true;
 		else if(value === "false") return false;
 		else if(value === "true") return true;

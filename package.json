@@ -58,6 +58,7 @@
   },
   "scripts": {
     "start": "node ./start.js -local",
-    "server": "node ./server/server.js --loglevel=6 --username=admin --password=admin --ip=127.0.0.1 --port=8099 -nochroot"
+    "server": "node ./server/server.js --loglevel=6 --username=admin --password=admin --ip=127.0.0.1 --port=8099",
+    "webide-dev": "sudo node ./server/server.js --domain=webide-dev.se --host=webide-dev.se --ip=127.0.0.1 --port=8099"
   }
 }

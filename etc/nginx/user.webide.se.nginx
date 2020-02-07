@@ -47,6 +47,69 @@ server {
 }
 
 
+
+
+#
+# Proxy ####.%USERNAME%.%DOMAIN% to port on user netns ip
+# note: Nginx uses the first rule it finds, so this needs to be above socket.%USERNAME%.%DOMAIN%
+#
+
+#SSL#server {
+  #SSL#listen 80;
+  #SSL#listen [::]:80;
+  #SSL#server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
+  #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
+#SSL#}
+
+upstream portnr {
+  server %NETNSIP% fail_timeout=3s max_fails=1;
+  server %DOCKERIP% backup;
+}
+
+server {
+  server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
+  listen 80;#NOSSL#
+  listen [::]:80;#NOSSL#
+  #SSL#listen 443 ssl http2;
+  #SSL#listen [::]:443 ssl http2;
+  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
+  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
+
+  access_log %HOMEDIR%log/access.log %USERNAME%;
+
+  location / {
+    charset	utf-8;
+    proxy_pass http://portnr:$1;
+    proxy_http_version 1.1;
+    proxy_set_header host              $http_host;
+    proxy_set_header x-real-ip         $remote_addr;
+    proxy_set_header x-forwarded-for   $remote_addr;
+    proxy_set_header x-forwarded-proto $scheme;
+    proxy_set_header upgrade           $http_upgrade;
+    proxy_set_header connection        "upgrade";
+    
+    # We can't pass the port nr to upstream, but we can use an error page as fallback!
+    # Only problem is when the fallback also fails the user will get a generic 502 error instead of our @badgateway
+    error_page 502 @fallback;
+  }
+
+  location @badgateway {
+    add_header Access-Control-Allow-Origin * always;
+    default_type text/plain;
+    return 502 "Cannot connect to port: $1 on %NETNSIP%!\n";
+  }
+  
+  location @fallback {
+    proxy_pass http://10.2.3.235:$1;
+    error_page 502 @badgateway;
+  }
+
+  
+
+}
+
+
+
 #
 # Proxy socket.%USERNAME%.%DOMAIN% to unix-socket at %HOMEDIR%sock/socket
 #
@@ -91,46 +154,3 @@ server {
 
 }
 
-#
-# Proxy ####.%USERNAME%.%DOMAIN% to port on user netns ip
-#
-
-#SSL#server {
-  #SSL#listen 80;
-  #SSL#listen [::]:80;
-  #SSL#server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
-  #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
-#SSL#}
-
-server {
-  server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
-  listen 80;#NOSSL#
-  listen [::]:80;#NOSSL#
-  #SSL#listen 443 ssl http2;
-  #SSL#listen [::]:443 ssl http2;
-  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
-  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
-
-  access_log %HOMEDIR%log/access.log %USERNAME%;
-
-  location / {
-    charset	utf-8;
-    proxy_pass http://%NETNSIP%:$1;
-    proxy_http_version 1.1;
-    proxy_set_header host              $http_host;
-    proxy_set_header x-real-ip         $remote_addr;
-    proxy_set_header x-forwarded-for   $remote_addr;
-    proxy_set_header x-forwarded-proto $scheme;
-    proxy_set_header upgrade           $http_upgrade;
-    proxy_set_header connection        "upgrade";
-  }
-
-  location @badgateway {
-    add_header Access-Control-Allow-Origin * always;
-    default_type text/plain;
-    return 502 "Cannot connect to port: $1 on %NETNSIP%!\n";
-  }
-  
-  error_page 502 @badgateway;
-
-}

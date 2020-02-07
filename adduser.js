@@ -17,6 +17,9 @@
 	
 	Gotcha: apparmor can be slooow to update profiles
 	
+	
+	todo: Move as much as possible to server.js to make it easier to move user's between servers
+	
 */
 
 if(process.cwd() != __dirname) throw new Error("adduser.js needs to be run in the same dir as the script eg " + __dirname + " while current directory is " + process.cwd());
@@ -306,6 +309,7 @@ function adduser() {
 		homeDir = UTIL.trailingSlash(homeDir);
 		
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+		var dockerVMIP = UTIL.int2ip(167903234 + uid) // Starts on 10.2.0.2 ...
 		
 		//var gid = getGroupId(groupName);
 		
@@ -340,7 +344,7 @@ function adduser() {
 	// Make it so that no one else beside the user can read the user files
 	chmodrSync(homeDir, "750");
 	
-	// home dir needs to have execute permissions for everyone for the unix sockets to work !!!?
+		// Nginx (www-data) need -x permission on all folders in order to stat! sudo -u www-data stat /home/ltest1/wwwpub/
 	fs.chmodSync(homeDir, "751");
 	
 	// For DNS lookups to work !?
@@ -403,28 +407,8 @@ function adduser() {
 		chownrDirSync(homeDir + ".npm-packages", uid, gid);
 	
 		
-		// Create nginx profile
-		var url_user = UTIL.urlFriendly(username);
+		// Nginx profile will be created by server.js
 		
-		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
-		nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
-		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-		
-	try {
-			fs.writeFileSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", nginxProfile);
-			fs.symlinkSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "");
-			
-			console.time("Reload nginx");
-		var reloadNginxStdout = child_process.execSync("service nginx reload");
-		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
-			console.timeEnd("Reload nginx");
-			if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
-	}
-	catch (err) {
-			console.log(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
-			NO_CERT = true;
-		}
 	
 		if(!NO_CERT) {
 		// Register SSL certificate for user web page
@@ -517,11 +501,19 @@ function adduser() {
 		
 		function updateFile(path) {
 			var str = fs.readFileSync(path, ENCODING);
+			
+			str = updateFileContent(str);
+			
+			fs.writeFileSync(path, str);
+		}
+		
+		function updateFileContent(str) {
 			str = str.replace(/%USERNAME%/g, username);
 			str = str.replace(/%HOMEDIR%/g, homeDir);
 			str = str.replace(/%DOMAIN%/g, DOMAIN);
 			str = str.replace(/%NETNSIP%/g, netnsIP);
-			fs.writeFileSync(path, str);
+			str = str.replace(/%DOCKERIP%/g, dockerVMIP);
+			return str;
 		}
 		
 	});

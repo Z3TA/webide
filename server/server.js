@@ -178,6 +178,9 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 var defaultDomain = DEFAULT.domain;
 var DOMAIN = getArg(["domain", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
 
+//console.log("DOMAIN=" + DOMAIN);
+//process.exit();
+
 var CHROMIUM_DEBUG_PORT = 9222;
 var VNC_PORT = 5901;
 
@@ -3329,7 +3332,9 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 						
 						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN.replace/\./g, "\\.") ); // dots need to be escaped!
+						nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
+						nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + uid));
 						
 						module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 							if(err) throw err;
@@ -3359,9 +3364,15 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 								
 								var exec = module_child_process.exec;
 								exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
-									if(error) throw(error);
-									if(stderr) throw new Error(stderr);
-									if(stdout) throw new Error(stdout);
+									if(stderr) error = new Error(stderr);
+									if(stdout) error = new Error(stdout);
+									if(error) {
+										module_fs.unlink(nginxProfileEnabledPath, function(err) {
+											if(err) throw err;
+										});
+										console.error(error);
+										reportError(error);
+									}
 									
 									nginxProfileOK = true;
 									console.timeEnd("Check " + username + " Nginx enabled");
@@ -4571,7 +4582,7 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + "/.npm-packages";
 		}
 		
-//spawnOptions.env["DOCKER_HOST"] = "unix:///sock/docker"; // note: the unix:// protocol is needed, because, while it usesd the socket to connect, without the protocol part it will try to run commands via an tpc port on localhost...
+		spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
 		
 		if(CHROOT && uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
@@ -6278,7 +6289,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	var libvirtAddedToGroup = false;
 	var abort = false;
 	var dockerSshPubKey;
-	//var staticIP = UTIL.int2ip(167772162 + uid + 32000); // Max 31k users per server ought to be enough
+	var staticIP = UTIL.int2ip(167903234+uid); // 10.2.X.Y
 	//var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
 	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
@@ -6576,6 +6587,9 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 	
 	function checkIP(attempts) {
 		
+		checkIptables(staticIP);
+		return;
+		
 		// it might take some time for the libvirt dhcp to configure itself...
 		if(attempts==undefined) attempts = 1;
 		
@@ -6645,39 +6659,55 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		if(zpool == undefined) throw new Error("zpool=" + zpool);
 		// Assuming we already have a zvol!
 		
-		module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
+		var MAC = "XX:XX:XX:XX:XX:XX".replace(/X/g, function() {
+			return "0123456789ABCDEF".charAt(Math.floor(Math.random() * 16))
+		});
+		
+		module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
-			
-			progress();
-			
-			xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
-			
-			xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
-			
-			xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
-			
-			var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
-			log(username + " creating " + vmXmlPath + " ...", DEBUG);
-			module_fs.writeFile(vmXmlPath, xml, function(err) {
+			else {
+				progress();
+				log(username + " Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
+				defineVM();
+			}
+		});
+		
+		function defineVM() {
+			module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
 				if(err) return error(err);
 				
 				progress();
 				
-				log(username + " defining " + vmXmlPath + " ...", DEBUG);
-				module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
+				xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
+				
+				xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
+				
+				xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
+				
+				xml = xml.replace(/<mac address='.*'\/>/, "<mac address='" + MAC + "'/>");
+				
+				var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
+				log(username + " creating " + vmXmlPath + " ...", DEBUG);
+				module_fs.writeFile(vmXmlPath, xml, function(err) {
 					if(err) return error(err);
 					
 					progress();
 					
-					log(stdout, INFO);
-					log(stderr, WARN);
-					
-					startVM(true);
-					
+					log(username + " defining " + vmXmlPath + " ...", DEBUG);
+					module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
+						if(err) return error(err);
+						
+						progress();
+						
+						log(stdout, INFO);
+						log(stderr, WARN);
+						
+						startVM(true);
+						
+					});
 				});
 			});
-		});
-		
+		}
 	}
 	
 	function progress(inc, max) {

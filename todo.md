@@ -78,6 +78,9 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+
+todo: Test Docker VM creation
+
 generate mac and static IP when creating the VM!
 
 167903234 = "10.2.0.2"

@@ -626,6 +626,17 @@ group = "root"
 dynamic_ownership = 0
 ````
 
+Setup libvirt DHCP
+Note that users netns is 10.0.X.Y so we will use 10.2.X.Y for the Docker VM's
+
+sudo virsh net-edit default
+
+<ip address='10.2.0.1' netmask='255.255.0.0'>
+    <dhcp>
+      <range start='10.2.121.2' end='10.2.125.254'/>
+    </dhcp>
+  </ip>
+
 Create a VM
 ````
 cd dockervm
