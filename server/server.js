@@ -2543,7 +2543,7 @@ var loginCounter = 0;
 										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
 									}
 									else if(req.dockerDaemon) {
-										dockerDaemon(userConnectionName, homeDir, uid, req.dockerDaemon, workerResp);
+										dockerDaemon(userConnectionName, homeDir, uid, gid, req.dockerDaemon, workerResp);
 									}
 									
 									
@@ -6272,7 +6272,7 @@ status = status + " to " + matchEndpoint[1];
 }
 
 
-function dockerDaemon(username, homeDir, uid, options, callback) {
+function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	"use strict";
 	
 	/*
@@ -6571,36 +6571,45 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		if(IP == undefined) throw new Error("IP=" + IP);
 		
-		log(username + " running config script via SSH... IP=" + IP, DEBUG);
-		module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash check_config_in_vm.sh " + username + "" , EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) {
-				
-				// We might have been successful anyway!
-				if(stdout.indexOf("SUCCESS!") != -1) return success();
-				if(stdout.indexOf("userhome already mounted") != -1) return success();
-				
-				log("stdout=" + stdout);
-				log("stderr=" + stderr);
-				
-				console.error(err);
-				
-				// Don't want to tell users about our week password :P So use a custom error
-				return error("Unable to configure Docker daemon VM settings!");
-			}
-			else success();
+		
+		log(username + " copying config script to Docker daemon VM on " + IP, DEBUG);
+		module_child_process.exec("scp -i /root/.ssh/dockervm ../dockervm/check_config_in_vm.sh docker@10.2.3.235:/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) return error(err);
+			progress();
 			
-			function success() {
-				progress();
+			log(username + " running config script via SSH on " + IP, DEBUG);
+			module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) {
+					
+					// We might have been successful anyway!
+					if(stdout.indexOf("SUCCESS!") != -1) return success();
+					if(stdout.indexOf("userhome already mounted") != -1) return success();
+					
+					log("stdout=" + stdout);
+					log("stderr=" + stderr);
+					
+					console.error(err);
+					
+					// Don't want to tell users about our week password :P So use a custom error
+					return error("Unable to configure Docker daemon VM settings!");
+				}
+				else success();
 				
-				if(options.command == "start" || options.command == "status") {
-					return done({started: true, IP: IP});
+				function success() {
+					progress();
+					
+					if(options.command == "start" || options.command == "status") {
+						return done({started: true, IP: IP});
+					}
+					else if(options.command == "stop") {
+						throw new Error("Should not configure when shutting down!");
+					}
+					else throw new Error("Unknown options.command=" + options.command);
 				}
-				else if(options.command == "stop") {
-					throw new Error("Should not configure when shutting down!");
-				}
-				else throw new Error("Unknown options.command=" + options.command);
-			}
+			});
 		});
+		
+		
 	}
 	
 	function checkIP(attempts) {
@@ -6685,9 +6694,11 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 			//log(JSON.stringify(arr));
 			
 			// Last octet should end with a binary 0 to make it unicast (or 1 for multicast). Eg the number should be even
+			// Some documentation say "least-significant bit of the first octet ..."
 			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
 			//arr[5] = parseInt(arr[5].toString(2).slice(0,2)+"0",2);
 			arr[5] = roundEven(arr[5]);
+			arr[0] = roundEven(arr[0]);
 			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
 			
 			// Second last octet should end with a binary 1 to indicate it's locally administered (or 0 for globally unique)
@@ -6714,17 +6725,20 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		var MAC = generateMAC();
 		
-		
+		log(username + " checking ip-dhcp config...");
 		module_child_process.exec('virsh net-dumpxml default', EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			else {
 				// <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
 				
-				var reIP = new RegExp("<host mac='(.*)' name='(.*)' ip='" + staticIP + "'\\/>");
+				var reIP = new RegExp("<host mac='(.*)'.* ip='" + staticIP + "'\\/>");
 				var matchIP = stdout.match(reIP);
-				if(!matchIP) return addIP();
+				if(!matchIP) {
+					log("reIP=" + reIP + " did not find a match in stdout=" + stdout, DEBUG);
+					return addIP();
+				}
 				else {
-					log("dhcp-host record already exist: " + matchIP[0]);
+					log(username + " found that a dhcp-host record already exist: " + matchIP[0], INFO);
 					// Should we reuse the MAC!?
 					return removeIP(matchIP[0]);
 				}
@@ -6732,6 +6746,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		});
 		
 		function addIP() {
+			log(username + ' adding ip-dhcp-host MAC=' + MAC + ' IP=' + staticIP + ' ...', DEBUG);
 			module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) return error(err);
 			else {
@@ -6744,6 +6759,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		
 		function removeIP(dhcpHostStr) {
 			// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+			log(username + ' deleting ip-dhcp-host "' + dhcpHostStr + '" ...', DEBUG);
 			module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) return error(err);
 				else {
@@ -6755,6 +6771,7 @@ function dockerDaemon(username, homeDir, uid, options, callback) {
 		}
 		
 		function defineVM() {
+			log(username + " reading docker_user.xml ...", DEBUG);
 			module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
 				if(err) return error(err);
 				

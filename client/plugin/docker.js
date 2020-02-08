@@ -78,7 +78,7 @@
 	}
 	
 	function updateStatus(status, IP) {
-		discoveryBarIcon.title = "Docker deamon " + status + " on " + IP;
+		discoveryBarIcon.title = "Docker deamon " + status + (IP ? " on " + IP : "");
 	}
 	
 	function wakeup() {

@@ -78,6 +78,10 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Still having issues with parcel live reload when running in Docker
+
+ltest1:1001:65536
+
 Adding the user to the docker VM with the same uid, then edit /etc/subuid and map it to the same id, then
 start dockerd with --userns-remap ltest1 seem to fix the issues!
 /etc/systemd/system/docker.service.d/startup_options.conf

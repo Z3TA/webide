@@ -10,26 +10,42 @@ set -e
 [[ $SUDO_USER -eq "docker" ]] || { echo >&2 "This script should only be run inside a Docker VM"; exit 1; }
 
 
-USERNAME=$1
-HNAME=$2
-#IP=$3
-#GW=$4
+username=$1
+uid=$2
+gid=$3
+#IP=$4
+#GW=$5
 
 # Assuming home directories are in /home
-HOMEDIR="/home/$USERNAME/"
+homedir="/home/$username/"
 
-echo "USERNAME=$USERNAME";
-echo "HOMEDIR=$HOMEDIR";
+echo "username=$username";
+echo "uid=$uid";
+echo "gid=$gid";
+echo "homedir=$homedir";
 #echo "IP=$IP";
 #echo "GW=$GW";
 
 # Set the hostname
-echo docker_$USERNAME > /etc/hostname
+echo docker_$username > /etc/hostname
+
+echo "Activating Docker user namespace and binding to TCP..."
+useradd -u $uid $username || (echo "user $username already exist!")
+echo "$username:$uid:65536" > /etc/subuid
+echo "$username:$gid:65536" > /etc/subgid
+mkdir -p /etc/systemd/system/docker.service.d/
+echo "[Service]" > /etc/systemd/system/docker.service.d/startup_options.conf
+# Need two ExecStart or Docker will say "Service has more than one ExecStart=" :P
+echo "ExecStart=" >> /etc/systemd/system/docker.service.d/startup_options.conf
+echo "ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376 --userns-remap $username" >> /etc/systemd/system/docker.service.d/startup_options.conf
+systemctl daemon-reload
+systemctl restart docker
+
 
 # Mount the user home dir
-echo "mounting $USERNAME home dir..."
-mkdir -p $HOMEDIR
-(mount userhome $HOMEDIR -t 9p -o trans=virtio) || (echo "mount failed"; exit 1)
+echo "mounting $username home dir..."
+mkdir -p $homedir
+(mount userhome $homedir -t 9p -o trans=virtio) || (echo "mount failed"; exit 1)
 
 # Set static IP
 #ip addr add $IP/16 dev ens3
