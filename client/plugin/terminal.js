@@ -634,7 +634,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inText = true;
 				}
 				else if(char == "K" && inNumber == "2") {
-					console.log("todo: Clear entire line ");
+					console.log("Clear entire line ");
+					file.removeAllTextOnRow(file.caret.row);
 					inNumber = "";
 					inText = true;
 				}
@@ -731,7 +732,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
-					console.log("Move cursor right " + times + " lines");
+					console.log("Move cursor right " + times + " columns");
 					for(var j=0; j<times;j++) {
 						if(file.caret.eol) file.insertText(" ");
 						else file.moveCaretRight();
@@ -747,7 +748,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
-					console.log("Move cursor left " + times + " lines");
+					console.log("Move cursor left " + times + " columns");
 					for(var j=0; j<times;j++) file.moveCaretLeft();
 					
 					inEsc = false;
@@ -805,6 +806,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					inEsc = false;
 					inText = true;
 				}
+				
 				else if(inEsc && char == "7") {
 					if(charBuffer) print();
 					
@@ -826,7 +828,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
-					console.log("todo: Move/scroll window UP " + times + " line(s)");
+					console.log("Move/scroll window UP " + times + " line(s)");
 					var topRow = file.startRow;
 					var bottomRow = file.startRow;
 					
@@ -910,11 +912,16 @@ var topLineText = "";
 						Esc[?8h 	Set auto-repeat mode 	DECARM
 						Esc[?9h 	Set interlacing mode 	DECINLM
 						
+						ESC[?25h  Make Cursor visible
+						
 						ESC[?47h  Save screen
 						
 					*/
 					if(inNumber == 4) {
 						terminalState.smoothScrolling = true;
+					}
+					else {
+						console.warn("Unknown inNumber=" + inNumber + " ");
 					}
 					
 					inNumber = "";
@@ -1070,6 +1077,11 @@ var topLineText = "";
 					numberSerie.push(inNumber);
 					
 					for (var j=0; j<numberSerie.length; j++) {
+						
+						
+						// 22 Normal color or intensity (Neither bold nor faint )
+						
+						
 						// foreground
 						if(numberSerie[j] == "30") foregroundColor = colorBlack;
 						else if(numberSerie[j] == "31") foregroundColor = colorRed;
@@ -1079,6 +1091,10 @@ var topLineText = "";
 						else if(numberSerie[j] == "35") foregroundColor = colorMagenta;
 						else if(numberSerie[j] == "36") foregroundColor = colorCyan;
 						else if(numberSerie[j] == "37") foregroundColor = colorWhite;
+						
+						// 38 = special color (Next arguments are 5;n or 2;r;g;b)
+						
+						else if(numberSerie[j] == "39") foregroundColor = defaultForeGroundColor; // Default foreground color 
 						
 						// background
 						else if(numberSerie[j] == "40") backgroundColor = colorBlack;
@@ -1175,7 +1191,8 @@ var topLineText = "";
 						}
 						else {
 							if(charBuffer) print();
-file.insertLineBreak();
+//file.insertLineBreak();
+file.moveCaretDown();
 						}
 					}
 					else if(code == 13) {// Carriage Return \r
@@ -1219,7 +1236,7 @@ file.insertLineBreak();
 			
 			function print() {
 				
-				console.log("Terminal Insert: " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
+				console.log("Terminal Insert: caret=" + JSON.stringify(file.caret) + " length=" + charBuffer.length + " " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
 				//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 				// terminal always overwrite !?
 				var colStart = file.caret.col;

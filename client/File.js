@@ -1559,7 +1559,7 @@ file.mode = "text";
 		console.log("deleteTextRange: firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " " + JSON.stringify(file.rowFromIndex(firstIndex)));
 		
 		file.sanityCheck();
-		file.debugGrid();
+		//file.debugGrid();
 		
 		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
@@ -2248,7 +2248,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		}
 		
 		
-		console.log("Inserting line break at caret=" + JSON.stringify(caret) + " grid.length=" + file.grid.length);
+		console.warn("Inserting line break at caret=" + JSON.stringify(caret) + " grid.length=" + file.grid.length);
 		
 		//if(caret != file.caret) console.warn("caret=" + JSON.stringify(caret) + " is not file.caret=" + JSON.stringify(file.caret) + "");
 
@@ -3010,7 +3010,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 	File.prototype.moveCaretToStartOfLine = function(caret) {
 		var file = this;
 		
-		console.log("File:moveCaretToStartOfLine");
+		console.warn("File:moveCaretToStartOfLine");
 		
 		if(caret == undefined) caret = file.caret;
 		

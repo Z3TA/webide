@@ -78,30 +78,13 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-Still having issues with parcel live reload when running in Docker
-
-ltest1:1001:65536
-
-Adding the user to the docker VM with the same uid, then edit /etc/subuid and map it to the same id, then
-start dockerd with --userns-remap ltest1 seem to fix the issues!
-/etc/systemd/system/docker.service.d/startup_options.conf
-
-tried mount userhome $HOMEDIR -t 9p -o trans=virtio,umask=0022,gid=1001,uid=1001 but it didn't work
-
-When home dir is shared with Docke VM,
-all files created by Docker images will get root as owner...
-
-
-Issues with parsel and our Docker VM...
-https://hackernoon.com/move-over-next-js-and-webpack-ba367f07545
-https://hackernoon.com/a-better-way-to-develop-node-js-with-docker-cd29d3a0093
-
-
-testing docker
+React Native support!
+Able to use Android emulator
 
 
 
-docker...
+
+---
 
 Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
 No disconnect option when closing and reopening the ftp/sftp widget
@@ -112,8 +95,7 @@ or just start typing...
 
 
 
-React Native support!
-Able to use Android emulator
+
 
 
 todo: Delete emoty files and folders in user home dirs, because there will be no more chrooting
@@ -124,16 +106,14 @@ todo: In order to be able to move users between servers, server.js should take c
 adduser.js shouln't have to chown folders and set sticky bit!
 
 
-todo: Restrict access to webide_nodejs_init.service !?
-users are in another namespace, so we shouln't have to do that
-
 unable to insert ^ on swedish keyboard in Firefox
 
 cant scroll the function list on macbook using the pad
 
 text on the right side dissappears after 4 seconds on macbook...
 
-todo: Add services running "in production" to user netns!!
+Add services running "in production" to user netns!
+so that port.user.webide.se will work in prod
 
 terminal sessions should be saved so you can continue where you left off,
 for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
@@ -168,10 +148,6 @@ but the spelling dictionary is not very helpful for finding replacements for pro
 Spellcheck plugin need regression tests! (it stopped working and I did not notice)
 
 Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
-
-how to give netns to existing users !?
-Linux netns is lost at reboot!!
-So they need to created when the user logs in!
 
 
 TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
