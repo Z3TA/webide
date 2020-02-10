@@ -2834,6 +2834,37 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 	}
 	
+	File.prototype.moveCaretToCol = function(col, caret) {
+		var file = this;
+		
+		if(caret == undefined) caret = file.caret;
+		
+		if(col < 0) col = caret.col + col;
+		if(col < 0) col = 0;
+		if(file.grid[caret.row].length < col) col = file.grid[caret.row].length;
+		
+		var index = caret.index;
+		caret.index = index - (caret.col - col);
+		caret.col = col;
+		
+		
+		
+		if(file.grid[caret.row].length <= col) caret.eol = true;
+		else caret.eol = false;
+		
+		if(file.text.length <= caret.index) caret.eof = true;
+		else caret.eof = false;
+		
+		file.checkCaret();
+		
+		if(caret == file.caret) {
+			EDITOR.fireEvent("moveCaret", [file, caret]);
+		}
+		
+		return caret;
+		
+	}
+	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this;
 		var grid = file.grid;

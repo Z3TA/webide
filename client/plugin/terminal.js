@@ -415,7 +415,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			
 			http://www.termsys.demon.co.uk/vtansi.htm
 			http://ascii-table.com/ansi-escape-sequences-vt-100.php
-			
+			https://www.inwap.com/pdp10/ansicode.txt
 			
 		*/
 		
@@ -680,7 +680,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
-					console.log("Move cursor up " + times + " lines");
+					console.log("Move cursor up " + times + " lines from caret=" + JSON.stringify(file.caret));
 					
 					var col = file.caret.col;
 					
@@ -701,7 +701,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
-					console.log("Move cursor down " + times + " lines");
+					console.log("Move cursor down " + times + " lines from caret=" + JSON.stringify(file.caret) );
 					
 					var col = file.caret.col;
 					
@@ -750,6 +750,21 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 					
 					console.log("Move cursor left " + times + " columns");
 					for(var j=0; j<times;j++) file.moveCaretLeft();
+					
+					inEsc = false;
+					inBracket = false;
+					inNumber = "";
+					inText = true;
+				}
+				else if((inEsc || inNumber || inBracket) && char == "G") {
+					if(charBuffer) print();
+					
+					if(inNumber) var col = parseInt(inNumber);
+					else var col = 0;
+					
+					console.log("Move to column " + col + " of current line");
+// Columns start on column 1 in terminals
+					file.moveCaretToCol(col-1);
 					
 					inEsc = false;
 					inBracket = false;
@@ -1179,7 +1194,7 @@ var topLineText = "";
 						if(charBuffer) print();
 						
 						console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + 
-						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
+						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length + " caret=" + JSON.stringify(file.caret)  );
 						
 						if(terminalState.topLine > 0 && terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
 							file.removeRow(terminalState.topLine-1 + file.startRow);
@@ -1192,10 +1207,11 @@ var topLineText = "";
 						else {
 							if(charBuffer) print();
 //file.insertLineBreak();
-file.moveCaretDown();
+							file.moveCaretDown();
 						}
 					}
 					else if(code == 13) {// Carriage Return \r
+						console.log("terminal: Carriage Return on caret=" + JSON.stringify(file.caret) );
 						if(charBuffer) print();
 						//file.moveCaretToEndOfLine();
 						file.moveCaretToStartOfLine();
