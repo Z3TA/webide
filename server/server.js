@@ -1024,6 +1024,13 @@ return;
 	function xwininfo(displayId, processName, username) {
 		// check our x11 server
 		
+		if(VNC_CHANNEL.hasOwnProperty(displayId)) {
+			if(VNC_CHANNEL[displayId].info && VNC_CHANNEL[displayId].info.app == processName) {
+				log(processName + " already got a VNC channel on displayId=" + displayId + " ", DEBUG);
+return;
+			}
+		}
+		
 		module_child_process.exec("xwininfo -display :" + displayId + " -root -children", function(error, stdout, stderr) {
 			if(error) throw err;
 			if(stderr) log("xwininfo: stderr=" + stderr, NOTICE);
