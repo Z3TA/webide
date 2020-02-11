@@ -78,11 +78,55 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Detect when app is started:
+sudo forkstat -e exec -x
+
+
+in guest terminal:
+export DISPLAY=:5
+DISPLAY=:5 mate-calc
+
+
+in other terminal:
+Xvfb :5 -screen 0 800x600x24 -ac &
+xwininfo -display :5 -root -children
+x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
+
+
+Set DISPLAY in user's env variable
+and run Xvfb set to that display
+that uses x11vnc
+
+
+
+
+
+export PATH=/zpcdata/projects/webide/android-tools:/zpcdata/projects/webide/android-tools/bin:$PATH
+
+apt-get install libgl1-mesa-dev
+
+Run Android emulator in the editor
+
+sudo apt update && sudo apt install android-sdk
+
+
+Problem: localhost is hardcoded in example files...
+
+
+
 React Native support!
 Able to use Android emulator
 
 
 
+
+---
+
+Can't commit if you have added a bunch of files ...
+Unable to get status!
+Server: API error: stdout maxBuffer length exceeded
+
+Tell the user to update .hgignore !?
 
 ---
 
@@ -95,7 +139,7 @@ or just start typing...
 
 
 
-
+todo: Remove red background from find when de-selecting "use regex"
 
 
 todo: Delete emoty files and folders in user home dirs, because there will be no more chrooting

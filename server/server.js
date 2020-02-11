@@ -201,6 +201,10 @@ if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
 var GCSF = {}; // username: GCSF session
 var DROPBOX = {}; // username: Dropbox daemon
 
+
+var DISPLAY_COUNTER = 5; // Dont start on low numbers as those might be taken by physical monitors
+
+
 // Declare modules here as a OPTIMIZATION
 var module_fs = require("fs");
 var module_child_process = require('child_process');
@@ -896,7 +900,7 @@ function main() {
 		}
 		catch(err) {
 			log(err.message);
-			log("posix module needed for chroot! Try with -nochroot flag!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
+			log("posix module needed for chroot!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
 			process.exit(1);
 		}
 	}
@@ -910,7 +914,7 @@ function main() {
 					we will give each user their uid (decimal) as IP
 					ip= 167772162 + uid (so that a uid of 0 would get ip=10.0.0.2)
 					
-					Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolve.conf is unreachable!
+					Note: If you get DNS issues in the netns it's probably because the ip in /etc/resolv.conf is unreachable!
 					
 				*/
 				module_child_process.exec("ip link add name netnsbridge type bridge && ip link set netnsbridge up && ip addr add 10.0.0.1/16 brd + dev netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
@@ -935,6 +939,191 @@ function main() {
 				log("nat POSTROUTING exist for user netns", DEBUG);
 			}
 		});
+	}
+	
+	if(info.uid == 0 && !USERNAME) {
+		// ## forkstat
+		// Detect when users start an app
+		
+		
+		var forkstat = module_child_process.spawn("forkstat", ["-e", "exec", "-x", "-l", "-d", "-s"]);
+		
+		/*
+			
+			-x = show user id
+			-l = Line buffered mode
+			-d = strip off the directory path from the process name
+			-s = show short process name information (no script args)
+		*/
+		
+		forkstat.on("close", function (code, signal) {
+			log("forkstat close: code=" + code + " signal=" + signal, NOTICE);
+		});
+		
+		forkstat.on("disconnect", function () {
+			log("forkstat disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
+		});
+		
+		forkstat.on("error", function (err) {
+			log("forkstat error: err.message=" + err.message, ERROR);
+			console.error(err);
+		});
+		
+		forkstat.stdout.on("data", function(data) {
+			//log("forkstat stdout: " + data, DEBUG);
+			
+			
+			// Time     Event   PID    UID TTY    Info   Duration Process
+			// 13:22:46 exec  20807   1001 pts/11                 mate-calc
+			// 15:48:19 exec  19817                               <unknown>
+			
+			var re = /exec\s+(\d+)\s+(\d+)?\s+([^ ]*)$/;
+			var str = data.toString();
+			var arr = str.split("\n");
+			
+			arr.forEach(function(str) {
+				
+				if(str.indexOf("Time ") == 0) return;
+				if(str == "") return;
+				
+				var match = str.match(re);
+				if(!match) throw new Error("forkstat: Unable to match str=" + str + " with re=" + re);
+				
+				var pid = match[1];
+				var uid = parseInt(match[2]);
+				var tty = match[3];
+				var info = match[4];
+				var duration = match[5];
+				var process = match[6];
+				
+				log(str, DEBUG);
+				log("pid=" + pid + " uid=" + uid + " tty=" + tty + " info=" + info + " duraction=" + duration + " process=" + process + " ");
+				
+				if(process.indexOf("/") != 0) {
+					log("process=" + process + " does not start with a slash!", DEBUG);
+					return;
+				}
+				
+				// What display port do our user have ?
+				for(var name in USER_CONNECTIONS) {
+					//log("uid=" + uid + " (" + typeof uid + ") vs " + USER_CONNECTIONS[name].uid + " (" + typeof USER_CONNECTIONS[name].uid + ") ", DEBUG);
+					if(uid == USER_CONNECTIONS[name].uid) {
+						xwininfo(USER_CONNECTIONS[name].display, process, name, );
+						return;
+					}
+				}
+				log("Found no user with uid=" + uid, DEBUG);
+			});
+			
+		});
+		
+		forkstat.stderr.on("data", function (data) {
+			log("forkstat stderr: " + data, DEBUG);
+		});
+		
+	}
+	
+	function xwininfo(displayId, processName, username) {
+		// check our x11 server
+		
+		module_child_process.exec("xwininfo -display :" + displayId + " -root -children", function(error, stdout, stderr) {
+			if(error) throw err;
+			if(stderr) log(stderr, NOTICE);
+			
+			/*
+				
+				xwininfo: Window id: 0x298 (the root window) (has no name)
+				
+				Root window id: 0x298 (the root window) (has no name)
+				Parent window id: 0x0 (none)
+				4 children:
+				0x200003 "Calculator": ("mate-calc" "Mate-calc")  312x225+0+0  +0+0
+				0x200001 "mate-calc": ("mate-calc" "Mate-calc")  10x10+10+10  +10+10
+				0x400001 (has no name): ()  10x10+1+1  +1+1
+				0x1600003 (has no name): ()  3x3+0+0  +0+0
+				
+				
+			*/
+			
+			log(stdout, DEBUG);
+			
+			var reWindowId = /window id: (.*) /;
+			var matchWindowId = stdout.match(reWindowId);
+			if(!matchWindowId) throw new Error("Unable to find reWindowId=" + reWindowId + " in stdout=" + stdout);
+			var windowId = matchWindowId[1];
+			
+			if(processName.indexOf(" ") != -1) var processPath = processName.slice(0, processName.indexOf(" ") + 1);
+			else var processPath = processName;
+			
+			if(processPath == "") {
+				log("processName=" + processName + " has no path!");
+				return;
+			}
+			
+			log("processPath=" + processPath, DEBUG);
+			var shortProcessName = UTIL.getFilenameFromPath(processPath);
+			
+			log("shortProcessName=" + shortProcessName, DEBUG);
+			
+			var reWindow = new RegExp('"' + shortProcessName + '"' + ".*(\\d+)x(\\d+)", "g");
+			log("reWindow=" + reWindow + "", DEBUG);
+			
+			var arr = stdout.split("\n");
+			var res = [];
+			
+			arr.forEach(function(str) {
+				
+				log("str=" + str, DEBUG);
+				
+				var matchWindow = stdout.match(reWindow);
+				if(!matchWindow) {
+					log("Did not find reWindow=" + reWindow + " in str=" + str, DEBUG);
+					return;
+				}
+				
+				var x = parseInt(matchWindow[1]);
+				var y = parseInt(matchWindow[2]);
+				
+				if(isNaN(x) || isNaN(x)) {
+					log("x=" + x + " y=" + y + " matchWindow=" + JSON.stringify(matchWindow), DEBUG);
+					return;
+				}
+				
+				res.push({x: x, y: y});
+				
+			});
+
+			log("res=" + JSON.stringify(res), DEBUG);
+			
+if(res.length == 0) {
+				log("Did not find reWindow=" + reWindow + " ", DEBUG);
+return;
+}
+			
+			res.sort(function (a, b) {
+				if(a.x * a.y > b.x * b.y) return -1;
+				if(a.x * a.y < b.x * b.y) return 1;
+				else return 0;
+			});
+			
+			log("sorted res=" + JSON.stringify(res));
+			
+			// Need special version of X11vnc in order for unix sockets to work!
+			//var x11vncPort = HOME_DIR + username + "/sock/vnc_" + processName;
+			
+			getTcpPort(VNC_PORT, function(x11vncPort) {
+				var resp = startX11vnc(username, displayId, windowId, x11vncPort);
+				
+				resp.res = res[0];
+				
+				// Tell user the vnc password and port
+				sendToClient(username, "vnc", resp)
+				
+			})
+			
+			
+		});
+		
 	}
 	
 	if(info.uid > 0 && !USERNAME && CHROOT) {
@@ -1081,6 +1270,104 @@ function main() {
 		if(!NO_REMOTE_FILES) openRemoteFileServer();
 		
 	}
+}
+
+function startX11vnc(username, displayId, windowId, x11vncPort) {
+	
+	if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
+	
+	// ### x11vnc
+	
+	if(!UTIL.isNumeric(x11vncPort)) {
+		var modifiedLibvncserver = true;
+		var vncUnixSocket = x11vncPort;
+	}
+	
+	if(modifiedLibvncserver) x11vncPort = 0;
+	
+	// note: x11vnc supports both websockets and normal tcp on the same port!
+	
+	var vncPassword = generatePassword(8);
+	
+	
+	// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
+	var x11vncArgs = [
+		"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
+		"-passwd",
+		vncPassword,
+		"-rfbport",
+		x11vncPort,
+		"-display",
+		":" + displayId,
+		"-id",
+		windowId,
+		"-forever"
+	];
+	
+	if(modifiedLibvncserver) {
+		x11vncArgs.push("unixsock");
+		x11vncArgs.push(vncUnixSocket);
+	}
+	
+	// debug: xwininfo -display :5 -root -children
+	// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
+	
+	log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs));
+	var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs);
+	
+	VNC_CHANNEL[displayId].x11vnc = x11vnc;
+	
+	x11vnc.on("close", function (code, signal) {
+		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+	});
+	
+	x11vnc.on("disconnect", function () {
+		log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
+	});
+	
+	x11vnc.on("error", function (err) {
+		log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+		console.error(err);
+	});
+	
+	x11vnc.stdout.on("data", function (data) {
+		log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
+	});
+	
+	x11vnc.stderr.on("data", function (data) {
+		log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
+	});
+	
+	var resp = {
+		vncPassword: vncPassword
+	}
+	VNC_CHANNEL[displayId].info = resp;
+	
+	
+	var proxyOptions = {
+		ws: true
+	}
+	
+	if(modifiedLibvncserver) {
+		resp.vncChannel = displayId;
+		proxyOptions.target = {
+			socketPath: vncUnixSocket
+		};
+	}
+	else {
+		resp.vncHost = HOSTNAME;
+		resp.vncPort = x11vncPort;
+		proxyOptions.target = {
+			host: 'localhost',
+			port: x11vncPort
+		};
+	}
+	
+	
+	
+	VNC_CHANNEL[displayId].proxy = new module_httpProxy.createProxyServer(proxyOptions);
+	
+	return resp;
 }
 
 function openStdinChannel() {
@@ -2080,6 +2367,7 @@ throw err;
 						var homeDir; // User's home dir
 						var shell; // User's shell (currently disabled/not implemented)
 						var groups; // Object with groupName:groupId
+						var display = ++DISPLAY_COUNTER; // User virtual display id (accessable via VNC)
 						
 						userConnectionName = username;
 						
@@ -2147,7 +2435,9 @@ throw err;
 									echoCounter: 1, // Start with 1 so it's true:ish
 									connectedClientIds: [userConnectionId],
 									connectionCLientAliases: {1: userAlias},
-									sessionId: [clientSessionId]
+									sessionId: [clientSessionId],
+									display: display,
+									uid: uid
 								}
 								
 							}
@@ -2162,7 +2452,7 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
 							// Tell the worker process which user
 							var userInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
 							
@@ -2171,6 +2461,9 @@ throw err;
 							userWorker.send({identify: userInfo});
 							userWorker.on("message", messageFromWorker);
 							userWorker.on("close", workerCloseHandler);
+							
+							
+							var xserver = createUserXserver(username, display);
 							
 							/*
 								setTimeout(function() {
@@ -2581,7 +2874,7 @@ var loginCounter = 0;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir);
+										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
 										userWorker.send({identify: userInfo});
 										
 										userWorker.on("message", messageFromWorker);
@@ -3116,22 +3409,24 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			
 			var IP = UTIL.int2ip(167772162 + uid);
 			
+			
 			var createNetnsFile = function createNetnsFile(etcFile, content) {
 				filesToWrite++;
 				
 				var stats = 0;
 				var writes = 0;
+				var netnsPath = UTIL.joinPaths("/etc/netns/", username, etcFile);
 				
 				stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
 					if(err && err.code == "ENOENT") {
 						// ip netns exec wont unshare bind if the file don't exist in /etc/
 						
-						stats++;module_fs.stat(UTIL.joinPaths("/etc/netns/", username, etcFile), function(err) {stats--;
+						stats++;module_fs.stat(netnsPath, function(err) {stats--;
 							if(err && err.code == "ENOENT") return doneMaybe();
 							else if(err) throw err;
 							
 							// Make sure there is no file in /etc/netns/ or mount will throw errors!
-							writes++;module_fs.unlink(UTIL.joinPaths("/etc/netns/", username, etcFile), content, function (err) {writes--;
+							writes++;module_fs.unlink(netnsPath, content, function (err) {writes--;
 								if (err) throw err;
 								doneMaybe();
 							});
@@ -3142,8 +3437,9 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 					}
 					else if(err) throw err;
 					
-					writes++;module_fs.writeFile(UTIL.joinPaths("/etc/netns/", username, etcFile), content, function (err) {writes--;
+					writes++;module_fs.writeFile(netnsPath, content, function (err) {writes--;
 						if (err) throw err;
+						log("Created " + netnsPath, INFO);
 						doneMaybe();
 					});
 				});
@@ -3375,9 +3671,9 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 									if(error) {
 										// Get the actual error
 										module_child_process.exec("nginx -T", EXEC_OPTIONS, function(err, stdout, stderr) {
-											if(err) throw err;
 											log(stdout, NOTICE)
-											reportError(stdout);
+											log(stderr, NOTICE)
+											reportError(stdout + "\n" + stderr);
 											log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
 											module_fs.unlink(nginxProfileEnabledPath, function(err) {
 												if(err) throw err;
@@ -4544,7 +4840,96 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(username, uid, gid, homeDir, groups) {
+function createUserXserver(username, displayId) {
+	
+	var xvfbArgs = [
+		":" + displayId,  // Server/monitor/display ... ?
+		"-screen",
+		"0",
+		"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
+		"-ac" // Disables X access control
+	];
+	
+	// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+	// debug: xwininfo -display :5 -root -children
+	// debug: ps ax | grep Xvfb
+	
+	log(   "Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ")"   );
+	var xvfb = module_child_process.spawn("Xvfb", xvfbArgs);
+	
+	if(VNC_CHANNEL.hasOwnProperty(displayId)) throw new Error("displayId=" + displayId + " already exist in VNC_CHANNEL");
+	
+	VNC_CHANNEL[displayId] = {startedBy: username};
+	VNC_CHANNEL[displayId].xvfb = xvfb;
+	
+	xvfb.on("close", function (code, signal) {
+		log(username + " xvfb (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+	});
+	
+	xvfb.on("disconnect", function () {
+		log(username + " xvfb (displayId=" + displayId + ") disconnect: xvfb.connected=" + xvfb.connected, DEBUG);
+	});
+	
+	xvfb.on("error", function (err) {
+		log(username + " xvfb (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+		console.error(err);
+	});
+	
+	xvfb.stdout.on("data", function(data) {
+		log(username + " xvfb (displayId=" + displayId + ") stdout: " + data, WARN);
+	});
+	
+	xvfb.stderr.on("data", function (data) {
+		log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
+		
+		if(data.indexOf("(EE) Server is already active for display " + displayId) != -1) {
+			/*
+				The server was probably restarted without killing xvfb
+				This means a chromium-browser and x11vnc is also probably running !
+				And will make x11vnc close (ListenOnTCPPort: Address already in use)
+				
+				We don't want to reuse chromium-browser inside the "ghost" Xvfb because we don't know what user started it.
+				And it's probably best to not reuse the Xvfb either.
+				But the user has already been sent the callback ...
+				
+				Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
+				
+			*/
+			
+			module_ps.lookup({
+				command: 'Xvfb',
+				arguments: xvfbArgs.join(" "),
+			}, function(err, resultList ) {
+				if (err) {
+					throw new Error( err );
+				}
+				
+				resultList.forEach(function( p ){
+					if( p ){
+						console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
+						module_ps.kill( p.pid, function( err ) {
+							if (err) {
+								throw new Error( err );
+							}
+							else {
+								console.log( 'Process %s has been killed!', pid );
+								// Restart Xvfb. But only if it has not already been restarted to prevent endless loop.
+								if(xvfbStartCounter <= 1) startXvfb();
+								
+							}
+						});
+					}
+					else throw new Error("Expected p");
+				});
+			});
+		}
+		
+	});
+	
+	return xvfb;
+}
+
+function createUserWorker(username, uid, gid, homeDir, groups, display) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
@@ -4564,6 +4949,11 @@ function createUserWorker(username, uid, gid, homeDir, groups) {
 	if(groups) {
 		// we have to manually serialize objects!
 		spawnOptions.env.groups = JSON.stringify(groups);
+	}
+	
+	if(display) {
+		// Each user has their own X-server (Xvfb)
+		spawnOptions.env.DISPLAY = ":" + display
 	}
 	
 	// For forking when running in the Termux Android app
@@ -4984,90 +5374,90 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	}
 	
 	function startX11vnc(x11vncPort) {
-		
-		if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
-		
-		// ### x11vnc    
-		
-		if(x11vncPort instanceof Error) {
-			stopVncChannel(displayId);
-			return callback(x11vncPort);
-		}
-		
-		
-		if(modifiedLibvncserver) x11vncPort = 0;
-		
-		// note: x11vnc supports both websockets and normal tcp on the same port! 
-		
-		var vncPassword = generatePassword(8);
-		
-		
-		// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
-		var x11vncArgs = [
-			"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
-			"-passwd",
-			vncPassword,
-			"-rfbport",
-			x11vncPort,
-			"-display",
-			":" + displayId,
-			"-id",
-			chromeWindowId,
-			"-forever"
-		];
-		
-		if(modifiedLibvncserver) {
-			x11vncArgs.push("unixsock");
-			x11vncArgs.push(vncUnixSocket);
-		}
-		
-		// debug: xwininfo -display :5 -root -children
-		// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
-		
-		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
-		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
-		var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
-		
-		VNC_CHANNEL[displayId].x11vnc = x11vnc;
-		
-		x11vnc.on("close", function (code, signal) {
-			log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-		});
-		
-		x11vnc.on("disconnect", function () {
-			log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
-		});
-		
-		x11vnc.on("error", function (err) {
-			log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
-			console.error(err);
-		});
-		
-		x11vnc.stdout.on("data", function (data) {
-			log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
-		});
-		
-		x11vnc.stderr.on("data", function (data) {
-			log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
-		});
-		
-		var resp = {
-			chromiumDebuggerPort: chromiumDebuggerPort,
-			vncPassword: vncPassword
-		}
-		
-		if(modifiedLibvncserver) {
-			resp.vncChannel = displayId;
-		}
-		else {
-			resp.vncHost = HOSTNAME;
-			resp.vncPort = x11vncPort;
-		}
-		
-		VNC_CHANNEL[displayId].info = resp;
-		
-		callback(null, resp);
-	}
+
+if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
+
+// ### x11vnc
+
+if(x11vncPort instanceof Error) {
+stopVncChannel(displayId);
+return callback(x11vncPort);
+}
+
+
+if(modifiedLibvncserver) x11vncPort = 0;
+
+// note: x11vnc supports both websockets and normal tcp on the same port!
+
+var vncPassword = generatePassword(8);
+
+
+// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
+var x11vncArgs = [
+"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
+"-passwd",
+vncPassword,
+"-rfbport",
+x11vncPort,
+"-display",
+":" + displayId,
+"-id",
+chromeWindowId,
+"-forever"
+];
+
+if(modifiedLibvncserver) {
+x11vncArgs.push("unixsock");
+x11vncArgs.push(vncUnixSocket);
+}
+
+// debug: xwininfo -display :5 -root -children
+// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
+
+log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
++ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
+var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
+
+VNC_CHANNEL[displayId].x11vnc = x11vnc;
+
+x11vnc.on("close", function (code, signal) {
+log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+});
+
+x11vnc.on("disconnect", function () {
+log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
+});
+
+x11vnc.on("error", function (err) {
+log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+console.error(err);
+});
+
+x11vnc.stdout.on("data", function (data) {
+log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
+});
+
+x11vnc.stderr.on("data", function (data) {
+log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
+});
+
+var resp = {
+chromiumDebuggerPort: chromiumDebuggerPort,
+vncPassword: vncPassword
+}
+
+if(modifiedLibvncserver) {
+resp.vncChannel = displayId;
+}
+else {
+resp.vncHost = HOSTNAME;
+resp.vncPort = x11vncPort;
+}
+
+VNC_CHANNEL[displayId].info = resp;
+
+callback(null, resp);
+}
 }
 
 function stopVncChannel(displayId) {
