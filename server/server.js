@@ -100,9 +100,7 @@ var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
 
 var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false); // Translate all paths like if the home dir was the root folder
 
-var DISPLAY_ID = 0; // Counter of visual displays
-
-var PIPE_COUNTER = 0;
+var PIPE_COUNTER = 0; // Remove file sockets
 
 var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 
@@ -977,7 +975,7 @@ function main() {
 			// 13:22:46 exec  20807   1001 pts/11                 mate-calc
 			// 15:48:19 exec  19817                               <unknown>
 			
-			var re = /exec\s+(\d+)\s+(\d+)?\s+([^ ]*)$/;
+			var re = /exec\s+(\d+)\s+(\d+)?.*\s+([^ ]*)$/;
 			var str = data.toString();
 			var arr = str.split("\n");
 			
@@ -991,28 +989,28 @@ function main() {
 				
 				var pid = match[1];
 				var uid = parseInt(match[2]);
-				var tty = match[3];
-				var info = match[4];
-				var duration = match[5];
-				var process = match[6];
+				var p = match[3];
+				
+				// We only care for GUI apps
+				if(p=="xwininfo" || p=="sh" || p=="dbus-daemon" || p=="dconf-service" || p=="dbus-launch" || p=="at-spi2-registryd" || p=="at-spi-bus-launcher" || p=="x11vnc" ) return;
+				if(p == "sh") return;
 				
 				log(str, DEBUG);
-				log("pid=" + pid + " uid=" + uid + " tty=" + tty + " info=" + info + " duraction=" + duration + " process=" + process + " ");
-				
-				if(process.indexOf("/") != 0) {
-					log("process=" + process + " does not start with a slash!", DEBUG);
-					return;
-				}
+				log("pid=" + pid + " uid=" + uid + " p=" + p + " ");
 				
 				// What display port do our user have ?
 				for(var name in USER_CONNECTIONS) {
 					//log("uid=" + uid + " (" + typeof uid + ") vs " + USER_CONNECTIONS[name].uid + " (" + typeof USER_CONNECTIONS[name].uid + ") ", DEBUG);
 					if(uid == USER_CONNECTIONS[name].uid) {
-						xwininfo(USER_CONNECTIONS[name].display, process, name, );
-						return;
+						// It takes some time for the app to show up in xwininfo!
+						setTimeout(function() {
+							xwininfo(USER_CONNECTIONS[name].display, p, name);
+						}, 300);
+						
+return;
 					}
 				}
-				log("Found no user with uid=" + uid, DEBUG);
+				log("Found no online user with uid=" + uid, DEBUG);
 			});
 			
 		});
@@ -1028,8 +1026,8 @@ function main() {
 		
 		module_child_process.exec("xwininfo -display :" + displayId + " -root -children", function(error, stdout, stderr) {
 			if(error) throw err;
-			if(stderr) log(stderr, NOTICE);
-			
+			if(stderr) log("xwininfo: stderr=" + stderr, NOTICE);
+			log("xwininfo: (look for " + processName + ") displayId=" + displayId + " stdout=" + stdout, DEBUG);
 			/*
 				
 				xwininfo: Window id: 0x298 (the root window) (has no name)
@@ -1045,27 +1043,12 @@ function main() {
 				
 			*/
 			
-			log(stdout, DEBUG);
-			
 			var reWindowId = /window id: (.*) /;
 			var matchWindowId = stdout.match(reWindowId);
 			if(!matchWindowId) throw new Error("Unable to find reWindowId=" + reWindowId + " in stdout=" + stdout);
 			var windowId = matchWindowId[1];
 			
-			if(processName.indexOf(" ") != -1) var processPath = processName.slice(0, processName.indexOf(" ") + 1);
-			else var processPath = processName;
-			
-			if(processPath == "") {
-				log("processName=" + processName + " has no path!");
-				return;
-			}
-			
-			log("processPath=" + processPath, DEBUG);
-			var shortProcessName = UTIL.getFilenameFromPath(processPath);
-			
-			log("shortProcessName=" + shortProcessName, DEBUG);
-			
-			var reWindow = new RegExp('"' + shortProcessName + '"' + ".*(\\d+)x(\\d+)", "g");
+			var reWindow = new RegExp('"' + processName + '"[^\\d]*(\\d+)x(\\d+)');
 			log("reWindow=" + reWindow + "", DEBUG);
 			
 			var arr = stdout.split("\n");
@@ -1075,7 +1058,7 @@ function main() {
 				
 				log("str=" + str, DEBUG);
 				
-				var matchWindow = stdout.match(reWindow);
+				var matchWindow = str.match(reWindow);
 				if(!matchWindow) {
 					log("Did not find reWindow=" + reWindow + " in str=" + str, DEBUG);
 					return;
@@ -1084,8 +1067,10 @@ function main() {
 				var x = parseInt(matchWindow[1]);
 				var y = parseInt(matchWindow[2]);
 				
+				log(" Found match: x=" + x + " y=" + y + " matchWindow=" + JSON.stringify(matchWindow) + "");
+				
 				if(isNaN(x) || isNaN(x)) {
-					log("x=" + x + " y=" + y + " matchWindow=" + JSON.stringify(matchWindow), DEBUG);
+					log("x=" + x + " or y=" + y + " is NaN! matchWindow=" + JSON.stringify(matchWindow), DEBUG);
 					return;
 				}
 				
@@ -1111,10 +1096,13 @@ return;
 			// Need special version of X11vnc in order for unix sockets to work!
 			//var x11vncPort = HOME_DIR + username + "/sock/vnc_" + processName;
 			
-			getTcpPort(VNC_PORT, function(x11vncPort) {
+			getTcpPort(VNC_PORT, function(err, x11vncPort) {
+				if(err) throw err;
+				
 				var resp = startX11vnc(username, displayId, windowId, x11vncPort);
 				
 				resp.res = res[0];
+				resp.app = processName;
 				
 				// Tell user the vnc password and port
 				sendToClient(username, "vnc", resp)
@@ -1315,7 +1303,10 @@ function startX11vnc(username, displayId, windowId, x11vncPort) {
 	log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs));
 	var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs);
 	
-	VNC_CHANNEL[displayId].x11vnc = x11vnc;
+	var channelId = displayId;
+	var vncChannel = VNC_CHANNEL[displayId]
+	
+	vncChannel.x11vnc = x11vnc;
 	
 	x11vnc.on("close", function (code, signal) {
 		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
@@ -1341,7 +1332,7 @@ function startX11vnc(username, displayId, windowId, x11vncPort) {
 	var resp = {
 		vncPassword: vncPassword
 	}
-	VNC_CHANNEL[displayId].info = resp;
+	vncChannel.info = resp;
 	
 	
 	var proxyOptions = {
@@ -1349,23 +1340,22 @@ function startX11vnc(username, displayId, windowId, x11vncPort) {
 	}
 	
 	if(modifiedLibvncserver) {
-		resp.vncChannel = displayId;
+		resp.socket = vncUnixSocket;
+		
 		proxyOptions.target = {
 			socketPath: vncUnixSocket
 		};
 	}
 	else {
-		resp.vncHost = HOSTNAME;
+		//resp.vncHost = HOSTNAME;
 		resp.vncPort = x11vncPort;
-		proxyOptions.target = {
-			host: 'localhost',
-			port: x11vncPort
-		};
+		proxyOptions.target = 'ws://127.0.0.1:' + x11vncPort;
 	}
 	
+	proxyOptions.ws = true
 	
-	
-	VNC_CHANNEL[displayId].proxy = new module_httpProxy.createProxyServer(proxyOptions);
+	// The proxy was unable to proxy the request. It however worked with Nginx!
+	//vncChannel.proxy = new module_httpProxy.createProxyServer(proxyOptions);
 	
 	return resp;
 }
@@ -4346,6 +4336,8 @@ function handleHttpRequest(request, response) {
 	
 	//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
 	
+	/*
+		
 	if(firstDir == "vnc" && secondDir) {
 		
 		if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
@@ -4363,7 +4355,8 @@ function handleHttpRequest(request, response) {
 		
 		return;
 	}
-	else if(firstDir == "oembed") {
+	*/
+	if(firstDir == "oembed") {
 		/*
 			https://embed.ly/providers/validate/oembed
 			

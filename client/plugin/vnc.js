@@ -1,29 +1,25 @@
 (function() {
 	"use strict";
 	
-	// !DO:NOT:BUNDLE!
-	
 	EDITOR.plugin({
-		desc: "Launch noVNC",
-		load: function loadVncSupport() {
+		desc: "Use GUI apps via VNC",
+		load: function loadVnc() {
 			
-			var char_V = 86;
+			CLIENT.on("vnc", handleVnc);
 			
-			EDITOR.bindKey({desc: "Launch noVNC", fun: launchNoVnc, charCode: char_V, combo: CTRL + ALT});
 		},
-		unload: function unloadVncSupport() {
-			EDITOR.unbindKey(launchNoVnc);
+		unload: function unloadVnc() {
+			CLIENT.removeEvent("vnc", handleVnc);
 		}
 	});
 	
-	function launchNoVnc() {
+	function handleVnc(info) {
 		
-		var host = "webide.se";
-		var port = "5901";
-		var pw = "";
-		var url = "noVNC/vnc.html??host=" + host + "&port=" + port + "&password=" + encodeURIComponent(pw) + "&autoconnect=true"
-		var width = 780; // When Chromium runs fullscreen inside a 800x600 screen
-		var height = 553;
+		var scrollbarWidth = 18;
+		var scrollbarHeight = 18;
+		var url = "noVNC/vnc.html?path=_vnc" + info.vncPort + "&password=" + encodeURIComponent(info.vncPassword) + "&autoconnect=true"
+		var width = info.res.x + scrollbarWidth;
+		var height = info.res.y + scrollbarHeight;
 		var top = 1;
 		var left = 500;
 		
@@ -39,6 +35,10 @@
 			win.document.getElementById("noVNC_canvas").style.margin = "0px";
 			//win.resizeTo(width, height);
 			win.document.getElementById("noVNC_status").style.display="none"; // Flashes so fast we can't read what it says
+			
+			setTimeout(function() {
+				win.document.title = info.app;
+			}, 3000);
 			
 		}
 		
