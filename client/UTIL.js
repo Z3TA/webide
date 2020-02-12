@@ -3094,6 +3094,7 @@ b = b.slice(8);
 		
 	},
 	isAllCaps: function isAllCaps(str) {
+		if(typeof str == "number") return true; // See usage in UTIL.updateError
 		if(typeof str != "string") throw new Error("str=" + str + " is not a string!");
 		
 		for(var i=0; i<str.length; i++) {
