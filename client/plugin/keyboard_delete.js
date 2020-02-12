@@ -10,7 +10,7 @@
 			fun: keydel
 		});
 		
-		EDITOR.bindKey({desc: "Delete char to the right of cursor Emacs style", charCode: 68, combo: CTRL, fun: deleteRightCharacter}); // Ctrl+D
+		//EDITOR.bindKey({desc: "Delete char to the right of cursor Emacs style", charCode: 68, combo: CTRL, fun: deleteRightCharacter}); // Ctrl+D
 		EDITOR.bindKey({desc: "Delete word to the right of cursor", charCode: 46, combo: CTRL, fun: deleteRightWord}); // Ctrl+Delete
 	}
 	

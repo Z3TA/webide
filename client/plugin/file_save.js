@@ -86,8 +86,6 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		return saveCurrentFile(file, combo);
 	}
 	
-	
-	
 	function saveFileFromWindowMenu(file, combo) {
 		EDITOR.stat("saveFileFromWindowMenu");
 		windowMenuSave.hide();

@@ -22,6 +22,7 @@ API.mysql = require("./plugin/mysql.js");
 API.nodejsautocomplete = require("./plugin/nodejsautocomplete.js");
 API.nodejsrepl = require("./plugin/nodejsrepl.js");
 API.LSP = require("./plugin/lsp.js");
+API.desktop = require("./plugin/desktop.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 

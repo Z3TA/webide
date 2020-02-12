@@ -989,14 +989,14 @@ function main() {
 				
 				var pid = match[1];
 				var uid = parseInt(match[2]);
-
-if(!CRAZY && uid == 0) return;
-
+				
+				if(!CRAZY && uid == 0) return;
+				
 				var p = match[3];
 				
 				// We only care for GUI apps
-				if(p=="xwininfo" || p=="sh" || p=="dbus-daemon" || p=="dconf-service" || p=="dbus-launch" || p=="at-spi2-registryd" || p=="at-spi-bus-launcher" || p=="x11vnc" ) return;
-				if(p == "sh") return;
+				//if(p=="sh" || p=="dbus-daemon" || p=="dconf-service" || p=="dbus-launch" || p=="at-spi2-registryd" || p=="at-spi-bus-launcher" ) return;
+				
 				
 				log(str, DEBUG);
 				log("pid=" + pid + " uid=" + uid + " p=" + p + " ");
@@ -1105,6 +1105,10 @@ return;
 			
 			// Need special version of X11vnc in order for unix sockets to work!
 			//var x11vncPort = HOME_DIR + username + "/sock/vnc_" + processName;
+			
+			sendToClient(username, "desktopWindow", {app: processName, res: res[0]});
+			
+			return;
 			
 			getTcpPort(VNC_PORT, function(err, x11vncPort) {
 				if(err) throw err;

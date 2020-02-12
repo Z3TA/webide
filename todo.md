@@ -78,27 +78,15 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-Detect when app is started:
-sudo forkstat -e exec -x
+Give each user a Desktop that they can start GUI apps on
+
+Make it possible to see gui apps running in (docker) containers:
+socat TCP-LISTEN:6006,fork,range=10.2.3.235/32 UNIX-CONNECT:/tmp/.X11-unix/X6
+
+docker run -ti --rm -e DISPLAY=10.2.0.1:6 firefox
 
 
-in guest terminal:
-export DISPLAY=:5
-DISPLAY=:5 mate-calc
-
-
-in other terminal:
-Xvfb :5 -screen 0 800x600x24 -ac &
-xwininfo -display :5 -root -children
-x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
-
-
-Set DISPLAY in user's env variable
-and run Xvfb set to that display
-that uses x11vnc
-
-
-
+Use GUI tools via Docker...
 
 
 export PATH=/zpcdata/projects/webide/android-tools:/zpcdata/projects/webide/android-tools/bin:$PATH
