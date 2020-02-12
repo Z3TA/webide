@@ -50,7 +50,7 @@
 
 			EDITOR.unregisterAltKey(newFileFromVirtualKeyboard);
 			
-			EDITOR.dashboard.removeWidget(newFileDashboardWidget);
+			if(newFileDashboardWidget) EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
 			EDITOR.discoveryBar.remove(discoveryBarIcon);
 		},

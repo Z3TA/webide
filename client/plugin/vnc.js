@@ -18,8 +18,8 @@
 		var scrollbarWidth = 18;
 		var scrollbarHeight = 18;
 		var url = "noVNC/vnc.html?path=_vnc" + info.vncPort + "&password=" + encodeURIComponent(info.vncPassword) + "&autoconnect=true"
-		var width = info.res.x + scrollbarWidth;
-		var height = info.res.y + scrollbarHeight;
+		var width = info.res.x// + scrollbarWidth;
+		var height = info.res.y + 1// + scrollbarHeight;
 		var top = 1;
 		var left = 500;
 		

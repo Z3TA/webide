@@ -78,6 +78,10 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Can we make Xvfb listen on TCP instead of unix socket!?
+So that DISPLAY variable will work on both local and docker VM, without having to use socat to proxy to the unix socket...
+nope :( We have to use socat, and run it as root...
+
 Give each user a Desktop that they can start GUI apps on
 
 Make it possible to see gui apps running in (docker) containers:

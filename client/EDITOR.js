@@ -8997,7 +8997,8 @@ function main() {
 		EDITOR.user = {
 			name: login.user,
 				homeDir: login.homeDir,
-				platform: login.platform
+				platform: login.platform,
+domain: login.user + "." + login.tld
 		};
 
 if(login.netnsIP) EDITOR.user.netnsIP = login.netnsIP;

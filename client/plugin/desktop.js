@@ -3,7 +3,9 @@
 	
 	var windowMenu;
 	var active = false;
-
+	var desktopPassword = "";
+	var desktopPort = -1;
+	
 	EDITOR.plugin({
 		desc: "A virtual desktop for GUI apps",
 		load: function loadDesktop() {
@@ -29,6 +31,7 @@
 	});
 	
 	function handleDekstopEvent(obj) {
+		// Falsh discovery icon!?
 		alertBox(JSON.stringify(obj));
 	}
 	
@@ -41,7 +44,7 @@
 	}
 	
 	function startDesktop(show) {
-		CLIENT.cmd("dekstop.start", {}, function(err, info) {
+		CLIENT.cmd("desktop.start", {}, function(err, info) {
 			if(err) return alertBox(err.message);
 			
 			desktopPassword = info.password;
@@ -59,9 +62,12 @@
 		
 		if(!active) return startDesktop(true); 
 		
-		var url = "noVNC/vnc.html?path=_vnc" + desktopPort + "&password=" + encodeURIComponent(desktopPassword) + "&autoconnect=true"
+		var u = EDITOR.user;
+		var proto = window.location.protocol;
+		
+		var url = "noVNC/vnc.html?host=" + desktopPort + "." + u.domain + "&password=" + encodeURIComponent(desktopPassword) + "&autoconnect=true"
 		var width = 800;
-		var height = 600;
+		var height = 600 + 1;
 		var top = 1;
 		var left = 500;
 		

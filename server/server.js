@@ -995,7 +995,7 @@ function main() {
 				var p = match[3];
 				
 				// We only care for GUI apps
-				//if(p=="sh" || p=="dbus-daemon" || p=="dconf-service" || p=="dbus-launch" || p=="at-spi2-registryd" || p=="at-spi-bus-launcher" ) return;
+				if(p=="sh" || p=="dbus-daemon" || p=="dconf-service" || p=="dbus-launch" || p=="at-spi2-registryd" || p=="at-spi-bus-launcher" ) return;
 				
 				
 				log(str, DEBUG);
@@ -1007,7 +1007,7 @@ function main() {
 					if(uid == USER_CONNECTIONS[name].uid) {
 						// It takes some time for the app to show up in xwininfo!
 						setTimeout(function() {
-							xwininfo(USER_CONNECTIONS[name].display, p, name);
+							xwininfo(USER_CONNECTIONS[name].uid, p, name);
 						}, 300);
 						
 return;
@@ -1029,13 +1029,14 @@ return;
 		
 		if(VNC_CHANNEL.hasOwnProperty(displayId)) {
 			if(VNC_CHANNEL[displayId].info && VNC_CHANNEL[displayId].info.app == processName) {
-				log(processName + " already got a VNC channel on displayId=" + displayId + " ", DEBUG);
+				log(processName + " already got a VNC channel on displayId=" + displayId + " info=" + JSON.stringify(VNC_CHANNEL[displayId].info), DEBUG);
+				sendToClient(username, "vnc", VNC_CHANNEL[displayId].info)
 return;
 			}
 		}
 		
 		module_child_process.exec("xwininfo -display :" + displayId + " -root -children", function(error, stdout, stderr) {
-			if(error) throw err;
+			if(error) return console.error(error);
 			if(stderr) log("xwininfo: stderr=" + stderr, NOTICE);
 			log("xwininfo: (look for " + processName + ") displayId=" + displayId + " stdout=" + stdout, DEBUG);
 			/*
@@ -1058,7 +1059,7 @@ return;
 			if(!matchWindowId) throw new Error("Unable to find reWindowId=" + reWindowId + " in stdout=" + stdout);
 			var windowId = matchWindowId[1];
 			
-			var reWindow = new RegExp('"' + processName + '"[^\\d]*(\\d+)x(\\d+)');
+			var reWindow = new RegExp('/^\\s*([^ ]*).*"' + processName + '"[^\\d]*(\\d+)x(\\d+)');
 			log("reWindow=" + reWindow + "", DEBUG);
 			
 			var arr = stdout.split("\n");
@@ -1074,8 +1075,9 @@ return;
 					return;
 				}
 				
-				var x = parseInt(matchWindow[1]);
-				var y = parseInt(matchWindow[2]);
+				var id = matchWindow[1]
+				var x = parseInt(matchWindow[2]);
+				var y = parseInt(matchWindow[3]);
 				
 				log(" Found match: x=" + x + " y=" + y + " matchWindow=" + JSON.stringify(matchWindow) + "");
 				
@@ -1084,7 +1086,7 @@ return;
 					return;
 				}
 				
-				res.push({x: x, y: y});
+				res.push({id: id, x: x, y: y});
 				
 			});
 
@@ -1107,13 +1109,16 @@ return;
 			//var x11vncPort = HOME_DIR + username + "/sock/vnc_" + processName;
 			
 			sendToClient(username, "desktopWindow", {app: processName, res: res[0]});
-			
 			return;
 			
 			getTcpPort(VNC_PORT, function(err, x11vncPort) {
 				if(err) throw err;
 				
-				var resp = startX11vnc(username, displayId, windowId, x11vncPort);
+				/*
+					problem: If we only pick the window, we wont see things like menus... (menus counts as own windows)
+				*/
+				
+				var resp = startX11vnc(username, displayId, res[0].id, x11vncPort);
 				
 				resp.res = res[0];
 				resp.app = processName;
@@ -2458,16 +2463,17 @@ throw err;
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
 							// Tell the worker process which user
-							var userInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell};
+							var userWorkerInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell, id: uid};
 							
-							log("User userConnectionName=" + userConnectionName + " logged in! CHROOT=" + CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userInfo=" + JSON.stringify(userInfo));
 							
-							userWorker.send({identify: userInfo});
+							log("User userConnectionName=" + userConnectionName + " logged in! CHROOT=" + CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
+							
+							userWorker.send({identify: userWorkerInfo});
 							userWorker.on("message", messageFromWorker);
 							userWorker.on("close", workerCloseHandler);
 							
 							
-							var xserver = createUserXserver(username, display);
+							//var xserver = createUserXserver(username, display);
 							
 							/*
 								setTimeout(function() {
@@ -2483,7 +2489,7 @@ throw err;
 
 
 							// Respond to the client that the login was successful
-							var userInfo = {
+							var userClientInfo = {
 								user: userConnectionName,
 								alias: userAlias,
 								sessionId: json.sessionId,
@@ -2492,19 +2498,20 @@ throw err;
 								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
 								editorVersion: EDITOR_VERSION,
 								platform: process.platform,
-								homeDir: (CHROOT || VIRTUAL_ROOT) ? "/" : homeDir
+								homeDir: (CHROOT || VIRTUAL_ROOT) ? "/" : homeDir,
+								tld: DOMAIN
 							};
 							
 							if(CHROOT) {
-								userInfo.installDirectory = __dirname.replace(/server$/, "");
+								userClientInfo.installDirectory = __dirname.replace(/server$/, "");
 							}
 							
 							if(uid && process.platform=="linux") {
 var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
-userInfo.netnsIP = netnsIP;
+								userClientInfo.netnsIP = netnsIP;
 }
 
-							send({resp: {loginSuccess: userInfo}});
+							send({resp: {loginSuccess: userClientInfo}});
 							
 							// Tell all client that a new client has connected
 							var clientJoin = {
@@ -2879,7 +2886,7 @@ var loginCounter = 0;
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
 										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
-										userWorker.send({identify: userInfo});
+										userWorker.send({identify: userWorkerInfo});
 										
 										userWorker.on("message", messageFromWorker);
 										userWorker.on("close", workerCloseHandler);
