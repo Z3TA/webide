@@ -989,6 +989,9 @@ function main() {
 				
 				var pid = match[1];
 				var uid = parseInt(match[2]);
+
+if(!CRAZY && uid == 0) return;
+
 				var p = match[3];
 				
 				// We only care for GUI apps
