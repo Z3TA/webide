@@ -10,7 +10,7 @@
 		desc: "A virtual desktop for GUI apps",
 		load: function loadDesktop() {
 			
-			windowMenu = EDITOR.windowMenu.add(S("desktop"), [S("View"), 1], showDesktopFromWindowMenu, showDesktopFromKeyboardCombo);
+			windowMenu = EDITOR.windowMenu.add(S("displayDesktop"), [S("View"), 1], showDesktopFromWindowMenu, showDesktopFromKeyboardCombo);
 			
 			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL, fun: showDesktopFromKeyboardCombo}); // Ctrl+D
 			
@@ -44,7 +44,7 @@
 	}
 	
 	function startDesktop(show) {
-		CLIENT.cmd("desktop.start", {}, function(err, info) {
+		CLIENT.cmd("display.start", {}, function(err, info) {
 			if(err) return alertBox(err.message);
 			
 			desktopPassword = info.password;

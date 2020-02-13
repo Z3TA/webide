@@ -200,8 +200,6 @@ var GCSF = {}; // username: GCSF session
 var DROPBOX = {}; // username: Dropbox daemon
 
 
-var DISPLAY_COUNTER = 5; // Dont start on low numbers as those might be taken by physical monitors
-
 
 // Declare modules here as a OPTIMIZATION
 var module_fs = require("fs");
@@ -2376,7 +2374,6 @@ throw err;
 						var homeDir; // User's home dir
 						var shell; // User's shell (currently disabled/not implemented)
 						var groups; // Object with groupName:groupId
-						var display = ++DISPLAY_COUNTER; // User virtual display id (accessable via VNC)
 						
 						userConnectionName = username;
 						
@@ -2445,7 +2442,6 @@ throw err;
 									connectedClientIds: [userConnectionId],
 									connectionCLientAliases: {1: userAlias},
 									sessionId: [clientSessionId],
-									display: display,
 									uid: uid
 								}
 								
@@ -2461,7 +2457,7 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
 							// Tell the worker process which user
 							var userWorkerInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell, id: uid};
 							
@@ -2472,8 +2468,6 @@ throw err;
 							userWorker.on("message", messageFromWorker);
 							userWorker.on("close", workerCloseHandler);
 							
-							
-							//var xserver = createUserXserver(username, display);
 							
 							/*
 								setTimeout(function() {
@@ -2885,7 +2879,7 @@ var loginCounter = 0;
 									
 									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
 									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, display);
+										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
 										userWorker.send({identify: userWorkerInfo});
 										
 										userWorker.on("message", messageFromWorker);
@@ -4854,95 +4848,6 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserXserver(username, displayId) {
-	
-	var xvfbArgs = [
-		":" + displayId,  // Server/monitor/display ... ?
-		"-screen",
-		"0",
-		"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
-		"-ac" // Disables X access control
-	];
-	
-	// debug: Xvfb :5 -screen 0 800x600x24 -ac &
-	// debug: xwininfo -display :5 -root -children
-	// debug: ps ax | grep Xvfb
-	
-	log(   "Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ")"   );
-	var xvfb = module_child_process.spawn("Xvfb", xvfbArgs);
-	
-	if(VNC_CHANNEL.hasOwnProperty(displayId)) throw new Error("displayId=" + displayId + " already exist in VNC_CHANNEL");
-	
-	VNC_CHANNEL[displayId] = {startedBy: username};
-	VNC_CHANNEL[displayId].xvfb = xvfb;
-	
-	xvfb.on("close", function (code, signal) {
-		log(username + " xvfb (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-	});
-	
-	xvfb.on("disconnect", function () {
-		log(username + " xvfb (displayId=" + displayId + ") disconnect: xvfb.connected=" + xvfb.connected, DEBUG);
-	});
-	
-	xvfb.on("error", function (err) {
-		log(username + " xvfb (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
-		console.error(err);
-	});
-	
-	xvfb.stdout.on("data", function(data) {
-		log(username + " xvfb (displayId=" + displayId + ") stdout: " + data, WARN);
-	});
-	
-	xvfb.stderr.on("data", function (data) {
-		log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
-		
-		if(data.indexOf("(EE) Server is already active for display " + displayId) != -1) {
-			/*
-				The server was probably restarted without killing xvfb
-				This means a chromium-browser and x11vnc is also probably running !
-				And will make x11vnc close (ListenOnTCPPort: Address already in use)
-				
-				We don't want to reuse chromium-browser inside the "ghost" Xvfb because we don't know what user started it.
-				And it's probably best to not reuse the Xvfb either.
-				But the user has already been sent the callback ...
-				
-				Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
-				
-			*/
-			
-			module_ps.lookup({
-				command: 'Xvfb',
-				arguments: xvfbArgs.join(" "),
-			}, function(err, resultList ) {
-				if (err) {
-					throw new Error( err );
-				}
-				
-				resultList.forEach(function( p ){
-					if( p ){
-						console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
-						module_ps.kill( p.pid, function( err ) {
-							if (err) {
-								throw new Error( err );
-							}
-							else {
-								console.log( 'Process %s has been killed!', pid );
-								// Restart Xvfb. But only if it has not already been restarted to prevent endless loop.
-								if(xvfbStartCounter <= 1) startXvfb();
-								
-							}
-						});
-					}
-					else throw new Error("Expected p");
-				});
-			});
-		}
-		
-	});
-	
-	return xvfb;
-}
-
 function createUserWorker(username, uid, gid, homeDir, groups, display) {
 	
 	// You can have different group and user. Default is the user/group running the node process
@@ -4963,11 +4868,6 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 	if(groups) {
 		// we have to manually serialize objects!
 		spawnOptions.env.groups = JSON.stringify(groups);
-	}
-	
-	if(display) {
-		// Each user has their own X-server (Xvfb)
-		spawnOptions.env.DISPLAY = ":" + display
 	}
 	
 	// For forking when running in the Termux Android app
@@ -5027,6 +4927,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 spawnOptions.env.HOST = netnsIP;
+		spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
 		
 		spawnOptions.shell = EXEC_OPTIONS.shell;
 		

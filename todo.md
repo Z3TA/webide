@@ -78,6 +78,12 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+might not have to use user namespace on Docker VM,
+instead make Docker run with the uid we want
+(need to give root permissions to that uid)
+
+socat TCP-LISTEN:7001,fork UNIX-CONNECT:/tmp/.X11-unix/X1001
+
 Can we make Xvfb listen on TCP instead of unix socket!?
 So that DISPLAY variable will work on both local and docker VM, without having to use socat to proxy to the unix socket...
 nope :( We have to use socat, and run it as root...
