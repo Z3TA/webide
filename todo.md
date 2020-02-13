@@ -78,38 +78,39 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+todo: Able to set screen size of display/desktop
+
+expo detects the Android emulator! yay!
+
+expo devtools want to access WebSocket connection to 'ws://localhost:1900
+(it however starts a browser in the display/desktop!)
+
+Android SDK + tools should be pre-installed !?
+Should probably base home dir's on a zfs snapshot to avoid duplication!?
+
+Should be able to start an Android Emulator in one click via Tools > Emulator > Android > Device
+
+Allow user to use /dev/kvm:
+sudo setfacl -m u:UserName:rwx /dev/kvm
+
+setup wizard screen is blank when running android studio in vnc
+possible fix: Edit android-studio/bin/idea.properties and add
+disable.android.first.run=true
+
+
+
 might not have to use user namespace on Docker VM,
 instead make Docker run with the uid we want
 (need to give root permissions to that uid)
 
-socat TCP-LISTEN:7001,fork UNIX-CONNECT:/tmp/.X11-unix/X1001
 
-Can we make Xvfb listen on TCP instead of unix socket!?
-So that DISPLAY variable will work on both local and docker VM, without having to use socat to proxy to the unix socket...
-nope :( We have to use socat, and run it as root...
+
 
 Give each user a Desktop that they can start GUI apps on
 
-Make it possible to see gui apps running in (docker) containers:
-socat TCP-LISTEN:6006,fork,range=10.2.3.235/32 UNIX-CONNECT:/tmp/.X11-unix/X6
 
-docker run -ti --rm -e DISPLAY=10.2.0.1:6 firefox
-
-
-Use GUI tools via Docker...
-
-
-export PATH=/zpcdata/projects/webide/android-tools:/zpcdata/projects/webide/android-tools/bin:$PATH
-
-apt-get install libgl1-mesa-dev
 
 Run Android emulator in the editor
-
-sudo apt update && sudo apt install android-sdk
-
-
-Problem: localhost is hardcoded in example files...
-
 
 
 React Native support!

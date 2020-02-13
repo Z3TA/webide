@@ -42,17 +42,17 @@ var DISPLAY = {
 		// By listening on TCP we can allow VM's and Docker containers to start GUI apps on our display!
 		// The xclient will connect to port 6000 + displayNr
 		// todo: Add iptables rules so that only the user and the docker VM can connect to the display
-		SCREEN[displayId].socat = spawnTcpProxyToUnixSocket(6000+user.id, "/tmp/.X11-unix/X" + user.id)
+		SCREEN[displayId].socat = spawnTcpProxyToUnixSocket(6000+user.id, "/tmp/.X11-unix/X" + user.id, displayId, user.name)
 		
 		
-		getWindowId(displayId, function(err, windowId) {
-			if(err) return callback(err);
+		//getWindowId(displayId, function(err, windowId) {
+			//if(err) return callback(err);
 			
-			var x11vncPort = 7000 + user.id; // The port to run the VNC protocol on
-			var vnc = startX11vnc(username, displayId, windowId, x11vncPort);
+		var x11vncPort = 7000 + user.id; // The port to run the VNC protocol on
+		var vnc = startX11vnc(username, displayId, x11vncPort);
 			
 			return callback(null, {port: vnc.vncPort, password: vnc.vncPassword});
-		});
+		//});
 		
 	},
 	stop: function(user, json, callback) {
@@ -79,17 +79,29 @@ var DISPLAY = {
 	
 }
 
-function spawnTcpProxyToUnixSocket(port, unixSocket) {
+function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 	var args = [
 		"TCP-LISTEN:" + port + ",fork",
 		"UNIX-CONNECT:" + unixSocket
 	];
+	
+	var errAddressInUse = false;
 	
 	log("Starting socat with args=" + JSON.stringify(args), DEBUG);
 	var socat = module_child_process.spawn("socat", args);
 	
 	socat.on("close", function (code, signal) {
 		log(username + " socat close: code=" + code + " signal=" + signal, NOTICE);
+		
+		if(code != 0 && errAddressInUse) {
+			// The address is taken for 20-30 seconds
+			var waitSeconds = 10;
+			log(username + " waiting " + waitSeconds + " seconds before restarting socat...", DEBUG);
+			setTimeout(function() {
+				log(username + " restarting socat!", DEBUG);
+				SCREEN[displayId].socat = spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username);
+			}, waitSeconds*1000);
+		}
 	});
 	
 	socat.on("disconnect", function () {
@@ -107,6 +119,12 @@ function spawnTcpProxyToUnixSocket(port, unixSocket) {
 	
 	socat.stderr.on("data", function (data) {
 		log(username + " socat stderr: " + data, INFO);
+		
+		var str = data.toString();
+		
+		if(str.indexOf("Address already in use") != -1) errAddressInUse = true;
+		else errAddressInUse = false;
+		
 	});
 	
 	return socat;
@@ -144,7 +162,7 @@ function getWindowId(displayId, callback) {
 	
 }
 
-function startX11vnc(username, displayId, windowId, x11vncPort) {
+function startX11vnc(username, displayId, x11vncPort, windowId) {
 	
 	if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
 	
@@ -171,8 +189,8 @@ function startX11vnc(username, displayId, windowId, x11vncPort) {
 		x11vncPort,
 		"-display",
 		":" + displayId,
-		"-id",
-		windowId,
+		//"-id",
+		//windowId,
 		"-forever"
 	];
 	
@@ -254,7 +272,7 @@ function createScreen(username, displayId) {
 		":" + displayId,  // Server/monitor/display ... ?
 		"-screen",
 		"0",
-		"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
+		"800x900x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
 		"-ac" // Disables X access control
 	];
 	

@@ -277,7 +277,7 @@ user.teardown = function teardown(msg, terddownComplete) {
 	
 	console.log("Recived teardown request from parent process!");
 	
-	API.desktop.stop();
+	API.display.stop();
 	
 	// Stop running NodeJS scrips
 	var scriptsToStop = 0;

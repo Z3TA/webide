@@ -31,7 +31,7 @@
 	});
 	
 	function handleDekstopEvent(obj) {
-		// Falsh discovery icon!?
+		// Flash discovery icon!?
 		alertBox(JSON.stringify(obj));
 	}
 	
