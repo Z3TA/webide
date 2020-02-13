@@ -387,7 +387,7 @@ if(!serverState && !localState) {
 					else if(!stateChanged(serverState, localState)) {
 						// Doesn't matter if server and local state is the same
 						console.log("reopenFiles: Server and local state is the same for path=" + path);
-						return decidedWhichStateToUse(serverState);
+						return decidedWhichStateToUse(serverState || localState);
 					}
 					else if(!serverState) {
 						// Use local state if no server state exist
