@@ -937,7 +937,7 @@ function main() {
 		});
 	}
 	
-	if(info.uid == 0 && !USERNAME) {
+	if(info.uid == 0 && !USERNAME && 1==2) {
 		// ## forkstat
 		// Detect when users start an app
 		
