@@ -5,6 +5,8 @@
 	var active = false;
 	var desktopPassword = "";
 	var desktopPort = -1;
+	var desktopWidth =  Math.min(1000, screen.width, Math.max(screen.width/2, 800));
+	var desktopHeight = Math.min(1000, screen.height-110, Math.max(screen.height, 900));
 	
 	EDITOR.plugin({
 		desc: "A virtual desktop for GUI apps",
@@ -44,15 +46,25 @@
 	}
 	
 	function startDesktop(show) {
-		CLIENT.cmd("display.start", {}, function(err, info) {
+		
+		
+		console.log("startDesktop: before: desktopWidth=" + desktopWidth + " desktopHeight=" + desktopHeight);
+		
+		CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function(err, info) {
 			if(err) return alertBox(err.message);
 			
 			desktopPassword = info.password;
 			desktopPort = info.port;
+			desktopWidth = info.width;
+			desktopHeight = info.height;
+			
+			console.log("startDesktop: after: desktopWidth=" + desktopWidth + " desktopHeight=" + desktopHeight);
 			
 			active = true;
 			
 			if(show) showDesktop()
+			
+			
 			
 		});
 		
@@ -66,10 +78,10 @@
 		var proto = window.location.protocol;
 		
 		var url = "noVNC/vnc.html?host=" + desktopPort + "." + u.domain + "&password=" + encodeURIComponent(desktopPassword) + "&autoconnect=true"
-		var width = 800;
-		var height = 600 + 1;
-		var top = 1;
-		var left = 500;
+		var width = desktopWidth;
+		var height = desktopHeight + 1;
+		var top = 0;
+		var left = screen.width-desktopWidth;
 		
 		EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 		

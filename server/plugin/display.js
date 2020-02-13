@@ -30,29 +30,27 @@ var DISPLAY = {
 		if(displayId == undefined) throw new Error("displayId=" + displayId + "");
 		
 		if(SCREEN.hasOwnProperty(displayId)) {
-			var vnc = SCREEN[displayId];
-			return callback(null, {port: vnc.vncPort, password: vnc.vncPassword});
+			return callback(null, SCREEN[displayId].vnc);
 		}
 		
-		SCREEN[displayId] = {};
+		SCREEN[displayId] = {
+			vnc: {}
+		};
 		
-		SCREEN[displayId].xvfb = createScreen(username, displayId);
+		createScreen(username, displayId, json.width, json.height);
 		
 		// We can't get x server to listen on TCP, it only wants to listen on unix socket. So we have to proxy to the socket
 		// By listening on TCP we can allow VM's and Docker containers to start GUI apps on our display!
 		// The xclient will connect to port 6000 + displayNr
 		// todo: Add iptables rules so that only the user and the docker VM can connect to the display
-		SCREEN[displayId].socat = spawnTcpProxyToUnixSocket(6000+user.id, "/tmp/.X11-unix/X" + user.id, displayId, user.name)
+		spawnTcpProxyToUnixSocket(6000+user.id, "/tmp/.X11-unix/X" + user.id, displayId, user.name)
 		
 		
-		//getWindowId(displayId, function(err, windowId) {
-			//if(err) return callback(err);
-			
 		var x11vncPort = 7000 + user.id; // The port to run the VNC protocol on
-		var vnc = startX11vnc(username, displayId, x11vncPort);
-			
-			return callback(null, {port: vnc.vncPort, password: vnc.vncPassword});
-		//});
+		startX11vnc(username, displayId, x11vncPort);
+		
+		return callback(null, SCREEN[displayId].vnc);
+		
 		
 	},
 	stop: function(user, json, callback) {
@@ -68,8 +66,7 @@ var DISPLAY = {
 		
 		function stop(displayId) {
 			var screen = SCREEN[displayId]
-			if(screen.proxy) screen.proxy.close();
-			if(screen.sockat) screen.sockat.kill();
+			if(screen.socat) screen.socat.kill();
 			if(screen.x11vnc) screen.x11vnc.kill();
 			if(screen.xvfb) screen.xvfb.kill();
 			delete SCREEN[displayId];
@@ -127,7 +124,7 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 		
 	});
 	
-	return socat;
+	SCREEN[displayId].socat = socat;
 }
 
 function getWindowId(displayId, callback) {
@@ -169,11 +166,11 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	// ### x11vnc
 	
 	if(!UTIL.isNumeric(x11vncPort)) {
-		var modifiedLibvncserver = true;
+		var unixPipe = true;
 		var vncUnixSocket = x11vncPort;
 	}
 	
-	if(modifiedLibvncserver) x11vncPort = 0;
+	if(unixPipe) x11vncPort = 0;
 	
 	// note: x11vnc supports both websockets and normal tcp on the same port!
 	
@@ -194,7 +191,7 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 		"-forever"
 	];
 	
-	if(modifiedLibvncserver) {
+	if(unixPipe) {
 		x11vncArgs.push("unixsock");
 		x11vncArgs.push(vncUnixSocket);
 	}
@@ -204,11 +201,6 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	
 	log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs));
 	var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs);
-	
-	var channelId = displayId;
-	var vncChannel = SCREEN[displayId]
-	
-	vncChannel.x11vnc = x11vnc;
 	
 	x11vnc.on("close", function (code, signal) {
 		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
@@ -233,46 +225,36 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 		log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
 	});
 	
-	var resp = {
-		vncPassword: vncPassword
-	}
+	SCREEN[displayId].x11vnc = x11vnc;
+	
+	SCREEN[displayId].vnc.password = vncPassword;
 	
 	
-	
-	var proxyOptions = {
-		ws: true
-	}
-	
-	if(modifiedLibvncserver) {
-		resp.socket = vncUnixSocket;
-		
-		proxyOptions.target = {
-			socketPath: vncUnixSocket
-		};
+	if(unixPipe) {
+		SCREEN[displayId].vnc.socket = vncUnixSocket;
 	}
 	else {
-		//resp.vncHost = HOSTNAME;
-		resp.vncPort = x11vncPort;
-		proxyOptions.target = 'ws://127.0.0.1:' + x11vncPort;
+		//SCREEN[displayId].vnc.host = HOSTNAME;
+		SCREEN[displayId].vnc.port = x11vncPort;
 	}
 	
-	proxyOptions.ws = true
-	
-	// The proxy was unable to proxy the request. It however worked with Nginx!
-	//vncChannel.proxy = new module_httpProxy.createProxyServer(proxyOptions);
-	
-	vncChannel.vnc = resp;
-	
-	return resp;
 }
 
-function createScreen(username, displayId) {
+function createScreen(username, displayId, width, height) {
+	
+	if(width == undefined) width = 800;
+	if(height == undefined) height = 900;
+	
+	var res = width + "x" + height + "x24";
+	
+	SCREEN[displayId].vnc.width = width;
+	SCREEN[displayId].vnc.height = height;
 	
 	var xvfbArgs = [
 		":" + displayId,  // Server/monitor/display ... ?
 		"-screen",
 		"0",
-		"800x900x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
+		res, // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
 		"-ac" // Disables X access control
 	];
 	
@@ -306,7 +288,8 @@ function createScreen(username, displayId) {
 		log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
 	});
 	
-	return xvfb;
+	SCREEN[displayId].xvfb = xvfb
+	
 }
 
 function generatePassword(n) {

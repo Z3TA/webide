@@ -23,6 +23,7 @@ LANG["en"] = {
 	discovery_bar: "Discovery bar",
 	discovery_bar_captions: "Discovery bar captions",
 	disconnected: "disconnected",
+	displayDesktop: "Display/Desktop",
 	
 cancel: "Cancel",
 	clone_a_repository: "Clone a repository",

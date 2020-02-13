@@ -78,8 +78,6 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-todo: Able to set screen size of display/desktop
-
 expo detects the Android emulator! yay!
 
 expo devtools want to access WebSocket connection to 'ws://localhost:1900
