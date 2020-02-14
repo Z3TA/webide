@@ -28,6 +28,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		}
 	});
 	
+	// event below is not yet implemented
 	function androidEmulatorStatus(status) {
 		if(status.started) {
 windowMenu.activate();
@@ -50,13 +51,28 @@ return startEmulator();
 function startEmulator() {
 // We could in theory start the emulator in it's own screen/display/desktop...
 
-		CLIENT.cmd("android.startEmulator", {}, function(err) {
-if(err) return alertBox(err.message);
-
-EDITOR.virtualDisplay.show();
+		var emulatorWidth = 500;
+		var emulatorHeight = 900;
+		
+		EDITOR.virtualDisplay.show(emulatorWidth, emulatorHeight, displayReady);
+		
+		function displayReady() {
+var startTimeout = 10000;
+			CLIENT.cmd("android.startEmulator", {}, startTimeout, function(err) {
+				if(err) {
+					// The emulator is a bit random if it starts or not...
+					var msg = "If you do not see the Android Emulator, try clicking on the Android icon again! Error: " + err.message);
+					alertBox(msg);
+					
+					return;
+				}
+				
+				windowMenu.activate();
+				discoveryBarIcon.classList.add("active");
 
 });
-
+		}
+		
 return PREVENT_DEFAULT;
 	}
 	

@@ -5096,13 +5096,16 @@ posX = EDITOR.width - offsetWidth;
 		_win: null, // The browser window
 		width: Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 800)  )   ),
 		height: Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   ),
-		start: function(show, preferredWith, preferredHeight) {
+		start: function(show, preferredWith, preferredHeight, callback) {
 			
 			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
 			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
 			
 			CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function(err, info) {
-				if(err) return alertBox(err.message);
+				if(err) {
+					if(callback) return callback(err);
+					else return alertBox(err.message);
+				}
 				
 				EDITOR.virtualDisplay.password = info.password;
 				EDITOR.virtualDisplay.port = info.port;
@@ -5113,7 +5116,8 @@ posX = EDITOR.width - offsetWidth;
 				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
 				for(var i=0; i<f.length; i++) f[i]("start");
 				
-				if(show) EDITOR.virtualDisplay.show();
+				if(show) EDITOR.virtualDisplay.show(callback);
+				else if(callback) callback(null);
 			});
 			
 			return PREVENT_DEFAULT;
@@ -5127,9 +5131,18 @@ posX = EDITOR.width - offsetWidth;
 			
 			return PREVENT_DEFAULT;
 		},
-		show: function(preferredWith, preferredHeight) {
-			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight);
-			if(EDITOR.virtualDisplay.open) return PREVENT_DEFAULT;
+		show: function(preferredWith, preferredHeight, callback) {
+			if(typeof preferredWith == "function" && preferredHeight == undefined && callback == undefined) {
+				callback = preferredWith;
+				preferredWith = undefined;
+			}
+			
+			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback);
+			if(EDITOR.virtualDisplay.open) {
+				if(callback) callback(null);
+				
+				return PREVENT_DEFAULT;
+			}
 			
 			var url = "noVNC/vnc.html?host=" + EDITOR.virtualDisplay.port + "." + EDITOR.user.domain + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password) + "&autoconnect=true"
 			var width = EDITOR.virtualDisplay.width;
@@ -5145,8 +5158,12 @@ posX = EDITOR.width - offsetWidth;
 			function winLoaded(err, win) {
 				if(err) return alertBox(err.message);
 				
+				//alertBox("Window loaded! EDITOR.virtualDisplay.open=" + EDITOR.virtualDisplay.open + " (before)");
+				
 				EDITOR.virtualDisplay.open = true;
 				EDITOR.virtualDisplay._win = win;
+				
+				if(callback) callback(null);
 				
 				var noVNC_control_bar_anchor = win.document.getElementById("noVNC_control_bar_anchor");
 				noVNC_control_bar_anchor.style.display="none"; // Not needed
@@ -7402,13 +7419,13 @@ folderExistInCallback(false);
 		
 		var theWindow = open(url);
 		
-		setTimeout(function() {
+		//setTimeout(function() {
 		if(theWindow != null) testWindow(theWindow);
 		else {
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
-				
+			
 			var failText = "The new window was most likely blocked by a popup blocker. " +
-				"(enable popups from " + document.domain + " to get rid of this message)"
+			"(enable popups from " + document.domain + " to get rid of this message)"
 			
 			var errorText = "Could not open the window. Please disable the popup stopper!"
 			
@@ -7418,10 +7435,10 @@ folderExistInCallback(false);
 				if(tryAgain) theWindow = open(url);
 			*/
 			
-				var retry = "Retry";
-				var cancel = "Cancel";
-				confirmBox(failText, [retry, cancel], function(answer) {
-					if(answer == retry) {
+			var retry = "Retry";
+			var cancel = "Cancel";
+			confirmBox(failText, [retry, cancel], function(answer) {
+				if(answer == retry) {
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
 					if(!theWindow) return callback(new Error(errorText));
@@ -7429,10 +7446,10 @@ folderExistInCallback(false);
 				}
 				else callback(new Error(errorText));
 			});
-				
-				
-			}
-		}, 200);
+			
+			
+		}
+		//}, 200);
 		
 		function testWindow(theWindow) {
 			

@@ -1,17 +1,10 @@
 /*
 	
-	If you want to run your own VPN server, check out this project:
-	https://github.com/trailofbits/algo
 	
-	There are many VPN protocols, the wireguard protocol seem to be the most popular!
-	There is also openvpn, but it was very complicated to setup...
-	
-	Manual test:
-	sudo ip netns exec USERNAME wg-quick up /home/USERNAME/wireguard/wg0.conf
-	
-	Check IP:
-	sudo ip netns exec USERNAME curl https://www.whatismyip.com/ | grep "IPv4 is:"
-	
+
+	might not have to use user namespace on Docker VM,
+	instead make Docker run with the uid we want
+	(need to give root permissions to that uid)
 	
 */
 (function() {

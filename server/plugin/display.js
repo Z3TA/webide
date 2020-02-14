@@ -33,7 +33,8 @@ var DISPLAY = {
 		}
 		
 		SCREEN[displayId] = {
-			vnc: {}
+			vnc: {},
+			stopping: false
 		};
 		
 		createScreen(username, displayId, json.width, json.height);
@@ -96,7 +97,10 @@ var DISPLAY = {
 			if(screen.socat) screen.socat.kill();
 			if(screen.x11vnc) screen.x11vnc.kill();
 			if(screen.xvfb) screen.xvfb.kill();
-			delete SCREEN[displayId];
+			
+			SCREEN[displayId].stopping = true;
+			
+			//delete SCREEN[displayId];
 		}
 		
 	}
@@ -202,7 +206,7 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	// note: x11vnc supports both websockets and normal tcp on the same port!
 	
 	var vncPassword = generatePassword(8);
-	
+	SCREEN[displayId].vnc.password = vncPassword;
 	
 	// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
 	var x11vncArgs = [
@@ -221,21 +225,32 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	if(unixPipe) {
 		x11vncArgs.push("unixsock");
 		x11vncArgs.push(vncUnixSocket);
+		SCREEN[displayId].vnc.socket = vncUnixSocket;
+	}
+	else {
+		//SCREEN[displayId].vnc.host = HOSTNAME;
+		SCREEN[displayId].vnc.port = x11vncPort;
 	}
 	
 	// debug: xwininfo -display :5 -root -children
 	// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
-	
+	restart();
+
+	function restart() {
 	log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs));
 	var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs);
 	
 	x11vnc.on("close", function (code, signal) {
 		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-		//throw new Error("x11vnc close code=" + code);
-	});
-	
-	x11vnc.on("disconnect", function () {
-		log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
+			
+			if(!SCREEN[displayId].stopping) {
+				restart();
+			}
+			
+		});
+		
+		x11vnc.on("disconnect", function () {
+			log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
 	});
 	
 	x11vnc.on("error", function (err) {
@@ -253,16 +268,6 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	});
 	
 	SCREEN[displayId].x11vnc = x11vnc;
-	
-	SCREEN[displayId].vnc.password = vncPassword;
-	
-	
-	if(unixPipe) {
-		SCREEN[displayId].vnc.socket = vncUnixSocket;
-	}
-	else {
-		//SCREEN[displayId].vnc.host = HOSTNAME;
-		SCREEN[displayId].vnc.port = x11vncPort;
 	}
 	
 }

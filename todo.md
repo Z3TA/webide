@@ -78,55 +78,13 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-
-Android emulator button
-
-Display/Desktop icon in discovery bar
-
-
-cd /home/ltest1/Android/Sdk/emulator
-./emulator -avd Pixel_2_API_29
-
-rm /home/ltest1/.android/avd/Pixel_2_API_29.avd/*.lock
-
-export JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules'
-
-expo detects the Android emulator! yay!
-
-expo devtools want to access WebSocket connection to 'ws://localhost:1900
-(it however starts a browser in the display/desktop!)
-
 Android SDK + tools should be pre-installed !?
 Should probably base home dir's on a zfs snapshot to avoid duplication!?
 
-Should be able to start an Android Emulator in one click via Tools > Emulator > Android > Device
-
-Allow user to use /dev/kvm:
-sudo setfacl -m u:UserName:rwx /dev/kvm
-
-setup wizard screen is blank when running android studio in vnc
-possible fix: Edit android-studio/bin/idea.properties and add
-disable.android.first.run=true
 
 
-
-might not have to use user namespace on Docker VM,
-instead make Docker run with the uid we want
-(need to give root permissions to that uid)
-
-
-
-
-Give each user a Desktop that they can start GUI apps on
-
-
-
-Run Android emulator in the editor
-
-
-React Native support!
-Able to use Android emulator
-
+expo devtools want to access WebSocket connection to 'ws://localhost:1900
+(it however starts a browser in the display/desktop!)
 
 
 
