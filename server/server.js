@@ -937,6 +937,15 @@ function main() {
 		});
 	}
 	
+	if(info.uid == 0 && process.platform=="linux" && !CRAZY) {
+		// Hide processes from other users
+		module_child_process.exec("mount -o remount,rw,hidepid=2 /proc", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) throw err;
+			if(stderr) log(stderr, NOTICE);
+			if(stdout) log(stdout, INFO);
+		});
+	}
+	
 	if(info.uid == 0 && !USERNAME && 1==2) {
 		// ## forkstat
 		// Detect when users start an app
@@ -4862,7 +4871,9 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 		HOME: (!CHROOT || USERNAME) ? homeDir : "/",
 		USER: username,
 		LOGNAME: username,
-		USER_NAME: username
+		USER_NAME: username,
+		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
+		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/"
 	}
 	
 	if(groups) {
