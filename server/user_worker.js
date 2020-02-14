@@ -23,6 +23,7 @@ API.nodejsautocomplete = require("./plugin/nodejsautocomplete.js");
 API.nodejsrepl = require("./plugin/nodejsrepl.js");
 API.LSP = require("./plugin/lsp.js");
 API.display = require("./plugin/display.js");
+API.android = require("./plugin/android.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -223,7 +224,7 @@ user.identify = function identify(info) {
 		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
 	}
 	
-if(VIRTUAL_ROOT) {
+	if(VIRTUAL_ROOT) {
 		user.defaultWorkingDirectory = "/";
 		user.homeDir = "/";
 		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because VIRTUAL_ROOT=" + VIRTUAL_ROOT + "  )");
@@ -656,6 +657,7 @@ process.on('message', function commandMessage(message) {
 			// foo.bar.baz
 			funToRun = API;
 			for(var i=0; i<commands.length; i++) {
+				//log("command=" + command + " i=" + i + " commands=" + JSON.stringify(commands) + " keys=" + Object.keys(funToRun), DEBUG);
 				if(funToRun.hasOwnProperty(commands[i])) funToRun = funToRun[commands[i]];
 				else return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
 			}

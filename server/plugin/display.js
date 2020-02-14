@@ -7,7 +7,6 @@
 
 var UTIL = require("../../client/UTIL.js");
 var module_child_process = require('child_process');
-var module_ps = require('ps-node');
 var logModule = require("../../shared/log.js");
 var log = logModule.log;
 // Log levels

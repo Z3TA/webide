@@ -311,8 +311,9 @@ function adduser() {
 		
 		/*
 			todo: Clone fs from _base_user_
-			Update all instances of _base_user_ to the username
-			
+			* Update all instances of _base_user_ to the username
+			* Update the password file
+			* Replace netnsIP and dockerVMIP
 		*/
 		
 		
@@ -398,8 +399,8 @@ function adduser() {
 		
 		console.timeEnd("Adding user");
 		
-	
-
+		
+		
 		function updateFile(path) {
 			var str = fs.readFileSync(path, ENCODING);
 			

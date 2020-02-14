@@ -103,7 +103,7 @@
 		//exploreDir(EDITOR.workingDirectory);
 		
 		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/folder.svg", 50,  S("file_explorer") + " (" + EDITOR.getKeyFor(toggleFileExplorerFromKeyboardCombo) + ")", "dir", toggleFileExplorerFromDiscoveryBar);
-		
+		// Icon created by: https://www.flaticon.com/authors/phatplus
 		
 		if(visible) toggleFileExplorer(visible);
 		

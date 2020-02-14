@@ -54,7 +54,7 @@
 		EDITOR.registerAltKey({char: "s", alt:2, label: S("save"), fun: saveFileFromVirtualKeyboard});
 		
 		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/disk.svg", 10,  S("save_current_file") + " (" + EDITOR.getKeyFor(saveFileFromKeyboardCombo) + ")", "save", saveFileFromDiscoveryBar);
-		
+		// Icon created by: https://www.flaticon.com/authors/phatplus
 	}
 	
 	function unloadFileSaver() {

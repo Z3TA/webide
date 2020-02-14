@@ -64,6 +64,8 @@ else if(HOME_DIR == "/home/" && process.platform === "win32") (function getWindo
 	}
 })();
 
+global.home = HOME_DIR;
+
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);

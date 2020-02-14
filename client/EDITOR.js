@@ -199,7 +199,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	share: [], // Share a file with other apps on the platform
 	soundAssist: [], // Get notified when soundAssist is turned on/off
 	wrapText: [], // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
-	findInFiles: [] // Starts a find-in-files tool when calling EDITOR.findInFiles()
+	findInFiles: [], // Starts a find-in-files tool when calling EDITOR.findInFiles()
+	virtualDisplay: [] // Listen for state changes of the virtual display (open, close, start, stop)
 };
 
 EDITOR.renderFunctions = [];
@@ -5089,6 +5090,100 @@ posX = EDITOR.width - offsetWidth;
 		}
 	}
 	
+	EDITOR.virtualDisplay = {
+		started: false, // If the virtual display has started
+		open: false, // If the browser window with the VNC client is open
+		_win: null, // The browser window
+		width: Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 800)  )   ),
+		height: Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   ),
+		start: function(show, preferredWith, preferredHeight) {
+			
+			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
+			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
+			
+			CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function(err, info) {
+				if(err) return alertBox(err.message);
+				
+				EDITOR.virtualDisplay.password = info.password;
+				EDITOR.virtualDisplay.port = info.port;
+				EDITOR.virtualDisplay.width = info.width;
+				EDITOR.virtualDisplay.height = info.height;
+				EDITOR.virtualDisplay.started = true;
+				
+				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
+				for(var i=0; i<f.length; i++) f[i]("start");
+				
+				if(show) EDITOR.virtualDisplay.show();
+			});
+			
+			return PREVENT_DEFAULT;
+		},
+		stop: function() {
+			
+			EDITOR.virtualDisplay.started = false;
+			
+			var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
+			for(var i=0; i<f.length; i++) f[i]("stop");
+			
+			return PREVENT_DEFAULT;
+		},
+		show: function(preferredWith, preferredHeight) {
+			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight);
+			if(EDITOR.virtualDisplay.open) return PREVENT_DEFAULT;
+			
+			var url = "noVNC/vnc.html?host=" + EDITOR.virtualDisplay.port + "." + EDITOR.user.domain + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password) + "&autoconnect=true"
+			var width = EDITOR.virtualDisplay.width;
+			var height = EDITOR.virtualDisplay.height + 1;
+			var top = 0;
+			var left = screen.width-EDITOR.virtualDisplay.width;
+			
+			EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
+			
+			return PREVENT_DEFAULT;
+			
+			
+			function winLoaded(err, win) {
+				if(err) return alertBox(err.message);
+				
+				EDITOR.virtualDisplay.open = true;
+				EDITOR.virtualDisplay._win = win;
+				
+				var noVNC_control_bar_anchor = win.document.getElementById("noVNC_control_bar_anchor");
+				noVNC_control_bar_anchor.style.display="none"; // Not needed
+				win.document.getElementById("noVNC_canvas").style.margin = "0px";
+				//win.resizeTo(width, height);
+				win.document.getElementById("noVNC_status").style.display="none"; // Flashes so fast we can't read what it says
+				
+				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
+				for(var i=0; i<f.length; i++) f[i]("open"); //
+				
+				win.onunload = close;
+				win.beforeunload = close;
+				
+				function close() {
+					if(!EDITOR.virtualDisplay.open) return;
+					
+					EDITOR.virtualDisplay.open = false;
+					EDITOR.virtualDisplay._win = null;
+					
+					var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
+					for(var i=0; i<f.length; i++) f[i]("close");
+				}
+				
+				setTimeout(function() {
+					win.document.title = "Desktop";
+				}, 3000);
+			}
+		},
+		hide: function() {
+			var win = EDITOR.virtualDisplay._win;
+			if(win) win.close();
+			
+			return PREVENT_DEFAULT;
+		}
+	}
+	
+	
 	var stats = null; // Key:value to store stats
 	var saveStatsTimer;
 	EDITOR.statsEnabled = true;
@@ -7307,12 +7402,13 @@ folderExistInCallback(false);
 		
 		var theWindow = open(url);
 		
+		setTimeout(function() {
 		if(theWindow != null) testWindow(theWindow);
 		else {
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
-			
+				
 			var failText = "The new window was most likely blocked by a popup blocker. " +
-			"Click OK to retry opening it. (enable popups from " + document.domain + " to get rid of this message)"
+				"(enable popups from " + document.domain + " to get rid of this message)"
 			
 			var errorText = "Could not open the window. Please disable the popup stopper!"
 			
@@ -7322,9 +7418,10 @@ folderExistInCallback(false);
 				if(tryAgain) theWindow = open(url);
 			*/
 			
-			var ok = "OK";
-			confirmBox(failText, [ok], function(answer) {
-				if(answer == ok) {
+				var retry = "Retry";
+				var cancel = "Cancel";
+				confirmBox(failText, [retry, cancel], function(answer) {
+					if(answer == retry) {
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
 					if(!theWindow) return callback(new Error(errorText));
@@ -7332,10 +7429,12 @@ folderExistInCallback(false);
 				}
 				else callback(new Error(errorText));
 			});
-		}
+				
+				
+			}
+		}, 200);
 		
 		function testWindow(theWindow) {
-			
 			
 			/*
 				Due to CORS we might get errors accessing properties on the new window

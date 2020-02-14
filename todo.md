@@ -78,10 +78,10 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
 
-todo: Apparmor profiles. global instead of per user!
-Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
+Android emulator button
+
+Display/Desktop icon in discovery bar
 
 
 cd /home/ltest1/Android/Sdk/emulator
@@ -131,6 +131,16 @@ Able to use Android emulator
 
 
 ---
+
+Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
+
+todo: Apparmor profiles. global instead of per user!
+Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
+
+todo: Create _base_user_ 
+* Install Android studio & configure sdk + 
+(* Install nvm and latest nodejs stable )
+
 
 Can't commit if you have added a bunch of files ...
 Unable to get status!

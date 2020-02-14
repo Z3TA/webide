@@ -39,7 +39,8 @@
 			// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/add-file.svg", 10,  S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")", "new", newFileFromDiscoveryBar);
-			
+			// Icon created by: https://www.flaticon.com/authors/phatplus
+
 		},
 		unload: function unloadNewFilePlugin() {
 			EDITOR.ctxMenu.remove(menuItem);
