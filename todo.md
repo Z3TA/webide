@@ -82,13 +82,10 @@ Android SDK + tools should be pre-installed !?
 Should probably base home dir's on a zfs snapshot to avoid duplication!?
 
 
+Android emulator settings screen cant be closed
 
 expo devtools want to access WebSocket connection to 'ws://localhost:1900
 (it however starts a browser in the display/desktop!)
-
-
-
----
 
 Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
 
@@ -99,13 +96,18 @@ todo: Create _base_user_
 * Install Android studio & configure sdk + 
 (* Install nvm and latest nodejs stable )
 
+android-studio folder needs to be in  ~/Android (because we have hard-coded it)
 
+
+
+
+
+---
 Can't commit if you have added a bunch of files ...
 Unable to get status!
 Server: API error: stdout maxBuffer length exceeded
 
 Tell the user to update .hgignore !?
-
 ---
 
 Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp

@@ -1,7 +1,7 @@
 /*
 	
 	
-
+	
 	might not have to use user namespace on Docker VM,
 	instead make Docker run with the uid we want
 	(need to give root permissions to that uid)
@@ -75,7 +75,8 @@
 	}
 	
 	function wakeup() {
-		CLIENT.cmd("dockerDaemon", {command: "start"}, function dockerDeamonAwakenMaybe(err, status) {
+		var timeout = 20000;
+		CLIENT.cmd("dockerDaemon", {command: "start"}, timeout, function dockerDeamonAwakenMaybe(err, status) {
 			if(err) alertBox("Unable to start the Docker daemon! Error: " + err.message);
 			else {
 				
