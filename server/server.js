@@ -2943,7 +2943,90 @@ function checkMounts(options, checkMountsCallback) {
 	var filesToWrite = 0;
 	var filesWritten = 0;
 	var kvmAccessGranted = false;
+	var wwwpubCreated = false;
+	var sockDirCreated = false;
+	var logDirCreated = false;
+	var prodDirCreated = false;
+	var npmDirCreated = false;
 	
+	getGroupId("www-data", function(err, wwwgid) {
+		if(err) throw err;
+		
+		// Nginx will serve files from the wwwpub folder
+		createIfNotExist(HOME_DIR + username + "/wwwpub/", uid, wwwgid, "2755", function(err, createdTheFolder) {
+			if(err) throw err;
+			
+			if(createdTheFolder) {
+				fs.writeFile(HOME_DIR + username + "/wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING, function(err) {
+					if(err) throw err;
+					wwwpubCreated = true;
+				});
+			}
+			else wwwpubCreated = true;
+		})
+		
+		// Create a directory for unix sockets
+		// note: Each process needs to set umask to give write permission to the group!
+		createIfNotExist(HOME_DIR + username + "/sock/", uid, wwwgid, "2755", function(err) {
+			if(err) throw err;
+			else sockDirCreated = true;
+		});
+		
+	});
+	
+	// Create a directory where nginx can save logs
+	createIfNotExist(HOME_DIR + username + "/log/", uid, gid, "2755", function(err) {
+		if(err) throw err;
+		else logDirCreated = true;
+	});
+	
+	// Create a directory for putting "in production" files
+	createIfNotExist(HOME_DIR + username + "/.prod/", uid, gid, "0770", function(err) {
+		if(err) throw err;
+		else prodDirCreated = true;
+	});
+	
+	// Create a directory where npm can install packages globally
+	createIfNotExist(HOME_DIR + username + "/.npm-packages/", uid, gid, "0775", function(err) {
+		if(err) throw err;
+		else npmDirCreated = true;
+	});
+	
+	function createIfNotExist(folder, uid, gid, mode, callback) {
+		var createdTheFolder = false;
+		module_fs.stat(folder, function(err, stats) {
+			if(err && err.code == "ENOENT") {
+				module_fs.mkdir(folder, function(err) {
+					if(err) return callback(err);
+					createdTheFolder = true;
+					chown(folder, uid, gid, mode, done);
+				});
+				return;
+			}
+			else if(err) return callback(err);
+			else if(stats.gid != gid) return chown(folder, uid, gid, mode, done);
+			else if(stats.gid == gid) {
+				return callback(null, createdTheFolder);
+			}
+			else throw new Error("err=" + (err && err.message) + " stats=" + JSON.stringify(stats));
+		});
+		
+		function done(err) {
+			if(err) return callback(err);
+			else callback(null, createdTheFolder);
+		}
+	}
+	
+	function chown(folder, uid, gid, mode, callback) {
+		module_fs.chown(folder, uid, gid, function(err) {
+			if(err) return callback(err);
+			// Set the group-id bit so that all new files created will belong to the group
+			module_fs.chmod(folder, mode, function(err) {
+				if(err) return callback(err);
+				else return callback(null);
+			});
+		});
+	}
 	
 	// Make it possible to run Android emulator
 	module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
@@ -2953,21 +3036,21 @@ function checkMounts(options, checkMountsCallback) {
 		kvmAccessGranted = true;
 	});
 	
+	
+	if(!createdNetworkNamespaces) {
 		
-		if(!createdNetworkNamespaces) {
+		var IP = UTIL.int2ip(167772162 + uid);
+		
+		
+		var createNetnsFile = function createNetnsFile(etcFile, content) {
+			filesToWrite++;
 			
-			var IP = UTIL.int2ip(167772162 + uid);
+			var stats = 0;
+			var writes = 0;
+			var netnsPath = UTIL.joinPaths("/etc/netns/", username, etcFile);
 			
-			
-			var createNetnsFile = function createNetnsFile(etcFile, content) {
-				filesToWrite++;
-				
-				var stats = 0;
-				var writes = 0;
-				var netnsPath = UTIL.joinPaths("/etc/netns/", username, etcFile);
-				
-				stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
-					if(err && err.code == "ENOENT") {
+			stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
+				if(err && err.code == "ENOENT") {
 						// ip netns exec wont unshare bind if the file don't exist in /etc/
 						
 						stats++;module_fs.stat(netnsPath, function(err) {stats--;
@@ -3223,7 +3306,7 @@ function checkMounts(options, checkMountsCallback) {
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
-		if(kvmAccessGranted && createdNetworkNamespaces && nginxProfileOK && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
+		if(prodDirCreated && npmDirCreated && logDirCreated && sockDirCreated && wwwpubCreated && kvmAccessGranted && createdNetworkNamespaces && nginxProfileOK && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -3251,6 +3334,11 @@ function checkMounts(options, checkMountsCallback) {
 			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
 			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
 			if(!kvmAccessGranted) log("Waiting for access to /dev/kvm ...", DEBUG);
+			if(!wwwpubCreated)  log("wwwpub folder not yet checked/created...", DEBUG);
+			if(!sockDirCreated)  log("sock folder not yet checked/created...", DEBUG);
+			if(!logDirCreated)  log("log folder not yet checked/created...", DEBUG);
+			if(!prodDirCreated)  log(".prod folder not yet checked/created...", DEBUG);
+			if(!npmDirCreated)  log(".npm-packages folder not yet checked/created...", DEBUG);
 			
 		}
 	}

@@ -375,114 +375,11 @@ function adduser() {
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
 		updateFile(homeDir + ".bashrc");
 		
-	// add wwwpub
-		var wwwgid = getGroupId("www-data");
-	//fs.mkdirSync(homeDir + "wwwpub");
-		fs.writeFileSync(homeDir + "wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING);
-		chownrDirSync(homeDir + "wwwpub", uid, wwwgid);
-	// Make wwwpub public, and set the group-id bit so that all new files get the www-data group
-		chmodrSync(homeDir + "wwwpub", "2755");
 		
 		
 		// Enable hggit
 		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n[ui]\nusername = ' + username + "\n\n", ENCODING);
 		
-		
-		// Create a directory for unix sockets
-		fs.mkdirSync(homeDir + "sock");
-		// Make sure www-data can read and write to unix sockets
-		// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
-		chmodrSync(homeDir + "sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
-		chownrDirSync(homeDir + "sock", uid, wwwgid);
-		// note: Each process needs to set umask to give write permission to the group!
-		
-	// Create a directory where nginx can save logs
-	fs.mkdirSync(homeDir + "log");
-		chmodrSync(homeDir + "log", "2770"); // Set the group-id bit so that all new files created will belong to the group
-		chownrDirSync(homeDir + "log", uid, gid);
-		
-		// Create a directory for putting "in production" files
-		fs.mkdirSync(homeDir + ".prod");
-		chmodrSync(homeDir + ".prod", "770");
-		chownrDirSync(homeDir + ".prod", uid, gid);
-		
-		// Create a directory where npm can install packages globally
-		fs.mkdirSync(homeDir + ".npm-packages");
-		chmodrSync(homeDir + ".npm-packages", "775");
-		chownrDirSync(homeDir + ".npm-packages", uid, gid);
-	
-		
-		// Nginx profile will be created by server.js
-		
-	
-		if(!NO_CERT) {
-		// Register SSL certificate for user web page
-			console.time("Letsencrypt");
-		var letsencrypt = require("./shared/letsencrypt.js");
-			letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, true);
-			console.timeEnd("Letsencrypt");
-		}
-		
-		
-		/*
-			In order to have a separate apparmor profile for user_worker.js we need a separate executable (scripts also work, but we need the node rcp channel so we need to use fork and not spawn)
-			Use mount --bind instead of hard link to prevent EXDEV: cross-device link not permitted (we sometimes got that error even though the link was on the same device!)
-			Note: user_worker.js needs capability setgid, setuid, and sys_chroot, which we don't want to give to user scripts, only user_worker.js!
-			It's thus important that when user_worker.js forks, it has to set execPath in fork options!!
-			
-			It will be mounted the first time user logs in.
-		*/
-		//mount('/usr/bin/node', '/usr/bin/nodejs_' + username);
-		
-		//var makeNull = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/null c 1 3").toString(ENCODING);
-	//if(makeNull.trim() != "") throw makeNull;
-		// /dev/null will be created when user first login
-		
-	// On some systems we need to mount --bind urandom !??
-		//mount("/dev/urandom", HOME + username + "/dev/urandom");
-		// Will be mounted when the user logs in
-	
-		
-		// These folders need to be created to prevent errors when mounting the binaries (theory why we get errors: creating the folders in parallel leads to racing conditions!?)
-		fs.mkdirSync(HOME + username + "/usr/");
-		fs.mkdirSync(HOME + username + "/usr/bin/");
-	
-		fs.chmodSync(HOME + username + "/usr/", "555");
-		fs.chmodSync(HOME + username + "/usr/bin/", "555");
-		
-	
-	// npm needs /usr/local/etc or it will try to create it
-		fs.mkdirSync(HOME + username + "/usr/local/");
-		fs.mkdirSync(HOME + username + "/usr/local/etc");
-		
-		//chownrDirSync(HOME + username + "/usr/local/", uid, gid);
-		//chmodrSync(HOME + username + "/usr/local/", "555");
-	
-
-	// Mount these instead of copying to save hdd space
-		// They will be mounted when the user first login
-		/*
-		mount("/lib/", HOME + username + "/lib");
-		mount("/lib64/", HOME + username + "/lib64");
-		mount("/usr/lib/", HOME + username + "/usr/lib");
-		mount("/usr/local/lib", HOME + username + "/usr/local/lib"); // Needed for Python packages (hggit)
-		mount("/usr/share/", HOME + username + "/usr/share"); // npm dependencies
-		mount("/usr/bin/hg", HOME + username + "/usr/bin/hg");
-		mount("/usr/bin/python", HOME + username + "/usr/bin/python");
-		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
-		mount("/etc/ssl/certs", HOME + username + "/etc/ssl/certs"); // Sometimes? Needed for SSL verfification
-		*/
-	
-		
-		// See how to debug apparmor in README.txt
-		// Apparmor profiles will be created when the user first login
-		/*
-		createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
-		createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
-		*/
 		
 		
 		// Activate the user by creating the password file
@@ -501,9 +398,8 @@ function adduser() {
 		
 		console.timeEnd("Adding user");
 		
-	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	
-		
+
 		function updateFile(path) {
 			var str = fs.readFileSync(path, ENCODING);
 			

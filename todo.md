@@ -78,8 +78,6 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-Removing chroot option
-
 Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
 
 todo: Apparmor profiles. global instead of per user!
