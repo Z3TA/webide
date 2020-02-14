@@ -5,8 +5,8 @@
 	var active = false;
 	var desktopPassword = "";
 	var desktopPort = -1;
-	var desktopWidth =  Math.min(1000, screen.width, Math.max(screen.width/2, 800));
-	var desktopHeight = Math.min(1000, screen.height-110, Math.max(screen.height, 900));
+	var desktopWidth = Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 800)  )   );
+	var desktopHeight = Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   );
 	
 	EDITOR.plugin({
 		desc: "A virtual desktop for GUI apps",

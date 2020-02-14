@@ -53,6 +53,34 @@ var DISPLAY = {
 		
 		
 	},
+	status: function(user, json, callback) {
+		
+		var status = {
+			started: false
+		};
+		
+		for(var displayId in SCREEN) {
+			counter++;
+			checkStatus(displayId);
+		}
+		
+		callback(null, status);
+		
+		function checkStatus(displayId) {
+			var socat = SCREEN[displayId].socat && SCREEN[displayId].socat.connected;
+			var x11vnc = SCREEN[displayId].x11vnc && SCREEN[displayId].x11vnc.connected;
+			var xvfb = SCREEN[displayId].xvfb && SCREEN[displayId].xvfb.connected;
+			
+			status[displayId] = {
+				socat: socat,
+				x11vnc: x11vnc,
+				xvfb: xvfb
+			};
+			
+			if(x11vnc) status.started = true;
+		}
+		
+	},
 	stop: function(user, json, callback) {
 		
 		var counter = 0;
