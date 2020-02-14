@@ -78,6 +78,21 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+Removing chroot option
+
+Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
+
+todo: Apparmor profiles. global instead of per user!
+Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
+
+
+cd /home/ltest1/Android/Sdk/emulator
+./emulator -avd Pixel_2_API_29
+
+rm /home/ltest1/.android/avd/Pixel_2_API_29.avd/*.lock
+
+export JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules'
+
 expo detects the Android emulator! yay!
 
 expo devtools want to access WebSocket connection to 'ws://localhost:1900

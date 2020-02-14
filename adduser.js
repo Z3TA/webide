@@ -3,22 +3,20 @@
 
 /*
 	This is a useful script for those managing webide running as a cloud editor,
-	it will add users both as system users and into the /etc/webide_users file.
 	
 	Make this script executable:
 	sudo chmod +x adduser.js
 	
 	Run this script (example: add user foouser with password foopw):
-	./adduser.js foouser foopw
+	sudo ./adduser.js foouser foopw
 	
 	Remove a user:
-	sudo userdel -r -f nameOfUser
-	sudo nano server/users.pw
+	sudo ./removeuser.js nameOfUser
 	
-	Gotcha: apparmor can be slooow to update profiles
 	
 	
 	todo: Move as much as possible to server.js to make it easier to move user's between servers
+	For moving users between servers, username, uid, and gid need to be globally unique!
 	
 */
 
@@ -310,6 +308,13 @@ function adduser() {
 		
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 		var dockerVMIP = UTIL.int2ip(167903234 + uid) // Starts on 10.2.0.2 ...
+		
+		/*
+			todo: Clone fs from _base_user_
+			Update all instances of _base_user_ to the username
+			
+		*/
+		
 		
 		//var gid = getGroupId(groupName);
 		

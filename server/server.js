@@ -64,17 +64,6 @@ else if(HOME_DIR == "/home/" && process.platform === "win32") (function getWindo
 	}
 })();
 
-/*
-	DEBUG_CHROOT has to be set manually!
-	When you set it back to false from true, make sure you carefully unmount the mounted dirs first!!!
-	Do NOT mess with this flag in production (it might corrupt or delete parts of your system!!!)
-	Make BACKUPS before changing this flag: (sudo zfs snapshot rpool/ROOT/ubuntu@test)
-*/
-var DEBUG_CHROOT = false; // Mounts everyhing into the chroot if set to true
-var MOUNT_BINS = false; // Mounts /bin and /usr/bin
-if(MOUNT_BINS == true && DEBUG_CHROOT == true) throw new Error("Not both DEBUG_CHROOT and MOUNT_BINS can be true, choose one!");
-
-
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var NO_BROADCAST = !!(getArg(["nobroadcast"]) || false);
@@ -89,12 +78,6 @@ var WARN = 4;
 var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
-
-/*
-	The reason why we are not using CHROOT by default is because of relative paths to work, in for example docker-compose
-	Dealing with chroot's have also been an headache... So we want to avoid chroot if possible!
-*/
-var CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 
 var NO_NETNS = !!(getArg(["nonetns", "nonetns"]) || false);
 
@@ -588,7 +571,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 				}
 			}
 			
-			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd CHROOT=" + CHROOT, INFO);
+			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd", INFO);
 			
 			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
 			error.code = "USER_NOT_FOUND";
@@ -889,18 +872,6 @@ function main() {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
 	
-	if(CHROOT) {
-		// Make sure we can load the posix module before continuing with chroot
-		try {
-			require("posix");
-		}
-		catch(err) {
-			log(err.message);
-			log("posix module needed for chroot!\nYou can also use a virtual root with the -virtualroot flag", NOTICE);
-			process.exit(1);
-		}
-	}
-	
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
 		module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
@@ -1140,12 +1111,6 @@ return;
 		
 	}
 	
-	if(info.uid > 0 && !USERNAME && CHROOT) {
-		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
-		log(info);
-		process.exit();
-	}
-	
 	if(info.uid == 0 && process.platform=="linux") {
 		module_child_process.exec("bash linux_harderning_after_reboot.sh", function(error, stdout, stderr) {
 			if(error) throw new Error("Hardening failed: " + error.message);
@@ -1191,9 +1156,7 @@ return;
 	
 	function getGuestCount() {
 		
-		mysqlConnect();
-		
-		if(!USERNAME && !DEBUG_CHROOT && ALLOW_GUESTS) {
+		if(!USERNAME && ALLOW_GUESTS) {
 			
 			module_fs.readFile(__dirname + "/GUEST_COUNTER", "utf8", function(err, data) {
 				if(err) {
@@ -1269,12 +1232,11 @@ return;
 		
 		
 		if(HTTP_IP == "127.0.0.1") {
-			if(!CHROOT && USERNAME ) {
+			if(!USERNAME) {
 				openStdinChannel();
 			}
 			
 			log("Server running on URL/address: http://" + makeUrl() + "");
-			
 		}
 		
 		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {
@@ -2092,50 +2054,8 @@ function sockJsConnection(connection) {
 			}
 		*/
 		
-		// The user might reconnect, so we don't want to unmount stuff!
-		/*
-			setTimeout(function() {
-			unmountMounts(userConnectionName);
-			}, 2000);
-		*/
 		
 	}
-	
-	function unmountMounts(username, callback) {
-		throw new Error("DEPRECATED");
-		
-		var toUnmount = 10;
-		
-		if(!DEBUG_CHROOT) {
-			toUnmount++;
-			umount(UTIL.joinPaths([HOME_DIR, username, "/etc/ssl/certs"]), unmounted);
-		}
-		
-		umount(UTIL.joinPaths([HOME_DIR, username, "/dev/urandom"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/lib"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/lib64"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/lib"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/local/lib"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/share"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/hg"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/git"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/python"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/nodejs"]), unmounted);
-		
-		function unmounted(err) {
-			toUnmount--;
-			if(err) {
-				if(callback) callback(err);
-				else log(err.message, WARN);
-				callback = null;
-			}
-			else if(toUnmount == 0) {
-				if(callback) callback(null);
-			}
-		}
-		
-	}
-	
 	
 	function handleUserMessage(message) { // A function so it can call itself from the queue
 		"use strict";
@@ -2386,7 +2306,7 @@ throw err;
 						
 						userConnectionName = username;
 						
-						if(USERNAME && !CHROOT) {
+						if(USERNAME) {
 							// Running as standalone desktop app
 							homeDir = process.env.HOME || process.env.USERPROFILE;
 							if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
@@ -2468,10 +2388,10 @@ throw err;
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
 							// Tell the worker process which user
-							var userWorkerInfo = {name: userConnectionName, rootPath: (CHROOT || VIRTUAL_ROOT) && rootPath, homeDir: homeDir, shell: shell, id: uid};
+							var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, shell: shell, id: uid};
 							
 							
-							log("User userConnectionName=" + userConnectionName + " logged in! CHROOT=" + CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
+							log("User userConnectionName=" + userConnectionName + " logged in! VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
 							
 							userWorker.send({identify: userWorkerInfo});
 							userWorker.on("message", messageFromWorker);
@@ -2501,13 +2421,11 @@ throw err;
 								connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
 								editorVersion: EDITOR_VERSION,
 								platform: process.platform,
-								homeDir: (CHROOT || VIRTUAL_ROOT) ? "/" : homeDir,
+								homeDir: (VIRTUAL_ROOT) ? "/" : homeDir,
 								tld: DOMAIN
 							};
 							
-							if(CHROOT) {
 								userClientInfo.installDirectory = __dirname.replace(/server$/, "");
-							}
 							
 							if(uid && process.platform=="linux") {
 var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
@@ -2648,9 +2566,7 @@ var loginCounter = 0;
 										
 										var folder = req.createHttpEndpoint.folder;
 										
-										if(CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
-										
-										console.log("createHttpEndpoint: CHROOT=" + CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+										console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
 										
 										createHttpEndpoint(userConnectionName, folder, function(err, url) {
 											if(err) workerResp(err.message);
@@ -2660,8 +2576,6 @@ var loginCounter = 0;
 									else if(req.removeHttpEndpoint) {
 										
 										var folder = req.removeHttpEndpoint.folder;
-										
-										if(CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 										
 										removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
 											//if(err) throw err;
@@ -3011,7 +2925,7 @@ function checkMounts(options, checkMountsCallback) {
 	if(gid == undefined) throw new Error("gid=" + gid);
 	if(checkMountsCallback == undefined) throw new Error("checkMountsCallback=" + checkMountsCallback);
 	
-	log("checkMounts: username=" + username + " CHROOT=" + CHROOT, DEBUG);
+	log("checkMounts: username=" + username, DEBUG);
 	
 	// Make sure everything is mounted etc ...
 	
@@ -3021,403 +2935,24 @@ function checkMounts(options, checkMountsCallback) {
 	
 	
 	var nginxProfileOK = false;
-	var foldersToMount = 0;
-	var foldersMounted = 0;
-	var apparmorProfilesToCreate = 0;
-	var reloadApparmor = false;
-	var reloadedApparmor = false;
-	var checkMountsReady = false;
+	var checkMountsReady = false; // Prevent double callback
 	var sslCertChecked = false;
-	var hgrccacertsUptodate = true;
-	var passwdCreated = true;
-	var subuidCreated = true;
-	var subgidCreated = true;
 	var checkMountsAbort = false;
 	var mysqlCheck = false;
 	var createdNetworkNamespaces = (process.platform != "linux");
 	var filesToWrite = 0;
 	var filesWritten = 0;
+	var kvmAccessGranted = false;
 	
 	
-	// When a user have been moved to another server, the user id will be different.
-	// So we have to reset the user permissions!
-	// www-data user id might be the same though, depending on distro
-	// this means USER NAMES NEED TO BE UNIQUE!
-	checkUserRights(username, function checkedUserRights(err) {
-		if(err) return checkMountsError(err);
-		
-		//console.log("User rights OK for username=" + username);
-		
-		console.time("Mount " + username + " files and folders");
-		
-		if(CHROOT) {
-			
-			/*
-				Make sure mounts exist
-				----------------------
-				Mount instead of copying to save hdd space
-				
-				Problem: Racing to create folders
-				Solution: Create folder before mounting
-				
-				Each mount takes ca 150ms, so only mount bare minimum for performance!
-				(it's better performance wise to mount a whole folder then many separate files in the same folder)
-				
-				Don't forget to update removeuser.js !
-			*/
-			
-			// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
-			// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
-			
-			// ALSO UPDATE removeuser.js !!!
-			
-			var apparmorProfiles = [
-				"../etc/apparmor/usr.bin.nodejs_someuser",
-				"../etc/apparmor/home.someuser.usr.bin.node",
-				"../etc/apparmor/home.someuser.usr.bin.python",
-				"../etc/apparmor/home.someuser.usr.bin.hg",
-				"../etc/apparmor/home.someuser.usr.bin.git",
-				"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js",
-				"../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npx-cli.js",
-				"../etc/apparmor/home.someuser.bin.bash"
-			];
-			
-			var apparmorProfilesToCreate = apparmorProfiles.length;
-			var foldersToMount = 3;
-			
-			var passwdCreated = false;
-			var subuidCreated = false;
-			var subgidCreated = false;
-			
-		// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
-		module_mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted);
-		
-		module_mount("/lib/", homeDir + "lib", folderMounted);
-		module_mount("/lib64/", homeDir + "lib64", folderMounted);
-		
-		if(DEBUG_CHROOT) {
-			foldersToMount += 9;
-			
-			// Note you need to manually delete /home/user/etc
-			
-			module_mount("/usr/", homeDir + "usr/", folderMounted);
-			module_mount("/etc/", homeDir + "etc/", folderMounted);
-			module_mount("/proc/", homeDir + "proc/", folderMounted);
-			module_mount("/bin/", homeDir + "bin/", folderMounted);
-			module_mount("/dev/", homeDir + "dev/", folderMounted);
-			module_mount("/run/", homeDir + "run/", folderMounted);
-			module_mount("/var/", homeDir + "var/", folderMounted);
-			module_mount("/sys/", homeDir + "sys/", folderMounted);
-			module_mount("/sbin/", homeDir + "sbin/", folderMounted);
-		}
-		else {
-			
-			if(MOUNT_BINS) {
-				// Useful if you want all programs available in the chroot
-				foldersToMount += 2;
-				module_mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
-				module_mount("/bin/", homeDir + "bin/", folderMounted);
-				
-			}
-			else {
-				// Only pick some of the programs from /usr/bin/ and /bin/
-				
-				foldersToMount++;
-				module_mount(process.argv[0], homeDir + "usr/bin/node", function(err) {
-					if(err) throw err;
-					// Some programs like to use nodejs instead of node
-					module_fs.symlink("node", homeDir + "usr/bin/nodejs", function (err) {
-						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-						foldersMounted++;
-						checkMountsReadyMaybe();
-					});
-				});
-				
-				// Don't forget to investigate all links and add umount to removeuser.js!!!
-				foldersToMount++;mountFollowSymlink("/usr/bin/python", homeDir, function(err, targetRelative) {
-					if(err) throw err;
-					
-					// Mercurial wants a python2
-					module_fs.symlink(targetRelative, homeDir + "usr/bin/python2", function (err) {
-						if(err && err.code != "EEXIST") throw(err);
-						foldersMounted++;
-						checkMountsReadyMaybe();
-					});
-				});
-				
-				// Don't forget to investigate all links and add umount to removeuser.js!!!
-				
-				
-				
-				// For bins that are symlinks
-				foldersToMount++;mountFollowSymlink("/bin/sh", homeDir, folderMounted); // gunzip will give ENOENT error without /bin/sh
-				foldersToMount++;mountFollowSymlink("/usr/bin/g++", homeDir, folderMounted); // Needed by some make scripts
-				foldersToMount++;mountFollowSymlink("/usr/bin/as", homeDir, folderMounted); // Needed by g++
-				foldersToMount++;mountFollowSymlink("/usr/bin/ld", homeDir, folderMounted); // Needed by make scripts
-				foldersToMount++;mountFollowSymlink("/usr/bin/ar", homeDir, folderMounted); // Needed to compile Node.js!?
-				foldersToMount++;mountFollowSymlink("/usr/bin/ranlib", homeDir, folderMounted); // Needed to compile Node.js!?
-				//foldersToMount++;mountFollowSymlink("/usr/bin/which", homeDir, folderMounted); // Needed by docker install script
-				foldersToMount++;mountFollowSymlink("/usr/bin/touch", homeDir, folderMounted); // Needed by make scripts
-				foldersToMount++;mountFollowSymlink("/usr/bin/less", homeDir, folderMounted); // Wanted by Mercurial
-				
-				
-				// for debugging
-				foldersToMount++;module_mount("/bin/ping", homeDir + "bin/ping", folderMounted);
-
-				
-				foldersToMount++;module_mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-				foldersToMount++;module_mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-				foldersToMount++;module_mount("/usr/bin/git", homeDir + "usr/bin/git", folderMounted);
-				
-				foldersToMount++;module_mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-				foldersToMount++;module_mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
-				foldersToMount++;module_mount("/usr/bin/unrar-nonfree", homeDir + "usr/bin/unrar", folderMounted);
-				foldersToMount++;module_mount("/usr/bin/unzip", homeDir + "usr/bin/unzip", folderMounted);
-				foldersToMount++;module_mount("/usr/bin/zip", homeDir + "usr/bin/zip", folderMounted); // Create .zip files (zip folders)
-				foldersToMount++;module_mount("/usr/bin/make", homeDir + "usr/bin/make", folderMounted); // Needed by some npm modules to install
-				foldersToMount++;module_mount("/usr/bin/printf", homeDir + "usr/bin/printf", folderMounted); // Needed by some make scripts
-				
-				foldersToMount++;module_mount("/usr/bin/x86_64-linux-gnu-gcc-7", homeDir + "usr/bin/cc", folderMounted); // Needed by g++ ??
-				
-				foldersToMount++;module_mount("/usr/bin/tr", homeDir + "usr/bin/tr", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/tail", homeDir + "usr/bin/tail", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/gawk", homeDir + "usr/bin/awk", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/sort", homeDir + "usr/bin/sort", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/sha256sum", homeDir + "usr/bin/sha256sum", folderMounted); // Used by nvm
-				foldersToMount++;module_mount("/usr/bin/dirname", homeDir + "usr/bin/dirname", folderMounted); // Used by nvm
-				
-				foldersToMount++;module_mount("/usr/bin/openssl", homeDir + "usr/bin/openssl", folderMounted); // Needed to compile Node.js!?
-				foldersToMount++;module_mount("/usr/bin/pkg-config", homeDir + "usr/bin/pkg-config", folderMounted); // Needed to compile Node.js!? (to find openssl)
-				foldersToMount++;module_mount("/usr/bin/curl", homeDir + "usr/bin/curl", folderMounted); // Needed by some install scripts (curl | sh) :P
-				//foldersToMount++;module_mount("/usr/bin/id", homeDir + "usr/bin/id", folderMounted); // Needed by docker install script
-				//foldersToMount++;module_mount("/usr/bin/newuidmap", homeDir + "usr/bin/newuidmap", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/usr/bin/head", homeDir + "usr/bin/head", folderMounted); // Wanted by rclone install
-				foldersToMount++;module_mount("/usr/bin/expr", homeDir + "usr/bin/expr", folderMounted); // Wanted dropbox config
-				foldersToMount++;module_mount("/usr/bin/wget", homeDir + "usr/bin/wget", folderMounted); // Can be useful
-				
-foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", folderMounted); // Docker
-				foldersToMount++;module_mount("/usr/local/bin/docker-compose", homeDir + "usr/local/bin/docker-compose", folderMounted); // Docker
-				foldersToMount++;module_mount("/var/run/docker.sock", homeDir + "sock/docker", folderMounted); // Docker
-				
-				
-				
-				//foldersToMount++;module_mount("/bin/mktemp", homeDir + "bin/mktemp", folderMounted); // Needed by docker install script
-				//foldersToMount++;module_mount("/bin/cat", homeDir + "bin/cat", folderMounted); // Needed by docker install script
-				foldersToMount++;module_mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
-				foldersToMount++;module_mount("/bin/gunzip", homeDir + "bin/gunzip", folderMounted);
-				foldersToMount++;module_mount("/bin/gzip", homeDir + "bin/gzip", folderMounted); // gunzip seems to need it
-				foldersToMount++;module_mount("/bin/ln", homeDir + "bin/ln", folderMounted); // can be useful when fiddling in the terminal
-				foldersToMount++;module_mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-				foldersToMount++;module_mount("/bin/mkdir", homeDir + "bin/mkdir", folderMounted); // can be useful when fiddling in the terminal
-				foldersToMount++;module_mount("/bin/mv", homeDir + "bin/mv", folderMounted); // can be useful when fiddling in the terminal
-				foldersToMount++;module_mount("/bin/rm", homeDir + "bin/rm", folderMounted); // can be useful when fiddling in the terminal
-				foldersToMount++;module_mount("/bin/rmdir", homeDir + "bin/rmdir", folderMounted); // can be useful when fiddling in the terminal
-				foldersToMount++;module_mount("/bin/tar", homeDir + "bin/tar", folderMounted);
-				foldersToMount++;module_mount("/bin/sed", homeDir + "bin/sed", folderMounted); // Needed by make scripts
-				foldersToMount++;module_mount("/bin/grep", homeDir + "bin/grep", folderMounted); // Needed by make scripts
-				foldersToMount++;module_mount("/bin/cp", homeDir + "bin/cp", folderMounted); // Needed by make scripts
-				foldersToMount++;module_mount("/bin/uname", homeDir + "bin/uname", folderMounted); // Wanted by nvm
-				foldersToMount++;module_mount("/bin/bzip2", homeDir + "bin/bzip2", folderMounted); // Needed by tar
-				foldersToMount++;module_mount("/bin/readlink", homeDir + "bin/readlink", folderMounted); // Needed by Dropbox client
-				
-			}
-			
-			// Put programs outside /bin/ and /usr/bin here
-			
-			//foldersToMount++;mountFollowSymlink("/sbin/iptables", homeDir, folderMounted); // Needed by docker
-			//foldersToMount++;mountFollowSymlink("/sbin/lsmod", homeDir, folderMounted); // Needed by docker
-			
-			foldersToMount++;module_mount("/usr/include", homeDir + "usr/include", folderMounted); // Needed by g++
-			
-			foldersToMount++;module_mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-			
-			
-			
-			// ALSO UPDATE removeuser.js !!!
-			
-			
-			foldersToMount++;module_mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
-			
-			
-			
-
-
-			//foldersToMount++;module_mount("/sys/module/", homeDir + "sys/module", folderMounted); // Needed by lsmod (Docker dep)
-			
-			
-			
-			// Some python scripts (Mercurial) need /usr/share
-			foldersToMount++;module_mount("/usr/share/", homeDir + "usr/share", folderMounted);
-			
-			
-			// npm
-			foldersToMount++;module_mount("/usr/lib/", homeDir + "usr/lib", function(err) {
-				if(err) throw err;
-				/*
-					npm creastes a symlink in /usr/bin/
-					npm can be installed on different places depending on OS and distro and package maintainer ...
-					In Ubuntu run: dpkg -L npm
-					
-					Nodesource puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
-					Ubuntu 18 puts it in  /usr/share/npm/bin/npm-cli.js
-					Arch Linux puts it in /usr/lib/node_modules/npm/bin/npm-cli.js
-					
-					So we'll force everyone to have it in /usr/lib/node_modules/npm/bin/ (sorry Ubuntu)
-					You need nodejs v10 to support Ubuntu-18 meanwhile Ubuntu-18 comes with nodejs v8 !
-					So Ubuntu server admins need to uninstall nodejs and npm and install it from nodesource
-					(see instructions in README.txt)
-					
-				*/
-				
-				var npmBin = "/usr/lib/node_modules/npm/bin/";
-				module_fs.stat(npmBin, function(err, stats) {
-					if(err && err.code == "ENOENT") {
-						throw new Error("npm-cli.js needs to be installed in " + npmBin + "\nUninstall nodejs and npm, then install nodejs from nodesource! See instructions in README");
-					}
-					else if(err) throw err;
-					
-					var usrBinRelativeNpmBinDir = npmBin
-					usrBinRelativeNpmBinDir = usrBinRelativeNpmBinDir.replace(/^\/usr\/lib/, "../lib"); // Nodesource
-					
-					module_fs.symlink(usrBinRelativeNpmBinDir + "npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-						if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-						
-						module_fs.symlink(usrBinRelativeNpmBinDir + "/npx-cli.js", homeDir + "usr/bin/npx", function symLinkCreated(err) {
-							if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-							foldersMounted++;
-							checkMountsReadyMaybe();
-						});
-					});
-				});
-			});
-			
-			/*
-				## mount proc
-				/proc/ is a psuedo filesystem needed by many apps
-				/proc/cpuinfo - Needed for os.cpus()
-				/proc/stat - Needed for nodejs/npm
-				/proc/sys/vm/overcommit_memory - Needed for nodejs/npm
-				
-				question: What's the difference between -t proc none and -t proc proc !?
-				answer: The proc filesystem is not associated with a special device, and when mounting it, an arbitrary keyword, such as proc can be used instead of a device specification
-				ref: https://linux.die.net/man/8/mount
-			*/
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc-temp "' + homeDir + 'proc/" -o hidepid=2,gid=2', folderMounted);
-			/*
-				must make a remount in order to hidepid to take effect!
-				must also use gid=1 (a number other then 0) in order to hidepid to take effect!
-			*/
-			foldersToMount++;module_mount(null, homeDir + "proc/", 'mount -t proc ' + username + '-proc "' + homeDir + 'proc/" -o remount,hidepid=2,gid=2', folderMounted);
-			
-			
-			// ## mount dev
-			// Need to create the dev and dev/pts folder first because mount devpts wont create it
-			foldersToMount += 3;
-			module_fs.mkdir(homeDir + "dev/", function(err) {
-				if(err && err.code != "EEXIST") throw err;
-				
-				module_mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-				module_mount("/dev/null", homeDir + "dev/null", folderMounted);
-				
-				// Needed for pseudo terminals 
-				// First dev/pts need to be created with rwrwrw, then dev/pts/ptmx need to be mounted to dev/ptmx (Ubuntu 18)
-				module_fs.mkdir(homeDir + "dev/pts/", function(err) {
-					if(err && err.code != "EEXIST") throw err;
-					
-					module_mount(null, homeDir + "dev/pts/", 'mount -t devpts none "' + homeDir + 'dev/pts/" -o ptmxmode=0666,newinstance', function(err) {
-						if(err) throw err;
-						
-						module_mount(homeDir + "dev/pts/ptmx", homeDir + "dev/ptmx", folderMounted);
-					});
-				});
-			});
-			
-		}
-		
-		// ALSO UPDATE removeuser.js !!!
-		
-			
-		// Create apparmor profiles unless they already exist
-		// createApparmorProfile returns the destination path from apparmorProfiles which is the path to the templates
-		console.time("Creating " + username + " apparmor profiles");
-		for (var i=0; i<apparmorProfiles.length; i++) {
-			apparmorProfiles[i] = createApparmorProfile(apparmorProfiles[i], username, apparmorProfileCreated);
-		}
-		
-		// Create a fake /etc/passwd that some programs use to lookup home dir and username
-		// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
-		if(!DEBUG_CHROOT) {
-			module_fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
-				passwdCreated = true;
-				checkMountsReadyMaybe();
-			});
-		}
-		else passwdCreated = true;
-		
-		/*
-			// Docker needs /etc/subuid, but we don't want to show what other users are on the system
-			if(!DEBUG_CHROOT) {
-			module_fs.readFile("/etc/subuid", "utf8", function(err, data) {
-			var rows = data.split("\n");
-			var foundUser = false;
-			for (var i=0, col; i<rows.length; i++) {
-			col = rows[i].split(":");
-			if(col[0]==username) found(rows[i]);
-			}
-			if(!foundUser) {
-			reportError("Did not find username=" + username + " in /etc/subuid data=" + data);
-			subuidCreated = true;
-			checkMountsReadyMaybe();
-			return;
-			}
-			function found(data) {
-			foundUser = true;
-			module_fs.writeFile(homeDir + "etc/subuid", data + "\n", function(err) {
-			subuidCreated = true;
-			checkMountsReadyMaybe();
-			});
-			}
-			});;
-			}
-			else subuidCreated = true;
-		*/
-		subuidCreated = true;
-		
-		/*
-			// Docker needs /etc/subgid, but we don't want to show what other users are on the system
-			if(!DEBUG_CHROOT) {
-			module_fs.readFile("/etc/subgid", "utf8", function(err, data) {
-			var rows = data.split("\n");
-			var foundUser = false;
-			for (var i=0, col; i<rows.length; i++) {
-			col = rows[i].split(":");
-			if(col[0]==username) found(rows[i]);
-			}
-			if(!foundUser) {
-			reportError("Did not find username=" + username + " in /etc/subgid data=" + data);
-			subgidCreated = true;
-			checkMountsReadyMaybe();
-			return;
-			}
-			function found(data) {
-			foundUser = true;
-			module_fs.writeFile(homeDir + "etc/subgid", data + "\n", function(err) {
-			subgidCreated = true;
-			checkMountsReadyMaybe();
-			});
-			}
-			});;
-			}
-			else subgidCreated = true;
-		*/
-		subgidCreated = true;
-
-
-		} // end if(CHROOT)
-		
-		
-		
-		
+	// Make it possible to run Android emulator
+	module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
+		if(err) throw err;
+		if(stderr) log(stderr, NOTICE);
+		if(stdout) log(stdout, INFO);
+		kvmAccessGranted = true;
+	});
+	
 		
 		if(!createdNetworkNamespaces) {
 			
@@ -3540,35 +3075,6 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		}
 		
 		
-		/*
-			// Check if cacerts need to be updated
-			var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
-			var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
-			module_fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
-			if(err) return checkMountsError(err);
-			if(checkMountsAbort) return;
-			module_fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
-			if(err) return checkMountsError(err);
-			console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
-			console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
-			process.exit();
-			if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
-			// The cacerts.rc file is up to date or have been modified by the user
-			hgrccacertsUptodate = true;
-			checkMountsReadyMaybe();
-			}
-			else {
-			module_copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
-			if(err) return checkMountsError(err);
-			hgrccacertsUptodate = true;
-			checkMountsReadyMaybe();
-			});
-			}
-			});
-			});
-		*/
-		
-		
 		// ### MySQL
 		module_mount(MYSQL_PORT, homeDir + "sock/mysql", function(err) {
 			if(err) {
@@ -3602,21 +3108,13 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			});
 			
 			function mountMysqlClient() {
-				if(DEBUG_CHROOT || MOUNT_BINS) {
-					// /usr/bin will be mounted anyway
-					mysqlCheck = true;
-					checkMountsReadyMaybe();
-					return;
-				}
-				else  {
-					module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
+			module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
 						if(err) throw err;
 						
 						mysqlCheck = true;
 						checkMountsReadyMaybe();
 						return;
 					});
-				}
 			}
 		});
 		
@@ -3719,182 +3217,13 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			});
 		});
 		
-	}); // checked user rights
 	
-	function checkUserRights(username, callback) {
-		var toChown = 0;
-		var toStat = 0;
-		
-		//console.log("Checking user rights for username=" + username + " ...");
-		console.time("Check " + username + " user rights");
-		module_fs.stat(HOME_DIR + username, function (err, stats) {
-			if(err) throw err;
-			/*
-				If you get ENOENT: no such file or directory, stat '/home/guest1'
-				It's possible that the user was not fully deleted, eg. the user exist, but not the home dir,
-				try userdel guest1, or restore the home dir from backup.
-			*/
-			
-			
-			if(stats.uid != uid || stats.gid != gid) {
-
-				// Reset the fs user rights
-				// Don't chown all dirs though, chowning the mounted files could be disastrous!'
-// www user needs to have write access to /sock and read access to /wwwpub
-				// make sure the right www user id
-				getGroupId("www-data", function(err, wwwgid) {
-					if(err) throw err;
-					
-					module_fs.readdir(HOME_DIR + username, function (err, files) {
-						if(err) throw err;
-						
-						for (var i=0; i<files.length; i++) {
-							check(files[i]);
-						}
-						
-					});
-
-					
-
-					toChown++;
-					module_fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
-						toChown--;
-						if(err) throw err;
-						checkedUserRights();
-					});
-					
-					function check(file) { // Closure so we know which path
-						var path = UTIL.joinPaths([HOME_DIR, username, file]);
-						
-						console.log("checkUserRights: Checking file=" + file + " path=" + path);
-						
-						if(file=="dev" || file=="proc" || file=="bin" || file=="usr" || file=="lib" || file=="lib64") {
-							// Ignore these. Chown'ing these could be disastrous!
-							checkedUserRights();
-							return;
-						}
-						else if(file=="wwwpub" || file == "sock") {
-							// www-data should be the group
-							toChown++;
-							chownDirRecursive(path, uid, wwwgid, function(err) {
-								toChown--;
-								if(err) throw err;
-								checkedUserRights();
-							});
-							return;
-						}
-						else {
-							
-							// Is it a folder ?
-							toStat++;
-							module_fs.stat(path, function (err, stats) {
-								toStat--;
-								if(err) throw err;
-								
-								if(stats.isDirectory()) {
-									toChown++;
-									chownDirRecursive(path, uid, gid, function(err) {
-										toChown--;
-										if(err) throw err;
-										checkedUserRights();
-									});
-								}
-								else {
-									toChown++;
-									module_fs.chown(path, uid, gid, function chowned(err) {
-										toChown--;
-										if(err) throw err;
-										checkedUserRights();
-									});
-								}
-							});
-						}
-					}
-					
-				});
-			}
-			else {
-				checkedUserRights();
-			}
-		});
-		
-		function checkedUserRights() {
-			if(toChown == 0 && toStat == 0) {
-				if(callback) {
-					console.timeEnd("Check " + username + " user rights");
-					callback(null);
-					callback = null;
-				}
-			}
-			else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
-		}
-	}
 	
-	function apparmorProfileCreated(err) {
-		if(err) throw err;
-		apparmorProfilesToCreate--;
-		var counter = 0;
-		if(apparmorProfilesToCreate == 0 && reloadApparmor) {
-			console.timeEnd("Creating " + username + " apparmor profiles");
-			
-			console.time(username + " Reloading apparmor");
-			var exec = module_child_process.exec;
-			
-			var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
-			//var apparmorReloadCommand = "service apparmor reload";
-			//var apparmorReloadCommand = "apparmor_parser -r ";
-			var apparmorReloadCommand = "apparmor_parser -r";
-			for (var i=0; i<apparmorProfiles.length; i++) {
-				//apparmorReloadCommand += " && apparmor_parser -r " + apparmorProfiles[i];
-				apparmorReloadCommand += " " + apparmorProfiles[i];
-			}
-			// Note: Need to have a debug message infront of all spawn and exec because they do not get proper call stacks
-			log("exec: " + apparmorReloadCommand, DEBUG);
-			exec(apparmorReloadCommand, EXEC_OPTIONS, function(error, stdout, stderr) {
-				console.timeEnd(username + " Reloading apparmor");
-				if(error) throw(error);
-				if(stderr) throw new Error(stderr);
-				if(stdout) throw new Error(stdout);
-				
-				console.log("done: service apparmor reload");
-				
-				clearInterval(apparmorReloadTimer);
-				
-				reloadedApparmor = true;
-				checkMountsReadyMaybe();
-			});
-		}
-		
-		checkMountsReadyMaybe();
-		
-		function checkApparmorReloaded() {
-			console.log("Waiting for apparmor to reload ... " + ++counter);
-		}
-		
-	}
-	
-	function folderMounted(err) {
-		foldersMounted++;
-		
-		//if(err) return checkMountsError(err);
-		
-		// Let the user login even if there is a mount error
-		if(err) mountErrorMessages.push(err);
-		
-		if(foldersMounted > foldersToMount) throw new Error("foldersMounted=" + foldersMounted + " foldersToMount=" + foldersToMount);
-		
-		if(foldersMounted == foldersToMount) console.timeEnd("Mount " + username + " files and folders");
-		
-		checkMountsReadyMaybe();
-	}
 	
 	function checkMountsReadyMaybe() {
 		if(checkMountsAbort) return;
 		
-		console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + " foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " apparmorProfilesToCreate=" + apparmorProfilesToCreate + " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked + " mysqlCheck=" + mysqlCheck + " ");
-		
-		if(createdNetworkNamespaces && nginxProfileOK && foldersToMount == foldersMounted && apparmorProfilesToCreate == 0 && passwdCreated && subuidCreated && subgidCreated 
-		&& ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
+		if(kvmAccessGranted && createdNetworkNamespaces && nginxProfileOK && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
 			
 			if(!checkMountsReady) { // Prevent double accept
 				checkMountsReady = true;
@@ -3918,15 +3247,10 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 			
 			if(!createdNetworkNamespaces) log("Waiting for network namespace to be created...", DEBUG);
 			if(!nginxProfileOK) log("Waiting for Nginx profiles to be created...", DEBUG);
-			if(foldersToMount != foldersMounted) log("Waiting for foldersToMount=" + foldersToMount + " foldersMounted=" + foldersMounted + " ...", DEBUG);
-			if(apparmorProfilesToCreate != 0) log("Waiting for apparmorProfilesToCreate=" + apparmorProfilesToCreate, DEBUG)
-			if(!passwdCreated) log("Waiting for /etc/passwd to be created...", DEBUG);
-			if(!subuidCreated)  log("Waiting for /etc/subuid to be created...", DEBUG);
-			if(!subgidCreated)  log("Waiting for /etc/subgid to be created...", DEBUG);
-			if((reloadApparmor && !reloadedApparmor) || reloadApparmor ) log("Waiting for apparmor to be reloaded...", DEBUG);
 			if((!sslCertChecked && options.waitForSSL)) log("Waiting for SSL certificates to be created...", DEBUG);
 			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
 			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
+			if(!kvmAccessGranted) log("Waiting for access to /dev/kvm ...", DEBUG);
 			
 		}
 	}
@@ -3938,59 +3262,6 @@ foldersToMount++;module_mount("/usr/bin/docker", homeDir + "usr/bin/docker", fol
 		
 		checkMountsCallback(err);
 		
-	}
-	
-	function createApparmorProfile(template, username, callback) {
-		/*
-			example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
-		*/
-		var dest = template.replace("someuser", username);
-		
-		var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
-		dest = dest.replace("home.", homeDot);
-		dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
-		
-		//console.log("Apparmor: template=" + template + " dest=" + dest);
-		
-		// First check if the profile exist
-		module_fs.stat(dest, function (err, stats) {
-			
-			if(err) {
-				if(err.code != "ENOENT") throw err;
-				
-				module_fs.readFile(template, "utf8", function (err, apparmorProfile) {
-					if(err) throw err;
-					
-					apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
-					apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-					apparmorProfile = apparmorProfile.replace(/%WEBIDE%/g, UTIL.parentFolder(__dirname));
-					
-					// Create the profile
-					module_fs.writeFile(dest, apparmorProfile, function (err) {
-						if(err) throw err;
-						
-						reloadApparmor = true;
-						
-						/*
-							var bin = dest.replace("/etc/apparmor.d", "");
-							bin = dest.replace(".", "/");
-							
-							//var enforceApparmorProfileStdout = module_child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
-							//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-						*/
-						
-						return callback(null);
-					});
-				});
-			}
-			else {
-				// profile already exist!
-				return callback(null);
-			}
-			
-		});
-		
-		return dest;
 	}
 	
 	function checkSslCert() {
@@ -4861,14 +4132,14 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
-	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--chroot=" + (CHROOT), "--virtualroot=" + VIRTUAL_ROOT];
+	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
 	var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
 	// Using spawn instead of fork to be able to use Linux network namespaces
 	
 	spawnOptions.env = {
 		username: username,
-		HOME: (!CHROOT || USERNAME) ? homeDir : "/",
+		HOME: homeDir,
 		USER: username,
 		LOGNAME: username,
 		USER_NAME: username,
@@ -4887,7 +4158,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 	}
 	
 	// Need to start the worker as root if network namespaces are used!
-	if(!CHROOT && NO_NETNS) {
+	if(NO_NETNS) {
 		log("Spawning with uid=" + uid + " and gid=" + gid + " ...", DEBUG);
 		if(uid != undefined) spawnOptions.uid = parseInt(uid);
 		if(gid != undefined) spawnOptions.gid = parseInt(gid);
@@ -4900,24 +4171,15 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 		spawnOptions.env.gid = gid;
 		
 		// Assume unix like system
-		if(CHROOT) {
-		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:/.npm-packages/bin";
-		spawnOptions.env["NPM_CONFIG_PREFIX"] = "/.npm-packages";
-			spawnOptions.env.PORT = "/sock/test";
-			spawnOptions.env.NPM_PACKAGES = "/.npm-packages";
-		}
-		else {
-			spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:";
+		
+		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:";
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + "/.npm-packages";
 			spawnOptions.env.PORT = homeDir + "/sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
 			spawnOptions.env.NPM_PACKAGES = homeDir + "/.npm-packages";
-		}
+		
 		
 		spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
 		
-		
-		
-		if(CHROOT && uid) workerNode = "/usr/bin/nodejs_" + username; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	}
 	
 	if(uid == undefined || uid == -1) {
@@ -4952,7 +4214,7 @@ spawnOptions.env.HOST = netnsIP;
 		spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 	}
 	
-	log("Spawning user worker process... username=" + username + " uid=" + uid + " gid=" + gid + " chroot=" + (CHROOT) + " groups=" + JSON.stringify(groups), INFO);
+	log("Spawning user worker process... username=" + username + " uid=" + uid + " gid=" + gid + " groups=" + JSON.stringify(groups), INFO);
 	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
 	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)

@@ -51,8 +51,6 @@ var DEBUG = 7;
 
 var USER_PROD_FOLDER = "/.prod/";
 
-var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
-//log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
 //log("process.env.uid=" + process.env.uid, 7);
 //log("process.env=" + JSON.stringify(process.env));
 
@@ -87,14 +85,7 @@ if(info.uid==0) {
 	
 	var posix = require("posix");
 	
-	
 	log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
-	
-	if(USE_CHROOT) {
-		if(HOME=="/") throw new Error("Unncessasary to chroot into /");
-		log("chroot into " + HOME, DEBUG);
-	posix.chroot(HOME);
-	}
 	
 	
 	log("setegid to " + gid, DEBUG);
@@ -153,21 +144,6 @@ if(info.uid==0) {
 		unshare(CLONE_NEWNET);
 	*/
 	
-	
-	if(USE_CHROOT) {
-	process.env.HOME = "/";
-	
-	var npmOptions = {
-		env: {
-			HOME: "/",
-			PATH: "/usr/bin:/bin:/.npm-packages/bin", // npm want node to be inside PATH
-			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where to put global packages
-			dev: true // So that scripts know we're in "development"
-		}
-	};
-}
-else {
-	
 	//if(gid) process.setgid(gid);
 	//if(uid) process.setuid(uid);
 	
@@ -179,7 +155,7 @@ else {
 			dev: true // So that scripts know we're in "development"
 		}
 	}
-}
+
 }
 
 
@@ -221,8 +197,6 @@ user.isSavingStorage = [];
 user.rootPath = undefined;
 user.runningNodeJsScripts = {};
 
-if(USE_CHROOT) user.chrooted = true;
-
 user.identify = function identify(info) {
 	
 	//console.log("user.identify: info=" + JSON.stringify(info));
@@ -249,14 +223,10 @@ user.identify = function identify(info) {
 		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
 	}
 	
-	if(USE_CHROOT) {
-		user.rootPath = null;
-	}
-
-if(USE_CHROOT || VIRTUAL_ROOT) {
+if(VIRTUAL_ROOT) {
 		user.defaultWorkingDirectory = "/";
 		user.homeDir = "/";
-		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + "  )");
+		//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because VIRTUAL_ROOT=" + VIRTUAL_ROOT + "  )");
 	}
 	
 	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);
@@ -268,7 +238,7 @@ if(USE_CHROOT || VIRTUAL_ROOT) {
 	user.storageDir = user.translatePath( module_path.join(user.homeDir, ".webide/",  "storage/") ) ;
 	
 	
-	console.log("Identified as user.name=" + user.name + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + user.rootPath + " homeDir=" + user.homeDir + " storageDir=" + user.storageDir + " workingDirectory=" + user.workingDirectory);
+	console.log("Identified as user.name=" + user.name + " VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + user.rootPath + " homeDir=" + user.homeDir + " storageDir=" + user.storageDir + " workingDirectory=" + user.workingDirectory);
 	
 }
 
@@ -340,15 +310,13 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	if(pathToFileOrDir == undefined) throw new Error("pathToFileOrDir=" + pathToFileOrDir);
 	
-	//console.log(user.name + " translatePath=" + pathToFileOrDir + " user.rootPath=" + user.rootPath + " USE_CHROOT=" + USE_CHROOT + " VIRTUAL_ROOT=" + VIRTUAL_ROOT);
-	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 	
 	if(pathToFileOrDir[0] == "~") {
 		pathToFileOrDir = pathToFileOrDir.replace("~", user.homeDir);
 	}
 	
-	if(user.rootPath && !USE_CHROOT && VIRTUAL_ROOT) {
+	if(user.rootPath && VIRTUAL_ROOT) {
 		var urlModule = require("url");
 		var pathModule = require("path");
 		
@@ -419,7 +387,7 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 	
 	//console.log(user.name + " toVirtualPath realPath=" + realPath);
 	
-	if(!user.rootPath || USE_CHROOT) {
+	if(!user.rootPath) {
 		//console.log("No need to translate (no rootPath)");
 		return realPath;
 	}
@@ -1288,7 +1256,7 @@ function npm(arg, extraOptions, callback) {
 		}
 	}
 	
-	npmOptions.execPath = USE_CHROOT ? "/usr/bin/node" : process.argv[0];
+	npmOptions.execPath = process.argv[0];
 	npmOptions.silent = true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	
 	// The update notifier gives spawn EACCESS because in one of those 238 files it tries to read or write to a file or folder it doesn't have access to.
@@ -1638,13 +1606,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
-		
-		if(USE_CHROOT) {
-			var nodejsPath = "/usr/bin/node";
-		}
-		else {
-			var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
-		}
+		var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
 		
 		var nodeScriptOptions = {
 			execPath: nodejsPath, 
@@ -1665,12 +1627,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			else nodeScriptOptions.execArgv = [inspectStr];
 		}
 		
-		if(rootFolder && USE_CHROOT) {
-			nodeScriptOptions.env.PORT = "/sock/" + UTIL.getFolderName(rootFolder);
-		}
-		else {
-			nodeScriptOptions.env.PORT = HOME + "/sock/" + UTIL.getFolderName(rootFolder);
-		}
+		nodeScriptOptions.env.PORT = HOME + "/sock/" + UTIL.getFolderName(rootFolder);
 		
 		start();
 		
@@ -1681,7 +1638,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
-			var watchDir = UTIL.trailingSlash(USE_CHROOT ? '/sock/' : HOME + '/sock/');
+			var watchDir = UTIL.trailingSlash(HOME + '/sock/');
 			
 				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
 				var fs = require("fs");
