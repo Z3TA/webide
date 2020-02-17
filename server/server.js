@@ -3137,7 +3137,7 @@ function checkMounts(options, checkMountsCallback) {
 				
 				// Override host's resolvers
 				createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
-				
+				// note: systemd will probably re-bind resolv.conf in regular intervals with the system resolvers!
 				
 				// Make it harder to see other users on the system by faking...
 				createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
