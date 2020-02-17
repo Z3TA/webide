@@ -13,6 +13,7 @@ var mimeMap = {
 	mp3: "audio/mpeg",
 	mpeg: "video/mpeg",
 	ogg: "audio/vorbis",
+	oga: "audio/ogg,",
 	pdf: "application/pdf",
 	png: "image/png",
 	ppt: "application/vnd.ms-powerpoint",
