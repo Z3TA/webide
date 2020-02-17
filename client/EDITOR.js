@@ -7427,7 +7427,7 @@ folderExistInCallback(false);
 			var failText = "The new window was most likely blocked by a popup blocker. " +
 			"(enable popups from " + document.domain + " to get rid of this message)"
 			
-			var errorText = "Could not open the window. Please disable the popup stopper!"
+			var errorText = "If the new window could not open, try disable the popup stopper (allow popups on " + window.location.host + ")";
 			
 			/*
 				// native confirm dialog did not enable the window!
