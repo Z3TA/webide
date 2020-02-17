@@ -3,7 +3,7 @@
 	
 	var windowMenu;
 	var discoveryBarIcon;
-	var desktopWidth = Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 800)  )   );
+	var desktopWidth = Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 1000)  )   );
 	var desktopHeight = Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   );
 	
 	EDITOR.plugin({
