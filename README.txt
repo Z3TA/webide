@@ -886,6 +886,13 @@ And you will see all console.log's etc in the debugger!
 If the connection is lost you must restart Opera Mobile.
 
 
+Android support
+===============
 
+
+setup wizard screen is blank when running android studio in vnc
+---------------------------------------------------------------
+Edit android-studio/bin/idea.properties and add
+disable.android.first.run=true
 
 
