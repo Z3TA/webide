@@ -78,6 +78,9 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+
+find /home/username \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/userskeleton/username/g'
+
 Android SDK + tools should be pre-installed !?
 Should probably base home dir's on a zfs snapshot to avoid duplication!?
 

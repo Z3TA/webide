@@ -337,13 +337,7 @@ function adduser() {
 		
 		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
 		
-	// Use the systems dns settings !?
-	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "run/resolvconf/resolv.conf")
-	//copyFileSync("/etc/resolv.conf", homeDir + "etc/resolv.conf")
-	
-	// Use the systems ca's
-	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "etc/ssl/certs/ca-certifacates.crt")
-	
+
 	// The user owns his files
 	chownrSync(homeDir, uid, gid);
 	
