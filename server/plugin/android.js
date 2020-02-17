@@ -33,7 +33,7 @@ var DEBUG = 7;
 
 var ANDROID = {
 	startEmulator: function(user, json, callback) {
-		startAvd(user.name, function(err) {
+		startAvd(user.name, json.avd, function(err) {
 			if(err) callback(err);
 			else callback(null);
 			
@@ -46,14 +46,35 @@ var ANDROID = {
 	}
 }
 
-function startAvd(username, avd, callback) {
+function startAvd(username, avd, callback, recursion) {
 	
 	if(typeof avd == "function") {
 		callback = avd;
 		avd = undefined;
 	}
 	
-	if(avd == undefined) avd = "Pixel_2_API_29";
+	var bin = "/home/" + username + "/Android/Sdk/emulator/emulator";
+	
+	if(avd == undefined) {
+
+		if(recursion) throw new Error("username=" + recursion + " avd=" + avd + " recursion=" + recursion);
+		
+		module_child_process.exec(bin + " -list-avds", function(err, stdout, stderr) {
+			if(err) return callbac(err);
+			if(stderr) return callback(new Error(stderr));
+			if(!stdout) return callback(new Error("No installed AVD's!?"));
+			
+			var list = stdout.split("\n");
+			var avd = list[0];
+			
+			log("No avd specified, so using " + avd + " ...", DEBUG);
+			return startAvd(username, avd, callback, 1);
+			
+		});
+		
+		return;
+		
+	}
 	
 	var lastStderr = "";
 	var lastStdout = "";
@@ -72,7 +93,7 @@ function startAvd(username, avd, callback) {
 		avd, 
 	];
 	
-	var bin = "/home/" + username + "/Android/Sdk/emulator/emulator";
+	
 	
 	log(username + " starting bin=" + bin + " with args=" + JSON.stringify(emulatorArgs), DEBUG);
 	var emulator = module_child_process.spawn(bin, emulatorArgs);
