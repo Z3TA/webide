@@ -20,14 +20,14 @@
 			windowMenuNewWindow = EDITOR.windowMenu.add(S("open_in_new_window"), [S("File"), 9], openInNewWindow);
 			windowMenuSplitScreen = EDITOR.windowMenu.add(S("split_screen_new_window"), [S("View"), 50], splitScreen);
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/new-window.svg", 130, S("open_in_new_window"), "+win", openWindowFromMenu);
+			//discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/new-window.svg", 130, S("open_in_new_window"), "+win", openWindowFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 		},
 		unload: function unloadFloatingWindow() {
 			EDITOR.windowMenu.remove(windowMenuNewWindow);
 			EDITOR.windowMenu.remove(windowMenuSplitScreen);
-			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 			EDITOR.removeEvent("ctxMenu", openInNewWindowCtxmenuOption);
 		},
 		order: 6000 // Want option to appear low in the context menu

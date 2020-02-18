@@ -47,6 +47,7 @@
 	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
 	
 	var winMenuMercurial, winMenuMercurial2, winMenuCommit, winMenuDiffRevision, winMenuAnnotations, winMenuClone, winMenuPullRequest;
+	var winMenuDiffFile
 	
 	var discoveryBarIcon;
 	
@@ -77,9 +78,11 @@
 		winMenuMercurial2 = EDITOR.windowMenu.add(S("show_command_bar"), [S("SCM"), 8, 1], toggleVersionControlWidget);
 		winMenuCommit = EDITOR.windowMenu.add(S("Commit"), ["SCM", 5], showCommitDialog);
 		winMenuDiffRevision = EDITOR.windowMenu.add(S("diff_revision"), [S("SCM"), 6], diffWorkingDirectory);
+		winMenuDiffFile= EDITOR.windowMenu.add(S("diff_file"), [S("SCM"), 6], diffWorkingDirectory);
 		winMenuAnnotations = EDITOR.windowMenu.add(S("show_annotactions"), [S("SCM"), 11], toggleAnotations);
 		winMenuClone = EDITOR.windowMenu.add(S("clone_a_repository"), [S("SCM"), 15], showCloneDialog);
 		winMenuPullRequest = EDITOR.windowMenu.add(S("export_pull_request"), [S("SCM"), 17], exportPullRequest);
+		
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -97,7 +100,7 @@
 		
 		EDITOR.registerAltKey({char: ",", alt:1, label: "revision", fun: showVersionControlWidget});
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/share.svg", 110, "Version control", "SCM", toggleVersionControlWidget);
+		//discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/share.svg", 110, "Version control", "SCM", toggleVersionControlWidget);
 		
 	}
 	
@@ -131,7 +134,7 @@
 		EDITOR.windowMenu.remove(winMenuClone);
 		EDITOR.windowMenu.remove(winMenuPullRequest);
 		
-		EDITOR.discoveryBar.remove(discoveryBarIcon);
+		if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		hideMercurialWidgets();
 		
@@ -2494,6 +2497,10 @@ var error = err.message;
 		return false;
 	}
 	
+	function diffFile() {
+		mercurialDiff(rootDir, [EDITOR.currentFile.path]);
+	}
+	
 	function buildVersionControlWidget(widget) {
 		
 		var div = document.createElement("div");
@@ -2727,7 +2734,7 @@ var error = err.message;
 		versionControlWidget.show();
 		winMenuMercurial.activate();
 		winMenuMercurial2.activate();
-		discoveryBarIcon.classList.add("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
 	}
 	
 	function hideVersionControlWidget() {
@@ -2735,7 +2742,7 @@ var error = err.message;
 		versionControlWidget.hide();
 		winMenuMercurial.deactivate();
 		winMenuMercurial2.deactivate();
-		discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {

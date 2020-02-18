@@ -3308,8 +3308,11 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 			item.appendChild(image);
 			
 			var caption = document.createElement("figcaption");
-			caption.innerText = captionText;
-			caption.classList.add("discoveryBarCaption");
+caption.classList.add("discoveryBarCaption");
+			var span = document.createElement("span");
+			span.innerText = captionText;
+caption.appendChild(span);
+			
 			if(!EDITOR.discoveryBar.captions) caption.classList.add("hidden");
 			item.appendChild(caption);
 			

@@ -259,7 +259,7 @@
 		
 		EDITOR.registerAltKey({char: "space", alt:3, label: "Static site generator", fun: showSSG});
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/website.svg", 100, "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")", "SSG", toggleSSG);
+		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/website.svg", 140, "Static site generator (" + EDITOR.getKeyFor(showSSG) + ")", "SSG", toggleSSG);
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		

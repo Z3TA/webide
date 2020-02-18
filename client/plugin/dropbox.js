@@ -43,7 +43,7 @@
 			
 			CLIENT.removeEvent("loginSuccess", checkIfDropboxIsRunning);
 			
-			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 		}
 	});
 	
@@ -114,14 +114,14 @@ dropboxDaemonWasKilled();
 	
 	function dropboxDaemonIsRunning() {
 		daemonAlive = true;
-		discoveryBarIcon.classList.add("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
 		winMenuDropbox.activate();
 		
 	}
 	
 	function dropboxDaemonWasKilled() {
 		daemonAlive = false;
-		discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 		winMenuDropbox.deactivate();
 	}
 	

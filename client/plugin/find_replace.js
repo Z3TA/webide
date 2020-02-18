@@ -47,7 +47,7 @@ if(CHROMEBOOK) {
 		
 		winMenuFindReplace = EDITOR.windowMenu.add(S("find_replace"), [S("File"), 7], findReplace);
 		
-		discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 60, S("find_replace") + " (Ctrl+F) or Hold down shift-key to find in files (Ctrl+Shift+F)", "find", findReplaceFromDiscoveryBar);
+		//discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/zoom-lens.svg", 60, S("find_replace") + " (Ctrl+F) or Hold down shift-key to find in files (Ctrl+Shift+F)", "find", findReplaceFromDiscoveryBar);
 		// Icon created by: https://www.flaticon.com/authors/phatplus
 		
 		// Point variables to the document object model
@@ -80,7 +80,7 @@ if(CHROMEBOOK) {
 		
 		EDITOR.windowMenu.remove(winMenuFindReplace);
 		
-		EDITOR.discoveryBar.remove(discoveryBarIcon);
+		if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		// Cleanup
 		hide_search();
@@ -452,7 +452,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			EDITOR.renderNeeded();
 		}
 		
-		discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 	}
 	
 	function show_search() {
@@ -478,7 +478,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				EDITOR.input = false;
 			}
 			
-			discoveryBarIcon.classList.add("active");
+			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
 			
 			console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			

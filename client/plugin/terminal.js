@@ -62,7 +62,7 @@ todo: Run vttest
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			EDITOR.registerAltKey({char: "t", alt:1, label: "term", fun: startTerminalFromMenu});
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 90,  S("terminal_emulator") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "term", startTerminalFromMenu);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "term", startTerminalFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			

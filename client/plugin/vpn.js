@@ -21,12 +21,15 @@
 	var widget;
 	var configPath = "/wireguard/wg0.conf";
 	var connected = false;
+	var winMenuItem;
 	
 EDITOR.plugin({
 desc: "Connect to VPN server",
 load: function loadVpnSupport() {
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/wireguard-vpn.svg", 90,  "Virtual private network (VPN) IP tunnel", "VPN", toggleVpnConnection);
+			winMenuItem = EDITOR.windowMenu.add("VPN", [S("tools"), 1], toggleVpnConnection);
+			
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/wireguard-vpn.svg", 130,  "Virtual private network (VPN) IP tunnel", "VPN", toggleVpnConnection);
 			
 			//widget = EDITOR.createWidget(buildVpnWidget);
 			
@@ -37,7 +40,9 @@ unload: function unloadVpnSupport() {
 			
 			//widget.unload();
 			
-			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
+			
+			EDITOR.windowMenu.remove(winMenuItem);
 			
 			CLIENT.removeEvent("loginSuccess", checkVpnStatus);
 			
@@ -57,11 +62,13 @@ unload: function unloadVpnSupport() {
 			else {
 				if(status.indexOf("connected") == 0) {
 					connected = true;
-					discoveryBarIcon.activate();
+					if(discoveryBarIcon) discoveryBarIcon.activate();
+					winMenuItem.activate();
 				}
 				else if(status == "disconnected") {
 					connected = false;
-					discoveryBarIcon.deactivate();
+					if(discoveryBarIcon) discoveryBarIcon.deactivate();
+					winMenuItem.deactivate();
 				}
 				else {
 					throw new Error("Unexpected answer from server: status=" + status);
@@ -74,7 +81,9 @@ unload: function unloadVpnSupport() {
 	}
 	
 	function updateStatus(status) {
-		discoveryBarIcon.title = "Virtual private network (VPN) IP tunnel " + status;
+		var title = "Virtual private network (VPN) IP tunnel " + status;
+		if(discoveryBarIcon) discoveryBarIcon.title = title;
+		winMenuItem.text.title = title;
 	}
 	
 	function vpnConnect() {
@@ -105,7 +114,8 @@ return;
 			if(err) alertBox(err.message);
 			else {
 alertBox("Connected to VPN!");
-				discoveryBarIcon.activate();
+				if(discoveryBarIcon) discoveryBarIcon.activate();
+				winMenuItem.activate();
 				updateStatus("connected!")
 			}
 		});
@@ -120,7 +130,8 @@ alertBox("Connected to VPN!");
 			if(err) alertBox(err.message);
 			else {
 alertBox("Disconnected from VPN!");
-		discoveryBarIcon.deactivate();
+				if(discoveryBarIcon) discoveryBarIcon.deactivate();
+winMenuItem.deactivate();
 				updateStatus("(not connected)");
 }
 });

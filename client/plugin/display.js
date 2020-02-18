@@ -16,7 +16,7 @@
 			
 			EDITOR.on("virtualDisplay", virtualDisplayStatus);
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/monitor.svg", 110,  S("displayDesktop") + " (" + EDITOR.getKeyFor(showDesktopFromKeyboardCombo) + ")", "dspl", toggleDisplayFromDiscoveryBar);
+			//discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/monitor.svg", 110,  S("displayDesktop") + " (" + EDITOR.getKeyFor(showDesktopFromKeyboardCombo) + ")", "dspl", toggleDisplayFromDiscoveryBar);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 		},
@@ -28,18 +28,18 @@
 			
 			EDITOR.removeEvent("virtualDisplay", virtualDisplayStatus);
 			
-			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 		}
 	});
 	
 	function virtualDisplayStatus(status) {
 		if(status == "open") {
 windowMenu.activate();
-			discoveryBarIcon.classList.add("active");
+			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
 		}
 		else if(status == "close") {
 			windowMenu.deactivate();
-discoveryBarIcon.classList.remove("active");
+			if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 		}
 	}
 	
