@@ -139,11 +139,12 @@ console.timeEnd("check exist");
 
 
 
-var zfsPool;
+var zfsPool = "";
+var zfsSnapVersion = 0;
 
 if(!NOZFS) {
 	console.time("ZFS");
-child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
+child_process.exec("zfs list -t snapshot", function execAddUser(err, stdout, stderr) {
 	// If zfs doesn't exist we get both an err and stderr.
 	// If not super user we get both an err and stderr.
 	//console.log("zfs: err=" + (err ? err.message : "") + " stdout=" + stdout + " stderr=" + stderr);
@@ -152,23 +153,29 @@ child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 	else if(err) throw err;
 	else {
 		
-			// zpc/home         3.84G  1.37T  5.02M  /home
+			// rpool/home/userskeleton@base1                                                                         0B      -  6.15G  -
 			var homeWithoutEndingSlashAndEscapedSlashes = HOME.substr(0, HOME.length-1).replace(/\//, "\\/");
-			var rePool = new RegExp("(.*)\\/.*" + homeWithoutEndingSlashAndEscapedSlashes + "\\n");
-			var matchPool = stdout.match(rePool);
+			var reSnap = new RegExp("(.*)" + homeWithoutEndingSlashAndEscapedSlashes + "\\/userskeleton@base(\\d+)");
+			var matchSnap = stdout.match(reSnap);
 			
-	if(matchPool) {
-				zfsPool = matchPool[1];
+			if(matchSnap) {
+				zfsPool = matchSnap[1];
+				zfsSnapVersion = matchSnap[2];
 				
-				var zfsCreateStdout = child_process.execSync("zfs create " + zfsPool + userHomeDir);
-				zfsCreateStdout = zfsCreateStdout.toString(ENCODING);
+				console.log("zfsPool=" + zfsPool + " zfsSnapVersion=" + zfsSnapVersion);
 				
-				if(zfsCreateStdout) console.log(zfsCreateStdout);
+				var zfsclone = child_process.execSync("zfs clone " + zfsPool + homeWithoutEndingSlashAndEscapedSlashes + "/userskeleton@base" +zfsSnapVersion + " " + zfsPool + userHomeDir);
+				zfscloneStdout = zfsclone.toString(ENCODING);
+				
+				if(zfscloneStdout) console.log(zfscloneStdout);
 				else console.log("Created zfs file system on " + userHomeDir);
 				
 			}
 			else {
-				console.log("Warning: No zfs file systems exist for " + HOME + " !");
+				console.log("reSnap=" + reSnap);
+				console.log("stdout=" + stdout);
+				console.log("userskeleton zfs with a base# snapshot was not found! Create a snapshot for userskeleton or run with -nozfs flag!");
+				process.exit();
 				NOZFS = true;
 			}
 			}
@@ -319,7 +326,7 @@ function adduser() {
 		
 		//var gid = getGroupId(groupName);
 		
-		
+		if(NOZFS) {
 		// Add skeleton files ...
 	//copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
@@ -336,8 +343,8 @@ function adduser() {
 		copyFileSync("etc/userdir_skeleton/.npmrc", homeDir + ".npmrc"); // settings for npm
 		
 		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
+		}
 		
-
 	// The user owns his files
 	chownrSync(homeDir, uid, gid);
 	
@@ -363,13 +370,45 @@ function adduser() {
 		if(err.code != "ENOENT") throw err;
 	}
 	
+		if(NOZFS) {
 		// Replace %USERNAME% %HOMEDIR% and %DOMAIN% and %NETNSIP%
 		updateFile(homeDir + ".webide/storage/cmsjz_sites");
 		updateFile(homeDir + "ssg_blog_example/source/rss_en.xml");
 		updateFile(homeDir + "wwwpub/welcome.htm");
 		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
 		updateFile(homeDir + ".bashrc");
+		}
+		else {
+			//var userSkeletonNetnsIP = UTIL.int2ip(167772162 + 1005);
+			//var userSkeletonDockerVMIP = UTIL.int2ip(167903234 + 1005);
+			
+			//recursiveReplaceInFiles(homeDir, "userskeleton", username); // too slow!
+			
+			// The recursive replace takes too long, so replace single files...
+			
+			console.time("replaceUsername");
+			replaceUsername(homeDir + ".webide/storage/cmsjz_sites");
+			replaceUsername(homeDir + "ssg_blog_example/source/rss_en.xml");
+			replaceUsername(homeDir + "wwwpub/welcome.htm");
+			replaceUsername(homeDir + "nodejs_examples/http_server/http_server_example.js");
+			replaceUsername(homeDir + ".android/avd/Pixel_2_API_25.avd/hardware-qemu.ini");
+			replaceUsername(homeDir + ".android/avd/Pixel_2_API_25.avd/snapshots/default_boot/hardware.ini");
+			replaceUsername(homeDir + ".android/avd/Pixel_2_API_25.avd/emu-launch-params.txt");
+			replaceUsername(homeDir + ".android/avd/Pixel_2_API_25.ini");
+			replaceUsername(homeDir + ".android/adb.5037");
+			replaceUsername(homeDir + ".config/Android Open Source Project/Emulator.conf");
+			replaceUsername(homeDir + ".java/fonts/1.8.0_202-release/fcinfo-1-localhost-Ubuntu-18.04-en.properties");
+			replaceUsername(homeDir + ".AndroidStudio3.5/config/options/path.macros.xml");
+			replaceUsername(homeDir + ".AndroidStudio3.5/system/.home");
+			//replaceUsername(homeDir + "");
+			
+			console.timeEnd("replaceUsername");
+			
+		}
 		
+		function replaceUsername(path) {
+			replaceInFile(path, "userskeleton", username);
+		}
 		
 		
 		// Enable hggit
@@ -382,8 +421,10 @@ function adduser() {
 			var hashedPassword = password;
 		}
 		else {
+console.time("hashing password");
 			var pwHash = require("./server/pwHash.js");
 			var hashedPassword = pwHash(password);
+console.timeEnd("hashing password");
 		}
 		
 		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/", "password"]), hashedPassword, ENCODING);
@@ -394,6 +435,13 @@ function adduser() {
 		console.timeEnd("Adding user");
 		
 		
+		
+		function replaceInFile(path, find, replace) {
+			var str = fs.readFileSync(path, ENCODING);
+			var re = new RegExp(find, "g");
+			str = str.replace(re, replace);
+			fs.writeFileSync(path, str);
+		}
 		
 		function updateFile(path) {
 			var str = fs.readFileSync(path, ENCODING);
@@ -592,6 +640,13 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	
 }
 
+function recursiveReplaceInFiles(dir, find, replace) {
+	var cmd = "find " + dir + " \\( -type d -name .git -prune \\) -o -type f -print0 | xargs -0 sed -i 's/" + find + "/" + replace + "/g'";
+	console.log("recursiveReplace " + find + " in " + dir + " cmd=" + cmd);
+	console.time("recursiveReplace " + find + " in " + dir);
+	//child_process.execSync(cmd, {shell: "/bin/bash"});
+	console.timeEnd("recursiveReplace " + find + " in " + dir);
+}
 
 
 
