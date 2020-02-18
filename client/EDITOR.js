@@ -5101,10 +5101,12 @@ posX = EDITOR.width - offsetWidth;
 			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
 			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
 			
-			CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function(err, info) {
+			CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function displayStarted(err, info) {
 				if(err) {
-					if(callback) return callback(err);
-					else return alertBox(err.message);
+					if(callback) callback(err);
+					else alertBox(err.message);
+					callback = null;
+					return;
 				}
 				
 				EDITOR.virtualDisplay.password = info.password;
@@ -5118,6 +5120,8 @@ posX = EDITOR.width - offsetWidth;
 				
 				if(show) EDITOR.virtualDisplay.show(callback);
 				else if(callback) callback(null);
+				
+				callback = null;
 			});
 			
 			return PREVENT_DEFAULT;
@@ -5137,7 +5141,10 @@ posX = EDITOR.width - offsetWidth;
 				preferredWith = undefined;
 			}
 			
+			console.warn("EDITOR.virtualDisplay.show()");
+			
 			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback);
+
 			if(EDITOR.virtualDisplay.open) {
 				if(callback) callback(null);
 				
@@ -5150,6 +5157,7 @@ posX = EDITOR.width - offsetWidth;
 			var top = 0;
 			var left = screen.width-EDITOR.virtualDisplay.width;
 			
+			console.warn("EDITOR.virtualDisplay calling EDITOR.createWindow ");
 			EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 			
 			return PREVENT_DEFAULT;

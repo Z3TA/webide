@@ -55,7 +55,7 @@ discoveryBarIcon.classList.remove("active");
 			EDITOR.virtualDisplay.show(desktopWidth, desktopHeight);
 		}
 		
-		return showDesktop();
+		return PREVENT_DEFAULT;
 	}
 	
 	function showDesktopFromKeyboardCombo() {
