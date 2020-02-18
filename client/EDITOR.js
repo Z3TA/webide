@@ -5099,10 +5099,12 @@ posX = EDITOR.width - offsetWidth;
 		_win: null, // The browser window
 		width: Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 800)  )   ),
 		height: Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   ),
-		start: function(show, preferredWith, preferredHeight, callback) {
+		start: function(show, preferredWith, preferredHeight, callback, recurse) {
 			
 			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
 			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
+			
+			if(recurse == undefined) recurse = 0;
 			
 			CLIENT.cmd("display.start", {width: desktopWidth, height: desktopHeight}, function displayStarted(err, info) {
 				if(err) {
@@ -5121,7 +5123,7 @@ posX = EDITOR.width - offsetWidth;
 				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
 				for(var i=0; i<f.length; i++) f[i]("start");
 				
-				if(show) EDITOR.virtualDisplay.show(callback);
+				if(show) EDITOR.virtualDisplay.show(undefined, undefined, callback, recurse);
 				else if(callback) callback(null);
 				
 				callback = null;
@@ -5138,16 +5140,36 @@ posX = EDITOR.width - offsetWidth;
 			
 			return PREVENT_DEFAULT;
 		},
-		show: function(preferredWith, preferredHeight, callback) {
+		show: function(preferredWith, preferredHeight, callback, recurse) {
 			if(typeof preferredWith == "function" && preferredHeight == undefined && callback == undefined) {
 				callback = preferredWith;
 				preferredWith = undefined;
 			}
 			
+			if(recurse == undefined) recurse = 0;
+			
 			console.warn("EDITOR.virtualDisplay.show()");
 			
-			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback);
+			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
 
+			// The display should be running, but check status just in case! (user worker might have restarted)
+			CLIENT.cmd("display.status", function checkedDisplayStatus(err, status) {
+				if(err) {
+					callback(new Error("Unable to get display.status! Error: " + err.message));
+					callback = null;
+					return;
+				}
+				
+				if(!status.started && recurse > 3) return callback(new Error("Unable to show virtual display! status=" + JSON.stringify(status, null, 2) + " recurse=" + recurse + ""));
+				else if(!status.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
+				else openWindow();
+			});
+			
+			
+			return PREVENT_DEFAULT;
+			
+			function openWindow() {
+				
 			if(EDITOR.virtualDisplay.open) {
 				if(callback) callback(null);
 				
@@ -5201,6 +5223,7 @@ posX = EDITOR.width - offsetWidth;
 				setTimeout(function() {
 					win.document.title = "Desktop";
 				}, 3000);
+			}
 			}
 		},
 		hide: function() {

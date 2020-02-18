@@ -280,7 +280,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				var error = UTIL.updateError(properCallStackError[id], "ETIMEDOUT", " " + req + " command timeod out! Request: " + UTIL.shortString(string));
 			}
 			
-			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + " LIENT.cmdTimeout=" + CLIENT.cmdTimeout);
+			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + (CLIENT.cmdTimeout==timeout?" (default)":"") + "");
 			
 			// note: If the message did get through, we might get the answer after re-connecting!
 			// we do not however want the answer to result in a double callback!

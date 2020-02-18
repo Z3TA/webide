@@ -29,12 +29,17 @@ var DISPLAY = {
 		if(displayId == undefined) throw new Error("displayId=" + displayId + "");
 		
 		if(SCREEN.hasOwnProperty(displayId)) {
+			
+			if(SCREEN[displayId].stopping) return callback(new Error("Screen is being stopped..."));
+			if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
+			
 			return callback(null, SCREEN[displayId].vnc);
 		}
 		
 		SCREEN[displayId] = {
 			vnc: {},
-			stopping: false
+			stopping: false,
+			starting: true
 		};
 		
 		createScreen(username, displayId, json.width, json.height);
@@ -49,6 +54,10 @@ var DISPLAY = {
 		var x11vncPort = 7000 + user.id; // The port to run the VNC protocol on
 		startX11vnc(username, displayId, x11vncPort);
 		
+		setTimeout(function() {
+			SCREEN[displayId].starting = false;
+		}, 3000);
+		
 		return callback(null, SCREEN[displayId].vnc);
 		
 		
@@ -56,11 +65,11 @@ var DISPLAY = {
 	status: function(user, json, callback) {
 		
 		var status = {
-			started: false
+			started: false,
+			restarting: false
 		};
 		
 		for(var displayId in SCREEN) {
-			counter++;
 			checkStatus(displayId);
 		}
 		
@@ -74,7 +83,9 @@ var DISPLAY = {
 			status[displayId] = {
 				socat: socat,
 				x11vnc: x11vnc,
-				xvfb: xvfb
+				xvfb: xvfb,
+				starting: SCREEN[displayId].starting,
+				stopping: SCREEN[displayId].stopping
 			};
 			
 			if(x11vnc) status.started = true;
@@ -85,8 +96,23 @@ var DISPLAY = {
 		
 		var counter = 0;
 		
+		if( !SCREEN.hasOwnProperty(displayId) ) {
+			if(callback) callback(null, counter);
+			return;
+}
+		
+		
+		
 		for(var displayId in SCREEN) {
 			counter++;
+			
+			if( SCREEN[displayId].starting ) {
+				var error = new Error("Can't stop display while it's starting!");
+				if(callback) callback(error);
+				else LOG(error.message, WARN);
+				return;
+			}
+			
 			stop(displayId);
 		}
 		
@@ -94,13 +120,20 @@ var DISPLAY = {
 		
 		function stop(displayId) {
 			var screen = SCREEN[displayId]
+			
+			screen.stopping = true;
+			
 			if(screen.socat) screen.socat.kill();
 			if(screen.x11vnc) screen.x11vnc.kill();
 			if(screen.xvfb) screen.xvfb.kill();
 			
-			SCREEN[displayId].stopping = true;
+			setTimeout(function() {
+				//screen.stopping = false;
+				
+				delete SCREEN[displayId];
+			}, 3000);
 			
-			//delete SCREEN[displayId];
+			
 		}
 		
 	}

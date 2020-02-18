@@ -78,6 +78,29 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+display.start called twice!?
+
+display did not start properly for new user
+check display.status every time the user request local desktop!?
+
+AVD took a long time to start for new user... show progress bar!?
+
+
+grep -rnw '/home/userskeleton/' -e '10.0.3.239'
+
+
+clone a snapshot of userskeleton when creating a new user!
+
+
+sudo zfs snapshot rpool/home/userskeleton@base1
+
+sudo zfs send -i zpcdata/docker@base | ssh root@webide.se zfs recv ben/docker
+
+zfs send -i tank/dana@snap1 tank/dana@snap2 | ssh host2 zfs recv newtank/dana
+
+zfs clone datapool/docs@today datapool/pict
+
+zfs list -t snapshot
 
 find /home/username \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/userskeleton/username/g'
 
