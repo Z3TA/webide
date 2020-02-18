@@ -78,10 +78,13 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-display.start called twice!?
+repeat bug:
+Start android emulator
+Reload
+Start screen
 
-display did not start properly for new user
-check display.status every time the user request local desktop!?
+Will result in 5 callbacks, dublicate id for display.start!
+
 
 AVD took a long time to start for new user... show progress bar!?
 

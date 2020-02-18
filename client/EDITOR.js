@@ -5101,6 +5101,8 @@ posX = EDITOR.width - offsetWidth;
 		height: Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   ),
 		start: function(show, preferredWith, preferredHeight, callback, recurse) {
 			
+			console.warn("EDITOR.virtualDisplay.start()");
+			
 			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
 			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
 			
@@ -5113,6 +5115,8 @@ posX = EDITOR.width - offsetWidth;
 					callback = null;
 					return;
 				}
+				
+				console.log("display.start: info=" + JSON.stringify(info));
 				
 				EDITOR.virtualDisplay.password = info.password;
 				EDITOR.virtualDisplay.port = info.port;
@@ -5147,6 +5151,7 @@ posX = EDITOR.width - offsetWidth;
 			}
 			
 			if(recurse == undefined) recurse = 0;
+			if(typeof callback != "function") throw new Error("callback=" + callback + " (" + (typeof callback) + ")");
 			
 			console.warn("EDITOR.virtualDisplay.show()");
 			
@@ -5160,9 +5165,17 @@ posX = EDITOR.width - offsetWidth;
 					return;
 				}
 				
-				if(!status.started && recurse > 3) return callback(new Error("Unable to show virtual display! status=" + JSON.stringify(status, null, 2) + " recurse=" + recurse + ""));
-				else if(!status.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
-				else openWindow();
+				if(recurse > 3) return callback(new Error("Too much recursion! status=" + JSON.stringify(status, null, 2) + " recurse=" + recurse + ""));
+				
+				if(status.noDisplays) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
+				
+				for(var displayId in status) {
+					if( status[displayId].started ) return openWindow();
+					else if( status[displayId].starting ) return setTimeout(openWindow, 1000);
+					else if( status[displayId].stopping ) return callback(new Error("The display is being stopped. Please try again in a few seconds..."));
+					else throw new Error("status=" + JSON.stringify(status));
+				}
+				
 			});
 			
 			

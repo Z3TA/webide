@@ -2,6 +2,7 @@
 
 dir=/home/userskeleton
 
+rm $dir/.android/avd/Pixel_2_API_25.avd/*.lock
 rm $dir/log/*
 rm $dir/.webide/storage/__*
 rm $dir/.webide/storage/state_*

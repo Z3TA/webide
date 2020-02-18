@@ -52,7 +52,9 @@ windowMenu.activate();
 			EDITOR.virtualDisplay.hide();
 		}
 		else if(!EDITOR.virtualDisplay.open) {
-			EDITOR.virtualDisplay.show(desktopWidth, desktopHeight);
+			EDITOR.virtualDisplay.show(desktopWidth, desktopHeight, function(err) {
+				if(err) alertBox("Unable to show the local desktop! Error: " + err.message);
+			});
 		}
 		
 		return PREVENT_DEFAULT;

@@ -33,6 +33,9 @@ var DEBUG = 7;
 
 var ANDROID = {
 	startEmulator: function(user, json, callback) {
+		
+		if(user.name == undefined) throw new Error("Unable to start Andrid emulator because user.name=" + user.name + "");
+		
 		startAvd(user.name, json.avd, function(err) {
 			if(err) callback(err);
 			else callback(null);
@@ -60,7 +63,7 @@ function startAvd(username, avd, callback, recursion) {
 		if(recursion) throw new Error("username=" + recursion + " avd=" + avd + " recursion=" + recursion);
 		
 		module_child_process.exec(bin + " -list-avds", function(err, stdout, stderr) {
-			if(err) return callbac(err);
+			if(err) return callback(err);
 			if(stderr) return callback(new Error(stderr));
 			if(!stdout) return callback(new Error("No installed AVD's!?"));
 			
@@ -98,7 +101,7 @@ function startAvd(username, avd, callback, recursion) {
 	log(username + " starting bin=" + bin + " with args=" + JSON.stringify(emulatorArgs), DEBUG);
 	var emulator = module_child_process.spawn(bin, emulatorArgs);
 	
-	emulator.on("close", function (code, signal) {
+	emulator.on("close", function emulatorClosed(code, signal) {
 		log(username + " emulator (avd=" + avd + ") close: code=" + code + " signal=" + signal, NOTICE);
 		
 		if(callback) {
@@ -126,6 +129,20 @@ callback(err);
 	emulator.stdout.on("data", function (data) {
 		lastStdout = data.toString();
 		log(username + " emulator (avd=" + avd + ") stdout: " + data, INFO);
+		
+		var reLock = /A snapshot operation for '(.*)' is pending and timeout has expired/;
+		var matchLock = lastStdout.match(reLock);
+		
+		if(matchLock) {
+			var lockedAvd = matchLock[1];
+			if(lockedAvd != avd) throw new Error("lockedAvd=" + lockedAvd + " avd=" + avd);
+			module_child_process.exec("rm /home/" + username + "/.android/avd/" + avd + ".avd/*.lock", function(err, stdout, stderr) {
+				if(err) throw err;
+				if(stderr) log(stderr, WARN);
+				if(stdout) log(stdout, INFO);
+			});
+		}
+		
 	});
 	
 	emulator.stderr.on("data", function (data) {

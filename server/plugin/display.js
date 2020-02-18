@@ -5,10 +5,12 @@
 */
 "use strict";
 
+var module_ps = require('ps-node');
 var UTIL = require("../../client/UTIL.js");
 var module_child_process = require('child_process');
 var logModule = require("../../shared/log.js");
 var log = logModule.log;
+
 // Log levels
 var ERROR = 3;
 var WARN = 4;
@@ -25,17 +27,37 @@ var DISPLAY = {
 		
 		var username = user.name;
 		var displayId = user.id;
+		log("****************************************************************************")
+		log("DISPLAY START! username=" + username + " displayId=" + displayId, NOTICE);
+		log("****************************************************************************")
 		
-		if(displayId == undefined) throw new Error("displayId=" + displayId + "");
+		if(displayId == undefined) return callback(new Error("No display assigned because user.id=" + user.id + ""));
 		
 		if(SCREEN.hasOwnProperty(displayId)) {
 			
 			if(SCREEN[displayId].stopping) return callback(new Error("Screen is being stopped..."));
-			if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
-			
-			return callback(null, SCREEN[displayId].vnc);
+			else if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
+			else if(SCREEN[displayId].started) return callback(null, SCREEN[displayId].vnc);
+			else throw new Error("Don't know what to do... SCREEN[" + displayId + "]=" + JSON.stringify(SCREEN[displayId]));
 		}
 		
+		// The screen might be running in the background (worker process crashed without cleanup?), but we can't reuse it because we don't know the password
+		killProcess("socat", function(err) {
+			if(err) log(err.message, INFO) 
+			killProcess("x11vnc", function(err) {
+				if(err) log(err.message, INFO) 
+				killProcess("xvfb", function(err) {
+					if(err) log(err.message, INFO) 
+					
+					start();
+				});
+			});
+		});
+		
+		
+		
+		function start() {
+			
 		SCREEN[displayId] = {
 			vnc: {},
 			stopping: false,
@@ -58,15 +80,16 @@ var DISPLAY = {
 			SCREEN[displayId].starting = false;
 		}, 3000);
 		
-		return callback(null, SCREEN[displayId].vnc);
-		
+			callback(null, SCREEN[displayId].vnc);
+		}
 		
 	},
 	status: function(user, json, callback) {
 		
+		// Note: a undefined or null response will be converted to {}
+		
 		var status = {
-			started: false,
-			restarting: false
+			noDisplays: true
 		};
 		
 		for(var displayId in SCREEN) {
@@ -76,9 +99,14 @@ var DISPLAY = {
 		callback(null, status);
 		
 		function checkStatus(displayId) {
-			var socat = SCREEN[displayId].socat && SCREEN[displayId].socat.connected;
-			var x11vnc = SCREEN[displayId].x11vnc && SCREEN[displayId].x11vnc.connected;
-			var xvfb = SCREEN[displayId].xvfb && SCREEN[displayId].xvfb.connected;
+			var socat = SCREEN[displayId].socat && isStream(SCREEN[displayId].socat.stdout);
+			var x11vnc = SCREEN[displayId].x11vnc && isStream(SCREEN[displayId].x11vnc.stdout);
+			var xvfb = SCREEN[displayId].xvfb && isStream(SCREEN[displayId].xvfb.stdout);
+			
+			delete status.noDisplays
+			
+			log("socat=" + socat, DEBUG);
+			
 			
 			status[displayId] = {
 				socat: socat,
@@ -88,7 +116,8 @@ var DISPLAY = {
 				stopping: SCREEN[displayId].stopping
 			};
 			
-			if(x11vnc) status.started = true;
+			if(x11vnc) status[displayId].started = true;
+			else status[displayId].started = false;
 		}
 		
 	},
@@ -154,7 +183,9 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 	socat.on("close", function (code, signal) {
 		log(username + " socat close: code=" + code + " signal=" + signal, NOTICE);
 		
-		if(code != 0 && errAddressInUse) {
+		log("errAddressInUse=" + errAddressInUse, DEBUG);
+		
+		if(code != 0 && errAddressInUse && 1==2) {
 			// The address is taken for 20-30 seconds
 			var waitSeconds = 10;
 			log(username + " waiting " + waitSeconds + " seconds before restarting socat...", DEBUG);
@@ -276,9 +307,12 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	x11vnc.on("close", function (code, signal) {
 		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			
-			if(!SCREEN[displayId].stopping) {
-				restart();
-			}
+			log("SCREEN[" + displayId + "].stopping=" + SCREEN[displayId].stopping, DEBUG);
+			
+			// We seem to get a restart loop, so don't restart (need to do it manually)
+			
+			//if(!SCREEN[displayId].stopping) setTimeout(restart, 1000);
+			
 			
 		});
 		
@@ -357,6 +391,34 @@ function createScreen(username, displayId, width, height) {
 	
 }
 
+function killProcess(command, callback) {
+	log("killProcess: Killing existing " + command + " ...", DEBUG);
+	module_ps.lookup({
+		command: command
+	}, function(err, resultList ) {
+		if(err) return callback(err);
+		
+		if(resultList.length == 0) {
+			log("killProcess: Did not find command=" + command, DEBUG);
+			return callback(null, -1);
+		}
+		
+		resultList.forEach(function( p ){
+			if( p ){
+				log( 'killProcess: Found PID: ' + p.pid + ', COMMAND: ' + p.command + ', ARGUMENTS: ' + p.arguments + ' ', DEBUG );
+				module_ps.kill( p.pid, function( err ) {
+					if(err) return callback(err);
+					
+					log( 'killProcess: Process ' + p.pid + ' has been killed!', DEBUG);
+					
+					callback(null, p.pid);
+				});
+			}
+			else callback(new Error("p=" + p));
+		});
+	});
+}
+
 function generatePassword(n) {
 	if(n == undefined) n = 8;
 	var pw = "";
@@ -364,5 +426,10 @@ function generatePassword(n) {
 	return pw;
 }
 
+function isStream(stream) {
+	return stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+}
 
 module.exports = DISPLAY;
