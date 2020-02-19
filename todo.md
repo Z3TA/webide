@@ -79,46 +79,12 @@ What I'm working on
 -------------------
 
 
-
-
-grep -rnw '/home/userskeleton/' -e '10.0.3.239'
-
-
-clone a snapshot of userskeleton when creating a new user!
-
-
-sudo zfs snapshot rpool/home/userskeleton@base1
-
-sudo zfs send -i zpcdata/docker@base | ssh root@webide.se zfs recv ben/docker
-
-zfs send -i tank/dana@snap1 tank/dana@snap2 | ssh host2 zfs recv newtank/dana
-
-zfs clone datapool/docs@today datapool/pict
-
-zfs list -t snapshot
-
-find /home/username \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/userskeleton/username/g'
-
-Android SDK + tools should be pre-installed !?
-Should probably base home dir's on a zfs snapshot to avoid duplication!?
-
-
-Android emulator settings screen cant be closed
-
 expo devtools want to access WebSocket connection to 'ws://localhost:1900
 (it however starts a browser in the display/desktop!)
 
-Moving functionality from adduser.js to server.js in order to make it possible to move user's between servers
 
 todo: Apparmor profiles. global instead of per user!
 Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
-
-todo: Create _base_user_ 
-* Install Android studio & configure sdk + 
-(* Install nvm and latest nodejs stable )
-
-android-studio folder needs to be in  ~/Android (because we have hard-coded it)
-
 
 
 

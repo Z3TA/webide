@@ -889,6 +889,8 @@ If the connection is lost you must restart Opera Mobile.
 Android support
 ===============
 
+When installing android-studio, the android-studio folder needs to be in  ~/Android
+(The Sdk folder also need to be in ~/Android)
 
 setup wizard screen is blank when running android studio in vnc
 ---------------------------------------------------------------

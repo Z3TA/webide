@@ -155,12 +155,30 @@ child_process.exec("zfs list -t snapshot", function execAddUser(err, stdout, std
 		
 			// rpool/home/userskeleton@base1                                                                         0B      -  6.15G  -
 			var homeWithoutEndingSlashAndEscapedSlashes = HOME.substr(0, HOME.length-1).replace(/\//, "\\/");
-			var reSnap = new RegExp("(.*)" + homeWithoutEndingSlashAndEscapedSlashes + "\\/userskeleton@base(\\d+)");
+			var reSnap = new RegExp("(.*)" + homeWithoutEndingSlashAndEscapedSlashes + "\\/userskeleton@base(\\d+)", "g"); // Must have the g flag or exec will run in an endless loop!
 			var matchSnap = stdout.match(reSnap);
 			
 			if(matchSnap) {
-				zfsPool = matchSnap[1];
-				zfsSnapVersion = matchSnap[2];
+				
+				var snapshots = [];
+				
+				while ((matchSnap = reSnap.exec(stdout)) !== null) {
+					
+					snapshots.push({pool: matchSnap[1], ver: parseInt(matchSnap[2])});
+				}
+				
+				snapshots.sort(function(a, b) {
+					// Highest number first
+					if(a.ver > b.ver) return -1;
+					else if(b.ver > a.ver) return 1;
+					else return 0;
+				});
+				
+				zfsPool = snapshots[0].pool;
+				zfsSnapVersion = snapshots[0].ver;
+				
+				//console.log("snapshots=" + JSON.stringify(snapshots) + " zfsPool=" + zfsPool + " zfsSnapVersion=" + zfsSnapVersion + " ");
+				//process.exit();
 				
 				console.log("zfsPool=" + zfsPool + " zfsSnapVersion=" + zfsSnapVersion);
 				
@@ -178,12 +196,12 @@ child_process.exec("zfs list -t snapshot", function execAddUser(err, stdout, std
 				process.exit();
 				NOZFS = true;
 			}
-			}
+		}
 		
 		console.timeEnd("ZFS");
 		adduser();
 		
-});
+	});
 }
 else adduser();
 
@@ -217,9 +235,9 @@ function createSystemUser(name, uid, gid, homeDir, callback) {
 	if(uid == undefined) uid = findFreeUid();
 	if(gid == undefined) gid = findFreeGid();
 	
-if(homeDir == undefined) {
-// Create the home dir
-homeDir = HOME + name;
+	if(homeDir == undefined) {
+		// Create the home dir
+		homeDir = HOME + name;
 		fs.mkdir(homeDir, function(err) {
 			if(err) return callback(err);
 			
@@ -241,10 +259,10 @@ homeDir = HOME + name;
 	
 	function addGroupAndUser() {
 		
-var groupName = name;
+		var groupName = name;
 		var groupaddCmd = "groupadd -g " + gid + " " + groupName;
 		// sudo groupadd -g 144 testgroup
-var shell = "/bin/false";
+		var shell = "/bin/false";
 		var useraddCmd = "useradd -d " + homeDir + " -g " + groupName + " -s " + shell + " -u " + uid + " " + name;
 		// sudo useradd -d /home/testuser -g testgroup -s /bin/false -u 133 testuser
 		
@@ -385,6 +403,8 @@ function adduser() {
 			//recursiveReplaceInFiles(homeDir, "userskeleton", username); // too slow!
 			
 			// The recursive replace takes too long, so replace single files...
+			
+			// grep -rnw '/home/userskeleton/' -e 'userskeleton'
 			
 			console.time("replaceUsername");
 			replaceUsername(homeDir + ".webide/storage/cmsjz_sites");
