@@ -31,6 +31,8 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+var _emulator;
+
 var ANDROID = {
 	startEmulator: function(user, json, callback) {
 		
@@ -44,8 +46,14 @@ var ANDROID = {
 		});
 		
 	},
-	stopEmulator: function() {
-		
+	stopEmulator: function(user, json, callback) {
+		if(_emulator) {
+log("Killing Android emulator...", DEBUG);
+			_emulator.stdin.pause();
+_emulator.kill();
+			callback(null, true);
+		}
+		else callback(null, false);
 	}
 }
 
@@ -100,6 +108,8 @@ function startAvd(username, avd, callback, recursion) {
 	
 	log(username + " starting bin=" + bin + " with args=" + JSON.stringify(emulatorArgs), DEBUG);
 	var emulator = module_child_process.spawn(bin, emulatorArgs);
+	
+	_emulator = emulator;
 	
 	emulator.on("close", function emulatorClosed(code, signal) {
 		log(username + " emulator (avd=" + avd + ") close: code=" + code + " signal=" + signal, NOTICE);

@@ -125,17 +125,14 @@ var DISPLAY = {
 	},
 	stop: function(user, json, callback) {
 		
+		log("Stopping all displays...", DEBUG);
+		
 		var counter = 0;
-		
-		if( !SCREEN.hasOwnProperty(displayId) ) {
-			if(callback) callback(null, counter);
-			return;
-}
-		
-		
 		
 		for(var displayId in SCREEN) {
 			counter++;
+			
+			log("Maybe stop displayId=" + displayId + " ...", DEBUG);
 			
 			if( SCREEN[displayId].starting ) {
 				var error = new Error("Can't stop display while it's starting!");
@@ -150,13 +147,27 @@ var DISPLAY = {
 		if(callback) callback(null, counter);
 		
 		function stop(displayId) {
+			log("Stopping displayId=" + displayId + " ...", DEBUG);
+			
 			var screen = SCREEN[displayId]
 			
 			screen.stopping = true;
 			
-			if(screen.socat) screen.socat.kill();
-			if(screen.x11vnc) screen.x11vnc.kill();
-			if(screen.xvfb) screen.xvfb.kill();
+			if(screen.socat) {
+				log("Killing socat...", DEBUG);
+				screen.socat.stdin.pause();
+				screen.socat.kill();
+			}
+			if(screen.x11vnc) {
+				log("Killing x11vnc...", DEBUG);
+				screen.x11vnc.stdin.pause();
+screen.x11vnc.kill();
+			}
+			if(screen.xvfb) {
+				log("Killing xvfb...", DEBUG);
+				screen.xvfb.stdin.pause();
+				screen.xvfb.kill();
+			}
 			
 			setTimeout(function() {
 				//screen.stopping = false;
@@ -193,7 +204,7 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 			log(username + " waiting " + waitSeconds + " seconds before restarting socat...", DEBUG);
 			setTimeout(function() {
 				if( SCREEN[displayId] && SCREEN[displayId].stopping ) return;
-					
+				
 				log(username + " restarting socat!", DEBUG);
 				spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username);
 			}, waitSeconds*1000);

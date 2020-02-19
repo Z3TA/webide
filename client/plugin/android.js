@@ -1,3 +1,10 @@
+/*
+	
+	Known issues:
+* Android emulator settings screen cant be closed
+	
+*/
+
 (function() {
 	"use strict";
 

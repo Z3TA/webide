@@ -35,6 +35,7 @@ var log = logModule.log;
 var getArg = require("../shared/getArg.js");
 
 var module_Websocket = require("ws");
+var module_child_process = require('child_process');
 
 var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
 var TLD = DEFAULT.domain;
@@ -248,13 +249,40 @@ user.teardown = function teardown(msg, terddownComplete) {
 	
 	console.log("Recived teardown request from parent process!");
 	
-	API.display.stop();
+	var scriptsToStop = 0;
+	
+	scriptsToStop++;API.android.stopEmulator(user, {}, function(err) {
+		scriptsToStop--;
+		if(err) console.error(err);
+		doneMaybe();
+	});
+	
+	scriptsToStop++;API.display.stop(user, {}, function(err) {
+		scriptsToStop--;
+		if(err) console.error(err);
+		doneMaybe();
+	});
 	
 	// Stop running NodeJS scrips
-	var scriptsToStop = 0;
 	for(var filePath in user.runningNodeJsScripts) {
 		scriptsToStop++;
 		stopNodeJsScript(filePath, nodeJsScriptStopped);
+	}
+	
+	// Kill all processes started by the worker
+	// This would also kill scripts in production...
+	if(user.id && 1==2) {
+		scriptsToStop++;
+		setTimeout(function killProcesses() {
+			log("Killing all processes spawned by " + user.name + " uid=" + user.id + " ...", DEBUG);
+			module_child_process.exec("pkill -U " + user.id, function(err, stdout, stderr) {
+				scriptsToStop--;
+				if(err) console.error(err);
+				if(stderr) log(stderr, NOTICE);
+				if(stdout) log(stdout, DEBUG);
+				doneMaybe();
+			});
+		}, 2000);
 	}
 	
 	doneMaybe();
@@ -269,9 +297,11 @@ user.teardown = function teardown(msg, terddownComplete) {
 	function doneMaybe() {
 		if(scriptsToStop === 0) {
 			//process.send({done: "teardown"});
-			process.exit();
+			// Give some time for child processes to exit
+			setTimeout(function quit() { process.exit(); }, 2000);
+			
 		}
-		else log("Waiting fo " + scriptsToStop + " scripts to stop before closing user worker.");
+		else log("Waiting for " + scriptsToStop + " scripts to stop before closing user worker.");
 	}
 }
 
