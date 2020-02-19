@@ -58,6 +58,8 @@ var DISPLAY = {
 		
 		function start() {
 			
+			if(SCREEN.hasOwnProperty(displayId)) throw new Error("SCREEN[" + displayId + "]=" + JSON.stringify(SCREEN[displayId]));
+			
 		SCREEN[displayId] = {
 			vnc: {},
 			stopping: false,
@@ -185,13 +187,15 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 		
 		log("errAddressInUse=" + errAddressInUse, DEBUG);
 		
-		if(code != 0 && errAddressInUse && 1==2) {
+		if(code != 0 && errAddressInUse && !(SCREEN[displayId] && SCREEN[displayId].stopping)) {
 			// The address is taken for 20-30 seconds
 			var waitSeconds = 10;
 			log(username + " waiting " + waitSeconds + " seconds before restarting socat...", DEBUG);
 			setTimeout(function() {
+				if( SCREEN[displayId] && SCREEN[displayId].stopping ) return;
+					
 				log(username + " restarting socat!", DEBUG);
-				SCREEN[displayId].socat = spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username);
+				spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username);
 			}, waitSeconds*1000);
 		}
 	});
@@ -309,9 +313,8 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 			
 			log("SCREEN[" + displayId + "].stopping=" + SCREEN[displayId].stopping, DEBUG);
 			
-			// We seem to get a restart loop, so don't restart (need to do it manually)
-			
-			//if(!SCREEN[displayId].stopping) setTimeout(restart, 1000);
+			// We seem to get a restart loop, so don't restart (need to do it manually?) Can't restart display manually!
+			if(!SCREEN[displayId].stopping) setTimeout(restart, 5000);
 			
 			
 		});
@@ -393,30 +396,51 @@ function createScreen(username, displayId, width, height) {
 
 function killProcess(command, callback) {
 	log("killProcess: Killing existing " + command + " ...", DEBUG);
-	module_ps.lookup({
-		command: command
-	}, function(err, resultList ) {
-		if(err) return callback(err);
+	
+	var abort = false;
+	var killed = 0;
+	var tokill = 0;
+	
+	module_ps.lookup({command: command}, lookedUp);
+	
+	function lookedUp(err, resultList ) {
+		if(err) return error(err);
 		
 		if(resultList.length == 0) {
 			log("killProcess: Did not find command=" + command, DEBUG);
-			return callback(null, -1);
+			callback(null, false); callback=null; return;
 		}
 		
-		resultList.forEach(function( p ){
-			if( p ){
-				log( 'killProcess: Found PID: ' + p.pid + ', COMMAND: ' + p.command + ', ARGUMENTS: ' + p.arguments + ' ', DEBUG );
-				module_ps.kill( p.pid, function( err ) {
-					if(err) return callback(err);
-					
-					log( 'killProcess: Process ' + p.pid + ' has been killed!', DEBUG);
-					
-					callback(null, p.pid);
-				});
-			}
-			else callback(new Error("p=" + p));
+		resultList.forEach(kill);
+	}
+	
+	function kill(p) {
+		if(!p) return error(new Error("p=" + p));
+		
+		tokill++;
+		
+		log( 'killProcess: Found PID: ' + p.pid + ', COMMAND: ' + p.command + ', ARGUMENTS: ' + p.arguments + ' ', DEBUG );
+		module_ps.kill( p.pid, function( err ) {
+			killed++;
+			if(err) return error(err);
+			
+			log( 'killProcess: Process ' + p.pid + ' has been killed!', DEBUG);
+			
+			allKilledMaybe();
+			
 		});
-	});
+	}
+	
+	function allKilledMaybe() {
+		if(abort) return; // Might have got an error
+		if(killed == tokill) {callback(null, true); callback=null;}
+	}
+	
+	function error(err) {
+		callback(err);
+		callback = null;
+		abort = true;
+	}
 }
 
 function generatePassword(n) {

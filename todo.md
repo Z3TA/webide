@@ -78,15 +78,7 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-repeat bug:
-Start android emulator
-Reload
-Start screen
 
-Will result in 5 callbacks, dublicate id for display.start!
-
-
-AVD took a long time to start for new user... show progress bar!?
 
 
 grep -rnw '/home/userskeleton/' -e '10.0.3.239'
