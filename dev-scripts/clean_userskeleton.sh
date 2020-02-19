@@ -1,4 +1,6 @@
-
+#
+# Cleanup before making another snapshot
+#
 
 dir=/home/userskeleton
 

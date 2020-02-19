@@ -3,4 +3,8 @@
 # Change the domain to a server you have access to
 # 
 
-rsync -aPz ./ root@olle.100m.se:/root/backup/webide/
+# Make sure the folder containing the script is the working dir
+cd $(dirname $0)
+
+# Sync the parent dir (because this file is in dev-scripts/
+rsync -aPz ../ root@olle.100m.se:/root/backup/webide/
