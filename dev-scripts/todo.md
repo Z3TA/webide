@@ -78,6 +78,12 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+What to do with existing users !?
+
+todo: Delete empty files and folders in user home dirs, because there will be no more chrooting
+
+
+
 
 expo devtools want to access WebSocket connection to 'ws://localhost:1900
 (it however starts a browser in the display/desktop!)
@@ -109,7 +115,7 @@ or just start typing...
 todo: Remove red background from find when de-selecting "use regex"
 
 
-todo: Delete emoty files and folders in user home dirs, because there will be no more chrooting
+
 
 hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
 
