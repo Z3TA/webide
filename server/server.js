@@ -4262,10 +4262,11 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 		
 		// Assume unix like system
 		
-		spawnOptions.env.PATH = "/usr/bin:/usr/local/bin/:/bin:/sbin:" + homeDir + "/.npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:";
-			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + "/.npm-packages";
-			spawnOptions.env.PORT = homeDir + "/sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
-			spawnOptions.env.NPM_PACKAGES = homeDir + "/.npm-packages";
+		// The paths will be checked in order (so put local first)
+		spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin/:/usr/bin:/bin:/sbin:";
+			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
+			spawnOptions.env.PORT = homeDir + "sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
+			spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";
 		
 		
 		spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
