@@ -25,8 +25,8 @@
 	
 */
 
-if(process.env.dev) var unixSocket = "/sock/http_server_example_dev";
-else if(process.env.prod) var unixSocket = "/sock/http_server_example";
+if(process.env.dev) var unixSocket = "%HOMEDIR%sock/http_server_example_dev";
+else if(process.env.prod) var unixSocket = "%HOMEDIR%sock/http_server_example";
 else throw new Error("Did not find dev nor prod environment variables!");
 
 // We need the group (www-data) to have write access to the unix socket

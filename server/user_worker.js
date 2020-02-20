@@ -705,10 +705,11 @@ process.on('message', function commandMessage(message) {
 		else {
 			funToRun(user, json, function ranApi(err, answer) {
 				if(err) {
-					log(err.message);
 					
-					if(!err.stack) console.trace("Stack ...")
-					else log(err.stack);
+					if(typeof err.stack != "string" || err.stack.indexOf("\n") == -1) console.trace("Stack ...")
+					else {
+						log("err.stack=" + JSON.stringify(err.stack));
+					}
 					
 					var msg = {
 						error: "API error: " + (err.message ? err.message : err) + ""
@@ -1581,13 +1582,17 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	function findRootFolder(directory) {
 		console.log("findRootFolder: directory=" + directory);
+		directory = UTIL.trailingSlash(directory);
 		/*
 			Check for package.json or .hg or .git
 		*/
 		
 		var fs = require("fs");
 		fs.readdir(directory, function readdir(err, folderItems) {
-			if(err) return callback(err);
+			if(err) {
+				if(directory == "/home/" && err.code == "EACCES") return askForDebugPort(); // We can't read /home/
+				else return callback(err);
+			}
 			
 			// folderItems is name of files and folders
 			for (var i=0; i<folderItems.length; i++) {
@@ -1648,7 +1653,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				dev: true,
 				tld: TLD,
 				TLD: TLD, // Have both tld and TLD because it's not obvious which one to use
-				PATH: "/usr/bin:/bin"
+				PATH: process.env.PATH
 			},
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
 		};
@@ -1659,8 +1664,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			else nodeScriptOptions.execArgv = [inspectStr];
 		}
 		
+if(rootFolder) {
 		nodeScriptOptions.env.PORT = HOME + "/sock/" + UTIL.getFolderName(rootFolder);
-		
+		}
+
 		start();
 		
 		
@@ -2004,6 +2011,12 @@ console.warn = function() {
 // Overload console.error
 console.error = function() {
 	var msg = arguments[0];
+	if(msg instanceof Error) {
+		var stack = msg.stack;
+msg = msg.message;
+	}
 	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(user.name + ": " + msg, 3);
+	log(user.name + ": " + msg + (stack?stack:""), 3);
 }
+
+

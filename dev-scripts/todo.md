@@ -79,6 +79,11 @@ What I'm working on
 -------------------
 
 
+hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
+
+
+
+
 
 todo: Write guides about how to use Docker, AVD's and reach TCP ports (d###.user.webide.se if exposed by Docker)
 
@@ -127,24 +132,15 @@ Tell the user to update .hgignore !?
 ---
 
 Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
-No disconnect option when closing and reopening the ftp/sftp widget
+There's no disconnect option when closing and reopening the ftp/sftp widget
 
 
 Able to quick search the menu itmes (goto anything!?)
-or just start typing...
+or just start typing.!?
 
 
 
 todo: Remove red background from find when de-selecting "use regex"
-
-
-
-
-hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
-
-todo: In order to be able to move users between servers, server.js should take care of everything!
-adduser.js shouln't have to chown folders and set sticky bit!
-
 
 unable to insert ^ on swedish keyboard in Firefox
 
