@@ -78,15 +78,38 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
+
+
+todo: Write guides about how to use Docker, AVD's and reach TCP ports (d###.user.webide.se if exposed by Docker)
+
+expo devtools want to access WebSocket connection to 'ws://localhost:1900
+(it however starts a browser in the display/desktop!)
+
+
+testing react native
+
+
+
+
+Make a dev staging server (VM)
+
 What to do with existing users !?
+(keep their data as is)
+stop webide services
+server need to be rebooted to release mounts
+Upload new files to server
+Remove empty files and folders for each user (plus etc and run)
+start services and hope for the best :P
+do a lot of testing
+
+
 
 todo: Delete empty files and folders in user home dirs, because there will be no more chrooting
 
 
 
 
-expo devtools want to access WebSocket connection to 'ws://localhost:1900
-(it however starts a browser in the display/desktop!)
+
 
 
 todo: Apparmor profiles. global instead of per user!

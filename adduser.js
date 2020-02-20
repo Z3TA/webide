@@ -36,8 +36,9 @@ var chmodrSync = require("./shared/chmodrSync.js");
 var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrSync = require("./shared/chownrSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
+var skeleton = require("./shared/skeleton.js");
 
-var defaultDomain = DEFAULT.domain;;
+var defaultDomain = DEFAULT.domain;
 var defaultHome = DEFAULT.home_dir;
 
 // Get arguments ...
@@ -345,58 +346,36 @@ function adduser() {
 		//var gid = getGroupId(groupName);
 		
 		if(NOZFS) {
-		// Add skeleton files ...
-	//copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
-	//copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
-	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs_examples", homeDir);
-	//copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/ssg_blog_example", homeDir);
-	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/.webide/", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/.ssh/", homeDir);
-		
-		copyFileSync("etc/userdir_skeleton/.bashrc", homeDir + ".bashrc"); // bash settings, how the prompt look etc
-		copyFileSync("etc/userdir_skeleton/.npmrc", homeDir + ".npmrc"); // settings for npm
-		
-		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
+			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP});
 		}
 		
-	// The user owns his files
-	chownrSync(homeDir, uid, gid);
-	
-	// Make it so that no one else beside the user can read the user files
-	chmodrSync(homeDir, "750");
-	
+		// The user owns his files
+		chownrSync(homeDir, uid, gid);
+		
+		// Make it so that no one else beside the user can read the user files
+		chmodrSync(homeDir, "750");
+		
 		// Nginx (www-data) need -x permission on all folders in order to stat! sudo -u www-data stat /home/ltest1/wwwpub/
-	fs.chmodSync(homeDir, "751");
-	
-	// For DNS lookups to work !?
-	//chmodrSync(homeDir + "etc/", "444");
-	//chmodrSync(homeDir + "run/", "444");
-	
+		fs.chmodSync(homeDir, "751");
+		
+		// For DNS lookups to work !?
+		//chmodrSync(homeDir + "etc/", "444");
+		//chmodrSync(homeDir + "run/", "444");
+		
 		// .ssh folder is secret!
 		chmodrSync(homeDir + ".ssh/", "700");
 		
 		
-	// Try Copy over the test file (only exist in dev)
-	try {
+		// Try Copy over the test file (only exist in dev)
+		try {
 			copyFileSync("./testfile.txt", HOME + username + "/testfile.txt");
 	}
 	catch(err) {
 		if(err.code != "ENOENT") throw err;
 	}
 	
-		if(NOZFS) {
-		// Replace %USERNAME% %HOMEDIR% and %DOMAIN% and %NETNSIP%
-		updateFile(homeDir + ".webide/storage/cmsjz_sites");
-		updateFile(homeDir + "ssg_blog_example/source/rss_en.xml");
-		updateFile(homeDir + "wwwpub/welcome.htm");
-		updateFile(homeDir + "nodejs_examples/http_server/http_server_example.js");
-		updateFile(homeDir + ".bashrc");
-		}
-		else {
+		if(!NOZFS) {
+			
 			//var userSkeletonNetnsIP = UTIL.int2ip(167772162 + 1005);
 			//var userSkeletonDockerVMIP = UTIL.int2ip(167903234 + 1005);
 			
@@ -420,6 +399,7 @@ function adduser() {
 			replaceUsername(homeDir + ".java/fonts/1.8.0_202-release/fcinfo-1-localhost-Ubuntu-18.04-en.properties");
 			replaceUsername(homeDir + ".AndroidStudio3.5/config/options/path.macros.xml");
 			replaceUsername(homeDir + ".AndroidStudio3.5/system/.home");
+replaceUsername(homeDir + ".npmrc");
 			//replaceUsername(homeDir + "");
 			
 			console.timeEnd("replaceUsername");
@@ -463,22 +443,7 @@ console.timeEnd("hashing password");
 			fs.writeFileSync(path, str);
 		}
 		
-		function updateFile(path) {
-			var str = fs.readFileSync(path, ENCODING);
-			
-			str = updateFileContent(str);
-			
-			fs.writeFileSync(path, str);
-		}
 		
-		function updateFileContent(str) {
-			str = str.replace(/%USERNAME%/g, username);
-			str = str.replace(/%HOMEDIR%/g, homeDir);
-			str = str.replace(/%DOMAIN%/g, DOMAIN);
-			str = str.replace(/%NETNSIP%/g, netnsIP);
-			str = str.replace(/%DOCKERIP%/g, dockerVMIP);
-			return str;
-		}
 		
 	});
 }
