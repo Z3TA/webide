@@ -16,12 +16,10 @@
 		desc: "Update editor settings from window menu",
 		load: function loadEditorSettings() {
 			wmJsx = EDITOR.windowMenu.add(S("parse jsx"), [S("editor"), S("settings"), 50], toggleJsx);
-			
+			wmJsx.domElement.title = "(can be buggy) enabled by default on .jsx and .tsx files";
 			EDITOR.loadSettings("jsx", EDITOR.settings.jsx, function connectionStatusSettingsLoaded(state) {
 				if(state != EDITOR.settings.jsx) toggleJsx(state);
 			});
-			
-			// Always parse JSX (can be buggy) by default on .jsx and .tsx files
 			
 		},
 		unload: function unloadEditorSettings() {

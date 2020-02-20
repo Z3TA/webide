@@ -898,3 +898,11 @@ Edit android-studio/bin/idea.properties and add
 disable.android.first.run=true
 
 
+NPM packages
+=============
+
+If you get a message like "Cannot find module" when running "npm start",
+you could try resetting your globally installed npm-packages:
+
+´rm -rf ~/.npm-packages/*´
+
