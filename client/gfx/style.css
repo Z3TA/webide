@@ -1954,7 +1954,7 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 .discoveryItem figcaption {
 	display: block;
 	position: relative;
-	top: -18px;
+	top: -12px;
 	text-align: center;
 }
 
@@ -1963,7 +1963,7 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	text-transform: uppercase;
 	
 	font-family: Arial;
-	font-size:10px;
+	font-size: 9px;
 	line-height: 10px;
 	
 	color: #333;
@@ -1993,7 +1993,6 @@ margin-left: 5px;
 	max-width: 32px;
 }
 
-
 .header .discoveryBar .discoveryItem img {
 
 	height: 70%;
@@ -2004,11 +2003,16 @@ margin-left: 5px;
 padding: 0;
 }
 
-
 .header .discoveryBar button.hide {
 	margin-top: 10px;
 }
 
+.header figcaption {
+	top: -20px;
+}
+.header figcaption span {
+	font-size: 8px;
+}
 
 .discoveryBar .discoveryItem {
 	bacgkround-color: blue;
