@@ -3,17 +3,18 @@
 	A node script that manage other node scripts ...
 	
 	Each webide user has it's own nodejs deamon manager worker (this script)
-	chroot into the user's home dir and set uid and gid to the user's id.
 	
-	open log file in user's home dir /log/deamon_manager.log
+	* Set uid and gid to the user's id.
+	* Open log file in user's home dir ~/log/deamon_manager.log
 	
-	traverse the USER_PROD_FOLDER and look for a package.json file.
-	look for main script and start it
-	restart the script if it exits, and notify the user via e-mail or sms
+	* traverse the USER_PROD_FOLDER (~/.prod/) and look for a package.json file.
+	* look for main script and start it
+	* restart the script if it exits, and notify the user via e-mail or sms
 	
-	open a scriptname.stdout.log and scriptname.stderr.log file for each micro-service
+	* open a scriptname.stdout.log and scriptname.stderr.log file for each micro-service
 	
-	Arguments: --path=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
+	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
+	sudo node nodejs_init_worker.js -home /home/ltest1 -uid 1001 -gid 1001 -user ltest1
 	
 */
 
@@ -26,8 +27,7 @@ var DEFAULT = require("./server/default_settings.js");
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
 var UTIL = require("./client/UTIL.js");
-
-var PATH = getArg(["path", "path", "homeDir"]) || process.env.homeDir;
+var HOME = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
 var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
@@ -54,7 +54,7 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 var TLD = DEFAULT.domain;
 
-if(!PATH) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
+if(!HOME) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
 if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
 if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
 
@@ -69,30 +69,42 @@ var WARN = 4;
 var ERR = 3; // <3>This is an ERR level message
 var ERROR = 3;
 
-var USER_PROD_FOLDER = "/.prod/";
+var USER_PROD_FOLDER = HOME + "/.prod/";
 
-PATH = UTIL.trailingSlash(PATH); // Make sure it ends with a slash
+HOME = UTIL.trailingSlash(HOME); // Make sure it ends with a slash
 
 // What happens if we open a file stream before chroot ?
 // answer: the file stream will be kept open =)
 // We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
 
+log("GID=" + GID + " UID=" + UID);
+
+
+// Must be numbers!
+GID = parseInt(GID);
+UID = parseInt(UID);
 
 var posix = require("posix");
 try {
-	posix.chroot(PATH);
+	process.setgid(GID);
 }
 catch(err) {
 	if(err.code == "EPERM") return initError(new Error("Not running as root! (try using sudo)"));
 	else throw err;
 }
 
-//log("GID=" + GID + " UID=" + UID);
 
-process.setgid(parseInt(GID));
-process.setuid(parseInt(UID));
 
-var initLogFilePath = "/log/nodejs_init_worker.log";
+// We must init groups or the user will be member of the root group!!
+posix.initgroups(USERNAME, GID);
+
+process.setuid(UID);
+
+
+if(process.getuid && process.getuid() === 0) throw new Error("Failed to change user! Worker process is still root! process.getuid()=" + process.getuid());
+
+
+var initLogFilePath = HOME + "log/nodejs_init_worker.log";
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
@@ -225,7 +237,7 @@ function start(pathToFolder) {
 							var path = require("path");
 							var scriptFilePath = path.join(pathToFolder, fileName);
 							
-							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, "/log/" + fileName + ".log");
+							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOME+"log/" + fileName + ".log");
 							
 						});
 					}
@@ -247,7 +259,7 @@ function start(pathToFolder) {
 				var name = json.name || findFile;
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
-				startService(mainFile, name, pathToFolder, "/log/" + name + ".log", json.email);
+				startService(mainFile, name, pathToFolder, HOME+"log/" + name + ".log", json.email);
 			}
 			else return log(packageJson + " has no main file entry!");
 		}
@@ -392,7 +404,7 @@ function findScripts(pathToFolder, callback) {
 								
 								var scriptFilePath = path.join(pathToFolder, fileName);
 								
-								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: "/log/" + fileName + ".log"});
+								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOME + "log/" + fileName + ".log"});
 								
 							});
 						}
@@ -416,7 +428,7 @@ function findScripts(pathToFolder, callback) {
 				if(json.main) {
 					var name = json.name || findFile;
 					var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: "/log/" + name + ".log", email: json.email});
+					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: HOME + "log/" + name + ".log", email: json.email});
 				}
 				else return log(packageJson + " has no main file entry!");
 				

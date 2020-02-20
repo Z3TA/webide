@@ -51,7 +51,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var USER_PROD_FOLDER = "/.prod/";
+
 
 //log("process.env.uid=" + process.env.uid, 7);
 //log("process.env=" + JSON.stringify(process.env));
@@ -60,6 +60,8 @@ var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 
 var USERNAME = getArg(["user", "username"])
 var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
+
+var USER_PROD_FOLDER = HOME + "/.prod/";
 
 var module_os = require("os");
 
@@ -1134,7 +1136,10 @@ function httpGet(options, callback) {
 		"Cache-Control": "no-cache"
 	}
 	
-	if(options.port == undefined) options.port = 80;
+	if(isNaN(parseInt(options.port)) && typeof options.port == "string") {
+		options.socketPath = options.port;
+	}
+	else if(options.port == undefined) options.port = 80;
 	
 	var http = require("http");
 	var req = http.request(options, function (res) {

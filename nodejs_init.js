@@ -16,9 +16,8 @@ var UTIL = require("./client/UTIL.js");
 
 var DEFAULT = require("./server/default_settings.js");
 
-var defaultHomeDir = DEFAULT.home_dir;
-var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
-if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
+var HOME_DIR = getArg(["h", "homedir"]) || DEFAULT.home_dir;
+HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
@@ -51,19 +50,10 @@ var fs = require("fs");
 
 var module_mount = require("./shared/mount.js");
 
-// Get the node inode id
-var NODE_INODE = 0;
-var usrBinNode = "/usr/bin/node";
-fs.stat(usrBinNode, function(err, stats) {
-	if(err) throw err; // fatal
-	
-	NODE_INODE = stats.ino;
-	
 	// Start a nodejs init worker for each user
 	var eachUser = require("./shared/eachUser.js");
 	eachUser(HOME_DIR, userFound, allUsersFound);
 	
-});
 
 function userFound(user) {
 	startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
@@ -226,13 +216,31 @@ function httpServerError(err) {
 }
 
 function httpServerListening() {
-	log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
+	
+	
+	
+	if(isNaN(parseInt(HTTP_PORT)) && typeof HTTP_PORT == "string") {
+		log("Listening on http://" + HTTP_PORT);
+		
+		var fs = require("fs");
+		fs.chmod(HTTP_PORT, 0o777, function(err) {
+			if (err) throw err;
+			log('The permissions for ' + HTTP_PORT + ' have been changed!', DEBUG);
+		});
+		
+	}
+	else {
+		log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
+	}
+	
+	
+	
 }
 
-function startNodejsInitWorker(homeDir, name, uid, gid) {
+function startNodejsInitWorker(homeDir, username, uid, gid) {
 	
 	if(typeof homeDir != "string") throw new Error("homeDir=" + homeDir + " needs to be a string (folder)!");
-	if(typeof name != "string") throw new Error("name=" + name + " needs to be a string!");
+	if(typeof username != "string") throw new Error("username=" + username + " needs to be a string!");
 	if(typeof uid != "number") throw new Error("uid=" + uid + " needs to be a number!");
 	if(typeof gid != "number") throw new Error("gid=" + gid + " needs to be a number!");
 	
@@ -243,14 +251,14 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 	
 	homeDir = UTIL.trailingSlash(homeDir);
 	
-	var nodeWorkerArgs = [];
-	var nodeWorkerOptions = {
-		execPath: "/usr/bin/nodejs_" + name,
+	var workerArgs = [];
+	var spawnOptions = {
+		//execPath: "/usr/bin/nodejs_" + username,
 		env: {
 			homeDir: homeDir,
 			uid: uid,
 			gid: gid,
-			user: name
+			user: username
 		}
 	};
 	
@@ -264,63 +272,50 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		fs.readdir(prodFolder, function(err, filesInProdDir) {
 			if(err) {
 				log(err.message, NOTICE);
-				log("Failed to start init worker for " + name + " because we can't find " + prodFolder + " !");
-				delete NODE_INIT_WORKER[name];
+				log("Failed to start init worker for " + username + " because we can't find " + prodFolder + " !");
+				delete NODE_INIT_WORKER[username];
 				return;
 			}
 			
 			// Don't bother starting the worker if prod is empty
 			if(filesInProdDir.length == 0) {
-				log("No files in " + prodFolder + " wont bother to start the init worker for " + name);
-				delete NODE_INIT_WORKER[name];
+				log("No files in " + prodFolder + " wont bother to start the init worker for " + username);
+				delete NODE_INIT_WORKER[username];
 				return;
 			}
 			
-			// Make sure nodejs worker exec exist
-			fs.stat(nodeWorkerOptions.execPath, function(err, stats) {
+			
 				
-				//console.log(nodeWorkerOptions.execPath + " stats=" + JSON.stringify(stats));
-				
-				if(err) {
-					log(err.message, NOTICE);
-					log("We will no longer retry restarting the init worker for " + name + " because " + err.code + " " + nodeWorkerOptions.execPath + " !", NOTICE);
-					delete NODE_INIT_WORKER[name];
-					return;
-				}
-				
-				if(stats.ino != NODE_INODE) {
-					log(nodeWorkerOptions.execPath + " has inode " + stats.ino + " but it should be " + NODE_INODE);
-					log("Mounting " + usrBinNode + " to " + nodeWorkerOptions.execPath + " ...", DEBUG)
-					module_mount(usrBinNode, nodeWorkerOptions.execPath, function mounted(err) {
-						if(err) {
-							log("Failed to mount " + usrBinNode + " to " + nodeWorkerOptions.execPath + ": " + err.message, NOTICE);
-							// Should this be fatal !? eg throw ?
-							delete NODE_INIT_WORKER[name];
-							return;
-						}
-						else {
-							return restart(); // Try again
-						}
-					});
-				}
-				
-				var child_process = require("child_process");
-				
-				if(NODE_INIT_WORKER.hasOwnProperty(name)) {
+			if(NODE_INIT_WORKER.hasOwnProperty(username)) {
 					// Make sure it's dead
-					log("Making sure init worker for " + name + " is dead ...");
-					if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
-					NODE_INIT_WORKER[name].kill('SIGKILL');
+				log("Making sure init worker for " + username + " is dead ...");
+				if(NODE_INIT_WORKER[username].connected) NODE_INIT_WORKER[username].disconnect();
+				NODE_INIT_WORKER[username].kill('SIGKILL');
 				}
 				
 				var workerScript = "./nodejs_init_worker.js";
-				log("Starting init worker for " + JSON.stringify(name) + ": Forking " + workerScript + " nodeWorkerArgs=" + JSON.stringify(nodeWorkerArgs) + " nodeWorkerOptions=" + JSON.stringify(nodeWorkerOptions));
+			log("Starting init worker for " + username + ": Forking " + workerScript + " workerArgs=" + JSON.stringify(workerArgs) + " spawnOptions=" + JSON.stringify(spawnOptions));
 				
-				NODE_INIT_WORKER[name] = child_process.fork(workerScript, nodeWorkerArgs, nodeWorkerOptions);
+			var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
+			var command = "/sbin/ip";
+			//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
+			var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
+			var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+			spawnOptions.env.HOST = netnsIP;
+			spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
+			
+			spawnOptions.shell = "/bin/dash";
+			
+			spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
+			// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
+			var stdioPipe = true;
+			
+			var module_child_process = require("child_process");
+			NODE_INIT_WORKER[username] = module_child_process.spawn(command, args, spawnOptions);
 				// We might get a seg fault here - which we can not try-catch!
 				// Then try with a new version of nodejs ... lets hope this doesn't happen in prod
 				
-				var worker = NODE_INIT_WORKER[name];
+			var worker = NODE_INIT_WORKER[username];
 				
 				worker.on("close", workerClose);
 				worker.on("disconnect", workerDisconnect);
@@ -332,21 +327,20 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 				
 				worker.send({ping: firstPing});
 				
-			});
 		});
 	}
 	
 	function workerDisconnect() {
-		log(name + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[name].connected);
+		log(username + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[username].connected);
 	}
 	
 	function workerError(err) {
-		log(name + " worker error: err.message=" + err.message);
+		log(username + " worker error: err.message=" + err.message);
 	}
 	
 	function messageFromWorker(msg, handle) {
 		if(msg.message) {
-			log(name + " worker message: " + msg.message.msg, msg.message.level);
+			log(username + " worker message: " + msg.message.msg, msg.message.level);
 		}
 		else if(msg.pong) {
 			if(msg.pong == firstPing) {
@@ -356,15 +350,15 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 	}
 	
 	function workerClose(code, signal) {
-		log(name + " worker close: code=" + code + " signal=" + signal);
+		log(username + " worker close: code=" + code + " signal=" + signal);
 	}
 	
 	function workerExitHandler(code, signal) {
-		log(name + " worker exit: code=" + code + " signal=" + signal);
+		log(username + " worker exit: code=" + code + " signal=" + signal);
 		
 		// A non zero exit code is fatal and we need to restart the worker
 		if(parseInt(code) !== 0) {
-			log(name + " worker process exited with code=" + code, ERR);
+			log(username + " worker process exited with code=" + code, ERR);
 			
 			if(SHUTDOWN) return;
 			

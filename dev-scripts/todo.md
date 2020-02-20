@@ -78,8 +78,7 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-
-hmm, can we talk to webide_nodejs_init.service when in the network namespace !?
+debugging user script deployment
 
 
 

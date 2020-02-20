@@ -4321,9 +4321,7 @@ spawnOptions.env.HOST = netnsIP;
 		}
 		else {
 			console.log("args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
-			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
-			// Easiest solution is to remove and re-add the user.
-			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + username + " exist!", NOTICE);
+			
 			throw err;
 		}
 	}
