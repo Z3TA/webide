@@ -1,10 +1,12 @@
-Copyright (c) 2015-2019 Johan Zetterberg
+Copyright (c) 2015-2020 Johan Zetterberg
 
 This copyright notice must be included in all copies of the Software.
 
 The authors/copyright-holder reserve the right to sell and distribute the software!
 You are however allowed to make private copies, modify, and host multiple instances.
 
+* Forbidden to use this software while driving a vehicle or piloting an aircraft
+* Allowed to use this software on any device for any purpouse
 
 * Forbidden to Sell this software
 * Forbidden to Sell this software as a service
