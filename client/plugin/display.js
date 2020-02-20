@@ -10,9 +10,10 @@
 		desc: "A virtual desktop for GUI apps",
 		load: function loadDesktop() {
 			
+			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL, fun: showDesktopFromKeyboardCombo}); // Ctrl+D
+			
 			windowMenu = EDITOR.windowMenu.add(S("displayDesktop"), [S("View"), 1], toggleDisplay, showDesktopFromKeyboardCombo);
 			
-			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL, fun: showDesktopFromKeyboardCombo}); // Ctrl+D
 			
 			EDITOR.on("virtualDisplay", virtualDisplayStatus);
 			
@@ -66,7 +67,9 @@ windowMenu.activate();
 	
 	function showDesktop() {
 		
-		return EDITOR.virtualDisplay.show(desktopWidth, desktopHeight);
+		return EDITOR.virtualDisplay.show(desktopWidth, desktopHeight, function(err) {
+			if(err) alertBox(err.message);
+		});
 	}
 	
 })();
