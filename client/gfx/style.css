@@ -1399,6 +1399,7 @@ div.gotoFile li:hover {
 	color: #838ca2;
 	color: #313a4f;
 	color: black;
+	border: 0px solid blue;
 }
 
 /* ::first-lette only works with blocks! */
@@ -1437,6 +1438,14 @@ div.gotoFile li:hover {
 	border: 0;
 }
 
+
+.inlineCaption {
+	display:inline-block;
+ font-size: 13px;
+	color: #838ca2;
+	border: 0px solid red;
+	
+}
 
 /* ### Dialogs */
 .dialog {

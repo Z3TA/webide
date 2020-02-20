@@ -129,6 +129,15 @@ var suggestWord = null; // Used to prevent double lookups
 				
 				var li = EDITOR.ctxMenu.addItem({text: spell.suggestion, temp: true, callback: insertSpellSuggestion, separator: true, order: 2});
 				//alertBox(li.getAttribute("position"));
+				/*
+					var caption = document.createElement("span");
+					caption.classList.add("inlineCaption");
+					caption.innerText = "sugg: "
+					//li.insertBefore(caption, li.firstChild);
+					li.replaceChild(caption, li.firstChild);
+				*/
+				li.title = "Spellcheck suggestion";
+				
 			}
 			
 			
@@ -289,6 +298,8 @@ if(target.className != "fileCanvas") return;
 			if(suggestion) {
 				console.log("showSpellSuggestion:wordOnCaret: suggestion=" + suggestion);
 				EDITOR.ctxMenu.addItem({text: suggestion, callback: replaceWord, temp: true, order: 1, separator: true});
+				
+				
 			}
 			else if(markedAsMisspelled) {
 				console.log("showSpellSuggestion:wordOnCaret: No spell suggestion found!");
