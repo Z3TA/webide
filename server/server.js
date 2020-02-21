@@ -4247,6 +4247,8 @@ function createUserWorker(username, uid, gid, homeDir, groups, display) {
 		spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
+if(DOMAIN) spawnOptions.env.tld = DOMAIN;
+
 	// Need to start the worker as root if network namespaces are used!
 	if(NO_NETNS) {
 		log("Spawning with uid=" + uid + " and gid=" + gid + " ...", DEBUG);

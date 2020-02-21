@@ -23,6 +23,7 @@ var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.nodejs_deamon_manager_port; 
 var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
+var DOMAIN = getArg(["domain", "domain", "tld"]) || DEFAULT.domain;
 
 var NODE_INIT_WORKER = {}; // username:childProcess
 
@@ -171,43 +172,53 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 			var isStarting = false;
 		var userInfo = require("./shared/userInfo.js");
 		
-		userInfo(username, function(err, user) {
-		
-			if(err) throw err;
-			
-			if(!NODE_INIT_WORKER.hasOwnProperty(username) && action != "stop") {
-				startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
-				isStarting = true;
-			}
-			else if(!NODE_INIT_WORKER[username].connected && action != "stop") {
-				startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
-				isStarting = true;
-			}
-			
-			if(action == "start") {
-				if(isStarting) return;
-				NODE_INIT_WORKER[username].send({restart: pathToFolder});
-				response.writeHead(200);
-				response.end('Starting ' + pathToFolder + "\n");
-			}
-			else if(action == "stop") {
-				NODE_INIT_WORKER[username].send({stop: pathToFolder});
-				response.writeHead(200);
-				response.end('Stopping ' + pathToFolder + "\n");
-			}
-			else if(action == "restart") {
-				if(isStarting) return;
-				NODE_INIT_WORKER[username].send({restart: pathToFolder});
-				response.writeHead(200);
-				response.end('Restarting ' + pathToFolder + "\n");
-			}
-			// debug ?
-			else {
+// Make shure path exist
+		fs.stat(pathToFolder, function(err) {
+			if(err) {
 				response.writeHead(400);
-				response.end('Unknown action: ' + action + "\n");
+				response.end('Error: ' + err.message + "\n");
+				return;
 			}
+			
+			userInfo(username, function(err, user) {
+				
+				if(err) throw err;
+				
+				if(!NODE_INIT_WORKER.hasOwnProperty(username) && action != "stop") {
+					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+					isStarting = true;
+				}
+				else if(!NODE_INIT_WORKER[username].connected && action != "stop") {
+					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+					isStarting = true;
+				}
+				
+				if(action == "start") {
+					if(isStarting) return;
+					NODE_INIT_WORKER[username].send({restart: pathToFolder});
+					response.writeHead(200);
+					response.end('Starting ' + pathToFolder + "\n");
+				}
+				else if(action == "stop") {
+					NODE_INIT_WORKER[username].send({stop: pathToFolder});
+					response.writeHead(200);
+					response.end('Stopping ' + pathToFolder + "\n");
+				}
+				else if(action == "restart") {
+					if(isStarting) return;
+					NODE_INIT_WORKER[username].send({restart: pathToFolder});
+					response.writeHead(200);
+					response.end('Restarting ' + pathToFolder + "\n");
+				}
+				// debug ?
+				else {
+					response.writeHead(400);
+					response.end('Unknown action: ' + action + "\n");
+				}
+				
+			});
+		});
 		
-	});
 	}
 }
 
@@ -258,7 +269,8 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 			homeDir: homeDir,
 			uid: uid,
 			gid: gid,
-			user: username
+			user: username,
+			tld: DOMAIN
 		}
 	};
 	

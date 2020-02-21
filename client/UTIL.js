@@ -108,9 +108,12 @@ var UTIL = {
 		
 		var delimiter = UTIL.getPathDelimiter(path);
 		
-		if(path.charAt(path.length) != delimiter) {
-			console.warn("The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path=" + path);
-			path = path.substring(0, path.lastIndexOf(delimiter));
+		if(path.charAt(path.length-1) == delimiter) {
+			path = path.substring(0, path.lastIndexOf(delimiter)); // Remove last delimiter
+		}
+		else {
+			// It's assumed that all folder paths will end with a path delimiter, so no ending delimiter might result in a bug! (note: use UTIL.joinPaths instead of concateting)
+			console.warn("The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path='" + path + "'");
 		}
 		
 		console.log("path=" + path);

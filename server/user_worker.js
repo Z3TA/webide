@@ -38,7 +38,7 @@ var module_Websocket = require("ws");
 var module_child_process = require('child_process');
 
 var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
-var TLD = DEFAULT.domain;
+var TLD = getArg(["domain", "domain", "tld"]) || process.env.tld || DEFAULT.domain;
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
@@ -61,7 +61,9 @@ var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 var USERNAME = getArg(["user", "username"])
 var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
-var USER_PROD_FOLDER = HOME + "/.prod/";
+HOME = UTIL.trailingSlash(HOME);
+
+var USER_PROD_FOLDER = UTIL.joinPaths(HOME, ".prod/");
 
 var module_os = require("os");
 
@@ -154,8 +156,8 @@ if(info.uid==0) {
 	var npmOptions = {
 		env: {
 			HOME: HOME,
-			PATH: "/usr/bin:/bin:/" + HOME + "/.npm-packages/bin", // npm want node to be inside PATH
-			NPM_CONFIG_PREFIX: HOME + "/.npm-packages", // Help npm figure out where to put global packages
+			PATH: "/usr/bin:/bin:/" + UTIL.joinPaths(HOME, ".npm-packages/bin"), // npm want node to be inside PATH
+			NPM_CONFIG_PREFIX: UTIL.joinPaths(HOME, ".npm-packages"), // Help npm figure out where to put global packages
 			dev: true // So that scripts know we're in "development"
 		}
 	}
@@ -852,9 +854,15 @@ API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
 	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder path need to end with a folder delimiter (slash)!"));
 	if(pw == undefined) return callback(new Error("User password needed to remove " + prodFolder + " !"));
 	
-	API.deleteDirectory(user, {directory: prodFolder, recursive: true}, function(err, resp) {
-		if(err) callback(err);
-		else nodejs_init_action("stop", prodFolder, pw, callback);
+	// Stop before deleting files
+	nodejs_init_action("stop", prodFolder, pw, function(stopErr, stopResp) {
+		if(stopErr) log(stopErr.message, WARN);
+		
+		API.deleteDirectory(user, {directory: prodFolder, recursive: true}, function(delErr, delResp) {
+			if(delErr) log(delErr.message, WARN);
+			callback(stopErr || delErr, stopResp || delResp);
+		});
+		
 	});
 	
 }
@@ -1670,7 +1678,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		}
 		
 if(rootFolder) {
-		nodeScriptOptions.env.PORT = HOME + "/sock/" + UTIL.getFolderName(rootFolder);
+			nodeScriptOptions.env.PORT = UTIL.joinPaths(HOME, "sock/", UTIL.getFolderName(rootFolder));
 		}
 
 		start();
@@ -1682,7 +1690,7 @@ if(rootFolder) {
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
-			var watchDir = UTIL.trailingSlash(HOME + '/sock/');
+			var watchDir = UTIL.joinPaths(HOME, 'sock/');
 			
 				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
 				var fs = require("fs");
