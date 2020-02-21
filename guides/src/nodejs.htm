@@ -14,38 +14,44 @@
 <h2>Running Node.JS via the editor</h2>
 
 <p>Open any JavaScript (node.js) file and press <kbd>F2</kbd>
-(or click "Run nodejs script" in the menu).<br>
-Try any of the example files in the /nodejs/ folder.</p>
+(or right click and select "Run nodejs script").</p>
 
 <p>Press <kbd>F4</kbd> to stop the script.</p>
 
 
-<h3>Try via the terminal if you get errors</h3>
+<h3>Via terminal emulator</h3>
 
-<p>Right click and select "Terminal". In the terminal emulator type <b>npm install</b> 
-and then <b>node nameofapp.js</b> (or <b>npm start</b>).</p>
+<p>If running the Node.js app via the editor doesn't work, try running it via the "Terminal emulator":<br>
+Right click and select "Terminal emulator".<br>
+In the terminal emulator type <b>npm install</b> (Press enter) 
+and then <b>node nameofapp.js</b> (or <b>npm start</b>) (and press Enter).</p>
 
 
+<h2>Prefer using unix sockets instead of ports</h2>
 
-<h2>Replace port-nr with /sock/somename!</h2>
+<p>When using a unix socket (/home/username/sock/nameofapp) instead of port number,
+the app can be reached from http://nameofapp.username.domain.tld</p>
 
-<p>The cloud editor communicates with the Internet via unix sockets.<br>
-So instead of using for example port 80, use /sock/nameofsocket.<br>
-Eg. replace <i>server.listen(80)</i> with <i>server.listen("/sock/nameofsocket")</i></p>
+<p>Eg. replace <i>server.listen(80)</i> with <i>server.listen("/home/username/sock/nameofsocket")</i> in your Node.js app.</p> 
 
-<p>All HTTP (and websocket) requests going to
-https://nameofsocket.username.webide.se
-will be proxied to your /sock/nameofsocket unix socket!</p>
-
-<p>If you get <i>Error: EADDRINUSE /sock/nameofsocket</i> simply delete the file.<br>
+<p>If you get <i>Error: EADDRINUSE /home/username/sock/nameofsocket</i> delete the unix socket before running server.listen().<br>
 The editor will automatically delete sockets files when the script exit,
-and also set process.env.PORT to the name of the project folder.</p>
+and also set process.env.PORT to the name of the project folder's name.</p>
+
+
+<h3>Accessing TCP ports</h3>
+
+<p>If the app don't support unix sockets, then try with a regular port number.</p>
+
+<p>Port numbers can be accesed from http://####.username.domain.tld 
+(replace #### with the port number the app is listening to)</p>
+
 
 
 
 <h2>Deploying to production</h2>
 
-<p>The cloud editor makes it easy to deploy an app into production. Just press <kbd>Ctrl + F2</kbd>.<br>
+<p>Window menu "Node.js" or keyboard <kbd>Ctrl + F2</kbd>.<br>
 This will copy the entire project into a production environment and (re)start the script.<br>
 (Make sure you test the script before deploying it.)</p>
 
@@ -56,7 +62,7 @@ This will copy the entire project into a production environment and (re)start th
 	<li><kbd>Shift + Ctrl + F4</kbd> remove the script from "production"</li>
 </ul>
 
-<p>Production log files can be found in the /log/ directory.</p>
+<p>Production log files can be found in the log folder in your home directory.</p>
 
 
 
@@ -66,7 +72,7 @@ This will copy the entire project into a production environment and (re)start th
 and myName: username to the process.env (enviroment variables).<br>
 Scripts started from the editor will have process.env.dev set to true.<br>
 This is useful if you for example want to use a <i>different</i> 
-unix sockets for production then in development.</p>
+unix socket for production then in development. For example see: nodejs_examples/http_server/http_server_example.js</p>
 
 
 </body>

@@ -13,6 +13,7 @@
 	var discoveryBarIcon;
 	var widget;
 	var deamonAwake = false;
+	var windowMenu;
 	
 	EDITOR.plugin({
 		desc: "Docker",
@@ -20,6 +21,8 @@
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/docker.svg", 100,  "Docker daemon", "DOCKR", toggleDocker);
 			// Docker Icon by Icon Mafia https://iconscout.com 
+			
+			windowMenu = EDITOR.windowMenu.add(S("docker daemon"), [S("tools"), 1], toggleDocker);
 			
 			//widget = EDITOR.createWidget(buildVpnWidget);
 			
@@ -42,6 +45,8 @@
 		if(deamonAwake) sleep();
 		else wakeup();
 		
+windowMenu.hide();
+
 		return PREVENT_DEFAULT;
 	}
 	
@@ -56,11 +61,13 @@
 					EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 					
 					discoveryBarIcon.activate();
+					windowMenu.activate();
 					updateStatus("running", status.IP);
 				}
 				else if(status.stopped) {
 					deamonAwake = false;
 					discoveryBarIcon.deactivate();
+					windowMenu.deactivate();
 					updateStatus("shut off")
 				}
 				else {
@@ -85,13 +92,12 @@
 				
 				alertBox("The Docker daemon is now awaken! Speak to it using the docker command in the terminal emulator");
 				discoveryBarIcon.activate();
+				windowMenu.activate();
 				updateStatus("running", status.IP);
 				deamonAwake = true;
 			}
 		});
 	}
-	
-	
 	
 	function sleep() {
 		CLIENT.cmd("dockerDaemon", {command: "stop"}, function dockerDeamonLullaby(err) {
@@ -99,6 +105,7 @@
 			else {
 				alertBox("The Docker daemon has ben put to sleep!");
 				discoveryBarIcon.deactivate();
+				windowMenu.deactivate();
 				updateStatus("(shut off)");
 deamonAwake = false;
 			}

@@ -78,13 +78,6 @@ Always set callback=null after calling back!!! to prevent double callback and so
 What I'm working on
 -------------------
 
-debugging user script deployment
-
-
-
-
-
-todo: Write guides about how to use Docker, AVD's and reach TCP ports (d###.user.webide.se if exposed by Docker)
 
 expo devtools want to access WebSocket connection to 'ws://localhost:1900
 (it however starts a browser in the display/desktop!)
