@@ -270,6 +270,8 @@ if(target.className != "fileCanvas") return;
 		
 		//var caret = EDITOR.mousePositionToCaret(posX, posY);
 		
+if(caret.eol) return true;
+
 		var markedAsMisspelled = file.grid[caret.row][caret.col].wave;
 		
 		if(file) {
