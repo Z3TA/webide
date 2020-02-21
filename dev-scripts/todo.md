@@ -35,7 +35,8 @@ Probably should read through this file and reletlessly delete stuff.
 
 
 Why run your IDE in the cloud?
-* You might be able to get higher bandwith, so uploads/downloads will be faster, you do not have to download anything to your local computer/device
+* You might be able to get higher bandwith, so uploads/downloads will be faster, 
+you do not have to download anything to your local computer/device
 
 
 Cloud functions are stupid, they are hard to debug. And the latency is terrible.
@@ -73,17 +74,41 @@ Step 3: Use device X, fix pain points
 An editor that you can connect to from anywhere
 Dropped your laptop in the ocean? Just get a new one and continue where you left off.
 
-Always set callback=null after calling back!!! to prevent double callback and so that we also get an error when actually calling it twice, with a nice call stack that will help debug the error.
+Always set callback=null after calling back!!! to prevent double callback 
+and so that we also get an error when actually calling it twice, with a nice call stack that will help debug the error.
+
 
 What I'm working on
 -------------------
 
 
-expo devtools want to access WebSocket connection to 'ws://localhost:1900
-(it however starts a browser in the display/desktop!)
+todo: Clean up netnns when removing a user!
 
 
-testing react native
+terminal sessions should be saved so you can continue where you left off,
+for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
+or switching to another computer.
+
+
+when client disconnects from server, it has troubles reconnecting...
+tell user to reload (F5) ?!?
+
+Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
+
+Replace http://10.0.3.235:3000/ with 3000.user.webide.se in terminal and stdout messages!
+todo: Also replace in node.js stdout when starting the script from the editor
+
+How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
+
+
+Test network namespaces on another server before upgrading prod!!
+
+regression: Automatic re-login after server re-start no longer works!
+
+
+After having the computer in sleep mode for a while,
+and then come back, the editor still thinks it's connected...
+And when we try to login, it says "we are already logged in as user username on server"
 
 
 
@@ -127,7 +152,7 @@ Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
 There's no disconnect option when closing and reopening the ftp/sftp widget
 
 
-Able to quick search the menu itmes (goto anything!?)
+Able to quick search the menu items (goto anything!?)
 or just start typing.!?
 
 
@@ -140,21 +165,11 @@ cant scroll the function list on macbook using the pad
 
 text on the right side dissappears after 4 seconds on macbook...
 
-Add services running "in production" to user netns!
-so that port.user.webide.se will work in prod
-
-terminal sessions should be saved so you can continue where you left off,
-for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
-or switching to another computer.
-
 regression: When connecting it says I'm in collaboration mode with a PC that is shut off... 
 You are in collaboration mode with Safari(192.168.0.158)
 
 Tabs don't show up in the editor (but they are in the source) 
 needed for Makefile because Makefile only support tabs!
-
-when client disconnects from server, it has troubles reconnecting...
-tell user to reload (F5) ?!?
 
 when saving as to a file that already exist, in the warning, also have a button for opening that file!
 
@@ -175,8 +190,6 @@ but the spelling dictionary is not very helpful for finding replacements for pro
 
 Spellcheck plugin need regression tests! (it stopped working and I did not notice)
 
-Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
-
 
 TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
@@ -188,39 +201,14 @@ idea: If there is a number in clipboard when opening the file, goto that line!?
 
 Shouln't there be a way to init a Mercurial repo!? ;)
 
-terminal emulator has issues with "expo init AwesomeProject" because it has an interactive menu!
-
-
 perf: Did we slow down the terminal emeulator by adding the ip regexp check to every message !?
 npm install went slow with 100% cpu usage on the editor...
 measure before optimizing!!!
 possible optimization: Check the last screen x rows if file.text contains the IP as a timeout 1s after last terminal message, then if found, replace it!
 
-todo: Clean up netnns when removing a user!
-
-Replace http://10.0.3.235:3000/ with 3000.user.webide.se in terminal and stdout messages!
-todo: Also replace in node.js stdout when starting the script from the editor
-
-How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
-
-
-Test network namespaces on another server before upgrading prod!!
-
-
-
-
 ## Forward loopback to ip !?
 sudo ip netns exec iptables -t nat -A PREROUTING -p tcp --dport 1111 -j DNAT --to-destination 10.0.0.2:111
 sudo ip netns exec iptables -t nat -A POSTROUTING -j MASQUERADE
-
-
-
-Support react (native) development!
-
-Docker support!
-
-
-
 
 Cant type open to open a file from the command line using ~ for home dir, when running on local desktop.
 hmm, don't seem to be able to open files on a samba share!? ~/userfiles/dokument/anteckningar/linux.txt
@@ -228,8 +216,6 @@ hmm, don't seem to be able to open files on a samba share!? ~/userfiles/dokument
 regression: Doesn't highlight parentheses when you are on EOL!
 
 regression: Ping & network status doesn't show up in Safari!
-
-regression: Automatic re-login after server re-start no longer works!
 
 todo: When there are two functions with the same name in the same scope, color them red!!
 
@@ -276,18 +262,6 @@ Also change the banner to "Run script name with Node.js"
 Having two nodejs scripts open and clicking "run script" in the banner starts the wrong script!..
 
 regression: right clicking to stop a nodejs script no longer works! (it seems to restart it) (when having two scripts open, maybe it tries to close the wrong one!?)
----
-
-After having the computer in sleep mode for a while,
-and then come back, the editor still thinks it's connected...
-And when we try to login, it says "we are already logged in as user username on server"
-
----
-
-CLIENT: CLIENT.cmd id=undefined req=ping CLIENT.js:160:12
-CLIENT: ping! pingErr.code=ENETUNREACH CLIENT.js:614:13
-CLIENT: firing client event 'pingTimeout' data=undefined CLIENT.js:326:11
-
 
 Possibly security issue with _vnc nginx that lets you access any port on localhost!
 
