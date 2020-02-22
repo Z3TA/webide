@@ -100,6 +100,8 @@ var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can sto
 var LAST_USERADD = ""; // For debugging
 
 var USER_WORKERS = {}; // username: worker process
+var MESSAGE_BUFFER = {}; // username: [messages] - Save messages if no client is connected
+var MAX_MESSAGE_BUFFER = 1000;
 
 
 (function() {
@@ -1998,6 +2000,9 @@ function sockJsConnection(connection) {
 		
 		if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 			delete USER_CONNECTIONS[userConnectionName];
+			
+			MESSAGE_BUFFER[userConnectionName] = [];
+			
 		}
 		else {
 			// Tell all remaining clients that this client disconnected
@@ -2390,6 +2395,20 @@ throw err;
 									lastUserWorkerCrash: new Date()
 								}
 								
+								if(MESSAGE_BUFFER.hasOwnProperty(userConnectionName)) {
+									
+									if(MESSAGE_BUFFER[userConnectionName].skipped) {
+										MESSAGE_BUFFER[userConnectionName].push({msg: "MAX_MESSAGE_BUFFER=" + MAX_MESSAGE_BUFFER + " reached. " + MESSAGE_BUFFER[userConnectionName].skipped + " messages where skipped."});
+									}
+									
+									MESSAGE_BUFFER[userConnectionName].forEach(function(msg) {
+										var str = JSON.stringify(msg);
+										log(IP + " <= " + UTIL.shortString(str, 256));
+										connection.write(str);
+									});
+									MESSAGE_BUFFER[userConnectionName].length = 0;
+									delete MESSAGE_BUFFER[userConnectionName];
+								}
 							}
 							else {
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
@@ -2425,8 +2444,8 @@ throw err;
 							
 							//console.log("userConnectionId=" + userConnectionId);
 							
-
-
+							
+							
 							// Respond to the client that the login was successful
 							var userClientInfo = {
 								user: userConnectionName,
@@ -2441,13 +2460,13 @@ throw err;
 								tld: DOMAIN
 							};
 							
-								userClientInfo.installDirectory = __dirname.replace(/server$/, "");
+							userClientInfo.installDirectory = __dirname.replace(/server$/, "");
 							
 							if(uid && process.platform=="linux") {
-var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+								var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 								userClientInfo.netnsIP = netnsIP;
-}
-
+							}
+							
 							send({resp: {loginSuccess: userClientInfo}});
 							
 							// Tell all client that a new client has connected
@@ -2617,16 +2636,19 @@ var loginCounter = 0;
 			
 			if(answer.id == id) id = null; // Do not reuse the same id
 			else if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
-			else if(typeof answer.id == "string") {
+			/*
+				else if(typeof answer.id == "string") {
 				var arr = answer.id.split("|");
 				if(userConnectionId == arr[0]) {
-					answer.id = parseInt(arr[1]);
+				answer.id = parseInt(arr[1]);
 				}
-else {
-					log("Ignoring message from user worker heading to connectionId=" + arr[0], DEBUG);
-					return;
+				else {
+				log("Ignoring message from user worker heading to connectionId=" + arr[0], DEBUG);
+				return;
 				}
-			}
+				}
+			*/
+			
 			
 			// Sanity check
 			// Note: This function mutates the answer object, so if it's called in a loop, next iteration will have id==undefined
@@ -4192,7 +4214,7 @@ var str = JSON.stringify(obj);
 			
 		}
 		else if(workerMessage.message) {
-			var obj;
+			log("Message from " + username + " worker: " + UTIL.shortString(JSON.stringify(workerMessage.message)), DEBUG);
 			if(USER_CONNECTIONS.hasOwnProperty(username)) {
 				var str = JSON.stringify(workerMessage.message);
 				for (var i=0, conn; i<USER_CONNECTIONS[username].connections.length; i++) {
@@ -4201,6 +4223,20 @@ var str = JSON.stringify(obj);
 					log(getIp(conn) + " <= " + UTIL.shortString(str, 256));
 					conn.write(str);
 					
+				}
+			}
+			else {
+				if(MESSAGE_BUFFER[username].length == MAX_MESSAGE_BUFFER) {
+					MESSAGE_BUFFER[username].skipped = 0;
+				}
+				
+				if(MESSAGE_BUFFER[username].length > MAX_MESSAGE_BUFFER) {
+					MESSAGE_BUFFER[username].skipped++;
+					log("MAX_MESSAGE_BUFFER=" + MAX_MESSAGE_BUFFER + " reached for " + username + ". Skipping message.", DEBUG)
+				}
+				else {
+					log("Buffering message", DEBUG);
+					MESSAGE_BUFFER[username].push(workerMessage.message);
 				}
 			}
 		}

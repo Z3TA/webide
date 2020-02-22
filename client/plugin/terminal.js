@@ -33,6 +33,13 @@ todo: Run vttest
 	var TLD = window.location.hostname;
 	var netnsIP;
 	var username;
+	var terminalFileStateProps = {
+		mode: "text",
+		lineBreak: "\n",
+		parse: false,
+		noChangeEvents: true,
+		noCollaboration: true
+	}
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -356,15 +363,7 @@ console.warn("Terminal events already active!");
 			return;
 		}
 		
-var stateProps = {
-mode: "text",
-lineBreak: "\n",
-parse: false,
-noChangeEvents: true,
-noCollaboration: true
-}
-
-		EDITOR.openFile(name, "", {show: true, props: stateProps}, function fileOpened(err, file) {
+		EDITOR.openFile(name, "", {show: true, props: terminalFileStateProps}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
 				else return alertBox(err.message);
@@ -412,9 +411,22 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				
 				file = f;
 				parse(term.data);
-			})
+			});
+			return;
 		}
-		else if(term.data) parse(term.data);
+		
+		if(file && terminalFiles.indexOf(file) == -1) {
+			// File was probably reopened from last session
+			terminalFiles.push(file);
+			for(var prop in terminalFileStateProps) {
+				file[prop] = terminalFileStateProps[prop];
+			}
+		}
+else {
+console.log(file.path + " is a terminal emulator file!");
+}
+		
+		if(term.data) parse(term.data);
 		
 		console.log("terminal:" + JSON.stringify(term, null, 2));
 		

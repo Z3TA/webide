@@ -81,6 +81,10 @@ and so that we also get an error when actually calling it twice, with a nice cal
 What I'm working on
 -------------------
 
+todo: Fix issues with collaboration:
+* Reopen files
+* Find in files
+
 Refactoring server.js so that each user connection share the worker process
 todo: Test what happens when user worker crashes
 
