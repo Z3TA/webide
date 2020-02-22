@@ -28,6 +28,7 @@ var UTIL = require("./client/UTIL.js");
 
 var fs = require("fs");
 var child_process = require('child_process');
+var rmDirRecursive = require("./shared/rmDirRecursive.js");
 
 
 if(FORCE) startDelete();
@@ -88,7 +89,8 @@ if(ps) {
 	var url_user = UTIL.urlFriendly(username);
 	var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
 	var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
-	try {
+	console.log("Deleting " + nginxProfileSymlink);
+try {
 		fs.unlinkSync(nginxProfileSymlink);
 		fs.unlinkSync(nginxProfile);
 	}
@@ -151,7 +153,9 @@ if(ps) {
 	
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
-	
+	/*
+		
+		
 	umount(HOME + username + "/bin/ping");
 	
 	umount(HOME + username + "/etc/ssl/certs");
@@ -285,14 +289,27 @@ if(ps) {
 	umount(HOME + username + "/run/", true);
 	umount(HOME + username + "/bin/", true);
 	
+		
+		// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
+		umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
+		unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
+		
+	*/
+	
 	
 	fuseUmount(HOME + username + "/googleDrive");
 	
+	// todo: Make sure all Dropbox daemons are killed so that they do not clean the Dropbox when we delete it!!
 	
 	
-	// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
-	umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
-	unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
+	rmDirRecursive("/etc/netns/" + username, function(err) {
+		if(err) console.warn(err.message);
+	});
+	
+	
+	// todo: Stop and Delete Docker VM image
+	
+	
 	
 	
 	if(!NOZFS) {
