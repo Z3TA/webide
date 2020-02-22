@@ -81,8 +81,12 @@ and so that we also get an error when actually calling it twice, with a nice cal
 What I'm working on
 -------------------
 
+Refactoring server.js so that each user connection share the worker process
+todo: Test what happens when user worker crashes
 
-todo: Clean up netnns when removing a user!
+Refactoring user worker and client connection on server side...
+Currently each connection listens on worker messages,
+but instead we should make it so the worker dispatches messages to the correct client connection!???
 
 
 terminal sessions should be saved so you can continue where you left off,

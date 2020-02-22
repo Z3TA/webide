@@ -672,11 +672,17 @@ process.on('message', function commandMessage(message) {
 		var id = message.id;
 		var resp = message.parentResponse;
 		var err = message.err;
+		
+		//log( "Got parent response: id=" + id + " resp=" + UTIL.shortString(JSON.stringify(resp)) + " err=" + UTIL.shortString(JSON.stringify(resp)) , DEBUG);
+		
 		if(parentRequestCallback.hasOwnProperty(id)) {
 			parentRequestCallback[id](err, resp);
 			delete parentRequestCallback[id];
 		}
-		else throw new Error("No callback saved for parentRequestCallback id=" + id);
+		else {
+			// It might be a response from an earlier life (because we crashed)
+			log("No callback saved for parentRequestCallback id=" + id + " resp=" + UTIL.shortString(JSON.stringify(resp)) + " err=" + UTIL.shortString(JSON.stringify(resp)) , DEBUG);
+		}
 	}
 	else if(message.commands) {
 		
@@ -1953,6 +1959,8 @@ function createInspector(url) {
 function parentRequest(req, callback) {
 	
 	var id = ++parentRequestId;
+	
+	//log("Sendiing parent request: id=" + id + " req=" + UTIL.shortString(JSON.stringify(req)), DEBUG);
 	
 	process.send({id: id, request: req});
 	parentRequestCallback[id] = callback;

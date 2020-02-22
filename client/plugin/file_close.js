@@ -58,6 +58,10 @@
 		console.log("Closing the editor ...");
 		if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
 		
+		if(CLIENT.connected) {
+			CLIENT.cmd("quit", {});
+		}
+		
 		self.close();
 		
 		window.close();

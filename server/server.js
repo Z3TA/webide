@@ -99,6 +99,9 @@ var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can sto
 
 var LAST_USERADD = ""; // For debugging
 
+var USER_WORKERS = {}; // username: worker process
+
+
 (function() {
 	// Make sure we are in the server directory
 	var workingDirectory = process.cwd();
@@ -1924,6 +1927,7 @@ function isPrivatev4IP(ip) {
 }
 
 function getIp(connection) {
+	if(connection == undefined) throw new Error("connection=" + connection);
 	var IP = connection.remoteAddress;
 	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
 	return IP;
@@ -1940,7 +1944,6 @@ function sockJsConnection(connection) {
 	var commandQueue = [];
 	var awaitingMessagesFromWorker = {};
 	var recreateUserProcessSleepTime = 0;
-	var lastUserProcessCrash = new Date();
 	var userBrowser = UTIL.checkBrowser(agent);
 	var clientSessionId = "";
 	var checkingUser = false;
@@ -1980,58 +1983,66 @@ function sockJsConnection(connection) {
 		
 		log("Closed client connection (protocol=" + protocol + ") from " + IP);
 		
+		// Keep stuff (user worker,etc) running for some time so that the user can reconnect and continue terminal emulator session etc...
+		
+		if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+			log("userConnectionName=" + userConnectionName + " not in USER_CONNECTIONS=" + JSON.stringify( Object.keys(USER_CONNECTIONS) ) + "", WARN);
+			return;
+		}
+		
+		USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
+		USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
+		USER_CONNECTIONS[userConnectionName].sessionId.splice(USER_CONNECTIONS[userConnectionName].sessionId.indexOf(clientSessionId), 1);
+		
+		delete USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId];
+		
+		if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
+			delete USER_CONNECTIONS[userConnectionName];
+		}
+		else {
+			// Tell all remaining clients that this client disconnected
+			var disconnectMsg = {
+				clientLeave: {
+					ip: IP,
+					cId: userConnectionId,
+					connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds,
+					alias: userAlias,
+					connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
+				}
+			};
+			
+			var data = JSON.stringify(disconnectMsg);
+			
+			for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+				if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(data, 256));
+				USER_CONNECTIONS[userConnectionName].connections[i].write(data);
+			}
+		}
+		}
+
+function userCleanup() {
+		
 		if(userWorker) {
 			
 			// Each connection has it's own worker process!
 			
-			userWorker.send({teardown: true}); // Worker should be exiting ...
+			userWorker.send({teardown: true}); // Will make Worker exiting by itself (no need for kill signal)
 			
-			/*
-				awaitingMessagesFromWorker["teardownComplete"] = function afterTeardown() {
-				userWorker.kill('SIGTERM');
-				};
-			*/
+		}
+		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
+		
+		
+		if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+			// No other clients logged is as this user
 			
-			// Users logged in with the same username can send messages to each other
-			
-			USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
-			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
-			USER_CONNECTIONS[userConnectionName].sessionId.splice(USER_CONNECTIONS[userConnectionName].sessionId.indexOf(clientSessionId), 1);
-			
-			delete USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId];
-			
-			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
-				delete USER_CONNECTIONS[userConnectionName];
-				
-				if(DROPBOX.hasOwnProperty(userConnectionName)) {
-					if(!DROPBOX[userConnectionName].linked) stopDropboxDaemon(userConnectionName);
-					// else: Keep it running so that it will be synced once the user logs back in
-				}
-				
-				if(VPN.hasOwnProperty(userConnectionName)) vpnCommand(userConnectionName, VPN[userConnectionName].homeDir, VPN[userConnectionName], function() {
-					log("Stopped VPN connection for " + userConnectionName + "");
-				});
-				
+			if(DROPBOX.hasOwnProperty(userConnectionName)) {
+				if(!DROPBOX[userConnectionName].linked) stopDropboxDaemon(userConnectionName);
+				// else: Keep it running so that it will be synced once the user logs back in
 			}
-			else {
-				// Tell all remaining clients that this client disconnected
-				var disconnectMsg = {
-					clientLeave: {
-						ip: IP, 
-						cId: userConnectionId, 
-						connectedClientIds: USER_CONNECTIONS[userConnectionName].connectedClientIds, 
-						alias: userAlias,
-						connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
-					}
-				};
-				
-				var data = JSON.stringify(disconnectMsg);
-				
-				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-					if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(data, 256));
-					USER_CONNECTIONS[userConnectionName].connections[i].write(data);
-				}
-			}
+			
+			if(VPN.hasOwnProperty(userConnectionName)) vpnCommand(userConnectionName, VPN[userConnectionName].homeDir, VPN[userConnectionName], function() {
+				log("Stopped VPN connection for " + userConnectionName + "");
+			});
 			
 			for(var displayId in VNC_CHANNEL) {
 				if(VNC_CHANNEL[displayId].startedBy == userConnectionName) stopVncChannel(displayId);
@@ -2044,10 +2055,12 @@ function sockJsConnection(connection) {
 				}
 			}
 			
+			
+			gcsfCleanup(userConnectionName);
+			
 		}
-		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 		
-		gcsfCleanup(userConnectionName);
+		
 		
 		/*
 			if(IP == "127.0.0.1" && HTTP_PORT == "8099") {
@@ -2373,7 +2386,8 @@ throw err;
 									connectedClientIds: [userConnectionId],
 									connectionCLientAliases: {1: userAlias},
 									sessionId: [clientSessionId],
-									uid: uid
+									uid: uid,
+									lastUserWorkerCrash: new Date()
 								}
 								
 							}
@@ -2388,16 +2402,16 @@ throw err;
 							
 							if(gid == undefined) gid = uid;
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
-							// Tell the worker process which user
-							var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, shell: shell, id: uid};
 							
+							
+							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
+							// Tell the worker process which user
+							var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid};
 							
 							log("User userConnectionName=" + userConnectionName + " logged in! VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
 							
 							userWorker.send({identify: userWorkerInfo});
-							userWorker.on("message", messageFromWorker);
-							userWorker.on("close", workerCloseHandler);
+							
 							
 							
 							/*
@@ -2529,292 +2543,9 @@ var loginCounter = 0;
 							
 							return true;
 							
-							function messageFromWorker(workerMessage, handle) {
-								//console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
-								
-								if(workerMessage.resp || workerMessage.error) {
-									send(workerMessage);
-								}
-								else if(workerMessage.message) {
-									var obj;
-									if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-										for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-											
-											// Need to copy the props into another object so the object passed to send will be unique (and have id=0)
-											obj = {};
-											for(var name in workerMessage.message) {
-												obj[name] = workerMessage.message[name];
-											}
-											obj.id = 0;
-											
-											send(obj, USER_CONNECTIONS[userConnectionName].connections[i]);
-										}
-									}
-								}
-								else if(workerMessage.done) { // Not used! Saved if we need it in the future
-									if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
-										awaitingMessagesFromWorker[workerMessage.done]();
-									}
-								}
-								else if(workerMessage.request) {
-									// For special functionality ...
-									
-									var id = workerMessage.id;
-									var req = workerMessage.request;
-									
-									if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-									
-									if(req.createHttpEndpoint) {
-										
-										var folder = req.createHttpEndpoint.folder;
-										
-										console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
-										
-										createHttpEndpoint(userConnectionName, folder, function(err, url) {
-											if(err) workerResp(err.message);
-											else workerResp(null, {url: url});
-										});
-									}
-									else if(req.removeHttpEndpoint) {
-										
-										var folder = req.removeHttpEndpoint.folder;
-										
-										removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
-											//if(err) throw err;
-											workerResp(err, {folder: folder});
-										});
-									}
-									else if(req.debugInBrowserVnc) {
-										var url = req.debugInBrowserVnc.url;
-										startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
-											workerResp(err, resp);
-										});
-									}
-									else if(req.googleDrive) {
-										console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
-										if(req.googleDrive.code) {
-											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF sessions for " + userConnectionName));
-											GCSF[userConnectionName].enterCode(req.googleDrive.code, function(err, resp) {
-												workerResp(err, resp);
-											});
-										}
-										else if(req.googleDrive.umount) {
-											// Both gcsfUmount and gcsfLogout will call gcsfCleanup() which closes any GCSF login or mount session
-											gcsfUmount(userConnectionName, function(umountError) {
-												gcsfLogout(userConnectionName, function(logoutErr) {
-													var errMsg = "";
-													if(umountError) errMsg += "Failed to umount!"; // Don't give too much info (might be sensitive)
-													if(logoutErr) errMsg += "Failed to logout: " + logoutErr.message;
-													
-													workerResp(errMsg || null);
-												});
-											});
-										}
-										else if(req.googleDrive.cancelLogin) {
-											if(!GCSF[userConnectionName]) return workerResp(new Error("No active GCSF sessions for " + userConnectionName));
-											
-											gcsfCleanup(userConnectionName);
-											
-											return workerResp(null);
-											
-										}
-										else {
-											gcsfLogin(userConnectionName, 0, function(err, resp) {
-												workerResp(err, resp);
-											});
-										}
-									}
-									
-									else if(req.tcpPort) {
-										// Find a free TCP port
-										var tcpPort = parseInt(req.tcpPort);
-										if(isNaN(tcpPort)) tcpPort = 1024;
-										// Make sure the port is not used
-										getTcpPort(tcpPort, function(err, port) {
-											if(err) workerResp(err);
-											else workerResp(null, port);
-										});
-									}
-									
-									else if(req.proxy) {
-										// So the editor client can access another url from the current server URL to avoid CORS-errors
-										// only works for http(s)!? Not Websockets!?
-										
-										var proxyName = req.proxy.name;
-										var proxyUrl = req.proxy.url;
-										var proxyWs = req.proxy.ws;
-										
-										for(var name in PROXY) {
-											if(name == proxyName) return workerResp(new Error("There's already a proxy named " + proxyName));
-										}
-										
-										PROXY[proxyName] = {
-											startedBy: username,
-											proxy: new module_httpProxy.createProxyServer({
-												target: proxyUrl,
-												ws: proxyWs
-											})
-										};
-										
-										PROXY[proxyName].proxy.on('error', function (err, req, res) {
-											res.writeHead(502, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-											res.end("Proxy failed: " + err.message);
-										});
-										
-										PROXY[proxyName].proxy.on('proxyReq', function(proxyReq, req, res, options){
-											var rewritedPath = req.url.replace('/proxy/' + proxyName, '');
-											proxyReq.path = rewritedPath;
-										});
-										
-										var resp = {
-											name: proxyName,
-											url: proxyUrl
-										};
-										
-										workerResp(null, resp);
-										
-									}
-									else if(req.stopProxy) {
-										var proxyName = req.proxy.name;
-										
-										if(!PROXY.hasOwnProperty(proxyName)) {
-											return workerResp(new Error("There's no proxy named " + proxyName));
-										}
-										
-										if(PROXY[proxyName].startedBy != username) {
-											return workerResp(new Error("The proxy named " + proxyName + " was not started by you!"));
-										}
-										
-										if(PROXY[proxyName].proxy) PROXY[proxyName].proxy.close();
-										
-										delete PROXY[proxyName]
-									}
-									
-									else if(req.createMysqlDb) {
-										createMysqlDb(username, req.createMysqlDb, workerResp);
-									}
-									
-									else if(req.remoteFile) {
-										var fileName = req.remoteFile.name;
-										
-										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
-											workerResp("No remote file sockets found for username=" + username);
-											log( "Users with remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
-											return;
-										}
-										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
-											workerResp("No remote file socket found for fileName= " + fileName + "");
-											log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
-											return;
-										}
-										else {
-											var socket = REMOTE_FILE_SOCKETS[username][fileName];
-											if(req.remoteFile.content) {
-												// File saved
-												socket.write(req.remoteFile.content + EOF);
-											}
-											if(req.remoteFile.close) {
-												// File closed
-												socket.destroy();
-											}
-											workerResp(null);
-										}
-									}
-									
-									else if(req.pipe) {
-										if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
-											workerResp("No remote pipe sockets found for username=" + username);
-											log( "Users with pipe sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
-											return;
-										}
-										else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty("pipe" + req.pipe.id) ) {
-											workerResp("No remote pipe socket found for id= " + req.pipe.id + "");
-											log( "Remote sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
-											return;
-										}
-										else {
-											var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
-											if(req.pipe.content) {
-												log("Sending " + req.pipe.content.length + " characters through remote pipe " + req.pipe.id)
-												socket.write(req.pipe.content);
-											}
-											if(req.pipe.close) {
-												socket.destroy();
-											}
-											workerResp(null);
-										}
-										
-									}
-									
-									// ### Dropbox worker requests
-									else if(req.startDropboxDaemon) {
-										startDropboxDaemon(userConnectionName, uid, gid, homeDir, function(err, resp) {
-											workerResp(err, resp);
-										});
-									}
-									else if(req.checkDropboxDaemon) {
-										checkDropboxDaemon(userConnectionName, function(err, resp) {
-											workerResp(err, resp);
-										});
-									}
-									else if(req.stopDropboxDaemon) {
-										stopDropboxDaemon(userConnectionName, function(err, resp) {
-											workerResp(err, resp);
-										});
-									}
-									else if(req.vpn) {
-										vpnCommand(userConnectionName, homeDir, req.vpn, workerResp);
-									}
-									else if(req.dockerDaemon) {
-										dockerDaemon(userConnectionName, homeDir, uid, gid, req.dockerDaemon, workerResp);
-									}
-									
-									
-									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
-									}
-								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
-								
-								
-								function workerResp(err, resp) {
-									if(id == undefined) throw new Error("id=" + id);
-									var obj = {id: id, parentResponse: resp};
-									if(err) obj.err = err.message ? {message: err.message, code: err.code} : err;
-									userWorker.send(obj);
-								}
-								
-							}
 							
-							function workerCloseHandler(code, signal) {
-								//console.log(userConnectionName + " worker close: code=" + code + " signal=" + signal);
-								
-								var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
-								
-								if(code !== 0) {
-									
-									log("Recreating user worker process for " + userConnectionName);
-									
-									var timeSinceLastCrash = new Date() - lastUserProcessCrash;
-									console.log("timeSinceLastCrash=" + timeSinceLastCrash);
-									if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
-									else recreateUserProcessSleepTime = 2000 + recreateUserProcessSleepTime * 2;
-									
-									lastUserProcessCrash = new Date();
-									
-									msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted in " + recreateUserProcessSleepTime/1000 + " seconds ...)";
-									
-									console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
-									setTimeout(function restartWorkerProcess() {
-										userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups);
-										userWorker.send({identify: userWorkerInfo});
-										
-										userWorker.on("message", messageFromWorker);
-										userWorker.on("close", workerCloseHandler);
-									}, recreateUserProcessSleepTime);
-								}
-								
-								send({msg: msg, code: "WORKER_CLOSE", id: 0});
-								
-							}
+							
+							
 							
 						}
 					}
@@ -2863,9 +2594,12 @@ var loginCounter = 0;
 				
 				
 			}
+			else if(command == "quit") {
+				userCleanup();
+			}
 			else {
 				
-				userWorker.send({commands: {command: command, json: json, id: id}});
+				userWorker.send({commands: {command: command, json: json, id: userConnectionId + "|" + id}});
 			}
 			
 		}
@@ -2874,16 +2608,25 @@ var loginCounter = 0;
 			
 			if(conn == undefined) conn = connection;
 			
-			//console.log("answer.id=" + answer.id);
+			log("answer.id=" + answer.id, DEBUG);
 			
 			if(answer.id == undefined && id) {
-				//console.log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2));
+				log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2), DEBUG);
 				answer.id = id;
 			}
 			
 			if(answer.id == id) id = null; // Do not reuse the same id
-			
-			if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
+			else if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
+			else if(typeof answer.id == "string") {
+				var arr = answer.id.split("|");
+				if(userConnectionId == arr[0]) {
+					answer.id = parseInt(arr[1]);
+				}
+else {
+					log("Ignoring message from user worker heading to connectionId=" + arr[0], DEBUG);
+					return;
+				}
+			}
 			
 			// Sanity check
 			// Note: This function mutates the answer object, so if it's called in a loop, next iteration will have id==undefined
@@ -3130,6 +2873,10 @@ function checkMounts(options, checkMountsCallback) {
 				var parsedIP = matchIP[1];
 				if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedIP + " IP=" + IP + "  ");
 				
+			// Create /etc/netns/guest3/ if it doesn't already exist
+			module_fs.mkdir("/etc/netns/" + username, function(err) {
+				if(err && err.code != "EEXIST") throw err;
+				
 				
 				// When user launches for example a node.js web server listening on "localhost"
 				// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
@@ -3153,6 +2900,10 @@ function checkMounts(options, checkMountsCallback) {
 				
 				createdNetworkNamespaces = true;
 				checkMountsReadyMaybe();
+				
+			});
+			
+			
 			});
 			
 			
@@ -4218,7 +3969,9 @@ function randomString(letters) {
 	return text;
 }
 
-function createUserWorker(username, uid, gid, homeDir, groups, display) {
+function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
+	
+	if(USER_WORKERS.hasOwnProperty(username)) return USER_WORKERS[username];
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
@@ -4328,9 +4081,8 @@ spawnOptions.env.HOST = netnsIP;
 		}
 	}
 	
-	worker.on("close", function workerClose(code, signal) {
-		console.log(username + " worker close: code=" + code + " signal=" + signal);
-	});
+	worker.on("message", messageFromWorker);
+	worker.on("close", workerCloseHandler);
 	
 	worker.on("disconnect", function workerDisconnect() {
 		console.log(username + " worker disconnect: worker.connected=" + worker.connected);
@@ -4358,8 +4110,332 @@ spawnOptions.env.HOST = netnsIP;
 	
 	log(username + " worker pid=" + worker.pid);
 	
+	USER_WORKERS[username] = worker;
 	
-	return worker;
+	return USER_WORKERS[username];
+	
+	
+	function workerCloseHandler(code, signal) {
+		log(username + " worker close: code=" + code + " signal=" + signal, INFO);
+		
+		if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+			log("Not restarting worker process for " + username + " because there are no clients connected!", INFO);
+			return;
+		}
+		
+		var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
+		
+		if(code !== 0) {
+			
+			log("Recreating user worker process for " + username);
+			
+			var timeSinceLastCrash = new Date() - USER_CONNECTIONS[username].lastUserWorkerCrash;
+			console.log("timeSinceLastCrash=" + timeSinceLastCrash);
+			if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
+			else recreateUserProcessSleepTime = 2000 + recreateUserProcessSleepTime * 2;
+			
+			USER_CONNECTIONS[username].lastUserWorkerCrash = new Date();
+			
+			msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted in " + recreateUserProcessSleepTime/1000 + " seconds ...)";
+			
+			console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
+			setTimeout(function restartWorkerProcess() {
+				
+				// note: User connections share the same worker!
+				var userWorkerInfo = {name: username, rootPath: rootPath, homeDir: homeDir, id: uid};
+				
+				USER_WORKERS[username] = createUserWorker(username, uid, gid, homeDir, groups, rootPath);
+				
+				USER_WORKERS[username].send({identify: userWorkerInfo});
+				
+			}, recreateUserProcessSleepTime);
+		}
+		
+		var connections = USER_CONNECTIONS[userConnectionName].connections;
+		var obj = {msg: msg, code: "WORKER_CLOSE"};
+var str = JSON.stringify(obj);
+		connections.forEach(function(conn) {
+			log(getIp(conn) + " <= " + UTIL.shortString(str, 256));
+			conn.write(str);
+		});
+		
+	}
+	
+	function messageFromWorker(workerMessage, handle) {
+		//console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+		
+		if(workerMessage.resp || workerMessage.error) {
+			
+			log("workerMessage.id=" + workerMessage.id, DEBUG);
+			
+			if(typeof workerMessage.id == "string") {
+				var arr = workerMessage.id.split("|");
+				var userConnectionId = parseInt(arr[0])-1;
+				workerMessage.id = parseInt(arr[1]);
+			}
+			else throw new Error("Bad workerMessage.id=" + workerMessage.id + " typeof " + (typeof workerMessage.id));
+			
+			// Sanity check
+			if( workerMessage.hasOwnProperty("echo") && workerMessage.hasOwnProperty("id") ) throw new Error("echo with id=" + workerMessage.id + ": " + JSON.stringify(workerMessage.echo, null, 2));
+			
+			if(!workerMessage.id && workerMessage.hasOwnProperty("resp")) throw new Error("No id in workerMessage with resp! workerMessage=" + JSON.stringify(workerMessage));
+			if(!workerMessage.id && workerMessage.hasOwnProperty("error")) throw new Error("No id in workerMessage with error! workerMessage=" + JSON.stringify(workerMessage));
+			// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
+			
+			var str = JSON.stringify(workerMessage);
+			
+			var conn = USER_CONNECTIONS[username].connections[userConnectionId];
+			if(conn == undefined) throw new Error("userConnectionId=" + userConnectionId + " USER_CONNECTIONS[username].connections.length=" + USER_CONNECTIONS[username].connections.length);
+			log(getIp(conn) + " <= " + (workerMessage.id ? workerMessage.id : "") + UTIL.shortString(str, 256));
+			
+			conn.write(str);
+			
+		}
+		else if(workerMessage.message) {
+			var obj;
+			if(USER_CONNECTIONS.hasOwnProperty(username)) {
+				var str = JSON.stringify(workerMessage.message);
+				for (var i=0, conn; i<USER_CONNECTIONS[username].connections.length; i++) {
+					
+					var conn = USER_CONNECTIONS[username].connections[i];
+					log(getIp(conn) + " <= " + UTIL.shortString(str, 256));
+					conn.write(str);
+					
+				}
+			}
+		}
+		else if(workerMessage.done) { // Not used! Saved if we need it in the future
+			if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
+				awaitingMessagesFromWorker[workerMessage.done]();
+			}
+		}
+		else if(workerMessage.request) {
+			// For special functionality ...
+			
+			var id = workerMessage.id;
+			var req = workerMessage.request;
+			
+			if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+			
+			if(req.createHttpEndpoint) {
+				
+				var folder = req.createHttpEndpoint.folder;
+				
+				console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+				
+				createHttpEndpoint(username, folder, function(err, url) {
+					if(err) workerResp(err.message);
+					else workerResp(null, {url: url});
+				});
+			}
+			else if(req.removeHttpEndpoint) {
+				
+				var folder = req.removeHttpEndpoint.folder;
+				
+				removeHttpEndpoint(username, folder, function(err, folder) {
+					//if(err) throw err;
+					workerResp(err, {folder: folder});
+				});
+			}
+			else if(req.debugInBrowserVnc) {
+				var url = req.debugInBrowserVnc.url;
+				startChromiumBrowserInVnc(username, uid, gid, url, function(err, resp) {
+					workerResp(err, resp);
+				});
+			}
+			else if(req.googleDrive) {
+				console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
+				if(req.googleDrive.code) {
+					if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
+					GCSF[username].enterCode(req.googleDrive.code, function(err, resp) {
+						workerResp(err, resp);
+					});
+				}
+				else if(req.googleDrive.umount) {
+					// Both gcsfUmount and gcsfLogout will call gcsfCleanup() which closes any GCSF login or mount session
+					gcsfUmount(username, function(umountError) {
+						gcsfLogout(username, function(logoutErr) {
+							var errMsg = "";
+							if(umountError) errMsg += "Failed to umount!"; // Don't give too much info (might be sensitive)
+							if(logoutErr) errMsg += "Failed to logout: " + logoutErr.message;
+							
+							workerResp(errMsg || null);
+						});
+					});
+				}
+				else if(req.googleDrive.cancelLogin) {
+					if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
+					
+					gcsfCleanup(username);
+					
+					return workerResp(null);
+					
+				}
+				else {
+					gcsfLogin(username, 0, function(err, resp) {
+						workerResp(err, resp);
+					});
+				}
+			}
+			
+			else if(req.tcpPort) {
+				// Find a free TCP port
+				var tcpPort = parseInt(req.tcpPort);
+				if(isNaN(tcpPort)) tcpPort = 1024;
+				// Make sure the port is not used
+				getTcpPort(tcpPort, function(err, port) {
+					if(err) workerResp(err);
+					else workerResp(null, port);
+				});
+			}
+			
+			else if(req.proxy) {
+				// So the editor client can access another url from the current server URL to avoid CORS-errors
+				// only works for http(s)!? Not Websockets!?
+				
+				var proxyName = req.proxy.name;
+				var proxyUrl = req.proxy.url;
+				var proxyWs = req.proxy.ws;
+				
+				for(var name in PROXY) {
+					if(name == proxyName) return workerResp(new Error("There's already a proxy named " + proxyName));
+				}
+				
+				PROXY[proxyName] = {
+					startedBy: username,
+					proxy: new module_httpProxy.createProxyServer({
+						target: proxyUrl,
+						ws: proxyWs
+					})
+				};
+				
+				PROXY[proxyName].proxy.on('error', function (err, req, res) {
+					res.writeHead(502, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+					res.end("Proxy failed: " + err.message);
+				});
+				
+				PROXY[proxyName].proxy.on('proxyReq', function(proxyReq, req, res, options){
+					var rewritedPath = req.url.replace('/proxy/' + proxyName, '');
+					proxyReq.path = rewritedPath;
+				});
+				
+				var resp = {
+					name: proxyName,
+					url: proxyUrl
+				};
+				
+				workerResp(null, resp);
+				
+			}
+			else if(req.stopProxy) {
+				var proxyName = req.proxy.name;
+				
+				if(!PROXY.hasOwnProperty(proxyName)) {
+					return workerResp(new Error("There's no proxy named " + proxyName));
+				}
+				
+				if(PROXY[proxyName].startedBy != username) {
+					return workerResp(new Error("The proxy named " + proxyName + " was not started by you!"));
+				}
+				
+				if(PROXY[proxyName].proxy) PROXY[proxyName].proxy.close();
+				
+				delete PROXY[proxyName]
+			}
+			
+			else if(req.createMysqlDb) {
+				createMysqlDb(username, req.createMysqlDb, workerResp);
+			}
+			
+			else if(req.remoteFile) {
+				var fileName = req.remoteFile.name;
+				
+				if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+					workerResp("No remote file sockets found for username=" + username);
+					log( "Users with remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+					return;
+				}
+				else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
+					workerResp("No remote file socket found for fileName= " + fileName + "");
+					log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+					return;
+				}
+				else {
+					var socket = REMOTE_FILE_SOCKETS[username][fileName];
+					if(req.remoteFile.content) {
+						// File saved
+						socket.write(req.remoteFile.content + EOF);
+					}
+					if(req.remoteFile.close) {
+						// File closed
+						socket.destroy();
+					}
+					workerResp(null);
+				}
+			}
+			
+			else if(req.pipe) {
+				if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+					workerResp("No remote pipe sockets found for username=" + username);
+					log( "Users with pipe sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+					return;
+				}
+				else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty("pipe" + req.pipe.id) ) {
+					workerResp("No remote pipe socket found for id= " + req.pipe.id + "");
+					log( "Remote sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+					return;
+				}
+				else {
+					var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
+					if(req.pipe.content) {
+						log("Sending " + req.pipe.content.length + " characters through remote pipe " + req.pipe.id)
+						socket.write(req.pipe.content);
+					}
+					if(req.pipe.close) {
+						socket.destroy();
+					}
+					workerResp(null);
+				}
+				
+			}
+			
+			// ### Dropbox worker requests
+			else if(req.startDropboxDaemon) {
+				startDropboxDaemon(username, uid, gid, homeDir, function(err, resp) {
+					workerResp(err, resp);
+				});
+			}
+			else if(req.checkDropboxDaemon) {
+				checkDropboxDaemon(username, function(err, resp) {
+					workerResp(err, resp);
+				});
+			}
+			else if(req.stopDropboxDaemon) {
+				stopDropboxDaemon(username, function(err, resp) {
+					workerResp(err, resp);
+				});
+			}
+			else if(req.vpn) {
+				vpnCommand(username, homeDir, req.vpn, workerResp);
+			}
+			else if(req.dockerDaemon) {
+				dockerDaemon(username, homeDir, uid, gid, req.dockerDaemon, workerResp);
+			}
+			
+			
+			else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+		}
+		else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+		
+		
+		function workerResp(err, resp) {
+			if(id == undefined) throw new Error("id=" + id);
+			var obj = {id: id, parentResponse: resp};
+			if(err) obj.err = err.message ? {message: err.message, code: err.code} : err;
+			worker.send(obj);
+		}
+		
+	}
 }
 
 
