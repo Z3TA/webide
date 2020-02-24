@@ -3161,6 +3161,13 @@ return oldError;
 		else if(str.length == 0) return true;
 else return false;
 	},
+	isEmpty: function isEmpty(obj) {
+		for(var prop in obj) {
+			if(obj.hasOwnProperty(prop)) return false;
+		}
+		
+		return true;
+	},
 	int2ip: function int2ip(ipInt) {
 		return ( (ipInt>>>24) +'.' + (ipInt>>16 & 255) +'.' + (ipInt>>8 & 255) +'.' + (ipInt & 255) );
 	},

@@ -83,12 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-problem: Two users login,
-first user logs out.
-second user geta resp from the worker with connection id=2 but there is no index=2 in USER_CONNECTIONS[username].connections[userConnectionId];
 
 
-
+todo: Test remote file socket for regression
 
 
 

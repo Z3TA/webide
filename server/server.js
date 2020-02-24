@@ -146,7 +146,7 @@ var APC = String.fromCharCode(159);
 
 
 
-var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
+var USER_CONNECTIONS = {}; // username: {connections: {id: connection}, ...}
 
 var HTTP_SERVER;
 
@@ -1398,21 +1398,10 @@ function openStdinChannel() {
 	
 	stdinServer.listen(STDIN_PORT, "127.0.0.1");
 	
-	
-	function sendToAll(user_connections, data) {
-		for (var i=0, conn; i<user_connections.connections.length; i++) {
-			if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
-			user_connections.connections[i].write(data);
-		}
-	}
-	
 	function sendOrBuffer(str) {
-		client_connections = USER_CONNECTIONS[USERNAME];
-		
-		if(client_connections) {
-			var data = JSON.stringify({stdin: str}); // Serialize
+		if(USER_CONNECTIONS.hasOwnProperty(USERNAME)) {
 			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
-			sendToAll(client_connections, data);
+			sendToAll(USERNAME, {stdin: str});
 		}
 		else {
 			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
@@ -1430,11 +1419,9 @@ function openStdinChannel() {
 				var args = str.slice(0, lbIndex);
 				console.log("args=" + UTIL.lbChars(args));
 				if(args.length > 0) {
-					client_connections = USER_CONNECTIONS[USERNAME];
-					if(client_connections) {
-						var data = JSON.stringify({arguments: args}); // Serialize
+					if(USER_CONNECTIONS.hasOwnProperty(USERNAME)) {
 						console.log("Sending editor arguments to client user " + USERNAME + " (str.length=" + str.length + ")");
-						sendToAll(client_connections, data);
+						sendToAll(USERNAME, {arguments: args});
 					}
 					else {
 						console.log("Editor client user " + USERNAME + " not connected! Saving arguments for when the user logs in: args=" + args);
@@ -1537,7 +1524,7 @@ function openRemoteFileServer() {
 					if(fileName == "STDIN") {
 						pipeId = ++PIPE_COUNTER;
 						fileName = "pipe" + pipeId;
-						sendToAll(client_connections, JSON.stringify({remotePipe: {host: remoteHost, start: true, id: pipeId}}));
+						sendToAll(username, {remotePipe: {host: remoteHost, start: true, id: pipeId}});
 					}
 					
 					REMOTE_FILE_SOCKETS[username][fileName] = socket;
@@ -1557,8 +1544,8 @@ function openRemoteFileServer() {
 						strBuffer = strBuffer.slice(0, -1);
 						console.log("Recieved content (" + strBuffer.length + " bytes) for " + fileName);
 						
-						var msg = JSON.stringify({remoteFile: {fileName: fileName, content: strBuffer, host: remoteHost}}); // Serialize
-						sendToAll(client_connections, msg);
+						var msg = {remoteFile: {fileName: fileName, content: strBuffer, host: remoteHost}};
+						sendToAll(username, msg);
 						fileContentReceived = true;
 						// We want to keep the connection open, so we can send back the content when it's saved!
 						
@@ -1582,10 +1569,10 @@ function openRemoteFileServer() {
 		}
 		
 		function sendToStdin() {
-			var msg = JSON.stringify({remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}}); // Serialize
+			var msg = {remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}};
 			
 			console.log("Sending data to editor client user " + USERNAME + " (strBuffer.length=" + strBuffer.length + ")");
-			sendToAll(client_connections, msg);
+			sendToAll(username, msg);
 			strBuffer = ""; // Clear the buffer
 		}
 		
@@ -1606,7 +1593,7 @@ function openRemoteFileServer() {
 			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
 			
 			if(pipeId) {
-				sendToAll(client_connections, JSON.stringify({remotePipe: {host: remoteHost, end: true, id: pipeId}}));
+				sendToAll(username, {remotePipe: {host: remoteHost, end: true, id: pipeId}});
 			}
 		}
 		
@@ -1643,21 +1630,12 @@ function openRemoteFileServer() {
 	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
 	// Listen on all IP's so that we can get files from anywhere ...
 	
-	
-	function sendToAll(user_connections, data) {
-		for (var i=0, conn; i<user_connections.connections.length; i++) {
-			if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
-			user_connections.connections[i].write(data);
-		}
-	}
-	
 	function sendOrBuffer(str) {
 		client_connections = USER_CONNECTIONS[USERNAME];
 		
 		if(client_connections) {
-			var data = JSON.stringify({stdin: str}); // Serialize
 			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
-			sendToAll(client_connections, data);
+			sendToAll(client_connections, {stdin: str});
 		}
 		else {
 			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
@@ -1935,6 +1913,21 @@ function getIp(connection) {
 	return IP;
 }
 
+function sendToAll(username, obj) {
+	if(typeof username != "string") throw new Error("username=" + username + " should be a string!");
+	if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+		log("username=" + username + " does not exist in USER_CONNECTIONS=" + Object.keys(USER_CONNECTIONS), WARN);
+		return;
+	}
+	
+	var uc = USER_CONNECTIONS[username].connections;
+	var data = JSON.stringify(obj);
+	for (var connectionId in uc.connections) {
+		log(getIp(uc.connections[connectionId]) + "(" + connectionId + ") <= " + UTIL.shortString(data, 256));
+		uc.connections[connectionId].write(data);
+	}
+}
+
 function sockJsConnection(connection) {
 	
 	var userConnectionName = null; // Populated once the user has successfully logged in
@@ -1990,12 +1983,12 @@ function sockJsConnection(connection) {
 		}
 		
 		USER_CONNECTIONS[userConnectionName].connectedClientIds.splice( USER_CONNECTIONS[userConnectionName].connectedClientIds.indexOf(userConnectionId), 1 );
-		USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
 		USER_CONNECTIONS[userConnectionName].sessionId.splice(USER_CONNECTIONS[userConnectionName].sessionId.indexOf(clientSessionId), 1);
 		
+		delete USER_CONNECTIONS[userConnectionName].connections[userConnectionId];
 		delete USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId];
 		
-		if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
+		if(UTIL.isEmpty(USER_CONNECTIONS[userConnectionName].connections)) {
 			delete USER_CONNECTIONS[userConnectionName];
 			
 			MESSAGE_BUFFER[userConnectionName] = [];
@@ -2013,12 +2006,8 @@ function sockJsConnection(connection) {
 				}
 			};
 			
-			var data = JSON.stringify(disconnectMsg);
+			sendToAll(userConnectionName, disconnectMsg);
 			
-			for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-				if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(data, 256));
-				USER_CONNECTIONS[userConnectionName].connections[i].write(data);
-			}
 		}
 		}
 
@@ -2374,7 +2363,7 @@ throw err;
 								userConnectionId = 1;
 								
 								USER_CONNECTIONS[userConnectionName] = {
-									connections: [connection],
+									connections: {1: connection},
 									connectionCounter: 1, // Start with 1 so it's true:ish. Keep incrementing so we get a unique id
 									echoCounter: 1, // Start with 1 so it's true:ish
 									connectedClientIds: [userConnectionId],
@@ -2402,7 +2391,7 @@ throw err;
 							else {
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
 								
-								USER_CONNECTIONS[userConnectionName].connections.push(connection);
+								USER_CONNECTIONS[userConnectionName].connections[userConnectionId] = connection;
 								USER_CONNECTIONS[userConnectionName].connectedClientIds.push(userConnectionId);
 								USER_CONNECTIONS[userConnectionName].connectionCLientAliases[userConnectionId] = userAlias;
 								USER_CONNECTIONS[userConnectionName].sessionId.push(clientSessionId);
@@ -2469,8 +2458,8 @@ throw err;
 								connectionCLientAliases: USER_CONNECTIONS[userConnectionName].connectionCLientAliases
 							};
 							
-							for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-								send({clientJoin: clientJoin, id: 0}, USER_CONNECTIONS[userConnectionName].connections[i]);
+							for (var connectionId in USER_CONNECTIONS[userConnectionName].connections) {
+								send({clientJoin: clientJoin, id: 0}, USER_CONNECTIONS[userConnectionName].connections[connectionId]);
 							}
 							
 							if(commandQueue.length > 0) {
@@ -2577,11 +2566,8 @@ var loginCounter = 0;
 				json.cId = userConnectionId;
 				json.alias = userAlias;
 				
-				for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-					//if(USER_CONNECTIONS[userConnectionName].connections[i] != connection) {
-						send({echo: json, id: 0}, USER_CONNECTIONS[userConnectionName].connections[i]);
-					//}
-				}
+				sendToAll(userConnectionName, {echo: json});
+				
 			}
 			else if(command == "invite") {
 				
@@ -3577,9 +3563,9 @@ function handleHttpRequest(request, response) {
 			
 			var conn, ip;
 			conns: for(var username in USER_CONNECTIONS) {
-				for(var i=0; i<USER_CONNECTIONS[username].connections.length; i++) {
-					conn = USER_CONNECTIONS[username].connections[i];
-					ip = conn.headers["x-real-ip"] || conn.remoteAddress;
+				for(var connectionId in USER_CONNECTIONS[username].connections) {
+					conn = USER_CONNECTIONS[username].connections[connectionId];
+					ip = getIp(conn);
 					if(ip == IP) {
 						sendToUser = username;
 						log("User found: " + sendToUser, INFO);
@@ -3680,19 +3666,9 @@ console.error(err);
 								}
 								
 								// Notify the user
-								var user_connections = USER_CONNECTIONS[username];
-								if(user_connections) {
-									
-									var data = JSON.stringify({
-										uploadedFiles: uploadedFiles
-									});
-									
-									log("Notifying user " + username + " (" + user_connections.connections.length + " connections): data: " + data, DEBUG);
-									
-									for (var i=0; i<user_connections.connections.length; i++) {
-										if(LOGLEVEL >= DEBUG) log(getIp(user_connections.connections[i]) + " <= " + UTIL.shortString(data, 256));
-										user_connections.connections[i].write(data);
-									}
+								if(USER_CONNECTIONS.hasOwnProperty(username)) {
+									log("Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
+									sendToAll(username, {uploadedFiles: uploadedFiles});
 								}
 								else {
 									uploadMessage += "Warning: " + username + " is not online!";
@@ -4161,13 +4137,7 @@ spawnOptions.env.HOST = netnsIP;
 			}, recreateUserProcessSleepTime);
 		}
 		
-		var connections = USER_CONNECTIONS[username].connections;
-		var obj = {msg: msg, code: "WORKER_CLOSE"};
-var str = JSON.stringify(obj);
-		connections.forEach(function(conn) {
-			log(getIp(conn) + " <= " + UTIL.shortString(str, 256));
-			conn.write(str);
-		});
+		sendToAll(username, {msg: msg, code: "WORKER_CLOSE"});
 		
 	}
 	
@@ -4180,7 +4150,7 @@ var str = JSON.stringify(obj);
 			
 			if(typeof workerMessage.id == "string") {
 				var arr = workerMessage.id.split("|");
-				var userConnectionId = parseInt(arr[0])-1;
+				var userConnectionId = parseInt(arr[0]);
 				workerMessage.id = parseInt(arr[1]);
 			}
 			else throw new Error("Bad workerMessage.id=" + workerMessage.id + " typeof " + (typeof workerMessage.id));
@@ -4201,8 +4171,12 @@ var str = JSON.stringify(obj);
 			}
 			
 			var conn = USER_CONNECTIONS[username].connections[userConnectionId];
-			if(conn == undefined) throw new Error("userConnectionId=" + userConnectionId + " USER_CONNECTIONS[username].connections.length=" + USER_CONNECTIONS[username].connections.length);
-			log(getIp(conn) + " <= " + (workerMessage.id ? workerMessage.id : "") + UTIL.shortString(str, 256));
+			if(conn == undefined) {
+				log("Unknown connection: userConnectionId=" + userConnectionId + " connections keys: " + Object.keys(USER_CONNECTIONS[username].connections) + " resp=" + UTIL.shortString(str), WARN);
+				return;
+			}
+			
+			log(getIp(conn) + "(" + userConnectionId + ") <= " + (workerMessage.id ? workerMessage.id : "") + UTIL.shortString(str, 256));
 			
 			conn.write(str);
 			
@@ -4210,14 +4184,7 @@ var str = JSON.stringify(obj);
 		else if(workerMessage.message) {
 			log("Message from " + username + " worker: " + UTIL.shortString(JSON.stringify(workerMessage.message)), DEBUG);
 			if(USER_CONNECTIONS.hasOwnProperty(username)) {
-				var str = JSON.stringify(workerMessage.message);
-				for (var i=0, conn; i<USER_CONNECTIONS[username].connections.length; i++) {
-					
-					var conn = USER_CONNECTIONS[username].connections[i];
-					log(getIp(conn) + " <= " + UTIL.shortString(str, 256));
-					conn.write(str);
-					
-				}
+				sendToAll(username, workerMessage.message);
 			}
 			else {
 				if(MESSAGE_BUFFER[username].length == MAX_MESSAGE_BUFFER) {
@@ -5943,20 +5910,11 @@ function checkForOtherDropboxDaemons(username, callback) {
 
 function sendToClient(userConnectionName, cmd, obj) {
 	if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-		
-		//var json = {id: 0};
 		var json = {};
 		json[cmd] = obj;
 		
-		var str = JSON.stringify(json);
-		
-		for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-			if(LOGLEVEL >= DEBUG) log(getIp(USER_CONNECTIONS[userConnectionName].connections[i]) + " <= " + UTIL.shortString(str, 256));
-			USER_CONNECTIONS[userConnectionName].connections[i].write(str);
-		}
-		return i>0;
-	}
-	else return false;
+		sendToAll(userConnectionName, json);
+}
 }
 
 function vpnCommand(username, homeDir, options, callback) {
