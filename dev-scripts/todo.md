@@ -77,14 +77,17 @@ Dropped your laptop in the ocean? Just get a new one and continue where you left
 Always set callback=null after calling back!!! to prevent double callback 
 and so that we also get an error when actually calling it twice, with a nice call stack that will help debug the error.
 
+When developing developer tools, 1/3 of your time should be spent educating users how to use it, and 1/3 if your time should be spent on marketing/hyping.
+
 
 What I'm working on
 -------------------
 
+Avoid sending file state to server if the state has not changed!
 
-todo: Fix issues with collaboration:
-* Reopen files
-* Find in files
+
+
+
 
 Refactoring server.js so that each user connection share the worker process
 todo: Test what happens when user worker crashes

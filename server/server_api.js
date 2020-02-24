@@ -3420,6 +3420,10 @@ API.platform = function platform(user, json, callback) {
 	callback(null, process.platform);
 }
 
+API.crashme = function crash(user, json, callback) {
+// Only used to test what happens if the user worker crashes
+throw new Error("Crash boom bang!");
+}
 
 function runFtpQueue() {
 	

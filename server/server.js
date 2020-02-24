@@ -1937,15 +1937,12 @@ function getIp(connection) {
 
 function sockJsConnection(connection) {
 	
-	var userWorker = null;
-	var userConnectionName = null;
+	var userConnectionName = null; // Populated once the user has successfully logged in
 	var userConnectionId = -1;
 	var IP = getIp(connection);
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
 	var commandQueue = [];
-	var awaitingMessagesFromWorker = {};
-	var recreateUserProcessSleepTime = 0;
 	var userBrowser = UTIL.checkBrowser(agent);
 	var clientSessionId = "";
 	var checkingUser = false;
@@ -2027,18 +2024,10 @@ function sockJsConnection(connection) {
 
 function userCleanup() {
 		
-		if(userWorker) {
-			
-			// Each connection has it's own worker process!
-			
-			userWorker.send({teardown: true}); // Will make Worker exiting by itself (no need for kill signal)
-			
-		}
-		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
-		
-		
 		if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 			// No other clients logged is as this user
+			
+			USER_WORKERS[userConnectionName].send({teardown: true}); // Will make Worker exiting by itself (no need for kill signal)
 			
 			if(DROPBOX.hasOwnProperty(userConnectionName)) {
 				if(!DROPBOX[userConnectionName].linked) stopDropboxDaemon(userConnectionName);
@@ -2125,7 +2114,7 @@ return false;
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
-		if(!userWorker) {
+		if(!userConnectionName) {
 			
 			//console.log("json=" + JSON.stringify(json));
 			
@@ -2422,14 +2411,16 @@ throw err;
 							if(gid == undefined) gid = uid;
 							
 							
+							if(!USER_WORKERS.hasOwnProperty(userConnectionName)) {
+								createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
+							}
 							
-							userWorker = createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
 							// Tell the worker process which user
 							var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid};
 							
 							log("User userConnectionName=" + userConnectionName + " logged in! VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
 							
-							userWorker.send({identify: userWorkerInfo});
+							USER_WORKERS[userConnectionName].send({identify: userWorkerInfo});
 							
 							
 							
@@ -2618,7 +2609,7 @@ var loginCounter = 0;
 			}
 			else {
 				
-				userWorker.send({commands: {command: command, json: json, id: userConnectionId + "|" + id}});
+				USER_WORKERS[userConnectionName].send({commands: {command: command, json: json, id: userConnectionId + "|" + id}});
 			}
 			
 		}
@@ -3993,8 +3984,6 @@ function randomString(letters) {
 
 function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	
-	if(USER_WORKERS.hasOwnProperty(username)) return USER_WORKERS[username];
-	
 	// You can have different group and user. Default is the user/group running the node process
 	var spawnOptions = {};
 	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
@@ -4134,7 +4123,6 @@ spawnOptions.env.HOST = netnsIP;
 	
 	USER_WORKERS[username] = worker;
 	
-	return USER_WORKERS[username];
 	
 	
 	function workerCloseHandler(code, signal) {
@@ -4150,7 +4138,7 @@ spawnOptions.env.HOST = netnsIP;
 		if(code !== 0) {
 			
 			log("Recreating user worker process for " + username);
-			
+			var recreateUserProcessSleepTime = 0;
 			var timeSinceLastCrash = new Date() - USER_CONNECTIONS[username].lastUserWorkerCrash;
 			console.log("timeSinceLastCrash=" + timeSinceLastCrash);
 			if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
@@ -4166,7 +4154,7 @@ spawnOptions.env.HOST = netnsIP;
 				// note: User connections share the same worker!
 				var userWorkerInfo = {name: username, rootPath: rootPath, homeDir: homeDir, id: uid};
 				
-				USER_WORKERS[username] = createUserWorker(username, uid, gid, homeDir, groups, rootPath);
+				createUserWorker(username, uid, gid, homeDir, groups, rootPath);
 				
 				USER_WORKERS[username].send({identify: userWorkerInfo});
 				
@@ -4244,11 +4232,6 @@ var str = JSON.stringify(obj);
 					log("Buffering message", DEBUG);
 					MESSAGE_BUFFER[username].push(workerMessage.message);
 				}
-			}
-		}
-		else if(workerMessage.done) { // Not used! Saved if we need it in the future
-			if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
-				awaitingMessagesFromWorker[workerMessage.done]();
 			}
 		}
 		else if(workerMessage.request) {

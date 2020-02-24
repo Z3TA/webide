@@ -117,6 +117,8 @@ var CLIENT = {}; // Client object is global
 			CLIENT.connected = false;
 			CLIENT.url = null;
 			
+			stopPing();
+			
 			if(callback) {
 				var err = new Error("Connection closed");
 				err.code = "CONNECTION_CLOSED";
@@ -537,7 +539,7 @@ reconnectTimeoutTime += 10000;
 			if(json.id) {
 				if(callbackWaitList.hasOwnProperty(json.id)) {
 					CLIENT.inFlight--;
-
+					
 					console.log("CLIENT: Got server response for id=" + json.id);
 					
 					var err = null;

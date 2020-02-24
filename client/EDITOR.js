@@ -5689,6 +5689,7 @@ EDITOR.fireEvent("btk");
 			}
 			catch(err) {
 				console.warn("Error in fName=" + fName + " err.message=" + err.message);
+console.error(err);
 				returns[fName] = err;
 				if(!callback) throw err;
 				return;
