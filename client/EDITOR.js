@@ -3323,8 +3323,8 @@ caption.appendChild(span);
 		add: function addDiscoveryItem(element, position) {
 			// Adds an item
 			
-			// note: Don't add icon captions, it will look ugly, and make the CSS complicated, and the text wont fit.
-			// But it's impossible to know what the icons do, users testing showed that the user had no idea how to create a new file, nor how to save it!
+			// Should we have icon captions? It will look ugly, and make the CSS complicated, and the text wont fit.
+			// But it's impossible to know what the icons do. User testing showed that the user had no idea how to create a new file, nor how to save it!
 
 			if(position == undefined) throw new Error("Second argument: position need to be defined!");
 			
