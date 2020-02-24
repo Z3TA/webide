@@ -83,7 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Restart user worker (to get new api updates) when manually reloading the editor!
+Restart user worker (to get new api updates) when manually reloading the editor!?!?
 
 
 
@@ -91,41 +91,13 @@ Restart user worker (to get new api updates) when manually reloading the editor!
 todo: Test remote file socket for regression
 
 
-
-
-
-Refactoring server.js so that each user connection share the worker process
-todo: Test what happens when user worker crashes
-
-Refactoring user worker and client connection on server side...
-Currently each connection listens on worker messages,
-but instead we should make it so the worker dispatches messages to the correct client connection!???
-
-
-terminal sessions should be saved so you can continue where you left off,
-for example when leaving the computer for 10 minutes (client OS/browser will disconnect, to save battery), 
-or switching to another computer.
-
-
-when client disconnects from server, it has troubles reconnecting...
-tell user to reload (F5) ?!?
-
-Sometimes the editor have issues reconnecting to the server (due to timeout errors?!?)
-
-Replace http://10.0.3.235:3000/ with 3000.user.webide.se in terminal and stdout messages!
+Replace http://10.0.3.235:3000/ with 3000.user.webide.se in stdout messages!
 todo: Also replace in node.js stdout when starting the script from the editor
 
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
 
 
 Test network namespaces on another server before upgrading prod!!
-
-regression: Automatic re-login after server re-start no longer works!
-
-
-After having the computer in sleep mode for a while,
-and then come back, the editor still thinks it's connected...
-And when we try to login, it says "we are already logged in as user username on server"
 
 
 
