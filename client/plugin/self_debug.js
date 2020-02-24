@@ -278,7 +278,7 @@ sendit();
 		var no = "Keep running";
 		
 		console.log("selfDebug: Asking the user what to do...");
-		confirmBox("" + sourceLink + lineString + message + "<br><br>Close/restart the editor ?", [
+		confirmBox("" + sourceLink + lineString + message + " (code=" + (error && error.code) + ")<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
 			
@@ -363,7 +363,8 @@ sendit();
 		'Browser: ' + BROWSER + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
-		errMessage + '\n' +
+		'Error message: ' + errMessage + '\n' +
+		'Error code: ' + (error && error.code) + '\n' +
 		'\n' +
 		(error ? error.stack + '\n' : "") +
 		'\n' +

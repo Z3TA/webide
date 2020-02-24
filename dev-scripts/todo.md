@@ -83,6 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Restart user worker (to get new api updates) when manually reloading the editor!
+
+
 
 
 todo: Test remote file socket for regression

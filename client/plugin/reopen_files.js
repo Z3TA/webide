@@ -812,11 +812,14 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 	
 	function fileStateChange(file) {
 		changedstate[file.path] = true;
+		return true;
 	}
 	
 	function removeFromOpenedFiles(filePath, callback) {
 		// Called when the editor close a file
 		
+delete changedstate[filePath];
+
 		if(typeof filePath == "object" && typeof filePath.path == "string") filePath = filePath.path;
 		
 		console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
@@ -900,7 +903,7 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		console.log("reopenFiles: saveStateOfOpenFiles!");
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
-console.log(UTIL.getStack("saveStateOfOpenFiles"));
+		console.log(UTIL.getStack("saveStateOfOpenFiles"));
 		
 		if(CLIENT.connected && CLIENT.ping < 2000 && EDITOR.storage.ready()) {
 			var list = EDITOR.sortFileList(); // Array sorted by file.order
