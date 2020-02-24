@@ -63,6 +63,8 @@
 	
 	var oldServerState = {};
 	
+	var changedstate = {}; // file-path: Boolean
+	
 	EDITOR.plugin({
 		desc: "Open up the files from last session", 
 		order: 2000, // Load after the parser and other stuff that has fileOpen event listener
@@ -106,7 +108,9 @@
 			
 			EDITOR.removeEvent("fileOpen", addToOpenedFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
+			EDITOR.removeEvent("fileChange", fileStateChange);
 			EDITOR.removeEvent("afterSave", saveStateOfFile);
+			EDITOR.removeEvent("moveCaret", fileStateChange);
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			EDITOR.removeEvent("afk", stopSavingState);
 			EDITOR.removeEvent("btk", continueSavingState);
@@ -151,7 +155,9 @@
 		if(firstRun) {
 			EDITOR.on("fileOpen", addToOpenedFiles, 1);
 			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
+			EDITOR.on("fileChange", fileStateChange);
 			EDITOR.on("afterSave", saveStateOfFile, 1);
+			EDITOR.on("moveCaret", fileStateChange);
 			
 			EDITOR.on("afk", stopSavingState);
 			EDITOR.on("btk", continueSavingState);
@@ -725,6 +731,8 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		
 		if(!file.path) throw new Error("Argument need to be a file object!");
 		
+		changedstate[file.path] = false;
+		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			if(openedFilesString == null) openedFilesString = "";
@@ -802,7 +810,9 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 		return text;
 	}
 	
-	
+	function fileStateChange(file) {
+		changedstate[file.path] = true;
+	}
 	
 	function removeFromOpenedFiles(filePath, callback) {
 		// Called when the editor close a file
@@ -886,9 +896,11 @@ console.log("reopenFiles: fileReopened file.path=" + file.path);
 	
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
+		
 		console.log("reopenFiles: saveStateOfOpenFiles!");
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
+console.log(UTIL.getStack("saveStateOfOpenFiles"));
 		
 		if(CLIENT.connected && CLIENT.ping < 2000 && EDITOR.storage.ready()) {
 			var list = EDITOR.sortFileList(); // Array sorted by file.order
@@ -936,7 +948,11 @@ EDITOR.storage.setItem(key, filePath);
 						//console.log("reopenFiles: openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
 							//console.log("reopenFiles: Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
-							saveState(openFiles[i], stateSaved);
+							if(changedstate[openFiles[i]]) {
+								saveState(openFiles[i], stateSaved);
+							}
+							else stateSaved(null, openFiles[i]);
+							
 						}
 					}
 					else if(callback) callback(null);
@@ -976,6 +992,8 @@ EDITOR.storage.setItem(key, filePath);
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
 		console.log("reopenFiles: Saving state for: " + path);
+		
+		changedstate[false] = false;
 		
 		if(path.length == 0) {
 			findBugs(false, function(err, openedFilesString) {

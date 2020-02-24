@@ -446,7 +446,9 @@ _editorInput = true;
 	var serverStorageWaitingItems = {};
 	EDITOR.storage = {
 		setItem: function storageSetItem(id, val, wait, callback) {
+			if(EDITOR.settings.devMode) {
 			var stack = UTIL.getStack("EDITOR.storage.setItem");
+			}
 			
 			if(typeof wait == "function" && callback == undefined) {
 				callback = wait;
@@ -513,10 +515,12 @@ _editorInput = true;
 			
 			if(callback !== undefined && typeof callback != "function") throw new Error("Second argument to EDITOR.storage.removeItem should be a callback function (optional)");
 			
+if(EDITOR.settings.devMode) {
 			// Save the stack in case we get an error
 			var stack = UTIL.getStack("EDITOR.storage.removeItem");
+			}
 			
-			if(serverStorageWaitingItems.hasOwnProperty(id)) {
+if(serverStorageWaitingItems.hasOwnProperty(id)) {
 				// No need to save it if it's going to get deleted!
 clearTimeout(serverStorageWaitingItems[id]);
 				delete serverStorageWaitingItems[id];
@@ -5689,7 +5693,7 @@ EDITOR.fireEvent("btk");
 			}
 			catch(err) {
 				console.warn("Error in fName=" + fName + " err.message=" + err.message);
-console.error(err);
+				console.error(err);
 				returns[fName] = err;
 				if(!callback) throw err;
 				return;
@@ -6698,8 +6702,10 @@ else {
 		if(b.charCode != undefined && isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
-		if(!b.desc) UTIL.getStack("Key binding should have a description!");
-		
+		if(!b.desc) {
+console.log(UTIL.getStack("Key binding should have a description!"));
+		}
+
 		if(b.mode == undefined) {
 //console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			b.mode = "default";
@@ -6722,7 +6728,7 @@ else {
 				if(b.disableOthers) disable.push(keyBindings[i]);
 				else {
 					// It's OK to bind the same key combo to do many things, eg Esc key, but we should give a warning:
-					UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
+					console.log(UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !"));
 				}
 			}
 		}

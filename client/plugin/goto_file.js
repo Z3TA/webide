@@ -490,7 +490,7 @@ if(CHROMEBOOK) {
 		console.log("goto_file: trySearch: isSearching=" + isSearching + " text=" + text);
 		
 		if(lastSearchText == text) {
-			UTIL.getStack("trySearch repeated! text=" + text + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching);
+			console.log(UTIL.getStack("trySearch repeated! text=" + text + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching));
 			//return;
 		}
 		
