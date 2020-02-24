@@ -55,25 +55,8 @@
 	}
 	
 	function closeEditor(file, combo) {
-		console.log("Closing the editor ...");
-		if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
 		
-		if(CLIENT.connected) {
-			CLIENT.cmd("quit", {});
-		}
-		
-		self.close();
-		
-		window.close();
-		
-		// Firefox hack
-		window.open('','_parent','');
-		window.close();
-		
-		if(typeof browser == "object" && browser.tabs && typeof browser.tabs.remove == "function") browser.tabs.remove();
-		
-		
-		alertBox("Manually close the window to exit");
+		EDITOR.exit();
 		
 		return false;
 	}

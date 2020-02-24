@@ -81,9 +81,6 @@ and so that we also get an error when actually calling it twice, with a nice cal
 What I'm working on
 -------------------
 
-problem: We get buffered messages from the server before we have reopened files from last session
-
-
 
 todo: Fix issues with collaboration:
 * Reopen files

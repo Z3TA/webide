@@ -4173,7 +4173,7 @@ spawnOptions.env.HOST = netnsIP;
 			}, recreateUserProcessSleepTime);
 		}
 		
-		var connections = USER_CONNECTIONS[userConnectionName].connections;
+		var connections = USER_CONNECTIONS[username].connections;
 		var obj = {msg: msg, code: "WORKER_CLOSE"};
 var str = JSON.stringify(obj);
 		connections.forEach(function(conn) {
@@ -4205,6 +4205,12 @@ var str = JSON.stringify(obj);
 			// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
 			
 			var str = JSON.stringify(workerMessage);
+			
+			if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+				log("No clients for " + username + " connected. Unable to deliver resp=" + UTIL.shortString(str), WARN);
+				return;
+				// Should we buffer it !? If the client restarted it will not recognize the request id
+			}
 			
 			var conn = USER_CONNECTIONS[username].connections[userConnectionId];
 			if(conn == undefined) throw new Error("userConnectionId=" + userConnectionId + " USER_CONNECTIONS[username].connections.length=" + USER_CONNECTIONS[username].connections.length);

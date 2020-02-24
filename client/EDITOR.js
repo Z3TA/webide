@@ -6236,13 +6236,41 @@ if(waitingForAsync == 0) gotOptions();
 	}
 	
 	EDITOR.exit = function() {
-		/* Close the editor
+		
+		console.log("Calling exit event listeners...");
+		EDITOR.fireEvent("exit", ["exit"], function afterExitEvent(err, returns) {
+			console.log("All exit event listeners called!");
+			if(err) throw(err);
 			
-			Or just hide it?
-			And listen to an event that will bring it back!?
+			if(CLIENT.inFlight == 0) exitNow();
+			else {
+				console.log("Waiting one second before exiting... CLIENT.inFlight=" + CLIENT.inFlight);
+				setTimeout(exitNow, 1000);
+			}
 			
-		*/
-		window.close();
+			function exitNow() {
+				console.log("Closing the editor ...");
+				if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
+				
+				if(CLIENT.connected) {
+					CLIENT.cmd("quit", {});
+				}
+				
+				self.close();
+				
+				window.close();
+				
+				// Firefox hack
+				window.open('','_parent','');
+				window.close();
+				
+				if(typeof browser == "object" && browser.tabs && typeof browser.tabs.remove == "function") browser.tabs.remove();
+				
+				
+				alertBox("Manually close the window to exit");
+			}
+			
+		});
 		
 	}
 	
@@ -8038,8 +8066,10 @@ EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 
 EDITOR.reload = function reload(url) {
 	console.warn("Reloading the editor ...");
-	// Call exit listeners before reloading
-	EDITOR.fireEvent("exit", [], function afterExitEvent(err, returns) {
+		
+		console.log("Calling exit event listeners...");
+		EDITOR.fireEvent("exit", ["reload"], function afterExitEvent(err, returns) {
+			console.log("All exit event listeners called!");
 		if(err) throw err;
 		
 		var gotError = false;
@@ -8078,61 +8108,68 @@ EDITOR.reload = function reload(url) {
 			//document.location = "about:blank";
 			//document.location = "file:///" + require("dirname") + "/client/index.htm";
 			
-			console.log("Reloading! RUNTIME=" + RUNTIME);
+				if(CLIENT.inFlight == 0) reloadNow(); 
+				else {
+					console.log("Waiting one second before reloading... CLIENT.inFlight=" + CLIENT.inFlight);
+					setTimeout(reloadNow, 1000);
+				}
+				
+				function reloadNow() {
+					console.log("Reloading! RUNTIME=" + RUNTIME);
 			
 			window.onbeforeunload = null;
 			if(url) window.location=url;
 			else location.reload();
 			
 			// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-			
-		}
-	});
-}
-
-var waitingForFileToBeParsed = {};
+				}
+			}
+		});
+	}
+	
+	var waitingForFileToBeParsed = {};
 	EDITOR.parse = function parse(fileOrString, lang, path, callback) {
-	/*
-		Useful for when you want to parse a file, but not open it. Returns:
-		{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
-	*/
-	
-	if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
-	
-	if(callback == undefined && typeof lang == "function") {
-		callback = lang;
-		lang = undefined;
-	}
-	else if(callback == undefined && typeof path == "function") {
-		callback = path;
-		path = undefined;
-	}
-	
-	if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
-	
-	if(path == undefined) path = UTIL.hash(fileOrString);
-	
-	// Prevent race conditions
-	var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
-	
-	if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
-	
-	waitingForFileToBeParsed[path].push(callback);
-	
-	if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
-	
+		/*
+			Useful for when you want to parse a file, but not open it. Returns:
+			{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
+		*/
+		
+		if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
+		
+		if(callback == undefined && typeof lang == "function") {
+			callback = lang;
+			lang = undefined;
+		}
+		else if(callback == undefined && typeof path == "function") {
+			callback = path;
+			path = undefined;
+		}
+		
+		if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
+		
+		if(path == undefined) path = UTIL.hash(fileOrString);
+		
+		// Prevent race conditions
+		var wait = waitingForFileToBeParsed.hasOwnProperty(path); 
+		
+		if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
+		
+		waitingForFileToBeParsed[path].push(callback);
+		
+		if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
+		
 		var f = EDITOR.eventListeners.parse.map(funMap);
 		for(var i=0, ret=false; i<f.length; i++) {
 			if(callback) ret = f[i](fileOrString, lang, path, parseDone); // async
 			else ret = f[i](fileOrString, lang, path); // sync
-		if(ret) return ret; // Only let one parser parse it
-	}
-	
-	function parseDone(err, parseResult) {
+			if(ret) return ret; // Only let one parser parse it
+		}
+		
+		function parseDone(err, parseResult) {
 			if(!waitingForFileToBeParsed.hasOwnProperty(path)) throw new Error("path=" + path + " not in waitingForFileToBeParsed=" + JSON.stringify(waitingForFileToBeParsed, null, 2) + "\nfileOrString=" + fileOrString+ " lang=" + lang + " err?" + (!!err) + " parseResult?" + (!!parseResult) + ". How did this happen!?");
 			
-		for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
-			waitingForFileToBeParsed[path][i](err, parseResult);
+			for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
+				waitingForFileToBeParsed[path][i](err, parseResult);
 		}
 		delete waitingForFileToBeParsed[path];
 	}
@@ -8842,7 +8879,9 @@ if(RUNTIME == "nw.js") {
 			console.warn("EDITOR.storage not ready!");
 		}
 		
-		EDITOR.fireEvent("exit", [], function(err, returns) {
+			console.log("Calling exit event listeners...");
+			EDITOR.fireEvent("exit", ["close"], function(err, returns) {
+				console.log("All exit event listeners called!");
 			if(err) throw err;
 			
 			var gotError = false;
@@ -8908,7 +8947,19 @@ window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEv
 	EDITOR.interact("resize", resizeEvent);
 	
 }, false);
-
+	
+	window.addEventListener("unload", function unloading() {
+		console.log("unload event!");
+		
+		// It is unlikely that we manage to run all exit events...
+		console.log("Calling exit event listeners...");
+		EDITOR.fireEvent("exit", ["unload"], function afterExitEvent(err, returns) {
+			console.log("All exit event listeners called!");
+			if(err) console.error(err);
+		});
+		
+	}, false);
+	
 /*
 	
 	The third argumentin addEventListener is a Boolean value 
@@ -12205,6 +12256,7 @@ function getFile(url, callback) {
 		for(var path in EDITOR.files) {
 			if(!EDITOR.files[path].isSaved) return "Are you sure you want to close the editor ?";
 		}
+		
 	}
 	
 	function clearSelection() {

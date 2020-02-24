@@ -49,6 +49,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.pingInterval = 5000; // How long time to wait until sendng next ping
 	CLIENT.pingTimeout = 1000;
 	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
+	CLIENT.inFlight = 0;
 	
 	var checkEditorInterval = setInterval(checkEditor);
 	
@@ -206,6 +207,8 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		
 		var id = ++idCounter;
 		
+		
+		
 		var string = id + GS + req;
 		
 		if(json) {
@@ -235,6 +238,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		}
 		
 		console.log("CLIENT: Sending: " + UTIL.shortString(string) + " to server ...");
+		
 		connection.send(string);
 		
 		/*
@@ -251,6 +255,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		*/
 		if(requestThatDontCallBack.indexOf(req) == -1) {
 			setTimeout(commandTimeout, timeout || CLIENT.cmdTimeout);
+			CLIENT.inFlight++;
 		}
 		
 		function commandTimeout() {
@@ -259,6 +264,8 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				It's very annoying when you do something, and the editor doesn't respond
 				because there is a problem with the connection to the server...
 			*/
+			
+			CLIENT.inFlight--;
 			
 			if(!properCallStackError.hasOwnProperty(id) && !callbackWaitList.hasOwnProperty(id)) return; // We have received the response!
 			else if(!properCallStackError.hasOwnProperty(id)) throw new Error("Request id=" + id + " req=" + req + " timed out, but there is no properCallStackError! timeout=" + timeout);
@@ -529,7 +536,8 @@ reconnectTimeoutTime += 10000;
 			
 			if(json.id) {
 				if(callbackWaitList.hasOwnProperty(json.id)) {
-					
+					CLIENT.inFlight--;
+
 					console.log("CLIENT: Got server response for id=" + json.id);
 					
 					var err = null;

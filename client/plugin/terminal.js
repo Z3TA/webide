@@ -39,7 +39,9 @@ todo: Run vttest
 		parse: false,
 		noChangeEvents: true,
 		noCollaboration: true
-	}
+	};
+	var waitForReopen = true; // Buffer terminal messages for two seconds so that the last session get a chance to load
+	var BUFFER = {}; // termid: [data]
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -72,6 +74,13 @@ todo: Run vttest
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "term", startTerminalFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
+			setTimeout(function() {
+				console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+				
+				parseBuffer();
+				
+				waitForReopen = false;
+			}, 2000);
 			
 		},
 		unload: function unloadTerminal() {
@@ -126,7 +135,7 @@ todo: Run vttest
 		console.warn("addTerminalEvents");
 		
 		if(terminalActive === true) {
-console.warn("Terminal events already active!");
+			console.warn("Terminal events already active!");
 			return;
 		}
 		
@@ -387,9 +396,907 @@ console.warn("Terminal events already active!");
 		});
 	}
 	
+	/*
+		
+		http://www.termsys.demon.co.uk/vtansi.htm
+		http://ascii-table.com/ansi-escape-sequences-vt-100.php
+		https://www.inwap.com/pdp10/ansicode.txt
+		
+	*/
+	
+	function parse(data, file) {
+		
+		console.log("Parse data=" + data);
+		
+		if(reNetnsIP) {
+			
+			data = data.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
+			// $1 and $3 might be colors...
+			/*
+				if( data.indexOf(netnsIP) != -1) {
+				for(var i=0; i<data.length; i++) {
+				console.log( i + " = " + data.charAt(i) + " = " + data.charCodeAt(i) );
+				}
+				}
+			*/
+		}
+		
+		
+		var char = "";
+		var code = 0;
+		var inEsc = false;
+		var inText = true;
+		var inBracket = false;
+		var inNumber = "";
+		var bright = false;
+		var inNumberSerie = false;
+		var numberSerie = [];
+		
+		var defaultForeGroundColor = EDITOR.settings.style.textColor;
+		var defaultBackgroundColor = null; // EDITOR.settings.style.bgColor;
+		
+		var colorBlack = "black";
+		var colorRed = "red";
+		var colorGreen = "green";
+		var colorYellow = "yellow";
+		var colorBlue = "blue";
+		var colorMagenta = "magenta";
+		var colorCyan = "cyan";
+		var colorWhite = "white";
+		
+		var bright = false;
+		var dim = false;
+		var underscore = false;
+		var blink = false;
+		var reverse = false;
+		var hidden = false;
+		var foregroundColor = defaultForeGroundColor;
+		var backgroundColor = defaultBackgroundColor;
+		
+		if(!file.terminal) file.terminal = new TerminalState();
+		var terminalState = file.terminal;
+		
+		var charBuffer = "";
+		
+		for (var i=0; i<data.length; i++) {
+			char = data.charAt(i);
+			code = data.charCodeAt(i);
+			
+			console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket +
+			" inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
+			
+			if(code == 7) { // BEL
+				if(charBuffer) print();
+				inNumber = "";
+				inNumberSerie = false;
+				numberSerie.length = 0;
+				inText = true;
+			}
+			else if(code == 27) { // ESC
+				if(charBuffer) print();
+				inEsc = true;
+				inText = false;
+				inBracket = false;
+				inNumberSerie = false;
+				inNumber = "";
+				numberSerie.length = 0;
+			}
+			else if(inEsc && code == 93) { // 93=]
+				if(charBuffer) print();
+				// Undocumented
+				inEsc = false;
+			}
+			else if(inEsc && code == 91) { // 91=[
+				if(charBuffer) print();
+				inBracket = true;
+				inEsc = false;
+			}
+			
+			// ### Start numbers
+			else if(inBracket && code == 48) { // 0
+				inNumber = "0";
+				inBracket = false;
+			}
+			else if(inBracket && code == 49) { // 1
+				inNumber = "1";
+				inBracket = false;
+			}
+			else if(inBracket && code == 50) { // 2
+				inNumber = "2";
+				inBracket = false;
+			}
+			else if(inBracket && code == 51) { // 3
+				inNumber = "3";
+				inBracket = false;
+			}
+			else if(inBracket && code == 52) { // 4
+				inNumber = "4";
+				inBracket = false;
+			}
+			else if(inBracket && code == 53) { // 5
+				inNumber = "5";
+				inBracket = false;
+			}
+			else if(inBracket && code == 54) { // 6
+				inNumber = "6";
+				inBracket = false;
+			}
+			else if(inBracket && code == 55) { // 7
+				inNumber = "7";
+				inBracket = false;
+			}
+			else if(inBracket && code == 56) { // 8
+				inNumber = "8";
+				inBracket = false;
+			}
+			else if(inBracket && code == 57) { // 9
+				inNumber = "9";
+				inBracket = false;
+			}
+			
+			// ### Add numbers
+			else if((inNumber || inNumberSerie) && code == 48) { // 0
+				inNumber += "0";
+			}
+			else if((inNumber || inNumberSerie) && code == 49) { // 1
+				inNumber += "1";
+			}
+			else if((inNumber || inNumberSerie) && code == 50) { // 2
+				inNumber += "2";
+			}
+			else if((inNumber || inNumberSerie) && code == 51) { // 3
+				inNumber += "3";
+			}
+			else if((inNumber || inNumberSerie) && code == 52) { // 4
+				inNumber += "4";
+			}
+			else if((inNumber || inNumberSerie) && code == 53) { // 5
+				inNumber += "5";
+			}
+			else if((inNumber || inNumberSerie) && code == 54) { // 6
+				inNumber += "6";
+			}
+			else if((inNumber || inNumberSerie) && code == 55) { // 7
+				inNumber += "7";
+			}
+			else if((inNumber || inNumberSerie) && code == 56) { // 8
+				inNumber += "8";
+			}
+			else if((inNumber || inNumberSerie) && code == 57) { // 9
+				inNumber += "9";
+			}
+			
+			else if(inNumber && code == 59) { // ;
+				numberSerie.push(inNumber);
+				inNumberSerie = true;
+				inNumber = "";
+			}
+			
+			else if(inBracket && code == 109) { // m
+				if(charBuffer) print();
+				resetDisplay();
+				inBracket = false;
+				inText = true;
+			}
+			
+			else if(inNumberSerie && inNumber && char == "r") {
+				if(charBuffer) print();
+				var bottom = parseInt(inNumber);
+				var top = parseInt(numberSerie.pop());
+				
+				console.log("Set top=" + top + " and bottom=" + bottom + " lines of a window");
+				
+				if( isNaN(top) || isNaN(bottom) ) throw new Error("top=" + top + " bottom=" + bottom + " data=" + data);
+				
+				terminalState.topLine = top;
+				terminalState.bottomLine = bottom;
+				
+				inNumberSerie = false;
+				numberSerie.length = 0;
+				inNumber = "";
+				inText = true;
+			}
+			
+			
+			
+			// ### Clearing lines
+			else if(char == "K" && (inBracket || inNumber == "0") ) {
+				
+				console.log("Clear line from cursor right ");
+				var row = file.grid[file.caret.row];
+				if(row.length > file.caret.col) {
+					var firstIndex = file.caret.index;
+					var lastIndex = row[row.length-1].index;
+					file.deleteTextRange(firstIndex, lastIndex);
+				}
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if(char == "K" && inNumber == "1") {
+				console.log("todo: Clear line from cursor left ");
+				inNumber = "";
+				inText = true;
+			}
+			else if(char == "K" && inNumber == "2") {
+				console.log("Clear entire line ");
+				file.removeAllTextOnRow(file.caret.row);
+				inNumber = "";
+				inText = true;
+			}
+			
+			// ### Clearing screen
+			else if(char == "J" && (inBracket || inNumber == "0") ) {
+				console.log("todo: Clear screen from cursor down");
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if(char == "J" && inNumber == "1") {
+				console.log("todo: Clear screen from cursor up ");
+				inNumber = "";
+				inText = true;
+			}
+			else if(char == "J" && inNumber == "2") { // J
+				var startRow = file.startRow;
+				
+				console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
+				
+				file.moveCaretToEndOfFile();
+				file.insertLineBreak();
+				file.startRow = file.caret.row;
+				EDITOR.renderNeeded();
+				
+				/*
+					for(var row=startRow; row<file.grid.length; row++) {
+					console.log("Clearing row=" + row);
+					file.removeAllTextOnRow(row);
+					}
+				*/
+				
+				inNumber = "";
+				inText = true;
+			}
+			
+			// ### Moving the cursor
+			else if((inEsc || inNumber || inBracket) && char == "A") {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				
+				console.log("Move cursor up " + times + " lines from caret=" + JSON.stringify(file.caret));
+				
+				var col = file.caret.col;
+				
+				for(var j=0; j<times;j++) file.moveCaretUp();
+				
+				if(file.caret.col < col) {
+					file.insertSpace(col - file.caret.col);
+				}
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if((inEsc || inNumber || inBracket) && char == "B") {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				
+				console.log("Move cursor down " + times + " lines from caret=" + JSON.stringify(file.caret) );
+				
+				var col = file.caret.col;
+				
+				for(var j=0; j<times;j++) {
+					console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
+					
+					if(file.caret.row == file.grid.length-1) {
+						// Terminal wants to move the caret down, but there are no more lines in the editor:
+						file.moveCaretToEndOfFile();
+						file.insertLineBreak();
+					}
+					else file.moveCaretDown();
+					
+				}
+				
+				if(file.caret.col < col) {
+					file.insertSpace(col - file.caret.col);
+				}
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if((inEsc || inNumber || inBracket) && char == "C") {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				
+				console.log("Move cursor right " + times + " columns");
+				for(var j=0; j<times;j++) {
+					if(file.caret.eol) file.insertText(" ");
+					else file.moveCaretRight();
+				}
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if((inEsc || inNumber || inBracket) && char == "D") {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				
+				console.log("Move cursor left " + times + " columns");
+				for(var j=0; j<times;j++) file.moveCaretLeft();
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if((inEsc || inNumber || inBracket) && char == "G") {
+				if(charBuffer) print();
+				
+				if(inNumber) var col = parseInt(inNumber);
+				else var col = 0;
+				
+				console.log("Move to column " + col + " of current line");
+				// Columns start on column 1 in terminals
+				file.moveCaretToCol(col-1);
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) {
+				if(charBuffer) print();
+				
+				console.log("Move cursor to upper left corner");
+				file.moveCaret(undefined, file.startRow, 0);
+				inEsc = false;
+				inBracket = false;
+				inText = true;
+			}
+			else if(inNumberSerie && (char == "H" || char == "f")) {
+				if(charBuffer) print();
+				
+				var toCol = parseInt(inNumber) - 1;
+				var toRow = parseInt(file.startRow + parseInt(numberSerie.pop())) - 1; // + terminalState.topLine;
+				
+				console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
+				
+				console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
+				
+				while(toRow >= file.grid.length) {
+					file.writeLineBreak();
+				}
+				
+				console.log(" file.grid.length=" + file.grid.length + " toRow=" + toRow);
+				console.log(" file.grid[" + toRow + "].length=" + file.grid[toRow].length);
+				
+				if(toCol >= file.grid[toRow].length) {
+					var spaces = "";
+					for(var j=0; j<toCol-file.grid[toRow].length; j++) {
+						spaces += " ";
+					}
+					file.moveCaret(undefined, toRow, file.grid[toRow].length-1);
+					if(spaces) file.insertText(spaces);
+				}
+				
+				file.moveCaret(undefined, toRow, toCol);
+				
+				inNumber = "";
+				inNumberSerie = false;
+				//numberSerie.length = 0;
+				if(numberSerie.length > 0) throw new Error("Unexpected numberSerie.length=" + numberSerie.length + " numberSerie=" + JSON.stringify(numberSerie));
+				inText = true;
+			}
+			else if(inEsc && char == "E") {
+				if(charBuffer) print();
+				
+				console.log("todo: Move to next line");
+				inEsc = false;
+				inText = true;
+			}
+			
+			else if(inEsc && char == "7") {
+				if(charBuffer) print();
+				
+				console.log("todo: Save cursor position and attributes");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "8") {
+				if(charBuffer) print();
+				
+				console.log("todo: Restore cursor position and attributes");
+				inEsc = false;
+				inText = true;
+			}
+			
+			// ### Scrolling
+			else if( (inEsc || inNumber) && (char == "D" || char == "L")) {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				console.log("Move/scroll window UP " + times + " line(s)");
+				var topRow = file.startRow;
+				var bottomRow = file.startRow;
+				
+				if(terminalState.topLine > 0) topRow += terminalState.topLine-1;
+				if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine;
+				
+				var topLineText = "";
+				var bottomLineText = "";
+				for(var j=0; j<times; j++) {
+					topLineText = terminalState.topScrollRowBuffer.pop();
+					
+					if(topLineText == undefined) topLineText = "";
+					
+					//file.insertTextRow(topLineText, topRow);
+					file.insertTextRow("", topRow);
+					
+					bottomLineText = file.removeRow(bottomRow);
+					terminalState.bottomScrollRowBuffer.unshift(bottomLineText);
+				}
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			else if( (inEsc || inNumber) && char == "M") {
+				if(charBuffer) print();
+				
+				if(inNumber) var times = parseInt(inNumber);
+				else var times = 1;
+				
+				var topRow = file.startRow;
+				var bottomRow = file.startRow;
+				
+				if(terminalState.topLine > 0) topRow += (terminalState.topLine-1);
+				if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
+				
+				console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine +
+				" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
+				
+				var bottomLineText = "";
+				var topLineText = "";
+				for(var j=0; j<times; j++) {
+					bottomLineText = terminalState.bottomScrollRowBuffer.shift();
+					
+					if(bottomLineText == undefined) bottomLineText = "";
+					
+					//file.insertTextRow(bottomLineText, bottomRow);
+					
+					if(!inNumber) {
+						topLineText = file.removeRow(bottomRow);
+						file.insertTextRow("", topRow);
+					}
+					else {
+						file.insertTextRow("", bottomRow+1);
+						topLineText = file.removeRow(topRow);
+					}
+					
+					terminalState.topScrollRowBuffer.push(topLineText);
+				}
+				
+				inEsc = false;
+				inBracket = false;
+				inNumber = "";
+				inText = true;
+			}
+			
+			
+			else if(inNumber && char == "h") {
+				if(charBuffer) print();
+				
+				/*
+					Esc[20h 	Set new line mode 	LMN
+					Esc[?1h 	Set cursor key to application 	DECCKM
+					none 	Set ANSI (versus VT52) 	DECANM
+					Esc[?3h 	Set number of columns to 132 	DECCOLM
+					Esc[?4h 	Set smooth scrolling 	DECSCLM
+					Esc[?5h 	Set reverse video on screen 	DECSCNM
+					Esc[?6h 	Set origin to relative 	DECOM
+					Esc[?7h 	Set auto-wrap mode 	DECAWM
+					Esc[?8h 	Set auto-repeat mode 	DECARM
+					Esc[?9h 	Set interlacing mode 	DECINLM
+					
+					ESC[?25h  Make Cursor visible
+					
+					ESC[?47h  Save screen
+					
+				*/
+				if(inNumber == 4) {
+					terminalState.smoothScrolling = true;
+				}
+				else {
+					console.warn("Unknown inNumber=" + inNumber + " ");
+				}
+				
+				inNumber = "";
+				inText = true;
+			}
+			else if(inNumber && char == "l") { // small L
+				if(charBuffer) print();
+				
+				/*
+					Esc[20l 	Set line feed mode 	LMN
+					Esc[?1l 	Set cursor key to cursor 	DECCKM
+					Esc[?2l 	Set VT52 (versus ANSI) 	DECANM
+					Esc[?3l 	Set number of columns to 80 	DECCOLM
+					Esc[?4l 	Set jump scrolling 	DECSCLM
+					Esc[?5l 	Set normal video on screen 	DECSCNM
+					Esc[?6l 	Set origin to absolute 	DECOM
+					Esc[?7l 	Reset auto-wrap mode 	DECAWM
+					Esc[?8l 	Reset auto-repeat mode 	DECARM
+					Esc[?9l 	Reset interlacing mode 	DECINLM
+				*/
+				
+				if(inNumber == 4) {
+					terminalState.smoothScrolling = false;
+				}
+				
+				inNumber = "";
+				inText = true;
+			}
+			
+			
+			// ### Misc
+			else if(inEsc && char == "=") {
+				console.log("todo: Set alternate keypad mode");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == ">") {
+				console.log("todo: Set numeric keypad mode ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "A" && data.charAt(i-1) == "(") {
+				console.log("todo: Set United Kingdom G0 character set");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "A" && data.charAt(i-1) == ")") {
+				console.log("todo: Set United Kingdom G1 character set ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "B" && data.charAt(i-1) == "(") {
+				console.log("todo: Set United States G0 character set ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "B" && data.charAt(i-1) == ")") {
+				console.log("todo: Set United States G1 character set");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "0" && data.charAt(i-1) == "(") {
+				console.log("todo: Set G0 special chars. & line set ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "0" && data.charAt(i-1) == ")") {
+				console.log("todo: Set G1 special chars. & line set  ");
+				// baud rate ??
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "1" && data.charAt(i-1) == "(") {
+				console.log("todo: Set G0 alternate character ROM ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "1" && data.charAt(i-1) == ")") {
+				console.log("todo: Set G1 alternate character ROM ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "2" && data.charAt(i-1) == "(") {
+				console.log("todo: Set G0 alt char ROM and spec. graphics");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "2" && data.charAt(i-1) == ")") {
+				console.log("todo: Set G1 alt char ROM and spec. graphics");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "N") {
+				console.log("todo: Set single shift 2 ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "O") {
+				console.log("todo: Set single shift 3 ");
+				inEsc = false;
+				inText = true;
+			}
+			
+			// ### Tabs
+			else if(inEsc && char == "H") {
+				console.log("todo: Set a tab at the current column");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inBracket && char == "g") {
+				console.log("todo: Clear a tab at the current column");
+				inBracket = false;
+				inText = true;
+			}
+			else if(inNumber == "0" && char == "g") {
+				console.log("todo: Clear a tab at the current column");
+				inNumber = "";
+				inText = true;
+			}
+			else if(inNumber == "3" && char == "g") {
+				console.log("todo: Clear all tabs");
+				inNumber = "";
+				inText = true;
+			}
+			
+			// ### Letters width/height
+			else if(inEsc && char == "3" && data.charAt(i-1) == "#") {
+				console.log("todo: Double-height letters, top half ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "4" && data.charAt(i-1) == "#") {
+				console.log("todo: Double-height letters, bottom half ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "5" && data.charAt(i-1) == "#") {
+				console.log("todo: Single width, single height letters ");
+				inEsc = false;
+				inText = true;
+			}
+			else if(inEsc && char == "6" && data.charAt(i-1) == "#") {
+				console.log("todo: Double width, single height letters");
+				inEsc = false;
+				inText = true;
+			}
+			
+			else if(inNumber && char == "m") { // code=109
+				// ### Display mode
+				
+				if(charBuffer) print();
+				
+				numberSerie.push(inNumber);
+				
+				for (var j=0; j<numberSerie.length; j++) {
+					
+					
+					// 22 Normal color or intensity (Neither bold nor faint )
+					
+					
+					// foreground
+					if(numberSerie[j] == "30") foregroundColor = colorBlack;
+					else if(numberSerie[j] == "31") foregroundColor = colorRed;
+					else if(numberSerie[j] == "32") foregroundColor = colorGreen;
+					else if(numberSerie[j] == "33") foregroundColor = colorYellow;
+					else if(numberSerie[j] == "34") foregroundColor = colorBlue;
+					else if(numberSerie[j] == "35") foregroundColor = colorMagenta;
+					else if(numberSerie[j] == "36") foregroundColor = colorCyan;
+					else if(numberSerie[j] == "37") foregroundColor = colorWhite;
+					
+					// 38 = special color (Next arguments are 5;n or 2;r;g;b)
+					
+					else if(numberSerie[j] == "39") foregroundColor = defaultForeGroundColor; // Default foreground color
+					
+					// background
+					else if(numberSerie[j] == "40") backgroundColor = colorBlack;
+					else if(numberSerie[j] == "41") backgroundColor = colorRed;
+					else if(numberSerie[j] == "42") backgroundColor = colorGreen;
+					else if(numberSerie[j] == "43") backgroundColor = colorYellow;
+					else if(numberSerie[j] == "44") backgroundColor = colorBlue;
+					else if(numberSerie[j] == "45") backgroundColor = colorMagenta;
+					else if(numberSerie[j] == "46") backgroundColor = colorCyan;
+					else if(numberSerie[j] == "47") backgroundColor = colorWhite;
+					
+					else {
+						while(numberSerie[j].length > 0) {
+							
+							if(numberSerie[j].charAt(0) == "0") {
+								resetDisplay(); // Reset all
+							}
+							else if(numberSerie[j].charAt(0) == "1") {
+								bright = true;
+							}
+							else if(numberSerie[j].charAt(0) == "2") {
+								dim = true;
+							}
+							else if(numberSerie[j].charAt(0) == "4") {
+								underscore = true;
+							}
+							else if(numberSerie[j].charAt(0) == "5") {
+								blink = true;
+							}
+							else if(numberSerie[j].charAt(0) == "7") {
+								reverse = true;
+							}
+							else if(numberSerie[j].charAt(0) == "8") {
+								hidden = true;
+							}
+							
+							numberSerie[j] = numberSerie[j].slice(1);
+						}
+					}
+				}
+				
+				if(backgroundColor == defaultBackgroundColor && EDITOR.settings.style.bgColor == "rgb(255,255,255)") {
+					// If there's no background set, the editors default will be used.
+					// Many programs asume you are using a black or very dark background for the terminal!
+					// So if we are using the white default we have to make some color adjustments
+					
+					if(foregroundColor == colorYellow) foregroundColor = "#c59800";
+					if(foregroundColor == colorCyan) foregroundColor = "#008686";
+					if(foregroundColor == colorWhite) foregroundColor = "#828282";
+				}
+				
+				inNumber = "";
+				inNumberSerie = false;
+				numberSerie.length = 0;
+				inText = true;
+			}
+			
+			else if(inNumber && char == "P") {
+				// This is not in the spec!!?!? But bash sends it
+				if(charBuffer) print();
+				
+				var times = parseInt(inNumber);
+				
+				console.log("Delete " + times + " characters");
+				for(var j=0; j<times;j++) file.deleteCharacter();
+				
+				inNumber = "";
+				inText = true;
+			}
+			
+			else if(inEsc && code == 109) { // m
+				if(charBuffer) print();
+				
+				inText = true;
+				inEsc = false;
+			}
+			else if(inText) {
+				// ### Text
+				
+				if(code == 10) { // New Line \n
+					
+					if(charBuffer) print();
+					
+					console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow +
+					" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length + " caret=" + JSON.stringify(file.caret)  );
+					
+					if(terminalState.topLine > 0 && terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
+						file.removeRow(terminalState.topLine-1 + file.startRow);
+					}
+					
+					if(file.caret.row == file.grid.length-1) {
+						file.moveCaretToEndOfFile();
+						file.writeLineBreak();
+					}
+					else {
+						if(charBuffer) print();
+						//file.insertLineBreak();
+						file.moveCaretDown();
+					}
+				}
+				else if(code == 13) {// Carriage Return \r
+					console.log("terminal: Carriage Return on caret=" + JSON.stringify(file.caret) );
+					if(charBuffer) print();
+					//file.moveCaretToEndOfLine();
+					file.moveCaretToStartOfLine();
+					//file.moveCaretDown();
+				}
+				else if(code == 8) { // BS  (backspace)
+					//if(file.caret.col > 0) file.moveCaretLeft();
+					if(charBuffer) print();
+					file.moveCaretLeft();
+					//file.deleteCharacter();
+				}
+				else if(code == 9) { // TAB (horizontal tab)
+					var spaces = ""
+					for (var j=0; j<EDITOR.settings.tabSpace; j++) {
+						spaces += " ";
+					}
+					file.insertText(spaces);
+				}
+				else {
+					/*
+						Optimization:
+						Buffer characters instead of inserting them one by one.
+					*/
+					charBuffer += char;
+					
+				}
+				
+				terminalState.caret.row = file.caret.row;
+				terminalState.caret.col = file.caret.col;
+				
+			}
+			
+		}
+		
+		if(charBuffer) print();
+		
+		EDITOR.renderNeeded();
+		
+		function print() {
+			
+			console.log("Terminal Insert: caret=" + JSON.stringify(file.caret) + " length=" + charBuffer.length + " " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
+			//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+			// terminal always overwrite !?
+			var colStart = file.caret.col;
+			if(!file.caret.eol && !terminalState.smoothScrolling) {
+				var deleteTo = Math.min(file.caret.index + charBuffer.length-1, file.caret.index + file.grid[file.caret.row].length - file.caret.col - 1);
+				file.deleteTextRange(file.caret.index, deleteTo);
+			}
+			file.insertText(charBuffer);
+			charBuffer = "";
+			
+			if(backgroundColor != defaultBackgroundColor) {
+				for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].bgColor = backgroundColor;
+			}
+			if(foregroundColor != defaultForeGroundColor) {
+				for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].color = foregroundColor;
+			}
+			else if(reverse) {
+				// Make the (default?) text color the background and the bacgkround the text color
+				for(var col=colStart; col<file.caret.col; col++) {
+					file.grid[file.caret.row][col].bgColor = EDITOR.settings.style.textColor;
+					file.grid[file.caret.row][col].color = EDITOR.settings.style.bgColor;
+				}
+			}
+			
+			terminalState.caret.col = file.caret.col;
+		}
+		
+		function resetDisplay() {
+			bright = false;
+			dim = false;
+			underscore = false;
+			blink = false;
+			reverse = false;
+			hidden = false;
+			foregroundColor = defaultForeGroundColor;
+			backgroundColor = defaultBackgroundColor;
+		}
+		
+	}
+	
+	function parseBuffer() {
+		var file;
+		for(var terminalId in BUFFER) {
+			file = EDITOR.files[termPrefix + terminalId];
+			if(!file) throw new Error("Terminal file not open: " + termPrefix + terminalId);
+			for (var i=0; i<BUFFER[terminalId].length; i++) {
+				parse(BUFFER[terminalId][i], file);
+			}
+			BUFFER[terminalId].length = 0;
+			delete BUFFER[terminalId];
+		}
+	}
+	
 	function terminalMessage(term) {
 		
 		var file = EDITOR.files[termPrefix + term.id];
+		var buffer = BUFFER[term.id];
+		
+		console.log("terminalMessage: term.id=" + term.id + " waitForReopen=" + waitForReopen + "  file?=" + (file && file.path) + " term.data=" + (term.data));
 		
 		if(term.exit) {
 			
@@ -405,15 +1312,30 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		}
 		
 		if(!file && term.data) {
+			console.log("terminalMessage: Got data, but terminal file is not open! Buffering...");
+			if(buffer == undefined) buffer = BUFFER[term.id] = [];
+			buffer.push(term.data);
+			
+			if(waitForReopen) {
+				console.log("terminalMessage: waitForReopen!");
+				return; // Wait and see if the old session is opened before opening a new terminal file
+			}
+			
 			var name = termPrefix + term.id;
-			openTerminalFile(name, function(err, f) {
+			console.log("terminalMessage: openTerminalFile...");
+			openTerminalFile(name, function terminalFileOpened(err, f) {
+				console.log("terminalMessage: terminalFileOpened! buffer.length=" + buffer.length);
 				if(err) return alertBox(err.message);
 				
-				file = f;
-				parse(term.data);
+				if(!EDITOR.files.hasOwnProperty(termPrefix + term.id)) throw new Error("termPrefix=" + termPrefix + " + term.id=" + term.id + " file failed to open!");
+				
+				parseBuffer();
+				
 			});
 			return;
 		}
+		
+		console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 		
 		if(file && terminalFiles.indexOf(file) == -1) {
 			// File was probably reopened from last session
@@ -421,902 +1343,25 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			for(var prop in terminalFileStateProps) {
 				file[prop] = terminalFileStateProps[prop];
 			}
+			if(!terminalActive) addTerminalEvents();
 		}
 else {
 console.log(file.path + " is a terminal emulator file!");
 }
 		
-		if(term.data) parse(term.data);
-		
-		console.log("terminal:" + JSON.stringify(term, null, 2));
-		
-		
-		/*
-			
-			http://www.termsys.demon.co.uk/vtansi.htm
-			http://ascii-table.com/ansi-escape-sequences-vt-100.php
-			https://www.inwap.com/pdp10/ansicode.txt
-			
-		*/
-		
-		function parse(data) {
-			
-			console.log("Parse data=" + data);
-			
-			if(reNetnsIP) {
-				
-				data = data.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
-				// $1 and $3 might be colors...
-				/*
-					if( data.indexOf(netnsIP) != -1) {
-					for(var i=0; i<data.length; i++) {
-					console.log( i + " = " + data.charAt(i) + " = " + data.charCodeAt(i) );
-					}
-					}
-				*/
-			}
-			
-			
-			var char = "";
-			var code = 0;
-			var inEsc = false;
-			var inText = true;
-			var inBracket = false;
-			var inNumber = "";
-			var bright = false;
-			var inNumberSerie = false;
-			var numberSerie = [];
-			
-			var defaultForeGroundColor = EDITOR.settings.style.textColor;
-			var defaultBackgroundColor = null; // EDITOR.settings.style.bgColor;
-			
-			var colorBlack = "black";
-			var colorRed = "red";
-			var colorGreen = "green";
-			var colorYellow = "yellow";
-			var colorBlue = "blue";
-			var colorMagenta = "magenta";
-			var colorCyan = "cyan";
-			var colorWhite = "white";
-			
-			var bright = false;
-			var dim = false;
-			var underscore = false;
-			var blink = false;
-			var reverse = false;
-			var hidden = false;
-			var foregroundColor = defaultForeGroundColor;
-			var backgroundColor = defaultBackgroundColor;
-			
-			if(!file.terminal) file.terminal = new TerminalState();
-			var terminalState = file.terminal;
-			
-			var charBuffer = "";
-			
-			for (var i=0; i<data.length; i++) {
-				char = data.charAt(i);
-				code = data.charCodeAt(i);
-				
-				console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket + 
-				" inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
-				
-				if(code == 7) { // BEL
-					if(charBuffer) print();
-					inNumber = "";
-					inNumberSerie = false;
-					numberSerie.length = 0;
-					inText = true;
-				}
-				else if(code == 27) { // ESC
-					if(charBuffer) print();
-					inEsc = true;
-					inText = false;
-					inBracket = false;
-					inNumberSerie = false;
-					inNumber = "";
-					numberSerie.length = 0;
-				}
-				else if(inEsc && code == 93) { // 93=]  
-					if(charBuffer) print();
-					// Undocumented
-					inEsc = false;
-				}
-				else if(inEsc && code == 91) { // 91=[
-					if(charBuffer) print();
-					inBracket = true;
-					inEsc = false;
-				}
-				
-				// ### Start numbers
-				else if(inBracket && code == 48) { // 0
-					inNumber = "0";
-					inBracket = false;
-				}
-				else if(inBracket && code == 49) { // 1
-					inNumber = "1";
-					inBracket = false;
-				}
-				else if(inBracket && code == 50) { // 2
-					inNumber = "2";
-					inBracket = false;
-				}
-				else if(inBracket && code == 51) { // 3
-					inNumber = "3";
-					inBracket = false;
-				}
-				else if(inBracket && code == 52) { // 4
-					inNumber = "4";
-					inBracket = false;
-				}
-				else if(inBracket && code == 53) { // 5
-					inNumber = "5";
-					inBracket = false;
-				}
-				else if(inBracket && code == 54) { // 6
-					inNumber = "6";
-					inBracket = false;
-				}
-				else if(inBracket && code == 55) { // 7
-					inNumber = "7";
-					inBracket = false;
-				}
-				else if(inBracket && code == 56) { // 8
-					inNumber = "8";
-					inBracket = false;
-				}
-				else if(inBracket && code == 57) { // 9
-					inNumber = "9";
-					inBracket = false;
-				}
-				
-				// ### Add numbers
-				else if((inNumber || inNumberSerie) && code == 48) { // 0
-					inNumber += "0";
-				}
-				else if((inNumber || inNumberSerie) && code == 49) { // 1
-					inNumber += "1";
-				}
-				else if((inNumber || inNumberSerie) && code == 50) { // 2
-					inNumber += "2";
-				}
-				else if((inNumber || inNumberSerie) && code == 51) { // 3
-					inNumber += "3";
-				}
-				else if((inNumber || inNumberSerie) && code == 52) { // 4
-					inNumber += "4";
-				}
-				else if((inNumber || inNumberSerie) && code == 53) { // 5
-					inNumber += "5";
-				}
-				else if((inNumber || inNumberSerie) && code == 54) { // 6
-					inNumber += "6";
-				}
-				else if((inNumber || inNumberSerie) && code == 55) { // 7
-					inNumber += "7";
-				}
-				else if((inNumber || inNumberSerie) && code == 56) { // 8
-					inNumber += "8";
-				}
-				else if((inNumber || inNumberSerie) && code == 57) { // 9
-					inNumber += "9";
-				}
-				
-				else if(inNumber && code == 59) { // ;
-					numberSerie.push(inNumber);
-					inNumberSerie = true;
-					inNumber = "";
-				}
-				
-				else if(inBracket && code == 109) { // m
-					if(charBuffer) print();
-					resetDisplay();
-					inBracket = false;
-					inText = true;
-				}
-				
-				else if(inNumberSerie && inNumber && char == "r") {
-					if(charBuffer) print();
-					var bottom = parseInt(inNumber);
-					var top = parseInt(numberSerie.pop());
-					
-					console.log("Set top=" + top + " and bottom=" + bottom + " lines of a window"); 
-					
-					if( isNaN(top) || isNaN(bottom) ) throw new Error("top=" + top + " bottom=" + bottom + " data=" + data);
-					
-					terminalState.topLine = top;
-					terminalState.bottomLine = bottom;
-					
-					inNumberSerie = false;
-					numberSerie.length = 0;
-					inNumber = "";
-					inText = true;
-				}
-				
-				
-				
-				// ### Clearing lines
-				else if(char == "K" && (inBracket || inNumber == "0") ) {
-					
-					console.log("Clear line from cursor right ");
-					var row = file.grid[file.caret.row];
-					if(row.length > file.caret.col) {
-						var firstIndex = file.caret.index;
-						var lastIndex = row[row.length-1].index;
-						file.deleteTextRange(firstIndex, lastIndex);
-					}
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if(char == "K" && inNumber == "1") {
-					console.log("todo: Clear line from cursor left ");
-					inNumber = "";
-					inText = true;
-				}
-				else if(char == "K" && inNumber == "2") {
-					console.log("Clear entire line ");
-					file.removeAllTextOnRow(file.caret.row);
-					inNumber = "";
-					inText = true;
-				}
-				
-				// ### Clearing screen
-				else if(char == "J" && (inBracket || inNumber == "0") ) {
-					console.log("todo: Clear screen from cursor down");
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if(char == "J" && inNumber == "1") {
-					console.log("todo: Clear screen from cursor up ");
-					inNumber = "";
-					inText = true;
-				}
-				else if(char == "J" && inNumber == "2") { // J
-					var startRow = file.startRow;
-					
-					console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
-					
-					file.moveCaretToEndOfFile();
-					file.insertLineBreak();
-					file.startRow = file.caret.row;
-					EDITOR.renderNeeded();
-					
-					/*
-					for(var row=startRow; row<file.grid.length; row++) {
-						console.log("Clearing row=" + row);
-						file.removeAllTextOnRow(row);
-					}
-					*/
-					
-					inNumber = "";
-					inText = true;
-				}
-				
-				// ### Moving the cursor
-				else if((inEsc || inNumber || inBracket) && char == "A") {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					
-					console.log("Move cursor up " + times + " lines from caret=" + JSON.stringify(file.caret));
-					
-					var col = file.caret.col;
-					
-					for(var j=0; j<times;j++) file.moveCaretUp();
-					
-					if(file.caret.col < col) {
-						file.insertSpace(col - file.caret.col);
-					}
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if((inEsc || inNumber || inBracket) && char == "B") {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					
-					console.log("Move cursor down " + times + " lines from caret=" + JSON.stringify(file.caret) );
-					
-					var col = file.caret.col;
-					
-					for(var j=0; j<times;j++) {
-						console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
-						
-						if(file.caret.row == file.grid.length-1) {
-							// Terminal wants to move the caret down, but there are no more lines in the editor:
-							file.moveCaretToEndOfFile();
-							file.insertLineBreak();
-						}
-						else file.moveCaretDown();
-						
-					}
-					
-					if(file.caret.col < col) {
-						file.insertSpace(col - file.caret.col);
-					}
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if((inEsc || inNumber || inBracket) && char == "C") {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					
-					console.log("Move cursor right " + times + " columns");
-					for(var j=0; j<times;j++) {
-						if(file.caret.eol) file.insertText(" ");
-						else file.moveCaretRight();
-					}
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if((inEsc || inNumber || inBracket) && char == "D") {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					
-					console.log("Move cursor left " + times + " columns");
-					for(var j=0; j<times;j++) file.moveCaretLeft();
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if((inEsc || inNumber || inBracket) && char == "G") {
-					if(charBuffer) print();
-					
-					if(inNumber) var col = parseInt(inNumber);
-					else var col = 0;
-					
-					console.log("Move to column " + col + " of current line");
-// Columns start on column 1 in terminals
-					file.moveCaretToCol(col-1);
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) {
-					if(charBuffer) print();
-					
-					console.log("Move cursor to upper left corner");
-					file.moveCaret(undefined, file.startRow, 0);
-					inEsc = false;
-					inBracket = false;
-					inText = true;
-				}
-				else if(inNumberSerie && (char == "H" || char == "f")) {
-					if(charBuffer) print();
-					
-					var toCol = parseInt(inNumber) - 1;
-					var toRow = parseInt(file.startRow + parseInt(numberSerie.pop())) - 1; // + terminalState.topLine;
-					
-					console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
-					
-					console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
-					
-					while(toRow >= file.grid.length) {
-						file.writeLineBreak();
-					}
-					
-					console.log(" file.grid.length=" + file.grid.length + " toRow=" + toRow);
-					console.log(" file.grid[" + toRow + "].length=" + file.grid[toRow].length);
-					
-					if(toCol >= file.grid[toRow].length) {
-						var spaces = "";
-						for(var j=0; j<toCol-file.grid[toRow].length; j++) {
-							spaces += " ";
-						}
-						file.moveCaret(undefined, toRow, file.grid[toRow].length-1);
-						if(spaces) file.insertText(spaces);
-					}
-					
-					file.moveCaret(undefined, toRow, toCol);
-					
-					inNumber = "";
-					inNumberSerie = false;
-					//numberSerie.length = 0;
-					if(numberSerie.length > 0) throw new Error("Unexpected numberSerie.length=" + numberSerie.length + " numberSerie=" + JSON.stringify(numberSerie));
-					inText = true;
-				}
-				else if(inEsc && char == "E") {
-					if(charBuffer) print();
-					
-					console.log("todo: Move to next line");
-					inEsc = false;
-					inText = true;
-				}
-				
-				else if(inEsc && char == "7") {
-					if(charBuffer) print();
-					
-					console.log("todo: Save cursor position and attributes");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "8") {
-					if(charBuffer) print();
-					
-					console.log("todo: Restore cursor position and attributes");
-					inEsc = false;
-					inText = true;
-				}
-				
-				// ### Scrolling
-				else if( (inEsc || inNumber) && (char == "D" || char == "L")) {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					console.log("Move/scroll window UP " + times + " line(s)");
-					var topRow = file.startRow;
-					var bottomRow = file.startRow;
-					
-					if(terminalState.topLine > 0) topRow += terminalState.topLine-1;
-					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine;
-					
-					var topLineText = "";
-					var bottomLineText = "";
-					for(var j=0; j<times; j++) {
-					topLineText = terminalState.topScrollRowBuffer.pop();
-					
-					if(topLineText == undefined) topLineText = "";
-					
-					//file.insertTextRow(topLineText, topRow);
-						file.insertTextRow("", topRow);
-						
-					bottomLineText = file.removeRow(bottomRow);
-					terminalState.bottomScrollRowBuffer.unshift(bottomLineText);
-					}
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				else if( (inEsc || inNumber) && char == "M") {
-					if(charBuffer) print();
-					
-					if(inNumber) var times = parseInt(inNumber);
-					else var times = 1;
-					
-					var topRow = file.startRow;
-					var bottomRow = file.startRow;
-					
-					if(terminalState.topLine > 0) topRow += (terminalState.topLine-1);
-					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
-					
-					console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine + 
-					" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
-					
-var bottomLineText = "";
-var topLineText = "";
-					for(var j=0; j<times; j++) {
-					bottomLineText = terminalState.bottomScrollRowBuffer.shift();
-					
-					if(bottomLineText == undefined) bottomLineText = "";
-					
-					//file.insertTextRow(bottomLineText, bottomRow);
-						
-						if(!inNumber) {
-							topLineText = file.removeRow(bottomRow);
-						file.insertTextRow("", topRow);
-						}
-						else {
-							file.insertTextRow("", bottomRow+1);
-							topLineText = file.removeRow(topRow);
-						}
-						
-					terminalState.topScrollRowBuffer.push(topLineText);
-					}
-					
-					inEsc = false;
-					inBracket = false;
-					inNumber = "";
-					inText = true;
-				}
-				
-				
-				else if(inNumber && char == "h") {
-					if(charBuffer) print();
-					
-					/*
-						Esc[20h 	Set new line mode 	LMN
-						Esc[?1h 	Set cursor key to application 	DECCKM
-						none 	Set ANSI (versus VT52) 	DECANM
-						Esc[?3h 	Set number of columns to 132 	DECCOLM
-						Esc[?4h 	Set smooth scrolling 	DECSCLM
-						Esc[?5h 	Set reverse video on screen 	DECSCNM
-						Esc[?6h 	Set origin to relative 	DECOM
-						Esc[?7h 	Set auto-wrap mode 	DECAWM
-						Esc[?8h 	Set auto-repeat mode 	DECARM
-						Esc[?9h 	Set interlacing mode 	DECINLM
-						
-						ESC[?25h  Make Cursor visible
-						
-						ESC[?47h  Save screen
-						
-					*/
-					if(inNumber == 4) {
-						terminalState.smoothScrolling = true;
-					}
-					else {
-						console.warn("Unknown inNumber=" + inNumber + " ");
-					}
-					
-					inNumber = "";
-					inText = true;
-				}
-				else if(inNumber && char == "l") { // small L
-					if(charBuffer) print();
-					
-					/*
-						Esc[20l 	Set line feed mode 	LMN
-						Esc[?1l 	Set cursor key to cursor 	DECCKM
-						Esc[?2l 	Set VT52 (versus ANSI) 	DECANM
-						Esc[?3l 	Set number of columns to 80 	DECCOLM
-						Esc[?4l 	Set jump scrolling 	DECSCLM
-						Esc[?5l 	Set normal video on screen 	DECSCNM
-						Esc[?6l 	Set origin to absolute 	DECOM
-						Esc[?7l 	Reset auto-wrap mode 	DECAWM
-						Esc[?8l 	Reset auto-repeat mode 	DECARM
-					Esc[?9l 	Reset interlacing mode 	DECINLM
-					*/
-					
-					if(inNumber == 4) {
-						terminalState.smoothScrolling = false;
-					}
-					
-					inNumber = "";
-					inText = true;
-				}
-				
-				
-				// ### Misc
-				else if(inEsc && char == "=") {
-					console.log("todo: Set alternate keypad mode");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == ">") {
-					console.log("todo: Set numeric keypad mode ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "A" && data.charAt(i-1) == "(") {
-					console.log("todo: Set United Kingdom G0 character set");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "A" && data.charAt(i-1) == ")") {
-					console.log("todo: Set United Kingdom G1 character set ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "B" && data.charAt(i-1) == "(") {
-					console.log("todo: Set United States G0 character set ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "B" && data.charAt(i-1) == ")") {
-					console.log("todo: Set United States G1 character set");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "0" && data.charAt(i-1) == "(") {
-					console.log("todo: Set G0 special chars. & line set ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "0" && data.charAt(i-1) == ")") {
-					console.log("todo: Set G1 special chars. & line set  ");
-					// baud rate ??
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "1" && data.charAt(i-1) == "(") {
-					console.log("todo: Set G0 alternate character ROM ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "1" && data.charAt(i-1) == ")") {
-					console.log("todo: Set G1 alternate character ROM ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "2" && data.charAt(i-1) == "(") {
-					console.log("todo: Set G0 alt char ROM and spec. graphics");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "2" && data.charAt(i-1) == ")") {
-					console.log("todo: Set G1 alt char ROM and spec. graphics");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "N") {
-					console.log("todo: Set single shift 2 ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "O") {
-					console.log("todo: Set single shift 3 ");
-					inEsc = false;
-					inText = true;
-				}
-				
-				// ### Tabs
-				else if(inEsc && char == "H") {
-					console.log("todo: Set a tab at the current column");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inBracket && char == "g") {
-					console.log("todo: Clear a tab at the current column");
-					inBracket = false;
-					inText = true;
-				}
-				else if(inNumber == "0" && char == "g") {
-					console.log("todo: Clear a tab at the current column");
-					inNumber = "";
-					inText = true;
-				}
-				else if(inNumber == "3" && char == "g") {
-					console.log("todo: Clear all tabs");
-					inNumber = "";
-					inText = true;
-				}
-				
-				// ### Letters width/height
-				else if(inEsc && char == "3" && data.charAt(i-1) == "#") {
-					console.log("todo: Double-height letters, top half ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "4" && data.charAt(i-1) == "#") {
-					console.log("todo: Double-height letters, bottom half ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "5" && data.charAt(i-1) == "#") {
-					console.log("todo: Single width, single height letters ");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "6" && data.charAt(i-1) == "#") {
-					console.log("todo: Double width, single height letters");
-					inEsc = false;
-					inText = true;
-				}
-				
-				else if(inNumber && char == "m") { // code=109
-					// ### Display mode
-					
-					if(charBuffer) print();
-					
-					numberSerie.push(inNumber);
-					
-					for (var j=0; j<numberSerie.length; j++) {
-						
-						
-						// 22 Normal color or intensity (Neither bold nor faint )
-						
-						
-						// foreground
-						if(numberSerie[j] == "30") foregroundColor = colorBlack;
-						else if(numberSerie[j] == "31") foregroundColor = colorRed;
-						else if(numberSerie[j] == "32") foregroundColor = colorGreen;
-						else if(numberSerie[j] == "33") foregroundColor = colorYellow;
-						else if(numberSerie[j] == "34") foregroundColor = colorBlue;
-						else if(numberSerie[j] == "35") foregroundColor = colorMagenta;
-						else if(numberSerie[j] == "36") foregroundColor = colorCyan;
-						else if(numberSerie[j] == "37") foregroundColor = colorWhite;
-						
-						// 38 = special color (Next arguments are 5;n or 2;r;g;b)
-						
-						else if(numberSerie[j] == "39") foregroundColor = defaultForeGroundColor; // Default foreground color 
-						
-						// background
-						else if(numberSerie[j] == "40") backgroundColor = colorBlack;
-						else if(numberSerie[j] == "41") backgroundColor = colorRed;
-						else if(numberSerie[j] == "42") backgroundColor = colorGreen;
-						else if(numberSerie[j] == "43") backgroundColor = colorYellow;
-						else if(numberSerie[j] == "44") backgroundColor = colorBlue;
-						else if(numberSerie[j] == "45") backgroundColor = colorMagenta;
-						else if(numberSerie[j] == "46") backgroundColor = colorCyan;
-						else if(numberSerie[j] == "47") backgroundColor = colorWhite;
-						
-						else {
-							while(numberSerie[j].length > 0) {
-								
-								if(numberSerie[j].charAt(0) == "0") {
-									resetDisplay(); // Reset all
-								}
-								else if(numberSerie[j].charAt(0) == "1") {
-									bright = true;
-								}
-								else if(numberSerie[j].charAt(0) == "2") {
-									dim = true;
-								}
-								else if(numberSerie[j].charAt(0) == "4") {
-									underscore = true;
-								}
-								else if(numberSerie[j].charAt(0) == "5") {
-									blink = true;
-								}
-								else if(numberSerie[j].charAt(0) == "7") {
-									reverse = true;
-								}
-								else if(numberSerie[j].charAt(0) == "8") {
-									hidden = true;
-								}
-								
-								numberSerie[j] = numberSerie[j].slice(1);
-							}
-						}
-					}
-					
-					if(backgroundColor == defaultBackgroundColor && EDITOR.settings.style.bgColor == "rgb(255,255,255)") {
-						// If there's no background set, the editors default will be used.
-						// Many programs asume you are using a black or very dark background for the terminal!
-						// So if we are using the white default we have to make some color adjustments
-						
-						if(foregroundColor == colorYellow) foregroundColor = "#c59800";
-						if(foregroundColor == colorCyan) foregroundColor = "#008686";
-						if(foregroundColor == colorWhite) foregroundColor = "#828282";
-					}
-					
-					inNumber = "";
-					inNumberSerie = false;
-					numberSerie.length = 0;
-					inText = true;
-				}
-				
-				else if(inNumber && char == "P") {
-					// This is not in the spec!!?!? But bash sends it
-					if(charBuffer) print();
-					
-					var times = parseInt(inNumber);
-					
-					console.log("Delete " + times + " characters");
-					for(var j=0; j<times;j++) file.deleteCharacter();
-				
-					inNumber = "";
-					inText = true;
-				}
-				
-				else if(inEsc && code == 109) { // m
-					if(charBuffer) print();
-					
-					inText = true;
-					inEsc = false;
-				}
-				else if(inText) {
-					// ### Text
-					
-					if(code == 10) { // New Line \n
-						
-						if(charBuffer) print();
-						
-						console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + 
-						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length + " caret=" + JSON.stringify(file.caret)  );
-						
-						if(terminalState.topLine > 0 && terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
-							file.removeRow(terminalState.topLine-1 + file.startRow);
-						}
-						
-						if(file.caret.row == file.grid.length-1) {
-						file.moveCaretToEndOfFile();
-							file.writeLineBreak();
-						}
-						else {
-							if(charBuffer) print();
-//file.insertLineBreak();
-							file.moveCaretDown();
-						}
-					}
-					else if(code == 13) {// Carriage Return \r
-						console.log("terminal: Carriage Return on caret=" + JSON.stringify(file.caret) );
-						if(charBuffer) print();
-						//file.moveCaretToEndOfLine();
-						file.moveCaretToStartOfLine();
-						//file.moveCaretDown();
-					}
-					else if(code == 8) { // BS  (backspace)  
-						//if(file.caret.col > 0) file.moveCaretLeft();
-						if(charBuffer) print();
-						file.moveCaretLeft();
-						//file.deleteCharacter();
-					}
-					else if(code == 9) { // TAB (horizontal tab)
-						var spaces = ""
-						for (var j=0; j<EDITOR.settings.tabSpace; j++) {
-							spaces += " ";
-						}
-						file.insertText(spaces);
-					}
-					else {
-						/*
-							Optimization:
-							Buffer characters instead of inserting them one by one.
-						*/
-						charBuffer += char;
-						
-					}
-					
-					terminalState.caret.row = file.caret.row;
-					terminalState.caret.col = file.caret.col;
-					
-				}
-				
-			}
-			
-			if(charBuffer) print();
-			
-			EDITOR.renderNeeded();
-			
-			function print() {
-				
-				console.log("Terminal Insert: caret=" + JSON.stringify(file.caret) + " length=" + charBuffer.length + " " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
-				//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
-				// terminal always overwrite !?
-				var colStart = file.caret.col;
-				if(!file.caret.eol && !terminalState.smoothScrolling) {
-					var deleteTo = Math.min(file.caret.index + charBuffer.length-1, file.caret.index + file.grid[file.caret.row].length - file.caret.col - 1);
-					file.deleteTextRange(file.caret.index, deleteTo);
-				}
-				file.insertText(charBuffer);
-				charBuffer = "";
-				
-				if(backgroundColor != defaultBackgroundColor) {
-					for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].bgColor = backgroundColor;
-				}
-				if(foregroundColor != defaultForeGroundColor) {
-					for(var col=colStart; col<file.caret.col; col++) file.grid[file.caret.row][col].color = foregroundColor;
-				}
-				else if(reverse) {
-					// Make the (default?) text color the background and the bacgkround the text color
-					for(var col=colStart; col<file.caret.col; col++) {
-						file.grid[file.caret.row][col].bgColor = EDITOR.settings.style.textColor;
-						file.grid[file.caret.row][col].color = EDITOR.settings.style.bgColor;
-					}
-				}
-				
-				terminalState.caret.col = file.caret.col;
-			}
-			
-			function resetDisplay() {
-				bright = false;
-				dim = false;
-				underscore = false;
-				blink = false;
-				reverse = false;
-				hidden = false;
-				foregroundColor = defaultForeGroundColor;
-				backgroundColor = defaultBackgroundColor;
-			}
-			
+		if(term.data) {
+			console.log("terminalMessage: Parsing data...");
+			parseBuffer();
+			parse(term.data, file);
 		}
+		
 	}
 	
 	function terminalKeyPressed(file, character, combo, keyPressEvent) {
 		
 		var isTerminal = terminalFiles.indexOf(file) != -1;
+		
+		
 		
 		if(!isTerminal) return ALLOW_DEFAULT;
 		
@@ -1355,13 +1400,21 @@ var topLineText = "";
 			
 		*/
 		
-		if(terminalFiles.indexOf(file) == -1) return ALLOW_DEFAULT;
+		console.log("terminalKeyDown: file.path=" + file.path);
+		console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+		
+		if(terminalFiles.indexOf(file) == -1) {
+			console.log("Not a terminal file: " + file.path);
+			return ALLOW_DEFAULT;
+		}
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
 		console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
 		
-		if(!EDITOR.input) return ALLOW_DEFAULT;
+		if(!EDITOR.input) {
+			return ALLOW_DEFAULT;
+		}
 		
 		var id = file.path.match(reTerm)[1];
 		var data;
@@ -1562,9 +1615,18 @@ var topLineText = "";
 		
 	}
 	
-	function exitAllTerminals() {
-		console.log("exitAllTerminals: " + terminalFiles.length);
-		for (var i=0; i<terminalFiles.length; i++) terminalCloseFile(terminalFiles[i]);
+	function exitAllTerminals(reason) {
+		console.log("exitAllTerminals: " + terminalFiles.length + " reason=" + reason);
+		
+		for (var i=0; i<terminalFiles.length; i++) {
+			if(reason=="exit") {
+terminalCloseFile(terminalFiles[i]);
+			}
+else {
+				terminalFiles[i].write("\n\nEditor exit event (" + reason + ") " + (new Date()) + "\n\n" );
+			}
+		}
+		
 		return true;
 	}
 	
