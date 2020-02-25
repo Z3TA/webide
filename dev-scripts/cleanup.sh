@@ -3,6 +3,6 @@
 
 dir=$1
 
-find $dir -size 0 -delete
-find $dir -empty -type d -delete
+find $dir -size 0 -delete -print
+find $dir -empty -type d -delete -print
 

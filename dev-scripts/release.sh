@@ -3,12 +3,18 @@
 # Exit if anything fails
 set -e
 
+# Make sure the folder containing the script is the working dir
+cd $(dirname $0)
+
+# Move to the webide directory
+cd ..
+
 # Delete dependency of dependency to force dependencies to use our patched dependency
 rm -rf node_modules/mysql2/node_modules/iconv-lite
 
 if [[ "$@" =~ "-publish" ]]
 then
-  node semver.js
+  node dev-scripts/semver.js
   rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
   # Create a tag so that we can easily go back to last release
   hg tag $(cat SEMVER)
@@ -18,7 +24,7 @@ fi
 
 
 # Get the current version (generates version.txt)
-node changeset.js
+node dev-scripts/changeset.js
 commit=$(cat version.txt)
 semver=$(cat SEMVER)
 version=2
@@ -76,7 +82,7 @@ cp temp/release/linux/documentation/about.htm temp/release/linux/client/about/
 # Generate bundle
 # Make sure the bundle is generated *after* any scripts has been modified!
 cd temp/release/linux/
-nodejs makebundle.js
+nodejs dev-scripts/makebundle.js
 gzip client/bundle.htm --best --keep
 cd ../../../
 

@@ -8121,16 +8121,18 @@ EDITOR.reload = function reload(url) {
 					setTimeout(reloadNow, 1000);
 				}
 				
-				function reloadNow() {
-					console.log("Reloading! RUNTIME=" + RUNTIME);
-			
-			window.onbeforeunload = null;
-			if(url) window.location=url;
-			else location.reload();
-			
-			// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-				}
 			}
+
+function reloadNow() {
+console.log("Reloading! RUNTIME=" + RUNTIME);
+
+window.onbeforeunload = null;
+if(url) window.location=url;
+else location.reload();
+
+// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+}
+
 		});
 	}
 	

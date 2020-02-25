@@ -85,6 +85,20 @@ What I'm working on
 
 
 
+Rollout plan:
+sudo zfs snapshot ben/ROOT/ubuntu@webidechroot
+sudo zfs snapshot ben/srv@webidechroot
+
+sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton
+sudo zfs send zpcdata/docker@base | ssh root@webide.se zfs recv ben/docker
+systemctl disable webide webide_nodejs_init webide_signup
+systemctl stop webide webide_nodejs_init webide_signup
+reboot now
+cd /srv/webide/
+for homedir in /home/*; do (dev-scripts/cleanup.sh $homedir); done
+
+systemctl enable webide webide_nodejs_init webide_signup
+systemctl start webide webide_nodejs_init webide_signup
 
 
 
