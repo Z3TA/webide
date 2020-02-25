@@ -84,7 +84,7 @@ What I'm working on
 -------------------
 
 
-Server: API error: not trusting file /zpcdata/projects/webide/.hg/hgrc from untrusted user 1000, group 1000
+
 
 
 

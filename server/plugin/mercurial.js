@@ -67,7 +67,14 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	CORE.listFiles(user, {pathToFolder: virtualPath}, function(err, fileList) {
 		
 		if(err) {
-			if(err.code == "ENOENT") clone();
+			if(err.code == "ENOENT") {
+				// Make sure the parent path exist
+				var parentFolder = UTIL.parentFolder(virtualPath);
+				CORE.createPath(user, {pathToCreate: parentFolder}, function(err) {
+					if(err) return callback(err);
+					else clone();
+				});
+			}
 			else callback(err);
 		}
 		else {
@@ -104,7 +111,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		if(hguser) arg = arg.concat(config);
 		
 		var spawn = require('child_process').spawn;
-		var options = {env: execFileOptions.env, shell: false};
+		var parentFolder = UTIL.parentFolder(localPath);
+		var options = {env: execFileOptions.env, shell: false, cwd: parentFolder};
 		console.log("Spawning hg with arg=" + JSON.stringify(arg) + " and options=" + JSON.stringify(options));
 		var clone = spawn("hg", arg, options);
 		var stdout = "";

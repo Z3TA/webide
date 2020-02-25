@@ -3335,7 +3335,8 @@ API.run = function run(user, json, callback) {
 		encoding: 'utf8',
 		maxBuffer: 200*1024,
 		env: process.env,
-		shell: EXEC_OPTIONS.shell
+		shell: EXEC_OPTIONS.shell,
+cwd: user.workingDirectory
 	};
 	
 	/*
@@ -3354,7 +3355,7 @@ options.cwd = json.cwd;
 	}
 	else {
 		options.cwd = user.workingDirectory;
-// If no cwd is specified __dirname (where this script is located) will be used!
+		// If no cwd is specified __dirname (where this script is located) will be used!
 	}
 	
 	if(json.env) {

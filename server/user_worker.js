@@ -213,6 +213,8 @@ user.identify = function identify(info) {
 	user.defaultWorkingDirectory = info.homeDir;
 	user.homeDir = info.homeDir;
 	
+npmOptions.cwd = info.homeDir;
+
 	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
 	var module_path = require("path");
