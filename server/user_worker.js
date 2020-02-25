@@ -153,18 +153,17 @@ if(info.uid==0) {
 	//if(gid) process.setgid(gid);
 	//if(uid) process.setuid(uid);
 	
-	var npmOptions = {
-		env: {
-			HOME: HOME,
-			PATH: "/usr/bin:/bin:/" + UTIL.joinPaths(HOME, ".npm-packages/bin"), // npm want node to be inside PATH
-			NPM_CONFIG_PREFIX: UTIL.joinPaths(HOME, ".npm-packages"), // Help npm figure out where to put global packages
-			dev: true // So that scripts know we're in "development"
-		}
-	}
 
 }
 
-
+var npmOptions = {
+	env: {
+		HOME: HOME,
+		PATH: "/usr/bin:/bin:/" + UTIL.joinPaths(HOME, ".npm-packages/bin"), // npm want node to be inside PATH
+		NPM_CONFIG_PREFIX: UTIL.joinPaths(HOME, ".npm-packages"), // Help npm figure out where to put global packages
+		dev: true // So that scripts know we're in "development"
+	}
+}
 
 var isRoot = process.getuid && process.getuid() === 0;
 //if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN)
@@ -213,7 +212,7 @@ user.identify = function identify(info) {
 	user.defaultWorkingDirectory = info.homeDir;
 	user.homeDir = info.homeDir;
 	
-npmOptions.cwd = info.homeDir;
+	npmOptions.cwd = info.homeDir;
 
 	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
