@@ -394,8 +394,11 @@ function sendMail(from, to, subject, text) {
 			if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
 				console.warn(err.message);
 			}
-			else throw new Error(err);
+			else {
+log("Failed to send e-mail! Error: " + err.message, WARN);
+//throw new Error(err);
 		}
+}
 		else {
 			log("Mail sent: " + info.response);
 		}

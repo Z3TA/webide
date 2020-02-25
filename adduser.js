@@ -346,12 +346,16 @@ function adduser() {
 		//var gid = getGroupId(groupName);
 		
 		if(NOZFS) {
+			console.time("Update skeleton files");
 			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP});
+			console.timeEnd("Update skeleton files");
 		}
 		
+console.time("chownrSync " + homeDir);
 		// The user owns his files
 		chownrSync(homeDir, uid, gid);
-		
+		console.timeEnd("chownrSync " + homeDir);
+
 		// Make it so that no one else beside the user can read the user files
 		chmodrSync(homeDir, "750");
 		
