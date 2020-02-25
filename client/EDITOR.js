@@ -7659,12 +7659,12 @@ EDITOR.mergeTool = function mergeTool(directory) {
 
 EDITOR.runTests = function runTests(onlyOne, allInSync) {
 	
-	if(EDITOR.workingDirectory != "/" && EDITOR.workingDirectory != "/wwwpub/" && !onlyOne) {
-		return alertBox("Make sure you are running under chroot and with a dummy user before running tests!\
-		(Working directory (" + EDITOR.workingDirectory + ") needs to be / (root))");
+		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne) {
+			return alertBox("Make sure you are running the editor as a cloud IDE before running tests!\
+			(Working directory (" + EDITOR.workingDirectory + ") needs to be wwwroot/)");
 	}
 	
-	if(!onlyOne) EDITOR.changeWorkingDir("/");
+	//if(!onlyOne) EDITOR.changeWorkingDir("/");
 	
 	runTests_5616458984153156(onlyOne, allInSync);
 	return true;

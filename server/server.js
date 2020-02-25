@@ -1914,6 +1914,7 @@ function getIp(connection) {
 }
 
 function sendToAll(username, obj) {
+
 	if(typeof username != "string") throw new Error("username=" + username + " should be a string!");
 	if(!USER_CONNECTIONS.hasOwnProperty(username)) {
 		log("username=" + username + " does not exist in USER_CONNECTIONS=" + Object.keys(USER_CONNECTIONS), WARN);
@@ -1921,10 +1922,11 @@ function sendToAll(username, obj) {
 	}
 	
 	var uc = USER_CONNECTIONS[username].connections;
+
 	var data = JSON.stringify(obj);
-	for (var connectionId in uc.connections) {
-		log(getIp(uc.connections[connectionId]) + "(" + connectionId + ") <= " + UTIL.shortString(data, 256));
-		uc.connections[connectionId].write(data);
+	for (var connectionId in uc) {
+		log(getIp(uc[connectionId]) + "(" + connectionId + ") <= " + UTIL.shortString(data, 256));
+		uc[connectionId].write(data);
 	}
 }
 
@@ -2077,6 +2079,8 @@ function userCleanup() {
 				return send({error: "Failed to parse JSON (" + err.message + "): " + message});
 			}
 		}
+		
+		log("handleUserMessage: id=" + id + " command=" + command + " userConnectionName=" + userConnectionName, DEBUG);
 		
 		if(command == "stdout") {
 			try {
@@ -2555,7 +2559,7 @@ var loginCounter = 0;
 			}
 		}
 		else {
-			// We got a user worker!
+			// User has authorized
 			
 			if(command == "echo") {
 				// Send the data to all other connected client, except the client that sent the echo msg
