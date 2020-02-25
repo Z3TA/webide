@@ -3349,7 +3349,14 @@ API.run = function run(user, json, callback) {
 		}
 	*/
 	
-	if(json.cwd) options.cwd = json.cwd;
+	if(json.cwd) {
+options.cwd = json.cwd;
+	}
+	else {
+		options.cwd = user.workingDirectory;
+// If no cwd is specified __dirname (where this script is located) will be used!
+	}
+	
 	if(json.env) {
 		for(var prop in json.env) {
 			options.env[prop] = json.env[prop];

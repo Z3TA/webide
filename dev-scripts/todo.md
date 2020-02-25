@@ -83,8 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Inline errors work when running manually, but not when running tests...
-Maybe because the file is not saved!?
+
+Server: API error: not trusting file /zpcdata/projects/webide/.hg/hgrc from untrusted user 1000, group 1000
+
 
 
 Running tests

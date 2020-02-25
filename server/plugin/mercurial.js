@@ -104,8 +104,9 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		if(hguser) arg = arg.concat(config);
 		
 		var spawn = require('child_process').spawn;
-		console.log("Spawning hg with arg=" + JSON.stringify(arg));
-		var clone = spawn("hg", arg, {env: execFileOptions.env, shell: false});
+		var options = {env: execFileOptions.env, shell: false};
+		console.log("Spawning hg with arg=" + JSON.stringify(arg) + " and options=" + JSON.stringify(options));
+		var clone = spawn("hg", arg, options);
 		var stdout = "";
 		var stderr = "";
 		

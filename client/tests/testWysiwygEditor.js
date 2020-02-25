@@ -393,7 +393,7 @@
 	});
 	
 	
-	EDITOR.addTest(1, false, function inlineErrorMessages(callback) { // 520
+	EDITOR.addTest(false, function inlineErrorMessages(callback) { // 520
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
 		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
 		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},150);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
@@ -442,9 +442,6 @@
 			
 			setTimeout(function() {
 				
-				// When running manually we get inline error, but when running tests we get an alert that says "Uncaught TypeError: Cannot read property 'innerH' of null"
-				EDITOR.closeAllDialogs("MISC");
-				
 			var file = preview.sourceFile;
 			var index = file.text.indexOf(var1) + var1.length;
 			var atCaret = autoComplete(file, index);
@@ -476,8 +473,8 @@
 		
 	});
 	
-	// 530
-	EDITOR.addTest(530, false, function pressEnterTwiceInWYSIWYG(callback) {
+	
+	EDITOR.addTest(530, false, function pressEnterTwiceInWYSIWYG(callback) { // 530
 		/*
 			Pressing enter *twice* seem to remove the line breaks before </main> end tag !?
 			It seem the browser removes the ending line break only *sometimes* (at random) so we need the WysiwygEditor to handle it and not blow up
@@ -488,6 +485,8 @@
 		launchServe({sourcePage: fileHtml, compiledPage: compiledHtml, testFile: "pressEnterTwiceInWYSIWYG.htm", onlyPreview: false}, function servedPreview(err, wEditor, cleanup) {
 			if(err) throw err;
 			
+			setTimeout(function() {
+				
 			var win = wEditor.previewWin;
 			var doc = win.document;
 			var main = doc.getElementsByTagName("main")[0];
@@ -524,6 +523,7 @@
 				}, 500); // Simulate user interaction
 			}, 500);
 			
+			}, 1000); // Wait for window to load
 		});
 		
 	});

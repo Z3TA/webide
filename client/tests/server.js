@@ -239,10 +239,8 @@ callback(true);
 	
 	EDITOR.addTest(function testCreatePath(callback) {
 		
-		//alertBox(EDITOR.workingDirectory);
-		
 		var tempPath = UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/bar/");
-		var pathToCreate = UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + tempPath);
+		var pathToCreate = UTIL.toSystemPathDelimiters(tempPath);
 		var json = {pathToCreate: pathToCreate};
 		
 		CLIENT.cmd("createPath", json, function(err, json) {

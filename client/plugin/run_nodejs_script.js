@@ -998,7 +998,7 @@ else {
 	EDITOR.addTest(false, function nodeJsInlineConsoleLogTest(callback) {
 		
 		var data = '\nconsole.log("Hello world!");\n\n';
-		var filePath = "/nodeJsInlineConsoleLogTest.js";
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/nodeJsInlineConsoleLogTest.js");
 		
 		EDITOR.saveToDisk(filePath, data, function(err) {
 			if(err) throw err;
@@ -1018,7 +1018,7 @@ else {
 					
 					// Cleanup
 					EDITOR.closeFile(file.path);
-					EDITOR.closeFile("/nodeJsInlineConsoleLogTest.js.stdout");
+					EDITOR.closeFile(UTIL.joinPaths(EDITOR.user.homeDir, "/nodeJsInlineConsoleLogTest.js.stdout"));
 					
 					if(nodeJsBanner) nodeJsBanner.hide();
 					
@@ -1038,11 +1038,11 @@ else {
 		var errMsg = "Error: What a great name!";
 		
 		var msg = {
-			"scriptName":"/some_node_script1.js",
+			"scriptName": UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script1.js"),
 			"stderr": "/some_node_script1.js:" + (1) + "\n\nhi Johan;\n    ^\n\n" + errMsg + "\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
 		};
 		
-		EDITOR.openFile("/some_node_script1.js", 'hi Johan;\n', function(err, file) {
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script1.js"), 'hi Johan;\n', function(err, file) {
 			if(err) throw err;
 			
 			nodejsMessage(msg);
@@ -1056,7 +1056,7 @@ else {
 				EDITOR.closeFile(file.path);
 				callback(true);
 				
-			},100);
+			},1000);
 			
 		});
 	});
@@ -1066,13 +1066,13 @@ else {
 		var errMsg = "ErrorExample: This is the error description";
 		
 		var msg = {
-			"scriptName":"/some_node_script2.js",
+			"scriptName": UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script2.js"),
 			"stderr" : errMsg + "\n    at /some_node_script2.js:" + (1) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
 		};
 		
 		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
 		
-		EDITOR.openFile("/some_node_script2.js", 'console.log("hello world!");\n', function(err, file) {
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script2.js"), 'console.log("hello world!");\n', function(err, file) {
 			if(err) throw err;
 			
 			nodejsMessage(msg);
@@ -1084,7 +1084,7 @@ else {
 				EDITOR.closeFile(file.path + ".stdout");
 				EDITOR.closeFile(file.path);
 				callback(true);
-			},100);
+			},1000);
 			
 		});
 	});
@@ -1094,23 +1094,25 @@ else {
 		var errMsg = "Error: My error";
 		
 		var msg = {
-			"scriptName":"/some_node_script3.js",
+			"scriptName": UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script3.js"),
 			"stderr" : "events.js:182\n      throw er; // Unhandled 'error' event\n      ^\n" + errMsg + "\n    at Object._errnoException (util.js:1019:11)\n    at _exceptionWithHostPort (util.js:1041:20)\n    at Server.setupListenHandle [as _listen2] (net.js:1327:19)\n    at listenInCluster (net.js:1385:12)\n    at Server.listen (net.js:1480:5)\n    at Object.<anonymous> (/some_node_script3.js:2:8)\n    at Module._compile (module.js:624:30)\n    at Object.Module._extensions..js (module.js:635:10)\n    at Module.load (module.js:545:32)\n    at tryModuleLoad (module.js:508:12)\n"
 		};
 		
-		EDITOR.openFile("/some_node_script3.js", '\nserver.listen("/sock/_abc", () => console.log("server started"));\n', function(err, file) {
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/some_node_script3.js"), '\nserver.listen("/sock/_abc", () => console.log("server started"));\n', function(err, file) {
 			if(err) throw err;
 			
 			nodejsMessage(msg);
 			
 			setTimeout(function checkEditorInfo() {
-				if(!infoHas({file: file, str: errMsg, row: 1, col: 8})) throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
-				
+				if(!infoHas({file: file, str: errMsg, row: 1, col: 8})) {
+					UTIL.objInfo(EDITOR.info);
+					throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
+				}
 				EDITOR.removeAllInfo(file);
 				EDITOR.closeFile(file.path + ".stdout");
 				EDITOR.closeFile(file.path);
 				callback(true);
-			},100);
+			},1000);
 			
 		});
 	});
