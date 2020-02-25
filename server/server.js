@@ -3,6 +3,15 @@
 
 "use strict";
 
+/*
+
+Test cloudIDE server locally:
+sudo node server/server.js --hostname=webide-dev.se -pp 80
+
+
+*/
+
+
 var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
@@ -1914,7 +1923,7 @@ function getIp(connection) {
 }
 
 function sendToAll(username, obj) {
-
+	
 	if(typeof username != "string") throw new Error("username=" + username + " should be a string!");
 	if(!USER_CONNECTIONS.hasOwnProperty(username)) {
 		log("username=" + username + " does not exist in USER_CONNECTIONS=" + Object.keys(USER_CONNECTIONS), WARN);
@@ -1922,7 +1931,7 @@ function sendToAll(username, obj) {
 	}
 	
 	var uc = USER_CONNECTIONS[username].connections;
-
+	
 	var data = JSON.stringify(obj);
 	for (var connectionId in uc) {
 		log(getIp(uc[connectionId]) + "(" + connectionId + ") <= " + UTIL.shortString(data, 256));

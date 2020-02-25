@@ -7,7 +7,7 @@
 			
 			The original fix for this bug was to enable unix network for the hg binary in apparmor!
 		*/
-		var rootFolder = "/mercurialCloneRepoUniqueNameNoNeedToCommit/";
+		var rootFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/mercurialCloneRepoUniqueNameNoNeedToCommit/");
 		var testFolder = rootFolder + "test/";
 		
 		// Folder might exist if earlier test failed
@@ -87,7 +87,7 @@ if(err) throw err;
 	
 	
 	EDITOR.addTest(function mercurialCloneRepo(callback) {
-		var testFolder = "/mercurialCloneRepoUniqueName/test/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/mercurialCloneRepoUniqueName/test/");
 		var testCounter = 0;
 		
 		testClone();
@@ -127,7 +127,7 @@ function testClone() {
 		}
 		
 		function cleanup(cleanupCallback) {
-			CLIENT.cmd("deleteDirectory", {directory: "/mercurialCloneRepoUniqueName/", recursive: true}, function(err, json) {
+			CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/mercurialCloneRepoUniqueName/"), recursive: true}, function(err, json) {
 				if(err) return cleanupCallback(err);
 				else cleanupCallback(null);
 				});
@@ -169,7 +169,7 @@ function testClone() {
 		}
 		
 		
-		var testFolderParent = "/cloneFromGithub/";
+		var testFolderParent = UTIL.joinPaths(EDITOR.user.homeDir, "/cloneFromGithub/");
 		var testCounter = 0;
 		var cloneSuccess = 0;
 		var cloneTests = 0; 

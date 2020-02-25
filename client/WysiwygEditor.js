@@ -2214,6 +2214,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var message = errorEvent.message;
 			var source = errorEvent.filename;
 			var lineno = errorEvent.lineno;
+			var code = errorEvent.code;
 			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
 			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 			
@@ -2222,10 +2223,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			var filePath = folder + source.replace(urlPath, "");
 			
-			var sourceLink = 'Detected error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
+			var sourceLink = 'Detected ' + (code?code:"") + ' error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
 			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
 			EDITOR.renderNeeded();})">' + filePath + ":" + lineno + "</a>";
-			alertBox(sourceLink + "\n\n" + message + "");
+			//if(code == undefined) code = "PREVIEW_ERROR";
+			alertBox(sourceLink + "\n\n" + message + "", code);
 		}
 	}
 	

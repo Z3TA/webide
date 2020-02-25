@@ -83,7 +83,7 @@
 	
 	
 	EDITOR.addTest(function testReadLines5(callback) {
-		var filePath = "/tmp/readLinesTest.txt";
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/tmp/readLinesTest.txt");
 		
 		var tests = [
 			{
@@ -119,7 +119,7 @@
 		];
 		
 		// First make sure the /tmp/ folder exist
-		EDITOR.createPath("/tmp/", function(err, path) {
+		EDITOR.createPath(UTIL.joinPaths(EDITOR.user.homeDir, "/tmp/"), function(err, path) {
 			if(err) throw err;
 			
 		// Run the tests with different chunk sizes
@@ -198,8 +198,8 @@
 			write streams doesn't work on Node.JS <10 on Ubuntu 18!
 		*/
 		// Tests both readLine and writeLine!
-		var filePath = "/testfile.txt";
-		var testFile = "/testReadLines6.txt";
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
+		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/testReadLines6.txt");
 		var lb = "\n";
 		
 		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {

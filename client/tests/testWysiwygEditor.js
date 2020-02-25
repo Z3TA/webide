@@ -9,7 +9,7 @@
 		
 		var compiledPage = "<html>\n<body>\nheader\n<main>\n\n\n<h1>Hello world</h1>\n\n<p>Paragraph</p>\n\n\t</main>\nfooter\n</body>\n</html>\n"
 		var sourcePage = "<html>\n<body>\n\n<h1>Hello world</h1>\n\n<p>Paragraph</p>\n\n</body>\n</html>\n"
-		var testFolder = "/testfolder/wysiwyg/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testfolder/wysiwyg/");
 		var testFile = "page_compiled_extra_added.htm";
 		var newWindow;
 		
@@ -80,7 +80,7 @@
 		
 		var compiledPage = "<html>\n<body>\nheader\n<main>\n<p>main</p>\n</main>\nfooter\n</body>\n</html>\n"
 		var sourcePage = "<html>\n<body>\n<p>main</p>\n</body>\n</html>\n"
-		var testFolder = "/testfolder/wysiwyg/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testfolder/wysiwyg/");
 		var testFile = "page_compiled.htm";
 		var newWindow;
 		
@@ -171,7 +171,7 @@
 		
 		var sourcePage = "<html>\n<body>\n\n\n<p>Paragraph</p>\n\n\n</body>\n</html>\n";
 		
-		var testFolder = "/testfolder/wysiwyg/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testfolder/wysiwyg/");
 		var testFile = "wysiwygRemoveLineReplaceLine.htm";
 		var newWindow;
 		var wysiwygEditorLoadedCalled = false;
@@ -393,7 +393,7 @@
 	});
 	
 	
-	EDITOR.addTest(520, false, function inlineErrorMessages(callback) {
+	EDITOR.addTest(1, false, function inlineErrorMessages(callback) { // 520
 		// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
 		var msgStr = '"This is an error! ' + (new Date()).getTime() + '"';
 		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error(' + msgStr + ');\n},150);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
@@ -431,7 +431,7 @@
 	});
 	
 	// Run this test early so that it doesn't fail randomly
-	EDITOR.addTest(7, false, function previewAutocomplete(callback) {
+	EDITOR.addTest(7, false, function previewAutocomplete(callback) { // 7
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';
@@ -441,6 +441,10 @@
 			if(err) throw err;
 			
 			setTimeout(function() {
+				
+				// When running manually we get inline error, but when running tests we get an alert that says "Uncaught TypeError: Cannot read property 'innerH' of null"
+				EDITOR.closeAllDialogs("MISC");
+				
 			var file = preview.sourceFile;
 			var index = file.text.indexOf(var1) + var1.length;
 			var atCaret = autoComplete(file, index);
@@ -452,7 +456,7 @@
 			
 			cleanup();
 			callback(true);
-			}, 1000); // Wait for the window to load (some times it can take a very long time)
+			}, 2000); // Wait for the window to load (some times it can take a very long time)
 			
 		});
 		
@@ -532,7 +536,7 @@
 		var initialText = "Test reloadAndRecompileWhenScriptIsSaved script loaded"
 		var successText = "Test reloadAndRecompileWhenScriptIsSaved succeeded!";
 		var someScript = "window.onload=function() {\ndocument.getElementById('paragraph').innerText = '" + initialText + "';\n};\n";
-		var testFolder = "/testfolder/wysiwyg/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testfolder/wysiwyg/");
 		
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
@@ -607,7 +611,7 @@
 		if(opt.compiledPage == undefined) opt.compiledPage = opt.sourcePage;
 		if(opt.onlyPreview == undefined) opt.onlyPreview = true;
 		if(opt.bodyTagSource == undefined) opt.bodyTagSource = "body";
-		if( opt.testFolder == undefined) opt.testFolder = "/testfolder/wysiwyg/";
+		if( opt.testFolder == undefined) opt.testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testfolder/wysiwyg/");
 		
 		EDITOR.createPath(opt.testFolder, function folderCreated(err, path) {
 			if(err) return callback(err);

@@ -44,8 +44,8 @@
 	*/
 	
 	EDITOR.addTest(function renameFolder(callback) {
-		var testFolder = "/tryToRenameMe/";
-		var renameTo = "/renameFolderTo/"
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/tryToRenameMe/");
+		var renameTo = UTIL.joinPaths(EDITOR.user.homeDir, "/renameFolderTo/")
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
 			
@@ -65,7 +65,7 @@
 	});
 	
 	EDITOR.addTest(function installNodejsModule(callback) {
-var testFolder = "/testInstallNodejsModule/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testInstallNodejsModule/");
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
@@ -80,7 +80,7 @@ var testFolder = "/testInstallNodejsModule/";
 					
 // stdout file opens async, so wait to make sure it has opened
 setTimeout(function() {
-					EDITOR.closeFile("/testInstallNodejsModule/.stdout");
+						EDITOR.closeFile(UTIL.joinPaths(EDITOR.user.homeDir, "/testInstallNodejsModule/.stdout"));
 callback(true);
 					}, 200);
 					
@@ -91,7 +91,7 @@ callback(true);
 	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
-		var testFolder = "/testReadFromDiskUniqueName/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testReadFromDiskUniqueName/");
 		var testFile = "testReadFromDisk.txt";
 		var testText = "abc123\n";
 		
@@ -136,7 +136,7 @@ callback(true);
 	
 	EDITOR.addTest(function testGetFileSizeOnDisk(callback) {
 		
-		var testFolder = "/testGetFileSizeOnDiskUniqueName/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testGetFileSizeOnDiskUniqueName/");
 		var testFile = "testGetFileSizeOnDisk.txt";
 		var testText = "abc123\n";
 		
@@ -183,7 +183,7 @@ callback(true);
 	
 	EDITOR.addTest(function testListFiles(callback) {
 		
-		var testFolder = "/testListFilesUniqueName/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testListFilesUniqueName/");
 		var testFile = "testListFiles.txt";
 		var testText = "abc123\n";
 		
@@ -241,7 +241,7 @@ callback(true);
 		
 		//alertBox(EDITOR.workingDirectory);
 		
-		var tempPath = "/testCreatePathUniqueName/foo/bar/";
+		var tempPath = UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/bar/");
 		var pathToCreate = UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + tempPath);
 		var json = {pathToCreate: pathToCreate};
 		
@@ -254,17 +254,17 @@ callback(true);
 				if(fullPath.indexOf("foo") == -1) throw new Error("Full path=" + fullPath + " does not include foo! pathToCreate=" + pathToCreate);
 				
 				// Cleanup
-				CLIENT.cmd("deleteDirectory", {directory: "/testCreatePathUniqueName/foo/bar/"}, function(err, json) {
+				CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/bar/")}, function(err, json) {
 					if(err) throw err
 					else {
 						
 						// Cleanup
-						CLIENT.cmd("deleteDirectory", {directory: "/testCreatePathUniqueName/foo/"}, function(err, json) {
+						CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/")}, function(err, json) {
 							if(err) throw err
 							else {
 								
 								// Cleanup
-								CLIENT.cmd("deleteDirectory", {directory: "/testCreatePathUniqueName/"}, function(err, json) {
+								CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/")}, function(err, json) {
 									if(err) throw err
 									else {
 										
@@ -315,7 +315,7 @@ callback(true);
 	
 	EDITOR.addTest(function testServe(callback) {
 		
-		var testFolder = "/testServeUniqueName/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testServeUniqueName/");
 		var testFile = "testfile.txt";
 		var testText = "Hello World!\n";
 		
@@ -384,7 +384,7 @@ callback(true);
 	
 	EDITOR.addTest(function testHash(callback) {
 		
-		var testFolder = "/testHash/";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testHash/");
 		var testFile = "testHash.txt";
 		var testText = "";
 		var testRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789\n";

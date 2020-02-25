@@ -771,7 +771,7 @@ UTIL.assert(at.right, "az");
 	});
 	
 	EDITOR.addTest(function test_fixIndentation(callback) {
-		EDITOR.openFile("/test_fixIndentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/test_fixIndentation.js"), 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
 			if(err) throw err;
 			if(!file) throw new Error("file=" + file);
 			
@@ -1861,8 +1861,8 @@ UTIL.assert(at.right, "az");
 	});
 	
 	EDITOR.addTest(function writeLines(callback) {
-		var testFolder = "/bigFileWriteLines/"
-		var originalFilePath = testFolder + "/writeLinesTest";
+		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/bigFileWriteLines/");
+		var originalFilePath = UTIL.joinPaths(testFolder, "/writeLinesTest");
 		var testFiles = [];
 		var testCounter = 0;
 		
@@ -1992,8 +1992,8 @@ UTIL.assert(at.right, "az");
 	EDITOR.addTest(function editBigFile(callback) {
 		// note: Need to place the testfile.txt inside the user home dir!
 		
-		var filePath = "/testfile.txt";
-		var testFile = "/editBigFileTest.txt";
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
+		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/editBigFileTest.txt");
 		
 		console.log("Saving copy of " + filePath + " at " + testFile + " ...");
 		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {
@@ -2067,8 +2067,8 @@ UTIL.assert(at.right, "az");
 	});
 	
 	EDITOR.addTest(function editBigFile2(callback) {
-		var filePath = "/testfile.txt";
-		var testFile = "/editBigFileTest2.txt";
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
+		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/editBigFileTest2.txt");
 		
 		console.log("Saving copy of " + filePath + " at " + testFile + " ...");
 		CLIENT.cmd("copyFile", {from: filePath, to: testFile}, function(err) {

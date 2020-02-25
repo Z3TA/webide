@@ -31,4 +31,3 @@ EDITOR.addTest(function getFoldersTest(callback) {
 	callback(true);
 
 });
-	
