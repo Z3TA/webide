@@ -4,7 +4,7 @@
 	
 	EDITOR.addTest(function testReadLines1(callback) {
 		
-		var testFileLocation = "testfile.txt";
+		var testFileLocation = UTIL.joinPaths(EDITOR.user.homeDir, "testfile.txt");
 		
 		EDITOR.readLines(testFileLocation, {start: 1, end: 10}, function(err, lines) {
 			
@@ -24,7 +24,7 @@
 	
 	EDITOR.addTest(function testReadLines2(callback) {
 		
-		var testFileLocation = "testfile.txt";
+		var testFileLocation = UTIL.joinPaths(EDITOR.user.homeDir, "testfile.txt");
 		
 		EDITOR.readLines(testFileLocation, {start: 11, end: 20}, function(err, lines) {
 			
@@ -43,7 +43,7 @@
 	
 	EDITOR.addTest(function testReadLines3(callback) {
 		
-		var testFileLocation = "testfile.txt";
+		var testFileLocation = UTIL.joinPaths(EDITOR.user.homeDir, "testfile.txt");
 		
 		EDITOR.readLines(testFileLocation, {start: 30001, end: 30010}, function(err, lines) {
 			
@@ -62,7 +62,7 @@
 	
 	EDITOR.addTest(function testReadLines4(callback) {
 		
-		var testFileLocation = "testfile.txt";
+		var testFileLocation = UTIL.joinPaths(EDITOR.user.homeDir, "testfile.txt");
 		
 		// Trying to read more lines then what exist
 		
