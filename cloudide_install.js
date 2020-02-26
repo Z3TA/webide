@@ -65,6 +65,11 @@ exec('apt-get install docker-ce-cli');
 exec('curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose');
 exec('chmod +x /usr/local/bin/docker-compose');
 
+exec("mv dockervm/dockervm /root/.ssh/");
+exec("chown root:root /root/.ssh/dockervm");
+exec("chmod 700 /root/.ssh/dockervm");
+
+
 
 
 var HOSTNAME = getArg(["host", "host", "hostname", "domain"]); // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
