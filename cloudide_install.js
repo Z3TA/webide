@@ -163,7 +163,7 @@ execTry("ln -s $(pwd)/etc/nginx/nginx.logrotate.conf /etc/logrotate.d/nginx.logr
 
 
 console.log("Installing VNC dependencies");
-exec("apt install xvfb x11vnc -y");
+exec("apt install xvfb x11vnc socat -y");
 
 
 console.log("Installing Mercurial");

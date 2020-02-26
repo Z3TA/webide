@@ -886,6 +886,15 @@ And you will see all console.log's etc in the debugger!
 If the connection is lost you must restart Opera Mobile.
 
 
+Debugging display/desktop issues
+================================
+sudo apt install x11-apps
+
+Try running xeyes (app) from the terminal emulator, and see if you get anything on the display
+
+
+
+
 Android support
 ===============
 
