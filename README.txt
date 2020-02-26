@@ -480,7 +480,7 @@ Installing vnc dependencies
 ---------------------------
 ````
 sudo apt update
-sudo apt install xvfb x11vnc chromium-browser
+sudo apt install xvfb x11vnc
 ````
 
 Installing/upgrading Dropbox daemon
@@ -715,7 +715,7 @@ If you have problems connecting, try
 sudo iptables -I FORWARD 1 -j ACCEPT
 
 when you are done:
-sudo iptables -D FORWARD 1 -j ACCEPT
+sudo iptables -D FORWARD 1
 
 
 Installing more programs to the users folder (chroot)
