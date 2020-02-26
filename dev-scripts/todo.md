@@ -83,31 +83,26 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+umount: /home/guest4: target is busy.
+
+virsh status paused !?!?
+
+Docker VM's don't get assigned static ip!??
+
+
+test docker! in prod
+
+Add message in seignup that it can take a lot of time? Add a countdown?
 
 libvirt need to run as root.. add to cloudide_isntall!
 
 Also Setup libvirt DHCP in cloudide_isntall!
 
 
-
-Rollout plan:
-sudo zfs snapshot ben/ROOT/ubuntu@webidechroot
-sudo zfs snapshot ben/srv@webidechroot
-
-sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton
-sudo zfs send zpcdata/docker@base | ssh root@webide.se zfs recv ben/docker
-systemctl disable webide webide_nodejs_init webide_signup
-systemctl stop webide webide_nodejs_init webide_signup
-reboot now
-cd /srv/webide/
-for homedir in /home/*; do (dev-scripts/cleanup.sh $homedir); done
-
-systemctl enable webide webide_nodejs_init webide_signup
-systemctl start webide webide_nodejs_init webide_signup
+todo: Make webider the default editor so that files opens in the editor when you edit something via terminal
 
 
-
-
+todo: Remove docker VM when deleting user1
 
 
 Restart user worker (to get new api updates) when manually reloading the editor!?!?

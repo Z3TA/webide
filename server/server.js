@@ -198,6 +198,7 @@ if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
 var GCSF = {}; // username: GCSF session
 var DROPBOX = {}; // username: Dropbox daemon
 
+var DOCKER_LOCK =  {}; // username: command (prevent running many commands at the same time)
 
 
 // Declare modules here as a OPTIMIZATION
@@ -6050,6 +6051,11 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	
 	if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
 	
+	if(DOCKER_LOCK.hasOwnProperty(username)) {
+		return callback(new Error("Waiting for last command=" + DOCKER_LOCK[username]));
+	}
+	
+	DOCKER_LOCK[username] = options.command;
 	
 	log("##############################################################");
 	log(" DOCKER  " + username + "  " + options.command + "  uid=" + uid + "      ");
@@ -6152,7 +6158,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			var reVM = new RegExp("docker_" + username + "\\s+(.*)");
 			var matchVM = stdout.match(reVM);
 			if(!matchVM) {
-				// User has no VM configured
+				log(username + " has no VM configured!", DEBUG);
 				
 				if(options.command == "status" || options.command=="stop") return done({stopped: true});
 				
@@ -6184,20 +6190,32 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 					}
 					else throw new Error("Unknown options.command=" + options.command);
 				}
-				else throw new Error("Unknown vmStatus=" + vmStatus);
+				else {
+					/*
+						Other states can be:
+						paused: The VM has just been defined, and start command has just been issued!?
+						dying: ?
+						crashed: ?
+						
+					*/
+					
+					var err = new Error("Unknown vmStatus=" + vmStatus + " (username=" + username + ")");
+					reportError(err);
+					return error(err);
+				}
 			}
 		});
 	}
 	
 	function checkSSHKey() {
-	// Do the root account has a dockervm ssh key?!?
-	module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
-		if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
-		// sudo ssh-keygen -f /root/.ssh/dockervm
-		else if(err) return error(err);
-		
-		dockerSshPubKey = pubkey;
-	});
+		// Do the root account has a dockervm ssh key?!?
+		module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
+			if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
+			// sudo ssh-keygen -f /root/.ssh/dockervm
+			else if(err) return error(err);
+			
+			dockerSshPubKey = pubkey;
+		});
 	}
 	
 	function ping(ipToPing, pingFail) {
@@ -6434,6 +6452,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	}
 	
 	function setupVM(zpool) {
+		log(username + " setting up VM...");
 		if(zpool == undefined) throw new Error("zpool=" + zpool);
 		// Assuming we already have a zvol!
 		
@@ -6475,6 +6494,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		}
 		
 		var MAC = generateMAC();
+		log(username + " generated MAC=" + MAC);
 		
 		log(username + " checking ip-dhcp config...");
 		module_child_process.exec('virsh net-dumpxml default', EXEC_OPTIONS, function(err, stdout, stderr) {
@@ -6578,6 +6598,8 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		
 		callback(null, resp);
 		callback = null;
+		
+		delete DOCKER_LOCK[username];
 	}
 	
 	function error(errorOrErrMsg, code) {
@@ -6595,6 +6617,8 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		abort = true;
 		
 		sendToClient(username, "progress", []);
+		
+		delete DOCKER_LOCK[username];
 	}
 
 
