@@ -115,7 +115,7 @@ function connect(username, password, hostname, database, callback) {
 	}
 	else {
 		// Connect to local database
-		var socket = "/sock/mysql";
+		var socket = "/var/run/mysqld/mysqld.sock";
 		
 		module_fs.stat(socket, function(err, stats) {
 			if(err && err.code == "ENOENT") return callback(new Error("Can not find " + socket + ". MySQL is probably not installed or configured on this server. See mySQL section in README.txt for more info."));
