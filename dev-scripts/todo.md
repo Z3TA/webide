@@ -83,31 +83,10 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Don't reload nginx until the certificate is in place!
 
-/srv/webide/server/server.js:3207
-						if(error) throw(error);
-						          ^
+libvirt need to run as root.. add to cloudide_isntall!
 
-Error: Command failed: service nginx reload
-Job for nginx.service failed because the control process exited with error code.
-See "systemctl status nginx.service" and "journalctl -xe" for details.
-
-    at ChildProcess.exithandler (child_process.js:294:12)
-    at ChildProcess.emit (events.js:198:13)
-    at maybeClose (internal/child_process.js:982:16)
-    at Process.ChildProcess._handle.onexit (internal/child_process.js:259:5)
-root@webide:/srv/webide# nginx -T
-nginx: [emerg] BIO_new_file("/etc/letsencrypt/live/guest12.webide\.se/fullchain.pem") failed (SSL: error:02001002:system library:fopen:No such file or directory:fopen('/etc/letsencrypt/live/guest12.webide\.se/fullchain.pem','r') error:2006D080:BIO routines:BIO_new_file:no such file)
-nginx: configuration file /etc/nginx/nginx.conf test failed
-
-
-
-
-
-
-Where id mysqlconnect go!?
-
+Also Setup libvirt DHCP in cloudide_isntall!
 
 
 
@@ -127,13 +106,6 @@ systemctl enable webide webide_nodejs_init webide_signup
 systemctl start webide webide_nodejs_init webide_signup
 
 
-
-dave,dir,find to service worker cache!
-
-apt install acl
-
-
-Running tests
 
 
 

@@ -205,6 +205,11 @@ exec("apt-get install acl -y");
 exec("sysctl -w net.ipv4.ip_forward=1");
 
 
+// Install KVM support
+exec("sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager -y");
+
+
+
 console.log("Finish!");
 
 console.log("You might need to edit the following files:");
