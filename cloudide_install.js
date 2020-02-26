@@ -55,7 +55,12 @@ exec("apt install wireguard openresolv -y");
 
 
 // Docker support
-exec("apt install docker -y");
+exec("apt-get remove docker docker-engine docker.io containerd runc -y");
+exec("apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y");
+exec("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -");
+exec('sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"');
+exec('apt-get update');
+exec('apt-get install docker-ce-cli');
 
 exec('curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose');
 exec('chmod +x /usr/local/bin/docker-compose');
@@ -153,7 +158,7 @@ execTry("ln -s $(pwd)/etc/nginx/nginx.logrotate.conf /etc/logrotate.d/nginx.logr
 
 
 console.log("Installing VNC dependencies");
-exec("apt install xvfb x11vnc chromium-browser -y");
+exec("apt install xvfb x11vnc -y");
 
 
 console.log("Installing Mercurial");
@@ -189,6 +194,15 @@ exec("apt-get install mysql-client -y");
 console.log("Configuring MySQL server");
 addToFile("/etc/my.cnf", "\nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n", "[mysqld]\n");
 
+
+// So that users cant list other user's files
+exec("chmod 711 /home");
+
+// Able to run: setfacl -m u:username:rwx /dev/kvm
+exec("apt-get install acl -y");
+
+// Allow ip forwarding so that users in netns can talk to the Internet
+exec("sysctl -w net.ipv4.ip_forward=1");
 
 
 console.log("Finish!");

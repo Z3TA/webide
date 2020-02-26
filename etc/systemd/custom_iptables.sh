@@ -148,7 +148,11 @@ ip6tables -A OUTPUT -j REJECT
 iptables -A OUTPUT -j REJECT
 
 
-# We are not a router
+# Make users in netns able to talk to the Internet
+iptables -A FORWARD -d 10.0.0.0/8 -j ACCEPT
+iptables -A FORWARD -s 10.0.0.0/8 -j ACCEPT
+
+# Block all other routing by default
 ip6tables -A FORWARD -j REJECT --reject-with icmp6-adm-prohibited
 iptables -A FORWARD -j REJECT
 
