@@ -1950,7 +1950,7 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 .discoveryItem figcaption {
 	display: block;
 	position: relative;
-	top: -12px;
+	top: -21px;
 	text-align: center;
 }
 
@@ -2325,6 +2325,10 @@ margin-top: 20px;
 		border: 0px solid orange;
 		margin: 7px;
 		margin-top: 10px;
+	}
+	
+	.discoveryItem figcaption {
+		top: -12px;
 	}
 	
 }
