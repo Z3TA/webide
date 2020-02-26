@@ -567,8 +567,9 @@ reconnectTimeoutTime += 10000;
 				}
 				else if(gotResponseForTimedOutRequest.hasOwnProperty(json.id)) {
 					generalError = gotResponseForTimedOutRequest[json.id];
-					generalError.message = generalError.message += " Request took " + Math.round(((new Date()) - generalError.time)/1000) + " seconds.";
-				}
+					generalError.message = generalError.message += " Request took " + Math.round(((new Date()) - generalError.time)/1000) + " seconds. Response: " + UTIL.shortString(JSON.stringify(json, null, 2));
+				
+}
 				else {
 					generalError = new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
