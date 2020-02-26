@@ -6342,7 +6342,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		
 		
 		log(username + " copying config script to Docker daemon VM on " + IP, DEBUG);
-		module_child_process.exec("scp -i /root/.ssh/dockervm ../dockervm/check_config_in_vm.sh docker@10.2.3.235:/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
+		module_child_process.exec("scp -i /root/.ssh/dockervm ../dockervm/check_config_in_vm.sh docker@" + IP + ":/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			progress();
 			
