@@ -69,21 +69,26 @@ var CACHE_FILES = [
 	// style.css' should be inlined in bundle.htm
 	
 	// Discovery bar icons
-	'/gfx/treaty.svg',
-	'/gfx/data.svg',
-	'/gfx/cloud.svg',
-	'/gfx/website.svg',
-	'/gfx/share.svg',
-	'/gfx/multimedia.svg',
-	'/gfx/board.svg',
-	'/gfx/new-window.svg',
-	'/gfx/database.svg',
-	'/gfx/upload.svg',
-	'/gfx/upload.svg',
 	'/gfx/add-file.svg',
-'/gfx/icon/dropbox.svg',
+	'/gfx/disk.svg',
+	'/gfx/data.svg',
+	'/gfx/multimedia.svg',
+	'/gfx/folder.svg',
+	'/gfx/board.svg',
+	'/gfx/icon/dropbox.svg',
+	'/gfx/cloud.svg',
+	'/gfx/docker.svg',
+	'/gfx/database.svg',
+	'/gfx/android.svg',
 	'/gfx/wireguard-vpn.svg',
-
+	'/gfx/treaty.svg',
+	'/gfx/website.svg',
+	
+	//'/gfx/share.svg',
+	//'/gfx/new-window.svg',
+	//'/gfx/upload.svg',
+	
+	
 	// Cache font
 '/gfx/font/ubuntu/ubuntu.css',
 	'/gfx/font/ubuntu/UbuntuMono-BI.ttf',
