@@ -11,8 +11,14 @@ fi
 # Exit if anything fails
 set -e
 
-# Check if something is not commmited
 
+# Make sure the folder containing the script is the working dir
+cd $(dirname $0)
+
+# Move to the webide directory
+cd ..
+
+# Check if something is not commmited
 if hg status | grep -q '^M ';
   then
     hg status
@@ -53,7 +59,7 @@ then
   echo "Using existing release in temp/release/server/"
 else
    # Note: you can publish at the same time, using the -publish flag
-   ./release.sh $@
+   ./dev-scripts/release.sh $@
 fi
 
 
