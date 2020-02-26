@@ -57,12 +57,12 @@ server {
 #SSL#server {
   #SSL#listen 80;
   #SSL#listen [::]:80;
-  #SSL#server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
+  #SSL#server_name ~^(\d+)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
 #SSL#}
 
 server {
-  server_name ~^(\d+)\.%USERNAME%\.%DOMAIN%$;
+  server_name ~^(\d+)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   listen 80;#NOSSL#
   listen [::]:80;#NOSSL#
   #SSL#listen 443 ssl http2;
@@ -107,12 +107,12 @@ server {
 #SSL#server {
   #SSL#listen 80;
   #SSL#listen [::]:80;
-  #SSL#server_name ~^d(\d+)\.%USERNAME%\.%DOMAIN%$;
+  #SSL#server_name ~^d(\d+)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
 #SSL#}
 
 server {
-  server_name ~^d(\d+)\.%USERNAME%\.%DOMAIN%$;
+  server_name ~^d(\d+)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   listen 80;#NOSSL#
   listen [::]:80;#NOSSL#
   #SSL#listen 443 ssl http2;
@@ -152,12 +152,12 @@ server {
 #SSL#server {
   #SSL#listen 80;
   #SSL#listen [::]:80;
-  #SSL#server_name ~^(.*)\.%USERNAME%\.%DOMAIN%$;
+  #SSL#server_name ~^(.*)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
 #SSL#}
 
 server {
-  server_name ~^(.*)\.%USERNAME%\.%DOMAIN%$;
+  server_name ~^(.*)\.%USERNAME%\.%DOM_ESC_DOTS%$;
   listen 80;#NOSSL#
   listen [::]:80;#NOSSL#
   #SSL#listen 443 ssl http2;

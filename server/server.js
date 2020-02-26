@@ -884,8 +884,8 @@ function main() {
 	
 	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
-mysqlConnect();
-
+	mysqlConnect();
+	
 	if(info.uid < 0) {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
@@ -2996,10 +2996,12 @@ function checkMounts(options, checkMountsCallback) {
 						
 						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-						nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN.replace(/\./g, "\\.") ); // dots need to be escaped!
 						nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
 						nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + uid));
-						
+					// dots need to be escaped!? Not in cert paths or nginx will not reload! Only in regular expressions!
+					nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
+					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+					
 						module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 							if(err) throw err;
 							console.log("Nginx profile created!");
@@ -3166,8 +3168,9 @@ function checkMounts(options, checkMountsCallback) {
 					}
 					else {
 						console.log("SSL certificate for " + userDomain + " installed!");
-						
+						setTimeout(function() {
 						enableSSL(userDomain);
+						}, 500); // It will take some time for the certificate to be installed!? no, it was another bug, but keep the timeout for now...
 					}
 				}); // letsencrypt.register
 			}
@@ -3204,9 +3207,14 @@ function checkMounts(options, checkMountsCallback) {
 					exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
 						console.timeEnd(username + " nginx reload");
 						
-						if(error) throw(error);
-						if(stderr) throw new Error(stderr);
-						if(stdout) throw new Error(stdout);
+						var err = error || stdout || stderr;
+						if(err) reportError(err);
+						
+						/*
+							if(error) throw(error);
+							if(stderr) throw new Error(stderr);
+							if(stdout) throw new Error(stdout);
+						*/
 						
 						sslCertChecked = true;
 						console.timeEnd("Check " + username + " SSL Cert");
