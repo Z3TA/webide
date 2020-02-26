@@ -214,7 +214,7 @@ exec("sysctl -w net.ipv4.ip_forward=1");
 exec("sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager -y");
 
 // Don't let normal users see the guts
-exec("chmod 770 /srv");
+exec("chmod 771 /srv");
 
 
 console.log("Finish!");
