@@ -884,6 +884,8 @@ function main() {
 	
 	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
+mysqlConnect();
+
 	if(info.uid < 0) {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}

@@ -83,6 +83,11 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+TypeError: Cannot read property 'query' of undefined
+    at /srv/webide/server/server.js:2945:20
+
+
+
 
 Rollout plan:
 sudo zfs snapshot ben/ROOT/ubuntu@webidechroot
@@ -101,7 +106,14 @@ systemctl start webide webide_nodejs_init webide_signup
 
 
 
+dave,dir,find to service worker cache!
+
+apt install acl
+
+
 Running tests
+
+
 
 
 Restart user worker (to get new api updates) when manually reloading the editor!?!?
