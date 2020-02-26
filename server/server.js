@@ -6342,12 +6342,12 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		
 		
 		log(username + " copying config script to Docker daemon VM on " + IP, DEBUG);
-		module_child_process.exec("scp -i /root/.ssh/dockervm ../dockervm/check_config_in_vm.sh docker@" + IP + ":/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
+		module_child_process.exec("scp -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../dockervm/check_config_in_vm.sh docker@" + IP + ":/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) return error(err);
 			progress();
 			
 			log(username + " running config script via SSH on " + IP, DEBUG);
-			module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
+			module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) {
 					
 					// We might have been successful anyway!
