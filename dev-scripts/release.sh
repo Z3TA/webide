@@ -96,20 +96,13 @@ rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/client/plugin/jswordwrap/
 rm -rf temp/release/linux/guide/
 rm -rf temp/release/linux/promo/
+rm -rf temp/release/linux/dev-scripts/
+rm -rf temp/release/linux/vagrant/
 
 
-rm temp/release/linux/make_test_file.js
-rm temp/release/linux/charStats.js
-rm temp/release/linux/upgrade.sh
-rm temp/release/linux/release.sh
-rm temp/release/linux/todo.md
 rm temp/release/linux/testfile.txt
 rm temp/release/linux/.hgignore
 rm temp/release/linux/jz.xcf
-rm temp/release/linux/makebundle.js
-rm temp/release/linux/makebundle2.js
-rm temp/release/linux/changeset.js
-rm temp/release/linux/semver.js
 #rm temp/release/linux/SEMVER
 rm temp/release/linux/client/gfx/icon/test.htm
 rm temp/release/linux/client/gfx/smallfont_4x6.png
@@ -117,7 +110,6 @@ rm temp/release/linux/client/gfx/jz64.png
 rm temp/release/linux/client/gfx/jz128.png
 rm temp/release/linux/client/gfx/jz192.png
 rm temp/release/linux/client/gfx/jz512.png
-rm temp/release/linux/replaceStringInFileWithContentOfFile.js
 rm temp/release/linux/server/privkey.pem
 rm temp/release/linux/server/fullchain.pem
 
@@ -146,10 +138,15 @@ cp -rf temp/release/linux/. temp/release/server/
 mv temp/release/server/documentation/* temp/release/server/client/about/
 rmdir temp/release/server/documentation/
 
+
+
 echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/letsencrypt/
 rm -rf temp/release/linux/client/signup/
+rm -rf temp/release/linux/dockervm/
+
+
 rm temp/release/linux/gcsf
 rm temp/release/linux/adduser.js
 rm temp/release/linux/cloudide_install.js
@@ -160,10 +157,11 @@ rm temp/release/linux/removeuser.js
 rm temp/release/linux/signup_service.js
 rm temp/release/linux/update.js
 rm temp/release/linux/user_activity.js
-rm temp/release/linux/client/bundle.htm
 rm temp/release/linux/client/bundle.htm.gz
 rm temp/release/linux/client/sitemap.txt
 rm temp/release/linux/backup.sh
+
+
 
 # Remove dependencies not needed when running on the "desktop"
 sed -i '/generate-password/d' temp/release/linux/package.json

@@ -84,7 +84,6 @@ What I'm working on
 -------------------
 
 
-
 Rollout plan:
 sudo zfs snapshot ben/ROOT/ubuntu@webidechroot
 sudo zfs snapshot ben/srv@webidechroot
@@ -113,6 +112,8 @@ Release!
 
 todo: Test remote file socket for regression
 
+todo: Test code with http://lisperator.net/uglifyjs/mangle and fix issues
+Add support for linter tool!?
 
 Replace http://10.0.3.235:3000/ with 3000.user.webide.se in stdout messages!
 todo: Also replace in node.js stdout when starting the script from the editor
