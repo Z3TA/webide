@@ -126,7 +126,7 @@ function sigint() {
 
 function httpRequest(request, response) {
 	
-	log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress));
+	log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress || HTTP_PORT));
 	
 	var arr = request.url.split("?");
 	if(arr[0] == "/ping") {
