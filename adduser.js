@@ -353,11 +353,15 @@ function adduser() {
 		
 console.time("chownrSync " + homeDir);
 		// The user owns his files
-		chownrSync(homeDir, uid, gid);
+		//chownrSync(homeDir, uid, gid); // 8138.152ms
+		child_process.execSync("chown -R " + uid + ":" + gid + " " + homeDir); // 3787.743ms
 		console.timeEnd("chownrSync " + homeDir);
 
 		// Make it so that no one else beside the user can read the user files
-		chmodrSync(homeDir, "750");
+		console.time("chmodrSync " + homeDir);
+		//chmodrSync(homeDir, "750"); // 6868.963ms
+		child_process.execSync("chmod 750 -R " + homeDir); // 2021.330ms
+		console.timeEnd("chmodrSync " + homeDir);
 		
 		// Nginx (www-data) need -x permission on all folders in order to stat! sudo -u www-data stat /home/ltest1/wwwpub/
 		fs.chmodSync(homeDir, "751");
@@ -367,7 +371,8 @@ console.time("chownrSync " + homeDir);
 		//chmodrSync(homeDir + "run/", "444");
 		
 		// .ssh folder is secret!
-		chmodrSync(homeDir + ".ssh/", "700");
+		child_process.execSync("chmod 700 -R " + homeDir + ".ssh/");
+		
 		
 		
 		// Try Copy over the test file (only exist in dev)

@@ -224,7 +224,7 @@ alertGeneralMessage("Connection to signup service closed! Attempting to reconnec
 			var username = inputUsername.value;
 			var password = inputPassword.value;
 			emtyGeneralAlerts();
-			alertGeneralMessage("Creating user " + username + " ... You will be redirected to the editor once the account has been created! ", true);
+			alertGeneralMessage("Creating user " + username + " ... You will be redirected to the editor once the account has been created! It can take up to 20 seconds.", true);
 			createButton.disabled = true;
 			inputUsername.disabled = true;
 			inputPassword.disabled = true;

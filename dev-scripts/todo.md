@@ -83,16 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-umount: /home/guest4: target is busy.
-
-virsh status paused !?!?
-
-Docker VM's don't get assigned static ip!??
 
 
 test docker! in prod
-
-Add message in seignup that it can take a lot of time? Add a countdown?
 
 libvirt need to run as root.. add to cloudide_isntall!
 
