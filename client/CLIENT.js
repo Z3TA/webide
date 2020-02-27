@@ -31,7 +31,7 @@ var CLIENT = {}; // Client object is global
 	var pingCounter = 0;
 	var nextPingTimer;
 	var pingTimeout;
-	var requestThatDontCallBack = ["stdout", "log", "echo", "ping"];
+	var requestThatDontCallBack = ["stdout", "log", "echo", "ping", "quit"];
 	var GS = String.fromCharCode(29);
 	var WEBSOCK_OPEN = 1;
 	
@@ -291,6 +291,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			
 			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + (CLIENT.cmdTimeout==timeout?" (default)":"") + "");
 			gotResponseForTimedOutRequest[id].time = new Date();
+			gotResponseForTimedOutRequest[id].code = "ETIMEDOUT";
 			
 			// note: If the message did get through, we might get the answer after re-connecting!
 			// we do not however want the answer to result in a double callback!
@@ -569,7 +570,7 @@ reconnectTimeoutTime += 10000;
 					generalError = gotResponseForTimedOutRequest[json.id];
 					generalError.message = generalError.message += " Request took " + Math.round(((new Date()) - generalError.time)/1000) + " seconds. Response: " + UTIL.shortString(JSON.stringify(json, null, 2));
 				
-}
+				}
 				else {
 					generalError = new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
