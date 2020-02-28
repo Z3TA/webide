@@ -189,7 +189,7 @@
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
 						var cancel = "No, cancel deployment";
-						folder = UTIL.getDirectoryFromPath(currentFile.path);
+						folder = UTIL.getDirectoryFromPath(currentFile.path) || EDITOR.workingDirectory;
 						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							

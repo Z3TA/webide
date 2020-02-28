@@ -1200,7 +1200,7 @@
 		
 		function importSiteSettings() {
 			var fileName = "ssgconf.json";
-			var defaultPath = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 			
 			if(defaultPath.indexOf(fileName) != -1) importCfg(defaultPath);
 			else EDITOR.pathPickerTool({instruction: "Select a " + fileName + " file", defaultPath: defaultPath}, function(err, path) {
@@ -1251,7 +1251,7 @@
 		var fileName = "ssgconf.json";
 		var folder = site.projectFolder;
 		if(folder == undefined || folder == ".") {
-			var defaultPath = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 			EDITOR.pathPickerTool({instruction: "Choose a project folder", defaultPath: defaultPath}, function gotPath(err, folder) {
 				if(err) alertBox("Unable to pick a project folder: " + err.message);
 				else {

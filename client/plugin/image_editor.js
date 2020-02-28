@@ -8,7 +8,7 @@
 	
 	var controls;
 	var zoomInput;
-	
+	var coordinateX, coordinateY;
 	
 	EDITOR.plugin({
 		desc: "Edit images",
@@ -28,6 +28,7 @@ unload: function unloadImageEditor() {
 			EDITOR.removeEvent("mouseScroll", zoomImage);
 			EDITOR.removeEvent("paste", imagePaste);
 			EDITOR.removeEvent("mouseClick", colorPicker);
+			EDITOR.removeEvent("mouseMove", moveMouseOnImage);
 			
 			controls.unload();
 			
@@ -68,6 +69,22 @@ unload: function unloadImageEditor() {
 			EDITOR.putIntoClipboard(colorInput.value);
 		};
 		wrap.appendChild(colorInput);
+		
+		var coordinatesLabel = document.createElement("label");
+		coordinatesLabel.innerText = "Coordinates: ";
+		var coordinates = document.createElement("span");
+		coordinateX = document.createElement("span");
+		coordinateX.classList.add("coordinate");
+		coordinates.appendChild(coordinateX);
+		
+		coordinateY = document.createElement("span");
+		coordinateY.classList.add("coordinate");
+		coordinates.appendChild(coordinateY);
+		
+		coordinates.onclick = function copyCoordinatesToClipboard() {
+			
+		}
+		wrap.appendChild(coordinates);
 		
 		
 		
@@ -179,14 +196,27 @@ EDITOR.putIntoClipboard(rgbStr);
 		if(file.canvas != undefined) {
 			EDITOR.canvas.style.cursor = 'default';
 			controls.show();
+			EDITOR.on("mouseMove", moveMouseOnImage);
 		}
 		else if(file.text != undefined) {
 			EDITOR.canvas.style.cursor = 'text';
 			controls.hide();
+			EDITOR.removeEvent("mouseMove", moveMouseOnImage);
 		}
 		else {
 			EDITOR.canvas.style.cursor = 'help';
 		}
+		
+	}
+	
+	function moveMouseOnImage(mouseX, mouseY, target, mouseMoveEvent) {
+		var file = EDITOR.currentFile;
+		
+		if(!(file instanceof ImageFile)) return true;
+		
+		
+		coordinateX.innerText = mouseX;
+		coordinateY.innerText = mouseY;
 		
 	}
 	

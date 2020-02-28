@@ -712,7 +712,7 @@ else throw err;
 			
 			
 			if(UTIL.isFilePath(filePath)) {
-				var folderToSearchIn = UTIL.getDirectoryFromPath(filePath);
+				var folderToSearchIn = UTIL.getDirectoryFromPath(filePath) || EDITOR.workingDirectory;
 				var fileToSearchFor = UTIL.getFilenameFromPath(filePath);
 }
 			else if(matchFile) {
@@ -720,7 +720,8 @@ else throw err;
 				var fileToSearchFor = matchFile[0];
 			}
 			else {
-				var folderToSearchIn = UTIL.getDirectoryFromPath(file.path);
+				var folderToSearchIn = UTIL.getDirectoryFromPath(file.path) || EDITOR.workingDirectory;
+				
 			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) {
 folderToSearchIn = EDITOR.workingDirectory;
 				}

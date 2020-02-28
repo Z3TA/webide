@@ -284,7 +284,7 @@ todo: Run vttest
 		EDITOR.ctxMenu.hide();
 		winMenuTerminal.hide();
 		
-		var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		var cwd = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 		
 		if(cwd && cwd.indexOf("://") != -1) {
 			if(EDITOR.user) cwd = EDITOR.user.homeDir;

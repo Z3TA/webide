@@ -1983,7 +1983,7 @@ function checkDir(user, virtualPath, callback) {
 	var localPath = user.translatePath(virtualPath);
 	if(localPath instanceof Error) return callback(localPath);
 	
-	var localDirectory = UTIL.getDirectoryFromPath(localPath);
+	var localDirectory = UTIL.getDirectoryFromPath(localPath) || EDITOR.workingDirectory;
 	
 	findDotHg(localDirectory, function(err, mercurialRoot) {
 		if(err) return callback(err);

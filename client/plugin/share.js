@@ -66,7 +66,7 @@ desc: "Allow sharing stuff with other apps",
 				
 				if(answer == move || answer == copy) {
 					// Create the target folder first!
-					var directory = UTIL.getDirectoryFromPath(newPath);
+					var directory = UTIL.getDirectoryFromPath(newPath) || EDITOR.workingDirectory;
 					EDITOR.createPath(directory, function(err) {
 						if(err) return alertBox("Unable to create directory=" + directory + " Error: " + err.message);
 						

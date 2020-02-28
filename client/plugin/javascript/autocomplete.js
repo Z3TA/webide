@@ -421,7 +421,7 @@
 	
 	function updateRelatedScripts(htmlFile) {
 		console.time("updateRelatedScripts in " + htmlFile.path);
-		var directory = UTIL.getDirectoryFromPath(htmlFile.path);
+		var directory = UTIL.getDirectoryFromPath(htmlFile.path) || EDITOR.workingDirectory;
 		var scripts = findScriptFiles(directory, htmlFile.text);
 		
 		console.log("scripts=" + scripts);

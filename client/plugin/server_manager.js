@@ -546,7 +546,7 @@
 		function browseKey() {
 			var defaultPath = "";
 			
-			if(EDITOR.currentFile) defaultPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path)
+			if(EDITOR.currentFile) defaultPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory;
 			else defaultPath = EDITOR.workingDirectory;
 			
 			EDITOR.localFileDialog(defaultPath, function selectKey(path) {

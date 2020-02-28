@@ -210,7 +210,7 @@
 				var pathToExplore = dirToExplore;
 			}
 			else if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
-				var pathToExplore = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+				var pathToExplore = UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory;
 			}
 			else if(lastPathExplored.indexOf(EDITOR.workingDirectory) == 0) {
 				var pathToExplore = lastPathExplored;
@@ -792,7 +792,7 @@ if(!iconLoadError) {
 						
 						fileItemMenuHolder.removeChild(fileItemMenu); // Hide the menu
 						
-						var basePath = UTIL.getDirectoryFromPath(oldPath.replace(/[/\\]$/, ""));
+						var basePath = UTIL.getDirectoryFromPath(oldPath.replace(/[/\\]$/, "")) || EDITOR.workingDirectory;
 						if(newPath.indexOf(basePath) != 0) {
 							// The file or folder was moved into another directory
 							el.parentElement.removeChild(el);

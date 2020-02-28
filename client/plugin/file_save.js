@@ -189,7 +189,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		if(oldPath == currentPath) return; // Path didn't change
 		
 		oldFolder = currentFolder;
-		currentFolder = UTIL.getDirectoryFromPath(currentPath);
+		currentFolder = UTIL.getDirectoryFromPath(currentPath) || EDITOR.workingDirectory;
 		
 		var pathIsFolder = UTIL.isDirectory(pathValue);
 		
@@ -511,7 +511,7 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		
 		inputPath.setAttribute("size", size);
 		
-		var folder = UTIL.getDirectoryFromPath(originalFilePath);
+		var folder = UTIL.getDirectoryFromPath(originalFilePath) || EDITOR.workingDirectory;
 		
 		suggestFolders(folder);
 	}
@@ -523,7 +523,7 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		}
 		else {
 			EDITOR.saveFile(file, function(err) {
-				if(err) alertBox("Unable to save file!\n" + err.message, err.code, "warning");
+				if(err && err.code != "remoteFileSaved") alertBox("Unable to save file!\n" + err.message, err.code, "warning");
 			});
 		}
 		
