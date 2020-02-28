@@ -9,6 +9,7 @@
 	var controls;
 	var zoomInput;
 	var coordinateX, coordinateY;
+	var originalSizeWidth, originalSizeHeight;
 	
 	EDITOR.plugin({
 		desc: "Edit images",
@@ -72,11 +73,14 @@ unload: function unloadImageEditor() {
 		
 		var coordinatesLabel = document.createElement("label");
 		coordinatesLabel.innerText = "Coordinates: ";
+		wrap.appendChild(coordinatesLabel);
 		var coordinates = document.createElement("span");
+		coordinates.classList.add("widgetItem");
 		coordinateX = document.createElement("span");
 		coordinateX.classList.add("coordinate");
+		coordinates.appendChild(document.createTextNode("x="));
 		coordinates.appendChild(coordinateX);
-		
+		coordinates.appendChild(document.createTextNode(", y="))
 		coordinateY = document.createElement("span");
 		coordinateY.classList.add("coordinate");
 		coordinates.appendChild(coordinateY);
@@ -86,6 +90,20 @@ unload: function unloadImageEditor() {
 		}
 		wrap.appendChild(coordinates);
 		
+		var originalSizeLabel = document.createElement("label");
+		originalSizeLabel.innerText = "Original size: ";
+		wrap.appendChild(originalSizeLabel);
+		var originalSize = document.createElement("span");
+originalSize.classList.add("widgetItem");
+		originalSizeWidth = document.createElement("span");
+		originalSizeWidth.classList.add("size");
+		originalSize.appendChild(document.createTextNode("width="));
+		originalSize.appendChild(originalSizeWidth);
+		originalSize.appendChild(document.createTextNode(", height="))
+		originalSizeHeight = document.createElement("span");
+		originalSizeHeight.classList.add("size");
+		originalSize.appendChild(originalSizeHeight);
+		wrap.appendChild(originalSize);
 		
 		
 		return wrap;
@@ -196,6 +214,10 @@ EDITOR.putIntoClipboard(rgbStr);
 		if(file.canvas != undefined) {
 			EDITOR.canvas.style.cursor = 'default';
 			controls.show();
+			
+			originalSizeWidth.innerText = file.sWidth;
+			originalSizeHeight.innerText = file.sHeight;
+			
 			EDITOR.on("mouseMove", moveMouseOnImage);
 		}
 		else if(file.text != undefined) {
@@ -214,9 +236,10 @@ EDITOR.putIntoClipboard(rgbStr);
 		
 		if(!(file instanceof ImageFile)) return true;
 		
+		var pos = file.pixelCoordinateFromMousePosition(mouseX, mouseY);
 		
-		coordinateX.innerText = mouseX;
-		coordinateY.innerText = mouseY;
+		coordinateX.innerText =pos.x;
+		coordinateY.innerText = pos.y;
 		
 	}
 	

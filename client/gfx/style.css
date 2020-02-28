@@ -582,6 +582,9 @@ label {
 	font-weight: bold;
 	}
 
+.widgetItem {
+	margin-right: 4px;
+}
 
 input[type=button], button.button, input[type=submit] {
 	border-radius: 3px;
