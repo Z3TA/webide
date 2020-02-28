@@ -83,7 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+use webider as default editor (for terminal apps)
 
+
+
+When opening a file Ctrl+O and trying to change the path to search in,
+it keeps getting reset, very annoying!
 
 test docker! in prod
 

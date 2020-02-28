@@ -1803,7 +1803,9 @@ if(fileParse !== undefined) {
 			for(var fName in returns) {
 				if( returns[fName] === PREVENT_DEFAULT ) {
 					console.warn(fName + " prevented file from being saved!");
-					if(callback) callback( new Error(fName + " prevented file from being saved!") );
+var error = new Error(fName + " prevented file from being saved!")
+error.code = fName;
+					if(callback) callback(error);
 					return;
 				}
 				else if ( returns[fName] !== ALLOW_DEFAULT ) {
