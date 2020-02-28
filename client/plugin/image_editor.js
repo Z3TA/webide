@@ -10,6 +10,7 @@
 	var zoomInput;
 	var coordinateX, coordinateY;
 	var originalSizeWidth, originalSizeHeight;
+	var inputPath;
 	
 	EDITOR.plugin({
 		desc: "Edit images",
@@ -71,6 +72,36 @@ unload: function unloadImageEditor() {
 		};
 		wrap.appendChild(colorInput);
 		
+		var originalSizeLabel = document.createElement("label");
+		originalSizeLabel.innerText = "Original size: ";
+		wrap.appendChild(originalSizeLabel);
+		var originalSize = document.createElement("span");
+		originalSize.classList.add("widgetItem");
+		originalSizeWidth = document.createElement("span");
+		originalSizeWidth.classList.add("size");
+		originalSize.appendChild(document.createTextNode("width="));
+		originalSize.appendChild(originalSizeWidth);
+		originalSize.appendChild(document.createTextNode(", height="))
+		originalSizeHeight = document.createElement("span");
+		originalSizeHeight.classList.add("size");
+		originalSize.appendChild(originalSizeHeight);
+		wrap.appendChild(originalSize);
+		
+		
+		var pathLabel = document.createElement("label");
+		pathLabel.innerText = "Path: ";
+		wrap.appendChild(pathLabel);
+		inputPath = document.createElement("input");
+		inputPath.setAttribute("type", "text");
+		wrap.appendChild(inputPath);
+		var resetPath = document.createElement("button");
+		resetPath.classList.add("button");
+		resetPath.innerText = "Reset path";
+		resetPath.onclick = function() {
+			inputPath.value = "";
+		}
+		wrap.appendChild(resetPath);
+		
 		var coordinatesLabel = document.createElement("label");
 		coordinatesLabel.innerText = "Coordinates: ";
 		wrap.appendChild(coordinatesLabel);
@@ -89,22 +120,6 @@ unload: function unloadImageEditor() {
 			
 		}
 		wrap.appendChild(coordinates);
-		
-		var originalSizeLabel = document.createElement("label");
-		originalSizeLabel.innerText = "Original size: ";
-		wrap.appendChild(originalSizeLabel);
-		var originalSize = document.createElement("span");
-originalSize.classList.add("widgetItem");
-		originalSizeWidth = document.createElement("span");
-		originalSizeWidth.classList.add("size");
-		originalSize.appendChild(document.createTextNode("width="));
-		originalSize.appendChild(originalSizeWidth);
-		originalSize.appendChild(document.createTextNode(", height="))
-		originalSizeHeight = document.createElement("span");
-		originalSizeHeight.classList.add("size");
-		originalSize.appendChild(originalSizeHeight);
-		wrap.appendChild(originalSize);
-		
 		
 		return wrap;
 		
@@ -187,8 +202,7 @@ originalSize.classList.add("widgetItem");
 		// Updating the colorInput will not trigger it's onchange event!
 EDITOR.putIntoClipboard(rgbStr);
 
-		return false;
-		
+		return ALLOW_DEFAULT;
 	}
 	
 	function zoomImage(dir, steps, combo, scrollEvent) {
@@ -219,16 +233,34 @@ EDITOR.putIntoClipboard(rgbStr);
 			originalSizeHeight.innerText = file.sHeight;
 			
 			EDITOR.on("mouseMove", moveMouseOnImage);
+			EDITOR.on("mouseClick", addToPath);
 		}
 		else if(file.text != undefined) {
 			EDITOR.canvas.style.cursor = 'text';
 			controls.hide();
 			EDITOR.removeEvent("mouseMove", moveMouseOnImage);
+			EDITOR.removeEvent("mouseClick", addToPath);
 		}
 		else {
 			EDITOR.canvas.style.cursor = 'help';
 		}
 		
+	}
+	
+	function addToPath(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
+		if(target != EDITOR.canvas) return true;
+		var file = EDITOR.currentFile;
+		if(!(file instanceof ImageFile)) return true;
+		
+		if(mouseDirection != "down") return true;
+		
+		
+		var pos = file.pixelCoordinateFromMousePosition(mouseX, mouseY);
+		
+		
+		inputPath.value = inputPath.value + " L " + pos.x + " " + pos.y;
+		
+		return ALLOW_DEFAULT;
 	}
 	
 	function moveMouseOnImage(mouseX, mouseY, target, mouseMoveEvent) {
