@@ -167,14 +167,16 @@ console.log("clone error stderr=" + stderr);
 				
 			// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 			
+			var friendlyMsg = "Unable to clone " + remote + "\n";
+			
 				if(destinationNotEmpty) {
-				cloneDone("The destination folder is not empty: " + virtualPath + destinationNotEmpty[1]);
+				cloneDone(friendlyMsg + "The destination folder is not empty: " + virtualPath + destinationNotEmpty[1]);
 				}
 			else if(stderr) {
-				cloneDone(err.message + "\n" + stderr);
+				cloneDone(friendlyMsg + err.message + "\n" + stderr);
 			}
 			else {
-				cloneDone(err.message);
+				cloneDone(friendlyMsg + err.message);
 			}
 			
 			user.send({mercurialProgress: {max: 1, value: 1}});
