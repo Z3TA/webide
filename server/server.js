@@ -4179,7 +4179,7 @@ spawnOptions.env.HOST = netnsIP;
 		
 		if(workerMessage.resp || workerMessage.error) {
 			
-			log("workerMessage.id=" + workerMessage.id, DEBUG);
+			//log("workerMessage.id=" + workerMessage.id, DEBUG);
 			
 			if(typeof workerMessage.id == "string") {
 				var arr = workerMessage.id.split("|");
