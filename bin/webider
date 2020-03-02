@@ -18,7 +18,7 @@ var DEFAULT_PORT = 8103;
 
 var EOF = String.fromCharCode(3);
 
-var DEBUG = true; // global flag
+var DEBUG = false; // spit out debug info if true
 
 var module_os = require("os");
 var module_string_decoder = require('string_decoder');

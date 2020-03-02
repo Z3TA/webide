@@ -1475,7 +1475,18 @@ function openRemoteFileServer() {
 		log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
 	});
 	
-	remoteFileServer.on("connection", function stdinConnection(socket) {
+	remoteFileServer.on("connection", stdinConnection);
+	remoteFileServer.on("error", stdSocketError);
+	
+	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
+	// Listen on all IP's so that we can get files from anywhere ...
+	
+	
+	// Also listen on a unix socket so that the remote socket can be reached from within user netns ?
+	// No, we can reach it via 10.0.0.1 from within the user netns!
+	
+	
+	function stdinConnection(socket) {
 		
 		var decoder = new StringDecoder('utf8');
 		var username; // username for this socket
@@ -1504,7 +1515,7 @@ function openRemoteFileServer() {
 		socket.on("error", remoteFileSocketError);
 		
 		function remoteFileSocketData(data) {
-			// The data will always start with username, linbreak, filename || STDIN, linebreak. 
+			// The data will always start with username, linbreak, filename || STDIN, linebreak.
 			
 			console.log("Remote file socket received " + data.length + " bytes of data ...");
 			
@@ -1632,15 +1643,11 @@ function openRemoteFileServer() {
 			return clients;
 		}
 		
-	});
+	}
 	
-	
-	remoteFileServer.on("error", function stdSocketError(err) {
+	function stdSocketError(err) {
 		log("Remote file server error: " + err.message, WARN);
-	});
-	
-	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
-	// Listen on all IP's so that we can get files from anywhere ...
+	}
 	
 	function sendOrBuffer(str) {
 		client_connections = USER_CONNECTIONS[USERNAME];
@@ -3998,7 +4005,9 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 		LOGNAME: username,
 		USER_NAME: username,
 		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
-		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/"
+		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
+		EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
+		VISUAL: "webide"
 	}
 	
 	if(groups) {

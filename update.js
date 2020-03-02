@@ -11,7 +11,6 @@
 
 var getArg = require("./shared/getArg.js");
 var copyFileSync = require("./shared/copyFileSync.js");
-var copyFolderRecursiveSync = require("./shared/copyFolderRecursiveSync.js");
 var chmodrSync = require("./shared/chmodrSync.js");
 var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
@@ -43,6 +42,8 @@ function startUpdate() {
 	//copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
 	//copyFileSync("./etc/systemd/webide_signup.service", "/etc/systemd/system/webide_signup.service");
 	//copyFileSync("./etc/systemd/webide_nodejs_init.service", "/etc/systemd/system/webide_nodejs_init.service");
+
+copyFileSync("./bin/webider", "/usr/local/bin/webide");
 
 run("systemctl daemon-reload");
 	//run("systemctl restart webide");
