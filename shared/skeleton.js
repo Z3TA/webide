@@ -3,6 +3,10 @@ var copyFolderRecursiveSync = require("./copyFolderRecursiveSync.js");
 var copyFileSync = require("./copyFileSync.js");
 var UTIL = require("../client/UTIL.js");
 var module_path = require("path");
+var ENCODING = "utf8";
+
+var chmodrSync = require("./chmodrSync.js");
+var chownrDirSync = require("./chownrDirSync.js");
 
 var skeleton = {
 	update: function update(userInfo) {
@@ -12,6 +16,8 @@ var skeleton = {
 		if(!userInfo.hasOwnProperty("domain")) throw new Error("domain not in " + JSON.stringify(userInfo));
 		if(!userInfo.hasOwnProperty("netnsIP")) throw new Error("netnsIP not in " + JSON.stringify(userInfo));
 		if(!userInfo.hasOwnProperty("dockerVMIP")) throw new Error("dockerVMIP not in " + JSON.stringify(userInfo));
+		if(!userInfo.hasOwnProperty("uid")) throw new Error("uid not in " + JSON.stringify(userInfo));
+		if(!userInfo.hasOwnProperty("gid")) throw new Error("gid not in " + JSON.stringify(userInfo));
 		
 		var webideRoot = module_path.resolve(__dirname, "../"); // In case the script is not run from there
 		
@@ -38,9 +44,22 @@ var skeleton = {
 		updateFile(userInfo.homeDir + ".bashrc", userInfo);
 		updateFile(userInfo.homeDir + ".npmrc", userInfo);
 		
+		// Make sure the log folder exist so that Nginx can start
+		var fs = require("fs");
+		try { fs.mkdirSync(UTIL.joinPaths([userInfo.homeDir, "log/"])); } catch(err) { console.log(err.message); }
+		chmodrSync(UTIL.joinPaths([userInfo.homeDir, "log/"]), "2770"); // Set the group-id bit so that all new files created will belong to the group
+		chownrDirSync(UTIL.joinPaths([userInfo.homeDir, "log/"]), userInfo.uid, userInfo.gid);
+		
+		
 	}
 }
 
+function run(cmd) {
+	var fs = require("fs");
+	var child_process = require('child_process');
+	var stdout = child_process.execSync(cmd).toString(ENCODING);
+	if(stdout.trim()) throw new Error(stdout);
+}
 
 function updateFile(path, userInfo) {
 	var fs = require("fs");

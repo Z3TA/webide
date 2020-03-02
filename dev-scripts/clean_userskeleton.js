@@ -39,7 +39,10 @@ userinfo(skeletonUser, function(err, info) {
 		homeDir: UTIL.trailingSlash(info.homeDir),
 		netnsIP: netnsIP,
 		dockerVMIP: dockerVMIP,
-		domain: domain
+		domain: domain,
+uid: info.uid,
+gid: info.gid
+
 	}
 	
 	deleteFiles(userInfo.homeDir);
