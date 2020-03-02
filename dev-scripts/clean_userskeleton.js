@@ -3,7 +3,16 @@
 
 /*
 	
-	Run this script before making another snapshot...
+	Guide for updating userskeleton (the user *new* users will be based on)
+	
+	1. Update files in etc/userdir_skeleton
+	or login as userskeleton and download/update stuff
+
+	2. Run this script which cleans up temporary files and cache, 
+and also copies fresh files from etc/userdir_skeleton
+
+	4. Create a new snapshot, and send it the the prod server
+	
 	sudo zfs snapshot rpool/home/userskeleton@base2
 	
 	Then send snapshot to prod server...
@@ -11,7 +20,9 @@
 	sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton
 	
 	If the fs already exist: (send incremental data)
-	sudo zfs send -i rpool/home/userskeleton@base1 rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton
+	sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton
+	
+	(where snap X on the server is the last common snap and snap Y is the latest in dev)
 	
 	zfs list -t snapshot
 	

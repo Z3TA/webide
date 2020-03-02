@@ -347,7 +347,7 @@ function adduser() {
 		
 		if(NOZFS) {
 			console.time("Update skeleton files");
-			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP});
+			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP, uid: uid, gid: gid});
 			console.timeEnd("Update skeleton files");
 		}
 		
