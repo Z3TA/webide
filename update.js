@@ -42,7 +42,8 @@ function startUpdate() {
 	//copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
 	//copyFileSync("./etc/systemd/webide_signup.service", "/etc/systemd/system/webide_signup.service");
 	//copyFileSync("./etc/systemd/webide_nodejs_init.service", "/etc/systemd/system/webide_nodejs_init.service");
-
+	copyFileSync("./etc/systemd/custom_iptables.service", "/etc/systemd/system/custom_iptables.service");
+	
 copyFileSync("./bin/webider", "/usr/local/bin/webide");
 
 run("systemctl daemon-reload");
