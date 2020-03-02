@@ -76,7 +76,7 @@ EDITOR.plugin({
 			
 			var currentFolder = UTIL.getDirectoryFromPath(file.path);
 			
-			if(currentFolder.indexOf(EDITOR.workingDirectory) == -1) {
+			if(currentFolder && currentFolder.indexOf(EDITOR.workingDirectory) == -1) {
 				// The file switched to or saved is not part of the current working directory, so change working directory!
 				console.log("updateWorkingDirectory: Chaning working directory because you saved or switched to " + file.path);
 				EDITOR.changeWorkingDir(currentFolder);
