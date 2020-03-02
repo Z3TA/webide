@@ -83,8 +83,15 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-update userskeleton!
-with skeleton files!
+Getting 403 when trying to access https://guest26.webide.se/welcome.htm
+
+
+
+AVD not working for guest users on webide!
+
+
+test pushing to prod in prod
+
 
 Test to make sure everything works in prod!
 
@@ -118,7 +125,9 @@ todo: Apparmor profiles. global instead of per user!
 Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
 
 
+---
 
+Discovery icon capations wasn't visible on mobile 
 
 ---
 Can't commit if you have added a bunch of files ...

@@ -5195,8 +5195,18 @@ posX = EDITOR.width - offsetWidth;
 				return PREVENT_DEFAULT;
 			}
 			
-			var url = "noVNC/vnc.html?host=" + EDITOR.virtualDisplay.port + "." + EDITOR.user.domain + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password) + "&autoconnect=true"
-			var width = EDITOR.virtualDisplay.width;
+if(EDITOR.user.domain) {
+// Certificate might not yet have been registered, so we use http:
+// If you would use the TLD and the domain would not yet have been registered we would get cert errors
+					var urlHost = "http://" + EDITOR.user.domain + "/vnc_/";
+				}
+				else {
+					var urlHost = "noVNC/"
+				}
+				
+				var url = urlHost + "vnc.html?host=" + EDITOR.virtualDisplay.port + "." + EDITOR.user.domain + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password) + "&autoconnect=true"
+				
+				var width = EDITOR.virtualDisplay.width;
 			var height = EDITOR.virtualDisplay.height + 1;
 			var top = 0;
 			var left = screen.width-EDITOR.virtualDisplay.width;

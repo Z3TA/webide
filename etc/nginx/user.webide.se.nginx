@@ -15,13 +15,17 @@ server {
   #SSL#listen 443 ssl http2;
   #SSL#listen [::]:443 ssl http2;
   server_name %USERNAME%.%DOMAIN%;
-  root %HOMEDIR%wwwpub/;
+  root %HOMEDIR%wwwpub/;§
   index index.html index.htm;
 
   #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/fullchain.pem;
   #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
+
+  location /_vnc/ {
+    alias /srv/webide/client/noVNC/;
+  }
 
   location / {
     charset	utf-8;
