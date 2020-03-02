@@ -41,7 +41,7 @@ function getArg(word) {
 				break;
 			}
 		}
-		console.log("value=" + value);
+		//console.log("value=" + value);
 		if(value === undefined) return true;
 		else if(value === "false") return false;
 		else if(value === "true") return true;

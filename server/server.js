@@ -2099,7 +2099,7 @@ function userCleanup() {
 			}
 		}
 		
-		log("handleUserMessage: id=" + id + " command=" + command + " userConnectionName=" + userConnectionName, DEBUG);
+		//log("handleUserMessage: id=" + id + " command=" + command + " userConnectionName=" + userConnectionName, DEBUG);
 		
 		if(command == "stdout") {
 			try {
@@ -2627,10 +2627,10 @@ var loginCounter = 0;
 			
 			if(conn == undefined) conn = connection;
 			
-			log("answer.id=" + answer.id, DEBUG);
+			//log("answer.id=" + answer.id, DEBUG);
 			
 			if(answer.id == undefined && id) {
-				log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2), DEBUG);
+				//log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2), DEBUG);
 				answer.id = id;
 			}
 			
@@ -6231,7 +6231,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		// Make sure the IP is reachable
 		// Retry some times as it takes time for the server to boot!
 		
-		var maxTry = 10;
+		var maxTry = 13;
 		
 		if(!ipToPing) throw new Error("ipToPing=" + ipToPing + " IP=" + IP);
 		
