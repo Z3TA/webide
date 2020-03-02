@@ -1953,7 +1953,7 @@ function sockJsConnection(connection) {
 	var userBrowser = UTIL.checkBrowser(agent);
 	var clientSessionId = "";
 	var checkingUser = false;
-	
+	var connectionAuthorized = false;
 	
 	
 	var userAlias = userBrowser + "(" + IP + ")";
@@ -2119,7 +2119,7 @@ return false;
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
-		if(!userConnectionName) {
+		if(!connectionAuthorized) {
 			
 			//console.log("json=" + JSON.stringify(json));
 			
@@ -2556,11 +2556,9 @@ var loginCounter = 0;
 							});
 							}
 							
+							connectionAuthorized = true;
+							
 							return true;
-							
-							
-							
-							
 							
 						}
 					}
@@ -2572,6 +2570,8 @@ var loginCounter = 0;
 		}
 		else {
 			// User has authorized
+			
+			if(!USER_WORKERS.hasOwnProperty(userConnectionName)) throw new Error(userConnectionName + " has no worker process!");
 			
 			if(command == "echo") {
 				// Send the data to all other connected client, except the client that sent the echo msg
