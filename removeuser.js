@@ -95,7 +95,26 @@ try {
 		fs.unlinkSync(nginxProfile);
 	}
 	catch(err) {
-		if(err.code == "ENOENT") console.warn("Did not find nginxProfile=" + nginxProfile);
+		if(err.code == "ENOENT") {
+console.warn("Did not find nginxProfile=" + nginxProfile);
+			// Might now have provided the correct DOMAIN
+			try {
+var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
+			}
+			catch(err) {
+				if(err.code == "ENOENT") console.log("Nginx doesn't seem to be installed!");
+				else throw err;
+			}
+			
+			if(nginxProfiles.toString().indexOf(url_user) != -1) { // Can't compare the string from fs.readdirSync without .toString() !!!
+				console.log("Are you sure you are using the correct domain!? DOMAIN=" + DOMAIN + " Use --domain=tld to specify domain when deleting users!");
+				process.exit();
+			}
+			else {
+				console.log("url_user=" +url_user + " not in nginxProfiles=" + nginxProfiles);
+			}
+			
+		}
 		else throw err;
 	}
 	
@@ -141,158 +160,6 @@ try {
 		sudo lsof | grep '/bin/bash'
 		sudo umount -lf /home/ltest4/bin/bash
 		
-		
-	*/
-	
-	// !!!! IF ANY FOLDER FAILS TO UNMOUNT IT IS NOT SAFE TO DELETE THE HOME DIR !!!!
-	// !!!! IF THE HOME DIR IS DELETED WHILE A FOLDER IS STILL MOUNTED THAT FOLDER WILL BE DELETED !!!!
-	
-	// We don't want to accidently mess with any of these, so just in case we are doing some debugging
-	
-	// Same order as in server.js to make it easier to spot what is missing
-	
-	
-	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
-	/*
-		
-		
-	umount(HOME + username + "/bin/ping");
-	
-	umount(HOME + username + "/etc/ssl/certs");
-	
-	umount(HOME + username + "/usr/bin/env");
-	umount(HOME + username + "/usr/bin/hg");
-	umount(HOME + username + "/usr/bin/git");
-	umount(HOME + username + "/usr/bin/node");
-	umount(HOME + username + "/usr/bin/ssh");
-	umount(HOME + username + "/usr/bin/ssh-keygen");
-	umount(HOME + username + "/usr/bin/unrar");
-	umount(HOME + username + "/usr/bin/unzip");
-	umount(HOME + username + "/usr/bin/zip");
-	umount(HOME + username + "/usr/bin/make");
-	umount(HOME + username + "/usr/bin/printf");
-	umount(HOME + username + "/usr/bin/cc");
-	umount(HOME + username + "/usr/bin/tr");
-	umount(HOME + username + "/usr/bin/tail");
-	umount(HOME + username + "/usr/bin/awk");
-	umount(HOME + username + "/usr/bin/sort");
-	umount(HOME + username + "/usr/bin/sha256sum");
-	umount(HOME + username + "/usr/bin/dirname");
-	umount(HOME + username + "/usr/bin/openssl");
-	umount(HOME + username + "/usr/bin/pkg-config");
-	umount(HOME + username + "/usr/bin/curl");
-	//umount(HOME + username + "/usr/bin/id");
-	//umount(HOME + username + "/usr/bin/newuidmap");
-	umount(HOME + username + "/usr/bin/head");
-	umount(HOME + username + "/usr/bin/expr");
-	umount(HOME + username + "/usr/bin/wget");
-	
-	umount(HOME + username + "/usr/bin/docker");
-	umount(HOME + username + "/usr/local/bin/docker-compose");
-	umount(HOME + username + "/sock/docker");
-	
-	
-	umount(HOME + username + "/usr/include");
-	umount(HOME + username + "/usr/lib");
-	umount(HOME + username + "/usr/local/lib");
-	umount(HOME + username + "/usr/share");
-	
-	umount(HOME + username + "/proc/cpuinfo");
-	umount(HOME + username + "/proc/stat");
-	umount(HOME + username + "/proc/sys/vm/overcommit_memory");
-	umount(HOME + username + "/proc/modules");
-	umount(HOME + username + "/proc/");
-	
-	umount(HOME + username + "/dev/urandom");
-	umount(HOME + username + "/dev/null");
-	umount(HOME + username + "/dev/ptmx");
-	umount(HOME + username + "/dev/pts");
-	
-	//umount(HOME + username + "/dev/tty");
-	
-	
-	umount(HOME + username + "/bin/mktemp");
-	umount(HOME + username + "/bin/cat");
-	umount(HOME + username + "/bin/bash");
-	umount(HOME + username + "/bin/gunzip");
-	umount(HOME + username + "/bin/gzip");
-	umount(HOME + username + "/bin/ln");
-	umount(HOME + username + "/bin/ls");
-	umount(HOME + username + "/bin/mkdir");
-	umount(HOME + username + "/bin/mv");
-	umount(HOME + username + "/bin/rm");
-	umount(HOME + username + "/bin/rmdir");
-	umount(HOME + username + "/bin/tar");
-	umount(HOME + username + "/bin/sed");
-	umount(HOME + username + "/bin/grep");
-	umount(HOME + username + "/bin/cp");
-	umount(HOME + username + "/bin/uname");
-	umount(HOME + username + "/bin/bzip2");
-	umount(HOME + username + "/bin/readlink");
-	
-	
-	umount(HOME + username + "/lib");
-	umount(HOME + username + "/lib64");
-	
-	
-	umount(HOME + username + "/usr/", true);
-	umount(HOME + username + "/etc/", true);
-	umount(HOME + username + "/proc/", true);
-	umount(HOME + username + "/dev/pts", true);
-	umount(HOME + username + "/dev/", true);
-	
-	
-	// Mounts with links. Created by mountFollowSymlink(). Also attemp umount on the links just in case!
-	umount(HOME + username + "/usr/bin/python");
-	umount(HOME + username + "/usr/bin/python2.7");
-	umount(HOME + username + "/usr/bin/python2");
-
-	umount(HOME + username + "/bin/sh");
-	umount(HOME + username + "/bin/dash");
-	
-	umount(HOME + username + "/usr/bin/g++");
-	umount(HOME + username + "/usr/bin/g++-7");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-g++-7");
-	
-	umount(HOME + username + "/usr/bin/as");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-as");
-	
-	umount(HOME + username + "/usr/bin/ld");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ld");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ld.bfd");
-	
-	umount(HOME + username + "/usr/bin/ar");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ar");
-	
-	umount(HOME + username + "/usr/bin/ranlib");
-	umount(HOME + username + "/usr/bin/x86_64-linux-gnu-ranlib");
-	
-	umount(HOME + username + "/usr/bin/which");
-	umount(HOME + username + "/bin/which");
-	
-	umount(HOME + username + "/usr/bin/touch");
-	umount(HOME + username + "/bin/touch");
-	
-	umount(HOME + username + "/usr/bin/less");
-	umount(HOME + username + "/bin/less");
-	
-	umount(HOME + username + "/sbin/iptables");
-	umount(HOME + username + "/sbin/xtables-multi");
-	
-	umount(HOME + username + "/sbin/lsmod");
-	umount(HOME + username + "/bin/kmod");
-	
-
-
-	
-	// Just in case
-	umount(HOME + username + "/run/", true);
-	umount(HOME + username + "/bin/", true);
-	
-		
-		// It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!!
-		umount("/usr/bin/nodejs_" + username); // Used by user_worker.js
-		unlink("/usr/bin/nodejs_" + username); // Remove the dummy file.
 		
 	*/
 	
