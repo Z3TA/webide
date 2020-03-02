@@ -46,8 +46,8 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connected = false;
 	CLIENT.ping = -1;
-	CLIENT.pingInterval = 5000; // How long time to wait until sendng next ping
-	CLIENT.pingTimeout = 1000;
+	CLIENT.pingInterval = 15000; // How long time to wait until sendng next ping
+	CLIENT.pingTimeout = 10000;
 	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 	CLIENT.inFlight = 0;
 	
