@@ -175,7 +175,8 @@ cp -rf temp/release/linux/. temp/release/npm/
 
 echo "Clean up the server release"
 # CLient is meant to run in the browser
-rm -rf temp/release/server/bin/
+rm temp/release/server/bin/webide
+rm temp/release/server/bin/webide.bat
 
 rm -rf temp/release/server/webide.app/
 
