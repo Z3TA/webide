@@ -85,6 +85,8 @@ What I'm working on
 
 
 
+Test to make sure everything works in prod!
+
 When opening a file Ctrl+O and trying to change the path to search in,
 it keeps getting reset, very annoying!
 
@@ -98,7 +100,7 @@ Also Setup libvirt DHCP in cloudide_isntall!
 todo: Make webider the default editor so that files opens in the editor when you edit something via terminal
 
 
-todo: Remove docker VM when deleting user1
+
 
 
 Restart user worker (to get new api updates) when manually reloading the editor!?!?

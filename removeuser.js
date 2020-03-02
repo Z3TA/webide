@@ -111,7 +111,7 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 				process.exit();
 			}
 			else {
-				console.log("url_user=" +url_user + " not in nginxProfiles=" + nginxProfiles);
+				//console.log("url_user=" +url_user + " not in nginxProfiles=" + nginxProfiles);
 			}
 			
 		}
@@ -196,6 +196,19 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 				var homeWithoutEndingSlashAndEscapedSlashes = HOME.substr(0, HOME.length-1).replace(/\//, "\\/");
 				var rePool = new RegExp("(.*)\\/.*" + homeWithoutEndingSlashAndEscapedSlashes + "\\n");
 				var matchPool = stdout.match(rePool);
+				var matchDockeVM = stdout.match(new RegExp(".*docker_" + username));
+				
+				
+				if(matchDockeVM) {
+					
+					tryrun("virsh shutdown docker_" + username);
+					tryrun("virsh destroy docker_" + username);
+					tryrun("virsh undefine docker_" + username);
+					
+					run("zfs destroy " + matchDockeVM[0]);
+					
+				}
+				
 				
 				if(matchPool) {
 					var zfsPool = matchPool[1];
@@ -211,6 +224,8 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 				
 				userdel();
 			}
+				
+				
 				
 			}
 			
@@ -435,6 +450,24 @@ function fuseUmount(path, ignoreErrors) {
 	return;
 }
 
+function run(cmd) {
+	var fs = require("fs");
+	var child_process = require('child_process');
+	var stdout = child_process.execSync(cmd).toString(ENCODING);
+	if(stdout.trim()) throw new Error(stdout);
+}
+
+function tryrun(cmd) {
+	var fs = require("fs");
+	var child_process = require('child_process');
+	try {
+		var stdout = child_process.execSync(cmd).toString(ENCODING);
+	}
+	catch(err) {
+		console.log(err.message);
+	}
+	if(typeof stdout == "string" && stdout.trim() != "") console.log(stdout);
+}
 
 function regExpEsc(str) {
 	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
