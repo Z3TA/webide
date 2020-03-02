@@ -97,19 +97,11 @@ libvirt need to run as root.. add to cloudide_isntall!
 Also Setup libvirt DHCP in cloudide_isntall!
 
 
-todo: Make webider the default editor so that files opens in the editor when you edit something via terminal
-
-
-
-
-
 Restart user worker (to get new api updates) when manually reloading the editor!?!?
 
 
 Release!
 
-
-todo: Test remote file socket for regression
 
 todo: Test code with http://lisperator.net/uglifyjs/mangle and fix issues
 Add support for linter tool!?
@@ -118,31 +110,6 @@ Replace http://10.0.3.235:3000/ with 3000.user.webide.se in stdout messages!
 todo: Also replace in node.js stdout when starting the script from the editor
 
 How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
-
-
-Test network namespaces on another server before upgrading prod!!
-
-
-
-
-Make a dev staging server (VM)
-
-What to do with existing users !?
-(keep their data as is)
-stop webide services
-server need to be rebooted to release mounts
-Upload new files to server
-Remove empty files and folders for each user (plus etc and run)
-start services and hope for the best :P
-do a lot of testing
-
-
-
-todo: Delete empty files and folders in user home dirs, because there will be no more chrooting
-
-
-
-
 
 
 
