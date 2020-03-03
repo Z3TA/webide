@@ -23,7 +23,7 @@ server {
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
 
-  location /_vnc/ {
+  location /vnc_/ {
     alias /srv/webide/client/noVNC/;
   }
 
