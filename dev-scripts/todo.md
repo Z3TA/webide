@@ -83,7 +83,21 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+display issue, unable to repeat, but happaned both in dev and prod!
 
+ Error: Don't know what to do... stopping=false starting=false started=undefined SCREEN[1095]={
+Mar 03 15:05:51 webide.se nodejs[14527]:                         "vnc": {
+Mar 03 15:05:51 webide.se nodejs[14527]:                           "width": 1000,
+Mar 03 15:05:51 webide.se nodejs[14527]:                           "height": 970,
+Mar 03 15:05:51 webide.se nodejs[14527]:                           "password": "08271684",
+Mar 03 15:05:51 webide.se nodejs[14527]:                           "port": 8095
+Mar 03 15:05:51 webide.se nodejs[14527]:                         },
+
+
+
+
+Might have been a very old certificate, from when we did not use wildcards!
+We didn't get a wildstar cert from Letsencrypt !??!?
 
 AVD not working for guest users on webide!
 

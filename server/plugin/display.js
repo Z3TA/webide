@@ -38,7 +38,14 @@ var DISPLAY = {
 			if(SCREEN[displayId].stopping) return callback(new Error("Screen is being stopped..."));
 			else if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
 			else if(SCREEN[displayId].started) return callback(null, SCREEN[displayId].vnc);
-			else throw new Error("Don't know what to do... stopping=" + SCREEN[displayId].stopping + " starting=" + SCREEN[displayId].starting + " started=" + SCREEN[displayId].started + " SCREEN[" + displayId + "]=" + JSON.stringify(SCREEN[displayId], null, 2));
+			else throw new Error("Don't know what to do... " +
+			"stopping=" + SCREEN[displayId].stopping + 
+			" starting=" + SCREEN[displayId].starting + 
+			" started=" + SCREEN[displayId].started + 
+			" socat?" + (!!SCREEN[displayId].socat) + 
+			" x11vnc?" + (!!SCREEN[displayId].x11vnc) + 
+			" xvfb?" + (!!SCREEN[displayId].xvfb) + 
+			"");
 		}
 		
 		// The screen might be running in the background (worker process crashed without cleanup?), but we can't reuse it because we don't know the password
@@ -63,7 +70,8 @@ var DISPLAY = {
 		SCREEN[displayId] = {
 			vnc: {},
 			stopping: false,
-			starting: true
+			starting: true,
+				started: false
 		};
 		
 		createScreen(username, displayId, json.width, json.height);

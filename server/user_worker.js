@@ -274,7 +274,8 @@ user.teardown = function teardown(msg, terddownComplete) {
 		stopNodeJsScript(filePath, nodeJsScriptStopped);
 	}
 	
-	// Kill all processes started by the worker
+	
+	// Kill all processes started by the worker !?
 	// This would also kill scripts in production...
 	if(user.id && 1==2) {
 		scriptsToStop++;
