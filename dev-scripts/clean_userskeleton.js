@@ -24,6 +24,10 @@ and also copies fresh files from etc/userdir_skeleton
 	
 	(where snap X on the server is the last common snap and snap Y is the latest in dev)
 	
+	The files might have been modified...
+	zfs destroy ben/home/userskeleton@backup
+	zfs rollback ben/home/userskeleton@baseX
+	
 	zfs list -t snapshot
 	
 	

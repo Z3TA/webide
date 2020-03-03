@@ -2730,7 +2730,7 @@ function checkMounts(options, checkMountsCallback) {
 				});
 			}
 			else wwwpubCreated = true;
-		})
+		});
 		
 		// Create a directory for unix sockets
 		// note: Each process needs to set umask to give write permission to the group!
@@ -2760,40 +2760,28 @@ function checkMounts(options, checkMountsCallback) {
 	});
 	
 	function createIfNotExist(folder, uid, gid, mode, callback) {
+		// Don't bother checking if it exist, just try to create it
 		var createdTheFolder = false;
-		module_fs.stat(folder, function(err, stats) {
-			if(err && err.code == "ENOENT") {
-				module_fs.mkdir(folder, function(err) {
-					if(err) return callback(err);
-					createdTheFolder = true;
-					chown(folder, uid, gid, mode, done);
-				});
-				return;
-			}
-			else if(err) return callback(err);
-			else if(stats.gid != gid) return chown(folder, uid, gid, mode, done);
-			else if(stats.gid == gid) {
-				return callback(null, createdTheFolder);
-			}
-			else throw new Error("err=" + (err && err.message) + " stats=" + JSON.stringify(stats));
-		});
 		
-		function done(err) {
-			if(err) return callback(err);
-			else callback(null, createdTheFolder);
-		}
-	}
-	
-	function chown(folder, uid, gid, mode, callback) {
-		module_fs.chown(folder, uid, gid, function(err) {
-			if(err) return callback(err);
-			// Set the group-id bit so that all new files created will belong to the group
-			module_fs.chmod(folder, mode, function(err) {
+		module_fs.mkdir(folder, function(err) {
+			
+			if(err && err.code != "EEXIST") return callback(err);
+			
+			if(!err) createdTheFolder = true;
+			
+			// Don't bother checking. Always chown
+			module_fs.chown(folder, uid, gid, function(err) {
 				if(err) return callback(err);
-				else return callback(null);
+				// (Don't forget about the group-id bit so that all new files created will belong to the group)
+				module_fs.chmod(folder, mode, function(err) {
+					if(err) return callback(err);
+					else return callback(null, createdTheFolder);
+				});
 			});
 		});
 	}
+	
+	
 	
 	// Make it possible to run Android emulator
 	module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
@@ -2818,7 +2806,7 @@ function checkMounts(options, checkMountsCallback) {
 			
 			stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
 				if(err && err.code == "ENOENT") {
-						// ip netns exec wont unshare bind if the file don't exist in /etc/
+					// ip netns exec wont unshare bind if the file don't exist in /etc/
 						
 						stats++;module_fs.stat(netnsPath, function(err) {stats--;
 							if(err && err.code == "ENOENT") return doneMaybe();

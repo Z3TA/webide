@@ -50,6 +50,8 @@ var skeleton = {
 		chmodrSync(UTIL.joinPaths([userInfo.homeDir, "log/"]), "2770"); // Set the group-id bit so that all new files created will belong to the group
 		chownrDirSync(UTIL.joinPaths([userInfo.homeDir, "log/"]), userInfo.uid, userInfo.gid);
 		
+		// Make sure files in wwwpub are public
+		chmodrSync(UTIL.joinPaths([userInfo.homeDir, "wwwpub/"]), "2755"); // Set the group-id bit so that all new files created will belong to the group
 		
 	}
 }
