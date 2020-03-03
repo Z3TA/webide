@@ -2990,6 +2990,8 @@ function checkMounts(options, checkMountsCallback) {
 						
 						if(err) throw err;
 						
+					// Also need to update update.js if more variables are added!
+
 						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 						nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
@@ -3031,8 +3033,8 @@ function checkMounts(options, checkMountsCallback) {
 									if(error) {
 										// Get the actual error
 										module_child_process.exec("nginx -T", EXEC_OPTIONS, function(err, stdout, stderr) {
-											log(stdout, NOTICE)
-											log(stderr, NOTICE)
+											log(stdout, NOTICE);
+											log(stderr, NOTICE);
 											reportError(stdout + "\n" + stderr);
 											log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
 											module_fs.unlink(nginxProfileEnabledPath, function(err) {

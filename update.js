@@ -16,9 +16,14 @@ var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
 var eachUser = require("./shared/eachUser.js");
 
-var defaultHome = "/home/";
+var DEFAULT = require("./server/default_settings.js");
+
+var defaultDomain = DEFAULT.domain;
+var defaultHome = DEFAULT.home_dir;
+
 var HOME = getArg(["home", "home"]) || defaultHome;
 var HEADLESS = !!getArg(["headless", "headless"]);
+var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 
 var ENCODING = "utf8";
 
@@ -42,7 +47,7 @@ function startUpdate() {
 	//copyFileSync("./etc/systemd/webide.service", "/etc/systemd/system/webide.service");
 	//copyFileSync("./etc/systemd/webide_signup.service", "/etc/systemd/system/webide_signup.service");
 	//copyFileSync("./etc/systemd/webide_nodejs_init.service", "/etc/systemd/system/webide_nodejs_init.service");
-	copyFileSync("./etc/systemd/custom_iptables.service", "/etc/systemd/system/custom_iptables.service");
+	//copyFileSync("./etc/systemd/custom_iptables.service", "/etc/systemd/system/custom_iptables.service");
 	
 copyFileSync("./bin/webider", "/usr/local/bin/webide");
 
@@ -69,6 +74,23 @@ createApparmorProfile("./etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin
 createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
 */
 	
+		
+		// Update user nginx profile
+		// Also need to update server.js if more variables are added!
+		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", "utf8");
+		var url_user = UTIL.urlFriendly(user.name);
+		nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
+		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, user.homeDir);
+		nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + user.uid));
+		nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + user.uid));
+		// dots need to be escaped!? Not in cert paths or nginx will not reload! Only in regular expressions!
+		nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
+		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+		
+		var userDomain = url_user + "." + DOMAIN;
+		var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
+		fs.writeFileSync(nginxProfilePath, nginxProfile);
+		
 	
 	// Make sure files exist and file permissions are rights ...
 		
