@@ -95,10 +95,6 @@ Mar 03 15:05:51 webide.se nodejs[14527]:                         },
 
 
 
-
-Might have been a very old certificate, from when we did not use wildcards!
-We didn't get a wildstar cert from Letsencrypt !??!?
-
 AVD not working for guest users on webide!
 
 
