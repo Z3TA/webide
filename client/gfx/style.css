@@ -2331,7 +2331,7 @@ margin-top: 20px;
 	}
 	
 	.discoveryItem figcaption {
-		top: -12px;
+		top: -23px;
 	}
 	
 }
@@ -2501,6 +2501,7 @@ max-width: 40px;
 	.header .discoveryBar .discoveryItem {
 		max-width: 10%; /* 100% devided by number of items  */
 	}
+	
 }
 
 
