@@ -476,7 +476,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 			if(CLIENT.connected) {
 				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user.name != user.value)) {
 					// Must disconnect in order to login as a different user!
-					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user.name=" + EDITOR.user.name + " user.value=" + user.value);
+					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user.name=" + (EDITOR.user && EDITOR.user.name) + " user.value=" + user.value);
 					CLIENT.disconnect();
 					connectToServer();
 				}
