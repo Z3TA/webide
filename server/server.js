@@ -2126,8 +2126,8 @@ return false;
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
-log("command=" + command + " connectionAuthorized=" + connectionAuthorized, DEBUG);
-
+		log("command=" + command + " connectionAuthorized=" + connectionAuthorized, DEBUG);
+		
 		if(!connectionAuthorized) {
 			
 			//console.log("json=" + JSON.stringify(json));
@@ -5672,8 +5672,12 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 			callback(null, {url: authUrl});
 			callback = null;
 				}
-				else {
+				else if(USER_CONNECTIONS.hasOwnProperty(username)) {
 					sendToClient(username, "dropbox", {url: authUrl});
+				}
+				else {
+					// No client is connected. Kill the Dropbox daemon
+					stopDropboxDaemon(username);
 				}
 			}
 		});
