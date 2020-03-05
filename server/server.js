@@ -2374,11 +2374,13 @@ throw err;
 						}
 						
 						function checkedMounts(err, mountInfo) {
+							log("checkedMounts! username=" + username, DEBUG);
 							if(err) idFail("Problem creating mounts: " + err.message);
 							else acceptUser();
 						}
 						
 						function acceptUser() {
+							log("acceptUser! username=" + username, DEBUG);
 							
 							clientSessionId = json.sessionId;
 							
@@ -3996,6 +3998,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 		USER_NAME: username,
 		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
 		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
+		ANDROID_HOME:  HOME_DIR + username + "/Android/Sdk",
 		EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
 		VISUAL: "webide"
 	}
