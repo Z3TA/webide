@@ -2126,6 +2126,8 @@ return false;
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
+log("command=" + command + " connectionAuthorized=" + connectionAuthorized, DEBUG);
+
 		if(!connectionAuthorized) {
 			
 			//console.log("json=" + JSON.stringify(json));
@@ -2385,6 +2387,8 @@ throw err;
 							clientSessionId = json.sessionId;
 							
 							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+								log("userConnectionName=" + userConnectionName + " exist in USER_CONNECTIONS!", DEBUG);
+								
 								userConnectionId = 1;
 								
 								USER_CONNECTIONS[userConnectionName] = {
@@ -2414,6 +2418,8 @@ throw err;
 								}
 							}
 							else {
+								log("userConnectionName=" + userConnectionName + " not in USER_CONNECTIONS!", DEBUG);
+								
 								userConnectionId = ++USER_CONNECTIONS[userConnectionName].connectionCounter;
 								
 								USER_CONNECTIONS[userConnectionName].connections[userConnectionId] = connection;
@@ -2426,16 +2432,19 @@ throw err;
 							
 							
 							if(!USER_WORKERS.hasOwnProperty(userConnectionName)) {
+								log("Creating worker process for userConnectionName=" + userConnectionName + "...", DEBUG);
 								createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
+							
+								// Tell the worker process which user
+								var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid};
+								
+								log("User userConnectionName=" + userConnectionName + " sending identify to worker process", DEBUG);
+								USER_WORKERS[userConnectionName].send({identify: userWorkerInfo});
+								
 							}
-							
-							// Tell the worker process which user
-							var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid};
-							
-							log("User userConnectionName=" + userConnectionName + " logged in! VIRTUAL_ROOT=" + VIRTUAL_ROOT + " rootPath=" + rootPath + " userConnectionId=" + userConnectionId + " sessionId=" + json.sessionId + " userWorkerInfo=" + JSON.stringify(userWorkerInfo));
-							
-							USER_WORKERS[userConnectionName].send({identify: userWorkerInfo});
-							
+							else {
+								log("Worker process for userConnectionName=" + userConnectionName + " already exist!", DEBUG);
+							}
 							
 							
 							/*
@@ -2472,9 +2481,11 @@ throw err;
 								userClientInfo.netnsIP = netnsIP;
 							}
 							
+							log("User userConnectionName=" + userConnectionName + " sending loginSuccess to client!", DEBUG);
 							send({resp: {loginSuccess: userClientInfo}});
 							
-							// Tell all client that a new client has connected
+							
+							// Tell all clients that a new client has connected
 							var clientJoin = {
 								ip: IP,
 								cId: userConnectionId,
