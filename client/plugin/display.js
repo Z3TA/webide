@@ -1,6 +1,10 @@
 (function() {
 	"use strict";
 	
+	// Showing the local desktop on the desktop you are already on will result in an endless mirror-in-mirror loop
+	var h = window.location.hostname;
+	if(h == "127.0.0.1" || h == "localhost") return;
+	
 	var windowMenu;
 	var discoveryBarIcon;
 	var desktopWidth = Math.round(   Math.min(  1000, screen.width, Math.max(screen.width/3, 1000)  )   );

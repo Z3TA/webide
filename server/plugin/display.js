@@ -26,12 +26,10 @@ var DISPLAY = {
 	start: function(user, json, callback) {
 		
 		var username = user.name;
-		var displayId = user.id;
+		var displayId = user.id || 0;
 		log("****************************************************************************")
 		log("DISPLAY START! username=" + username + " displayId=" + displayId, NOTICE);
 		log("****************************************************************************")
-		
-		if(displayId == undefined) return callback(new Error("No display assigned because user.id=" + user.id + ""));
 		
 		if(SCREEN.hasOwnProperty(displayId)) {
 			
@@ -74,7 +72,11 @@ var DISPLAY = {
 				started: false
 		};
 		
-		createScreen(username, displayId, json.width, json.height);
+			if(displayId == 0) {
+				var x11vncPort = 7000;
+			}
+			else {
+				createScreen(username, displayId, json.width, json.height);
 		
 		// We can't get x server to listen on TCP, it only wants to listen on unix socket. So we have to proxy to the socket
 		// By listening on TCP we can allow VM's and Docker containers to start GUI apps on our display!
@@ -84,12 +86,22 @@ var DISPLAY = {
 		
 		
 		var x11vncPort = 7000 + user.id; // The port to run the VNC protocol on
-		startX11vnc(username, displayId, x11vncPort);
+			}
+			
+startX11vnc(username, displayId, x11vncPort);
 		
 		setTimeout(function() {
 			SCREEN[displayId].starting = false;
-		}, 3000);
-		
+
+				if(SCREEN[displayId].x11vnc && isStream(SCREEN[displayId].x11vnc.stdout)) {
+SCREEN[displayId].started = true;
+				}
+				else {
+					log("x11vnc for username=" + username + " migh have failed to start!", WARN);
+				}
+
+			}, 3000);
+			
 			callback(null, SCREEN[displayId].vnc);
 		}
 		

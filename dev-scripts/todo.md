@@ -9,6 +9,8 @@ by looking at the diff. We want to know WHY you did it.
 Note to myself
 --------------
 
+canvas becomes orange in Firefox when it loses focus!
+
 Solve problems and pains! Do not look for problems that fit a solution!
 
 Before you start working on something new, first describe the problem, 
@@ -83,22 +85,8 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-display issue, unable to repeat, but happaned both in dev and prod!
-
- Error: Don't know what to do... stopping=false starting=false started=undefined SCREEN[1095]={
-Mar 03 15:05:51 webide.se nodejs[14527]:                         "vnc": {
-Mar 03 15:05:51 webide.se nodejs[14527]:                           "width": 1000,
-Mar 03 15:05:51 webide.se nodejs[14527]:                           "height": 970,
-Mar 03 15:05:51 webide.se nodejs[14527]:                           "password": "08271684",
-Mar 03 15:05:51 webide.se nodejs[14527]:                           "port": 8095
-Mar 03 15:05:51 webide.se nodejs[14527]:                         },
 
 
-
-AVD not working for guest users on webide!
-
-
-test pushing to prod in prod
 
 
 Test to make sure everything works in prod!

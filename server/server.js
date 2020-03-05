@@ -2471,7 +2471,7 @@ throw err;
 								editorVersion: EDITOR_VERSION,
 								platform: process.platform,
 								homeDir: (VIRTUAL_ROOT) ? "/" : homeDir,
-								tld: DOMAIN
+								tld: !USERNAME && DOMAIN
 							};
 							
 							userClientInfo.installDirectory = __dirname.replace(/server$/, "");
