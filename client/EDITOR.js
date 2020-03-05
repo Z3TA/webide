@@ -5143,6 +5143,8 @@ posX = EDITOR.width - offsetWidth;
 		},
 		stop: function() {
 			
+			console.warn("EDITOR.virtualDisplay.stop()");
+			
 			EDITOR.virtualDisplay.started = false;
 			
 			var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
@@ -5151,6 +5153,8 @@ posX = EDITOR.width - offsetWidth;
 			return PREVENT_DEFAULT;
 		},
 		show: function(preferredWith, preferredHeight, callback, recurse) {
+			console.warn("EDITOR.virtualDisplay.show()");
+			
 			if(typeof preferredWith == "function" && preferredHeight == undefined && callback == undefined) {
 				callback = preferredWith;
 				preferredWith = undefined;
@@ -5159,12 +5163,12 @@ posX = EDITOR.width - offsetWidth;
 			if(recurse == undefined) recurse = 0;
 			if(typeof callback != "function") throw new Error("callback=" + callback + " (" + (typeof callback) + ")");
 			
-			console.warn("EDITOR.virtualDisplay.show()");
-			
 			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
 
 			// The display should be running, but check status just in case! (user worker might have restarted)
+			console.log("EDITOR.virtualDisplay.show: Checking display.status...");
 			CLIENT.cmd("display.status", function checkedDisplayStatus(err, status) {
+console.log("EDITOR.virtualDisplay.show: Got display.status: " + JSON.stringify(status));
 				if(err) {
 					callback(new Error("Unable to get display.status! Error: " + err.message));
 					callback = null;
@@ -5188,6 +5192,7 @@ posX = EDITOR.width - offsetWidth;
 			return PREVENT_DEFAULT;
 			
 			function openWindow() {
+				console.log("EDITOR.virtualDisplay.show: Opening window...");
 				
 			if(EDITOR.virtualDisplay.open) {
 				if(callback) callback(null);

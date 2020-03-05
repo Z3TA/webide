@@ -85,7 +85,13 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Nothing happens when I click Ctrl+D local desktop in Firefox
 
+test local desktop on mac
+
+test to access terminal on macbook
+
+test to see what happens when you invite collaborator...
 
 
 
@@ -106,6 +112,9 @@ Restart user worker (to get new api updates) when manually reloading the editor!
 
 Release!
 
+
+todo: Update to latest version of nodehun, which has breaking changes!!
+https://www.npmjs.com/package/nodehun
 
 todo: Test code with http://lisperator.net/uglifyjs/mangle and fix issues
 Add support for linter tool!?

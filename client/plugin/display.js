@@ -16,7 +16,7 @@
 			
 			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL, fun: showDesktopFromKeyboardCombo}); // Ctrl+D
 			
-			windowMenu = EDITOR.windowMenu.add(S("displayDesktop"), [S("View"), 1], toggleDisplay, showDesktopFromKeyboardCombo);
+			windowMenu = EDITOR.windowMenu.add(S("displayDesktop"), [S("View"), 1], toggleDisplayFromWindowMenu, showDesktopFromKeyboardCombo);
 			
 			
 			EDITOR.on("virtualDisplay", virtualDisplayStatus);
@@ -38,6 +38,7 @@
 	});
 	
 	function virtualDisplayStatus(status) {
+		console.log("display: virtualDisplayStatus=" + status);
 		if(status == "open") {
 windowMenu.activate();
 			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
@@ -52,13 +53,22 @@ windowMenu.activate();
 		return toggleDisplay();
 	}
 	
+	function toggleDisplayFromWindowMenu() {
+		console.log("display: toggleDisplayFromWindowMenu!");
+		return toggleDisplay();
+	}
+	
 	function toggleDisplay() {
+		console.log("display: toggleDisplay!");
 		if(EDITOR.virtualDisplay.open) {
+			console.log("display: Virtual display was open. Hiding!");
 			EDITOR.virtualDisplay.hide();
 		}
 		else if(!EDITOR.virtualDisplay.open) {
+			console.log("display: Virtual display was NOT open! Showing it...");
 			EDITOR.virtualDisplay.show(desktopWidth, desktopHeight, function(err) {
 				if(err) alertBox("Unable to show the local desktop! Error: " + err.message);
+console.log("display: Virtual display should now be visible!");
 			});
 		}
 		
