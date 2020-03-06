@@ -86,16 +86,19 @@ var DISPLAY = {
 				];
 				
 				
-				log(   "Starting websockify with args=" + JSON.stringify(websockifyArgs) + " (" + websockifyArgs.join(" ") + ")"   );
-				var websockify = module_child_process.spawn("../tools/websockify/websockify.js", websockifyArgs);
+				var module_path = require("path");
+				var websockifyPath = module_path.join(__dirname, "../tools/websockify/websockify.js");
+				
+				log(   "Starting websockifyPath=" + websockifyPath + " with args=" + JSON.stringify(websockifyArgs) + " (" + websockifyArgs.join(" ") + ")"   );
+				var websockify = module_child_process.spawn(websockifyPath, websockifyArgs);
 				
 				SCREEN[displayId].websockify = websockify;
 				
 				websockify.on("close", function (code, signal) {
 					log(username + " websockify (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 					
-SCREEN[displayId].started = false;
-SCREEN[displayId].starting = false;
+					SCREEN[displayId].started = false;
+					SCREEN[displayId].starting = false;
 				});
 				
 				websockify.on("disconnect", function () {
@@ -120,13 +123,41 @@ SCREEN[displayId].starting = false;
 				
 				websockify.stderr.on("data", function (data) {
 					log(username + " websockify (displayId=" + displayId + ") stderr: " + data, ERROR);
+					
+					if(callback) {
+						callback(new Error(data.toString()));
+callback = null;
+					}
+					
 				});
 				
+				
+				setTimeout(function() {
+					SCREEN[displayId].starting = false;
+					
+					if(SCREEN[displayId].websockify && isStream(SCREEN[displayId].websockify.stdout)) {
+						SCREEN[displayId].started = true;
+						
+						if(callback) {
+callback(null, SCREEN[displayId].vnc);
+							callback = null;
+						}
+					}
+					else {
+						log("websockify for username=" + username + " migh have failed to start!", WARN);
+					}
+					
+				}, 500);
+				
+				return;
 				
 			}
 			else if(process.platform == "win32") {
 				// todo: Include a VNC server for windows
-				return callback(new Error("VNC server for Windows currectly not included!"));
+				callback(new Error("VNC server for Windows currectly not included!"));
+				callback = null;
+				return;
+				
 			}
 			else {
 				// For Systems that use X(11) display server
@@ -166,6 +197,7 @@ SCREEN[displayId].started = true;
 			}
 			
 			callback(null, SCREEN[displayId].vnc);
+			callback = null;
 		}
 		
 	},
