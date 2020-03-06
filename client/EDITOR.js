@@ -5214,7 +5214,7 @@ if(EDITOR.user.domain) {
 					var url = urlHost + "vnc.html?host=" + hostQuery + "&autoconnect=true"
 				
 					// If we set a password, the user will never get the password prompt!
-if(EDITOR.virtualDisplay.password) url = url + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password);
+					if(EDITOR.virtualDisplay.password) url = url + "&password=" + encodeURIComponent(EDITOR.virtualDisplay.password);
 					
 					
 				var width = EDITOR.virtualDisplay.width;
@@ -5240,19 +5240,19 @@ if(EDITOR.virtualDisplay.password) url = url + "&password=" + encodeURIComponent
 				
 //win.resizeTo(width, height);
 
+// Enable scaling
+var sel = win.document.getElementById("noVNC_setting_resize");
+sel.value = "scale";
+var evt = win.document.createEvent("HTMLEvents");
+evt.initEvent("change", false, true);
+sel.dispatchEvent(evt);
+
 try {
+
 				// These might not exist depending on the version of noVNC
 win.document.getElementById("noVNC_control_bar_anchor").style.display="none"; // Not needed
 				win.document.getElementById("noVNC_canvas").style.margin = "0px";
 				win.document.getElementById("noVNC_status").style.display="none"; // Flashes so fast we can't read what it says
-							
-							// Enable scaling
-							var sel = win.document.getElementById("noVNC_setting_resize");
-							sel.value = "scale";
-							var evt = document.createEvent("HTMLEvents");
-							evt.initEvent("change", false, true);
-							sel.dispatchEvent(evt);
-							
 							
 				}
 catch(err) {
