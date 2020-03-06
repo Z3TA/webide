@@ -33,15 +33,15 @@ var DISPLAY = {
 		
 		if(SCREEN.hasOwnProperty(displayId)) {
 			
-			if(SCREEN[displayId].stopping) return callback(new Error("Screen is being stopped..."));
-			else if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
-			else if(SCREEN[displayId].started) return callback(null, SCREEN[displayId].vnc);
+			if(SCREEN[displayId].status.stopping) return callback(new Error("Screen is being stopped..."));
+			else if(SCREEN[displayId].status.starting) return callback(new Error("Screen is starting..."));
+			else if(SCREEN[displayId].status.started) return callback(null, SCREEN[displayId].vnc);
 			else {
 				// note: SCREEN[displayId] should be deleted when the display is stopped!
 				throw new Error("Don't know what to do... " +
-			"stopping=" + SCREEN[displayId].stopping + 
-			" starting=" + SCREEN[displayId].starting + 
-			" started=" + SCREEN[displayId].started + 
+				"stopping=" + SCREEN[displayId].status.stopping + 
+				" starting=" + SCREEN[displayId].status.starting + 
+				" started=" + SCREEN[displayId].status.started + 
 			" socat?" + (!!SCREEN[displayId].socat) + 
 			" x11vnc?" + (!!SCREEN[displayId].x11vnc) + 
 			" xvfb?" + (!!SCREEN[displayId].xvfb) + 
@@ -71,9 +71,11 @@ var DISPLAY = {
 			
 		SCREEN[displayId] = {
 			vnc: {},
-			stopping: false,
-			starting: true,
-				started: false
+				status: {
+					stopping: false,
+					starting: true,
+					started: false
+				}
 		};
 		
 			if(process.platform == "darwin") {
@@ -115,17 +117,11 @@ var DISPLAY = {
 				});
 				
 				websockify.stdout.on("data", function(data) {
-					log(username + " websockify (displayId=" + displayId + ") stdout: " + data, WARN);
-					
-					if(!SCREEN[displayId].started) {
-						SCREEN[displayId].started = true;
-						SCREEN[displayId].starting = false;
-					}
-					
+					log(username + " websockify (displayId=" + displayId + ") stdout: " + data, DEBUG);
 				});
 				
 				websockify.stderr.on("data", function (data) {
-					log(username + " websockify (displayId=" + displayId + ") stderr: " + data, ERROR);
+					log(username + " websockify (displayId=" + displayId + ") stderr: " + data, NOTICE);
 					
 					if(callback) {
 						callback(new Error("websockify error: " + data.toString()));
@@ -134,17 +130,21 @@ var DISPLAY = {
 					
 				});
 				
-				
 				setTimeout(function() {
-					SCREEN[displayId].starting = false;
+					SCREEN[displayId].status.starting = false;
 					
 					if(SCREEN[displayId].websockify && isStream(SCREEN[displayId].websockify.stdout)) {
-						SCREEN[displayId].started = true;
+						SCREEN[displayId].status.started = true;
 						
 						if(callback) {
 callback(null, SCREEN[displayId].vnc);
 							callback = null;
+							
+							// note: The client will send a status request after it gets the success callback
 						}
+						
+						log("SCREEN[" + displayId + "].status = " + JSON.stringify(SCREEN[displayId].status));
+						
 					}
 					else {
 						log("websockify for username=" + username + " migh have failed to start!", WARN);
@@ -185,10 +185,10 @@ startX11vnc(username, displayId, x11vncPort);
 				
 				
 				setTimeout(function() {
-			SCREEN[displayId].starting = false;
+					SCREEN[displayId].status.starting = false;
 
 				if(SCREEN[displayId].x11vnc && isStream(SCREEN[displayId].x11vnc.stdout)) {
-SCREEN[displayId].started = true;
+						SCREEN[displayId].status.started = true;
 				}
 				else {
 					log("x11vnc for username=" + username + " migh have failed to start!", WARN);
@@ -222,22 +222,20 @@ SCREEN[displayId].started = true;
 			var socat = SCREEN[displayId].socat && isStream(SCREEN[displayId].socat.stdout);
 			var x11vnc = SCREEN[displayId].x11vnc && isStream(SCREEN[displayId].x11vnc.stdout);
 			var xvfb = SCREEN[displayId].xvfb && isStream(SCREEN[displayId].xvfb.stdout);
+			var websockify = SCREEN[displayId].websockify && isStream(SCREEN[displayId].websockify.stdout);
 			
-			delete status.noDisplays
-			
-			log("socat=" + socat, DEBUG);
-			
+			delete status.noDisplays; // Delete the default answer for when no displays was found
 			
 			status[displayId] = {
 				socat: socat,
 				x11vnc: x11vnc,
 				xvfb: xvfb,
-				starting: SCREEN[displayId].starting,
-				stopping: SCREEN[displayId].stopping
+				websockify: websockify,
+				starting: SCREEN[displayId].status.starting,
+				stopping: SCREEN[displayId].status.stopping,
+				started: SCREEN[displayId].status.started,
 			};
 			
-			if(x11vnc) status[displayId].started = true;
-			else status[displayId].started = false;
 		}
 		
 	},
@@ -252,7 +250,7 @@ SCREEN[displayId].started = true;
 			
 			log("Maybe stop displayId=" + displayId + " ...", DEBUG);
 			
-			if( SCREEN[displayId].starting ) {
+			if( SCREEN[displayId].status.starting ) {
 				var error = new Error("Can't stop display while it's starting!");
 				if(callback) callback(error);
 				else LOG(error.message, WARN);
@@ -269,7 +267,7 @@ SCREEN[displayId].started = true;
 			
 			var screen = SCREEN[displayId]
 			
-			screen.stopping = true;
+			screen.status.stopping = true;
 			
 			if(screen.socat) {
 				log("Killing socat...", DEBUG);
@@ -293,8 +291,6 @@ screen.x11vnc.kill();
 			}
 			
 			setTimeout(function() {
-				//screen.stopping = false;
-				
 				delete SCREEN[displayId];
 			}, 3000);
 			
@@ -321,12 +317,12 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 		
 		log("errAddressInUse=" + errAddressInUse, DEBUG);
 		
-		if(code != 0 && errAddressInUse && !(SCREEN[displayId] && SCREEN[displayId].stopping)) {
+		if(code != 0 && errAddressInUse && !(SCREEN[displayId] && SCREEN[displayId].status.stopping)) {
 			// The address is taken for 20-30 seconds
 			var waitSeconds = 10;
 			log(username + " waiting " + waitSeconds + " seconds before restarting socat...", DEBUG);
 			setTimeout(function() {
-				if( SCREEN[displayId] && SCREEN[displayId].stopping ) return;
+				if( SCREEN[displayId] && SCREEN[displayId].status.stopping ) return;
 				
 				log(username + " restarting socat!", DEBUG);
 				spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username);
@@ -445,10 +441,10 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	x11vnc.on("close", function (code, signal) {
 		log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			
-			log("SCREEN[" + displayId + "].stopping=" + SCREEN[displayId].stopping, DEBUG);
+			log("SCREEN[" + displayId + "].stopping=" + SCREEN[displayId].status.stopping, DEBUG);
 			
 			// We seem to get a restart loop, so don't restart (need to do it manually?) Can't restart display manually!
-			if(!SCREEN[displayId].stopping) setTimeout(restart, 5000);
+			if(!SCREEN[displayId].status.stopping) setTimeout(restart, 5000);
 			
 			
 		});
@@ -472,6 +468,8 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	});
 	
 	SCREEN[displayId].x11vnc = x11vnc;
+		SCREEN[displayId].status.started = true;
+
 	}
 	
 }
