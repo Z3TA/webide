@@ -1200,7 +1200,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 			
 			codeBlock[codeBlockDepth] = {word: lastWord, indentation: parentCodeBlock.indentation+1, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
-			insideArray[codeBlockDepth] = false;
+			insideArray[codeBlockDepth] = ""; // A string: Name of the array!?
 			arrayStart[codeBlockDepth] = -1;
 			arrayItemCount[codeBlockDepth] = 0;
 			insideParenthesis[codeBlockDepth] = "";
@@ -2187,7 +2187,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					
 					word = text.substring(arrayStart[codeBlockDepth], i+1);
 					
-					insideArray[codeBlockDepth] = false;
+					insideArray[codeBlockDepth] = "";
 					
 					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
 					
