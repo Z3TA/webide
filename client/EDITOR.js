@@ -9543,7 +9543,7 @@ EDITOR.discoveryBar.show();
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
-		if(EDITOR.openDialogs.length > 0) return alert("Close all open dialogs before running tests!"); // Tests that try to close dialogs will fail
+		if(EDITOR.openDialogs.length > 0) return alert("Close all open dialogs before running tests!"); // Tests that try to close dialogs could otherwise fail
 		
 		EDITOR.dashboard.hide(true);
 		

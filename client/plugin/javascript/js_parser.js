@@ -2021,7 +2021,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					JSX is a popular preprocessor language that 
 					converts XML-like structure to nested document.createEelement.
 					
-					I do not think the complexity of a transpiler is forth it,
+					I do not think the complexity of a transpiler is worth it,
 					as you can be much more expressive using document.createElement and use functions for abstractions.
 					/ JZ
 					
@@ -2038,56 +2038,58 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					xmlTagStart = i;
 					xmlTagWordLength = 0;
 				}
-				else if(JSX && jsxMaybe && xmlTagWordLength===0 && char === " ") {
+				else if(JSX && jsxMaybe && xmlTagWordLength===0 && (char === " " || char == lastLineBreakCharacter)) {
 																												xmlTagWordLength = i-xmlTagStart;
 																											}
-						else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/]/)) : true)) {
+						else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/\n]/)) : true)) {
+					
+					if(lastChar === "/") xmlTagSelfEnding = true;
+					else xmlTagSelfEnding = false;
+					
+					if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
+					
+					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
+					
+					jsxMaybe = false;
+					
+					//console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode + " insideScriptTag=" + insideScriptTag);
+					
+					if(!xmlTagSelfEnding) {
+						word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
 						
-						if(lastChar === "/") xmlTagSelfEnding = true;
-						else xmlTagSelfEnding = false;
+						//console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " insideXmlTag=" + insideXmlTag + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 						
-						if(xmlTagWordLength === 0) xmlTagWordLength = i-xmlTagStart;
-						
-						xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
-						
-						jsxMaybe = false;
-						
-							//console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode + " insideScriptTag=" + insideScriptTag);
-						
-						if(!xmlTagSelfEnding) {
-							word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
+						if(insideXmlTagEnding) {
+							//console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 							
-								//console.log("JSX: Tag : " + word + " line=" + lineNumber + " column=" + column + " insideXmlTagEnding=" + insideXmlTagEnding + " insideXmlTag=" + insideXmlTag + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
-							
-							if(insideXmlTagEnding) {
-								//console.log("JSX: Tag close: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+							if(jsxOpenElements.indexOf(word) != -1) {
+								jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
 								
-								if(jsxOpenElements.indexOf(word) != -1) {
-									jsxOpenElements.splice(jsxOpenElements.lastIndexOf(word), 1);
-									
-									if(vb_nextRowIndentation) vb_nextRowIndentation = 0;
-									else vb_thisRowIndentation--; // Variable reuse
-									
-								}
-							}
-							else {
-								// Tag opening
-								jsxOpenElements.push(word);
+								if(vb_nextRowIndentation) vb_nextRowIndentation = 0;
+								else vb_thisRowIndentation--; // Variable reuse
 								
-								vb_nextRowIndentation=1; // Variable reuse
-								//console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
 							}
 						}
-						
-						insideXmlTagEnding = false;
+						else {
+							// Tag opening
+							jsxOpenElements.push(word);
+							
+							vb_nextRowIndentation=1; // Variable reuse
+							//console.log("JSX: Tag opening: " + word + " line=" + lineNumber + " column=" + column + " jsxOpenElements=" + JSON.stringify(jsxOpenElements));
+						}
 					}
+					
+					insideXmlTagEnding = false;
+				}
 																											
+				//if(char == lastLineBreakCharacter) console.log("End of line=" + lineNumber + " insideXmlTag=" + insideXmlTag + " jsxMaybe=" + jsxMaybe + " xmlTagWordLength=" + xmlTagWordLength);
+				
 																										//}
 			} // end: Not inside comment
 			
 			
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp + " jsxMaybe=" + jsxMaybe);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " lastChar=" + lastChar + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp + " jsxMaybe=" + jsxMaybe);
 			
 			if(codeBlockLeft==codeBlockRight) {
 				insideCodeBlock = false;
