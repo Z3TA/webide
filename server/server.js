@@ -2436,7 +2436,17 @@ throw err;
 								createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
 							
 								// Tell the worker process which user
-								var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid, tld: DOMAIN || HOSTNAME, ip: HTTP_IP};
+								var userWorkerInfo = {
+									name: userConnectionName, 
+									rootPath: (VIRTUAL_ROOT && rootPath), 
+									homeDir: homeDir, 
+									id: uid, 
+									ip: HTTP_IP
+								};
+								
+								// Only give tld when running as a cloud editor!
+								if(!USERNAME) userWorkerInfo.tld = DOMAIN || HOSTNAME;
+								// if a username is provided in server.js arguments, then we are running as a local desktop editor
 								
 								log("User userConnectionName=" + userConnectionName + " sending identify to worker process", DEBUG);
 								USER_WORKERS[userConnectionName].send({identify: userWorkerInfo});

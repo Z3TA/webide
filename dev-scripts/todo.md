@@ -83,17 +83,11 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-VNC server for Mac (mac has a built in screen share service)
+better JSX support
 
-Mac apps wont work in x11
 
-No websocket support in Mac's x11vnc !?
+Can't preview/run nodejs apps via the editor on Mac because it can't find the /sock/ folder!
 
-Nothing happens when I click Ctrl+D local desktop in Firefox
-
-test local desktop on mac
-
-test to access terminal on macbook
 
 test to see what happens when you invite collaborator...
 when on desktop (not cloud ide)
