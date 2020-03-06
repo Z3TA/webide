@@ -86,7 +86,6 @@ What I'm working on
 better JSX support
 
 
-Can't preview/run nodejs apps via the editor on Mac because it can't find the /sock/ folder!
 
 
 test to see what happens when you invite collaborator...

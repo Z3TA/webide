@@ -212,8 +212,8 @@ user.identify = function identify(info) {
 	user.defaultWorkingDirectory = info.homeDir;
 	user.homeDir = info.homeDir;
 	user.tld = info.tld;
-user.ip = info.ip;
-
+	user.ip = info.ip;
+	
 	npmOptions.cwd = info.homeDir;
 
 	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
@@ -1700,13 +1700,14 @@ if(rootFolder) {
 			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
 			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			
+
+if(user.tld) {
 			var watchDir = UTIL.joinPaths(HOME, 'sock/');
-			
 				// Watch for new unix named pipes (unix sockets) so we can delete them when the script stops
 				var fs = require("fs");
 			var sockWatcher = fs.watch(watchDir, sockEvent);
 				var createdSockets = [];
-			
+			}
 			
 			nodeScript = child_process.fork(scriptFilePath, nodeScriptArgs, nodeScriptOptions);
 			// The node worker will chroot to user's home dir, setegid and seteuid ????? HUH ?
