@@ -36,7 +36,9 @@ var DISPLAY = {
 			if(SCREEN[displayId].stopping) return callback(new Error("Screen is being stopped..."));
 			else if(SCREEN[displayId].starting) return callback(new Error("Screen is starting..."));
 			else if(SCREEN[displayId].started) return callback(null, SCREEN[displayId].vnc);
-			else throw new Error("Don't know what to do... " +
+			else {
+				// note: SCREEN[displayId] should be deleted when the display is stopped!
+				throw new Error("Don't know what to do... " +
 			"stopping=" + SCREEN[displayId].stopping + 
 			" starting=" + SCREEN[displayId].starting + 
 			" started=" + SCREEN[displayId].started + 
@@ -44,6 +46,8 @@ var DISPLAY = {
 			" x11vnc?" + (!!SCREEN[displayId].x11vnc) + 
 			" xvfb?" + (!!SCREEN[displayId].xvfb) + 
 			"");
+			}
+			
 		}
 		
 		// The screen might be running in the background (worker process crashed without cleanup?), but we can't reuse it because we don't know the password
@@ -97,8 +101,7 @@ var DISPLAY = {
 				websockify.on("close", function (code, signal) {
 					log(username + " websockify (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 					
-					SCREEN[displayId].started = false;
-					SCREEN[displayId].starting = false;
+					delete SCREEN[displayId];
 				});
 				
 				websockify.on("disconnect", function () {
@@ -125,8 +128,8 @@ var DISPLAY = {
 					log(username + " websockify (displayId=" + displayId + ") stderr: " + data, ERROR);
 					
 					if(callback) {
-						callback(new Error(data.toString()));
-callback = null;
+						callback(new Error("websockify error: " + data.toString()));
+						callback = null;
 					}
 					
 				});
