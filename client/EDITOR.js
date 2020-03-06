@@ -5168,7 +5168,7 @@ posX = EDITOR.width - offsetWidth;
 			// The display should be running, but check status just in case! (user worker might have restarted)
 			console.log("EDITOR.virtualDisplay.show: Checking display.status...");
 			CLIENT.cmd("display.status", function checkedDisplayStatus(err, status) {
-console.log("EDITOR.virtualDisplay.show: Got display.status: " + JSON.stringify(status));
+				console.log("EDITOR.virtualDisplay.show: Got display.status: " + JSON.stringify(status));
 				if(err) {
 					callback(new Error("Unable to get display.status! Error: " + err.message));
 					callback = null;
@@ -5234,12 +5234,27 @@ if(EDITOR.user.domain) {
 				
 				if(callback) callback(null);
 				
-				var noVNC_control_bar_anchor = win.document.getElementById("noVNC_control_bar_anchor");
-				noVNC_control_bar_anchor.style.display="none"; // Not needed
+//win.resizeTo(width, height);
+
+try {
+				// These might not exist depending on the version of noVNC
+win.document.getElementById("noVNC_control_bar_anchor").style.display="none"; // Not needed
 				win.document.getElementById("noVNC_canvas").style.margin = "0px";
-				//win.resizeTo(width, height);
 				win.document.getElementById("noVNC_status").style.display="none"; // Flashes so fast we can't read what it says
-				
+
+// Enable scaling
+var sel = win.document.getElementById("noVNC_setting_resize");
+sel.value = "scale";
+var evt = document.createEvent("HTMLEvents");
+evt.initEvent("change", false, true);
+sel.dispatchEvent(evt);
+
+
+				}
+catch(err) {
+console.warn(err.message);
+}
+
 				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
 				for(var i=0; i<f.length; i++) f[i]("open"); //
 				

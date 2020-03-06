@@ -211,7 +211,9 @@ user.identify = function identify(info) {
 	user.rootPath = info.rootPath;
 	user.defaultWorkingDirectory = info.homeDir;
 	user.homeDir = info.homeDir;
-	
+	user.tld = info.tld;
+user.ip = info.ip;
+
 	npmOptions.cwd = info.homeDir;
 
 	//console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);

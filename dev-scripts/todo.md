@@ -9,8 +9,6 @@ by looking at the diff. We want to know WHY you did it.
 Note to myself
 --------------
 
-canvas becomes orange in Firefox when it loses focus!
-
 Solve problems and pains! Do not look for problems that fit a solution!
 
 Before you start working on something new, first describe the problem, 
@@ -85,6 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+VNC server for Mac (mac has a built in screen share service)
+
+Mac apps wont work in x11
+
+No websocket support in Mac's x11vnc !?
+
 Nothing happens when I click Ctrl+D local desktop in Firefox
 
 test local desktop on mac
@@ -92,7 +96,13 @@ test local desktop on mac
 test to access terminal on macbook
 
 test to see what happens when you invite collaborator...
+when on desktop (not cloud ide)
 
+make most features work when running on desktop (not cloud ide)
+
+
+limit folder autocompl so they dont cover the full screen
+max height with overflo sctoll?
 
 
 Test to make sure everything works in prod!
@@ -112,6 +122,8 @@ Restart user worker (to get new api updates) when manually reloading the editor!
 
 Release!
 
+
+canvas becomes orange in Firefox when it loses focus!...
 
 todo: Update to latest version of nodehun, which has breaking changes!!
 https://www.npmjs.com/package/nodehun

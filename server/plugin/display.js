@@ -48,11 +48,11 @@ var DISPLAY = {
 		
 		// The screen might be running in the background (worker process crashed without cleanup?), but we can't reuse it because we don't know the password
 		killProcess("socat", function(err) {
-			if(err) log(err.message, INFO) 
+			if(err) log(err.message, INFO)
 			killProcess("x11vnc", function(err) {
-				if(err) log(err.message, INFO) 
+				if(err) log(err.message, INFO)
 				killProcess("xvfb", function(err) {
-					if(err) log(err.message, INFO) 
+					if(err) log(err.message, INFO)
 					
 					start();
 				});
@@ -72,7 +72,66 @@ var DISPLAY = {
 				started: false
 		};
 		
-			if(displayId == 0) {
+			if(process.platform == "darwin") {
+				// Mac users need to enable desktop sharing! See dev-scripts/mac/desktop-share.sh
+				// You also have to manually install websockify modules: cd server/tools/websockify/ && npm install
+				
+				var macVncWebsocketPort = 8000;
+				
+				SCREEN[displayId].vnc.port = macVncWebsocketPort;
+				
+				var websockifyArgs = [
+					user.ip + ":" + macVncWebsocketPort,
+					user.ip + ":5900" // Original port
+				];
+				
+				
+				log(   "Starting websockify with args=" + JSON.stringify(websockifyArgs) + " (" + websockifyArgs.join(" ") + ")"   );
+				var websockify = module_child_process.spawn("../tools/websockify/websockify.js", websockifyArgs);
+				
+				SCREEN[displayId].websockify = websockify;
+				
+				websockify.on("close", function (code, signal) {
+					log(username + " websockify (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+					
+SCREEN[displayId].started = false;
+SCREEN[displayId].starting = false;
+				});
+				
+				websockify.on("disconnect", function () {
+					log(username + " websockify (displayId=" + displayId + ") disconnect: websockify.connected=" + websockify.connected, DEBUG);
+				});
+				
+				websockify.on("error", function (err) {
+					log(username + " websockify (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+					console.error(err);
+					//throw err;
+				});
+				
+				websockify.stdout.on("data", function(data) {
+					log(username + " websockify (displayId=" + displayId + ") stdout: " + data, WARN);
+					
+					if(!SCREEN[displayId].started) {
+						SCREEN[displayId].started = true;
+						SCREEN[displayId].starting = false;
+					}
+					
+				});
+				
+				websockify.stderr.on("data", function (data) {
+					log(username + " websockify (displayId=" + displayId + ") stderr: " + data, ERROR);
+				});
+				
+				
+			}
+			else if(process.platform == "win32") {
+				// todo: Include a VNC server for windows
+				return callback(new Error("VNC server for Windows currectly not included!"));
+			}
+			else {
+				// For Systems that use X(11) display server
+				
+				if(displayId == 0) {
 				var x11vncPort = 7000;
 			}
 			else {
@@ -89,8 +148,9 @@ var DISPLAY = {
 			}
 			
 startX11vnc(username, displayId, x11vncPort);
-		
-		setTimeout(function() {
+				
+				
+				setTimeout(function() {
 			SCREEN[displayId].starting = false;
 
 				if(SCREEN[displayId].x11vnc && isStream(SCREEN[displayId].x11vnc.stdout)) {
@@ -101,6 +161,9 @@ SCREEN[displayId].started = true;
 				}
 
 			}, 3000);
+			
+				
+			}
 			
 			callback(null, SCREEN[displayId].vnc);
 		}
@@ -187,6 +250,11 @@ screen.x11vnc.kill();
 				log("Killing xvfb...", DEBUG);
 				screen.xvfb.stdin.pause();
 				screen.xvfb.kill();
+			}
+			if(screen.websockify) {
+				log("Killing websockify...", DEBUG);
+				screen.websockify.stdin.pause();
+				screen.websockify.kill();
 			}
 			
 			setTimeout(function() {

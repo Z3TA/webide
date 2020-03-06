@@ -2436,7 +2436,7 @@ throw err;
 								createUserWorker(userConnectionName, uid, gid, homeDir, groups, (VIRTUAL_ROOT && rootPath));
 							
 								// Tell the worker process which user
-								var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid};
+								var userWorkerInfo = {name: userConnectionName, rootPath: (VIRTUAL_ROOT && rootPath), homeDir: homeDir, id: uid, tld: DOMAIN || HOSTNAME, ip: HTTP_IP};
 								
 								log("User userConnectionName=" + userConnectionName + " sending identify to worker process", DEBUG);
 								USER_WORKERS[userConnectionName].send({identify: userWorkerInfo});
