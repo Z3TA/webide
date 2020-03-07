@@ -83,9 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-better JSX support
-
-
+Need to run with devmode=true to detect bug in terminal emulator! file.text and file.grid becomes devert!
 
 
 test to see what happens when you invite collaborator...

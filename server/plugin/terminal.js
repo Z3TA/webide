@@ -31,15 +31,24 @@ if(ptyMissing) {
 	TERMINAL.write = ptyModuleNotLoaded;
 	TERMINAL.resize = ptyModuleNotLoaded;
 	TERMINAL.close = ptyModuleNotLoaded;
+	TERMINAL.terminalList = ptyModuleNotLoaded;
 }
 else {
 	TERMINAL.open = newTerminal;
 	TERMINAL.write = terminalWrite;
 	TERMINAL.resize = terminalResize;
 	TERMINAL.close = terminalClose;
+	TERMINAL.list = terminalList;
+}
+
+function terminalList(user, json, callback) {
+	var terminals = Object.keys(TERMINALS);
+	callback(null, terminals);
 }
 
 function newTerminal(user, json, callback) {
+	
+	console.log("json.id=" + json.id + " TERMINAL_COUNTER=" + TERMINAL_COUNTER + " TERMINALS=" + Object.keys(TERMINALS));
 	
 	var defaultCwd = process.env.HOME;
 	
@@ -79,7 +88,7 @@ env[key] = json.env[key];
 		if(termId < TERMINAL_COUNTER) {
 			var error = new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher");
 			error.code = "TERMINAL_ID_COUNTER";
-			return callback(error);
+			return callback(error, Object.keys(TERMINALS));
 		}
 		
 		if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;

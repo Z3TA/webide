@@ -1113,7 +1113,7 @@ file.mode = "text";
 		var textToBeRemoved = file.text.substring(firstIndex, lastIndex+1);
 		if(textToBeRemoved.match(/[\n|\r\n]/)) {
 			file.debugGrid();
-			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
+			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length + " file.path=" + file.path);
 		}
 		
 		

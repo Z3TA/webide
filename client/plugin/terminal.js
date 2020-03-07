@@ -74,17 +74,33 @@ todo: Run vttest
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "term", startTerminalFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
+			// Wait for last terminal sessions to be reopened...
 			setTimeout(function() {
 				console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 				
 				parseBuffer();
 				
 				waitForReopen = false;
+				
+				// Open existing terminals
+				CLIENT.cmd("terminal.list", {}, function terminalList(err, terminalIdList) {
+					if(err) throw err;
+					
+console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
+
+					for (var i=0; i<terminalIdList.length; i++) {
+						openTerminalFile(termPrefix + terminalIdList[i])
+					}
+					
+				});
+				
 			}, 2000);
 			
 		},
 		unload: function unloadTerminal() {
 			
+EDITOR.unbindKey(startTerminalFromKeyboard);
+
 			EDITOR.ctxMenu.remove(menuItem);
 			
 			EDITOR.windowMenu.remove(winMenuTerminal);
@@ -92,12 +108,18 @@ todo: Run vttest
 			CLIENT.removeEvent("terminal", terminalMessage);
 			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 			
+			EDITOR.removeEvent("fileShow", terminalFileShow);
 			EDITOR.removeEvent("afterResize", resizeTerminals);
 			EDITOR.removeEvent("fileClose", terminalCloseFile);
+			EDITOR.removeEvent("mouseClick", terminalMouseClick);
 			EDITOR.removeEvent("exit", exitAllTerminals);
+			
+			CLIENT.removeEvent("loginSuccess", getNetnsIP);
+			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 			
 			EDITOR.unregisterAltKey(altKey);
 			EDITOR.unregisterAltKey(ctrlKey);
+			EDITOR.unregisterAltKey(startTerminalFromMenu);
 			
 			EDITOR.discoveryBar.remove(discoveryBarIcon);
 			
@@ -303,13 +325,24 @@ todo: Run vttest
 			terminalName = termPrefix + terminalId;
 		}
 		
+		console.log("terminal: terminal.open terminalId=" + terminalId);
 		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId, env: EDITOR.env}, function terminalOpened(err, term) {
 			if(err) {
+				console.log("terminal: terminal.open err.message=" + err.message);
 				// How do I repeat: Open two terminals, then close them, and open a new terminal
 				var reHigher = /Terminal id needs to be (\d+) or higher/;
 				var matchHigher = err.message.match(reHigher);
 				if(matchHigher) {
-					terminalId = parseInt(matchHigher[1]);
+					terminalId = 0;
+					var terminalList = term;
+					// Find open gap in list of terminal Id's
+					for (var i=1; i<terminalList.length+1; i++) {
+						if(i<terminalList[i-1]) {
+							terminalId = i;
+							break;
+						}
+					}
+					if(!terminalId) terminalId = i+1;
 					terminalName = termPrefix + terminalId;
 					return CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, terminalOpened);
 				}
@@ -317,12 +350,14 @@ todo: Run vttest
 				else return alertBox(err.message);
 			}
 			
+			console.log("terminal: terminal.open success! term=" + JSON.stringify(term));
+			
 			// We might get terminal data before we get the open callback!
 			openTerminalFile(terminalName, startTerminalCallback);
 			
 			EDITOR.stat("terminal_emulator");
 			
-			});
+		});
 	}
 	
 	function resizeTerminals(file) {
@@ -359,19 +394,37 @@ todo: Run vttest
 	
 	function openTerminalFile(name, callback) {
 		
+		console.log("terminal: openTerminalFile: name=" + name);
+		
 		if(!name) throw new Error("name=" + name);
 		
 		if(EDITOR.openFileQueue.indexOf(name) != -1) {
-			console.warn("The terminal name=" + name + " is already in the openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			console.warn("terminal: The terminal name=" + name + " is already in the openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 			EDITOR.whenFileOpens(name, callback);
 			return;
 		}
 		
 		if(EDITOR.files.hasOwnProperty(name)) {
+			console.log("terminal: File already open! name=" + name);
+			// Make sure it's a proper terminal file
+			var file = EDITOR.files[name];
+terminalFiles.push(file);
+			for(var prop in terminalFileStateProps) {
+				file[prop] = terminalFileStateProps[prop];
+			}
+			if(!terminalActive) addTerminalEvents();
+			
+			file.writeLineBreak();
+			file.writeLine(name + " session continued. Press Enter to get a prompt.");
+			file.writeLineBreak();
+			file.moveCaretToEndOfFile();
+			EDITOR.renderNeeded();
+			
 			if(callback) callback(null, EDITOR.files[name]); 
 			return;
 		}
 		
+		console.log("terminal: Opening file name=" + name + " ...");
 		EDITOR.openFile(name, "", {show: true, props: terminalFileStateProps}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
