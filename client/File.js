@@ -881,6 +881,8 @@ file.mode = "text";
 			Use File.insertTextRow() to insert a row before EOF.
 		*/
 		
+		
+		
 		text = text + ''; // Convert to string if it's not already a string
 		
 		if(text.length == 0) {
@@ -892,6 +894,8 @@ file.mode = "text";
 		var grid = file.grid;
 		var textIndex = file.text.length + file.lineBreak.length;
 		
+file.sanityCheck();
+
 		if(text.indexOf(file.lineBreak) != -1) {
 			var rows = text.split(file.lineBreak);
 			// Add the lines one by one
@@ -922,6 +926,8 @@ file.mode = "text";
 			
 			file.scrollToCaret();
 		}
+		
+		file.sanityCheck();
 		
 	}
 	
@@ -1115,7 +1121,7 @@ file.mode = "text";
 		var textToBeRemoved = file.text.substring(firstIndex, lastIndex+1);
 		if(textToBeRemoved.match(/[\n|\r\n]/)) {
 			file.debugGrid();
-			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length + " file.path=" + file.path);
+			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " RAW: ***" + textToBeRemoved + "*** firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length + " file.path=" + file.path);
 		}
 		
 		file.sanityCheck();
