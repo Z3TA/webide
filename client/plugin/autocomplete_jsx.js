@@ -59,7 +59,9 @@
 			}
 		}
 		
-		if(options.length == 0 && gotOptions == 0 && word.length == 0) {
+		console.log("autoCompleteJSX: options.length=" + options.length + " gotOptions=" + gotOptions + " word.length=" + word.length);
+		// Why only autocomplete when on an emty line!?  && word.length == 0
+		if(options.length == 0 && gotOptions == 0) {
 			// Close last opened tag
 			
 			var charIndex = file.caret.index;
@@ -98,10 +100,18 @@
 		return propsStr;
 	}
 	
-	
-	
-	
-	
+	EDITOR.addTest(1, function autocompleteJsxComponent(callback) {
+		EDITOR.openFile(EDITOR.user.homeDir + "/wwwpub/autocompleteJsxComponent.js", 'return (\n<foo>bar\n', function(err, file) {
+			
+			file.moveCaretToIndex(17);
+			EDITOR.mock("keydown", {charCode: 9}); // tab to autocomplete
+			
+			UTIL.assert(file.wordAtCaret(file.caret, "/").left, "foo>");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
 	
 })();
 
