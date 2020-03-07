@@ -60,6 +60,12 @@ function newTerminal(user, json, callback) {
 	var exec = json.exec || defaultShell;
 	var termId = json.id || ++TERMINAL_COUNTER;
 	
+	if(TERMINALS.hasOwnProperty(termId)) {
+		var error = new Error("Terminal " + termId + " already exist! Terminal id needs to be " + TERMINAL_COUNTER + " or higher");
+error.code = "TERMINAL_ID_COUNTER";
+return callback(error, Object.keys(TERMINALS));
+	}
+	
 	if(json.env) {
 		for(var key in json.env) {
 env[key] = json.env[key];
@@ -85,11 +91,7 @@ env[key] = json.env[key];
 	
 	
 	function open(cwd) {
-		if(termId < TERMINAL_COUNTER) {
-			var error = new Error("Terminal id needs to be " + TERMINAL_COUNTER + " or higher");
-			error.code = "TERMINAL_ID_COUNTER";
-			return callback(error, Object.keys(TERMINALS));
-		}
+		if(TERMINALS.hasOwnProperty(termId)) throw new Error("Terminal already exist! termId=" + termId + " TERMINALS=" + JSON.stringify(Object.keys(TERMINALS)));
 		
 		if(termId > TERMINAL_COUNTER) TERMINAL_COUNTER = termId;
 		
