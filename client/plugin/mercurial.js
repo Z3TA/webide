@@ -1106,7 +1106,7 @@ else var directory = EDITOR.workingDirectory;
 		while(fileSelect.firstChild) fileSelect.removeChild(fileSelect.firstChild); // Emty file list
 		
 		if(directory == undefined) {
-			if(EDITOR.currentFile) directory = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			if(EDITOR.currentFile) directory = UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory;
 			else directory = EDITOR.workingDirectory;
 		}
 		
