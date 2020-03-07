@@ -83,6 +83,10 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+todo: JSX coloring: <Text h1>Heading 1</Text>
+
+
+
 
 test to see what happens when you invite collaborator...
 when on desktop (not cloud ide)
