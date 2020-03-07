@@ -86,6 +86,10 @@ What I'm working on
 todo: JSX coloring: <Text h1>Heading 1</Text>
 
 
+readme? Might have to temporary disable to run tests, due to ip netns
+sudo systemctl stop systemd-resolved
+then enable it again after running tests
+sudo systemctl start systemd-resolved
 
 
 test to see what happens when you invite collaborator...
