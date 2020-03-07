@@ -931,13 +931,13 @@ file.mode = "text";
 		
 		if(!file.lineBreak) throw new Error("File has no line break! file.lineBreak=" + file.lineBreak);
 		
+		file.sanityCheck();
+		
 		var textIndex = file.text.length + file.lineBreak.length;
 		
 		insertGridRow(file, textIndex, "");
 		
 		file.text += file.lineBreak;
-		
-		file.checkGrid();
 		
 		var grid = file.grid;
 		if(file.caret.eof) {
@@ -950,6 +950,8 @@ file.mode = "text";
 			
 			file.scrollToCaret();
 		}
+		
+		file.sanityCheck();
 		
 		// Should I call file.change !?!?!?
 		
@@ -970,8 +972,6 @@ file.mode = "text";
 		if(row == undefined) throw new Error("File.insertTextOnRow: Second parameter row is undefined!");
 		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
-		
-		file.checkGrid();
 		
 		//console.log("insertTextOnRow row=" + row);
 				
@@ -1037,6 +1037,8 @@ file.mode = "text";
 		var file = this;
 		
 		console.log("++++++++++ removeRow row=" + row + " ++++++++++");
+		
+		file.sanityCheck();
 		
 		var grid = file.grid;
 		
@@ -1116,6 +1118,7 @@ file.mode = "text";
 			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length + " file.path=" + file.path);
 		}
 		
+		file.sanityCheck();
 		
 		return file.deleteTextRange(firstIndex, lastIndex);
 		
