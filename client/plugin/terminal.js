@@ -515,8 +515,7 @@ terminalFiles.push(file);
 			char = data.charAt(i);
 			code = data.charCodeAt(i);
 			
-			console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket +
-			" inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
+			//console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket + " inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
 			
 			if(code == 7) { // BEL
 				if(charBuffer) print();

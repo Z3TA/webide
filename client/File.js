@@ -429,7 +429,7 @@ file.mode = "text";
 		}
 		
 		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
-		console.log(UTIL.getStack("creating caret"));
+		//console.log(UTIL.getStack("creating caret"));
 		
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
@@ -4659,7 +4659,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			row--;
 			gridRow = grid[row];
 		}
-		else if(row > 0) {
+		else if(row >= 0) {
 			
 			gridRow = grid[row];
 			
