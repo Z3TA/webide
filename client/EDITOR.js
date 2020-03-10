@@ -3359,8 +3359,25 @@ caption.appendChild(span);
 				//el.setAttribute("tabindex", ++discoveryBarTabIndex);
 			});
 			
-			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) return new Error("Discovery bar is disabled by query string!");
+			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
+var disabledError = new Error("Discovery bar is disabled by query string!");
+
+console.warn(disabledError.message);
+
+return {
+activate: function() {
+throw disabledError;
+},
+deactivate: function() {
+throw disabledError;
+},
+isActive: function() {
+throw disabledError;
+}
+};
 			
+}
+
 			//EDITOR.discoveryBar.show();
 			
 			// Work like the windowMenu api
