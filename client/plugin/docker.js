@@ -60,14 +60,14 @@ windowMenu.hide();
 					if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
 					EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 					
-					discoveryBarIcon.activate();
-					windowMenu.activate();
+					if(discoveryBarIcon) discoveryBarIcon.activate();
+					if(windowMenu) windowMenu.activate();
 					updateStatus("running", status.IP);
 				}
 				else if(status.stopped) {
 					deamonAwake = false;
-					discoveryBarIcon.deactivate();
-					windowMenu.deactivate();
+					if(discoveryBarIcon) discoveryBarIcon.deactivate();
+					if(windowMenu) windowMenu.deactivate();
 					updateStatus("shut off")
 				}
 				else {
@@ -78,7 +78,7 @@ windowMenu.hide();
 	}
 	
 	function updateStatus(status, IP) {
-		discoveryBarIcon.title = "Docker deamon " + status + (IP ? " on " + IP : "");
+		if(discoveryBarIcon) discoveryBarIcon.title = "Docker deamon " + status + (IP ? " on " + IP : "");
 	}
 	
 	function wakeup() {

@@ -68,7 +68,7 @@ unload: function unloadVpnSupport() {
 				else if(status == "disconnected") {
 					connected = false;
 					if(discoveryBarIcon) discoveryBarIcon.deactivate();
-					winMenuItem.deactivate();
+					if(winMenuItem) winMenuItem.deactivate();
 				}
 				else {
 					throw new Error("Unexpected answer from server: status=" + status);
