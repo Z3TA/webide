@@ -6,7 +6,20 @@
 
 	EDITOR.bindKey({desc: "Run JSX tests", key: "j", combo: CTRL+ALT, fun: runAllJsxTests});
 	
+	
+	
 	var tests = [
+		function JSX8(callback) {
+			EDITOR.openFile("jsx8.js", 'if( a < b) console.log(">");\n', function(err, file) {
+				if(err) throw err;
+				
+				UTIL.assert(file.parsed.xmlTags.length, 0);
+				UTIL.assert(file.grid[1].indentation, 0);
+				
+				EDITOR.closeFile(file.path);
+				callback(true);
+			});
+		},
 		function JSX7(callback) {
 			EDITOR.openFile("jsx7.js", '(\n<foo\nprop="1"\n>\n<bar />\n</foo>\n);\n', function(err, file) {
 				

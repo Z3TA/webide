@@ -145,7 +145,7 @@
 			var ext = UTIL.getFileExtension(path);
 			if(ext == "jsx" || ext == "tsx") options.jsx = true;
 		}
-	
+		
 		console.log("parseRequest" + id + " = " + file.path);
 		
 		console.time("parseRequest" + id);
@@ -334,7 +334,7 @@
 				//console.log("functions to update: " + (oldParse.functions && oldParse.functions.length))
 				if(oldParse.functions) updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
 				//else {
-//console.log("No parsed functions to update! file.parsed=", file.parsed);
+				//console.log("No parsed functions to update! file.parsed=", file.parsed);
 				//}
 				
 				// Update quotes
@@ -642,7 +642,7 @@
 							for(var i=0; i<oldParse.xmlTags.length; i++) {
 								if(oldParse.xmlTags[i].start > oldStart && oldParse.xmlTags[i].end < oldEnd) {
 									spliceLen++;
-									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
+									console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
 									if(spliceStart==-1) spliceStart = i;
 									continue;
 								}
@@ -650,6 +650,8 @@
 									break;
 								}
 								else if(oldParse.xmlTags[i].start > oldEnd) {
+									console.log("Update spliceStart=" + spliceStart + " to " + i + " because oldParse.xmlTags[" + i + "].start=" + oldParse.xmlTags[i].start + ">oldEnd=" + oldEnd + " ");
+									
 									spliceStart = i;
 									break;
 								}
@@ -760,7 +762,7 @@
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) {
 									var newTags = fullParse.xmlTags.map(function(tag) { return file.text.slice(tag.start, tag.end);  });
 									var oldTags = oldParse.xmlTags.map(function(tag) { return file.text.slice(tag.start, tag.end);  });
-throw new Error(    "fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " fullParse.xmlTags=" + JSON.stringify(fullParse.xmlTags, null, 2) + " oldParse.xmlTags=" + JSON.stringify(oldParse.xmlTags, null, 2) + " newTags=" + JSON.stringify(newTags) + "\n oldTags=" + JSON.stringify(oldTags) + "\n tagDiff=" + JSON.stringify(UTIL.arrDiff(newTags, oldTags))    );
+									throw new Error(    "fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " fullParse.xmlTags=" + JSON.stringify(fullParse.xmlTags, null, 2) + " oldParse.xmlTags=" + JSON.stringify(oldParse.xmlTags, null, 2) + " newTags=" + JSON.stringify(newTags) + "\n oldTags=" + JSON.stringify(oldTags) + "\n tagDiff=" + JSON.stringify(UTIL.arrDiff(newTags, oldTags))    );
 								}
 								
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
@@ -807,12 +809,12 @@ throw new Error(    "fullParse.xmlTags.length=" + fullParse.xmlTags.length + " o
 			
 			// Parse the whole file
 			console.log("Parsing whole file");
-
-var options = {jsx: EDITOR.settings.jsx};
-
-var ext = file.fileExtension;
-if(ext == "jsx" || ext == "tsx") options.jsx = true;
-
+			
+			var options = {jsx: EDITOR.settings.jsx};
+			
+			var ext = file.fileExtension;
+			if(ext == "jsx" || ext == "tsx") options.jsx = true;
+			
 			var newParse = parseJavaScript(file, options);
 			
 			
@@ -1033,7 +1035,6 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 		codeBlock = [{word: "", indentation: 0, line: 0}],
 		codeBlockRight = 0,
 		codeBlockLeft = 0,
-		insideCodeBlock = false,
 		insideXmlTag = false,
 		insideXmlTagEnding = false,
 		xmlTag = "",
@@ -1455,7 +1456,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 								if(!Object.hasOwnProperty.call(globalVariables, properties[0])) {
 									variable = globalVariables[properties[0]] = new Variable();
 									//console.log("Added new global variable properties[0]=" + properties[0] + " leftSide=" + leftSide + " insideFunctionBody[subFunctionDepth=" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " myFunction[subFunctionDepth=" + subFunctionDepth + "].arguments=" + myFunction[subFunctionDepth].arguments);
-							}
+								}
 								else {
 									variable = globalVariables[properties[0]];
 								}
@@ -1606,8 +1607,8 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 			if(!insideScriptTag && char=="-" && lastChar=="-" && llChar=="!" && lllChar=="<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
-						xmlMode = xmlModeBeforeTag;
-						jsxMaybe = false;
+				xmlMode = xmlModeBeforeTag;
+				jsxMaybe = false;
 				commentStart = i-4;
 			}
 			else if(!insideScriptTag && char==">" && lastChar=="-" && llChar=="-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
@@ -1953,7 +1954,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
-							//console.log("Reset xmlMode=" + xmlMode + " xmlTag=" + xmlTag);
+					//console.log("Reset xmlMode=" + xmlMode + " xmlTag=" + xmlTag);
 					
 					if(xmlTag.toLowerCase()=="script" || xmlTag.toLowerCase()=="pre" ||  xmlTag.toLowerCase()=="textarea") {
 						
@@ -2026,12 +2027,12 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					/ JZ
 					
 				*/ 
-						//if(JSX && !xmlMode) {
+				//if(JSX && !xmlMode) {
 				
 				else if(JSX && jsxMaybe && pastChar0=="<" && char=="/") {
-																												insideXmlTagEnding = true;
-																											}
-					// note: Need to prevent if(x<y && a>b) ...
+					insideXmlTagEnding = true;
+				}
+				// note: Need to prevent if(x<y && a>b) and also if( a < b )...
 				else if( JSX && !insideXmlTag && !insideRegExp && !insideQuote && char == "<" && (  text[charIndex+1]==="/" || lastChar.match(   /\s|>|\(/   )  ) ) {
 					jsxMaybe = true;
 					// Reuse variable from xml because we are lazy
@@ -2039,9 +2040,9 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					xmlTagWordLength = 0;
 				}
 				else if(JSX && jsxMaybe && xmlTagWordLength===0 && (char === " " || char == lastLineBreakCharacter)) {
-																												xmlTagWordLength = i-xmlTagStart;
-																											}
-						else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (lastChar.match(/['"}/\n]/)) : true)) {
+					xmlTagWordLength = i-xmlTagStart;
+				}
+				else if(JSX && jsxMaybe && char == ">" && (xmlTagWordLength ? (xmlTagWordLength > 1 && lastChar.match(/['"}/\n]/)) : true)) {
 					
 					if(lastChar === "/") xmlTagSelfEnding = true;
 					else xmlTagSelfEnding = false;
@@ -2052,7 +2053,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					
 					jsxMaybe = false;
 					
-					//console.log("JSX: xmlTagSelfEnding=" + xmlTagSelfEnding + " xmlMode=" + xmlMode + " insideScriptTag=" + insideScriptTag);
+					//console.log("JSX: xmlTagWordLength=" + xmlTagWordLength + " xmlTagStart=" + xmlTagStart + " i=" + i + " xmlTagSelfEnding=" + xmlTagSelfEnding + "");
 					
 					if(!xmlTagSelfEnding) {
 						word = text.slice(xmlTagStart+( insideXmlTagEnding ? 2: 1 ), xmlTagWordLength ? xmlTagStart + xmlTagWordLength : i ); // Reuse variable because we are lazy
@@ -2081,22 +2082,15 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					
 					insideXmlTagEnding = false;
 				}
-																											
+				
 				//if(char == lastLineBreakCharacter) console.log("End of line=" + lineNumber + " insideXmlTag=" + insideXmlTag + " jsxMaybe=" + jsxMaybe + " xmlTagWordLength=" + xmlTagWordLength);
 				
-																										//}
+				//}
+				
+				//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " lastChar=" + lastChar + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp + " jsxMaybe=" + jsxMaybe);
+				
 			} // end: Not inside comment
 			
-			
-			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " lastChar=" + lastChar + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp + " jsxMaybe=" + jsxMaybe);
-			
-			if(codeBlockLeft==codeBlockRight) {
-				insideCodeBlock = false;
-			} 
-			else {
-				insideCodeBlock = true;
-			}
 			
 			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS && !insideRegExp && !insideXmlTag) {
 				
@@ -2413,7 +2407,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 							else if(leftSide.indexOf(".") != -1) functionName = leftSide;
 							
 							if(functionName.charAt(0) == ".") {
-// It's an object without a name that has a method pointing to a function !?
+								// It's an object without a name that has a method pointing to a function !?
 								newFunc.lambda = true;
 								if(altFunctionName) functionName = altFunctionName;
 								else functionName = variableName;
@@ -2456,7 +2450,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 							if(!newFunc.lambda) newFunc.global = true;
 							functionIndex = functions.push(newFunc) - 1;
 							
-								myFunction[subFunctionDepth] = functions[functionIndex];
+							myFunction[subFunctionDepth] = functions[functionIndex];
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
@@ -2545,9 +2539,9 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 					commentStart = i;
 				}
 				// else {
-						//console.log("char=" + char + " pastChar0=" + pastChar0 + " pastChar1=" + pastChar1 + " pastChar2=" + pastChar2 + " pastChar3=" + pastChar3);					
+				//console.log("char=" + char + " pastChar0=" + pastChar0 + " pastChar1=" + pastChar1 + " pastChar2=" + pastChar2 + " pastChar3=" + pastChar3);					
 				//}
-						
+				
 				
 				if(!insideDblQuote && !insideLineComment) {
 					
@@ -3018,13 +3012,13 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 						
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						
 						if(word=="return") {
 							//console.log("return undefined?");
 							if(myFunction[subFunctionDepth]) {
-							myFunction[subFunctionDepth].returns.push("void");
+								myFunction[subFunctionDepth].returns.push("void");
 							}
 						}
 						
@@ -3059,7 +3053,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 								
 								// We are inside a var declaration!
 								
-								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideCodeBlock=" + insideCodeBlock + " ");
+								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " ");
 								
 								
 								// A local variable (inside a function or JSON??)
@@ -3304,7 +3298,7 @@ if(ext == "jsx" || ext == "tsx") options.jsx = true;
 		// Only functions Should have a prototype! 
 		
 		//console.warn("new Variable! type=" + type + " value=" + value + "");
-		}
+	}
 	
 	function XmlTag(start, end, wordLength, selfEnding) {
 		this.start = start;
