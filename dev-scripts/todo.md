@@ -83,6 +83,27 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+
+
+Issues with EDITOR.loadSettings on jsx settings
+
+Issue with parsing, xmlTag moves... it changes position when editing...
+
+Issue with JSX false posetive...
+
+
+
+Read editorconfig to set rules for new files!
+
+
+Chrome doesn't start in chrome-less mode on Macbook
+
+
+When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
+
+
+Some issues with JSX coloring
+
 todo: JSX coloring: <Text h1>Heading 1</Text>
 
 

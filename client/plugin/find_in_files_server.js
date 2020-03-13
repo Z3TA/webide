@@ -182,22 +182,29 @@ if(CHROMEBOOK) {
 		
 		if(file.grid.length < 2) return false;
 		
-		var secondLineContainsRegExp = (file.rowText(1).slice(0,8) == "RegExp: ");
-		var containsLines = (text.search(/Line\s*?\d*:/) != -1);
-		var containsPathMd = (text.search(/^-*$/) != -1 != -1);
+		if(file.rowText(1).slice(0,8) != "RegExp: ") {
+			console.log("isSearchReport: Second line does not start with RegExp: ");
+			return false;
+		}
 		
-		console.log("secondLineContainsRegExp=" + secondLineContainsRegExp + " containsLines=" + containsLines + " containsPathMd=" + containsPathMd);
+		if(text.search(/Line\s*?\d*:/) == -1) {
+			console.log("isSearchReport: Text does not contain Line ddd ");
+			return false;
+		}
 		
-		if(secondLineContainsRegExp && containsLines && containsPathMd) return true
-		else return false;
+		if(text.search(/^-*$/m) == -1) {
+			console.log("isSearchReport: Text does not contain -------- ");
+			return false;
+		}
 		
+		return true;
 	}
 	
 	function fifmousemove(mouseX, mouseY, target, mouseMoveEvent) {
 		var file = EDITOR.currentFile;
 		
 		// Prevent this from running in files that are not search reports!
-		if(!isSearchReport(file)) throw new Error("file.path=" + file.path + " is not a search report! This mousemove event should only be triggered on searcg reports! mouseMoveEventRegistered=" + mouseMoveEventRegistered);
+		if(!isSearchReport(file)) throw new Error("file.path=" + file.path + " is not a search report! This mousemove event should only be triggered on search reports! mouseMoveEventRegistered=" + mouseMoveEventRegistered);
 		
 		var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 		var row = caret.row;
@@ -234,8 +241,12 @@ EDITOR.on("mouseMove", fifmousemove);
 			}
 		}
 		else {
-			EDITOR.removeEvent("mouseMove", fifmousemove);
+			if(mouseMoveEventRegistered) {
+				EDITOR.canvas.style.cursor = 'text';
+				EDITOR.canvas.title = "";
+				EDITOR.removeEvent("mouseMove", fifmousemove);
 			mouseMoveEventRegistered = false;
+			}
 		}
 	}
 	
