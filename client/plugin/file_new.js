@@ -60,54 +60,69 @@
 	
 	function newFileFromDiscoveryBar() {
 		EDITOR.stat("newFileFromDiscoveryBar");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
 	function newFileFromKeyboardComboOnStandalone() {
 		EDITOR.stat("newFileFromKeyboardComboOnStandalone");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
 	function newFileFromKeyboardCombo() {
 		EDITOR.stat("newFileFromKeyboardCombo");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
 	function newFileFromVirtualKeyboard() {
 		EDITOR.stat("newFileFromVirtualKeyboard");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
 	function newFileFromWindowMenu() {
 		EDITOR.stat("newFileFromWindowMenu");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
 	function newFileFromContextMenu() {
 		EDITOR.stat("newFileFromContextMenu");
-		return keyboardNewFile();
+		return newFile();
 	}
 	
-	function keyboardNewFile() {
+	function newFile() {
 		EDITOR.ctxMenu.hide();
 		winMenuNewFile.hide();
 		EDITOR.dashboard.hide();
 		
 		createNewFile("new file", "");
-		return false;
+		
+		return PREVENT_DEFAULT;
 	}
 	
 	function createNewFile(path, content) {
 		if(path == undefined) path = "new file";
 		if(content == undefined) content = "";
 		
-		EDITOR.openFile(path, content, function(err, file) {
-			if(err) return alertBox("Unable to create new file: " + err.message);
+		EDITOR.findFileReverseRecursive(".editorconfig", EDITOR.workingDirectory, function(err, files) {
+			if(files.length == 0) return openFile();
 			
-			// Mark the file as NOT saved, because its a NEW file
-			file.isSaved = false;
-			file.savedAs = false;
+			EDITOR.readFromDisk(files[0], function(err, data) {
+				if(err) {
+					console.error(err);
+					alertBox("Unable to read from " + files[0] );
+					return openFile();
+				}
+				
+				// Parse .editorconfig
+				openFile();
+			});
+			
 		});
+		
+		function openFile() {
+			EDITOR.openFile(path, content, {isSaved: false, savedAs: false, props: {}}, function(err, file) {
+				if(err) return alertBox("Unable to create new file: " + err.message);
+		});
+		}
 	}
 	
 	function createNewFileDashboardWidget() {

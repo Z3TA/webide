@@ -83,16 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-
-
-Issues with EDITOR.loadSettings on jsx settings
-
-Issue with parsing, xmlTag moves... it changes position when editing...
-
-Issue with JSX false posetive...
-
-
-
 Read editorconfig to set rules for new files!
 
 

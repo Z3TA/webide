@@ -8873,13 +8873,51 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 		
 	}
 	
-CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
+	EDITOR.findFileReverseRecursive = function findFiles(names, startDir, callback) {
+/*
+Searches down towards the root, looking for file names
+*/
+		if(typeof names == "string") names = [names];
+		
+		var filesFound = [];
+		var folders = UTIL.getFolders(startDir, true);
+		
+		search(folders.pop()); // Search down recursively
+		
+		return true;
+		
+		function search(currentFolder) {
+			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
+				
+				if(err) {
+					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
+					return callback(err);
+					callback = null;
+				}
+				
+				for (var i=0; i<files.length; i++) {
+					if(names.indexOf(files[i].name)) {
+						filesFound.push(UTIL.trailingSlash(currentFolder) + files[i].name);
+					}
+				}
+				
+				if(folders.length > 0) search(folders.pop());
+				else {
+					return callback(null, filesFound);
+					callback = null;
+				}
+				
+			});
+		}
+	}
 	
-	var connectedFiles = filesOnServer();
-	
-	if(connectedFiles.length > 0) {
-		if(confirm("Close all opened files on " + serverAddress + " ?")) {
-			
+	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
+		
+		var connectedFiles = filesOnServer();
+		
+		if(connectedFiles.length > 0) {
+			if(confirm("Close all opened files on " + serverAddress + " ?")) {
+				
 			connectedFiles.forEach(function(path) {
 				EDITOR.closeFile(path);
 			});
