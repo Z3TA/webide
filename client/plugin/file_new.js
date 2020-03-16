@@ -103,9 +103,14 @@
 		if(content == undefined) content = "";
 		
 		EDITOR.findFileReverseRecursive(".editorconfig", EDITOR.workingDirectory, function(err, files) {
+			
+			console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
+			
 			if(files.length == 0) return openFile();
 			
-			EDITOR.readFromDisk(files[0], function(err, data) {
+			var editorConfigFilePath = files[0];
+			
+			EDITOR.readFromDisk(editorConfigFilePath, function(err, path, text) {
 				if(err) {
 					console.error(err);
 					alertBox("Unable to read from " + files[0] );
@@ -113,15 +118,59 @@
 				}
 				
 				// Parse .editorconfig
-				openFile();
+				var eof = UTIL.determineLineBreakCharacters(text);
+				var ini = UTIL.ini(eof);
+				var editorConfig = ini.parse(text);
+				
+				console.log("createNewFile: text=" + text);
+				console.log("createNewFile: editorConfig=" + JSON.stringify(editorConfig, null, 2));
+				
+				var settings = editorConfig["*"] || editorConfig["js"];
+				
+				if(settings.indent_style == "space") {
+var indentationCharacters = " ";
+					if(settings.indent_size) {
+						for(var i=1; i<settings.indent_size; i++) indentationCharacters += " ";
+					}
+					else indentationCharacters = "  "; // Two spaces
+				}
+				else if(settings.indent_style == "tab") {
+					var indentationCharacters = "\t";
+				}
+				else if(settings.indent != undefined) {
+					throw new Error("Unknown settings.indent=" + settings.indent + " from " + editorConfigFilePath);
+				}
+				
+				if(settings.end_of_line == "lf") {
+					var lineBreakCharacters = "\n";
+				}
+				else if(settings.end_of_line == "crlf") {
+					var lineBreakCharacters = "\r\n";
+				}
+				else if(settings.end_of_line != undefined) {
+					throw new Error("Unknown settings.end_of_line=" + settings.end_of_line + " from " + editorConfigFilePath);
+				}
+				
+				openFile(lineBreakCharacters, indentationCharacters);
+				
 			});
 			
 		});
 		
-		function openFile() {
-			EDITOR.openFile(path, content, {isSaved: false, savedAs: false, props: {}}, function(err, file) {
+		function openFile(lineBreakCharacters, indentationCharacters) {
+			
+			var props = {};
+			if(lineBreakCharacters) props.lineBreak = lineBreakCharacters;
+			if(indentationCharacters) props.indentation = indentationCharacters;
+			
+			console.log("createNewFile: props=" + JSON.stringify(props));
+			
+			EDITOR.openFile(path, content, {isSaved: false, savedAs: false, props: props}, function(err, file) {
 				if(err) return alertBox("Unable to create new file: " + err.message);
-		});
+		
+				console.log("createNewFile: lineBreak=" + JSON.stringify(file.lineBreak) + " indentation=" + props.indentation);
+				
+			});
 		}
 	}
 	

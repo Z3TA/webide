@@ -8896,7 +8896,8 @@ Searches down towards the root, looking for file names
 				}
 				
 				for (var i=0; i<files.length; i++) {
-					if(names.indexOf(files[i].name)) {
+					if(names.indexOf(files[i].name) != -1) {
+						console.log("findFileReverseRecursive: Found " + files[i].name + " in " + JSON.stringify(names));
 						filesFound.push(UTIL.trailingSlash(currentFolder) + files[i].name);
 					}
 				}
