@@ -83,10 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+fix discovery icon caption bg color on Dark theme
 
-working on start.js (start desktop editor on different systems/OS's)
-
-
+todo: Make a desktop release (npm)
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
