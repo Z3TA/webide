@@ -472,7 +472,7 @@ function startClient(ip, port, proto) {
 		tryPrograms.push(["cmd", ["/K", "start", '""', "iexplore", "-k", url]]);
 	}
 	else if(platform == "darwin") {
-		tryPrograms.push(['/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome', ['--app="' + url + '"']]);
+		tryPrograms.push(['"/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"', ['--app="' + url + '"']]);
 		
 		// Unfortunately Safari doesn't support chromless
 		// We might be able to remove the chrome after it started though, by using osascript
@@ -610,6 +610,8 @@ function attemptLaunch(program, args, options, uid, gid, callbackFunction) {
 	
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
+	
+	if(process.platform=="darwin") options.shell = true; // Use sh -c on Mac for Chrome to work
 	
 	try {
 		var cp = module_child_process.spawn(program, args, options);
