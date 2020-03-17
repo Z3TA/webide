@@ -83,8 +83,8 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Read editorconfig to set rules for new files!
 
+working on start.js (start desktop editor on different systems/OS's)
 
 Chrome doesn't start in chrome-less mode on Macbook
 

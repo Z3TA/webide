@@ -25,7 +25,7 @@
 	Debug:
 	node start.js -debug > debug.log 2>&1
 	
-	Optimization nodes:
+	Optimization notes:
 	start client: ca 450ms
 	start server: ca 240ms
 	
@@ -467,33 +467,33 @@ function startClient(ip, port, proto) {
 	
 	var tryPrograms = [];
 	
-	// Always try nw.js first!
-	//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
-	//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
-	
-	// We prefer the chromium/chrome browser!
-	tryPrograms.push(["chrome", ["--app=" + url, "--disable-gpu-vsync "]]);
-	tryPrograms.push(["chromium-browser", ["--app=" + url, "--disable-gpu-vsync "]]); 
-	
-	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
-	// We want to open files via http/https though! Using file:// protocol will cause issues.
-	tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
-	//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
-	
-	
 	if(platform == "win32") {
 		// Only try IE on Windows
-		tryPrograms.push(["iexplore", ["-k", url]]);
+		tryPrograms.push(["cmd", ["/K", "start", '""', "iexplore", "-k", url]]);
 	}
-	
-	if(platform == "darwin") {
-		// Only try Safari on Mac
+	else if(platform == "darwin") {
+		tryPrograms.push(['/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome', ['--app="' + url + '"']]);
+		
 		// Unfortunately Safari doesn't support chromless
 		// We might be able to remove the chrome after it started though, by using osascript
 		
 		//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
 		
-		tryPrograms.push(["safari", [url]]);
+		tryPrograms.push(["open", ["-W", "-a", "safari", url]]);
+	}
+	else {
+		// Always try nw.js first!
+		//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
+		//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
+		
+		// We prefer the chromium/chrome browser!
+		tryPrograms.push(["chrome", ["--app=" + url, "--disable-gpu-vsync "]]);
+		tryPrograms.push(["chromium-browser", ["--app=" + url, "--disable-gpu-vsync "]]);
+		
+		// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files
+		// We want to open files via http/https though! Using file:// protocol will cause issues.
+		tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
+		//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
 	}
 	
 	
@@ -507,34 +507,13 @@ function startClient(ip, port, proto) {
 	
 	
 	function tryProgram(arr) {
-		var programOriginal = arr[0];
+		var program = arr[0];
 		var args = arr[1] || [];
-		var program;
-		
-		if(platform == "darwin") {
-			
-			args.unshift(programOriginal);
-			args.unshift("-a"); // Specify application
-			args.unshift("-W"); // Wait until the application exit before exiting
-			program = "open";
-		}
-		else if(platform == "win32") {
-			
-			args.unshift(programOriginal);
-			args.unshift('""');
-			args.unshift("start");
-			//args.unshift("/C"); // /C
-			args.unshift("/K");
-			
-			program = "cmd";
-			
-		}
-		else program = programOriginal;
 		
 		attemptLaunch(program, args, function triedProgram(err, cp) {
 			if(err) {
 				
-				log("Failed to start program=" + programOriginal);
+				log("Failed to start program=" + program);
 				
 				var time = timeStamp();
 				
@@ -552,7 +531,7 @@ function startClient(ip, port, proto) {
 			}
 			else {
 					// Depending on the program we wont get a callback until the browser/runtime has already exited!
-				log("Successfully started program=" + programOriginal);
+				log("Successfully started program=" + program);
 				log("If the program however failed to start,");
 				log("open your favorite browser and navigate to the URL below:");
 				log(proto + "://" + ip + ":" + port);
