@@ -86,10 +86,9 @@ What I'm working on
 
 working on start.js (start desktop editor on different systems/OS's)
 
-Chrome doesn't start in chrome-less mode on Macbook
 
 
-When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
+unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
 
 Some issues with JSX coloring

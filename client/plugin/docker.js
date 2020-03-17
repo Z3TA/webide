@@ -50,7 +50,13 @@ windowMenu.hide();
 		return PREVENT_DEFAULT;
 	}
 	
-	function checkDockerStatus() {
+	function checkDockerStatus(login) {
+		if(!login.tld) {
+			console.warn("Disabling Docker plugin");
+			EDITOR.disablePlugin("Docker", true);
+return;
+		}
+		
 		CLIENT.cmd("dockerDaemon", {command: "status"}, function dockerStatus(err, status) {
 			if(err) alertBox("Unable to get Docker daemon status! Error: " + err.message);
 			else {
