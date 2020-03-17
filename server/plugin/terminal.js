@@ -31,7 +31,7 @@ if(ptyMissing) {
 	TERMINAL.write = ptyModuleNotLoaded;
 	TERMINAL.resize = ptyModuleNotLoaded;
 	TERMINAL.close = ptyModuleNotLoaded;
-	TERMINAL.terminalList = ptyModuleNotLoaded;
+	TERMINAL.list = ptyModuleNotLoaded;
 }
 else {
 	TERMINAL.open = newTerminal;
