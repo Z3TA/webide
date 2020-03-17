@@ -47,7 +47,13 @@
 		}
 	});
 	
-	function checkIfDropboxIsRunning() {
+	function checkIfDropboxIsRunning(login) {
+if(!login.tld) {
+console.warn("Disabling Dropbox plugin");
+EDITOR.disablePlugin("Mount Dropbox", true);
+return;
+}
+
 		CLIENT.cmd("checkDropboxDaemon", function(err, resp) {
 			if(err) {
 				alertBox("Unable to get Dropbox status: " + err.message);

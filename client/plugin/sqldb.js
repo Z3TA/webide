@@ -73,8 +73,15 @@
 			if(CLIENT.connectionId) checkDbService();
 			else CLIENT.on("loginSuccess", checkDbServiceOnceLoggedIn);
 			
-			function checkDbServiceOnceLoggedIn() {
+			function checkDbServiceOnceLoggedIn(login) {
 				CLIENT.removeEvent("loginSuccess", checkDbServiceOnceLoggedIn);
+
+if(!login.tld) {
+console.warn("Disabling DB plugin");
+EDITOR.disablePlugin("Mange SQL databases", true);
+return;
+}
+
 				checkDbService();
 			}
 			

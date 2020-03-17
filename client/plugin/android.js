@@ -22,6 +22,8 @@ var windowMenu;
 
 CLIENT.on("androidEmulatorStatus", androidEmulatorStatus);
 
+			CLIENT.on("loginSuccess", disableAndroidSupportMaybe);
+			
 			console.log("android.js plugin loaded!");
 			
 		},
@@ -32,8 +34,18 @@ CLIENT.on("androidEmulatorStatus", androidEmulatorStatus);
 EDITOR.discoveryBar.remove(discoveryBarIcon);
 
 			CLIENT.removeEvent("androidEmulatorStatus");
+			
+			CLIENT.removeEvent("loginSuccess", disableAndroidSupportMaybe);
 		}
 	});
+	
+	function disableAndroidSupportMaybe(login) {
+		if(!login.tld) {
+console.warn("Disabling Android AVD plugin");
+EDITOR.disablePlugin("Android support", true);
+return;
+}
+	}
 	
 	// event below is not yet implemented
 	function androidEmulatorStatus(status) {
