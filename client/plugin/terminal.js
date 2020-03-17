@@ -86,9 +86,16 @@ todo: Run vttest
 				
 				// Open existing terminals
 				CLIENT.cmd("terminal.list", {}, function terminalList(err, terminalIdList) {
-					if(err) throw err;
-					
-console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
+					if(err) {
+							if(err.code == "MODULE_MISSING") {
+								console.warn("Disabling Terminal plugin");
+EDITOR.disablePlugin("Terminal emulator", true);
+return;
+							}
+							else throw err;
+						}
+						
+						console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
 
 					for (var i=0; i<terminalIdList.length; i++) {
 						openTerminalFile(termPrefix + terminalIdList[i])
