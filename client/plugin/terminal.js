@@ -75,6 +75,8 @@ todo: Run vttest
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			// Wait for last terminal sessions to be reopened...
+			// Also wait for the user to get logged in
+			EDITOR.once("storageReady", function openActiveTerminals() {
 			setTimeout(function() {
 				console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 				
@@ -95,6 +97,7 @@ console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
 				});
 				
 			}, 2000);
+			});
 			
 		},
 		unload: function unloadTerminal() {
