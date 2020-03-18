@@ -549,6 +549,13 @@ Simply delete node_modules/mysql2/node_modules/iconv-lite
 (you might have to do this every time you have run npm, awaiting a better fix)
 
 
+Linux network namespaces
+------------------------
+When the user worker process is put in a network namespace
+/etc/resolv.conf will be mounted from /etc/netns/username
+But if you are running systemd-resolved it will eventually re-mount /etc/resolv.conf
+So if you want to use different resolvers inside network namespace's you have to disable systemd-resolved
+
 
 
 Apparmor debugging
