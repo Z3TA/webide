@@ -488,9 +488,10 @@ a:visited {
 	border-top: 0px solid red;
 }
 
-.discoveryItem figcaption {
-	color: #707880;
-	background-color: rgba(41,42,48, .75);
+
+.discoveryItem figcaption span {
+color: #707880;
+background-color: rgba(41,42,48, .75);
 }
 
 .discoveryItem .active figcaption, .discoveryItem:hover figcaption {
