@@ -176,7 +176,9 @@
 			EDITOR.windowMenu.remove(winMenuRedo);
 			EDITOR.windowMenu.remove(winMenuInvite);
 			EDITOR.windowMenu.remove(winMenuRecord);
-
+			EDITOR.windowMenu.remove(winMenuTutorials);
+			
+			
 			// TEST-CODE-START
 			if(bindTest) {
 				EDITOR.unbindKey(testCollaboration);
@@ -2090,6 +2092,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	function invite(file) {
 		EDITOR.ctxMenu.hide();
+		if(winMenuInvite) winMenuInvite.hide();
+		
+		var host = window.location.hostname;
+		if(host == "127.0.0.1" || host == "localhost") {
+			return alertBox("Specify a public/LAN IP in server arguments to be able to share your session. example:\nnode server/server.js -ip 192.168.0.101 -user name -pw pass");
+		}
 		
 		CLIENT.cmd("invite", {}, function(err, login) {
 			
