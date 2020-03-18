@@ -184,9 +184,17 @@ inputPath.value = path;
     else throw err;
    }
    
+   var folderCount = 0;
+   var maxFolders = 40; // Limit folder so they don't cover the whole screen
+   
    if(files) {
     for (var i=0; i<files.length; i++) {
-     if(files[i].type=="d") addFolder(files[i].name);
+     if(files[i].type=="d") {
+      if(++folderCount < maxFolders) addFolder(files[i].name);
+     }
+    }
+    if(folderCount > maxFolders) {
+     folderPicker.appendChild(document.createTextNode(" " + (folderCount-maxFolders) + " more..."));
     }
    }
    

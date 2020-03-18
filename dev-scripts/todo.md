@@ -92,12 +92,6 @@ Some issues with JSX coloring
 todo: JSX coloring: <Text h1>Heading 1</Text>
 
 
-make most features work when running on desktop (not cloud ide)
-
-
-limit folder autocompl so they dont cover the full screen
-max height with overflo sctoll?
-
 
 Test to make sure everything works in prod!
 
