@@ -2550,13 +2550,15 @@ send({stdin: stdinChannelBuffer, id: 0});
 								
 								function lastLoginFileUpdated() {
 										// Update loginCounter
-										module_fs.readFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "loginCounter"]), function readLoginCounter(err, data) {
+										module_fs.readFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "loginCounter"]), "utf8", function readLoginCounter(err, data) {
 											if(err) {
 if(err.code != "ENOENT") throw err;
 var loginCounter = 0;
 }
 											else {
+												data = data.replace(/'/g, ""); // nr.toString() pads with ' single quotes
 												var loginCounter = parseInt(data);
+												if(isNaN(loginCounter)) loginCounter = 0;
 											}
 											
 											loginCounter++;
@@ -2571,7 +2573,7 @@ var loginCounter = 0;
 												
 												
 												console.timeEnd("Login " + IP);
-												console.log(IP + " logged in as " + username + "");
+												console.log(IP + " logged in as " + username + " loginCounter=" + loginCounter + " ");
 												
 												checkingUser = false;
 												
