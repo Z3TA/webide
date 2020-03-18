@@ -966,7 +966,6 @@ select.functionList {
 }
 
 select.functionList.floatingInHeader {
-	with: auto;
 	max-width: 50%;
 	height: 16px;
 	width: 16px;
@@ -1068,11 +1067,7 @@ div.gotoFile li {
 }
 
 div.gotoFile li.selected {
-	background-color: #3c3f37;
-	
 	background-color: #b5d4ff;
-	color: #b5d4ffText;
-	
 }
 
 div.gotoFile li b {
@@ -1878,7 +1873,6 @@ div.group {
 	display: inline-block;
 	padding: 2px;
 	vertical-align: middle;
-	max-wdith: 500px;
 }
 
 .repoCommit .group.buttons {
@@ -2014,13 +2008,11 @@ padding: 0;
 }
 
 .discoveryBar .discoveryItem {
-	bacgkround-color: blue;
 	margin: 0px;
 	width: 38px;
 	height: 38px;
 	max-height: 90%;
 	max-width: 90%;
-	
 }
 
 .discoveryBar .discoveryItem:hover img, .discoveryBar .discoveryItem .active img {
@@ -2043,7 +2035,6 @@ margin-top: 20px;
 /* ### runBanner */
 
 .runBanner {
-	pisition: relative;
 	border: 0px solid pink;
 }
 
