@@ -490,8 +490,8 @@ a:visited {
 
 
 .discoveryItem figcaption span {
-color: #707880;
-background-color: rgba(41,42,48, .75);
+	color: #707880;
+	background-color: rgba(41,42,48, .75);
 }
 
 .discoveryItem .active figcaption, .discoveryItem:hover figcaption {
@@ -544,8 +544,6 @@ div.tableHolder {
 
 .footer table.data td {
 	border: 0;
-	
-	
 }
 
 .footer table.data th {
@@ -560,9 +558,7 @@ div.tableHolder {
 }
 
 .mercurialAnnotationWidget {
-	font-family: font-family: "Courier New", Courier, monospace;
 	font-size: 13px;
-	background-color:none;
 	color: white;
 	border: none;
 }
