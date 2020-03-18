@@ -83,9 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-fix discovery icon caption bg color on Dark theme
-
-todo: Make a desktop release (npm)
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
@@ -94,15 +91,6 @@ Some issues with JSX coloring
 
 todo: JSX coloring: <Text h1>Heading 1</Text>
 
-
-readme? Might have to temporary disable to run tests, due to ip netns
-sudo systemctl stop systemd-resolved
-then enable it again after running tests
-sudo systemctl start systemd-resolved
-
-
-test to see what happens when you invite collaborator...
-when on desktop (not cloud ide)
 
 make most features work when running on desktop (not cloud ide)
 

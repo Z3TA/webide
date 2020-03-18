@@ -2096,7 +2096,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		var host = window.location.hostname;
 		if(host == "127.0.0.1" || host == "localhost") {
-			return alertBox("Specify a public/LAN IP in server arguments to be able to share your session. example:\nnode server/server.js -ip 192.168.0.101 -user name -pw pass");
+			return alertBox("Specify a public/LAN IP in server arguments to be able to share your session. example:\nnode server/server.js -ip 192.168.0.101 -user name -pw pass (use ip a, ifconfig or ipconfig to see your IP)");
 		}
 		
 		CLIENT.cmd("invite", {}, function(err, login) {
