@@ -2469,6 +2469,8 @@ API.storageSet = function storageSet(user, json, callback) {
 
 API.storageRemove = function storageRemove(user, json, callback) {
 	
+if(!user.storage) return callback("User storage not yet loaded!");
+
 	var itemName = json.item;
 	
 	if(itemName == undefined) return callback(new Error("item=" + itemName + " can not be null or undefined!"));
