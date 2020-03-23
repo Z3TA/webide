@@ -125,7 +125,7 @@
 			console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
 			
 			if(err) return alertBox(err.message);
-			if(!Array.isArray(files)) throw new Error("Not an array: " + JSON.stringify(files));
+			if(!Array.isArray(files)) throw new Error("createNewFile: Not an array: files=" + JSON.stringify(files) + "");
 			
 			
 			if(files.length == 0) return openFile();
