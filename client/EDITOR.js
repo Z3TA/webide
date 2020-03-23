@@ -9579,6 +9579,13 @@ EDITOR.discoveryBar.show();
 		*/
 		if(EDITOR.discoveryBar.enabled && !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) EDITOR.discoveryBar.show();
 		
+		
+		console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
+		if(typeof navigator.keyboard == "object") {
+			//navigator.keyboard.lock();
+		}
+		
+
 		sendStatistics();
 		
 		windowLoaded = true;

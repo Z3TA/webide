@@ -23,8 +23,20 @@
 				// https://defkey.com/search?irq=new+file
 				EDITOR.bindKey({desc: "Create new file", charCode: key_Enter, combo: CTRL, fun: newFileFromKeyboardCombo});
 			
+			console.log("createNewFile: DISPLAY_MODE=" + DISPLAY_MODE + " typeof Keyboard = " + (typeof Keyboard));
+			
 			if(DISPLAY_MODE == "standalone") {
 				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardComboOnStandalone});
+			}
+			else if(typeof navigator.keyboard == "object") {
+				console.log("createNewFile: Acquiring lock on KeyN ...");
+				navigator.keyboard.lock(["KeyN"]).then(function(obj) {
+					// note: Locked keys only works in fullscreen!
+					console.log("createNewFile: Allowed to bind to KeyN! obj=" + JSON.stringify(obj));
+					EDITOR.bindKey({desc: "Create new file", key: "n", combo: CTRL, fun: newFileFromKeyboardComboViaKeyboardLock});
+				}).catch(function(err) {
+					console.log("createNewFile: Not allowed to use KeyN! " + (err.message || err));
+				});
 			}
 			
 			
@@ -40,7 +52,7 @@
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/add-file.svg", 10,  S("new_file") + " (" + EDITOR.getKeyFor(newFileFromKeyboardCombo) + ")", "new", newFileFromDiscoveryBar);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
-
+			
 		},
 		unload: function unloadNewFilePlugin() {
 			EDITOR.ctxMenu.remove(menuItem);
@@ -48,7 +60,8 @@
 			
 			EDITOR.unbindKey(newFileFromKeyboardCombo);
 			EDITOR.unbindKey(newFileFromKeyboardComboOnStandalone);
-
+			EDITOR.unbindKey(newFileFromKeyboardComboViaKeyboardLock);
+			
 			EDITOR.unregisterAltKey(newFileFromVirtualKeyboard);
 			
 			if(newFileDashboardWidget) EDITOR.dashboard.removeWidget(newFileDashboardWidget);
@@ -65,6 +78,11 @@
 	
 	function newFileFromKeyboardComboOnStandalone() {
 		EDITOR.stat("newFileFromKeyboardComboOnStandalone");
+		return newFile();
+	}
+	
+	function newFileFromKeyboardComboViaKeyboardLock() {
+		EDITOR.stat("newFileFromKeyboardComboViaKeyboardLock");
 		return newFile();
 	}
 	
@@ -105,6 +123,10 @@
 		EDITOR.findFileReverseRecursive(".editorconfig", EDITOR.workingDirectory, function(err, files) {
 			
 			console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
+			
+			if(err) return alertBox(err.message);
+			if(!Array.isArray(files)) throw new Error("Not an array: " + JSON.stringify(files));
+			
 			
 			if(files.length == 0) return openFile();
 			
