@@ -83,16 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-
-
-
-Tabs don't show up in the editor (but they are in the source) 
-needed for Makefile because Makefile only support tabs!
-
-
-
-
-
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
 unable to repeat: When opening a file Ctrl+O and trying to change the path to search in,

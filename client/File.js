@@ -158,7 +158,8 @@ var File; // File object is global
 		file.parse = true; // Always parse new files by default
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
 		
-		if(EDITOR.parseFileExtensionAsCode.indexOf(file.fileExtension) != -1 || file.fileExtension == "") file.mode = "code"
+if(file.name == "Makefile") file.mode = "text";
+		else if(EDITOR.parseFileExtensionAsCode.indexOf(file.fileExtension) != -1 || file.fileExtension == "") file.mode = "code"
 		else if(EDITOR.plainTextFileExtensions.indexOf(file.fileExtension) != -1 ) {
 file.mode = "text";
 			file.parse = false; // No need to parse the file if we *know* it's a plain text file

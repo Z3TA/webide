@@ -2694,9 +2694,14 @@ EDITOR.canvasContext = ctx;
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
+		var tabs = 0;
+		while(tabs < col && file.grid[row][tabs].char=="\t") tabs++;
+		
+		//console.log("EDITOR.renderCaret: tabs=" + tabs + " file.grid[row].length=" + file.grid[row].length + " col=" + col);
+		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col - tabs + ((file.grid[row].indentation+tabs) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -5933,7 +5938,10 @@ EDITOR.fireEvent("btk");
 				
 				//console.log("indentation=" + gridRow.indentation);
 				
-				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				var tabs = 0;
+				while(tabs < gridRow.length && gridRow[tabs].char == "\t") tabs++;
+				
+				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabs) * EDITOR.settings.tabSpace - file.startColumn - tabs) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
 				//console.log("mouseCol=" + mouseCol);
 				
@@ -9585,7 +9593,7 @@ EDITOR.discoveryBar.show();
 			//navigator.keyboard.lock();
 		}
 		
-
+		
 		sendStatistics();
 		
 		windowLoaded = true;

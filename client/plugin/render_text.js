@@ -67,6 +67,7 @@
 		for(var row = 0; row < buffer.length; row++) {
 			
 			indentation = buffer[row].indentation;
+
 			indentationWidth = indentation * EDITOR.settings.tabSpace;
 			
 			//console.log("indentation=" + indentation);
@@ -91,6 +92,11 @@
 				
 				bufferRowCol = buffer[row][col];
 				
+if(bufferRowCol.char == "\t") {
+left += EDITOR.settings.gridWidth * EDITOR.settings.tabSpace;
+continue;
+}
+
 				if(bufferRowCol.hasCharacter) {
 					
 					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters) {
