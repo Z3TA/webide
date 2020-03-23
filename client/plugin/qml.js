@@ -1,4 +1,11 @@
-// !DO:NOT:BUNDLE!
+/*
+!DO:NOT:BUNDLE!
+
+sudo apt-get install build-essential
+sudo apt-get install qtcreator
+sudo apt-get install qtdeclarative5-dev
+
+*/
 
 (function() {
 "use strict";

@@ -83,22 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-basic qml support with qmlscene
-
-
-
-trying to build qt app...
-
-Experimenting with Qt ....
-qmlscene hello.qml
-
-
-sudo apt-get install build-essential
-sudo apt-get install qtcreator
-sudo apt-get install qtdeclarative5-dev
-
-
-
 
 Experimenting with GJS (Javascript Bindings for GNOME / GTK)
 
