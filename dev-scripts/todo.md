@@ -84,13 +84,21 @@ What I'm working on
 -------------------
 
 
-Experimenting with GJS (Javascript Bindings for GNOME / GTK)
+
+
+Tabs don't show up in the editor (but they are in the source) 
+needed for Makefile because Makefile only support tabs!
+
+
+
 
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
 unable to repeat: When opening a file Ctrl+O and trying to change the path to search in,
 it keeps getting reset, very annoying!
+
+unable to repeat: canvas becomes orange in Firefox when it loses focus!...
 
 
 Some issues with JSX coloring
@@ -100,20 +108,6 @@ todo: JSX coloring: <Text h1>Heading 1</Text>
 
 
 
-test docker! in prod
-
-libvirt need to run as root.. add to cloudide_isntall!
-
-Also Setup libvirt DHCP in cloudide_isntall!
-
-
-Restart user worker (to get new api updates) when manually reloading the editor!?!?
-
-
-Release!
-
-
-canvas becomes orange in Firefox when it loses focus!...
 
 todo: Update to latest version of nodehun, which has breaking changes!!
 https://www.npmjs.com/package/nodehun
@@ -121,19 +115,8 @@ https://www.npmjs.com/package/nodehun
 todo: Test code with http://lisperator.net/uglifyjs/mangle and fix issues
 Add support for linter tool!?
 
-Replace http://10.0.3.235:3000/ with 3000.user.webide.se in stdout messages!
-todo: Also replace in node.js stdout when starting the script from the editor
-
-How will the user know that 10.0.x.y:3000 can be accessed from https://3000.user.webide.se !?
-
-
-
 todo: Apparmor profiles. global instead of per user!
 Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
-
-
----
-
 
 
 ---
@@ -148,24 +131,18 @@ Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
 There's no disconnect option when closing and reopening the ftp/sftp widget
 
 
-Able to quick search the menu items (goto anything!?)
-or just start typing.!?
-
-
-
 todo: Remove red background from find when de-selecting "use regex"
 
-unable to insert ^ on swedish keyboard in Firefox
+
 
 cant scroll the function list on macbook using the pad
 
-text on the right side dissappears after 4 seconds on macbook...
 
-regression: When connecting it says I'm in collaboration mode with a PC that is shut off... 
+
+Unable to repeat: When connecting it says I'm in collaboration mode with a PC that is shut off... 
 You are in collaboration mode with Safari(192.168.0.158)
 
-Tabs don't show up in the editor (but they are in the source) 
-needed for Makefile because Makefile only support tabs!
+
 
 when saving as to a file that already exist, in the warning, also have a button for opening that file!
 
