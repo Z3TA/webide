@@ -15,6 +15,9 @@
 	
 	var nodeJsBanner, startStopButton, urlHolder;
 	
+	var TLD = window.location.hostname;
+	var reNetnsIP, username;
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -207,6 +210,14 @@ nodeJsBanner.hide();
 			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname + "\n" +
 			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /sock/socketname file)\n';
 			}
+		
+		if(login.netnsIP && !UTIL.isIP(TLD)) {
+			var netnsIP = login.netnsIP;
+			// Remember to put double \\ escape backslashes because of new RegExp() !
+			// note: The IP and port might be sprinkled with colors!
+			reNetnsIP = new RegExp("(" + UTIL.escapeRegExp(netnsIP) + "|localhost|0\\.0\\.0\\.0):(\\x1b\\[\\d+m)?(\\d+)(\\x1b\\[\\d+m)?", "g");
+		}
+		username = login.user;
 	}
 	
 	function nodejsDebugMsg(json) {
@@ -222,6 +233,10 @@ nodeJsBanner.hide();
 			text = text.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
 			text = text.replace(">", "&gt;");
 			
+if(reNetnsIP) {
+text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
+}
+
 			// console.log(undefined) results in an empty message
 			if(text == "") text = "undefined?";
 			
@@ -917,8 +932,12 @@ alertBox("No file open!");
 		EDITOR.renderNeeded();
 		
 		function write(str) {
-			// Lines breaks will ne CRLF on Windows
+			// Lines breaks will be CRLF on Windows
 			str = str.replace(/\r/g, ""); // Remove all CR
+			
+			if(reNetnsIP) {
+				str = str.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
+			}
 			
 			if(eof) {
 				// Auto scroll down
