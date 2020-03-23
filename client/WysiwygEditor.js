@@ -1811,13 +1811,13 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			previewWin.window.console.warn = consoleLogCapturer;
 			
 			// For sanity
-			if(previewWin.loaded === false) {
+			if(previewWin.loadedByWebideYo === false) {
 				previewWin.addEventListener("load", function checkConsoleLogOverloaded() {
 					if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
 					else console.log("consoleLogCapturer attached successfully!? (it attached before load) " + UTIL.timeStamp());
 				});
 			}
-			else if(previewWin.loaded === true) {
+			else if(previewWin.loadedByWebideYo === true) {
 				console.log("consoleLogCapturer attached successfully!? (it attached after load) " + UTIL.timeStamp());
 			}
 			/*
@@ -1846,7 +1846,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		previewWin.window.addEventListener("error", captureError);
 		
 			
-		if(previewWin.loaded === true) attachEvents();
+		if(previewWin.loadedByWebideYo === true) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
 			attachEvents();
 		});
@@ -1862,7 +1862,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		function attachEvents() {
 			
-			if(previewWin.loaded !== true) throw new Error("The preview window has not loaded!");
+			if(previewWin.loadedByWebideYo !== true) throw new Error("The preview window has not loaded!");
 			
 			var doc = previewWin.document;
 			var win = previewWin.window;
