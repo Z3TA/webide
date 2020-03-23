@@ -83,8 +83,30 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+basic qml support with qmlscene
+
+
+
+trying to build qt app...
+
+Experimenting with Qt ....
+qmlscene hello.qml
+
+
+sudo apt-get install build-essential
+sudo apt-get install qtcreator
+sudo apt-get install qtdeclarative5-dev
+
+
+
+
+Experimenting with GJS (Javascript Bindings for GNOME / GTK)
+
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
+
+unable to repeat: When opening a file Ctrl+O and trying to change the path to search in,
+it keeps getting reset, very annoying!
 
 
 Some issues with JSX coloring
@@ -93,10 +115,6 @@ todo: JSX coloring: <Text h1>Heading 1</Text>
 
 
 
-Test to make sure everything works in prod!
-
-When opening a file Ctrl+O and trying to change the path to search in,
-it keeps getting reset, very annoying!
 
 test docker! in prod
 

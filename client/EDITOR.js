@@ -25,6 +25,7 @@ var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 
 // List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
 // Note: The file parsers should fill this list!
+// todo: make language plugins register the file extensions!?
 EDITOR.parseFileExtensionAsCode = [
 	"js",
 	"ts",
@@ -40,7 +41,9 @@ EDITOR.parseFileExtensionAsCode = [
 	"xml", 
 	"json", 
 	"css",
-	"webmanifest"
+	"webmanifest",
+"qml",
+"qrc"
 ];
 
 // These file extensions will be treated as plain text
@@ -5217,10 +5220,16 @@ posX = EDITOR.width - offsetWidth;
 				return PREVENT_DEFAULT;
 			}
 			
+				/*
+					problem: We need to access port.user.domain.tld and will get a cross-origin error!
+					solution: Use /noVNC and add Access-Control-Allow-Origin * to port.user.domain.tld
+				*/
+				
 if(EDITOR.user.domain) {
 // Certificate might not yet have been registered, so we use http:
 // If you would use the TLD and the domain would not yet have been registered we would get cert errors
-					var urlHost = "http://" + EDITOR.user.domain + "/vnc_/";
+					//var urlHost = "http://" + EDITOR.user.domain + "/vnc_/";
+					var urlHost = "noVNC/";
 					var hostQuery = EDITOR.virtualDisplay.port + "." + EDITOR.user.domain;
 				}
 				else {
@@ -5239,23 +5248,37 @@ if(EDITOR.user.domain) {
 			var top = 0;
 			var left = screen.width-EDITOR.virtualDisplay.width;
 			
-			console.warn("EDITOR.virtualDisplay calling EDITOR.createWindow ");
-			EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
+				var winLoadedCalled = false;
+				
+				console.warn("EDITOR.virtualDisplay calling EDITOR.createWindow ");
+			var theWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 			
-			return PREVENT_DEFAULT;
-			
-			
-			function winLoaded(err, win) {
-				if(err) return alertBox(err.message);
+				setTimeout(function winNeverLoaded() {
+					if(!winLoadedCalled) {
+						throw new Error("winLoaded event never called when opening desktop window!");
+					}
+				}, 3000);
+				
+				return PREVENT_DEFAULT;
+				
+				
+				function winLoaded(err, win) {
+					winLoadedCalled = true;
+					console.log("EDITOR.virtualDisplay window loaded!");
+					
+					if(err && err.code != "CROSS_ORIGIN") return alertBox("Problem opening window for desktop: " + err.message);
 				
 				//alertBox("Window loaded! EDITOR.virtualDisplay.open=" + EDITOR.virtualDisplay.open + " (before)");
 				
-				EDITOR.virtualDisplay.open = true;
-				EDITOR.virtualDisplay._win = win;
-				
 				if(callback) callback(null);
 				
-//win.resizeTo(width, height);
+					if(!win) return;
+					
+					
+					EDITOR.virtualDisplay.open = true;
+					EDITOR.virtualDisplay._win = win || theWindow;
+					
+					//win.resizeTo(width, height);
 
 // Enable scaling
 var sel = win.document.getElementById("noVNC_setting_resize");
@@ -5275,8 +5298,10 @@ win.document.getElementById("noVNC_control_bar_anchor").style.display="none"; //
 catch(err) {
 console.warn(err.message);
 }
-
-				var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
+					
+					
+					
+					var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
 				for(var i=0; i<f.length; i++) f[i]("open"); //
 				
 				win.onunload = close;
@@ -7535,7 +7560,7 @@ folderExistInCallback(false);
 			Some browsers (Chrome) will allow the popup if another window is closed prior.
 		*/ 
 		
-		console.warn("Creating new window url=" + url);
+		console.warn("EDITOR.createWindow: Creating new window url=" + url);
 		
 		// Decide window width, height and placement ...
 		// Some browsers (which?) will not allow us to change these via script after the window have has been created (so we must set them here).
@@ -7555,10 +7580,19 @@ folderExistInCallback(false);
 		if(url == undefined) url = "about:blank";
 		
 		var theWindow = open(url);
-		
-		//setTimeout(function() {
-		if(theWindow != null) testWindow(theWindow);
-		else {
+		// Sometimes we will not get theWindow descriptor right away... (for example when there is a cross-origin error)
+		if(theWindow != null) {
+			console.log("EDITOR.createWindow: theWindow available right away!");
+			testWindow(theWindow);
+		}
+		else setTimeout(function() {
+		if(theWindow != null) {
+				console.log("EDITOR.createWindow: theWindow available after timeout!");
+				testWindow(theWindow);
+			}
+			else {
+				console.log("EDITOR.createWindow: theWindow not available!");
+				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
 			var failText = "The new window was most likely blocked by a popup blocker. " +
@@ -7586,10 +7620,12 @@ folderExistInCallback(false);
 			
 			
 		}
-		//}, 200);
+		}, 200);
+		
+		return theWindow;
 		
 		function testWindow(theWindow) {
-			
+			console.log("EDITOR.createWindow: testWindow!");
 			/*
 				Due to CORS we might get errors accessing properties on the new window
 				
@@ -7603,6 +7639,7 @@ folderExistInCallback(false);
 				var test = theWindow.document.domain;
 			}
 			catch(err) {
+				console.log("EDITOR.createWindow: Possible cross-origin error!");
 				
 				var origin = UTIL.getLocation(document.location.href);
 				var other = UTIL.getLocation(url);
@@ -7612,8 +7649,13 @@ folderExistInCallback(false);
 				if(origin.host != other.host) diff.push("host: " + origin.host + " vs " + other.host);
 				if(origin.port != other.port) diff.push("port: " + origin.port + " vs " + other.port);
 				
-				return callback(new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) ));
+				var error = new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) );
+				if(diff.length > 0) error.code = "CROSS_ORIGIN";
+				
+				return callback(error);
 			}
+			
+			console.log("EDITOR.createWindow: We can access theWindow.document.domain=" + test);
 			
 			/*
 				Problem: It's impossible to tell if the window has finished loading. eg. if we attach a load event listener to it, it might never fire!
@@ -7625,21 +7667,23 @@ folderExistInCallback(false);
 			*/
 			
 			try { // Edge browser throws 0: Permission denied
-				console.log("theWindow.location.href = " + theWindow.location.href); 
-			console.log("New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
-			console.log("theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
+				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href); 
+			console.log("EDITOR.createWindow: New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
+			console.log("EDITOR.createWindow: theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
 				
-			if(theWindow.location.href == "about:blank") theWindow.loaded = false; 
-			else theWindow.loaded = true;
+			if(theWindow.location.href == "about:blank") theWindow.loadedByWebideYo = false;  // Unique property for sanity
+				else theWindow.loadedByWebideYo = true;
 			
 			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
 			if(url == "about:blank") theWindow.isBlankUrl = true;
 			}
-			catch(err) {}
+			catch(err) {
+
+}
 			
 			theWindow.addEventListener("load", function() {
-				console.log("New window: " +  UTIL.timeStamp() + " load event!");
-				console.log("theWindow.location.href = " + theWindow.location.href);
+				console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
+				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 				/*
 					document.readyState === "complete" does not mean everything has loaded!
 					So because it's impossible to tell if the window has loaded or not,
@@ -7648,17 +7692,17 @@ folderExistInCallback(false);
 					What if the window was loaded until we got here (theWindow.addEventListener("load") ? Nightmare!
 					
 				*/
-				if(theWindow.loaded === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
-				theWindow.loaded = true; 
+				if(theWindow.loadedByWebideYo === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
+				theWindow.loadedByWebideYo = true; 
 				if(waitUntilLoaded) callback(null, theWindow);
 			}, false);
 			theWindow.addEventListener("DOMContentLoaded", function() {
-				console.log("New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
-				console.log("theWindow.location.href = " + theWindow.location.href);
+				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
+				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 			}, false);
 			
-			console.log("theWindow.document.domain=" + theWindow.document.domain);
-			console.log("document.domain=" + document.domain);
+			console.log("EDITOR.createWindow: theWindow.document.domain=" + theWindow.document.domain);
+			console.log("EDITOR.createWindow: document.domain=" + document.domain);
 			
 			if(!url) {
 				theWindow.document.open();

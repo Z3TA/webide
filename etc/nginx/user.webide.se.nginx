@@ -97,6 +97,8 @@ server {
     proxy_set_header upgrade           $http_upgrade;
     proxy_set_header connection        "upgrade";
     
+    add_header Access-Control-Allow-Origin * always;
+
     # We can't pass the port nr to upstream, but we can use an error page as fallback!
     # Only problem is when the fallback also fails the user will get a generic 502 error instead of our @badgateway
     error_page 502 @fallback;

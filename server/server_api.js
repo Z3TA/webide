@@ -4,6 +4,7 @@
 // Need to require non native modules here before we are chrooted
 
 var iconv = require('iconv-lite');
+var module_ps = require("ps-node");
 
 var UTIL = require("../client/UTIL.js");
 
@@ -25,6 +26,8 @@ var FIND_IN_FILES_ABORTED = false;
 var ECHO_COUNTER = 0;
 
 var EXEC_OPTIONS = {shell: "/bin/dash"};
+
+var PROCESS = {}; // pid: spawned process
 
 API.countLines = function countLines(user, json, callback) {
 
@@ -3325,7 +3328,70 @@ API.abortFindInFiles = function abortFindInFiles(user, json, callback) {
 	callback(null);
 }
 
+API.startProcess = function startProcess(user, json, callback) {
+	// Starts a long running process
+	
+	var pArgs = json.args;
+	var pPath = json.path;
+	var pid = -1;
+	var username = user.name;
+	
+	console.log(   "Starting " + pPath + " with args=" + JSON.stringify(pArgs) + " (" + pArgs.join(" ") + ")"   );
+	var module_child_process = require("child_process");
+	var p = module_child_process.spawn(pPath, pArgs);
+	
+	p.on("close", function (code, signal) {
+		console.log(username + " " + pPath + " close: code=" + code + " signal=" + signal);
+		user.send({process: {pid: pid, close: true, code: code}});
+	});
+	
+	p.on("disconnect", function () {
+		console.log(username + " " + pPath + " disconnect: p.connected=" + p.connected);
+	});
+	
+	p.on("error", function (err) {
+		console.log(username + " " + pPath + " error: err.message=" + err.message);
+		console.error(err);
+		user.send({process: {pid: pid, error: err.message, errorCode: err.code}});
+	});
+	
+	p.stdout.on("data", function(data) {
+		console.log(username + " " + pPath + " stdout: " + data);
+		user.send({process: {pid: pid, stdout: data.toString()}});
+	});
+	
+	p.stderr.on("data", function (data) {
+		console.log(username + " " + pPath + " stderr: " + data);
+		user.send({process: {pid: pid, stderr: data.toString()}});
+	});
+	
+	pid = p.pid;
+	
+	PROCESS[pid] = p;
+	
+	callback(null, {pid: pid});
+}
 
+API.killProcess = function killProcess(user, json, callback) {
+	// Kills a process
+	
+	var pid = parseInt(json.pid);
+	
+	if(typeof pid != "number") return callback(new Error("pid=" + pid + " json.pid=" + json.pid + " is not a number!"));
+	if(pid < 1) return callback(new Error("pid=" + pid + " is less then 1"));
+	
+	if(PROCESS.hasOwnProperty(pid)) {
+		PROCESS[pid].kill();
+		delete PROCESS[pid];
+		return callback(null);
+	}
+	else {
+		console.log("pid=" + pid + " not in PROCESS " + JSON.stringify(Object.keys(PROCESS)));
+		module_ps.kill( pid, function( err ) {
+			return callback(err);
+		});
+	}
+}
 
 API.run = function run(user, json, callback) {
 	// Runs a shell command
