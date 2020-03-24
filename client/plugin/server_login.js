@@ -143,8 +143,8 @@
 						
 						// Note: The title in index.htm will be the header in Google search, and the text below will be the description!
 						// Google will only show the first 150 characters ...
-						//                .....................................................................................................................................................
-						return confirmBox("" + window.location.hostname + " lets you develop and also host websites and Node.JS services. Including database support and many cool features! \n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+						//                 .....................................................................................................................................................
+						return confirmBox("Develop Android/iOS (React Native) or Progressive web apps (PWA), or Node.js micro-services and REST/JSON API's. Database, shell, Docker, FTP, Emulator, virtual X11 desktop, etc.\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 							if(answer == loginAsGuest) {
 								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
 								userValue = "guest";
