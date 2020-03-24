@@ -1868,18 +1868,23 @@ error.code = fName;
 					if(exist) {
 						var overwrite = "Overwrite";
 						var cancel = "Cancel";
-						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
-							if(answer == overwrite) {
+						var open = "Open existing file"
+						confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [open, overwrite, cancel], function(answer) {
+							if(answer == open) {
+								EDITOR.openFile(path);
+							}
+							else if(answer == overwrite) {
 								if(path != file.path) reOpen(file.path, path);
 								else EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
+								return;
 							}
-							else {
+							
 								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
 								if(callback) callback(err);
 								else throw err;
 								return;
-							}
+							
 						});
 					}
 					else if(path != file.path) reOpen(file.path, path);
@@ -1891,7 +1896,7 @@ error.code = fName;
 				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
 					if(err) {
 						if(err.code == "ENOENT") {
-console.warn("File did not exist on disk: " + file.path);
+							console.warn("File did not exist on disk: " + file.path);
 						}
 else if(err.code == "ENETDOWN") {
 							if(callback) return callback(err);
@@ -12200,7 +12205,7 @@ function scrollWheel(scrollWheelEvent) {
 	
 	EDITOR.interact("mouseScroll", scrollWheelEvent);
 	
-	return true;
+		return ALLOW_DEFAULT;
 }
 
 

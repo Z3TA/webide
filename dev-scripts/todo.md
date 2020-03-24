@@ -125,7 +125,7 @@ There's no disconnect option when closing and reopening the ftp/sftp widget
 
 
 
-cant scroll the function list on macbook using the pad
+Unable to fix: Safari bug: cant scroll the function list using the track pad
 
 
 
@@ -133,8 +133,6 @@ Unable to repeat: When connecting it says I'm in collaboration mode with a PC th
 You are in collaboration mode with Safari(192.168.0.158)
 
 
-
-when saving as to a file that already exist, in the warning, also have a button for opening that file!
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
 
