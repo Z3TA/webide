@@ -115,7 +115,7 @@ if(CHROMEBOOK) {
 		findReplaceDiv = document.createElement("div");
 		
 		findReplaceDiv.setAttribute("id", "findReplace");
-		findReplaceDiv.setAttribute("class", "findReplace");
+		findReplaceDiv.classList.add("findReplace");
 		
 		// Build the input stuff ...
 		
@@ -126,20 +126,20 @@ if(CHROMEBOOK) {
 		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
 		inputFind.setAttribute("id", "inputFind");
-		inputFind.setAttribute("class", "inputtext");
 		inputFind.setAttribute("size", size);
 inputFind.setAttribute("autocomplete", "off");
-
+		inputFind.classList.add("inputtext");
 		//inputFind.setAttribute("value", "X(..)X");
 		
 		
 		inputReplace = document.createElement("input");
 		inputReplace.setAttribute("type", "text");
 		inputReplace.setAttribute("id", "inputReplace");
-		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
 inputReplace.setAttribute("autocomplete", "off");
 		//inputReplace.setAttribute("value", "Y$1Y");
+		inputReplace.classList.add("inputtext");
+		inputReplace.classList.add("replace");
 		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
@@ -152,34 +152,36 @@ inputReplace.setAttribute("autocomplete", "off");
 		
 		findButtonLeft = document.createElement("input");
 		findButtonLeft.setAttribute("type", "button");
-		findButtonLeft.setAttribute("class", "button half");
 		findButtonLeft.setAttribute("id", "findButtonLeft");
 		findButtonLeft.setAttribute("value", "Left");
+		findButtonLeft.classList.add("button");
+		findButtonLeft.classList.add("half");
+		
 		
 		findButtonRight = document.createElement("input");
 		findButtonRight.setAttribute("type", "button");
-		findButtonRight.setAttribute("class", "button half");
 		findButtonRight.setAttribute("id", "findButtonRight");
 		findButtonRight.setAttribute("value", "Right");
+		findButtonRight.classList.add("button");
+		findButtonRight.classList.add("half");
 		
 		replaceButton = document.createElement("input");
 		replaceButton.setAttribute("type", "button");
-		replaceButton.setAttribute("class", "button");
 		replaceButton.setAttribute("id", "replaceButton");
 		replaceButton.setAttribute("value", "Replace");
+		replaceButton.classList.add("button");
 		
 		findAllButton = document.createElement("input");
 		findAllButton.setAttribute("type", "button");
-		findAllButton.setAttribute("class", "button");
 		findAllButton.setAttribute("id", "findAllButton");
 		findAllButton.setAttribute("value", "Find All");
+		findAllButton.classList.add("button");
 		
 		replaceAllButton = document.createElement("input");
 		replaceAllButton.setAttribute("type", "button");
-		replaceAllButton.setAttribute("class", "button");
 		replaceAllButton.setAttribute("id", "replaceAllButton");
 		replaceAllButton.setAttribute("value", "Replace All");
-		
+		replaceAllButton.classList.add("button");
 		
 		
 		var regexOptionLabel = document.createElement("label");
@@ -189,8 +191,19 @@ inputReplace.setAttribute("autocomplete", "off");
 		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
-		regexOption.setAttribute("class", "option regex");
-		
+regexOption.classList.add("option");
+regexOption.classList.add("regex");
+		regexOption.onclick = function() {
+			var text = inputFind.value;
+			var regexpError = regexOption.checked && regError(text);
+			
+			if(regexpError) {
+				inputFind.classList.add("error");
+			}
+			else {
+				inputFind.classList.remove("error");
+			}
+		};
 		
 		var ignoreCaseLabel = document.createElement("label");
 		ignoreCaseLabel.setAttribute("for", "ignoreCaseOption");
@@ -199,8 +212,8 @@ inputReplace.setAttribute("autocomplete", "off");
 		ignoreCaseOption = document.createElement("input");
 		ignoreCaseOption.setAttribute("type", "checkbox");
 		ignoreCaseOption.setAttribute("id", "ignoreCaseOption");
-		ignoreCaseOption.setAttribute("class", "option ignoreCase");
-		
+		ignoreCaseOption.classList.add("option");
+		ignoreCaseOption.classList.add("ignoreCase");
 		
 		var buttonFindInFiles = document.createElement("button");
 		buttonFindInFiles.innerText = "Find in files...";
@@ -212,8 +225,9 @@ inputReplace.setAttribute("autocomplete", "off");
 		}
 		var findInFilesKeyBind = document.createElement("span");
 		findInFilesKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor("findInFiles") ));
-		findInFilesKeyBind.setAttribute("class", "key inline");
 		buttonFindInFiles.appendChild(findInFilesKeyBind);
+		findInFilesKeyBind.classList.add("key");
+		findInFilesKeyBind.classList.add("inline");
 		
 		var closeDialogButton = document.createElement("button");
 		closeDialogButton.classList.add("button");
@@ -222,9 +236,9 @@ inputReplace.setAttribute("autocomplete", "off");
 		
 		var closeDialogKeyBind = document.createElement("span");
 		closeDialogKeyBind.appendChild(document.createTextNode( EDITOR.getKeyFor(hideFindReplaceGui) ));
-		closeDialogKeyBind.setAttribute("class", "key inline");
 		closeDialogButton.appendChild(closeDialogKeyBind);
-		
+		closeDialogKeyBind.classList.add("key");
+		closeDialogKeyBind.classList.add("inline");
 		
 		var table = document.createElement("table"),
 			tr = document.createElement("tr"),
@@ -347,10 +361,8 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			replaceAll(inputReplace.value, inputFind.value, EDITOR.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
-		inputFind.addEventListener("keyup", function(keyUpEvent) {
+		inputFind.addEventListener("keyup", function searchWhileTyping(keyUpEvent) {
 			var keyEnter = 13;
-			var keyEscape = 27;
-			var backSlash = 
 			
 			keyUpEvent.preventDefault();
 			
@@ -359,22 +371,14 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			}
 			
 			var text = inputFind.value;
-			var regexpError = false;
-			if(regexOption.checked && text.length > 0) {
-				try {
-					var reTest = new RegExp(text, "ig");
-				}
-				catch(err) {
-					regexpError = true;
-				}
-			}
+			var regexpError = regexOption.checked && regError(text);
 			
 			if(regexpError) {
-				inputFind.setAttribute("class", "inputtext error");
+				inputFind.classList.add("error");
 				return;
 			}
 			else {
-				inputFind.setAttribute("class", "inputtext");
+				inputFind.classList.remove("error");
 			}
 			
 			if(!regexpError) {
@@ -384,6 +388,19 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			}
 			
 		}, false);
+		
+		function regError(text) {
+			// returns true if there is an error in the regexp
+			if(text.length == 0) return false;
+			try {
+				var reTest = new RegExp(text, "ig");
+			}
+			catch(err) {
+				var regexpError = true;
+			}
+			
+			return regexpError;
+		}
 		
 		inputReplace.addEventListener("keyup", function(keyUpEvent) {
 			var keyEnter = 13;

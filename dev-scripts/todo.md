@@ -86,8 +86,6 @@ What I'm working on
 
 
 
-
-
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
 unable to repeat: When opening a file Ctrl+O and trying to change the path to search in,
@@ -124,9 +122,6 @@ Tell the user to update .hgignore !?
 
 Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
 There's no disconnect option when closing and reopening the ftp/sftp widget
-
-
-todo: Remove red background from find when de-selecting "use regex"
 
 
 
