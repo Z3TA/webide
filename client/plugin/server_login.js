@@ -144,7 +144,7 @@
 						// Note: The title in index.htm will be the header in Google search, and the text below will be the description!
 						// Google will only show the first 150 characters ... webide.se
 						//                 .....................................................................................................................................................
-						return confirmBox("WebIDE is an editor/IDE for JavaScript: Create Web (PWA), Smartphone (React-Native), or Node.js apps. Database, Docker, FTP, Emulator, X11 desktop, static sites generator built in...\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+						return confirmBox("WebIDE is an editor/IDE for JavaScript: Create Web (PWA), Smartphone (React-Native), or Node.js apps. Database, Docker, FTP, Emulator, X11 desktop, static site generator built in...\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 							if(answer == loginAsGuest) {
 								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
 								userValue = "guest";
