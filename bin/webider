@@ -234,8 +234,12 @@ function parseArguments(args) {
 	
 	// First item is path to nodejs
 	args.shift();
-	
+	// Second item is path to the script
 	var scriptPath = args.shift();
+	
+	// Note: Special flags must come before the path!
+	
+	debug("args=" + JSON.stringify(args));
 	
 	parse();
 	
@@ -257,7 +261,7 @@ function parseArguments(args) {
 	if(host) settings.host = host;
 	if(port) settings.port = port;
 if(filePath) settings.filePath = filePath;
-	if(!username) settings.username = username;
+	if(username) settings.username = username;
 
 	if(!host) {
 		debug("Looking up host and port from settings file(s) because it was not specified in arguments ...");
@@ -266,31 +270,39 @@ if(filePath) settings.filePath = filePath;
 	else gotSettings(settings, true);
 	
 	function parse() {
+		//debug("Parsing...");
+		
+		// First look for debug flag
 		for (var i=0; i<args.length; i++) {
+			if(args[i] == "-debug") {
+				DEBUG = true;
+				args.splice(i, 1);
+			}
+		}
+		
+		for (var i=0; i<args.length; i++) {
+			//debug("args[" + i + "]=" + args[i] + "");
 			if(args[i] == "-h" || args[i] == "-host") {
 				host = args[i+1];
 				if(!host) throw new Error("Expected a hostname or ip after " + args[i]);
+				debug("Parsed " + args[i] + " " + args[i+1]);
 				args.splice(i, 2);
 				return parse(args);
 			}
 			else if(args[i] == "-p" || args[i] == "-port") {
 				port = args[i+1];
 				if(!port) throw new Error("Expected a port nr after " + args[i]);
+				debug("Parsed " + args[i] + " " + args[i+1]);
 				args.splice(i, 2);
 				return parse(args);
 			}
 			else if(args[i] == "-u" || args[i] == "-user") {
 				username = args[i+1];
 				if(!username) throw new Error("Expected a user name nr after " + args[i]);
+				debug("Parsed " + args[i] + " " + args[i+1]);
 				args.splice(i, 2);
 				return parse(args);
 			}
-			else if(args[i] == "-debug") {
-				DEBUG = true
-				args.splice(i, 1);
-				return parse(args);
-			}
-			
 			
 		}
 	}
@@ -370,15 +382,16 @@ function dance(settings) {
 	
 	function connectionConnected() {
 		connected = true;
-		debug("Connected to editor server !");
+		debug("Connected to editor server!");
 		
 		// When connecting we Must always send our username, and name of file
 		var username = settings.username || module_os.userInfo().username;
+		debug("Sending username=" + username);
 		connection.write(username + "\n");
 		
 		if(settings.filePath) {
 			connection.write(settings.filePath + "\n");
-			
+			debug("Sending file content...");
 			connection.write(fileContent + EOF);
 			
 		}
