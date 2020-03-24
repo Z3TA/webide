@@ -6275,7 +6275,16 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			else {
 				log("ping success! attempts=" + pingFail, DEBUG);
 				
+				if(pingFail > 5) {
+					// it can take some time for the SSH daemon to start after network...
+					setTimeout(function() {
 				configure(ipToPing);
+					}, 1500);
+				}
+				else {
+					// VM is fast or already started
+					configure(ipToPing);
+				}
 				
 			}
 		});
