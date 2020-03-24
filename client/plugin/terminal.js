@@ -318,8 +318,8 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		
 		var cwd = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 		
-		if(cwd && cwd.indexOf("://") != -1) {
-			if(EDITOR.user) cwd = EDITOR.user.homeDir;
+		if(EDITOR.user && ( !cwd || cwd.indexOf("://") != -1)) {
+			cwd = EDITOR.user.homeDir;
 		}
 		
 		if(!cwd) cwd = "/";
