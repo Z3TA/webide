@@ -1484,7 +1484,7 @@ function openRemoteFileServer() {
 	
 	// Also listen on a unix socket so that the remote socket can be reached from within user netns ?
 	// No, we can reach it via 10.0.0.1 from within the user netns!
-	
+	// note: Need to allow access to REMOTE_FILE_PORT in iptables/firewall!
 	
 	function stdinConnection(socket) {
 		

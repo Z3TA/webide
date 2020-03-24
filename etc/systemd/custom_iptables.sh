@@ -131,6 +131,12 @@ iptables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 
 
+
+# Allow webider (editing remote files via local editor)
+ip6tables -A INPUT -p tcp --dport 8103 -m state --state NEW -j ACCEPT
+iptables -A INPUT -p tcp --dport 8103 -m state --state NEW -j ACCEPT
+
+
 # Prevent sending spam
 iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
 ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT

@@ -494,6 +494,11 @@ wget https://www.dropbox.com/download?plat=lnx.x86_64
 Extract files to /srv/webide/dropbox/
 
 
+Do something for each user in bash shell
+----------------------------------------
+cd /home/
+for d in *; do chown $d:$d /home/$d/.webide; done
+
 
 Adding and removing webide users
 --------------------------------
@@ -555,6 +560,7 @@ When the user worker process is put in a network namespace
 /etc/resolv.conf will be mounted from /etc/netns/username
 But if you are running systemd-resolved it will eventually re-mount /etc/resolv.conf
 So if you want to use different resolvers inside network namespace's you have to disable systemd-resolved
+`sudo systemctl stop systemd-resolved`
 
 
 
@@ -720,10 +726,11 @@ zfs list -t snapshot
 
 If you have problems connecting, try 
 sudo iptables -I FORWARD 1 -j ACCEPT
+sudo iptables -I INPUT 1 -j ACCEPT
 
 when you are done:
 sudo iptables -D FORWARD 1
-
+sudo iptables -D INPUT 1
 
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
