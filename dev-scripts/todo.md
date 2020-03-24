@@ -83,6 +83,11 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+
+
+
+
+
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
 unable to repeat: When opening a file Ctrl+O and trying to change the path to search in,
@@ -154,10 +159,7 @@ but the spelling dictionary is not very helpful for finding replacements for pro
 Spellcheck plugin need regression tests! (it stopped working and I did not notice)
 
 
-TEST ON STAGING SERVER BEFORE PUSHING TO PROD!
 
-
-Entering .. in open file widget should go to parent dir, not open selected file!
 
 
 idea: If there is a number in clipboard when opening the file, goto that line!?
