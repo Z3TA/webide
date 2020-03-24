@@ -43,7 +43,8 @@ EDITOR.parseFileExtensionAsCode = [
 	"css",
 	"webmanifest",
 "qml",
-"qrc"
+"qrc",
+"c"
 ];
 
 // These file extensions will be treated as plain text
