@@ -83,6 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Working on support for unicode characers width different width's
+fromCodePoint
+
+Handle tabs inside string (not start)
+
+regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
 
 
 
@@ -134,7 +140,9 @@ You are in collaboration mode with Safari(192.168.0.158)
 
 
 
-regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
+
+^^^^
+
 
 hide function list if there are no functions. Or it will take up extra annoying space and show an extra scrollbar
 

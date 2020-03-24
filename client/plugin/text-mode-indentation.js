@@ -170,7 +170,7 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 		var gotCharacter = false; // Only show white space characters on the edges
 		var caretRow = file.caret.row - startRow;
 		var caretCol = file.caret.col;
-		
+		var tabs = 0;
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -182,6 +182,8 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 			
 			gotCharacter = false;
 			
+			tabs = 0;
+			
 			for(var col = colStart; col < colStop; col++) {
 				bufferRowCol = buffer[row][col];
 				char = bufferRowCol.char;
@@ -191,15 +193,17 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 				}
 				else if(char=="\t") {
 					characters += "→";
+					tabs++;
 				}
 				else if(char=="\u00A0" || char=="\u2000" || char=="\u2001" || char=="\u2002" || char=="\u2003" || char=="\u2004" || char=="\u2005" || char=="\u2006" || char=="\u2007" || char=="\u2008" || char=="\u2009" || char=="\u200A" || char=="\u200B" || char=="\u202F" || char=="\u205F" || char=="\u3000") {
 					characters += "☺";
 				}
 				else if(characters) {
-					if(!gotCharacter) {
+					if(!gotCharacter || tabs) {
 print();
-						left += (characters.length+1) * EDITOR.settings.gridWidth;
+						left += (characters.length+1 + tabs*(EDITOR.settings.tabSpace-1)) * EDITOR.settings.gridWidth;
 						characters = "";
+						tabs = 0;
 					}
 					else {
 						left += (characters.length+1) * EDITOR.settings.gridWidth;
@@ -210,6 +214,8 @@ else {
 					left += EDITOR.settings.gridWidth;
 					gotCharacter = true;
 				}
+				
+				
 			}
 			
 			//console.log("renderWhiteSpace: row=" + row + " caretRow=" + caretRow + " col=" + col + " caretCol=" + caretCol);

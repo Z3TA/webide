@@ -64,6 +64,8 @@
 		var colStart = 0;
 		var colStop = 0;
 		
+		var afterTab = false;
+		
 		for(var row = 0; row < buffer.length; row++) {
 			
 			indentation = buffer[row].indentation;
@@ -92,20 +94,27 @@
 				
 				bufferRowCol = buffer[row][col];
 				
-if(bufferRowCol.char == "\t") {
-left += EDITOR.settings.gridWidth * EDITOR.settings.tabSpace;
-continue;
-}
+
+				
 
 				if(bufferRowCol.hasCharacter) {
 					
-					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters) {
+					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters || bufferRowCol.char == "\t") {
 						
+
+
 						ctx.fillText(characters, left, middle);
 						
 						left += characters.length * EDITOR.settings.gridWidth;
 						
 						characters = "";
+
+if(bufferRowCol.char == "\t") {
+left += EDITOR.settings.gridWidth * EDITOR.settings.tabSpace;
+afterTab = true;
+continue;
+}
+
 						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
 					}
 					//console.log(bufferRowCol.char + " " + bufferRowCol.color + " top=" + top + " left=" + left + "");

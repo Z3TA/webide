@@ -2701,7 +2701,10 @@ EDITOR.canvasContext = ctx;
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
 		var tabs = 0;
-		while(tabs < col && file.grid[row][tabs].char=="\t") tabs++;
+		for(var i=0; i<col; i++) {
+			if(file.grid[row][i].char=="\t") tabs++;
+		}
+		//while(tabs < col && file.grid[row][tabs].char=="\t") tabs++;
 		
 		//console.log("EDITOR.renderCaret: tabs=" + tabs + " file.grid[row].length=" + file.grid[row].length + " col=" + col);
 		
@@ -5921,10 +5924,10 @@ EDITOR.fireEvent("btk");
 			
 			if(isNaN(mouseRow)) throw new Error("mouseRow=" + mouseRow + " mouseY=" + mouseY + " EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight + " file.startRow=" + file.startRow + " ");
 			
-			//console.log("mouseRow=" + mouseRow);
+			//console.log("mousePositionToCaret: mouseRow=" + mouseRow);
 			
 			if(mouseRow >= grid.length) {
-				console.warn("Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+				console.warn("mousePositionToCaret: Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
 				
 				// For example when clicking under the text when scrolled down so only half the screen contains text
 				
@@ -5932,7 +5935,7 @@ EDITOR.fireEvent("btk");
 				
 			}
 			else if(mouseRow < 0) {
-				console.warn("Mouse position above the grid!");
+				console.warn("mousePositionToCaret: Mouse position above the grid!");
 				return file.createCaret(0, 0, 0);
 			}
 			else {
@@ -5940,16 +5943,27 @@ EDITOR.fireEvent("btk");
 				
 				if(gridRow == undefined) throw new Error("mouseRow=" + mouseRow + " grid.length=" + grid.length);
 				
-				//console.log("Mouse on row " + gridRow.lineNumber);
+				//console.log("mousePositionToCaret: Mouse on row " + gridRow.lineNumber);
 				
-				//console.log("indentation=" + gridRow.indentation);
+				//console.log("mousePositionToCaret: indentation=" + gridRow.indentation);
 				
-				var tabs = 0;
-				while(tabs < gridRow.length && gridRow[tabs].char == "\t") tabs++;
+				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
-				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabs) * EDITOR.settings.tabSpace - file.startColumn - tabs) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				//console.log("mousePositionToCaret: mouseCol=" + mouseCol);
 				
-				//console.log("mouseCol=" + mouseCol);
+				//while(tabs < gridRow.length && gridRow[tabs].char == "\t") tabs++;
+				for(var i=0; i<gridRow.length && i<mouseCol; i++) {
+					if(gridRow[i].char=="\t") {
+//tabs++;
+						mouseCol -= (EDITOR.settings.tabSpace-1);
+					}
+				}
+				
+				//var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabs) * EDITOR.settings.tabSpace - file.startColumn - tabs) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				
+				//mouseCol -= (tabs*(EDITOR.settings.tabSpace-1));
+				
+				//console.log("mousePositionToCaret: mouseCol=" + mouseCol);
 				
 				if(mouseCol > gridRow.length) { // End of line
 					mouseCol = gridRow.length;
@@ -5965,7 +5979,7 @@ EDITOR.fireEvent("btk");
 			
 		}
 		else {
-			console.warn("No file open!");
+			console.warn("mousePositionToCaret: No file open!");
 		}
 		
 	}
