@@ -142,9 +142,9 @@
 						var loginAsGuest = "Login as Guest";
 						
 						// Note: The title in index.htm will be the header in Google search, and the text below will be the description!
-						// Google will only show the first 150 characters ...
+						// Google will only show the first 150 characters ... webide.se
 						//                 .....................................................................................................................................................
-						return confirmBox("Develop Android/iOS (React Native) or Progressive web apps (PWA), or Node.js micro-services and REST/JSON API's. Database, shell, Docker, FTP, Emulator, virtual X11 desktop, etc.\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+						return confirmBox("WebIDE is an editor/IDE for JavaScript: Create Web (PWA), Smartphone (React-Native), or Node.js apps. Database, Docker, FTP, Emulator, X11 desktop, static sites generator built in...\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 							if(answer == loginAsGuest) {
 								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
 								userValue = "guest";
