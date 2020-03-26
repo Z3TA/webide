@@ -99,8 +99,8 @@
 			
 			tabColumnCounter = 0;
 			extraSpace = 0;
-
-			for(var col = colStart+tabIndention; col < colStop; col++) {
+			
+			for(var col = colStart; col < colStop; col++) {
 				
 				//left = EDITOR.settings.leftMargin + (col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 				
@@ -118,25 +118,12 @@
 						
 						characters = "";
 						
-						if(bufferRowCol.char == "\t") {
-							tabSpace = 8 - ((col+tabColumnCounter+extraSpace) % 8);
-							
-							left += tabSpace * EDITOR.settings.gridWidth;
-							tabColumnCounter += (tabSpace-1);
-							console.log("textRender: tabSpace=" + tabSpace + " tabColumnCounter=" + tabColumnCounter + "  ");
-							continue;
-						}
-						
-						
-						
 						if( UTIL.containsEmoji(bufferRowCol.char) ) {
 							ctx.fillText(bufferRowCol.char, left, middle);
 							left += EDITOR.settings.gridWidth * 2;
 							extraSpace++;
 							continue;
 						}
-						
-						
 						
 						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
 					}

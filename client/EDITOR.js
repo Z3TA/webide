@@ -2704,29 +2704,14 @@ EDITOR.canvasContext = ctx;
 		var tabIndention = 0;
 		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
 		
-		var tabColumnSpaces = 0;
-		var tabSpace = 0;
-		
 		var doubleWidth = 0;
-		
 		for(var i=tabIndention; i<col; i++) {
-			if(file.grid[row][i].char=="\t") {
-				tabSpace = 8 - ((i+tabColumnSpaces+doubleWidth) % 8);
-				tabColumnSpaces += (tabSpace-1);
-			}
-			
-			console.log("EDITOR.renderCaret: i=" + i + " char=" + file.grid[row][i].char + " tabSpace=" + tabSpace + " tabColumnSpaces=" + tabColumnSpaces + " file.grid[" + row + "].length=" + file.grid[row].length);
-			
 			if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
 		}
 		
-		tabColumnSpaces -= (tabIndention) ;
-		
-		//console.log("EDITOR.renderCaret: tabColumnSpaces=" + tabColumnSpaces + " doubleWidth=" + doubleWidth + " file.grid[" + row + "].length=" + file.grid[row].length + " col=" + col);
-		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col + tabColumnSpaces + doubleWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + doubleWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -5961,50 +5946,25 @@ EDITOR.fireEvent("btk");
 				
 				//console.log("mousePositionToCaret: Mouse on row " + gridRow.lineNumber);
 				
-				//console.log("mousePositionToCaret: indentation=" + gridRow.indentation);
-				
 				var tabIndention = 0;
 				while(gridRow[tabIndention].char=="\t" && tabIndention < gridRow.length) tabIndention++;
 				
 				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
-				//console.log("mousePositionToCaret: mouseCol=" + mouseCol);
+				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
 				
-				//while(tabs < gridRow.length && gridRow[tabs].char == "\t") tabs++;
-				var tabSpace = 0;
-				var tabColumnSpaces = 0;
-				for(var i=tabIndention; i<mouseCol && i<gridRow.length; i++) {
-					if(gridRow[i].char=="\t") {
-//tabs++;
-						tabSpace = 8 - ((i+tabColumnSpaces) % 8);
-						tabColumnSpaces += (tabSpace-1);
-						// Is mouseCol within the tab space !?
-						if( Math.ceil(i+tabSpace/2) > mouseCol ) {
-							// Place left of the tab
-							mouseCol -= (mouseCol-i);
-						}
-						else if( (i+tabSpace) > mouseCol ) {
-							// Place right side of the tab
-							mouseCol -= (mouseCol-i-1);
-						}
-						else {
-							// Ignore the tab space
-							mouseCol -= (tabSpace-1);
-						}
-					}
-					else if( UTIL.containsEmoji(gridRow[i].char) ) {
+				// When clicking inside tab indentation we should always go to the right
+				if(mouseCol < 0) mouseCol = tabIndention - Math.ceil(Math.abs(mouseCol) / EDITOR.settings.tabSpace);
+				else if(mouseCol < tabIndention) mouseCol = tabIndention;
+				
+				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
+				
+				for(var i=0; i<mouseCol && i<gridRow.length; i++) {
+					if( UTIL.containsEmoji(gridRow[i].char) ) {
 						// Emojis have double width
 						mouseCol -= 1;
 					}
 				}
-				
-				mouseCol += (tabIndention);
-				
-				//var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabs) * EDITOR.settings.tabSpace - file.startColumn - tabs) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
-				
-				//mouseCol -= (tabs*(EDITOR.settings.tabSpace-1));
-				
-				//console.log("mousePositionToCaret: mouseCol=" + mouseCol);
 				
 				if(mouseCol > gridRow.length) { // End of line
 					mouseCol = gridRow.length;
@@ -6014,7 +5974,6 @@ EDITOR.fireEvent("btk");
 				}
 				
 				return file.createCaret(undefined, mouseRow, mouseCol);
-				
 				
 			}
 			
