@@ -108,7 +108,7 @@
 				
 				if(bufferRowCol.hasCharacter) {
 					
-					if(oldStyle != bufferRowCol.color || containSpecialWidthCharacters || bufferRowCol.char == "\t" ) {
+					if(oldStyle != bufferRowCol.color || containSpecialWidthCharacters) {
 						
 						console.log("textRender: characters=" + UTIL.lbChars(characters) + " col=" + col + " tabColumnCounter=" + tabColumnCounter + " %8=" + ((col+tabColumnCounter) % 8) + " bufferRowCol.char=" + UTIL.lbChars(bufferRowCol.char) + " row=" + row);
 						

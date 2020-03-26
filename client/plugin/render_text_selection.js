@@ -17,7 +17,7 @@
 
 	console.log("Loaded selectionRender");
 	
-	function selectionRender(ctx, buffer, file, startRow) {
+	function selectionRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 		
 		if(buffer.length === 0) return;
 		
@@ -29,18 +29,18 @@
 		
 		ctx.beginPath(); // Reset all the paths!
 		
-		var left = 0,
-			top = 0,
-			indentation = 0;
-			
+		var left = 0;
+		var top = 0;
+			var indentation = 0;
 		var file = EDITOR.currentFile;
+		var charWidth = 1;
 		
 		ctx.fillStyle=EDITOR.settings.style.selectedTextBg;
 	
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
-			indentation = buffer[row].indentation;
+			
 			
 			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
 			
@@ -48,17 +48,43 @@
 				ctx.rect(EDITOR.settings.leftMargin, top,	EDITOR.settings.gridWidth * buffer[row].length, EDITOR.settings.gridHeight);
 			}
 			
-				for(var col = 0; col < buffer[row].length; col++) {
-					
-					left = EDITOR.settings.leftMargin + (col + indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
-					
-					//if(isNaN(left)) throw new Error("left is NaN! EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " col=" + col + " indentation=" + indentation + " EDITOR.settings.tabSpace=" + EDITOR.settings.tabSpace + " file.startColumn=" + file.startColumn + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth + "");
-					//if(isNaN(top)) throw new Error("top is NaN");
-					
+			indentation = buffer[row].indentation;
+			
+			left = EDITOR.settings.leftMargin + (indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			tabIndention = 0;
+			while(tabIndention < buffer[row].length && buffer[row][tabIndention].char == "\t") {
+				
+				if(buffer[row][tabIndention].selected) {
+					ctx.rect(left, top, (EDITOR.settings.tabSpace+1) * EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+				}
+				tabIndention++;
+				left += (EDITOR.settings.tabSpace+1) * EDITOR.settings.gridWidth;
+			}
+			
+			
+			//left = EDITOR.settings.leftMargin + (indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
+			
+			//if(isNaN(left)) throw new Error("left is NaN! EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " col=" + col + " indentation=" + indentation + " EDITOR.settings.tabSpace=" + EDITOR.settings.tabSpace + " file.startColumn=" + file.startColumn + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth + "");
+			//if(isNaN(top)) throw new Error("top is NaN");
+			
+			// Can probably be optimized by painting a long line rather then induvidual letters
+			
+			for(var col = tabIndention; col < buffer[row].length; col++) {
+				
+if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
+charWidth = 2;
+}
+else {
+charWidth = 1;
+}
+
 					if(buffer[row][col].selected) {
-						ctx.rect(left, top,	EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
-					}
-					
+						ctx.rect(left, top,EDITOR.settings.gridWidth*charWidth, EDITOR.settings.gridHeight);
+				}
+				
+				left += EDITOR.settings.gridWidth * charWidth;
+				
 			}
 			
 		}

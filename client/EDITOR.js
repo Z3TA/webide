@@ -5947,15 +5947,17 @@ EDITOR.fireEvent("btk");
 				//console.log("mousePositionToCaret: Mouse on row " + gridRow.lineNumber);
 				
 				var tabIndention = 0;
-				while(gridRow[tabIndention].char=="\t" && tabIndention < gridRow.length) tabIndention++;
+				while(tabIndention < gridRow.length && gridRow[tabIndention].char=="\t") tabIndention++;
 				
 				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
 				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
 				
-				// When clicking inside tab indentation we should always go to the right
-				if(mouseCol < 0) mouseCol = tabIndention - Math.ceil(Math.abs(mouseCol) / EDITOR.settings.tabSpace);
-				else if(mouseCol < tabIndention) mouseCol = tabIndention;
+				if(tabIndention > 0) {
+					// When clicking inside tab indentation we should always go to the right
+					if(mouseCol < 0) mouseCol = tabIndention - Math.ceil(Math.abs(mouseCol) / EDITOR.settings.tabSpace);
+					else if(mouseCol < tabIndention) mouseCol = tabIndention;
+				}
 				
 				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
 				
