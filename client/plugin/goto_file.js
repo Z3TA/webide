@@ -673,6 +673,8 @@ else throw err;
 			}
 			}
 			
+// Is there a file path/name in the clipboard?
+
 			// Is the caret on a file path or file name ? And a line number ? Eg. in a bug report
 			var filePath = ""
 			var notaPath = ":[]{}+-%#'\"";
