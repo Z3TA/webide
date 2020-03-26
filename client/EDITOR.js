@@ -2437,13 +2437,14 @@ EDITOR.canvasContext = ctx;
 			//console.timeEnd("preRenders");
 			// preRenderFunctions could be optimized using web workers!
 			
-			// Find out if the buffer contains zero with characters ( might need optimization )
+			// Find out if the buffer contains characters with special width ( might need optimization )
 			if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
-				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+				var textString = file.text.substring(startIndex, endIndex);
+				var containSpecialWidthCharacters = ( UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString) );
 			}
-			else var containZeroWidthCharacters = false;
+			else var containSpecialWidthCharacters = false;
 			
 			//ctx.imageSmoothingEnabled = true;
 			
@@ -2474,7 +2475,7 @@ EDITOR.canvasContext = ctx;
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
 				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
 				//console.time("render: " + funName);
-				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, screenStartRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, screenStartRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns); // Call render
 				//console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
@@ -2603,13 +2604,13 @@ EDITOR.canvasContext = ctx;
 				buffer = EDITOR.preRenderFunctions[i](buffer, file);
 			}
 			
-			// Find out if the buffer contains zero with characters ( might need optimization )
 			if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
-				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+				var textString = file.text.substring(startIndex, endIndex);
+				var containSpecialWidthCharacters = (UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString));
 			}
-			else var containZeroWidthCharacters = false;
+			else var containSpecialWidthCharacters = false;
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
@@ -2631,7 +2632,7 @@ EDITOR.canvasContext = ctx;
 			console.log("Rendering gridRow=" + gridRow);
 			
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containZeroWidthCharacters, gridRow, gridRow); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, gridRow, gridRow); // Call render
 			}
 			
 			console.timeEnd("renderRow");
@@ -2700,17 +2701,32 @@ EDITOR.canvasContext = ctx;
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
-		var tabs = 0;
-		for(var i=0; i<col; i++) {
-			if(file.grid[row][i].char=="\t") tabs++;
-		}
-		//while(tabs < col && file.grid[row][tabs].char=="\t") tabs++;
+		var tabIndention = 0;
+		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
 		
-		//console.log("EDITOR.renderCaret: tabs=" + tabs + " file.grid[row].length=" + file.grid[row].length + " col=" + col);
+		var tabColumnSpaces = 0;
+		var tabSpace = 0;
+		
+		var doubleWidth = 0;
+		
+		for(var i=tabIndention; i<col; i++) {
+			if(file.grid[row][i].char=="\t") {
+				tabSpace = 8 - ((i+tabColumnSpaces+doubleWidth) % 8);
+				tabColumnSpaces += (tabSpace-1);
+			}
+			
+			console.log("EDITOR.renderCaret: i=" + i + " char=" + file.grid[row][i].char + " tabSpace=" + tabSpace + " tabColumnSpaces=" + tabColumnSpaces + " file.grid[" + row + "].length=" + file.grid[row].length);
+			
+			if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
+		}
+		
+		tabColumnSpaces -= (tabIndention) ;
+		
+		//console.log("EDITOR.renderCaret: tabColumnSpaces=" + tabColumnSpaces + " doubleWidth=" + doubleWidth + " file.grid[" + row + "].length=" + file.grid[row].length + " col=" + col);
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col - tabs + ((file.grid[row].indentation+tabs) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + tabColumnSpaces + doubleWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -5947,17 +5963,42 @@ EDITOR.fireEvent("btk");
 				
 				//console.log("mousePositionToCaret: indentation=" + gridRow.indentation);
 				
-				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				var tabIndention = 0;
+				while(gridRow[tabIndention].char=="\t" && tabIndention < gridRow.length) tabIndention++;
+				
+				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
 				//console.log("mousePositionToCaret: mouseCol=" + mouseCol);
 				
 				//while(tabs < gridRow.length && gridRow[tabs].char == "\t") tabs++;
-				for(var i=0; i<gridRow.length && i<mouseCol; i++) {
+				var tabSpace = 0;
+				var tabColumnSpaces = 0;
+				for(var i=tabIndention; i<mouseCol && i<gridRow.length; i++) {
 					if(gridRow[i].char=="\t") {
 //tabs++;
-						mouseCol -= (EDITOR.settings.tabSpace-1);
+						tabSpace = 8 - ((i+tabColumnSpaces) % 8);
+						tabColumnSpaces += (tabSpace-1);
+						// Is mouseCol within the tab space !?
+						if( Math.ceil(i+tabSpace/2) > mouseCol ) {
+							// Place left of the tab
+							mouseCol -= (mouseCol-i);
+						}
+						else if( (i+tabSpace) > mouseCol ) {
+							// Place right side of the tab
+							mouseCol -= (mouseCol-i-1);
+						}
+						else {
+							// Ignore the tab space
+							mouseCol -= (tabSpace-1);
+						}
+					}
+					else if( UTIL.containsEmoji(gridRow[i].char) ) {
+						// Emojis have double width
+						mouseCol -= 1;
 					}
 				}
+				
+				mouseCol += (tabIndention);
 				
 				//var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabs) * EDITOR.settings.tabSpace - file.startColumn - tabs) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
@@ -6006,7 +6047,7 @@ EDITOR.fireEvent("btk");
 		var char = "";
 		var left1 = file.text.charAt(file.caret.index-1);
 		var left2 = file.text.charAt(file.caret.index-2);
-var word = "";
+		var word = "";
 		var options = []; // Word options
 		var mcl = []; // Move caret left
 		
@@ -6088,73 +6129,73 @@ var word = "";
 			
 		}
 		
-if(waitingForAsync == 0) gotOptions();
+		if(waitingForAsync == 0) gotOptions();
 		
 		return PREVENT_DEFAULT;
-
+		
 		function gotOptions() {
 			
-		if(options.length != mcl.length) {
-			throw new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " ");
-			return false;
-		}
-		
-			console.log("EDITOR.autoComplete: options:" + JSON.stringify(options, null, 2));
-		
-		var removeIndex = -1;
-		for(var i=0; i<removeOptions.length; i++) {
-			removeIndex = options.indexOf(removeOptions[i]);
-			while(removeIndex != -1) {
-				options.splice(removeIndex, 1);
-				removeIndex = options.indexOf(removeOptions[i]);
+			if(options.length != mcl.length) {
+				throw new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " ");
+				return false;
 			}
-		}
-		
-		if(options.length > 1) {
 			
+			console.log("EDITOR.autoComplete: options:" + JSON.stringify(options, null, 2));
+			
+			var removeIndex = -1;
+			for(var i=0; i<removeOptions.length; i++) {
+				removeIndex = options.indexOf(removeOptions[i]);
+				while(removeIndex != -1) {
+					options.splice(removeIndex, 1);
+					removeIndex = options.indexOf(removeOptions[i]);
+				}
+			}
+			
+			if(options.length > 1) {
+				
 				// Remove empty items
 				options = options.filter(function(item) {
 					return typeof item == "string" && item.length > 0;
 				});
 				
-			// Type up until the common character  fooBar vs fooBaz, type fooBa|
-			var shared = sharedStart(options);
-			
-				console.log("EDITOR.autoComplete: sharedStart=" + shared + " word=" + word);
-			
-			// hmm!?
-			/*
-				if(shared.length > 0) {
-				if(word.indexOf(".") != -1) {
-				var arr = word.split(".");
+				// Type up until the common character  fooBar vs fooBaz, type fooBa|
+				var shared = sharedStart(options);
 				
-				completeWord(arr[arr.length-1], shared, 0);
-				}
-				else {
+				console.log("EDITOR.autoComplete: sharedStart=" + shared + " word=" + word);
+				
+				// hmm!?
+				/*
+					if(shared.length > 0) {
+					if(word.indexOf(".") != -1) {
+					var arr = word.split(".");
+					
+					completeWord(arr[arr.length-1], shared, 0);
+					}
+					else {
+					completeWord(word, shared, 0);
+					}
+				*/
+				
 				completeWord(word, shared, 0);
+				
+				
+				// Show info
+				for(var i=0, opt; i<options.length; i++) {
+					opt =  options[i];
+					opt = opt.replace(new RegExp(file.lineBreak,"g"), " ");
+					opt = opt.replace(/</g, "&lt;"); // Because EDITOR.addInfo takes HTML
+					opt = opt.replace(/>/g, "&gt;");
+					EDITOR.addInfo(file.caret.row, file.caret.col, opt);
 				}
-			*/
-			
-			completeWord(word, shared, 0);
-			
-			
-			// Show info
-			for(var i=0, opt; i<options.length; i++) {
-				opt =  options[i];
-				opt = opt.replace(new RegExp(file.lineBreak,"g"), " ");
-				opt = opt.replace(/</g, "&lt;"); // Because EDITOR.addInfo takes HTML
-				opt = opt.replace(/>/g, "&gt;");
-				EDITOR.addInfo(file.caret.row, file.caret.col, opt);
+				
+			}
+			else if(options.length == 1) {
+				completeWord(word, options[0], mcl[0]);
+				if(functionArguments && functionArguments.length > 0) EDITOR.addInfo( file.caret.row, file.caret.col, functionArguments.join(",") );
 			}
 			
-		}
-		else if(options.length == 1) {
-			completeWord(word, options[0], mcl[0]);
-			if(functionArguments && functionArguments.length > 0) EDITOR.addInfo( file.caret.row, file.caret.col, functionArguments.join(",") );
-			}
-		
-		if(options.length == 0) EDITOR.stat("autocomplete_nothing");
-		else EDITOR.stat("autocomplete_found");
+			if(options.length == 0) EDITOR.stat("autocomplete_nothing");
+			else EDITOR.stat("autocomplete_found");
 		}
 		
 		function callback(ret, notAsync) {
@@ -6404,9 +6445,9 @@ if(waitingForAsync == 0) gotOptions();
 			if(EDITOR.files.hasOwnProperty(fileOrFilePath)) {
 				var file = EDITOR.files[file];
 			}
-else {
+			else {
 				throw new Error("File not open: fileOrFilePath=" + fileOrFilePath + " Open files are: " + JSON.stringify(Object.keys(EDITOR.files)));
-}
+			}
 		}
 		else {
 			throw new Error("fileOrFilePath=" + fileOrFilePath + " is not a string nor an instance of File!");
@@ -6416,7 +6457,7 @@ else {
 		
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
-		return;
+			return;
 		}
 		
 		console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
@@ -6811,11 +6852,11 @@ else {
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
 		if(!b.desc) {
-console.log(UTIL.getStack("Key binding should have a description!"));
+			console.log(UTIL.getStack("Key binding should have a description!"));
 		}
-
+		
 		if(b.mode == undefined) {
-//console.warn('No mode defined for "' + b.desc + '" asuming default mode');
+			//console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			b.mode = "default";
 		}
 		else if(EDITOR.modes.indexOf(b.mode) == -1) {
@@ -6923,7 +6964,7 @@ console.log(UTIL.getStack("Key binding should have a description!"));
 		}
 		
 		EDITOR.plugins.push(p);
-		}
+	}
 	
 	EDITOR.disablePlugin = function(desc, remove) {
 		var plugin;
@@ -6932,7 +6973,7 @@ console.log(UTIL.getStack("Key binding should have a description!"));
 			if(plugin.desc == desc) {
 				
 				if(plugin.loaded && !plugin.unload) {
-throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+					throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
 				}
 				
 				if(plugin.unload) plugin.unload();
@@ -7034,7 +7075,7 @@ throw new Error("The plugin has already been loaded, and it does not have an unl
 		
 		CLIENT.cmd("connect", json, function(err, json) {
 			if(err) {
-callback(err);
+				callback(err);
 				EDITOR.stat("connect_" + protocol + "_fail");
 			}
 			else {
@@ -7084,11 +7125,11 @@ callback(err);
 				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
 				
 				if(err.code != "ENOENT") {
-alertBox("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
+					alertBox("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
 					folderExistInCallback(undefined);
 				}
 				else {
-folderExistInCallback(false);
+					folderExistInCallback(false);
 				}
 			}
 			else {

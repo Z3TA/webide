@@ -23,7 +23,7 @@
 	
 	console.log("Loaded textRenderer");
 	
-	function textRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+	function textRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 		
 		//console.time("textRender");
 		
@@ -64,7 +64,12 @@
 		var colStart = 0;
 		var colStop = 0;
 		
-		var afterTab = false;
+		var tabIndention = 0;
+		
+		var tabColumnCounter = 0;
+		var extraSpace = 0;
+		
+		var tabSpace = 0;
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -88,33 +93,51 @@
 			if(isNaN(left)) throw new Error("left is NaN");
 			if(isNaN(top)) throw new Error("top is NaN EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " row=" + row + " startRow=" + startRow + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
 
-			for(var col = colStart; col < colStop; col++) {
+			tabIndention = 0;
+			while(tabIndention < buffer[row].length && buffer[row][tabIndention].char == "\t") tabIndention++;
+			left += tabIndention * EDITOR.settings.gridWidth * (EDITOR.settings.tabSpace);
+			
+			tabColumnCounter = 0;
+			extraSpace = 0;
+
+			for(var col = colStart+tabIndention; col < colStop; col++) {
 				
 				//left = EDITOR.settings.leftMargin + (col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 				
 				bufferRowCol = buffer[row][col];
 				
-
-				
-
 				if(bufferRowCol.hasCharacter) {
 					
-					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters || bufferRowCol.char == "\t") {
+					if(oldStyle != bufferRowCol.color || containSpecialWidthCharacters || bufferRowCol.char == "\t" ) {
 						
-
-
+						console.log("textRender: characters=" + UTIL.lbChars(characters) + " col=" + col + " tabColumnCounter=" + tabColumnCounter + " %8=" + ((col+tabColumnCounter) % 8) + " bufferRowCol.char=" + UTIL.lbChars(bufferRowCol.char) + " row=" + row);
+						
 						ctx.fillText(characters, left, middle);
 						
 						left += characters.length * EDITOR.settings.gridWidth;
 						
 						characters = "";
-
-if(bufferRowCol.char == "\t") {
-left += EDITOR.settings.gridWidth * EDITOR.settings.tabSpace;
-afterTab = true;
-continue;
-}
-
+						
+						if(bufferRowCol.char == "\t") {
+							tabSpace = 8 - ((col+tabColumnCounter+extraSpace) % 8);
+							
+							left += tabSpace * EDITOR.settings.gridWidth;
+							tabColumnCounter += (tabSpace-1);
+							console.log("textRender: tabSpace=" + tabSpace + " tabColumnCounter=" + tabColumnCounter + "  ");
+							continue;
+						}
+						
+						
+						
+						if( UTIL.containsEmoji(bufferRowCol.char) ) {
+							ctx.fillText(bufferRowCol.char, left, middle);
+							left += EDITOR.settings.gridWidth * 2;
+							extraSpace++;
+							continue;
+						}
+						
+						
+						
 						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
 					}
 					//console.log(bufferRowCol.char + " " + bufferRowCol.color + " top=" + top + " left=" + left + "");
@@ -163,7 +186,7 @@ continue;
 						ctx.stroke();
 						
 					}
-
+					
 				}
 				else {
 					// Should never happen / depricated
@@ -184,9 +207,9 @@ continue;
 		
 		
 		//console.timeEnd("textRender");
-
-
+		
+		
 	}
-
-
+	
+	
 })();
