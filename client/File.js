@@ -3809,7 +3809,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		//console.log("scrollToCaret: caret.col=" + caret.col + " > EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " ? " + (caret.col > EDITOR.view.endingColumn));
 		//console.log("scrollToCaret: caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
 		
-		
+		// todo: Take the width of the characters into account!
 		
 		var indentationWidth = file.grid[caret.row].indentation * EDITOR.settings.tabSpace;
 		

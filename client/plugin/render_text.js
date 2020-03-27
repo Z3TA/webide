@@ -134,14 +134,18 @@
 			var bufferRowCol;
 			var characters = "";
 			var charWidth = 1;
-			var transpLvlLeft = transpLvlStepLeft;
-			var transpLvlRight = 100-transpLvlStepRight;
+			
 			var start = 0;
 			
 			if(colStart > 0) {
 				start = Math.max(0, colStart-transparentCharsLeft);
 				left -= (colStart-start) * EDITOR.settings.gridWidth;
 			}
+			
+			var transpLvlStepLeft = 100 / (colStart-start+1);
+			
+			var transpLvlLeft = transpLvlStepLeft;
+			var transpLvlRight = 100-transpLvlStepRight;
 			
 			for(var col = start; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
 				

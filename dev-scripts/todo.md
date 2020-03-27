@@ -83,20 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-caret position with transparent characters in margins
-
-mouse pos to caret column including tab spaces
-
-When tabs are to the left they are indentation.
-When they are in the middle they are columns, like in config files, example /etc/hosts
-
-
-tabs should align, rather then just add space !?
-
-Working on support for unicode characers width different width's
-fromCodePoint
-
-Handle tabs inside string (not start)
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
 

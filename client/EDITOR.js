@@ -84,8 +84,8 @@ EDITOR.settings = {
 		color: "rgb(0,0,0)"
 	},
 	showLineNumbers: true, // Can be used to toggle line-numbers on/off
-	leftMargin: 250,
-	rightMargin: 250,
+	leftMargin: 50,
+	rightMargin: 50,
 	topMargin: 10,
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
@@ -219,9 +219,9 @@ EDITOR.view = {
 	visibleRows: 0, 
 	canvasWidth: 0,
 	canvasHeight: 0,
-	startingColumn: 0, // doesn't seem to be used!?
-	endingColumn: 0
+	endingColumn: 0 // Will always be EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns
 };
+// starting column is file specific
 
 EDITOR.tests = []; // {description, fun}
 

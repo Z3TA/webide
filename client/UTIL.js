@@ -2140,6 +2140,18 @@ else {
 		}
 	},
 	
+	textLength: function textlength(str) {
+		// Returns the length of the text, taking special-width-characters into account
+		var count = 0;
+		for(var i=0; i<str.length; i++) {
+			if(containsEmoji(str[i])) count += 2;
+			//else if( indexOfZeroWidthCharacter(str[i]) == -1) count += 1;
+// For now zero width characters take up one space in the editor (to make it easier to spot and delete them?)
+else count++;
+		}
+		return count;
+	},
+	
 	loadCSS: function loadCSS(url, callback) {
 		var head  = document.getElementsByTagName('head')[0];
 		var link  = document.createElement('link');
