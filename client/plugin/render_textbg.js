@@ -23,7 +23,8 @@
 	EDITOR.addRender(textBgRender, 1900);
 	
 	function textBgRender(ctx, buffer, file, startRow) {
-		
+		"use strict";
+
 		//console.time("textBgRender");
 		
 		if(startRow == undefined) startRow = 0;

@@ -338,17 +338,12 @@
 				
 				left = (col + indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth / minification;
 				
-				if(grid[row][col].hasCharacter) {
-					
 					char = grid[row][col].char;
 								
 					context.fillStyle = grid[row][col].color;// for fillText rgb 
 						
 					context.fillText(char, left, middle);
 					
-				}
-
-				
 			}
 			
 		}

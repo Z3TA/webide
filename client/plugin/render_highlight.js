@@ -1,6 +1,7 @@
 
 (function() {
-
+	"use strict";
+	
 	/*
 	
 		Effects for selected text
@@ -32,7 +33,8 @@
 		var indentation = 0;
 		var file = EDITOR.currentFile;
 		var charWidth = 1;
-		
+		var tabIndention = 0;
+
 		ctx.fillStyle=EDITOR.settings.style.highlightTextBg;
 	
 		

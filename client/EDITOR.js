@@ -84,8 +84,8 @@ EDITOR.settings = {
 		color: "rgb(0,0,0)"
 	},
 	showLineNumbers: true, // Can be used to toggle line-numbers on/off
-	leftMargin: 50,
-	rightMargin: 50,
+	leftMargin: 250,
+	rightMargin: 250,
 	topMargin: 10,
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22

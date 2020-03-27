@@ -3607,7 +3607,6 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				bgColor: gridRow[i].bgColor,
 				selected: gridRow[i].selected,
 				highlighted: gridRow[i].highlighted,
-				hasCharacter: true,
 				wave: gridRow[i].wave,
 				circle: false,
 				quote: false,
@@ -4735,7 +4734,6 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		box.index = index;
 		box.selected = false;
 		box.highlighted = false;
-		box.hasCharacter = (char != undefined);
 		box.wave = false;
 		box.circle = false;
 		box.color = EDITOR.settings.style.textColor;

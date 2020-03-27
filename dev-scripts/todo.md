@@ -83,6 +83,8 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+caret position with transparent characters in margins
+
 mouse pos to caret column including tab spaces
 
 When tabs are to the left they are indentation.
