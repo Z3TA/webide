@@ -769,7 +769,7 @@ file.mode = "text";
 			if(caret.eol == false) {
 				
 				if(!file.grid[caret.row][caret.col]) {
-					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " grid.length=" + file.grid.length + " in file.path=" + file.path);
+					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " grid.length=" + file.grid.length + " in file.path=" + file.path);
 				}
 				else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
 					file.debugGrid();
@@ -2403,8 +2403,6 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 	File.prototype.moveCaretRight = function(caret, repeat) {
 		var file = this;
 		
-		console.log("File:moveCaretRight");
-		
 		if(caret == undefined) caret = file.caret;
 		if(repeat === undefined) repeat = 1;
 		if(repeat === 0) return;
@@ -2422,10 +2420,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				caret.row++;
 				caret.col = 0;
 				caret.index += file.lineBreak.length;
-				//console.log("Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
+				//console.log("File.moveCaretRight: Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
 				
 				caret.index += file.grid[caret.row].indentationCharacters.length;
-				//console.log("Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
+				//console.log("File.moveCaretRight: Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
 				
 				if(file.grid[caret.row].length == 0) {
 					caret.eol = true;
@@ -2441,9 +2439,27 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				caret.index++;
 			}
 			else {
+				
+				
+				// Skip surrogate pairs
+				if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char) ) {
+					console.log("File.moveCaretRight: Skip surrogate");
+					caret.col++;
+					caret.index++;
+				}
+				
 				caret.col++;
 				caret.index++;
-				caret.eol = false;
+				
+				if( file.grid[caret.row][caret.col] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) {
+					// Also skip the surrogate modifier
+					console.log("File.moveCaretRight: Skip surrogate modifier");
+					caret.col+=2;
+					caret.index+=2;
+				}
+				
+				if( file.grid[caret.row].length==caret.col ) caret.eol = true;
+				else caret.eol = false;
 			}
 			
 			if(caret.index == file.text.length) {

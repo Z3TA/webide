@@ -2708,6 +2708,7 @@ EDITOR.canvasContext = ctx;
 		for(var i=tabIndention; i<col; i++) {
 			if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
 				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
+				
 				// They can also have modifiers, which are also two characters in JavaScript
 				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
 					i+= 3;
@@ -2717,15 +2718,19 @@ EDITOR.canvasContext = ctx;
 			else if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
 		}
 		
-		if( !caret.eol ) {
-			if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
-				doubleWidth++;
-				if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) doubleWidth+=2;
+		// When cursor is between surrogates
+/*
+if( !caret.eol ) {
+if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
+doubleWidth++;
+if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) doubleWidth+=2;
 
-			}
-			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) doubleWidth += 2;
-			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) doubleWidth++;
-		}
+}
+else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) doubleWidth += 2;
+else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) doubleWidth++;
+}
+*/
+		
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);

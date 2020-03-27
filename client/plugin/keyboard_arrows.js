@@ -65,7 +65,7 @@
 		if(!EDITOR.input) return true;
 		if(!file) return true;
 		
-		console.log("Moving caret right ... combo=" + JSON.stringify(combo));
+		console.log("keyboard_arrows_moveRight: Moving caret right ... combo=" + JSON.stringify(combo));
 		
 		// Holding down ctrl should step a while word!?
 		
@@ -81,7 +81,7 @@
 		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
-			console.log("step to next word");
+			console.log("keyboard_arrows_moveRight: step to next word");
 			for(var i=stepStart; i<file.text.length; i++) {
 				if(isWhiteSpace(file.text.charAt(i))) {
 					stepStop = i;
@@ -96,6 +96,18 @@
 			if(combo.shift) {
 				if(!caret.eol) {
 					file.select(file.grid[caret.row][caret.col], "right");
+					// Also select surrogate pairs
+					if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char)  ) {
+						console.log("keyboard_arrows_moveRight: Selecting surrogate pair");
+						file.select(file.grid[caret.row][caret.col+1], "right");
+						// Also select surrogate modifier
+						if( file.grid[caret.row][caret.col+2] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+2].char) ) {
+							console.log("keyboard_arrows_moveRight: Selecting surrogate modifier (pair)");
+							file.select(file.grid[caret.row][caret.col+2], "right");
+							file.select(file.grid[caret.row][caret.col+3], "right");
+						}
+					}
+					
 				}
 			}
 			

@@ -173,12 +173,12 @@
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
 				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
-					if( gridRow[col+2] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
+					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
 						col += 3;
 						charWidth++;
 					}
-					else {
+					else if(gridRow[col+1]) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
 						col++;
 						charWidth++;

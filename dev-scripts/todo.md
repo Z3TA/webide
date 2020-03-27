@@ -83,6 +83,15 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+issue with [ when scrolled right, when moving the caret left using keyboard
+File.js line 772
+
+editor has issues handling broken up surrogates
+
+Handle surrogates and surrogate modifiers when moving the caret and selecting text
+
+todo: Delete whole surrogate pair when deleting (using backspace)
+
 Handle surrogates and surrogate modifiers
 
 
