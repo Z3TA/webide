@@ -33,7 +33,7 @@
 		
 		var left = 0,
 			top = 0,
-		middle = 0,
+			middle = 0,
 			indentation = 0,
 			indentationWidth = 0,
 			bufferRowCol,
@@ -74,8 +74,6 @@
 		var renderRow = makeLineRender(containSpecialWidthCharacters, ctx);
 		
 		for(var row = 0; row < buffer.length; row++) {
-			
-			
 			
 			indentation = buffer[row].indentation;
 
@@ -174,24 +172,32 @@
 				}
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
-				ctx.fillText(bufferRowCol.char, left, middle);
+				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
+					if( gridRow[col+2] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
+						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
+						col += 3;
+						charWidth++;
+					}
+					else {
+						ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
+						col++;
+						charWidth++;
+					}
+				}
+				else ctx.fillText(bufferRowCol.char, left, middle);
+				
+				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
+				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
 				
 				left += EDITOR.settings.gridWidth * charWidth;
 				
 				if(charWidth > 1) extraSpace += charWidth-1;
 				
-				
-				
-				if(bufferRowCol.wave) renderWave();
-				else if(bufferRowCol.circle) renderCircle()
-				
-				
-				
 			}
 			
 		}
 		
-		function drawLineWithSingleLengthCharacter() {
+		function drawLineWithSingleLengthCharacter(gridRow, colStart, colStop, left, middle) {
 			
 			var bufferRowCol;
 			var characters = "";
@@ -232,8 +238,8 @@
 				
 				characters += bufferRowCol.char;
 				
-				if(bufferRowCol.wave) renderWave();
-				else if(bufferRowCol.circle) renderCircle()
+				if(bufferRowCol.wave) renderWave(middle, left, characters.length);
+				else if(bufferRowCol.circle) renderCircle(middle, left, characters.length)
 			}
 			
 			if(characters != "") {
@@ -241,7 +247,7 @@
 			}
 		}
 		
-		function renderWave() {
+		function renderWave(top, left, charLength) {
 			ctx.beginPath();
 			ctx.strokeStyle="rgba(255,0,0,0.5)";
 			
@@ -249,21 +255,21 @@
 			//ctx.moveTo(left, top + EDITOR.settings.gridHeight);
 			//ctx.lineTo(left + EDITOR.settings.gridWidth, top + EDITOR.settings.gridHeight);
 			
-			var x = left + (characters.length-1) * EDITOR.settings.gridWidth - 1;
+			var x = left + (charLength-1) * EDITOR.settings.gridWidth - 1;
 			var y = top + EDITOR.settings.gridHeight - 3 + Math.sin(x);
 			
 			ctx.moveTo(x, y);
 			
-			for(var x = x, y = y; x < (left + (characters.length-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth); x++, y+=Math.sin(x+1)) {
+			for(var x = x, y = y; x < (left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth); x++, y+=Math.sin(x+1)) {
 				ctx.lineTo(x, y);
 			}
 			
 			ctx.stroke();
 		}
 		
-		function renderCircle() {
+		function renderCircle(top, left, charLength) {
 			// ### Circle
-			var x = left + (characters.length-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2;
+			var x = left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2;
 			var y = top + EDITOR.settings.gridHeight / 2;
 			
 			ctx.strokeStyle="rgba(255,0,0,0.6)";

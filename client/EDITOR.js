@@ -2706,7 +2706,25 @@ EDITOR.canvasContext = ctx;
 		
 		var doubleWidth = 0;
 		for(var i=tabIndention; i<col; i++) {
-			if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
+			if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
+				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
+				// They can also have modifiers, which are also two characters in JavaScript
+				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
+					i+= 3;
+					doubleWidth -= 2;
+				}
+			}
+			else if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
+		}
+		
+		if( !caret.eol ) {
+			if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
+				doubleWidth++;
+				if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) doubleWidth+=2;
+
+			}
+			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) doubleWidth += 2;
+			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) doubleWidth++;
 		}
 		
 		// Math.floor to prevent sub pixels
@@ -5962,7 +5980,7 @@ EDITOR.fireEvent("btk");
 				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
 				
 				for(var i=0; i<mouseCol && i<gridRow.length; i++) {
-					if( UTIL.containsEmoji(gridRow[i].char) ) {
+					 if( UTIL.containsEmoji(gridRow[i].char) ) {
 						// Emojis have double width
 						mouseCol -= 1;
 					}

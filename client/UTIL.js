@@ -2140,6 +2140,26 @@ else {
 		}
 	},
 	
+	isSurrogateStart: function isSurrogateStart(str) {
+		if( str.match("[\uD800-\uDBFF]") ) return true;
+		else return false;
+	},
+	
+	isSurrogateEnd: function isSurrogateEnd(str) {
+		if( str.match("[\uDC00-\uDFFF]") ) return true;
+		else return false;
+	},
+	
+	isSurrogateModifierStart: function isSurrogateEnd(str) {
+		if( str.match(/\uD83C/) ) return true;
+		else return false;
+	},
+	
+	isSurrogateModifierEnd: function isSurrogateEnd(str) {
+		if( str.match(/[\uDFFB-\uDFFF]/) ) return true;
+		else return false;
+	},
+	
 	textLength: function textlength(str) {
 		// Returns the length of the text, taking special-width-characters into account
 		var count = 0;

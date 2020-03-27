@@ -83,10 +83,13 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Handle surrogates and surrogate modifiers
+
+
+
+parent matching and special width characters and surogates
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
-
-
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
