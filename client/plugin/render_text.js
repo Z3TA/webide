@@ -96,7 +96,7 @@
 			
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
-			renderRow(buffer[row], colStart, colStop, left, middle);
+			renderRow(buffer[row], colStart, colStop, left, middle, tabIndention);
 			
 		}
 		
@@ -121,7 +121,7 @@
 		var transpLvlStepLeft = 100 / transparentCharsLeft;
 		var transpLvlStepRight = 100 / transparentCharsRight;
 		
-		return function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle) {
+		return function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle, tabIndention) {
 			/*
 				
 				Because characters can have different width's we can't just start on a column,
@@ -172,6 +172,9 @@
 				}
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
+				if(col >= tabIndention && bufferRowCol.char == "\t") {
+					charWidth += 8 - (col-tabIndention+extraSpace) % 8;
+				}
 				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
@@ -197,7 +200,7 @@
 			
 		}
 		
-		function drawLineWithSingleLengthCharacter(gridRow, colStart, colStop, left, middle) {
+		function drawLineWithSingleLengthCharacter(gridRow, colStart, colStop, left, middle, tabIndention) {
 			
 			var bufferRowCol;
 			var characters = "";

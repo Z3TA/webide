@@ -2704,37 +2704,40 @@ EDITOR.canvasContext = ctx;
 		var tabIndention = 0;
 		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
 		
-		var doubleWidth = 0;
+		var extraWidth = 0;
 		for(var i=tabIndention; i<col; i++) {
-			if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
+			if(file.grid[row][i].char == "\t") {
+				extraWidth += (8 - (i-tabIndention+extraWidth) % 8);
+			}
+			else if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
 				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
 				
 				// They can also have modifiers, which are also two characters in JavaScript
 				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
 					i+= 3;
-					doubleWidth -= 2;
+					extraWidth -= 2;
 				}
 			}
-			else if (UTIL.containsEmoji(file.grid[row][i].char) ) doubleWidth++;
+			else if (UTIL.containsEmoji(file.grid[row][i].char) ) extraWidth++;
 		}
 		
 		// When cursor is between surrogates
 /*
 if( !caret.eol ) {
 if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
-doubleWidth++;
-if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) doubleWidth+=2;
+			extraWidth++;
+			if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) extraWidth+=2;
 
 }
-else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) doubleWidth += 2;
-else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) doubleWidth++;
+			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) extraWidth += 2;
+			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) extraWidth++;
 }
 */
 		
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col + doubleWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + extraWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -5983,11 +5986,36 @@ EDITOR.fireEvent("btk");
 				}
 				
 				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
-				
-				for(var i=0; i<mouseCol && i<gridRow.length; i++) {
-					 if( UTIL.containsEmoji(gridRow[i].char) ) {
+				var tabSpace = 0;
+				var extraSpace = 0;
+				for(var i=tabIndention; i<mouseCol && i<gridRow.length; i++) {
+					if(gridRow[i].char == "\t") {
+						
+						tabSpace = 8 - ((i+extraSpace-tabIndention) % 8);
+						extraSpace += (tabSpace);
+						// Is mouseCol within the tab space !?
+						if( Math.ceil(i+tabSpace/2) >= mouseCol ) {
+							// Place left of the tab
+							console.log("mousePositionToCaret: Place left of the tab");
+							mouseCol -= (mouseCol-i);
+						}
+						else if( (i+tabSpace) >= mouseCol ) {
+							// Place right side of the tab
+							console.log("mousePositionToCaret: Place right of the tab");
+							mouseCol -= (mouseCol-i-1);
+						}
+						else {
+							// Ignore the tab space
+							
+							console.log("mousePositionToCaret: Ignore the tabSpace=" + tabSpace + " extraSpace=" + extraSpace + " tabIndention=" + tabIndention);
+							mouseCol -= (tabSpace);
+						}
+						
+					}
+					 else if( UTIL.containsEmoji(gridRow[i].char) ) {
 						// Emojis have double width
 						mouseCol -= 1;
+						extraSpace++;
 					}
 				}
 				

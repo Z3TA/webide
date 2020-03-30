@@ -69,12 +69,15 @@
 			//if(isNaN(top)) throw new Error("top is NaN");
 			
 			// Can probably be optimized by painting a long line rather then induvidual letters
-			
+			var extraSpace = 0;
 			for(var col = tabIndention; col < buffer[row].length; col++) {
 				
-if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
-charWidth = 2;
-}
+				if( buffer[row][col].char == "\t") {
+					charWidth = 9 - (col-tabIndention+extraSpace) % 8;;
+				}
+				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
+					charWidth = 2;
+				}
 else {
 charWidth = 1;
 }
@@ -85,6 +88,7 @@ charWidth = 1;
 				
 				left += EDITOR.settings.gridWidth * charWidth;
 				
+				if(charWidth > 1) extraSpace += charWidth-1;
 			}
 			
 		}
