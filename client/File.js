@@ -769,7 +769,7 @@ file.mode = "text";
 			if(caret.eol == false) {
 				
 				if(!file.grid[caret.row][caret.col]) {
-					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " grid.length=" + file.grid.length + " in file.path=" + file.path);
+					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " grid.length=" + file.grid.length + " in file.path=" + file.path + " row: " + UTIL.lbChars(file.rowText(caret.row, false)) );
 				}
 				else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
 					file.debugGrid();
@@ -2442,7 +2442,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				
 				
 				// Skip surrogate pairs
-				if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char) ) {
+				if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col+1] && UTIL.isSurrogateEnd( file.grid[caret.row][caret.col+1].char) ) {
 					console.log("File.moveCaretRight: Skip surrogate");
 					caret.col++;
 					caret.index++;
@@ -2451,7 +2451,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				caret.col++;
 				caret.index++;
 				
-				if( file.grid[caret.row][caret.col] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) {
+				if( file.grid[caret.row][caret.col] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col+1].char) ) {
 					// Also skip the surrogate modifier
 					console.log("File.moveCaretRight: Skip surrogate modifier");
 					caret.col+=2;
