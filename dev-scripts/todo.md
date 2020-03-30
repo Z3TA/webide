@@ -83,12 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-could just as well support tab columns while where at it...
-
-issue with [ when scrolled right, when moving the caret left using keyboard
-File.js line 772
-
-editor has issues handling broken up surrogates
+parenthesis highlighting
 
 Handle surrogates and surrogate modifiers when moving the caret and selecting text
 

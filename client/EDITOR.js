@@ -2442,7 +2442,7 @@ EDITOR.canvasContext = ctx;
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var textString = file.text.substring(startIndex, endIndex);
-				var containSpecialWidthCharacters = ( UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString) );
+				var containSpecialWidthCharacters = ( UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString) || textString.indexOf("\t")!= -1 );
 			}
 			else var containSpecialWidthCharacters = false;
 			
@@ -5910,6 +5910,71 @@ EDITOR.fireEvent("btk");
 	}
 	EDITOR.removePreRender = function(fun) {
 		return removeFrom(EDITOR.preRenderFunctions, fun);
+	}
+	
+	EDITOR.makeGetCanvasPosition = function(file, containSpecialWidthCharacters) {
+		// Returns the x and y coordinate for a column
+		
+		if(file == undefined) file = EDITOR.currentFile;
+		
+		
+		if(containSpecialWidthCharacters) {
+			return function canvasPos(row, col) {
+				
+var gridRow = file.grid[row];
+
+				var indentationWidth = gridRow.indentation * EDITOR.settings.tabSpace;
+				var x = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+				var y = EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight;
+
+				var tabIndention = 0;
+				while(tabIndention < gridRow.length && gridRow[tabIndention].char == "\t") tabIndention++;
+				
+				for(var i = tabIndention, bufferRowCol, charWidth = 1, extraSpace=0; i < col && i < gridRow.length; i++) {
+bufferRowCol = gridRow[i];
+
+					if( UTIL.containsEmoji(bufferRowCol.char) ) {
+						charWidth = 2;
+					}
+					else {
+						charWidth = 1;
+					}
+					
+					if(bufferRowCol.char == "\t") {
+						charWidth += 8 - (i-tabIndention+extraSpace) % 8;
+					}
+					if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
+						if( gridRow[i+2] && gridRow[i+3] && UTIL.isSurrogateModifierStart(gridRow[i+2].char) ) {
+							i += 3;
+							charWidth++;
+						}
+						else if(gridRow[i+1]) {
+							i++;
+							charWidth++;
+						}
+					}
+					
+					console.log("canvasPos: char=" + UTIL.lbChars(bufferRowCol.char) + " charWidth=" + charWidth);
+					
+					x += (EDITOR.settings.gridWidth * charWidth);
+					
+					if(charWidth > 1) extraSpace += (charWidth-1);
+				}
+				
+				
+				
+return {x: x, y: y};
+			}
+		}
+		else {
+			return function canvasPos(row, col) {
+				return {
+					x: EDITOR.settings.leftMargin + (col + file.grid[row].indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth,
+					y: EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight
+				}
+			}
+		}
+		
 	}
 	
 	EDITOR.mousePositionToCaret = function (paramMouseX, paramMouseY, clickFeel) {

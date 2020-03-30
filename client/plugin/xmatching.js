@@ -30,8 +30,8 @@
 
 
 		var name = "xMatcher" + xMatcher.length;
-		var customRender = function (ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
-			highlightMatch(ctx, buffer, file, a, b, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns);
+		var customRender = function (ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
+			highlightMatch(ctx, buffer, file, a, b, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns);
 		}
 		
 var func = customRender;
@@ -41,7 +41,7 @@ var func = customRender;
 		}
 		catch(err) {
 			console.error(err);
-			var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
+			var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
 		}
 		
 		xMatcher.push(func);
@@ -50,7 +50,7 @@ var func = customRender;
 
 	}
 	
-	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containZeroWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
+	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -135,19 +135,22 @@ var func = customRender;
 			}
 			
 			
-			var firstLocation = {
+			var canvasPos = EDITOR.makeGetCanvasPosition(file, containSpecialWidthCharacters);
+			var firstLocation = canvasPos(leftPosition.row, leftPosition.col);
+			var secondLocation = canvasPos(rightPosition.row, rightPosition.col);
+			
+			/*
+				var firstLocation = {
 				x: EDITOR.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth,
 				y: EDITOR.settings.topMargin + (leftPosition.row+startRow) * EDITOR.settings.gridHeight
-			};
-			
-			
-			
-			var secondLocation = {
-				x: EDITOR.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth,
-					y: EDITOR.settings.topMargin + (rightPosition.row+startRow) * EDITOR.settings.gridHeight
-			};
-					
+				};
 				
+				var secondLocation = {
+				x: EDITOR.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth,
+				y: EDITOR.settings.topMargin + (rightPosition.row+startRow) * EDITOR.settings.gridHeight
+				};
+			*/
+			
 			// Now when we got both positions, lets show something!
 			
 			//ctx.rect(firstLocation.x, firstLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight); // x,y,width,height
