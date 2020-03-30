@@ -2704,40 +2704,53 @@ EDITOR.canvasContext = ctx;
 		var tabIndention = 0;
 		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
 		
-		var extraWidth = 0;
-		for(var i=tabIndention; i<col; i++) {
+		console.log("renderCaret: row=" + row + " col=" + col + " tabIndention=" + tabIndention + " ");
+		
+		var colAdjustment = 0;
+		var tabColumnTextLengthAdjustment = 0;
+		for(var i=tabIndention, tabColumnWidth=0; i<col; i++) {
 			if(file.grid[row][i].char == "\t") {
-				extraWidth += (8 - (i-tabIndention+extraWidth) % 8);
+				tabColumnWidth = (8 - (i-tabIndention+tabColumnTextLengthAdjustment) % 8);
+				console.log("renderCaret: i=" + i + " tab! tabColumnWidth=" + tabColumnWidth + " colAdjustment=" + colAdjustment + " tabColumnTextLengthAdjustment=" + tabColumnTextLengthAdjustment + " ")
+				colAdjustment += (tabColumnWidth-1); // hmm!??
+				tabColumnTextLengthAdjustment += tabColumnWidth-1;
 			}
 			else if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
+				console.log("renderCaret: i=" + i + " isSurrogateStart!  ")
 				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
 				
 				// They can also have modifiers, which are also two characters in JavaScript
 				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
+					console.log("renderCaret: i=" + i + " isSurrogateModifierStart!  ")
 					i+= 3;
-					extraWidth -= 2;
+					tabColumnTextLengthAdjustment -= 2; // To make the tab column width calculation correct
+					colAdjustment -= 2;
 				}
 			}
-			else if (UTIL.containsEmoji(file.grid[row][i].char) ) extraWidth++;
+			else if (UTIL.containsEmoji(file.grid[row][i].char) ) {
+				console.log("renderCaret: i=" + i + "containsEmoji!  ")
+				colAdjustment++;
+				tabColumnTextLengthAdjustment++;
+			}
 		}
 		
 		// When cursor is between surrogates
-/*
-if( !caret.eol ) {
+		/*
+			if( !caret.eol ) {
 if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
-			extraWidth++;
-			if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) extraWidth+=2;
+			colAdjustment++;
+			if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) colAdjustment+=2;
 
 }
-			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) extraWidth += 2;
-			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) extraWidth++;
+			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) colAdjustment += 2;
+			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) colAdjustment++;
 }
 */
 		
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col + extraWidth + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + colAdjustment + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -6055,7 +6068,7 @@ return {x: x, y: y};
 				for(var i=tabIndention; i<mouseCol && i<gridRow.length; i++) {
 					if(gridRow[i].char == "\t") {
 						
-						tabSpace = 8 - ((i+extraSpace-tabIndention) % 8);
+						tabSpace = 7 - ((i+extraSpace-tabIndention) % 8);
 						extraSpace += (tabSpace);
 						// Is mouseCol within the tab space !?
 						if( Math.ceil(i+tabSpace/2) >= mouseCol ) {

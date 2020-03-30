@@ -73,7 +73,7 @@
 			for(var col = tabIndention; col < buffer[row].length; col++) {
 				
 				if( buffer[row][col].char == "\t") {
-					charWidth = 9 - (col-tabIndention+extraSpace) % 8;;
+					charWidth = 8 - (col-tabIndention+extraSpace) % 8;;
 				}
 				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
 					charWidth = 2;

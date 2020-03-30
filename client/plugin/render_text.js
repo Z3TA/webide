@@ -128,7 +128,7 @@
 				we have to measure the width of the text before it
 				
 			*/
-			var extraSpace = 0;
+			var extraSpace = 0; // Mainly for calculating tab column space!?
 			var bufferRowCol;
 			var characters = "";
 			var charWidth = 1;
@@ -173,13 +173,14 @@
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
 				if(col >= tabIndention && bufferRowCol.char == "\t") {
-					charWidth += 8 - (col-tabIndention+extraSpace) % 8;
+					charWidth += 7 - (col-tabIndention+extraSpace) % 8;
 				}
 				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
 						col += 3;
 						charWidth++;
+						extraSpace -= 3; // To make the tab column width calculation correct
 					}
 					else if(gridRow[col+1]) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
