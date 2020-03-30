@@ -1332,7 +1332,7 @@ file.sanityCheck();
 		else if(character.charCodeAt(0) == 13) {
 			throw new Error("Tried to insert a new line character");
 		}
-		else if(character.charCodeAt(0) == 9) {
+		else if(file.mode == "code" && character.charCodeAt(0) == 9) {
 			throw new Error("Tried to insert a tab character");
 		}
 		else if(character.charCodeAt(0) == 8) {
