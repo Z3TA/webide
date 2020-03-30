@@ -5933,25 +5933,24 @@ var gridRow = file.grid[row];
 				for(var i = tabIndention, bufferRowCol, charWidth = 1, extraSpace=0; i < col && i < gridRow.length; i++) {
 bufferRowCol = gridRow[i];
 
-					if( UTIL.containsEmoji(bufferRowCol.char) ) {
-						charWidth = 2;
-					}
-					else {
-						charWidth = 1;
-					}
-					
 					if(bufferRowCol.char == "\t") {
 						charWidth += 8 - (i-tabIndention+extraSpace) % 8;
 					}
-					if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
+					else if( UTIL.containsEmoji(bufferRowCol.char) ) {
+						charWidth = 2;
+					}
+					else if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
 						if( gridRow[i+2] && gridRow[i+3] && UTIL.isSurrogateModifierStart(gridRow[i+2].char) ) {
 							i += 3;
-							charWidth++;
+							charWidth = 2;
 						}
 						else if(gridRow[i+1]) {
 							i++;
-							charWidth++;
+							charWidth = 2;
 						}
+					}
+					else {
+						charWidth = 1;
 					}
 					
 					console.log("canvasPos: char=" + UTIL.lbChars(bufferRowCol.char) + " charWidth=" + charWidth);
@@ -6077,11 +6076,31 @@ return {x: x, y: y};
 						}
 						
 					}
-					 else if( UTIL.containsEmoji(gridRow[i].char) ) {
+					else if( UTIL.isSurrogateStart(gridRow[i].char) && gridRow[i+1] ) {
+						// Surrogates are two "chars" in JavaScript but in unicode they are a single character
+						// All surrogates are rendered two columns wide
+						
+						console.log("mousePositionToCaret: isSurrogateStart i=" + i);
+						
+						// They can also have modifiers, which are also two characters in JavaScript
+						if( gridRow[i+2] && UTIL.isSurrogateModifierStart(gridRow[i+2].char) && gridRow[i+3] ) {
+							console.log("mousePositionToCaret: surrogate with modifer! i=" + i);
+							i+= 3;
+							extraSpace -= 2;
+							mouseCol += 2;
+						}
+					}
+					else if( UTIL.containsEmoji(gridRow[i].char) ) {
 						// Emojis have double width
+						// note: surrogates are handled above, this is only for emojis that are a single utf-16 character
 						mouseCol -= 1;
 						extraSpace++;
 					}
+				}
+				
+				// Where on the emoji did we click?
+				if( gridRow[mouseCol] && 1 ) {
+
 				}
 				
 				if(mouseCol > gridRow.length) { // End of line
