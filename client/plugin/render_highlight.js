@@ -58,9 +58,13 @@
 			
 			left = EDITOR.settings.leftMargin + (indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 			
+			var extraSpace = 0;
 			for(var col = 0; col < buffer[row].length; col++) {
 				
-				if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
+				if( col >= tabIndention && buffer[row][col].char == "\t") {
+					charWidth = 9 - (col-tabIndention+extraSpace) % 8;;
+				}
+				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
 					charWidth = 2;
 				}
 				else {
@@ -76,6 +80,7 @@
 				
 				left += EDITOR.settings.gridWidth*charWidth;
 				
+				if(charWidth > 1) extraSpace += charWidth-1;
 			}
 			
 			
