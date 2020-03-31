@@ -69,11 +69,19 @@
 			//if(isNaN(top)) throw new Error("top is NaN");
 			
 			// Can probably be optimized by painting a long line rather then induvidual letters
-			var extraSpace = 0;
+			var tabColumnTextLengthAdjustment = 0;
 			for(var col = tabIndention; col < buffer[row].length; col++) {
 				
 				if( buffer[row][col].char == "\t") {
-					charWidth = 8 - (col-tabIndention+extraSpace) % 8;;
+					charWidth = 8 - (col-tabIndention+tabColumnTextLengthAdjustment) % 8;;
+				}
+				else if( UTIL.isSurrogateStart(buffer[row][col].char) ) {
+					console.log("selectionRender: col=" + col + " isSurrogateStart!  ")
+charWidth = 1;
+					if( buffer[row][col+2] && UTIL.isSurrogateModifierStart(buffer[row][col+2].char) ) {
+						console.log("selectionRender: col=" + col + " isSurrogateModifierStart!  ")
+						col+= 3;
+					}
 				}
 				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
 					charWidth = 2;
@@ -88,7 +96,7 @@ charWidth = 1;
 				
 				left += EDITOR.settings.gridWidth * charWidth;
 				
-				if(charWidth > 1) extraSpace += charWidth-1;
+				if(charWidth > 1) tabColumnTextLengthAdjustment += charWidth-1;
 			}
 			
 		}
