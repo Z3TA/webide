@@ -5938,7 +5938,7 @@ var gridRow = file.grid[row];
 
 				var indentationWidth = gridRow.indentation * EDITOR.settings.tabSpace;
 				var x = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
-				var y = EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight;
+				var y = EDITOR.settings.topMargin + (row-file.startRow) * EDITOR.settings.gridHeight;
 
 				var tabIndention = 0;
 				while(tabIndention < gridRow.length && gridRow[tabIndention].char == "\t") tabIndention++;
@@ -5982,7 +5982,7 @@ return {x: x, y: y};
 			return function canvasPos(row, col) {
 				return {
 					x: EDITOR.settings.leftMargin + (col + file.grid[row].indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth,
-					y: EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight
+					y: EDITOR.settings.topMargin + (row-file.startRow) * EDITOR.settings.gridHeight
 				}
 			}
 		}
