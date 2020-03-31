@@ -136,8 +136,8 @@ var func = customRender;
 			
 			
 			var canvasPos = EDITOR.makeGetCanvasPosition(file, containSpecialWidthCharacters);
-			var firstLocation = canvasPos(leftPosition.row, leftPosition.col);
-			var secondLocation = canvasPos(rightPosition.row, rightPosition.col);
+			var firstLocation = canvasPos(leftPosition.row + bufferStartRow, leftPosition.col);
+			var secondLocation = canvasPos(rightPosition.row + bufferStartRow, rightPosition.col);
 			
 			/*
 				var firstLocation = {
