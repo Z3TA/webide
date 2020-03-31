@@ -83,7 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-working on caret rendering with tab columns... some issues with the calculations
+
+dont make it possible to place mouse caret between surrogate and modifier
+
+
+
+selection
 
 render caret with tab columns and surrogate modifiers
 

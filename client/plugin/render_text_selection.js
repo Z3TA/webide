@@ -69,6 +69,7 @@
 			//if(isNaN(top)) throw new Error("top is NaN");
 			
 			// Can probably be optimized by painting a long line rather then induvidual letters
+console.log("selectionRender: row=" + row);
 			var tabColumnTextLengthAdjustment = 0;
 			for(var col = tabIndention; col < buffer[row].length; col++) {
 				
@@ -81,6 +82,7 @@ charWidth = 1;
 					if( buffer[row][col+2] && UTIL.isSurrogateModifierStart(buffer[row][col+2].char) ) {
 						console.log("selectionRender: col=" + col + " isSurrogateModifierStart!  ")
 						col+= 3;
+						charWidth = 2;
 					}
 				}
 				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {

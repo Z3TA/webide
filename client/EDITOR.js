@@ -5996,8 +5996,8 @@ return {x: x, y: y};
 			---
 			
 			We need to know row indentation to know what column!
-			
 			We also need to take into account how much is scrolled
+			And also the width of special-width characters such as emojis and tab columns
 			
 			FILE CARET IS BOUND TO THE GRID!
 			caret.index is always the index in file.text (it doesn't correspond to the position in a big file)
@@ -6096,11 +6096,15 @@ return {x: x, y: y};
 						console.log("mousePositionToCaret: isSurrogateStart i=" + i);
 						
 						// They can also have modifiers, which are also two characters in JavaScript
+						
 						if( gridRow[i+2] && UTIL.isSurrogateModifierStart(gridRow[i+2].char) && gridRow[i+3] ) {
 							console.log("mousePositionToCaret: surrogate with modifer! i=" + i);
+							
+							console.log("mousePositionToCaret: momo");
 							i+= 3;
 							extraSpace -= 2;
 							mouseCol += 2;
+							
 						}
 					}
 					else if( UTIL.containsEmoji(gridRow[i].char) ) {
