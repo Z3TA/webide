@@ -92,7 +92,7 @@ else {
 charWidth = 1;
 }
 
-					if(buffer[row][col].selected) {
+					if(buffer[row][col] && buffer[row][col].selected) {
 						ctx.rect(left, top,EDITOR.settings.gridWidth*charWidth, EDITOR.settings.gridHeight);
 				}
 				
