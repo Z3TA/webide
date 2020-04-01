@@ -58,17 +58,24 @@
 			
 			left = EDITOR.settings.leftMargin + (indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 			
-			var extraSpace = 0;
+			var tabColumnTextLengthAdjustment = 0;
 			for(var col = 0; col < buffer[row].length; col++) {
+				charWidth = EDITOR.glyphWidth(file, buffer[row][col].index);
 				
 				if( col >= tabIndention && buffer[row][col].char == "\t") {
-					charWidth = 9 - (col-tabIndention+extraSpace) % 8;;
+					charWidth = 8 - (col-tabIndention+tabColumnTextLengthAdjustment) % 8;;
 				}
-				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
-					charWidth = 2;
-				}
-				else {
-					charWidth = 1;
+				else if( UTIL.isSurrogateStart(buffer[row][col].char) ) {
+					
+					
+					if( buffer[row][col+2] && UTIL.isSurrogateModifierStart(buffer[row][col+2].char) ) {
+						col+= 3;
+						tabColumnTextLengthAdjustment -= 3;
+					}
+					else if( buffer[row][col+1] ) {
+						col++;
+						tabColumnTextLengthAdjustment -= 1;
+					}
 				}
 				
 				//if(isNaN(left)) throw new Error("left is NaN");
@@ -80,7 +87,7 @@
 				
 				left += EDITOR.settings.gridWidth*charWidth;
 				
-				if(charWidth > 1) extraSpace += charWidth-1;
+				if(charWidth > 1) tabColumnTextLengthAdjustment += charWidth-1;
 			}
 			
 			

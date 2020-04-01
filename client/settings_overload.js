@@ -85,6 +85,8 @@
 				
 				whenFontLoaded();
 				
+EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
+
 				// Re-render with the new font
 				EDITOR.renderNeeded();
 				EDITOR.render();
@@ -103,6 +105,8 @@
 				console.log("settings_overload: All fonts ready maybe!?");
 				
 				whenFontLoaded();
+				
+				EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
 				
 				EDITOR.renderNeeded();
 				EDITOR.render();

@@ -71,7 +71,7 @@
 		
 		var tabSpace = 0;
 		
-		var renderRow = makeLineRender(containSpecialWidthCharacters, ctx);
+		var renderRow = makeLineRender(file, containSpecialWidthCharacters, ctx);
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -83,7 +83,7 @@
 			
 			indentationWidth = indentation * EDITOR.settings.tabSpace;
 			
-			//console.log("indentation=" + indentation);
+			//console.log("textRender:indentation=" + indentation);
 			
 			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
 			middle = top + Math.floor(EDITOR.settings.gridHeight/2);
@@ -96,6 +96,7 @@
 			
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
+			console.log("textRender:renderRow: row=" + row);
 			renderRow(buffer[row], colStart, colStop, left, middle, tabIndention);
 			
 		}
@@ -104,7 +105,7 @@
 		
 	}
 	
-	function makeLineRender(containSpecialWidthCharacters, ctx) {
+	function makeLineRender(file, containSpecialWidthCharacters, ctx) {
 		
 		var oldStyle = EDITOR.settings.style.textColor;
 		
@@ -145,16 +146,13 @@
 			var transpLvlLeft = transpLvlStepLeft;
 			var transpLvlRight = 100-transpLvlStepRight;
 			
+			var startIndex = gridRow.startIndex;
+			
 			for(var col = start; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
 				
 				bufferRowCol = gridRow[col];
 				
-				if( UTIL.containsEmoji(bufferRowCol.char) ) {
-					charWidth = 2;
-				}
-				else {
-					charWidth = 1;
-				}
+				charWidth = EDITOR.glyphWidth(file, startIndex + col);
 				
 				console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " ");
 				
@@ -173,19 +171,20 @@
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
 				if(col >= tabIndention && bufferRowCol.char == "\t") {
-					charWidth += 7 - (col-tabIndention+extraSpace) % 8;
+					console.log("textRender: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
+					charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
 				}
 				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
 						col += 3;
-						charWidth++;
+						//charWidth++;
 						extraSpace -= 3; // To make the tab column width calculation correct
 					}
 					else if(gridRow[col+1]) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
 						col++;
-						charWidth++;
+						extraSpace -= 1;
 					}
 				}
 				else ctx.fillText(bufferRowCol.char, left, middle);

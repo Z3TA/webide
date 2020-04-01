@@ -2442,7 +2442,14 @@ EDITOR.canvasContext = ctx;
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var textString = file.text.substring(startIndex, endIndex);
-				var containSpecialWidthCharacters = ( UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString) || textString.indexOf("\t")!= -1 );
+				var containSpecialWidthCharacters = false;
+				for(var i=0; i<textString.length; i++) {
+					if( EDITOR.glyphWidth(file, startIndex + i) > 1 ) {
+						containSpecialWidthCharacters = true;
+						break;
+					}
+				}
+				containSpecialWidthCharacters = ( containSpecialWidthCharacters || UTIL.indexOfZeroWidthCharacter(textString) != -1 || textString.indexOf("\t")!= -1 );
 			}
 			else var containSpecialWidthCharacters = false;
 			
@@ -2708,13 +2715,16 @@ EDITOR.canvasContext = ctx;
 		
 		var colAdjustment = 0;
 		var tabColumnTextLengthAdjustment = 0;
-		for(var i=tabIndention, tabColumnWidth=0; i<col; i++) {
+		for(var i=tabIndention, charWidth=1, tabColumnWidth=0; i<col; i++) {
+			charWidth = EDITOR.glyphWidth(file, file.grid[row][i].index);
+			
 			if(file.grid[row][i].char == "\t") {
 				tabColumnWidth = (8 - (i-tabIndention+tabColumnTextLengthAdjustment) % 8);
 				console.log("renderCaret: i=" + i + " tab! tabColumnWidth=" + tabColumnWidth + " colAdjustment=" + colAdjustment + " tabColumnTextLengthAdjustment=" + tabColumnTextLengthAdjustment + " ")
 				colAdjustment += (tabColumnWidth-1); // hmm!??
 				tabColumnTextLengthAdjustment += tabColumnWidth-1;
 			}
+			
 			else if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
 				console.log("renderCaret: i=" + i + " isSurrogateStart!  ")
 				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
@@ -2726,11 +2736,20 @@ EDITOR.canvasContext = ctx;
 					tabColumnTextLengthAdjustment -= 2; // To make the tab column width calculation correct
 					colAdjustment -= 2;
 				}
+				else if( file.grid[row][i+1] ) {
+					console.log("renderCaret: Skip surrogate end");
+					i += 1;
+				}
+				
+				if(charWidth != 2) {
+					console.log("renderCaret: i=" + i + " surrogate pair that is not two monospace wide!");
+					colAdjustment -= (2-charWidth); // Is there any surrogate pairs who's glyph width is not 2 !?!?
+				}
 			}
-			else if (UTIL.containsEmoji(file.grid[row][i].char) ) {
-				console.log("renderCaret: i=" + i + "containsEmoji!  ")
-				colAdjustment++;
-				tabColumnTextLengthAdjustment++;
+			else if( charWidth  > 1  ) {
+				console.log("renderCaret: i=" + i + " glyph wdith=" + charWidth + " ")
+				colAdjustment += (charWidth-1);
+				tabColumnTextLengthAdjustment += (charWidth-1);
 			}
 		}
 		
@@ -6052,8 +6071,8 @@ return {x: x, y: y};
 				var tabIndention = 0;
 				while(tabIndention < gridRow.length && gridRow[tabIndention].char=="\t") tabIndention++;
 				
-				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
-				
+				var mouseColBegin = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				var mouseCol = mouseColBegin;
 				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
 				
 				if(tabIndention > 0) {
@@ -6065,7 +6084,8 @@ return {x: x, y: y};
 				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
 				var tabSpace = 0;
 				var extraSpace = 0;
-				for(var i=tabIndention; i<mouseCol && i<gridRow.length; i++) {
+				for(var i=tabIndention, charWidth = 1; i<mouseCol && i<gridRow.length; i++) {
+					charWidth = EDITOR.glyphWidth(file, gridRow[i].index);
 					if(gridRow[i].char == "\t") {
 						
 						tabSpace = 7 - ((i+extraSpace-tabIndention) % 8);
@@ -6106,19 +6126,20 @@ return {x: x, y: y};
 							mouseCol += 2;
 							
 						}
+						else if( gridRow[i+1] ) {
+							console.log("mousePositionToCaret: skip surrogate ending");
+							i++;
+						}
+						
 					}
-					else if( UTIL.containsEmoji(gridRow[i].char) ) {
-						// Emojis have double width
-						// note: surrogates are handled above, this is only for emojis that are a single utf-16 character
-						mouseCol -= 1;
-						extraSpace++;
+					else if( charWidth > 1 ) {
+						// note: surrogates are handled above, this is only for glyphs from single utf-16 character
+						console.log("mousePositionToCaret: i=" + i + " " + gridRow[i].char + " charWidth=" + charWidth + "");
+						mouseCol -= (charWidth-1);
+						extraSpace += (charWidth-1);
 					}
 				}
 				
-				// Where on the emoji did we click?
-				if( gridRow[mouseCol] && 1 ) {
-
-				}
 				
 				if(mouseCol > gridRow.length) { // End of line
 					mouseCol = gridRow.length;
@@ -6132,6 +6153,34 @@ return {x: x, y: y};
 					mouseCol++;
 				}
 				
+				var widthOfCurrectCharacter = gridRow[mouseCol] && EDITOR.glyphWidth(file, gridRow[mouseCol].index);
+				if( widthOfCurrectCharacter && widthOfCurrectCharacter > 1 ) {
+					
+					// How can we adjust the caret to that if we clicked on a wide glyph it will go to the closest edge!???
+
+					var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn + mouseCol + extraSpace ) * EDITOR.settings.gridWidth));
+					var diff = (mouseX - mouseColX);
+					//var oddExtraSpace = extraSpace % 2;
+					console.log("mousePositionToCaret: widthOfCurrectCharacter=" + widthOfCurrectCharacter + " charWidth=" + charWidth + " (last char) mouseCol=" + mouseCol + " mouseColBegin=" + mouseColBegin + " extraSpace=" + extraSpace + " mouseX=" + mouseX + " mouseColX=" + mouseColX + " diff=" + diff + " gridWidth=" + EDITOR.settings.gridWidth);
+					
+					
+					/*
+						if( oddExtraSpace && diff > 0 ) {
+						console.log("mousePositionToCaret: Adjusting right");
+						mouseCol++;
+						}
+						if(  mouseX > mouseColX+EDITOR.settings.gridWidth/2  ) {
+						console.log("mousePositionToCaret: Adjusting right");
+						mouseCol++;
+						}
+						else if( mouseCol>0 && mouseX < mouseColX-charWidth*EDITOR.settings.gridWidth/2  ) {
+						console.log("mousePositionToCaret: Adjusting left");
+						mouseCol--;
+						}
+					*/
+					
+				}
+				
 				return file.createCaret(undefined, mouseRow, mouseCol);
 				
 			}
@@ -6141,6 +6190,51 @@ return {x: x, y: y};
 			console.warn("mousePositionToCaret: No file open!");
 		}
 		
+	}
+	
+	EDITOR.makeGlyphWidthDetector = function() {
+		
+		/*
+			The width depens on the font, so it's impossible to say what the width is based on the character code!
+			So we must render the character to know for sure.
+			For optimization we use a hearustic that all characters below 256!? are rendered as one character
+			
+			Make this function *after* the font has been set!
+		*/
+		
+		var glyphWidth = {}; // Memoization
+		var oneCharWidth = EDITOR.settings.gridWidth;
+		
+		return function(file, index) {
+			var char =  file.text[index];
+			
+			var charCode = char.charCodeAt(0)
+			//console.log("glyphWidth: charCode=" + charCode);
+			
+			if(charCode < 10) return 1;
+			
+			if( glyphWidth[char] ) return glyphWidth[char];
+			
+			// Combine surrogate pairs
+			if( char.match(/[\uD800-\uDBFF]/) && file.text[index+1] ) {
+				//console.log("glyphWidth: Adding surrogate pair");
+				char += file.text[index+1];
+			}
+			
+			var renderWidth = EDITOR.canvasContext.measureText(char).width;
+			//console.log("glyphWidth: renderWidth=" + renderWidth);
+			
+			glyphWidth[char] = Math.ceil(renderWidth / oneCharWidth)
+			
+			//console.log("glyphWidth: " + char + "=" + glyphWidth[char]);
+			
+			return glyphWidth[char];
+		}
+	}
+	
+	EDITOR.glyphWidth = function() {
+		console.warn("glyphWidth not yet initiated!");
+		return 1;
 	}
 	
 	EDITOR.autoComplete = function autoComplete(file, combo, character, charCode, keyPushDirection) {

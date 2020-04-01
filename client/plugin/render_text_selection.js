@@ -72,33 +72,36 @@
 console.log("selectionRender: row=" + row);
 			var tabColumnTextLengthAdjustment = 0;
 			for(var col = tabIndention; col < buffer[row].length; col++) {
-				
+				charWidth = EDITOR.glyphWidth(file, buffer[row][col].index);
 				if( buffer[row][col].char == "\t") {
 					charWidth = 8 - (col-tabIndention+tabColumnTextLengthAdjustment) % 8;;
 				}
 				else if( UTIL.isSurrogateStart(buffer[row][col].char) ) {
 					console.log("selectionRender: col=" + col + " isSurrogateStart!  ")
-charWidth = 1;
+					
 					if( buffer[row][col+2] && UTIL.isSurrogateModifierStart(buffer[row][col+2].char) ) {
 						console.log("selectionRender: col=" + col + " isSurrogateModifierStart!  ")
 						col+= 3;
-						charWidth = 2;
+						tabColumnTextLengthAdjustment -= 3;
+					}
+					else if( buffer[row][col+1] ) {
+						console.log("selectionRender: skip surrogate ending");
+						col++;
+						tabColumnTextLengthAdjustment -= 1;
 					}
 				}
-				else if(containSpecialWidthCharacters && UTIL.containsEmoji(buffer[row][col].char) ) {
-					charWidth = 2;
+				
+				if(charWidth > 1) {
+tabColumnTextLengthAdjustment += charWidth-1;
 				}
-else {
-charWidth = 1;
-}
-
-					if(buffer[row][col] && buffer[row][col].selected) {
+				
+				if(buffer[row][col] && buffer[row][col].selected) {
 						ctx.rect(left, top,EDITOR.settings.gridWidth*charWidth, EDITOR.settings.gridHeight);
 				}
 				
 				left += EDITOR.settings.gridWidth * charWidth;
 				
-				if(charWidth > 1) tabColumnTextLengthAdjustment += charWidth-1;
+				
 			}
 			
 		}
