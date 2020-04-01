@@ -6222,9 +6222,9 @@ return {x: x, y: y};
 			}
 			
 			var renderWidth = EDITOR.canvasContext.measureText(char).width;
-			//console.log("glyphWidth: renderWidth=" + renderWidth);
+			console.log("glyphWidth: renderWidth=" + renderWidth + " oneCharWidth=" + oneCharWidth + " ");
 			
-			glyphWidth[char] = Math.ceil(renderWidth / oneCharWidth)
+			glyphWidth[char] = Math.ceil(Math.floor(renderWidth) / Math.floor(oneCharWidth));
 			
 			//console.log("glyphWidth: " + char + "=" + glyphWidth[char]);
 			
