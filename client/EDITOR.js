@@ -6122,13 +6122,14 @@ return {x: x, y: y};
 							
 							console.log("mousePositionToCaret: momo");
 							i+= 3;
-							extraSpace -= 2;
-							mouseCol += 2;
+							extraSpace -= (4-charWidth);
+							mouseCol += (4-charWidth);
 							
 						}
 						else if( gridRow[i+1] ) {
 							console.log("mousePositionToCaret: skip surrogate ending");
 							i++;
+							mouseCol -= (charWidth-2);
 						}
 						
 					}
@@ -6151,6 +6152,10 @@ return {x: x, y: y};
 				if( gridRow[mouseCol] && UTIL.isSurrogateEnd(gridRow[mouseCol].char) ) {
 					console.log("mousePositionToCaret: surrogate END i=" + i);
 					mouseCol++;
+				}
+				else if( gridRow[mouseCol] && UTIL.isSurrogateModifierStart(gridRow[mouseCol].char) ) {
+					console.log("mousePositionToCaret: at surrogate modifier start i=" + i);
+					mouseCol += 2;
 				}
 				
 				var widthOfCurrectCharacter = gridRow[mouseCol] && EDITOR.glyphWidth(file, gridRow[mouseCol].index);
@@ -6222,9 +6227,9 @@ return {x: x, y: y};
 			}
 			
 			var renderWidth = EDITOR.canvasContext.measureText(char).width;
-			console.log("glyphWidth: renderWidth=" + renderWidth + " oneCharWidth=" + oneCharWidth + " ");
+			//console.log("glyphWidth: renderWidth=" + renderWidth + " oneCharWidth=" + oneCharWidth + " ");
 			
-			glyphWidth[char] = Math.ceil(Math.floor(renderWidth) / Math.floor(oneCharWidth));
+			glyphWidth[char] = Math.ceil(Math.floor(renderWidth*10) / Math.floor(oneCharWidth*10));
 			
 			//console.log("glyphWidth: " + char + "=" + glyphWidth[char]);
 			
