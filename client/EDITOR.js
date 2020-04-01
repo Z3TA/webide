@@ -6127,6 +6127,11 @@ return {x: x, y: y};
 					mouseCol = 0;
 				}
 				
+				if( gridRow[mouseCol] && UTIL.isSurrogateEnd(gridRow[mouseCol].char) ) {
+					console.log("mousePositionToCaret: surrogate END i=" + i);
+					mouseCol++;
+				}
+				
 				return file.createCaret(undefined, mouseRow, mouseCol);
 				
 			}
