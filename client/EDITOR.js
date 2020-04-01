@@ -5956,7 +5956,7 @@ EDITOR.fireEvent("btk");
 var gridRow = file.grid[row];
 
 				var indentationWidth = gridRow.indentation * EDITOR.settings.tabSpace;
-				var x = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+				var x = EDITOR.settings.leftMargin + (indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 				var y = EDITOR.settings.topMargin + (row-file.startRow) * EDITOR.settings.gridHeight;
 
 				var tabIndention = 0;
@@ -6157,7 +6157,7 @@ return {x: x, y: y};
 				if( widthOfCurrectCharacter && widthOfCurrectCharacter > 1 ) {
 					
 					// How can we adjust the caret to that if we clicked on a wide glyph it will go to the closest edge!???
-
+					
 					var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn + mouseCol + extraSpace ) * EDITOR.settings.gridWidth));
 					var diff = (mouseX - mouseColX);
 					//var oddExtraSpace = extraSpace % 2;
