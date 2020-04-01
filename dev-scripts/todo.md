@@ -83,18 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-
-dont make it possible to place mouse caret between surrogate and modifier
-
-
-
-selection
-
-render caret with tab columns and surrogate modifiers
-
-mousepositiontocaret on lines with surrogate modifiers
-
-place caret closest to mouse on surrogates and emojis
+broken up between surrogate and surrogate modifier in chars in margin
 
 wrong charsinmargin for surrogates
 
@@ -123,7 +112,8 @@ Some issues with JSX coloring
 todo: JSX coloring: <Text h1>Heading 1</Text>
 
 
-
+Do tutorials and stuff.
+React native, PWA, etc
 
 
 todo: Update to latest version of nodehun, which has breaking changes!!

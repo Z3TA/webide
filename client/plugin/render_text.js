@@ -170,11 +170,12 @@
 				}
 				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				
+				
 				if(col >= tabIndention && bufferRowCol.char == "\t") {
 					console.log("textRender: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
 					charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
 				}
-				if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
+				else if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
 						col += 3;
@@ -187,7 +188,22 @@
 						extraSpace -= 1;
 					}
 				}
-				else ctx.fillText(bufferRowCol.char, left, middle);
+				else if( UTIL.isSurrogateEnd(bufferRowCol.char) ) {
+					console.log("textRender: col=" + col + " isSurrogateEnd!");
+					continue;
+				}
+				else if( UTIL.isSurrogateModifierEnd(bufferRowCol.char) ) {
+					console.log("textRender: col=" + col + " isSurrogateModifierEnd!");
+					continue;
+				}
+				else if( UTIL.isSurrogateModifierStart(bufferRowCol.char) ) {
+console.log("textRender: col=" + col + " isSurrogateModifierStart!");
+					col++;
+					continue;
+				}
+				else {
+ctx.fillText(bufferRowCol.char, left, middle);
+				}
 				
 				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
 				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
