@@ -435,6 +435,40 @@ node server/server.js -port 80 -nochroot -virtualroot -noguest -home C:\Users\
 The following text assumes you are on a Unix/Linux like operating system ...
 
 
+Updating userskeleton and etc/userdir_skeleton
+----------------------------------------------
+/home/userskeleton ZFS will be cloned for each new user.
+Cloned filesystems will not take up HDD space!
+
+1. Update files in etc/userdir_skeleton
+or login as userskeleton and download/update stuff
+
+2. Run `sudo ./dev-scripts/clean_userskeleton.js` which cleans up temporary files and cache, 
+and also copies fresh files from etc/userdir_skeleton into /home/userskeleton
+
+4. Create a new snapshot, and send it the the prod server
+````
+sudo zfs list -t snapshot
+sudo zfs snapshot rpool/home/userskeleton@base2
+````
+Then send snapshot to prod server...
+If the fs do not exist:
+`sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton`
+	
+If the fs already exist: (send incremental data)
+`sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton`
+	
+(where snap X on the server is the last common snap and snap Y is the latest in dev)
+
+The files might have been modified on the server...
+On the server, delete any newer snapshots and/or rollback
+````
+zfs list -t snapshot | grep userskeleton
+zfs destroy ben/home/userskeleton@backup
+zfs rollback ben/home/userskeleton@baseX
+````
+
+
 Installing/upgrading Nodejs
 ---------------------------
 Uninstall nodejs if it's already installed, then install it foromnodesource.

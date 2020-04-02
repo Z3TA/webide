@@ -3,33 +3,8 @@
 
 /*
 	
-	Guide for updating userskeleton (the user *new* users will be based on)
-	
-	1. Update files in etc/userdir_skeleton
-	or login as userskeleton and download/update stuff
-
-	2. Run this script which cleans up temporary files and cache, 
-and also copies fresh files from etc/userdir_skeleton
-
-	4. Create a new snapshot, and send it the the prod server
-	
-	sudo zfs snapshot rpool/home/userskeleton@base2
-	
-	Then send snapshot to prod server...
-	If the fs do not exist:
-	sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton
-	
-	If the fs already exist: (send incremental data)
-	sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton
-	
-	(where snap X on the server is the last common snap and snap Y is the latest in dev)
-	
-	The files might have been modified...
-	zfs destroy ben/home/userskeleton@backup
-	zfs rollback ben/home/userskeleton@baseX
-	
-	zfs list -t snapshot
-	
+This script will copy files from etc/userdir_skeleton into /home/userskeleton
+	Guide for updating userskeleton (the user *new* users will be based on) is found in README
 	
 */
 
