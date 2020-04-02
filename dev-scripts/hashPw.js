@@ -14,7 +14,7 @@
 	
 */
 
-var pwHash = require("./server/pwHash.js");
+var pwHash = require("../server/pwHash.js");
 	
 	var pw = process.argv[2]
 	
