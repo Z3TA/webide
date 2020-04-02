@@ -821,8 +821,8 @@ parse: false
 			};
 			
 			if(replaceWith) json.replaceWith = replaceWith;
-			
-			CLIENT.cmd("findReplaceInFiles", json, function(err, json) {
+			var timeout = (1000 * 60 * 3);
+			CLIENT.cmd("findReplaceInFiles", json, timeout, function(err, json) {
 				if(err) {
 					alertBox(err.message);
 					reportFile.writeLine(err.message);
