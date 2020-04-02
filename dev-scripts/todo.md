@@ -83,7 +83,13 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-broken up between surrogate and surrogate modifier in chars in margin
+how to get rid of symbolic links to bins in user dirs ?
+
+issues rendering caret when glyphs are 3 wide
+
+issues when rendering text when scrolled to the right and surrogates
+
+xmatch off when all characters are extra wide !?
 
 wrong charsinmargin for surrogates
 

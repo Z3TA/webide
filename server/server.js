@@ -2972,22 +2972,19 @@ function checkMounts(options, checkMountsCallback) {
 					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
 						if(err) throw err;
 						
-						mountMysqlClient();
+					mySqlDone();
 					});
 				}
-				else mountMysqlClient();
-			});
-			
-			function mountMysqlClient() {
-			module_mount("/usr/bin/mysql", homeDir + "usr/bin/mysql", function(err) {
-						if(err) throw err;
-						
-						mysqlCheck = true;
-						checkMountsReadyMaybe();
-						return;
-					});
-			}
+			else mySqlDone();
 		});
+			
+		function mySqlDone() {
+			mysqmysqlCheck = true;
+checkMountsReadyMaybe();
+}
+		});
+
+
 		
 		// Make sure nginx profile exist
 		var nginxSitesAvailable = "/etc/nginx/sites-available/"
