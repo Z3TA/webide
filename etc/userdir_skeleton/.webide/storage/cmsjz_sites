@@ -7,11 +7,11 @@
 		"repository": "",
 		"repoUser": "",
 		"repoPw": "",
-		"projectFolder": "/ssg_blog_example/",
-		"source": "/ssg_blog_example/source/",
-		"preview": "/ssg_blog_example/preview/",
-		"publish": "/wwwpub/blog/",
-		"template": "/ssg_blog_example/template.htm",
+		"projectFolder": "/home/userskeleton/ssg_blog_example/",
+		"source": "/home/userskeleton/ssg_blog_example/source/",
+		"preview": "/home/userskeleton/ssg_blog_example/preview/",
+		"publish": "/home/userskeleton/wwwpub/blog/",
+		"template": "/home/userskeleton/ssg_blog_example/template.htm",
 		"url": "%USERNAME%.%DOMAIN%/blog/"
 	}
 ]
