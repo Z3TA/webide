@@ -171,13 +171,13 @@ var CLIENT = {}; // Client object is global
 			timeout = CLIENT.cmdTimeout;
 		}
 		else if(typeof timeout != "number") {
-			throw new Error("timeout=" + timeout + " need to be a number!");
+			throw new Error("timeout=" + timeout + " need to be a number (milliseconds)!");
 		}
 		
 		if(typeof json == "function" && callback == undefined) {
 			callback = json;
 			json = null;
-		}
+}
 		else if(typeof json != "object") {
 throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
 		}
