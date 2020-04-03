@@ -2747,6 +2747,7 @@ EDITOR.canvasContext = ctx;
 					console.log("renderCaret: Skip surrogate end");
 					i += 1;
 					colAdjustment += (charWidth-2);
+					tabColumnTextLengthAdjustment += (charWidth-2);
 				}
 				
 			}
