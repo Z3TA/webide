@@ -4727,6 +4727,80 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 	}
 	
+	File.prototype.surrogates = function surrogates(rowOrGridRow, endCol) {
+		// Returns how many surrogates(start) there are in the text
+		var file = this;
+		
+		var counter = 0;
+		
+		if(typeof rowOrGridRow == "number") {
+			var gridRow = file.grid[row];
+		}
+		else if(typeof rowOrGridRow == "object") {
+			var gridRow = rowOrGridRow;
+		}
+		else throw new Error("typeof rowOrGridRow=" + rowOrGridRow + "(" + (typeof rowOrGridRow) + ")");
+		
+		if( !gridRow ) throw new Error("file.grid.length=" + file.grid.length + " row=" + row);
+		
+		for(var col=0; col<endCol && col < gridRow.length; col++) {
+			if( UTIL.isSurrogateStart(gridRow[col].char) ) {
+				counter++;
+			}
+		}
+		
+return counter;
+	}
+	
+	File.prototype.textWidth = function textWidth(rowOrGridRow, endCol) {
+		// Returns the total monospace glyph width from first column to endCol with starting (indentation) tabs ignored
+		var file = this;
+		
+		var totalGlyphWidth = 0;
+		
+		if(typeof rowOrGridRow == "number") {
+			var gridRow = file.grid[row];
+		}
+		else if(typeof rowOrGridRow == "object") {
+			var gridRow = rowOrGridRow;
+		}
+		else throw new Error("typeof rowOrGridRow=" + rowOrGridRow + "(" + (typeof rowOrGridRow) + ")");
+		
+		if( !gridRow ) throw new Error("file.grid.length=" + file.grid.length + " row=" + row);
+		
+		// Ignore tab indentation
+		var tabIndention = 0;
+		while(tabIndention < gridRow.length && gridRow[tabIndention].char == "\t") tabIndention++;
+		
+		for(var col=tabIndention, charWidth=1, extraSpace=0; col<endCol && col < gridRow.length; col++) {
+			charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
+			
+			if(gridRow[col].char == "\t") {
+				console.log("textWidth: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
+				charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
+			}
+			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
+				console.log("textWidth: col=" + col + " surrogate start");
+				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
+					console.log("textWidth: col=" + col + " surrogate modifier");
+					col += 3;
+					//charWidth++;
+					//extraSpace -= 3; // To make the tab column width calculation correct
+				}
+				else if( gridRow[col+1] ) {
+					console.log("textWidth: col=" + col + " no modifier");
+					col++;
+					//extraSpace -= 1;
+				}
+			}
+			
+			if(charWidth > 1) extraSpace += charWidth-1;
+		}
+		
+		//if( col > endCol ) endCol
+		
+		return endCol+1 + extraSpace;
+	}
 	
 	
 	/*

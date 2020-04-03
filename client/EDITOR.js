@@ -2409,7 +2409,14 @@ EDITOR.canvasContext = ctx;
 			
 			var bufferStartRow = Math.max(0, fileStartRow);;
 			var bufferEndRow = Math.min(grid.length-1, fileEndRow);
-			var maxColumns = Math.max(EDITOR.view.endingColumn + Math.ceil(EDITOR.settings.rightMargin/EDITOR.settings.gridWidth), EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see
+			var charsInRightMargin = Math.ceil(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
+			/*
+				Optimization: Cut off what we can not see
+				note: Surrogate pairs are two characters and with modifier they are four characters, 
+				so if a line contain only surrogates with modifier they will be 4 times as many utf-16 characters
+			*/
+			
+			var maxColumns = Math.max(EDITOR.view.endingColumn + charsInRightMargin, EDITOR.view.visibleColumns *4);
 			//console.log("render: maxColumns=" + maxColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 			if(maxColumns < 20) maxColumns = 20;
 			for(var row = bufferStartRow; row <= bufferEndRow; row++) {
@@ -6182,6 +6189,10 @@ return {x: x, y: y};
 					*/
 					
 				}
+				
+				// Broken surrogate can make the adjustment wrong
+				if(mouseCol > gridRow.length) mouseCol = gridRow.length;
+				
 				
 				return file.createCaret(undefined, mouseRow, mouseCol);
 				

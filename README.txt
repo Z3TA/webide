@@ -761,10 +761,12 @@ zfs list -t snapshot
 If you have problems connecting, try 
 sudo iptables -I FORWARD 1 -j ACCEPT
 sudo iptables -I INPUT 1 -j ACCEPT
+sudo iptables -I OUTPUT 1 -j ACCEPT
 
 when you are done:
 sudo iptables -D FORWARD 1
 sudo iptables -D INPUT 1
+sudo iptables -D OUTPUT 1
 
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------

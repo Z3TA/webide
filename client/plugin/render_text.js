@@ -129,7 +129,7 @@
 				we have to measure the width of the text before it
 				
 			*/
-			var extraSpace = 0; // Mainly for calculating tab column space!?
+			
 			var bufferRowCol;
 			var characters = "";
 			var charWidth = 1;
@@ -139,6 +139,9 @@
 			if(colStart > 0) {
 				start = Math.max(0, colStart-transparentCharsLeft);
 				left -= (colStart-start) * EDITOR.settings.gridWidth;
+				
+				var surrogatesBefore = start > 0 ? file.surrogates(gridRow, start-1) : 0;
+				//left -= surrogatesBefore * EDITOR.settings.gridWidth;
 			}
 			
 			var transpLvlStepLeft = 100 / (colStart-start+1);
@@ -148,67 +151,81 @@
 			
 			var startIndex = gridRow.startIndex;
 			
-			for(var col = start; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
+			var widthBeforeStart = start > 0 ? file.textWidth(gridRow, start-1) : 0; // Mainly for calculating tab column space
+			var extraSpace = 0;
+			
+			console.log("textRender: surrogatesBefore=" + surrogatesBefore + " widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
+			
+			if(widthBeforeStart > (start-1))  {
+				//start -= (widthBeforeStart-start);
+			}
+			
+			//console.log("textRender: widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
+			
+			if(start < 0) throw new Error("start=" + start + " widthBeforeStart=" + widthBeforeStart + " colStart=" + colStart + " transparentCharsLeft=" + transparentCharsLeft + " ");
+			
+			// Seems we need to start from the beginning!
+			for(var col = 0; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
 				
 				bufferRowCol = gridRow[col];
 				
 				charWidth = EDITOR.glyphWidth(file, startIndex + col);
 				
-				console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " ");
+				console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
 				
-				if( (col+extraSpace) < colStart) {
+				// ### Set the fill style
+				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
 					// Chars in left margin
+					console.log("textRender: col=" + col + " left margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
 					transpLvlLeft += transpLvlStepLeft * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
 				}
 				else if(col+extraSpace > colStop) {
 					// Chars in right margin
+					console.log("textRender: col=" + col + " right margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
 					transpLvlRight -= transpLvlStepRight * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
 				}
-				else if(oldStyle != bufferRowCol.color) ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
+				else if(oldStyle != bufferRowCol.color) {
+					console.log("textRender: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
+ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
+				}
 				
-				
+				// ### Paint the character and calculate spacing
 				if(col >= tabIndention && bufferRowCol.char == "\t") {
 					console.log("textRender: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
 					charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
 				}
 				else if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
+					console.log("textRender: col=" + col + " surrogate start");
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-						ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
+						console.log("textRender: col=" + col + " surrogate modifier");
+						if( (col+extraSpace) >= start ) ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
+						// a surrage with a modifier is 4 utf16 characters but only take up 1-3 spaces depending on glyph width
 						col += 3;
 						//charWidth++;
-						extraSpace -= 3; // To make the tab column width calculation correct
+						extraSpace -= 3;
 					}
 					else if(gridRow[col+1]) {
-						ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
+						console.log("textRender: col=" + col + " no modifier");
+						 if( (col+extraSpace) >= start ) ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
 						col++;
 						extraSpace -= 1;
 					}
 				}
-				else if( UTIL.isSurrogateEnd(bufferRowCol.char) ) {
-					console.log("textRender: col=" + col + " isSurrogateEnd!");
-					continue;
-				}
-				else if( UTIL.isSurrogateModifierEnd(bufferRowCol.char) ) {
-					console.log("textRender: col=" + col + " isSurrogateModifierEnd!");
-					continue;
-				}
-				else if( UTIL.isSurrogateModifierStart(bufferRowCol.char) ) {
-console.log("textRender: col=" + col + " isSurrogateModifierStart!");
-					col++;
-					continue;
-				}
-				else {
+				else if(  (col+extraSpace) >= start  ) {
+					console.log("textRender: col=" + col + " default");
 ctx.fillText(bufferRowCol.char, left, middle);
 				}
 				
 				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
 				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
 				
+				if(  (col+extraSpace) >= start  ) {
 				left += EDITOR.settings.gridWidth * charWidth;
+				}
 				
 				if(charWidth > 1) extraSpace += charWidth-1;
 				

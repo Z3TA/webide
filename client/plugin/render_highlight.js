@@ -81,7 +81,7 @@
 				//if(isNaN(left)) throw new Error("left is NaN");
 				//if(isNaN(top)) throw new Error("top is NaN");
 				
-				if(buffer[row][col].highlighted && !buffer[row][col].selected) {
+				if(buffer[row][col] && buffer[row][col].highlighted && !buffer[row][col].selected) {
 					ctx.rect(left, top,EDITOR.settings.gridWidth*charWidth, EDITOR.settings.gridHeight);
 				}
 				
