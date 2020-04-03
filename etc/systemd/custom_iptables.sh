@@ -25,7 +25,7 @@ iptables -P OUTPUT ACCEPT
 iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 
 
-# Accept already astablished connections
+# Accept already established connections
 
 ip6tables -A INPUT -m conntrack -j ACCEPT --ctstate RELATED,ESTABLISHED
 iptables -A INPUT -m conntrack -j ACCEPT --ctstate RELATED,ESTABLISHED
@@ -89,7 +89,10 @@ ip6tables -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j ACC
 iptables -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 ip6tables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
+#iptables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --sport 1024: --dport 1024: -j ACCEPT
+# Unfortunately we have to accept all incomming traffic for passive FTP to work! :(
+# The FTP protocol is really old and assumes we are in control of the IP level 
 
 ip6tables -A OUTPUT -p tcp --dport 21 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 21 -m state --state NEW,ESTABLISHED -j ACCEPT
