@@ -83,11 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+step over surrogates when moving the caret, deleting letter etc.
 
-
-xmatch off when all characters are extra wide !?
-
-wrong charsinmargin for surrogates
+render whitespace
 
 Handle surrogates and surrogate modifiers when moving the caret and selecting text
 
@@ -97,6 +95,8 @@ Handle surrogates and surrogate modifiers
 
 
 Better unicode support (emojis and other wide glyphs)
+
+small issue witch chars in margin and surrogate characters, where the row is placed one or two (depending on glyph width) to the left or right
 
 ---
 
