@@ -83,11 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-how to get rid of symbolic links to bins in user dirs ?
 
-issues rendering caret when glyphs are 3 wide
-
-issues when rendering text when scrolled to the right and surrogates
 
 xmatch off when all characters are extra wide !?
 
@@ -100,10 +96,25 @@ todo: Delete whole surrogate pair when deleting (using backspace)
 Handle surrogates and surrogate modifiers
 
 
+Better unicode support (emojis and other wide glyphs)
+
+---
 
 parent matching and special width characters and surogates
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
+
+inline JS error message show up on wrong line in .htm file! example ilsbofiske getElementById("body") (change body to something that don't exist)
+
+users can see other users home dirs in prod!
+
+todo: Detect when ssgconf.json is saved manually by the user, and update the SSG site settings!
+
+can't delete tab indention using Shift+Tab when the text is selected!
+
+unable to repeat: when typing (...) on and indented line , also surrounded by () the matching is on the wrong place!
+
+how to get rid of symbolic links to bins in user dirs ?
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
