@@ -2733,18 +2733,15 @@ EDITOR.canvasContext = ctx;
 				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
 					console.log("renderCaret: i=" + i + " isSurrogateModifierStart!  ")
 					i+= 3;
-					tabColumnTextLengthAdjustment -= 2; // To make the tab column width calculation correct
-					colAdjustment -= 2;
+					tabColumnTextLengthAdjustment -= (4-charWidth); // To make the tab column width calculation correct
+					colAdjustment -= (4-charWidth);
 				}
 				else if( file.grid[row][i+1] ) {
 					console.log("renderCaret: Skip surrogate end");
 					i += 1;
+					colAdjustment += (charWidth-2);
 				}
 				
-				if(charWidth != 2) {
-					console.log("renderCaret: i=" + i + " surrogate pair that is not two monospace wide!");
-					colAdjustment -= (2-charWidth); // Is there any surrogate pairs who's glyph width is not 2 !?!?
-				}
 			}
 			else if( charWidth  > 1  ) {
 				console.log("renderCaret: i=" + i + " glyph wdith=" + charWidth + " ")
