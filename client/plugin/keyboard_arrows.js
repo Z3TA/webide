@@ -134,8 +134,6 @@
 		
 		file.removeHighlights();
 		
-		console.log("Move caret left!");
-		
 		var caret = file.caret;
 		var caretIndex = caret.index;
 		var stepStart = caretIndex;
@@ -163,20 +161,39 @@
 			}
 		}
 		
-		console.log("stepStart=" + stepStart);
-		console.log("stepStop=" + stepStop);
+		console.log("keyboard_arrows_moveLeft: stepStart=" + stepStart);
+		console.log("keyboard_arrows_moveLeft: stepStop=" + stepStop);
 		
 		if(!combo.shift) file.deselect();
 		
 		for(var i=stepStart; i<=stepStop; i++) {
-			
-			file.moveCaretLeft(caret);
-			
 			if(combo.shift) {
-				if(!caret.eol) {
-					file.select(file.grid[caret.row][caret.col], "left");
+				if(caret.col > 0) {
+					file.select(file.grid[caret.row][caret.col-1], "left");
+					// Also select surrogate pairs
+					if(  UTIL.isSurrogateEnd( file.grid[caret.row][caret.col-1].char)  ) {
+						console.log("keyboard_arrows_moveLeft: Selected a surrogate end!");
+						
+						if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col-1].char) && file.grid[caret.row][caret.col-2] ) {
+							console.log("keyboard_arrows_moveLeft: Selecting surrogate modifier");
+							file.select(file.grid[caret.row][caret.col-2], "left");
+							
+							if( file.grid[caret.row][caret.col-3] && UTIL.isSurrogateEnd(file.grid[caret.row][caret.col-3].char) && file.grid[caret.row][caret.col-4] ) {
+								console.log("keyboard_arrows_moveLeft: Selecting surrogate (pair) after selecting modifier");
+								file.select(file.grid[caret.row][caret.col-3], "left");
+								file.select(file.grid[caret.row][caret.col-4], "left");
+							}
+						}
+						else if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col-1].char) && file.grid[caret.row][caret.col-2] ) {
+							console.log("keyboard_arrows_moveLeft: Selecting surrogate");
+							file.select(file.grid[caret.row][caret.col-2], "left");
+						}
+						
+					}
 				}
 			}
+			
+			file.moveCaretLeft(caret);
 		}
 		
 		file.scrollToCaret(caret);

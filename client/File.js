@@ -2539,6 +2539,27 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			else {
 				caret.eol = false;
 				caret.index--;
+				
+				
+				// Skip surrogate pairs
+				
+				if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col-1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col-1].char) ) {
+					console.log("File.moveCaretLeft: Skip surrogate modifier");
+					caret.col--
+					caret.index--;
+					// We might be between a surrogate and modifier
+					if( caret.col > 1 && UTIL.isSurrogateEnd( file.grid[caret.row][caret.col-1].char) && UTIL.isSurrogateStart( file.grid[caret.row][caret.col-2].char) ) {
+						console.log("File.moveCaretLeft: Skip surrogate after skipping modifier");
+						caret.col-=2;
+						caret.index-=2;
+					}
+				}
+				else if(  UTIL.isSurrogateEnd( file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col-1] && UTIL.isSurrogateStart( file.grid[caret.row][caret.col-1].char) ) {
+					console.log("File.moveCaretLeft: Skip surrogate");
+					caret.col--;
+					caret.index--;
+				}
+				
 			}
 			
 			caret.eof = false;
@@ -2565,8 +2586,6 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 	File.prototype.moveCaretUp = function(caret) {
 		var file = this;
 		
-		console.log("File:moveCaretUp");
-		
 		if(caret == undefined) caret = file.caret;
 		file.checkCaret(caret);
 		
@@ -2578,20 +2597,50 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			caret.row--;
 			
-			var	gridRow = file.grid[caret.row];
-			var gridRowLength = gridRow.length;
-			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
+			var gridRow = file.grid[caret.row];
 			
-			//console.log("indentationDiff=" + indentationDiff);
+			var colBefore = caret.col;
+			var col = caret.col;
+			var measureOldRow = file.measureText(rowBefore, caret.col-1);
+			caret.col += (measureOldRow.width-col);
+			caret.col -= measureOldRow.surrogates;
+			console.log("moveCaretUp: After adding " + ((measureOldRow.width-col)) + " and removing " + measureOldRow.surrogates + " caret.col=" + caret.col);
 			
-			caret.col += indentationDiff;
-			caret.index += indentationDiff;
+			var col = caret.col;
+			var measureNewRow = file.measureText(gridRow, caret.col-1);
+			caret.col -= (measureNewRow.width-col);
+			console.log("moveCaretUp: After removing " + ((measureNewRow.width-col)) + " caret.col=" + caret.col);
 			
-			if(caret.col < 0) {
-				caret.index -= caret.col;
-				caret.col = 0;
+var measureNewRow = file.measureText(gridRow, caret.col-1);
+			caret.col -= (measureNewRow.width-col);
+console.log("moveCaretUp: After adjusting " + ((measureNewRow.width-col)) + " caret.col=" + caret.col);
+caret.col += measureNewRow.surrogates;
+			console.log("moveCaretUp: After adding " + measureNewRow.surrogates + " caret.col=" + caret.col);
+			
+			console.log("moveCaretUp: colBefore=" + colBefore + " caret.col=" + caret.col + " measureOldRow=" + JSON.stringify(measureOldRow) + " measureNewRow=" + JSON.stringify(measureNewRow) + " ");
+			
+			if( gridRow[caret.col] && UTIL.isSurrogateEnd(gridRow[caret.col].char) ) {
+				console.log("moveCaretUp: stepping right from surrogate end");
+				caret.col++;
+				
+				if( gridRow[caret.col] && UTIL.isSurrogateStart(gridRow[caret.col].char) ) {
+					console.log("moveCaretUp: stepping right over surrogate modifier");
+					caret.col += 2;
+					
+				}
 			}
 			
+			
+			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
+			
+			//console.log("moveCaretUp: indentationDiff=" + indentationDiff);
+			
+			caret.col += indentationDiff;
+			
+			
+			if(caret.col < 0) caret.col = 0;
+			
+			var gridRowLength = gridRow.length;
 			if(caret.col >= gridRowLength) {
 				caret.col = gridRowLength;
 				caret.eol = true;
@@ -2601,6 +2650,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				else {
 					caret.index = gridRow[gridRowLength - 1].index + 1;
 				}
+				
 			}
 			else {
 				caret.eol = false;
@@ -2646,23 +2696,32 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				file.startRow++;
 			}
 			
-			var	gridRow = file.grid[caret.row];
-			var gridRowLength = gridRow.length;
+			var gridRow = file.grid[caret.row];
+			
+			
+			var col = caret.col;
+			var measureOldRow = file.measureText(rowBefore, caret.col);
+			caret.col += (measureOldRow.width-col);
+			caret.col -= measureOldRow.surrogates;
+			
+			var col = caret.col;
+			var measureNewRow = file.measureText(gridRow, caret.col);
+			caret.col -= (measureNewRow.width-col);
+			caret.col += measureNewRow.surrogates;
+			
+			console.log("moveCaretDown: caret.col=" + caret.col + " measureOldRow=" + JSON.stringify(measureOldRow) + " measureNewRow=" + JSON.stringify(measureNewRow) + " ");
+			
+			
 			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
-			
-			//console.log("indentationDiff=" + indentationDiff);
-			
-			
-			
+			//console.log("moveCaretDown: indentationDiff=" + indentationDiff);
 			caret.col += indentationDiff;
-			caret.index += indentationDiff;
+			
 			
 			if(caret.col < 0) {
-				caret.index -= caret.col;
 				caret.col = 0;
 			}
 			
-			
+			var gridRowLength = gridRow.length;
 			if(caret.col >= gridRowLength) {
 				caret.col = gridRowLength;
 				caret.eol = true;
@@ -2685,7 +2744,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			else {
 				caret.eol = false;
 				
-				//console.log(JSON.stringify(caret, null, 4));
+				//console.log("moveCaretDown: " + JSON.stringify(caret, null, 4));
 				
 				caret.index = gridRow[caret.col].index;
 			}
@@ -2712,6 +2771,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			Behaves like delete in most editors.	
 			
 			The caller needs to explicitly call EDITOR.renderNeeded()
+			
+			Only deletes forward (to the right) so caller need to be aware of surrogates!
+			eg. will delete surrogate end if characters is a surrogate start, 
+			but will not delete surrogate start if character is a surrogate end.
 		*/
 		
 		var file = this;
@@ -2721,7 +2784,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		file.sanityCheck();
 		
 		
-		//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
+		//console.log("deleteCharacter: Deleting character at " + JSON.stringify(caret) + " ...");
 		
 		var grid = file.grid;
 		var row = caret.row;
@@ -2733,12 +2796,14 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		var indexDecrementor = 1; // How many characters to remove
 		var box;
 		
+		console.log("deleteCharacter: Deleting character=" + character + " at row=" + row + " col=" + col + " ");
+		
 		file.checkCaret(caret); // Sanity check in case something is wrong
 		
 		//file.debugGrid();
 		
 		if(caret.eof) {
-			console.warn("Can not delete at EOF!");
+			console.warn("deleteCharacter: Can not delete at EOF!");
 			return;
 		}
 		
@@ -2783,10 +2848,32 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				grid[i].lineNumber--;
 			}
 			
-			//console.log("Row " + (row+1) + " removed");
+			//console.log("deleteCharacter: Row " + (row+1) + " removed");
 			
 		}
+		else if( UTIL.isSurrogateStart(character) && col < (thisRow.length-1) && UTIL.isSurrogateEnd(thisRow[col+1].char) ) {
+			
+			if( col < (thisRow.length-3) && UTIL.isSurrogateModifierEnd(thisRow[col+3].char) ) {
+				console.log("deleteCharacter: Deleting surrogate and surrogate modifier");
+				indexDecrementor = 4;
+			}
+			else {
+				console.log("deleteCharacter: Deleting surrogate");
+				indexDecrementor = 2;
+			}
+			
+			// Give deleted characters for edit listeners
+			character = "";
+			for(var i=index; i<index+indexDecrementor; i++) {
+				character += file.text.charAt(i);
+			}
+			
+			thisRow.splice(col, indexDecrementor);
+		}
 		else {
+			console.log("deleteCharacter: isSurrogateStart?" + UTIL.isSurrogateStart(character) + " thisRow.length=" + thisRow.length + " col < (thisRow.length-1) ? " + (col < (thisRow.length-1)) + " isSurrogateEnd col=" + (col+1) + "?" + UTIL.isSurrogateEnd(thisRow[col+1].char) + " ");
+			
+			console.log("deleteCharacter: Deleting normal character");
 			
 			// Remove box from the grid
 			
@@ -4752,11 +4839,9 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 return counter;
 	}
 	
-	File.prototype.textWidth = function textWidth(rowOrGridRow, endCol) {
+	File.prototype.measureText = function measureText(rowOrGridRow, endCol) {
 		// Returns the total monospace glyph width from first column to endCol with starting (indentation) tabs ignored
 		var file = this;
-		
-		var totalGlyphWidth = 0;
 		
 		if(typeof rowOrGridRow == "number") {
 			var gridRow = file.grid[row];
@@ -4772,25 +4857,26 @@ return counter;
 		var tabIndention = 0;
 		while(tabIndention < gridRow.length && gridRow[tabIndention].char == "\t") tabIndention++;
 		
+		var surrogates = 0;
+		
 		for(var col=tabIndention, charWidth=1, extraSpace=0; col<endCol && col < gridRow.length; col++) {
 			charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
 			
 			if(gridRow[col].char == "\t") {
-				console.log("textWidth: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
+				console.log("measureText: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
 				charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
 			}
 			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
-				console.log("textWidth: col=" + col + " surrogate start");
+				console.log("measureText: col=" + col + " surrogate start");
 				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-					console.log("textWidth: col=" + col + " surrogate modifier");
+					console.log("measureText: col=" + col + " surrogate modifier");
 					col += 3;
-					//charWidth++;
-					//extraSpace -= 3; // To make the tab column width calculation correct
+					surrogates +=3;
 				}
 				else if( gridRow[col+1] ) {
-					console.log("textWidth: col=" + col + " no modifier");
+					console.log("measureText: col=" + col + " no modifier");
 					col++;
-					//extraSpace -= 1;
+					surrogates++;
 				}
 			}
 			
@@ -4799,7 +4885,7 @@ return counter;
 		
 		//if( col > endCol ) endCol
 		
-		return endCol+1 + extraSpace;
+		return {width: endCol+1 + extraSpace, surrogates: surrogates};
 	}
 	
 	
