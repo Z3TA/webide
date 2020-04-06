@@ -74,9 +74,12 @@
 	// note: The css file is loaded in the window.onload event.
 	function cssLoadedMaybe(err) {
 		
-		if(err) return;
-		
-		if(typeof whenFontLoaded != "function") return;
+		if(err) {
+console.error(err);
+return makeGlyphWidthDetector();
+		}
+
+		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
 		
 		if(document.fonts && document.fonts.ready) {
 			document.fonts.ready.then(function () {
@@ -85,11 +88,7 @@
 				
 				whenFontLoaded();
 				
-EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
-
-				// Re-render with the new font
-				EDITOR.renderNeeded();
-				EDITOR.render();
+				makeGlyphWidthDetector();
 				
 			});
 		}
@@ -106,13 +105,18 @@ EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
 				
 				whenFontLoaded();
 				
-				EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
-				
-				EDITOR.renderNeeded();
-				EDITOR.render();
+				makeGlyphWidthDetector();
 				
 			}, time);
 		}
+		
+		function makeGlyphWidthDetector() {
+			EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
+			
+			EDITOR.renderNeeded();
+			EDITOR.render();
+		}
+		
 	}
 	
 	
