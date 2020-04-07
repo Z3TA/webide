@@ -1190,9 +1190,9 @@ file.sanityCheck();
 		var index = caret.index;
 		
 		
-		// Fix inconsistent line breaks
-		text = text.replace(/\r/g, "");
-		if(file.lineBreak.length > 1) text = text.replace(/\n/g, file.lineBreak);
+		// Fix inconsistent line breaks ? No, we should not alter the text or it will cause undo/redo history indexes to become off. It's up to the caller to sanitize
+		//text = text.replace(/\r/g, "");
+		//if(file.lineBreak.length > 1) text = text.replace(/\n/g, file.lineBreak);
 		
 		file.text = file.text.substr(0, index) + text + file.text.substring(index, file.text.length); // Insert the text
 		
@@ -2788,6 +2788,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		var character = caret.eof ? undefined : file.text.charAt(index);
 		var indexDecrementor = 1; // How many characters to remove
 		var box;
+		var startColIndentationCharCount = thisRow.indentationCharacters.length; // For change event
+		var endRow = caret.row; // For change event
+		var endCol = caret.col; // For change event
+		var endColIndentCharCount = startColIndentationCharCount;
 		
 		console.log("deleteCharacter: Deleting character=" + character + " at row=" + row + " col=" + col + " ");
 		
@@ -2808,6 +2812,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				Remove the line break (and row). Plus all indentation characters
 			*/
 			
+			endRow++; // For change event
+			endCol = 0;
 			
 			// Remove all tabs and line-break characters
 			indexDecrementor = file.lineBreak.length + rowBelow.indentationCharacters.length;
@@ -2859,6 +2865,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			character = "";
 			for(var i=index; i<index+indexDecrementor; i++) {
 				character += file.text.charAt(i);
+				endCol++;
 			}
 			
 			thisRow.splice(col, indexDecrementor);
@@ -2925,8 +2932,12 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		}
 		
 		// Call file edit listeners
-		file.change("delete", character, index, row, col) // change, text, index, row, col
-		
+		if(character.length == 1) {
+		file.change("delete", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount) // change, text, index, row, col
+		}
+		else {
+			file.change("deleteTextRange", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount);
+		}
 		
 		console.timeEnd("deleteCharacter");
 		
@@ -4906,7 +4917,7 @@ state.extraSpace += (charWidth-1);
 	}
 	
 	File.prototype.measureText = function measureText(row, endCol) {
-		// Returns the total monospace glyph width from first column to endCol with starting (indentation) tabs ignored
+		// Returns the total monospace (glyph) width from first column to endCol with starting (indentation) tabs ignored
 		var file = this;
 		
 		var walker = file.columnWalker(row, endCol);

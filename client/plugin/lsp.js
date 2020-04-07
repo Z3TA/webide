@@ -270,6 +270,17 @@ delete languageServers[language];
 	
 	function lspFileChange(file, type, characters, caretIndex, row, col, colIndent, endRow, endCol, endColIndent) {
 		
+		if(file == undefined) throw new Error("Missing file (first argument) arguments=" + JSON.stringify(arguments));
+		if(type == undefined) throw new Error("Missing type (second argument) arguments=" + JSON.stringify(arguments));
+		if(characters == undefined) throw new Error("Missing characters (third argument) arguments=" + JSON.stringify(arguments));
+		if(caretIndex == undefined) throw new Error("Missing caretIndex (argument 4) arguments=" + JSON.stringify(arguments));
+if(row == undefined) throw new Error("Missing row (argument 5) arguments=" + JSON.stringify(arguments));
+if(col == undefined) throw new Error("Missing col (argument 6) arguments=" + JSON.stringify(arguments));
+if(colIndent == undefined) throw new Error("Missing colIndent (argument 7) arguments=" + JSON.stringify(arguments));
+if(endRow == undefined) throw new Error("Missing endRow (argument 8) arguments=" + JSON.stringify(arguments));
+if(endCol == undefined) throw new Error("Missing endCol (argument 9) arguments=" + JSON.stringify(arguments));
+if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10) arguments=" + JSON.stringify(arguments));
+		
 		if(!trackedFiles.hasOwnProperty(file)) {
 			console.log("lspFileChange: not tracked: " + file.path);
 			return;
