@@ -6214,6 +6214,8 @@ return {x: x, y: y};
 			For optimization we use a hearustic that all characters below 256!? are rendered as one character
 			
 			Make this function *after* the font has been set!
+			
+			Should we call this function with character codepoints instead of file and index !? (so the caller don't have to know about file)
 		*/
 		
 		var glyphWidth = {}; // Memoization

@@ -2600,12 +2600,13 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			var gridRow = file.grid[caret.row];
 			
-			var col = caret.col;
-			var walker = file.columnWalker(caret.row+1, caret.col);
+			var originalCol = caret.col;
+			var walker = file.columnWalker(caret.row+1, caret.col-1); // Don't walk on the col we are currently on (only measure the wdith of the characters before/left of it)
 			while(!walker.done) walker.next();
+			var widthCurrentLine = walker.totalWidth;
 			
-			caret.col = col+walker.extraSpace;
-			console.log("moveCaretUp: col=" + col + " extraSpace=" + walker.extraSpace + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker));
+			//caret.col = walker.col+walker.extraSpace;
+			console.log("moveCaretUp: widthCurrentLine=" + widthCurrentLine + " originalCol=" + originalCol + " extraSpace=" + walker.extraSpace + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker));
 			
 			/*
 				var measureOldRow = file.measureText(rowBefore, caret.col-1);
@@ -2614,12 +2615,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				console.log("moveCaretUp: After adding " + ((measureOldRow.width-col)) + " and removing " + measureOldRow.surrogates + " caret.col=" + caret.col);
 			*/
 			
-			
-			
 			var walker = file.columnWalker(caret.row);
-			while(!walker.done && (walker.col+walker.extraSpace) < caret.col) walker.next();
+			while(!walker.done && (walker.totalWidth) < widthCurrentLine) walker.next();
 			
-			caret.col = walker.col;
+			caret.col = walker.col+1;
 			
 			console.log("moveCaretUp: caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
 			
@@ -2686,8 +2685,8 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			var rowBefore = file.grid[caret.row];
 			
 			var col = caret.col;
-			var width = file.measureText(caret.row, caret.col);
-			caret.col = width;
+			var width = file.measureText(caret.row, caret.col-1);
+			
 			
 			caret.row++;
 			
@@ -2699,11 +2698,12 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			
 			var walker = file.columnWalker(caret.row);
-			while(!walker.done && (walker.col+walker.extraSpace) < caret.col) walker.next();
+			while(!walker.done && (walker.totalWidth) < width) walker.next();
 			
-			caret.col = walker.col;
 			
-			console.log("moveCaretDown: caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
+			caret.col = walker.col+1;
+			
+			console.log("moveCaretDown: width=" + width + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
 			
 			
 			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
@@ -4830,7 +4830,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		var counter = 0;
 		
 		if(typeof rowOrGridRow == "number") {
-			var gridRow = file.grid[row];
+			var gridRow = file.grid[rowOrGridRow];
 		}
 		else if(typeof rowOrGridRow == "object") {
 			var gridRow = rowOrGridRow;
@@ -4848,70 +4848,105 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 return counter;
 	}
 	
-	File.prototype.columnWalker = function columnWalker(row, endCol) {
+	File.prototype.columnWalker = function columnWalker(rowOrGridRow, endCol) {
 		/*
-			
+			The walker will also walk on the endCol
+			Accept gridrow so that we can use the function with a buffer (which don't have to know abut the file.grid)
 		*/
 		var file = this;
+		
+		if(typeof rowOrGridRow == "number") {
+			var gridRow = file.grid[rowOrGridRow];
+		}
+		else if(typeof rowOrGridRow == "object") {
+			var gridRow = rowOrGridRow;
+		}
+		else throw new Error("typeof rowOrGridRow=" + rowOrGridRow + "(" + (typeof rowOrGridRow) + ")");
+		
+		if( !gridRow ) throw new Error("file.grid.length=" + file.grid.length + " rowOrGridRow=" + rowOrGridRow);
 		
 		var state = {
 			done: false,
 			extraSpace: 0,
 			tabIndention: 0,
 			next: walk,
-			col: 0
+			col: -1,
+			char: "", // Can be many code points
+			charWidth: 0,
+			totalWidth: 0 //Total width of the row so far
+		}
+		// Total width of the row so far can be calculated from col + extraSpace
+		
+		if(endCol == undefined) endCol = gridRow.length-1;
+		if(endCol >= gridRow.length) endCol = gridRow.length-1;
+		if(endCol < 0) {
+			//console.log("columnWalker: row is empty. Nothing to walk on!");
+			state.done = true;
+			state.col = 0; // ??
+			return state;
 		}
 		
-		var gridRow = file.grid[row];
-		
-		if(endCol == undefined) endCol = gridRow.length;
-		if(endCol > gridRow.length) endCol = gridRow.length;
-		if(endCol < 0) throw new Error("endCol=" + endCol + " is less then zero!");
-		
-		var tabColumnTextLengthAdjustment = 0;
 		
 		return state;
 		
 		function walk() {
-			var col = state.col;
-			
-			if(col >= (endCol)) {
-				console.log("columnWalker: state.col=" + state.col + " endCol=" + endCol + " We are done!");
-				state.done = true;
+			if(state.done || state.col > endCol) {
+				console.log("columnWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
 				return state;
 			}
 			
-			state.col++;
+			var col = ++state.col;
+			
+			
 			
 			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
 				state.tabIndention++;
-				console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
+				//console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
 				return state;
 			}
 			
+			
+			
 			var charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
+			
+			var char = gridRow[col].char;
 			
 			if(gridRow[col].char == "\t") {
 				charWidth += (  (8 - charWidth) - (col-state.tabIndention+state.extraSpace) % 8  );
 				
-				console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+				//console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
 			}
 			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
 				console.log("columnWalker: col=" + col + " surrogate start");
 				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 					console.log("columnWalker: col=" + col + " surrogate modifier");
+					char += gridRow[col+1].char;
+					char += gridRow[col+2].char;
+					char += gridRow[col+3].char;
 					state.col += 3;
 					state.extraSpace -= 3;
 				}
 				else if( gridRow[col+1] ) {
-					console.log("columnWalker: col=" + col + " no modifier");
+					//console.log("columnWalker: col=" + col + " no modifier");
+					char += gridRow[col+1].char;
 					state.col++;
 					state.extraSpace -= 1;
+					
 				}
 			}
 			
 			if(charWidth > 1) {
 state.extraSpace += (charWidth-1);
+			}
+			
+			state.charWidth = charWidth;
+			state.char = char;
+			state.totalWidth += charWidth;
+			
+			
+			if(state.col >= (endCol)) {
+				console.log("columnWalker: This is the last iteration! state.col=" + state.col + " endCol=" + endCol + "");
+				state.done = true;
 			}
 			
 			//console.log("columnWalker: state=" + JSON.stringify(state));
@@ -4928,8 +4963,8 @@ state.extraSpace += (charWidth-1);
 		var walker = file.columnWalker(row, endCol);
 		while(!walker.done) walker.next();
 		
-		return endCol+walker.extraSpace;
-		
+		//return endCol+walker.extraSpace;
+		return walker.totalWidth;
 		
 		
 		

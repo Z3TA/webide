@@ -153,6 +153,74 @@
 			
 			var extraSpace = 0;
 			
+			var walker = file.columnWalker(gridRow);
+			while(!walker.done) {
+				walker.next();
+				if( paint(walker) === false ) {
+					//console.log("paint: Stopping because paint() returned false");
+					break;
+				}
+				
+			}
+				
+			//console.log("paint: Exit loop walker=" + JSON.stringify(walker));
+			
+			function paint(walker) {
+				var col = walker.col;
+				var extraSpace = walker.extraSpace;
+				var charWidth = walker.charWidth;
+				var character = walker.char;
+				
+				if(col > (colStop-extraSpace+transparentCharsRight)) {
+					console.log("paint: Stopping because col=" + col + " colStop=" + colStop + " extraSpace=" + extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
+return false;
+				}
+				var bufferRowCol = gridRow[col];
+				if(!bufferRowCol) {
+					console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
+					return false;
+				}
+				
+				console.log("paint: col=" + col + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
+				
+				// ### Set the fill style
+				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
+					// Chars in left margin
+					//console.log("paint: col=" + col + " left margin");
+					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
+					transpLvlLeft += transpLvlStepLeft * charWidth;
+					//ctx.fillStyle = oldStyle = "orange";
+				}
+				else if(col+extraSpace > colStop) {
+					// Chars in right margin
+					//console.log("paint: col=" + col + " right margin");
+					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
+					transpLvlRight -= transpLvlStepRight * charWidth;
+					//ctx.fillStyle = oldStyle = "orange";
+				}
+				else if(oldStyle != bufferRowCol.color) {
+					//console.log("paint: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
+					ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
+				}
+				
+				// ### Paint the character
+				if(  (col+extraSpace) >= start  ) {
+					//console.log("paint: col=" + col + " default");
+					ctx.fillText(character, left, middle);
+				}
+				
+				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
+				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
+				
+				if(  (col+extraSpace) >= start  ) {
+					left += EDITOR.settings.gridWidth * charWidth;
+				}
+				
+			}
+			
+			
+			return;
+			
 			// Seems we need to start from the beginning!
 			for(var col = 0; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
 				

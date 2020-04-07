@@ -83,12 +83,19 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+issue with last character not showing up
+
 Use columnWalker everywhere so that I don't have to change stuff everywhere when unicode updates...
+
+var ZWJ = String.fromCharCode(8205); // Zero-width joiner:  When placed between two characters that would otherwise not be connected, a ZWJ causes them to be printed in their connected forms.
+
+
+Also Variation Selectors...
 
 Zero-width joiner .......
 
 
-unable to repeat: sometimes when scrolled to the right, and moving the caret to col=0 it doesn't scroll all the way back, even though the text could still fit on the screen!
+
 
 step over surrogates when moving the caret, deleting letter etc.
 
