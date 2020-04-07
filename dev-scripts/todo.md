@@ -83,23 +83,21 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Use columnWalker everywhere so that I don't have to change stuff everywhere when unicode updates...
 
-sometimes when scrolled to the right, and moving the caret to col=0 it doesn't scroll all the way back, even though the text could still fit on the screen!
+Zero-width joiner .......
+
+
+unable to repeat: sometimes when scrolled to the right, and moving the caret to col=0 it doesn't scroll all the way back, even though the text could still fit on the screen!
 
 step over surrogates when moving the caret, deleting letter etc.
 
 render whitespace
 
-Handle surrogates and surrogate modifiers when moving the caret and selecting text
-
-todo: Delete whole surrogate pair when deleting (using backspace)
-
-Handle surrogates and surrogate modifiers
-
 
 Better unicode support (emojis and other wide glyphs)
 
-small issue witch chars in margin and surrogate characters, where the row is placed one or two (depending on glyph width) to the left or right
+
 
 idea: when scrolling on an emoji with modifier, toggle between the modifiers!
 

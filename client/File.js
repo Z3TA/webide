@@ -1168,22 +1168,22 @@ file.sanityCheck();
 		}
 		
 		if(text == undefined) {
-			throw new Error("No text to insert! text is undefined!");
+			throw new Error("insertText: No text to insert! text is undefined!");
 		}
 		else if(typeof text == "object") {
-			throw new Error("First argument to file.insertText should be the text string. The second argument should be the caret (or undefined to use the file caret)");
+			throw new Error("insertText: First argument to file.insertText should be the text string. The second argument should be the caret (or undefined to use the file caret)");
 		}
 		else if(!UTIL.isString(text)) {
-			throw new Error("text=" + text + " need to be a string!\n" + text);
+			throw new Error("insertText: text=" + text + " need to be a string!\n" + text);
 		}
 		else if(text.length === 0) {
-			console.warn("No text to insert! (text.length=" + text.length + ")");
+			console.warn("insertText: No text to insert! (text.length=" + text.length + ")");
 			return;
 		}
 		
 		file.sanityCheck();
 		
-		//console.log("Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
+		//console.log("insertText: Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
 		
 		console.time("insertText");
 		
@@ -1204,17 +1204,18 @@ file.sanityCheck();
 		// Take the remaining and save in temp array
 		var remain = gridRow.splice(caret.col, gridRow.length-caret.col);
 		
-		//console.log("remain=" + JSON.stringify(remain, null, 2));
+		//console.log("insertText: remain=" + JSON.stringify(remain, null, 2));
 		
 		var textIndex = index;
-		//console.log("1. textIndex=" + textIndex);
+		//console.log("insertText: 1. textIndex=" + textIndex);
 		
 		// Add the first text row
 		for (var i=0; i<textRows[0].length; i++) {
 			gridRow.push(new Box(textRows[0].charAt(i), textIndex));
+			console.log("insertText: Adding Box charAt=" + textRows[0].charAt(i) + " !!" + (!!textRows[0].charAt(i)) + " type=" + (typeof textRows[0].charAt(i)) + " length=" + (textRows[0].charAt(i).length) + " charCode=" + textRows[0].charCodeAt(i) + " codePointAt=" + textRows[0].codePointAt(i));
 			textIndex++;
 		}
-		//console.log("2. textIndex=" + textIndex);
+		//console.log("insertText: 2. textIndex=" + textIndex);
 		
 		
 		var gridRowIndex = caret.row;
@@ -1226,7 +1227,7 @@ file.sanityCheck();
 			insertGridRow(file, textIndex, textRows[i], gridRowIndex);
 			textIndex += textRows[i].length;
 		}
-		//console.log("3. textIndex=" + textIndex);
+		//console.log("insertText: 3. textIndex=" + textIndex);
 		
 		// Update box index of the remaining
 		for (var i=0; i<remain.length; i++) {
@@ -1234,15 +1235,15 @@ file.sanityCheck();
 			textIndex++;
 		}
 		
-		//console.log("4. textIndex=" + textIndex);
+		//console.log("insertText: 4. textIndex=" + textIndex);
 		
 		// Insert the remaining at the last inserted row
 		
 		gridRow = file.grid[gridRowIndex];
 		
-		//console.log("caret.row=" + caret.row + " textRows.length=" + textRows.length + " file.grid.length=" + file.grid.length);
+		//console.log("insertText: caret.row=" + caret.row + " textRows.length=" + textRows.length + " file.grid.length=" + file.grid.length);
 		
-		//console.log("gridRow=" + JSON.stringify(gridRow));
+		//console.log("insertText: gridRow=" + JSON.stringify(gridRow));
 		for(var i=0; i<remain.length; i++) {
 			gridRow.push(remain[i]);
 		}
@@ -2871,7 +2872,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			thisRow.splice(col, indexDecrementor);
 		}
 		else {
-			console.log("deleteCharacter: isSurrogateStart?" + UTIL.isSurrogateStart(character) + " thisRow.length=" + thisRow.length + " col < (thisRow.length-1) ? " + (col < (thisRow.length-1)) + " isSurrogateEnd col=" + (col+1) + "?" + UTIL.isSurrogateEnd(thisRow[col+1].char) + " ");
+			console.log("deleteCharacter: isSurrogateStart?" + UTIL.isSurrogateStart(character) + " thisRow.length=" + thisRow.length + " col < (thisRow.length-1) ? " + (col < (thisRow.length-1)) + " isSurrogateEnd col=" + (col+1) + "?" + (thisRow[col+1] && UTIL.isSurrogateEnd(thisRow[col+1].char)) + " ");
 			
 			console.log("deleteCharacter: Deleting normal character");
 			

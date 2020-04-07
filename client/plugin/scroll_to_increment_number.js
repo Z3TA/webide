@@ -84,7 +84,6 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		}
 		else return;
 		
-		
 		file.moveCaret(start, undefined, undefined, caret);
 		
 		// for future optimization: Both deleteTextRange and insertText forces a render, so use deleteCharacter, putCharacter, and EDITOR.renderRow() instead
