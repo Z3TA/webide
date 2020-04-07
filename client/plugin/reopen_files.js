@@ -900,13 +900,13 @@
 	function saveStateOfOpenFiles(reason, callback) {
 		// Called when the editor closes, and at an time interval
 		
-		console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
+		//console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
 		if(typeof callback != "function") {
-			console.log("callback=" + callback + " (" + (typeof callback) + ") is not a function!");
+			//console.log("callback=" + callback + " (" + (typeof callback) + ") is not a function!");
 			callback = null;
 		}
 		
-		console.log(UTIL.getStack("saveStateOfOpenFiles"));
+		//console.log(UTIL.getStack("saveStateOfOpenFiles"));
 		
 		if(CLIENT.connected && CLIENT.ping < 2000 && EDITOR.storage.ready()) {
 			var list = EDITOR.sortFileList(); // Array sorted by file.order
@@ -916,7 +916,7 @@
 			for(var i=0; i<list.length; i++) {
 				key = "__openFile" + i;
 				filePath = list[i].path;
-				console.log("reopenFiles: Check slot " + i + " filePath=" + filePath + " storage=" + EDITOR.storage.getItem(key));
+				//console.log("reopenFiles: Check slot " + i + " filePath=" + filePath + " storage=" + EDITOR.storage.getItem(key));
 				if( EDITOR.storage.getItem(key) != filePath ) {
 					EDITOR.storage.setItem(key, filePath);
 				}
@@ -997,7 +997,7 @@
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		console.log("reopenFiles: Saving state for: " + path);
+		//console.log("reopenFiles: Saving state for: " + path);
 		
 		changedstate[false] = false;
 		

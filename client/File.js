@@ -2933,7 +2933,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		// Call file edit listeners
 		if(character.length == 1) {
-		file.change("delete", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount) // change, text, index, row, col
+			file.change("delete", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount) // change, text, index, row, col
 		}
 		else {
 			file.change("deleteTextRange", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount);
@@ -4909,7 +4909,7 @@ return counter;
 state.extraSpace += (charWidth-1);
 			}
 			
-			console.log("columnWalker: state=" + JSON.stringify(state));
+			//console.log("columnWalker: state=" + JSON.stringify(state));
 			
 			return state;
 		}

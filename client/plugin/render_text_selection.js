@@ -20,7 +20,8 @@
 	function selectionRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 		
 		if(buffer.length === 0) return;
-		
+		if(file.selected.length === 0) return;
+
 		//console.time("selectionRender");
 		
 		if(startRow == undefined) startRow = 0;

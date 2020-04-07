@@ -3698,7 +3698,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			*/
 			
 			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
-			console.log("DropdownMenu:hideMaybe: ul=", menu.domElement, " movedto=", element);
+			//console.log("DropdownMenu:hideMaybe: ul=", menu.domElement, " movedto=", element);
 			
 			menu.active = false;
 			
@@ -4382,7 +4382,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		}
 		
 		function showSubmenuMaybe() {
-			console.log("showSubmenuMaybe");
+			//console.log("showSubmenuMaybe");
 			if(stemParent && stemParent.activated) {
 				
 				item.parentMenu.hideSiblings(item.subMenu);

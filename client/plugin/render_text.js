@@ -96,7 +96,7 @@
 			
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
-			console.log("textRender:renderRow: row=" + row);
+			//console.log("textRender:renderRow: row=" + row);
 			renderRow(buffer[row], colStart, colStop, left, middle, tabIndention);
 			
 		}
@@ -154,7 +154,7 @@
 			var widthBeforeStart = start > 0 ? file.textWidth(gridRow, start-1) : 0; // Mainly for calculating tab column space
 			var extraSpace = 0;
 			
-			console.log("textRender: surrogatesBefore=" + surrogatesBefore + " widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
+			//console.log("textRender: surrogatesBefore=" + surrogatesBefore + " widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
 			
 			if(widthBeforeStart > (start-1))  {
 				//start -= (widthBeforeStart-start);
@@ -171,7 +171,7 @@
 				
 				charWidth = EDITOR.glyphWidth(file, startIndex + col);
 				
-				console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
+				//console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
 				
 				// ### Set the fill style
 				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
@@ -189,7 +189,7 @@
 					//ctx.fillStyle = oldStyle = "orange";
 				}
 				else if(oldStyle != bufferRowCol.color) {
-					console.log("textRender: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
+					//console.log("textRender: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
 ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 				}
 				
@@ -199,7 +199,7 @@ ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 					charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
 				}
 				else if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
-					console.log("textRender: col=" + col + " surrogate start");
+					//console.log("textRender: col=" + col + " surrogate start");
 					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
 						console.log("textRender: col=" + col + " surrogate modifier");
 						if( (col+extraSpace) >= start ) ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
@@ -216,7 +216,7 @@ ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 					}
 				}
 				else if(  (col+extraSpace) >= start  ) {
-					console.log("textRender: col=" + col + " default");
+					//console.log("textRender: col=" + col + " default");
 ctx.fillText(bufferRowCol.char, left, middle);
 				}
 				

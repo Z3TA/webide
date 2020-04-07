@@ -314,13 +314,13 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		*/
 		
 		if(!eventListeners.hasOwnProperty(ev)) {
-			console.warn("CLIENT: Creating new event (listener): " + ev);
+			console.log("CLIENT: Creating new event (listener): " + ev);
 			eventListeners[ev] = [];
 		}
 		
 		if(eventListeners[ev].indexOf(cb) != -1) throw new Error("Event listener already registered for ev=" + ev + " and cb=" + cb);
 		
-		console.warn("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev + " (length=" + eventListeners[ev].length + " loggedIn=" + loggedIn + ")");
+		console.log("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev + " (length=" + eventListeners[ev].length + " loggedIn=" + loggedIn + ")");
 		
 		eventListeners[ev].push(cb);
 		
@@ -334,7 +334,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 	
 	CLIENT.fireEvent = function fireEvent(ev, data) {
 		
-		console.log("CLIENT: firing client event '" + ev + "' data=" + data + "");
+		//console.log("CLIENT: firing client event '" + ev + "' data=" + data + "");
 		
 		if(!eventListeners.hasOwnProperty(ev)) {
 			console.warn("CLIENT: No registered event listener for ev=" + ev)
@@ -502,7 +502,7 @@ reconnectTimeoutTime += 10000;
 		
 		var msg = sockJsEvent.data;
 		
-		console.log("CLIENT: Server: " + UTIL.shortString(msg));
+		//console.log("CLIENT: Server: " + UTIL.shortString(msg));
 		//console.log( "CLIENT: Server: " + msg );
 		
 		CLIENT.connected = true;
@@ -541,7 +541,7 @@ reconnectTimeoutTime += 10000;
 				if(callbackWaitList.hasOwnProperty(json.id)) {
 					CLIENT.inFlight--;
 					
-					console.log("CLIENT: Got server response for id=" + json.id);
+					//console.log("CLIENT: Got server response for id=" + json.id);
 					
 					var err = null;
 					var generalError;
@@ -629,7 +629,7 @@ CLIENT.ping = -1;
 	
 	function sendPing() {
 		var start = timer();
-		console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
+		//console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
 		CLIENT.cmd("ping", {data: ++pingCounter}, function(pingErr, resp) {
 			
 			clearTimeout(pingTimeout);
@@ -648,7 +648,7 @@ CLIENT.ping = -1;
 			if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
 			CLIENT.ping = ping;
 				
-			console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
+			//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 			
 				if(resp != pingCounter) var error = new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
 				
