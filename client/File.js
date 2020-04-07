@@ -2599,36 +2599,30 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			var gridRow = file.grid[caret.row];
 			
-			var colBefore = caret.col;
 			var col = caret.col;
-			var measureOldRow = file.measureText(rowBefore, caret.col-1);
-			caret.col += (measureOldRow.width-col);
-			caret.col -= measureOldRow.surrogates;
-			console.log("moveCaretUp: After adding " + ((measureOldRow.width-col)) + " and removing " + measureOldRow.surrogates + " caret.col=" + caret.col);
+			var walker = file.columnWalker(caret.row+1, caret.col);
+			while(!walker.done) walker.next();
 			
-			var col = caret.col;
-			var measureNewRow = file.measureText(gridRow, caret.col-1);
-			caret.col -= (measureNewRow.width-col);
-			console.log("moveCaretUp: After removing " + ((measureNewRow.width-col)) + " caret.col=" + caret.col);
+			caret.col = col+walker.extraSpace;
+			console.log("moveCaretUp: col=" + col + " extraSpace=" + walker.extraSpace + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker));
 			
-var measureNewRow = file.measureText(gridRow, caret.col-1);
-			caret.col -= (measureNewRow.width-col);
-console.log("moveCaretUp: After adjusting " + ((measureNewRow.width-col)) + " caret.col=" + caret.col);
-caret.col += measureNewRow.surrogates;
-			console.log("moveCaretUp: After adding " + measureNewRow.surrogates + " caret.col=" + caret.col);
+			/*
+				var measureOldRow = file.measureText(rowBefore, caret.col-1);
+				caret.col += (measureOldRow.width-col);
+				caret.col -= measureOldRow.surrogates;
+				console.log("moveCaretUp: After adding " + ((measureOldRow.width-col)) + " and removing " + measureOldRow.surrogates + " caret.col=" + caret.col);
+			*/
 			
-			console.log("moveCaretUp: colBefore=" + colBefore + " caret.col=" + caret.col + " measureOldRow=" + JSON.stringify(measureOldRow) + " measureNewRow=" + JSON.stringify(measureNewRow) + " ");
 			
-			if( gridRow[caret.col] && UTIL.isSurrogateEnd(gridRow[caret.col].char) ) {
-				console.log("moveCaretUp: stepping right from surrogate end");
-				caret.col++;
-				
-				if( gridRow[caret.col] && UTIL.isSurrogateStart(gridRow[caret.col].char) ) {
-					console.log("moveCaretUp: stepping right over surrogate modifier");
-					caret.col += 2;
-					
-				}
-			}
+			
+			var walker = file.columnWalker(caret.row);
+			while(!walker.done && (walker.col+walker.extraSpace) < caret.col) walker.next();
+			
+			caret.col = walker.col;
+			
+			console.log("moveCaretUp: caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
+			
+			
 			
 			
 			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
@@ -2690,6 +2684,10 @@ caret.col += measureNewRow.surrogates;
 			
 			var rowBefore = file.grid[caret.row];
 			
+			var col = caret.col;
+			var width = file.measureText(caret.row, caret.col);
+			caret.col = width;
+			
 			caret.row++;
 			
 			if(caret.row >= file.startRow + EDITOR.view.visibleRows) {
@@ -2699,17 +2697,12 @@ caret.col += measureNewRow.surrogates;
 			var gridRow = file.grid[caret.row];
 			
 			
-			var col = caret.col;
-			var measureOldRow = file.measureText(rowBefore, caret.col);
-			caret.col += (measureOldRow.width-col);
-			caret.col -= measureOldRow.surrogates;
+			var walker = file.columnWalker(caret.row);
+			while(!walker.done && (walker.col+walker.extraSpace) < caret.col) walker.next();
 			
-			var col = caret.col;
-			var measureNewRow = file.measureText(gridRow, caret.col);
-			caret.col -= (measureNewRow.width-col);
-			caret.col += measureNewRow.surrogates;
+			caret.col = walker.col;
 			
-			console.log("moveCaretDown: caret.col=" + caret.col + " measureOldRow=" + JSON.stringify(measureOldRow) + " measureNewRow=" + JSON.stringify(measureNewRow) + " ");
+			console.log("moveCaretDown: caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
 			
 			
 			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
@@ -4839,9 +4832,91 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 return counter;
 	}
 	
-	File.prototype.measureText = function measureText(rowOrGridRow, endCol) {
+	File.prototype.columnWalker = function columnWalker(row, endCol) {
+		/*
+			
+		*/
+		var file = this;
+		
+		var state = {
+			done: false,
+			extraSpace: 0,
+			tabIndention: 0,
+			next: walk,
+			col: 0
+		}
+		
+		var gridRow = file.grid[row];
+		
+		if(endCol == undefined) endCol = gridRow.length;
+		if(endCol > gridRow.length) endCol = gridRow.length;
+		if(endCol < 0) throw new Error("endCol=" + endCol + " is less then zero!");
+		
+		var tabColumnTextLengthAdjustment = 0;
+		
+		return state;
+		
+		function walk() {
+			var col = state.col;
+			
+			if(col >= (endCol)) {
+				console.log("columnWalker: state.col=" + state.col + " endCol=" + endCol + " We are done!");
+				state.done = true;
+				return state;
+			}
+			
+			state.col++;
+			
+			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
+				state.tabIndention++;
+				console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
+				return state;
+			}
+			
+			var charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
+			
+			if(gridRow[col].char == "\t") {
+				charWidth += (  (8 - charWidth) - (col-state.tabIndention+state.extraSpace) % 8  );
+				
+				console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+			}
+			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
+				console.log("columnWalker: col=" + col + " surrogate start");
+				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
+					console.log("columnWalker: col=" + col + " surrogate modifier");
+					state.col += 3;
+					state.extraSpace -= 3;
+				}
+				else if( gridRow[col+1] ) {
+					console.log("columnWalker: col=" + col + " no modifier");
+					state.col++;
+					state.extraSpace -= 1;
+				}
+			}
+			
+			if(charWidth > 1) {
+state.extraSpace += (charWidth-1);
+			}
+			
+			console.log("columnWalker: state=" + JSON.stringify(state));
+			
+			return state;
+		}
+		
+	}
+	
+	File.prototype.measureText = function measureText(row, endCol) {
 		// Returns the total monospace glyph width from first column to endCol with starting (indentation) tabs ignored
 		var file = this;
+		
+		var walker = file.columnWalker(row, endCol);
+		while(!walker.done) walker.next();
+		
+		return endCol+walker.extraSpace;
+		
+		
+		
+		
 		
 		if(typeof rowOrGridRow == "number") {
 			var gridRow = file.grid[row];

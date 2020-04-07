@@ -2728,7 +2728,7 @@ EDITOR.canvasContext = ctx;
 			if(file.grid[row][i].char == "\t") {
 				tabColumnWidth = (8 - (i-tabIndention+tabColumnTextLengthAdjustment) % 8);
 				console.log("renderCaret: i=" + i + " tab! tabColumnWidth=" + tabColumnWidth + " colAdjustment=" + colAdjustment + " tabColumnTextLengthAdjustment=" + tabColumnTextLengthAdjustment + " ")
-				colAdjustment += (tabColumnWidth-1); // hmm!??
+				colAdjustment += (tabColumnWidth-1); // Glyph width of tabs are always 1 but actually tabColumnWidth not depending on font
 				tabColumnTextLengthAdjustment += tabColumnWidth-1;
 			}
 			
