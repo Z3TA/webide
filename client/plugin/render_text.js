@@ -151,18 +151,7 @@
 			
 			var startIndex = gridRow.startIndex;
 			
-			var widthBeforeStart = start > 0 ? file.textWidth(gridRow, start-1) : 0; // Mainly for calculating tab column space
 			var extraSpace = 0;
-			
-			//console.log("textRender: surrogatesBefore=" + surrogatesBefore + " widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
-			
-			if(widthBeforeStart > (start-1))  {
-				//start -= (widthBeforeStart-start);
-			}
-			
-			//console.log("textRender: widthBeforeStart=" + widthBeforeStart + " start=" + start + " ");
-			
-			if(start < 0) throw new Error("start=" + start + " widthBeforeStart=" + widthBeforeStart + " colStart=" + colStart + " transparentCharsLeft=" + transparentCharsLeft + " ");
 			
 			// Seems we need to start from the beginning!
 			for(var col = 0; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
