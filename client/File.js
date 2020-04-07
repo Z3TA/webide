@@ -3936,28 +3936,32 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		}
 		
 		if((caret.col+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
-			// Caret is after the visible space
+			console.log("scrollToCaret: Caret is after the visible space");
 			// We want to see a bit forward, but not more then to eol ? No, it's actually easier to read if we do not make a big jump!
 			delta = ((caret.col+indentationWidth) - (EDITOR.view.endingColumn-lookAhead)) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
 			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}
 		else if(caret.col < (file.startColumn-indentationWidth)) {
-			// Caret is left of the visible space
+			
 			delta = (file.startColumn-indentationWidth) - caret.col;
 			
 			//EDITOR.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
 			startColumn -= delta;
 			
-			if((startColumn-indentationWidth) > 0) {
+			console.log("scrollToCaret: Caret is left of the visible space! delta=" + delta + " startColumn=" + startColumn + " indentationWidth=" + indentationWidth);
+			
+			if((startColumn-indentationWidth) >= 0) {
 				// We would prefer if the startColumn was 0
 				// But we don't need to see the indentation
 				// it's annoying if it jumps while reading, but we usually don't read from right to left
 				
 				if((caret.col+indentationWidth) < EDITOR.view.visibleColumns) startColumn = minIndentation*EDITOR.settings.tabSpace;
+				console.log("scrollToCaret: Adjusted startColumn=" + startColumn + " from minIndentation=" + minIndentation);
 			}
 		}
 		
+		console.log("scrollToCaret: file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		// We want to see the whole line if possible
 // but we also want to see the whole line of the line we are currently on.
 		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
