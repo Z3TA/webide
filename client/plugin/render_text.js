@@ -130,18 +130,11 @@
 				
 			*/
 			
-			var bufferRowCol;
-			var characters = "";
-			var charWidth = 1;
-			
 			var start = 0;
 			
 			if(colStart > 0) {
 				start = Math.max(0, colStart-transparentCharsLeft);
 				left -= (colStart-start) * EDITOR.settings.gridWidth;
-				
-				var surrogatesBefore = start > 0 ? file.surrogates(gridRow, start-1) : 0;
-				//left -= surrogatesBefore * EDITOR.settings.gridWidth;
 			}
 			
 			var transpLvlStepLeft = 100 / (colStart-start+1);
@@ -149,9 +142,6 @@
 			var transpLvlLeft = transpLvlStepLeft;
 			var transpLvlRight = 100-transpLvlStepRight;
 			
-			var startIndex = gridRow.startIndex;
-			
-			var extraSpace = 0;
 			
 			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done) {
