@@ -2700,6 +2700,156 @@ EDITOR.canvasContext = ctx;
 		
 	}
 	
+	EDITOR.gridWalker = function gridWalker(gridRow, endCol) {
+		/*
+			The walker will also walk on the endCol
+			Accept gridrow so that we can use the function with a buffer (which don't have to know abut the file.grid)
+		*/
+		
+		if(typeof gridRow != "object") throw new Error("First argument gridRow=" + gridRow + "(" + (typeof gridRow) + ") needs to be a file.grid row!");
+		
+		var state = {
+			done: false,
+			extraSpace: 0,
+			tabIndention: 0,
+			next: walk,
+			col: 0,
+			char: "", // Can be many code points
+			charWidth: 0,
+			charCodePoints: 0,
+			totalWidth: 0 //Total width of the row so far
+			
+		}
+		// Total width of the row so far can be calculated from col + extraSpace
+		// state includes the column/character we are standing on!
+		
+		if(endCol == undefined) endCol = gridRow.length-1;
+		if(endCol >= gridRow.length) endCol = gridRow.length-1;
+		
+		if(gridRow.length == 0) {
+			console.log("columnWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
+			state.done = true;
+			return state;
+		}
+		
+		if(endCol < 0) {
+			throw new Error("endCol=" + endCol + "  gridRow.length=" + gridRow.length + "  ");
+		}
+		
+		return state;
+		
+		function walk() {
+			if(state.done) {
+				console.log("columnWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
+				return state;
+			}
+			
+			console.log("columnWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
+			
+			state.col += state.char.length;
+			
+			state.extraSpace += (state.charWidth-1);
+			
+			state.extraSpace -= (state.charCodePoints-1);
+			
+			
+			if(state.col > endCol) {
+				console.log("columnWalker: Hmm, the walk ended! state.col=" + state.col + " endCol=" + endCol + " last-char=" + state.char + " We are done!");
+				state.done = true;
+				return state;
+			}
+			
+			var col = state.col;
+			
+			
+			
+			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
+				state.tabIndention++;
+				//console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
+				return state;
+			}
+			
+			state.charCodePoints = 1;
+			
+			state.char = gridRow[col].char;
+			
+			if(state.char == "\t") {
+				var charWidth = (  8 - (col-state.tabIndention+state.extraSpace) % 8  );
+				
+				//console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+			}
+			else if( UTIL.isSurrogateStart(state.char) ) {
+				combineSurrogate(col);
+			}
+			
+			// Need to check if next character is a zero width joiner, then combine
+			if( gridRow[col+state.charCodePoints] ) checkForZeroWidthJoiner(col+state.charCodePoints);
+			
+			var charWidth = EDITOR.glyphWidth2(state.char);
+			
+			state.charWidth = charWidth;
+			state.totalWidth += charWidth;
+			
+			
+			
+			if(state.col+state.char.length > (endCol)) {
+				console.log("columnWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
+				state.done = true;
+			}
+			
+			console.log("columnWalker: state=" + JSON.stringify(state));
+			
+			console.log("columnWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
+			
+			
+			return state;
+		}
+		
+		function combineSurrogate(col) {
+			console.log("columnWalker:combineSurrogate: col=" + col + " surrogate start");
+			if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
+				console.log("columnWalker: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " modifier=" + (gridRow[col+2].char + gridRow[col+3].char) + " ");
+				state.charCodePoints+=3;
+				state.char += gridRow[col+1].char;
+				state.char += gridRow[col+2].char;
+				state.char += gridRow[col+3].char;
+			}
+			else if( gridRow[col+1] ) {
+				console.log("columnWalker:combineSurrogate: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " no modifier");
+				state.charCodePoints++;
+				state.char += gridRow[col+1].char;
+			}
+		}
+		
+		function checkForZeroWidthJoiner(col) {
+			// Recursive (there can be many combinations)
+			
+			if( gridRow[col].char === "\u200D" ) {
+				console.log("columnWalker:checkForZeroWidthJoiner: Found one at col=" + col);
+				state.char += "\u200D";
+				state.charCodePoints++;
+				
+				var nextChar = gridRow[col+1] && gridRow[col+1].char;
+				console.log("columnWalker:checkForZeroWidthJoiner: nextChar=" + nextChar + " (" + (nextChar.codePointAt(0).toString(16)) + ")");
+				if(nextChar === undefined) return;
+				
+				// Add next character
+				state.charCodePoints++;
+				state.char += nextChar;
+				
+				if( UTIL.isSurrogateStart(nextChar) ) {
+					combineSurrogate(col+1);
+				}
+				
+				console.log("columnWalker:checkForZeroWidthJoiner: Next col=" + (state.col+state.charCodePoints) + " char=" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char) + " (" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char.codePointAt(0).toString(16)) + ")  ");
+				
+				if( gridRow[state.col+state.charCodePoints] ) checkForZeroWidthJoiner(state.col+state.charCodePoints);
+				
+			}
+		}
+		
+	}
+	
 	EDITOR.renderCaret = function(caret, colPlus, fillStyle, screenStartRow, bufferStartRow) {
 		var file = EDITOR.currentFile;
 		if(file == undefined) return;
@@ -2715,61 +2865,16 @@ EDITOR.canvasContext = ctx;
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
+		
+		
 		var tabIndention = 0;
 		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
 		
 		console.log("renderCaret: row=" + row + " col=" + col + " tabIndention=" + tabIndention + " ");
 		
-		var colAdjustment = 0;
-		var tabColumnTextLengthAdjustment = 0;
-		for(var i=tabIndention, charWidth=1, tabColumnWidth=0; i<col; i++) {
-			charWidth = EDITOR.glyphWidth(file, file.grid[row][i].index);
-			
-			if(file.grid[row][i].char == "\t") {
-				tabColumnWidth = (8 - (i-tabIndention+tabColumnTextLengthAdjustment) % 8);
-				console.log("renderCaret: i=" + i + " tab! tabColumnWidth=" + tabColumnWidth + " colAdjustment=" + colAdjustment + " tabColumnTextLengthAdjustment=" + tabColumnTextLengthAdjustment + " ")
-				colAdjustment += (tabColumnWidth-1); // Glyph width of tabs are always 1 but actually tabColumnWidth not depending on font
-				tabColumnTextLengthAdjustment += tabColumnWidth-1;
-			}
-			
-			else if( UTIL.isSurrogateStart(file.grid[row][i].char) ) {
-				console.log("renderCaret: i=" + i + " isSurrogateStart!  ")
-				// Surrogates are two "chars" in JavaScript but in unicode they are a single character
-				
-				// They can also have modifiers, which are also two characters in JavaScript
-				if( file.grid[row][i+2] && UTIL.isSurrogateModifierStart(file.grid[row][i+2].char) ) {
-					console.log("renderCaret: i=" + i + " isSurrogateModifierStart!  ")
-					i+= 3;
-					tabColumnTextLengthAdjustment -= (4-charWidth); // To make the tab column width calculation correct
-					colAdjustment -= (4-charWidth);
-				}
-				else if( file.grid[row][i+1] ) {
-					console.log("renderCaret: Skip surrogate end");
-					i += 1;
-					colAdjustment += (charWidth-2);
-					tabColumnTextLengthAdjustment += (charWidth-2);
-				}
-				
-			}
-			else if( charWidth  > 1  ) {
-				console.log("renderCaret: i=" + i + " glyph wdith=" + charWidth + " ")
-				colAdjustment += (charWidth-1);
-				tabColumnTextLengthAdjustment += (charWidth-1);
-			}
-		}
-		
-		// When cursor is between surrogates
-		/*
-			if( !caret.eol ) {
-if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col].char) ) {
-			colAdjustment++;
-			if( file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+1].char) ) colAdjustment+=2;
-
-}
-			else if( UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) ) colAdjustment += 2;
-			else if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) ) colAdjustment++;
-}
-*/
+		var walker = EDITOR.gridWalker(file.grid[row], col);
+		while(!walker.done) walker.next();
+		var colAdjustment = walker.extraSpace;
 		
 		
 		// Math.floor to prevent sub pixels
@@ -6086,65 +6191,39 @@ return {x: x, y: y};
 					else if(mouseCol < tabIndention) mouseCol = tabIndention;
 				}
 				
-				console.log("mousePositionToCaret: After: mouseCol=" + mouseCol + "");
-				var tabSpace = 0;
-				var extraSpace = 0;
-				for(var i=tabIndention, charWidth = 1; i<mouseCol && i<gridRow.length; i++) {
-					charWidth = EDITOR.glyphWidth(file, gridRow[i].index);
-					if(gridRow[i].char == "\t") {
-						
-						tabSpace = 7 - ((i+extraSpace-tabIndention) % 8);
-						extraSpace += (tabSpace);
-						// Is mouseCol within the tab space !?
-						if( Math.ceil(i+tabSpace/2) >= mouseCol ) {
-							// Place left of the tab
-							console.log("mousePositionToCaret: Place left of the tab");
-							mouseCol -= (mouseCol-i);
-						}
-						else if( (i+tabSpace) >= mouseCol ) {
-							// Place right side of the tab
-							console.log("mousePositionToCaret: Place right of the tab");
-							mouseCol -= (mouseCol-i-1);
-						}
-						else {
-							// Ignore the tab space
-							
-							console.log("mousePositionToCaret: Ignore the tabSpace=" + tabSpace + " extraSpace=" + extraSpace + " tabIndention=" + tabIndention);
-							mouseCol -= (tabSpace);
-						}
-						
-					}
-					else if( UTIL.isSurrogateStart(gridRow[i].char) && gridRow[i+1] ) {
-						// Surrogates are two "chars" in JavaScript but in unicode they are a single character
-						// All surrogates are rendered two columns wide
-						
-						console.log("mousePositionToCaret: isSurrogateStart i=" + i);
-						
-						// They can also have modifiers, which are also two characters in JavaScript
-						
-						if( gridRow[i+2] && UTIL.isSurrogateModifierStart(gridRow[i+2].char) && gridRow[i+3] ) {
-							console.log("mousePositionToCaret: surrogate with modifer! i=" + i);
-							
-							console.log("mousePositionToCaret: momo");
-							i+= 3;
-							extraSpace -= (4-charWidth);
-							mouseCol += (4-charWidth);
-							
-						}
-						else if( gridRow[i+1] ) {
-							console.log("mousePositionToCaret: skip surrogate ending");
-							i++;
-							mouseCol -= (charWidth-2);
-						}
-						
-					}
-					else if( charWidth > 1 ) {
-						// note: surrogates are handled above, this is only for glyphs from single utf-16 character
-						console.log("mousePositionToCaret: i=" + i + " " + gridRow[i].char + " charWidth=" + charWidth + "");
-						mouseCol -= (charWidth-1);
-						extraSpace += (charWidth-1);
-					}
+				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
+				
+				
+				var walker = EDITOR.gridWalker(gridRow);
+				while(!walker.done && walker.totalWidth < mouseCol) walker.next();
+				var extraSpace = walker.extraSpace;
+				var charWidth = walker.charWidth;
+				
+				
+				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " walker=" + JSON.stringify(walker));
+				
+				if(mouseCol > walker.totalWidth) {
+					// Place mouse at EOL
+					mouseCol = gridRow.length;
 				}
+				else {
+					mouseCol = walker.col + walker.charCodePoints;
+					
+					if(charWidth > 0) {
+						var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn + walker.totalWidth ) * EDITOR.settings.gridWidth));
+						var diff = Math.abs(mouseX - mouseColX);
+						console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
+						if(diff/EDITOR.settings.gridWidth > walker.charWidth/2) {
+console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
+							mouseCol -= walker.charCodePoints;
+						}
+						
+					}
+					
+				}
+				
+				
+				
 				
 				
 				if(mouseCol > gridRow.length) { // End of line
@@ -6155,40 +6234,12 @@ return {x: x, y: y};
 				}
 				
 				if( gridRow[mouseCol] && UTIL.isSurrogateEnd(gridRow[mouseCol].char) ) {
-					console.log("mousePositionToCaret: surrogate END i=" + i);
+					console.log("mousePositionToCaret: surrogate END! mouseCol=" + mouseCol);
 					mouseCol++;
 				}
 				else if( gridRow[mouseCol] && UTIL.isSurrogateModifierStart(gridRow[mouseCol].char) ) {
-					console.log("mousePositionToCaret: at surrogate modifier start i=" + i);
+					console.log("mousePositionToCaret: at surrogate modifier start! mouseCol=" + mouseCol);
 					mouseCol += 2;
-				}
-				
-				var widthOfCurrectCharacter = gridRow[mouseCol] && EDITOR.glyphWidth(file, gridRow[mouseCol].index);
-				if( widthOfCurrectCharacter && widthOfCurrectCharacter > 1 ) {
-					
-					// How can we adjust the caret to that if we clicked on a wide glyph it will go to the closest edge!???
-					
-					var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn + mouseCol + extraSpace ) * EDITOR.settings.gridWidth));
-					var diff = (mouseX - mouseColX);
-					//var oddExtraSpace = extraSpace % 2;
-					console.log("mousePositionToCaret: widthOfCurrectCharacter=" + widthOfCurrectCharacter + " charWidth=" + charWidth + " (last char) mouseCol=" + mouseCol + " mouseColBegin=" + mouseColBegin + " extraSpace=" + extraSpace + " mouseX=" + mouseX + " mouseColX=" + mouseColX + " diff=" + diff + " gridWidth=" + EDITOR.settings.gridWidth);
-					
-					
-					/*
-						if( oddExtraSpace && diff > 0 ) {
-						console.log("mousePositionToCaret: Adjusting right");
-						mouseCol++;
-						}
-						if(  mouseX > mouseColX+EDITOR.settings.gridWidth/2  ) {
-						console.log("mousePositionToCaret: Adjusting right");
-						mouseCol++;
-						}
-						else if( mouseCol>0 && mouseX < mouseColX-charWidth*EDITOR.settings.gridWidth/2  ) {
-						console.log("mousePositionToCaret: Adjusting left");
-						mouseCol--;
-						}
-					*/
-					
 				}
 				
 				// Broken surrogate can make the adjustment wrong
@@ -6252,6 +6303,11 @@ return {x: x, y: y};
 		console.warn("glyphWidth not yet initiated!");
 		return 1;
 	}
+
+EDITOR.glyphWidth2 = function(char) {
+var renderWidth = EDITOR.canvasContext.measureText(char).width;
+return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWidth*10));
+}
 	
 	EDITOR.autoComplete = function autoComplete(file, combo, character, charCode, keyPushDirection) {
 		/*

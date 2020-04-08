@@ -153,11 +153,11 @@
 			
 			var extraSpace = 0;
 			
-			var walker = file.columnWalker(gridRow);
+			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done) {
 				walker.next();
 				if( paint(walker) === false ) {
-					//console.log("paint: Stopping because paint() returned false");
+					console.log("paint: Stopping because paint() returned false");
 					break;
 				}
 				
@@ -186,14 +186,14 @@ return false;
 				// ### Set the fill style
 				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
 					// Chars in left margin
-					//console.log("paint: col=" + col + " left margin");
+					console.log("paint: col=" + col + " left margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
 					transpLvlLeft += transpLvlStepLeft * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
 				}
 				else if(col+extraSpace > colStop) {
 					// Chars in right margin
-					//console.log("paint: col=" + col + " right margin");
+					console.log("paint: col=" + col + " right margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
 					transpLvlRight -= transpLvlStepRight * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
@@ -205,8 +205,11 @@ return false;
 				
 				// ### Paint the character
 				if(  (col+extraSpace) >= start  ) {
-					//console.log("paint: col=" + col + " default");
+					console.log("paint: Painting character=" + character + " for col=" + col + "");
 					ctx.fillText(character, left, middle);
+				}
+				else {
+					console.log("paint: Not painting character=" + character + " because col=" + col + " plus extraSpace=" + extraSpace + " is less then start=" + start + "  ");
 				}
 				
 				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);

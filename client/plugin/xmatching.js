@@ -52,6 +52,8 @@ var func = customRender;
 	
 	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
 		
+		console.time("highlightMatch " + lP + rP);
+		
 		if(startRow == undefined) startRow = 0;
 		
 		var leftEqualsRightCount = true;

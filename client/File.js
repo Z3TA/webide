@@ -2413,6 +2413,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		file.sanityCheck();
 		
+		console.log("moveCaretRight: caret.index=" + caret.index + " file.text.length=" + file.text.length);
 		
 		if(caret.index < file.text.length) {
 			
@@ -2421,10 +2422,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				caret.row++;
 				caret.col = 0;
 				caret.index += file.lineBreak.length;
-				//console.log("File.moveCaretRight: Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
+				//console.log("moveCaretRight: Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
 				
 				caret.index += file.grid[caret.row].indentationCharacters.length;
-				//console.log("File.moveCaretRight: Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
+				//console.log("moveCaretRight: Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
 				
 				if(file.grid[caret.row].length == 0) {
 					caret.eol = true;
@@ -2441,23 +2442,13 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			}
 			else {
 				
+				// Step over the surrogates etc.
+				var walker = EDITOR.gridWalker(file.grid[caret.row], caret.col);
+				while(!walker.done) walker.next();
+				caret.col += walker.charCodePoints;
+				caret.index += walker.charCodePoints;
+				console.log("moveCaretRight: walker=" + JSON.stringify(walker));
 				
-				// Skip surrogate pairs
-				if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col+1] && UTIL.isSurrogateEnd( file.grid[caret.row][caret.col+1].char) ) {
-					console.log("File.moveCaretRight: Skip surrogate");
-					caret.col++;
-					caret.index++;
-				}
-				
-				caret.col++;
-				caret.index++;
-				
-				if( file.grid[caret.row][caret.col] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col+1] && UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col+1].char) ) {
-					// Also skip the surrogate modifier
-					console.log("File.moveCaretRight: Skip surrogate modifier");
-					caret.col+=2;
-					caret.index+=2;
-				}
 				
 				if( file.grid[caret.row].length==caret.col ) caret.eol = true;
 				else caret.eol = false;
@@ -2500,7 +2491,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		if(times == undefined) times = 0;
 		if(times < 0) throw new Error("times=" + times);
 		
-		//console.log("File:moveCaretLeft");
+		//console.log("moveCaretLeft: ");
 		
 		if(caret == undefined) {
 			caret = file.caret;
@@ -2516,7 +2507,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		var grid = file.grid;
 		var row = caret.row;
 		
-		//console.log("Moving caret left from " + JSON.stringify(caret) + "...");
+		//console.log("moveCaretLeft: Moving caret left from " + JSON.stringify(caret) + "...");
 		
 		
 		// Sanity check in case something is wrong
@@ -2527,39 +2518,23 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			if(caret.col == -1) {
 				// Move one row up
-				//console.log("Moving one row up");
+				//console.log("moveCaretLeft: Moving one row up");
 				caret.row--;
 				caret.col = grid[caret.row].length;
 				caret.eol = true;
 				caret.index -= file.lineBreak.length;
 				caret.index -= grid[row].indentationCharacters.length;
 				
-				//console.log("caret.index=" + caret.index + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
+				//console.log("moveCaretLeft: caret.index=" + caret.index + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
 				
 			}
 			else {
 				caret.eol = false;
 				caret.index--;
 				
+				unicodeSkip();
 				
-				// Skip surrogate pairs
 				
-				if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col-1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col-1].char) ) {
-					console.log("File.moveCaretLeft: Skip surrogate modifier");
-					caret.col--
-					caret.index--;
-					// We might be between a surrogate and modifier
-					if( caret.col > 1 && UTIL.isSurrogateEnd( file.grid[caret.row][caret.col-1].char) && UTIL.isSurrogateStart( file.grid[caret.row][caret.col-2].char) ) {
-						console.log("File.moveCaretLeft: Skip surrogate after skipping modifier");
-						caret.col-=2;
-						caret.index-=2;
-					}
-				}
-				else if(  UTIL.isSurrogateEnd( file.grid[caret.row][caret.col].char) && file.grid[caret.row][caret.col-1] && UTIL.isSurrogateStart( file.grid[caret.row][caret.col-1].char) ) {
-					console.log("File.moveCaretLeft: Skip surrogate");
-					caret.col--;
-					caret.index--;
-				}
 				
 			}
 			
@@ -2581,6 +2556,57 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		return caret;
 		
+		function unicodeSkip() {
+			// Skip surrogate pairs
+			
+			skipSurrogates(caret.col);
+			
+			checkZeroWidthJoiner();
+			
+			function checkZeroWidthJoiner() {
+				console.log("moveCaretLeft:unicodeSkip:checkZeroWidthJoiner: caret.col=" + caret.col);
+				if( file.grid[caret.row][caret.col-1] && file.grid[caret.row][caret.col-1].char=="\u200D" ) {
+					console.log("moveCaretLeft:unicodeSkip:checkZeroWidthJoiner: Skipping zero width joiner");
+					caret.col--;
+					caret.index--;
+					
+					caret.col--;
+					caret.index--;
+					if(!skipSurrogates(caret.col)) {
+						console.log("moveCaretLeft:unicodeSkip:checkZeroWidthJoiner: Skipped non surrogate " +  file.grid[caret.row][caret.col].char);
+					}
+					
+					checkZeroWidthJoiner();
+				}
+			}
+			
+			function skipSurrogates(col) {
+				if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][col-1].char) ) {
+					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Skip surrogate modifier " + (file.grid[caret.row][col-1].char + file.grid[caret.row][col].char));
+					caret.col--
+					caret.index--;
+					col--;
+					// We might be between a surrogate and modifier
+					if( col > 1 && UTIL.isSurrogateEnd( file.grid[caret.row][col-1].char) && UTIL.isSurrogateStart( file.grid[caret.row][col-2].char) ) {
+						console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Skip surrogate after skipping modifier " + (file.grid[caret.row][col-2].char + file.grid[caret.row][col-1].char));
+						caret.col-=2;
+						caret.index-=2;
+						col--;
+						return true;
+					}
+				}
+				else if(  UTIL.isSurrogateEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateStart( file.grid[caret.row][col-1].char) ) {
+					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Skip surrogate " + (file.grid[caret.row][col-1].char + file.grid[caret.row][col].char));
+					caret.col--;
+					caret.index--;
+					col--;
+					return true;
+				}
+				
+				return false;
+			}
+		}
+		
 	}
 	
 	
@@ -2601,7 +2627,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			var gridRow = file.grid[caret.row];
 			
 			var originalCol = caret.col;
-			var walker = file.columnWalker(caret.row+1, caret.col-1); // Don't walk on the col we are currently on (only measure the wdith of the characters before/left of it)
+			var walker = EDITOR.gridWalker(rowBefore, caret.col-1); // Don't walk on the col we are currently on (only measure the wdith of the characters before/left of it)
 			while(!walker.done) walker.next();
 			var widthCurrentLine = walker.totalWidth;
 			
@@ -2615,7 +2641,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 				console.log("moveCaretUp: After adding " + ((measureOldRow.width-col)) + " and removing " + measureOldRow.surrogates + " caret.col=" + caret.col);
 			*/
 			
-			var walker = file.columnWalker(caret.row);
+			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done && (walker.totalWidth) < widthCurrentLine) walker.next();
 			
 			caret.col = walker.col+1;
@@ -2697,7 +2723,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			var gridRow = file.grid[caret.row];
 			
 			
-			var walker = file.columnWalker(caret.row);
+			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done && (walker.totalWidth) < width) walker.next();
 			
 			
@@ -4848,170 +4874,14 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 return counter;
 	}
 	
-	File.prototype.columnWalker = function columnWalker(rowOrGridRow, endCol) {
-		/*
-			The walker will also walk on the endCol
-			Accept gridrow so that we can use the function with a buffer (which don't have to know abut the file.grid)
-		*/
-		var file = this;
-		
-		if(typeof rowOrGridRow == "number") {
-			var gridRow = file.grid[rowOrGridRow];
-		}
-		else if(typeof rowOrGridRow == "object") {
-			var gridRow = rowOrGridRow;
-		}
-		else throw new Error("typeof rowOrGridRow=" + rowOrGridRow + "(" + (typeof rowOrGridRow) + ")");
-		
-		if( !gridRow ) throw new Error("file.grid.length=" + file.grid.length + " rowOrGridRow=" + rowOrGridRow);
-		
-		var state = {
-			done: false,
-			extraSpace: 0,
-			tabIndention: 0,
-			next: walk,
-			col: -1,
-			char: "", // Can be many code points
-			charWidth: 0,
-			totalWidth: 0 //Total width of the row so far
-		}
-		// Total width of the row so far can be calculated from col + extraSpace
-		
-		if(endCol == undefined) endCol = gridRow.length-1;
-		if(endCol >= gridRow.length) endCol = gridRow.length-1;
-		if(endCol < 0) {
-			//console.log("columnWalker: row is empty. Nothing to walk on!");
-			state.done = true;
-			state.col = 0; // ??
-			return state;
-		}
-		
-		
-		return state;
-		
-		function walk() {
-			if(state.done || state.col > endCol) {
-				console.log("columnWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
-				return state;
-			}
-			
-			var col = ++state.col;
-			
-			
-			
-			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
-				state.tabIndention++;
-				//console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
-				return state;
-			}
-			
-			
-			
-			var charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
-			
-			var char = gridRow[col].char;
-			
-			if(gridRow[col].char == "\t") {
-				charWidth += (  (8 - charWidth) - (col-state.tabIndention+state.extraSpace) % 8  );
-				
-				//console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
-			}
-			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
-				console.log("columnWalker: col=" + col + " surrogate start");
-				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-					console.log("columnWalker: col=" + col + " surrogate modifier");
-					char += gridRow[col+1].char;
-					char += gridRow[col+2].char;
-					char += gridRow[col+3].char;
-					state.col += 3;
-					state.extraSpace -= 3;
-				}
-				else if( gridRow[col+1] ) {
-					//console.log("columnWalker: col=" + col + " no modifier");
-					char += gridRow[col+1].char;
-					state.col++;
-					state.extraSpace -= 1;
-					
-				}
-			}
-			
-			if(charWidth > 1) {
-state.extraSpace += (charWidth-1);
-			}
-			
-			state.charWidth = charWidth;
-			state.char = char;
-			state.totalWidth += charWidth;
-			
-			
-			if(state.col >= (endCol)) {
-				console.log("columnWalker: This is the last iteration! state.col=" + state.col + " endCol=" + endCol + "");
-				state.done = true;
-			}
-			
-			//console.log("columnWalker: state=" + JSON.stringify(state));
-			
-			return state;
-		}
-		
-	}
-	
 	File.prototype.measureText = function measureText(row, endCol) {
 		// Returns the total monospace (glyph) width from first column to endCol with starting (indentation) tabs ignored
 		var file = this;
 		
-		var walker = file.columnWalker(row, endCol);
+		var walker = EDITOR.gridWalker(file.grid[row], endCol);
 		while(!walker.done) walker.next();
 		
-		//return endCol+walker.extraSpace;
 		return walker.totalWidth;
-		
-		
-		
-		
-		if(typeof rowOrGridRow == "number") {
-			var gridRow = file.grid[row];
-		}
-		else if(typeof rowOrGridRow == "object") {
-			var gridRow = rowOrGridRow;
-		}
-		else throw new Error("typeof rowOrGridRow=" + rowOrGridRow + "(" + (typeof rowOrGridRow) + ")");
-		
-		if( !gridRow ) throw new Error("file.grid.length=" + file.grid.length + " row=" + row);
-		
-		// Ignore tab indentation
-		var tabIndention = 0;
-		while(tabIndention < gridRow.length && gridRow[tabIndention].char == "\t") tabIndention++;
-		
-		var surrogates = 0;
-		
-		for(var col=tabIndention, charWidth=1, extraSpace=0; col<endCol && col < gridRow.length; col++) {
-			charWidth = EDITOR.glyphWidth(file, gridRow.startIndex + col);
-			
-			if(gridRow[col].char == "\t") {
-				console.log("measureText: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
-				charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
-			}
-			else if( UTIL.isSurrogateStart(gridRow[col].char) ) {
-				console.log("measureText: col=" + col + " surrogate start");
-				if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-					console.log("measureText: col=" + col + " surrogate modifier");
-					col += 3;
-					surrogates +=3;
-				}
-				else if( gridRow[col+1] ) {
-					console.log("measureText: col=" + col + " no modifier");
-					col++;
-					surrogates++;
-				}
-			}
-			
-			if(charWidth > 1) extraSpace += charWidth-1;
-		}
-		
-		//if( col > endCol ) endCol
-		
-		return {width: endCol+1 + extraSpace, surrogates: surrogates};
 	}
 	
 	
