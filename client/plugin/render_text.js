@@ -77,10 +77,6 @@
 			
 			indentation = buffer[row].indentation;
 
-			tabIndention = 0;
-			while(tabIndention < buffer[row].length && buffer[row][tabIndention].char == "\t") tabIndention++;
-			indentation += tabIndention;
-			
 			indentationWidth = indentation * EDITOR.settings.tabSpace;
 			
 			//console.log("textRender:indentation=" + indentation);
@@ -97,7 +93,7 @@
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
 			//console.log("textRender:renderRow: row=" + row);
-			renderRow(buffer[row], colStart, colStop, left, middle, tabIndention);
+			renderRow(buffer[row], colStart, colStop, left, middle);
 			
 		}
 		
@@ -122,7 +118,7 @@
 		var transpLvlStepLeft = 100 / transparentCharsLeft;
 		var transpLvlStepRight = 100 / transparentCharsRight;
 		
-		return function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle, tabIndention) {
+		return function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle) {
 			/*
 				
 				Because characters can have different width's we can't just start on a column,
@@ -150,7 +146,6 @@
 					console.log("paint: Stopping because paint() returned false");
 					break;
 				}
-				
 			}
 				
 			//console.log("paint: Exit loop walker=" + JSON.stringify(walker));

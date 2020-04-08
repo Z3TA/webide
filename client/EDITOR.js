@@ -2727,24 +2727,25 @@ EDITOR.canvasContext = ctx;
 		if(endCol >= gridRow.length) endCol = gridRow.length-1;
 		
 		if(gridRow.length == 0) {
-			console.log("columnWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
+			console.log("gridWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
 			state.done = true;
 			return state;
 		}
 		
 		if(endCol < 0) {
-			throw new Error("endCol=" + endCol + "  gridRow.length=" + gridRow.length + "  ");
+			console.warn("gridWalker: endCol=" + endCol + " before beginning! gridRow.length=" + gridRow.length + "  ");
+			return state;
 		}
 		
 		return state;
 		
 		function walk() {
 			if(state.done) {
-				console.log("columnWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
+				console.log("gridWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
 				return state;
 			}
 			
-			console.log("columnWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
+			console.log("gridWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
 			
 			//state.col += state.char.length;
 			state.col += state.charCodePoints;
@@ -2755,7 +2756,7 @@ EDITOR.canvasContext = ctx;
 			
 			
 			if(state.col > endCol) {
-				console.log("columnWalker: Hmm, the walk ended! state.col=" + state.col + " endCol=" + endCol + " last-char=" + state.char + " We are done!");
+				console.log("gridWalker: Hmm, the walk ended! state.col=" + state.col + " endCol=" + endCol + " last-char=" + state.char + " We are done!");
 				state.done = true;
 				return state;
 			}
@@ -2763,22 +2764,21 @@ EDITOR.canvasContext = ctx;
 			var col = state.col;
 			
 			state.charCodePoints = 1;
-			
-			// Tabs at the beginning will indentate. While tabs in the middle will arrange text into columns
-			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
-				state.tabIndention++;
-				//console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
-				return state;
-			}
-			
-			
-			
 			state.char = gridRow[col].char;
 			
 			if(state.char == "\t") {
+				if(state.col == state.tabIndention) {
+					// Tabs at the beginning will indentate. While 
+					var charWidth = EDITOR.settings.tabSpace;
+					state.tabIndention++;
+					console.log("gridWalker: col=" + col + " Indentation Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+				}
+				else {
+					// tabs in the middle will arrange text into columns
 				var charWidth = (  8 - (col-state.tabIndention+state.extraSpace) % 8  );
+					console.log("gridWalker: col=" + col + " Culumn Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+				}
 				
-				//console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
 			}
 			else {
 				
@@ -2796,28 +2796,28 @@ EDITOR.canvasContext = ctx;
 			state.totalWidth += charWidth;
 			
 			if(state.col+state.char.length > (endCol)) {
-				console.log("columnWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
+				console.log("gridWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
 				state.done = true;
 			}
 			
-			console.log("columnWalker: state=" + JSON.stringify(state));
+			console.log("gridWalker: state=" + JSON.stringify(state));
 			
-			console.log("columnWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
+			console.log("gridWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
 			
 			return state;
 		}
 		
 		function combineSurrogate(col) {
-			console.log("columnWalker:combineSurrogate: col=" + col + " surrogate start");
+			console.log("gridWalker:combineSurrogate: col=" + col + " surrogate start");
 			if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-				console.log("columnWalker: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " modifier=" + (gridRow[col+2].char + gridRow[col+3].char) + " ");
+				console.log("gridWalker: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " modifier=" + (gridRow[col+2].char + gridRow[col+3].char) + " ");
 				state.charCodePoints+=3;
 				state.char += gridRow[col+1].char;
 				state.char += gridRow[col+2].char;
 				state.char += gridRow[col+3].char;
 			}
 			else if( gridRow[col+1] ) {
-				console.log("columnWalker:combineSurrogate: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " no modifier");
+				console.log("gridWalker:combineSurrogate: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " no modifier");
 				state.charCodePoints++;
 				state.char += gridRow[col+1].char;
 			}
@@ -2827,12 +2827,12 @@ EDITOR.canvasContext = ctx;
 			// Recursive (there can be many combinations)
 			
 			if( gridRow[col].char === "\u200D" ) {
-				console.log("columnWalker:checkForZeroWidthJoiner: Found one at col=" + col);
+				console.log("gridWalker: checkForZeroWidthJoiner: Found one at col=" + col);
 				state.char += "\u200D";
 				state.charCodePoints++;
 				
 				var nextChar = gridRow[col+1] && gridRow[col+1].char;
-				console.log("columnWalker:checkForZeroWidthJoiner: nextChar=" + nextChar + " (" + (nextChar.codePointAt(0).toString(16)) + ")");
+				console.log("gridWalker: checkForZeroWidthJoiner: nextChar=" + nextChar + " (" + (nextChar.codePointAt(0).toString(16)) + ")");
 				if(nextChar === undefined) return;
 				
 				// Add next character
@@ -2843,7 +2843,7 @@ EDITOR.canvasContext = ctx;
 					combineSurrogate(col+1);
 				}
 				
-				console.log("columnWalker:checkForZeroWidthJoiner: Next col=" + (state.col+state.charCodePoints) + " char=" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char) + " (" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char.codePointAt(0).toString(16)) + ")  ");
+				console.log("gridWalker: checkForZeroWidthJoiner: Next col=" + (state.col+state.charCodePoints) + " char=" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char) + " (" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char.codePointAt(0).toString(16)) + ")  ");
 				
 				if( gridRow[state.col+state.charCodePoints] ) checkForZeroWidthJoiner(state.col+state.charCodePoints);
 				
@@ -2868,12 +2868,6 @@ EDITOR.canvasContext = ctx;
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
 		
-		
-		var tabIndention = 0;
-		while(tabIndention < col && file.grid[row][tabIndention].char=="\t") tabIndention++;
-		
-		console.log("renderCaret: row=" + row + " col=" + col + " tabIndention=" + tabIndention + " ");
-		
 		var walker = EDITOR.gridWalker(file.grid[row], col);
 		while(!walker.done) walker.next();
 		var colAdjustment = walker.extraSpace;
@@ -2881,7 +2875,7 @@ EDITOR.canvasContext = ctx;
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
-		var left = Math.floor(EDITOR.settings.leftMargin + (col + colAdjustment + ((file.grid[row].indentation+tabIndention) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + colAdjustment + ((file.grid[row].indentation) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
 		var ctx = EDITOR.canvasContext;
 		
@@ -6180,27 +6174,13 @@ return {x: x, y: y};
 				
 				//console.log("mousePositionToCaret: Mouse on row " + gridRow.lineNumber);
 				
-				var tabIndention = 0;
-				while(tabIndention < gridRow.length && gridRow[tabIndention].char=="\t") tabIndention++;
-				
-				var mouseColBegin = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
+				var mouseColBegin = Math.floor((mouseX - EDITOR.settings.leftMargin - ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				var mouseCol = mouseColBegin;
-				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
-				
-				if(tabIndention > 0) {
-					// When clicking inside tab indentation we should always go to the right
-					if(mouseCol < 0) mouseCol = tabIndention - Math.ceil(Math.abs(mouseCol) / EDITOR.settings.tabSpace);
-					else if(mouseCol < tabIndention) mouseCol = tabIndention;
-				}
-				
-				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " tabIndention=" + tabIndention);
-				
 				
 				var walker = EDITOR.gridWalker(gridRow);
 				while(!walker.done && walker.totalWidth < mouseCol) walker.next();
 				var extraSpace = walker.extraSpace;
 				var charWidth = walker.charWidth;
-				
 				
 				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " walker=" + JSON.stringify(walker));
 				
@@ -6212,7 +6192,7 @@ return {x: x, y: y};
 					mouseCol = walker.col + walker.charCodePoints;
 					
 					if(charWidth > 0) {
-						var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation+tabIndention) * EDITOR.settings.tabSpace - file.startColumn + walker.totalWidth ) * EDITOR.settings.gridWidth));
+						var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn + walker.totalWidth ) * EDITOR.settings.gridWidth));
 						var diff = Math.abs(mouseX - mouseColX);
 						console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
 						if(diff/EDITOR.settings.gridWidth > walker.charWidth/2) {
@@ -6223,9 +6203,6 @@ return {x: x, y: y};
 					}
 					
 				}
-				
-				
-				
 				
 				
 				if(mouseCol > gridRow.length) { // End of line

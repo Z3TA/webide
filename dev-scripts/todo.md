@@ -83,6 +83,10 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+moving caret up/down when moving from longer line to shorter line the caret lands one char before eol
+
+Tab indention should also be handled by the gridWalker!?
+
 issue with tab columns and columnWalker
 
 issue with mouse to caret and columnWalker
