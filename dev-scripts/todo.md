@@ -83,7 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-issue with tab indentations and columnWalker
+issue with tab columns and columnWalker
 
 issue with mouse to caret and columnWalker
 

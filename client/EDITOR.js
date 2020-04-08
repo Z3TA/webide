@@ -2746,8 +2746,9 @@ EDITOR.canvasContext = ctx;
 			
 			console.log("columnWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
 			
-			state.col += state.char.length;
-			
+			//state.col += state.char.length;
+			state.col += state.charCodePoints;
+
 			state.extraSpace += (state.charWidth-1);
 			
 			state.extraSpace -= (state.charCodePoints-1);
@@ -2761,15 +2762,16 @@ EDITOR.canvasContext = ctx;
 			
 			var col = state.col;
 			
+			state.charCodePoints = 1;
 			
-			
+			// Tabs at the beginning will indentate. While tabs in the middle will arrange text into columns
 			if(state.tabIndention < gridRow.length && gridRow[state.tabIndention].char == "\t") {
 				state.tabIndention++;
 				//console.log("columnWalker: Counting state.tabIndention=" + state.tabIndention);
 				return state;
 			}
 			
-			state.charCodePoints = 1;
+			
 			
 			state.char = gridRow[col].char;
 			
@@ -2778,19 +2780,20 @@ EDITOR.canvasContext = ctx;
 				
 				//console.log("columnWalker: col=" + col + " Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
 			}
-			else if( UTIL.isSurrogateStart(state.char) ) {
-				combineSurrogate(col);
+			else {
+				
+				if( UTIL.isSurrogateStart(state.char) ) {
+					combineSurrogate(col);
+				}
+				
+				// Need to check if next character is a zero width joiner, then combine
+				if( gridRow[col+state.charCodePoints] ) checkForZeroWidthJoiner(col+state.charCodePoints);
+				
+				var charWidth = EDITOR.glyphWidth2(state.char);
 			}
-			
-			// Need to check if next character is a zero width joiner, then combine
-			if( gridRow[col+state.charCodePoints] ) checkForZeroWidthJoiner(col+state.charCodePoints);
-			
-			var charWidth = EDITOR.glyphWidth2(state.char);
 			
 			state.charWidth = charWidth;
 			state.totalWidth += charWidth;
-			
-			
 			
 			if(state.col+state.char.length > (endCol)) {
 				console.log("columnWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
@@ -2800,7 +2803,6 @@ EDITOR.canvasContext = ctx;
 			console.log("columnWalker: state=" + JSON.stringify(state));
 			
 			console.log("columnWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
-			
 			
 			return state;
 		}
@@ -6214,7 +6216,7 @@ return {x: x, y: y};
 						var diff = Math.abs(mouseX - mouseColX);
 						console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
 						if(diff/EDITOR.settings.gridWidth > walker.charWidth/2) {
-console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
+							console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
 							mouseCol -= walker.charCodePoints;
 						}
 						
