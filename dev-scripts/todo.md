@@ -85,8 +85,6 @@ What I'm working on
 
 x position of row text is off when scrolled to the right when theare are surrogates!?
 
-moving caret up/down when moving from longer line to shorter line the caret lands one char before eol
-
 moveToCaret jumps more then neccesary! when surrogates are involved
 
 

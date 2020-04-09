@@ -750,7 +750,7 @@ file.mode = "text";
 		}
 		if(caret.eol) {
 			if(caret.col != file.grid[caret.row].length) {
-				throw new Error("Caret on column " + caret.col + ". Expected it to be on column " + file.grid[caret.row].length + " because caret.eol = true=" + caret.eol + " and caret.row=" + caret.row + " ");
+				throw new Error("Caret on column " + caret.col + ". Expected it to be on column file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " because caret.eol=" + caret.eol + " (true) ");
 			}
 			if(!caret.eof) {
 				char = file.text.charAt(caret.index);
@@ -2621,25 +2621,18 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		if(caret.row > 0) {
 			
 			var rowBefore = file.grid[caret.row];
-			var temp = file.copyCaret(caret);
-			file.checkCaret(temp);
+var walker = EDITOR.gridWalker(rowBefore, caret.col);
+while( !walker.done) walker.next();
+var widthCurrentLine = walker.totalWidth;
+if(!caret.eol) widthCurrentLine -= walker.charWidth;
 			
 			caret.row--;
-			
 			var gridRow = file.grid[caret.row];
-			
-			
 			
 			var originalCol = caret.col;
 			
 			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
 			console.log("moveCaretUp: indentationDiff=" + indentationDiff);
-			
-			file.checkCaret(temp);
-			console.log("moveCaretUp: before: temp.col=" + temp.col);
-			file.moveCaretLeft(temp);
-			console.log("moveCaretUp: after: temp.col=" + temp.col);
-			var widthCurrentLine = file.measureText(temp.row, temp.col);
 			
 			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done && (walker.totalWidth) <= (widthCurrentLine+indentationDiff)) walker.next();
@@ -2648,7 +2641,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			console.log("moveCaretUp: widthCurrentLine=" + widthCurrentLine + " walker.totalWidth=" + walker.totalWidth + " indentationDiff=" + indentationDiff + "  caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
 			
-			
+			if(walker.totalWidth <= (widthCurrentLine+indentationDiff) && walker.done) {
+				// We are on the last column. Step to EOL
+				caret.col += walker.charCodePoints;
+			}
 			
 			if(caret.col < 0) caret.col = 0;
 			
@@ -2701,10 +2697,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		if(caret.row < (file.grid.length-1)) {
 			
 			var rowBefore = file.grid[caret.row];
-			var temp = file.copyCaret(caret);
-			file.moveCaretLeft(temp);
-			var width = file.measureText(temp.row, temp.col);
-			
+			var walker = EDITOR.gridWalker(rowBefore, caret.col);
+			while( !walker.done) walker.next();
+			var widthCurrentLine = walker.totalWidth;
+			if(!caret.eol) widthCurrentLine -= walker.charWidth;
 			
 			caret.row++;
 			
@@ -2719,13 +2715,17 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			
 			
 			var walker = EDITOR.gridWalker(gridRow);
-			while( !walker.done && (walker.totalWidth) <= (width+indentationDiff) ) walker.next();
-			
+			while( !walker.done && (walker.totalWidth) <= (widthCurrentLine+indentationDiff) ) walker.next();
 			
 			caret.col = walker.col;
 			
-			console.log("moveCaretDown: width=" + width + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
+			console.log("moveCaretDown: widthCurrentLine=" + widthCurrentLine + " indentationDiff=" + indentationDiff + " caret.col=" + caret.col + " walker=" + JSON.stringify(walker) + " ");
 			
+			if(walker.totalWidth <= (widthCurrentLine+indentationDiff) && walker.done) {
+				// We are on the last column. Step to EOL
+console.log("moveCaretDown: Stepping right!");
+				caret.col += walker.charCodePoints;
+			}
 			
 			if(caret.col < 0) {
 				caret.col = 0;
@@ -4839,14 +4839,20 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 	}
 	
-	File.prototype.measureText = function measureText(row, endCol) {
+	File.prototype.measureText = function measureText(row, endCol, includeEncCol) {
 		// Returns the total monospace (glyph) width from first column until and including endCol
 		var file = this;
 		
 		var walker = EDITOR.gridWalker(file.grid[row], endCol);
 		while(!walker.done) walker.next();
 		
-		return walker.totalWidth;
+		var totalWidth = walker.totalWidth;
+		
+		if(includeEncCol === false) {
+			totalWidth -= walker.charWidth;
+		}
+		
+		return totalWidth;
 	}
 	
 	
