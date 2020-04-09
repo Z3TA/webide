@@ -2872,6 +2872,13 @@ EDITOR.canvasContext = ctx;
 		while(!walker.done) walker.next();
 		var colAdjustment = walker.extraSpace;
 		
+		if(walker.col < col) {
+			// Caret at EOL!?
+			colAdjustment -= walker.charCodePoints;
+			colAdjustment += walker.charWidth;
+		}
+		
+		console.log("renderCaret: col=" + col + " walker=" + JSON.stringify(walker));
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);
