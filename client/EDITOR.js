@@ -6193,7 +6193,7 @@ return {x: x, y: y};
 					
 					if(charWidth > 0) {
 						var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn + walker.totalWidth ) * EDITOR.settings.gridWidth));
-						var diff = Math.abs(mouseX - mouseColX);
+						var diff = mouseColX - mouseX;
 						console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
 						if(diff/EDITOR.settings.gridWidth > walker.charWidth/2) {
 							console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
