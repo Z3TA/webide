@@ -83,12 +83,6 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-error when stepping left over "‍🏭" when the factory is on first col
-
-variation slectors!? ⚡️
-
-
-️
 x position of row text is off when scrolled to the right when theare are surrogates!?
 
 moveToCaret jumps more then neccesary! when surrogates are involved

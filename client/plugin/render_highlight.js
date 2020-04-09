@@ -37,6 +37,8 @@
 
 		ctx.fillStyle=EDITOR.settings.style.highlightTextBg;
 	
+
+
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
