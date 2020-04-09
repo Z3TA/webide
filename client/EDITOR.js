@@ -2700,10 +2700,12 @@ EDITOR.canvasContext = ctx;
 		
 	}
 	
-	EDITOR.gridWalker = function gridWalker(gridRow, endCol) {
+	EDITOR.gridWalker = function gridWalker(gridRow, endCol, startCol) {
 		/*
 			The walker will also walk on the endCol
 			Accept gridrow so that we can use the function with a buffer (which don't have to know abut the file.grid)
+			
+			You probably don't want to use startCol! Need to start from the beginning to get the correct width!
 		*/
 		
 		if(typeof gridRow != "object") throw new Error("First argument gridRow=" + gridRow + "(" + (typeof gridRow) + ") needs to be a file.grid row!");
@@ -2713,7 +2715,7 @@ EDITOR.canvasContext = ctx;
 			extraSpace: 0,
 			tabIndention: 0,
 			next: walk,
-			col: 0,
+			col: startCol || 0,
 			char: "", // Can be many code points
 			charWidth: 0,
 			charCodePoints: 0,
@@ -2788,6 +2790,13 @@ EDITOR.canvasContext = ctx;
 				
 				// Need to check if next character is a zero width joiner, then combine
 				if( gridRow[col+state.charCodePoints] ) checkForZeroWidthJoiner(col+state.charCodePoints);
+				
+				// We also need to check if next character is a variation selector, and combine it
+				if( gridRow[col+state.charCodePoints] && UTIL.isVariationSelector(gridRow[col+state.charCodePoints].char) ) {
+					console.log("gridWalker: col=" + col + " Combining variation selector ");
+					state.char += gridRow[col+state.charCodePoints].char;
+					state.charCodePoints++;
+				}
 				
 				var charWidth = EDITOR.glyphWidth2(state.char);
 			}

@@ -2554,9 +2554,22 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		return caret;
 		
 		function unicodeSkip() {
-			// Skip surrogate pairs
+			// We can't use gridWalker when moving left.
+			// We have to walk backwards.
+			// When modifying this we also have to modify EDITOR.gridWalker and vice versa
+			
+			
+			if( file.grid[caret.row][caret.col] && UTIL.isVariationSelector(file.grid[caret.row][caret.col].char) ) {
+				console.log( "moveCaretLeft:unicodeSkip: Skipping variation selector:" + file.grid[caret.row][caret.col].char.codePointAt(0).toString(16) );
+				caret.col--;
+				caret.index--;
+			}
+			
+			if(caret.col == 0) return;
 			
 			skipSurrogates(caret.col);
+			
+			if(caret.col == 0) return;
 			
 			checkZeroWidthJoiner();
 			
@@ -2602,7 +2615,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 					return true;
 				}
 				else {
-					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Not a surrogate: col=" + col + " file.grid.length=" + file.grid.length + " char=" + (file.grid[caret.row][col] && file.grid[caret.row][col].char));
+					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Not a surrogate start nor end: col=" + col + " file.grid.length=" + file.grid.length + " char=" + (file.grid[caret.row][col] && file.grid[caret.row][col].char) + " (" + (file.grid[caret.row][col] && file.grid[caret.row][col].char).codePointAt(0).toString(16) + ")");
 				}
 				
 				return false;
@@ -2869,46 +2882,27 @@ console.log("moveCaretDown: Stepping right!");
 			//console.log("deleteCharacter: Row " + (row+1) + " removed");
 			
 		}
-		else if( UTIL.isSurrogateStart(character) && col < (thisRow.length-1) && UTIL.isSurrogateEnd(thisRow[col+1].char) ) {
-			
-			if( col < (thisRow.length-3) && UTIL.isSurrogateModifierEnd(thisRow[col+3].char) ) {
-				console.log("deleteCharacter: Deleting surrogate and surrogate modifier");
-				indexDecrementor = 4;
-			}
-			else {
-				console.log("deleteCharacter: Deleting surrogate");
-				indexDecrementor = 2;
-			}
-			
-			// Give deleted characters for edit listeners
-			character = "";
-			for(var i=index; i<index+indexDecrementor; i++) {
-				character += file.text.charAt(i);
-				endCol++;
-			}
-			
-			thisRow.splice(col, indexDecrementor);
-		}
 		else {
-			console.log("deleteCharacter: isSurrogateStart?" + UTIL.isSurrogateStart(character) + " thisRow.length=" + thisRow.length + " col < (thisRow.length-1) ? " + (col < (thisRow.length-1)) + " isSurrogateEnd col=" + (col+1) + "?" + (thisRow[col+1] && UTIL.isSurrogateEnd(thisRow[col+1].char)) + " ");
 			
-			console.log("deleteCharacter: Deleting normal character");
+			var walker = EDITOR.gridWalker(thisRow, col, col);
+			walker.next();
 			
-			// Remove box from the grid
+			indexDecrementor = walker.charCodePoints;
 			
-			
-			var box = grid[row][col];
-			
-			box.char = undefined;
-			box.index = undefined;
-			
-			thisRow.splice(col, 1);
-			
-			/*
-				if(character == "\t") {
-				thisRow.indentation--;
+			if(indexDecrementor > 1) {
+				// Give deleted characters for edit listeners
+				character = "";
+				for(var i=index; i<index+indexDecrementor; i++) {
+					character += file.text.charAt(i);
+					endCol++;
 				}
-			*/
+			}
+			
+			console.log("deleteCharacter: thisRow.length=" + thisRow.length + " col=" + col + " indexDecrementor=" + indexDecrementor + " character=" + character);
+			
+			// Remove box/boxes from the grid
+			thisRow.splice(col, indexDecrementor);
+			
 		}
 		
 		// Remove the character(s) from the text string

@@ -2151,13 +2151,18 @@ else {
 		else return false;
 	},
 	
-	isSurrogateModifierStart: function isSurrogateEnd(str) {
+	isSurrogateModifierStart: function isSurrogateModifierStart(str) {
 		if( str.match(/\uD83C/) ) return true;
 		else return false;
 	},
 	
-	isSurrogateModifierEnd: function isSurrogateEnd(str) {
+	isSurrogateModifierEnd: function isSurrogateModifierEnd(str) {
 		if( str.match(/[\uDFFB-\uDFFF]/) ) return true;
+		else return false;
+	},
+	
+	isVariationSelector: function isVariationSelector(str) {
+		if( str.match(/[\uFE00-\uFE0F]/) ) return true;
 		else return false;
 	},
 	
