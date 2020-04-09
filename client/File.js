@@ -2567,10 +2567,12 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 					caret.col--;
 					caret.index--;
 					
+					if(caret.col == 0) return; // Might be a ZWJ without anything before it due to corrution (deleted chars)
+					
 					caret.col--;
 					caret.index--;
 					if(!skipSurrogates(caret.col)) {
-						console.log("moveCaretLeft:unicodeSkip:checkZeroWidthJoiner: Skipped non surrogate " +  file.grid[caret.row][caret.col].char);
+						console.log("moveCaretLeft:unicodeSkip:checkZeroWidthJoiner: Skipped non surrogate char=" + (file.grid[caret.row][caret.col] && file.grid[caret.row][caret.col].char));
 					}
 					
 					checkZeroWidthJoiner();
@@ -2578,7 +2580,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 			}
 			
 			function skipSurrogates(col) {
-				if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][col-1].char) ) {
+				if( file.grid[caret.row][col] && UTIL.isSurrogateModifierEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateModifierStart(file.grid[caret.row][col-1].char) ) {
 					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Skip surrogate modifier " + (file.grid[caret.row][col-1].char + file.grid[caret.row][col].char));
 					caret.col--
 					caret.index--;
@@ -2592,7 +2594,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 						return true;
 					}
 				}
-				else if(  UTIL.isSurrogateEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateStart( file.grid[caret.row][col-1].char) ) {
+				else if(   file.grid[caret.row][col] && UTIL.isSurrogateEnd(file.grid[caret.row][col].char) && file.grid[caret.row][col-1] && UTIL.isSurrogateStart( file.grid[caret.row][col-1].char) ) {
 					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Skip surrogate " + (file.grid[caret.row][col-1].char + file.grid[caret.row][col].char));
 					caret.col--;
 					caret.index--;
@@ -2600,7 +2602,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 					return true;
 				}
 				else {
-					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Not a surrogate: " + file.grid[caret.row][col].char);
+					console.log("moveCaretLeft:unicodeSkip:skipSurrogates: Not a surrogate: col=" + col + " file.grid.length=" + file.grid.length + " char=" + (file.grid[caret.row][col] && file.grid[caret.row][col].char));
 				}
 				
 				return false;
@@ -2621,10 +2623,10 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		if(caret.row > 0) {
 			
 			var rowBefore = file.grid[caret.row];
-var walker = EDITOR.gridWalker(rowBefore, caret.col);
-while( !walker.done) walker.next();
-var widthCurrentLine = walker.totalWidth;
-if(!caret.eol) widthCurrentLine -= walker.charWidth;
+			var walker = EDITOR.gridWalker(rowBefore, caret.col);
+			while( !walker.done) walker.next();
+			var widthCurrentLine = walker.totalWidth;
+			if(!caret.eol) widthCurrentLine -= walker.charWidth;
 			
 			caret.row--;
 			var gridRow = file.grid[caret.row];
