@@ -127,10 +127,28 @@
 			*/
 			
 			var start = 0;
-			
+			var walker = EDITOR.gridWalker(gridRow);
 			if(colStart > 0) {
+				/*
+					colStart is how much is scrolled to the right
+					but we want to start earlier in order to show the transparent characters in left margin
+				*/
 				start = Math.max(0, colStart-transparentCharsLeft);
-				left -= (colStart-start) * EDITOR.settings.gridWidth;
+				left -= (colStart - start) * EDITOR.settings.gridWidth;
+				
+				//while(walker.col + walker.extraSpace < start && !walker.done) walker.next();
+				while(walker.col + walker.extraSpace < start-walker.charWidth && !walker.done) walker.next();
+				left += (walker.col + walker.extraSpace - start + walker.charWidth) * EDITOR.settings.gridWidth;
+				
+				//while(walker.col < (start - walker.charCodePoints) && !walker.done ) walker.next();
+				//left += (walker.totalWidth) * EDITOR.settings.gridWidth;
+				
+				//while(walker.col < (start) && !walker.done ) walker.next();
+				//start = walker.col;
+				
+				//left -= (colStart - walker.totalWidth + walker.extraSpace) * EDITOR.settings.gridWidth;
+				
+				console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
 			}
 			
 			var transpLvlStepLeft = 100 / (colStart-start+1);
@@ -138,8 +156,8 @@
 			var transpLvlLeft = transpLvlStepLeft;
 			var transpLvlRight = 100-transpLvlStepRight;
 			
+			//var firstInc = false;
 			
-			var walker = EDITOR.gridWalker(gridRow);
 			while(!walker.done) {
 				walker.next();
 				if( paint(walker) === false ) {
@@ -166,7 +184,7 @@ return false;
 					return false;
 				}
 				
-				console.log("paint: col=" + col + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
+				console.log("paint: col=" + col + " extraSpace=" + extraSpace + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
 				
 				// ### Set the fill style
 				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
@@ -201,6 +219,13 @@ return false;
 				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
 				
 				if(  (col+extraSpace) >= start  ) {
+					//var diff = (col+extraSpace) - start;
+					//if(!firstInc) {
+					//console.log("paint: First inc! diff=" + diff);
+					//left += EDITOR.settings.gridWidth * diff;
+					//}
+					//firstInc = true;
+					//console.log("paint: inc left col=" + col + " extraSpace=" + extraSpace + " sart=" + start + " diff=" + diff);
 					left += EDITOR.settings.gridWidth * charWidth;
 				}
 				

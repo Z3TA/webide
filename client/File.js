@@ -3929,11 +3929,10 @@ console.log("moveCaretDown: Stepping right!");
 		//console.log("scrollToCaret: caret.col=" + caret.col + " > EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " ? " + (caret.col > EDITOR.view.endingColumn));
 		//console.log("scrollToCaret: caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
 		
-		// todo: Take the width of the characters into account!
 		
 		var indentationWidth = file.grid[caret.row].indentation * EDITOR.settings.tabSpace;
 		
-		console.warn("scrollToCaret: indentationWidth=" + indentationWidth + " startColumn=" + startColumn + " caret.col=" + caret.col + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + "");
+		
 		
 		/*
 			
@@ -3947,10 +3946,14 @@ console.log("moveCaretDown: Stepping right!");
 			if(file.grid[row].indentation < minIndentation) minIndentation = file.grid[row].indentation;
 		}
 		
-		if((caret.col+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
+		var textWidth = file.measureText(caret.row, caret.col, false);
+		
+		console.warn("scrollToCaret: textWidth=" + textWidth + " indentationWidth=" + indentationWidth + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " lookAhead=" + lookAhead + " startColumn=" + startColumn + " caret.col=" + caret.col + " ");
+		
+		if((textWidth+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
 			console.log("scrollToCaret: Caret is after the visible space");
 			// We want to see a bit forward, but not more then to eol ? No, it's actually easier to read if we do not make a big jump!
-			delta = ((caret.col+indentationWidth) - (EDITOR.view.endingColumn-lookAhead)) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
+			delta = ((textWidth+indentationWidth) - (EDITOR.view.endingColumn-lookAhead)) //+ Math.max(0, Math.min(Math.floor(EDITOR.view.visibleColumns/2), file.grid[caret.row].length - caret.col));
 			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}
@@ -3973,12 +3976,14 @@ console.log("moveCaretDown: Stepping right!");
 			}
 		}
 		
-		console.log("scrollToCaret: file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		
 		// We want to see the whole line if possible
 // but we also want to see the whole line of the line we are currently on.
-		if(file.grid[caret.row].length <= EDITOR.view.visibleColumns) {
+		var widthOfWholeLine =  file.measureText(caret.row, file.grid[caret.row].length);
+		console.log("scrollToCaret: widthOfWholeLine=" + widthOfWholeLine + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		if(widthOfWholeLine <= EDITOR.view.visibleColumns) {
 			// If possible we would also like to see the start of all lines on the screen
-			// just make sure we cansee the caret on the line we are on!
+			// just make sure we can see the caret on the line we are on!
 if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 				startColumn = minIndentation*EDITOR.settings.tabSpace + indentationWidth;
 			}
@@ -4835,7 +4840,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 	}
 	
-	File.prototype.measureText = function measureText(row, endCol, includeEncCol) {
+	File.prototype.measureText = function measureText(row, endCol, includeEndCol) {
 		// Returns the total monospace (glyph) width from first column until and including endCol
 		var file = this;
 		
@@ -4844,7 +4849,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 		var totalWidth = walker.totalWidth;
 		
-		if(includeEncCol === false) {
+		if(includeEndCol === false) {
 			totalWidth -= walker.charWidth;
 		}
 		
