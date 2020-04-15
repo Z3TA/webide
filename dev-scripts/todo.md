@@ -83,6 +83,9 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Optimize unicode character support!!
+
+perf regression when selecting text!?
 
 Double click to select word no longer works because there are too many console.log making it lag...
 

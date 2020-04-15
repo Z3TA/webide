@@ -118,7 +118,10 @@
 		var transpLvlStepLeft = 100 / transparentCharsLeft;
 		var transpLvlStepRight = 100 / transparentCharsRight;
 		
-		return function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle) {
+		if(containSpecialWidthCharacters) return drawLineWithSpecialWidthCharacters;
+		else return drawLineWithSingleLengthCharacter;
+		
+		function drawLineWithSpecialWidthCharacters(gridRow, colStart, colStop, left, middle) {
 			/*
 				
 				Because characters can have different width's we can't just start on a column,
@@ -148,7 +151,7 @@
 				
 				//left -= (colStart - walker.totalWidth + walker.extraSpace) * EDITOR.settings.gridWidth;
 				
-				console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
+				//console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
 			}
 			
 			var transpLvlStepLeft = 100 / (colStart-start+1);
@@ -161,7 +164,7 @@
 			while(!walker.done) {
 				walker.next();
 				if( paint(walker) === false ) {
-					console.log("paint: Stopping because paint() returned false");
+					//console.log("paint: Stopping because paint() returned false");
 					break;
 				}
 			}
@@ -175,28 +178,28 @@
 				var character = walker.char;
 				
 				if(col > (colStop-extraSpace+transparentCharsRight)) {
-					console.log("paint: Stopping because col=" + col + " colStop=" + colStop + " extraSpace=" + extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
+					//console.log("paint: Stopping because col=" + col + " colStop=" + colStop + " extraSpace=" + extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
 return false;
 				}
 				var bufferRowCol = gridRow[col];
 				if(!bufferRowCol) {
-					console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
+					//console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
 					return false;
 				}
 				
-				console.log("paint: col=" + col + " extraSpace=" + extraSpace + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
+				//console.log("paint: col=" + col + " extraSpace=" + extraSpace + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
 				
 				// ### Set the fill style
 				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
 					// Chars in left margin
-					console.log("paint: col=" + col + " left margin");
+					//console.log("paint: col=" + col + " left margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
 					transpLvlLeft += transpLvlStepLeft * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
 				}
 				else if(col+extraSpace > colStop) {
 					// Chars in right margin
-					console.log("paint: col=" + col + " right margin");
+					//console.log("paint: col=" + col + " right margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
 					transpLvlRight -= transpLvlStepRight * charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
@@ -208,11 +211,11 @@ return false;
 				
 				// ### Paint the character
 				if(  (col+extraSpace) >= start  ) {
-					console.log("paint: Painting character=" + character + " for col=" + col + "");
+					//console.log("paint: Painting character=" + character + " for col=" + col + "");
 					ctx.fillText(character, left, middle);
 				}
 				else {
-					console.log("paint: Not painting character=" + character + " because col=" + col + " plus extraSpace=" + extraSpace + " is less then start=" + start + "  ");
+					//console.log("paint: Not painting character=" + character + " because col=" + col + " plus extraSpace=" + extraSpace + " is less then start=" + start + "  ");
 				}
 				
 				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
@@ -313,23 +316,9 @@ ctx.fillText(bufferRowCol.char, left, middle);
 				left -= colStart * EDITOR.settings.gridWidth;
 			}
 			
-			for(var col = 0; col < (colStop-extraSpace) && col < gridRow.length; col++) {
+			for(var col = colStart; col < colStop && col < gridRow.length; col++) {
 				
 				bufferRowCol = gridRow[col];
-				
-				if( UTIL.containsEmoji(bufferRowCol.char) ) {
-					charWidth = 2;
-				}
-				else {
-					charWidth = 1;
-				}
-				
-				if(col < colStart) {
-					// We can't see it, but still need to measure the width
-					ctx.fillText(bufferRowCol.char, left, middle);
-					left += EDITOR.settings.gridWidth * charWidth;
-					continue;
-				}
 				
 				if(oldStyle != bufferRowCol.color) {
 					

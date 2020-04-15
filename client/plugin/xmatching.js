@@ -90,7 +90,9 @@ var func = customRender;
 			
 			if(charToTheLeft == lP && charAtCaret == rP) { // (|)
 				//console.log("We are between two matches");
-				return;
+				
+console.timeEnd("highlightMatch " + lP + rP);
+return;
 			}
 			
 			// Figure out if we are next to a character we want to match, and witch one
@@ -108,6 +110,7 @@ var func = customRender;
 				//console.log("Caret is not close to an " + lP + " or " + rP + " ");
 				//console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
 			
+console.timeEnd("highlightMatch " + lP + rP);
 				return;
 			}
 			
@@ -133,6 +136,7 @@ var func = customRender;
 			
 			if(!leftPosition || !rightPosition) {
 				//console.log("No match found! (probably located outside the buffer)")
+				console.timeEnd("highlightMatch " + lP + rP);
 				return;
 			}
 			

@@ -2706,7 +2706,11 @@ EDITOR.canvasContext = ctx;
 			Accept gridrow so that we can use the function with a buffer (which don't have to know abut the file.grid)
 			
 			You probably don't want to use startCol! Need to start from the beginning to get the correct width!
-		*/
+		
+todo: Rewrite so that the garbage collector wont kill us!
+ca 20ms to render, ca 13ms to render without creating new objects
+
+*/
 		
 		if(typeof gridRow != "object") throw new Error("First argument gridRow=" + gridRow + "(" + (typeof gridRow) + ") needs to be a file.grid row!");
 		
