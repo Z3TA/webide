@@ -108,6 +108,8 @@ var suggestWord = null; // Used to prevent double lookups
 		
 		if(word.length == 0) return ALLOW_DEFAULT;
 		
+if( UTIL.containsEmoji(word) ) return ALLOW_DEFAULT;
+
 		if(suggestWord == word) return; // Prevent double lookups when double clicking
 		
 		suggestWord = word;
@@ -428,6 +430,8 @@ if(caret.eol) return true;
 			
 			
 			function testWord(word) {
+				
+				if( UTIL.containsEmoji(word) ) return;
 				
 				var lastUpper = 0;
 				var part = "";
