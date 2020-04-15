@@ -1311,9 +1311,19 @@ file.sanityCheck();
 		*/
 		var file = this;
 		
+		if(character.length > 1) {
+			console.warn("Multiple characters are going to be inserted!");
+			for(var i=0; i<character.length; i++) {
+				file.putCharacter(character[i], caret);
+			}
+			return;
+		}
+		
 		if(caret == undefined) {
 			caret = file.caret;
 		}
+		
+		file.checkCaret(caret);
 		
 		// Delete selection before putting character
 		if(file.selected.length > 0) {
@@ -4856,6 +4866,22 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		return totalWidth;
 	}
 	
+	File.prototype.getCharacterAt = function getCharacterAt(caretOrIndex) {
+		var file = this;
+		var index = caretOrIndex.index || caretOrIndex;
+		var r = file.rowFromIndex(index);
+		
+		if(r.indentChar) return r.indentChar;
+		if(r.lbChar) return r.lbChar;
+		
+		var row = r.row;
+		var col = r.col;
+		var gridRow = file.grid[row];
+		var walker = EDITOR.gridWalker(gridRow, col, col);
+		walker.next();
+		
+		return walker.char;
+	}
 	
 	/*
 		
