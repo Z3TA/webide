@@ -29,10 +29,10 @@
 		
 		if(caret.eol) {
 			if(file.grid[caret.row].length > 0) {
-console.log("changeEmojiModifier: Caret on end of line. Stepping left...");
-file.moveCaretLeft(caret);
+				console.log("changeEmojiModifier: Caret on end of line. Stepping left...");
+				file.moveCaretLeft(caret);
 			}
-else {
+			else {
 				console.log("changeEmojiModifier: On empty line!");
 				return;
 			}
@@ -72,6 +72,8 @@ else {
 			}
 		}
 		
+return;
+
 		if( char.length==2 && UTIL.isSurrogateStart(char[0]) && UTIL.isSurrogateEnd(char[1]) ) {
 			// Attempt to give it a color
 			file.deleteCharacter(caret);
