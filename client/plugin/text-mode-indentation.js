@@ -172,6 +172,10 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 		var caretCol = file.caret.col;
 		var tabs = 0;
 		
+		var walker;
+		var charBufferWidth = 0;
+		var col = 0;
+		
 		for(var row = 0; row < buffer.length; row++) {
 			
 			colStart = Math.max(0, file.startColumn - indentationWidth)
@@ -184,50 +188,51 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 			
 			tabs = 0;
 			
-			for(var col = colStart; col < colStop; col++) {
-				bufferRowCol = buffer[row][col];
-				char = bufferRowCol.char;
+			walker = EDITOR.gridWalker( buffer[row] );
+			
+			while(walker.col + walker.extraSpace < colStart-walker.charWidth && !walker.done) walker.next();
+			left += (walker.col + walker.extraSpace - colStart + walker.charWidth) * EDITOR.settings.gridWidth;
+			
+			while(!walker.done) {
+				walker.next();
 				
-				if(char==" ") {
-					characters += "•";
+				//console.log("renderWhiteSpace: walker=" + JSON.stringify(walker));
+				
+				if(walker.col > colStop) break;
+				
+				char = walker.char;
+				
+				if(char==" ") { // space (normal from space bar)
+					print("•");
 				}
-				else if(char=="\t") {
-					characters += "→";
-					tabs++;
+				else if(char=="\t") { // character tabulation
+					if(EDITOR.settings.tabSpace > 2 && walker.tabIndention > walker.col) print("⟶");
+					else print("→");
+				}
+				else if(char=="") { // line tabulation
+					print("□");
+				}
+				else if(char=="\f") { // form feed
+					print("¦");
+				}
+				else if(char=="\r") { // carriage return
+					print("↵");
+				}
+				else if(char=="\n") { // new line
+					print("→");
 				}
 				else if(char=="\u00A0" || char=="\u2000" || char=="\u2001" || char=="\u2002" || char=="\u2003" || char=="\u2004" || char=="\u2005" || char=="\u2006" || char=="\u2007" || char=="\u2008" || char=="\u2009" || char=="\u200A" || char=="\u200B" || char=="\u202F" || char=="\u205F" || char=="\u3000") {
-					characters += "☺";
-				}
-				else if(characters) {
-					if(!gotCharacter || tabs) {
-print();
-						left += (characters.length+1 + tabs*(EDITOR.settings.tabSpace-1)) * EDITOR.settings.gridWidth;
-						characters = "";
-						tabs = 0;
-					}
-					else {
-						left += (characters.length+1) * EDITOR.settings.gridWidth;
-						characters = "";
-					}
-				}
-else {
-					left += EDITOR.settings.gridWidth;
-					gotCharacter = true;
+					print("Ø");
 				}
 				
-				
+				left += walker.charWidth * EDITOR.settings.gridWidth;
 			}
 			
-			//console.log("renderWhiteSpace: row=" + row + " caretRow=" + caretRow + " col=" + col + " caretCol=" + caretCol);
-			
-			// don't show white space next to the caret while typing
-			if(characters && !(caretRow == row && caretCol == col && characters.length == 1)) print();
-			characters = "";
 		}
 		
-		function print() {
+		function print(char) {
 			//console.log("renderWhiteSpace: print " + characters.length);
-			ctx.fillText(characters, left, middle);
+			ctx.fillText(char, left, middle);
 		}
 		
 	}

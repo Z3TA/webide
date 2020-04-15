@@ -84,6 +84,8 @@ What I'm working on
 -------------------
 
 
+Double click to select word no longer works because there are too many console.log making it lag...
+
 Use columnWalker everywhere so that I don't have to change stuff everywhere when unicode updates...
 
 var ZWJ = String.fromCharCode(8205); // Zero-width joiner:  When placed between two characters that would otherwise not be connected, a ZWJ causes them to be printed in their connected forms.
