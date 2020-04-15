@@ -2451,7 +2451,7 @@ EDITOR.canvasContext = ctx;
 				var textString = file.text.substring(startIndex, endIndex);
 				var containSpecialWidthCharacters = false;
 				for(var i=0; i<textString.length; i++) {
-					if( EDITOR.glyphWidth(file, startIndex + i) > 1 ) {
+					if( EDITOR.glyphWidth(textString[i]) > 1 ) {
 						containSpecialWidthCharacters = true;
 						break;
 					}
@@ -2751,7 +2751,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 				return state;
 			}
 			
-			console.log("gridWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
+			//console.log("gridWalker: state.col=" + state.col + " last-char-length=" + state.char.length + " gridRow.length=" + gridRow.length);
 			
 			//state.col += state.char.length;
 			state.col += state.charCodePoints;
@@ -2762,7 +2762,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 			
 			if(state.col > endCol) {
-				console.log("gridWalker: Hmm, the walk ended! state.col=" + state.col + " endCol=" + endCol + " last-char=" + state.char + " We are done!");
+				//console.log("gridWalker: Hmm, the walk ended! state.col=" + state.col + " endCol=" + endCol + " last-char=" + state.char + " We are done!");
 				state.done = true;
 				return state;
 			}
@@ -2777,12 +2777,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 					// Tabs at the beginning will indentate. While 
 					var charWidth = EDITOR.settings.tabSpace;
 					state.tabIndention++;
-					console.log("gridWalker: col=" + col + " Indentation Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+					//console.log("gridWalker: col=" + col + " Indentation Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
 				}
 				else {
 					// tabs in the middle will arrange text into columns
 				var charWidth = (  8 - (col-state.tabIndention+state.extraSpace) % 8  );
-					console.log("gridWalker: col=" + col + " Culumn Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
+					//console.log("gridWalker: col=" + col + " Culumn Tab with=" + charWidth + " tabIndention=" + state.tabIndention + " ");
 				}
 				
 			}
@@ -2797,40 +2797,40 @@ ca 20ms to render, ca 13ms to render without creating new objects
 				
 				// We also need to check if next character is a variation selector, and combine it
 				if( gridRow[col+state.charCodePoints] && UTIL.isVariationSelector(gridRow[col+state.charCodePoints].char) ) {
-					console.log("gridWalker: col=" + col + " Combining variation selector ");
+					//console.log("gridWalker: col=" + col + " Combining variation selector ");
 					state.char += gridRow[col+state.charCodePoints].char;
 					state.charCodePoints++;
 				}
 				
-				var charWidth = EDITOR.glyphWidth2(state.char);
+				var charWidth = EDITOR.glyphWidth(state.char);
 			}
 			
 			state.charWidth = charWidth;
 			state.totalWidth += charWidth;
 			
 			if(state.col+state.char.length > (endCol)) {
-				console.log("gridWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
+				//console.log("gridWalker: This was the last iteration! state.col=" + state.col + " state.char.length=" + state.char.length + " endCol=" + endCol + "");
 				state.done = true;
 			}
 			
-			console.log("gridWalker: state=" + JSON.stringify(state));
+			//console.log("gridWalker: state=" + JSON.stringify(state));
 			
-			console.log("gridWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
+			//console.log("gridWalker: state.char: " + state.char.split('').map(char => char.codePointAt(0).toString(16)  ));
 			
 			return state;
 		}
 		
 		function combineSurrogate(col) {
-			console.log("gridWalker:combineSurrogate: col=" + col + " surrogate start");
+			//console.log("gridWalker:combineSurrogate: col=" + col + " surrogate start");
 			if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-				console.log("gridWalker: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " modifier=" + (gridRow[col+2].char + gridRow[col+3].char) + " ");
+				//console.log("gridWalker: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " modifier=" + (gridRow[col+2].char + gridRow[col+3].char) + " ");
 				state.charCodePoints+=3;
 				state.char += gridRow[col+1].char;
 				state.char += gridRow[col+2].char;
 				state.char += gridRow[col+3].char;
 			}
 			else if( gridRow[col+1] ) {
-				console.log("gridWalker:combineSurrogate: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " no modifier");
+				//console.log("gridWalker:combineSurrogate: col=" + col + " surrogate=" + (gridRow[col].char + gridRow[col+1].char) + " no modifier");
 				state.charCodePoints++;
 				state.char += gridRow[col+1].char;
 			}
@@ -2840,12 +2840,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			// Recursive (there can be many combinations)
 			
 			if( gridRow[col].char === "\u200D" ) {
-				console.log("gridWalker: checkForZeroWidthJoiner: Found one at col=" + col);
+				//console.log("gridWalker: checkForZeroWidthJoiner: Found one at col=" + col);
 				state.char += "\u200D";
 				state.charCodePoints++;
 				
 				var nextChar = gridRow[col+1] && gridRow[col+1].char;
-				console.log("gridWalker: checkForZeroWidthJoiner: nextChar=" + nextChar + " (" + (nextChar.codePointAt(0).toString(16)) + ")");
+				//console.log("gridWalker: checkForZeroWidthJoiner: nextChar=" + nextChar + " (" + (nextChar.codePointAt(0).toString(16)) + ")");
 				if(nextChar === undefined) return;
 				
 				// Add next character
@@ -2856,7 +2856,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 					combineSurrogate(col+1);
 				}
 				
-				console.log("gridWalker: checkForZeroWidthJoiner: Next col=" + (state.col+state.charCodePoints) + " char=" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char) + " (" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char.codePointAt(0).toString(16)) + ")  ");
+				//console.log("gridWalker: checkForZeroWidthJoiner: Next col=" + (state.col+state.charCodePoints) + " char=" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char) + " (" + (gridRow[state.col+state.charCodePoints] && gridRow[state.col+state.charCodePoints].char.codePointAt(0).toString(16)) + ")  ");
 				
 				if( gridRow[state.col+state.charCodePoints] ) checkForZeroWidthJoiner(state.col+state.charCodePoints);
 				
@@ -6271,21 +6271,14 @@ return {x: x, y: y};
 		var glyphWidth = {}; // Memoization
 		var oneCharWidth = EDITOR.settings.gridWidth;
 		
-		return function(file, index) {
-			var char =  file.text[index];
+		return function(char) {
+			if(typeof char != "string") throw new Error("char=" + char + " (" + (typeof char) + ") is not a string! ");
 			
+			// Optimization :P
 			var charCode = char.charCodeAt(0)
-			//console.log("glyphWidth: charCode=" + charCode);
-			
-			if(charCode < 10) return 1;
+			if(charCode < 256) return 1;
 			
 			if( glyphWidth[char] ) return glyphWidth[char];
-			
-			// Combine surrogate pairs
-			if( char.match(/[\uD800-\uDBFF]/) && file.text[index+1] ) {
-				//console.log("glyphWidth: Adding surrogate pair");
-				char += file.text[index+1];
-			}
 			
 			var renderWidth = EDITOR.canvasContext.measureText(char).width;
 			//console.log("glyphWidth: renderWidth=" + renderWidth + " oneCharWidth=" + oneCharWidth + " ");

@@ -83,6 +83,41 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+todo: Flamegraph, 
+
+
+render before different glyph width unicode: 
+Firefox: 8-12ms 
+Chrome: 9-10ms
+
+render after different glyph width unicode (using text render optimize): 
+Firefox: 65-68ms 
+Chrome: 40-45ms
+
+render after different glyph width unicode (without text render optimize): 
+Firefox: 170-190ms (90-110ms after commenting out console.log's)
+Chrome: 90-110ms (44-45 after commenting out console.log's)
+
+After gridWalker optimization (reuse walker state object) ,without text render optimize:
+Firefox: 181-190ms
+Chrome: 90-101ms
+
+After optimizing EDITOR.glyphWidth, using text render optimize:
+Firefox: 12-14ms
+Chrome: 8-10ms
+
+After optimizing EDITOR.glyphWidth ,without text render optimize:
+Firefox: 61-63ms
+Chrome: 45-63ms
+
+
+
+Whats taking so long?
+
+
+
+optimization: Try not to create new objects!
+
 Optimize unicode character support!!
 
 perf regression when selecting text!?
