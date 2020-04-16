@@ -83,7 +83,13 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-todo: Flamegraph, 
+
+
+Optimize new textrender to be on pair with old text render,
+we then don't have to check if text contains special width character before rendering
+check for zero width character in grid walker.
+
+
 
 
 render before different glyph width unicode: 
@@ -118,9 +124,20 @@ Optimizing UTIL.isSurrogateStart and isVariationSelector with re.test instead of
 Firefox: 55-60
 Chrome: 19-24ms
 
+After optimizing new text render with char buffering
+Firefox: 12-15
+Chrome: 9-13
 
+Whats taking so long? Answer: Blitting the pixels on the screen!
 
-Whats taking so long?
+textRender old: (Chrome) 4.37, current: 10.42 aftert inlining paint function: 5-10ms
+render:
+Firefox: 12-15
+Chrome: 9-11
+
+after screwup,without text render optimize:
+Firefox: 15-18
+Chrome: 13-17 or 10-13 (textRender only: 6-10)
 
 
 
@@ -151,6 +168,10 @@ render whitespace
 
 Better unicode support (emojis and other wide glyphs)
 
+
+Was optimzing, but after refactoring I got high spikes .... Then used Ctrl+Z to undo the refactoring, 
+but the editor screwed up the undo, so it needs a correct undo/redo!
+in the meantime we can have a time-machine functionality that makes a backup every 5 minute!?
 
 
 idea: when scrolling on an emoji with modifier, toggle between the modifiers!

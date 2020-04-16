@@ -101,23 +101,22 @@
 		
 	}
 	
+	/*
+		note: Tried to optimize by removing drawLineWithSingleLengthCharacter, but got high spikes in render time!
+	*/
 	function makeLineRender(file, containSpecialWidthCharacters, ctx) {
 		
 		var oldStyle = EDITOR.settings.style.textColor;
 		
-		//var transparentChars = Math.floor(Math.min( (EDITOR.settings.leftMargin) / EDITOR.settings.gridWidth - 2, EDITOR.settings.rightMargin / EDITOR.settings.gridWidth));
 		var transparentCharsLeft = Math.floor(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth - 2);
 		var transparentCharsRight = Math.floor(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
 		
-		
-		
-		console.log("textRender: transparentCharsLeft=" + transparentCharsLeft + " transparentCharsRight=" + transparentCharsRight);
-		
-		//transparentCharsLeft = 3;
+		//console.log("textRender: transparentCharsLeft=" + transparentCharsLeft + " transparentCharsRight=" + transparentCharsRight);
 		
 		var transpLvlStepLeft = 100 / transparentCharsLeft;
 		var transpLvlStepRight = 100 / transparentCharsRight;
 		
+		return drawLineWithSpecialWidthCharacters;
 		if(containSpecialWidthCharacters) return drawLineWithSpecialWidthCharacters;
 		else return drawLineWithSingleLengthCharacter;
 		
@@ -139,17 +138,8 @@
 				start = Math.max(0, colStart-transparentCharsLeft);
 				left -= (colStart - start) * EDITOR.settings.gridWidth;
 				
-				//while(walker.col + walker.extraSpace < start && !walker.done) walker.next();
 				while(walker.col + walker.extraSpace < start-walker.charWidth && !walker.done) walker.next();
 				left += (walker.col + walker.extraSpace - start + walker.charWidth) * EDITOR.settings.gridWidth;
-				
-				//while(walker.col < (start - walker.charCodePoints) && !walker.done ) walker.next();
-				//left += (walker.totalWidth) * EDITOR.settings.gridWidth;
-				
-				//while(walker.col < (start) && !walker.done ) walker.next();
-				//start = walker.col;
-				
-				//left -= (colStart - walker.totalWidth + walker.extraSpace) * EDITOR.settings.gridWidth;
 				
 				//console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
 			}
@@ -159,7 +149,8 @@
 			var transpLvlLeft = transpLvlStepLeft;
 			var transpLvlRight = 100-transpLvlStepRight;
 			
-			//var firstInc = false;
+			var charBufferPosLeft = left;
+			var charBuffer = "";
 			
 			while(!walker.done) {
 				walker.next();
@@ -171,137 +162,96 @@
 				
 			//console.log("paint: Exit loop walker=" + JSON.stringify(walker));
 			
+			if(charBuffer.length > 0) {
+				ctx.fillText(charBuffer, charBufferPosLeft, middle);
+			}
+			
 			function paint(walker) {
-				var col = walker.col;
-				var extraSpace = walker.extraSpace;
-				var charWidth = walker.charWidth;
-				var character = walker.char;
+				/*
+					var col = walker.col;
+					var extraSpace = walker.extraSpace;
+					var charWidth = walker.charWidth;
+					var character = walker.char;
+				*/
 				
-				if(col > (colStop-extraSpace+transparentCharsRight)) {
-					//console.log("paint: Stopping because col=" + col + " colStop=" + colStop + " extraSpace=" + extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
-return false;
+				// Optimization: Avoid calling ctx methods at all cost!
+				
+				if(walker.col > (colStop - walker.extraSpace + transparentCharsRight)) {
+					//console.log("paint: Stopping because col=" + walker.col + " colStop=" + colStop + " extraSpace=" + walker.extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
+					return false;
 				}
-				var bufferRowCol = gridRow[col];
+				var bufferRowCol = gridRow[walker.col];
 				if(!bufferRowCol) {
 					//console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
 					return false;
 				}
 				
-				//console.log("paint: col=" + col + " extraSpace=" + extraSpace + " character=" +character + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
+				//console.log("paint: col=" + walker.col + " extraSpace=" + walker.extraSpace + " walker.char=" + walker.char + " charWidth=" + walker.charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + walker.extraSpace + " gridRow.length=" + gridRow.length);
 				
-				// ### Set the fill style
-				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
+				if( (walker.col + walker.extraSpace) < colStart && (walker.col + walker.extraSpace) >= start) {
 					// Chars in left margin
-					//console.log("paint: col=" + col + " left margin");
+					console.log("paint: col=" + walker.col + " left margin");
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
-					transpLvlLeft += transpLvlStepLeft * charWidth;
+					transpLvlLeft += transpLvlStepLeft * walker.charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
+					ctx.fillText(walker.char, left, middle);
+					
+					charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
 				}
-				else if(col+extraSpace > colStop) {
+				else if(walker.col + walker.extraSpace > colStop) {
 					// Chars in right margin
-					//console.log("paint: col=" + col + " right margin");
+					//console.log("paint: col=" + walker.col + " right margin");
+					
+					if(charBuffer.length > 0) {
+						ctx.fillText(charBuffer, charBufferPosLeft, middle);
+						charBuffer = "";
+					}
+					
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
-					transpLvlRight -= transpLvlStepRight * charWidth;
+					transpLvlRight -= transpLvlStepRight * walker.charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
+					ctx.fillText(walker.char, left, middle);
 				}
-				else if(oldStyle != bufferRowCol.color) {
-					//console.log("paint: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
+				else if( (walker.col + walker.extraSpace) >= start && oldStyle != bufferRowCol.color) {
+					//console.log("paint: col=" + walker.col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
+					
+					if(charBuffer.length > 0) {
+						ctx.fillText(charBuffer, charBufferPosLeft, middle);
+						charBufferPosLeft = left;
+					}
+					
+					charBuffer = walker.char;
+					
 					ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
+					
 				}
-				
-				// ### Paint the character
-				if(  (col+extraSpace) >= start  ) {
-					//console.log("paint: Painting character=" + character + " for col=" + col + "");
-					ctx.fillText(character, left, middle);
+				else if(  (walker.col + walker.extraSpace) >= start  ) {
+					if(walker.charWidth != 1) {
+						ctx.fillText(charBuffer, charBufferPosLeft, middle);
+						charBuffer = "";
+						
+						//console.log("paint: Painting walker.char=" + walker.char + " for col=" + walker.col + "");
+						ctx.fillText(walker.char, left, middle);
+						
+						charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
+					}
+					else {
+						//console.log("paint: Adding walker.char=" + walker.char + " to charBuffer=" + charBuffer);
+						charBuffer += walker.char;
+					}
 				}
 				else {
-					//console.log("paint: Not painting character=" + character + " because col=" + col + " plus extraSpace=" + extraSpace + " is less then start=" + start + "  ");
+					//console.log("paint: Not painting walker.char=" + walker.char + " because col=" + walker.col + " plus extraSpace=" + walker.extraSpace + " is less then start=" + start + "  ");
 				}
 				
-				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
-				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
+				if(bufferRowCol.wave) renderWave(ctx, middle-EDITOR.settings.gridHeight/2, left, walker.charWidth);
+				else if(bufferRowCol.circle) renderCircle(ctx, middle-EDITOR.settings.gridHeight/2, left, walker.charWidth)
 				
-				if(  (col+extraSpace) >= start  ) {
-					//var diff = (col+extraSpace) - start;
-					//if(!firstInc) {
-					//console.log("paint: First inc! diff=" + diff);
-					//left += EDITOR.settings.gridWidth * diff;
-					//}
-					//firstInc = true;
-					//console.log("paint: inc left col=" + col + " extraSpace=" + extraSpace + " sart=" + start + " diff=" + diff);
-					left += EDITOR.settings.gridWidth * charWidth;
+				if(  (walker.col + walker.extraSpace) >= start  ) {
+					left += EDITOR.settings.gridWidth * walker.charWidth;
 				}
 				
-			}
-			
-			
-			return;
-			
-			// Seems we need to start from the beginning!
-			for(var col = 0; col < (colStop-extraSpace+transparentCharsRight) && col < gridRow.length; col++) {
-				
-				bufferRowCol = gridRow[col];
-				
-				charWidth = EDITOR.glyphWidth(file, startIndex + col);
-				
-				//console.log("textRender: col=" + col + " char=" + bufferRowCol.char + " charWidth=" + charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
-				
-				// ### Set the fill style
-				if( (col+extraSpace) < colStart && (col+extraSpace) >= start) {
-					// Chars in left margin
-					console.log("textRender: col=" + col + " left margin");
-					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
-					transpLvlLeft += transpLvlStepLeft * charWidth;
-					//ctx.fillStyle = oldStyle = "orange";
-				}
-				else if(col+extraSpace > colStop) {
-					// Chars in right margin
-					console.log("textRender: col=" + col + " right margin");
-					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
-					transpLvlRight -= transpLvlStepRight * charWidth;
-					//ctx.fillStyle = oldStyle = "orange";
-				}
-				else if(oldStyle != bufferRowCol.color) {
-					//console.log("textRender: col=" + col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
-ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
-				}
-				
-				// ### Paint the character and calculate spacing
-				if(col >= tabIndention && bufferRowCol.char == "\t") {
-					console.log("textRender: col=" + col + " tabIndention=" + tabIndention + " extraSpace=" + extraSpace + " ");
-					charWidth += (  (8 - charWidth) - (col-tabIndention+extraSpace) % 8  );
-				}
-				else if( UTIL.isSurrogateStart(bufferRowCol.char) ) {
-					//console.log("textRender: col=" + col + " surrogate start");
-					if( gridRow[col+2] && gridRow[col+3] && UTIL.isSurrogateModifierStart(gridRow[col+2].char) ) {
-						console.log("textRender: col=" + col + " surrogate modifier");
-						if( (col+extraSpace) >= start ) ctx.fillText(bufferRowCol.char + gridRow[col+1].char + gridRow[col+2].char + gridRow[col+3].char, left, middle);
-						// a surrage with a modifier is 4 utf16 characters but only take up 1-3 spaces depending on glyph width
-						col += 3;
-						//charWidth++;
-						extraSpace -= 3;
-					}
-					else if(gridRow[col+1]) {
-						console.log("textRender: col=" + col + " no modifier");
-						 if( (col+extraSpace) >= start ) ctx.fillText(bufferRowCol.char + gridRow[col+1].char, left, middle);
-						col++;
-						extraSpace -= 1;
-					}
-				}
-				else if(  (col+extraSpace) >= start  ) {
-					//console.log("textRender: col=" + col + " default");
-ctx.fillText(bufferRowCol.char, left, middle);
-				}
-				
-				if(bufferRowCol.wave) renderWave(middle-EDITOR.settings.gridHeight/2, left, charWidth);
-				else if(bufferRowCol.circle) renderCircle(middle-EDITOR.settings.gridHeight/2, left, charWidth)
-				
-				if(  (col+extraSpace) >= start  ) {
-				left += EDITOR.settings.gridWidth * charWidth;
-				}
-				
-				if(charWidth > 1) extraSpace += charWidth-1;
-				
+return true;
 			}
 			
 		}
