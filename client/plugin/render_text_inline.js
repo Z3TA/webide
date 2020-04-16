@@ -117,7 +117,7 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 //renderRow(ctx, buffer[row], colStart, colStop, left, middle);
 
 			
-			gridRow = file.grid[row];
+			gridRow = buffer[row];
 			
 			
 			start = 0;
@@ -135,7 +135,7 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				
 			}
 			
-transpLvlStepLeft = 100 / (colStart-start+1);
+			transpLvlStepLeft = 100 / (colStart-start+1);
 			transpLvlLeft = transpLvlStepLeft;
 			transpLvlRight = 100-transpLvlStepRight;
 			
@@ -189,19 +189,26 @@ transpLvlStepLeft = 100 / (colStart-start+1);
 					
 					if(charBuffer.length > 0) {
 						ctx.fillText(charBuffer, charBufferPosLeft, middle);
-						charBufferPosLeft = left;
+						
 					}
 					
-					charBuffer = walker.char;
-					
 					ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
+					if(walker.charWidth != 1) {
+						ctx.fillText(walker.char, left, middle);
+						charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
+					}
+					else {
+						charBuffer = walker.char;
+						charBufferPosLeft = left;
+					}
 					
 				}
 				else if(  (walker.col + walker.extraSpace) >= start  ) {
 					if(walker.charWidth != 1) {
-						ctx.fillText(charBuffer, charBufferPosLeft, middle);
-						charBuffer = "";
-						
+						if(charBuffer.length > 0) {
+							ctx.fillText(charBuffer, charBufferPosLeft, middle);
+							charBuffer = "";
+						}
 						//console.log("paint: Painting walker.char=" + walker.char + " for col=" + walker.col + "");
 						ctx.fillText(walker.char, left, middle);
 						

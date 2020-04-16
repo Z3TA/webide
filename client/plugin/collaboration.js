@@ -2696,7 +2696,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				return;
 			}
 			
-			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
+			if(!fileChangeEventOrderCounters.hasOwnProperty(file.path)) throw new Error("fileChangeEventOrderCounters: file.path=" + file.path + "  not in: " + JSON.stringify(fileChangeEventOrderCounters, null, 2));
 			
 			var currentOrder = fileChangeEventOrderCounters[file.path];
 			if(ev.order > currentOrder) fileChangeEventOrderCounters[file.path]++;

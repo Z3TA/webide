@@ -2588,7 +2588,7 @@ EDITOR.canvasContext = ctx;
 		//console.log("rendering finish");
 	}
 	
-	EDITOR.renderRow = function(gridRow) {
+	EDITOR.renderRow = function(row) {
 		
 		console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
 		
@@ -2596,23 +2596,23 @@ EDITOR.canvasContext = ctx;
 			
 			var file = EDITOR.currentFile;
 			
-			if(gridRow == undefined) gridRow = file.caret.row;
-			if(file.grid.length <= gridRow) throw new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " ");
+			if(row == undefined) row = file.caret.row;
+			if(file.grid.length <= row) throw new Error("row=" + row + " over file.grid.length=" + file.grid.length + " ");
 			
-			if(!file.rowVisible(gridRow)) {
-				console.warn("Row=" + gridRow + " not in view!");
+			if(!file.rowVisible(row)) {
+				console.warn("Row=" + row + " not in view!");
 				return;
 			}
 			
-			var screenStartRow = Math.max(0, gridRow - file.startRow);
+			var screenStartRow = Math.max(0, row - file.startRow);
 			
 			console.time("renderRow");
 			
 			var buffer = [];
 			
 			// Create the buffer
-			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see file.grid[gridRow].length
-			buffer.push(file.cloneRow(gridRow, maxColumns)); // Clone the row
+			var maxColumns = Math.max(EDITOR.view.endingColumn, EDITOR.view.visibleColumns *2); // Optimization: Cut off what we can not see file.grid[row].length
+			buffer.push(file.cloneRow(row, maxColumns)); // Clone the row
 			
 			
 			// Load on the fly functionality on the buffer
@@ -2622,13 +2622,17 @@ EDITOR.canvasContext = ctx;
 				buffer = EDITOR.preRenderFunctions[i](buffer, file);
 			}
 			
-			if(buffer.length > 0) {
+			/*
+				
+				if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var textString = file.text.substring(startIndex, endIndex);
 				var containSpecialWidthCharacters = (UTIL.indexOfZeroWidthCharacter(textString) != -1 || UTIL.containsEmoji(textString));
-			}
-			else var containSpecialWidthCharacters = false;
+				}
+				else var containSpecialWidthCharacters = false;
+			*/
+			var containSpecialWidthCharacters = true;
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
@@ -2647,10 +2651,10 @@ EDITOR.canvasContext = ctx;
 				ctx.lineWidth = 1;
 			*/
 			
-			console.log("Rendering gridRow=" + gridRow);
+			console.log("Rendering row=" + row);
 			
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, gridRow, gridRow); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, row, row); // Call render
 			}
 			
 			console.timeEnd("renderRow");
