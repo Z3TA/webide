@@ -2445,20 +2445,24 @@ EDITOR.canvasContext = ctx;
 			// preRenderFunctions could be optimized using web workers!
 			
 			// Find out if the buffer contains characters with special width ( might need optimization )
-			if(buffer.length > 0) {
+			/*
+				if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var textString = file.text.substring(startIndex, endIndex);
 				var containSpecialWidthCharacters = false;
 				for(var i=0; i<textString.length-1; i++) {
-					if( UTIL.isSurrogateStart(textString[i]) ) {
-						containSpecialWidthCharacters = true;
-						break;
-					}
+				if( UTIL.isSurrogateStart(textString[i]) ) {
+				containSpecialWidthCharacters = true;
+				break;
+				}
 				}
 				containSpecialWidthCharacters = ( containSpecialWidthCharacters || UTIL.indexOfZeroWidthCharacter(textString) != -1 || textString.indexOf("\t")!= -1 );
-			}
-			else var containSpecialWidthCharacters = false;
+				}
+				else
+				
+			*/
+			var containSpecialWidthCharacters = true;
 			
 			//ctx.imageSmoothingEnabled = true;
 			

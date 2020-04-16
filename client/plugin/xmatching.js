@@ -52,7 +52,7 @@ var func = customRender;
 	
 	function highlightMatch(ctx, buffer, file, lP, rP, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns) {
 		
-		console.time("highlightMatch " + lP + rP);
+		//console.time("highlightMatch " + lP + rP);
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -91,7 +91,7 @@ var func = customRender;
 			if(charToTheLeft == lP && charAtCaret == rP) { // (|)
 				//console.log("We are between two matches");
 				
-console.timeEnd("highlightMatch " + lP + rP);
+//console.timeEnd("highlightMatch " + lP + rP);
 return;
 			}
 			
@@ -110,7 +110,7 @@ return;
 				//console.log("Caret is not close to an " + lP + " or " + rP + " ");
 				//console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
 			
-console.timeEnd("highlightMatch " + lP + rP);
+//console.timeEnd("highlightMatch " + lP + rP);
 				return;
 			}
 			
@@ -136,7 +136,7 @@ console.timeEnd("highlightMatch " + lP + rP);
 			
 			if(!leftPosition || !rightPosition) {
 				//console.log("No match found! (probably located outside the buffer)")
-				console.timeEnd("highlightMatch " + lP + rP);
+				//console.timeEnd("highlightMatch " + lP + rP);
 				return;
 			}
 			
@@ -208,7 +208,7 @@ console.timeEnd("highlightMatch " + lP + rP);
 				*/
 		}
 		
-		console.timeEnd("highlightMatch " + lP + rP);
+		//console.timeEnd("highlightMatch " + lP + rP);
 		
 		
 		

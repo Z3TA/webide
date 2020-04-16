@@ -139,6 +139,14 @@ after screwup,without text render optimize:
 Firefox: 15-18
 Chrome: 13-17 or 10-13 (textRender only: 6-10)
 
+when not inlined: one line: textRender: 0.2-0.4ms (Chrome)
+when inlined: one line: textRender:  (Chrome) 0.2-0.3
+feel when selecting text: no percived difference
+the non inlined version performs slightly better
+no difference on Firefox
+
+Not checking for special width characters:
+
 
 
 optimization: Try not to create new objects!

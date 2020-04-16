@@ -21,7 +21,21 @@ console.warn("No font defined!");
 EDITOR.addRender(textRender, 2100);
 
 console.log("Loaded textRenderer");
-
+	
+	
+	/*
+		Optimizations:
+		
+		* Addin colStart & colStop had no effect!
+		* Commenting some if's had no effect!
+		* Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
+		* ctx.fillStyle behind if, textRender: 8.727ms, even faster!
+		* Calling ctx.fillTex in chunks: Alot faster! (5-6 times faster)
+		* Inlining function calls after implementing better unicode and tab support ca 30% faster on Chrome, no effect on Firefox
+		(inlining functinos often makes things faster in Chrome, but it might also worsen the performance as the function might become too big for V8 to cache/optimize)
+		
+		Setting the font takes 1-2ms! Don't do it at every render!
+	*/
 function textRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 
 //console.time("textRender");
@@ -39,26 +53,14 @@ bufferRowCol,
 x = 0,
 y = 0,
 characters = "",
-oldStyle = EDITOR.settings.style.textColor;
+		oldStyle;
 
+//ctx.strokeStyle="rgba(0,255,0,0.5)"; // For rendering circles and waves
 
-ctx.strokeStyle="rgba(0,255,0,0.5)";
-// Setting the font takes 1-2ms! Don't do it at every render!
-//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+//ctx.fillStyle = oldStyle;
 
-ctx.fillStyle = oldStyle;
-
-ctx.beginPath(); // Reset all the paths!
-/*
-Optimization:
-
-* Addin colStart & colStop had no effect!
-* Commenting some if's had no effect!
-* Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
-* ctx.fillStyle behind if, textRender: 8.727ms, even faster!
-* Calling ctx.fillTex in chunks: Alot faster! (5-6 times faster)
-
-*/
+		//ctx.beginPath(); // For rendering circles and waves - Reset all the paths!
+		
 
 var colStart = 0;
 var colStop = 0;
@@ -70,6 +72,28 @@ var extraSpace = 0;
 
 var tabSpace = 0;
 
+		var transparentCharsLeft = Math.floor(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth - 2);
+		var transparentCharsRight = Math.floor(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
+		
+		//console.log("textRender: transparentCharsLeft=" + transparentCharsLeft + " transparentCharsRight=" + transparentCharsRight);
+		
+		var transpLvlStepLeft = 100 / transparentCharsLeft;
+		var transpLvlStepRight = 100 / transparentCharsRight;
+		
+		var gridRow
+		
+		var start = 0;
+		
+		var walker;
+		
+		var transpLvlLeft = transpLvlStepLeft;
+		var transpLvlRight = 100-transpLvlStepRight;
+		
+		var charBuffer = "";
+		var charBufferPosLeft = left;
+		
+		var bufferRowCol;
+		
 for(var row = 0; row < buffer.length; row++) {
 
 indentation = buffer[row].indentation;
@@ -93,23 +117,11 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 //renderRow(ctx, buffer[row], colStart, colStop, left, middle);
 
 			
-			var gridRow = file.grid[row];
+			gridRow = file.grid[row];
 			
 			
-			var oldStyle = EDITOR.settings.style.textColor;
-			
-			//var transparentChars = Math.floor(Math.min( (EDITOR.settings.leftMargin) / EDITOR.settings.gridWidth - 2, EDITOR.settings.rightMargin / EDITOR.settings.gridWidth));
-			var transparentCharsLeft = Math.floor(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth - 2);
-			var transparentCharsRight = Math.floor(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
-			
-			//console.log("textRender: transparentCharsLeft=" + transparentCharsLeft + " transparentCharsRight=" + transparentCharsRight);
-			
-			var transpLvlStepLeft = 100 / transparentCharsLeft;
-			var transpLvlStepRight = 100 / transparentCharsRight;
-			
-			
-			var start = 0;
-			var walker = EDITOR.gridWalker(gridRow);
+			start = 0;
+			walker = EDITOR.gridWalker(gridRow);
 			if(colStart > 0) {
 				/*
 					colStart is how much is scrolled to the right
@@ -118,28 +130,17 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				start = Math.max(0, colStart-transparentCharsLeft);
 				left -= (colStart - start) * EDITOR.settings.gridWidth;
 				
-				//while(walker.col + walker.extraSpace < start && !walker.done) walker.next();
 				while(walker.col + walker.extraSpace < start-walker.charWidth && !walker.done) walker.next();
 				left += (walker.col + walker.extraSpace - start + walker.charWidth) * EDITOR.settings.gridWidth;
 				
-				//while(walker.col < (start - walker.charCodePoints) && !walker.done ) walker.next();
-				//left += (walker.totalWidth) * EDITOR.settings.gridWidth;
-				
-				//while(walker.col < (start) && !walker.done ) walker.next();
-				//start = walker.col;
-				
-				//left -= (colStart - walker.totalWidth + walker.extraSpace) * EDITOR.settings.gridWidth;
-				
-				//console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
 			}
 			
-			var transpLvlStepLeft = 100 / (colStart-start+1);
+transpLvlStepLeft = 100 / (colStart-start+1);
+			transpLvlLeft = transpLvlStepLeft;
+			transpLvlRight = 100-transpLvlStepRight;
 			
-			var transpLvlLeft = transpLvlStepLeft;
-			var transpLvlRight = 100-transpLvlStepRight;
-			
-			var charBufferPosLeft = left;
-			var charBuffer = "";
+			charBuffer = "";
+			charBufferPosLeft = left;
 			
 			while(!walker.done) {
 				walker.next();
@@ -151,7 +152,7 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 					//console.log("paint: Stopping because col=" + walker.col + " colStop=" + colStop + " extraSpace=" + walker.extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
 					break;
 				}
-				var bufferRowCol = gridRow[walker.col];
+				bufferRowCol = gridRow[walker.col];
 				if(!bufferRowCol) {
 					//console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
 					break;
@@ -159,7 +160,6 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				
 				//console.log("paint: col=" + walker.col + " extraSpace=" + walker.extraSpace + " walker.char=" + walker.char + " charWidth=" + walker.charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
 				
-				// ### Set the fill style
 				if( (walker.col + walker.extraSpace) < colStart && (walker.col + walker.extraSpace) >= start) {
 					// Chars in left margin
 					//console.log("paint: col=" + walker.col + " left margin");
@@ -231,155 +231,9 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				ctx.fillText(charBuffer, charBufferPosLeft, middle);
 			}
 			
-			
-			
-			
-			
-			
-			
 }
 
 //console.timeEnd("textRender");
-
-}
-
-
-function renderRow(ctx, gridRow, colStart, colStop, left, middle) {
-
-var oldStyle = EDITOR.settings.style.textColor;
-
-//var transparentChars = Math.floor(Math.min( (EDITOR.settings.leftMargin) / EDITOR.settings.gridWidth - 2, EDITOR.settings.rightMargin / EDITOR.settings.gridWidth));
-var transparentCharsLeft = Math.floor(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth - 2);
-var transparentCharsRight = Math.floor(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
-
-//console.log("textRender: transparentCharsLeft=" + transparentCharsLeft + " transparentCharsRight=" + transparentCharsRight);
-
-var transpLvlStepLeft = 100 / transparentCharsLeft;
-var transpLvlStepRight = 100 / transparentCharsRight;
-
-
-var start = 0;
-var walker = EDITOR.gridWalker(gridRow);
-if(colStart > 0) {
-/*
-colStart is how much is scrolled to the right
-but we want to start earlier in order to show the transparent characters in left margin
-*/
-start = Math.max(0, colStart-transparentCharsLeft);
-left -= (colStart - start) * EDITOR.settings.gridWidth;
-
-//while(walker.col + walker.extraSpace < start && !walker.done) walker.next();
-while(walker.col + walker.extraSpace < start-walker.charWidth && !walker.done) walker.next();
-left += (walker.col + walker.extraSpace - start + walker.charWidth) * EDITOR.settings.gridWidth;
-
-//while(walker.col < (start - walker.charCodePoints) && !walker.done ) walker.next();
-//left += (walker.totalWidth) * EDITOR.settings.gridWidth;
-
-//while(walker.col < (start) && !walker.done ) walker.next();
-//start = walker.col;
-
-//left -= (colStart - walker.totalWidth + walker.extraSpace) * EDITOR.settings.gridWidth;
-
-//console.log("paint: colStart=" + colStart + " start=" + start + " walker=" + JSON.stringify(walker));
-}
-
-var transpLvlStepLeft = 100 / (colStart-start+1);
-
-var transpLvlLeft = transpLvlStepLeft;
-var transpLvlRight = 100-transpLvlStepRight;
-
-var charBufferPosLeft = left;
-var charBuffer = "";
-
-while(!walker.done) {
-walker.next();
-
-// Paint function inlined for optimization (had very little effect)
-// Optimization: Avoid calling ctx methods at all cost!
-
-if(walker.col > (colStop - walker.extraSpace + transparentCharsRight)) {
-//console.log("paint: Stopping because col=" + walker.col + " colStop=" + colStop + " extraSpace=" + walker.extraSpace + " transparentCharsRight=" + transparentCharsRight + " ");
-break;
-}
-var bufferRowCol = gridRow[walker.col];
-if(!bufferRowCol) {
-//console.log("paint: Stopping because bufferRowCol=" + bufferRowCol + " col=" + col + " gridRow.length=" + gridRow.length);
-break;
-}
-
-//console.log("paint: col=" + walker.col + " extraSpace=" + walker.extraSpace + " walker.char=" + walker.char + " charWidth=" + walker.charWidth + " oldStyle=" + oldStyle + " start=" + start + " colStart=" + colStart + " colStop=" + colStop + " extraSpace=" + extraSpace + " gridRow.length=" + gridRow.length);
-
-// ### Set the fill style
-if( (walker.col + walker.extraSpace) < colStart && (walker.col + walker.extraSpace) >= start) {
-// Chars in left margin
-//console.log("paint: col=" + walker.col + " left margin");
-ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
-transpLvlLeft += transpLvlStepLeft * walker.charWidth;
-//ctx.fillStyle = oldStyle = "orange";
-ctx.fillText(walker.char, left, middle);
-
-charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
-}
-else if(walker.col + walker.extraSpace > colStop) {
-// Chars in right margin
-
-if(charBuffer.length > 0) {
-ctx.fillText(charBuffer, charBufferPosLeft, middle);
-charBuffer = "";
-}
-
-//console.log("paint: col=" + walker.col + " right margin");
-ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
-transpLvlRight -= transpLvlStepRight * walker.charWidth;
-//ctx.fillStyle = oldStyle = "orange";
-ctx.fillText(walker.char, left, middle);
-}
-else if( (walker.col + walker.extraSpace) >= start && oldStyle != bufferRowCol.color) {
-//console.log("paint: col=" + walker.col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
-
-if(charBuffer.length > 0) {
-ctx.fillText(charBuffer, charBufferPosLeft, middle);
-charBufferPosLeft = left;
-}
-
-charBuffer = walker.char;
-
-ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
-
-}
-else if(  (walker.col + walker.extraSpace) >= start  ) {
-if(walker.charWidth != 1) {
-ctx.fillText(charBuffer, charBufferPosLeft, middle);
-charBuffer = "";
-
-//console.log("paint: Painting walker.char=" + walker.char + " for col=" + walker.col + "");
-ctx.fillText(walker.char, left, middle);
-
-charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
-}
-else {
-//console.log("paint: Adding walker.char=" + walker.char + " to charBuffer=" + charBuffer);
-charBuffer += walker.char;
-}
-}
-else {
-//console.log("paint: Not painting walker.char=" + walker.char + " because col=" + walker.col + " plus extraSpace=" + walker.extraSpace + " is less then start=" + start + "  ");
-}
-
-if(bufferRowCol.wave) renderWave(ctx, middle-EDITOR.settings.gridHeight/2, left, walker.charWidth);
-else if(bufferRowCol.circle) renderCircle(ctx, middle-EDITOR.settings.gridHeight/2, left, walker.charWidth)
-
-if(  (walker.col + walker.extraSpace) >= start  ) {
-left += EDITOR.settings.gridWidth * walker.charWidth;
-}
-
-}
-
-//console.log("paint: Exit loop walker=" + JSON.stringify(walker));
-
-if(charBuffer.length > 0) {
-ctx.fillText(charBuffer, charBufferPosLeft, middle);
-}
 
 }
 
