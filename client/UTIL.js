@@ -2141,41 +2141,29 @@ else {
 		}
 	},
 	
+	reSurrogateStart: /[\uD800-\uDBFF]/,
 		isSurrogateStart: function isSurrogateStart(str) {
-			if( str.match(/[\uD800-\uDBFF]/) ) return true;
-		else return false;
+		return this.reSurrogateStart.test(str);
 	},
 	
+	reSurrogateEnd: /[\uDC00-\uDFFF]/,
 	isSurrogateEnd: function isSurrogateEnd(str) {
-			if( str.match(/[\uDC00-\uDFFF]/) ) return true;
-		else return false;
+		return this.reSurrogateEnd.test(str);
 	},
 	
+	reSurrogateModifierStart: /\uD83C/,
 	isSurrogateModifierStart: function isSurrogateModifierStart(str) {
-		if( str.match(/\uD83C/) ) return true;
-		else return false;
+		return this.reSurrogateModifierStart.test(str);
 	},
 	
+	reSurrogateModifierEnd: /[\uDFFB-\uDFFF]/,
 	isSurrogateModifierEnd: function isSurrogateModifierEnd(str) {
-		if( str.match(/[\uDFFB-\uDFFF]/) ) return true;
-		else return false;
+		return this.reSurrogateModifierEnd.test(str);
 	},
 	
+	reVariationSelector: /[\uFE00-\uFE0F]/,
 	isVariationSelector: function isVariationSelector(str) {
-		if( str.match(/[\uFE00-\uFE0F]/) ) return true;
-		else return false;
-	},
-	
-	textLength: function textlength(str) {
-		// Returns the length of the text, taking special-width-characters into account
-		var count = 0;
-		for(var i=0; i<str.length; i++) {
-			if(containsEmoji(str[i])) count += 2;
-			//else if( indexOfZeroWidthCharacter(str[i]) == -1) count += 1;
-// For now zero width characters take up one space in the editor (to make it easier to spot and delete them?)
-else count++;
-		}
-		return count;
+		return this.reVariationSelector.test(str);
 	},
 	
 	loadCSS: function loadCSS(url, callback) {

@@ -2450,8 +2450,8 @@ EDITOR.canvasContext = ctx;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 				var textString = file.text.substring(startIndex, endIndex);
 				var containSpecialWidthCharacters = false;
-				for(var i=0; i<textString.length; i++) {
-					if( EDITOR.glyphWidth(textString[i]) > 1 ) {
+				for(var i=0; i<textString.length-1; i++) {
+					if( UTIL.isSurrogateStart(textString[i]) ) {
 						containSpecialWidthCharacters = true;
 						break;
 					}
@@ -6268,7 +6268,7 @@ return {x: x, y: y};
 			Should we call this function with character codepoints instead of file and index !? (so the caller don't have to know about file)
 		*/
 		
-		var glyphWidth = {}; // Memoization
+		var glyphWidthCache = {}; // Memoization
 		var oneCharWidth = EDITOR.settings.gridWidth;
 		
 		return function(char) {
@@ -6278,16 +6278,19 @@ return {x: x, y: y};
 			var charCode = char.charCodeAt(0)
 			if(charCode < 256) return 1;
 			
-			if( glyphWidth[char] ) return glyphWidth[char];
+			if( glyphWidthCache[char] ) {
+				//console.log("glyphWidth: Found char=" + char + " charCode=" + charCode + " in cache!");
+				return glyphWidthCache[char];
+			}
 			
 			var renderWidth = EDITOR.canvasContext.measureText(char).width;
 			//console.log("glyphWidth: renderWidth=" + renderWidth + " oneCharWidth=" + oneCharWidth + " ");
 			
-			glyphWidth[char] = Math.ceil(Math.floor(renderWidth*10) / Math.floor(oneCharWidth*10));
+			glyphWidthCache[char] = Math.ceil(Math.floor(renderWidth*10) / Math.floor(oneCharWidth*10));
 			
 			//console.log("glyphWidth: " + char + "=" + glyphWidth[char]);
 			
-			return glyphWidth[char];
+			return glyphWidthCache[char];
 		}
 	}
 	

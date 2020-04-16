@@ -102,13 +102,21 @@ After gridWalker optimization (reuse walker state object) ,without text render o
 Firefox: 181-190ms
 Chrome: 90-101ms
 
-After optimizing EDITOR.glyphWidth, using text render optimize:
-Firefox: 12-14ms
-Chrome: 8-10ms
-
 After optimizing EDITOR.glyphWidth ,without text render optimize:
 Firefox: 61-63ms
 Chrome: 45-63ms
+
+After optimizing EDITOR.glyphWidth, using text render optimize:
+Firefox: 12-14ms
+Chrome: 8-10ms then 18-26 ... seems to slow down!?
+
+Optimizing UTIL.isSurrogateStart and isVariationSelector,without text render optimize:
+Firefox: 55-60
+Chrome: 19-24ms
+
+Optimizing UTIL.isSurrogateStart and isVariationSelector with re.test instead of re.match,without text render optimize:
+Firefox: 55-60
+Chrome: 19-24ms
 
 
 
