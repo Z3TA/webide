@@ -1200,6 +1200,8 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 	checkDir(user, virtualFilePath, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
+		var startTime = (new Date()).getTime();
+		
 		var execFile = require('child_process').execFile;
 		var spawn = require('child_process').spawn;
 		
@@ -1254,21 +1256,64 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 			var changesetId = [];
 			var changesets = {};
 			var logCounter = 0;
-			var args; 
+			var args;
+			
+			var maxChangeId = 0;
+			var minChangeId = 9007199254740991;
+			
 			for(var i=0, changeId; i<lines.length; i++) {
 				lines[i] = lines[i].split(":");
 				changeId = parseInt(lines[i][0]);
 				
+				if(changeId > maxChangeId) maxChangeId = changeId;
+				if(changeId < minChangeId) minChangeId = changeId;
+				
 				if(changesetId.indexOf(changeId) == -1) {
 					changesetId.push(changeId);
-					args = ["-v", "log", "--rev", changeId]
-					console.log("execFile: hg args=" + JSON.stringify(args));
-					execFile('hg',args , { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, hglog);
 					}
 				lines[i] = changeId; // Map line to changeset
 			}
 			
+			var totalChangesets = changesetId.length;
+			
+			if(totalChangesets == 0) return callback(new Error("Found no changesets!"));
+			
+			
+			var maxConcurrency = 10;
+			var inFlight = 0;
+			var maxTime = 50000;
+			
+			changesetId.sort(function(a,b) {
+				if(a > b) return 1;
+				else if(b > a) return -1;
+				else return 0;
+			})
+			
+			console.log("first=" + changesetId[0]);
+			console.log("last=" + changesetId[changesetId.length-1]);
+			
+			check();
+			
+			function check() {
+				var currentTime = (new Date()).getTime();
+				if( (currentTime - startTime) > maxTime ) return done();
+				
+				for (var i=0; i<maxConcurrency-inFlight && i<changesetId.length; i++) {
+					checkLog( changesetId.pop() );
+				}
+				
+				setTimeout(check, 100);
+			}
+			
+			function checkLog(changeId) {
+				args = ["-v", "log", "--rev", changeId]
+				console.log("execFile: hg args=" + JSON.stringify(args));
+				inFlight++;
+				execFile('hg',args , { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, hglog);
+			}
+			
 			function hglog(err, stdout, stderr) {
+				inFlight--;
 				console.log("hg log stderr=" + stderr);
 				console.log("hg log stdout=" + stdout);
 				
@@ -1316,12 +1361,18 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 					console.log("value=" + value);
 				}
 				
-				if(++logCounter == changesetId.length) done();
+				if(++logCounter == totalChangesets) done();
 				
 			}
 			
 			function done() {
-				callback(null, {changesets: changesets, lines: lines});
+				if(callback) {
+					callback(null, {changesets: changesets, lines: lines});
+					callback = null;
+			}
+				else {
+					console.log("Already called back!");
+				}
 			}
 			
 			

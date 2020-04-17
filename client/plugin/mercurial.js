@@ -1643,6 +1643,8 @@ var error = err.message;
 		
 		if(!doAnnotate) return;
 		
+hide();
+
 		if(annotations.hasOwnProperty(file.path)) show(annotations[file.path]);
 		else {
 			
@@ -1759,16 +1761,20 @@ var error = err.message;
 			if(changeId) {
 				var change = changesets[changeId];
 				if(!change) {
+					annotationText.innerText = "Error: Did not get a description for commit id=" + changeId + " !";
+// Add link for manually querying it!?
 					for(var id in changesets) console.log(id + " = " + changesets[id]);
-					throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) + 
+					console.warn("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) + 
 					" typeof changesets = " + (typeof changesets) + " change=" + change + " Object.keys(changesets)=" + Object.keys(changesets) + 
 					" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) + 
 					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') +
 					" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				}
+else {
 				console.log("change=" + change);
 				annotationText.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
-				
+				}
+
 				annotationRev.innerText = "rev " + changeId;
 				
 				annotationRev.onclick = diff; 
