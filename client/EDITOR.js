@@ -12117,7 +12117,7 @@ function mouseDown(mouseDownEvent) {
 			
 		}
 	
-	//return true;
+	return true;
 	
 }
 
@@ -12225,6 +12225,10 @@ function mouseUp(mouseUpEvent) {
 		if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
 		return false;
 	}
+else {
+// Allow default
+return true;
+}
 }
 
 function getMousePosition(mouseEvent) {
