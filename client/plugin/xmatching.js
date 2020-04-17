@@ -140,10 +140,8 @@ return;
 				return;
 			}
 			
-			
-			var canvasPos = EDITOR.makeGetCanvasPosition(file, containSpecialWidthCharacters);
-			var firstLocation = canvasPos(leftPosition.row + bufferStartRow, leftPosition.col);
-			var secondLocation = canvasPos(rightPosition.row + bufferStartRow, rightPosition.col);
+			var firstLocation = file.canvasPosition(leftPosition.row + bufferStartRow, leftPosition.col);
+			var secondLocation = file.canvasPosition(rightPosition.row + bufferStartRow, rightPosition.col);
 			
 			/*
 				var firstLocation = {

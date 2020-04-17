@@ -4852,6 +4852,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 	
 	File.prototype.measureText = function measureText(row, endCol, includeEndCol) {
 		// Returns the total monospace (glyph) width from first column until and including endCol
+		if(typeof row != "number") throw new Error("measureText: First argument row=" + row + " should be a number!");
 		var file = this;
 		
 		var walker = EDITOR.gridWalker(file.grid[row], endCol);
@@ -4864,6 +4865,19 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		}
 		
 		return totalWidth;
+	}
+	
+	File.prototype.canvasPosition = function(row, col) {
+		var file = this;
+		// Returns the x and y coordinate for a column
+		
+		var columns = file.measureText(row, col, false);
+		
+		var indentationWidth = file.grid[row].indentation * EDITOR.settings.tabSpace;
+		var x = EDITOR.settings.leftMargin + (columns + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+		var y = EDITOR.settings.topMargin + (row-file.startRow) * EDITOR.settings.gridHeight;
+		
+		return {x: x, y: y};
 	}
 	
 	File.prototype.getCharacterAt = function getCharacterAt(caretOrIndex) {

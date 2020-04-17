@@ -83,98 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+dont auto-complete HTML tags when inside (parenthesis) because it's annoying when you get an HTML tag when you want to see function arguments
 
+check for zero width character in grid walker!?
 
-Optimize new textrender to be on pair with old text render,
-we then don't have to check if text contains special width character before rendering
-check for zero width character in grid walker.
-
-
-
-
-render before different glyph width unicode: 
-Firefox: 8-12ms 
-Chrome: 9-10ms
-
-render after different glyph width unicode (using text render optimize): 
-Firefox: 65-68ms 
-Chrome: 40-45ms
-
-render after different glyph width unicode (without text render optimize): 
-Firefox: 170-190ms (90-110ms after commenting out console.log's)
-Chrome: 90-110ms (44-45 after commenting out console.log's)
-
-After gridWalker optimization (reuse walker state object) ,without text render optimize:
-Firefox: 181-190ms
-Chrome: 90-101ms
-
-After optimizing EDITOR.glyphWidth ,without text render optimize:
-Firefox: 61-63ms
-Chrome: 45-63ms
-
-After optimizing EDITOR.glyphWidth, using text render optimize:
-Firefox: 12-14ms
-Chrome: 8-10ms then 18-26 ... seems to slow down!?
-
-Optimizing UTIL.isSurrogateStart and isVariationSelector,without text render optimize:
-Firefox: 55-60
-Chrome: 19-24ms
-
-Optimizing UTIL.isSurrogateStart and isVariationSelector with re.test instead of re.match,without text render optimize:
-Firefox: 55-60
-Chrome: 19-24ms
-
-After optimizing new text render with char buffering
-Firefox: 12-15
-Chrome: 9-13
-
-Whats taking so long? Answer: Blitting the pixels on the screen!
-
-textRender old: (Chrome) 4.37, current: 10.42 aftert inlining paint function: 5-10ms
-render:
-Firefox: 12-15
-Chrome: 9-11
-
-after screwup,without text render optimize:
-Firefox: 15-18
-Chrome: 13-17 or 10-13 (textRender only: 6-10)
-
-when not inlined: one line: textRender: 0.2-0.4ms (Chrome)
-when inlined: one line: textRender:  (Chrome) 0.2-0.3
-feel when selecting text: no percived difference
-the non inlined version performs slightly better
-no difference on Firefox
-
-Not checking for special width characters:
-
-
-
-optimization: Try not to create new objects!
-
-Optimize unicode character support!!
-
-perf regression when selecting text!?
-
-Double click to select word no longer works because there are too many console.log making it lag...
 
 Use columnWalker everywhere so that I don't have to change stuff everywhere when unicode updates...
-
-var ZWJ = String.fromCharCode(8205); // Zero-width joiner:  When placed between two characters that would otherwise not be connected, a ZWJ causes them to be printed in their connected forms.
-
-
-Also Variation Selectors...
-
-Zero-width joiner .......
-
-
-
-
-step over surrogates when moving the caret, deleting letter etc.
-
-render whitespace
-
-
-Better unicode support (emojis and other wide glyphs)
 
 
 Was optimzing, but after refactoring I got high spikes .... Then used Ctrl+Z to undo the refactoring, 
@@ -182,11 +96,9 @@ but the editor screwed up the undo, so it needs a correct undo/redo!
 in the meantime we can have a time-machine functionality that makes a backup every 5 minute!?
 
 
-idea: when scrolling on an emoji with modifier, toggle between the modifiers!
 
 ---
 
-parent matching and special width characters and surogates
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
 
