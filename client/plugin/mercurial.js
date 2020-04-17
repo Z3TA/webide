@@ -1654,7 +1654,7 @@ var error = err.message;
 			
 			if(matchOrig) filePath = matchOrig[1];
 			
-			CLIENT.cmd("mercurial.annotate", {file: filePath}, function updateAnnotation(err, resp) {
+			CLIENT.cmd("mercurial.annotate", {file: filePath}, 60000, function updateAnnotation(err, resp) {
 				
 				if(err) {
 					alertBox("Unable to show annotations for " + filePath + "\n" + err.message);
