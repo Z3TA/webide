@@ -83,10 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-
 release
 
 
+user couln't run node.js script because it requred a newer version.
+Make it possible to change Node.js version via GUI/menu!? Use nvm to manage the user's node version?
+Make sure the user worker use the nvm's node version when running script from the IDE
 
 can't delete tab indention using Shift+Tab when the text is selected!
 
