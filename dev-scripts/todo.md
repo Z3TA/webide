@@ -84,10 +84,85 @@ What I'm working on
 -------------------
 
 
+release
+
+
+
+can't delete tab indention using Shift+Tab when the text is selected!
+
+regression: right clicking to stop a nodejs script no longer works! (it seems to restart it) (when having two scripts open, maybe it tries to close the wrong one!?)
+Stop nodejs script via menu restarts it!
+
+
+Transition to work fully in the cloud !
+(then I could work from a live-cd eg. no need to install stuff on my local PC)
+
+Do tutorials and stuff.
+React native, PWA, etc
+
 
 
 
 ---
+
+suggest words for auto completing while typing on mobile/virtual keyboard!?
+
+Can't search/open files in mounted samba share!?
+
+When you open the editor via jzedit on command line, the browser loads before the server and you get a blank page!?
+
+gjs support!? (Native Gnome apps using JS)
+
+unable to pull from repo due to merge issue whitespace
+
+add: switch to last tab / or file tab navigation to virt keyb
+
+issues when running server.js via the IDE
+
+blog about semantic vs sentinental versioning
+
+when sharing using web share:
+"Error: Found no user to send the file to! Add a user field"
+
+autocomplete special elements like form.onsubmit and img.src
+
+the blurring when scrolling is annoying on mobile.
+it gets more and more blurry the more you scroll up/down
+
+when pasting on mobile you get an input that covers
+the whole screen with both built-in and native keyboard
+and you can't zoom back out.
+
+hard to place caret in terminal emulator
+and text get corrupted when writing in the middle
+
+pull and update did not reload open files that where updated by mercurial!
+
+virtual keyboard: I keep reaching for buttom left to click shift
+in order to make an upper case character
+
+hide f from window menu in plain text files=?
+
+get rid of discovery bar on mobile - so we can see more file tabs
+
+add icons to some of the menu items for quick finding,
+like save, open
+
+dynamic margin / line nr on mobile.
+
+able to hide line numbers via view menu
+
+able to get a scrollbar via view menu?
+
+no line nr in plain text files?
+instead show a very thin scroll indicator
+so you know where in the file uou are
+
+After closing a widget, the file explorer doesn't gain full height!
+
+Got a bunch of errors when I got an inline error message
+
+trying to right click on a link (without href?) in order to open a it in a new window... Make them into buttons instead?!?
 
 todo: check for zero width character in grid walker!?
 
@@ -105,11 +180,7 @@ users can see other users home dirs in prod!
 
 todo: Detect when ssgconf.json is saved manually by the user, and update the SSG site settings!
 
-can't delete tab indention using Shift+Tab when the text is selected!
-
-unable to repeat: when typing (...) on and indented line , also surrounded by () the matching is on the wrong place!
-
-how to get rid of symbolic links to bins in user dirs ?
+how to get rid of symbolic links to bins in user dirs ? leftover from when we placed all users in a chroot
 
 unable to repeat: When in Safari on Macbook, after you have moved the cursors, the first key-press letter doesn't get inserted
 
@@ -118,15 +189,9 @@ it keeps getting reset, very annoying!
 
 unable to repeat: canvas becomes orange in Firefox when it loses focus!...
 
-
 Some issues with JSX coloring
 
 todo: JSX coloring: <Text h1>Heading 1</Text>
-
-
-Do tutorials and stuff.
-React native, PWA, etc
-
 
 todo: Update to latest version of nodehun, which has breaking changes!!
 https://www.npmjs.com/package/nodehun
@@ -136,7 +201,6 @@ Add support for linter tool!?
 
 todo: Apparmor profiles. global instead of per user!
 Don't need /usr/bin/nodejs_%USERNAME%, Apparmor can work with scripts! eg. srv.webide.server.user_worker.js
-
 
 ---
 Can't commit if you have added a bunch of files ...
@@ -149,20 +213,7 @@ Tell the user to update .hgignore !?
 Able to type ~/.ssh/id_rsa for key path when managing ftp/sftp
 There's no disconnect option when closing and reopening the ftp/sftp widget
 
-
-
 Unable to fix: Safari bug: cant scroll the function list using the track pad
-
-
-
-Unable to repeat: When connecting it says I'm in collaboration mode with a PC that is shut off... 
-You are in collaboration mode with Safari(192.168.0.158)
-
-
-
-
-^^^^
-
 
 hide function list if there are no functions. Or it will take up extra annoying space and show an extra scrollbar
 
@@ -172,16 +223,11 @@ little annoying when you save a file for the first time and it says "new file",
 remove the "new file" part if it says "new file(.*)"
 also check the clipboard for a file name, then automatically insert it.
 
-
 the automatic spellcheck when clicking on a word is more annoying then useful...
 alternative: something like: "word appears to be spellec correctly: alternative word: "
 but the spelling dictionary is not very helpful for finding replacements for programming keywords, which might be super confusing!
 
 Spellcheck plugin need regression tests! (it stopped working and I did not notice)
-
-
-
-
 
 idea: If there is a number in clipboard when opening the file, goto that line!?
 
@@ -207,13 +253,11 @@ todo: When there are two functions with the same name in the same scope, color t
 
 todo: Show a red circle if you have forgot + in string concatenation !?
 
-
 able to edit the discovery bar...
 edit instead of hide - 
 widget - list with checkboxes to enable
 able to make custom button
 allow third party script: EDITOR.loadScript (fetched by server)
-
 
 reload_files: load from disk if file was saved?!!
 
@@ -233,7 +277,6 @@ bar
 
 When for example terminal3 is open and you start a new terminal, the termina3 file get used... very annoying!
 
-Sometimes text disappears from the terminal log file and you can't search for the dissappeared string...
 ---
 
 After being away from the editor tab for a while I come back to a lot of:
@@ -246,8 +289,6 @@ If user has hidden the nodejs banner once, don't show it again for the same file
 Also change the banner to "Run script name with Node.js"
 
 Having two nodejs scripts open and clicking "run script" in the banner starts the wrong script!..
-
-regression: right clicking to stop a nodejs script no longer works! (it seems to restart it) (when having two scripts open, maybe it tries to close the wrong one!?)
 
 Possibly security issue with _vnc nginx that lets you access any port on localhost!
 
@@ -266,41 +307,32 @@ Is there anyone depending on CONNECTION_CLOSE code or can we change it?
 
 does exit events work!?
 todo: Refactor exit event, make sure nw.js and browser does the same things
-During an exit event we would like to call storage.setItem with wait=false !!!
-
-
+During an exit event we would like to call storage.setItem with wait=false !!!???
 
 ubuntu font is very small on Chromebook compared to Courier new (or whatever is used!?) standard
 
-reopen_files doesn't seem to save text content if file is not saved!
+reopen_files doesn't seem to save text content if file is not saved!??
 
 reopen_files using old state instead of opening from disk, even when the file was marked as saved !?
 
-
-
 meta key? (window key) Should it be possibe to capture meta combos, or are they reserved for the OS!?
 
-jump to defenition...
+jump to defenition... ?
+
 ctrl+ff (f two times) to search functions!?
 
 in reopen_files server storage, also save where in the file the caret is
-and use that if state is not save in local storage
-
-
+and use that if state is not saved in local storage...?
 
 Making sure common keyboard shortcuts work on Chromebooks
 
 Implementing standard keyboard shortcuts:
 https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
-
 https://defkey.com/what-means/alt-space
-
 Alt+Backspace doesn't work on chromebook
-
 lack of home key on CHromebooks, how to quickly scroll up!?
 
-
-todo: Replace the folder autocomplete in file_save witht the folderPicker component because we copied the code from there and to make the bundle smaller (remove dublicate code)
+todo: Replace the folder autocomplete in file_save with the folderPicker component because we copied the code from there and to make the bundle smaller (remove dublicate code)
 
 bug: When using  the up/down arrow keys when Open-file dialog is open, we get errors...
 
@@ -319,8 +351,6 @@ Should probably refactor EDITOR.view.endColumn. startingColumn is not even used!
 Resizing fixes it!
 ---
 
-can we capture meta key and prevent default ? DOes it work in A2D mode? nope and nope
-
 can the special keyboard keys on the chromebook be captured!?
 magnifying glass = key=Meta charCode=91
 left f arrow = keyIsDown: key=BrowserBack charCode=166
@@ -331,8 +361,7 @@ Can they the used ? yes!
 
 magnifying glass to search and open files ? :)
 
-
-
+---
 
 When logged in with the same user, you should share worker process!?
 so that for example a terminal session will stay alive if one client disconnects!?
