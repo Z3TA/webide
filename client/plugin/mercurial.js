@@ -1643,8 +1643,8 @@ var error = err.message;
 		
 		if(!doAnnotate) return;
 		
-hide();
-
+		hide();
+		
 		if(annotations.hasOwnProperty(file.path)) show(annotations[file.path]);
 		else {
 			
@@ -1696,6 +1696,7 @@ hide();
 				var annotationRev = document.createElement("a");
 				annotationRev.setAttribute("class", "annotationRev");
 				annotationRev.setAttribute("href", "JavaScript: ;");
+annotationRev.setAttribute("title", "Show diff");
 				annotationWidget.appendChild(annotationRev);
 				
 				var annotationText = document.createElement("div");
