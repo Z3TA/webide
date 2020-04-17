@@ -3,13 +3,21 @@
 
 // Need to require non native modules here before we are chrooted
 
-var iconv = require('iconv-lite');
-var module_ps = require("ps-node");
+var module_iconv = require('iconv-lite');
+var module_ftp = require('ftp');
+var module_ssh2 = require('ssh2');
 
 var UTIL = require("../client/UTIL.js");
 
-var FTP = require('ftp');
-var SSH2 = require('ssh2');
+// Optional modules:
+try {
+	var module_ps = require("ps-node");
+}
+catch(err) {
+	log("Unable to load optional module(s): " + err.message);
+}
+
+
 
 var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
 var ftpBusy = false;
@@ -335,16 +343,16 @@ callback(new Error("Too many redirects! redirects=" + redirects));
 			if(charset && !(charset == "utf-8" || charset == "utf8")) {
 				console.log("Detected charset=" + charset);
 				
-				console.log("iconv.encodingExists('" + charset + "')=" + iconv.encodingExists(charset));
+				console.log("iconv.encodingExists('" + charset + "')=" + module_iconv.encodingExists(charset));
 				
-				if(!iconv.encodingExists(charset)) {
+				if(!module_iconv.encodingExists(charset)) {
 					gotError = true;
 					callback(new Error("Unable to decode charset=" + charset));
 					callback = null;
 					return;
 				}
 				else {
-					body = iconv.decode(buffer, charset);
+					body = module_iconv.decode(buffer, charset);
 				}
 			}
 			callback(null, body);
@@ -2155,7 +2163,7 @@ API.connect = function connect(user, json, callback) {
 			ftpQueue.length = 0;
 		}
 		
-		var Client = FTP;
+		var Client = module_ftp;
 		user.remoteConnections[serverAddress] = {client: new Client(), protocol: protocol};
 		var ftpClient = user.remoteConnections[serverAddress].client;
 		ftpClient.on('ready', function() {
@@ -2318,7 +2326,7 @@ API.connect = function connect(user, json, callback) {
 		}
 		
 		function connect() {
-			var Client = SSH2.Client;
+			var Client = module_ssh2.Client;
 			
 			var c = new Client();
 			c.on('ready', function() {
@@ -3386,6 +3394,8 @@ API.killProcess = function killProcess(user, json, callback) {
 		return callback(null);
 	}
 	else {
+		if(!module_ps) return callback(new Error("Module ps not loaded!"));
+		
 		console.log("pid=" + pid + " not in PROCESS " + JSON.stringify(Object.keys(PROCESS)));
 		module_ps.kill( pid, function( err ) {
 			return callback(err);

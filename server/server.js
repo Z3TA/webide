@@ -5930,6 +5930,8 @@ function stopDropboxDaemon(username, callback) {
 
 function checkForOtherDropboxDaemons(username, callback) {
 	
+if(!module_ps) return callback(new Error("module_ps not loaded!"));
+
 	var daemons = [];
 	
 	module_ps.lookup({

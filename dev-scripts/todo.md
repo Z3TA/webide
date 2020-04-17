@@ -83,22 +83,19 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-dont auto-complete HTML tags when inside (parenthesis) because it's annoying when you get an HTML tag when you want to see function arguments
 
-check for zero width character in grid walker!?
-
-
-Use columnWalker everywhere so that I don't have to change stuff everywhere when unicode updates...
-
-
-Was optimzing, but after refactoring I got high spikes .... Then used Ctrl+Z to undo the refactoring, 
-but the editor screwed up the undo, so it needs a correct undo/redo!
-in the meantime we can have a time-machine functionality that makes a backup every 5 minute!?
 
 
 
 ---
 
+todo: check for zero width character in grid walker!?
+
+Was optimzing, but after refactoring I got high spikes .... Then used Ctrl+Z to undo the refactoring, 
+but the editor screwed up the undo, so it needs a correct undo/redo!
+in the meantime we can have a time-machine functionality that makes a backup every 5 minute!?
+
+dont auto-complete HTML tags when inside (parenthesis) because it's annoying when you get an HTML tag when you want to see function arguments
 
 regression? Reading the clipboard with the goto_file plugin doesn't work, having spellcheck.js:116 in the clipboard does nothing
 

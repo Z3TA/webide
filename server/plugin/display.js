@@ -5,11 +5,18 @@
 */
 "use strict";
 
-var module_ps = require('ps-node');
 var UTIL = require("../../client/UTIL.js");
 var module_child_process = require('child_process');
 var logModule = require("../../shared/log.js");
 var log = logModule.log;
+
+// Optional modules:
+try {
+	var module_ps = require("ps-node");
+}
+catch(err) {
+	log("Unable to load optional module(s): " + err.message);
+}
 
 // Log levels
 var ERROR = 3;
@@ -528,6 +535,8 @@ function createScreen(username, displayId, width, height) {
 
 function killProcess(command, callback) {
 	log("killProcess: Killing existing " + command + " ...", DEBUG);
+	
+	if(!module_ps) return callback(new Error("Unable to kill command=" + command + " Module ps not loaded!"));
 	
 	var abort = false;
 	var killed = 0;
