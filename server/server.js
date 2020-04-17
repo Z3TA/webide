@@ -2979,7 +2979,7 @@ function checkMounts(options, checkMountsCallback) {
 		});
 			
 		function mySqlDone() {
-			mysqmysqlCheck = true;
+			mysqlCheck = true;
 checkMountsReadyMaybe();
 }
 		});
