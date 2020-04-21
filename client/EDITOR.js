@@ -11762,7 +11762,7 @@ function keyIsDown(keyDownEvent) {
 
 function getCombo(eventObject) {
 	
-	var combo = {shift: false, alt: false, ctrl: false, sum: 0};
+	var combo = {shift: false, alt: false, ctrl: false, meta: false, sum: 0};
 	
 		if(eventObject == undefined) {
 			console.warn("getCombo: eventObject=" + eventObject + " returning zeroed combo!");
@@ -11783,6 +11783,12 @@ function getCombo(eventObject) {
 		combo.ctrl = true;
 		combo.sum  += CTRL;
 	}
+		
+		// Mac keyboard's Command key is called meta. If it's not a Mac it will be the Window key
+		if(eventObject.metaKey) {
+			combo.ctrl = true;
+			combo.sum  += META;
+		}
 	
 	return combo;
 }
