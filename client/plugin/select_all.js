@@ -10,18 +10,22 @@
 		fun: selectAll
 	});
 	
-if(MAC) {
-EDITOR.bindKey({
-desc: S("select_all_text"),
-key: "A",
-combo: META,
-fun: selectAll
-});
-}
-
+	if(MAC) {
+		EDITOR.bindKey({
+			desc: S("select_all_text"),
+			key: "A",
+			combo: META,
+			fun: macSelectAll
+		});
+	}
+	
 	EDITOR.windowMenu.add(S("select_all_text"), [S("File"), 6], selectAll);
 	
-	function selectAll(file, combo, character, charCode, keyPushDirection) {
+function macSelectAll(file) {
+return selectAll(file);
+}
+
+	function selectAll(file) {
 		
 		console.log("Ctrl + A = SELECT ALL");
 		
