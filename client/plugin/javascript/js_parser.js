@@ -245,6 +245,11 @@
 			We could argue that PHP scripts should not include html, or JS, but most php scripts probably does.
 		*/
 		
+		if(file.mode == "code") {
+console.log("js_parser: shouldParse? Parsing " + file.path + " because file.mode=" + file.mode);
+return true;
+		}
+
 		if( (file.fileExtension=="" && file.mode=="code") || 
 		file.fileExtension=="js" || 
 		file.fileExtension=="jsx" || 
