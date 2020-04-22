@@ -11,10 +11,10 @@
 	});
 	
 	if(MAC) {
-console.log("selectAll: Adding key binding for Meta+A to select all");
+		console.log("selectAll: Adding key binding for Meta+A to select all");
 		EDITOR.bindKey({
 			desc: S("select_all_text"),
-			key: "A",
+			charCode: 65,
 			combo: META,
 			fun: macSelectAll
 		});
