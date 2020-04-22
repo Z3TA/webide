@@ -44,7 +44,8 @@ EDITOR.parseFileExtensionAsCode = [
 	"webmanifest",
 "qml",
 "qrc",
-"c"
+"c",
+"gs" // Google Script
 ];
 
 // These file extensions will be treated as plain text

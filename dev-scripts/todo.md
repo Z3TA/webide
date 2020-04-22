@@ -83,12 +83,28 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-release
+todo: Add support for Meta/Command key combos that Mac users expect...
+Chrome however calls separate Meta and combinatin events...
 
+
+todo: Better support for Google Script (JavaScript used to script Sheets etc)
+Autocomplete, and if possible running script.
+Google's own editor doesn't give proper call stacks which makes debugging really hard.
+
+
+
+
+blog about wide glyps unicode surrogate, modifiers and combiner character
+as well as tab indentation vs tab columns
+
+When right clicking for spellcheck suggestion the word is capitilized, which is confusing.
 
 user couln't run node.js script because it requred a newer version.
 Make it possible to change Node.js version via GUI/menu!? Use nvm to manage the user's node version?
 Make sure the user worker use the nvm's node version when running script from the IDE
+
+Android emulator doesn't seem to shut down after user leaves...
+There should be a lastUserLeft and userLoggedIn event sent to the user worker so that it can manage it's resources.
 
 can't delete tab indention using Shift+Tab when the text is selected!
 
