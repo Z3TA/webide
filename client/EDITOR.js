@@ -11589,11 +11589,11 @@ function keyIsDown(keyDownEvent) {
 				}
 			}
 			else {
-					//console.log("keyIsDown: NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
+console.log("keyIsDown: NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
-		// call them
+		// call key bindings
 		for(var i=0; i<f.length; i++) {
 				console.log("keyIsDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
 			
@@ -11811,7 +11811,7 @@ function keyIsUp(keyUpEvent) {
 	var funReturn;
 	var preventDefault = false;
 	
-// keyUpEvent.metaKey is false on the keyup event. So we have to check manually
+		// keyUpEvent.metaKey is false on the keyup event. So we have to check manually
 		if(keyUpEvent.key=="Meta" 
 		|| charCode==91 // Left Command
 		|| charCode==93 // Right command
