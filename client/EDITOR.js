@@ -11788,8 +11788,8 @@ function getCombo(eventObject) {
 	}
 		
 		// Mac keyboard's Command key is called meta. If it's not a Mac it will be the Window key
-		// Chrome doesn't treat meta as a modifier key, eg. Chrome fires a separate event for the Meta key
-		if(eventObject.metaKey) {
+		// Old versions of Chrome doesn't treat meta as a modifier and fires a separate event for the Meta key
+		if(eventObject.metaKey || metaKeyIsDown) {
 			combo.meta = true;
 			combo.sum += META;
 		}
@@ -11811,7 +11811,13 @@ function keyIsUp(keyUpEvent) {
 	var funReturn;
 	var preventDefault = false;
 	
-		if(keyUpEvent.metaKey) metaKeyIsDown = false;
+// keyUpEvent.metaKey is false on the keyup event. So we have to check manually
+		if(keyUpEvent.key=="Meta" 
+		|| charCode==91 // Left Command
+		|| charCode==93 // Right command
+		|| charCode==224 // Meta on Firefox
+		|| charCode==17 // Meta on old Opera
+		) metaKeyIsDown = false; 
 		
 		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " metaKeyIsDown=" + metaKeyIsDown + "");
 	

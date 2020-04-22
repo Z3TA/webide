@@ -11,6 +11,7 @@
 	});
 	
 	if(MAC) {
+console.log("selectAll: Adding key binding for Meta+A to select all");
 		EDITOR.bindKey({
 			desc: S("select_all_text"),
 			key: "A",
@@ -27,7 +28,7 @@ return selectAll(file);
 
 	function selectAll(file) {
 		
-		console.log("Ctrl + A = SELECT ALL");
+		console.log("selectAll:  EDITOR.input=" +  EDITOR.input);
 		
 		if(file && EDITOR.input) {
 			// Select everything
