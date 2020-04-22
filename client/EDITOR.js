@@ -11465,7 +11465,7 @@ function keyboardCatcherKey(keyEvent) {
 	return true;
 }
 
-	var metaKeyIsDown = false;
+	var metaKeyIsDown = false; // Chrome fires separate event for meta key, you can not combine meta with other key like Meta+A on Chrome
 function keyIsDown(keyDownEvent) {
 	/*
 		
@@ -11476,6 +11476,8 @@ function keyIsDown(keyDownEvent) {
 	
 	//keyDownEvent.preventDefault();
 	
+		if(keyDownEvent.metaKey) metaKeyIsDown = true;
+		
 	var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
 	var character = String.fromCharCode(charCode);
 	var combo = getCombo(keyDownEvent);
@@ -11507,9 +11509,7 @@ function keyIsDown(keyDownEvent) {
 	
 		EDITOR.lastKeyDown = key || charCode;
 		
-		if(keyDownEvent.metaKey) metaKeyIsDown = true;
-		
-		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " metaKeyIsDown=" + metaKeyIsDown + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
@@ -11639,7 +11639,7 @@ function keyIsDown(keyDownEvent) {
 	var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
 	var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
 	
-	console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " BROWSER=" + BROWSER + " MAC=" + MAC);
+		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " metaKeyIsDown=" + metaKeyIsDown + " BROWSER=" + BROWSER + " MAC=" + MAC);
 	
 	if((combo.sum > 0 || metaCmdKey) && !captured) {
 		// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
@@ -11811,9 +11811,9 @@ function keyIsUp(keyUpEvent) {
 	var funReturn;
 	var preventDefault = false;
 	
-if(keyUpEvent.metaKey) metaKeyIsDown = false;
-
-	console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
+		if(keyUpEvent.metaKey) metaKeyIsDown = false;
+		
+		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " metaKeyIsDown=" + metaKeyIsDown + "");
 	
 	/*
 		
