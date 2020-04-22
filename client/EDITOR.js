@@ -11789,9 +11789,9 @@ function getCombo(eventObject) {
 		
 		// Mac keyboard's Command key is called meta. If it's not a Mac it will be the Window key
 		// Chrome doesn't treat meta as a modifier key, eg. Chrome fires a separate event for the Meta key
-		if(eventObject.metaKey || metaKeyIsDown) {
-			combo.ctrl = true;
-			combo.sum  += META;
+		if(eventObject.metaKey) {
+			combo.meta = true;
+			combo.sum += META;
 		}
 	
 	return combo;
