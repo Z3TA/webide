@@ -45,7 +45,7 @@ EDITOR.parseFileExtensionAsCode = [
 "qml",
 "qrc",
 "c",
-"gs" // Google Script
+	"gs" // Google Script
 ];
 
 // These file extensions will be treated as plain text
@@ -11465,7 +11465,7 @@ function keyboardCatcherKey(keyEvent) {
 	return true;
 }
 
-
+	var metaKeyIsDown = false;
 function keyIsDown(keyDownEvent) {
 	/*
 		
@@ -11506,6 +11506,8 @@ function keyIsDown(keyDownEvent) {
 	*/
 	
 		EDITOR.lastKeyDown = key || charCode;
+		
+		if(keyDownEvent.metaKey) metaKeyIsDown = true;
 		
 		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
@@ -11786,7 +11788,8 @@ function getCombo(eventObject) {
 	}
 		
 		// Mac keyboard's Command key is called meta. If it's not a Mac it will be the Window key
-		if(eventObject.metaKey) {
+		// Chrome doesn't treat meta as a modifier key, eg. Chrome fires a separate event for the Meta key
+		if(eventObject.metaKey || metaKeyIsDown) {
 			combo.ctrl = true;
 			combo.sum  += META;
 		}
@@ -11808,6 +11811,8 @@ function keyIsUp(keyUpEvent) {
 	var funReturn;
 	var preventDefault = false;
 	
+if(keyUpEvent.metaKey) metaKeyIsDown = false;
+
 	console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
 	
 	/*
