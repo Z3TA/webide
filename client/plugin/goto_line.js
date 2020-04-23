@@ -45,6 +45,8 @@
 		
 		EDITOR.bindKey({desc: S("goto_line"), charCode: key_G, combo: CTRL, fun: gotoLineFromKeyboardComboG}); // ctrl + G
 		EDITOR.bindKey({desc: S("goto_line"), charCode: key_J, combo: CTRL, fun: show_gotoInputEmacs}); // ctrl + J (Emacs)
+		if(MAC) EDITOR.bindKey({desc: S("goto_line"), charCode: key_G, combo: META, fun: mac_gotoLine});
+		
 		EDITOR.bindKey({desc: S("hide_goto_line_widget"), charCode: key_Esc, fun: hide_gotoLineInput});
 		
 		var voiceRegexp = /((go ?to)|(jump( ?to)?))?( ?line)? (\d*)/i;
@@ -177,6 +179,11 @@ file.gotoLine(line);
 		EDITOR.stat("gotoLineFromKeyboardComboG");
 		return show_gotoInput(file, combo);
 	}
+
+function mac_gotoLine(file, combo) {
+EDITOR.stat("mac_gotoLine");
+return show_gotoInput(file, combo);
+}
 	
 	function show_gotoInputEmacs(file, combo) {
 		EDITOR.stat("gotoLineFromKeyboardComboJ");
