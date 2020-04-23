@@ -614,7 +614,11 @@ tabFileText.setAttribute("path", path);
 		function contextmenu(ev) {
 			console.log("file_tabs: Showing context menu... ev.target=", ev.target);
 			
-			if(ev.target.className=="closeFileTab") return true; // Ctrl-clicking closes the file without asking to save
+			if(MAC && ev.target.className=="closeFileTab") {
+
+				return closeTab(ev);
+				
+			}
 			
 			EDITOR.ctxMenu.show(ev || event);
 			EDITOR.ctxMenu.addTemp("Close all files except this one", true, closeAllOtherFiles);
