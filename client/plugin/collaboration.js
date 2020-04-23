@@ -2905,10 +2905,6 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		return collabRedo(file);
 	}
 	
-function mac_collabRedo(file) {
-collabRedo(file)
-}
-
 	function collabRedo(file) {
 		if(!file) return true;
 		if(!EDITOR.input) return true; // why? Because we might be in a DOM input element!
@@ -2982,6 +2978,10 @@ collabRedo(file)
 		EDITOR.input = true;
 		collabUndo(EDITOR.currentFile);
 		EDITOR.input = false;
+	}
+	
+	function mac_collabUndo(file) {
+		return collabUndo(file);
 	}
 	
 	function collabUndo(file) {
