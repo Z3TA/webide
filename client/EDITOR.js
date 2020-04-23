@@ -10866,8 +10866,8 @@ function cut(cutEvent) {
 	
 	console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
-nativeCut = false; // Allow next key press to register
-
+		nativeCut = false; // Allow next key press to register
+		
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
@@ -11471,8 +11471,10 @@ function keyboardCatcherKey(keyEvent) {
 	return true;
 }
 
-	var metaKeyIsDown = false; // Chrome fires separate event for meta key, you can not combine meta with other key like Meta+A on Chrome
-function keyIsDown(keyDownEvent) {
+	EDITOR.metaKeyIsDown = false; // Chrome fires separate event for meta key, you can not combine meta with other key like Meta+A on Chrome
+	EDITOR.ctrlKeyIsDown = false;
+	
+	function keyIsDown(keyDownEvent) {
 	/*
 		
 		note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
@@ -11482,7 +11484,8 @@ function keyIsDown(keyDownEvent) {
 	
 	//keyDownEvent.preventDefault();
 	
-		if(keyDownEvent.metaKey) metaKeyIsDown = true;
+		if(keyDownEvent.metaKey) EDITOR.metaKeyIsDown = true;
+		if(keyDownEvent.ctrlKey) EDITOR.ctrlKeyIsDown = true;
 		
 	var charCode = keyDownEvent.charCode || keyDownEvent.keyCode || null;
 	var character = String.fromCharCode(charCode);
@@ -11515,7 +11518,7 @@ function keyIsDown(keyDownEvent) {
 	
 		EDITOR.lastKeyDown = key || charCode;
 		
-		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " metaKeyIsDown=" + metaKeyIsDown + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
@@ -11645,7 +11648,7 @@ function keyIsDown(keyDownEvent) {
 	var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
 	var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
 	
-		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " metaKeyIsDown=" + metaKeyIsDown + " BROWSER=" + BROWSER + " MAC=" + MAC);
+		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " BROWSER=" + BROWSER + " MAC=" + MAC);
 	
 	if((combo.sum > 0 || metaCmdKey) && !captured) {
 		// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
@@ -11795,7 +11798,7 @@ function getCombo(eventObject) {
 		
 		// Mac keyboard's Command key is called meta. If it's not a Mac it will be the Window key
 		// Old versions of Chrome doesn't treat meta as a modifier and fires a separate event for the Meta key
-		if(eventObject.metaKey || metaKeyIsDown) {
+		if(eventObject.metaKey || EDITOR.metaKeyIsDown) {
 			combo.meta = true;
 			combo.sum += META;
 		}
@@ -11823,9 +11826,11 @@ function keyIsUp(keyUpEvent) {
 		|| charCode==93 // Right command
 		|| charCode==224 // Meta on Firefox
 		|| charCode==17 // Meta on old Opera
-		) metaKeyIsDown = false; 
+		) EDITOR.metaKeyIsDown = false; 
 		
-		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " metaKeyIsDown=" + metaKeyIsDown + "");
+		if(charCode==17) EDITOR.ctrlKeyIsDown = false; 
+		
+		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + "");
 	
 	/*
 		
