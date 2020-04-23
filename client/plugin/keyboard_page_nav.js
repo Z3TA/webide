@@ -14,6 +14,8 @@
 	
 	EDITOR.bindKey({desc: S("moves_caret_to_end_of_line"), charCode: END, combo: 0, fun: endOfLine, mode: "default"});
 	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_line"), charCode: HOME, combo: 0, fun: startOfLine, mode: "default"});
+	if(MAC) EDITOR.bindKey({desc:S("moves_caret_to_beginning_of_line"), key: "Left Arrow", combo: META, fun: mac_startOfLine});
+	
 	
 	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_start"), charCode: HOME, combo: CTRL + SHIFT, fun: selectToTop, mode: "default"});
 	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_end"), charCode: END, combo: CTRL + SHIFT, fun: selectToEnd, mode: "default"});
@@ -166,6 +168,10 @@
 		
 		return false;
 		}
+	
+	function mac_startOfLine(file, combo) {
+		return startOfLine(file, combo);
+	}
 	
 	function startOfLine(file, combo) {
 		if(!EDITOR.input) return true;

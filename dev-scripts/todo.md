@@ -83,6 +83,8 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Useful keyboard shortcuts for Macbook users
+
 todo: Add support for Meta/Command key combos that Mac users expect...
 Chrome however calls separate Meta and combinatin events...
 
