@@ -10,8 +10,10 @@
 	EDITOR.bindKey({desc: S("moves_caret_one_page_down"), charCode: 34, combo: 0, fun: pageDown});
 	
 	EDITOR.bindKey({desc: S("moves_caret_to_end_of_file"), charCode: END, combo: CTRL, fun: end});
-	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_file"), charCode: HOME, combo: CTRL, fun: home});
+	if(MAC) EDITOR.bindKey({desc: S("moves_caret_to_end_of_file"), key: "ArrowDown", combo: META, fun: mac_end});
 	
+	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_file"), charCode: HOME, combo: CTRL, fun: home});
+	if(MAC) EDITOR.bindKey({desc: S("moves_caret_to_end_of_line"), key: "ArrowUp", combo: META, fun: mac_home});
 	
 	EDITOR.bindKey({desc: S("moves_caret_to_end_of_line"), charCode: END, combo: 0, fun: endOfLine, mode: "default"});
 	if(MAC) EDITOR.bindKey({desc: ("moves_caret_to_end_of_line"), key: "ArrowRight", combo: META, fun: mac_endOfLine});
@@ -114,6 +116,10 @@
 		return false;
 	}
 
+	function mac_end(file, combo) {
+		return end(file, combo);
+	}
+	
 	function end(file, combo) {
 		if(!EDITOR.input) return true;
 		
@@ -138,7 +144,10 @@
 		return false;
 	}
 	
-	
+	function mac_home(file, combo) {
+return home(file, combo);
+}
+
 	function home(file, combo) {
 		if(!EDITOR.input) return true;
 		
