@@ -28,6 +28,7 @@
 		var char_Esc = 27;
 		
 		EDITOR.bindKey({desc: S("find_replace"), charCode: char_F, combo: CTRL, fun: findReplace});
+		if(MAC) EDITOR.bindKey({desc: S("find_replace"), charCode: char_F, combo: META, fun: mac_findReplace});
 		
 		EDITOR.bindKey({desc: S("hide_find_replace_widget"), charCode: char_Esc, fun: hideFindReplaceGui});
 		
@@ -525,6 +526,10 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 	
 	function findReplaceViaChromebookSearch(file, combo, char, charCode, direction, targetClass, keyDownEvent) {
 		//keyDownEvent.preventDefault();
+		return findReplace(file);
+	}
+	
+	function mac_findReplace(file) {
 		return findReplace(file);
 	}
 	
