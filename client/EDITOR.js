@@ -10809,6 +10809,8 @@ function copy(copyEvent) {
 		" EDITOR.input=" + EDITOR.input + 
 		" copyEvent.target=" + copyEvent.target);
 	
+		nativeCopy = false; // Allow next key press to register
+		
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
@@ -10864,6 +10866,8 @@ function cut(cutEvent) {
 	
 	console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
+nativeCut = false; // Allow next key press to register
+
 	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 		// Give focus back to the editor/canvas
 		EDITOR.input = true;
@@ -10904,6 +10908,8 @@ function paste(pasteEvent) {
 	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
 	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
+		nativePaste = false; // Allow next key press to register
+		
 	//var text = pasteEvent.clipboardData.getData('text');
 	var ret;
 	var textChanged = false;
@@ -11589,7 +11595,7 @@ function keyIsDown(keyDownEvent) {
 				}
 			}
 			else {
-console.log("keyIsDown: NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
+					//console.log("keyIsDown: NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
