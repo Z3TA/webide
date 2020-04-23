@@ -21,10 +21,11 @@
 	EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_line"), charCode: HOME, combo: 0, fun: startOfLine, mode: "default"});
 	if(MAC) EDITOR.bindKey({desc: S("moves_caret_to_beginning_of_line"), key: "ArrowLeft", combo: META, fun: mac_startOfLine});
 	
-	
 	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_start"), charCode: HOME, combo: CTRL + SHIFT, fun: selectToTop, mode: "default"});
-	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_end"), charCode: END, combo: CTRL + SHIFT, fun: selectToEnd, mode: "default"});
+	if(MAC) EDITOR.bindKey({desc: S("selects_all_from_current_position_to_start"), key: "ArrowUp", combo: META + SHIFT, fun: mac_selectToTop});
 	
+	EDITOR.bindKey({desc: S("selects_all_from_current_position_to_end"), charCode: END, combo: CTRL + SHIFT, fun: selectToEnd, mode: "default"});
+	if(MAC) EDITOR.bindKey({desc: S("selects_all_from_current_position_to_end"), key: "ArrowDown", combo: META + SHIFT, fun: mac_selectToEnd});
 	
 	EDITOR.windowMenu.add(S("page_up"), [S("Navigate"), 10], pageUp);
 	EDITOR.windowMenu.add(S("page_down"), [S("Navigate"), 10], pageDown);
@@ -33,6 +34,10 @@
 	EDITOR.windowMenu.add(S("beginning_of_file"), [S("Navigate"), 10], home);
 	EDITOR.windowMenu.add(S("end_of_line"), [S("Navigate"), 10], endOfLine);
 	EDITOR.windowMenu.add(S("beginning_of_line"), [S("Navigate"), 10], startOfLine, "bottom");
+	
+	function mac_selectToTop(file) {
+		return selectToTop(file);
+	}
 	
 	function selectToTop(file) {
 		if(!EDITOR.input) return true;
@@ -58,6 +63,10 @@
 		return PREVENT_DEFAULT;
 	}
 	
+function mac_selectToEnd(file) {
+return selectToEnd(file);
+}
+
 	function selectToEnd(file) {
 		if(!EDITOR.input) return true;
 		
@@ -145,9 +154,9 @@
 	}
 	
 	function mac_home(file, combo) {
-return home(file, combo);
-}
-
+		return home(file, combo);
+	}
+	
 	function home(file, combo) {
 		if(!EDITOR.input) return true;
 		
