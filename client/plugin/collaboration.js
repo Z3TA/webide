@@ -123,7 +123,11 @@
 			var Z = 90;
 			
 			EDITOR.bindKey({desc: S("Redo"), charCode: Y, fun: collabRedo, combo: CTRL});
+			if(MAC) EDITOR.bindKey({desc: S("Redo"), charCode: Y, fun: mac_collabRedo, combo: META});
+			
 			EDITOR.bindKey({desc: S("Undo"), charCode: Z, fun: collabUndo, combo: CTRL});
+			if(MAC) EDITOR.bindKey({desc: S("Undo"), charCode: Z, fun: mac_collabUndo, combo: META});
+			
 			
 			EDITOR.registerAltKey({char: "ABC", label: S("Undo"), alt: 1, fun: collabUndo}); 
 			EDITOR.registerAltKey({char: "ABC", label: S("Redo"), alt: 2, fun: collabRedo});
@@ -2897,6 +2901,14 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		EDITOR.input = false;
 	}
 	
+	function mac_collabRedo(file) {
+		return collabRedo(file);
+	}
+	
+function mac_collabRedo(file) {
+collabRedo(file)
+}
+
 	function collabRedo(file) {
 		if(!file) return true;
 		if(!EDITOR.input) return true; // why? Because we might be in a DOM input element!
