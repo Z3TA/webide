@@ -63,10 +63,10 @@
 		return PREVENT_DEFAULT;
 	}
 	
-function mac_selectToEnd(file) {
-return selectToEnd(file);
-}
-
+	function mac_selectToEnd(file) {
+		return selectToEnd(file);
+	}
+	
 	function selectToEnd(file) {
 		if(!EDITOR.input) return true;
 		
@@ -78,7 +78,7 @@ return selectToEnd(file);
 				selection.push(grid[row][col]);
 			}
 		}
-		for(var col=file.caret.col+1; col<grid[file.caret.row].length; col++) {
+		for(var col=file.caret.col; col<grid[file.caret.row].length; col++) {
 			selection.push(grid[file.caret.row][col]);
 		}
 		
