@@ -83,10 +83,10 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Useful keyboard shortcuts for Macbook users
+Parse TypeScript type defentitions for autocomplete!
+Look for @types in node_modules !? And parse all!? 
 
-todo: Add support for Meta/Command key combos that Mac users expect...
-Chrome however calls separate Meta and combinatin events...
+Google Script type defenitions.
 
 
 todo: Better support for Google Script (JavaScript used to script Sheets etc)
