@@ -12,10 +12,9 @@
 		desc: "Change window size",
 		load: function() {
 			
-			var size1 = size(1080, 1080);
-			
+			addMenu(1080,1350);
 			addMenu(1080,1080);
-			addMenu(500,500);
+			addMenu(1080,608);
 			
 			windowMenus.push( EDITOR.windowMenu.add("Custom", [S("View"), "Resize window"], customSize)  );
 			
@@ -40,18 +39,38 @@
 	
 	function size(width, height) {
 		return function() {
-			var isAtMaxWidth = screen.availWidth - window.innerWidth === 0;
-			
-			if(isAtMaxWidth) alertBox("Might not be able to resize while the window is maximized!");
-			
-			console.log("window_size: isAtMaxWidth=" + isAtMaxWidth + " screen.availWidth=" + screen.availWidth + " window.innerWidth=" + window.innerWidth + " window.height=" + window.height);
-console.log("window_size: Resizing to " + width + "x" + height + " ");
-			window.resizeTo(width, height);
+			setSize(width, height);
 		}
 	}
 	
+	function setSize(width, height) {
+		var isAtMaxWidth = screen.availWidth - window.innerWidth === 0;
+		
+		if(isAtMaxWidth) alertBox("Might not be able to resize while the window is maximized!");
+		
+		console.log("window_size: isAtMaxWidth=" + isAtMaxWidth + " screen.availWidth=" + screen.availWidth + " window.innerWidth=" + window.innerWidth + " window.height=" + window.height);
+		console.log("window_size: Resizing to " + width + "x" + height + " ");
+		window.resizeTo(width, height);
+	}
+	
+	
 	function customSize() {
 		
+		var currentWidth = window.outerWidth;
+		var currentHeight = window.outerHeight;
+		
+		promptBox("Enter size: width x height", {defaultValue: currentWidth + "x" + currentHeight, selectAll: true}, function(size) {
+
+			var arr = size.split("x");
+
+var width = arr[0];
+var height = arr[1];
+
+setSize(width, height);
+			
+		});
 	}
+	
+	
 	
 })();
