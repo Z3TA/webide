@@ -91,7 +91,7 @@ var UTIL = {
 		if(lastSlash == -1) {
 			//throw new Error("Unable to get directory of path=" + path + " (does not contain a slash)")
 			console.warn("UTIL.getDirectoryFromPath: Unable to get directory of path=" + path + " (does not contain a slash)");
-			if(EDITOR.settings.devMode) alertBox("UTIL.getDirectoryFromPath: Unable to get directory of path=" + path + " (does not contain a slash)"");
+			if(EDITOR.settings.devMode) alertBox("UTIL.getDirectoryFromPath: Unable to get directory of path=" + path + " (does not contain a slash)");
 			return "/"; // Root is better then null!?
 			//return UTIL.trailingSlash(EDITOR.workingDirectory);
 			//return null;
