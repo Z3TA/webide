@@ -18,7 +18,7 @@
 
 		EDITOR.on("keyPressed", auto_quote_on_keyPressed);
 		
-		EDITOR.bindKey({desc: S("Redo"), charCode: TAB, fun: stepOverQuoteMaybe});
+		EDITOR.bindKey({desc: "Step over quote maybe", charCode: TAB, fun: stepOverQuoteMaybe});
 	}
 
 	function autoQuoteUnload() {

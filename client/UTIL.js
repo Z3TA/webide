@@ -2502,7 +2502,7 @@ else {
 	},
 	
 	makeColorTransparent: function makeTransparent(colorString, transpLvl) {
-		// Take a rgb color and make it transparent rgba
+		// Take a rgb color and make it transparent rgba. transpLvl is 0-100
 		var useTranspLvl;
 		
 		if(transpLvl < 0) {

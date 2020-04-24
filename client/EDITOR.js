@@ -6025,21 +6025,21 @@ EDITOR.fireEvent("btk");
 		return removeFrom(EDITOR.animationFunctions, fun);
 	}
 	
-	var renderOrder = {};
+	EDITOR.renderOrder = {};
 	EDITOR.addRender = function(fun, order) {
 		
 		var fName = UTIL.getFunctionName(fun);
 		
-		if(renderOrder.hasOwnProperty(fName)) {
+		if(EDITOR.renderOrder.hasOwnProperty(fName)) {
 			throw new Error("There is already a render function with the name " + fName + ". Render function names need to be unique!");
 		}
 		if(order == undefined) throw new Error("Render order (second argument) need to be defined for " + fName + " Use number 1-1999 for backgrounds and 2000+ for foreground");
 		
-		for(var fn in renderOrder) {
-			if(renderOrder[fn] == order) throw new Error(fName + " has the same order=" + order + " as " + fn + ". Increase the order to make it run after " + fn + " or decrease the order to make it run before.");
+		for(var fn in EDITOR.renderOrder) {
+			if(EDITOR.renderOrder[fn] == order) throw new Error(fName + " has the same order=" + order + " as " + fn + ". Increase the order to make it run after " + fn + " or decrease the order to make it run before.");
 		}
 
-		renderOrder[fName] = order;
+		EDITOR.renderOrder[fName] = order;
 		
 		//console.log("Adding render: " + UTIL.getFunctionName(fun));
 		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + fName);
@@ -6053,8 +6053,8 @@ EDITOR.fireEvent("btk");
 		function sortByRenderOrder(fA, fB) {
 			var fNameA = UTIL.getFunctionName(fA);
 			var fNameB = UTIL.getFunctionName(fB);
-			var a = renderOrder[fNameA];
-			var b = renderOrder[fNameB];
+			var a = EDITOR.renderOrder[fNameA];
+			var b = EDITOR.renderOrder[fNameB];
 			
 			if(a > b) return 1;
 			else if(b > 1) return -1;
@@ -6066,7 +6066,7 @@ EDITOR.fireEvent("btk");
 	EDITOR.removeRender = function(fun) {
 		console.log("Removing render: " + UTIL.getFunctionName(fun));
 		
-		delete renderOrder[ UTIL.getFunctionName(fun) ];
+		delete EDITOR.renderOrder[ UTIL.getFunctionName(fun) ];
 		
 		removeFrom(EDITOR.renderFunctions, fun);
 	}
@@ -7111,6 +7111,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 		
 		keyBindings.push(b);
+		
+		keyBindings.sort(function(a, b) {
+			if(a.order == undefined) return -1;
+			else if(b.order == undefined) return 1;
+			else if(a.order > b.order) return 1;
+			else if(b.order > a.order) return -1;
+			else return 0;
+		});
 		
 		return disable; // Allows key bindings that disable others to enable the other 
 		
