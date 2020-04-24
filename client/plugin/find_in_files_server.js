@@ -484,6 +484,7 @@ if(err) console.error(err);
 		div.setAttribute("class", "findInFile");
 		
 		var searchFolder = EDITOR.currentFile ? UTIL.getDirectoryFromPath(EDITOR.currentFile.path) : EDITOR.workingDirectory;
+if(typeof searchFolder != "string") throw new Error("searchFolder=" + searchFolder + " is not a string! EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 		var size = searchFolder.length;
 		if(size > 40) size = 40;
 		if(size < 20) size = 20;
