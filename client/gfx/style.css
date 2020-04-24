@@ -1406,6 +1406,9 @@ div.gotoFile li:hover {
 .contextmenu .text::first-letter {
 	text-transform: capitalize;
 }
+.contextmenu li.notransform .text::first-letter {
+	text-transform: none;
+}
 
 
 .contextmenu li .key {

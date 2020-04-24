@@ -139,9 +139,9 @@ if( UTIL.containsEmoji(word) ) return ALLOW_DEFAULT;
 					li.replaceChild(caption, li.firstChild);
 				*/
 				li.title = "Spellcheck suggestion";
-				
+				li.classList.add("notransform");
 			}
-			
+
 			
 			function insertSpellSuggestion() {
 				var start = caret.index - caretAt.left.length;
