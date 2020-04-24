@@ -10222,7 +10222,8 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	// We then return the transcript property of the SpeechRecognitionAlternative object
 	
 	if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
-	
+	if(speechRecognitionEvent == undefined) throw new Error("speechRecognitionResult: speechRecognitionEvent=" + speechRecognitionEvent);
+
 	var last = speechRecognitionEvent.results.length - 1;
 	var speechResult = speechRecognitionEvent.results[last][0].transcript;
 	//var speechResult = speechRecognitionEvent.results[0][0].transcript;
