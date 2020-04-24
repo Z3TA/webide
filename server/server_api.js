@@ -2848,7 +2848,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	}
 	
 	var searchSubfolders = json.searchSubfolders || false;
-	var maxFolderDepth = json.maxFolderDepth || 10;
+	var maxFolderDepth = json.maxFolderDepth || 20;
 	var searchMaxFiles = json.searchMaxFiles || 100000;
 	var maxTotalMatches = json.maxTotalMatches || 500;
 	var caseSensitive = json.caseSensitive || false;
@@ -2869,7 +2869,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var abort = false;
 	var done = false;
 	var searchSymLinks = true;
-	var maxFilesToSearchAtTheSameTime = 50; // Hard drivers are really bad at multi tasking
+	var maxFilesToSearchAtTheSameTime = 20; // Hard drivers are really bad at multi tasking
 	var totalFoldersSearched = 0;
 	var totalFoldersToSearch = 0;
 	var progressInterval = 350;
