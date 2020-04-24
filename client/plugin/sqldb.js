@@ -1319,10 +1319,8 @@ callback(null, file);
 		}
 		else {
 			
-			EDITOR.openFile(fileName, initialText, function dbQueryResultFileOpened(err, file) {
+			EDITOR.openFile(fileName, initialText, {props: {parse: false}}, function dbQueryResultFileOpened(err, file) {
 				if(err) return callback(err);
-				
-				file.parse = false; // Tell eager parsers not to parse it
 				
 				callback(null, file);
 			});
