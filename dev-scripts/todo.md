@@ -83,6 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+
 Parse TypeScript type defentitions for autocomplete!
 Look for @types in node_modules !? And parse all!? 
 
@@ -96,10 +97,6 @@ Google's own editor doesn't give proper call stacks which makes debugging really
 
 
 
-blog about wide glyps unicode surrogate, modifiers and combiner character
-as well as tab indentation vs tab columns
-
-When right clicking for spellcheck suggestion the word is capitilized, which is confusing.
 
 user couln't run node.js script because it requred a newer version.
 Make it possible to change Node.js version via GUI/menu!? Use nvm to manage the user's node version?
@@ -124,6 +121,12 @@ React native, PWA, etc
 
 
 ---
+
+Annoying when you type if and a function  with long name is removed from the function list, thne screen jumps because the function list is resized!
+Make the resizing of the function list lag so that it doesn't resize while typing.
+Or outo insert () when typing ( !?
+
+bug? Show white space only works on text files!? Not code!?
 
 suggest words for auto completing while typing on mobile/virtual keyboard!?
 
@@ -5177,6 +5180,10 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Update the URL for public repos,
+so that if you copy the URL someone else can access that file!
+eg. clone=repo&openFile=path&row=X
 
 ---
 
