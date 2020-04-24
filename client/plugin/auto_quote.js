@@ -4,25 +4,49 @@
 	
 	var singleQuote = "'";
 	var dblQuote = '"';
+	var didPressTab = false;
+	var TAB = 9;
+	var reQuote = /'|"/;
 	
 	EDITOR.plugin({
 		desc: "Auto insert quote characters when typing a quote",
 		load: autoQuoteMain,
-		unload: autoQuoteUnload,
+		unload: autoQuoteUnload
 	});
-	
 	
 	function autoQuoteMain() {
 
 		EDITOR.on("keyPressed", auto_quote_on_keyPressed);
 		
+		EDITOR.bindKey({desc: S("Redo"), charCode: TAB, fun: stepOverQuoteMaybe});
 	}
 
 	function autoQuoteUnload() {
 		EDITOR.removeEvent("keyPressed", auto_quote_on_keyPressed);
+		EDITOR.unbindKey(stepOverQuoteMaybe);
 	}
 	
-	function auto_quote_on_keyPressed(file, character, combo) {
+	function stepOverQuoteMaybe(file, combo) {
+		
+		var row = file.caret.row;
+		var col = file.caret.col;
+		
+		if(!file.caret.eol && reQuote.test(file.grid[row][col].char)) {
+			file.moveCaretRight();
+			EDITOR.renderNeeded();
+			didPressTab = true;
+		}
+		else if(didPressTab && col > 0 && reQuote.test(file.grid[row][col-1].char)) {
+			// It's very likely that we want an comma and space, like in "", 
+			file.putCharacter(",");
+			file.putCharacter(" ");
+			EDITOR.renderNeeded();
+		}
+		""
+		return ALLOW_DEFAULT;
+	}
+	
+	function auto_quote_on_keyPressed(file, character, combo, ev) {
 		
 		if(!file) return true;
 		if(!EDITOR.input) return true;
@@ -32,6 +56,8 @@
 		if(Object.keys(file.parsed).length == 0) return true;
 		
 		//console.log(JSON.stringify(file.parsed));
+		
+		if(didPressTab && ev.charCode != TAB) didPressTab = false;
 		
 		if(character == singleQuote || character == dblQuote) return autoQuote(file, character, combo)
 		else return true;
