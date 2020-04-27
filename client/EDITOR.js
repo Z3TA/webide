@@ -9605,6 +9605,9 @@ function main() {
 			// If user is holding down a key, we probably wont get the keyup event!
 			EDITOR.metaKeyIsDown = false;
 			EDITOR.ctrlKeyIsDown = false;
+			if(typeof recognition != "undefined") {
+				recognition.stop();
+			}
 		}
 		
 		window.onfocus = function() {
