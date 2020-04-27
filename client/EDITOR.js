@@ -9599,16 +9599,19 @@ function main() {
 	
 	window.onbeforeunload = confirmExit;
 	
-window.onBlur = function() {
-console.log("window.onBlur!");
-EDITOR.windowGotFocus = false;
-}
-
-window.onFocus = function() {
-console.log("window.onFocus!");
-EDITOR.windowGotFocus = true;
-}
-
+		window.onblur = function() {
+			console.log("window.onblur!");
+			EDITOR.windowGotFocus = false;
+			// If user is holding down a key, we probably wont get the keyup event!
+			EDITOR.metaKeyIsDown = false;
+			EDITOR.ctrlKeyIsDown = false;
+		}
+		
+		window.onfocus = function() {
+			console.log("window.onfocus!");
+			EDITOR.windowGotFocus = true;
+		}
+		
 	if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
 	
 	
