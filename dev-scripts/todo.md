@@ -83,6 +83,10 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Issue on Macbook, when editor loses focus while Meta key is down, the keyup event is not detected!
+
+
+
 
 Parse TypeScript type defentitions for autocomplete!
 Look for @types in node_modules !? And parse all!? 
@@ -95,6 +99,7 @@ Autocomplete, and if possible running script.
 Google's own editor doesn't give proper call stacks which makes debugging really hard.
 
 
+Need to work on user onboarding, handholding them into creating their first PWA!?
 
 
 

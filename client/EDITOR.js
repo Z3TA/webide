@@ -9599,6 +9599,16 @@ function main() {
 	
 	window.onbeforeunload = confirmExit;
 	
+window.onBlur = function() {
+console.log("window.onBlur!");
+EDITOR.windowGotFocus = false;
+}
+
+window.onFocus = function() {
+console.log("window.onFocus!");
+EDITOR.windowGotFocus = true;
+}
+
 	if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
 	
 	

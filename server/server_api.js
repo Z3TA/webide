@@ -2942,7 +2942,7 @@ searchDir(fileList[i].path, folderDepth);
 		
 		console.log("continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(FIND_IN_FILES_ABORTED) return aborted()
+		if(FIND_IN_FILES_ABORTED) return aborted();
 		if(done) return console.log("Already done! from continueSearchFiles()");
 		
 		if(totalFiles >= searchMaxFiles) {
