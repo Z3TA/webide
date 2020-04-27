@@ -270,6 +270,12 @@ user.teardown = function teardown(msg, terddownComplete) {
 		doneMaybe();
 	});
 	
+	scriptsToStop++;API.mysql.disconnect(user, {}, function(err) {
+		scriptsToStop--;
+		if(err) console.error(err);
+		doneMaybe();
+	});
+	
 	// Stop running NodeJS scrips
 	for(var filePath in user.runningNodeJsScripts) {
 		scriptsToStop++;

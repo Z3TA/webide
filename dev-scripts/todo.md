@@ -83,7 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Issue on Macbook, when editor loses focus while Meta key is down, the keyup event is not detected!
+Problem with mySQL module: Error: Can't add new command when connection is in closed state
 
 
 

@@ -12,13 +12,14 @@ try {
 var module_mysql = require("mysql2");
 }
 catch(err) {
-	console.log(err.message);
+	console.log("MYSQL: " + err.message);
 }
 
 var module_os = require("os");
 var module_fs = require("fs");
 var currentDb = "information_schema";
 var connection;
+var connectionError = false;
 
 try {
 	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
@@ -62,14 +63,30 @@ else {
 			
 			connect(json.username, json.password, json.hostname, json.database, callback);
 			
+		},
+		disconnect: function mysqlDisconnect(user, json, callback) {
+			if(connection && !connection._fatalError) {
+				// It seems connection.end never calls back if there is a problem ...
+				console.log("MYSQL: connection=" + UTIL.objInfo(connection), DEBUG);
+				
+				connection.end(function(err) {
+					console.log("MYSQL: MySQL connection ended!");
+					if(err) console.error(err);
+					
+					callback(null);
+				});
+			}
+			else {
+				console.log("MYSQL: Not connected!");
+				callback(null);
+			}
 		}
-		
-}
+	}
 }
 
 function connectIfNotConnectedAndUseDatabase(editorUsername, database, callback) {
 	
-	if(!connection || connection.state === 'disconnected') {
+	if(!connection || connection.state === 'disconnected' || connection._fatalError || connectionError) {
 		if(!lastPassword) {
 			// Connect to local server
 			connect(editorUsername, undefined, undefined, database, callback);
@@ -79,7 +96,7 @@ function connectIfNotConnectedAndUseDatabase(editorUsername, database, callback)
 		}
 	}
 	else if(database != lastDatabase) {
-console.log("Switching to database=" + database);
+		console.log("MYSQL:Switching to database=" + database);
 		connection.query("USE `" + database + "`", function(err) {
 			if(!err) lastDatabase = database;
 			
@@ -123,7 +140,7 @@ function connect(username, password, hostname, database, callback) {
 			
 			console.log(JSON.stringify(stats, null, 2));
 			
-			console.log("stats.isSocket()=" + stats.isSocket());
+			console.log("MYSQL: stats.isSocket()=" + stats.isSocket());
 			
 			var connectionOptions = {
 				user: username,
@@ -146,9 +163,9 @@ function connect(username, password, hostname, database, callback) {
 	
 		connection = module_mysql.createConnection(connectionOptions);
 		
-		var processUser = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
+		var processUser = env.SUDO_USER || env.LOGNAME || env.USER || env.LNAME || env.USERNAME || info.username;
 		
-		console.log("connect: Connecting to mySQL database=" + database + " with username " + username + " running as " + processUser);
+		console.log("MYSQL: connect: Connecting to mySQL database=" + database + " with username " + username + " running as " + processUser);
 		
 		currentDb = database;
 		
@@ -160,7 +177,13 @@ function connect(username, password, hostname, database, callback) {
 				callback(err);
 			}
 			else {
-				console.log("Connected to mysql database=" + database + "");
+				console.log("MYSQL: Connected to mysql database=" + database + "");
+				connectionError = false;
+				connection.on('error', function(err) {
+					console.log("MYSQL error: (code=" + err.code + ") " + err.message);
+					connectionError = true;
+				});
+				
 				callback(null);
 			}
 		});
