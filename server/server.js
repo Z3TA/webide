@@ -292,6 +292,7 @@ process.on("exit", function () {
 	log("Program exit\n\n", DEBUG, true);
 });
 
+var mysqlReconnectTimer;
 function mysqlConnect() {
 	
 	log("Connecting to mySQL database ...", DEBUG);
@@ -321,6 +322,7 @@ function mysqlConnect() {
 	});                                              
 	
 	mysqlConnection.on('error', function(err) {
+		clearTimeout(mysqlReconnectTimer); // Prevent hot loop
 		log("MySQL error: (code=" + err.code + ") " + err.message, NOTICE);
 		if(err.code == "ENOENT") {
 			log("Mysql server is probably not installed, will not bother to try connecting to it.", NOTICE);
@@ -333,7 +335,7 @@ function mysqlConnect() {
 			mysqlConnect();
 		} else {
 			console.error(err);
-			setTimeout(mysqlConnect, 10000);    
+			mysqlReconnectTimer = setTimeout(mysqlConnect, 10000);    
 		}
 	});
 }
@@ -885,7 +887,7 @@ function main() {
 	
 	log("Server running as user=" + CURRENT_USER, DEBUG);
 	
-	mysqlConnect();
+	if(!USERNAME) mysqlConnect();
 	
 	if(info.uid < 0) {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
@@ -3592,13 +3594,14 @@ function handleHttpRequest(request, response) {
 		*/
 		var Busboy = require('busboy');
 		var sendToUser = "";
+		var notifyUser = true;
 		var files = [];
 		if (request.method === 'POST') {
 			/*
 				Figure out what user should get the file
 				Probably the user with the same IP !?
 				
-				What if there are manu users with the same IP!?
+				What if there are many users with the same IP!?
 				todo: Make the service worker handle the request!
 				Then "upload" the file from the service worker cache!?
 				https://glitch.com/~web-share-offline
@@ -3639,6 +3642,8 @@ function handleHttpRequest(request, response) {
 				log('Field [' + fieldname + ']: value: ', val, DEBUG);
 				
 				if(fieldname == "user") sendToUser = val;
+				else if(fieldname == "open" && val=="false") notifyUser = false;
+				
 			});
 			busboy.on('finish', function() {
 				log('Done parsing form!', DEBUG);
@@ -3708,7 +3713,7 @@ console.error(err);
 									var uploadMessage = "Warning: " + filesFailed.length + " / " + files.length + " failed to upload to " + sendToUser + "!\n" + filesFailed.join("\n");
 								}
 								
-								// Notify the user
+								if(notifyUser) {
 								if(USER_CONNECTIONS.hasOwnProperty(username)) {
 									log("Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
 									sendToAll(username, {uploadedFiles: uploadedFiles});
@@ -3717,7 +3722,7 @@ console.error(err);
 									uploadMessage += "Warning: " + username + " is not online!";
 									log("User " + username + " not online!", INFO);
 								}
-								
+								}
 								done(uploadMessage);
 							}
 						}

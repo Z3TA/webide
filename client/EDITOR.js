@@ -1410,7 +1410,7 @@ if(fileParse !== undefined) {
 				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
 			else if(err) {
-				alertBox("Error when opening " + path + "\n" + err.message);
+				alertBox("EDITORT.openFile: Error when opening " + path + "\n" + err.message);
 			}
 			else if(file) {
 				console.log("No callback for file.path=" + file.path);
@@ -1998,18 +1998,129 @@ else if(err.code == "ENETDOWN") {
 			path = trimmedPath;
 		}
 		
+		// SockJS can not handle large messages! Server disconnects if you send 50MB in one message
+		var lengthLimit = 5592408; // Ca 40 MB
+		if(text.length > lengthLimit) return uploadBigFile(path, text, inputBuffer, encoding, saveToDiskCallback);
+		// Posting to /share also seem to work when running as a desktop editor (not a cloud IDE) !
+		
+		console.log("EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " text.length=" + text.length);
+		if(EDITOR.uploadSpeed && text.length / EDITOR.uploadSpeed > 1024) {
+			var estimatedUploadTime = Math.floor(text.length / EDITOR.uploadSpeed);
+			var progress = document.getElementById("progress");
+			var progressValue = 0;
+			progress.value = progressValue;
+			progress.max = estimatedUploadTime;
+			var intervalTime = 250;
+			progress.style.display="block";
+			EDITOR.resizeNeeded();
+			var progressInterval = setInterval(function () {
+				console.log("UploadProgress: progress.value=" + progress.value + " progress.max=" + progress.max + " intervalTime=" + intervalTime + " estimatedUploadTime=" + estimatedUploadTime + " text.length=" + text.length + " EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " saveTimeout=" + saveTimeout);
+				progressValue += intervalTime;
+				progress.value = progressValue;
+			}, intervalTime);
+		}
+		
 		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
-		CLIENT.cmd("saveToDisk", json, function saveToDiskCmd(err, json) {
+		var startTimer = (new Date()).getTime();
+		var saveTimeout = (estimatedUploadTime ? estimatedUploadTime : 10000) + 5000;
+		CLIENT.cmd("saveToDisk", json, saveTimeout, function saveToDiskCmd(err, json) {
+			
+			if(progress) {
+				clearInterval(progressInterval);
+				progress.style.display="none";
+				EDITOR.resizeNeeded();
+			}
+			
 			if(err) {
 				if(saveToDiskCallback) saveToDiskCallback(err);
 				else throw err;
 			}
 			else {
+				if(text.length > 1024*1024 || EDITOR.uploadSpeed == undefined) {
+					var endTimer = (new Date()).getTime();
+					var totalTime = endTimer - startTimer;
+					var uploadSpeed = text.length / totalTime;
+					if(uploadSpeed > 1) EDITOR.uploadSpeed = Math.floor(uploadSpeed);
+				}
+				
 				if(saveToDiskCallback) saveToDiskCallback(null, json.path, json.hash);
-				else console.log("File saved to disk: " + json.path);
+				else {
+console.log("File saved to disk: " + json.path);
+				}
 			}
 		});
 	}
+	
+	function uploadBigFile(path, text, inputBuffer, encoding, callback) {
+		
+		console.log("uploadBigFile: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " ")
+		
+		if(typeof FormData == "undefined") return error(new Error("Large file upload not supported because FormData object does not exist in your browser=" + BROWSER + " Please contact support and tell them your browser version!"));
+		
+		var formData = new FormData();
+		var blob = new Blob([text], { type: encoding || 'plain/text' });
+		var fileName = UTIL.getFilenameFromPath(path);
+		formData.append(fileName, blob, fileName);
+		if(EDITOR.user) formData.append('user', EDITOR.user.name);
+		formData.append("open", "false"); // Because we are reusing the web share utility, we don't want the file to be opened after uploaded
+		
+		var uploadPath = UTIL.joinPaths(EDITOR.user.homeDir, "upload/", fileName);
+		
+		var x = new XMLHttpRequest();
+		if(x.upload) {
+			var progress = document.getElementById("progress");
+			progress.value = 0;
+			progress.max = 1;
+			progress.style.display="block";
+			EDITOR.resizeNeeded();
+			x.upload.addEventListener("progress", function(progressEvent) {
+				console.log("uploadBigFile: progress: progressEvent=", progressEvent);
+				progress.value = progressEvent.loaded;
+				progress.max = progressEvent.total;
+				
+			});
+		}
+		x.onreadystatechange = function () {
+			console.log("uploadBigFile: readyState=" + x.readyState);
+			if(x.readyState == 4) {
+				console.log("uploadBigFile: status=" + x.status);
+				if(x.status == 200) {
+					console.log("uploadBigFile: Upload success!");
+					CLIENT.cmd("move", {oldPath: uploadPath, newPath: path}, function(err, hash) {
+						if(err) return error(new Error("Unable to move file after uploading! Error: " + err.message), err.code)
+						CLIENT.cmd("hash", {path: path}, function(err, hash) {
+							if(err) return error(new Error("Unable to hash file after uploading! Error: " + err.message), err.code)
+							
+							callback(null, path, hash);
+						});
+					});
+					if(progress) {
+						progress.style.display="none";
+						EDITOR.resizeNeeded();
+					}
+				}
+				else {
+					console.log("uploadBigFile: Upload failed!");
+					error(new Error("Upload failed! path=" + path + " text=" + UTIL.shortString(text) ));
+				}
+			}
+		};
+		
+		x.open('POST', '/share');
+		x.send(formData);
+		
+		function error(error, code) {
+			if(code) error.code = code;
+			if(callback) {
+callback(error);
+				callback = null;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+	
 	
 	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection

@@ -83,6 +83,7 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+
 Problem with mySQL module: Error: Can't add new command when connection is in closed state
 
 
@@ -126,6 +127,8 @@ React native, PWA, etc
 
 
 ---
+
+progress bar when uploading files
 
 Annoying when you type if and a function  with long name is removed from the function list, thne screen jumps because the function list is resized!
 Make the resizing of the function list lag so that it doesn't resize while typing.
