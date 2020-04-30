@@ -211,7 +211,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 						
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 						
-						if( userValue.match(/^guest\d+$/) && pwValue != "guest" && QUERY_STRING["user"] != "guest") {
+						if( userValue.match(/^guest\d+$/) && EDITOR.startedCounter > 2 && QUERY_STRING["user"] != "guest") {
 							// User have logged in with a guest account
 							// It's Not the first time user logs in
 							
