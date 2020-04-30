@@ -161,9 +161,21 @@ sendit();
 }
 	}
 	
+	// Prevent the editor from hanging the computer due to errors
+	var JS_ERROR_COUNTER = 0;
+	var MAX_JS_ERRORS = 50;
+	
 	function windowError(message, source, lineno, colno, error) {
 		
 		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + " EDITOR.platform=" + EDITOR.platform + "");
+		
+		if(++JS_ERROR_COUNTER > MAX_JS_ERRORS) {
+			alert("Too many JavaScript errors detected. The editor needs to be restarted!");
+			// Self destory
+			var url = document.location.href;
+			document.body.innerHTML = 'Too many JavaScript errors was detected. The editor need to be <a href="' + url + '">restarted</a>!';
+			EDITOR = null;
+		}
 		
 		findSourcePath(source, function(err, source) {
 			if(err) alertBox(err);

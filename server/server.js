@@ -2840,7 +2840,7 @@ function checkMounts(options, checkMountsCallback) {
 							else if(err) throw err;
 							
 							// Make sure there is no file in /etc/netns/ or mount will throw errors!
-							writes++;module_fs.unlink(netnsPath, content, function (err) {writes--;
+							writes++;module_fs.unlink(netnsPath, function (err) {writes--;
 								if (err) throw err;
 								doneMaybe();
 							});

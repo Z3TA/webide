@@ -1,4 +1,7 @@
 /*
+	All this file does is to capture errors until self_debug.js has loaded.
+	Eg. it's only in effect for less then a secod.. So that very early errors can be captured/logged.
+	
 	This file need to run first in order to recrod JS errors.
 	It can't capture syntax errors in this file, but it can capture syntax errors in fies that load after it!
 	

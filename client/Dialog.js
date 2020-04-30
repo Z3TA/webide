@@ -10,6 +10,8 @@
 
 var DIALOG_Z_INDEX = 256;
 var DIALOG_LAST_MSG = "";
+var MAX_OPEN_DIALOGS = 10;
+var CURRENTLY_OPEN_DIALOGS = 0;
 
 
 function Dialog(msg, options) {
@@ -41,6 +43,10 @@ function Dialog(msg, options) {
 		return 1;
 	}
 	
+	if(!++CURRENTLY_OPEN_DIALOGS > MAX_OPEN_DIALOGS) {
+		console.warn("CURRENTLY_OPEN_DIALOGS=" + CURRENTLY_OPEN_DIALOGS + " MAX_OPEN_DIALOGS=" + MAX_OPEN_DIALOGS);
+		return 1;
+	}
 	
 	if(typeof EDITOR != "undefined" && EDITOR.openDialogs) {
 		// Prevent the exact same message from showing again
@@ -182,6 +188,8 @@ Dialog.prototype.close = function(someEvent, callback) {
 	
 	console.log("Dialog.prototype.close ...");
 	
+CURRENTLY_OPEN_DIALOGS--;
+
 	if(typeof EDITOR != "undefined") {
 	EDITOR.openDialogs.splice(EDITOR.openDialogs.indexOf(dialog), 1);
 	
