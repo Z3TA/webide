@@ -83,6 +83,15 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Is there a Galaxy store for only galaxy notes!?
+
+When demoing on Chrome on iOS:
+* Opening db/sql module screwed up the layout where the db right menu took up half the size
+* Did not get add to home screen modal
+* Got two dialogs when logging in for the first time: 
+- - You are logged in as guest + First user feedback
+Windows menus where hard to use, and discovery buttons too small to click on
+
 
 Problem with mySQL module: Error: Can't add new command when connection is in closed state
 

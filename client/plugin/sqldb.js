@@ -149,12 +149,25 @@ else {
 		return ALLOW_DEFAULT;
 	}
 	
+	function hideDbExplorer() {
+		dbExplorerWidget.hide();
+	}
+	
 	function toggleDbManager() {
 		if(dbManagerWidget && dbManagerWidget.visible) {
 			hideDbManager();
 		}
 		else {
 			showDbManager();
+		}
+	}
+	
+	function toggleDbExplorer() {
+		if(dbExplorerWidget && dbExplorerWidget.visible) {
+			hideDbExplorer();
+		}
+		else {
+			showDbExplorer();
 		}
 	}
 	
@@ -171,6 +184,12 @@ else {
 		wrap.appendChild(databaseList);
 		
 		wrap.appendChild(content);
+		
+		var closeButton = document.createElement("button");
+		closeButton.innerText = "Hide db explorer";
+		closeButton.onclick = hideDbExplorer;
+		closeButton.classList.add("hide");
+		wrap.appendChild(closeButton);
 		
 		return wrap;
 	}
@@ -449,6 +468,13 @@ return;
 		connectButton.innerText = "Connect to DB server...";
 		connectButton.onclick = showConnectToServer;
 		holder.appendChild(connectButton);
+		
+		var togglerExplorerButton = document.createElement("button");
+		togglerExplorerButton.setAttribute("class", "button");
+		togglerExplorerButton.innerText = "Toggle Db Explorer";
+		togglerExplorerButton.onclick = toggleDbExplorer;
+		holder.appendChild(togglerExplorerButton);
+		
 		
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");

@@ -654,7 +654,10 @@ button .key.inline:after {
 	content: ")";
 }
 
-
+button.hide {
+	width: 100%;
+	opacity: .8;
+}
 
 
 .highlighted {
