@@ -96,6 +96,7 @@ Windows menus where hard to use, and discovery buttons too small to click on
 Problem with mySQL module: Error: Can't add new command when connection is in closed state
 
 
+Able to change Node.JS version via GUI
 
 
 Parse TypeScript type defentitions for autocomplete!

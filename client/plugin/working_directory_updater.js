@@ -36,6 +36,9 @@ EDITOR.plugin({
 		// See if we can find package.json or index.htm
 		
 		var folderPath = UTIL.getDirectoryFromPath(file.path);
+		
+		if(folderPath == null) return true; // File has no path delimiter
+		
 		var folders = UTIL.getFolders(folderPath, true);
 		
 		search(folders.pop()); // Search down recursively 

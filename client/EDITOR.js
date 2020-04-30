@@ -1533,6 +1533,8 @@ if(fileParse !== undefined) {
 		
 	}
 	
+	var closeFileHistory = []; // Trying to figure out why sometimes the user close files that are not open...
+// todo: Remove closeFileHistory after fixing the bug!
 	EDITOR.closeFile = function(path, doNotSwitchFile) {
 		
 		if(typeof path != "string" && path && path instanceof File) {
@@ -1540,7 +1542,7 @@ if(fileParse !== undefined) {
 		}
 		
 		if(!EDITOR.files.hasOwnProperty(path)) {
-			throw new Error("Can't close file that is not open: " + path + " Opened files are: " + JSON.stringify(Object.keys(EDITOR.files)).slice(1,-1));
+			throw new Error("Can't close file that is not open: " + path + " Opened files are: " + JSON.stringify(Object.keys(EDITOR.files)).slice(1,-1) + " closeFileHistory=" + JSON.stringify(closeFileHistory));
 		}
 		else {
 			
@@ -1599,6 +1601,8 @@ if(fileParse !== undefined) {
 			}
 			
 			delete EDITOR.files[path]; // Remove all references to the file BEFORE switching to another file
+			
+			closeFileHistory.push(path);
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
 				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path + 
