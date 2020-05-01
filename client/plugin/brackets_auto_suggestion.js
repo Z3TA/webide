@@ -56,13 +56,15 @@ unload: function() {
 	}
 	
 	function insertBracketsAndNewLineMaybe(file) {
-		console.log("suggestBrackets: Insert brackets and new line !? activated=" + activated + " col=" + file.caret.col);
+		
 		if(!activated) return true;
 		if(!file) return true;
 		
 		var col = file.caret.col;
 		if(col == 0) return true;
 		
+console.log("suggestBrackets: Insert brackets and new line !? activated=" + activated + " col=" + file.caret.col);
+
 		var row = file.caret.row;
 		
 		if(col > 0 && file.grid[row][col-1].char!=" ") file.putCharacter(" ");
