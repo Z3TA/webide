@@ -87,18 +87,9 @@ What I'm working on
 todo: Gnome desktop app plugin, live preview gjs
 gnome-desktop-app example
 
-bug: Line numbers are off on Macbook
-
-Didn't reconnect after the client had lost connection...
-When finding in files on Mac, in dev mode, the browser spin locked
-
-
-Alt + Z (to zoom) inserts ÷ on Macbook
-Zoom has really big text size and rows overlap on Macbook
 
 
 
-Trying gjs
 
 Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
 
@@ -154,10 +145,16 @@ React native, PWA, etc
 
 
 
-
 ---
+Macbook issues:
+bug: Line numbers are off on Macbook
 
-progress bar when uploading files
+Didn't reconnect after the client had lost connection...
+When finding in files on Mac, in dev mode, the browser spin locked
+
+Alt + Z (to zoom) inserts ÷ on Macbook
+Zoom has really big text size and rows overlap on Macbook
+---
 
 Annoying when you type if and a function  with long name is removed from the function list, thne screen jumps because the function list is resized!
 Make the resizing of the function list lag so that it doesn't resize while typing.

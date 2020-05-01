@@ -112,6 +112,7 @@ var USER_WORKERS = {}; // username: worker process
 var MESSAGE_BUFFER = {}; // username: [messages] - Save messages if no client is connected
 var MAX_MESSAGE_BUFFER = 1000;
 
+var USER_CLEANUP_TIMEOUT = [];
 
 (function() {
 	// Make sure we are in the server directory
@@ -2016,6 +2017,10 @@ function sockJsConnection(connection) {
 			
 			MESSAGE_BUFFER[userConnectionName] = [];
 			
+			clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
+			// Wait one hour and if the user has not logged back in; stop the user worker and do some cleanup
+			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 60*60*100);
+			
 		}
 		else {
 			// Tell all remaining clients that this client disconnected
@@ -2331,6 +2336,8 @@ throw err;
 						
 						userConnectionName = username;
 						
+clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
+
 						if(USERNAME) {
 							// Running as standalone desktop app
 							homeDir = process.env.HOME || process.env.USERPROFILE;
