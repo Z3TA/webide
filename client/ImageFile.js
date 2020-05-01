@@ -82,8 +82,8 @@ var ImageFile;
 		
 		var file = this;
 		
-		var x = Math.round((mouseX - file.dx) / file.zoomLevel);
-		var y = Math.round((mouseY - file.dy) / file.zoomLevel);
+		var x = Math.round((mouseX - file.dx) / file.zoomLevel * PIXEL_RATIO);
+		var y = Math.round((mouseY - file.dy) / file.zoomLevel * PIXEL_RATIO);
 		
 return {x: x, y: y};
 	}

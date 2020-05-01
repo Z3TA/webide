@@ -21,7 +21,7 @@ var ctxMenuVisibleOnce = false;
 var CONTEXT_MENU_IS_FULL_SCREEN = false;
 var usePseudoClipboard = undefined;
 var lastBufferStartRow = -1; // 
-var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+var PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 
 // List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
 // Note: The file parsers should fill this list!
@@ -2461,11 +2461,11 @@ EDITOR.canvasContext = ctx;
 		// Default is to render all rows, so screenStartRow = 0
 		
 		// Fix blurryness for screens with high pixel ratio
-		if(pixelRatio !== 1) {
-			//alertBox("pixelRatio=" + pixelRatio);
+		if(PIXEL_RATIO !== 1) {
+			//alertBox("PIXEL_RATIO=" + PIXEL_RATIO);
 			ctx.restore();
 			ctx.save();
-			ctx.scale(pixelRatio,pixelRatio);
+			ctx.scale(PIXEL_RATIO,PIXEL_RATIO);
 			//ctx.scale(1,1);
 		}
 		
@@ -3074,7 +3074,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			return;
 		}
 		
-		pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
 		var windowHeight = parseInt(window.innerHeight);
 		var windowWidth = parseInt(window.innerWidth);
@@ -3269,16 +3269,16 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
 		
-		//if(pixelRatio >= 1) {
-		var canvasWidth = EDITOR.view.canvasWidth * pixelRatio;
-		var canvasHeight = EDITOR.view.canvasHeight * pixelRatio;
+		//if(PIXEL_RATIO >= 1) {
+		var canvasWidth = EDITOR.view.canvasWidth * PIXEL_RATIO;
+		var canvasHeight = EDITOR.view.canvasHeight * PIXEL_RATIO;
 		//}
 		//else {
-		//var canvasWidth = EDITOR.view.canvasWidth / pixelRatio;
-		//var canvasHeight = EDITOR.view.canvasHeight / pixelRatio;
+		//var canvasWidth = EDITOR.view.canvasWidth / PIXEL_RATIO;
+		//var canvasHeight = EDITOR.view.canvasHeight / PIXEL_RATIO;
 		//}
 		
-		console.log("pixelRatio=" + pixelRatio + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
+		console.log("PIXEL_RATIO=" + PIXEL_RATIO + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
 		
 		if( EDITOR.canvas && (EDITOR.canvas.width != canvasWidth || EDITOR.canvas.height != canvasHeight || resizeOverride) ) {
 			
@@ -11502,10 +11502,10 @@ function resizeAndRender(afterResize) {
 			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
 			try {
-					EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*pixelRatio, sy*pixelRatio, sWidth*pixelRatio, sHeight*pixelRatio, dx, dy, dWidth, dHeight);
+					EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*PIXEL_RATIO, sy*PIXEL_RATIO, sWidth*PIXEL_RATIO, sHeight*PIXEL_RATIO, dx, dy, dWidth, dHeight);
 			}
 			catch(err) {
-				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " pixelRatio=" + pixelRatio + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
+				var error = new Error(err.message + " sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight + " PIXEL_RATIO=" + PIXEL_RATIO + " dx=" + dx + " dy=" + dy + " dWidth=" + dWidth + " dHeight=" + dHeight);
 				throw error;
 			}
 			

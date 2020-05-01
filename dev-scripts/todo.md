@@ -83,11 +83,22 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
-Expected Cmd+O for opening file on Macbook
+Didn't reconnect after the client had lost connection...
+When finding in files on Mac, in dev mode, the browser spin locked
+
+todo: Style the progress bar for dark theme
+
+Alt + Z (to zoom) inserts ÷ on Macbook
+Zoom has really big text size and rows overlap on Macbook
+
+ugly progress bar in dark theme
+ugly terminal colors in dark theme
 
 winLoaded event never called when opening desktop window
 
+Trying gjs
 
+Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
 
 Is there a Galaxy store for only galaxy notes!?
 
@@ -2970,12 +2981,20 @@ not all file tabs are visible on mobile device when there are many file tabs ope
 BUGS (and issues)
 =================
 
+When zooming on Macbook, the font is really big and rows overlap
+
+
+---
+unable to get pixel color when clicking on an image on Chromebook.
+Due to screen res ratio!? coordinates off!? Or because the image is too big to fit!?
+It zooms when you try to drag the image to change it's position on the screen when using touchpad on Mabook
+---
 
 
 when renaming a folder 
 Uncaught Error: folder=/ssg_blog_example/source/historier is not a directory! 
 
----
+---÷
 
 Autocompleting in EDITOR.js line 3667 on a DOM node element hangs the editor for a ling time, then gives an error:
 jzedit/client/plugin/javascript/autocomplete.js:1241
