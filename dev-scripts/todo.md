@@ -96,9 +96,7 @@ When finding in files on Mac, in dev mode, the browser spin locked
 Alt + Z (to zoom) inserts ÷ on Macbook
 Zoom has really big text size and rows overlap on Macbook
 
-ugly progress bar in dark theme
 
-winLoaded event never called when opening desktop window
 
 Trying gjs
 

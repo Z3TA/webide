@@ -5587,11 +5587,11 @@ if(EDITOR.user.domain) {
 				console.warn("EDITOR.virtualDisplay calling EDITOR.createWindow ");
 			var theWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 			
-				setTimeout(function winNeverLoaded() {
+setTimeout(function winNeverLoaded() {
 					if(!winLoadedCalled) {
 						throw new Error("winLoaded event never called when opening desktop window!");
 					}
-				}, 3000);
+				}, 15000); // Window might get killed by popup stopper and we have to wait for the retry dialog...
 				
 				return PREVENT_DEFAULT;
 				
