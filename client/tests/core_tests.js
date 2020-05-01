@@ -1691,7 +1691,7 @@ UTIL.assert(at.right, "az");
 		});
 	});
 	
-	EDITOR.addTest(1, function testUtilResolvePath(callback) {
+	EDITOR.addTest(function testUtilResolvePath(callback) {
 		
 		var R = UTIL.resolvePath;
 		

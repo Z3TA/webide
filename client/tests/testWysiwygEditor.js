@@ -435,7 +435,7 @@
 		
 		var var1 = "ocument.act";
 		var var2 = 'document.getElementById("foobar").innerH';
-		var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n' + var2 + '\n</script>\n<div id="foobar">Test previewAutocomplete</div>\n</body>';
+		var fileHtml = '<head></head><body>\n<div id="foobar">Test previewAutocomplete</div>\n<script>\nd' + var1 + '\n' + var2 + '\n</script>\n</body>';
 		
 		launchServe({sourcePage: fileHtml, testFile: "previewAutocomplete.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
