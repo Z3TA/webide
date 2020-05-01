@@ -65,6 +65,10 @@
 		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
 		EDITOR.bindKey({desc: S("hide_goto_file_widget"), charCode: charEscape, fun: hide_gotoFileInput});
 		
+// This doesn't work on Safari. todo: Test when added to home screen!
+		if(MAC) EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: META, fun: mac_show_gotoFileInput});
+		
+		
 if(CHROMEBOOK) {
 		// On Chromebooks Alt+Search activates caps lock, Shift+Search shows the app menu in full screen.
 		EDITOR.bindKey({desc: S("open_file_by_searching"), key: "Meta", combo: CTRL+ALT, fun: openFileViaChromebookSearch});
@@ -96,7 +100,8 @@ if(CHROMEBOOK) {
 	
 	function gotoFile_unload() {
 		EDITOR.unbindKey(show_gotoFileInput);
-		EDITOR.unbindKey(show_gotoFileInput2);
+		EDITOR.unbindKey(mac_show_gotoFileInput);
+EDITOR.unbindKey(show_gotoFileInput2);
 		EDITOR.unbindKey(hide_gotoFileInput);
 		EDITOR.unbindKey(gotoFile_moveUp);
 		EDITOR.unbindKey(gotoFile_moveDown);
@@ -105,6 +110,7 @@ if(CHROMEBOOK) {
 		EDITOR.unregisterAltKey(show_gotoFileInput);
 		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
+		EDITOR.removeEvent("openFileTool", openLocalFileTool);
 		
 		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
 		CLIENT.removeEvent("fileFound", gotoFileFileFound);
@@ -649,6 +655,11 @@ else throw err;
 	
 	var ignoreSelection = false;
 	
+	
+	function mac_show_gotoFileInput(file, combo) {
+		show_gotoFileInput(file, combo);
+		return PREVENT_DEFAULT;
+	}
 	
 	function show_gotoFileInput(file, combo) {
 		

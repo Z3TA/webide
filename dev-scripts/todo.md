@@ -83,6 +83,12 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+Expected Cmd+O for opening file on Macbook
+
+winLoaded event never called when opening desktop window
+
+
+
 Is there a Galaxy store for only galaxy notes!?
 
 When demoing on Chrome on iOS:
