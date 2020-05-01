@@ -92,13 +92,11 @@ bug: Line numbers are off on Macbook
 Didn't reconnect after the client had lost connection...
 When finding in files on Mac, in dev mode, the browser spin locked
 
-todo: Style the progress bar for dark theme on Macbook!
 
 Alt + Z (to zoom) inserts ÷ on Macbook
 Zoom has really big text size and rows overlap on Macbook
 
 ugly progress bar in dark theme
-ugly terminal colors in dark theme
 
 winLoaded event never called when opening desktop window
 

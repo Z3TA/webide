@@ -566,8 +566,9 @@ div.tableHolder {
 progress[value]::-webkit-progress-bar {
 	background-color: #474747;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+	border: 1px solid #6f6f6f;
 }
 progress[value]::-webkit-progress-value {
-background-color: #ffffff;
+background-color: #505559;
 }
 
