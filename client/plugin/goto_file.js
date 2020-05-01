@@ -65,7 +65,7 @@
 		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
 		EDITOR.bindKey({desc: S("hide_goto_file_widget"), charCode: charEscape, fun: hide_gotoFileInput});
 		
-// This doesn't work on Safari. todo: Test when added to home screen!
+		// This doesn't work on Safari. It does however work on Chrome when added to home screen!
 		if(MAC) EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: META, fun: mac_show_gotoFileInput});
 		
 		
