@@ -498,15 +498,6 @@ terminalFiles.push(file);
 		var defaultForeGroundColor = EDITOR.settings.style.textColor;
 		var defaultBackgroundColor = null; // EDITOR.settings.style.bgColor;
 		
-		var colorBlack = "black";
-		var colorRed = "red";
-		var colorGreen = "green";
-		var colorYellow = "yellow";
-		var colorBlue = "blue";
-		var colorMagenta = "magenta";
-		var colorCyan = "cyan";
-		var colorWhite = "white";
-		
 		var bright = false;
 		var dim = false;
 		var underscore = false;
@@ -1145,28 +1136,28 @@ terminalFiles.push(file);
 					
 					
 					// foreground
-					if(numberSerie[j] == "30") foregroundColor = colorBlack;
-					else if(numberSerie[j] == "31") foregroundColor = colorRed;
-					else if(numberSerie[j] == "32") foregroundColor = colorGreen;
-					else if(numberSerie[j] == "33") foregroundColor = colorYellow;
-					else if(numberSerie[j] == "34") foregroundColor = colorBlue;
-					else if(numberSerie[j] == "35") foregroundColor = colorMagenta;
-					else if(numberSerie[j] == "36") foregroundColor = colorCyan;
-					else if(numberSerie[j] == "37") foregroundColor = colorWhite;
+					if(numberSerie[j] == "30") foregroundColor = EDITOR.settings.style.colorBlack;
+					else if(numberSerie[j] == "31") foregroundColor = EDITOR.settings.style.colorRed;
+					else if(numberSerie[j] == "32") foregroundColor = EDITOR.settings.style.colorGreen;
+					else if(numberSerie[j] == "33") foregroundColor = EDITOR.settings.style.colorYellow;
+					else if(numberSerie[j] == "34") foregroundColor = EDITOR.settings.style.colorBlue;
+					else if(numberSerie[j] == "35") foregroundColor = EDITOR.settings.style.colorMagenta;
+					else if(numberSerie[j] == "36") foregroundColor = EDITOR.settings.style.colorCyan;
+					else if(numberSerie[j] == "37") foregroundColor = EDITOR.settings.style.colorWhite;
 					
 					// 38 = special color (Next arguments are 5;n or 2;r;g;b)
 					
 					else if(numberSerie[j] == "39") foregroundColor = defaultForeGroundColor; // Default foreground color
 					
 					// background
-					else if(numberSerie[j] == "40") backgroundColor = colorBlack;
-					else if(numberSerie[j] == "41") backgroundColor = colorRed;
-					else if(numberSerie[j] == "42") backgroundColor = colorGreen;
-					else if(numberSerie[j] == "43") backgroundColor = colorYellow;
-					else if(numberSerie[j] == "44") backgroundColor = colorBlue;
-					else if(numberSerie[j] == "45") backgroundColor = colorMagenta;
-					else if(numberSerie[j] == "46") backgroundColor = colorCyan;
-					else if(numberSerie[j] == "47") backgroundColor = colorWhite;
+					else if(numberSerie[j] == "40") backgroundColor = EDITOR.settings.style.colorBlack;
+					else if(numberSerie[j] == "41") backgroundColor = EDITOR.settings.style.colorRed;
+					else if(numberSerie[j] == "42") backgroundColor = EDITOR.settings.style.colorGreen;
+					else if(numberSerie[j] == "43") backgroundColor = EDITOR.settings.style.colorYellow;
+					else if(numberSerie[j] == "44") backgroundColor = EDITOR.settings.style.colorBlue;
+					else if(numberSerie[j] == "45") backgroundColor = EDITOR.settings.style.colorMagenta;
+					else if(numberSerie[j] == "46") backgroundColor = EDITOR.settings.style.colorCyan;
+					else if(numberSerie[j] == "47") backgroundColor = EDITOR.settings.style.colorWhite;
 					
 					else {
 						while(numberSerie[j].length > 0) {

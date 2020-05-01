@@ -106,6 +106,16 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		EDITOR.settings.caret.color = "#ffffff";
 		
 		
+		// Colors for the terminal emulator
+		EDITOR.settings.style.colorBlack = "rgb(235, 235, 229)";
+		EDITOR.settings.style.colorRed  = "#FFA8A8";
+		EDITOR.settings.style.colorGreen = "#00FA00";
+		EDITOR.settings.style.colorYellow = "#FFFF00";
+		EDITOR.settings.style.colorBlue = "#CCCCFF";
+		EDITOR.settings.style.colorMagenta = "#FF9EFF";
+		EDITOR.settings.style.colorCyan = "00FFFF";
+		EDITOR.settings.style.colorWhite = "black";
+		
 		// Experimenting
 		//EDITOR.settings.style.textColor = "rgb(221, 164, 99)"; // 
 		//EDITOR.settings.style.bgColor = "rgb(11, 12, 18)";

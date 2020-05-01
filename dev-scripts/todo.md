@@ -83,10 +83,16 @@ When developing developer tools, 1/3 of your time should be spent educating user
 What I'm working on
 -------------------
 
+
+todo: Gnome desktop app plugin, live preview gjs
+gnome-desktop-app example
+
+bug: Line numbers are off on Macbook
+
 Didn't reconnect after the client had lost connection...
 When finding in files on Mac, in dev mode, the browser spin locked
 
-todo: Style the progress bar for dark theme
+todo: Style the progress bar for dark theme on Macbook!
 
 Alt + Z (to zoom) inserts ÷ on Macbook
 Zoom has really big text size and rows overlap on Macbook

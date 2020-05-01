@@ -114,7 +114,18 @@ EDITOR.settings = {
 		addedTextColor: "#ff4a4a",
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
-		highlightTextBg: "rgb(155, 255, 155)"    // For text highlighting
+		highlightTextBg: "rgb(155, 255, 155)",    // For text highlighting
+
+// Colors for the terminal emulator
+colorBlack: "black",
+colorRed: "red",
+colorGreen: "green",
+colorYellow: "yellow",
+colorBlue: "blue",
+colorMagenta: "magenta",
+colorCyan: "cyan",
+colorWhite: "white"
+
 	},
 	scrollSpeedMultiplier: 1/17,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
