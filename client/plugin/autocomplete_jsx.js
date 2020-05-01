@@ -100,7 +100,7 @@
 		return propsStr;
 	}
 	
-	EDITOR.addTest(1, function autocompleteJsxComponent(callback) {
+	EDITOR.addTest(function autocompleteJsxComponent(callback) {
 		EDITOR.openFile(EDITOR.user.homeDir + "/wwwpub/autocompleteJsxComponent.js", 'return (\n<foo>bar\n', function(err, file) {
 			
 			file.moveCaretToIndex(17);

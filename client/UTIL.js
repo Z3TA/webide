@@ -1841,19 +1841,23 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 	
 	resolvePath: function resolveRelativePath(base, path) {
 		/*
-			Takes a relative path and returns a absolute path
+			Takes a relative path and returns an absolute path
 			
 			/foo/ + ../bar = /bar
 		*/
 		
-		//console.log("resolvePath: base=" + base + " path=" + path);
+		console.log("resolvePath: base=" + base + " path=" + path);
 		
 		if(base.indexOf("://") != -1) {
 			//console.log("resolvePath: Probably an url: base=" + base);
+if(base.slice(-1) != "/") {
+console.log("resolvePath: Adding a slash to the URL!");
+base += "/";
+}
 			var loc = UTIL.getLocation(base);
 			var url = base.slice(0, base.lastIndexOf(loc.pathname));
 			base = loc.pathname;
-			//console.log("resolvePath: new base=" + base + " url=" + url);
+			console.log("resolvePath: new base=" + base + " url=" + url);
 			
 			// Sanity check
 			if(url.indexOf("://") == -1) { 
