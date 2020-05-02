@@ -22,6 +22,7 @@
 		},
 		function JSX7(callback) {
 			EDITOR.openFile("jsx7.js", '(\n<foo\nprop="1"\n>\n<bar />\n</foo>\n);\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.grid[5].indentation, 0);
 				
@@ -34,6 +35,7 @@
 		
 		function JSX6(callback) {
 			EDITOR.openFile("jsx6.js", '(\' <   \'>\')\n(\' <b   "> \')\n(\' <\/script>\')\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.grid[0].indentation, 0);
 				UTIL.assert(file.grid[1].indentation, 0);
@@ -47,6 +49,7 @@
 		
 		function JSX5(callback) {
 			EDITOR.openFile("jsx5.js", 'var reScripts = /<script.*src="(.*)"><\/script>/g;\n// meh\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.parsed.xmlTags.length, 0);
 				
@@ -58,7 +61,8 @@
 		},
 		
 		function JSX4(callback) {
-			EDITOR.openFile("jsx3.js", '{\nwhile(a <b) {\n}\nvar n = [ ".", "<", ">", ";"];\n// hmm\n}\n', function(err, file) {
+			EDITOR.openFile("jsx4.js", '{\nwhile(a <b) {\n}\nvar n = [ ".", "<", ">", ";"];\n// hmm\n}\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.parsed.xmlTags.length, 0);
 				
@@ -72,6 +76,7 @@
 		
 		function JSX3(callback) {
 			EDITOR.openFile("jsx3.js", '{\nif(a.order < b.order) {\nreturn -1;\n}\nelse if(a.order > b.order) {\nreturn 1;\n}\nvar data = \'<svg xmlns="http://www.w3.org/2000/svg" width="\' + width + \'" height="\' + height + \'">\';\n//foo\n}\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.parsed.xmlTags.length, 1); // Should be an xml tag, not an JSX tag
 				
@@ -86,6 +91,7 @@
 		
 		function JSX2(callback) {
 			EDITOR.openFile("jsx2.htm", '<!DOCTYPE html>\n<script></script>\n<script></script>\n<script></script>\n', function(err, file) {
+				if(err) throw err;
 				
 				UTIL.assert(file.parsed.xmlTags.length, 7);
 				
@@ -101,6 +107,7 @@
 		function JSX1(callback) {
 			
 			EDITOR.openFile("jsx1.js", 'function foo(bar) {\nreturn <h1>Hello {bar}</h1>\n}\n<Foo bar={baz}>\nhi\n</Foo>\nif(a<b && c>d) {}\nif(a <b) {\n}\nelse if(a >b) {\n}\n', function(err, file) {
+				if(err) throw err;
 				
 				if(file.parsed.xmlTags.length != 4) throw new Error("Expected 3 XML tags! file.parsed.xmlTags.length=" + file.parsed.xmlTags.length);
 				
