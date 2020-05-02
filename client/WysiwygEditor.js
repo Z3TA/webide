@@ -2187,7 +2187,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		});
 		
 		if(!inlinedMessage || (inlinedMessage instanceof Error)) {
-			console.warn("Unable to inline msg=" + msg);
+			console.warn("Unable to inline msg=" + msg + " inlinedMessage.message=" + (inlinedMessage && inlinedMessage.message));
 			consoleLogOriginal(msg);
 			//alertBox(msg);
 		}
