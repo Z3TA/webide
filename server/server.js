@@ -259,7 +259,7 @@ process.on("SIGINT", function sigInt() {
 	
 	if(mysqlConnection && !mysqlConnection._fatalError) {
 		// It seems mysqlConnection.end never calls back if there is a problem ...
-		log("mysqlConnection=" + UTIL.objInfo(mysqlConnection), DEBUG);
+		//log("mysqlConnection=" + UTIL.objInfo(mysqlConnection), DEBUG);
 		
 		mysqlConnection.end(function(err) {
 			log("MySQL connection ended!");
@@ -2019,7 +2019,7 @@ function sockJsConnection(connection) {
 			
 			clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 			// Wait one hour and if the user has not logged back in; stop the user worker and do some cleanup
-			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 60*60*100);
+			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 2000); // 60*60*1000
 			
 		}
 		else {
@@ -2040,6 +2040,8 @@ function sockJsConnection(connection) {
 		}
 
 function userCleanup() {
+		
+		log("userCleanup: userConnectionName=" + userConnectionName + " USER_CONNECTIONS=" + Object.keys(USER_CONNECTIONS) + " ", DEBUG);
 		
 		if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 			// No other clients logged is as this user
@@ -4131,6 +4133,11 @@ spawnOptions.env.HOST = netnsIP;
 	
 	worker.on("disconnect", function workerDisconnect() {
 		console.log(username + " worker disconnect: worker.connected=" + worker.connected);
+		setTimeout(function() {
+			log("3 seconds after user worker (" + username + ") disconnect: worker.connected=" + worker.connected + " worker.exitCode=" + worker.exitCode + " (null means it's still running) worker.killed=" + worker.killed + " (if the worker have recieved a kill signal)    ");
+			
+		}, 3000);
+		
 	});
 	
 	worker.on("error", function workerError(err) {
@@ -4163,6 +4170,7 @@ spawnOptions.env.HOST = netnsIP;
 		log(username + " worker close: code=" + code + " signal=" + signal, INFO);
 		
 		if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+delete USER_WORKERS[username];
 			log("Not restarting worker process for " + username + " because there are no clients connected!", INFO);
 			return;
 		}

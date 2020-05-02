@@ -67,8 +67,6 @@ else {
 		disconnect: function mysqlDisconnect(user, json, callback) {
 			if(connection && !connection._fatalError) {
 				// It seems connection.end never calls back if there is a problem ...
-				console.log("MYSQL: connection=" + UTIL.objInfo(connection), DEBUG);
-				
 				connection.end(function(err) {
 					console.log("MYSQL: MySQL connection ended!");
 					if(err) console.error(err);
