@@ -2019,7 +2019,7 @@ function sockJsConnection(connection) {
 			
 			clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 			// Wait one hour and if the user has not logged back in; stop the user worker and do some cleanup
-			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 2000); // 60*60*1000
+			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 60*60*1000); // 60*60*1000
 			
 		}
 		else {
@@ -4170,7 +4170,7 @@ spawnOptions.env.HOST = netnsIP;
 		log(username + " worker close: code=" + code + " signal=" + signal, INFO);
 		
 		if(!USER_CONNECTIONS.hasOwnProperty(username)) {
-delete USER_WORKERS[username];
+			delete USER_WORKERS[username];
 			log("Not restarting worker process for " + username + " because there are no clients connected!", INFO);
 			return;
 		}
