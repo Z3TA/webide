@@ -1194,9 +1194,9 @@ terminalFiles.push(file);
 					// Many programs asume you are using a black or very dark background for the terminal!
 					// So if we are using the white default we have to make some color adjustments
 					
-					if(foregroundColor == colorYellow) foregroundColor = "#c59800";
-					if(foregroundColor == colorCyan) foregroundColor = "#008686";
-					if(foregroundColor == colorWhite) foregroundColor = "#828282";
+					if(foregroundColor == EDITOR.settings.style.colorYellow) foregroundColor = "#c59800";
+					if(foregroundColor == EDITOR.settings.style.colorCyan) foregroundColor = "#008686";
+					if(foregroundColor == EDITOR.settings.style.colorWhite) foregroundColor = "#828282";
 				}
 				
 				inNumber = "";
