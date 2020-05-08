@@ -6,6 +6,11 @@
 	var winMenuItem;
 	var enabled = false;
 	
+if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("connectionStatus") != -1) {
+console.warn("Connection status disabled via query string!");
+return;
+}
+
 	EDITOR.plugin({
 		desc: "Show connection status",
 		load: function loadConnectionStatus() {

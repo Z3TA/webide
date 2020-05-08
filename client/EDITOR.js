@@ -3697,20 +3697,20 @@ caption.appendChild(span);
 			});
 			
 			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
-var disabledErrorMessage = "Discovery bar is disabled by query string!";
+				var disabledErrorMessage = "Discovery bar is disabled by query string!";
 
-console.warn(disabledErrorMessage);
+				console.warn(disabledErrorMessage);
 
 return {
 					disabled: true,
 activate: function() {
-throw new Error(disabledErrorMessage);
+						console.error(disabledErrorMessage);
 },
 deactivate: function() {
-throw new Error(disabledErrorMessage);
+						console.error(disabledErrorMessage);
 },
 isActive: function() {
-throw new Error(disabledErrorMessage);
+						console.error(disabledErrorMessage);
 }
 };
 			
@@ -3758,7 +3758,10 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				return;
 			}
 			
-			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) throw new Error("discovery bar disabled via query string!");
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) {
+				console.error(new Error("discovery bar disabled via query string!"));
+				return;
+			}
 			
 			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
@@ -4836,6 +4839,7 @@ if(menuItem.parentMenu) {
 			windowMenuHeight.style.display="block";
 			
 			EDITOR.windowMenu.isEnabled = true;
+			
 		},
 		disable: function enableWindowMenu() {
 			var windowMenu = document.getElementById("windowMenu");
@@ -9650,9 +9654,6 @@ function main() {
 	
 	console.log("Starting the editor ...");
 	
-		//if(QUERY_STRING["embed"]) EDITOR.windowMenu.disable();
-		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("windowMenu") != -1) EDITOR.windowMenu.disable();
-		
 	window.name = "editor"; // For focus access
 	
 	//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);

@@ -8,7 +8,13 @@ var winMenuHide;
 		desc: "Hide the window menu",
 		load: function loadHideWindowMenu() {
 
-			EDITOR.on("storageReady", hideWindowMenuMaybe);
+			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("windowMenu") != -1) {
+hideWindowMenu(false);
+				console.warn("Window menu disabled via query string!");
+			}
+			else {
+EDITOR.on("storageReady", hideWindowMenuMaybe);
+			}
 			
 			winMenuHide = EDITOR.windowMenu.add(S("window_menu"), [S("View"), 140], hideWindowMenuFromWindowMenu);
 winMenuHide.activate();
@@ -25,7 +31,7 @@ winMenuHide.activate();
 });
 	
 	function hideWindowMenuFromWindowMenu() {
-		hideWindowMenu();
+		hideWindowMenu(true);
 		
 		alertBox('To show the window menu again: <b>Right click</b> (or long touch) to bring up the context menu ,and click <i>"Show window menu</i>"');
 	}
@@ -34,17 +40,17 @@ winMenuHide.activate();
 	
 		var hide = EDITOR.storage.getItem("hide_window_menu");
 		
-		if(hide == "true") hideWindowMenu();
+		if(hide == "true") hideWindowMenu(true);
 		
 	}
 	
-	function hideWindowMenu() {
+	function hideWindowMenu(saveSettings) {
 		EDITOR.windowMenu.disable();
 		
 		ctxWinMenuShow = EDITOR.ctxMenu.add("Show window menu", showWindowMenu, 20);
 		EDITOR.ctxMenu.activate(ctxWinMenuShow);
-
-if(EDITOR.storage.ready()) EDITOR.storage.setItem("hide_window_menu", "true");
+		
+		if(EDITOR.storage.ready() && saveSettings) EDITOR.storage.setItem("hide_window_menu", "true");
 	}
 	
 	function showWindowMenu() {
@@ -52,7 +58,7 @@ if(EDITOR.storage.ready()) EDITOR.storage.setItem("hide_window_menu", "true");
 		EDITOR.ctxMenu.hide();
 		EDITOR.ctxMenu.remove(ctxWinMenuShow);
 		ctxWinMenuShow = undefined;
-
+		
 if(EDITOR.storage.ready()) EDITOR.storage.setItem("hide_window_menu", "false");
 	}
 

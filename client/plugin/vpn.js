@@ -23,6 +23,11 @@
 	var connected = false;
 	var winMenuItem;
 	
+if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("vpn") != -1) {
+console.warn("VPN disabled via query string!");
+return;
+}
+
 EDITOR.plugin({
 desc: "Connect to VPN server",
 load: function loadVpnSupport() {

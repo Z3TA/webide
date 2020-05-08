@@ -595,10 +595,10 @@ reconnectTimeoutTime += 10000;
 						CLIENT.fireEvent(method, json[method]);
 					}
 					else if(EDITOR.settings.devMode) {
-throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
+console.error(new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2)));
 					// Might be an event without a listener!
+					}
 				}
-}
 				
 			}
 			
@@ -613,8 +613,8 @@ throw new Error("Unexpected server response. (No registered event listener for "
 			return;
 		}
 		
-sendingPings = true;
-
+		sendingPings = true;
+		
 		// Wait some time before sending first ping or we would get a very high ping (because the server is busy?)
 		// No! Make the ping request right away so that the user doesn't think we are lagging...
 		//nextPingTimer = setTimeout(sendPing, 2000);
@@ -626,7 +626,7 @@ sendingPings = true;
 		sendingPings = false;
 		clearTimeout(nextPingTimer);
 		clearTimeout(pingTimeout);
-CLIENT.ping = -1;
+		CLIENT.ping = -1;
 	}
 	
 	function sendPing() {
@@ -644,14 +644,14 @@ CLIENT.ping = -1;
 				
 			}
 			else {
-			var end = timer();
-			var ping = Math.round(end-start);
-			//var ping = Math.round((end-start)*10) / 10;
-			if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
-			CLIENT.ping = ping;
+				var end = timer();
+				var ping = Math.round(end-start);
+				//var ping = Math.round((end-start)*10) / 10;
+				if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
+				CLIENT.ping = ping;
 				
-			//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
-			
+				//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
+				
 				if(resp != pingCounter) var error = new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
 				
 				// Don't throw before we have set the next timeout!
@@ -661,7 +661,7 @@ CLIENT.ping = -1;
 			nextPingTimer = setTimeout(sendPing, CLIENT.pingInterval);
 			
 			if(error) throw error;
-
+			
 		});
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = Infinity;

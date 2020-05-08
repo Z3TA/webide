@@ -1,8 +1,5 @@
 /*
-	
-	
-	
-	might not have to use user namespace on Docker VM,
+	hmm: might not have to use user namespace on Docker VM,
 	instead make Docker run with the uid we want
 	(need to give root permissions to that uid)
 	
@@ -15,6 +12,11 @@
 	var deamonAwake = false;
 	var windowMenu;
 	
+if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("docker") != -1) {
+console.warn("Docker disabled via query string!");
+return;
+}
+
 	EDITOR.plugin({
 		desc: "Docker",
 		load: function loadDocker() {
@@ -66,13 +68,13 @@ return;
 					if(!status.IP) throw new Error("Did not get IP from dockerDaemon status=" + JSON.stringify(status));
 					EDITOR.env.DOCKER_HOST = "tcp://" + status.IP + ":2376";
 					
-					if(discoveryBarIcon) discoveryBarIcon.activate();
+					if(discoveryBarIcon && !discoveryBarIcon.disabled) discoveryBarIcon.activate();
 					if(windowMenu) windowMenu.activate();
 					updateStatus("running", status.IP);
 				}
 				else if(status.stopped) {
 					deamonAwake = false;
-					if(discoveryBarIcon) discoveryBarIcon.deactivate();
+					if(discoveryBarIcon && !discoveryBarIcon.disabled) discoveryBarIcon.deactivate();
 					if(windowMenu) windowMenu.deactivate();
 					updateStatus("shut off")
 				}

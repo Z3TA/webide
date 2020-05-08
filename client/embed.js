@@ -85,7 +85,7 @@
 			var editorWidth = offsetWidth || defaultEditorWidth;
 			var editorHeight = offsetHeight || defaultEditorHeight;
 			var editorLocation = getEditorLocation();
-			var editorQuery = "?embed=true&disable=menu,file_tabs&dev=false"; // set dev to true to see console.log messages
+			var editorQuery = "?embed=true&disable=windowMenu,discoveryBar,file_tabs,connectionStatus&dev=false"; // set dev to true to see console.log messages
 			var query = ta.getAttribute("query");
 			
 			if(query) editorQuery += "&" + query;
