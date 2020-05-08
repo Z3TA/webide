@@ -1363,21 +1363,17 @@ UTIL.assert(at.right, "az");
 		});
 	});
 	
-	
 	EDITOR.addTest(function parseXML(callback) {
-		EDITOR.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(err, file) {
-			
+		EDITOR.openFile("parseXML.xml", '<svg>\n<path></path>\n</svg>\n', function(err, file) {
 			var grid = file.grid;
 			
 			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
 			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
 			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
-			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
 			
 			EDITOR.closeFile(file.path);
 			
 			callback(true);
-			
 		});
 	});
 	
