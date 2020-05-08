@@ -85,16 +85,13 @@ Always follow happy path when demoing! Unless you want to find new bugs and issu
 What I'm working on
 -------------------
 
-hmm, what to do if the discovery bar is disabled by query string!?!?!?
 
 Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
-
-Issues with embedded editor!!
-todo: Disable docker and vpn when in embed mode !?
 
 
 Fix reported issues!!!
 
+bug: Color picker from images doesn't work when there is different pixel ratio then one
 
 performance issue when using fractal scaling in Ubuntu
 

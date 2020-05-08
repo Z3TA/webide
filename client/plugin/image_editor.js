@@ -11,6 +11,8 @@
 	var coordinateX, coordinateY;
 	var originalSizeWidth, originalSizeHeight;
 	var inputPath;
+	var imageModeAlreadyDisabled = true;
+	var imageModeAlreadyEnabled = false;
 	
 	EDITOR.plugin({
 		desc: "Edit images",
@@ -226,25 +228,45 @@ EDITOR.putIntoClipboard(rgbStr);
 	function showImageFileMaybe(file) {
 		
 		if(file.canvas != undefined) {
-			EDITOR.canvas.style.cursor = 'default';
-			controls.show();
-			
-			originalSizeWidth.innerText = file.sWidth;
-			originalSizeHeight.innerText = file.sHeight;
-			
-			EDITOR.on("mouseMove", moveMouseOnImage);
-			EDITOR.on("mouseClick", addToPath);
+			enableImageMode(file);
 		}
 		else if(file.text != undefined) {
-			EDITOR.canvas.style.cursor = 'text';
-			controls.hide();
-			EDITOR.removeEvent("mouseMove", moveMouseOnImage);
-			EDITOR.removeEvent("mouseClick", addToPath);
+			disableImageMode();
 		}
 		else {
 			EDITOR.canvas.style.cursor = 'help';
 		}
 		
+	}
+	
+	function enableImageMode(file) {
+		if(imageModeAlreadyEnabled) return showOtherImage(file);
+		
+		EDITOR.canvas.style.cursor = 'default';
+		controls.show();
+		
+		showOtherImage(file);
+		
+		EDITOR.on("mouseMove", moveMouseOnImage);
+		EDITOR.on("mouseClick", addToPath);
+		
+		imageModeAlreadyEnabled = true;
+	}
+	
+	function disableImageMode() {
+		if(imageModeAlreadyDisabled) return;
+		
+		EDITOR.canvas.style.cursor = 'text';
+		controls.hide();
+		EDITOR.removeEvent("mouseMove", moveMouseOnImage);
+		EDITOR.removeEvent("mouseClick", addToPath);
+		imageModeAlreadyEnabled = false;
+		imageModeAlreadyDisabled = true;
+	}
+	
+	function showOtherImage(file) {
+		originalSizeWidth.innerText = file.sWidth;
+		originalSizeHeight.innerText = file.sHeight;
 	}
 	
 	function addToPath(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
