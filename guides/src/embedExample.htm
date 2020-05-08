@@ -77,13 +77,13 @@ You can however use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Wi
 
 <p>Opens a file:</p>
 
-<textarea>
+<textarea rows="2" cols="80">
 iframe.contentWindow.postMessage({"openFile": {name: "file.txt",content: "Hello world!"}}, "*");
 </textarea>
 
 <p>And when the file is changed, the content is sent back:</p>
 
-<textarea>
+<textarea rows="8" cols="80">
 window.addEventListener("message", function receiveMessage(windowMessageEvent) {
   var msg = windowMessageEvent.data;
   if(msg.fileUpdate) {
@@ -97,7 +97,7 @@ window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 
 <p>Disables a plugin.</p>
 
-<textarea>
+<textarea rows="2" cols="80">
 iframe.contentWindow.postMessage({"disablePlugin": "Plugin description"}, "*");
 </textarea>
 
