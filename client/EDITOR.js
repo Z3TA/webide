@@ -3307,13 +3307,6 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			canvasContextReset();
 			
 			
-			// Squeeze the margin on really small screens
-			if(EDITOR.view.canvasWidth < 500 && EDITOR.currentFile && (EDITOR.currentFile instanceof File)) {
-				var maxLine = Math.max(10, EDITOR.currentFile.grid.length+1);
-				var lineLetters = (" " + maxLine).trim().length;
-				EDITOR.settings.leftMargin = Math.floor(EDITOR.settings.gridWidth * lineLetters + EDITOR.settings.gridWidth + 5);
-			}
-			
 			// Calculate the scroll zone
 			// To make sure the line do not cross letters, so the line can be cleared for the vertical scroll optimization
 			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
