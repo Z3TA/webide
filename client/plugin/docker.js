@@ -90,7 +90,7 @@ return;
 	}
 	
 	function wakeup() {
-		var timeout = 20000;
+		var timeout = 30000;
 		CLIENT.cmd("dockerDaemon", {command: "start"}, timeout, function dockerDeamonAwakenMaybe(err, status) {
 			if(err) alertBox("Unable to start the Docker daemon! Error: " + err.message);
 			else {
