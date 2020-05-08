@@ -594,9 +594,11 @@ reconnectTimeoutTime += 10000;
 					if(eventListeners.hasOwnProperty(method)) {
 						CLIENT.fireEvent(method, json[method]);
 					}
-					else throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
+					else if(EDITOR.settings.devMode) {
+throw new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2));
 					// Might be an event without a listener!
 				}
+}
 				
 			}
 			

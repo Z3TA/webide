@@ -73,7 +73,7 @@ return;
 				}
 				else if(status == "disconnected") {
 					connected = false;
-					if(discoveryBarIcon) discoveryBarIcon.deactivate();
+					if(discoveryBarIcon && !discoveryBarIcon.disabled) discoveryBarIcon.deactivate();
 					if(winMenuItem) winMenuItem.deactivate();
 				}
 				else {

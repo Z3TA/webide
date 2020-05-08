@@ -79,10 +79,24 @@ and so that we also get an error when actually calling it twice, with a nice cal
 
 When developing developer tools, 1/3 of your time should be spent educating users how to use it, and 1/3 if your time should be spent on marketing/hyping.
 
+Always follow happy path when demoing! Unless you want to find new bugs and issues...
+
 
 What I'm working on
 -------------------
 
+hmm, what to do if the discovery bar is disabled by query string!?!?!?
+
+Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
+
+Issues with embedded editor!!
+todo: Disable docker and vpn when in embed mode !?
+
+
+Fix reported issues!!!
+
+
+performance issue when using fractal scaling in Ubuntu
 
 todo: Gnome desktop app plugin, live preview gjs
 gnome-desktop-app example
@@ -123,6 +137,9 @@ Google's own editor doesn't give proper call stacks which makes debugging really
 Need to work on user onboarding, handholding them into creating their first PWA!?
 
 
+Live Markdown preview looking like Github page would be nice! 
+
+
 
 user couln't run node.js script because it requred a newer version.
 Make it possible to change Node.js version via GUI/menu!? Use nvm to manage the user's node version?
@@ -143,6 +160,7 @@ Transition to work fully in the cloud !
 Do tutorials and stuff.
 React native, PWA, etc
 
+Create example React native app!
 
 
 ---

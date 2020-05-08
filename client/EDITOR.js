@@ -3697,19 +3697,20 @@ caption.appendChild(span);
 			});
 			
 			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
-var disabledError = new Error("Discovery bar is disabled by query string!");
+var disabledErrorMessage = "Discovery bar is disabled by query string!";
 
-console.warn(disabledError.message);
+console.warn(disabledErrorMessage);
 
 return {
+					disabled: true,
 activate: function() {
-throw disabledError;
+throw new Error(disabledErrorMessage);
 },
 deactivate: function() {
-throw disabledError;
+throw new Error(disabledErrorMessage);
 },
 isActive: function() {
-throw disabledError;
+throw new Error(disabledErrorMessage);
 }
 };
 			
@@ -3726,7 +3727,18 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		remove: function removeDiscoveryItem(element) {
 			// Removes an item
+			if(element == undefined) {
+				console.warn("Cannot remove undefined item from the discovery bar!");
+				return;
+			}
+			else if(typeof element == "object" && element.disabled===true) {
+				return;
+			}
+			
 			var wrap = element.parentNode;
+			
+			if(typeof wrap != "object") throw new Error("Unable to remove discovery bar item: element=" + JSON.stringify(element) + " wrap=" + wrap + " is not an object!");
+			
 			discoveryBar.removeChild(wrap);
 		},
 		activate: function activateDiscoveryBarItem(element) {
@@ -10933,7 +10945,7 @@ function onMessage(windowMessageEvent) {
 		
 		function createFileOnce(removeListener) {
 			console.log("createFileOnce! removeListener=" + removeListener)
-			var filePath = UTIL.joinPaths("/embed/", msg.createFile.path);
+			var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/embed/", msg.createFile.path);
 			var content = msg.createFile.content;
 			createFile(filePath, content);
 			if(removeListener !== false) CLIENT.removeEvent("loginSuccess", createFileOnce);

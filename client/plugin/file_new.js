@@ -66,7 +66,7 @@
 			
 			if(newFileDashboardWidget) EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
-			EDITOR.discoveryBar.remove(discoveryBarIcon);
+			if(discoveryBarIcon) EDITOR.discoveryBar.remove(discoveryBarIcon);
 		},
 		order: 10
 	});
