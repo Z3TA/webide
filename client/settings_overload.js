@@ -304,7 +304,7 @@ EDITOR.settings.style.font = "LiberationMono";
 
 		else {
 			
-			// We choose Ubuntu Mono as standard because it loogs good with both CLD, GrayScale, *and* without Antialias! 
+			// We choose Ubuntu Mono as standard because it looks good with both CLD, GrayScale, *and* without Antialias! 
 			
 			webFontLoading = "ubuntu";
 			loadFont = function() {
