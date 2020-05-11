@@ -26,7 +26,9 @@
 		EDITOR.unbindKey(stepOverQuoteMaybe);
 	}
 	
-	function stepOverQuoteMaybe(file, combo) {
+	function stepOverQuoteMaybe(file) {
+		
+		if(!file) return ALLOW_DEFAULT;
 		
 		var row = file.caret.row;
 		var col = file.caret.col;
@@ -42,7 +44,7 @@
 			file.putCharacter(" ");
 			EDITOR.renderNeeded();
 		}
-		""
+		
 		return ALLOW_DEFAULT;
 	}
 	
