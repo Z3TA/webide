@@ -10372,6 +10372,8 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
 	if(speechRecognitionEvent == undefined) throw new Error("speechRecognitionResult: speechRecognitionEvent=" + speechRecognitionEvent);
 
+		if(!Array.isArray(speechRecognitionEvent.results)) throw new Error("speechRecognitionEvent.results=" + speechRecognitionEvent.results + " is not an Array! speechRecognitionEvent=" + speechRecognitionEvent);
+		
 	var last = speechRecognitionEvent.results.length - 1;
 	var speechResult = speechRecognitionEvent.results[last][0].transcript;
 	//var speechResult = speechRecognitionEvent.results[0][0].transcript;
@@ -10382,7 +10384,7 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	
 		// Need to copy list in case of one listener removing itself 
 		var voiceListeners = EDITOR.eventListeners.voiceCommand.map(function(voiceListener) {  return {re: voiceListener.re, fun: voiceListener.fun}  });
-		console.log("Calling voiceCommand listeners (" + f.length + ")");
+		console.log("Calling voiceCommand listeners (" + voiceListeners.length + ")");
 		for(var i=0, re, match, captured; i<voiceListeners.length; i++) {
 			re = voiceListeners[i].re;
 		if(re) {
