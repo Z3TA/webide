@@ -86,6 +86,10 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+todo: Check if npx webide.se is working on various systems...
+
+hmm, should we try to optimize startup time of npx !? And make it more seamless!?
+
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
 
 user feedback: I need a module installed but it's not compatable with this verson of node. I need node >= 12.0.0 
