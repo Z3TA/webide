@@ -11882,11 +11882,10 @@ function keyboardCatcherKey(keyEvent) {
 		else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
 		else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 		else if(combo.alt) {} // Wait for ALT+key combo!
+else if(combo.meta) {} // Wait for cmd+key combo!
 			else if(charCode == 17 || combo.ctrl) {console.log("keyIsDown: Ctrl ...");} // Wait for Ctrl+key combo!
 			else if(windowKey) {console.log("keyIsDown: Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
 			else if(metaCmdKey) {console.log("keyIsDown: meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
-		//else if(combo.shift) {} // Wait for Shift+key combo!
-		//&&//&&//
 		else {
 			throw Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode);
 			
