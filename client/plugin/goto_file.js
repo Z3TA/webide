@@ -629,7 +629,7 @@ else throw err;
 		
 		li.onclick = gotoFile;
 		
-		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
+		if(selectedItem && typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		EDITOR.resizeNeeded();
 		EDITOR.resize();
@@ -879,7 +879,7 @@ abortFindFiles();
 			}
 		}
 		
-		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
+		if(selectedItem && typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		setTimeout(function() { // Can't focus right away or it will be a keyup!
 			//inputGoto.focus();
@@ -914,7 +914,7 @@ abortFindFiles();
 			}
 		}
 		
-		if(typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
+		if(selectedItem && typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
 		//console.log("goto_file: yoyo i=" + i + " listItems.length=" + listItems.length);
 		
