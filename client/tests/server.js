@@ -569,7 +569,7 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		
 	});
 	
-	EDITOR.addTest(1, function cloudDep(callback) {
+	EDITOR.addTest(function cloudDep(callback) {
 		
 		// Test to make sure we can run the cloud bin's
 		
@@ -587,7 +587,8 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 			test("hg --version");
 			test("node --version");
 			test("npm --version");
-			
+			test("nvm --version");
+
 			if(platform != "win32") {
 				test("bash --version");
 				test("tar --version");

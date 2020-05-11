@@ -81,15 +81,21 @@ When developing developer tools, 1/3 of your time should be spent educating user
 
 Always follow happy path when demoing! Unless you want to find new bugs and issues...
 
+Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press to many keys at once (so not an editor issue)
 
 What I'm working on
 -------------------
 
+user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
+
+user feedback: I need a module installed but it's not compatable with this verson of node. I need node >= 12.0.0 
+
+Able to change Node.js version from UI/menu!?
+
+
+Fix reported issues!!! then make a new release
 
 Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
-
-
-Fix reported issues!!!
 
 bug: Color picker from images doesn't work when there is different pixel ratio then one
 
@@ -97,10 +103,12 @@ performance issue when using fractal scaling in Ubuntu
 
 todo: Gnome desktop app plugin, live preview gjs
 gnome-desktop-app example
+asdasdasdasdaks jdaskljhdasjlkhdasjhdjklashdjashdjklas hdjashjkdahskjdhakjsd haskjdhaskjdh askjdaksjdhkahskjdhaksj dkashdjkasjkd asd
+
+bug: unable to repeat: Sometimes when logging in it puts me on hold... and I have to refresh in order to login 
 
 
-
-
+todo: Support more Macbook keyboard shortcuts!
 
 Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
 
@@ -200,6 +208,8 @@ autocomplete special elements like form.onsubmit and img.src
 
 the blurring when scrolling is annoying on mobile.
 it gets more and more blurry the more you scroll up/down
+
+keyboard when looking at local desktop on mobile
 
 when pasting on mobile you get an input that covers
 the whole screen with both built-in and native keyboard
