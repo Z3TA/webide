@@ -587,8 +587,8 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 			test("hg --version");
 			test("node --version");
 			test("npm --version");
-			test("nvm --version");
-
+			//test("nvm --version");
+			
 			if(platform != "win32") {
 				test("bash --version");
 				test("tar --version");
