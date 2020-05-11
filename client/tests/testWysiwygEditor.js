@@ -528,7 +528,7 @@
 	});
 	
 	
-	EDITOR.addTest(function reloadAndRecompileWhenScriptIsSaved(callback) {
+	EDITOR.addTest(true, function reloadAndRecompileWhenScriptIsSaved(callback) {
 		var fileHtml = '<head></head><body>\n<p id="paragraph">Test reloadAndRecompileWhenScriptIsSaved ...</p>\n</body>';
 		var someScriptFileName = "somescript.js"
 		var compiledHtml = '<head>\n<script src="' + someScriptFileName + '"></script>\n</head>\n<body>\n<p>Header</p>\n<main>\n<p id="paragraph">Test reloadAndRecompileWhenScriptIsSaved ...</p>\n</main>\n<p>Footer</p>\n</body>';

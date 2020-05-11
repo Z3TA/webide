@@ -183,17 +183,17 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		}
 		
 		if(!CLIENT.connected) {
-			var error = new Error("Not connected to a webide server!");
+			var error = new Error("Not connected to a webide server! Unable to send cmd: req=" + req);
 			error.code = "ENETDOWN";
 		}
 		else if(CLIENT.ping == Infinity) {
-			var error = new Error("We might have lost the connection. Or the server is busy!");
+			var error = new Error("We might have lost the connection. Or the server is busy! Unable to send cmd: req=" + req);
 			error.code = "ENETUNREACH";
 		}
 		else if(connection.readyState!=WEBSOCK_OPEN) {
 			console.log("CLIENT: connection.readyState=" + connection.readyState);
 			
-			var error = new Error("Not connected to webide server");
+			var error = new Error("Not connected to webide server! Unable to send cmd: req=" + req);
 			error.code = "CONNECTION_CLOSED";
 			
 			CLIENT.fireEvent("connectionLost"); // Why is this here ?
