@@ -14,7 +14,7 @@ try {
 	var module_ps = require("ps-node");
 }
 catch(err) {
-	log("Unable to load optional module(s): " + err.message);
+	console.log("Unable to load optional module(s): " + err.message);
 }
 
 
