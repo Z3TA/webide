@@ -100,7 +100,7 @@ UTIL.assert(at.right, "az");
 		
 		var folders = UTIL.getFolders("sftp://foo.bar");
 		
-		if(!folders[0] == "/") throw new Error("Unexpected: " + JSON.stringify(folders));
+		if(folders[0] != "/") throw new Error("Unexpected: " + JSON.stringify(folders));
 		
 		callback(true);
 		
