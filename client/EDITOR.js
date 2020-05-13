@@ -8031,10 +8031,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
-			var failText = "The new window was most likely blocked by a popup blocker. " +
-			"(enable popups from " + document.domain + " to get rid of this message)"
+			var failText = "The new window was most likely blocked by the browser. " +
+			"(allow window/popups from " + document.domain + " to get rid of this message)"
 			
-			var errorText = "If the new window could not open, try disable the popup stopper (allow popups on " + window.location.host + ")";
+			var errorText = "If the new window could not open, it was probably blocked by the browser (please allow " + window.location.host + " to open new windows)";
 			
 			/*
 				// native confirm dialog did not enable the window!
