@@ -7994,7 +7994,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			Tip: You can set url to about:blank and then close/reopen the window when you know what url to load. 
 			Some browsers (Chrome) will allow the popup if another window is closed prior.
-		*/ 
+		*/
 		
 		console.warn("EDITOR.createWindow: Creating new window url=" + url);
 		
@@ -8031,8 +8031,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
-			var failText = "The new window was most likely blocked by the browser. " +
-			"(allow window/popups from " + document.domain + " to get rid of this message)"
+				var failText = "The new window was most likely blocked by the browser. " +
+				"(allow window/popups from " + document.domain + " to get rid of this message)"
 			
 			var errorText = "If the new window could not open, it was probably blocked by the browser (please allow " + window.location.host + " to open new windows)";
 			
@@ -8048,14 +8048,23 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(answer == retry) {
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
-					if(!theWindow) return callback(new Error(errorText));
-					else return testWindow(theWindow);
+					if(!theWindow) {
+							console.warn("EDITOR.createWindow: Calling back!");
+							callback(new Error(errorText));
+							callback = null;
+							return;
+						}
+						else return testWindow(theWindow);
 				}
-				else callback(new Error(errorText));
-			});
-			
-			
-		}
+				else {
+						console.warn("EDITOR.createWindow: Calling back!");
+						callback(new Error(errorText));
+						callback = null;
+					}
+				});
+				
+				
+			}
 		}, 200);
 		
 		return theWindow;
@@ -8088,7 +8097,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var error = new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) );
 				if(diff.length > 0) error.code = "CROSS_ORIGIN";
 				
-				return callback(error);
+				console.warn("EDITOR.createWindow: Calling back!");
+				callback(error);
+				callback = null;
+				return;
 			}
 			
 			console.log("EDITOR.createWindow: We can access theWindow.document.domain=" + test);
@@ -8104,18 +8116,18 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			try { // Edge browser throws 0: Permission denied
 				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href); 
-			console.log("EDITOR.createWindow: New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
-			console.log("EDITOR.createWindow: theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
+				console.log("EDITOR.createWindow: New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
+				console.log("EDITOR.createWindow: theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
 				
-			if(theWindow.location.href == "about:blank") theWindow.loadedByWebideYo = false;  // Unique property for sanity
+				if(theWindow.location.href == "about:blank") theWindow.loadedByWebideYo = false;  // Unique property for sanity
 				else theWindow.loadedByWebideYo = true;
-			
-			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
-			if(url == "about:blank") theWindow.isBlankUrl = true;
+				
+				// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
+				if(url == "about:blank") theWindow.isBlankUrl = true;
 			}
 			catch(err) {
-
-}
+				
+			}
 			
 			theWindow.addEventListener("load", function() {
 				console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
@@ -8130,8 +8142,13 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				*/
 				if(theWindow.loadedByWebideYo === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
 				theWindow.loadedByWebideYo = true; 
-				if(waitUntilLoaded) callback(null, theWindow);
-			}, false);
+				if(waitUntilLoaded) {
+					console.warn("EDITOR.createWindow: Calling back!");
+					callback(null, theWindow);
+					callback = null;
+				}
+				
+}, false);
 			theWindow.addEventListener("DOMContentLoaded", function() {
 				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
 				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
@@ -8148,7 +8165,34 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			EDITOR.openWindows.push(theWindow); // So that they can be conveniently closed on reload
 			
-			if(!waitUntilLoaded) return callback(null, theWindow);
+			if(!waitUntilLoaded) {
+				console.warn("EDITOR.createWindow: Calling back!");
+				callback(null, theWindow);
+				callback = null;
+				return;
+			}
+			
+			// It might have been loaded already
+			try {
+var loaded = !!theWindow.location.href;
+			}
+			catch(err) {
+				console.error(err);
+			}
+			console.log("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " ");
+			if(waitUntilLoaded && loaded) {
+				// A timeout to be really sure it has been loaded
+				setTimeout(function() {
+					if(theWindow.loadedByWebideYo === true) {
+						console.warn("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " Aborting callback because theWindow.loadedByWebideYo=" + theWindow.loadedByWebideYo);
+						return;
+					}
+					console.warn("EDITOR.createWindow: Calling back!");
+					callback(null, theWindow);
+callback = null;
+				}, 500);
+			}
+			
 		}
 		
 		function open(url) {
@@ -8159,190 +8203,190 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 		
 	} // End of EDITOR.createWindow (JSX screwed with the indentation!)
-
-
-// Tools for handling repositories (Mercurial, Git, etc)
-EDITOR.commitTool = function commitTool(directory) {
-	var f = EDITOR.eventListeners.commitTool.map(funMap);
+	
+	
+	// Tools for handling repositories (Mercurial, Git, etc)
+	EDITOR.commitTool = function commitTool(directory) {
+		var f = EDITOR.eventListeners.commitTool.map(funMap);
 		console.log("Calling commitTool listeners (" + f.length + ")");
-	for(var i=0; i<f.length; i++) {
-		f[i](directory);
+		for(var i=0; i<f.length; i++) {
+			f[i](directory);
+		}
 	}
-}
-
-EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
-	if(typeof resolved == "string" && unresolved == undefined && directory == undefined) {
-		directory = resolved;
-		resolved = undefined;
-		unresolved = undefined;
-	}
+	
+	EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
+		if(typeof resolved == "string" && unresolved == undefined && directory == undefined) {
+			directory = resolved;
+			resolved = undefined;
+			unresolved = undefined;
+		}
 		
 		var f = EDITOR.eventListeners.resolveTool.map(funMap);
 		console.log("Calling resolveTool listeners (" + f.length + ")");
 		for(var i=0; i<f.length; i++) {
 			f[i](resolved, unresolved, directory);
+		}
 	}
-}
-
-EDITOR.mergeTool = function mergeTool(directory) {
+	
+	EDITOR.mergeTool = function mergeTool(directory) {
 		var f = EDITOR.eventListeners.mergeTool.map(funMap);
 		console.log("Calling mergeTool listeners (" +f.length + ")");
 		for(var i=0, f; i<f.length; i++) {
 			f[i](directory);
+		}
 	}
-}
-
-EDITOR.runTests = function runTests(onlyOne, allInSync) {
 	
+	EDITOR.runTests = function runTests(onlyOne, allInSync) {
+		
 		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne) {
 			return alertBox("Make sure you are running the editor as a cloud IDE before running tests!\
 			(Working directory (" + EDITOR.workingDirectory + ") needs to be wwwroot/)");
+		}
+		
+		//if(!onlyOne) EDITOR.changeWorkingDir("/");
+		
+		runTests_5616458984153156(onlyOne, allInSync);
+		return true;
 	}
 	
-	//if(!onlyOne) EDITOR.changeWorkingDir("/");
+	EDITOR.deleteFile = function(filePath, callback) {
+		
+		console.log("Deleting filePath=" + filePath);
+		
+		var json = {filePath: filePath};
+		
+		CLIENT.cmd("deleteFile", json, function(err, json) {
+			if(err) {
+				if(callback) callback(err);
+				else throw err;
+			}
+			else {
+				if(callback) callback(err, json.filePath);
+			}
+		});
+	}
 	
-	runTests_5616458984153156(onlyOne, allInSync);
-	return true;
-}
-
-EDITOR.deleteFile = function(filePath, callback) {
 	
-	console.log("Deleting filePath=" + filePath);
-	
-	var json = {filePath: filePath};
-	
-	CLIENT.cmd("deleteFile", json, function(err, json) {
-		if(err) {
-			if(callback) callback(err);
-			else throw err;
-		}
-		else {
-			if(callback) callback(err, json.filePath);
-		}
-	});
-}
-
-
-EDITOR.dashboard = {
-	addWidget: function(el) {
-		
-		if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
-		
-		var dashboard = document.getElementById("dashboard");
-		console.log(dashboard);
-		try {
-			var child = dashboard.appendChild(el);
-		}
-		catch(err) {
-			console.log("addDashboardWidget: el:");
-			console.log(el);
-			throw err;
-		}
-		
-		return child;
-	},
-	removeWidget: function(el) {
-		var dashboard = document.getElementById("dashboard");
-		
-		try {
-			var removedNode = dashboard.removeChild(el);
-		}
-		catch(err) {
-			console.log("removeDashboardWidget: el:");
-			console.log(el);
-			throw err;
-		}
-		return removedNode;
-	},
-	hide: function hideDashboard(stayHidden) {
-		var dashboard = document.getElementById("dashboard");
-		
-		dashboard.style.display = "none";
+	EDITOR.dashboard = {
+		addWidget: function(el) {
+			
+			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
+			
+			var dashboard = document.getElementById("dashboard");
+			console.log(dashboard);
+			try {
+				var child = dashboard.appendChild(el);
+			}
+			catch(err) {
+				console.log("addDashboardWidget: el:");
+				console.log(el);
+				throw err;
+			}
+			
+			return child;
+		},
+		removeWidget: function(el) {
+			var dashboard = document.getElementById("dashboard");
+			
+			try {
+				var removedNode = dashboard.removeChild(el);
+			}
+			catch(err) {
+				console.log("removeDashboardWidget: el:");
+				console.log(el);
+				throw err;
+			}
+			return removedNode;
+		},
+		hide: function hideDashboard(stayHidden) {
+			var dashboard = document.getElementById("dashboard");
+			
+			dashboard.style.display = "none";
 			EDITOR.canvas.style.display = "block";
-		
-		EDITOR.dashboard.isVisible = false;
-		EDITOR.fireEvent("hideDashboard");
-		
-		if(stayHidden) EDITOR.dashboard.stayHidden = true;
-		
-		return true;
-	},
-	show: function showDashboard() {
-		
-		console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
-		
+			
+			EDITOR.dashboard.isVisible = false;
+			EDITOR.fireEvent("hideDashboard");
+			
+			if(stayHidden) EDITOR.dashboard.stayHidden = true;
+			
+			return true;
+		},
+		show: function showDashboard() {
+			
+			console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
 			
-		var dashboard = document.getElementById("dashboard");
-		
+			var dashboard = document.getElementById("dashboard");
+			
 			EDITOR.canvas.style.display = "none";
-		dashboard.style.display = "block";
-		
-		if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
-		
-		EDITOR.dashboard.isVisible = true;
-		
-		setTimeout(placeDashboard , 500);
-		
+			dashboard.style.display = "block";
+			
+			if(!EDITOR.dashboard.isVisible) EDITOR.fireEvent("showDashboard");
+			
+			EDITOR.dashboard.isVisible = true;
+			
+			setTimeout(placeDashboard , 500);
+			
 			EDITOR.stat("show_dashboard");
 			
-		return true;
-		
-		function placeDashboard() {
-			// Place it just below the header
-			var header = document.getElementById("header");
-			var headerRect = header.getBoundingClientRect();
+			return true;
 			
-			dashboard.style.top = (headerRect.bottom - 1) + "px";
-		}
-	},
-	isVisible: false,
-	stayHidden: false
-}
-
-EDITOR.openFileTool = function fileOpenTool(options, filePath) {
+			function placeDashboard() {
+				// Place it just below the header
+				var header = document.getElementById("header");
+				var headerRect = header.getBoundingClientRect();
+				
+				dashboard.style.top = (headerRect.bottom - 1) + "px";
+			}
+		},
+		isVisible: false,
+		stayHidden: false
+	}
+	
+	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
 		var f = EDITOR.eventListeners.openFileTool.map(funMap);
 		console.log("Calling openFileTool listeners (" + f.length + ")");
-	
-	var ret = false;
-	
+		
+		var ret = false;
+		
 		for(var i=0; i<f.length; i++) {
 			ret = f[i](options, filePath);
-		if(ret === true) break; // Only open one tool
-	}
-	
+			if(ret === true) break; // Only open one tool
+		}
+		
 		if(!ret) EDITOR.statInfo("tool_openFileTool_enoext", UTIL.getFileExtension(filePath));
 		
-	return ret;
-}
-
-EDITOR.pathPickerTool = function pathPicker(options, callback) {
-	// Show a tool for picking a file path, which will callback with the chosen path
-	
-	console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
-	
-	if(typeof options == "function") {
-		callback = options;
-		options = undefined;
+		return ret;
 	}
 	
-	if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
-	
-	if(typeof options == "string") options = {defaultPath: options};
-	
+	EDITOR.pathPickerTool = function pathPicker(options, callback) {
+		// Show a tool for picking a file path, which will callback with the chosen path
+		
+		console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
+		
+		if(typeof options == "function") {
+			callback = options;
+			options = undefined;
+		}
+		
+		if(callback == undefined) throw new Error("callback=" + callback + " needs to be a callback function!");
+		
+		if(typeof options == "string") options = {defaultPath: options};
+		
 		var f = EDITOR.eventListeners.pathPickerTool.map(funMap);
 		console.log("Calling pathPickerTool listeners (" + f.length + ") ");
-	
-	var ret = false;
-	
+		
+		var ret = false;
+		
 		for(var i=0, f; i<f.length; i++) {
 			ret = f[i](options, gotPath);
-		if(ret === true) return true; // Only open one tool, hope it will call back!
-	}
-	
-	// If no path picker wanted to handle it: Use the stone-age path picker
-	var defaultPath = options && options.defaultPath;
-	var instruction = (options && options.instruction) || "Choose a file path:";
+			if(ret === true) return true; // Only open one tool, hope it will call back!
+		}
+		
+		// If no path picker wanted to handle it: Use the stone-age path picker
+		var defaultPath = options && options.defaultPath;
+		var instruction = (options && options.instruction) || "Choose a file path:";
 		promptBox(instruction, {defaultValue: defaultPath}, function(path) {
 			if(!path) {
 				var error = new Error("Aborted when picking path");
@@ -8351,58 +8395,58 @@ EDITOR.pathPickerTool = function pathPicker(options, callback) {
 			}
 			else return gotPath(null, path);
 		});
-	
-	return true; // True as in "we found a path picker"
-	
-	function gotPath(err, path) {
-		if(err) return callback(err);
 		
-		console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
+		return true; // True as in "we found a path picker"
 		
-		// EDITOR.checkPath will call EDITOR.pathPickerTool
-		// So it's safest to not call it from here to prevent and endless loop
-		// You can instead call EDITOR.checkPath directly to get a path
-		
-		return callback(null, path);
+		function gotPath(err, path) {
+			if(err) return callback(err);
+			
+			console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
+			
+			// EDITOR.checkPath will call EDITOR.pathPickerTool
+			// So it's safest to not call it from here to prevent and endless loop
+			// You can instead call EDITOR.checkPath directly to get a path
+			
+			return callback(null, path);
+		}
 	}
-}
-
-EDITOR.previewTool = tool("previewTool", false);
-
-EDITOR.runScript = tool("runScript", false);
-
-EDITOR.stopScript = tool("stopScript", false);
+	
+	EDITOR.previewTool = tool("previewTool", false);
+	
+	EDITOR.runScript = tool("runScript", false);
+	
+	EDITOR.stopScript = tool("stopScript", false);
 	
 	EDITOR.share = tool("share", false);
 	
 	EDITOR.wrapText = tool("wrapText", false);
-
+	
 	EDITOR.findInFiles = tool("findInFiles", false);
 	
-function tool(eventListenerName) {
-	return function(file, ev) {
-		if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
-		
-		if(! file instanceof File) throw new Error("First argument file need to be a File object!");
-		
-		// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
+	function tool(eventListenerName) {
+		return function(file, ev) {
+			if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
+			
+			if(! file instanceof File) throw new Error("First argument file need to be a File object!");
+			
+			// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
 			console.log("ev.constructor.name=" + (ev && ev.constructor && ev.constructor.name));
 			if(typeof ev != "object") throw new Error("Second argument to " + eventListenerName + " needs to be an event object (mouseClick,keyPress, etc)!");
-		
-		
+			
+			
 			if(!EDITOR.eventListeners.hasOwnProperty(eventListenerName)) throw new Error("Unknown event listener: " + eventListenerName);
-		
+			
 			var f = EDITOR.eventListeners[eventListenerName].map(funMap);
 			console.log("Calling eventListener=" + eventListenerName + " (" + f.length + ")");
-		
-		var ret = PASS;
-		
-		var combo = getCombo(ev);
-		
+			
+			var ret = PASS;
+			
+			var combo = getCombo(ev);
+			
 			for(var i=0; i<f.length; i++) {
 				ret = f[i](file, combo);
 				if(ret === HANDLED) return PREVENT_DEFAULT; // Only run once
-					else if(ret !== PASS) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
+				else if(ret !== PASS) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
 			}
 			
 			alertBox("No " + eventListenerName + " (" + f.length + " tools) handled the request!", 404, "warning");
@@ -8447,14 +8491,14 @@ function tool(eventListenerName) {
 			
 			if(EDITOR.files.hasOwnProperty(oldPath)) {
 				// File is opened in the editor!
-			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
-			
-			var file = EDITOR.files[oldPath];
-			
-			// Save the text, do not count on the garbage collector the be "slow"
-			var text = file.text; 
-			var state = {
-				isSaved: file.isSaved,
+				// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
+				
+				var file = EDITOR.files[oldPath];
+				
+				// Save the text, do not count on the garbage collector the be "slow"
+				var text = file.text; 
+				var state = {
+					isSaved: file.isSaved,
 				changed: file.changed,
 				savedAs: file.savedAs
 			}

@@ -86,9 +86,10 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-todo: Check if npx webide.se is working on various systems...
+Problem loading markdown preview css in Chrome app mode
 
-hmm, should we try to optimize startup time of npx !? And make it more seamless!?
+Use nvm rc to automatically switch to a Node.JS version
+
 
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
 
@@ -96,8 +97,6 @@ user feedback: I need a module installed but it's not compatable with this verso
 
 Able to change Node.js version from UI/menu!?
 
-
-Fix reported issues!!! then make a new release
 
 Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
 
@@ -2351,6 +2350,10 @@ When searching, find all, create multiple selections(cursors), so that when you 
 
 What I'm thinking
 ==================
+
+hmm, should we try to optimize startup time of npx !? And make it more seamless!?
+
+---
 
 Trying to make stuff work on Windows is even harder then before.
 The Node.JS and Python experience is not that great. It's easier on Linux, but still fiddly.
