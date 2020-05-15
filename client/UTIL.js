@@ -698,7 +698,7 @@ console.warn("fun=" + fun);
 	},
 
 	nameFunction: function createFunctionWidthName(fun, name, parameterCount) {
-		// Returns a new function, which calls fun, but has the name specified in secondn argument
+		// Returns a new function, which calls fun, but has the name specified in second argument
 		if(typeof fun != "function") throw new Error("First argument to UTIL.nameFunction should be a function!");
 		if(typeof name != "string" || name.length == 0) throw new Error("Second argument to UTIL.nameFunction should be a name");
 		

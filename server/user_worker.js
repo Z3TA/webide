@@ -786,15 +786,33 @@ API.run_nodejs = function run_nodejs(user, json, callback) {
 	if(filePath instanceof Error) return callback(filePath);
 	
 	var debugit = json.debug || false;
+	var nodePath = json.nodePath;
 	
+	if(nodePath == undefined) whichNode();
+	else run();
+	
+	function whichNode() {
+		module_child_process.exec("which node", function(err, stdout, stderr) {
+			
+			var node = stdout.trim();
+			
+			log("which node: " + node, DEBUG);
+			
+			nodePath = node || process.argv[0]; // First argument is the path to the nodejs executable!
+			
+			run();
+		});
+	}
+	
+	function run() {
 	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 		// Stop the current running script before starting the same script again
 		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-			runNodeJsScript(filePath, json.args, json.installAllModules, debugit, callback);
+				runNodeJsScript(filePath, json.args, json.installAllModules, debugit, nodePath, callback);
 		});
 	}
-	else runNodeJsScript(filePath, json.args, json.installAllModules, debugit, callback);
-	
+	else runNodeJsScript(filePath, json.args, json.installAllModules, debugit, nodePath, callback);
+	}
 }
 
 API.stop_nodejs = function stop_nodejs(user, json, callback) {
@@ -1514,7 +1532,7 @@ function stopNodeJsScript(filePath, callback) {
 	
 }
 
-function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
+function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, callback) {
 	
 	if(args == undefined) args = "";
 	if(typeof args != "string") throw new Error("args=" + args + " (" + (typeof args) + ") need to be a string!");
@@ -1650,6 +1668,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	function askForDebugPort() {
 		if(debugit) {
+			// todo: Don't have to ask for port when in netns !
 			parentRequest({tcpPort: 1024}, function(err, port) {
 				console.log("parentRequest returned err=" + err + " port=" + port);
 				
@@ -1667,15 +1686,14 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	function runIt() {
 		
-		console.log(user.name + " starting NodeJS script: filePath=" + filePath);
+		console.log(user.name + " starting NodeJS script: nodePath=" + nodePath + " filePath=" + filePath);
 		
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
-		var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
 		
 		var nodeScriptOptions = {
-			execPath: nodejsPath, 
+			execPath: nodePath, 
 			cwd: directory,
 			env: {
 				myName: user.name,
@@ -1837,7 +1855,7 @@ if(user.tld) {
 							
 							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
 								if(err) console.log(err.message); // Means the script was already stopped.
-								runNodeJsScript(filePath, args, installAllModules, debugit, function(err) {
+								runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, function(err) {
 									if(err) user.send(err.message);
 								});
 							})

@@ -13,6 +13,7 @@ androidEmulator: "Android Emulator",
 	bookmarklet: "bookmarklet",
 	
 cancel: "Cancel",
+change_version: "Change version",
 	clone_a_repository: "Clone a repository",
 	close: "close",
 	close_editor: "Close the editor",

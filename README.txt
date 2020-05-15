@@ -386,6 +386,21 @@ Re-compiling dependencies for another version of Node.JS
 
 
 
+Installing many versions of Node.js
+===================================
+````
+sudo npm install -g n
+sudo chmod 700 /usr/lib/node_modules/n/bin/n
+sudo n 10
+sudo n 12
+sudo n 13
+sudo n 14
+ls -la /usr/local/n/versions/node/
+````
+
+If the editor should be able to automatically switch Node.js version you need to create
+`~/.local/bin/` and add it to the PATH variable (the cloudIDE automatically does this)
+
 
 Misc
 =====

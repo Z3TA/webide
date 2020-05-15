@@ -86,7 +86,14 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-User search for "" nothing or space? in files... 
+sudo npm install -g n
+sudo chmod 700 /usr/lib/node_modules/n/bin/n
+sudo n 10
+sudo n 12
+sudo n 13
+sudo n 14
+ls -la /usr/local/n/versions/node/
+
 
 Use nvm rc to automatically switch to a Node.JS version
 
@@ -96,6 +103,8 @@ user feedback: I need a module installed but it's not compatable with this verso
 
 Able to change Node.js version from UI/menu!?
 
+
+todo: Angel bracket auto-completion: Check if open parenthesis and also add );
 
 Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
 
