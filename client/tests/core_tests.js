@@ -96,11 +96,11 @@ UTIL.assert(at.right, "az");
 		
 	});
 	
-	EDITOR.addTest(function getFoldersNoPath(callback) {
+	EDITOR.addTest(1, function getFoldersNoPath(callback) {
 		
 		var folders = UTIL.getFolders("sftp://foo.bar");
-		
-		if(folders[0] != "/") throw new Error("Unexpected: " + JSON.stringify(folders));
+		// Make sure the folder path ends with a slash!
+		if(folders[0].charAt(folders[0].length-1) != "/") throw new Error("Unexpected: " + JSON.stringify(folders));
 		
 		callback(true);
 		

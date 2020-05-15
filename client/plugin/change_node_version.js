@@ -24,19 +24,21 @@
 	function removeWindowMenus() {
 		for(var v in winMenus) {
 EDITOR.windowMenu.remove(winMenus[v]);
-	delete winMenus[v];
-}
-}
+			delete winMenus[v];
+		}
+	}
 	
 	function checkNvmrc(dir) {
 		if(versions.length == 0) return;
 		
+if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will complain. And n doesn't work on Windows anyway 
+
 		//alertBox("Changed working dir to: dir=" + dir);
 		
 		console.log("change_node_version: working dir=" + dir);
 		
 		EDITOR.readFromDisk( UTIL.joinPaths(dir, ".nvmrc"), function (err, path, rcVersion, hash) {
-if(err) {
+			if(err) {
 if(err.code == "ENOENT") {
 					console.log("change_node_version: No .nvmrc found in dir=" + dir);
 					return;
