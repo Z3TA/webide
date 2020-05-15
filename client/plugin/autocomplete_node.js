@@ -77,7 +77,7 @@ prototype: {
 	
 	
 	EDITOR.plugin({
-		desc: "Autocomplete for Node.JS",
+		desc: "Autocomplete for Node.js",
 		load: function loadNodejsAutocomplete() {
 			
 			EDITOR.on("autoComplete", autoCompleteNode);

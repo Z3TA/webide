@@ -219,7 +219,7 @@ var indentationCharacters = " ";
 		jsImg.setAttribute("alt", "JS");
 		jsFile.appendChild(jsImg);
 		
-		jsFile.appendChild(document.createTextNode("Node.JS script (JavaScript)"));
+		jsFile.appendChild(document.createTextNode("Node.js script (JavaScript)"));
 		jsFile.onclick = function createJsFile(clickEvent) {
 			createNewFile( UTIL.joinPaths(EDITOR.user ? EDITOR.user.homeDir:"/", "nodejs/main.js"), '/*\n\n\*/\n\nconsole.log("hello world!");\n\n');
 			EDITOR.dashboard.hide();

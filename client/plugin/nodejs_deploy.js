@@ -5,7 +5,7 @@
 	var activated = false;
 	
 	EDITOR.plugin({
-		desc: "Allows deoploying Node.JS scripts",
+		desc: "Allows deoploying Node.js scripts",
 		load: function loadNodeJsDeploy() {
 			
 			// Make sure init service is running before activating the plugin
@@ -39,10 +39,10 @@
 						
 						EDITOR.bindKey({desc: S("remove_nodejs_project_from_production"), fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
 						
-						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.JS", 5], nodejsDeploy, "top");
-						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.JS", 5], nodejsProdRestart);
-						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.JS", 5], nodejsProdStop);
-						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.JS", 5], nodejsProdRemove, "bottom");
+						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.js", 5], nodejsDeploy, "top");
+						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.js", 5], nodejsProdRestart);
+						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], nodejsProdStop);
+						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.js", 5], nodejsProdRemove, "bottom");
 						
 						var discoveryItem = document.createElement("img");
 						discoveryItem.setAttribute("id", "deployDiscovery");

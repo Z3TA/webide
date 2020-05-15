@@ -19,7 +19,7 @@
 	var reNetnsIP, username;
 	
 	EDITOR.plugin({
-		desc: "Allows running Node.JS scripts",
+		desc: "Allows running Node.js scripts",
 		load: loadNodeJS,
 		unload: unloadNodeJS
 	});
@@ -31,8 +31,8 @@
 		EDITOR.bindKey({desc: S("run_nodejs_script"), fun: runNodeJsScript, charCode: keyF2, combo: 0});
 		EDITOR.bindKey({desc: S("stop_nodejs_script"), fun: stopNodeJsScript, charCode: keyF4, combo: 0});
 		
-		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.JS", 2], runNodeJsScriptFromMenu);
-		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.JS", 2], stopNodeJsScript);
+		winMenuStartScript = EDITOR.windowMenu.add(S("run_nodejs_script"), ["Node.js", 2], runNodeJsScriptFromMenu);
+		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.js", 2], stopNodeJsScript);
 		
 		EDITOR.on("ctxMenu", showRunNodejsScriptMenuItem);
 		EDITOR.on("runScript", runNodeJsScriptMaybe);
@@ -92,7 +92,7 @@ return;
 			//showNodejsBanner({url: url});
 			nodeJsBanner.show();
 			
-			startStopButton.innerText = "Run Node.JS script";
+			startStopButton.innerText = "Run Node.js script";
 			startStopButton.onclick = function() {
 saveAndRun(file);
 			}
@@ -822,7 +822,7 @@ startStopButton.classList.remove("start");
 		
 		if(startStopButton) {
 startStopButton.classList.add("start");
-			startStopButton.innerText = "Save & Restart Node.JS script";
+			startStopButton.innerText = "Save & Restart Node.js script";
 			startStopButton.onclick = saveAndRun;
 		}
 	}

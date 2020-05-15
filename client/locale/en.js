@@ -108,7 +108,7 @@ documentation: "documentation",
 network_problem: "network problem",
 	new: "new",
 	new_file: "New file",
-	nodejs_deploy: "Node.JS Deploy",
+	nodejs_deploy: "Node.js Deploy",
 	
 	open: "open",
 	open_in_new_window: "Open in new window",

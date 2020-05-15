@@ -4698,7 +4698,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				dropdownMenuRoot.addItem(S("View"), undefined, undefined, 4);
 				dropdownMenuRoot.addItem(S("Navigate"), undefined, undefined, 5);
 				dropdownMenuRoot.addItem(S("Tools"), undefined, undefined, 6);
-				dropdownMenuRoot.addItem("Node.JS", undefined, undefined, 7);
+				dropdownMenuRoot.addItem("Node.js", undefined, undefined, 7);
 				
 				// Add key bindings
 				
