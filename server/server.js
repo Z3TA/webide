@@ -2540,14 +2540,14 @@ send({stdin: stdinChannelBuffer, id: 0});
 							}
 							else {
 								// Save last login date and update loginCounter
-							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function createLastLoginFile(err) {
+							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function createLastLoginFile(err) {
 								if(err && err.code == "ENOENT") {
 									// .webide/storage/ probably doesn't exist in the home dir!
 										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"], {recursive: true}), function(err) {
 											if(err && err.code != "EEXIST") throw err;
 											
 											// Try again
-											module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp(), function(err) {
+											module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function(err) {
 												if(err) throw err;
 												else lastLoginFileUpdated()
 											});
@@ -2885,7 +2885,7 @@ function checkMounts(options, checkMountsCallback) {
 				filesToWrite++;module_fs.readFile("/etc/" + etcFile, "utf8", function(err, text) {filesWritten++;
 					if(err && err.code=="ENOENT") {
 						log("/etc/" + etcFile + " does not exist!", INFO);
-						return checkMountsReadyMaybe();
+					return checkMountsReadyMaybe();
 					}
 					else if(err) throw err;
 					
@@ -2899,7 +2899,7 @@ function checkMounts(options, checkMountsCallback) {
 					}
 					if(!line) {
 						log("Unable to find " + username + ": in /etc/" + etcFile, INFO);
-						return checkMountsReadyMaybe();
+					return checkMountsReadyMaybe();
 					}
 					
 					createNetnsFile(etcFile, line);
