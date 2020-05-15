@@ -2885,7 +2885,7 @@ function checkMounts(options, checkMountsCallback) {
 				filesToWrite++;module_fs.readFile("/etc/" + etcFile, "utf8", function(err, text) {filesWritten++;
 					if(err && err.code=="ENOENT") {
 						log("/etc/" + etcFile + " does not exist!", INFO);
-						return;
+						return checkMountsReadyMaybe();
 					}
 					else if(err) throw err;
 					
@@ -2899,7 +2899,7 @@ function checkMounts(options, checkMountsCallback) {
 					}
 					if(!line) {
 						log("Unable to find " + username + ": in /etc/" + etcFile, INFO);
-						return;
+						return checkMountsReadyMaybe();
 					}
 					
 					createNetnsFile(etcFile, line);
