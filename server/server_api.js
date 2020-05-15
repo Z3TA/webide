@@ -2811,6 +2811,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 
 
 API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFilesCallback) {
+	
 	/*
 		Finds or replaces inside files
 		Can be run on remote file systems (ftp,sftp,ftps)
@@ -2825,26 +2826,27 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	*/
 	
 	var searchPath = json.searchPath;
-	if(searchPath == undefined) return callback(new Error("searchPath=" + searchPath + " is not defined!"));
+	if(searchPath == undefined) return findReplaceInFilesCallback(new Error("searchPath=" + searchPath + " is not defined!"));
 	
 	var searchString = json.searchString;
-	if(searchString == undefined) return callback(new Error("searchString=" + searchString + " is not defined!"));
+	if(searchString == undefined) return findReplaceInFilesCallback(new Error("searchString=" + searchString + " is not defined!"));
+	if(searchString == "") return findReplaceInFilesCallback(new Error("searchString=" + searchString + " can not be empty!"));
 	
 	try {
 		var testSearchString = new RegExp(fileFilter);
 	}
 	catch(err) {
-		return callback(new Error("Bad RegExp: searchString=" + searchString + ": " + err.message));
+		return findReplaceInFilesCallback(new Error("Bad RegExp: searchString=" + searchString + ": " + err.message));
 	}
 	
 	var fileFilter = json.fileFilter;
-	if(fileFilter == undefined) return callback(new Error("fileFilter=" + fileFilter + " is not defined!"));
+	if(fileFilter == undefined) return findReplaceInFilesCallback(new Error("fileFilter=" + fileFilter + " is not defined!"));
 	
 	try {
 	var fileFilterRegExp = new RegExp(fileFilter);
 	}
 	catch(err) {
-		return callback(new Error("Bad RegExp: fileFilter=" + fileFilter + ": " + err.message));
+		return findReplaceInFilesCallback(new Error("Bad RegExp: fileFilter=" + fileFilter + ": " + err.message));
 	}
 	
 	var searchSubfolders = json.searchSubfolders || false;

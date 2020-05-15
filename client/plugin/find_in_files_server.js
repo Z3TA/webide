@@ -827,6 +827,7 @@ parse: false
 				if(err) {
 					alertBox(err.message);
 					reportFile.writeLine(err.message);
+EDITOR.renderNeeded();
 					
 					//inputInDir.setAttribute("class", "inputtext indir error");
 					//return alert("Can't do a search in a path that don't exist");
