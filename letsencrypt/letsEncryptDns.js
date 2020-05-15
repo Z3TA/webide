@@ -26,7 +26,7 @@
 	And don't forget to delete /etc/letsencrypt/live/domain.tld/ or certbot will create domain.tld-0001/
 	
 	Certbot get updates all the time so the command flags might change. Here's an example how you can create a certificate:
-	sudo certbot  certonly --manual --server https://acme-v02.api.letsencrypt.org/directory --manual-public-ip-logging-ok --preferred-challenges dns --non-interactive --agree-tos --email zeta@zetafiles.org -d 'editor.yourdomain.com' --manual-auth-hook="certbot-manual-auth-hook.sh" --manual-cleanup-hook="certbot-manual-cleanup-hook.sh" --account 6668a1af86a12faa8ba00196a8613299
+	sudo certbot certonly --manual --server https://acme-v02.api.letsencrypt.org/directory --manual-public-ip-logging-ok --preferred-challenges dns --non-interactive --agree-tos --email zeta@zetafiles.org -d 'editor.yourdomain.com' --manual-auth-hook="certbot-manual-auth-hook.sh" --manual-cleanup-hook="certbot-manual-cleanup-hook.sh" --account 6668a1af86a12faa8ba00196a8613299
 	
 	To list your accounts:
 	sudo ls -la /etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory/
