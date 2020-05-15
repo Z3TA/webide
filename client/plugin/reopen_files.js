@@ -918,7 +918,11 @@
 				filePath = list[i].path;
 				//console.log("reopenFiles: Check slot " + i + " filePath=" + filePath + " storage=" + EDITOR.storage.getItem(key));
 				if( EDITOR.storage.getItem(key) != filePath ) {
-					EDITOR.storage.setItem(key, filePath);
+					EDITOR.storage.setItem(key, filePath, true, function(err) {
+						// It's annoying that when we lose connection we get an error for each open file...
+// So swallow the error here
+						if(err) console.error(err);
+					});
 				}
 			}
 			// Mark next key as null so we know how many files to open

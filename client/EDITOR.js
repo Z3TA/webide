@@ -500,8 +500,8 @@ _editorInput = true;
 				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
 				if(callback) callback(err, json);
 				else if(err) {
+						//console.error(err);
 					console.log(stack);
-					//console.warn(err.message);
 						throw new Error("Unable to save id=" + id + " value=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
 				}
 					
