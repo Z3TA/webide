@@ -5,7 +5,7 @@
 	var winMenus = {};
 	var versions = [];
 	var nPath = "/usr/local/n/versions/node/";
-
+	
 	EDITOR.plugin({
 		desc: "Change Node.js version",
 		load: function loadChangeNodeVersion() {
@@ -15,11 +15,18 @@
 		unload: function unloadChangeNodeVersion() {
 			CLIENT.removeEvent("loginSuccess", checkNodeVersions);
 			
-			for(var v in winMenus) EDITOR.windowMenu.remove(winMenus[v]);
+			removeWindowMenus();
 			
 			EDITOR.removeEvent("changeWorkingDir", checkNvmrc);
 		}
 	});
+	
+	function removeWindowMenus() {
+		for(var v in winMenus) {
+EDITOR.windowMenu.remove(winMenus[v]);
+	delete winMenus[v];
+}
+}
 	
 	function checkNvmrc(dir) {
 		if(versions.length == 0) return;
@@ -72,6 +79,8 @@ if(versions.indexOf(rcVersion) != -1) {
 	}
 
 	function checkNodeVersions() {
+		// note: This function is called every time the user re-login
+		removeWindowMenus();
 		
 		EDITOR.listFiles(nPath, function(err, files) {
 			if(err) {
