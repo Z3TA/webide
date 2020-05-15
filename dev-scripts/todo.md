@@ -86,10 +86,9 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-Problem loading markdown preview css in Chrome app mode
+User search for "" nothing or space? in files... 
 
 Use nvm rc to automatically switch to a Node.JS version
-
 
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
 

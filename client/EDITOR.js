@@ -8182,6 +8182,7 @@ var loaded = !!theWindow.location.href;
 			console.log("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " ");
 			if(waitUntilLoaded && loaded) {
 				// A timeout to be really sure it has been loaded
+console.log("EDITOR.createWindow: Waiting to be really sure the window have been loaded...");
 				setTimeout(function() {
 					if(theWindow.loadedByWebideYo === true) {
 						console.warn("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " Aborting callback because theWindow.loadedByWebideYo=" + theWindow.loadedByWebideYo);

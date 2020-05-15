@@ -548,7 +548,7 @@ reconnectTimeoutTime += 10000;
 					
 					if(json.error) {
 						var errMsg = "Server: " + json.error;
-						console.error(errMsg + " code=" + json.errorCode);
+						console.warn(errMsg + " code=" + json.errorCode);
 						err = properCallStackError[json.id] || new Error(errMsg);
 						err = UTIL.updateError(err, json.errorCode, errMsg);
 					}

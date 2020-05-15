@@ -43,14 +43,21 @@ function markdownPreview(file) {
 			
 			preview.win = win;
 			
+// Chrome needs the full URL to the stylesheet, it can't resolve relative path from about:blank
+			var l = window.location;
+			var baseUrl = l.protocol + "//" + l.host + l.pathname;
+			var cssUrl = baseUrl + "plugin/markdown_preview/github.css";
+			
 			var style = document.createElement('link');
 			style.setAttribute("rel", "stylesheet");
 			style.setAttribute("type", "text/css");
-			style.setAttribute("href", "plugin/markdown_preview/github.css");
+			style.setAttribute("href", cssUrl);
 			
 			var doc = win.document;
 			var head = doc.getElementsByTagName('head')[0];
 			head.appendChild(style);
+			
+			console.log("markdownPreview: style=", style, " appened to head=", head);
 			
 			win.onbeforeunload = function markdownPreviewWindowClosed() {
 				console.log("markdownPreview: Window unloading!");
