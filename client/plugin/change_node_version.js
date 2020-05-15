@@ -2,27 +2,76 @@
 (function() {
 "use strict";
 
-var markdownParser = "plugin/markdown_preview/showdown.js";
-var markdownParserLoaded = false;
-var fileChangeListenerLoaded = false;
+	var winMenus = {};
+	var versions = [];
+	var nPath = "/usr/local/n/versions/node/";
 
-var filesInPreview = {};
-
-EDITOR.plugin({
-desc: "Change Node.js version",
-load: function loadChangeNodeVersion() {
+	EDITOR.plugin({
+		desc: "Change Node.js version",
+		load: function loadChangeNodeVersion() {
 			CLIENT.on("loginSuccess", checkNodeVersions);
-
-},
-unload: function unloadChangeNodeVersion() {
+			EDITOR.on("changeWorkingDir", checkNvmrc);
+		},
+		unload: function unloadChangeNodeVersion() {
 			CLIENT.removeEvent("loginSuccess", checkNodeVersions);
 			
-}
+			for(var v in winMenus) EDITOR.windowMenu.remove(winMenus[v]);
+			
+			EDITOR.removeEvent("changeWorkingDir", checkNvmrc);
+		}
+	});
+	
+	function checkNvmrc(dir) {
+		if(versions.length == 0) return;
+		
+		//alertBox("Changed working dir to: dir=" + dir);
+		
+		console.log("change_node_version: working dir=" + dir);
+		
+		EDITOR.readFromDisk( UTIL.joinPaths(dir, ".nvmrc"), function (err, path, rcVersion, hash) {
+if(err) {
+if(err.code == "ENOENT") {
+					console.log("change_node_version: No .nvmrc found in dir=" + dir);
+					return;
+				}
+				else throw err;
+			}
+
+			rcVersion = rcVersion.trim();
+			if(rcVersion.charAt(0) == "v") rcVersion.slice(1);
+			
+			console.log("change_node_version: rcVersion=" + rcVersion);
+			
+if(versions.indexOf(rcVersion) != -1) {
+				switchToVersion(rcVersion);
+			}
 });
+	}
+	
+	function switchToVersion(version) {
+		console.log("change_node_version: switchToVersion: version=" + version);
+		
+		var target = UTIL.joinPaths(nPath, version, "/bin/node");
+		var dest = UTIL.joinPaths(EDITOR.user.homeDir, ".local/bin/node");
+		var destDir = UTIL.joinPaths(EDITOR.user.homeDir, ".local/bin/");
+		var command = "mkdir -p " + destDir + " && rm -f " + dest + " && ln -s " + target  + " " + dest;
+		
+		console.log("change_node_version: command=" + command);
+		
+		CLIENT.cmd("run", {command: command}, function(err, resp) {
+			if(err) throw err;
+			
+			for(var v in winMenus) winMenus[v].deactivate();
+			
+			winMenus[version].activate();
+			
+			console.log("change_node_version: Changed to version=" + version);
+			
+			//alertBox("Changed Node.js version to: version=" + version);
+		});
+	}
 
 	function checkNodeVersions() {
-		
-		var nPath = "/usr/local/n/versions/node/";
 		
 		EDITOR.listFiles(nPath, function(err, files) {
 			if(err) {
@@ -30,33 +79,18 @@ unload: function unloadChangeNodeVersion() {
 				return;
 			}
 			
-			var versions = files.map(function(file) {
+			versions = files.map(function(file) {
 				return file.name;
 			});
 			
-			var winMenus = {};
+			console.log("change_node_version: Found versions=" + JSON.stringify(versions));
 			
 			versions.forEach(function(version) {
 				winMenus[version] = EDITOR.windowMenu.add(version, ["Node.js", S("change_version")], UTIL.nameFunction(useVersion, "use_nodejs_v" + version));
 				
 				function useVersion() {
-					
-					var target = UTIL.joinPaths(nPath, version, "/bin/node");
-					var dest = UTIL.joinPaths(EDITOR.user.homeDir, ".local/bin/node");
-					var destDir = UTIL.joinPaths(EDITOR.user.homeDir, ".local/bin/");
-					var command = "mkdir -p " + destDir + " && rm -f " + dest + " && ln -s " + target  + " " + dest;
-					
-					console.log("change_node_version: command=" + command);
-					
-					CLIENT.cmd("run", {command: command}, function(err, resp) {
-						if(err) throw err;
-						
-						for(var v in winMenus) winMenus[v].deactivate();
-						
-						winMenus[version].activate();
-					});
-					
-				}
+switchToVersion(version);
+}
 			});
 			
 			// Check which version is currently in use

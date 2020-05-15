@@ -86,22 +86,10 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-sudo npm install -g n
-sudo chmod 700 /usr/lib/node_modules/n/bin/n
-sudo n 10
-sudo n 12
-sudo n 13
-sudo n 14
-ls -la /usr/local/n/versions/node/
-
-
-Use nvm rc to automatically switch to a Node.JS version
-
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
 
-user feedback: I need a module installed but it's not compatable with this verson of node. I need node >= 12.0.0 
+Is there a Galaxy store for only galaxy notes!?
 
-Able to change Node.js version from UI/menu!?
 
 
 todo: Angel bracket auto-completion: Check if open parenthesis and also add );
@@ -110,20 +98,20 @@ Clicking on an window menu item should close menus that are not a child or grand
 
 bug: Color picker from images doesn't work when there is different pixel ratio then one
 
-performance issue when using fractal scaling in Ubuntu
+performance issue when using fractal scaling in Ubuntu!??
 
 todo: Gnome desktop app plugin, live preview gjs
 gnome-desktop-app example
-asdasdasdasdaks jdaskljhdasjlkhdasjhdjklashdjashdjklas hdjashjkdahskjdhakjsd haskjdhaskjdh askjdaksjdhkahskjdhaksj dkashdjkasjkd asd
-
-bug: unable to repeat: Sometimes when logging in it puts me on hold... and I have to refresh in order to login 
-
-
-todo: Support more Macbook keyboard shortcuts!
 
 Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
 
-Is there a Galaxy store for only galaxy notes!?
+bug: unable to repeat: Sometimes when logging in it puts me on hold... and I have to refresh in order to login 
+
+todo: Support more Macbook keyboard shortcuts!
+
+
+
+
 
 When demoing on Chrome on iOS:
 * Opening db/sql module screwed up the layout where the db right menu took up half the size
@@ -136,13 +124,10 @@ Windows menus where hard to use, and discovery buttons too small to click on
 Problem with mySQL module: Error: Can't add new command when connection is in closed state
 
 
-Able to change Node.JS version via GUI
-
-
 Parse TypeScript type defentitions for autocomplete!
 Look for @types in node_modules !? And parse all!? 
 
-Google Script type defenitions.
+Google Script type defenitions?
 
 
 todo: Better support for Google Script (JavaScript used to script Sheets etc)
