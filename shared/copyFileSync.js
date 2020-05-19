@@ -12,11 +12,7 @@ function copyFileSync( source, target ) {
 		}
 	}
 	
-	if ( fs.existsSync( targetFile ) ) {
-		console.warn("File already exist: " + targetFile);
-	}
-	else fs.writeFileSync(targetFile, fs.readFileSync(source));
-	
+	fs.writeFileSync(targetFile, fs.readFileSync(source));
 }
 
 module.exports = copyFileSync;

@@ -73,17 +73,35 @@ function removeFileSync(filePath) {
 	if(!error) console.log("Deleted " + filePath);
 }
 
-function removeDirRecursiveSync(directory) {
+function removeDirRecursiveSync(path) {
+	var fs = require("fs");
+	var files = [];
+	if( fs.existsSync(path) ) {
+		files = fs.readdirSync(path);
+		files.forEach(function(file,index){
+			var curPath = path + "/" + file;
+			if(fs.lstatSync(curPath).isDirectory()) { // recurse
+				removeDirRecursiveSync(curPath);
+			} else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
+	
+	/*
 	var fs = require("fs");
 	try {
-		fs.rmdirSync(directory, {recursive: true});
+		fs.rmdirSync(directory, {recursive: true, maxRetries: 3});
 	}
 	catch(err) {
 		var error = err;
 		console.log(err.code + ": " + directory);
 		if(err.code != "ENOENT") throw err;
 	}
-	if(!error) console.log("Deleted " + directory);
+	if(!error) 
+	*/
+	console.log("Deleted " + path);
 }
 
 function removeAllFiles(directory, re) {

@@ -86,6 +86,16 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+
+User onboarding!
+
+Use the Screen/code-casting function to welcome the user and show the user how to be successful with the editor...
+
+Make guides and examples
+
+
+
+
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
 
 Is there a Galaxy store for only galaxy notes!?
