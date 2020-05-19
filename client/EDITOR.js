@@ -5624,15 +5624,16 @@ setTimeout(function winNeverLoaded() {
 					//win.resizeTo(width, height);
 
 // Enable scaling
-var sel = win.document.getElementById("noVNC_setting_resize");
-sel.value = "scale";
+					var sel = win.document.getElementById("noVNC_setting_resize");
+					if(sel) {
+						sel.value = "scale";
 var evt = win.document.createEvent("HTMLEvents");
 evt.initEvent("change", false, true);
 sel.dispatchEvent(evt);
-
-try {
-
-				// These might not exist depending on the version of noVNC
+					}
+					
+					try {
+// These might not exist depending on the version of noVNC
 win.document.getElementById("noVNC_control_bar_anchor").style.display="none"; // Not needed
 				win.document.getElementById("noVNC_canvas").style.margin = "0px";
 				win.document.getElementById("noVNC_status").style.display="none"; // Flashes so fast we can't read what it says
@@ -5641,8 +5642,6 @@ win.document.getElementById("noVNC_control_bar_anchor").style.display="none"; //
 catch(err) {
 console.warn(err.message);
 }
-					
-					
 					
 					var f = EDITOR.eventListeners.virtualDisplay.map(funMap);
 				for(var i=0; i<f.length; i++) f[i]("open"); //
@@ -7969,7 +7968,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	*/
 	
 	EDITOR.openWindows = [];
-	EDITOR.createWindow = function(options, callback) {
+	EDITOR.createWindow = function createWindow(options, callback) {
 		// A callback is needed because we might have to show a button for the user to click to open the new window (if the browser has a popup stopper)
 		
 		// options object needs to be specified, because we need at least an url option
@@ -8021,7 +8020,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			console.log("EDITOR.createWindow: theWindow available right away!");
 			testWindow(theWindow);
 		}
-		else setTimeout(function() {
+		else setTimeout(function waitedBecauseWindowWasNullOrUndefined() {
 		if(theWindow != null) {
 				console.log("EDITOR.createWindow: theWindow available after timeout!");
 				testWindow(theWindow);
@@ -8044,7 +8043,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			var retry = "Retry";
 			var cancel = "Cancel";
-			confirmBox(failText, [retry, cancel], function(answer) {
+			confirmBox(failText, [retry, cancel], function confirmOpenWindow(answer) {
 				if(answer == retry) {
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
@@ -8129,7 +8128,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			}
 			
-			theWindow.addEventListener("load", function() {
+			theWindow.addEventListener("load", function createdWindowLoaded() {
 				console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
 				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 				/*
@@ -8149,7 +8148,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				}
 				
 }, false);
-			theWindow.addEventListener("DOMContentLoaded", function() {
+			theWindow.addEventListener("DOMContentLoaded", function createdWindowDOMContentLoaded() {
 				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
 				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 			}, false);
@@ -8183,7 +8182,7 @@ var loaded = !!theWindow.location.href;
 			if(waitUntilLoaded && loaded) {
 				// A timeout to be really sure it has been loaded
 console.log("EDITOR.createWindow: Waiting to be really sure the window have been loaded...");
-				setTimeout(function() {
+				setTimeout(function waitedToBeSureWindowHadLoaded() {
 					if(theWindow.loadedByWebideYo === true) {
 						console.warn("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " Aborting callback because theWindow.loadedByWebideYo=" + theWindow.loadedByWebideYo);
 						return;
