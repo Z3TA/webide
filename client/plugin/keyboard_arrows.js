@@ -13,30 +13,26 @@
 	
 	
 	// ## Right arrow
-	EDITOR.bindKey({desc: "Move caret right", charCode: key_RIGHT, fun: 
-		function moveCaretRight(file, combo) {
-			return keyboard_arrows_moveRight(file, combo);
-		}
-	});
+	EDITOR.bindKey({desc: "Move caret right", charCode: key_RIGHT, fun: moveCaretRight});
 	
-	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT, fun: 
-		function moveCaretRightAndSelect(file, combo) {
-			return keyboard_arrows_moveRight(file, combo);
-		}
-	});
+	function moveCaretRight(file, combo) {
+		return keyboard_arrows_moveRight(file, combo);
+	}
 	
-	EDITOR.bindKey({desc: "Move caret one word right", charCode: key_RIGHT, combo: CTRL, fun: 
-		function moveCaretOneWordRight(file, combo) {
-			return keyboard_arrows_moveRight(file, combo);
-		}
-	});
+	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT, fun: moveCaretRightAndSelect});
+	function moveCaretRightAndSelect(file, combo) {
+		return keyboard_arrows_moveRight(file, combo);
+	}
 	
-	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT+CTRL, fun: 
-		function moveCaretOneWordRightAndSelect(file, combo) {
-			return keyboard_arrows_moveRight(file, combo);
-		}
-	});
+	EDITOR.bindKey({desc: "Move caret one word right", charCode: key_RIGHT, combo: CTRL, fun: moveCaretOneWordRight});
+	function moveCaretOneWordRight(file, combo) {
+		return keyboard_arrows_moveRight(file, combo);
+	}
 	
+	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT+CTRL, fun: moveCaretOneWordRightAndSelect});
+	function moveCaretOneWordRightAndSelect(file, combo) {
+return keyboard_arrows_moveRight(file, combo);
+}
 	
 	// ## Left arrow
 	EDITOR.bindKey({desc: "Move the caret left", charCode: key_LEFT, fun: 

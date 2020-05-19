@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",
-    "uglify-js": "^3.9.3",
+    "uglify-js": "^3.7.2",
     "uglifycss": "^0.0.29"
   },
   "scripts": {
