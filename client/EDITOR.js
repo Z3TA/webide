@@ -8050,7 +8050,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					if(!theWindow) {
 							console.warn("EDITOR.createWindow: Calling back!");
 							callback(new Error(errorText));
-							callback = null;
+							callback = function() { return "Already called callback after open fail, after retry confirmBox" };
 							return;
 						}
 						else return testWindow(theWindow);
@@ -8058,7 +8058,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				else {
 						console.warn("EDITOR.createWindow: Calling back!");
 						callback(new Error(errorText));
-						callback = null;
+						callback = function() { return "Already called callback after canceled retry confirmBox" };
 					}
 				});
 				
@@ -8098,7 +8098,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 				console.warn("EDITOR.createWindow: Calling back!");
 				callback(error);
-				callback = null;
+				callback = function() { return "Already called callback after theWindow.document.domain error in testWindow" };
 				return;
 			}
 			
@@ -8144,7 +8144,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(waitUntilLoaded) {
 					console.warn("EDITOR.createWindow: Calling back!");
 					callback(null, theWindow);
-					callback = null;
+					callback = function() { return "Already called callback after theWindow got load event" };
 				}
 				
 }, false);
@@ -8167,7 +8167,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			if(!waitUntilLoaded) {
 				console.warn("EDITOR.createWindow: Calling back!");
 				callback(null, theWindow);
-				callback = null;
+				callback = function() { return "Already called callback in testWindow because not waitUntilLoaded" };
 				return;
 			}
 			
@@ -8189,7 +8189,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 					}
 					console.warn("EDITOR.createWindow: Calling back!");
 					callback(null, theWindow);
-callback = null;
+					callback = function() { return "Already called callback in testWindow because not waitUntilLoaded and loaded" };
 				}, 500);
 			}
 			
