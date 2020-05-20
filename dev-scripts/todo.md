@@ -86,6 +86,19 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+Google PageSpeed Insights: 
+Before early content: (second run)
+Mobile 88
+Desktop 99
+
+After early content: (second run)
+
+
+Experimenting with moving the scripts down in the bundle.htm so that the user see something while the page is being downloaded...
+With "Fast 3G" profile you see something after 700ms vs 2500ms
+
+
+
 
 User onboarding!
 
