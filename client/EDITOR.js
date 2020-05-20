@@ -608,7 +608,7 @@ clearTimeout(serverStorageWaitingItems[id]);
 	}
 	
 	if(localStorageAvailable) {
-		// Use window.localStorage but with the same interface as chrome.storage
+		// Use window.localStorage but with the same interface as chrome.storage (web app API for ChromeOS)
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(key, value, callback) {
 				if(typeof key == "object") {
@@ -9691,7 +9691,7 @@ function main() {
 	
 	console.log("Starting the editor ...");
 	
-	window.name = "editor"; // For focus access
+		window.name = "editor"; // For focus access
 	
 	//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 	
@@ -10078,8 +10078,19 @@ EDITOR.discoveryBar.show();
 			//navigator.keyboard.lock();
 		}
 		
+		// Loading styles reset
+		setTimeout(function() {
+			document.getElementById("wireframe").classList.remove("beforeload");
+			document.getElementById("header").classList.remove("beforeload");
+			document.getElementById("columns").classList.remove("beforeload");
+			document.getElementById("leftColumn").classList.remove("beforeload");
+			document.getElementById("editorCanvas").classList.remove("beforeload");
+			EDITOR.resizeNeeded(); // If the measurements in beforeload CSS is correct there won't be a resize!
+		}, 1000); // Wont get the login dialog in the footer until the reset!
 		
 		sendStatistics();
+		
+		
 		
 		windowLoaded = true;
 	}

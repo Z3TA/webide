@@ -333,7 +333,14 @@ image-rendering: crisp-edges;               /* Possible future browsers. */
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none;   /* Chrome/Safari/Opera */
 }
+.wireframe.beforeload {
+	height: 100%;
+}
 
+/*
+	Note regarding beforeload:
+	We don't need a loading message because it would just "flash" which is annoying because you don't have tome to read
+*/
 
 /* Only the file canvas should have the fileCanvas class! */
 .fileCanvas { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
@@ -341,10 +348,19 @@ image-rendering: crisp-edges;               /* Possible future browsers. */
 	cursor: text;
 }
 
+.fileCanvas.beforeload {
+	width: 0; /* prevents black flash. (Setting background don't help) */
+}
+
 .columns {
 	/*border: 1px solid red; */
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
 }
+.columns.beforeload {
+	height: 100%;
+	background: white;
+}
+
 
 .leftColumn {
 	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
@@ -353,6 +369,12 @@ image-rendering: crisp-edges;               /* Possible future browsers. */
 	padding: 0px;
 	margin: 0px;
 	border: 0px solid blue;
+}
+
+.leftColumn.beforeload {
+	background: #edf0f2; 
+	height: 100%; 
+	width: 64px;
 }
 
 .centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
@@ -376,6 +398,12 @@ image-rendering: crisp-edges;               /* Possible future browsers. */
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
 	
 	}
+
+.header.beforeload {
+	/* note: There are no files open in the file tabs on first load! (only on returning visits, which should be fast/cached) */
+	height: 28px;
+}
+
 
 .footer {
 	/* Needs to have height! */
