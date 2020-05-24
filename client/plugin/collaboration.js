@@ -1427,6 +1427,9 @@ var file = fileOrData;
 		
 		if(!recordInfo) loadRecord();
 		
+// todo: If there is no record loaded, ask the user if he/she want's an intro about screen-casting
+		if(!recordInfo) return alertBox("Unable to start playback. Try opening a record .json file, or Start recordning your own.");
+		
 		console.log("audioPlayer.readyState=" + audioPlayer.readyState);
 		if(recordInfo.audioPath && loadedAudioFile != recordInfo.audioPath) {
 			loadAudio(audioPlayer, recordInfo.audioPath, function(err) {

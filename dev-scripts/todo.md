@@ -86,8 +86,7 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-Writing bug for test:
-Closing a file while offline, will later give an error when that says file is not in the array...
+
 
 Start using the cloudIDE for all work!
 
@@ -107,7 +106,7 @@ Able to preview a React app
 Able to preview a React native app
 
 
-
+todo: If there is no record loaded, ask the user if he/she want's an intro about screen-casting
 
 
 
