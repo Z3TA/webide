@@ -864,7 +864,13 @@
 				delete oldServerState[filePath];
 				delete changedstate[filePath];
 				
-				EDITOR.storage.removeItem("state_" + filePath);
+				EDITOR.storage.removeItem("state_" + filePath, function(err) {
+					//alertBox("done: EDITOR.storage.removeItem: state_" + filePath + " err.message=" + (err && err.message) + " err.code=" + (err & err.code));
+					if(err) {
+						console.log("err.code=" + err.code);
+						console.error(err);
+					}
+				});
 				
 			});
 		});

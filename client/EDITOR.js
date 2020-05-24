@@ -544,8 +544,13 @@ clearTimeout(serverStorageWaitingItems[id]);
 			
 			if(_serverStorage.hasOwnProperty(id)) {
 				CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
-					if(callback) callback(err, json);
-					if(err && err.code != "ENOENT") {
+					if(callback) {
+callback(err, json);
+					callback = null;
+return;
+}
+					
+if(err && err.code != "ENOENT") {
 						console.log(stack);
 						console.log("storageRemove err.code=" + err.code)
 					throw err;
