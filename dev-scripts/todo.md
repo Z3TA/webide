@@ -86,30 +86,31 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-Google PageSpeed Insights: 
-Before early content: (second run)
-Mobile 88
-Desktop 99
+Writing bug for test:
+Closing a file while offline, will later give an error when that says file is not in the array...
 
-After early content: (second run)
+Start using the cloudIDE for all work!
 
 
-Experimenting with moving the scripts down in the bundle.htm so that the user see something while the page is being downloaded...
-With "Fast 3G" profile you see something after 700ms vs 2500ms
-
-
-
-
-User onboarding!
+User onboarding!!!
 
 Use the Screen/code-casting function to welcome the user and show the user how to be successful with the editor...
 
 Make guides and examples
 
-
-
-
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
+
+
+
+
+Able to preview a React app
+Able to preview a React native app
+
+
+
+
+
+
 
 Is there a Galaxy store for only galaxy notes!?
 

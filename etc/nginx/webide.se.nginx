@@ -81,8 +81,8 @@ server {
 
   location @badgateway {
     add_header Access-Control-Allow-Origin * always;
-    default_type text/plain;
-    return 502 "Editor not online ... Wait a few seconds and then refresh the browser.\n";
+    default_type text/html;
+    return 502 "Editor not online ... Wait a few seconds and then <a href='/'>refresh</a>.\n";
   }
   
   error_page 502 @badgateway;

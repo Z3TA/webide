@@ -96,7 +96,7 @@ UTIL.assert(at.right, "az");
 		
 	});
 	
-	EDITOR.addTest(1, function getFoldersNoPath(callback) {
+	EDITOR.addTest(function getFoldersNoPath(callback) {
 		
 		var folders = UTIL.getFolders("sftp://foo.bar");
 		// Make sure the folder path ends with a slash!

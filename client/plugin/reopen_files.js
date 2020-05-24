@@ -818,8 +818,6 @@
 	function removeFromOpenedFiles(filePath, callback) {
 		// Called when the editor close a file
 		
-		delete changedstate[filePath];
-		
 		if(typeof filePath == "object" && typeof filePath.path == "string") filePath = filePath.path;
 		
 		console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
@@ -864,9 +862,9 @@
 				});
 				
 				delete oldServerState[filePath];
+				delete changedstate[filePath];
 				
 				EDITOR.storage.removeItem("state_" + filePath);
-				
 				
 			});
 		});
@@ -1214,5 +1212,169 @@ console.error(err);
 		
 		copyOfEditorFiles = Object.keys(EDITOR.files);
 	} 	
+	
+	
+	
+	
+	// TEST-CODE-START
+
+	
+	EDITOR.addTest(2, true, function testCloseFileWhileOffline(callback) {
+		/*
+			Manual steps to reproduce:
+			1. Open a file
+			2. Wait 5+ seconds
+			3. Stop the server (or CLIENT.connected = false; in console)
+			4. Close the file
+			
+			Sometimes we get the errors, and sometimes not... WTF!?!?!?
+			One more file also needs to be open!?!?
+			
+			You do not get an error if the file is the last file opened!?
+			
+			
+			You should now get an error:
+			
+			
+			Seems to work when I keep clicking on the file... Do it need to change state!?
+			
+		*/
+		EDITOR.openFile("testCloseFileWhileOffline1.txt", 'first file opened\n', function(err, file) {
+			var file1 = file.path;
+			
+			saveStateOfOpenFiles("test", function(err) {
+				if(err) throw err;
+
+				file.writeLine("change1 of file1");
+				file.moveCaretRight();
+				
+				saveStateOfOpenFiles("test", function(err) {
+					if(err) throw err;
+					
+					file.writeLine("change2 of file1");
+					file.moveCaretRight();
+					
+					CLIENT.connected = false;
+					
+					setTimeout(function() {
+						
+						try {
+							EDITOR.closeFile(file1);
+						}
+						catch(err) {
+							var error = err;
+							console.error(err);
+							alertBox("testCloseFileWhileOffline: " + err.message);
+						}
+						
+						if(EDITOR.files.hasOwnProperty(file1)) {
+							alertBox("testCloseFileWhileOffline: File was not closed: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " error=" + error.message);
+							//throw new Error("File was not closed: filePath=" + filePath + " error=" + error.message);
+							setTimeout(function() {
+								
+								EDITOR.closeFile(file1);
+								
+								CLIENT.connected = true;
+								return callback(true);
+								
+							}, 3000);
+						}
+						else {
+							//EDITOR.closeFile(file2);
+							
+							setTimeout(function() {
+								CLIENT.connected = true;
+								return callback(true);
+							}, 2000);
+						}
+						
+					}, 10000);
+				});
+			});
+		});
+	});
+	
+	
+	
+	EDITOR.addTest(1, true, function testCloseFileWhileOffline2(callback) {
+		/*
+			Manual steps to reproduce:
+			1. Open a file
+			2. Wait 5+ seconds
+			3. Stop the server (or CLIENT.connected = false; in console)
+			4. Close the file
+			
+			Sometimes we get the errors, and sometimes not... WTF!?!?!?
+			One more file also needs to be open!?!?
+			
+			You do not get an error if the file is the last file opened!?
+			
+			
+			You should now get an error: 
+			
+			
+			Seems to work when I keep clicking on the file... Do it need to change state!?
+			
+		*/
+		EDITOR.openFile("testCloseFileWhileOffline1.txt", 'first file opened\n', function(err, file) {
+			var file1 = file.path;
+			file.moveCaretRight();
+			setTimeout(function() {
+				EDITOR.openFile("testCloseFileWhileOffline2.txt", 'second file opened\n', function(err, file) {
+					var file2 = file.path;
+					file.moveCaretRight();
+					file.writeLine("change of file2");
+					
+					setTimeout(function() {
+						file.moveCaretRight();
+						
+						CLIENT.connected = false;
+						
+						setTimeout(function() {
+							file.moveCaretRight();
+							
+							try {
+								EDITOR.closeFile(file1);
+							}
+							catch(err) {
+								var error = err;
+								console.error(err);
+								alertBox("testCloseFileWhileOffline: " + err.message);
+							}
+							
+							if(EDITOR.files.hasOwnProperty(file1)) {
+								alertBox("testCloseFileWhileOffline: File was not closed: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " error=" + error.message);
+								//throw new Error("File was not closed: filePath=" + filePath + " error=" + error.message);
+								setTimeout(function() {
+									
+									EDITOR.closeFile(file1);
+									
+									CLIENT.connected = true;
+									return callback(true);
+									
+								}, 3000);
+							}
+							else {
+								EDITOR.closeFile(file2);
+								
+								setTimeout(function() {
+									CLIENT.connected = true;
+									return callback(true);
+								}, 2000);
+							}
+							
+						}, 2000);
+					}, 10000);
+					
+
+				});
+				
+			}, 10000);
+		});
+	});
+	
+	
+	// TEST-CODE-END
+	
 	
 })();
