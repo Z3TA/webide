@@ -116,7 +116,9 @@ if( UTIL.containsEmoji(word) ) return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
 			if(err) {
-				alertBox(err.message);
+// These errors can be annoying and are not that important, so lets swallow them
+console.error(err);
+				//alertBox(err.message);
 				return;
 			}
 			
