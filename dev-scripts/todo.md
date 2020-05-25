@@ -86,7 +86,7 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-
+todo: Test response time of anycast slave server service updates for use with Letsencrypt DNS auth.
 
 Start using the cloudIDE for all work!
 
@@ -3926,6 +3926,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+On mobile browser: When quad clicking to select line, and then clicking back on virtual keyb, hides the keyb insted of deleting the selected text.
 
 Sometimes when using mousepad to scroll on Macbook it first scrolls, then scrolls a few lines in the wrong direction...
 

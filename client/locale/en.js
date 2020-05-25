@@ -62,6 +62,7 @@ documentation: "documentation",
 	find: "find",
 	find_replace: "Find/replace",
 	first_intro: "First intro",
+font: "font",
 	full_screen: "Full screen",
 	function_list: "Function list",
 	

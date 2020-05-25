@@ -333,6 +333,15 @@ debug("Antialias detected! Updating grid width");
 EDITOR.settings.gridWidth = 7.5;
 }
 					
+var isAndroid = /(android)/i.test(navigator.userAgent);
+					if(BROWSER == "Chrome" && DISPLAY_MODE == "standalone" && isAndroid) {
+						// Weird bug when added to desktop from Chrome on Android where we get different kerning...
+						EDITOR.settings.style.highlightMatchFont = "bold 16px ubuntu";
+						EDITOR.settings.style.fontSize = 16;
+						EDITOR.settings.gridHeight = 22;
+						EDITOR.settings.gridWidth = 8;
+					}
+					
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 				}
 			};
