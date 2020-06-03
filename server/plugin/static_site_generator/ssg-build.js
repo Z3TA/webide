@@ -149,6 +149,10 @@ var main = {
 		
 		if(typeof SEND_MESSAGE != "function") throw new Error("onMessage needs to be a function! typeof onMessage = " + (typeof this.onMessage));
 		
+		
+		console.log("=========================================================================");
+		console.log("||                    Static Site Generator                            ||");
+		console.log("=========================================================================");
 	console.time("SSG: walk");
 	findFiles(BASEPATH, ROOT, function() {
 			console.timeEnd("SSG: walk");
@@ -463,6 +467,8 @@ function compile(baseTree) {
 		
 		if(ABORT) return;
 		
+		console.log("SSG: compileDir: branch.__dirname=" + branch.__dirname);
+		
 		branch.parent = parentBranch;
 		
 		for(var fileName in branch.documents) {
@@ -520,15 +526,38 @@ function compile(baseTree) {
 			
 			
 			document.require = function(moduleName) {
-				console.log("SSG: compileFile: document.require: Requring moduleName=" + moduleName);
+				console.log("SSG: compileFile: document.require: Requring moduleName=" + moduleName + " process.cwd()=" + process.cwd());
+				
+				var errors = [];
+				
+				try {
+					var m = require(moduleName);
+				}
+				catch(err) {
+					errors.push(err);
+					console.log("SSG: compileFile: document.require: Failed to requre module by name (" + moduleName + ") error: " + err.message);
+				}
+				
+				if(m != undefined) return m;
+				
 				var nodeModulesPathOriginal = process.env.NODE_PATH;
 				//process.env.NODE_PATH = NODE_MODULES_PATH;
 				try {
 					var m = require(NODE_MODULES_PATH + moduleName);
 				}
 				catch(err) {
-					console.log("SSG: compileFile: document.require: Requring moduleName=" + moduleName + " failed! err=" + err.message + " NODE_MODULES_PATH=" + NODE_MODULES_PATH);
+					errors.push(err);
+					console.log("SSG: compileFile: document.require:  Failed to requre module (" + moduleName + ") with NODE_MODULES_PATH=" + NODE_MODULES_PATH);
 				}
+				
+				if(m != undefined) return m;
+				
+				var errorMessages = errors.map(function(err) {
+					return err.message;
+				});
+				
+				reportConsole([ "Failed to require " + moduleName + "! Errors: " + errorMessages.join(" ") ]);
+				
 				//process.env.NODE_PATH = nodeModulesPathOriginal;
 				return m;
 			};
@@ -801,7 +830,6 @@ function findFiles(dir, parentBranch, done) {
 			
 			branch.documents = {};
 			
-			
 			list.forEach(function(fileName) {
 				
 				// Ignore files starting with _ when publishing, or files starting with __ (two underscores) alltogehter (dont even include them in preview)
@@ -907,6 +935,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	
 	document.html = "";
 	document.path = filePath;
+	document.dir = filePath.slice(0, Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\")));
 	document.originalFileType = fileType;
 	
 	// properties we must have
@@ -1253,6 +1282,8 @@ Document.prototype.evaluate = function(str) {
 		filename: document.path,
 		displayErrors: true
 	}
+	
+	process.chdir(document.dir); // Makt path relative to this document
 	
 	script = new vm.Script(initCode, scriptOptions);
 	script.runInContext(context);
