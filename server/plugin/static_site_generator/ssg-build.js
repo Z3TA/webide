@@ -1803,12 +1803,6 @@ function parseEvalError(doc, scriptCount, err) {
 	
 	var filePath = doc.path;
 	
-	var workingDir = process.cwd();
-	
-	log("workingDir=" + workingDir);
-	
-	filePath = filePath.replace(workingDir, "");
-	
 	var line = parseInt(arr[1]);
 	var column = arr[2] && parseInt(arr[2]);
 	

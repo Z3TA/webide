@@ -325,7 +325,13 @@
 					EDITOR.addInfo(msg.line-1, col, msg.message, file, level);
 					if(EDITOR.currentFile != file) EDITOR.showFile(file);
 				}
+				else {
+					console.log("ssgBuildMessage: msg.line=" + msg.line + "");
+				}
 				
+			}
+			else {
+				console.log("ssgBuildMessage: File not in editor: msg.source=" + msg.source);
 			}
 		}
 		
