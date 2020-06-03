@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	EDITOR.addTest(function noNeedToCommit(callback) {
+	EDITOR.addTest(true, function noNeedToCommit(callback) {
 		/*
 			bug: Server says "no need to commit" even though files have been changed.
 			

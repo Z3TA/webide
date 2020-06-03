@@ -1223,7 +1223,7 @@ console.error(err);
 	
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, true, function testCloseFileWhileOffline3(callback) {
+	EDITOR.addTest(true, function testCloseFileWhileOffline3(callback) {
 		/*
 			
 			bug: If you close a file while the editor is offline,
