@@ -86,7 +86,8 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-todo: Test response time of anycast slave server service updates for use with Letsencrypt DNS auth.
+
+
 
 Start using the cloudIDE for all work!
 
