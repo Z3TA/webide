@@ -112,6 +112,13 @@ iptables -A OUTPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
 ip6tables -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
 iptables -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
 
+# DNS Server
+ip6tables -A INPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+
+# Zone transfer
+iptables -A OUTPUT -p udp --dport 5353 -m state --state NEW -j ACCEPT
+
 
 # Allow NTP Client
 ip6tables -A OUTPUT -p udp --dport 123 -m state --state NEW -j ACCEPT
