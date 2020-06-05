@@ -10440,8 +10440,6 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
 	if(speechRecognitionEvent == undefined) throw new Error("speechRecognitionResult: speechRecognitionEvent=" + speechRecognitionEvent);
 
-		if(!Array.isArray(speechRecognitionEvent.results)) throw new Error("speechRecognitionEvent.results=" + speechRecognitionEvent.results + " is not an Array! speechRecognitionEvent=" + speechRecognitionEvent);
-		
 	var last = speechRecognitionEvent.results.length - 1;
 	var speechResult = speechRecognitionEvent.results[last][0].transcript;
 	//var speechResult = speechRecognitionEvent.results[0][0].transcript;
