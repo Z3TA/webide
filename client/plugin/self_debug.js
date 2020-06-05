@@ -260,29 +260,6 @@ sendit();
 			lineString = "";
 		}
 		
-		// We need editor errors to look different to other dialogs.
-		// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
-		var death = document.createElement("div");
-		death.setAttribute("id", "errorOverlay");
-		death.style.width = window.innerWidth + "px";
-		death.style.height = window.innerHeight + "px";
-		death.style.zIndex = "2";
-		death.style.position = "absolute";
-		death.style.top = "0px";
-		death.style.left = "0px";
-		death.style.backgroundColor = "darkred";
-		death.style.opacity = "0.5";
-		
-		var deathText = document.createElement("span");
-		deathText.style.fontSize = "20px";
-		deathText.innerText = "EDITOR ERROR (CRASH): WARNING! THE EDITOR MIGHT BE IN A BAD STATE! Restarting the editor is adviced. A bug report would be helpful.";
-		
-		death.appendChild(deathText);
-		
-		if(document && document.body) document.body.appendChild(death);
-		
-		
-		
 		var yes = "Close/restart editor";
 		var createTestRestart = "Create a test case and restart";
 		var createTestKeepRunning = "Create a test case and keep running";
@@ -290,7 +267,7 @@ sendit();
 		var no = "Keep running";
 		
 		console.log("selfDebug: Asking the user what to do...");
-		confirmBox("" + sourceLink + lineString + message + " (code=" + (error && error.code) + ")<br><br>Close/restart the editor ?", [
+		var dialog = confirmBox("" + sourceLink + lineString + message + " (code=" + (error && error.code) + ")<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
 			
@@ -358,6 +335,31 @@ sendit();
 			}
 			
 		});
+
+if(dialog) {
+// We need editor errors to look different to other dialogs.
+// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
+var death = document.createElement("div");
+death.setAttribute("id", "errorOverlay");
+death.style.width = window.innerWidth + "px";
+death.style.height = window.innerHeight + "px";
+death.style.zIndex = "2";
+death.style.position = "absolute";
+death.style.top = "0px";
+death.style.left = "0px";
+death.style.backgroundColor = "darkred";
+death.style.opacity = "0.5";
+
+var deathText = document.createElement("span");
+deathText.style.fontSize = "20px";
+deathText.innerText = "EDITOR ERROR (CRASH): WARNING! THE EDITOR MIGHT BE IN A BAD STATE! Restarting the editor is adviced. A bug report would be helpful.";
+
+death.appendChild(deathText);
+
+if(document && document.body) document.body.appendChild(death);
+}
+
+
 	}
 	
 	

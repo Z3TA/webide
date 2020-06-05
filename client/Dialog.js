@@ -285,7 +285,7 @@ Dialog.prototype.incrementRepeatCounter = function incrementRepeatCounter() {
 function alertBox(msg, code, icon, recursionCount) {
 	var dialog = new Dialog(msg, {icon: icon, code: code});
 	
-	if(dialog.repeat) return dialog.repeat;
+	//if(dialog.repeat) return dialog.repeat;
 	
 	if(!dialog.div) {
 		return setTimeout(function wait() {
@@ -331,6 +331,9 @@ function confirmBox(msg, options, callback, recursionCount) {
 	var dialog = new Dialog(msg);
 	
 	if(!dialog.div) {
+		
+		if(dialog.repeat) return null;
+		
 		return setTimeout(function wait() {
 			// Wait until the body element is available
 			
