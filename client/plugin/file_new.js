@@ -240,7 +240,17 @@ var indentationCharacters = " ";
 		
 		htmlButton.appendChild(document.createTextNode("Web document (HTML)"));
 		htmlButton.onclick = function createHtmlFile(clickEvent) {
-			createNewFile( UTIL.joinPaths(EDITOR.user ? EDITOR.user.homeDir:"/", "wwwpub/document.htm"), '<!DOCTYPE HTML>\n<html lang="en">\n<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n<title>Page title</title>\n<meta name="description" content="A short summary of this page">\n<meta name="author" content="' + EDITOR.user.name + '">\n</head>\n<body>\n\n<h1>Page topic</h1>\n\n<p>Some paragraph</p>\n\n</body>\n</html>\n\n');
+
+// We have to escape the HTML so that it will not show up as vailid HTML in the editor bundle
+var htmlEscaped = '[!DOCTYPE HTML]\n[html lang="en"]\n[head]\n[meta http-equiv="Content-Type" content="text/html; charset=utf-8"]\n[title]Page title[/title]\n[meta name="description" content="A short summary of this page"]\n[meta name="author" content="' + EDITOR.user.name + '"]\n[/head]\n[body]\n\n[h1]Page topic[/h1]\n\n[p]Some paragraph[/p]\n\n[/body]\n[/html]\n\n';
+var leftArrow = String.fromCharCode(91);
+var rightArrow = String.fromCharCode(93);
+var reLeftArrow = new RegExp(leftArrow, "g");
+var reRightArrow = new RegExp(rightArrow, "g");
+var html = htmlEscaped.replace(reLeftArrow, "<").replace(reRightArrow, ">");
+
+createNewFile( UTIL.joinPaths(EDITOR.user ? EDITOR.user.homeDir:"/", "wwwpub/document.htm"), html);
+
 			EDITOR.dashboard.hide();
 		};
 		newFileWidget.appendChild(htmlButton);

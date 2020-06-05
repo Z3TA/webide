@@ -88,6 +88,33 @@ What I'm working on
 
 
 
+oEmbed
+
+
+
+
+New diary entry ...
+
+SSG preview of web sites that need re-building!?
+
+
+Problem printing to PDF on Firefox on Windows 10 ...
+https://webide.se/jsPDF/src/modules/addimage.js:288:41
+
+Stacktrace:
+TypeError: jsPDFAPI.loadFile is not a function 
+---
+
+---
+Error: winLoaded event never called when opening desktop window!
+Current file: /home/guest200/wwwpub/welcome.htm
+Browser: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0 (Firefox) 
+---
+
+
+ "Error: Request id=38 req=dockerDaemon has already timed out! Consider increasing the timeout=30000 Request took 4 seconds. Response: {\n \"error\": \"API error: Failed to ping the Docker deamon VM! pingFail=14 ipToPing=10.2.4.251
+
+
 
 Start using the cloudIDE for all work!
 
