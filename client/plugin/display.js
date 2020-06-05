@@ -14,7 +14,7 @@
 		desc: "A virtual desktop for GUI apps",
 		load: function loadDesktop() {
 			
-			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL, fun: showDesktopFromKeyboardCombo}); // Ctrl+D
+			EDITOR.bindKey({desc: "Show Desktop", charCode: 68, combo: CTRL+SHIFT, fun: showDesktopFromKeyboardCombo}); // D
 			
 			windowMenu = EDITOR.windowMenu.add(S("displayDesktop"), [S("View"), 1], toggleDisplayFromWindowMenu, showDesktopFromKeyboardCombo);
 			
