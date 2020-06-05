@@ -302,6 +302,9 @@
 		return wrap;
 		
 		function onRangeChange(inputRange, callback) {
+if(inputRange == undefined) throw new Error("inputRange=" + inputRange);
+if(typeof callback != "function") throw new Error("callback=" + callback + " (" + (typeof callback) + ")  ");
+
 			var gotInputEvent = false;
 			var currentValue = inputRange.value;
 			var oldValue = 0;
@@ -517,6 +520,9 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		}
 		
 		var file = EDITOR.currentFile;
+		
+		if(file.noCollaboration) return alertBox("Recording is not supported for the current opened file");
+		
 		if(!file) return alertBox("Need to start the recording inside a file! (no file is open)");
 		if(!file.savedAs) return alertBox("The file need to be saved-as before starting a recording! (empty file is fine, we just need a name!)");
 		if(!file.isSaved) return alertBox("The file need to be saved before starting a recording!");
@@ -1906,6 +1912,8 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	function timelineChange(currentValue, oldValue, e) {
 		console.log("timelineChange: currentValue=" + currentValue + " oldValue=" + oldValue + " lastRecordItem=" + lastRecordItem);
+		
+		if(!recordInfo) return alertBox("A playback record has not been loaded. Try opening a .json record file, or Start recording.");
 		
 		var filePath, file;
 		var moveCaret = true;
