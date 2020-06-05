@@ -11,7 +11,9 @@
 		var testFolder = rootFolder + "test/";
 		
 		// Folder might exist if earlier test failed
-		EDITOR.folderExistIn(rootFolder, "test", function(exists) {
+		EDITOR.folderExistIn(rootFolder, "test", function(err, exists) {
+			if(err) throw err;
+
 			if(exists) {
 				CLIENT.cmd("deleteDirectory", {directory: rootFolder, recursive: true}, function(err, json) {
 					if(err) throw err

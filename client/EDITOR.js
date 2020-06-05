@@ -7501,24 +7501,25 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
 				
 				if(err.code != "ENOENT") {
-					alertBox("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
-					folderExistInCallback(undefined);
+					var error = new Error("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
+					
+					folderExistInCallback(error, undefined);
 				}
 				else {
-					folderExistInCallback(false);
+					folderExistInCallback(null, false);
 				}
 			}
 			else {
 				
 				for(var i=0; i<list.length; i++) {
 					if(list[i].type == "d" && list[i].name == folderName) {
-						folderExistInCallback(list[i].path);
+						folderExistInCallback(null, list[i].path);
 						return;
 					}
 					else console.log(list[i].type + " " + list[i].name + " != " + folderName);
 				}
 				// end of for loop reached, no folder found:
-				folderExistInCallback(false);
+				folderExistInCallback(null, false);
 				
 			}
 			
@@ -7554,7 +7555,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			var pathToParentFolder = folderPaths[folderPaths.length-2];
 			var pathToCreate = folderPaths[folderPaths.length-1];
 			var folderName = UTIL.getFolderName(pathToCreate);
-			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(folderPath) {
+			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(err, folderPath) {
+				if(err) return alertBox(err.message);
+				
 				if(folderPath === false) {
 					
 					var create = "Create the path";

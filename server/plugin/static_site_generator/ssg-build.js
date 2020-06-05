@@ -1245,6 +1245,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		// Strip HTML from title
 		document.title = document.title.replace(/<[^>]*>/g, "");
 		
+document.name = document.path.slice(0,  document.path.lastIndexOf(".")).slice(Math.max(document.path.lastIndexOf("/"), document.path.lastIndexOf("\\")));
 		
 		gotData = true;
 		

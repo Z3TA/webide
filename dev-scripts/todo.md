@@ -86,14 +86,9 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+New diary entry ... SSG
 
 
-oEmbed
-
-
-
-
-New diary entry ...
 
 SSG preview of web sites that need re-building!?
 

@@ -40,6 +40,8 @@
 	
 	var discoveryBarIcon;
 	
+	var diaryWinMenu;
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -229,6 +231,7 @@
 		EDITOR.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + ALT + SHIFT});
 		
 		
+		
 		//build();
 		var SSG_label = S("ssg");
 		menuItem = EDITOR.ctxMenu.add(SSG_label, showSSG, 11);
@@ -242,6 +245,10 @@
 			EDITOR.windowMenu.add("Publish", [S("Tools"), SSG_label], publishSSG);
 			EDITOR.windowMenu.add("Settings/new", [S("Tools"), SSG_label], editSiteSettings);
 		*/
+		
+		EDITOR.bindKey({desc: "New diary entry", fun: diaryNewEntry, charCode: 68, combo: CTRL}); // D
+		diaryWinMenu = EDITOR.windowMenu.add(S("diary_new_entry"), [S("Tools"), 4], diaryNewEntry, diaryNewEntry);
+		
 		
 		EDITOR.on("fileShow", fileShow);
 		
@@ -304,6 +311,97 @@
 		
 	}
 	
+	function diaryNewEntry() {
+		var site = selectedSite;
+		
+		var sitesToCheck = 0;
+		var sitesChecked = 0;
+		var diariesFound = []; // [site, site]
+		
+		if(site == undefined) {
+			if(sites.length == 0) {
+				alertBox("Create a new site for the static site generator in order to start a dirary!");
+				return PREVENT_DEFAULT;
+			}
+			
+			sites.forEach(lookForDiaryFolder);
+		}
+		else {
+			lookForDiaryFolder(site);
+		}
+		
+		showSSG();
+		
+		return PREVENT_DEFAULT;
+		
+		
+		function lookForDiaryFolder(site) {
+			sitesToCheck++;
+			
+			EDITOR.folderExistIn(site.source, "dirary", function(err, path) {
+				if(path) diariesFound.push(site);
+				
+				 sitesChecked++;
+				
+				if(sitesChecked == sitesToCheck) {
+					
+					if(diariesFound.length == 1) {
+						makeEntry(diariesFound[0]);
+						return;
+					}
+					
+					if(diariesFound.length == 0) {
+						var options = sites.map(function(site) {return site.name});
+						confirmBox("To what site do you want to add a diary?", options, function(answer) {
+							for(var i=0; i<options.length; i++) {
+								if(options[i] == answer) addDiaryToSite(sites[i]);
+							}
+						});
+						return;
+					}
+					
+					var options = diariesFound.map(function(site) {return site.name});
+					confirmBox("In which site do you want to make a diary entry?", options, function(answer) {
+						for(var i=0; i<options.length; i++) {
+							if(options[i] == answer) makeEntry(diariesFound[i]);
+						}
+					});
+					
+				}
+			});
+			
+		}
+		
+		function makeEntry(site) {
+			var d = new Date();
+			var dateName = d.getFullYear() + "-" + UTIL.zeroPad(d.getMonth()) + "-" + UTIL.zeroPad(d.getDate()) + ".md";
+			
+			EDITOR.openFile( UTIL.joinPaths(site.source, "dirary/", dateName), "", function(err) {
+				if(err) return alertBox(err.message);
+				
+				
+			});
+		}
+		
+		function addDiaryToSite(site) {
+			UTIL.httpGet("/plugin/static_site_generator/diary_index.htm", function(err, indexHtml) {
+				if(err) return alertBox(err.message);
+				
+				
+				EDITOR.createPath(UTIL.joinPaths(site.source, "dirary/") , function(err, path) {
+					if(err) return alertBox(err.message);
+					
+					EDITOR.saveToDisk(path, indexHtml, function(err, filePath, hash) {
+						if(err) return alertBox(err);
+						makeEntry(site);
+					});
+					
+				});
+				
+			});
+		}
+		
+	}
 	
 	function ssgBuildMessage(msg) {
 		console.log("ssgBuildMessage: " + JSON.stringify(msg));
@@ -1793,7 +1891,9 @@ site = selectedSite;
 		}
 		
 		function lookInFolder(folder) {
-			EDITOR.folderExistIn(folder, ".hg", function(existingFolder) {
+			EDITOR.folderExistIn(folder, ".hg", function(err, existingFolder) {
+if(err) return alertBox(err.message);
+
 				if(existingFolder) {
 					hgFolderFound(existingFolder);
 			}

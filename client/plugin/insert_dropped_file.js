@@ -118,7 +118,9 @@
 			var folders = UTIL.getFolders(filePath);
 			
 			if(folders.length > 1) {
-				EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (path) {
+				EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (err, path) {
+if(err) return alertBox(err.message);
+
 					if(path === false) {
 						console.log("Path doesn't exist!");
 						var createPath = "Create the path";
