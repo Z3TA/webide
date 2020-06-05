@@ -203,7 +203,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		if(error) {
 			if(callback) callback(error);
 			else alertBox(error.message, error.code, "warning");
-			
+			callback = null;
 			return;
 		}
 		
@@ -228,6 +228,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		if(requestThatDontCallBack.indexOf(req) == -1) {
 			properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
 			// The error message will show if you click "bugreport!" (it's in the stack trace!?)
+			// tip: Throw a new error inside the caller! For example; instead of just if(err) throw err; throw new Error("Helpful context" + err.message)
 		}
 		
 		if(callback) {

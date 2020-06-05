@@ -106,7 +106,7 @@ switchToVersion(version);
 			
 			// Check which version is currently in use
 			CLIENT.cmd("run", {command: "node -v"}, function(err, resp) {
-				if(err) throw err;
+				if(err) throw new Error("Unable to get node version! Error: " + err.message + " err.code=" + err.code);
 				
 				var currentVersion = resp.stdout.trim().slice(1);
 				console.log("change_node_version: currentVersion=" + currentVersion);
