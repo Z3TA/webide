@@ -317,8 +317,10 @@
 		var sitesToCheck = 0;
 		var sitesChecked = 0;
 		var diariesFound = []; // [site, site]
+		var folderName = "diary";
 		
 		if(site == undefined) {
+			console.log("diaryNewEntry: No site selected!");
 			if(sites.length == 0) {
 				alertBox("Create a new site for the static site generator in order to start a dirary!");
 				return PREVENT_DEFAULT;
@@ -327,6 +329,7 @@
 			sites.forEach(lookForDiaryFolder);
 		}
 		else {
+			console.log("diaryNewEntry: selected site=" + site.name);
 			lookForDiaryFolder(site);
 		}
 		
@@ -336,14 +339,22 @@
 		
 		
 		function lookForDiaryFolder(site) {
-			sitesToCheck++;
 			
-			EDITOR.folderExistIn(site.source, "dirary", function(err, path) {
-				if(path) diariesFound.push(site);
-				
+			console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name);
+			
+			sitesToCheck++;
+			EDITOR.folderExistIn(site.source, folderName, function(err, path) {
 				 sitesChecked++;
 				
+				console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name + " sitesToCheck=" + sitesToCheck + " sitesChecked=" + sitesChecked + "  Folder exist ? " + path);
+				
+				if(err) throw err;
+				
+				if(path) diariesFound.push(site);
+				
 				if(sitesChecked == sitesToCheck) {
+					
+					console.log("diaryNewEntry: lookForDiaryFolder: diariesFound.length=" + diariesFound.length);
 					
 					if(diariesFound.length == 1) {
 						makeEntry(diariesFound[0]);
@@ -373,26 +384,41 @@
 		}
 		
 		function makeEntry(site) {
+			
+			console.log("diaryNewEntry: makeEntry: site=" + site.name);
+			
 			var d = new Date();
 			var dateName = d.getFullYear() + "-" + UTIL.zeroPad(d.getMonth()) + "-" + UTIL.zeroPad(d.getDate()) + ".md";
 			
-			EDITOR.openFile( UTIL.joinPaths(site.source, "dirary/", dateName), "", function(err) {
-				if(err) return alertBox(err.message);
-				
-				
+			// The file might already exist, so try to open it first
+			EDITOR.openFile( UTIL.joinPaths(site.source, folderName + "/", dateName), function(err) {
+				if(err && err.code == "ENOENT") {
+					// Create the file if it didn't exist
+					EDITOR.openFile( UTIL.joinPaths(site.source, folderName + "/", dateName), "", function(err) {
+						if(err) return alertBox(err.message);
+						
+						
+					});
+				}
+				else if(err) return alertBox(err.message);
 			});
 		}
 		
 		function addDiaryToSite(site) {
+			
+			console.log("diaryNewEntry: addDiaryToSite: site=" + site.name);
+			
 			UTIL.httpGet("/plugin/static_site_generator/diary_index.htm", function(err, indexHtml) {
 				if(err) return alertBox(err.message);
 				
 				
-				EDITOR.createPath(UTIL.joinPaths(site.source, "dirary/") , function(err, path) {
+				EDITOR.createPath(UTIL.joinPaths(site.source, folderName + "/") , function(err, folderPath) {
 					if(err) return alertBox(err.message);
 					
-					EDITOR.saveToDisk(path, indexHtml, function(err, filePath, hash) {
-						if(err) return alertBox(err);
+					var filePath = UTIL.joinPaths(site.source, folderName, "index.htm");
+					
+					EDITOR.saveToDisk(filePath, indexHtml, function(err, filePath, hash) {
+						if(err) return alertBox("Unable to save diary index.htm. Error: " + err.message);
 						makeEntry(site);
 					});
 					
@@ -523,7 +549,8 @@
 				else if(filePath.indexOf(resolvePath(sites[i], sites[i].preview)) != -1 && askToOpenSourceFileIfOpenedPreviewFile) {
 					var openInstead = file.path.replace(resolvePath(sites[i], sites[i].preview), resolvePath(sites[i], sites[i].source));
 					
-					EDITOR.doesFileExist(openInstead, function fileExistMaybe(fileExists) {
+					EDITOR.doesFileExist(openInstead, function fileExistMaybe(err, fileExists) {
+						if(err) throw err;
 						
 						if(!fileExists) return; // It's a false-posetive (the preview is probably set to /wwwpub which also has other files)
 						
@@ -2524,41 +2551,57 @@ whenAllFilesReloaded();
 		
 		// Calls back with (err,file)
 		
-		console.log("Picking suitable file to preview/edit on site.name=" + site.name + " ...");
+		console.log("pickFileToPreview: Picking suitable file to preview/edit on site.name=" + site.name + " ...");
 		
 		if(!site.source) throw new Error("Site name=" + site.name + " has no no source! site.source=" + site.source + " site=" + JSON.stringify(site));
 		
-		if(like(site, EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
-		
-		
-		// Is any of the source files opened ?
-		var openedFilesArray = [];
-		
-		for(var path in EDITOR.files) openedFilesArray.push(EDITOR.files[path]);
-		
-		var sourceFilePath = chooseFilePath(openedFilesArray);
-		
-		if(sourceFilePath) {
-			if(!EDITOR.files.hasOwnProperty(sourceFilePath)) throw new Error("Does not exist in EDITOR.files: " + sourceFilePath);
-			callback(null, EDITOR.files[sourceFilePath]);
+		if(like(site, EDITOR.currentFile)) {
+			console.log("pickFileToPreview: site.name=" + site.name + " likes EDITOR.currentFile.path=" + EDITOR.currentFile.path);
+			callback(null, EDITOR.currentFile);
+		return;
 		}
-		else {
-			// Open any of the source files
-			EDITOR.listFiles(resolvePath(site, site.source), function sourceFileList(err, list) {
+		
+		// Prefer the index file in the folder we are in
+		var folder = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		var indexfile = UTIL.joinPaths(folder, "index.htm");
+		EDITOR.doesFileExist(indexfile, function(err, exists) {
+			if(err) throw err;
+			
+			if(exists) return EDITOR.openFile(indexfile, undefined, callback);
+			
+			// Is any of the source files opened ?
+			var openedFilesArray = [];
+			
+			for(var path in EDITOR.files) openedFilesArray.push(EDITOR.files[path]);
+			
+			var sourceFilePath = chooseFilePath(openedFilesArray);
+			
+			if(sourceFilePath) {
+				if(!EDITOR.files.hasOwnProperty(sourceFilePath)) throw new Error("Does not exist in EDITOR.files: " + sourceFilePath);
+				callback(null, EDITOR.files[sourceFilePath]);
+			}
+			else {
 				
-				if(err) return callback(err);
-				
-				var sourceFilePath = chooseFilePath(list);
-				
-				if(sourceFilePath) EDITOR.openFile(sourceFilePath, undefined, callback);
-				else {
-					callback(new Error("Unable to pick a source file to preview/edit!"));
-				}
-				
-			});
-		}
+				// Open any of the source files
+				EDITOR.listFiles(resolvePath(site, site.source), function sourceFileList(err, list) {
+					
+					if(err) return callback(err);
+					
+					var sourceFilePath = chooseFilePath(list);
+					
+					if(sourceFilePath) EDITOR.openFile(sourceFilePath, undefined, callback);
+					else {
+						callback(new Error("Unable to pick a source file to preview/edit!"));
+					}
+					
+				});
+			}
+			
+		});
 		
 		function chooseFilePath(fileList) {
+			
+			console.log("pickFileToPreview: chooseFilePath: fileList.length=" + fileList.length);
 			
 			if(Object.prototype.toString.call( fileList ) !== '[object Array]') throw new Error("fileList must be an array!");
 			
@@ -2597,7 +2640,7 @@ whenAllFilesReloaded();
 		}
 		
 		if(file.name.match(/(header|footer).html?/i)) {
-			console.log("We don't like " + file.path + " because it's not a header of footer file");
+			console.log("We don't like " + file.path + " because it's a header or footer file");
 			return false;
 		}
 		

@@ -1509,14 +1509,14 @@ if(fileParse !== undefined) {
 		function gotSize(err, size) {
 			if(err) {
 				if(err.code === 'ENOENT' || err.code == "NOT_ABSOLUTE" || err.code == "550" || err.message.indexOf("No such file") != -1) {
-					callback(false);
+					callback(null, false);
 				}
 				else {
-					throw new Error("Unexpected error when checking if file exist (using EDITOR.getFileSizeOnDisk): err.code=" + err.code + " err.message=" + err.message);
+					callback(new Error("Unexpected error when checking if file exist (using EDITOR.getFileSizeOnDisk): err.code=" + err.code + " err.message=" + err.message));
 				}
 			}
 			else {
-				callback(true);
+				callback(null, true);
 			}
 		}
 	}
@@ -1885,8 +1885,10 @@ error.code = fName;
 				console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
 				
 				// Check if the file exist on disk so we don't accidently overwrite it!
-				EDITOR.doesFileExist(path, function fileExist(exist) {
-					if(exist) {
+				EDITOR.doesFileExist(path, function fileExist(err, exist) {
+					if(err) throw err;
+
+if(exist) {
 						var overwrite = "Overwrite";
 						var cancel = "Cancel";
 						var open = "Open existing file"

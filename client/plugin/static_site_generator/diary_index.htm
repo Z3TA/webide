@@ -4,8 +4,6 @@
 
 <?JS
 
-var files = document.folder.documents;
-
 var weekday = new Array(7);
 weekday[0] = "Sunday";
 weekday[1] = "Monday";
@@ -18,13 +16,21 @@ weekday[6] = "Saturday";
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-for(var f in files) {
+var files = [];
+for(var f in document.folder.documents) {
 if(f == "index.htm") continue;
+files.push(document.folder.documents[f]);
+}
 
-var path = files[f]["path"];
-var strDate = path.slice(0,  path.lastIndexOf(".")).slice(Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))+1);
+files.sort(function (a, b) {
+return new Date(b.name) - new Date(a.name);
+});
 
-var d = new Date(strDate);
+files.forEach(print);
+
+function print(file) {
+
+var d = new Date(file.name);
 var dayOfWeek = weekday[d.getDay()];
 var dayNr = d.getDate();
 var monthName = months[d.getMonth()];
@@ -32,7 +38,7 @@ var year = d.getFullYear();
 
 document.write("<h2>" + dayOfWeek + " " + dayNr + " " + monthName + " " + year + "</h2>");
 
-document.write(files[f]["body"]);
+document.write(file.body);
 
 document.write("<hr>");
 }

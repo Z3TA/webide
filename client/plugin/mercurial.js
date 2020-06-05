@@ -856,8 +856,9 @@ else var directory = EDITOR.workingDirectory;
 				}
 				else {
 					
-					EDITOR.doesFileExist(ignoreFilePath, function fileExist(exists) {
-						
+					EDITOR.doesFileExist(ignoreFilePath, function fileExist(err, exists) {
+						if(err) throw err;
+
 						if(exists) {
 							console.log(".hgigonore already exists");
 							EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
