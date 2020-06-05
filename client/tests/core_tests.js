@@ -40,6 +40,37 @@
 		
 	}
 	
+	EDITOR.addTest(1, function caretRowColNumber(callback) {
+		// caret.col and caret.row should always be type number!
+		EDITOR.openFile("caretRowColNumber.js", 'abcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\n', function(err, file) {
+			
+			UTIL.assert(typeof file.caret.col, "number");
+			UTIL.assert(typeof file.caret.row, "number");
+			
+			var caret = file.mutateCaret(file.caret, {index: 0, row: "0", col:"0", eof: false, eol: false});
+			UTIL.assert(typeof caret.col, "number");
+			UTIL.assert(typeof caret.row, "number");
+			
+			file.moveCaret(undefined, "1", "2");
+			UTIL.assert(typeof file.caret.col, "number");
+			UTIL.assert(typeof file.caret.row, "number");
+			
+			var caret = file.createCaret(undefined, "1", "2");
+			UTIL.assert(typeof caret.col, "number");
+			UTIL.assert(typeof caret.row, "number");
+			
+			file.moveCaretToCol("2");
+			UTIL.assert(typeof file.caret.col, "number");
+			UTIL.assert(typeof file.caret.row, "number");
+			
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
+	
+	
 	EDITOR.addTest(function testWordAtCaret(callback) {
 		EDITOR.openFile("testWordAtCaret.js", 'foo bar baz\n', function(err, file) {
 			

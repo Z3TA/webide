@@ -3006,6 +3006,9 @@ ca 20ms to render, ca 13ms to render without creating new objects
 	}
 	
 	EDITOR.renderCaret = function(caret, colPlus, fillStyle, screenStartRow, bufferStartRow) {
+		
+		//console.log("renderCaret: caret=" + JSON.stringify(caret) + " colPlus=" + colPlus);
+		
 		var file = EDITOR.currentFile;
 		if(file == undefined) return;
 		if(!(file instanceof File)) return;
@@ -3017,6 +3020,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		var row = caret.row;
 		var col = caret.col + colPlus;
+		
+		//console.log("renderCaret: col=" + col + " (" + typeof col + ") caret.col=" + caret.col + " (" + typeof caret.col + ") colPlus=" + colPlus + " (" + typeof colPlus + ")");
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length + " file.path=" + file.path + " caret=" + JSON.stringify(caret) + " file.caret==caret?" + (file.caret==caret));
 		
@@ -3031,7 +3036,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			colAdjustment += walker.charWidth;
 		}
 		
-		console.log("renderCaret: col=" + col + " walker=" + JSON.stringify(walker));
+		//console.log("renderCaret: col=" + col + " walker=" + JSON.stringify(walker));
 		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(EDITOR.settings.topMargin + (row - bufferStartRow + screenStartRow) * EDITOR.settings.gridHeight);

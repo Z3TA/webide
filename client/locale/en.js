@@ -66,9 +66,10 @@ font: "font",
 	full_screen: "Full screen",
 	function_list: "Function list",
 	
-	goto_char_index: "Goto character",
 	goto: "goto",
-	goto_line: "Goto line",
+	goto_char_index: "goto character",
+	goto_column: "goto column",
+	goto_line: "goto line",
 	
 	hide_find_in_files_widget: "Hide the find in files GUI",
 	hide_find_replace_widget: "Hide the find/replace GUI",

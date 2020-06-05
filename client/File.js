@@ -222,10 +222,12 @@ file.mode = "text";
 		file.checkCaret(newCaret);
 		
 		oldCaret.index = newCaret.index;
-		oldCaret.col = newCaret.col;
-		oldCaret.row = newCaret.row;
+		oldCaret.col = parseInt(newCaret.col);
+		oldCaret.row = parseInt(newCaret.row);
 		oldCaret.eol = newCaret.eol;
 		oldCaret.eof = newCaret.eof;
+		
+		if(oldCaret == file.caret) EDITOR.fireEvent("moveCaret", [file, file.caret]);
 		
 		return oldCaret;
 	}
@@ -247,8 +249,8 @@ file.mode = "text";
 		else {
 
 			if(index != undefined) caret.index = index;
-			if(row != undefined) caret.row = row;
-			if(col != undefined) caret.col = col;
+			if(row != undefined) caret.row = parseInt(row);
+			if(col != undefined) caret.col = parseInt(col);
 		
 			file.fixCaret(caret);
 
@@ -279,6 +281,8 @@ file.mode = "text";
 			
 		*/
 		
+		if(row != undefined) row = parseInt(row);
+		if(col != undefined) col = parseInt(col);
 		
 		var grid = file.grid;
 		var caret = {index: index, row: row, col: col, eol: false, eof: false};
@@ -2979,6 +2983,9 @@ console.log("moveCaretDown: Stepping right!");
 		
 		if(caret == undefined) caret = file.caret;
 		
+		col = parseInt(col);
+		if(isNaN(col)) throw new Error("col=" + col + " needs to be a numeric value!");
+		
 		if(col < 0) col = caret.col + col;
 		if(col < 0) col = 0;
 		if(file.grid[caret.row].length < col) col = file.grid[caret.row].length;
@@ -2986,8 +2993,7 @@ console.log("moveCaretDown: Stepping right!");
 		var index = caret.index;
 		caret.index = index - (caret.col - col);
 		caret.col = col;
-		
-		
+
 		
 		if(file.grid[caret.row].length <= col) caret.eol = true;
 		else caret.eol = false;
