@@ -272,7 +272,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		// scroll wheel = paste sel, or clipboard !?
 		
 		function caretMoved(err) {
-			if(err) alertBox(err.message);
+			if(err) alertBox("Error when moving terminal caret! error=" + err.message);
 			
 		}
 		
@@ -288,7 +288,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		if(!EDITOR.input) return true;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: text}, function terminalWrite(err) {
-			if(err) alertBox(err.message);
+			if(err) alertBox("Unable to write to terminal: " + err.message, err.code);
 		});
 		
 		return false;
@@ -307,7 +307,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	
 	function startTerminalOnLogin() {
 		startTerminal(function (err, file) {
-			if(err) return alertBox(err.message);
+			if(err) return alertBox("Unable to start terminal on login: " + err.message, err.code);
 			});
 	}
 	
@@ -357,7 +357,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 					return CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId}, terminalOpened);
 				}
 				else if(startTerminalCallback) startTerminalCallback(err);
-				else return alertBox(err.message);
+				else return alertBox("Unable to start terminal: " + err.message, err.code);
 			}
 			
 			console.log("terminal: terminal.open success! term=" + JSON.stringify(term));
@@ -438,7 +438,7 @@ terminalFiles.push(file);
 		EDITOR.openFile(name, "", {show: true, props: terminalFileStateProps}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
-				else return alertBox(err.message);
+				else return alertBox("Unable to open terminal file: name=" + name + " error=" + err.message, err.code);
 			}
 			
 			terminalFiles.push(file);
@@ -1378,7 +1378,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			console.log("terminalMessage: openTerminalFile...");
 			openTerminalFile(name, function terminalFileOpened(err, f) {
 				console.log("terminalMessage: terminalFileOpened! buffer.length=" + buffer.length);
-				if(err) return alertBox(err.message);
+				if(err) return alertBox("Unable to open terminal from file name=" + name + " error=" + err.message, err.code);
 				
 				if(!EDITOR.files.hasOwnProperty(termPrefix + term.id)) throw new Error("termPrefix=" + termPrefix + " + term.id=" + term.id + " file failed to open!");
 				
@@ -1439,7 +1439,7 @@ console.log(file.path + " is a terminal emulator file!");
 		}
 		
 		CLIENT.cmd("terminal.write", {id: terminalId, data: character}, function terminalWrite(err) {
-			if(err) alertBox(err.message, err.code || "TERMINAL_ERROR");
+			if(err) alertBox("Unable to send key to terminal! key=" + character + " error=" + err.message, err.code || "TERMINAL_ERROR");
 		});
 		
 		return PREVENT_DEFAULT;
@@ -1509,7 +1509,7 @@ console.log(file.path + " is a terminal emulator file!");
 						if(err && err.code == "ENOENT") {
 							EDITOR.openFile(path, "", {show: true}); // Create new empty file
 						}
-						else if(err) alertBox(err.message);
+						else if(err) alertBox("Unable to open file from command=" + command + " error=" + err.message, err.code);
 					});
 				}
 			} 
@@ -1642,7 +1642,7 @@ console.log(file.path + " is a terminal emulator file!");
 		else return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
-			if(err) alertBox(err.message, err.code || "TERMINAL_ERROR");
+			if(err) alertBox("Unable to write to terminal: data=" + data + " error=" + err.message, err.code || "TERMINAL_ERROR");
 		});
 		
 		return PREVENT_DEFAULT;
@@ -1661,7 +1661,7 @@ console.log(file.path + " is a terminal emulator file!");
 		EDITOR.renderNeeded();
 		
 		CLIENT.cmd("terminal.close", {id: id}, function terminalClose(err) {
-			if(err && err.code != "UNKNOWN_TERMINAL_ID") alertBox(err.message);
+			if(err && err.code != "UNKNOWN_TERMINAL_ID") alertBox("Unable to close terminal id=" + id + " error=" + err.message);
 		});
 		
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
@@ -1740,7 +1740,9 @@ else {
 						
 						EDITOR.showFileReset(); // Because files opened from the editor get show state to prevent other files to get shown
 						
-						EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
+						setTimeout(function() {
+							EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
+						}, 3000);
 						
 						callback(true);
 					}
