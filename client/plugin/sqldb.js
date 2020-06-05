@@ -645,7 +645,7 @@ getDatabases();
 	
 	var editTableName;
 	
-	function buildCreateTableHelper() {
+	function buildCreateTableHelper(widget) {
 
 		var wrap = document.createElement("div");
 		
@@ -701,6 +701,15 @@ EDITOR.resizeNeeded();
 			EDITOR.resizeNeeded();
 		}
 		wrap.appendChild(buttonAddKey);
+		
+		var buttonCancel = document.createElement("button")
+		buttonCancel.classList.add("button");
+		buttonCancel.innerText = "Cancel";
+		buttonCancel.onclick = function() {
+			widget.hide();
+		}
+		wrap.appendChild(buttonCancel);
+		
 		
 return wrap;
 	}
@@ -927,142 +936,146 @@ labelAutoInc.appendChild(inputAutoInc);
 		
 	}
 	
-	
-	function buildTableEditor() {
-		var wrap = document.createElement("div");
-		
-		var labelEditTableName = document.createElement("label");
-		labelEditTableName.setAttribute("for", "editTableName");
-		labelEditTableName.innerText = "Table name: ";
-		wrap.appendChild(labelEditTableName);
-		
-		editTableName = document.createElement("input")
-		editTableName.setAttribute("type", "text");
-		wrap.appendChild(editTableName);
-		
-		var buttonAddColumn = document.createElement("button");
-		buttonAddColumn.classList.add("button");
-		buttonAddColumn.innerText = "➕ Add column";
-		buttonAddColumn.onclick = function() {
-			var column = makeEditColumn();
-			tbody.appendChild(column);
+	/*
+function buildTableEditor(widget) {
+var wrap = document.createElement("div");
+
+var labelEditTableName = document.createElement("label");
+labelEditTableName.setAttribute("for", "editTableName");
+labelEditTableName.innerText = "Table name: ";
+wrap.appendChild(labelEditTableName);
+
+editTableName = document.createElement("input")
+editTableName.setAttribute("type", "text");
+wrap.appendChild(editTableName);
+
+var buttonAddColumn = document.createElement("button");
+buttonAddColumn.classList.add("button");
+buttonAddColumn.innerText = "➕ Add column";
+buttonAddColumn.onclick = function() {
+var column = makeEditColumn();
+tbody.appendChild(column);
 EDITOR.resizeNeeded();
-		}
-		wrap.appendChild(buttonAddColumn);
-		
-		var tableFields = document.createElement("table");
-		tableFields.classList.add("input");
-		var thead = document.createElement("thead")
-		var tr = document.createElement("tr");
-		
-		var th = document.createElement("th");
-		th.innerText = "Column Name";
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Keys";
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Data Type";
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Not Null";
-		th.classList.add("tiny");
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Auto Inc";
-		th.classList.add("tiny");
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Flags";
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Default value";
-		tr.appendChild(th);
-		
-		var th = document.createElement("th");
-		th.innerText = "Comments";
-		tr.appendChild(th);
-		
-		thead.appendChild(tr);
-		tableFields.appendChild(thead);
-		
-		var tbody = document.createElement("tbody")
-		
-		var column = makeEditColumn();
-		
-		tbody.appendChild(column)
-		
-		tableFields.appendChild(tbody);
-		
-		wrap.appendChild(tableFields);
-		
-		
-		
-		var dataTypes = document.createElement("datalist");
-		dataTypes.setAttribute("id", "dataTypes");
-		mySqlDataTypes.forEach(function(name) {
-			var opt = document.createElement("option");
-			opt.setAttribute("value", name);
-			dataTypes.appendChild(opt);
-		});
-		wrap.appendChild(dataTypes);
-		
-		
-		var labelKey = document.createElement("label");
-		labelKey.innerText = "New key: ";
-		labelKey.setAttribute("for", "inputNewKey");
-		wrap.appendChild(labelKey);
-		
-		var inputNewKey = document.createElement("input");
-		inputNewKey.setAttribute("id", "inputNewKey");
-		inputNewKey.setAttribute("type", "text");
-		wrap.appendChild(inputNewKey);
-		
-		var keyKind = document.createElement("select");
-		keyKinds.forEach(function(keyKind) {
-			var option = document.createElement("option");
-			option.innerText = keyKind;
-			keyKind.appendChild(option);
-		});
-		wrap.appendChild(keyKind);
-		
-		var keyType = document.createElement("select");
-		keyTypes.forEach(function(keyType) {
-			var option = document.createElement("option");
-			option.innerText = keyType;
-			keyType.appendChild(option);
-		});
-		wrap.appendChild(keyType);
-		
-		var buttonAddKey = document.createElement("button");
-		var tableKeys = [];
-		buttonAddKey.innerText = "Add new key";
-		buttonAddKey.onclick = function() {
-			var i = tableKeys.push({
-				name: inputNewKey.value,
-				kind: keyKind.value,
-				type: keyType.value,
-				columns: []
-			});
-			
-			
-			
-			
-		}
-		
-		wrap.appendChild(buttonAddKey);
-		
-		return wrap;
-		
-		
-		
-	}
+}
+wrap.appendChild(buttonAddColumn);
+
+var tableFields = document.createElement("table");
+tableFields.classList.add("input");
+var thead = document.createElement("thead")
+var tr = document.createElement("tr");
+
+var th = document.createElement("th");
+th.innerText = "Column Name";
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Keys";
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Data Type";
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Not Null";
+th.classList.add("tiny");
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Auto Inc";
+th.classList.add("tiny");
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Flags";
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Default value";
+tr.appendChild(th);
+
+var th = document.createElement("th");
+th.innerText = "Comments";
+tr.appendChild(th);
+
+thead.appendChild(tr);
+tableFields.appendChild(thead);
+
+var tbody = document.createElement("tbody")
+
+var column = makeEditColumn();
+
+tbody.appendChild(column)
+
+tableFields.appendChild(tbody);
+
+wrap.appendChild(tableFields);
+
+
+
+var dataTypes = document.createElement("datalist");
+dataTypes.setAttribute("id", "dataTypes");
+mySqlDataTypes.forEach(function(name) {
+var opt = document.createElement("option");
+opt.setAttribute("value", name);
+dataTypes.appendChild(opt);
+});
+wrap.appendChild(dataTypes);
+
+
+var labelKey = document.createElement("label");
+labelKey.innerText = "New key: ";
+labelKey.setAttribute("for", "inputNewKey");
+wrap.appendChild(labelKey);
+
+var inputNewKey = document.createElement("input");
+inputNewKey.setAttribute("id", "inputNewKey");
+inputNewKey.setAttribute("type", "text");
+wrap.appendChild(inputNewKey);
+
+var keyKind = document.createElement("select");
+keyKinds.forEach(function(keyKind) {
+var option = document.createElement("option");
+option.innerText = keyKind;
+keyKind.appendChild(option);
+});
+wrap.appendChild(keyKind);
+
+var keyType = document.createElement("select");
+keyTypes.forEach(function(keyType) {
+var option = document.createElement("option");
+option.innerText = keyType;
+keyType.appendChild(option);
+});
+wrap.appendChild(keyType);
+
+var buttonAddKey = document.createElement("button");
+var tableKeys = [];
+buttonAddKey.innerText = "Add new key";
+buttonAddKey.onclick = function() {
+var i = tableKeys.push({
+name: inputNewKey.value,
+kind: keyKind.value,
+type: keyType.value,
+columns: []
+});
+}
+
+wrap.appendChild(buttonAddKey);
+
+
+var buttonCancel = document.createElement("button");
+buttonCancel.innerText = "Cancel";
+buttonCancel.onclick = function() {
+widget.hide();
+}
+wrap.appendChild(buttonCancel);
+
+
+return wrap;
+
+}
+*/
 	
 	function makeEditColumn(options) {
 		
