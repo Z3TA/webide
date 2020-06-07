@@ -2872,7 +2872,10 @@ firstTimeVim = false;
 			if(!vimWasActive) {
 				toggleVim();
 				// The Vim dialog will only show once!
-				EDITOR.closeAllDialogs("VIM_MODE");
+				try {
+EDITOR.closeAllDialogs("VIM_MODE");
+}
+catch(err) {}
 			}
 			
 			// Get out from any mode
@@ -3716,7 +3719,11 @@ toggleVim();
 			if(!vimWasActive) {
 				toggleVim();
 				// The Vim dialog will only show once!
+				try {
 				EDITOR.closeAllDialogs("VIM_MODE");
+			}
+				catch(err) {}
+				
 			}
 			
 			// Get out from any mode
