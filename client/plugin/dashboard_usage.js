@@ -1,6 +1,9 @@
 (function() {
 	"use strict";
 	
+if(EDITOR.saveBandwith) return;
+
+
 	var cpuWidget;
 	var memoryWidget
 	var updateInterval;

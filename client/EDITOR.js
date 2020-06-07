@@ -335,7 +335,9 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	
 	var recognition = undefined;
 	
-	
+var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+	EDITOR.saveBandwith = (connection && connection.saveData) ? true : false;
+
 	function funMap(f){return f.fun}
 	
 	/*

@@ -86,8 +86,7 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-todo: Voice commands should be turned off by default in order to not make Google angry as we are sending  a bunch of empty sound samples...
-"Enable voice commands" in window menu
+How to test connection.saveData ?
 
 ---
 
