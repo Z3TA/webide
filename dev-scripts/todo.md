@@ -86,6 +86,23 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+todo: Voice commands should be turned off by default in order to not make Google angry as we are sending  a bunch of empty sound samples...
+"Enable voice commands" in window menu
+
+---
+
+todo: Detect data saving and disable some features that use a lot of bandiwth
+var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+var saveData = connection.saveData;
+
+or Save-Data: on in request header
+
+EDITOR.saveBandwith = true
+
+Some editor functionality has been turned off due to data saver. / in order to save bandwidth/data.
+
+---
+
 
 SSG preview of web sites that need re-building!?
 
