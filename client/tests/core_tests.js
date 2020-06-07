@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(1, function caretRowColNumber(callback) {
+	EDITOR.addTest(function caretRowColNumber(callback) {
 		// caret.col and caret.row should always be type number!
 		EDITOR.openFile("caretRowColNumber.js", 'abcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\n', function(err, file) {
 			

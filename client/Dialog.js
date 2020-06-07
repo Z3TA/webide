@@ -326,9 +326,15 @@ function alertBox(msg, code, icon, recursionCount) {
 	Example reason why you want to use custom confirm box:
 	* Native confirm box registers a keyPress if it was called on a keydown event
 */
-function confirmBox(msg, options, callback, recursionCount) {
+function confirmBox(msg, options, dialogOptions, callback, recursionCount) {
 	
-	var dialog = new Dialog(msg);
+if(typeof dialogOptions == "function") {
+recursionCount = callback;
+callback = dialogOptions;
+dialogOptions = {};
+}
+
+	var dialog = new Dialog(msg, dialogOptions);
 	
 	if(!dialog.div) {
 		

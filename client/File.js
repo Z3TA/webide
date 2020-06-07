@@ -1344,18 +1344,20 @@ file.sanityCheck();
 		if(character == undefined) {
 			throw new Error("character is undefined!");
 		}
-		else if(character.charCodeAt(0) == 13) {
-			throw new Error("Tried to insert a new line character");
+		else if(file.mode == "code" && character.charCodeAt(0) == 10) {
+			throw new Error("Tried to insert a line feed character");
 		}
-		else if(file.mode == "code" && character.charCodeAt(0) == 9) {
+		else if(file.mode == "code" && character.charCodeAt(0) == 13) {
+			throw new Error("Tried to insert a carriage return character");
+		}
+		else if(file.mode == "code" && EDITOR.mode == "default" && character.charCodeAt(0) == 9) {
 			throw new Error("Tried to insert a tab character");
 		}
 		else if(character.charCodeAt(0) == 8) {
 			throw new Error("Tried to insert a backspace character");
 		}
-		else if(character.charCodeAt(0) < 32) {
+		else if(EDITOR.mode == "default" && character.charCodeAt(0) < 32) {
 			throw new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ") EDITOR.lastKeyDown=" + EDITOR.lastKeyDown);
-			return;
 		}
 		
 		EDITOR.lastTimeCharacterInserted = new Date();

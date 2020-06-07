@@ -233,6 +233,7 @@
 				EDITOR.bindKey({desc: "Vim test 1", fun: vimTest1, charCode: ONE, combo: CTRL+SHIFT, mode: "*"});
 				EDITOR.bindKey({desc: "Vim test 2", fun: vimTest2, charCode: TWO, combo: CTRL+SHIFT, mode: "*"});
 				EDITOR.bindKey({desc: "Vim test 3", fun: vimTest3, charCode: THREE, combo: CTRL+SHIFT, mode: "*"});
+				
 				}
 			// TEST-CODE-END
 			
@@ -1139,7 +1140,10 @@ console.warn("Unable to undo! No recorded history!");
 			var deletedCharacter = file.text.charAt(caretIndex);
 			return rdo(function deleteUndo() {
 				file.moveCaretToIndex(caretIndex);
-				file.putCharacter(deletedCharacter);
+				if(deletedCharacter == "\n") {
+					file.insertLineBreak();
+				}
+				else file.putCharacter(deletedCharacter);
 			}, function deleteRedo() {
 				file.moveCaretToIndex(caretIndex);
 				file.deleteCharacter();
@@ -2748,12 +2752,30 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			
 			winMenuVim.activate();
 			
-			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
+			var file = EDITOR.currentFile;
+			
+			if(file && !history.hasOwnProperty(file)) startHistory(file);
 			
 			noEol();
 			showMessage("(VIM*) NORMAL MODE");
 			
-			if(firstTimeVim) {
+/*
+if( file && file.mode == "code" ) {
+				var usePlainText = "Reload file in plain text mode";
+				var ok = "OK";
+				confirmBox("The currently open file is in code-mode with automatic formatting, this might cause issues with Editor's Vim mode", [usePlainText, ok], {code: "VIM_MODE"}, function (answer) {
+					if(answer == usePlainText) {
+						file.reload(file.text,  {
+							mode: "text",
+							parse: false,
+							parsed: {}
+						});
+					}
+				});
+			}
+			else 
+*/
+if(firstTimeVim) {
 				alertBox('You are now in "VIM" mode. Press ' + EDITOR.getKeyFor("toggleVim") + ' to toggle to another mode.', "VIM_MODE");
 firstTimeVim = false;
 			}
@@ -3683,6 +3705,44 @@ toggleVim();
 	
 	EDITOR.addTest(5001, false, vimTest1);
 	EDITOR.addTest(5002, false, vimTest2);
+	
+	
+	
+	EDITOR.addTest(1, function deleteAndUndoDeleteLineBreakInVimMode(callback) {
+		
+		EDITOR.openFile("deleteAndUndoDeleteLineBreakInVimMode.js", 'abc\ndef\nghi\n', function(err, file) {
+			
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) {
+				toggleVim();
+				// The Vim dialog will only show once!
+				EDITOR.closeAllDialogs("VIM_MODE");
+			}
+			
+			// Get out from any mode
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("keydown", {charCode: ESC});
+			
+			// note: Normal mode moves caret to before last character
+			
+			file.moveCaret(3); // Move caret to EOL
+			
+			EDITOR.mock("typing", "i");
+			EDITOR.mock("keydown", {charCode: DELETE});
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "u");
+			
+			UTIL.assert(file.text, 'abc\ndef\nghi\n');
+			
+			EDITOR.closeFile(file.path);
+			
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
+			
+			callback(true);
+		});
+	});
+	
+	
 	
 	// TEST-CODE-END
 	
