@@ -315,6 +315,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	
 	var showDisoveryBarWindowMenuItem, showDisoveryBarCaptions;
 	
+	var enableVoiceCommands, voiceCommandsEnabled = false;
+	
 	// For keeping track of native copy, paste, cut functionality in Firefox
 	// To prevent Firefox from calling keyUp events before copy/paste/cut event
 	var nativeCopy = false;
@@ -330,27 +332,9 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		}
 		else var SpeechRecognition = webkitSpeechRecognition;
 	}
-	if(SpeechRecognition) {
-		var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
-		var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-		var speechRecognitionList = new SpeechGrammarList();
-		var recognition = new SpeechRecognition();
-		//recognition.continuous = false;
-		recognition.lang = 'en-US';
-		recognition.interimResults = false;
-		recognition.maxAlternatives = 1;
-		recognition.onresult = speechRecognitionResult;
-		recognition.onspeechend = function speechRecognitionEnd() {
-			recognition.stop();
-		}
-		recognition.onerror = function speechRecognitionError(ev) {
-			console.warn("Speech recognition error: " + ev.error);
-		}
-		recognition.onnomatch = function speechRecognitionNomatch(ev) {
-			console.log(ev);
-			console.warn("Speech recognition found no matching commands!");
-		}
-	}
+	
+	var recognition = undefined;
+	
 	
 	function funMap(f){return f.fun}
 	
@@ -9796,7 +9780,7 @@ function main() {
 			// If user is holding down a key, we probably wont get the keyup event!
 			EDITOR.metaKeyIsDown = false;
 			EDITOR.ctrlKeyIsDown = false;
-			if(typeof recognition != "undefined") {
+			if(typeof recognition != "undefined" && voiceCommandsEnabled) {
 				recognition.stop();
 			}
 		}
@@ -10088,6 +10072,10 @@ EDITOR.discoveryBar.show();
 		if(EDITOR.discoveryBar.enabled && !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) EDITOR.discoveryBar.show();
 		
 		
+		// Voice recognition only works for some people...
+		enableVoiceCommands = EDITOR.windowMenu.add(S("enable_voice_commands"), [S("Editor"), 50], toggleVoiceCommands);
+		
+		
 		console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
 		if(typeof navigator.keyboard == "object") {
 			//navigator.keyboard.lock();
@@ -10108,6 +10096,48 @@ EDITOR.discoveryBar.show();
 		
 		
 		windowLoaded = true;
+	}
+	
+	function toggleVoiceCommands() {
+		
+		if(voiceCommandsEnabled) {
+			enableVoiceCommands.deactivate();
+			voiceCommandsEnabled = false;
+		}
+		else {
+			
+			if(recognition == undefined) {
+				if(SpeechRecognition) {
+					var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+					var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+					var speechRecognitionList = new SpeechGrammarList();
+					recognition = new SpeechRecognition();
+					//recognition.continuous = false;
+					recognition.lang = 'en-US';
+					recognition.interimResults = false;
+					recognition.maxAlternatives = 1;
+					recognition.onresult = speechRecognitionResult;
+					recognition.onspeechend = function speechRecognitionEnd() {
+						recognition.stop();
+					}
+					recognition.onerror = function speechRecognitionError(ev) {
+						alertBox("Speech recognition error: " + ev.error);
+					}
+					recognition.onnomatch = function speechRecognitionNomatch(ev) {
+						console.log(ev);
+						console.warn("Speech recognition found no matching commands!");
+					}
+				}
+				else {
+					alertBox("SpeechRecognition is not supported by your BROWSER=" + BROWSER);
+					return;
+				}
+			}
+			
+			enableVoiceCommands.activate();
+			voiceCommandsEnabled = true;
+		}
+		
 	}
 	
 	function sendStatistics() {
@@ -11751,7 +11781,7 @@ function keyboardCatcherKey(keyEvent) {
 		
 		
 		// Voice recognition support in browsers seem to have been discontinued :(
-	if(charCode == charCodeCtrl && 1==2) {
+		if(charCode == charCodeCtrl && voiceCommandsEnabled) {
 			console.log("keyIsDown: recognition start! (keyDown Ctrl)");
 		if(recognition) {
 			try {
@@ -12141,7 +12171,7 @@ function keyIsUp(keyUpEvent) {
 	}
 	
 	var charCodeCtrl = 17;
-	if(charCode == charCodeCtrl) {
+		if(charCode == charCodeCtrl && voiceCommandsEnabled) {
 		console.log("recognition stop! (keyUp Ctrl)");
 		if(recognition) {
 			recognition.stop();
@@ -12325,7 +12355,7 @@ function mouseDown(mouseDownEvent) {
 			}
 		}
 		
-		if(mouseDownEvent.type == "touchstart" && recognition) {
+		if(mouseDownEvent.type == "touchstart" && recognition && voiceCommandsEnabled) {
 		// Dont start recording right away, because Android makes a very annoying sound when the recordning starts.
 		setTimeout(function stillDownMaybe() {
 			if(!EDITOR.touchDown) return;
@@ -12457,7 +12487,7 @@ function mouseUp(mouseUpEvent) {
 	
 	//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 	
-	if(mouseUpEvent.type == "touchstart" && recognition) {
+		if(mouseUpEvent.type == "touchstart" && recognition && voiceCommandsEnabled) {
 		recognition.stop();
 	}
 	
