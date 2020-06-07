@@ -42,6 +42,7 @@ todo: Run vttest
 	};
 	var waitForReopen = true; // Buffer terminal messages for two seconds so that the last session get a chance to load
 	var BUFFER = {}; // termid: [data]
+	var vimTip = true;
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -1512,11 +1513,37 @@ console.log(file.path + " is a terminal emulator file!");
 						else if(err) alertBox("Unable to open file from command=" + command + " error=" + err.message, err.code);
 					});
 				}
-			} 
+				else if(command == "vi" || command == "vim" && vimTip) {
+					var path = (UTIL.trailingSlash(folder) + match[4]).trim();
+					
+					var dontTell = "Don't tell me again";
+					var openInEditor = "I'll try that...";
+					var ok = "OK";
+					var key = EDITOR.getKeyFor("toggleVim");
+					confirmBox("Did you know that WebIDE has a Vi/Vim normal mode? Press " + key + " to toggle mode!", [dontTell, openInEditor, ok], function (answer) {
+						if(answer == dontTell) {
+							vimTip = false;
+						}
+						else if(answer == openInEditor) {
+							
+							EDITOR.openFile(path, undefined, {show: true}, function(err, file) {
+								if(err && err.code == "ENOENT") {
+									EDITOR.openFile(path, "", {show: true}); // Create new empty file
+								}
+								else if(err) alertBox("Unable to open file from command=" + command + " error=" + err.message, err.code);
+							});
+							
+						}
+					});
+					
+				}
+			}
 			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
 			
 		}
-		
+		else if(code == 27 && combo.sum == 0) { // Esc
+			data = ESC;
+		}
 		else if(code == 34 && combo.sum == 0) { // Page down
 			data = ESC + String.fromCharCode(81); // hmm?
 		}
@@ -1673,9 +1700,9 @@ console.log(file.path + " is a terminal emulator file!");
 		
 		for (var i=0; i<terminalFiles.length; i++) {
 			if(reason=="exit") {
-terminalCloseFile(terminalFiles[i]);
+				terminalCloseFile(terminalFiles[i]);
 			}
-else {
+			else {
 				terminalFiles[i].write("\n\nEditor exit event (" + reason + ") " + (new Date()) + "\n\n" );
 			}
 		}
