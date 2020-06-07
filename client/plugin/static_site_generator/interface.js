@@ -365,7 +365,10 @@
 					
 					if(diariesFound.length == 0) {
 						var options = sites.map(function(site) {return site.name});
+options.push("Cancel");
 						confirmBox("To what site do you want to add a diary?", options, function(answer) {
+							if(answer == "Cancel") return;
+
 							for(var i=0; i<options.length; i++) {
 								if(options[i] == answer) addDiaryToSite(sites[i]);
 							}
@@ -374,8 +377,11 @@
 					}
 					
 					var options = diariesFound.map(function(site) {return site.name});
+options.push("Cancel");
 					confirmBox("In which site do you want to make a diary entry?", options, function(answer) {
-						for(var i=0; i<options.length; i++) {
+						if(answer == "Cancel") return;
+
+for(var i=0; i<options.length; i++) {
 							if(options[i] == answer) makeEntry(diariesFound[i]);
 						}
 					});
