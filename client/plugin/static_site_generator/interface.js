@@ -303,6 +303,8 @@
 		
 		CLIENT.removeEvent("ssgBuildMessage", ssgBuildMessage);
 		
+		EDITOR.discoveryBar.remove(discoveryBarIcon);
+		
 		if(manager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(manager);
