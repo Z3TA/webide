@@ -17,6 +17,7 @@ var CLIENT = {}; // Client object is global
 	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
 	var idCounter = 0;
 	var callbackWaitList = {};
+	var callbackThrown = {};
 	var noCallbackList = {};
 	var gotResponseForTimedOutRequest = {};
 	var cache = {};
@@ -269,6 +270,19 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			*/
 			
 			CLIENT.inFlight--;
+			
+			
+			if(callbackThrown[id]) {
+				// We have got the response from the server, but the callback did throw an error. It's annoying if we also get a timeout error
+				
+				delete callbackThrown[id];
+				
+				delete properCallStackError[id];
+				delete noCallbackList[id];
+				delete gotResponseForTimedOutRequest[id];
+				delete callbackWaitList[id];
+				return;
+			}
 			
 			if(!properCallStackError.hasOwnProperty(id) && !callbackWaitList.hasOwnProperty(id)) return; // We have received the response!
 			else if(!properCallStackError.hasOwnProperty(id)) throw new Error("Request id=" + id + " req=" + req + " timed out, but there is no properCallStackError! timeout=" + timeout);
@@ -557,7 +571,9 @@ reconnectTimeoutTime += 10000;
 					// note: If the callback below throws, the timeout error would also throw! (because callbackWaitList[json.id] still exist)
 					// But the problem with try/catch is that they catch all kind of errors, like undefined variables... resulting in the wrong call site in the error message
 					//try {
+					callbackThrown[json.id] = true;
 					callbackWaitList[json.id](err, json.resp);
+					delete callbackThrown[json.id];
 					//}
 					//catch(errorInCallback) {
 						//generalError = errorInCallback;
