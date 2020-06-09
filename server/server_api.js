@@ -1124,7 +1124,14 @@ str = decoder.write(data);
 					var resp = {path: path};
 				
 					if(err) {
-console.warn(err.message);
+					
+					console.warn(err.message);
+					
+					if(err.message == "No such file") {
+						err = new Error(err.message + " (err.code=" + err.code + ")");
+						err.code = "ENOENT";
+					}
+					
 				}
 				else {
 				

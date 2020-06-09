@@ -1666,7 +1666,11 @@ if(fileParse !== undefined) {
 		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
-			if(err) callback(err);
+			if(err) {
+				var error = new Error("Unable to read path=" + path + " Error: " + err.message + "");
+				error.code = err.code;
+				callback(error);
+			}
 			else callback(null, json.path, json.data, json.hash);
 		});
 	}

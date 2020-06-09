@@ -43,6 +43,38 @@
 		});
 	*/
 	
+	EDITOR.addTest(1, function sftp_enoent(callback) {
+		// bug: SFTP does not give proper ENOENT error code when file doesn't exist
+		
+		var protocol = "sftp";
+		var serverAddress = "ben.100m.se";
+		var testFile =  protocol + "://" + serverAddress + "/uploads/nonexistingfile.txt";
+		var connJson = {protocol: protocol, serverAddress: serverAddress,  user: "sftptest", passw: "12345"};
+		
+		CLIENT.cmd("connect", connJson, function(err, json) {
+			if(err) throw err;
+			
+			EDITOR.readFromDisk(testFile, function(err) {
+				
+				if(err.code != "ENOENT") throw new Error("Unexpected error code=" + err.code + " err.message=" + err.message);
+				
+				CLIENT.cmd("disconnect", connJson, function(err, json) {
+					console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
+					
+					setTimeout(function() {
+						var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+						if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+					}, 1000);
+					
+				});
+				
+			});
+			
+		});
+		
+		
+	});
+	
 	EDITOR.addTest(function renameFolder(callback) {
 		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/tryToRenameMe/");
 		var renameTo = UTIL.joinPaths(EDITOR.user.homeDir, "/renameFolderTo/")
