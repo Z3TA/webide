@@ -1,0 +1,1015 @@
+This file contains a list of things we can do to improve already implemented features...
+
+
+Polishing (only existing features)
+==================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+long press name of folder to rename (currently need to click on icon) 
+
+cant preview markdown files directly in SSG
+
+In SCM, able to see all changes containing the selected text:
+hg grep --all Content-Security-Policy client/index.htm
+
+
+When connecting to a remote server via FTP/SFTP check opened files, compare them with file on disk (the hash) and mark them as saved if it's the same.
+
+SQL autocomplete 
+
+markdown preview (can't use wysiwygEdtiro, so we basically need to reimplement it, but for markdown instead of html)
+
+Add support for git, for example when cloning, detect if it's a git or mercurial repo, then use git if it's a git repo
+
+Goto-file widget pushes up the header!!
+
+The login form doesn't get submitted when you press Enter!
+
+Should be able to see changes to svg live while editing!
+
+Able to amend while making a commit (add the change to last commit)
+
+----
+Widget for the WYSIWYG
+When double clicking on a word: Bring up options: B,I,Link,TT,quote,comment (T=h1 or h2)
+When making a new line, show a plus sign, when clicking on the plus sign; bring up options: Add image,img-search,video,embed/snippet,hr 
+---
+
+Able to resize the bottom area. for example when using hg Log.
+
+---
+
+"hunk patch" with version control. eg. select parts/hunks of a file to commit
+
+probably a good idea to make the editor able to fold and show extra (the deleted) rows)
+So the "diff" can be the actual file. (allow edits in diff mode ?) button to go out of "diff mode".
+Then mark the "hunks" in the margin.
+
+---
+
+Test more scripts to see if the editor can inline all console.log's
+
+More formatting ? Inline breaks after ) and conditionals ? foo : bar !?
+
+---
+
+Make a folder/file path picker dialog for chosing a file path. For example for saving a file.
+
+Able to hide the function list, enabled by default.
+
+When a version control widget is active (visible) Show green "active" indicator on "version control" in the menu !?
+
+---
+
+Format code when parsing.
+Remove line breaks for lines:
+* Doesn't start with // or /*
+* Doesn't end with ;,{[
+
+Test:
+
+const { Future } = require("fluture");
+const S = require("sanctuary");
+
+const validateGreet = array =>
+  array.includes("HELLO")       ?
+  S.Right( array )    :
+  S.Left( "Invalid Greeting!" );
+  
+
+// Receives an array, and returns Either <String, Array>
+const transform = S.pipe( [
+  S.map( S.pipe( [ S.trim, S.toUpper ] ) ),
+  validateGreet
+] );
+
+//Play with me!
+const queryResult = Future.of( 
+  S.Just( ["  heello", "  world!"] ) 
+);
+
+//Play with me!
+//const queryResult = Future.of( S.Nothing );
+
+const execute = 
+  queryResult
+    .map( S.map( transform ) )
+    .fork(
+      err => {
+          console.error(`The end is near!: ${err}`);
+          process.exit(1);
+      },
+      res => {
+        // fromMaybe: https://sanctuary.js.org/#fromMaybe
+        const maybeResult = S.fromMaybe( S.Right([]) ) (res);
+
+        //https://sanctuary.js.org/#either
+        S.either( console.error ) (  console.log ) ( maybeResult )
+      }
+    );
+
+
+---
+
+Add local echo to the terminal plugin. For when the key presses are laggy like in Google cloud shell preview.
+
+See markdown topics that are commented out for example:
+// topic
+// -----
+
+Amend option in source control commit widget
+
+Save login date so it's easy to know which users are inactive
+Recycle guest users (clean data !?) when the guest has not logged in for 10 days
+Prompt returned guests (who's account has been recyckled/wrong pw) to create an account.
+
+When opening a file and you paste in a full path (starting with /) automatically switch to that folder when searching for files to open
+
+Static site generator: When publising an article from draft, eg renaming from _foo to foo . Add a button for it in the ssg interface and make a hg mv if it's in source control.
+
+Ctrl+S is used so frequently, that you sometimes hit Ctrl+D. So don't allow binding anything to Ctrl+D !?
+
+Pressing tab in file(search) open should fuzzy auto-complete from the results ... 
+Ex: I want to open package.json inside /projects/foo/bar/ 
+
+When source control detects a missing file, ask if it was renamed!? And let user select which file, then do a hg mv
+
+Take into account the full path when grouping file tabs so that server/plugin/foo and client/plugin/foo doesn't get grouped together.
+
+---
+Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace
+Reason: Many tools want to listen on localhost:someport
+
+username.webide.se/_port#### redirects to ip namespace port ####
+---
+
+Better documentation (maybe a blog post!?) on how unix sockets work in jzedit
+problem: When running web_preview files are loaded from webide.se.
+How to know which user to access ? johan.webide.se
+
+School signup: Se progress and usage statistics from team members
+
+terminal emulator
+- Copy/pasting
+- Placing the cursor using the mouse
+
+Issue when copying text rows with lf into a file with crlf line breaks !
+
+See last changed and file size on file when hovering on it in file explorer !?
+
+When changing indentation to two spaces, also make the indentation two characters wide! And 4 if you change to 4 spaces (or tabs?).
+
+---
+
+Every time a property or a method is accessed when running a node/javascript add 
+
+__checkObj(foo.bar, "foo.bar", __line);
+
+function __checkObj(obj, oname, line) {
+  var val;
+  if(typeof obj != "object") val = obj;
+  else val = __safeStringify(obj);
+  console.log(line + ":" + oname + ":" + val);
+}
+
+Then when you hover the mouse over it and holds down shift you see the value.
+And you get a warning for all properties that are undefined
+
+---
+
+Able to set breakpoint in JavaScript and pause the execution !?
+
+Could "pause" with alert() !?
+
+---
+
+Prevent user_worker.js process from closing/restarting several times in a row!
+
+---
+When typing in a full file path in File (search)
+Try to open the file
+change dir and search
+
+ex: /usr/lib/node_modules/npm/node_modules/update-notifier/index.js in directory /home/Z/Projects/jzedit/
+/home/Z/Projects/jzedit/ is not in the file path !
+1. Try to open the file path
+2. Change to that folder and search for the file eg set directory to /usr/lib/node_modules/npm/node_modules/update-notifier/ and file (search) to index.js (whatever is after the path delimiter / (slash)
+
+---
+
+When insert an if-statement and typing after it, the line below is indented which is annoying (due to optimizer not doing a full parse)
+Make a full parse if the line starts with if,for,while and the line below is indented !? Or de-indent the line below !?
+
+---
+more work on autocompletion !? Add completions for the ctx web 2d canvas api. Via canvas.getContext('2d') !?
+can the editor figure out that var ctx = canvas.getContext('2d') !? And give dynamic auto-complete !?
+Record demo video, or take screenshots and write a blog post.
+---
+
+Autocomplete even if we are next to a ) or } or ,
+
+---
+indentation:
+
+if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && 
+								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+									if(!userAccepted) { // Prevent double accept
+										acceptUser();
+										userAccepted = true;
+									}
+									else throw new Error("User already accepted!");
+								}
+
+if(charCode == CHARCODE_ENTER && 
+				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
+				password == password2) createAccount(inputUsername.value, inputPassword.value);
+
+
+if(1==2) 
+  
+
+  console.log("Hello!")
+console.log("World!")
+
+(indent until there's come kind of expression)
+
+const var =
+  val == 1 ? 1 :
+  va1 == 2 ? 2 :
+  null;
+
+Should Not be indented:
+if(1==2) ; <-- semicolon
+	console.log("Hello!");
+
+when hitting backspace to delete left to a } it get indented
+
+---
+
+First time a user logs in it takes a while ... show a welcome message !?
+
+in Firefox, if the function list is longer then 100% you get annoying orange color
+
+progress bar while installing nodejs modules !? (when running a nodejs script)
+
+Able to link folders to wwwpub, ex: linking mygame/pub to wwwpub/mydomain.com/mygame/
+
+copy/pasting in terminal!!
+
+---
+
+Autocomplete doesn't not always work! which is annoying! It should be able to work reliably !
+
+---
+
+Show rev in annotactions
+
+---
+
+Ctrl+Tab to switch tabs not working in the browser (it changes browser tab) is annoying
+Ctrl + up/down move to next/previous tab !?
+Ctrl + left/right move to left/right tab !?
+
+---
+
+Give a warning when there are two functions with the same name in the same scope!
+For example a named lamda function and a normal function, and the lamda functions tries to call the normal function,
+but calls itself over and over again. Will be a bit hard to debug.
+
+---
+Spectator mode:
+When the same user, or a user invited to the file/session open the same file. The spectator can only read/view the file.
+And all updates to the file is sent from the writer to the spectators.
+The original editor (or invitor) can select to temporary allow a spectator to edit the document.
+You also get a chat box where you can write messages.
+
+"file.path has been opened in another session. Do you want to allow the other session to see your changes live ? 
+The other session will not be able to change the file unless you allowit. 
+["Allow spectator", "Allow colaborate editing" "Keep editing without specator(s)"]
+
+(when original session closes the file or disconnects)
+"The other session(s) has closed *files*. Re-open the file(s) to be able to make changes." ["Reopen files now", "OK"] 
+
+"Accept invitation by user.name to ["specate" || "colaborate edit"] file.path ?"
+
+"file.path is already opened in another session. The file will be opened read-only!" ["Request spectate", "Request edit", "OK"]
+
+When loading a file, see if another user is logged in with the same user/pw and if the file is open, load that state!!
+If the file is unsaved, ask to save a backup.
+
+Possible to "request edit"
+
+"Type the name of the user you want to invote to spectate file.path"
+If the user don't exist or is inactive: You get an invite URL that automatically opens the spectator session
+
+If the users have the same username, show the host name, with the diff (foo.bar,baz.bar => foo,baz), in the chat"
+
+---
+
+When a user is connected from two computers and have the same file open, send all file changes to the server that then broadcast to all clients logged in as that user
+and runs a transorm ? Or just don't apply the changes until they come in from the server (like in the terminal)
+Need to send a message to the server when a file is closed by the client to keep track of which files are open.
+
+When two users are logged in with the same username, or one have been invited to join a session. 
+Colaboration mode will be active. And events will be mirrored.
+
+### Operational transform.
+
+Users sends to the server what they believe to be the current event order.
+If the server recives an event with the wrong (the same) order, it transforms one of the events.
+
+Ex:
+User 1 sends move caret to row 5 (order=1)
+User 2 sends add new line at row 4 (order=1)
+
+(there can be two outcomes, eg the server recives user 1's event first, or the server recives user 2's event first)
+
+Outcome 1: Server recives user 1's event first: move caret to row 5 (order=1)
+When user 2's event comes in, the server only has to change the order to order=2 as move caret has already been sent out. 
+TCP guarantees order. So (with TCP) the user can not recive order 2 before they recive order 1
+
+outcome 2: Server recives user 2's event first: add new line at row 4
+Server updates the move caret event to order=2 and change row from 5 to 6.
+
+
+---
+
+WYSIWYG tool fro creating links and headings
+
+Unload/load all plugins when loggin in as a different users, or on a different server
+
+When there's an error in a NodeJS script open the file, scroll to the line and show the error!
+
+When commiting and files are missing. Ask to remove those files from source control!
+
+---
+When deoplying, check package.json for "deploy_script" where a deploy script can be specified. 
+It must be a file path (to a .js file) as jzedit does not have a shell when running as a cloud ide.
+The specified nodejs script will run when the user deploy via the editor instead of the default:
+The default (if deploy is not specified) is to use nodejs_init that comes with the editor (copies files to prodFolder and restarts it via nodejs_init daemon)
+---
+
+When opening a file. But no results are found and you press enter, try opening whatever is in the input (eg /etc/foo)
+If input starts with / and has another / eg /foo/ switch to that folder! When it changes to /foo/bar/ switch to that folder!
+
+Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
+
+When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
+When saving a .css file belonging to the SSG, reload it in the preview! 
+
+Double clicking the file in commit file selection should open it.
+
+Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
+
+refactor voice, EDITOR.say, so all plugins can use it.
+
+npm modules
+using modules in SSG ... Able to add npm modules to the SSG ...
+
+Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
+If a remote repo is specified, clone to temp folder, check for file colitions (file exist in both folders) then copy over the content from the temp folder.
+Ask what to do for each file colliton ?
+
+Give friendly error when trying to pull emty git repo with hggit
+
+---
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Listeners for preivew and WYSIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
+see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
+plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
+---
+
+Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
+
+When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
+
+More intellisence. One of the reason ppl use HypeScript is because it gives them better intellisense.
+We can however give them intellisens without HypeScript!
+
+More work on web_preview.js plugin. Auto-complete, check if the file belongs to the web site being previewed
+
+Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
+
+Autocomplete paths when saving files, or "save file here" on file explorer context menu should request savefile-widget.
+
+workflow: Edit pages on a ftp server ...
+  Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.
+
+not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
+
+Support .editorConfig !
+
+A diff tool ...
+
+Column aligment: When line breaks in var declarations, lists, function calls and arguments
+
+Cache invalidation with the SSG: When a file is added, all href's to that file is updated with ?v=n++
+Also with CSS!
+
+cloning a repo takes a lot of time, use loading bar !?
+Use spawn instead of execFile !? And hg clone -v for verbosity
+
+Browse files, for example when picking a save-as path, or opening a file.
+
+
+Git support via Mercurial ? http://hg-git.github.io/
+
+
+Allow proper zooming, check window.devicePixelRatio ...
+Browser zooming alwost does the right thing ...
+
+Opening big files support in the browser
+
+---
+
+Show a fat warning if a variable inside function parameters also is declared in the function body
+
+---
+
+Key binding are impossible to "forget" once you've learned them. So we have to support the most common keybindings from all popular editors!!
+In order for the editor to feel nice eg. doing what the user intents.
+When there are two ore more keys that does different things on different editors. Ask the user what to do and if the setting should be remembered.
+
+---
+
+Be better at guessing the file path in file open and file save dialog.
+
+Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
+Because we are using the canvas, screen readers will have problems.
+
+---
+
+Do not touch indentation inside textarea, pre, or comments
+(quick fix workaround was to make it parse like a script tag so we could show code)
+
+---
+
+Properly indentate if,for,etc statement that don't use curly brackets !?
+if (foo==bar)
+  foo();
+else
+  bar
+
+look for JavaScript "in the wild" and see if the editor indentates it properly.
+
+---
+
+Investigate render_indentation.js is it needed ? fix regressions.
+
+What about (SSH) keys when using the browser as client !?
+
+Autocomplete: When finding a require statement, parse that file ...
+
+Explore old commits and see what files was include and what changed.
+
+When you are about to save a file, and then switch to another file, the file-save icon is still open, and you might acidentally save the wrong file ... !
+
+When opening the file explorer, open folders so that you can see the current file
+
+When using Ctrl + P and hold down the up/down key, it should switch selection. Instead of having to press the key multible times. Be able to just hold it down.
+
+"Use without logging in" button on the login widget.
+- Hide stuff / disable plugins that need the server ...!
+- Option to "save" (download) a file
+
+---
+File explorer:
+File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
+Able to select files and folders in file explorer !?
+delete (and rename) files via file explorer
+Move files in file explorer via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.z
+Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
+---
+
+EDITOR.autoCompletePath("/foo/ba") => /foo/bar/ (when saving files)
+
+Show inline result of consle.logs of nodejs scrips
+(see nodejs_worker.js)
+
+Show inline variable values using nodejs debugger repl
+
+update WysiwygEditor.js: When editing a CSS file and the preview is open, hot reload the CSS content!
+or when working on a JS file that is included in the pewview page, hot reload it!
+
+
+Need a stop button for search-in-files. 
+
+SSG:
+Auto pick file-name (todays date!?) when click new page on SSG
+Default save path for new files i SSG profile.
+If many paths (separated by comma) the user has to pick one.
+Auto fill stuff in template file, like date, and author
+
+
+
+Close all tabs except this!
+
+Auto complete Save file path when saving.
+
+Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
+It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
+
+When pressing the Ctrl, Alt, Ctrl+Shift, or Alt+Shift, or Ctrl+Alt, or Ctrl+Alt+Shift key, after 500ms, show a HUD of all functions that are bound to those keys, and their combo Letter, example Ctrl+S for save: S: save
+The HUD dissaprears when you release the keys.
+
+
+When editing in WYSIWYG mode, a shortcut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
+
+
+Add a watcher for every opened file and warn the user if the file changes by other programs.
+
+in reopenfiles.js check if the last modified date on disk is newer ... !?
+
+Commit tool: Show diff
+(Also make it possible to commit only selected diffs,
+probably have to use something better then a select box for the file select)
+
+commit widget: Double clicking on a file in the list should open the file and show what changed (a diff !!???)
+
+Commit tool: option to move, and revert.
+
+Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
+
+SSG: Meta publish date, publish only after this date. Make server auto publish!?
+
+Better support for files that requires spaces ? Or add separate support for each format ? For example nginx config files. (auto indentation)
+
+Autocomplete variables withing strings!
+
+Autocomplete on known variables. example:
+var inputSendTo = document.createElement("input");
+inputSendTo.set| -> setAttribute
+
+When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
+Auto opened SSG panel doesn't select the right site when clicking edit
+
+Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
+
+Show virtual paths on server errors like "unable to open file".
+
+Some sort of indication that you are disconnected to the server
+
+colaboration: When two or more people are logged into the *same user*
+and opens *the same file* the editor goes into colaboration mode, that lets you see each others changes live.
+Press xxx to follow someone else's cursor.
+
+Show inconsistent indentation. If the indentation characters are not corrent. Show them! (in red ?)
+tab tab ...
+So that I will know when someting goes wrong with indentation.
+Add the indentation widget to right click menu when clicking on a line that has bad indentation characters.
+
+Server storage instead of local storage.
+Server storage fallback to localStorage when server goes offline, then sync when it comes online agian !?
+
+Remove bootstrap function, it's no longer needed as the editor can be run
+in a browser and has a server.
+
+
+colaboration: When you log in to a user that is already logged in you'll get into colaboration mode,
+where each change will be mirrored to the other client.
+
+when someone logs in as you, you get the option to disallow it, or (default) enter colaboration mode
+when you log in as someone else, you get the option to kill the other session, or (default) enter colaboration mode
+
+Fix problem with endless mirror loops!
+
+Make a special start.js (node) script for OSX (that all OS's can use too!) !?
+Pass serverUrl as query string to client
+
+package your project for Npm, use the 'bin' field in package.json. Then on Windows, Npm will install a .cmd wrapper along side your script so users can execute it from the command-line
+Make a jzedit.js.cmd file so you can start it by typing jzedit.js in Windows.
+
+Update server_login.js to use current url as default server url
+
+Editor server login ... What if you're connected to the server, but not logged in. Or want to connect to another server ?
+
+
+Annoying line at the bottom (footer) of the editor
+
+Ask to disconnect from remote server when closing the last document open on that server.
+
+An error that might give some headache is when you misspell a variable when declaring it using var foo,
+then get an error that foo is undefined ... Warn when a declared variable is not used!
+
+It's a common error to forget a parentheses in for example nested if's. 
+Warn or auto insert missing parentheses !?
+
+Autocomplete global variables (in browser, from other files)
+
+Add icons to the file explorer and make it easier to navigate.
+Show git/mercurial status beside each file (New, Modified, Ignored)
+
+Move the caret to the far right when selecting by double clicking
+
+Reopen closed tab!!
+
+Ignore quotes when matching parentheses
+
+Adding a quote at the start of a word should only insert a single quote not ""
+
+Confirmation when deleting SSG site
+
+Preserve indentation (spaces?) when commenting out code
+
+Auto complete html tags inside strings. example:
+"<b>" + site.name + "</b> published to:<br>" + site.publish + "<br><i>" + site.url + "</i>"
+
+Refresh previw/WYSIWYG when editing CSS files
+
+SSG, able to set a site as default and show that first.
+
+SSG problem: WYSIWYG with files that contain <?JS code ?>
+Debug deleting large chunks in WYSIWYG doesn't remove all from source.
+Debug writing in editor inserts stuff from the ignore (transform).
+
+automatically bring up the SSG widget when opening a file the is managed by the SSG, and select that site
+
+show all editor windows when showing one of them! Like ex you have the preview open, then alt tab away, then alt tab back to
+the editor, you still want to see the preview window!
+
+Mercurial integration
+
+See total lines in bottom right corder when scrolling so you know where in the file your are.
+
+Improve the file explorer:
+Two panes, one for folders (with local fs and all remote fs as root's) and one for files (current selected folder).
+Icons! Delete, rename, create new files and folders. Move files using copy/pasting (even between different remote locations). Inspiration from Windows Explorer
+
+SSG/wysiwyg: Control what happends when you press enter. Use native selection API to place cursor in wysiwyg
+
+cleaning up pasting from Ms-word in SSG WYSIWYG
+
+ssg: show the ssg buttons whenever a file from a registered project is opened
+
+Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
+
+Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
+
+function list för asp and php !? (use https://github.com/felixfbecker/php-language-server and try VS Code Language Server Protocol)
+
+Easy way to rebind keys: settings_overload.js rebind(what, new combo)
+
+Reconnect FTP when there is a timeout disconnection.
+
+Autocomplete html tags inside strings (only look at the same line for opened tags)
+
+Make the editor scroll down when you press enter and cant see the line (it does scroll down when you start to type)
+When pressing enter, make you see a few more lines ? Like when scrolling using the mouse ? Test the feel in windows notepad (pasting stuff into lists)
+
+Allow indentation micromanaging (space) inside block comments and <pre> (they currently do not show after the file is reloaded)
+
+Annoying when making a block quote and cant see where to end it. Sugg: show a green line from the start of the unclosed block scope to the cursor
+
+Annoying when double quotes are inserted when you do not like double quotes: example foo =  (here)    ";
+
+Put all features under (native) menus so they can be found, for example using the Ubuntu "Alt" HUD for searching the app menu ...
+Could use it as a commander, ex: open recent file: .... open file: (list all files in current files's folder)
+http://support.system76.com/articles/ubuntu-basics/
+
+Icons in the contect menu so things get easier to find!
+
+Auto complete HTML tags inside JS strings.
+
+List-box in goto-file. Where local and remote systems are listen. Where working dir's are opened in a tree.
+
+autocomplete: Do not make variable suggestion when in HTML mode (only html tags)
+
+Auto scroll to found functions when typing in the function list
+
+Connection manager: Show last used connection as default
+
+SSG: Upload/publish to two locations at once.
+
+There should be a "waiting for disk?" message while files are opening from last session.
+
+It should be possible to scroll using touch (hold down finger and move it)
+
+Need a way to open file on touch (preferably a plus sign on the tabs list, like in browsers)
+
+Temporary show total lines in file while scrolling and where in the file you are. Ex: Page 2/100, of 15231 LOC
+Page up/down should move depedning on the amount of visible rows in the editor!
+
+
+Select default (root) folder in connection manager!
+
+When trying to make double quotes in vbScript "<foo bar=""baz"">" ... Maybe have to press Alt when making a " to auto insert the extra " + + " ? 
+
+Tab and shift+tab to manage indentation in non-intepreted files
+
+Don't add an extra " when the " match on that line. Ex: foo = "<--   jajaja "  not: "" jajaj"
+
+SSG, auto scroll down to where you was when previewing. (when you update and "refresh").
+
+Ctrl? click on a function name to go to it's definition.
+
+jzcms.json settings file for the static site generator. Inlcude ftp and target folders.
+
+Possible to stop searches that take long time
+
+Make better file-open, directory picker, and file-saveAs dialogs with support for remote FS (FTP/SSH).
+
+In server manager, sort connection list by last connected to.
+
+When opening files via Ctrl + P, show a loader that says how many files have bee looked at and how many files left.
+
+It's unclear what to do after connecting to a remote server. Like: how do I open a file, or create a new one?
+
+editor.addMenuItem should take a third argument that is called every time the context meny is shown, that has to return true for the item to be visible.
+
+Create dirs and new file on remote servers.
+
+file search btw chunks + replace in files
+
+A plus in the tabs to create/open a new file
+
+When auto completing a new function() {} check if it's a lambda or function, to set the caret in the right position.
+
+The undo/redo function needs to be rewritten!
+
+Show loading/streaming animation when opening a big file. And show the file after the first chunk!
+(don't wait for the full file to load).
+
+Having to delete the line braks when removing large text chunks (spanning many rows) is annoying!
+
+Detect misspelled properties!!!
+
+The quote auto inserted is annoying when quoting from right to left "<-second "<-first
+
+Annoying: When clicking Ctrl+O to open a file and it takes long time for the open the file explorer. Then hits Ctrl+O again several times in frustration.
+Then have to wait until all of them have loaded.
+
+
+Warn if a new line starts with (, [, /, +, ++, or --. 
+(And if there is a line break after return, break or continue.)
+
+
+Allow white space at start of line in block comments
+
+Ignore $ in variables for the spellchecker
+
+Pasing while searching should replace 
+
+Try different (JSON) js files in the wild and see how it handles the indentation.
+
+Auto scroll the function list when searching in it so we see matches.
+
+Better undo/redo!!
+
+Update with confirm if a file have been changed by another program.
+
+Making a multi line string was very annoying due to auto inserts of double '' and ' + + '
+
+Ctrl + click on a file path to open it. (no double click!!)
+
+Regex support in find/replace!
+
+Detect misspelled/unknown object properties!
+
+Ctrl+Shift+Tab = Goto last function we where in
+
+List of all keyBindings and a disciption of what each do
+
+Blink or something, green flashing on the file tabs!? To indicate the file has been successfully saved.
+
+Plain text mode, where you can see spaces in front of text (inlining)
+
+Loading icon while the file is streaming!?
+
+Regex (or *) search in Goto file.
+
+
+Refactor spellchecker: Apply wave via preRender function. Check against spellcheck cache.
+Remove all text marked as miss-spelled when toggling the spellchecker off.
+
+
+A better search in file.
+Editor crashes whean searching for "try to" or ">0;" in files.
+
+
+
+
+
+Indentation for good looking multidimensional arrays:
+var arr = [
+[1, "foo"],
+[2, "bar"],
+[3, "baz"]
+];
+
+Classic ASP, bash indention, and function list!
+
+Function args wont come up in autocomplete.
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
+Autocomplete function arguments inside the function!
+
+Auto-complete from all opened files (global variables)!
+
+Send back the domObject when calling editor.menu so you can change the text!
+Check "Enable spellchecker" if its not running and "Disable spellchecker" if it's running.
+
+Show comment markdown headers in the function list
+
+See repo: remove files not needed.
+
+It's hard to see if a file is saved or not!
+A better confirmation/indication that the file has been saved.
+Better looking file
+
+Auto load/connect to the debugger so that we can more easely find editor errors. Self debugging.
+
+goto_file.js: Seach in subfolder option, ignore dot filder and folders option. Better coloring.
+
+A key command for closing a file.
+
+A list of all key-bdings available, F1!?
+
+Also show the indention helper if we pasted in something and the last char was a {
+
+xmatch: do not count { inside strings.
+
+Write letter starting in center!? 
+Bigger chars in xmatching.
+
+Colors when parsing next text next to a html tag, it turns blue </>
+
+Moving file tabs, change position.
+
+When the state (file.text == last saved state) mark the tab as saved.
+
+Allow context menu everywhere, or at least on the file tabs too.
+
+Reopen last closed file tab.
+
+Switch file-tab positions
+
+A "check" sign when toggling stuff (if its on or off) in the context menu (right click).
+
+* Auto insert .. } if it makes sense to do so.
+
+* Really need to warn if there is = inside an if() !!
+
+* Some sort of block helper: when for example inserting in if-statement, the indentation get lost.
+Show a ruler or something!? When there is not a matching count of {} in the document.
+ex: {{<--
+}
+
+* When editing plain text it would be nice to be able to have spaces/tabs for indentation!
+Example, when making a dot list. Or should the editor do that to!?
+
+Set opening folder at startup to last opened folder.
+
+
+Annoying flashing yellow when opening a file.
+
+Context menu (right click) doesn't disappear when saving As
+Auto complete file names when editing href or src 
+Auto complete markdown lines ---- and ==== to fit (same length) as text above.
+Add words like href, src, etc to the spell-checker ignore.
+
+Don't insert double ' inside comments
+
+Auto remove mathching } when removing an if statement.
+
+Show big fat warning if = inside if( a = b) instead of ==, always a bug!
+Also warn when  you use == outside an if!?
+
+Indent inside if's
+if(word.length > 0 && 
+htmlTags.indexOf(word) == -1 && 
+jsKeywords.indexOf(word) == -1 && 
+!isNumeric(word) &&
+fileExtensions.indexOf(word) == -1) {
+
+Do not overwrite line-nr with chars-in-margin!
+
+
+Spell-checking is laggy
+
+
+
+Add words to the spellchecker, using context menu
+
+Files dont have tabs ...
+
+When devmode = false, error -> confirm("An error was descovered ... Do you want to report?")
+
+Don't mark file as changed if it has the same state as the last saved state.
+
+Make the highlight ({}) character red if there is no match.
+
+Make the scrollbar on the function-list lighter so that it doesn't steal focus from the code
+
+The tabs steal focus from the code ... make them lighter!? Or change the coding area!?
+
+automatically scroll down to the function, when you type in the function list (when there are MAAAAAny funtions)
+
+No color on high-light, just bold! paren + måsving
+
+Har to see what tab is opened. Make it yellow!
+
+confirm button before "replace in files" and a report of how much got replaced!
+
+Increase search input box when there is a long string
+
+The tabs look funky, changes places when you switch tab, and are on multiple lines, when the window is too small.
+
+Use a session file(s) instead of storing stuff in localstorage. Ex. JZedit/timemashine/filename.txt/date
+
+auto-complete variable names!
+
+fonts: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
+
+Better search in file. Like Nodepad++
+
+prettify the zoom heading labels. (show line number)
+inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner-design-image28200429
+
+Switch app icon to a ship container, because the editor helps you ship stuff ... 
+
+
+
+Saving a big file:
+readstream -> writestream to a temp file, up until the chunk loaded in the editor. Then continue with the original. When finished replace the original with the temp file.
+
+
+When searching in a file marked as big, do a whole file search from disk.
+
+
+Refactoring so all keyboard commands / key bindings gets registered.
+List of available commands.
+
+editor.bindKey() instead of editor.keyBindings.push()
+
+-search box in file explorer, where you type the name, and pressing enter opens that folder and scrolls.
+-like writing a path in bash. cd /ta -> no -> lets -> with auto complete
+
+support port in url's (connection manager, etc)
+
+Implement angel-wing/block variables (let, const) in the parser for smart auto-completion
+
+Figure out when indentation in the sourfe file goes bad and prevent it
+
+Preserve (manual) indentation inside block comments and pre tags !?
+
+Auto complete xml tags! (in xml/svg files)
+
+when deoploying nodejs micro services, ignore folders named data (only create them if they don't exist) when deoploying !?
+make it possible to deploy to ftp/sft/ftps!
+
+---
+properly indentate:
+if(1==1)
+console.log("a");
+console.log("b");
+
+console.log("c");
+
+---
+
+
+Voice commands / Speach recognition: test it on mobile, add voice commands for common key-bindings
+
+vioce command mode and insert mode: when in insert mode what you say is inserted as text !?
+Use The Insert key for insertingn speach to text !?
+
+---
+
+Better support for large files, like being able to edit and search.
+
+---
+
+Don't store username/password in localStorage!! third party modules/scripts will be able to access localStorage
+
+
+Make EDITOR.storage work like EDITOR.localStorage so they can easiliy replace each other !?
+
+When user drops a .zip file, ask where to extract it, then open it in file explorer, and also open any README.* or index.js 
+
+---
+Some nodejs scripts wants to automatically open up a new browser tab,
+detect this and open a new window.
+
+Example: https://github.com/okwolf/srvs.git
+
+---

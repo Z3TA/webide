@@ -1,0 +1,172 @@
+This file contains a list of things that should be optimized...
+
+
+Optimization
+============
+
+A battery saving mode!? (turn off parser?)
+Monitor CPU usage while using the editor to see if there is anything we can optimize to save battery
+
+
+Waiting until connected before showing welcome and login dialog gives a low score on Google pagespeed,
+so should probably load the dialog right away (then hide it after auto-login or whatever !?)
+
+---
+
+Don't load window menu or discovery bar until logged in in order to get a higher Lighthouse audit...
+
+---
+
+Text selection lags when selecting over a very long line
+
+---
+When running on a bare server (no GUI) when installed via npm -ig jzedit, 
+when running jzedit foo.txt,
+auto detect "no gui" and don't try running the client, 
+instead auto generate a password (or -pw to make the command prompt ask for a pw)
+When SSH:ed into a server, npm install -g jzedit, jzedit foo.txt ... Jzedit listening on foo.bar:8080 using username admin and password [generated]
+---
+
+Test server response time:
+CLIENT.cmd("ping", {time: new Date().getTime()}, (err, json) => console.log( ((new Date()).getTime() - json.ping ) + "ms") );
+
+The terminal have issues when it gets a lot of data. Try for example playing snake in the terminal: snake-cli
+
+Goto file (CTRL + O) sometimes freeze the editor. 
+It also takes several seconds to open a file From "goto file" in Windows. 
+But it's fast when for example opening from file explorer. So it's probably "goto file" cleanup that is blocking.
+
+Spellchecking while having many files open takes a shit-load of resources! And keeps the server busy so you can not save!
+
+Optimize creation of guest/new user! And login time/mounts check
+
+idea: performance regression tests:
+Check out each commit and run a bunch on stuff, like edit small and big files.
+Nuke console.log and save all results of console.time
+
+Double-clicking on a word in a large file is slow !! Try double clicking on EDITOR in EDITOR.js
+
+Check js_parser for performance regressions to figure out how to optimize, did anything added slow it down ?
+Make a tool to automatically perf test each revision of js_parser. Turn it into a nodejs module, parse a file from nodejs.
+
+add a perf mode, that don't run console log's but do run console.time!
+
+idea: wait until 800ms since last input before running parsers etc. And concatenate changes, for example text input. But do show the text on the screen!
+
+
+Opening and closing [] brackets is slow in large files. Even though dev mode is off!
+
+Double click to highlight a word in a large file is slow ...
+
+js parser needs more optimizations!
+parseJavaScript: 118.947021484375ms (full file: interface.js)
+
+reopen_files.js Don't auto-save state if something was changed within 3 seconds !? (would save memory ?)
+
+Firefox have some nasty performance issues ... paint 9ms keyisdown 12ms
+add console.time("keyIsDown")
+use animationframe instead of setinterval for render? setInterval, even though only 0.02ms to run seem to have some overhead cost!??
+
+Investigation why it's crazy slow in Firefox:
+It's fine (avg 57 fps) in Firefox on Windows when devMode is set to false (no console.log's) but 0 fps when devMode is set to true!
+The performance is also OK (avg 52 FPS) in Firefox on Linux, with a small file, and devMode set to false.
+
+
+Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
+
+editor.eventListeners.exit.push({fun: function closeOpenConnections() {
+for(var conn in editor.connections) {
+if(editor.connections[conn].close) editor.connections[conn].close();
+}
+return true;
+}});
+
+
+variableName and llWord in js_parser.js can sometimes hold large textes (check editor.js) witch might slow down parsing
+
+Double clicking on a common word in a large files (grid in File.js) takes a lot of time to highlight the words
+
+Long lines takes super long to render because of colorization.
+
+
+Typing in editor.js is really slow because of the JS parser. Only parse if special characters are entered!? Optimize the parser function.
+
+applyJScolors slow on long lines, ex: sockjs one liner
+
+Optimize file.insertText, when inserting at EOF. sugg: file.addToGrid(text)
+
+
+Note about trying to render before doing something:
+- It will not be visible on the screen until the main thread is idle.
+
+Note about optimizing for faster screen updates: 
+- VSync is usually 60 Hz, so the crunshing need to be faster then 16ms or we will miss this time-window and the editor will appear sluggish.
+
+
+Inserting a { took a very long time in a large file, probably because of fixIndentation.js 
+
+Copying the content of editor.js into another file was sloow!
+
+The most common editor benchmark: Open huge files.
+Do not open files that are too large for the editor to handle. 
+Or open part of file!?
+"The file is too large to handle. But we can open parts of it. Type a nr between X and Y:"
+
+parseJavaScript: 27.613ms on 65k file
+
+optemize it!
+
+try inlining all functions, and move to separate worker.
+
+
+
+Running the spellchcker will throttle the CPU at maximum for up to 30s or more!
+
+Deleting selected text is Sloooow.
+
+Editor became un-responsible when searching for: smoothing
+
+It lags while moving the character (arrows) in a large file.
+
+Deleting a selection is slow!!
+
+Inline functions in jsParser.js (make a better document previewer before that!? *smile*)
+
+Wait some times before starting a parse. (dont have to parse while we're typing, most of the time). 
+
+Do the grid boxes really have to know their character index!?
+
+Test a huuuge .js file with many functions to see how the editor performs.
+
+Typing is slow, especially in full screen.
+
+Rendering is slow when there are many misspelled words.
+
+Render only the row when typing along ...
+
+Go to Power Options -> Create a power plan -> Change advanced power settings and set CPU Maximum Rate to 5% or how much you need.
+
+Hide lag by rendering before doing work.
+
+editor.renderPart(row, col, length); // Render part of the grid 
+
+Can we get rid of the file.text and only use the grid!? Only convert the grid to text when saving. 
+
+Try the editor on a super slow PC to see what needs further optimization.
+
+createBuffer in render takes a very long time > 500 ms on files with very long lines. 
+
+
+Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in C:\Users\Z\dev-repositories\test\JZedit-tests\parser
+
+Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
+
+Run for loops in parallel: 
+#pragma omp parallel
+#pragma omp for
+
+
+Battery benchmark optimization. Detect if the computer is running on battery and make stuff more energy efficient (disable resource hungry features)
+
+optimize mouse select to not listen if not started selecting (or scrolling)
+

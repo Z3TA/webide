@@ -1,0 +1,16 @@
+This file contains a list of things about security that needs attention...
+
+
+Security
+========
+
+Encrypt/decrypt .jzeditStorage using the login password !?
+Hold the content in memory, encrypt on write.
+
+
+
+Make server run under apparmor profile ...
+
+
+
+

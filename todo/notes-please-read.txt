@@ -1,0 +1,72 @@
+
+WRITE TESTS FOR EACH BUG YOU FIX!! 
+AND REGRESSION TESTS FOR ALL NEW FEATURES!
+
+Commit messages should explain WHY you did the change, we can already see what you did
+by looking at the diff. We want to know WHY you did it.
+
+
+Note to myself
+--------------
+
+Solve problems and pains! Do not look for problems that fit a solution!
+
+Before you start working on something new, first describe the problem, 
+(and do a quick research to find out if a solutions already exist.)
+
+
+Never trust the SCM. Always make backups!! (file lost due to I forgot to run hg add, couldn't recover from a hg up, etc)
+
+When using source control NEVER switch to an earlier revision on working folder. 
+hg will merge things in and screw up so you can not get back to tip! All your work might get lost!
+Instead copy the whole project root folder elsewhere and run the "hg up" command there.
+
+Always make a ZFS snapshot before running apt upgrade!!!
+on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+
+
+Meego browser silently exit any function that tries to access a member on a undefined object!
+
+Android browser will not run the script if it contains a default keyword such as foo.default or foo.with
+
+Firefox dev tools sometimes hide console log messages!!
+
+
+
+About design: We had a VHS video that for some reason was black and white, I don't know if it was the cassette, cable or the video player that was making the video black and white,
+I had tried everything. Then one day suddenly the video had color! This was my sons favorite video, but now that it had color HE HATED IT!
+The video was displayed as origionally intendens, it had been improved with colors. But by son felt the colors was now wrong and the movie was thus ruined.
+
+The user might have a picture in their head how they want the program to look and behave, if possibe, we should make it possible for the user to tweak the 
+program so that it looks like the picture in their head!?
+
+
+
+Always set callback=null after calling back!!! to prevent double callback 
+and so that we also get an error when actually calling it twice, with a nice call stack that will help debug the error.
+
+When developing developer tools, 1/3 of your time should be spent educating users how to use it, and 1/3 of your time should be spent on marketing/hyping.
+
+Always follow happy path when demoing! Unless you want to find new bugs and issues...
+
+
+
+Know issues that can't or wont be fixed
+---------------------------------------
+Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press to many keys at once (so not an editor issue)
+
+
+Happy path
+----------
+Happy path: (manually check on prod after each release)
+1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
+2. WYSIWYG edit said page
+3. Publish changes
+
+
+Development Plan
+----------------
+Step 1: Move development to the cloud, fix pain points
+Step 2: Use a Chromebook to develop, fix pain points, 
+Step 3: Use device X, fix pain points

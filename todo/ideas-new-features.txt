@@ -1,0 +1,710 @@
+This file contains a list of ideas...
+
+
+Feature
+=======
+
+Bugs have higher prio! Fix bugs and issues before implementing new features! bugs.txt should be empty before doing any of these...
+
+
+When implementing a new feature
+-------------------------------
+Ask yourself, what is problem you want to solve?
+Priotize the feature list to make sure you are implementing the most critical feature.
+Design it in your head
+If possible, make it as an independent plugin (should only depend on editor.js, File.js and UTIL.js. It should not depend on other plugins)
+Write a prototype
+Put it behind a feature flag, so that it will not load by default
+If you discover any bugs or issues elsewhere, sorry, bugs and issues has higher prio then new features!
+Iterate on the feature
+Refactor the whole program if needed to make the fature work great
+Run the tests
+Iterate on the feature
+Write tests that confirms that the feautre works
+Run the tests
+Make mock tools and new testing tools if needed
+Run the tests
+Refactor the entire program if needed to allow testing
+Run the tests
+If there's a bug, see "When discovering a bug"
+Run the tests
+Polish the feature
+Measure performance
+Optimize if needed
+
+
+Feature list (Not ordered/prioritized)
+--------------------------------------
+
+Update the URL for public repos,
+so that if you copy the URL someone else can access that file!
+eg. clone=repo&openFile=path&row=X
+
+---
+
+Idea: A REPL (Ctrl +R) ? The you can use to evaluate from the current scope.
+For example
+function add(a, b) { return a + b; }
+Then you open the REPL and type add(1,2) It shows 3 (the return value)
+Or every time you write ? it evaluates whatever left of the ? !?
+
+---
+
+Able to sort a list of strings alphabetically,
+also able to store functions in a file alphabetically !? Right clicking on the function list -> "reorder functions alphabetically"
+
+---
+
+Drag an drop selected text.
+When text is selected, you can hold down left mouse button, then release it where you want the text to be moved
+
+(Standalone?) service: SMS-push: Get SMS messages sent to your API,
+or get SMS messages sent to nr be stored in /sms/(one file for each from-nr.json)
+
+Same but with e-mail, e-mails to user@webide.se or user@domain.se get stored in /email/message-id
+Or sent via HTTP POST to specified URL.
+
+---
+
+Tutorial mode inspired by scrimba.com
+Lets you record while you type,
+then when someone plays back, the code is re-written in collaboration mode,
+so that you can write at the same time while listening to the instructions!!
+
+Should also be possible to pause, go back and retake,
+
+
+---
+
+
+When pressing Ctrl+W it word wraps the code block, until matching }])
+
+markdown live preview
+
+---
+
+easy way to merge in changes
+made directly on ftp for a SSG
+site, eg. when someone have
+not used the SSG to make the change.
+
+---
+User option: First time opening the editor.
+Hi! Feedback from first time users are very valuable, you can help out by selecting "User testing" in the menu!
+
+User testing: Do you want all interactions with the editor to be recorded ?
+---
+
+Command discovery: When holding down Ctrl or Alt, you see all available commands, for example Ctrl+Om Ctrl+Shit+O etc with a description !?
+
+If you get a EACCESS error when saving a file, try sudo cp, ... like in Sublime Text
+
+---
+
+When pressing Ctrl+W it word wraps the code block, until matching }])
+
+---
+
+Auto parenthese spacing:
+(when adding a space next to a parenthese - also make sure the matching parenthese have the same amount of space)!
+example: ( (  (   |   )  ) )
+removing a space should also remove the space on the matching parenthese's side and vice versa.
+
+----
+Build a bug/issue tracker plugin !?
+Users can submit bugs and issues !? No, not via the editor
+Sent to and stored where ? project_issues.json !?
+
+Search field:   Summary how many of each type, manual edit (open the json file in the editor)
+Issue list, top-10
+(+1 +10 -1 -7 button) on each to change prio
+short description from text
+tag: list of buttons, other: type in other
+assigned to: select box which lets you reassign
+
+source:
+
+[
+{id: hash of create-date and user name, tags: ["bug", "polish", "unrepeatable"], "text", prio: 0, addedBy: "name", assignedTo: "name", addedDate: date, updatedDate: date}
+]
+source can also be edited manually, have a watcher that detects changes
+issue-hashid.txt
+issue are either updated or added when saving
+if added, ask for category: "What kind of issue is this ?" [... known issues, other] other: input box
+----
+
+
+Built in functionality for folding and adding extra rows that are not part of the file buffer.
+So that you can have nicer diffs
+
+---
+Inline assertion and code coverage.
+ex:
+// assert(plus(1,2), 3)
+eval's the plus(1,2) function and if it returns 3 an "OK" or check mark sign is shown after the comment:
+// assert(plus(1,2), 3) ✓
+Appends console.log(__line) after each LOC to get code coveregate, then high-lights line's that are not covered by the assertions.
+---
+
+Mercurial File history. Like log but shows all versions of a file. And lets you load/open them.
+(blog about how to implement)
+
+A code that you can run in the browsers dev tools console, that replaces a text area with the editor.
+
+irc chat, each channel is a file
+
+Idea from Emacs:
+	Ctrl + K = Kill, kills in context, eg kill inside a paranthesis removes all text from the cursor to the end of the paranthesis
+
+Able to move/copy files and folders between different servers (different connected sft servers)
+Some nice GUI with drag and drop support.
+
+Preview markdown files (preview in menu)
+
+---
+Able to edit a file with sudo. eg sudo jzedit /etc/somefile
+runs a script that tries to located a jzedit server, and if the same user (as system user) is logged in, 
+the server sends the file to the editor client.
+And when the file is saved, the sudo script recives the file and saves it.
+And finally when the file is closed, the sudo script exits.
+---
+
+Authenitcation:
+Support SAML 2.0 Federation at a minimum but OAuth 2.0 or OpenID Connect 1.0 preferably. Also supporting SCIM provisioning would be a plus
+SAML 2.0 is a bit of a beast to deal with but it's one of the most used SSO protocols in the Enterprise although it's slowly dying for new OAuth based protocols.
+
+User management. User roles and directories. Able to specify which URL's (web directories) can be accessed by which users/roles.
+Assign users to roles. Add and modify users. Automatically create .htaccess files and manage Nginx configs.
+
+A separate window for HTML widgets and control. 
+VB-like drag and drop headers et.al elements into either the code-area or WYSIWYG area.
+
+Opening images (png, jpg) shows the rendered image with img tools (crop and thumbnail frame)
+
+Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
+
+Ctrl + Hover ? Click on a function, show that function declaration
+
+Possible to make a backup of a folder. Copy folder or make a zip file.
+
+---
+When you change left side of tag/element. Auto change the right side/closing tag. 
+Eg when you change a <h2> to a <h3> auto change the closing </h2> to </h3>
+(Only when you hit tab/auto-complete !?)
+---
+
+When in WYSIWYG mode you can drag elements like buttons and input to the WYSIWYG. Like in VisualBasic.
+When you double click on the element, you get to the code that handles the onclick event. (like in vb)
+
+When opening images png, jpg, show image viewer, with ability to create thumbnails.
+
+When reading a log file ... Have editor api for following a file, like in tail -f
+
+
+Multiple cursors (like in sublime) Ctrl+D to create another cursor.
+Shift+Ctrl+l = 
+
+Test runner feedback. See the test results when you hit save.
+
+---
+"help" widget.
+textarea: Need help? Type here ...
+<send> <invite ...> <hide> (you can hide/show the chat using ctrl+?)
+
+invite: Type the name of the user you want to invite to your session, or give them this address: 
+
+Jon Doe want to enter you session.
+
+Read only, Write access, Decline
+
+All users on the server will see the chat!? Or only admins !?
+Or only those invited to the session !?
+---
+
+Dashboard:
+Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
+ssg: List documents, and how many visitors that thave viewed them
+Fast buttons for edit a document, create a new document/post in SSG.
+button: create new web site
+
+dashboard - show different projects, time spent, total users, traffic, revenue
+
+examples to choose from. 
+
+Start new project
+
+Publish app button
+Able to buy domain name or use existing one.
+
+CSS "function" list
+
+---
+Make each production-folder a zfs filesystem
+Take a snapshot when doploying
+Make it possible to rollback to an earlier deployemnt
+---
+
+SSH into another server and run shell commands.
+
+Ask for sudo password if we get EACCES error !? Then sudo echo "file content" > nameoffile.txt
+
+---
+
+Drag and drop folder to upload files
+
+---
+
+Update script that check https://www.webtigerteam.com/editor/download/linux/latest/version.inc and ask the user to update:
+The scripts syncs then checks hashtable.txt and compares to the local hashtable.txt and downloads all files that changed,
+then ask the user to restart the editor. (the client reloads)
+Also have some sort of fingerprint/signature to prevent MiTM attacks.
+The update should be done on server side /server.js
+
+---
+
+Static analysis, find undefined property! Example:
+
+function foo() {
+"use strict"
+
+let bar = {};
+bar.a = 1;
+bar.b = 2;
+console.log(bar.c);
+bar.c = 3;
+
+}
+
+foo();
+
+Have the parser find all referenced variables and objects (bar, bar.a, bar.b, bar.c) in the scope, plus all variable and property assignments (plus line number).
+Then have a plugin that find the scope in view, then check if any property or varable is referenced before assigned.
+
+---
+
+WebRTC video/voice while in colaboration mode.
+
+For caloboration to work we need a better undo/redo that mirrors all actions. ex: insert a letter (mirror) deleting a letter
+https://en.wikipedia.org/wiki/Operational_transformation
+
+Keybinding configuration, keybinding file, presets with Sublime, Vim, Emacs, gives you a list of key-bindings and let you rebind the keys.
+Keybindings: [select box] [update button] [edit button]
+
+Web widget to Suggest change on a web page, for example contact update or correction of spelling mistake. Kinda like a "Wiki".
+The change get submitted like a "pull request". Where the webmaster see a diff, with the option to merge it in.
+
+A bug, feautre and security tracker where you can post bugs etc and vote.
+Each user got one 100 points vote, five 10 point votes and ten 1 point votes. And can only vote one time on each bug/feature.
+The features etc are then ordered (and pritoized?) depending on the points.
+Paying users get a bunch more 100 point and 10 point votes.
+
+Idea: Group tabs into "projects", when you are in a project, all files opened will belong to that project. 
+If you switch project, it shows the files belonging to that project.
+
+When in debugger, animate "hot" functions with a text-fire effects. Only the "function" in function foo() { not the body }
+
+When in debugger/static analyser,Show dead code in a special color.
+
+Show variables not declared locally (in the function) with a different color. (scope colors). 
+The further away the scope is, the "brighter" the color is, so that it stands out.
+If the variable is declared in the parent of a subfunction, it just has slightly different color, but if it's for example from the global scope it stands out.
+
+Make it possible to include the editor in web pages. Replacing for example code-view divs and textareas. When having code examples on web pages.
+idea: Use the editor on web pages, instead of a code high-lighter
+
+Able to run shell commands on the ssh server you are connected to
+
+Run node script: F3? ... see console logs in the editor ... debugging!
+run isolated ... linux namespaces / containers ?
+
+In plenty editors, doing left-alt (left option) and selecting text will take a slice of that text:
+Notice that only characters are selected, empty lines are ignored. Also, after selecting with left-alt, there should be multi-cursors at the end of each selection:
+https://github.com/atom/atom/issues/2306
+
+
+Show invisible characters when selecting text ?
+
+Select the code block when tripple clicking ?
+
+Static site generator: Make it possible to shedule publishing posts in the future using the <meta name="created" content="2016-03-22"> meta tag.
+
+
+Mercurial SCM integration!
+Add file.hg.modified, etc to File object. Show hg status in file tabs and file explorer. Merge tool!
+
+Vim Style Key binding
+
+<img| auto completion, selects and image, and puts that in src, plus it's with and height attributes.
+
+Ctrl + Click on a CSS class to go to the defenition (inside the CSS file, to the correct line)
+Ctrl + Click on a function call to go to the definition ...
+Ctrl + Click on a function to see everywhere it's used, ex: for chaning position of arguments
+
+"Write any command" plugin that lets you pick any plugin/keycombo (from droplist) when you type in for example "find" shows "find in files", "etc"
+
+Try the editor on OSX.
+Compile nodehun for osx
+
+Auto complete ---- or === for ascii underlined headings
+
+PHP scripting with the static site generator: <?php ...php code here... ?>
+
+A communication channel, where a "wrapper" can tell the editor to open a file ... 
+In some programs you can define a editor for editing files. Git for example. Make it possible to use jzedit for that!
+See jzedit file
+
+"timelog": Puts whatever is on the same line as the cursor into a time log.
+dagbok. kan användas för fakturering, time management mm.
+
+Open a console/command-line/shell/ (remote or local) in a new tab (kinda lika a file) and send commands by entering text at EOF (Ctrl+J)
+
+When running a program and it crashes, auto goto that line (get file/line from the stack trace)
+When running a program, profile it (trace dumps) and use the logs in the editor to show relations, hot code, types, etc
+
+Hold down key to temporary see things (terminal based editors cant do that)
+
+Remotely run programs (ex sudo apt-get update, chmod 775 somefile.txt chown Z:adm folder/ -R, nodejs myscript.js) get output in the editor.
+
+Pipe to the editor and stream the text.
+
+Samba support, load files etc from samba shares: https://www.npmjs.com/package/smb2
+
+proper touchscreen support. So I can drag my code around.
+
+Gamification/Animations: Animate for example parenthesis/bracket highlightning so they are easier to see and looks cooler.
+
+Web app hot code reloading ... 
+problem: when you are debugging something you have to repeat stuff to get into the same state as the bug, you want to go back one step in state, then replay the next step to se if the bug got fixed
+solution: retry using the same state, use setScriptSource in chromium debugger to hot swap functions
+
+Smooth scrolling, like in the browser, animated scrolling.
+
+Letter annimation and (happy) popping sound when you type, double kill, megakill etc bonus when you write a lot in one go
+
+real-time collaboration 
+
+Class auto completion in HTML documents. Get the class list from the CSS files.
+
+Version control manager: select: git|mercurila (auto detect)
+this file: commit msg: Commit, push, pull (special color), Move, Add/remove, select: branch, merge updates from branch  
+title tags for explanations
+* Built in colaboration tool (git/mercurial). Everytime you save, it checks if a .hg or .git folder exists, then prompts for a commit, with "commit" and "commit and push" button
+* Auto pull often, check for uncommited changes.
+* Make tool to handle merge conflic
+
+
+HTML helper, shadowing in attributes. ex: <form ... show: action, method
+<wanderman> is there any plugin for atom that ,help learning html ? like poping up usage of attributes of elements
+
+Cancel or resume subscription from within the editor
+
+Git integration: stage for commit, commit, push 
+
+When pasting in a if or for statement without matching curly-brackets, insert the missing bracket if the global matched brackets is ok.
+
+Reopen/refresh file from disk.
+
+Mercurial integration: Mark lines that have changed since last commit (green bar in the left margin!?)
+
+
+Reopen last closed file (from this session)
+
+Show red circles where the parser detects a syntax error!? Like unfinished quote or regexp
+
+how a fat red circle around variables that are not defined anywhere!?
+
+shift button to move without moving the cursor.
+
+
+Nightmode/eye rest. High contrast makes the eys work hard! Make a "night mode" for those long coding nights.
+
+Feature to go to the creation/defenition a the function you are calling, then a shortcut to go back to where you was, even if it was in another file!
+
+When copying in something like "editor.addMenuItem("Copy file path", function copyFilePath() {" the editor should also add }); if there is a global {} missmatch.
+
+
+Quickly reload a single file from disk.
+
+Mercurial plugin. Automatic remote repository creation. 
+How to init an already existing repo with a emty remote repo
+cd to/dir
+hg init
+hg add **
+hg ci -m "first commit"
+echo [paths] > .hg/hgrc
+echo default = http://webtigerteam.com/repo/foo1 >> .hg/hgrc
+hg push
+
+File-watcher: After tabbing between the program and other program, check if the files have changed, using hash?
+
+Parser for nginx config files.
+
+Support for: http://editorconfig.org
+
+Show another part of the file so you can copy back and forth, without navigating.
+
+Button (F5) to execute the current script in NodeJS and show the output
+
+Argyment helper/autocompleter for callback function. foo(function(what, arguments) {...}); // Who is an async function
+
+Plugin for exacuting shell commands (both on local and remote/ssh) and get the result from stdout to a file
+
+A scrollbar, for quick indication of how large a file is, and for faster scrolling.
+
+A scrollbar! With text in it, but still thin.
+
+Mark unused variables!
+
+bash .sh file support/parser
+
+Edit files over ssh
+
+tutorial.txt: Learn how to use it
+
+Smooth scrolling. Show text while scrolling
+
+* Replace in file (using regex)
+
+The JavaScript parser should be able to handle <script>code</script> snippets from other language parsers
+
+* PHP parser !
+
+* Built in FTP/SFTP/SSH !
+
+* bash script parser !
+
+Show a vertical ruler if we are typing a too long line.
+
+Instead of word map. Make a plugin that when clicking Ctrl + W word wraps a paragraph.
+
+auto paste in snippets from stack exchange, Ctrl+H, write question, select result, paste the code from the most popular answer. 
+
+vi keybindings
+
+column selection
+
+File cloning/file views: Have the same file open in two tabs, but with different file positions, caret, selections and highlights
+
+Go to defenition: Ctrl click on a function name to cline the file in another tab and scroll down to that function.
+
+
+JavaScript: Warn when a new line starts with with (, [, /, +, ++, or -- 
+
+Open file on SSH!
+
+Profile idea: The editor will come with everyones profile: keyBindings, plugins, theme
+It should be easy to quickly get your own custom settings when installing the program on a new machine.
+Maybe give each user their own mercurial repository!?
+
+---
+
+Multiple cursors! Ctrl+Shift + up/down, or Ctrl+Shift + mouse click creates another cursors. 
+Useful when you want to format stuff that look the same, ex. if you want to make many var's into one long line var
+var foo=1, ... place bar and baz here
+var bar = 2;
+var baz = 3;
+
+Ctrl-F <search query> SelectAll <edit with multiple cursors>
+
+Select a multiple lines of an object/hash/dict, break into multiple cursors, rewrite line (copying and pasting as needed, it works that out as well) to change to variable declarations, or to add a comma, or to... whatever.
+
+---
+
+Undo/redo for caret/scrolling. shift+backspace: Go back to where we where before
+Ctrl+G when caret on a function name, goes to that function. Go to function declaration.
+
+Split/gline veiw, so you can edito the same file, but on different positions. Handy when you want to lookup stuff in the same file.
+
+Integrate mysql Query browser as a plugin
+
+
+Display white space characters (space and tabs) at start of a line and at end of line. (unless it's a comment)
+render function: start from end, then break at first char.
+
+Uncaught SyntaxError: Unexpected token )
+Find unmatched parentheses !!
+
+
+After tabbing back to the editor from another program. Check each file if it has changed from last saved state.
+Silently create a backup?
+When you save a file, and the file on disk doesn't match last saved state. Create a backup of the file on disk before overwriting.
+Then open the other file and make a diff.
+Hitting F5 = Reload all files from disk.
+
+
+Ctrl+T -> Choose between templates : blogpost.htm, websocketwebclient.js, nodewebsockserver.js, emptyhtml.htm
+
+A merge resolver. Show a diff. Then hit left arrow to select line from A, 
+or right arrow to select line from B. Or shift + arrow to insert a NEW line witch the content from A or B.
+And Delete by hitting delete.
+
+
+A self debugger that runs in the background and auto sends bug reports if there is any error.
+A timer on the web page: Time since last bug.
+
+Show help for standard JS methods like: text.substring( show: start, end
+
+Drop file into editor!!
+
+Give a warning when doing this: options.push[something]; when "options" in an array (should be .push() a method)
+
+optioin (menu option) to Add misspelled words to dictionary overload.
+
+More help with huge {} block nesting, detect problems, show warnings triangles!?
+
+Auto insert */ when typing /* in JS mode.
+
+A key to move something to the right *over* existing code. ex: place A|B xxxxxxxxx B <--- here
+
+A faster way to open files: Ctrl + G, goto line or file:line (insipration: Chrome debugger)
+
+When there is no file open, show a list of file? or a text: <p>Press <b>Ctrl + O</b> to open a file</p>
+
+Increase text size by Ctrl + Scroll wheel. (for presentation mode)
+
+Mark unused variables (and properties)
+
+Better search in file. Look at notepad++ for inspiration.
+
+Dumb autocompletion: Auto-complete words that we have already typed.
+
+Cltr + P: Type somthing to open any file (like in debug tools)
+
+When one or more lines are selected while pressing tab, make it a code block, insert { arount it } and place the caret to the left of the first one
+
+Keybinding-override: A GUI for over-riding all keybindings, lets you edit the key's for all functions in global.keyBindings
+
+ASCII-text module for writing LARGE text for the previewer
+http://patorjk.com/software/taag/#p=display&f=Sweet&t=I'm%20cool
+http://www.network-science.de/ascii/
+
+Open files dropped into the editor!!!
+
+Debugger integration! No more console.log debugging!
+When in dev-mode, you can just place a break-point and the program will stop there and you can see all the variable values, like in the debugger.
+
+When hitting F5 and the file starts with "#!/usr/bin/env node".
+Run node with debugger and when there is an error, go to that line and display the error message!
+If there is no error, open a new file with the stdout.
+
+Broadcast to local network that you are working on a spcific file. If someone else have the same file open, you can colaborate, and you get each others changes.
+You can also open up another copy of the editor locally (for split screen) and make changes to the same document. (how to do Ctrl+Z ?)
+
+
+cmsjz live preview!
+
+Make a better document preview ...
+
+Being able to split the same file into two views so you can look at two parts of the same file at once.
+
+Key binding for: put the selected text in clipboard and put the cliboard instead of the selected text.
+
+Drop files into the editor to open them.
+
+Different themses during day/night (sun up/down). Black on white is best when the room is light, but if the room is dark, a black background also works!
+Light bounce off light colors, that's why you can't have light text when it's light, or the text will seem blurry.
+Light also makes the eye focus more. And contrast will atttract most focus.
+
+Gameification, skinners box, highscore, get more points the more time you spend in the editor. Achemenets (for duing unusual stuff) and rewards (thropfies!?)
+
+When caret is next to {, make everything orange down to matching }
+
+When selecting several rows and hitting tab, make it a block by inserting { selection }
+
+
+FTP/SSH module!!
+
+Fullscreen mode.
+
+Auto insert } outside of strings or regexp when typing {. And only if there is an un-match.
+Auto insert matching } at the Right place! For example when encapsulating code in an if-statement.
+
+Ctrl + D to declare a variable, add it to first var declaration above!?
+Color undeclared (global) variables in an evil color.
+
+When the cursor is on a } show a split screen with the matching {
+
+A key to toggle scope-coloring.
+
+Drag and drop files into the editor.
+
+Bootstrap: nw.js project, web-page, etc. Create all the kakakaka
+
+Check for .editorconfig and set default indent_size, etc: http://EditorConfig.org
+
+Replace in function
+
+Tool to create text bitmap, so that font looks the same in all OS's. Problem: Background colors! Might have to redo the text renderer!
+
+test bitmap fonts to see if it's faster: Result: its 3 times faster without bitmaps.
+
+Smooth scrolling. Make it easier to read text while scrolling.
+
+When ctrl+z, move the caret to before the text being removed. For every action, create an undo-action.
+
+plugin idea: Translate code comments from one language to another. (as a preRender, do not change source)
+
+Printing text (on printer)
+
+Sort paragraphs by column. Ctrl + 1-9, auto detect date
+
+Code drag and drop, drag and drop selected text.
+
+When renaming a html tag, also rename the sibmling. <pre|<--renaming> lalala </pre><-- also rename this
+
+Support screen readers. It should be possible to use the editor with eyes closed.
+
+Spellcheck single word. For when the spell-checker is disabled.
+
+Peek definition. when you want to peek a few lines of a method or type
+
+auto-completes based on other words in open windows (or other files in the open project).
+
+Self hosted cloud editor. Work in the browser.
+
+Built in SQL query, with GUI for editing tables
+
+SQL auto completion: SELECT foo FROM table WHERE bar = ? (lookup mysql schema)
+
+modal editing, like in VIM
+
+Integrated testing and code coverage tools. See which lines that wasn't executed by the tests.
+
+---
+
+idea: A way to explore members of an object, 
+for example, you want to use something in UTIL, but doesn't remember the name,
+when you type UTIL.foo the auto completer, unless it finds a perfect match, should also show members that has foo in it,
+not just the ones that start with foo. !?
+
+---
+
+Idea, when accessing a member in an object, you get a warning if that member has not been declared.
+
+---
+
+
+Need though
+-----------
+
+Tooling for managers to measure productivity. (Only problem productivity can't  be measured simply from LOC, commits, tickets, etc)
+Could however use self-assesments like "How productive do you feel today ? " "What makes you more productive?" "What makes you less productive?"
+
+
+hmm ... Should all files be opened as streams!? ReadableStream 
+
+Give string variables and number variables different colors ? green (like "string") for string variables and blue for numbers.
+
+Put a weight ? on variables depending on scope? Like larger size for each level down in the scope.
+
+Switch SCM from Mercurial to Git because hg lost file changes!?
+
+Moving back to browser for a while, just to fix compatiblity issues. Then move back to nw.js. To make sure it works in the browser too.
+http-server .
+Spellchecker can be run as a service.
+
+
+About trying other runtimes, like native rendering. We should stick with "browser" because getting something to render natively, like openGL is too damn complicated.
+
+How should updating work!? Stable branch=double work!?
+

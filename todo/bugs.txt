@@ -1,0 +1,1068 @@
+This file contains a list of bugs that should be fixed...
+
+
+
+
+When discovering a bug
+----------------------
+Write down what you are working on ... because we are going to enter several levels of bugception and you will totally have forgotten what you worked on when you investigate the bug of the bug of the bug of the bug
+Find out how to repeat the bug
+Write bug traps, like if(f>99) throw new Error("Found bug X, state=" + state)
+Write down how to manually repeat it, make example files, file bug report
+You will most likely find additional bugs while doing this. Write them down too!
+Priotize for witch one of the bugs to fix.
+Write a test case before fixing it (Write code that automaticly repeats the bug) ... And document in the test file /tests/mybug.js about the bug or why the test is needed
+Write mock tools (editor.mock) if needed
+Run the test (and make sure it fails)
+Refactor the entire program if needed to allow testing
+Run the test
+Refactor the entire program if needed to fix the bug
+Run the tests 
+Fix the bug (like five years later after fixing all isses that comes up just for fixing this tiny bug <g>)
+Run the tests (and make sure there are no errors)
+
+
+When you break something
+------------------------
+Make a test case that checks if the thing you broke is working or not
+Write mock tools if needed
+Make sure the test case fails
+Fix what's broken
+Make sure the test case succeeds
+Run all tests! (to make sure you did not break anything else)
+
+
+
+BUGS (and issues)
+=================
+
+When zooming on Macbook, the font is really big and rows overlap
+
+
+---
+unable to get pixel color when clicking on an image on Chromebook.
+Due to screen res ratio!? coordinates off!? Or because the image is too big to fit!?
+It zooms when you try to drag the image to change it's position on the screen when using touchpad on Mabook
+---
+
+
+when renaming a folder 
+Uncaught Error: folder=/ssg_blog_example/source/historier is not a directory! 
+
+---÷
+
+Autocompleting in EDITOR.js line 3667 on a DOM node element hangs the editor for a ling time, then gives an error:
+jzedit/client/plugin/javascript/autocomplete.js:1241
+Uncaught TypeError: Cannot read property 'domElement' of undefined
+
+---
+
+bug: Old accounts are nuked, can't run hg clone! 
+hg clone ssh://hg@hg.sr.ht/~jz/survey-example --debug
+abort: Exec format error
+but it works on new accounts
+
+bug: Editor sometimes scrolls down while embedded.
+And sometimes it doesn't resize after hiding a widget, for example save-as. (it does resize most of the time, but once in a while it does not)
+
+issue: node.classList.a| can't autocomplete add(), remote, etc
+
+bug: The end line of function in the function list doesn't seem to update when you write code within a function!
+
+autocomplete: can't find insideRegExp variable in js_parser.js
+
+issue: Sometimes unable to find files when using open file ...
+I search for a file I know exist, but can't find it using regexp, need to search name verbatim,
+example: top_right_menu_button couln't be found using .*menu.*
+
+Bug in start.js, when restarting, it wont start the server!
+
+Sometimes when opening a file (goto file) it keeps searching the hdd, even though you have opened the file.
+
+Can't rename a folder on SFTP! (test uncommented in tests/server.js)
+
+When previewing a static web site, and reloading the css, then changing the body, the page is refreshed without *any* css!
+When previewing a static web site, and .css file is a seperate file, the css is not updated upon save!
+
+Hangs when uploading big zip file.
+
+When I scroll on a web page, then switch to the editor and scroll, it scrolls too much.
+
+bug: Cant open folders that have space in them in file explorer (probably don't work in the rest of the editor either)
+
+When editing the white space is not touches, eg indentation, only where you make changes.
+But sometimes the { and } doesn't get the correct indentation in the source code!
+
+When reloading while in collaboration mode and then editing I sometimes get errors like:
+Uncaught Error: Events for order=246 already exist for file=C:\Users\zetaf\projects\jzedit\todo.md
+
+Sometimes when hitting backspace in Firefox on Windows you trigger browser.back which is highly annoying!
+
+Can't open the editor while offline!! Damn you service worker!
+
+A Mercurial diff can be so large that it freezes the editor!
+
+Issues when starting a nodejs script in collab mode, the log file gets overwritten. (set file.changeEvents=false)
+
+x to close a tab is too far down when screen is small in Firefox!
+
+issue: file.isStreaming usage
+
+bug: Nuked the editor by accidentally pasting 50k LOC into the search box in the find/replace widget
+
+Parameter hints and autocomplete in nested functions. Example: foo(par1, bar(something, ))
+
+Issue when editing a SVG file. Colors where off. After reloading from disk, there where spaces inserted in the middle of tags.
+Then when switching to a txt the txt file got a huge left margin.
+It happens when you make a comment <!-- --> in the svg file.
+Alls happens when just doing normal edting.
+Indentation characters get screwed up.
+
+---
+Function get the name bar while it should be an anonymous function:
+
+foo({bar: 1}).then(() => {
+	// This should be an anonymous function
+});
+
+---
+
+Issues opening folder ini files on Windows which contains a bunch of weird characters
+
+When Ctro+O to open a file and pressing Enter doesn't work and clicking on the path gives:
+/home/Z/Projects/jzedit/client/plugin/goto_file.js:586
+Uncaught Error: path=null
+
+When scrolling up in a big file: Uncaught Error: y=-3 < 0
+
+Single equal sign in if() statement false posetive:
+					console.log("Unable to determine which or if the url belongs to any SSG-site: url=" + url); 
+
+
+Annoying that when you click inside the preview/WYSIWYG it scrolls down
+
+Test to see what happens if a user delete all his files and folders ...
+
+goto file doesn't really abort ... it globs the search folder ...
+When goto file searching and typing, restart the search in the original folder.
+
+Regexp search using ^ should match start of line, not just start of file!
+
+Endless loop when searching left using regexp.
+
+Got an error when cutting text in a text file, then pasting it at the end of the file (but not at EOF)
+(it sais something like xxx can not be over file length)
+
+---
+
+Editor sometimes crashes when pasting into another file with devMode on!
+Example pasing some nginx config from one nginx config file to another.
+
+---
+
+Uncaught Error: path=null
+
+Error: path=null
+    at HTMLLIElement.gotoFile (http://127.0.0.1:8099/plugin/goto_file.js:570:12)
+
+How to repeat:
+Searching for .service and trying to open etc/systemd/status-email-user@.service
+
+
+---
+
+Issue when calling CLIENT.cmd but it never recives an answer, eg the socket has been closed but appear open.
+
+---
+on Google dev tools screenshot:
+Key binding for xxx ... can not be ..
+
+---
+
+One equal in if-statement false-positive:
+
+if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + 
+			" ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
+				if(file.savedAs) EDITOR.readFromDisk(file.path, false, "binary", fileRead);
+				else {
+					var byteArr = stringToBytes(file.text);
+					var buffer = byteArr.map(function(b) {return String.fromCharCode(b);}).join("");
+					var text = decodeBytes(buffer, "cp1252"); // or cp1251
+					file.reload(text);
+				}
+			}
+
+---
+
+In Firefox when hitting Alt+Z (to zoom) a z gets inserted !
+
+When using console.log in Node.js apps, the messages sometimes doesn't show inline, and sometimes show at another console.log
+
+Got error, unable to stat "new file" and som notes got lost!!
+
+Folder and files within did not get read+exec persmission when moved into wwwpub folder on webide.se resulting in 404 errors!
+
+When file explorer already have been open, and you click "explore" (EDITOR.fileExplorer) and file explorer takes it, the folder gets appended twice!
+
+Can't browse for keys to SSH/SFTP server when running in browser!
+
+When you login as another user and get user.send, for example when using the terminal. You get double messages!
+
+When removing lines using backspace, function locations doesn't seem to be updated!
+
+Doesn't reopen big files when closing/reloading the editor!
+
+Ctrl + or minus tries to insert a key while zooming when running as A2HS app in Chrome
+
+False posetive (red circle);
+if(value == undefined) throw new Error("value=" + value + " can not be undefined if key=" + key + " is a key string");
+
+When opening a file, you get results from cache, but it's annoying when a file has been moved or deleted. Update cache !?
+
+Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
+
+---
+bug in terminal:
+/home/Z/Projects/jzedit/client/plugin/terminal.js:463
+Uncaught TypeError: Cannot read property 'length' of undefined
+---
+
+Unable to save as on ftp, "unable to get file size".
+
+---
+
+nginx doesn't seem to log anything in the users /log/ folder! (after log files have been rotated)
+
+---
+
+Some characters wont show up (not even as question marks) for example: abortFindFile<-typehere
+
+---
+goto_file goes into a abortFindFile loop
+
+2018-04-04 (12:21:26) 192.168.0.3 => 176abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:26) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:26) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"176"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:26) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"176"} (server.js:1201:4))
+2018-04-04 (12:21:27) 192.168.0.3 => 177abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:27) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:27) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"177"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:27) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"177"} (server.js:1201:4))
+2018-04-04 (12:21:27) 192.168.0.3 => 178abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:27) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:27) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"178"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:27) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"178"} (server.js:1201:4))
+---
+
+When going to EOF and then to start of file in a big file:
+/home/Z/Projects/jzedit/client//File.js:3814
+Uncaught Error: Increase EDITOR.settings.bigFileLoadRows=3000 to at least 3450
+
+(doesn't help to increase bigFileLoadRows)
+
+---
+
+Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
+
+---
+
+/client//CLIENT.js:123
+Error: Server: API error: Command failed: hg merge
+abort: no matching bookmark to merge - please merge with an explicit rev or bookmark
+(run 'hg heads' to see all heads)
+
+hg merge tip (worked)
+
+when trying to commit the merge I get: "We need to reslove the merge conflict manually."
+
+hg resolve --list shows nothing
+
+hg resolve --all says stuff has been resolved
+
+hg merge -r tip
+abort: outstanding uncommitted merge
+
+hg commit -m "hmm" worked!! ??!?!?
+
+---
+
+
+files opened in the editor was not reloaded when doing hg update !!!
+
+bug: js-parser: anonymous functions get wrong name if foo: to the left. 
+Example in server/mercurial.js where anonymous function in execFile callback 
+get the name "env" because of exec env option.
+
+Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
+
+Parser doesn't seem to find variables inside for(var a, b, c)
+
+fix bug that adds text to indentation characters  ... !!
+make a sanity check that checks the indentatioin characters for non white space characters
+
+On Chromebook when you Preview a web page, it wont auto update on file change after you have saved once, or edited outside the body.
+
+When running WYSIWYG when in Preview mode (web_preview.js) the preview is no longer getting updates! (only when you save)
+
+Making the virtual keyboard bigger doesn't seem to work in Opera Mobile!
+
+When pasting stuff into an emty document in wysiwyg it gets added after the body tag
+
+---
+Function list doesn't always update when debug mode is off !?
+When clicking on a function in the function-list:
+/home/Z/Projects/jzedit/client/File.js:3537
+Uncaught Error: Can't scroll to line=736 because it's above file.grid.length=656
+---
+
+Unable to find start of function (jsparser optimizer) when there is a line break between function name() and {
+
+Problem when trying to paste:
+@font-face {
+font-family: Play;
+src: url("fonts/Play/Play-Regular.ttf") format('truetype');
+}
+into xml file (svg) style block with cdata
+
+When saving as on a ftp site, it asks to create the path, then it will have trouble showing the folder in file explorer ...
+
+Was editing a nginx config file and somehow non-space/tab characters was added to the indentation characters!
+
+In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
+
+bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
+
+When using non asci characters in commit messages, Mercurial will complain!
+
+When copy pasting text into a file with CrLf line breks on linux ...
+
+Logging in as the same user, twice, you get dublicates and wierd behaviour ...
+
+Sometimes you get "undefined is not a function!" when Ctrl+Shift+F to find in files.
+
+When having file annotations (hg) on, the server sometimes complains about "too big" in large files (EDITOR.js).
+
+regression: When no file is open and you use Ctrl+P, pressing enter does nothing!
+
+Mercurial commit tool doesn't find new files in sub folders !!?
+
+When making a multi line comments, and there is a multi line comment in a function below. the pof opt in devmode complains about different amount of functions (only in devmode! due to check)
+
+problem with permission on folders when publishing SSG site ... !?
+
+When trying to create a file without file type eg foo/bar dot baz: The path does not exist: /foo/bar/
+
+Automatic " + + " in urls !? var csvUrl = "http://visual-utopia.com/history/"
+
+Can not edit the page in WYSIWYG mode because of:
+Line 57: Inserted: <p>Written by <a href="../index.htm" rel="author">Johan Zetterberg</a> Jul 7, 2017.</p>
+
+When saving a file in Windows: The path does not exist:
+/\\192.168.0.1\www\webtigerteam.com\serverless\/
+
+After clicking OK on the alertBox button (for example when turning devMode off) you can't write ...
+
+Double clicking on a single letter in a large file takes forever to highlight. Optimization: Only highlight what the user can see!
+
+Replace all using the same string in replace causes a endless loop. Example:
+replace shortString( with UTIL.shortString(
+
+Inserting [ characters is slow in large .js files and seem to screw up indentation!
+
+items in server-storage linger around, make sure reopenFiles.js et.al clear keys that are no longer needed.
+
+Mac issues:
+Copy/paste don't work
+Make a copy/paste plugin, select between many clipboards
+Show /client/ in path on errors.
+able to scroll function list, auto scroll when typing and moving inside functions!
+
+bug in mercurial if hgrc contains [auth] with username put no password!?
+
+Warning about single = inside if statement doesn't ignore regExp! ex: if(wysiwygEditor.ignoreTransform.inserted[i].text.match(/src=/i))
+
+Main window closed when printing ... and the printer printed a few hundred pages of byte code ...
+
+When connecting to a sftp, then disconnecting and disconnecting to another (newly created) sftp connection, it doesn't connect !? Make a time-out and notify the user!
+
+Can't read binary ? (encoding_converter.js) needs test case!
+
+
+When you select from EOL, to the left, then extend the selection further to the left, the last (right) char is deselected!
+
+
+Indentation error when editing a file that have angelbrackets starting below the functions, if's. eg:
+function foo()
+{
+  if(a) 
+  {...}
+}
+
+Auto complete in .htm document inside <script> tag eaither gives a html tag or it doesn't spell out when hitting tab.
+
+Auto completing inside <script> tag adds a script tag ... witch creates an error
+
+red circle in regexp:
+if(!queryData.match(/^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/)) {
+clientError("Data must be base64 encoded!");
+}
+
+Move dialogs when resizing!
+
+users .localStorage file is sometimes currupted ... } is inserted instead of a ,
+
+Search in file on remote fs doesn't work!
+
+Don't remove spaces/tabs from copied text when working with text mode files!!
+
+Replacing a text with a text that contains the text to be replaced causes an endless loop when clicking Replace all.
+Example: getSourceCode => getSourceCodeBody
+
+Text is blurry in Windows when the function list is visible ...
+
+Somehow the same file was openec twice ...  It happends when files are opened with / as path delimiters in windows,
+so you have one file with "C:\folder\file.txt" and another "C:/folder/file.txt"
+
+linux ftp file names with åäö get scramled
+
+colors keep getting off in svg (xml-parser) files.
+
+Save-as didn't update file.fileExtension !! saved as svg (wasn't parsed)
+
+Annoying when disconnecting from FTP, default working directory. What to set as default working director ??
+
+Annoying red circle in if-statement with regexp and single =
+
+selecting a text then shift and mouse clicking pops one character on the right side
+
+Function list is not updated if you move BUILD.login = function buildLogin() {} the function is lifted out
+
+Zooming in a CSS files highlights all # as topics
+
+Autocomplete should not complete the actual function arguments inside a function call, because it can be wrong! foo(aaaa, bbbb|) 
+
+{
+	foo: function() {};
+}
+foo() can not be called. Mark the function as not having a variable pointing to it!? ... to prevent auto completers from suggesting it
+
+Unable to delete SSG site
+
+IF and END IF ASP vbScript on the same line gives wrong indentation: ex:
+<% IF MilitaryScienceCostGold <= gold AND totalStone >= MilitaryScienceCostStone AND totalTree >= MilitaryScienceCostTree THEN %> <form action="science.asp" method="post"></form><br><% END IF %>
+
+When scrolled to the right and switching tab will throw an error
+
+Making a multi line JS comment at the top fucked up indentation on ALL lines, flattening them in source code. 
+
+Unicode characters that are not visible. for example: 5206 or 8206 "left-to-right mark" will cause the grid to show wrong
+
+
+Deleting lines that start with spaces, and then Ctrl+Z ...
+
+
+Annoying "" when adding " around json ...
+{
+""foo: "bar"
+}
+
+var in for() not found (when auto completing)
+function arguments not found when auto completing
+
+
+ftp choke Ctrl+P error
+
+Unable to open big remote files (over FTP) (because big files only support disk streams) (should everything be streams?) 
+
+
+"Scrolling bug", when scrolled to the right, then opening another document (using file explorer)
+
+Unable to find start of function:
+editor.eventListeners.exit.push({fun: function closeOpenConnections() {
+for(var conn in editor.connections) {
+editor.connections[conn].close();
+}
+return true;
+}});
+
+
+Can't save remote file after ftp timeout/disconnect -> reconnect 
+
+auto scroll down when text dissappears typing at the bottom but not eof
+
+Was gonna edit a legacy ASP file, but got warning about char encoding, asked to convert to utf8, but was too afraid to convert.
+
+String colors off in svg: ftps://192.168.1.77/hemsida/gfx/ikon/pdf.svg (making new lines to edit viewBox
+
+Saving a file (on remote) seems to recreate it and reset permissions!?? on windows share
+
+Clicking Ctrl+O many times will bring up many dialogs! Clicking cancel on one of them seems to cancel all, even the first one.
+
+Can't open "package.json" via Ctrl+P when there are no files open.
+
+---
+Indentation: (create new file and cipy this in)
+
+/tank/logs/log/mysql.log rwk,
+/tank/logs/log/mysql.err rwk,
+
+/tank/mysql/mysql/ r,
+/tank/mysql/mysql/** rwk,
+
+/tank/mysql/ r,
+/tank/mysql/** rwk,
+---
+
+Saved as, then more files loaded and I saved as on another file, not the file I wanted to save as!
+
+
+Selecting using keyboard from bottom up, does not select all characters. And text is crazy when copy pasting
+<tr>
+<td>Row1</td>
+<td>Still row 222!!!</td>
+</tr>
+
+
+Pushing WYSIWYG didnt work (needed to select a page first)
+
+
+Auto complete function arguments inside <script> inserts </script>
+
+
+When saving as or reloading a file, all white space are hidden! ... 
+.....text
+(save as)
+text (white space hidden)
+
+
+Sanitizing the WYSIWYG does bad things ...
+If you had the WYSIWYG open and doing a preview, it sanitizes when switching back!
+
+When making a /* block comment inside a function with sub functions, when closing the blog comment, you get an error message about missing functions
+
+
+Warns about single = in if ... ignore regexp!
+if (lines[t].search(/TTL=[0-9]+/i) > 0) {
+
+
+File was marked as saved, but did not have the latest content because it was changed by another program.
+
+
+Dont find error: if(err.code="ENOENT"  (one equal sign)
+
+
+Word wrapping plugin doesn't seem to work in new files ...
+
+---
+
+Got eternal spam "error reding dir" from goto_file
+
+---
+
+xml tag color error: .asp
+
+<h2>Image-pack</h2>
+<form action="account.asp<% =S %>" method="post" name="imagepack">
+
+
+---
+
+Unable to find start of function :
+
+<div id="log"></div>
+
+<script>
+
+function read(file) {
+var promise = new Promise( function (resolve, reject) {
+
+});
+
+/
+
+
+}
+
+</script>
+
+---
+
+Paranthesis matching doesn't work when there are parantheses in strings
+
+Cant make tidle char: ~ (Linux)
+
+Indentation error: 
+
+[PR_PUNCTUATION,  /^[=<>\/]+/],
+['lang-js',       /^on\w+\s*=\s*\"([^\"]+)\"/i],
+['lang-js',       /^on\w+\s*=\s*\'([^\']+)\'/i],
+['lang-js',       /^on\w+\s*=\s*([^\"\'>\s]+)/i],
+['lang-css',      /^style\s*=\s*\"([^\"]+)\"/i],
+['lang-css',      /^style\s*=\s*\'([^\']+)\'/i],
+['lang-css',      /^style\s*=\s*([^\"\'>\s]+)/i]
+]),
+['in.tag']);
+
+
+When double clicking on a word, then pasting something to replace it, a space on the right is deleted!
+
+Goto file. Old results sometimes overwrite newever results like fo overwrites foo
+
+When making a block comment /* and there is already a block comment below, it might "merge" two functions. And then when inserting the ending */ the parser complains that it found unexpected extra function.
+
+file explorer: After saving a file "save as" on ftp connection. Updating the file explorer only show the folder the file was saved in under root dir, and you cant open any files
+
+file:///C:/Users/Z/dev-repositories/jzedit/editor.js:2726
+Uncaught ReferenceError: sshClient is not defined
+
+Wrap plugin seems broken. Try it in react_vs_vanilla_js.htm
+
+FTP opened folder from both ftp:// and ftp:/// then I had two different versions of the same file. And lost all changes
+
+Can't use the remote connection after we got an error. For example access denied after attempting to save a file. (need to re-connect)
+
+When selecting text then pressing left or right arrow, the caret should jump over the selected text (that will be unselected)
+
+Unable to make a tilde character ~ (and other special characters) in Linux. 
+
+The list you get with quick open (Ctrl + P) is hard to read with sun glare on the screen.
+
+Doesn't line break long sentences in dialog box (but we dont want to break file-paths without spaces)
+
+Scrolling error when quickly closing down files ...
+
+Editor taking long to start when accessing network drives, show message about files being accessed !?
+
+---
+
+When disconnecting from a ftp server after reloading (f5) the program:
+Calling showSpellSuggestion ...
+server_manager.js:221 Uncaught TypeError: undefined is not a functionserver_manager.js:221 disconnectConnection
+
+
+Error reading folder: ftps://192.168.1.77/dokument/mapp med mellanslag och Ã¥Ã¤Ã¶
+Failed to change directory.
+
+Auto complete object prototype doesn't work (about.js)
+
+SFTP (Waiting for SFTP editor.js line 966) stops working after trying to write to a file without write access.
+
+The Ctrl+P quick open doesn't always show the results from the word typed. Like "todo" showing results for "to"
+
+---
+
+First functions name gets window.onload while second function name becomes winResize (not consitant)
+
+<script>
+var w, h;
+
+window.onload = function winLoad() {
+w = document.getElementById("width");
+h = document.getElementById("height");
+}
+
+window.resize = function winResize() {
+w.innerHTML = window.screen.availWidth;
+h.innerHTML = window.screen.availHeight;
+}
+
+</script>
+
+---
+
+Selecting a chunk of text from buttom up scrambles the text ... Adds the same text but backwards ...
+Cutting text seems to parse the file/text many times!!?
+
+var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
+'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
+'\n' +
+'Date:' + (new Date()) + '\n' +
+'Commit: ' + editor.version + '\n' +
+'Platform: ' + process.platform + '\n' +
+'Arguments: ' + require('nw.gui').App.argv + '\n' +
+'\n' +
+error.stack + '\n' +
+'\n' +
+'How to repeat:\n' +
+'\n' +
+'Hit Ctrl + Shift + S to send this report over HTTPS. (If you save this file for sending later, keep "bugreport" in the file name or you wont be able to send)';
+
+
+Ask for password in SSG if no credentials are provided, or add field, "when asked for login/pw use..."
+
+Unable to make a tilde ~ character in linux
+
+When saving a hgrc file save-as it got no name in the file-tabs
+
+fixIndentation is still not fixing the last }); !!
+
+When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
+
+Error when editing a function:
+function keyPressed(e)m{ inserting the m between ) and {
+
+Bracket /curly matching match against string or regexp!
+
+Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
+
+
+Opening a large file via xFTPx tries to open (due to big file) stream on local filesystem.
+Streaming strategy from FTP: Save a local copy to disk while streaming, then use that for lookups, (and edit it wile making changes btw stream chunks)
+
+
+Weird formatting in vbScript with IF ELSE END IF on the same line:
+var loggedIn = <% IF loggedIn THEN %>true<% ELSE %>false<% END IF %>;
+var popups = <% IF popups THEN %>true<% ELSE %>false<% END IF %>;
+var openpage = '<% =openpage %>';
+var showNews = <% IF showPersonalNews = 0 THEN %>false<% ELSE %>true<% END IF %>;
+var vuid = '<% =strCookie_VUID %>';
+var haveMovedArmy = <% IF haveMovedArmy THEN %>true<% ELSE %>false<% END IF %>;
+
+
+Search in file bug? 
+Can't find "cheat.txt" in \\192.168.1.80\domains\visual-utopia.com\ 
+"But none of them match the file filter!"
++ the gui wont go away when pressing escape!
+
+The indentation helper (render_indentation.js) doesn't work with parsing-only-the-function-optimization because lastRow.indentation is not affected!
+
+
+Always the wrong path when saving a file. Need to be smarter!
+
+ASP-file: <body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0"><iframe id="iframe" width="100%" height="100%" src="beta.htm?vuid=<% =strCookie_VUID %>" border="0" frameborder="0" marginheight="0" marginwidth="0"></iframe></body>
+bad color on strC
+
+Uncaught Error: fullParse.quotes.length=1 oldParse.quotes.length=0 
+
+There's something wrong with the parser, see async_await.js
+
+Function list selects the first function and the other were in child-function
+
+Escape key doesnt hide search in files.
+
+Selecting text using keyboard arrows from bttom up scrables the selection.
+
+Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
+
+Ctrl + P to open files can lag, so "todo" first blink with results for "todo", then overwrites with results for "to".
+
+Gets into a constant loop when replacing \\n with \n
+
+When selecting text using keyboard up/down arrows the text gets scrambled
+
+When selecting this using keyboard, then copy/past it gets scrabled:
+<%
+str = "<table>"
+%>
+
+Indention bug:
+// Update the function
+var firstFunction = js.functions[firstValueInObjectList(js.functions)];
+f.variables = firstFunction].variables;
+
+
+When selecting and cutting large text:
+Uncaught Error: file.startRow=1807 grid.length=884 file.partStartRow=0File.js:456 File.checkGrid
+
+When having only one paragraph and Ctlr W: Did not find start of paragraph
+
+
+When deleting rows, it doesn't scroll up
+
+Can we search in file on a FTP? Nope!
+
+implement editor.findFilesContaining(txt, path) ?
+
+Inlude global scope in auto completer: All script tags in a html files. Save in background parsed
+
+Add function arguments to the variable auto completer.
+
+Typing in editor.js is slow
+
+
+parse error:
+var myRe = /<\?JS.*?>/g;
+{
+
+}
+
+
+Getting a tag ending when autocompletion something that is no available: ex:
+proc</editor.tests.length;> in editor.js
+
+Missing auto completion for function arguments!
+
+Indentation in the source files is fubar
+
+Adding a } should fix indentation of all lines below!
+
+
+when selecing 0 in "editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});" using shift + keyboard arrows
+Error when running key bound function:Error: Selected box i=0 is not selected! box[0]={"char":"3","index":76,"selected":false,"highlighted":false,"hasCharacter":true,"wave":false,"circle":false,"color":"rgb(0,0,0)","quote":false,"comment":false}
+at File.checkSelection (File.js:963)
+at File.select (File.js:1040)
+at Object.moveRight [as fun] (keyboard_arrows.js:116)
+at keyIsDown (editor.js:2948)
+
+End doesn't go to EOF/EOL
+
+Indent breaks in string concatenation!
+foo = "bar" +
+baz;
+
+
+bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
+
+Lots of errors (absolute paths when dragging the folder to nw.exe):
+Uncaught Error: ENOENT: no such file or directory, open 'C:\Users\Z\dev-repositories\js-editor\runtime\nwjs-v0.12.3-win-x64\version.inc'
+Uncaught Error: spell-check worker exit:0
+
+
+Uncaught Error: getaddrinfo ENOENT localhost:57341
+
+bug: Find in file will not work if the search term is split between chunks
+
+bug: When selecting text using shift + mouse click, then clicking again, it sometimes removes the most right character. test ex:
+before fixing it.
+
+
+vb_parser: Lots of indention errors (double END IF ??) ex: castSpell.asp
+
+
+
+Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {
+
+
+red circle:
+setInterval( functionCheckStatus() {
+var dif = t1.getTime() - t2.getTime();
+}, 60000);
+
+Got a bug after opening a file with the exact same content and path as a file already opened.
+
+When creating the first JS function in a file. And copying in the function name, will result in a a very thin function-list.
+
+When last file gets closed, the toolbar still show it's path
+
+When auto completing JSON objects, ex: editor.settings.style.textColor, editor.settings.style. part gets removed.
+
+Opening a tag (<) before a tag that adds indentation de-indentate and mess up the indentation
+
+Gets scrolling bug alert when: scrolled to the right, then tabbing to a file that doesn't have that many colums
+
+auto completion of xml tags can be super annoying (buggy) ex:
+else if(insX</!--
+				*/
+
+
+Doesn't add indent characters for last curly bracket!
+{
+{
+{
+}
+}
+}
+
+No undo available after save!
+
+Auto complete doesn't find variable declarations inside for loops, ex: for(var charIndex=0; charIndex<text.length; charIndex++) {
+
+Double clicking on a file path should open the file!
+
+When searching the function list and (only find one match) click on it, doesn't scroll to the function
+
+Files doesn't load in the same order when reopening/reloading the editor! Sort tabs after every new tab being opened!
+
+Auto-completion in class-like object replace the text: ex: file.lineBreak; file.lineB, tab
+
+After: editor.tests.push({text: "All keyBindings should return true or false",fun: function testKeyBindings(callback) {
+// Next { will indent two times
+
+Didn't get file input focus when opening a file... 
+
+Saving takes a long time sometimes. because of network drive, can take several seconds! (i get nervious, how to confort?)
+
+function list gets biiiig:
+window.requestAnimFrame = (function(callback) {
+return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+function(callback) {
+window.setTimeout(callback, 1000 / fps);
+};
+})();
+
+
+
+JS inside <script> tags doesn't get parsed!? Colorized.
+
+Only fixIndentation on {} if there is a match!
+
+Opening files with weird formatting: files inside .hg for example, try binary files!
+
+Auto complete removes text: (editor.currentFile) editor.curr => currentFile
+Maybe have to fix auto complete ...
+
+Clicking 4 times to select with {} match doesn't work, stops at first }.
+
+Moving a tab doesn't "stay" after reload.
+
+Source indentation in html documents might be "off" if you remove or add div's.
+
+The caret is off in the magnification glass
+
+README.txt is opened with folder in tabs: JZEdit/README.txt
+
+Goto file doesn't work if you type too fast!
+
+JS parser seems to have problems finding variable type with single quoted strings.
+
+Can't open Big files from FTP/SFTP because of the stream.
+
+When the editor touches (redoes) all whitespace, like when removing a } somwhere.
+The SCM system goes heywack ... a lot of updates here and there and stupid commits.
+
+(IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
+Low prio because IE will probably be replaced by Edge ... or probably never.
+
+bug: When moving a folder out from another folder into that folder it dissappears
+bug: When renaming and then moving a child's child folder it has the old id/path!
+
+Se commit 2357 about fs links ... How should we handle them ? 
+Got an ENOENT error when stating .steam folder which links elwhere
+
+Issues with Hg annotations after hot reloading the plugin!
+
+
+Unable to repeat bugs (happens rarely)
+---------------------------------------
+
+---
+Problem printing to PDF on Firefox on Windows 10 ...
+https://webide.se/jsPDF/src/modules/addimage.js:288:41
+
+Stacktrace:
+
+TypeError: jsPDFAPI.loadFile is not a function
+    at getImageDataFromElement (https://webide.se/jsPDF/src/modules/addimage.js:288:41)
+    at Object.jsPDFAPI.getImageProperties (https://webide.se/jsPDF/src/modules/addimage.js:749:25)
+    at Context2D.drawImage (https://webide.se/jsPDF/src/modules/context2d.js:1268:40)
+    at O (https://webide.se/:27:930)
+    at Array.infoRender (https://webide.se/:27:966)
+    at Object.render (https://webide.se/:13:35474)
+    at https://webide.se/:105:2989
+    at doneMaybe (https://webide.se/:105:759)
+    at depLoaded (https://webide.se/:105:804)
+    at HTMLScriptElement.e.onload (https://webide.se/:13:122378) 
+
+TypeError: EDITOR.canvas.focus is not a function
+    at Object.setEditorInputFocus [as input] (https://webide.se/:13:7262)
+    at Object.EDITOR.showFile (https://webide.se/:13:96680)
+    at fileLoaded (https://webide.se/:13:19329)
+    at newFileConstructorFinished (https://webide.se/:11:1548) 
+---
+
+
+user worker crashes when opening file and erazing the text
+
+On mobile browser: When quad clicking to select line, and then clicking back on virtual keyb, hides the keyb insted of deleting the selected text.
+
+Sometimes when using mousepad to scroll on Macbook it first scrolls, then scrolls a few lines in the wrong direction...
+
+It somtimes takes a very long time to open files via goto_files.js ...
+
+Sometimes when searching for files (goto_file.js) it can't find a file, for example today it couln't find CLIENT.js ...
+
+Get spawn EACCESS error when running NPM install (due to npm checking for updates)
+
+When copy/pasting in a text file, everything become scrambled after saving/reloading
+
+After a bunch of edits I got error "can not find start of function". When I restarted the editor or copied the file to anohter instance of the editor the error was gone!
+
+The indentation "jumps"/is inconsistent when having breaks before {, [ or ( 
+
+Highlighted function in the function list, it sometimes to not highlight even though you are inside the function. But it does highlight if you move the cursors a few lines down into the function.
+
+When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
+
+After failing gotofile once, it seems to fail all the time after (aborting, too much latency) possible fixed when the ftp queue was implemented.
+
+Error when writing /" inside an function Ex:
+if(dir.indexOf(/"
+
+
+When copying in code into a function, colors, quotes, comments will be off (by line)?
+
+When selecting text to copy, using the mouse, sometimes the last character drops out
+
+---
+
+Cut/paste turned the text backwards!
+
+---
+
+Sometimes it doesn't work to select text, or the selection is buggy.
+
+---
+
+Some times the editor is invisble in MS windows. Only the debugger window loads.
+Probably because of failing JSON.parse
+
+---
+When double clicking a world and started typing:
+Index is undefined. Stuff will go wrong!
+---
+
+
+Text disappears from some lines when the spellchecker is running.
+
+---
+when closing:
+Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
+file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+---
+
+Pressing enter mess up the colors
+
+Somtimes keys with shift or alt-gr doesn't work! native
+
+Sometimes you get an error when closing the editor, that one of the file we want to save state for is not in global.files.
+
+When reloading using F5:
+node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
+use location.reload() instead!?
+
+Somtimes when closing the editor. The file path is already removed from global.files!
+
+Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
+
+Editor sometimes fails to save!!! When? there's an error / something crash?
+
+Sometimes when undoing (ctrl+Z) the caret is placed on a non existing grid column!
+
+Black screen when opening file
+
+Ctrl+X not working
+
+Opening files with inconsistent line breaks.
+
+Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
+
+Test if inlining functions in jsParser makes it faster. IT DID NOT!!
+
+bug: ssg preview doesn't hide when pressing escape.
+
+The code sometimes "jumps" when editing in a subfunction.
+
+Pasting code into an emty (sub) function sometimes does weird things
+
+When a site has been published via SSG it says site published to foo.bar.com and it's supposed to add http:// but it did not!??
+
+
+
+Low prio bugs
+-------------
+
+When loading the spellchecker on Linux it complains about libstdc++.so.6 version GLIBCXX_3.4.21 not found. Should update the runtime and use builtin spellcker!
+
+spellchecker: Red waves doesn't go away when changing the word.
+
+Sup pixel antialias doesn't work on (Linux) Firefox, ...

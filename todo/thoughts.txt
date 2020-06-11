@@ -1,0 +1,440 @@
+This file contains stuff thank I'm thinking about but have not made a decision
+
+
+What I'm thinking
+==================
+
+
+Why run your IDE in the cloud?
+* You might be able to get higher bandwith, so uploads/downloads will be faster, 
+you do not have to download anything to your local computer/device
+* An editor that you can connect to from anywhere
+Dropped your laptop in the ocean? Just get a new one and continue where you left off.
+
+
+
+hmm, should we try to optimize startup time of npx !? And make it more seamless!?
+
+---
+
+Trying to make stuff work on Windows is even harder then before.
+The Node.JS and Python experience is not that great. It's easier on Linux, but still fiddly.
+Maybe we should give up on native platforms and only focus on the web!? In order for users to get a "it just works" experience. (no install or setup)
+
+
+---
+
+It seems code editors/IDE's needs a sales process.
+When people check the editor out they will just stare at it for 3 seconds, then go check the next thing ...
+Witch the record function I can show them the core features of the editor.
+
+
+---
+
+Implement split screen ? Or is "open in new window" enough !?
+
+---
+
+Different projects ? Node.JS, Web app, QuickJS, Gnome JS !?
+
+---
+
+(feature discovery)
+
+Because most people evaluate the IDE by staring at it for 3 seconds,
+we need add some on screen bling bling blong that advertises the editor's features
+
+---
+
+How do you test the cloud editor inside the cloud editor !?
+
+---
+
+Thinking about docker support ... Able to run docker apps ?
+Some teams use docker so that all developers will have the same environment
+If you however run the editor as a cloud editor, all users will already have the same environment
+If you use docker and other tools, it's probably best to run the editor in a VPS or locally.
+
+Most common use-case for docker is to spin up a bunch of containers, for example database server
+I don't think you actually develop inside a docker conainer!?
+
+---
+
+There are 1-3 users trying out the editor every week, but none of them seem to write anything ...
+So how are they going to find the editor features !?
+They don't know what to do ... Very few reads the guides/articles. Make more guides/articles !?
+
+We need to show them success, or at least what success looks like ...
+
+Clone app, run ... edit !?
+
+Give users some alternatives:
+
+What do you want to create:
+
+Web site, Pure web app, database app
+
+Here are some examples 
+
+
+A shalboard
+
+Daily website visitors
+
+Hours spent coding
+Most files worked on
+
+Github stars !? =)
+
+npm downloads
+
+
+
+  
+
+
+
+---
+
+So many nodejs examples want to use tcp ports! Look into Linux net namespace
+
+----
+
+Make a docker image !?!?!? No, it's easier just to install via npm
+
+----
+
+Investigated using an emulator (jor1k) to run Linux in the browser ...
+Problems: It's very slow. You'll want a network connection, which doesn't work offline (doh).
+
+---
+
+Let users install their own version of nodejs and python !? and npm and packages !?
+
+----
+
+Share documents, either private or publicly. Colaborate with others.
+Making it easier to share files.
+
+---
+Command discovery: When holding down Ctrl or Alt, you see all avaible commands,
+for example Ctrl+Om Ctrl+Shit+O etc with a description.
+---
+
+Able to just leave the "console" and continue developing somwhere else, on another machine ...
+Save state to server !?
+
+use server storage for reopen files. !? ...
+Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
+if the local copy is newer, update the server storage. !??
+
+----
+
+Support non mono-space font (variable gluph width) !? 
+file.colToX() = Measure the text to get the x position.
+
+50% of first time users doesn't interact with the editor, and just close it down after staring on it for one second.
+Even though the text on the screen say "Right click to show they meny", they do nothing. Any ideas !?
+
+what's the selling point of your editor/ide?
+
+<cdunklau> zeta: the in-browser thing is interesting
+"A IDE/editor that runs in the browser"
+
+Should users have their own /usr/lib/node_modules folder so they can install nodejs modules globally!?
+
+The reason for type annotation is to help tooling, to allow go do definition, rename all instances of foo.bar, 
+to see which methods/properties are available on an object. Can we accompish that in this editor without type annotatioins !?
+
+The reason to use a compiler is so that you can use the latest or non-standard language features ...
+
+
+If you start new files while offline, then close the editor, 
+and next time you open the editor up the files you created while offline are gone !!!
+
+Have a web based file system that is synced with the server once online !?
+
+Many tools depends on the server, make as much as possible work offline !?
+
+---
+
+Rigester æo domain for unix sockets !?
+
+---
+
+Should we run with low loglevel in the server so that we don't get slowed down by console.log's !?
+
+---
+
+Should opened files and their state be saved on the server ?
+So that when a user switch to another device, it will reopen the same files !?
+
+
+---
+
+An existing user got logged in as guest ...
+
+Before logging in as guest, ask the user !?:
+Welcome to webide.se do you want to login as guest ?
+Login as guest, Create new account, I want to login to existing account
+
+
+---
+
+stackoverflow review 2018:
+Visual Studio Code  34.9%
+Visual Studio  34.3%
+Notepad++ 34.2%
+Sublime Text  28.9%
+Vim  25.8%
+IntelliJ 24.9%
+
+vi/vim (keybindings) modal editing support seems to be a must-have feature for IDE adaption !?
+But vim is too much hard work to implement! We would end up with vim inside the editor.
+Vim is a whole ecosystem with plugins, we can't put all that into the editor.
+Our editor already has it's own plugin system!
+Vim is hard for beginners, and we want to make a editor that is easy for beginners.
+We however want to make it fun to use the editor on a laptop without a mouse or touch screen.
+If someone wants to get the full vim experience they can always run vim in the built in terminal :P
+
+Is vim support a core feature !? Is it the reason why someone want to use this editor !? Nope
+
+Strategy for implementing vim: Start with basic support, make sure it does the same thing as vim.
+
+vim/modal editing: One mode for inserting text and one mode for navigating text.
+So that you do not have to take your hands off the keyboard, and not reach for arrow keys.
+Most useful on laptops that does not have a mouse.
+
+Most useful command seems to be "change between brackets" or "delete until x"
+
+----
+
+Workflow for colaborating:
+Something like an internal wiki ... 
+
+---
+
+Have a poll to see what users are most interested in:
+"What jzedit feature are you most interested in ?"
+- Content management (CMS) of web sites/documents
+- Developing and testing Node.js applications
+- Making full stack JavaScript progressive web apps
+- Editing and manageing a static web site
+- Developing/designing HTML/CSS web sites
+- Hosting a web site
+- Deploying a Node.js app
+- Other: 
+
+---
+
+How do you do/make "pull requests" !?
+
+"Make pull request" button in source control. 
+Another webide.se user. Or via e-mail.
+
+---
+Include domain in wwwfolder so users can have many domains !? No the editor should not be used as a web hosting service.
+Instead have a separate web hosting service with ftps access and redudancy.
+---
+I always seem to screw up when pushing changes and making updates to prod.
+Should have a prod-middlewhere server with the same config and test it there first ? Or just roll back when I screw up !?
+---
+
+How to manage different versions of nodejs ? Or just run the latest !?
+each node version would need it's own apparmor profile.
+Issue with nodejs breaking abi (native modules) compability 
+
+Make managing nodejs version a pro feature ? Run on own server 
+
+---
+
+Test are run async (all at the same time). Some tests want to be run alone.
+Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
+
+---
+
+Users want to control who has access to their web sites! Look up user control systems!
+
+---
+
+Storing state in "web_preview" so if you for example fill out a form, the data will still be there when the code is updated.
+Remve and re-add only the element that is being changed !? (instead of reloading the whole body)
+
+Give the user a (in browser) virtual machine (that runs inside the user's browser) !?!?
+
+
+---
+
+How do you install something ? Like ffmpeg . And then how do you run it ?
+Able to run shell commands or nodejs repl in the editor !?
+We don't like command lines
+Solution: Use a module that installs the program!
+
+---
+
+Why has not high level programming languages changed in the last 50 years !?
+Why are we still typing programming *code* into a text editor !?
+
+idea: Program using voice! Demo: Add elements to a web site. eg. new heading: Tigers
+new paragraph: Tigers are big and scary cats. 
+
+new button, id tigerbutton, class tigerbutton, 
+
+tigerbutton onclick alert you clicked on the tiger!
+
+class tigerbutton add image tiger.png 
+
+
+---
+
+hmm, for hg clone to work we need to allow python to access the internet! ...
+could solve any issues by setting up restrictive iptables and maybe a netns
+probably want to use netns (sudo ip netns exec NAME ping google.com) to put each worker process in a network namespace.
+
+package?json for the ssg !?
+
+Översätta till Svenska !?
+
+Editing a web page is kinda awkward ...
+What about being able to click on the web page and edit right there !? With an option to open editor:
+Save, Abort, Open IDE
+
+
+What about users that don't have function keys ?
+
+Keyboard shortcuts are hard to remember ...
+
+---
+
+Support key bindings for the popular text editors currently being used by web developers !?:
+Visual Studio 38.8%
+Notepad++ 34.3%
+Sublime Text 31.4%
+Vim 27.1%
+
+Stack exchange 2018 survey:
+Visual Studio Code    38.7%
+Visual Studio    35.7%
+Notepad++    34.5%
+Sublime Text    30.2%
+IntelliJ    26.5%
+Vim    26.1%
+Eclipse    18.7%
+Atom    18.6%
+Android Studio    17.6%
+PyCharm    11.4%
+PHPStorm    10.7%
+Xcode    8.8%
+NetBeans    8.4%
+IPython / Jupyter    5.9%
+Emacs    3.7%
+RStudio    1.9%
+RubyMine    1.8%
+TextMate    1.0%
+Coda    0.6%
+Komodo    0.6%
+Zend    0.4%
+Light Table    0.2%
+
+
+
+But instead of trying to "support" these key-bindings, why not try to be better !?
+
+Modal editing (using different modes) is a nice concept. Using the mouse is however very inutive and not much slower !?
+Laptops does however have a touch pad instead of a mouse. And phones have touch screens. It would be nice to be able to program efficiently from the phone!
+
+Keyboard layouts look different and it's really only the latin character keys a-z and number keys 1-0, plus tab, caps-lock,space, comma, dot, and maybe shift - that are located at the same places!
+Some keyboards don't have F1-F12 or a number-pad!
+
+Caps-lock can be used to switch modes!
+
+Shift is used to select text in many "modern" text editors. So shift should always be used to select stuff while in command mode.
+Examples: 
+shift+=Select everything inside whatever you are in (parentheses, brackets, string, function) 
+shift+=Same as shift+i but also selects the (parentheses, brackets, string, function)
+shift+=Selects until (from left to right) the end of whatever you are in (parentheses, brackets, string, function) 
+shift+=Selects the whole file
+shift+move=selects and moves (ijkl ?)
+ijkl = move
+esdf = scrolls up, left, right, down, right
+m=record macro
+r=run macro, or repeat last command
+w,r=switch between files: w=switch left, r=switch right
+g123=goto line 123, goes while typing (first to row 1 then to row 12 then to row 123)
+ghi=search for hi, searches while typing, and moves there
+shift+g same as g... but also selects
+
+3i=move 3 lines up
+3(shift+)i=select 3 lines up
+0=goto colum 0
+.(dot)=go right to next dot or to eol 
+o=move one word right
+u=move one word left
+c= (one press) copy (two presses) cut
+p=paste
+
+space=direction up or left: ex: ghi(space) searches left for hi. ijkl after a space searches in that direction
+g+space=searches up for the word the cursor is at
+
+Special motions: a=all i=in t='till
+
+
+
+
+
+
+
+
+
+---
+
+Using the editor in a terminal:
+npm install jzedit -g
+jzeidt -server -u admin -p 123 -c your-ip
+Follow instructions on the screen. eg: 
+Open your favorite browser and go to: http://host:5999/
+
+If you already have a jzedit client running:
+Ctrl+P
+Type the hostname you want to SSH/FTP into
+Hit enter
+Follow the instructions
+
+---
+
+idea on adding flags:
+Add a flag to the startup process when working on a feature. If the flag is present, the feature will not load in production.
+When the feature is complete, just remove the flag!
+eg. --disable-plugis=foo,bar,baz
+
+
+
+Should file.writeLine, file.write, file.writeLineBreak call file.change !?!?!?
+
+---
+
+work-flow: Colaborating with someone else ...
+Should it be possible for two people to login to and use the same account at the same time !?
+How should they colaborate ? Using SCM like git/mercurial !?
+
+---
+
+There should probably be performance tests so we know if the runtime have performance regressions.
+
+Is a spawned process still there after client disconnect /reconnect ?
+Yes it is!! ? Nope ... Actually, it's killed a few seconds after the user disconnects (or when sockjs thinks the client disconnects)
+Even if the client reconnects it's killed!!
+
+
+
+FEATURE FREEEZE!!!
+
+It seems making an editor/IDE is a forever task. I allocated six moths but have now worked over three years ...
+Truth is most users will *never use most of the features*. and the more features, the more regressions, which leads to slower development speed.
+So don't add a new feature for now. Just focus on the core features:
+* JavaScript programming
+* Creating web sites (using the SSG)
+* Writing NodeJS scripts (and micro services)
+* Mercurial integration for source control management
+
+I now have these four core features implemented, but they are rought, and I broke the Mercurial integration when adding NodeJS support (due to chroot).
