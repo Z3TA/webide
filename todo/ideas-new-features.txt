@@ -36,6 +36,19 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+
+
+---
+todo: Gnome desktop app plugin, live preview gjs
+gnome-desktop-app example
+
+Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
+---
+
+Able to preview a React app
+Able to preview a React native app
+
+
 Update the URL for public repos,
 so that if you copy the URL someone else can access that file!
 eg. clone=repo&openFile=path&row=X

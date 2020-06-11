@@ -8,20 +8,10 @@ Go through this file and relentlessly delete stuff
 
 
 ---
-
-
-SSG preview of web sites that need re-building!?
-
-
-
----
-
----
 Error: winLoaded event never called when opening desktop window!
 Current file: /home/guest200/wwwpub/welcome.htm
 Browser: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0 (Firefox) 
 ---
-
 
  "Error: Request id=38 req=dockerDaemon has already timed out! Consider increasing the timeout=30000 Request took 4 seconds. Response: {\n \"error\": \"API error: Failed to ping the Docker deamon VM! pingFail=14 ipToPing=10.2.4.251
 
@@ -37,42 +27,6 @@ Use the Screen/code-casting function to welcome the user and show the user how t
 Make guides and examples
 
 user feedback: a place I can learn and develop in with enough of the features so that I'm not spending the next two days installing addons. 
-
-
-
-
-Able to preview a React app
-Able to preview a React native app
-
-
-todo: If there is no record loaded, ask the user if he/she want's an intro about screen-casting
-
-
-
-
-Is there a Galaxy store for only galaxy notes!?
-
-
-
-todo: Angel bracket auto-completion: Check if open parenthesis and also add );
-
-Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
-
-bug: Color picker from images doesn't work when there is different pixel ratio then one
-
-performance issue when using fractal scaling in Ubuntu!??
-
-todo: Gnome desktop app plugin, live preview gjs
-gnome-desktop-app example
-
-Latest Gnome desktop look really nice. We should support making Gnome apps (with native UI)!
-
-bug: unable to repeat: Sometimes when logging in it puts me on hold... and I have to refresh in order to login 
-
-todo: Support more Macbook keyboard shortcuts!
-
-
-
 
 
 When demoing on Chrome on iOS:

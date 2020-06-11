@@ -36,6 +36,10 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+
+bug: Color picker from images doesn't work when there is different pixel ratio then one
+
 When zooming on Macbook, the font is really big and rows overlap
 
 

@@ -6,6 +6,16 @@ Polishing (only existing features)
 
 
 
+todo: Support more Macbook keyboard shortcuts!
+
+Clicking on an window menu item should close menus that are not a child or grandchild of that menu!
+
+todo: In the Angel bracket auto-completion: Check if open parenthesis and also add );
+
+todo: If there is no record loaded, ask the user if he/she want's an intro about screen-casting
+
+SSG preview of web sites that need re-building!?
+
 
 
 
