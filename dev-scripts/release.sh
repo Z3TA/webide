@@ -97,6 +97,7 @@ rm -rf temp/release/linux/client/plugin/jswordwrap/
 rm -rf temp/release/linux/guide/
 rm -rf temp/release/linux/promo/
 rm -rf temp/release/linux/dev-scripts/
+rm -rf temp/release/linux/todo/
 rm -rf temp/release/linux/vagrant/
 
 
