@@ -43,7 +43,7 @@
 		});
 	*/
 	
-	EDITOR.addTest(1, function sftp_enoent(callback) {
+	EDITOR.addTest(function sftp_enoent(callback) {
 		// bug: SFTP does not give proper ENOENT error code when file doesn't exist
 		
 		var protocol = "sftp";

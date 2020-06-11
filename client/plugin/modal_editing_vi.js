@@ -3711,8 +3711,7 @@ toggleVim();
 	
 	
 	
-	EDITOR.addTest(function deleteAndUndoDeleteLineBreakInVimMode(callback) {
-		
+	EDITOR.addTest(false, function deleteAndUndoDeleteLineBreakInVimMode(callback) {
 		EDITOR.openFile("deleteAndUndoDeleteLineBreakInVimMode.js", 'abc\ndef\nghi\n', function(err, file) {
 			
 			var vimWasActive = VIM_ACTIVE;
