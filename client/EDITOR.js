@@ -2113,7 +2113,8 @@ console.log("File saved to disk: " + json.path);
 				}
 				else {
 					console.log("uploadBigFile: Upload failed!");
-					error(new Error("Upload failed! path=" + path + " text=" + UTIL.shortString(text) ));
+					//console.log(x);
+					error(new Error("Upload failed! path=" + path + " x.status=" + x.status + " text=" + UTIL.shortString(text) ));
 				}
 			}
 		};

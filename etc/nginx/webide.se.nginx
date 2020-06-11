@@ -47,7 +47,7 @@ server {
   gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json;
 
   # Upload limit
-  client_max_body_size 2G;
+  client_max_body_size 16G;
 
   # Serve the bundle on request's to / (root)
   location = / {

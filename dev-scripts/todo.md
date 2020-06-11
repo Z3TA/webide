@@ -86,6 +86,14 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
+File was uloaded as base64 ...
+
+
+todo: Remove theme color and let OS decide!
+
+
+
+
 How to test connection.saveData ?
 
 ---
@@ -110,7 +118,24 @@ Problem printing to PDF on Firefox on Windows 10 ...
 https://webide.se/jsPDF/src/modules/addimage.js:288:41
 
 Stacktrace:
-TypeError: jsPDFAPI.loadFile is not a function 
+
+TypeError: jsPDFAPI.loadFile is not a function
+    at getImageDataFromElement (https://webide.se/jsPDF/src/modules/addimage.js:288:41)
+    at Object.jsPDFAPI.getImageProperties (https://webide.se/jsPDF/src/modules/addimage.js:749:25)
+    at Context2D.drawImage (https://webide.se/jsPDF/src/modules/context2d.js:1268:40)
+    at O (https://webide.se/:27:930)
+    at Array.infoRender (https://webide.se/:27:966)
+    at Object.render (https://webide.se/:13:35474)
+    at https://webide.se/:105:2989
+    at doneMaybe (https://webide.se/:105:759)
+    at depLoaded (https://webide.se/:105:804)
+    at HTMLScriptElement.e.onload (https://webide.se/:13:122378) 
+
+TypeError: EDITOR.canvas.focus is not a function
+    at Object.setEditorInputFocus [as input] (https://webide.se/:13:7262)
+    at Object.EDITOR.showFile (https://webide.se/:13:96680)
+    at fileLoaded (https://webide.se/:13:19329)
+    at newFileConstructorFinished (https://webide.se/:11:1548) 
 ---
 
 ---
