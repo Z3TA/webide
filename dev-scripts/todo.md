@@ -86,27 +86,13 @@ Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press t
 What I'm working on
 -------------------
 
-File was uloaded as base64 ...
 
 
-todo: Remove theme color and let OS decide!
 
 
 
 
 How to test connection.saveData ?
-
----
-
-todo: Detect data saving and disable some features that use a lot of bandiwth
-var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-var saveData = connection.saveData;
-
-or Save-Data: on in request header
-
-EDITOR.saveBandwith = true
-
-Some editor functionality has been turned off due to data saver. / in order to save bandwidth/data.
 
 ---
 

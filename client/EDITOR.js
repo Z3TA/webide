@@ -9957,6 +9957,10 @@ EDITOR.discoveryBar.show();
 	
 	//console.log("main function loaded");
 	
+		
+		if(EDITOR.saveBandwith) alertBox("Some editor functionality has been turned off to save data/bandwith (data-saver in enabled on your device)");
+		
+		
 	/*		
 		// Sort and load the start events
 		// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
