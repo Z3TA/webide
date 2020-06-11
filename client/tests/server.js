@@ -55,24 +55,21 @@
 			if(err) throw err;
 			
 			EDITOR.readFromDisk(testFile, function(err) {
-				
 				if(err.code != "ENOENT") throw new Error("Unexpected error code=" + err.code + " err.message=" + err.message);
 				
 				CLIENT.cmd("disconnect", connJson, function(err, json) {
-					console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
+					if(err) console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 					
 					setTimeout(function() {
 						var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
 						if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
-					}, 1000);
 					
+						callback(true);
+						
+					}, 1000);
 				});
-				
 			});
-			
 		});
-		
-		
 	});
 	
 	EDITOR.addTest(function renameFolder(callback) {
