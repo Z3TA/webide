@@ -194,8 +194,11 @@
 					if(err) {
 						console.error(err);
 						
-						if(userValue == DEFAULT_USERNAME) {
-alertBox("Failed to automatically login as " + userValue + "." +
+						if(err.message.indexOf("Username specified in server arguments") != 0) {
+							alertBox("Login with the username/password specified in server command arguments! (admin/admin is default)");
+						}
+						else if(userValue == DEFAULT_USERNAME) {
+							alertBox("Failed to automatically login as " + userValue + "." +
 							" Fill in your username and password below, or <a href='/signup/signup.htm'>Create a New account</a> !\n" +
 							"\n(" + err.message + ")");
 						}
@@ -355,7 +358,7 @@ alertBox("Failed to automatically login as " + userValue + "." +
 		// ### password
 		var labelPw = document.createElement("label");
 		labelPw.setAttribute("for", "serverLoginPw");
-		labelPw.appendChild(document.createTextNode("Username: "));
+		labelPw.appendChild(document.createTextNode("Password: "));
 		form.appendChild(labelPw);
 		
 		var pw = document.createElement("input");
