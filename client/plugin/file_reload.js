@@ -11,9 +11,14 @@
 	});
 	
 	function loadFileReload() {
+		
 		// Both Ctrl+R and Alt+R are protected by Firefox
-		EDITOR.bindKey({desc: S("reload_from_disk"), key: "R", combo: CTRL+SHIFT, fun: reloadFileFromKeyCombo});
+		EDITOR.bindKey({desc: S("reload_from_disk"), charCode: 82, combo: CTRL+SHIFT, fun: reloadFileFromKeyCombo});
+		
 		EDITOR.bindKey({desc: S("reload_from_disk"), key: "BrowserRefresh", combo: CTRL, fun: reloadFileViaBrowserRefresh});
+		
+		EDITOR.bindKey({desc: S("reload_from_disk"), charCode: 82, combo: CTRL, fun: reloadFileFromKeyComboStandalone});
+		
 		
 		EDITOR.on("ctxMenu", reloadFileCtxOption);
 		
@@ -25,10 +30,15 @@
 	function unloadFileReload() {
 		EDITOR.unbindKey(reloadFileFromKeyCombo);
 		EDITOR.unbindKey(reloadFileViaBrowserRefresh);
+		EDITOR.unbindKey(reloadFileFromKeyComboStandalone);
 		
 		EDITOR.removeEvent("ctxMenu", reloadFileCtxOption);
 		EDITOR.windowMenu.remove(winMenuReloadFromDisk);
 		EDITOR.unregisterAltKey(reloadFile);
+	}
+	
+	function reloadFileFromKeyComboStandalone(file) {
+		return reloadFile(file);
 	}
 	
 	function reloadFileViaBrowserRefresh(file) {
