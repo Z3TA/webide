@@ -9907,6 +9907,8 @@ EDITOR.discoveryBar.show();
 					f[i](_serverStorage);
 			}
 		});
+
+UTIL.setCookie("user", login.user, 999);
 	});
 	
 		CLIENT.on("workerClose", function() {

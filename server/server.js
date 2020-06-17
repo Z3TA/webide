@@ -3616,8 +3616,21 @@ function handleHttpRequest(request, response) {
 				https://glitch.com/~web-share-offline
 			*/
 			
+			log("File upload: request.headers=" + JSON.stringify(request.headers), DEBUG);
+			
+			var cookie = request.headers.cookie;
+			var cookieMatchUser = cookie.match(/user=([^;]*)?/);
+			if(cookieMatchUser) {
+				sendToUser = cookieMatchUser[1];
+				log("File upload: Found sendToUser=" + sendToUser + " in cookies!", INFO);
+			}
+			
+			if(!sendToUser) {
+				log("File upload: USER_CONNECTIONS=" + JSON.stringify(Object.keys(USER_CONNECTIONS)));
+				
 			var conn, ip;
 			conns: for(var username in USER_CONNECTIONS) {
+					log("File upload: Checking connections for username=" + username, DEBUG);
 				for(var connectionId in USER_CONNECTIONS[username].connections) {
 					conn = USER_CONNECTIONS[username].connections[connectionId];
 					ip = getIp(conn);
@@ -3626,8 +3639,13 @@ function handleHttpRequest(request, response) {
 						log("File upload: User found: " + sendToUser, INFO);
 						break conns;
 					}
+						else {
+							log("File upload: Not a match: User " + username  + " ip=" + ip + ". Uploader IP=" + IP, DEBUG);
+						}
+						
 					//log(UTIL.objInfo(conn), INFO);
 				}
+			}
 			}
 			
 			var busboy = new Busboy({ headers: request.headers });
@@ -3658,7 +3676,7 @@ function handleHttpRequest(request, response) {
 				log('File upload: Done parsing form!', DEBUG);
 				
 				var done = function(uploadMessage) {
-log("File upload: done! uploadMessage=" + uploadMessage, DEBUG);
+					log("File upload: done! uploadMessage=" + uploadMessage, DEBUG);
 					response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
 					response.end(uploadMessage);
 				}
