@@ -4,6 +4,9 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
+Optemize for large files,
+minified files are problematic, eg. files with one long line.
+
 A battery saving mode!? (turn off parser?)
 Monitor CPU usage while using the editor to see if there is anything we can optimize to save battery
 
