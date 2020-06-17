@@ -3623,7 +3623,7 @@ function handleHttpRequest(request, response) {
 					ip = getIp(conn);
 					if(ip == IP) {
 						sendToUser = username;
-						log("User found: " + sendToUser, INFO);
+						log("File upload: User found: " + sendToUser, INFO);
 						break conns;
 					}
 					//log(UTIL.objInfo(conn), INFO);
@@ -3632,13 +3632,13 @@ function handleHttpRequest(request, response) {
 			
 			var busboy = new Busboy({ headers: request.headers });
 			busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-				log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype, DEBUG);
+				log('File upload: File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype, DEBUG);
 				file.on('data', function(data) {
-					log('File [' + fieldname + '] got ' + data.length + ' bytes', DEBUG);
+					log('File upload: File [' + fieldname + '] got ' + data.length + ' bytes', DEBUG);
 					
 				});
 				file.on('end', function() {
-					log('File [' + fieldname + '] Finished', DEBUG);
+					log('File upload: File [' + fieldname + '] Finished', DEBUG);
 				});
 				
 				// Save file in temp dir, then move it to the user home dir.
@@ -3648,16 +3648,17 @@ function handleHttpRequest(request, response) {
 				
 			});
 			busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-				log('Field [' + fieldname + ']: value: ', val, DEBUG);
+				log('File upload: Field [' + fieldname + ']: value: ', val, DEBUG);
 				
 				if(fieldname == "user") sendToUser = val;
 				else if(fieldname == "open" && val=="false") notifyUser = false;
 				
 			});
 			busboy.on('finish', function() {
-				log('Done parsing form!', DEBUG);
+				log('File upload: Done parsing form!', DEBUG);
 				
 				var done = function(uploadMessage) {
+log("File upload: done! uploadMessage=" + uploadMessage, DEBUG);
 					response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
 					response.end(uploadMessage);
 				}
@@ -3668,6 +3669,7 @@ function handleHttpRequest(request, response) {
 					done("Error: Did not recieve any files!");
 				}
 				else if(sendToUser) {
+					log("File upload: sendToUser=" + sendToUser, DEBUG);
 					
 					var copyFile = function copyFile(fromPath, username, fileName) {
 						
@@ -3675,7 +3677,7 @@ function handleHttpRequest(request, response) {
 						var toPath = uploadFolder + fileName;
 						
 						// First create the upload dir if it doesn't already exist
-						log("Checking folder: " + uploadFolder, DEBUG);
+						log("File upload: Checking folder: " + uploadFolder, DEBUG);
 						module_fs.stat(uploadFolder, function(err, stats) {
 							if(err) {
 								if(err.code == "ENOENT") {
@@ -3692,11 +3694,11 @@ console.error(err);
 								else throw err;
 							}
 							else if(stats.isDirectory()) {
-								log("Folder exist: " + uploadFolder, DEBUG);
+								log("File upload: Folder exist: " + uploadFolder, DEBUG);
 								folderCreated(uploadFolder);
 							}
 							else {
-								log("Not a directory: " + uploadFolder, DEBUG);
+								log("File upload: Not a directory: " + uploadFolder, DEBUG);
 								filesFailed.push(fileName, " Error: Problem with upload folder");
 								filesMovedCount++;
 								doneMaybe();
@@ -3705,7 +3707,7 @@ console.error(err);
 						
 						function folderCreated(uploadFolder) {
 							
-							log("Copying file: " + fromPath + " to " + toPath, DEBUG);
+							log("CFile upload: opying file: " + fromPath + " to " + toPath, DEBUG);
 							module_fs.copyFile(fromPath, toPath, fileCopied);
 						}
 						
@@ -3724,12 +3726,12 @@ console.error(err);
 								
 								if(notifyUser) {
 								if(USER_CONNECTIONS.hasOwnProperty(username)) {
-									log("Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
+										log("File upload: Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
 									sendToAll(username, {uploadedFiles: uploadedFiles});
 								}
 								else {
 									uploadMessage += "Warning: " + username + " is not online!";
-									log("User " + username + " not online!", INFO);
+										log("File upload: User " + username + " not online!", INFO);
 								}
 								}
 								done(uploadMessage);
@@ -3743,11 +3745,11 @@ console.error(err);
 								filesFailed.push(fileName, " Error: " + err.message);
 							}
 							else {
-								log("Copied file to " + toPath, DEBUG);
+								log("File upload: Copied file to " + toPath, DEBUG);
 								uploadedFiles.push(fileName);
 								module_fs.unlink(fromPath, function(err) {
 									if(err) console.error(err);
-									else log("Deleted " + fromPath, DEBUG);
+									else log("File upload: Deleted " + fromPath, DEBUG);
 								});
 								
 								readEtcPasswd(username, function(err, user) {
@@ -3757,7 +3759,7 @@ console.error(err);
 									}
 									module_fs.chown(toPath, user.uid, user.gid, function(err) {
 										if(err) console.error(err);
-										else log("Changed ownership of " + toPath + " to " + username, DEBUG);
+										else log("File upload: Changed ownership of " + toPath + " to " + username, DEBUG);
 									});
 								});
 								
@@ -3774,14 +3776,14 @@ console.error(err);
 					
 					// Does user exist ?
 					var homeDir = HOME_DIR + sendToUser;
-					log("Checking folder: " + homeDir, DEBUG);
+					log("File upload: Checking folder: " + homeDir, DEBUG);
 					module_fs.stat(homeDir, function(err, stats) {
 						if(err) {
-							log("Folder not found: " + homeDir + " Assuming user doesnt exist.", DEBUG);
+							log("File upload: Folder not found: " + homeDir + " Assuming user doesnt exist.", DEBUG);
 							done("Error: User does not exist:" + sendToUser);
 						}
 						else if(stats.isDirectory()) {
-							log("Folder exist: " + homeDir + "", DEBUG);
+							log("File upload: Folder exist: " + homeDir + "", DEBUG);
 							
 							var fileName;
 							for (var i=0; i<files.length; i++) {
