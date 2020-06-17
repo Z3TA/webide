@@ -232,7 +232,8 @@ alert("Debug mode enabled!");
 	}
 	
 	function toggleDevMode() {
-		
+		EDITOR.ctxMenu.hide();
+
 		EDITOR.settings.devMode = EDITOR.settings.devMode ? false : true;
 		console.warn("Toggling devMode = " + EDITOR.settings.devMode + " callstack: " + UTIL.getStack("toggleDevMode"));
 		
@@ -246,11 +247,9 @@ alert("Debug mode enabled!");
 			disableDevMode();
 			console.log("devMode disabled");
 		}
-		EDITOR.ctxMenu.hide();
 		
 		return false;
-		
-	}
+		}
 	
 	function showDevTools() {
 		if(RUNTIME=="nw.js") {
