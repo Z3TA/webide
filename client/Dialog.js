@@ -147,7 +147,7 @@ function Dialog(msg, options) {
 	// Also avoid accidently closing the dialog (while typing spaces)
 	if(dialogDelay === 0) return 0; // Manually set focus
 	if(dialogDelay == undefined) dialogDelay = 2000;
-	setTimeout(focusDefaultElement, dialogDelay); 
+	dialog.focusTimeout = setTimeout(focusDefaultElement, dialogDelay); 
 	
 	return 0;
 	
@@ -190,6 +190,8 @@ Dialog.prototype.close = function(someEvent, callback) {
 	
 CURRENTLY_OPEN_DIALOGS--;
 
+	if(dialog.focusTimeout) clearTimeout(dialog.focusTimeout);
+	
 	if(typeof EDITOR != "undefined") {
 	EDITOR.openDialogs.splice(EDITOR.openDialogs.indexOf(dialog), 1);
 	
