@@ -187,12 +187,15 @@ sendit();
 		if(!EDITOR.settings.devMode) {
 			// People are generally *very* bad at reporting bugs, only 1 in 10000 bugs will be reported.
 			// So send away a mini report, while trying not to leak any personal data
+			
 			var miniReport = source + ":" + lineno + ":" + colno + "\n" + 
 			"\nStacktrace:\n" + (error && error.stack) + "\n" + 
 			"\nCurrent file: " + EDITOR.currentFile.path + "\n" + 
-			"Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")";
-			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: miniReport, namn: 'WebIDE', subject: message }, function (err, respStr) {
-			});
+			"Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n" +
+			"Last server msg: " + UTIL.shortString(JSON.stringify(CLIENT.lastMsgFromServer, null, 2)) + "\n" + 
+			"";
+			
+			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: miniReport, namn: 'WebIDE', subject: message }, function (err, respStr) {});
 		}
 	}
 	
@@ -266,6 +269,8 @@ sendit();
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
+		var lastMsgFromServer = CLIENT.lastMsgFromServer;
+		
 		console.log("selfDebug: Asking the user what to do...");
 		var dialog = confirmBox("" + sourceLink + lineString + message + " (code=" + (error && error.code) + ")<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
@@ -283,17 +288,14 @@ sendit();
 			}
 			else if(answer == sendBugReport) {
 				var errorReportFilePath = "bugreport.txt";
-				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
+				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error, lastMsgFromServer), function errorReportOpened(err, file) {
 					if(err && typeof GUI != "undefined") GUI.showDevTools(); // nw.js
 					
 					if(err) return alertBox("Unable to open errorReportFilePath=" + errorReportFilePath + " Error: " + err.message);
 					
-					file.moveCaretToEndOfFile(file.caret, function() {
-						file.scrollToCaret(file.caret);
-					});
+					// Select the row that contains repeat instructions
+					file.select(file.grid[4]);
 				});
-				
-				
 			}
 			
 			if(document && document.body && document.body.contains(death)) document.body.removeChild(death);
@@ -363,13 +365,23 @@ if(document && document.body) document.body.appendChild(death);
 	}
 	
 	
-	function reportTemplate(errMessage, source, lineno, colno, error) {
+	function reportTemplate(errMessage, source, lineno, colno, error, lastMsgFromServer) {
 		// Create a template used to report bugs
 		
 		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
 		
 		var message = 'To: "Editor bug report" <zeta@zetafiles.org>\n' +
 		'Subject: WebIDE ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
+		'\n' +
+		'How to repeat:\n' +
+		'Please provide instruction on how to reproduce the error!\n' +
+		'\n' +
+		'\n' +
+		'\n' +
+		'How to send: Use keybord shortcut: ' + EDITOR.getKeyFor(sendBugReport) + ',\n' +
+		'or right click and choose "Send bug report" via the context menu.\n' +
+		'(this only works if "bugreport" is in the file-name)\n' +
+		'Or send the bug report via e-mail (to the e-mail address at the top)\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +
@@ -382,15 +394,8 @@ if(document && document.body) document.body.appendChild(death);
 		'\n' +
 		(error ? error.stack + '\n' : "") +
 		'\n' +
-		'How to repeat:\n' + 
-		'Please provide instruction on how to reproduce the error!\n' + 
-		'\n' + 
-		'\n' + 
-		'\n' + 
-		'How to send: Use keybord shortcut: ' + EDITOR.getKeyFor(sendBugReport) + ',\n' + 
-		'or right click and choose "Send bug report" via the context menu.\n' + 
-		'(this only works if "bugreport" is in the file-name)\n' + 
-		'Or send the bug report via e-mail (to the e-mail address at the top)\n';
+		"Last server msg: " + UTIL.shortString(JSON.stringify(lastMsgFromServer, null, 2), 4096) + "\n" + 
+		"";
 		
 		return message;
 	}

@@ -51,6 +51,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.pingTimeout = 10000;
 	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 	CLIENT.inFlight = 0;
+	CLIENT.lastMsgFromServer = null; // Used for debugging
 	
 	var checkEditorInterval = setInterval(checkEditor);
 	
@@ -534,6 +535,8 @@ reconnectTimeoutTime += 10000;
 				return;
 			}
 			
+CLIENT.lastMsgFromServer = json;
+
 			if(json.error) {
 				console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
 			}
