@@ -726,7 +726,9 @@ process.on('message', function commandMessage(message) {
 			funToRun(user, json, function ranApi(err, answer) {
 				if(err) {
 					
-					if(typeof err.stack != "string" || err.stack.indexOf("\n") == -1) console.trace("Stack ...")
+					if(typeof err.stack != "string" || err.stack.indexOf("\n") == -1) {
+console.trace("Did not get a proper stack for err=" + JSON.stringify(err, null, 2));
+					}
 					else {
 						log("err.stack=" + JSON.stringify(err.stack));
 					}
