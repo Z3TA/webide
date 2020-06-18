@@ -345,17 +345,21 @@
 		}
 		
 		//console.log("defaultIndentationCharacters=" + defaultIndentationCharacters + " (" + defaultIndentationCharacters.length + ")");
-		console.log("currentIndentationCharacters='" + currentIndentationCharacters + "' (" + currentIndentationCharacters.length + ")");
-		console.log("shouldHaveIndentationCharacters='" + shouldHaveIndentationCharacters + "' (" + shouldHaveIndentationCharacters.length + ")");
+		console.log("fixIndentation: currentIndentationCharacters='" + currentIndentationCharacters + "' (" + currentIndentationCharacters.length + ")");
+		console.log("fixIndentation: shouldHaveIndentationCharacters='" + shouldHaveIndentationCharacters + "' (" + shouldHaveIndentationCharacters.length + ")");
 		
 		if(shouldHaveIndentationCharacters == currentIndentationCharacters) {
+			console.log("fixIndentation: Same characters!");
 			return; // Do nothing 
 		}
 		else if(currentIndentationCharacters.length == shouldHaveIndentationCharacters.length) {
+			console.log("fixIndentation: Same character length! replacing.");
 			// We only have to replace them!
 			gridRow.indentationCharacters = shouldHaveIndentationCharacters;
 		}
 		else {
+			console.log("fixIndentation: Updating characters...");
+			
 			// We'll remove the current characters and add the new ones
 			charactersToRemove = currentIndentationCharacters.length;
 			charactersToAdd = shouldHaveIndentationCharacters.length;
@@ -478,6 +482,54 @@
 		
 		return false;
 	}
+	
+	
+	// TEST-CODE-START
+	
+	EDITOR.addTest(1, function pastedTextShouldBeFormatted(callback) {
+		// Test pasting in a file that we don't own the lines!
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/pastedTextShouldBeFormatted.js"), '{\n\n\n\n}\n', function(err, file) {
+			if(err) throw err;
+			
+			file.moveCaretDown();
+			file.moveCaretDown();
+			
+			EDITOR.onPaste(new ClipboardEvent('paste', {
+				dataType: 'text/plain',
+				data: 'if(1==2) {\nconsole.log("hi");\n}\n'
+			}));
+			
+			// Note: The actual bug was that the *text saved to disk* was not formatted!
+			
+			EDITOR.deleteFile(file.path, function() {
+				EDITOR.saveFile(file, file.path, function(err, path) {
+					if(err) throw err;
+					
+					UTIL.assert(file.grid[3].indentationCharacters.length, 2);
+					
+					EDITOR.closeFile(path);
+					
+					// Wait so that editor don't complain about the file it just closed is still open
+					setTimeout(function() {
+						EDITOR.openFile(path, function(err, file) {
+							
+							UTIL.assert(file.grid[3].indentationCharacters.length, 2);
+							
+							EDITOR.closeFile(file);
+							
+							EDITOR.deleteFile(path, function() {
+								if(err) throw err;
+								callback(true);
+							});
+						});
+					}, 200);
+					
+				});
+			});
+		});
+	});
+	
+	// TEST-CODE-END
 	
 	
 })();

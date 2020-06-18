@@ -1769,31 +1769,9 @@ if(fileParse !== undefined) {
 			path = trimmedPath;
 		}
 		
-		
-		// Save the text, do not count on the garbage collector the be "slow"
-		
-		if(file instanceof ImageFile) {
-			var text = file.canvas.toDataURL("image/png");
-			if(text.indexOf("base64,") == -1) throw new Error("text does not contain base64, !! text=" + text);
-			
-			console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
-			
-			var quoted = (text.slice(0,1) == text.slice(-1) == '"'); // Some images doesn't get a quote around them!
-			
-			if(quoted) text = text.slice(text.indexOf("base64,") + 7, -1);
-			else text = text.slice(text.indexOf("base64,") + 7);
-			
-			console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
-			
-			var encoding = "base64";
-			var isImage = true;
-		}
-		else {
-			var text = file.text;
-			var encoding = "utf-8";
-			var isImage = false;
-		}
 		var isBuffer = false;
+		
+		var encoding, text; // Will be populated after beforeSave functions have run
 		
 		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors, returns) {
 			if(errors.length > 0) {
@@ -1834,6 +1812,28 @@ error.code = fName;
 		
 		function beginSaving() {
 			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
+			
+			if(file instanceof ImageFile) {
+				text = file.canvas.toDataURL("image/png");
+				if(text.indexOf("base64,") == -1) throw new Error("text does not contain base64, !! text=" + text);
+				
+				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+				
+				var quoted = (text.slice(0,1) == text.slice(-1) == '"'); // Some images doesn't get a quote around them!
+				
+				if(quoted) text = text.slice(text.indexOf("base64,") + 7, -1);
+				else text = text.slice(text.indexOf("base64,") + 7);
+				
+				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+				
+				encoding = "base64";
+				var isImage = true;
+			}
+			else {
+				text = file.text;
+				encoding = "utf-8";
+				var isImage = false;
+			}
 			
 			if(file.nativeFileSystemFileHandle) {
 				
@@ -9907,8 +9907,8 @@ EDITOR.discoveryBar.show();
 					f[i](_serverStorage);
 			}
 		});
-
-UTIL.setCookie("user", login.user, 999);
+			
+			UTIL.setCookie("user", login.user, 999);
 	});
 	
 		CLIENT.on("workerClose", function() {
@@ -11345,7 +11345,7 @@ function paste(pasteEvent) {
 	
 }
 
-
+	EDITOR.onPaste = paste; // Used for automated tests
 
 
 /*
