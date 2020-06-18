@@ -1412,7 +1412,7 @@ if(fileParse !== undefined) {
 				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
 			else if(err) {
-				alertBox("EDITORT.openFile: Error when opening " + path + "\n" + err.message);
+				alertBox("EDITOR.openFile: Error when opening " + path + "\n" + err.message);
 			}
 			else if(file) {
 				console.log("No callback for file.path=" + file.path);

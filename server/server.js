@@ -3743,6 +3743,8 @@ console.error(err);
 								}
 								
 								if(notifyUser) {
+									// Chrome PWA will close, then re-open the app when sharing files to it, so wait until it has reopened before notifying the user
+setTimeout(function() {
 								if(USER_CONNECTIONS.hasOwnProperty(username)) {
 										log("File upload: Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
 									sendToAll(username, {uploadedFiles: uploadedFiles});
@@ -3751,6 +3753,8 @@ console.error(err);
 									uploadMessage += "Warning: " + username + " is not online!";
 										log("File upload: User " + username + " not online!", INFO);
 								}
+									}, 4000);
+									
 								}
 								done(uploadMessage);
 							}

@@ -41,7 +41,7 @@ desc: "Allow sharing stuff with other apps",
 		console.log("uploadedFiles: " + JSON.stringify(fileNames));
 		
 		for(var i=0, path; i<fileNames.length; i++) {
-			path = "/upload/" + fileNames[i];
+			path = UTIL.joinPaths(EDITOR.user.homeDir, "/upload/", fileNames[i]);
 			EDITOR.openFile(path);
 		}
 		
