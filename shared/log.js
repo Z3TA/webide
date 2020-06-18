@@ -132,7 +132,8 @@ function log(msg, lvl, noTrace) {
 			}
 			else {
 				if(lvl <= _warning) CONSOLE_WARN_ORIGINAL(msgString);
-				else process._rawDebug(msgString);
+else CONSOLE_LOG_ORIGINAL(msgString);
+				//else process._rawDebug(msgString);
 				/*
 					process._rawDebug is faster then console.log
 					
