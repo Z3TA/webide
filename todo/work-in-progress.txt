@@ -3,7 +3,14 @@
 What I'm working on
 -------------------
 
+test web share, uploading image for a blog post
+
+
+USER ONBOARDING! Show features and how to use them.
+
+
 Go through this file and relentlessly delete stuff
+
 
 
 
