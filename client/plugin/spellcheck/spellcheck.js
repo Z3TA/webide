@@ -101,6 +101,8 @@ var suggestWord = null; // Used to prevent double lookups
 	function spellcheckWordOnCaret(file, combo, caret, target) {
 		if(!file) return ALLOW_DEFAULT;
 		
+if(!(file instanceof File)) return ALLOW_DEFAULT;
+
 		if(target.id != "editorCanvas") return;
 		
 		var caretAt = file.wordAtCaret(caret);
