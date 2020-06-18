@@ -3660,7 +3660,7 @@ function handleHttpRequest(request, response) {
 				});
 				
 				// Save file in temp dir, then move it to the user home dir.
-				var saveTo = module_path.join(module_os.tmpDir(), module_path.basename(fieldname));
+				var saveTo = module_path.join(module_os.tmpDir(), module_path.basename(filename || fieldname));
 				file.pipe(module_fs.createWriteStream(saveTo));
 				files.push(saveTo);
 				
