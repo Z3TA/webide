@@ -4176,6 +4176,9 @@ spawnOptions.env.HOST = netnsIP;
 		
 		worker.stderr.on("data", function workerExit(data) {
 			log(data.toString());
+			
+			reportError(username + " worker process stderr: " + data);
+			
 		});
 
 	}
