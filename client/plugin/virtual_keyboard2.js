@@ -384,10 +384,10 @@
 			console.log("Builtin already active!");
 			return;
 		}
-
-if(!(file instanceof File)) return;
-
-
+		
+		if(EDITOR.currentFile && !(EDITOR.currentFile instanceof File)) return;
+		
+		
 		var wrapper = document.getElementById("virtualKeyboard2");
 		wrapper.style.display="block";
 		

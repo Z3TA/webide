@@ -1771,7 +1771,7 @@ if(fileParse !== undefined) {
 		
 		var isBuffer = false;
 		
-		var encoding, text; // Will be populated after beforeSave functions have run
+		var isImage, encoding, text; // Will be populated after beforeSave functions have run
 		
 		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors, returns) {
 			if(errors.length > 0) {
@@ -1827,12 +1827,12 @@ error.code = fName;
 				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
 				
 				encoding = "base64";
-				var isImage = true;
+				isImage = true;
 			}
 			else {
 				text = file.text;
 				encoding = "utf-8";
-				var isImage = false;
+				isImage = false;
 			}
 			
 			if(file.nativeFileSystemFileHandle) {

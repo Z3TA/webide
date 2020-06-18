@@ -60,7 +60,8 @@ return keyboard_arrows_moveRight(file, combo);
 		
 		if(!EDITOR.input) return true;
 		if(!file) return true;
-		
+		if(!(file instanceof File)) return ALLOW_DEFAULT;
+
 		console.log("keyboard_arrows_moveRight: Moving caret right ... combo=" + JSON.stringify(combo));
 		
 		// Holding down ctrl should step a while word!?

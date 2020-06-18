@@ -6,6 +6,8 @@ What I'm working on
 test web share, uploading image for a blog post
 
 
+bug: cursor did not switch back to text after opening a image, then switching back to a text file...
+
 USER ONBOARDING! Show features and how to use them.
 
 
