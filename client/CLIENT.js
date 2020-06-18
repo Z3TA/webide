@@ -541,7 +541,19 @@ CLIENT.lastMsgFromServer = json;
 				console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
 			}
 			
-			if(json.code && json.code == "WORKER_CLOSE") CLIENT.fireEvent("workerClose");
+			if(json.code && json.code == "WORKER_CLOSE") {
+CLIENT.fireEvent("workerClose");
+				
+				/*
+					The user worker process closing means that all requests in flight will fail!
+					Should we tell all callbacks that that the worker closed?
+					Should we clear all timeout timers!?
+					
+				*/
+			
+
+
+}
 			
 			if(json.resp) {
 				var resp = json.resp;
