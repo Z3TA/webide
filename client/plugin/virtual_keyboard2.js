@@ -1471,7 +1471,7 @@ fun: function space(click) {
 				else throw new Error("Unknown lastUsedKeyboard=" + lastUsedKeyboard);
 			}
 			
-			if(EDITOR.currentFile && !usePhysical) {
+			if(EDITOR.currentFile && !usePhysical && (EDITOR.currentFile instanceof File)) {
 				// Wait for the resize, then scroll to the caret (where you clicked)
 				setTimeout(function() {
 					EDITOR.currentFile.scrollToCaret();
