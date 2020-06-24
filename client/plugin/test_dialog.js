@@ -12,7 +12,7 @@
 		load: function loadTestDialog() {
 			var charCode_D = 68;
 
-EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
+			EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: ALT + SHIFT, fun: testDialogs});
 			
 		},
 		unload: function unloadTestDialog() {
@@ -45,7 +45,7 @@ function testDialogs() {
 	
 	//confirm("Are you sure you want eat this?");
 	
-		promptBox("What is your name?", function(answer) {alert(answer);});
+		promptBox("What is your name?<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>Line2<br>", function(answer) {alert(answer);});
 	
 	//var q = prompt("What is your name?");
 	
