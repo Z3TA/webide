@@ -227,6 +227,8 @@ EDITOR.putIntoClipboard(rgbStr);
 	
 	function showImageFileMaybe(file) {
 		
+		console.log("image_editor: showImageFileMaybe: file.path=" + file.path);
+		
 		if(file.canvas != undefined) {
 			enableImageMode(file);
 		}
@@ -240,6 +242,9 @@ EDITOR.putIntoClipboard(rgbStr);
 	}
 	
 	function enableImageMode(file) {
+		
+		console.log("image_editor: enableImageMode:imageModeAlreadyEnabled=" + imageModeAlreadyEnabled);
+		
 		if(imageModeAlreadyEnabled) return showOtherImage(file);
 		
 		EDITOR.canvas.style.cursor = 'default';
@@ -251,9 +256,12 @@ EDITOR.putIntoClipboard(rgbStr);
 		EDITOR.on("mouseClick", addToPath);
 		
 		imageModeAlreadyEnabled = true;
+		imageModeAlreadyDisabled = false;
 	}
 	
 	function disableImageMode() {
+		console.log("image_editor: enableImageMode:imageModeAlreadyDisabled=" + imageModeAlreadyDisabled);
+		
 		if(imageModeAlreadyDisabled) return;
 		
 		EDITOR.canvas.style.cursor = 'text';
