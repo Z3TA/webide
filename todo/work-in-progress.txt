@@ -3,6 +3,9 @@
 What I'm working on
 -------------------
 
+
+issue: Image toolbar does not dissapper when you close image
+
 test web share, uploading image for a blog post
 
 todo: Source map on JSuglify!? (the minified bundle)
