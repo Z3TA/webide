@@ -10,12 +10,11 @@
 	}
 	
 	function backSpace(file, combo, character, charCode, keyPush) {
+		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
-		if(EDITOR.input) {
-			
 			if(!file) {
 				console.warn("No file! Keyboard backspace will do default (browser) action");
-				return true;
+			return ALLOW_DEFAULT;
 			}
 			
 			var caret = file.caret;
@@ -54,11 +53,10 @@
 				But not if we're on a widget ...
 			*/ 
 			return false; 
-		}
 		
-		return true;
 		
 	}
 	
 	
 })();
+

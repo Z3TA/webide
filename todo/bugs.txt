@@ -939,6 +939,8 @@ Issues with Hg annotations after hot reloading the plugin!
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+rare: When in a textarea you press backspace, and text is deleted both in the textarea and the editor...
+
 ---
 Problem printing to PDF on Firefox on Windows 10 ...
 https://webide.se/jsPDF/src/modules/addimage.js:288:41
