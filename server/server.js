@@ -4516,7 +4516,7 @@ spawnOptions.env.HOST = netnsIP;
 		function workerResp(err, resp) {
 			if(id == undefined) throw new Error("id=" + id);
 			var obj = {id: id, parentResponse: resp};
-			if(err) obj.err = err.message ? {message: err.message, code: err.code} : err;
+			if(err) obj.err = err.message ? {message: err.message, code: err.code, stack: err.stack} : err;
 			worker.send(obj);
 		}
 		

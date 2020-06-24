@@ -727,7 +727,7 @@ process.on('message', function commandMessage(message) {
 				if(err) {
 					
 					if(typeof err.stack != "string" || err.stack.indexOf("\n") == -1) {
-console.trace("Did not get a proper stack for err=" + JSON.stringify(err, null, 2));
+console.trace(user.name + ": Did not get a proper stack for err=" + JSON.stringify(err, null, 2));
 					}
 					else {
 						log("err.stack=" + JSON.stringify(err.stack));
