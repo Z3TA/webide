@@ -12,7 +12,7 @@ var DIALOG_Z_INDEX = 256;
 var DIALOG_LAST_MSG = "";
 var MAX_OPEN_DIALOGS = 10;
 var CURRENTLY_OPEN_DIALOGS = 0;
-
+var FULL_SCRFEEN_DIALOG_COUNT = 0;
 
 function Dialog(msg, options) {
 	var dialog = this;
@@ -134,8 +134,34 @@ function Dialog(msg, options) {
 	
 	var sligtlyUp = 32; // Space for buttons and stuff
 	
+	if(windowHeight < 500 || windowWidth < 500) {
+		dialog.fullScreen = true;
+		
+		div.style.position="relative";
+		div.style.border="0px solid";
+		div.style.top="0px";
+		div.style.width="100%";
+		div.style.height="100%";
+		div.style.overflow="scroll";
+		div.style.borderRadius="0px";
+		div.style.marginLeft="0px";
+		div.style.marginRight="0px";
+		div.style.maxWidth="none";
+		
+		FULL_SCRFEEN_DIALOG_COUNT++;
+		EDITOR.scrollingEnabled = true;
+		
+		dialogDelay = 0;
+		
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "none";
+		
+	}
+	else {
+		dialog.fullScreen = false;
 	div.style.top = Math.round(windowHeight / 2 - divHeight/2 - sligtlyUp) + "px";
 	div.style.left = Math.round(windowWidth / 2 - divWidth/2) + "px";
+	}
 	
 	if(typeof EDITOR != "undefined") {
 		// Give the focus to the box
@@ -204,8 +230,19 @@ CURRENTLY_OPEN_DIALOGS--;
 	if(dialog.div.parentElement) dialog.div.parentElement.removeChild(dialog.div);
 	else console.warn("Parent element does not exist for div=", dialog.div);
 	
+	if(dialog.fullScreen) {
+		FULL_SCRFEEN_DIALOG_COUNT--;
+		if(FULL_SCRFEEN_DIALOG_COUNT < 0) throw new Error("FULL_SCRFEEN_DIALOG_COUNT=" + FULL_SCRFEEN_DIALOG_COUNT);
+		if(FULL_SCRFEEN_DIALOG_COUNT == 0) {
+			EDITOR.scrollingEnabled = false;
+			
+			var wireframe = document.getElementById("wireframe");
+			wireframe.style.display = "block";
+		}
+	}
+	
 	if(dialog.editorHadInputFocus) {
-
+		
 		if(!EDITOR.input) {
 			console.log("Dialog.prototype.close: Giving focus/input back to the editor. EDITOR.input=" + EDITOR.input);
 			EDITOR.input = true;
