@@ -66,10 +66,12 @@ console.warn("A2HS: Already got appinstalled event!");
 		return;
 		}
 		
-		EDITOR.windowMenu.remove(windowMenuAdd2HS);
+		if(windowMenuAdd2HS) {
+EDITOR.windowMenu.remove(windowMenuAdd2HS);
 		windowMenuAdd2HS = null;
+		}
 		
-installed = true;
+		installed = true;
 
 return;
 

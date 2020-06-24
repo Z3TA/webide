@@ -5,6 +5,7 @@ What I'm working on
 
 test web share, uploading image for a blog post
 
+todo: Source map on JSuglify!? (the minified bundle)
 
 bug: cursor did not switch back to text after opening a image, then switching back to a text file...
 
