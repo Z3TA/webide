@@ -8,8 +8,8 @@
 	
 	var firstRunMsg = "";
 	var firstRunMsgDefault = "This program was started from the IDE\n" + 
-	"(Which gives you inline console log's and Error message.)\n" + 
-	"If there however are problems, try running the script from the Terminal instead.\n";
+	"(that gives you inline console log's and Error message.)\n" + 
+	"But if there is a problem, try running the script from the Terminal instead. (Right click > Terminal emulator)\n";
 	
 	var winMenuStartScript, winMenuStopScript;
 	
@@ -206,9 +206,9 @@ nodeJsBanner.hide();
 	function updateRunMsg(login) {
 		//alertBox(JSON.stringify(login));
 		if(login.user != "admin" && login.platform != "win32") {
-			firstRunMsg = firstRunMsgDefault + "Don't forget to use unix pipes instead of port numbers!\n" +
-			'Replace for example port 80 with "/sock/socketname" and access it from socketname.' + login.user + "." + location.hostname + "\n" +
-			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /sock/socketname file)\n';
+			firstRunMsg = firstRunMsgDefault + 'To access port 8080 go to http://8080.' + login.user + '.' + location.hostname + 
+			' or for unix sockets placed in /home/' + login.user + '/sock/socketname go to http://socketname.' + login.user + '.' + location.hostname + "\n" +
+			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /home/' + login.user + '/sock/socketname file)\n';
 			}
 		
 		if(login.netnsIP && !UTIL.isIP(TLD)) {
