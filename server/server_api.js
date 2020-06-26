@@ -1187,7 +1187,12 @@ str = decoder.write(data);
 		console.log("Read from disk: path=" + path);
 		
 				fs.readFile(path, function(err, buffer) {
-			if(err) return callback(err);
+			if(err) {
+				// fs.readFile does not give a proper error...
+				var error = new Error(err.message);
+				error.code = err.code;
+				return callback(error);
+			}
 			else {
 			//shasum.update(buffer.toString(encoding));
 			shasum.update(buffer); // Doesn't seem to matter if you pass it buffer or utf8 string!
