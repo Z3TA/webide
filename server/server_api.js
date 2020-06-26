@@ -1497,8 +1497,11 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	}
 
 	function checkSize(err, stats) {
-		
-		if(err) callback(err);
+		if(err) {
+			var error = new Error(err.message);
+			error.code = err.code;
+			return callback(error);
+		}
 		else callback(null, {size: stats["size"]});
 		
 	}
