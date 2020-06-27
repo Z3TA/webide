@@ -4,7 +4,17 @@ What I'm working on
 -------------------
 
 
+
 test web share, uploading image for a blog post
+
+
+regression? When editing yml file and pressing enter the line do not get indented
+Also when pressing tab I get tabs while the file only uses spaces for indentation!
+
+idea: See git/hg branch when you hover a file tab
+
+regression: Even the .editorconfig says use spaces! 
+
 
 bug: cursor did not switch back to text after opening a image, then switching back to a text file...
 
@@ -13,6 +23,10 @@ USER ONBOARDING! Show features and how to use them.
 
 Go through this file and relentlessly delete stuff
 
+
+todo: don't hide the cursor when pressing two spaces in a row (when manually indenting code) 
+
+idea: yml syntax checker/parser so that you don't have to push just to find out there is a syntax error in the yml 
 
 
 
