@@ -554,12 +554,9 @@ API.readLines = function readLines(user, json, callback) {
 		function streamError(err) {
 			console.log("Stream error! path=" + path);
 		
-		// Stream error doesn't appear to give a proper callstack!
-		if(typeof err.stack == "undefined") {
-			var error = new Error(JSON.stringify(err));
+		// Stream errors doesn't appear to give a proper callstack!
+		var error = new Error(JSON.stringify(err));
 			error.code = err.code;
-		}
-		else error = err;
 		
 		if(callback) callback(error);
 			callback = null;

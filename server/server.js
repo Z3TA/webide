@@ -3480,7 +3480,7 @@ function removeHttpEndpoint(username, folder, callback) {
 	}
 	
 	if(endpointDeleted) callback(null, folder);
-	else callback("Endpoint to folder=" + folder + " not found!");
+	else callback(new Error("Endpoint to folder=" + folder + " not found!"));
 	
 }
 
