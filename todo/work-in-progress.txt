@@ -3,10 +3,6 @@
 What I'm working on
 -------------------
 
-
-No "Server running on URL/address: " message when listening on custom ip... 
-
-
 Error: Already done!
     at doneFinish (/tank/johan/repo/jzedit/server/server_api.js:3119:18)
     at aborted (/tank/johan/repo/jzedit/server/server_api.js:3140:3)

@@ -1252,14 +1252,10 @@ return;
 		
 		wsServer.installHandlers(HTTP_SERVER, {prefix:'/webide'});
 		
-		
-		if(HTTP_IP == "127.0.0.1") {
-			if(!USERNAME) {
-				openStdinChannel();
-			}
+		if(HTTP_IP == "127.0.0.1" && !USERNAME) openStdinChannel();
 			
 			log("Server running on URL/address: http://" + makeUrl() + "");
-		}
+		
 		
 		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {
 			broadcast(HTTP_IP);
