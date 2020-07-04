@@ -3,12 +3,6 @@
 What I'm working on
 -------------------
 
-Error: Already done!
-    at doneFinish (/tank/johan/repo/jzedit/server/server_api.js:3119:18)
-    at aborted (/tank/johan/repo/jzedit/server/server_api.js:3140:3)
-    at Timeout.continueSearchFiles [as _onTimeout] (/tank/johan/repo/jzedit/server/server_api.js:2954:36) 
-
-
 idea: Make it possible to run webide server behind nat!
 
 
