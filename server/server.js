@@ -2748,15 +2748,22 @@ function checkMounts(options, checkMountsCallback) {
 	var prodDirCreated = false;
 	var npmDirCreated = false;
 	
+	
+	var intervalGetGroupId = setInterval(function() { log(username + " waiting for getGroupId...", DEBUG); }, 1000);
 	getGroupId("www-data", function(err, wwwgid) {
+		clearInterval(intervalGetGroupId);
 		if(err) throw err;
 		
 		// Nginx will serve files from the wwwpub folder
+		var intervalCreateIfNotExist = setInterval(function() { log(username + " waiting for createIfNotExist...", DEBUG); }, 1000);
 		createIfNotExist(HOME_DIR + username + "/wwwpub/", uid, wwwgid, "2755", function(err, createdTheFolder) {
+			clearInterval(intervalCreateIfNotExist);
 			if(err) throw err;
 			
 			if(createdTheFolder) {
+				var intervalFsWriteFile = setInterval(function() { log(username + " waiting for fs.writeFile...", DEBUG); }, 1000);
 				fs.writeFile(HOME_DIR + username + "/wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING, function(err) {
+					clearInterval(intervalFsWriteFile);
 					if(err) throw err;
 					wwwpubCreated = true;
 				});
