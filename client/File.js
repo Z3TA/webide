@@ -2306,7 +2306,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		newRow.lineNumber = currentRow.lineNumber; // It will be incremented later when all other rows are incremented // currentRow.lineNumber + 1;
 		newRow.indentationCharacters = "";
 		newRow.indentation = 0;
-		
+		newRow.owned = true;
 		
 		
 		/* 
@@ -3507,6 +3507,7 @@ console.log("moveCaretDown: Stepping right!");
 		grid[0].indentation = 0;
 		grid[0].indentationCharacters = "";
 		grid[0].startIndex = 0;
+		grid[0].owned = false;
 		
 		//console.log("EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		

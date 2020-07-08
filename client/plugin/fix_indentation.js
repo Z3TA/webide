@@ -340,6 +340,9 @@
 		totalCharactersAdded = 0,
 		index = gridRow.startIndex;
 		
+		var rowText = file.rowText(row).trim();
+		if(rowText == "") return; // Don't touch lines that only has white space!
+		
 		for(var i=0; i<indentation; i++) {
 			shouldHaveIndentationCharacters += defaultIndentationCharacters;
 		}
@@ -486,7 +489,69 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function pastedTextShouldBeFormatted(callback) {
+	EDITOR.addTest(1, function dontFixEmptyLines(callback) {
+		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/dontFixEmptyLines.js"), '{\n{\n\t\n\n\n}\n}\n', function(err, file) {
+			if(err) throw err;
+			
+			// Note: Only rows that we own will be indentatated
+			EDITOR.mock("keydown", {charCode: 46}); // Press delete
+			EDITOR.mock("typing", '{'); // Re-enter the angel bracket, this should take ownership of the whole block
+			UTIL.assert(file.grid[2].owned, true);
+			
+			file.moveCaretDown();
+			file.moveCaretDown();
+			file.moveCaretDown();
+			EDITOR.mock("typing", 'hi');
+			
+			// Note: The indentation characters are not inserted until the file is saved!
+			
+			UTIL.assert(file.grid[0].indentation, 0);
+			UTIL.assert(file.grid[1].indentation, 1);
+			UTIL.assert(file.grid[2].indentation, 2); // Empty line
+			UTIL.assert(file.grid[3].indentation, 2);
+			UTIL.assert(file.grid[4].indentation, 2); // Empty line
+			
+			EDITOR.deleteFile(file.path, function() {
+				EDITOR.saveFile(file, file.path, function(err, path) {
+					if(err) throw err;
+					
+					// The indentation characters have now been inserted
+					// Make sure no empty lines have been modified!
+					
+					UTIL.assert(file.grid[0].indentationCharacters.length, 0);
+					UTIL.assert(file.grid[1].indentationCharacters.length, file.indentation.length*1);
+					UTIL.assert(file.grid[2].indentationCharacters.length, 1); // Empty line, but there was a tab in the source!
+					UTIL.assert(file.grid[3].indentationCharacters.length, file.indentation.length*2);
+					UTIL.assert(file.grid[4].indentationCharacters.length, 0); // Empty line
+					
+					EDITOR.closeFile(path);
+					
+					// Reopen the file and check what was saved to disk
+					// Wait so that editor don't complain about the file it just closed is still open
+					setTimeout(function() {
+						EDITOR.openFile(path, function(err, file) {
+							
+							UTIL.assert(file.grid[0].indentationCharacters.length, 0);
+							UTIL.assert(file.grid[1].indentationCharacters.length, file.indentation.length*1);
+							UTIL.assert(file.grid[2].indentationCharacters.length, 1); // Empty line, but there was a tab in the source!
+							UTIL.assert(file.grid[3].indentationCharacters.length, file.indentation.length*2);
+							UTIL.assert(file.grid[4].indentationCharacters.length, 0); // Empty line
+							
+							EDITOR.closeFile(file);
+							
+							EDITOR.deleteFile(path, function() {
+								if(err) throw err;
+								callback(true);
+							});
+						});
+					}, 200);
+					
+				});
+			});
+		});
+	});
+	
+	EDITOR.addTest(function pastedTextShouldBeFormatted(callback) {
 		// Test pasting in a file that we don't own the lines!
 		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/pastedTextShouldBeFormatted.js"), '{\n\n\n\n}\n', function(err, file) {
 			if(err) throw err;
