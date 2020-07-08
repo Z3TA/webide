@@ -3,12 +3,27 @@
 What I'm working on
 -------------------
 
-idea: Make it possible to run webide server behind nat!
-
-
 
 
 Virtual Desktop / x11vnc suddenly stopped working...
+and now it magically works again...
+But can't seem to connect with noVNC (works in remmina)
+
+
+
+idea: Make it possible to run webide server behind nat!
+
+
+bug: 
+paste?!? bug when copying from ssh-X and pasting into the editor
+key=v
+combo={"shift":false,"alt":false,"ctrl":true,"meta":false,"sum":2}
+comboStr=CTRL
+BROWSER=Chrome 
+
+
+
+
 
 
 test web share, uploading image for a blog post

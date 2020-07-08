@@ -316,7 +316,7 @@ function spawnTcpProxyToUnixSocket(port, unixSocket, displayId, username) {
 	
 	var errAddressInUse = false;
 	
-	log("Starting socat with args=" + JSON.stringify(args), DEBUG);
+	log("Starting socat with args=" + JSON.stringify(args));
 	var socat = module_child_process.spawn("socat", args);
 	
 	socat.on("close", function (code, signal) {
@@ -414,27 +414,7 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 	SCREEN[displayId].vnc.password = vncPassword;
 	
 	
-	if( displayId == 0  && 1 == 2) {
-		
-		// -xkb -safer -nopw -once -geometry 1024x768 -auth /var/run/lightdm/root/\:0 -display :0
-		
-		var x11vncArgs = [
-			"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
-			"-passwd",
-			vncPassword,
-			"-rfbport",
-			x11vncPort,
-			"-display",
-			":" + displayId,
-			//"-id",
-			//windowId,
-			"-forever",
-			"-xkb",
-			"-auth",
-			"/var/run/lightdm/root/\:0"
-		];
-	}
-	else {
+	// debug: x11vnc -rfbport 5901 -display :0 -forever
 	// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
 	var x11vncArgs = [
 		"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
@@ -448,7 +428,6 @@ function startX11vnc(username, displayId, x11vncPort, windowId) {
 		//windowId,
 		"-forever"
 	];
-	}
 	
 	if(unixPipe) {
 		x11vncArgs.push("unixsock");
