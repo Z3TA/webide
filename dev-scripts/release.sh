@@ -135,7 +135,7 @@ cp client/jsPDF/src/modules/{cell.js,standard_fonts_metrics.js,split_text_to_siz
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
-sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"Server download $version\";/g" temp/release/server/client/EDITOR.js
+sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"Server\";/g" temp/release/server/client/EDITOR.js
 
 
 # Move the documentation
@@ -177,9 +177,9 @@ sed -i '/ps-node/d' temp/release/linux/package.json
 echo "Make a npm release (based on local-desktop)"
 cp -rf temp/release/linux/. temp/release/npm/
 
-sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"npm $semver\";/g" temp/release/npm/client/EDITOR.js
+sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"$semver npm\";/g" temp/release/npm/client/EDITOR.js
 
-sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"Desktop download $version\";/g" temp/release/linux/client/EDITOR.js
+sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"Desktop\";/g" temp/release/linux/client/EDITOR.js
 
 
 echo "Clean up the server release"
