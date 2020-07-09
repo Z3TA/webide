@@ -174,6 +174,9 @@ sed -i '/ps-node/d' temp/release/linux/package.json
 echo "Make a npm release (based on local-desktop)"
 cp -rf temp/release/linux/. temp/release/npm/
 
+sed -i -e "s/EDITOR.dist = \"repo\";/EDITOR.dist = \"npm $semver\";/g" temp/release/npm/client/EDITOR.js
+
+
 echo "Clean up the server release"
 # CLient is meant to run in the browser
 rm temp/release/server/bin/webide

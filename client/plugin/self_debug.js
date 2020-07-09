@@ -33,7 +33,6 @@
 		unload: bugReportUnload,
 	});
 	
-	
 	function bugReportLoad() {
 		var key_S = 83;
 		EDITOR.bindKey({desc: S("send_bug_report"), charCode: key_S, fun: sendBugReport, combo: ALT + SHIFT});
@@ -148,16 +147,10 @@ sendit();
 	
 	function selfDebugInteraction(interaction, options) {
 		var file = EDITOR.currentFile;
-		
 		if(file) {
-			
 			if(files[file]) {
-				
-				
-				
 				if(interaction == "keyDown") files[file].actions.push({interaction: interaction, options: options, fileState: fileState[file]});
 			}
-			
 }
 	}
 	
@@ -166,7 +159,6 @@ sendit();
 	var MAX_JS_ERRORS = 50;
 	
 	function windowError(message, source, lineno, colno, error) {
-		
 		console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + " EDITOR.platform=" + EDITOR.platform + "");
 		
 		if(++JS_ERROR_COUNTER > MAX_JS_ERRORS) {
@@ -192,6 +184,8 @@ sendit();
 			"\nStacktrace:\n" + (error && error.stack) + "\n" + 
 			"\nCurrent file: " + EDITOR.currentFile.path + "\n" + 
 			"Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n" +
+			"Version: " + EDITOR.version + "\n" +
+			"Dist: " + EDITOR.dist + "\n" +
 			"Last server msg: " + UTIL.shortString(JSON.stringify(CLIENT.lastMsgFromServer, null, 2)) + "\n" + 
 			"";
 			
@@ -385,6 +379,7 @@ if(document && document.body) document.body.appendChild(death);
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +
+		'Dist: ' + EDITOR.dist + '\n' +
 		'Platform: ' + process.platform + '\n' +
 		'Browser: ' + BROWSER + '\n' +
 		'Arguments: ' + editorArgs + '\n' +

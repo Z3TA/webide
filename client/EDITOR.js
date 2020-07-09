@@ -6,6 +6,8 @@
 var EDITOR = {};
 
 EDITOR.version = 0; // Populated by release.sh, DO NOT ALTER!
+EDITOR.dist = "repo"; // Populated by release.sh, DO NOT ALTER!
+
 console.log("EDITOR.version=" + EDITOR.version);
 if(!EDITOR.version) console.warn("EDITOR.version=" + EDITOR.version + " not populated!");
 
