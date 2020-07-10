@@ -929,11 +929,6 @@ abortFindFiles();
 		
 		console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 		
-		if(isSearching) {
-			console.log("goto_file: abortFindFiles because: gotoFile() and isSearching=" + isSearching + " (is true)");
-			abortFindFiles();
-		}
-		
 		if(gotoInputIsVisible && !EDITOR.input) {
 			
 			var selectedItem;
@@ -956,7 +951,7 @@ abortFindFiles();
 			if(!selectedItem) {
 				var listItems = gotoList.childNodes;
 				
-				// Witch list item is selected?
+				// Which list item is selected?
 				
 				for (var i=0; i<listItems.length; i++) {
 					if(listItems[i].getAttribute("class") == "selected") {
@@ -968,6 +963,11 @@ abortFindFiles();
 			
 			if(selectedItem) {
 				
+				if(isSearching) {
+					console.log("goto_file: abortFindFiles because: gotoFile() and isSearching=" + isSearching + " (is true) and an item was selected");
+					abortFindFiles();
+				}
+
 				var path = selectedItem.getAttribute("path");
 				var lineNr = selectedItem.getAttribute("lineNr");
 				
@@ -1014,21 +1014,24 @@ abortFindFiles();
 					
 				});
 				
+				/*
+
+					console.log("goto_file: Going to line " + line + ".");
+
+					file.caret.row = line-1;
+					//file.caret.col = 0;
+
+					file.fixCaret();
+					file.scrollToCaret();
+				*/
+
+				hide_gotoFileInput();
+
+			}
+			else {
+				//alertBox("No item selected!");
 			}
 			
-			
-			/*
-				
-				console.log("goto_file: Going to line " + line + ".");
-				
-				file.caret.row = line-1;
-				//file.caret.col = 0;
-				
-				file.fixCaret();
-				file.scrollToCaret();
-			*/
-			
-			hide_gotoFileInput();
 			
 			return false; // Return false to prevent default (typing a linebreak character)
 			
