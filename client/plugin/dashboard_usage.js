@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-if(EDITOR.saveBandwith) return;
+	if(EDITOR.saveBandwith) return;
 
 
 	var cpuWidget;
@@ -99,13 +99,15 @@ if(EDITOR.saveBandwith) return;
 				
 				// Times are the cummulated number of milliseconds (from boot) the CPU has spent in that mode. (One second has 1000 milli-seconds)
 				
-if(!Array.isArray(cpus)) throw new Error("Not an array: cpus=" + JSON.stringify(cpus));
+				if(!Array.isArray(cpus)) throw new Error("Not an array: cpus=" + JSON.stringify(cpus));
 
 				var times = cpus.map(function(cpu) {
 					return cpu.times["user"] + cpu.times["nice"] + cpu.times["sys"] + cpu.times["irq"];
 				});
 				
-				var total = times.reduce(sumReducer);
+				if(times.length == 0) return;
+
+				var total = times.reduce(sumReducer, 0);
 				
 				if(!last) last = total;
 				
