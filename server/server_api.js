@@ -1775,7 +1775,9 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 		//console.log("Reading directory=" + pathToFolder);
 		fs.readdir(pathToFolder, function readdir(err, folderItems) {
 			if(err) {
-				listFilesCallback(err);
+				var error = new Error(err.message); // fs does not give proper call stacks!
+				error.code = err.code;
+				listFilesCallback(error);
 				listFilesCallback = null;
 			}
 			else {
@@ -3561,8 +3563,5 @@ function runFtpQueue() {
 	else ftpBusy = false;
 	
 }
-
-
-
 
 module.exports = API;
