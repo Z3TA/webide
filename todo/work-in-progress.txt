@@ -8,6 +8,7 @@ What I'm working on
 Virtual Desktop / x11vnc suddenly stopped working...
 and now it magically works again...
 But can't seem to connect with noVNC (works in remmina)
+todo: Use the noVNC vnc proxy! (add as a dependency with npm)
 
 
 

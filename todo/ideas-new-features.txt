@@ -36,7 +36,17 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+---
 
+Automatically decrypt encrypted files and automatically decrypt when saving
+
+To Encrypt:
+
+gpg --output encrypted.data --symmetric --cipher-algo AES256 un_encrypted.data
+
+To Decrypt:
+
+gpg --output un_encrypted.data --decrypt encrypted.data 
 
 ---
 todo: Gnome desktop app plugin, live preview gjs
