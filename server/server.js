@@ -182,6 +182,235 @@ var DOMAIN = getArg(["domain", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? de
 var CHROMIUM_DEBUG_PORT = 9222;
 var VNC_PORT = 5901;
 
+var EOT = String.fromCharCode(4);
+var US = String.fromCharCode(31);
+
+// Enable to host a webide server behind nat
+var NAT_PORT = getArg(["nat-port", "nat-port"]) || DEFAULT.nat_port;
+var NAT_HOST = getArg(["nat-host", "nat-host"]) || DEFAULT.nat_host; // Hostname to connecto to or IP to listen on if running as a nat-server
+var NAT_TYPE = getArg(["nat-type", "nat-type"]); // "client" or "server"
+var NAT_CODE = getArg(["nat-code", "nat-code"]); // A random string or password
+var NAT_BANNED_CODES = []; // If the code is already in use it will be banned and both old user and new user need to change code
+var NAT_SERVER_WEBSOCKET = {}; // id: connection (SockJS connections on the NAT server)
+var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connection
+
+var NAT_CLIENTS = {}; // code : socket
+var NAT_CONNECTION_ID_COUNTER = 0; // Increment for each NAT:ed SockJS connection
+
+function connectToNatServer() {
+
+	if(!NAT_CODE) {
+		NAT_CODE = randomString(10);
+	}
+
+	var StringDecoder = module_string_decoder.StringDecoder;
+	var decoder = new StringDecoder('utf8');
+
+	var connection = module_net.createConnection({host: NAT_HOST, port: NAT_PORT});
+	connection.on("error", connectionError);
+	connection.on("connect", connectionConnected);
+	connection.on("close", connectionClosed);
+	connection.on("data", connectionData);
+
+	function connectionError(err) {
+		log("NAT CLIENT: Connection error: " + (err && (err.message || err) ), WARN);
+	}
+
+	function connectionConnected() {
+		log("NAT CLIENT: Connected to remote server!");
+
+		// When connecting we Must always send our nat code
+		log("NAT CLIENT: Sending NAT_CODE=" + NAT_CODE);
+		connection.write(NAT_CODE + EOT);
+	}
+
+	function connectionClosed(hadError) {
+		log("NAT CLIENT: Connection closed. hadError=" + hadError);
+	}
+
+	function connectionData(data) {
+		log("NAT CLIENT: Recived " + data.length + " bytes ... ");
+
+		strBuffer += decoder.write(data);
+
+		var eotIndex;
+
+		while( (eotIndex = strBuffer.indexOf(EOT)) != -1 ) {
+			natMessageFromServer(strBuffer.slice(0, eotIndex));
+			strBuffer = strBuffer.slice(eotIndex+1);
+		}
+	}
+
+
+	function natMessageFromServer(strBuffer) {
+		// format: opcode | connection id | payload
+
+		var sepIndex = strBuffer.indexOf(US);
+		var opcode = strBuffer.slice(0, sepIndex);
+		strBuffer = strBuffer.slice(sepIndex+1);
+		sepIndex = strBuffer.indexOf(US);
+		var nat_websocket_id = strBuffer.slice(0, sepIndex);
+		var message = strBuffer.slice(sepIndex+1);
+
+		log("NAT CLIENT: Recieved opcode=" + opcode + " nat_websocket_id=" + nat_websocket_id + " message=" + message, DEBUG);
+
+		var fakeWebsocket = NAT_CLIENT_WEBSOCKET[nat_websocket_id];
+
+		if(opcode == "new_connection") {
+			try {
+				var options = JSON.parse(message);
+			}
+			catch(err) {
+				throw new Error("Unable to parse message JSON from nat server: message=" + message + " error.message=" + error.message);
+			}
+
+			NAT_CLIENT_WEBSOCKET[nat_websocket_id] = new NatFakeWebsocket(connection, nat_websocket_id, options);
+			return;
+		}
+
+		if(opcode == "codebust") {
+			// code already in use!
+			throw new Error("codebust: nat code already in use");
+			return;
+		}
+
+		if(!fakeWebsocket) {
+			throw new Error("No fakeWebsocket created for nat_websocket_id=" + nat_websocket_id);
+		}
+
+		if(opcode == "error") {
+			log(message, WARN);
+			if( fakeWebsocket.onError ) fakeWebsocket.onError(new Error(message));
+			return;
+		}
+
+		if(!fakeWebsocket.onData) throw new Error("fakeWebsocket has no data event listener!");
+		fakeWebsocket.onData(message);
+
+
+	}
+}
+
+function NatFakeWebsocket(connectionToNatServer, nat_websocket_id, options) {
+	var fakeWebsocket = this;
+
+	fakeWebsocket.connectionToNatServer = connectionToNatServer;
+	fakeWebsocket.id = nat_websocket_id;
+
+	for(var prop in options) {
+		fakeWebsocket[prop] = options[prop];
+	}
+
+
+}
+NatFakeWebsocket.prototype.write = function(message) {
+	var fakeWebsocket = this;
+
+	fakeWebsocket.connectionToNatServer.write(fakeWebsocket.id + US + message + EOT);
+}
+NatFakeWebsocket.prototype.on = function(evName, evHandler) {
+	var fakeWebsocket = this;
+
+	var evPropName = "on" + evName[0].toUpperCase() + evName.slice(1);
+	fakeWebsocket[evPropName] = evHandler;
+}
+
+
+function startNatServer() {
+
+	var StringDecoder = module_string_decoder.StringDecoder;
+	var decoder = new StringDecoder('utf8');
+
+	var server = module_net.createServer();
+
+	server.on("listening", function serverListening() {
+		log("NAT SERVER: Listening on port " + NAT_PORT);
+	});
+
+	// We recive connections from editor servers behind NAT
+	server.on("connection", function connection(socket) {
+		log("NAT SERVER: socket connection !");
+
+		var code;
+
+		socket.on("data", function socketData(data) {
+			log("NAT SERVER: Recived " + data.length + " bytes ... ");
+
+			strBuffer += decoder.write(data);
+
+			var eotIndex;
+
+			while( (eotIndex = strBuffer.indexOf(EOT)) != -1 ) {
+				if(!code) {
+					// The very first message is the code
+					code = strBuffer.slice(0, eotIndex);
+					log("NAT SERVER: Recived code=" + code + " from " + socket.remoteAddress + " ");
+
+					if(NAT_CLIENTS.hasOwnProperty(code)) {
+						log("NAT SERVER: code=" + code + " already in use by " + NAT_CLIENTS[code].remoteAddress, WARN);
+						NAT_CLIENTS[code].write("codebust" + US + code + EOT);
+						NAT_CLIENTS[code].close();
+
+						socket.write("codebust" + US + code + EOT);
+						socket.close();
+						return;
+					}
+
+					NAT_CLIENTS[code] = socket;
+
+					strBuffer = strBuffer.slice(eotIndex+1);
+					continue;
+				}
+
+				natMessageFromClient(code, strBuffer.slice(0, eotIndex));
+				strBuffer = strBuffer.slice(eotIndex+1);
+			}
+		});
+
+		socket.on("end", function socketEnd(endData) {
+			log("NAT SERVER: socketEnd: endData.length=" + (endData && endData.length) );
+		});
+
+		socket.on("close", function sockClose(hadError) {
+			log("NAT SERVER: socket closed. hadError=" + hadError);
+			
+		});
+
+		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
+		socket.on("error", function sockError(err) {
+			log("NAT SERVER: socket error: " + err.message);
+		});
+
+	});
+
+	server.on("error", function stdSocketError(err) {
+		log("NAT SERVER: error: " + err.message, WARN);
+	});
+
+	server.listen(NAT_PORT, NAT_HOST);
+}
+
+function natMessageFromClient(nat_client_id, strBuffer) {
+	// format: sockjs connection id | payload
+
+	var sepIndex = strBuffer.indexOf(US);
+	var nat_websocket_id = strBuffer.slice(0, sepIndex);
+	var message = strBuffer.slice(sepIndex+1);
+
+	log("NAT SERVER: From nat_client_id=" + nat_client_id + " nat_websocket_id=" + nat_websocket_id + " message=" + message, DEBUG);
+
+	if(!NAT_SERVER_WEBSOCKET.hasOwnProperty(nat_websocket_id)) {
+		var opcode = "error";
+		var message = "No Websocket connection with id=" + id;
+		NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+
+		return;
+	}
+
+	NAT_SERVER_WEBSOCKET[nat_websocket_id].write(message);
+}
+
+
 var PORTS_IN_USE = [HTTP_PORT];
 
 var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
@@ -1961,20 +2190,16 @@ function sockJsConnection(connection) {
 	var checkingUser = false;
 	var connectionAuthorized = false;
 	
-	
+	var nat_client_id;
+	var nat_websocket_id;
+
+
 	var userAlias = userBrowser + "(" + IP + ")";
 	
 	// ipv6 can give ::ffff:127.0.0.1 or 127.0.0.1-xxxx
 	// PS: SockJS filters connection headers! The version we use lets x-real-ip through though.
 	
 	log("Connection on " + protocol + " from " + IP);
-	
-	/*
-		
-		Everything sent must be commands.
-		If not identified/logged in, commands will be queued
-		
-	*/
 	
 	connection.on("data", sockJsMessage);
 	
@@ -1986,6 +2211,48 @@ function sockJsConnection(connection) {
 	
 	function sockJsMessage(message) {
 		log(UTIL.shortString(IP + " => " + message));
+
+		if(nat_client_id) {
+			if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
+				return send({error: "Unknown NAT code=" + nat_client_id + ""});
+			}
+			else {
+				// Send the message to the NAT client
+				if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
+					log("No NAT client with id=" + nat_client_id, WARN);
+					send({error: "Cannot send message to NAT:ed server! Unknown NAT code=" + nat_client_id + ""});
+					return;
+				}
+
+				var opcode = ""
+				NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+
+				return;
+			}
+		}
+		else if(!connectionAuthorized) {
+			// Check if it's a NAT request
+			if(message.indexOf(US) != -1) {
+				var arr = message.split(US);
+				if(arr[0] == "NAT") {
+					nat_client_id = arr[1];
+
+					if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
+						return send({error: "Unknown NAT code=" + nat_client_id + ""});
+					}
+
+					nat_websocket_id = ++NAT_CONNECTION_ID_COUNTER;
+					NAT_SERVER_WEBSOCKET[nat_websocket_id] = connection;
+
+					var opcode = "new_connection";
+					NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+
+					return;
+				}
+			}
+		}
+
+
 		handleUserMessage(message);
 	}
 	
