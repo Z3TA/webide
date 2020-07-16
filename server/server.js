@@ -5854,7 +5854,7 @@ function startDropboxDaemon(username, uid, gid, homeDir, callback) {
 	
 	var options = {
 		uid: uid,
-		gid, gid,
+		gid: gid,
 		cwd: homeDir
 	};
 	
