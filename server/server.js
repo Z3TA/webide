@@ -1123,6 +1123,11 @@ function main() {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
 	
+	log("NAT_TYPE=" + NAT_TYPE + " NAT_PORT=" + NAT_PORT, DEBUG);
+
+	if(NAT_TYPE.indexOf("server") != -1) startNatServer();
+	else if(NAT_PORT) connectToNatServer();
+
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
 		module_child_process.exec("ip addr | grep -q netnsbridge", EXEC_OPTIONS, function(error, stdout, stderr) {
