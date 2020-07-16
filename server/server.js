@@ -187,7 +187,7 @@ var US = String.fromCharCode(31);
 
 // Enable to host a webide server behind nat
 var NAT_PORT = getArg(["nat-port", "nat-port"]) || DEFAULT.nat_port;
-var NAT_HOST = getArg(["nat-host", "nat-host"]) || DEFAULT.nat_host; // Hostname to connecto to or IP to listen on if running as a nat-server
+var NAT_HOST = getArg(["nat-host", "nat-host"]); // Hostname to connecto to or IP to listen on if running as a nat-server
 var NAT_TYPE = getArg(["nat-type", "nat-type"]); // "client" or "server"
 var NAT_CODE = getArg(["nat-code", "nat-code"]); // A password or codename, must be unique, used to connect to a webide server behind NAT
 var NAT_BANNED_CODES = []; // If the code is already in use it will be banned and both old user and new user need to change code
@@ -195,7 +195,57 @@ var NAT_SERVER_WEBSOCKET = {}; // id: connection (SockJS connections on the NAT 
 var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connection
 
 var NAT_CLIENTS = {}; // code : socket
-var NAT_CONNECTION_ID_COUNTER = 0; // Increment for each NAT:ed SockJS connection
+var NAT_WEBSOCKET_COUNTER = 0; // Increment for each NAT:ed SockJS connection
+
+if(NAT_PORT && !NAT_HOST) {
+	log("Please specify -nat-host ! If you computer is nehind NAT use --nat-host=webide.se or if you are starting a nat-server specify the public IP!");
+	process.exit();
+}
+
+
+// # Polyfills in case you are using an older Node.js version
+if (!String.prototype.repeat) {
+	String.prototype.repeat = function(count) {
+		'use strict';
+		if (this == null)
+			throw new TypeError('can\'t convert ' + this + ' to object');
+
+		var str = '' + this;
+		// To convert string to integer.
+		count = +count;
+		// Check NaN
+		if (count != count)
+			count = 0;
+
+		if (count < 0)
+			throw new RangeError('repeat count must be non-negative');
+
+		if (count == Infinity)
+			throw new RangeError('repeat count must be less than infinity');
+
+		count = Math.floor(count);
+		if (str.length == 0 || count == 0)
+			return '';
+
+		// Ensuring count is a 31-bit integer allows us to heavily optimize the
+		// main part. But anyway, most current (August 2014) browsers can't handle
+		// strings 1 << 28 chars or longer, so:
+		if (str.length * count >= 1 << 28)
+			throw new RangeError('repeat count must not overflow maximum string size');
+
+		var maxCount = str.length * count;
+		count = Math.floor(Math.log(count) / Math.log(2));
+		while (count) {
+			str += str;
+			count--;
+		}
+		str += str.substring(0, maxCount - str.length);
+		return str;
+	}
+}
+
+
+
 
 function connectToNatServer() {
 
@@ -205,6 +255,7 @@ function connectToNatServer() {
 
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
+	var strBuffer;
 
 	var connection = module_net.createConnection({host: NAT_HOST, port: NAT_PORT});
 	connection.on("error", connectionError);
@@ -214,6 +265,8 @@ function connectToNatServer() {
 
 	function connectionError(err) {
 		log("NAT CLIENT: Connection error: " + (err && (err.message || err) ), WARN);
+		if(err.code == "ECONNREFUSED") log("Unable to connect to " + NAT_HOST + ":" + NAT_PORT + " Is the other server started with --nat-port=" + NAT_PORT + " --nat-type=server !?");
+
 	}
 
 	function connectionConnected() {
@@ -226,12 +279,15 @@ function connectToNatServer() {
 
 	function connectionClosed(hadError) {
 		log("NAT CLIENT: Connection closed. hadError=" + hadError);
+
+		setTimeout(connectToNatServer, 5000); // Try Reconnecting
 	}
 
 	function connectionData(data) {
-		log("NAT CLIENT: Recived " + data.length + " bytes ... ");
+		var str = decoder.write(data);
+		strBuffer += str;
 
-		strBuffer += decoder.write(data);
+		log("NAT CLIENT: Recived " + data.length + " bytes: " + UTIL.shortString(str));
 
 		var eotIndex;
 
@@ -243,20 +299,27 @@ function connectToNatServer() {
 
 
 	function natMessageFromServer(strBuffer) {
-		// format: opcode | connection id | payload
+		// format: opcode | connection id | payload , or just opcode | payload
+
+		log("natMessageFromServer: strBuffer=" + strBuffer, DEBUG);
 
 		var sepIndex = strBuffer.indexOf(US);
 		var opcode = strBuffer.slice(0, sepIndex);
 		strBuffer = strBuffer.slice(sepIndex+1);
 		sepIndex = strBuffer.indexOf(US);
 		var nat_websocket_id = strBuffer.slice(0, sepIndex);
-		var message = strBuffer.slice(sepIndex+1);
+		var message = strBuffer.slice(sepIndex+1) || nat_websocket_id;
 
-		log("NAT CLIENT: Recieved opcode=" + opcode + " nat_websocket_id=" + nat_websocket_id + " message=" + message, DEBUG);
+		log("NAT CLIENT: Recieved opcode=*" + opcode + "* nat_websocket_id=*" + nat_websocket_id + "* message=*" + message + "*", DEBUG);
 
-		var fakeWebsocket = NAT_CLIENT_WEBSOCKET[nat_websocket_id];
+		
 
-		if(opcode == "new_connection") {
+		if(opcode == "url") {
+			log("This backend/server can be reached from public url: " + message);
+			return;
+		}
+
+		else if(opcode == "new_connection") {
 			try {
 				var options = JSON.parse(message);
 			}
@@ -268,12 +331,14 @@ function connectToNatServer() {
 			return;
 		}
 
-		if(opcode == "codebust") {
+		else if(opcode == "codebust") {
 			// code already in use!
 			throw new Error("codebust: nat code already in use");
 			return;
 		}
 
+
+		var fakeWebsocket = NAT_CLIENT_WEBSOCKET[nat_websocket_id];
 		if(!fakeWebsocket) {
 			throw new Error("No fakeWebsocket created for nat_websocket_id=" + nat_websocket_id);
 		}
@@ -286,7 +351,6 @@ function connectToNatServer() {
 
 		if(!fakeWebsocket.onData) throw new Error("fakeWebsocket has no data event listener!");
 		fakeWebsocket.onData(message);
-
 
 	}
 }
@@ -329,14 +393,18 @@ function startNatServer() {
 
 	// We recive connections from editor servers behind NAT
 	server.on("connection", function connection(socket) {
-		log("NAT SERVER: socket connection !");
+		
+		log("NAT SERVER: Incomming connection from " + socket.remoteAddress);
 
 		var code;
+		var strBuffer = "";
 
 		socket.on("data", function socketData(data) {
-			log("NAT SERVER: Recived " + data.length + " bytes ... ");
 
-			strBuffer += decoder.write(data);
+			var str = decoder.write(data);
+			strBuffer += str;
+
+			log("NAT SERVER: Recived " + data.length + " bytes: " + UTIL.shortString(str));
 
 			var eotIndex;
 
@@ -357,6 +425,9 @@ function startNatServer() {
 					}
 
 					NAT_CLIENTS[code] = socket;
+
+					var publicUrl = makeUrl();
+					NAT_CLIENTS[code].write("url" + US + publicUrl + EOT);
 
 					strBuffer = strBuffer.slice(eotIndex+1);
 					continue;
@@ -1123,10 +1194,8 @@ function main() {
 		log("Warning: Your system do not support setuid!\nAll users will have the same security privaleges as the current user (" + CURRENT_USER + ") ! ", 4);
 	}
 	
-	log("NAT_TYPE=" + NAT_TYPE + " NAT_PORT=" + NAT_PORT, DEBUG);
-
-	if(NAT_TYPE.indexOf("server") != -1) startNatServer();
-	else if(NAT_PORT) connectToNatServer();
+	log("NAT_TYPE=" + NAT_TYPE + " NAT_HOST=" + NAT_HOST + " NAT_PORT=" + NAT_PORT, DEBUG);
+	if(NAT_PORT && NAT_HOST && (!NAT_TYPE || NAT_TYPE.indexOf("server") == -1)) connectToNatServer();
 
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
@@ -1445,7 +1514,7 @@ return;
 	
 	function startServer() {
 		
-		log("Starting server ...");
+		log("Starting Editor Backend/server ...");
 		
 		var wsServer = module_sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
@@ -1488,7 +1557,7 @@ return;
 		
 		if(HTTP_IP == "127.0.0.1" && !USERNAME) openStdinChannel();
 			
-			log("Server running on URL/address: http://" + makeUrl() + "");
+			log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
 		
 		
 		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {
@@ -1497,6 +1566,8 @@ return;
 		
 		if(!NO_REMOTE_FILES) openRemoteFileServer();
 		
+		if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) startNatServer();
+
 	}
 }
 
@@ -2246,7 +2317,7 @@ function sockJsConnection(connection) {
 						return send({error: "Unknown NAT code=" + nat_client_id + ""});
 					}
 
-					nat_websocket_id = ++NAT_CONNECTION_ID_COUNTER;
+					nat_websocket_id = ++NAT_WEBSOCKET_COUNTER;
 					NAT_SERVER_WEBSOCKET[nat_websocket_id] = connection;
 
 					var opcode = "new_connection";
