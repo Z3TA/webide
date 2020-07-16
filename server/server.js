@@ -1110,7 +1110,7 @@ processedGuestId(id, "Failed to add to guest pool! err.code=" + err.code + " err
 function main() {
 	
 	// Get the current user (who runs this server)
-	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.getuid()};
 	var env = process.env;
 	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
