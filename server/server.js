@@ -197,7 +197,7 @@ var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connectio
 var NAT_CLIENTS = {}; // code : socket
 var NAT_WEBSOCKET_COUNTER = 0; // Increment for each NAT:ed SockJS connection
 
-if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("client") != -1) {
+if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("client") != -1 || NAT_CODE) {
 	if(!NAT_PORT) NAT_PORT = DEFAULT.nat_port;
 	if(!NAT_HOST) NAT_HOST = DEFAULT.nat_host;
 }
@@ -461,17 +461,20 @@ function startNatServer() {
 		});
 
 		socket.on("end", function socketEnd(endData) {
-			log("NAT SERVER: socketEnd: endData.length=" + (endData && endData.length) );
+			log("NAT SERVER: Nat socketEnd: endData.length=" + (endData && endData.length) );
 		});
 
 		socket.on("close", function sockClose(hadError) {
-			log("NAT SERVER: socket closed. hadError=" + hadError);
+			log("NAT SERVER: Nat socket closed. hadError=" + hadError);
 			
 		});
 
 		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
 		socket.on("error", function sockError(err) {
-			log("NAT SERVER: socket error: " + err.message);
+			log("NAT SERVER: Nat socket error: " + err.message + " code=" + err.code);
+
+			// Might want to close the socket so the other server can try to re-connect
+
 		});
 
 	});
@@ -2312,11 +2315,11 @@ function sockJsConnection(connection) {
 	function sockJsMessage(message) {
 		log(UTIL.shortString(IP + " => " + message));
 
-		log("nat_client_secret=" + nat_client_secret + " connectionAuthorized=" + connectionAuthorized + " ");
+		//log("nat_client_secret=" + nat_client_secret + " connectionAuthorized=" + connectionAuthorized + " ");
 
 		if(nat_client_secret) {
 			if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
-				connection.write('{msg:"Unknown NAT code="' + nat_client_secret  + '"}');
+				connection.write('{msg:"Unknown NAT code=' + nat_client_secret  + '"}');
 				return;
 			}
 			else {
