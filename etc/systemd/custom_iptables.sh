@@ -81,6 +81,12 @@ ip6tables -A OUTPUT -p tcp -m tcp -m multiport --dports 80,443 -j ACCEPT
 iptables -A OUTPUT -p tcp -m tcp -m multiport --dports 80,443 -j ACCEPT
 
 
+# Allow incoming NAT-tunnel
+ip6tables -A INPUT -p tcp --dport 8106 -j ACCEPT
+iptables -A INPUT -p tcp --dport 8106 -j ACCEPT
+
+
+
 # Allow outgoing FTP
 ip6tables -A INPUT -p tcp --sport 21 -m state --state ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp --sport 21 -m state --state ESTABLISHED -j ACCEPT

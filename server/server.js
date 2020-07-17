@@ -300,7 +300,7 @@ function connectToNatServer() {
 		var str = decoder.write(data);
 		strBuffer += str;
 
-		log("NAT CLIENT: Recived " + data.length + " bytes: " + UTIL.shortString(str));
+		log("NAT CLIENT: Recived " + data.length + " bytes: " + UTIL.shortString(str), DEBUG);
 
 		var eotIndex;
 
@@ -390,7 +390,7 @@ NatFakeWebsocket.prototype.write = function(message) {
 
 	var str = fakeWebsocket.__nat_websocket_id + US + message + EOT;
 
-	log("NAT CLIENT: Sending: str=" + str)
+	log("NAT CLIENT: Sending: str=" + str, DEBUG)
 
 	fakeWebsocket.__connectionToNatServer.write(str);
 }
@@ -426,7 +426,7 @@ function startNatServer() {
 			var str = decoder.write(data);
 			strBuffer += str;
 
-			log("NAT SERVER: Recived " + data.length + " bytes: " + UTIL.shortString(str));
+			log("NAT SERVER: Recived " + data.length + " bytes: " + UTIL.shortString(str), DEBUG);
 
 			var eotIndex;
 
@@ -2319,7 +2319,7 @@ function sockJsConnection(connection) {
 
 		if(nat_client_secret) {
 			if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
-				connection.write('{msg:"Unknown NAT code=' + nat_client_secret  + '"}');
+				connection.write('{"msg":"Unknown NAT code=' + nat_client_secret  + '"}');
 				return;
 			}
 			else {
@@ -2360,13 +2360,14 @@ function sockJsConnection(connection) {
 						send({error: "Unable to parse request: " + message});
 						return;
 					}
-					nat_client_secret = json.code;
-
-					if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
-						log("Unknown NAT code=" + nat_client_secret, WARN);
-						send({error: "Unknown NAT code=" + nat_client_secret + ""});
+					
+					if(!NAT_CLIENTS.hasOwnProperty(json.code)) {
+						log("Unknown NAT code=" + json.code, WARN);
+						send({error: "Unknown NAT code=" + json.code + ""});
 						return;
 					}
+
+					nat_client_secret = json.code;
 
 					nat_websocket_id = ++NAT_WEBSOCKET_COUNTER;
 					NAT_SERVER_WEBSOCKET[nat_websocket_id] = connection;
@@ -2384,7 +2385,7 @@ function sockJsConnection(connection) {
 					return;
 				}
 				else {
-					log("Not a NAT command: " + message);
+					//log("Not a NAT command: " + message, DEBUG);
 				}
 			}
 			else {

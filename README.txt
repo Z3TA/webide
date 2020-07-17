@@ -177,6 +177,16 @@ for example adding it to your .bashrc so that the server starts every time you s
 And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
 
 
+Run the editor on a computer/server that is behind a firewall NAT/router or does not have a public IP
+-----------------------------------------------------------------------------------------------------
+When starting the server from command line/prompt, specify a code/name in -nat-code argument/flag. Example:
+```
+node server/server.js -nat-code mysecret --username=myuser --password=123
+```
+Then you can access your computer/server via https://webide.se/?nat_code=mysecret
+
+
+
 
 Able to type webide via "unix" terminal without installing via npm --global
 ----------------------------------------------------------------------------

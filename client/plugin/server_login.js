@@ -195,7 +195,7 @@
 					console.log("Sending NAT request... (before auto login)!");
 					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
 						console.log("NAT request response (before auto login)! err=" + err + " resp=" + resp);
-						if(err) return alertBox(err.message);
+						if(err) return alertBox("Unable to automatically connect to server! Error: " + err.message);
 						identify();
 					});
 				}
@@ -582,7 +582,7 @@
 					console.log("Seding NAT request after submitting form...");
 					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
 						console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
-						if(err) return alertBox(err.message);
+						if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
 						identify();
 					});
 				}

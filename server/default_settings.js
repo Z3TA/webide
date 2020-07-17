@@ -19,7 +19,7 @@ module.exports = {
 
 	// Enable to host a webide server behind nat
 	nat_port: 8106,
-	nat_host: "127.0.0.1" // Nat server/proxy
+	nat_host: "webide.se" // Nat server/proxy
 }
 
 /*
