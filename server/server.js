@@ -186,7 +186,7 @@ var EOT = String.fromCharCode(4);
 var US = String.fromCharCode(31);
 
 // Enable to host a webide server behind nat
-var NAT_PORT = getArg(["nat-port", "nat-port"]) || DEFAULT.nat_port;
+var NAT_PORT = getArg(["nat-port", "nat-port"]);
 var NAT_HOST = getArg(["nat-host", "nat-host"]); // Hostname to connecto to or IP to listen on if running as a nat-server
 var NAT_TYPE = getArg(["nat-type", "nat-type"]); // "client" or "server"
 var NAT_CODE = getArg(["nat-code", "nat-code"]); // A password or codename, must be unique, used to connect to a webide server behind NAT
@@ -197,11 +197,24 @@ var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connectio
 var NAT_CLIENTS = {}; // code : socket
 var NAT_WEBSOCKET_COUNTER = 0; // Increment for each NAT:ed SockJS connection
 
+if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("client") != -1) {
+	if(!NAT_PORT) NAT_PORT = DEFAULT.nat_port;
+	if(!NAT_HOST) NAT_HOST = DEFAULT.nat_host;
+}
+
 if(NAT_PORT && !NAT_HOST) {
-	log("Please specify -nat-host ! If you computer is nehind NAT use --nat-host=webide.se or if you are starting a nat-server specify the public IP!");
+	log("You specified -nat-port=" + NAT_PORT + " Please specify -nat-host ! If you computer is nehind NAT use --nat-host=webide.se or if you are starting a nat-server specify the public IP!");
 	process.exit();
 }
 
+if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) {
+	console.log("HOSTNAME=" + HOSTNAME);
+
+	if(HOSTNAME == "127.0.0.1") {
+		log("Hostname cannot be " + HOSTNAME + ". This machine need to be reachable from the Internet in order for NAT-server to work! Specify -host domain or --hostname=domain");
+		process.exit();
+	}
+}
 
 // # Polyfills in case you are using an older Node.js version
 if (!String.prototype.repeat) {
@@ -255,7 +268,7 @@ function connectToNatServer() {
 
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
-	var strBuffer;
+	var strBuffer = "";
 
 	var connection = module_net.createConnection({host: NAT_HOST, port: NAT_PORT});
 	connection.on("error", connectionError);
@@ -291,8 +304,11 @@ function connectToNatServer() {
 
 		var eotIndex;
 
+		var str;
 		while( (eotIndex = strBuffer.indexOf(EOT)) != -1 ) {
-			natMessageFromServer(strBuffer.slice(0, eotIndex));
+			str = strBuffer.slice(0, eotIndex);
+			console.log("str=" + str);
+			natMessageFromServer(str);
 			strBuffer = strBuffer.slice(eotIndex+1);
 		}
 	}
@@ -315,7 +331,7 @@ function connectToNatServer() {
 		
 
 		if(opcode == "url") {
-			log("This backend/server can be reached from public url: " + message);
+			log("This backend/server can be reached from public url: http://" + message + "?nat_code=" + NAT_CODE, NOTICE);
 			return;
 		}
 
@@ -324,10 +340,12 @@ function connectToNatServer() {
 				var options = JSON.parse(message);
 			}
 			catch(err) {
-				throw new Error("Unable to parse message JSON from nat server: message=" + message + " error.message=" + error.message);
+				throw new Error("Unable to parse message JSON from nat server: message=" + message + " err.message=" + err.message);
 			}
 
-			NAT_CLIENT_WEBSOCKET[nat_websocket_id] = new NatFakeWebsocket(connection, nat_websocket_id, options);
+			var fakeWebsocket = NAT_CLIENT_WEBSOCKET[nat_websocket_id] = new NatFakeWebsocket(connection, nat_websocket_id, options);
+			sockJsConnection(fakeWebsocket);
+
 			return;
 		}
 
@@ -355,11 +373,11 @@ function connectToNatServer() {
 	}
 }
 
-function NatFakeWebsocket(connectionToNatServer, nat_websocket_id, options) {
+function NatFakeWebsocket(__connectionToNatServer, __nat_websocket_id, options) {
 	var fakeWebsocket = this;
 
-	fakeWebsocket.connectionToNatServer = connectionToNatServer;
-	fakeWebsocket.id = nat_websocket_id;
+	fakeWebsocket.__connectionToNatServer = __connectionToNatServer;
+	fakeWebsocket.__nat_websocket_id = __nat_websocket_id;
 
 	for(var prop in options) {
 		fakeWebsocket[prop] = options[prop];
@@ -370,7 +388,11 @@ function NatFakeWebsocket(connectionToNatServer, nat_websocket_id, options) {
 NatFakeWebsocket.prototype.write = function(message) {
 	var fakeWebsocket = this;
 
-	fakeWebsocket.connectionToNatServer.write(fakeWebsocket.id + US + message + EOT);
+	var str = fakeWebsocket.__nat_websocket_id + US + message + EOT;
+
+	log("NAT CLIENT: Sending: str=" + str)
+
+	fakeWebsocket.__connectionToNatServer.write(str);
 }
 NatFakeWebsocket.prototype.on = function(evName, evHandler) {
 	var fakeWebsocket = this;
@@ -461,23 +483,25 @@ function startNatServer() {
 	server.listen(NAT_PORT, NAT_HOST);
 }
 
-function natMessageFromClient(nat_client_id, strBuffer) {
+function natMessageFromClient(nat_client_secret, strBuffer) {
 	// format: sockjs connection id | payload
 
 	var sepIndex = strBuffer.indexOf(US);
 	var nat_websocket_id = strBuffer.slice(0, sepIndex);
 	var message = strBuffer.slice(sepIndex+1);
 
-	log("NAT SERVER: From nat_client_id=" + nat_client_id + " nat_websocket_id=" + nat_websocket_id + " message=" + message, DEBUG);
+	log("NAT SERVER: From nat_client_secret=" + nat_client_secret + " nat_websocket_id=" + nat_websocket_id + " message=" + message, DEBUG);
 
 	if(!NAT_SERVER_WEBSOCKET.hasOwnProperty(nat_websocket_id)) {
 		var opcode = "error";
-		var message = "No Websocket connection with id=" + id;
-		NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+		var message = "No Websocket connection with nat_websocket_id=" + nat_websocket_id;
+		
+		NAT_CLIENTS[nat_client_secret].write(opcode + US + nat_websocket_id + US + message + EOT);
 
 		return;
 	}
 
+	log(getIp(NAT_CLIENTS[nat_client_secret]) + " <= " + UTIL.shortString(message, 256));
 	NAT_SERVER_WEBSOCKET[nat_websocket_id].write(message);
 }
 
@@ -2232,7 +2256,7 @@ function isPrivatev4IP(ip) {
 function getIp(connection) {
 	if(connection == undefined) throw new Error("connection=" + connection);
 	var IP = connection.remoteAddress;
-	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
+	if(connection.headers && connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
 	return IP;
 }
 
@@ -2266,7 +2290,7 @@ function sockJsConnection(connection) {
 	var checkingUser = false;
 	var connectionAuthorized = false;
 	
-	var nat_client_id;
+	var nat_client_secret;
 	var nat_websocket_id;
 
 
@@ -2288,43 +2312,80 @@ function sockJsConnection(connection) {
 	function sockJsMessage(message) {
 		log(UTIL.shortString(IP + " => " + message));
 
-		if(nat_client_id) {
-			if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
-				return send({error: "Unknown NAT code=" + nat_client_id + ""});
+		log("nat_client_secret=" + nat_client_secret + " connectionAuthorized=" + connectionAuthorized + " ");
+
+		if(nat_client_secret) {
+			if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
+				connection.write('{msg:"Unknown NAT code="' + nat_client_secret  + '"}');
+				return;
 			}
 			else {
 				// Send the message to the NAT client
-				if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
-					log("No NAT client with id=" + nat_client_id, WARN);
-					send({error: "Cannot send message to NAT:ed server! Unknown NAT code=" + nat_client_id + ""});
+				if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
+					log("No NAT client with id=" + nat_client_secret, WARN);
+					
+					connection.write('{msg: "Cannot send message to NAT:ed server! Unknown NAT code=' + nat_client_secret + '"}');
 					return;
 				}
 
 				var opcode = ""
-				NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+				NAT_CLIENTS[nat_client_secret].write(opcode + US + nat_websocket_id + US + message + EOT);
 
 				return;
 			}
 		}
 		else if(!connectionAuthorized) {
 			// Check if it's a NAT request
-			if(message.indexOf(US) != -1) {
-				var arr = message.split(US);
-				if(arr[0] == "NAT") {
-					nat_client_id = arr[1];
+			if(message.indexOf(GS) != -1) {
+				var arr = message.split(GS);
+				var req_id = arr[0];
+				
+				function send(resp) {
+					resp.id = req_id;
+					var str = JSON.stringify(resp);
 
-					if(!NAT_CLIENTS.hasOwnProperty(nat_client_id)) {
-						return send({error: "Unknown NAT code=" + nat_client_id + ""});
+					log(getIp(connection) + " <= " + UTIL.shortString(str, 256));
+					connection.write(str);
+				}
+
+				if(arr[1] == "NAT") {
+					try {
+						var json = JSON.parse(arr[2]);
+					}
+					catch(err) {
+						log("Unable to parse request: " + message, WARN);
+						send({error: "Unable to parse request: " + message});
+						return;
+					}
+					nat_client_secret = json.code;
+
+					if(!NAT_CLIENTS.hasOwnProperty(nat_client_secret)) {
+						log("Unknown NAT code=" + nat_client_secret, WARN);
+						send({error: "Unknown NAT code=" + nat_client_secret + ""});
+						return;
 					}
 
 					nat_websocket_id = ++NAT_WEBSOCKET_COUNTER;
 					NAT_SERVER_WEBSOCKET[nat_websocket_id] = connection;
 
 					var opcode = "new_connection";
-					NAT_CLIENTS[nat_client_id].write(opcode + US + nat_websocket_id + US + message + EOT);
+					var options = UTIL.copyProps(connection, {});
+
+					NAT_CLIENTS[nat_client_secret].write(opcode + US + nat_websocket_id + US + JSON.stringify(options) + EOT);
+
+					log("New NAT Websocket for nat_client_secret=" + nat_client_secret + "");
+
+					// User wont login until a NAT response returns
+					send({resp: "ok"});
 
 					return;
 				}
+				else {
+					log("Not a NAT command: " + message);
+				}
+			}
+			else {
+				log("Message did not contain GS! message=" + message, WARN);
 			}
 		}
 
@@ -2995,20 +3056,19 @@ var loginCounter = 0;
 				
 				USER_WORKERS[userConnectionName].send({commands: {command: command, json: json, id: userConnectionId + "|" + id}});
 			}
-			
 		}
 		
 		function send(answer, conn) {
-			
+
 			if(conn == undefined) conn = connection;
-			
+
 			//log("answer.id=" + answer.id, DEBUG);
-			
+
 			if(answer.id == undefined && id) {
 				//log("Setting answer.id to id=" + id + " because answer.id=" + answer.id + "==undefined && id=" + id + " answer=" + JSON.stringify(answer, null, 2), DEBUG);
 				answer.id = id;
 			}
-			
+
 			if(answer.id == id) id = null; // Do not reuse the same id
 			else if(answer.id === 0) delete answer["id"]; // Use id=0 to avoid taking another id
 			/*
@@ -3023,23 +3083,22 @@ var loginCounter = 0;
 				}
 				}
 			*/
-			
-			
+
+
 			// Sanity check
 			// Note: This function mutates the answer object, so if it's called in a loop, next iteration will have id==undefined
 			if( answer.hasOwnProperty("echo") && answer.hasOwnProperty("id") ) throw new Error("echo with id=" + answer.id + ": " + JSON.stringify(echo, null, 2));
-			
+
 			if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
 			if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));
 			// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
-			
+
 			var str = JSON.stringify(answer);
-			
+
 			log(IP + " <= " + (answer.id ? answer.id : "") + UTIL.shortString(str, 256));
 			conn.write(str);
 		}
 	}
-	
 }
 
 

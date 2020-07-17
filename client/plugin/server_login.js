@@ -188,12 +188,37 @@
 				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
 				loggingIn = true;
 				if(loginButton) loginButton.disabled = true;
+				
+				var nat_code = QUERY_STRING["nat_code"];
+				if(nat_code) {
+					// Send nat request before logging in
+					console.log("Sending NAT request... (before auto login)!");
+					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
+						console.log("NAT request response (before auto login)! err=" + err + " resp=" + resp);
+						if(err) return alertBox(err.message);
+						identify();
+					});
+				}
+				else {
+					identify();
+				}
+			}
+			else {
+				showLoginDialog();
+				
+				if(userValue && !pwValue) {
+					var serverLoginPw = document.getElementById("serverLoginPw");
+					if(serverLoginPw) serverLoginPw.focus();
+				}
+			}
+
+			function identify() {
 				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
 					loggingIn = false;
 					if(loginButton) loginButton.disabled = false;
 					if(err) {
 						console.error(err);
-						
+
 						if(err.message.indexOf("Username specified in server arguments") != 0) {
 							alertBox("Login with the username/password specified in server command arguments! (admin/admin is default)");
 						}
@@ -206,22 +231,22 @@
 							alertBox("Failed to login as " + userValue + ". It is likely that the guest account have been reset because of inactivity!");
 						}
 						else alertBox(err.message);
-						
+
 						showLoginDialog();
 					}
 					else {
 						hideLoginDialog();
-						
+
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
-						
+
 						if( userValue.match(/^guest\d+$/) && EDITOR.startedCounter > 2 && QUERY_STRING["user"] != "guest") {
 							// User have logged in with a guest account
 							// It's Not the first time user logs in
-							
+
 							var alreadyHaveAccount = "Login to Another account";
 							var createAccount = "Create a New account";
 							var loginAsGuest = "Keep me logged in as " + userValue;
-							
+
 							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
 								if(answer == loginAsGuest) {
 									console.log("User wants to continue using the guest account.");
@@ -236,18 +261,10 @@
 									showLoginDialog();
 								}
 								else throw new Error("Unknown answer: " + answer);
-								});
+							});
 						}
-						}
-					});
-			}
-			else {
-				showLoginDialog();
-				
-				if(userValue && !pwValue) {
-				var serverLoginPw = document.getElementById("serverLoginPw");
-				if(serverLoginPw) serverLoginPw.focus();
-				}
+					}
+				});
 			}
 		}
 	}
@@ -303,11 +320,7 @@
 		var form = document.createElement("form");
 		form.onsubmit = connectToServer;
 		
-		// ### Url
-		var labelUrl = document.createElement("label");
-		labelUrl.setAttribute("for", "serverLoginUrl");
-		labelUrl.appendChild(document.createTextNode("Server URL: "));
-		form.appendChild(labelUrl);
+		
 		
 		if(RUNTIME == "nw.js") {
 			var defaultUrl =  "http://localhost:8099/webide";
@@ -322,7 +335,8 @@
 		var urlValue;
 		var userValue = QUERY_STRING.user;
 		var pwValue = QUERY_STRING.pw;
-		
+		var nat_code = QUERY_STRING["nat_code"];
+
 		if(!urlValue) urlValue = defaultUrl;
 		
 		if(!userValue) {
@@ -330,16 +344,41 @@
 			pwValue = DEFAULT_PASSWORD;
 		}
 		
-		var url = document.createElement("input");
-		url.setAttribute("type", "text");
-		url.setAttribute("id", "serverLoginUrl");
-		url.setAttribute("class", "inputtext url");
-		url.setAttribute("title", "URL to WebIDE server");
-		url.setAttribute("size", "30");
-		url.setAttribute("value", urlValue);
-		url.onchange = saveUserPw;
-		form.appendChild(url);
-		
+		if(nat_code) {
+
+			var labelNat = document.createElement("label");
+			labelNat.setAttribute("for", "natCode");
+			labelNat.appendChild(document.createTextNode("NAT code: "));
+			form.appendChild(labelNat);
+
+			var natCodeInput = document.createElement("input");
+			natCodeInput.setAttribute("type", "text");
+			natCodeInput.setAttribute("class", "inputtext url");
+			natCodeInput.setAttribute("title", "Code generated from the server behind NAT you want to connec to");
+			natCodeInput.setAttribute("size", "30");
+			natCodeInput.setAttribute("value", nat_code);
+			form.appendChild(natCodeInput);
+			
+		}
+		else {
+
+			// ### Url
+			var labelUrl = document.createElement("label");
+			labelUrl.setAttribute("for", "serverLoginUrl");
+			labelUrl.appendChild(document.createTextNode("Server URL: "));
+			form.appendChild(labelUrl);
+
+			var url = document.createElement("input");
+			url.setAttribute("type", "text");
+			url.setAttribute("id", "serverLoginUrl");
+			url.setAttribute("class", "inputtext url");
+			url.setAttribute("title", "URL to WebIDE server");
+			url.setAttribute("size", "30");
+			url.setAttribute("value", urlValue);
+			url.onchange = saveUserPw;
+			form.appendChild(url);
+		}
+
 		// ### user
 		var labelUser = document.createElement("label");
 		labelUser.setAttribute("for", "serverLoginUser");
@@ -379,18 +418,20 @@
 		form.appendChild(loginButton);
 		
 		
-		// ### Default url checkbox
-		var checkDefUrl = document.createElement("input");
-		checkDefUrl.setAttribute("type", "checkbox");
-		checkDefUrl.onclick = checkDefaultUrl;
-		checkDefUrl.checked = (url.value == defaultUrl);
-		checkDefUrl.setAttribute("id", "checkDefUrl");
-		var labelCheckDefUrl = document.createElement("label");
-		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
-		labelCheckDefUrl.appendChild(checkDefUrl);
-		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
-		form.appendChild(labelCheckDefUrl);
-		
+		if(!nat_code) {
+			// ### Default url checkbox
+			var checkDefUrl = document.createElement("input");
+			checkDefUrl.setAttribute("type", "checkbox");
+			checkDefUrl.onclick = checkDefaultUrl;
+			checkDefUrl.checked = (url.value == defaultUrl);
+			checkDefUrl.setAttribute("id", "checkDefUrl");
+			var labelCheckDefUrl = document.createElement("label");
+			labelCheckDefUrl.setAttribute("for", "checkDefUrl");
+			labelCheckDefUrl.appendChild(checkDefUrl);
+			labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
+			form.appendChild(labelCheckDefUrl);
+		}
+
 		var cancel = document.createElement("button");
 		cancel.setAttribute("type", "button");
 		cancel.setAttribute("class", "button");
@@ -402,12 +443,12 @@
 		
 		// ### Signup
 		if(!EDITOR.user || EDITOR.user.name != "admin") {
-		var signupLink = document.createElement("a");
-		signupLink.appendChild(document.createTextNode("Signup"));
-		signupLink.setAttribute("title", "Click here to create an account");
-		signupLink.setAttribute("href", "/signup/signup.htm");
-		signupLink.setAttribute("class", "signup link");
-		form.appendChild(signupLink);
+			var signupLink = document.createElement("a");
+			signupLink.appendChild(document.createTextNode("Signup"));
+			signupLink.setAttribute("title", "Click here to create an account");
+			signupLink.setAttribute("href", "/signup/signup.htm");
+			signupLink.setAttribute("class", "signup link");
+			form.appendChild(signupLink);
 		}
 		
 		// ### about
@@ -427,7 +468,7 @@
 				userValue = obj.editorServerUser;
 				pwValue = obj.editorServerPw;
 				
-				if(urlValue) url.value = urlValue;
+				if(urlValue && !nat_code) url.value = urlValue;
 				if(userValue) user.value = userValue;
 				if(pwValue) pw.value = pwValue;
 			});
@@ -448,7 +489,7 @@
 		}
 		
 		function saveUserPw(e) {
-			var urlValue = url.value;
+			var urlValue = url && url.value;
 			var userValue = user.value;
 			var pwValue = pw.value;
 			
@@ -474,7 +515,7 @@
 			clickedConnectLogin = true;
 			console.log("Login form submitted! Connecting to server ...");
 			
-			var server = {url: url.value};
+			var server = nat_code ? {url: nat_code} : {url: url.value};
 			
 			if(CLIENT.connected) {
 				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user.name != user.value)) {
@@ -525,7 +566,8 @@
 			
 			return false; // Don't navigate away (on form submit)
 			
-			function identify() {
+			function login() {
+
 				loggingIn = true;
 				if(loginButton) loginButton.disabled = true;
 				// Issue: if server restarts or have an issue, login-button will be stuck as disabled
@@ -534,18 +576,34 @@
 					if(loginButton) loginButton.disabled = false;
 				}, 5000);
 				
-				CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedIn(err, resp) {
-					loggingIn = false;
-					if(loginButton) loginButton.disabled = false;
-					if(err) {
-						console.error(err);
-						alertBox("Unable to login: " + err.message + "\nURL: " + server.url);
-					}
-					else {
-						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
-						saveLogin({user: user.value, pw: pw.value});
-					}
-				});
+				var nat_code = QUERY_STRING["nat_code"];
+				if(nat_code) {
+					// Send nat request before logging in
+					console.log("Seding NAT request after submitting form...");
+					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
+						console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
+						if(err) return alertBox(err.message);
+						identify();
+					});
+				}
+				else {
+					identify();
+				}
+
+				function identify() {
+					CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedIn(err, resp) {
+						loggingIn = false;
+						if(loginButton) loginButton.disabled = false;
+						if(err) {
+							console.error(err);
+							alertBox("Unable to login: " + err.message + "\nURL: " + server.url);
+						}
+						else {
+							alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
+							saveLogin({user: user.value, pw: pw.value});
+						}
+					});
+				}
 				
 			}
 			

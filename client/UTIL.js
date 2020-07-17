@@ -2934,6 +2934,45 @@ b = b.slice(8);
 		for(var name in from) to[name] = from[name]; // Mutating!
 	},
 	
+	copyProps: function copyProps(from, to, copiedObjects) {
+		// Recursive copy of object properties
+		var error = false;
+		
+		copiedObjects = copiedObjects || [];
+
+		for(var prop in from) {
+			error = false;
+			// Don't copy variables that can't be stringified (because they are circular)
+			try {
+				JSON.stringify(from[prop]);
+			}
+			catch(err) {
+				error = true;
+				//console.log("error: " + err.message);
+			}
+			if(typeof from[prop] == "object" && copiedObjects.indexOf(from[prop]) == -1) {
+
+				//console.log("same ? " + (from[prop] == to[prop]) );
+				//console.log("same name ? " + (prop == lastProp) );
+
+				if(Array.isArray()) to[prop] = [];
+				else to[prop] = {};
+				
+				//console.log("copy recursive: " + prop + "");
+				
+				copiedObjects.push(from[prop]);
+				copyProps(from[prop], to[prop], copiedObjects);
+			}
+			else if(!error) {
+				to[prop] = from[prop];
+				//console.log("copied " + prop);
+			}
+		}
+		return to;
+	},
+
+	// copyProps(obj, {});
+
 	isPrivateIp: function privateIp(ipAddr) {
 		var rePrivateIp = /(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/;
 		if(ipAddr.match(rePrivateIp)) return true;

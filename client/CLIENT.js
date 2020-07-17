@@ -433,7 +433,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			}
 		}
 		else {
-			console.log("CLIENT: seditorVersion: erviceWorker not supported on BROWSER=" + BROWSER);
+			console.log("CLIENT: editorVersion: ServiceWorker not supported on BROWSER=" + BROWSER);
 		}
 		
 		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
@@ -519,7 +519,7 @@ reconnectTimeoutTime += 10000;
 		var msg = sockJsEvent.data;
 		
 		//console.log("CLIENT: Server: " + UTIL.shortString(msg));
-		//console.log( "CLIENT: Server: " + msg );
+		console.log( "CLIENT: Server: " + msg );
 		
 		CLIENT.connected = true;
 		
