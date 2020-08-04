@@ -524,7 +524,7 @@
 					CLIENT.disconnect();
 					connectToServer();
 				}
-				else if(!EDITOR.user || EDITOR.user.name != user.value) identify();
+				else if(!EDITOR.user || EDITOR.user.name != user.value) login();
 				else alertBox("Already logged in as user=" + EDITOR.user.name + " on \n" + CLIENT.url);
 			}
 			else {
@@ -559,7 +559,7 @@
 					}
 					else {
 						console.log("Attempting logging in after connection ...");
-						identify();
+						login();
 					}
 				});
 			}
