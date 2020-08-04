@@ -1680,9 +1680,9 @@ console.log(file.path + " is a terminal emulator file!");
 			file = EDITOR.files[file];
 		}
 		
-		if(terminalFiles.indexOf(file) == -1) return true;
+		if(terminalFiles.indexOf(file) != -1) {
 		
-		var id = file.path.match(reTerm)[1];
+			var id = file.path.match(reTerm)[1];
 		
 		file.write("\n\nClosing " + file.path + " session " + new Date());
 		EDITOR.renderNeeded();
@@ -1692,7 +1692,14 @@ console.log(file.path + " is a terminal emulator file!");
 		});
 		
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
-		
+		}
+
+		// Terminal event sare removed in the fileSHow event, 
+		// but if the terminal is the only file open, we will not get a fileshow event!
+	
+
+		if(terminalFiles.length == 0 && Object.keys(EDITOR.files).length == 0) removeTerminalEvents();
+
 	}
 	
 	function exitAllTerminals(reason) {
