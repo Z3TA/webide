@@ -208,6 +208,8 @@ if(NAT_PORT && !NAT_HOST) {
 }
 
 if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) {
+	if(!NAT_PORT) NAT_PORT = DEFAULT.nat_port;
+	
 	console.log("HOSTNAME=" + HOSTNAME);
 
 	if(HOSTNAME == "127.0.0.1") {
@@ -403,6 +405,8 @@ NatFakeWebsocket.prototype.on = function(evName, evHandler) {
 
 
 function startNatServer() {
+
+	log("NAT SERVER: Starting NAT server...");
 
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
