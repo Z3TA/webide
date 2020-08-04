@@ -422,6 +422,8 @@ function startNatServer() {
 		
 		log("NAT SERVER: Incomming connection from " + socket.remoteAddress);
 
+		socket.setKeepalive(true, 5000);
+
 		var code;
 		var strBuffer = "";
 
@@ -442,6 +444,9 @@ function startNatServer() {
 
 					if(NAT_CLIENTS.hasOwnProperty(code)) {
 						log("NAT SERVER: code=" + code + " already in use by " + NAT_CLIENTS[code].remoteAddress, WARN);
+						
+						// note: It might be the same client re-connecting!
+						/// if the old session is disconnected we will get an error below:
 						NAT_CLIENTS[code].write("codebust" + US + code + EOT);
 						NAT_CLIENTS[code].close();
 
@@ -469,15 +474,17 @@ function startNatServer() {
 		});
 
 		socket.on("close", function sockClose(hadError) {
-			log("NAT SERVER: Nat socket closed. hadError=" + hadError);
-			
+			log("NAT SERVER: Nat socket closed. hadError=" + hadError + " code=" + code);
+			if(code) delete NAT_CLIENTS[code];
 		});
 
 		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
 		socket.on("error", function sockError(err) {
 			log("NAT SERVER: Nat socket error: " + err.message + " code=" + err.code);
 
-			// Might want to close the socket so the other server can try to re-connect
+			if(err.message.match(/This socket is closed/)) {
+				if(code) delete NAT_CLIENTS[code];
+			}
 
 		});
 

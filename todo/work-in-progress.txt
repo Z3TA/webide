@@ -3,9 +3,12 @@
 What I'm working on
 -------------------
 
+If a server is behind NAT it is likely also blocking outging connections,
+so we have to run the NAT-buster on port 80 or 443
 
-idea: Make it possible to run webide server behind nat!
 
+node-pty not working on Windows Server!
+(latest version of note-pty has breaking changes!)
 
 bug: 
 paste?!? bug when copying from ssh-X and pasting into the editor
