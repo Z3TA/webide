@@ -13,21 +13,22 @@ console.log("Requiring module: ftp");
 var module_ftp = require('ftp');
 
 console.log("Requiring module: ssh2");
-var module_ssh2 = require('ssh2');
+
 
 var UTIL = require("../client/UTIL.js");
 
 // Optional modules:
 
 try {
-
 	var module_ps = require("ps-node");
-
+	var module_ssh2 = require('ssh2'); // Issues in Node v4.2.6
 }
 catch(err) {
 	console.log("Unable to load optional module(s): " + err.message);
 }
 
+if(!module_ps) console.log("Unable to load module: ps-node");
+if(!module_ssh2) console.log("Unable to load module: ssh2");
 
 
 var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
@@ -2328,6 +2329,8 @@ API.connect = function connect(user, json, callback) {
 	function sshConnect(cb) {
 		// Connects to a SSH server and sets the working directory, returns the "connection" in the cb callback
 		
+		if(!module_ssh2) return callback(new Error("Module ssh2 not loaded!"));
+
 		var auth = {
 			host: serverAddress,
 			port: 22,
@@ -2359,7 +2362,6 @@ API.connect = function connect(user, json, callback) {
 		}
 		
 		function connect() {
-			console.log("Connecting using ssh2 module...");
 			var Client = module_ssh2.Client;
 			
 			var c = new Client();
