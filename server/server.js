@@ -423,6 +423,7 @@ function startNatServer() {
 		log("NAT SERVER: Incomming connection from " + socket.remoteAddress);
 
 		//socket.setKeepalive(true, 5000);
+		// todo: Implement manual keep-alive
 
 		var code;
 		var strBuffer = "";

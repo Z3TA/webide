@@ -1275,7 +1275,9 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			
 			if(stderr) {
 				
-				[stderr, stdout] = filterNpm(stderr, stdout);
+				var arr = filterNpm(stderr, stdout)
+				var stderr = arr[0];
+				var stdout = arr[1];
 				
 				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
 			}
@@ -1602,9 +1604,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 							
 							if(stderr) {
 								
-								[stderr, stdout] = filterNpm(stderr, stdout);
-								
-								
+								var arr = filterNpm(stderr, stdout)
+								var stderr = arr[0];
+								var stdout = arr[1];
+
 								if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 							}
 							
