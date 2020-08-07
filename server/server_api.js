@@ -1,17 +1,28 @@
 
 "use strict";
 
+Error.stackTraceLimit = 30;
+
+
 // Need to require non native modules here before we are chrooted
 
+console.log("Requiring module: iconv-lite");
 var module_iconv = require('iconv-lite');
+
+console.log("Requiring module: ftp");
 var module_ftp = require('ftp');
+
+console.log("Requiring module: ssh2");
 var module_ssh2 = require('ssh2');
 
 var UTIL = require("../client/UTIL.js");
 
 // Optional modules:
+
 try {
+
 	var module_ps = require("ps-node");
+
 }
 catch(err) {
 	console.log("Unable to load optional module(s): " + err.message);
@@ -2348,6 +2359,7 @@ API.connect = function connect(user, json, callback) {
 		}
 		
 		function connect() {
+			console.log("Connecting using ssh2 module...");
 			var Client = module_ssh2.Client;
 			
 			var c = new Client();

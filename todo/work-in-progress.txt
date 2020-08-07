@@ -3,6 +3,9 @@
 What I'm working on
 -------------------
 
+Support for Nodejs 4 ... !?
+Optional dependencies try catch ssh2
+
 If a server is behind NAT it is likely also blocking outging connections,
 so we have to run the NAT-buster on port 80 or 443
 
