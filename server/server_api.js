@@ -1,7 +1,7 @@
 
 "use strict";
 
-Error.stackTraceLimit = 30;
+Error.stackTraceLimit = 100;
 
 
 // Need to require non native modules here before we are chrooted
