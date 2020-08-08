@@ -1908,7 +1908,7 @@ function createInspector(url) {
 	});
 	
 	ws.on('error', function wsError(err, code, reason) {
-		console.§"wsError: code=" + code + " reason=" + reason);
+		console.log("wsError: code=" + code + " reason=" + reason);
 	});
 	
 	ws.on('message', function wsMessage(data) {
