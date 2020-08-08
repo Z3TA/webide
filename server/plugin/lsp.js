@@ -11,6 +11,8 @@ try {
 catch(err) {
 	console.log("Unable to load optional module(s): " + err.message);
 }
+if(!rpc) console.log("Unable to load module: vscode-jsonrpc");
+
 
 var module_child_process = require("child_process");
 

@@ -34,8 +34,17 @@ var log = logModule.log;
 
 var getArg = require("../shared/getArg.js");
 
-var module_Websocket = require("ws");
+
 var module_child_process = require('child_process');
+
+try {
+	var module_Websocket = require("ws"); // Issues in Node v4.2.6
+}
+catch(err) {
+	console.log("Unable to load optional module(s): " + err.message);
+}
+if(!module_Websocket) console.log("Unable to load module: ws");
+
 
 var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
 var TLD = getArg(["domain", "domain", "tld"]) || process.env.tld || DEFAULT.domain;
@@ -1842,9 +1851,14 @@ if(user.tld) {
 				// Debugger listening on ws://127.0.0.1:1030/3ad4f49d-215f-40b7-b85a-1fd27c0bd0e5
 				var matchDebugger = stderr.match(/Debugger listening on ([^\n]*)/);
 				if(matchDebugger) {
-					var debuggerUrl = matchDebugger[1];
-					user.runningNodeJsScripts[filePath].inspector = createInspector(debuggerUrl);
+					if(!module_Websocket) {
+						console.warn("Module ws not loaded! Unable to start inspector!");
+					}
+					else {
+						var debuggerUrl = matchDebugger[1];
+						user.runningNodeJsScripts[filePath].inspector = createInspector(debuggerUrl);
 					return; // Don't send the message to the user
+					}
 				}
 			}
 			
@@ -1894,7 +1908,7 @@ function createInspector(url) {
 	});
 	
 	ws.on('error', function wsError(err, code, reason) {
-		console.log("wsError: code=" + code + " reason=" + reason);
+		console.§"wsError: code=" + code + " reason=" + reason);
 	});
 	
 	ws.on('message', function wsMessage(data) {
