@@ -5,7 +5,13 @@
 	
 */
 
-var rpc = require("vscode-jsonrpc");
+try {
+	var rpc = require("vscode-jsonrpc"); // Issues in Node v4.2.6
+}
+catch(err) {
+	console.log("Unable to load optional module(s): " + err.message);
+}
+
 var module_child_process = require("child_process");
 
 var languageServers = {};
@@ -15,6 +21,8 @@ var LSP = {
 	start: function(user, json, callback) {
 		// Spawn a new language server
 		
+		if(!rpc) return callback(new Error("Module vscode-jsonrpc not loaded!"));
+
 		if(!json.language) return callback(new Error("No language specified!"));
 		
 		/*
@@ -32,28 +40,28 @@ var LSP = {
 			
 			var binary = "node";
 		
-		/*
+			/*
 			
-			Users must manually install each language server in their home dir!
+				Users must manually install each language server in their home dir!
 			
-			git clone https://github.com/sourcegraph/javascript-typescript-langserver.git /lsb/
-			cd javascript-typescript-langserver
-			npm install
-			npm run build
+				git clone https://github.com/sourcegraph/javascript-typescript-langserver.git /lsb/
+				cd javascript-typescript-langserver
+				npm install
+				npm run build
 			
 			
-			todo: Make a shared folder for all users where all language servers are installed. eg. /share/lsp/...
-			or use /usr/share !
+				todo: Make a shared folder for all users where all language servers are installed. eg. /share/lsp/...
+				or use /usr/share !
 			
-		*/
+			*/
 		
-		if(language == "javascript") {
-			//var args = ["./flow/node_modules/flow-bin/cli.js", "lsp"];
-			var args = ["./javascript-typescript-langserver/lib/language-server-stdio.js"];
-		}
-		else {
-			return callback(new Error("A language server do not exist for language=" + language + " ... (did you use the correct lanuage-id specified by the LSP protocol?)"))
-		}
+			if(language == "javascript") {
+				//var args = ["./flow/node_modules/flow-bin/cli.js", "lsp"];
+				var args = ["./javascript-typescript-langserver/lib/language-server-stdio.js"];
+			}
+			else {
+				return callback(new Error("A language server do not exist for language=" + language + " ... (did you use the correct lanuage-id specified by the LSP protocol?)"))
+			}
 		}
 		
 		console.log("Starting LSP server: binary=" + binary + " args=" + JSON.stringify(args));
@@ -76,9 +84,9 @@ var LSP = {
 		
 		
 		if(childProcess.stdout && childProcess.stderr) {
-		childProcess.stdout.on("data", function(data) {
-			console.log("" + language + " LSP stdout: " + data.toString());
-		});
+			childProcess.stdout.on("data", function(data) {
+				console.log("" + language + " LSP stdout: " + data.toString());
+			});
 			
 			childProcess.stderr.on("data", function(data) {
 				console.log("" + language + " LSP stderr: " + data.toString());
