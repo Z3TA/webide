@@ -3,8 +3,36 @@
 What I'm working on
 -------------------
 
-Support for Nodejs 4 ... !?
-Optional dependencies try catch ssh2
+/zpcdata/projects/webide/server/server_api.js:3149
+		if(done) throw new Error("Already done! doneStack=" + doneStack);
+		         ^
+
+Error: Already done! doneStack=Error
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3152:15)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2993:4)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3149:18)
+    at aborted (/zpcdata/projects/webide/server/server_api.js:3171:3)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2984:36)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+
+
+
+Got message "login with the username/password provided in server arguments" on webide.se
+only show that message if user/pw was actually provided by server arguments!!
+
+
+Publish to Samsung Galaxy store!?
+
+
+Client wont atuo-connect when used via nat code
+
 
 If a server is behind NAT it is likely also blocking outging connections,
 so we have to run the NAT-buster on port 80 or 443

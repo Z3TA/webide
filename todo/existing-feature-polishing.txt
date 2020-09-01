@@ -4,6 +4,20 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+When uploading an image in preview/WYSYWIG you need to re-preview.
+Instead detect if we are in preview/WYSYWIG and copy the image to the preview folder!
+
+Show how to allow popups when a popup gets blocked
+
+cant see or switch to different drive letters on Windows in file explorer or open file... 
+
+when pressing backspace in plain text indented file delete one level of indention eg all 4 spaces not just 1 space 
+
+Don't hide the cursor when pressing space (or tabs) ... I want to see the cursor so I can align the indentation!!
+Better support for indentation in plain text! 
+
+When holding down Ctrl and Right, jump over all spaces or one level of indentation! 
+
 
 
 todo: Support more Macbook keyboard shortcuts!

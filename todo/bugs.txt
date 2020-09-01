@@ -38,6 +38,505 @@ BUGS (and issues)
 
 
 
+
+-----------------------------------------------------------------------------------
+
+Goodgy worker process stderr: [2m2020-07-16 (16:36:16) [0m[4mGoodgy: sockEvent: eventType=rename filename= [2m(user_worker.js:1758:27))[0m
+
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+
+broken formatting in this file:
+
+
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-K8GZ565');</script>
+        <!-- End Google Tag Manager -->
+
+        <!-- Snajd 2020 -->
+
+        <meta charset="utf-8">
+        <title>Ulla Jacobsson | Damkläder Online Capes Ponchos Stilsäkra Plagg I Kvalité Och Färg</title>
+        <meta name="description" content="Välkommen till Ulla Jacobsson Kläder och Design. Din shoppingbutik online. Upptäck vårt utbud av caper, ponchos och sjalar i mängder av färger. Klänningar, tröjor och kappor i naturmaterial till bästa pris. Snabba leveranser 2-3 dagar. Trygg e-handel. Fri frakt. 14 dagars ångerrätt. 30 dagars bytesrätt. Snabb och enkel returhantering. Shoppa online nu.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <link rel="apple-touch-icon-precomposed" sizes="57x57" href="/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144x144.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="60x60" href="/apple-touch-icon-60x60.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/apple-touch-icon-120x120.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/apple-touch-icon-76x76.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/apple-touch-icon-152x152.png" />
+        <link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196" />
+        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+        <link rel="icon" type="image/png" href="/favicon-128.png" sizes="128x128" />
+        <meta name="application-name" content="Ulla Jacobsson"/>
+        <meta name="msapplication-TileColor" content="#FFFFFF" />
+        <meta name="msapplication-TileImage" content="/mstile-144x144.png" />
+        <meta name="msapplication-square70x70logo" content="/mstile-70x70.png" />
+        <meta name="msapplication-square150x150logo" content="/mstile-150x150.png" />
+        <meta name="msapplication-wide310x150logo" content="/mstile-310x150.png" />
+        <meta name="msapplication-square310x310logo" content="/mstile-310x310.png" />
+
+        <!-- build:css(.tmp) /styles/main.css -->
+        <link rel="stylesheet" href="/styles/main.css">
+        <!-- endbuild -->
+        <!-- build:js /scripts/vendor/modernizr.js -->
+        <script src="/bower_components/modernizr/modernizr.js"></script>
+        <!-- endbuild -->
+        <script id="mcjs">
+        if(window.location.hostname !== 'localhost'){
+            !function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/4da06c7e588babf49cd619bd0/ba18c2c3ee872bacc2e34b20d.js");
+        }
+        </script>
+    </head>
+    <body>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8GZ565"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+        <!--[if lt IE 10]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Load Facebook SDK for JavaScript -->
+        <div id="fb-root"></div>
+        <script>
+            window.fbAsyncInit = function() {
+              FB.init({
+                xfbml            : true,
+                version          : 'v5.0'
+              });
+            };
+
+            (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/sv_SE/sdk/xfbml.customerchat.js';
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+
+        <!-- Your customer chat code -->
+        <div class="fb-customerchat"
+            attribution=setup_tool
+            page_id="257433724313781"
+            logged_in_greeting="Hej! Välkommen till Ulla Jacobsson. Behöver du hjälp kan du chatta med oss här!"
+            logged_out_greeting="Hej! Välkommen till Ulla Jacobsson. Behöver du hjälp kan du chatta med oss här!">
+        </div>
+
+        <div class="flash">
+            <span>Fri frakt i hela Sverige</span>
+            <span>70 färger i lagret</span>
+            <span>Snabba leveranser</span>
+        </div>
+
+        <div class="header">
+            <nav class="navbar navbar-default" role="navigation">
+              <div class="container">
+                <div class="navbar-header">
+                  <button type="button" class="default navbar-toggle collapsed" data-toggle="collapse" data-target=".mainnav">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <div class="visible-xs navbar-cart pull-right btn btn-default"></div>
+
+                  <a class="navbar-brand route" href="#"></a>
+                </div>
+
+                <div class="collapse navbar-collapse mainnav">
+                  <ul class="nav navbar-nav navbar-right">
+                    <li class="default"><a href="/inspiration" class="route">Inspiration<span class="new">NY</span></a></li>
+                    <li class="default"><a href="/plaggen" class="route">Webbshop</a></li>
+                    <li class="default"><a href="/om-oss" class="route">Om Ulla Jacobsson</a></li>
+                    <li class="default"><a href="/butiker" class="route">Återförsäljare</a></li>
+                    <li class="default"><a href="/materialet" class="route">Material</a></li>
+                    <li class="default"><a href="/kontakt" class="route">Kontakt</a></li>
+                    <li class="kundkorg hidden-xs"></li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+        </div>
+
+        <div class="container">
+            <div class="filter"></div>
+            <div class="app-container">
+                <div class="spinner">
+                    <div class="dot1"></div>
+                    <div class="dot2"></div>
+                </div>
+            </div>
+
+            <div class="cartWidget"></div>
+        </div>
+
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-3">
+                        <h5><span class="glyphicon glyphicon-map-marker"></span> Ulla Jacobsson Kläder AB</h5>
+                        <p>Hillsta 8<br />
+                        82462 Forsa</p>
+
+                        <p>Tel: 0651-415 20<br />
+                        <a href="mailto:info@ullajacobsson.se">info@ullajacobsson.se</a><p>
+                    </div>
+                    <div class="col-xs-12 col-sm-3">
+                    </div>
+                    <div class="col-xs-12 col-sm-3">
+                        <p>
+                            <a title="Payson internetbetalningar" style="background: url('https://www.payson.se/sites/all/files/images/external/payson150x55.png'); width: 150px; height: 55px; text-indent: -6789px; display: block;" href="https://www.payson.se">Kortbetalning &amp; internetbetalning hos Payson</a>
+                        </p>
+                        <p>
+                            <a href="/kopvillkor" class="route">Läs våra köpvillkor</a>
+                        </p>
+                    </div>
+                    <div class="col-xs-12 col-sm-3 text-right">
+                        <p>
+                            <a href="#kundservice" class="route">
+                                Kundservice
+                                <img src="/images/icons/question_circle_color-128.png" class="" width="32" height="32" />
+                            </a>
+                        </p>
+                        <p>
+                            <a href="//www.facebook.com/ullajacobssonklader" target="_blank">
+                                Facebook
+                                <img src="/images/icons/facebook_circle_color-128.png" class="" width="32" height="32" />
+                            </a>
+                        </p>
+                        <p>
+                            <a href="//www.instagram.com/ullajacobsson" target="_blank">
+                                Instagram
+                                <img src="/images/icons/instagram_circle_color-128.png" class="" width="32" height="32" />
+                            </a>
+                        </p>
+                        <p>
+                            <a href="//www.youtube.com/user/ullajacobssonklader" target="_blank">
+                                YouTube
+                                <img src="/images/icons/youtube_circle_color-128.png" class="" width="32" height="32" />
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="snajd">Drift & Produktion <a href="https://snajd.se/" target="_blank">Snajd<span class="dot">.</span></a></div>
+            </div>
+        </div>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+        if(window.location.hostname !== 'localhost'){
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-54091331-1');
+        }
+        </script>
+
+        <script>
+        if(window.location.hostname !== 'localhost'){
+            !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n; n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0; t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '514417512078839'); fbq('track', "PageView");
+        }
+        </script>
+        <noscript><img height="1" width="1" class="hidden" src="https://www.facebook.com/tr?id=514417512078839&ev=PageView&noscript=1" /></noscript>
+
+        <!-- build:js /scripts/vendor.js -->
+        <script src="/bower_components/jquery/dist/jquery.js"></script>
+        <script src="/bower_components/jquery.ui/ui/core.js"></script>
+        <script src="/bower_components/jquery.ui/ui/widget.js"></script>
+        <script src="/bower_components/jquery.ui/ui/mouse.js"></script>
+        <script src="/bower_components/jquery.ui/ui/sortable.js"></script>
+        <script src="/bower_components/lodash/dist/lodash.compat.js"></script>
+        <script src="/bower_components/backbone/backbone.js"></script>
+        <script src="/scripts/vendor/view-manager.js"></script>
+        <script src="/bower_components/tinymce/tinymce.js"></script>
+        <script src="/bower_components/tinymce/jquery.tinymce.min.js"></script>
+        <script src="/bower_components/magnific-popup/dist/jquery.magnific-popup.js"></script>
+        <script src="/bower_components/jquery.iframe-transport/jquery.iframe-transport.js"></script>
+        <script src="/bower_components/fastclick/lib/fastclick.js"></script>
+		<script src="/bower_components/ResponsiveSlides/responsiveslides.js"></script>
+		<script src="/bower_components/masonry-layout/dist/masonry.pkgd.js"></script>
+        <script src="/bower_components/imagesloaded/imagesloaded.pkgd.js"></script>
+        <script src="/scripts/vendor/AnimOnScroll.js"></script>
+        <script src="/scripts/vendor/classie.js"></script>
+        <!-- endbuild -->
+
+        <!-- build:js /scripts/plugins.js -->
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/affix.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/alert.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/button.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/collapse.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/popover.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tab.js"></script>
+        <script src="/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/transition.js"></script>
+        <script src="/bower_components/fastclick/lib/fastclick.js"></script>
+        <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) /scripts/main.js -->
+        <script src="/scripts/main.js"></script>
+        <script src="/scripts/templates.js"></script>
+        <script src="/scripts/routes/AppRouter.js"></script>
+        <script src="/scripts/views/Plaggen.js"></script>
+        <script src="/scripts/models/Plagg.js"></script>
+        <script src="/scripts/collections/Plaggen.js"></script>
+        <script src="/scripts/views/Plagg.js"></script>
+        <script src="/scripts/models/Farg.js"></script>
+        <script src="/scripts/collections/Farg.js"></script>
+        <script src="/scripts/models/Bild.js"></script>
+        <script src="/scripts/collections/Bild.js"></script>
+        <script src="/scripts/views/PlaggBilder.js"></script>
+        <script src="/scripts/views/PlaggFarger.js"></script>
+        <script src="/scripts/views/PlaggFargval.js"></script>
+        <script src="/scripts/models/CartItem.js"></script>
+        <script src="/scripts/collections/Cart.js"></script>
+        <script src="/scripts/views/CartWidget.js"></script>
+        <script src="/scripts/models/Page.js"></script>
+        <script src="/scripts/views/Page.js"></script>
+        <script src="/scripts/views/Login.js"></script>
+        <script src="/scripts/views/Ansokan.js"></script>
+        <script src="/scripts/views/ResetPass.js"></script>
+        <script src="/scripts/views/ForAterforsaljare.js"></script>
+        <script src="/scripts/views/Kundkorg.js"></script>
+        <script src="/scripts/models/Butik.js"></script>
+        <script src="/scripts/collections/Butiker.js"></script>
+        <script src="/scripts/views/Butiker.js"></script>
+        <script src="/scripts/views/ButikLista.js"></script>
+        <script src="/scripts/views/ButikKarta.js"></script>
+        <script src="/scripts/views/ButikEdit.js"></script>
+        <script src="/scripts/views/FrontPage.js"></script>
+        <script src="/scripts/models/Event.js"></script>
+        <script src="/scripts/collections/Events.js"></script>
+        <script src="/scripts/views/EventList.js"></script>
+        <script src="/scripts/views/Events.js"></script>
+        <script src="/scripts/views/Kassa.js"></script>
+        <script src="/scripts/models/CheckoutFormData.js"></script>
+        <script src="/scripts/views/CheckoutForm.js"></script>
+        <script src="/scripts/views/CheckoutVerify.js"></script>
+        <script src="/scripts/views/Thanks.js"></script>
+        <script src="/scripts/models/CheckoutHashData.js"></script>
+        <script src="/scripts/models/Login.js"></script>
+        <script src="/scripts/routes/AdminRouter.js"></script>
+        <script src="/scripts/models/Order.js"></script>
+        <script src="/scripts/models/OrderRow.js"></script>
+        <script src="/scripts/collections/OrderRow.js"></script>
+        <script src="/scripts/collections/Order.js"></script>
+        <script src="/scripts/views/MinaOrdrar.js"></script>
+        <script src="/scripts/models/OrderStatus.js"></script>
+        <script src="/scripts/collections/OrderStatus.js"></script>
+        <script src="/scripts/views/Order.js"></script>
+        <script src="/scripts/models/User.js"></script>
+        <script src="/scripts/collections/User.js"></script>
+        <script src="/scripts/views/PlaggSlide.js"></script>
+        <script src="/scripts/views/EditPlaggBilder.js"></script>
+        <script src="/scripts/views/Premie.js"></script>
+        <script src="/scripts/views/Nyhetsbrev.js"></script>
+        <script src="/scripts/views/FlowPath.js"></script>
+        <script src="/scripts/views/FargKarta.js"></script>
+        <script src="/scripts/views/Outlet.js"></script>
+		<script src="/scripts/views/OutletSingle.js"></script>
+        <script src="/scripts/views/BuyBox.js"></script>
+        <script src="/scripts/views/Mix.js"></script>
+        <script src="/scripts/models/Mix.js"></script>
+        <script src="/scripts/collections/Mix.js"></script>
+        <script src="/scripts/views/MixEditor.js"></script>
+        <script src="/scripts/views/PlockaUppOrder.js"></script>
+		<script src="/scripts/views/ResetPage.js"></script>
+        <script src="/scripts/views/Filter.js"></script>
+        <script src="/scripts/models/Filter.js"></script>
+		<script src="/scripts/views/Kampanj.js"></script>
+		<script src="/scripts/views/Bildspel.js"></script>
+		<script src="/scripts/collections/Bildspel.js"></script>
+        <!-- endbuild -->
+
+        <script src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyCGYgiTYsfoJaRwc3DYCW-tjYVpGkiulgk"></script>
+</body>
+</html>
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+
+https://webide.se/:5:12274
+
+Stacktrace:
+Error: Unable to determine formatting of errorString='SyntaxError: Unexpected token ')''
+Does it have a call stack? Why not!?
+BROWSER=Chrome
+    at Object.parseJavaScriptErrorMessage [as parseErrorMessage] (https://webide.se/:5:12280)
+    at Object.showMessageFromStackTrace (https://webide.se/:13:125524)
+    at WysiwygEditor.error (https://webide.se/:75:31016)
+    at captureError (https://webide.se/:75:27985)
+
+Current file: /home/guest372/new file.htm
+Browser: Mozilla/5.0 (X11; CrOS armv7l 13099.85.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.110 Safari/537.36 (Chrome)
+Version: 6082
+Dist: repo
+Last server msg: {
+  "resp": {
+    "url": "webide.se/7qovyd5wzg/"
+  },
+  "id": 280
+} 
+
+
+-----------------------------------------------------------------------------------
+http://192.168.0.3:8099/File.js:1597:44
+
+Stacktrace:
+Error: Last index can not be between line-break characters CRLF
+    at File.deleteTextRange (http://192.168.0.3:8099/File.js:1597:50)
+    at undo (http://192.168.0.3:8099/plugin/collaboration.js:3093:9)
+    at Array.collabUndo (http://192.168.0.3:8099/plugin/collaboration.js:3073:3)
+    at keyIsDown (http://192.168.0.3:8099/EDITOR.js:11890:20)
+
+Current file: /zpcdata/projects/webide/server/server.js
+Browser: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/83.0.4103.61 Chrome/83.0.4103.61 Safari/537.36 (Chrome)
+Version: 0
+Dist: repo
+Last server msg: {
+  "resp": 473,
+  "id": "1955"
+} 
+
+
+-----------------------------------------------------------------------------------
+Subject: WebIDE /srv/webide/client/ (line 77 col 44839)
+
+How to repeat:
+Pull & Update via SCM command bar
+
+
+
+How to send: Use keybord shortcut: SHIFT + ALT + S,
+or right click and choose "Send bug report" via the context menu.
+(this only works if "bugreport" is in the file-name)
+Or send the bug report via e-mail (to the e-mail address at the top)
+
+Date:Tue Jul 14 2020 13:29:28 GMT+0200 (Central European Summer Time)
+Commit: 6070
+Dist: repo
+Platform: win32
+Browser: Chrome
+Arguments:  (browser url) https://webide.se/#
+
+Error message: Uncaught TypeError: Cannot read property 'path' of undefined
+Error code: undefined
+
+TypeError: Cannot read property 'path' of undefined
+    at figureOutDirectoryIfUndefined (https://webide.se/:77:44839)
+    at mercurialPullAndUpdate (https://webide.se/:77:21599)
+    at HTMLButtonElement.h.onclick (https://webide.se/:77:22186)
+
+Last server msg: {
+  "resp": {
+    "total": 16494166016,
+    "free": 8228089856
+  },
+  "id": 169
+} 
+
+
+
+-----------------------------------------------------------------------------------
+
+ip:81.170.176.148
+
+2020-08-07 (01:19:49) Remote file server connection from 192.35.168.201 (server.js:1844:3))
+2020-08-07 (01:19:49) ip=192.35.168.201 have domains: ["worker-12.sfj.censys-scanner.com"] (server.js:1848:12))
+2020-08-07 (01:19:50) Remote file socket server error: read ECONNRESET (server.js:1953:12))
+2020-08-07 (01:19:50) Remote file socket closed. hadError=true (server.js:1957:12))
+2020-08-07 (01:19:50) Remote file server connection from 192.35.168.201 (server.js:1844:3))
+2020-08-07 (01:19:50) Remote file socket received 128 bytes of data ... (server.js:1862:12))
+2020-08-07 (01:19:50) found value={w�u%n��2��TABz�n�daV����Hd�(��Y��/�+����TAB�� (server.js:1927:14))
+2020-08-07 (01:19:50) found value=/5� (server.js:1927:14))
+2020-08-07 (01:19:50) Unable to find a connected client for username={w�u%n��2��	z�n�daV����Hd�(��Y��/�+����	��! Aborting remote file transfer! Currently logged in users: [] (server.js:1981:5))
+2020-08-07 (01:19:50) Remote file socket closed. hadError=false (server.js:1957:12))
+2020-08-07 (01:19:50) ip=192.35.168.201 have domains: ["worker-12.sfj.censys-scanner.com"] (server.js:1848:12))
+2020-08-07 (01:19:50) Remote file server connection from 192.35.168.201 (server.js:1844:3))
+2020-08-07 (01:19:50) ip=192.35.168.201 have domains: ["worker-12.sfj.censys-scanner.com"] (server.js:1848:12))
+2020-08-07 (01:19:51) Remote file socket received 44 bytes of data ... (server.js:1862:12))
+2020-08-07 (01:19:51) found value=GETSPACE/SPACEHTTP/1.1CR (server.js:1927:14))
+2020-08-07 (01:19:51) found value=Host:SPACE104.248.26.78:8103CR (server.js:1927:14))
+! Aborting remote file transfer! Currently logged in users: [] (server.js:1981:5))1
+2020-08-07 (01:19:51) Remote file socket closed. hadError=false (server.js:1957:12))
+2020-08-07 (01:19:52) Remote file server connection from undefined (server.js:1844:3))
+2020-08-07 (01:19:52) Program exit
+                      
+                       
+dns.js:263
+      throw new Error('"name" argument must be a string');
+      ^
+
+Error: "name" argument must be a string
+    at Resolver.getHostByAddr [as reverse] (dns.js:263:13)
+    at Server.stdinConnection (/srv/jzedit/server/server.js:1846:14)
+    at emitOne (events.js:116:13)
+    at Server.emit (events.js:211:7)
+    at TCP.onconnection (net.js:1577:8)
+
+
+---
+
+guest361 worker process stderr: [2m2020-07-31 (12:03:25) [0m[4mguest361: No data in answer from command=createMysqlDb [2m(user_worker.js:752:15))[0m
+
+
+---
+
+https://webide.se/:13:78484
+
+Stacktrace:
+TypeError: Cannot read property 'getElementById' of undefined
+    at winLoaded (https://webide.se/:13:78484)
+    at waitedToBeSureWindowHadLoaded (https://webide.se/:13:112651)
+
+Current file: /home/guest377/wwwpub/welcome.htm
+Browser: Mozilla/5.0 (Linux; Android 10; Infinix X604) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Mobile Safari/537.36 (Chrome)
+Version: 6082
+Dist: repo
+Last server msg: {
+  "resp": {
+    "1114": {
+      "socat": true,
+      "x11vnc": true,
+      "xvfb": true,
+      "starting": true,
+      "stopping": false,
+      "started": true
+    }
+  },
+  "id": 56
+}
+---
+
+
+
 bug: Color picker from images doesn't work when there is different pixel ratio then one
 
 When zooming on Macbook, the font is really big and rows overlap
