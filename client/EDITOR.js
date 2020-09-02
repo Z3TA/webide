@@ -47,7 +47,8 @@ EDITOR.parseFileExtensionAsCode = [
 "qml",
 "qrc",
 "c",
-	"gs" // Google Script
+	"gs", // Google Script
+	"swift"
 ];
 
 // These file extensions will be treated as plain text

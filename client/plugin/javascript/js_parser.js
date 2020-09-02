@@ -246,8 +246,8 @@
 		*/
 		
 		if(file.mode == "code") {
-console.log("js_parser: shouldParse? Parsing " + file.path + " because file.mode=" + file.mode);
-return true;
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.mode=" + file.mode);
+			return true;
 		}
 
 		if( (file.fileExtension=="" && file.mode=="code") || 
@@ -264,9 +264,10 @@ return true;
 		file.fileExtension=="css" || 
 		file.fileExtension=="htm" || 
 		file.fileExtension=="html" || 
-file.fileExtension=="qml" || 
-file.fileExtension=="qrc" || 
-file.fileExtension=="c" || 
+		file.fileExtension=="qml" || 
+		file.fileExtension=="qrc" || 
+		file.fileExtension=="c" || 
+		file.fileExtension=="swift" || 
 		file.fileExtension=="java") {
 			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and file.mode=" + file.mode);
 			return true;
