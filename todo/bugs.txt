@@ -36,7 +36,67 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+-----------------------------------------------------------------------------------
 
+2020-09-02 (00:02:49) zeta: Searching file: /zpcdata/projects/webide/temp/release/npm/documentation/nodejs.htm (server_api.js:3047:12))
+2020-09-02 (00:02:49) zeta: doneMaybe: fileQueue.length=1615 filesBeingSearched=18 (server_api.js:3005:11))
+2020-09-02 (00:02:49) zeta: continueSearchFiles: fileQueue.length=1615 filesBeingSearched=18 (server_api.js:2982:11))
+2020-09-02 (00:02:49) zeta: continueSearchFiles: fileQueue.length=1615 filesBeingSearched=18 (server_api.js:2982:11))
+2020-09-02 (00:02:49) 192.168.0.3(1) <= 406{"resp":{"msg":"Aborted the search because we reached maxTotalMatches=500 limit!","matches":["toolbar","Toolbar"]},"id":406} (server.js:4693:4))
+2020-09-02 (00:02:49) zeta: Aborting file search/replace (server_api.js:3165:11))
+/zpcdata/projects/webide/server/server_api.js:3149
+		if(done) throw new Error("Already done! doneStack=" + doneStack);
+		         ^
+
+Error: Already done! doneStack=Error
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3152:15)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2993:4)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3149:18)
+    at aborted (/zpcdata/projects/webide/server/server_api.js:3171:3)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2984:36)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+
+
+-----------------------------------------------------------------------------------
+
+2020-09-01 (23:56:23) zeta: doneMaybe: fileQueue.length=2426 filesBeingSearched=1 (server_api.js:3005:11))
+2020-09-01 (23:56:23) zeta: Searching file: /zpcdata/projects/webide/temp/release/server/server/plugin/static_site_generator/ssg-build.js (server_api.js:3047:12))
+2020-09-01 (23:56:23) zeta: doneMaybe: fileQueue.length=2426 filesBeingSearched=0 (server_api.js:3005:11))
+2020-09-01 (23:56:23) 192.168.0.3 => 234abortFindInFiles (server.js:2328:3))
+2020-09-01 (23:56:23) command=abortFindInFiles connectionAuthorized=true (server.js:2554:3))
+2020-09-01 (23:56:23) zeta: No data in answer from command=abortFindInFiles (user_worker.js:761:15))
+2020-09-01 (23:56:23) 192.168.0.3(1) <= 234{"resp":{},"id":234} (server.js:4693:4))
+2020-09-01 (23:56:23) zeta: continueSearchFiles: fileQueue.length=2426 filesBeingSearched=0 (server_api.js:2982:11))
+2020-09-01 (23:56:23) zeta: Aborting file search/replace (server_api.js:3165:11))
+2020-09-01 (23:56:23) 192.168.0.3(1) <= 229{"resp":{"msg":"Found 0 match(es) in 3160/18533 file(s) searched in 8.68s.\n","matches":[]},"id":229} (server.js:4693:4))
+2020-09-01 (23:56:23) zeta: continueSearchFiles: fileQueue.length=2426 filesBeingSearched=0 (server_api.js:2982:11))
+2020-09-01 (23:56:23) zeta: Aborting file search/replace (server_api.js:3165:11))
+/zpcdata/projects/webide/server/server_api.js:3149
+		if(done) throw new Error("Already done! doneStack=" + doneStack);
+		         ^
+
+Error: Already done! doneStack=Error
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3152:15)
+    at aborted (/zpcdata/projects/webide/server/server_api.js:3171:3)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2984:36)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
+    at doneFinish (/zpcdata/projects/webide/server/server_api.js:3149:18)
+    at aborted (/zpcdata/projects/webide/server/server_api.js:3171:3)
+    at Timeout.continueSearchFiles [as _onTimeout] (/zpcdata/projects/webide/server/server_api.js:2984:36)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)
+    at Timer.processTimers (timers.js:223:10)
 
 
 -----------------------------------------------------------------------------------
