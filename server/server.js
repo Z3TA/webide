@@ -6565,7 +6565,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
 	sendToClient(username, "progress", [0,0]);
-	sendToClient(username, "progress", [0,30]);
+	sendToClient(username, "progress", [0,37]);
 	
 	// The user running libvirt need to have access to the user home dir in order to mount it
 	// We however need to run libvirt as root in order to write to the mounted home dir!
@@ -6628,7 +6628,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			if(!matchZvol) {
 				log(username + " do not have a Docker VM zvol", DEBUG);
 				
-				if(options.command == "status" || options.command=="stop") return done({stopped: true});
+				if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
 				
 				progress(0,2);
 				createZvol(zpool);
@@ -6656,7 +6656,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			if(!matchVM) {
 				log(username + " has no VM configured!", DEBUG);
 				
-				if(options.command == "status" || options.command=="stop") return done({stopped: true});
+				if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
 				
 				setupVM(zpool);
 			}
@@ -6682,7 +6682,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 						startVM();
 					}
 					else if(options.command == "status" || options.command=="stop") {
-						return done({stopped: true});
+						return done({stopped: true, created: true});
 					}
 					else throw new Error("Unknown options.command=" + options.command);
 				}
@@ -6718,7 +6718,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 		// Make sure the IP is reachable
 		// Retry some times as it takes time for the server to boot!
 		
-		var maxTry = 13;
+		var maxTry = 20;
 		
 		if(!ipToPing) throw new Error("ipToPing=" + ipToPing + " IP=" + IP);
 		
@@ -6733,15 +6733,17 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			if(err) {
 				pingFail++;
 				
-				log("ping fail! pingFail=" + pingFail, DEBUG);
+				log(username + " Docker VM ping fail! pingFail=" + pingFail, DEBUG);
 				
 				if(pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
 				
 				ping(ipToPing, pingFail);
 			}
 			else {
-				log("ping success! attempts=" + pingFail, DEBUG);
+				log(username + " Docker VM ping success! attempts=" + pingFail, DEBUG);
 				
+				progress(maxTry-pingFail);
+
 				if(pingFail > 5) {
 					// it can take some time for the SSH daemon to start after network...
 					setTimeout(function() {
@@ -6873,7 +6875,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 					progress();
 					
 					if(options.command == "start" || options.command == "status") {
-						return done({started: true, IP: IP});
+						return done({started: true, IP: IP, created: true});
 					}
 					else if(options.command == "stop") {
 						throw new Error("Should not configure when shutting down!");

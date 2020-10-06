@@ -10,6 +10,7 @@
 	var discoveryBarIcon;
 	var widget;
 	var deamonAwake = false;
+	var deamonCreated = false;
 	var windowMenu;
 	
 if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("docker") != -1) {
@@ -62,6 +63,9 @@ return;
 		CLIENT.cmd("dockerDaemon", {command: "status"}, function dockerStatus(err, status) {
 			if(err) alertBox("Unable to get Docker daemon status! Error: " + err.message);
 			else {
+
+				if(status.hasOwnProperty("created")) deamonCreated = status.created;
+
 				if(status.started) {
 					deamonAwake = true;
 					
@@ -90,8 +94,12 @@ return;
 	}
 	
 	function wakeup() {
-		var timeout = 30000;
+		var timeout = 60000;
+		var patientAlert;
 		CLIENT.cmd("dockerDaemon", {command: "start"}, timeout, function dockerDeamonAwakenMaybe(err, status) {
+			
+			if(patientAlert) patientAlert.close();
+
 			if(err) alertBox("Unable to start the Docker daemon! Error: " + err.message);
 			else {
 				
@@ -105,6 +113,9 @@ return;
 				deamonAwake = true;
 			}
 		});
+		if(!deamonCreated) {
+			patientAlert = alertBox("First time starting the Docker deamon will take a while. Please be patent!");
+		}
 	}
 	
 	function sleep() {
