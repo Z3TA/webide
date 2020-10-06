@@ -1,5 +1,10 @@
 (function() {
 	
+	/*
+		Autocompletes xml tag closings eg </foo>
+	*/
+
+
 	"use strict";
 	
 	var order = 100;
@@ -19,17 +24,31 @@
 			return;
 		}
 		
-		// Because high order, there's proabbly nothing else to complete. Maybe we want to close last opened xml tag!?
+		// Don't insert tag ending if we are inside a tag opening eg <foo ...
+		for (var i=file.caret.index; i>file.grid[file.caret.row].startIndex-1; i--) {
+			console.log("" + file.text.charAt(i));
+			if(file.text.charAt(i) == ">") break;
+			if(file.text.charAt(i) == "<") {
+				console.log("Not autocompleting tag ending because inside tag");
+				return;
+			}
+			
+		}
+		console.log("not inside tag");
+
+		// Because high order, there's probably nothing else to complete. Maybe we want to close last opened xml tag!?
 		var lastOpenXmlTag = UTIL.findLastOpenXmlTag(file, charIndex);
 		
 		if(lastOpenXmlTag.length == 0) return;
 		if(lastOpenXmlTag == "<") return;
 		
-		console.log("lastOpenXmlTag=" + lastOpenXmlTag);
+		console.log("lastOpenXmlTag=" + lastOpenXmlTag + " word=" + word);
 		
 		if(lastOpenXmlTag.match(/script/i) && word.length > 0) return; // Avoid adding </script> when inside a script element
 		
-			options.push(word + "</" + lastOpenXmlTag + ">");
+		if( lastOpenXmlTag.match(/!DOCTYPE/i) ) return;
+		
+		options.push(word + "</" + lastOpenXmlTag + ">");
 		
 		
 		return options;

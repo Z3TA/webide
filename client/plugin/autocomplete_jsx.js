@@ -25,6 +25,18 @@
 		
 		console.log("autoCompleteJSX: word=" + word + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
 		
+		// Don't insert tag ending if we are inside a tag opening eg <foo ...
+		for (var i=file.caret.index; i>file.grid[file.caret.row].startIndex-1; i--) {
+			console.log("autoCompleteJSX: " + file.text.charAt(i));
+			if(file.text.charAt(i) == ">") break;
+			if(file.text.charAt(i) == "<") {
+				console.log("autoCompleteJSX: Not autocompleting tag ending because inside tag");
+				return;
+			}
+
+		}
+		console.log("autoCompleteJSX: not inside tag");
+
 		var options = [];
 		var optionsToRemove = [];
 		
@@ -75,7 +87,8 @@
 			console.log("autoCompleteJSX: lastOpenXmlTag=" + lastOpenXmlTag);
 			
 			if(lastOpenXmlTag.match(/script/i) && word.length > 0) return; // Avoid adding </script> when inside a script element
-			
+			if( lastOpenXmlTag.match(/!DOCTYPE/i) ) return;
+
 			options.push(word + "</" + lastOpenXmlTag + ">");
 			
 		}
