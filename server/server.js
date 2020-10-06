@@ -3549,17 +3549,17 @@ checkMountsReadyMaybe();
 		}
 		else {
 			
-			if(!createdNetworkNamespaces) log("Waiting for network namespace to be created...", DEBUG);
-			if(!nginxProfileOK) log("Waiting for Nginx profiles to be created...", DEBUG);
-			if((!sslCertChecked && options.waitForSSL)) log("Waiting for SSL certificates to be created...", DEBUG);
-			if(!mysqlCheck) log("Waiting for mySQL socket to be created ...", DEBUG);
-			if(filesToWrite!=filesWritten) log("Waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
-			if(!kvmAccessGranted) log("Waiting for access to /dev/kvm ...", DEBUG);
-			if(!wwwpubCreated)  log("wwwpub folder not yet checked/created...", DEBUG);
-			if(!sockDirCreated)  log("sock folder not yet checked/created...", DEBUG);
-			if(!logDirCreated)  log("log folder not yet checked/created...", DEBUG);
-			if(!prodDirCreated)  log(".prod folder not yet checked/created...", DEBUG);
-			if(!npmDirCreated)  log(".npm-packages folder not yet checked/created...", DEBUG);
+			if(!createdNetworkNamespaces) log(username + " waiting for network namespace to be created...", DEBUG);
+			if(!nginxProfileOK) log(username + " waiting for Nginx profiles to be created...", DEBUG);
+			if((!sslCertChecked && options.waitForSSL)) log(username + " waiting for SSL certificates to be created...", DEBUG);
+			if(!mysqlCheck) log(username + " waiting for mySQL socket to be created ...", DEBUG);
+			if(filesToWrite!=filesWritten) log(username + " waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
+			if(!kvmAccessGranted) log(username + " waiting for access to /dev/kvm ...", DEBUG);
+			if(!wwwpubCreated)  log(username + " wwwpub folder not yet checked/created...", DEBUG);
+			if(!sockDirCreated)  log(username + " sock folder not yet checked/created...", DEBUG);
+			if(!logDirCreated)  log(username + " log folder not yet checked/created...", DEBUG);
+			if(!prodDirCreated)  log(username + ".prod folder not yet checked/created...", DEBUG);
+			if(!npmDirCreated)  log(username + ".npm-packages folder not yet checked/created...", DEBUG);
 			
 		}
 	}
