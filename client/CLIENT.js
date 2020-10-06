@@ -259,6 +259,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			
 		*/
 		if(requestThatDontCallBack.indexOf(req) == -1) {
+
 			setTimeout(commandTimeout, timeout || CLIENT.cmdTimeout);
 			CLIENT.inFlight++;
 		}
@@ -306,7 +307,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			}
 			
 			gotResponseForTimedOutRequest[id] = new Error("Request id=" + id + " req=" + req + " has already timed out! Consider increasing the timeout=" + timeout + (CLIENT.cmdTimeout==timeout?" (default)":"") + "");
-			gotResponseForTimedOutRequest[id].time = new Date();
+			gotResponseForTimedOutRequest[id].time = new Date(new Date() - timeout); // timeout time has already passed when we recieve the callback
 			gotResponseForTimedOutRequest[id].code = "ETIMEDOUT";
 			
 			// note: If the message did get through, we might get the answer after re-connecting!
