@@ -1086,7 +1086,7 @@
 				if(stateChanged(oldServerState[path], serverState)) {
 					EDITOR.storage.setItem("state_" + path, JSON.stringify(state), function(err) {
 // Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
-console.error(err);
+if(err) console.error(err);
 });
 					oldServerState[path] = serverState;
 				}
