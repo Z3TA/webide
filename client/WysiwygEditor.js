@@ -1036,7 +1036,7 @@ console.warn("Unable to get caret position!");
 		if(file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(mouseUpEvent.target);
 		//else console.log("EDITOR.input=" + EDITOR.input + " file==wysiwygEditor.sourceFile?" + (file==wysiwygEditor.sourceFile) + "");
 		
-		if(file.path.slice(-3) == "css") {
+		if(mouseUpEvent.ctrlKey && file.path.slice(-3) == "css") {
 			console.log("Current file is a CSS file!");
 			var fileName = UTIL.getFilenameFromPath(file.path);
 			var reStyle = new RegExp('<link.*href=.*' + fileName, "i");
