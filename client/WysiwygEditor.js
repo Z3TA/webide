@@ -729,12 +729,12 @@ console.warn("Unable to get caret position!");
 			// Most likely the user has closed the preview window
 			wysiwygEditor.close();
 			return;
-		}
+		}sourceFile
 		
 		var fileExt = UTIL.getFileExtension(file.path);
 		
 		if(fileExt == "css") {
-			return updateStylesheet(doc, file);
+			return updateStylesheet(doc, file, sourceFile);
 		}
 		
 		
@@ -893,7 +893,7 @@ console.warn("Unable to get caret position!");
 			var doc = win.document;
 			if(!doc) throw new Error("Unable to get document from wysiwygEditor window! doc=" + doc);
 			
-			return updateStylesheet(doc, file, saveEventCallback);
+			return updateStylesheet(doc, file, wysiwygEditor.sourceFile, saveEventCallback);
 			
 			//console.log("fileName=" + fileName + " was not found on the page in preview.");
 		}
@@ -932,7 +932,24 @@ console.warn("Unable to get caret position!");
 		else return saveEventCallback(null);
 	}
 	
-	function updateStylesheet(doc, file, callback) {
+	function updateStylesheet(doc, file, previewFile, callback) {
+		
+		// Make all url() relative to the css file
+		var cssContent = file.text;
+		var cssFilePath = file.path;
+		var previewFilePath = previewFile.path;
+		var relativePath = UTIL.relativePath(previewFilePath, cssFilePath);
+		if(relativePath) {
+			// we don't want to add the relative path infront of data URL's!
+			// couln't get negative lookahead to work so using a callback
+			cssContent = cssContent.replace(/url\((["'])?(data:)?([^)'"]*)(["'])?\)/g, function(match, p1, p2, p3, p4) {
+				if(p2 == "data:") return "url(" + p1 + p2 + p3 + p4 + ")";
+				else return "url(" + p1 + relativePath + p3 + p4 + ")";
+			});
+		}
+		
+		//console.log("relativePath=" + relativePath + " cssContent=" + cssContent);
+
 		var fileName = UTIL.getFilenameFromPath(file.path);
 		var links = doc.getElementsByTagName('link');
 		for (var i=0; i<links.length; i++) {
@@ -946,7 +963,7 @@ console.warn("Unable to get caret position!");
 					
 					var style = document.createElement("style")
 					style.setAttribute("href", links[i].href);
-					style.innerText = file.text;
+					style.innerText = cssContent;
 					
 					parent.insertBefore(style, links[i]);
 					parent.removeChild(links[i]);
@@ -966,7 +983,7 @@ console.warn("Unable to get caret position!");
 			href = style[i].getAttribute("href");
 			if(href) {
 				if(href.indexOf(fileName) != -1) {
-					style[i].innerText = file.text;
+					style[i].innerText = cssContent;
 					console.log("Replaced style content for " + fileName);
 					if(callback) callback(null);
 					return;

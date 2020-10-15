@@ -1957,6 +1957,31 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		
 	},
 	
+	relativePath: function relativePath(pathA, pathB) {
+
+		// Useful to figure out where pathB is relative to PathA
+		// ex: UTIL.relativePath("/root/src/index.htm", "/root/src/gfx/style.css") => gfx/
+
+		var folderA = UTIL.getDirectoryFromPath(pathA);
+		var folderB = UTIL.getDirectoryFromPath(pathB);
+
+		if(folderA == folderB) return "";
+
+		if(folderA.length > folderB.length) {
+			var temp = folderB;
+			folderB = folderA;
+			folderA = temp;
+		}
+
+		for (var i=0; i<folderA.length; i++) {
+			if(folderA[i] != folderB[i]) break;
+		}
+
+		if(i==0) return UTIL.resolvePath(folderA, folderB);
+
+		return folderB.slice(i);
+	},
+
 	joinPaths: function joinPaths(pathsArrayOrManyArgs) {
 		/*
 			
