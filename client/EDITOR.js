@@ -80,7 +80,16 @@ EDITOR.settings = {
 		"defs",
 		"marker",
 		"g",
-		"figure"
+		"figure",
+		"header",
+		"nav",
+		"article",
+		"aside",
+		"figure",
+		"footer",
+		"section",
+		"details",
+		"menu"
 	],
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {
