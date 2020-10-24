@@ -6502,6 +6502,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			if(ret && !ret.async) callback(ret, true);
 			else if(ret && ret.async) waitingForAsync++;
 			
+			if(ret.exclusive) break;
 		}
 		
 		if(waitingForAsync == 0) gotOptions();
@@ -6580,6 +6581,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			if(!Array.isArray(ret) && typeof ret == "object") {
 				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
+				if(ret.exclusive) removeOptions =  removeOptions.concat(options);
 				ret = ret.add;
 			}
 			

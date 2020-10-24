@@ -36,6 +36,10 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Ctrl + B = Go back to where I was
+
+---
+
 Anywhere in the file, pressing ALT+R or tools>REPL should load all code in a isolated REPL
 so that you can test out functions and make assertions
 
