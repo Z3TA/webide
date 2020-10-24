@@ -579,8 +579,9 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		var start = file.caret.index; // Will change depending if we search left or right
 		var end = 0;
 		var searchStrLenght = str.length;
-		
-		
+		var loopCounter = 0;
+		var loopMax = 100;
+
 		if(useRegex == undefined) useRegex = false;
 		if(keepSelection == undefined) keepSelection = false;
 		if(dontLoop == undefined) dontLoop = false;
@@ -602,8 +603,12 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			var re = new RegExp(str, flags);
 			}
 			catch(err) {
-				if(err) return alertBox(err.message);
+				if(err) {
+					alertBox(err.message);
+					return -1;
+				}
 			}
+
 			
 			var result;
 			
@@ -620,6 +625,9 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				while((result = re.exec(tempText)) != null) {
 					index = result.index;
 					searchStrLenght = result[0].length;
+
+					loopCounter++;
+					if(loopCounter > loopMax) throw new Error("Infinitive loop detected! result=" + JSON.stringify(result, null, 2));
 				}
 				
 				if( index==-1 && !dontLoop) {
@@ -628,6 +636,9 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 					while((result = re.exec(tempText)) != null) {
 						index = result.index;
 						searchStrLenght = result[0].length;
+
+						loopCounter++;
+						if(loopCounter > loopMax) throw new Error("Infinitive loop detected! result=" + JSON.stringify(result, null, 2));
 					}
 				}
 				
@@ -766,6 +777,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			lastStart = start;
 			start = find(str, file, useRegex, true, true, "right", ignoreCase);
 			console.log("start=" + start);
+
 		}
 		
 		EDITOR.renderNeeded();
@@ -802,8 +814,42 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 			console.log("Replacing at start=" + start);
 			
-			console.log("selectedText=" + selectedText);
+			console.log("selectedText=" + selectedText + " searchString=" + searchString + " useRegex=" + useRegex);
 			
+			// we might be replacing new line characters
+			if(selectedText.length == 0) {
+				if(!useRegex) throw new Error("Nothing was selected!? start=" + start + " searchString=" + searchString + " ");
+
+				file.moveCaretRight();
+				var nextFind = find(searchString, file, useRegex, keepSelection, dontLoop);
+				if(nextFind > -1) {
+					var text = file.text.slice(start, nextFind);
+				}
+				else {
+					var text = file.text.slice(start);
+				}
+
+				if(text.length == 0) {
+					console.log("text.length=" + text.length + " start=" + start + " nextFind=" + nextFind);
+					shake(replaceButton);
+					return;
+				}
+
+				var flags = "";
+				if(ignoreCase) flags += "i";
+				var re = new RegExp(searchString, flags);
+
+				newString = newString.replace(/\\n/g, "\n"); // Allow inserting new-lines (unescape new lines)
+
+				var newText = text.replace(re, newString);
+				var caret = file.createCaret(start);
+
+				file.deleteTextRange(start, start + text.length-1);
+				file.insertText(newText, caret);
+
+				return;
+			}
+
 			// Delete the selected text
 			file.deleteSelection();
 			
@@ -849,13 +895,24 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		
 		console.log("Replace all " + searchString + " width " + newString);
 		
-		while(start > -1) {
+		var flags = "g";
+		if(ignoreCase) flags += "i";
+
+		newString = newString.replace(/\\n/g, "\n"); // Allow inserting new-lines
+
+		var re = new RegExp(searchString, flags);
+
+		file.reload(file.text.replace(re, newString));
+
+		/*
+			while(start > -1) {
 			if(start < lastStart) throw new Error("Replace loop detected!");
 			lastStart = start;
 			start = replace(newString, searchString, file, useRegex, dontLoop, ignoreCase);
 			console.log("start=" + start);
 		}
-		
+		*/
+
 		EDITOR.renderNeeded();
 		
 	}
