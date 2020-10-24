@@ -3,6 +3,14 @@
 What I'm working on
 -------------------
 
+
+bug-fix: Add a loop counter to prevent infinite loops when searching (using regexp)
+
+Working on css intellisense
+
+
+---
+
 /zpcdata/projects/webide/server/server_api.js:3149
 		if(done) throw new Error("Already done! doneStack=" + doneStack);
 		         ^

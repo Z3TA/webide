@@ -89,7 +89,9 @@ EDITOR.settings = {
 		"footer",
 		"section",
 		"details",
-		"menu"
+		"menu",
+		"picture",
+		"figcaption"
 	],
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {
