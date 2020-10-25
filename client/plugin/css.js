@@ -6,7 +6,7 @@
 		* Show invalid CSS rules
 		* Show/goto rules that override current value
 
-		* When typing 12pxrem convert 12px to rem!
+		* When typing 12pxrem convert 12px to rem! or when clicking tab on 12px convert it to rem !?
 		* Mark lines not ending with semicolon!
 
 	*/
@@ -51,29 +51,95 @@
 		}
 	}
 
-	// Pre-render function to highlight misspelled rules
+	// Pre-render function to highlight missed semicolon
 	function checkCssRules(buffer, file, bufferStartRow, maxColumns) {
-		var str = ""
+
+
+
+		return buffer;
+	}
+
+
+
+	/*
+		Pre-render function to highlight misspelled rules
+
+		I thought this was going to be simple, 
+		but then there are comments and optional white spaces and semicolons... 
+		Should probably make a proper CSS parser, rather then doing it in a pre-render
+	*/
+
+	function checkCssRules(buffer, file, bufferStartRow, maxColumns) {
+		var rule = ""
 		var row = 0;
 		var col = 0;
 		var reSpace = /\s/;
+		var inComment = false;
+		var char = "";
+		var lastChar = "";
+		var inOptions = false;
+		var inSelector = true;
+		var selector = "";
 
 		for(var row=0; row<buffer.length; row++) {
 			//if(row == file.caret.row+bufferStartRow) continue;
-			str = "";
-			for(var col=0; col<buffer[row].length; col++) {
-				if(buffer[row][col].char == ":") {
+			
+			//console.log("============ row=" + row + " ===============");
 
-					if(cssRule.indexOf( str.trim() ) == -1) {
-						for(var i=0; i<str.length; i++) {
+			for(var col=0; col<buffer[row].length; col++) {
+				char = buffer[row][col].char;
+
+				// Ignore comments
+				if( inComment && char == "/" && lastChar == "*" ) inComment = false;
+				else if(char == "*" && lastChar == "/") inComment = true;
+				else if(inComment) continue;
+
+				if(char == "{") {
+					inSelector = false;
+				}
+				else if(inSelector) {
+					selector += char;
+				}
+				else if(char == ":") {
+
+					if(inOptions) {
+						// Missing semicolon !?
+						for(var r=row-1; r>0; r--) {
+							if(buffer[r].length > 0) {
+								if( buffer[r][ buffer[r].length-1 ].char == "}" || buffer[r][ buffer[r].length-1 ].char == "{" ) continue;
+
+								buffer[r][ buffer[r].length-1 ].circle = true;
+								break;
+							}
+						}
+					}
+
+					//console.log("rule=" + rule);
+
+					if(cssRule.indexOf( rule.trim() ) == -1) {
+						for(var i=0; i<rule.length && i < buffer[row].length; i++) {
 							buffer[row][i].wave = true;
 						}
 					}
-					break;
+					rule = "";
+
+					inOptions = true;
+					// Make sure there is a ; semicolon before we see another : colon!
 
 				}
+				else if(inOptions && char == ";") {
+					inOptions = false;
+				}
+				else if(!inOptions && char == "}") {
+					inSelector = true;
+				}
+				else if(!inOptions && !inSelector) {
+					rule += char;
+				}
 				
-				str += buffer[row][col].char;
+
+				//console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions);
+
 			}
 		}
 
