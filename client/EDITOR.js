@@ -6499,8 +6499,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
-			if(ret && !ret.async) callback(ret, true);
-			else if(ret && ret.async) waitingForAsync++;
+			if(ret == undefined) continue;
+
+			if(!ret.async) callback(ret, true);
+			else waitingForAsync++;
 			
 			if(ret.exclusive) break;
 		}

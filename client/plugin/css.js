@@ -108,6 +108,8 @@
 							if(buffer[r].length > 0) {
 								if( buffer[r][ buffer[r].length-1 ].char == "}" || buffer[r][ buffer[r].length-1 ].char == "{" ) continue;
 
+								if( r== file.caret.row ) break; // Don't show the red circle if the caret is on the line
+
 								buffer[r][ buffer[r].length-1 ].circle = true;
 								break;
 							}
@@ -147,6 +149,8 @@
 	}
 
 	function autoCompleteCssRules(file, word, wordLength, gotOptions) {
+
+		if(!isCssFile) return;
 
 		// note: default word delimiter splits - which is legal in CSS
 		// so we have to figure out the word ourselves!
