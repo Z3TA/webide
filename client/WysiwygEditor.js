@@ -119,7 +119,10 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		wysiwygEditor.captureConsoleLog = options.captureConsoleLog==false ? false : true;
 		
 		wysiwygEditor.toolbar = (options.toolbar==true);
-		
+		//wysiwygEditor.toolbar = options.toolbar == undefined ? true : !!options.toolbar;
+		//console.log("wysiwygEditor.toolbar=" + wysiwygEditor.toolbar + " options.toolbar=" + options.toolbar);
+		// Toolbar is still work in progress! Rationale for not having a toolbar is that the WYSIWYG should only be used for quick edits, and that vanilla HTML should be used for more advanced editing!
+
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(sourceFile.text); 
@@ -1977,7 +1980,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			}, 1);
 			
 				
-			if(wysiwygEditor.onlyPreview && wysiwygEditor.toolbar) {
+			if(!wysiwygEditor.onlyPreview && wysiwygEditor.toolbar) {
 					
 				// Prevent zooming (have to use zoom buttons in toolbar)
 				var meta = document.createElement("meta");
