@@ -41,6 +41,7 @@
 			isCssFile = true;
 
 			EDITOR.addPreRender(checkCssRules);
+			EDITOR.on("keyPressed", pxToRem);
 
 		}
 		else {
@@ -48,8 +49,46 @@
 			isCssFile = false;
 
 			EDITOR.removePreRender(checkCssRules);
+			EDITOR.removeEvent("keyPressed", pxToRem);
 		}
 	}
+
+	function pxToRem(file, character) {
+
+		var rootElementTextSize = 16;
+
+		if(character == "m" && file.caret.col > 0) {
+			if(file.grid[file.caret.row][file.caret.col-1].char == "p") {
+				var nrStr = "";
+				var reNr = /\d|\.|\,/;
+				for(var i=file.caret.col-2, char=""; i>0; i--) {
+					char = file.grid[file.caret.row][i].char;
+					if(char.match(reNr)) {
+						nrStr = char + nrStr;
+					}
+					else break;
+				}
+				if(nrStr.length > 0) {
+					var nr = parseFloat(nrStr);
+					var rem = Math.round( nr/rootElementTextSize * 1000 ) / 1000 ;
+
+					// Remove p
+					file.moveCaretLeft();
+					file.deleteCharacter();
+
+					for(var i=0; i<nrStr.length; i++) {
+						file.moveCaretLeft();
+						file.deleteCharacter();
+					}
+					file.insertText(rem + "rem");
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 
 	/*
 		Pre-render function to highlight misspelled rules
@@ -468,7 +507,6 @@
 	];
 
 	// TEST-CODE-START
-
 
 	EDITOR.addTest(1, false, function testCssParser(callback) {
 		EDITOR.openFile("testCssRuleWithComment.css", 'body {\n/* comment */\nborder: 1px solid red;\nlatcholajban: 3rem;\nbackground-image: url("data:image/svg+xml;base64,...");\n}\n', function (err, file) {
