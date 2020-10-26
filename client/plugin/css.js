@@ -51,16 +51,6 @@
 		}
 	}
 
-	// Pre-render function to highlight missed semicolon
-	function checkCssRules(buffer, file, bufferStartRow, maxColumns) {
-
-
-
-		return buffer;
-	}
-
-
-
 	/*
 		Pre-render function to highlight misspelled rules
 
@@ -70,7 +60,6 @@
 	*/
 
 	function checkCssRules(buffer, file, bufferStartRow, maxColumns) {
-		var rule = ""
 		var row = 0;
 		var col = 0;
 		var reSpace = /\s/;
@@ -80,27 +69,65 @@
 		var inOptions = false;
 		var inSelector = true;
 		var selector = "";
+		var word = "";
+		var inDoubleQuote = false;
+		var inSingleQuote = false;
+
+		//console.log("maxColumns=" + maxColumns);
 
 		for(var row=0; row<buffer.length; row++) {
 			//if(row == file.caret.row+bufferStartRow) continue;
 			
 			//console.log("============ row=" + row + " ===============");
 
+			if(col == maxColumns) {
+				// Assume proper line break when the line is cut off
+				inSingleQuote = false;
+				inDoubleQuote = false;
+				inOptions = false;
+				word = "";
+				//console.log("col=" + col + " maxColumns=" + maxColumns);
+			}
+
 			for(var col=0; col<buffer[row].length; col++) {
+				lastChar = char;
 				char = buffer[row][col].char;
 
 				// Ignore comments
-				if( inComment && char == "/" && lastChar == "*" ) inComment = false;
-				else if(char == "*" && lastChar == "/") inComment = true;
-				else if(inComment) continue;
-
-				if(char == "{") {
+				if( inComment && char == "/" && lastChar == "*" ) {
+					inComment = false;
+				}
+				else if(char == "*" && lastChar == "/") {
+					inComment = true;
+					word = word.slice(0, -1);
+				}
+				else if(inComment) {
+					continue;
+				}
+				else if(char == '"') {
+					inDoubleQuote = true;
+				}
+				else if(char == '"' && inDoubleQuote && lastChar != "\\") {
+					inDoubleQuote = false;
+				}
+				else if(inDoubleQuote) {
+					continue;
+				}
+				else if(char == "'") {
+					inSingleQuote = true;
+				}
+				else if(char == "'" && inSingleQuote && lastChar != "\\") {
+					inSingleQuote = false;
+				}
+				else if(inSingleQuote) {
+					continue;
+				}
+				else if(char == "{") {
 					inSelector = false;
+					//console.log("selector=" + word.trim());
+					word = "";
 				}
-				else if(inSelector) {
-					selector += char;
-				}
-				else if(char == ":") {
+				else if(!inSelector && char == ":") {
 
 					if(inOptions) {
 						// Missing semicolon !?
@@ -116,14 +143,14 @@
 						}
 					}
 
-					//console.log("rule=" + rule);
+					//console.log("word=" + word);
 
-					if(cssRule.indexOf( rule.trim() ) == -1) {
-						for(var i=0; i<rule.length && i < buffer[row].length; i++) {
+					if(cssRule.indexOf( word.trim() ) == -1) {
+						for(var i=0; i<word.length && i < buffer[row].length; i++) {
 							buffer[row][i].wave = true;
 						}
 					}
-					rule = "";
+					word = "";
 
 					inOptions = true;
 					// Make sure there is a ; semicolon before we see another : colon!
@@ -131,16 +158,17 @@
 				}
 				else if(inOptions && char == ";") {
 					inOptions = false;
+					//console.log("options=" + word.trim());
+					word = "";
 				}
 				else if(!inOptions && char == "}") {
 					inSelector = true;
 				}
-				else if(!inOptions && !inSelector) {
-					rule += char;
+				else {
+					word += char;
 				}
 				
-
-				//console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions);
+				//console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions + " word=" + word);
 
 			}
 		}
@@ -320,6 +348,7 @@
 		"font-variant-numeric",
 		"font-variant-position",
 		"font-weight",
+		"gap", // Valid in display: flex
 		"grid",
 		"grid-area",
 		"grid-auto-columns",
@@ -398,6 +427,7 @@
 		"resize",
 		"right",
 		"scroll-behavior",
+		"src", // valid for fonts
 		"tab-size",
 		"table-layout",
 		"text-align",
@@ -436,6 +466,32 @@
 		"writing-mode",
 		"z-index"
 	];
+
+	// TEST-CODE-START
+
+
+	EDITOR.addTest(1, false, function testCssParser(callback) {
+		EDITOR.openFile("testCssRuleWithComment.css", 'body {\n/* comment */\nborder: 1px solid red;\nlatcholajban: 3rem;\nbackground-image: url("data:image/svg+xml;base64,...");\n}\n', function (err, file) {
+			if(err) throw err;
+
+			var maxColumns = 100;
+			var startRow = 0;
+			var buffer = checkCssRules(file.grid, file, startRow, maxColumns);
+
+			if(buffer[2][0].wave === true) throw new Error("Expected line 3 to be valid CSS!\n" + JSON.stringify(buffer, null, 2));
+			if(buffer[3][0].wave !== true) throw new Error("Expected line 4 to NOT be valid CSS!\n" + JSON.stringify(buffer, null, 2));
+			if(buffer[4][0].wave === true) throw new Error("Expected line 5 to be valid CSS!\n" + JSON.stringify(buffer, null, 2));
+
+			EDITOR.closeFile(file);
+			callback(true);
+
+		});
+	});
+
+
+	// TEST-CODE-END
+
+
 
 
 })();

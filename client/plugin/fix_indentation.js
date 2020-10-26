@@ -489,7 +489,7 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function dontFixEmptyLines(callback) {
+	EDITOR.addTest(function dontFixEmptyLines(callback) {
 		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/dontFixEmptyLines.js"), '{\n{\n\t\n\n\n}\n}\n', function(err, file) {
 			if(err) throw err;
 			
