@@ -152,7 +152,8 @@ function S(key, values, locale) {
 		var data = {
 			meddelande: "locale=" + locale + "\nLOCALUE=" + LOCALE + "\nkey=" + key + "\nvalues=" + values + "\nStack=" + UTIL.getStack(key), 
 			namn: 'WebIDE', 
-			subject: "No tranlsation for " + key + " in " + LOCALE 
+			subject: "No tranlsation for " + key + " in " + LOCALE,
+			robot: "42"
 		}
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", data, function (err, respStr) {});
 		if(locale == "en") return key + "!MISSING-TRANSLATION!";

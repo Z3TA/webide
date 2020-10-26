@@ -112,7 +112,7 @@ sendit();
 		
 		function sendit() {
 			var message = file.text;
-			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'WebIDE' }, function (err, respStr) {
+			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'WebIDE', robot: "42" }, function (err, respStr) {
 				if(err) {
 					alertBox("Problem sending bug report:  " + err.message);
 					throw err;
@@ -189,7 +189,7 @@ sendit();
 			"Last server msg: " + UTIL.shortString(JSON.stringify(CLIENT.lastMsgFromServer, null, 2)) + "\n" + 
 			"";
 			
-			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: miniReport, namn: 'WebIDE', subject: message }, function (err, respStr) {});
+			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: miniReport, namn: 'WebIDE', subject: message, robot: "42" }, function (err, respStr) {});
 		}
 	}
 	

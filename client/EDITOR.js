@@ -9403,14 +9403,18 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 	
 	EDITOR.sendFeedback = function sendFeedback(feedback, subject) {
 		
-		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback" }, function (err, respStr) {
+		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback", robot: "42" }, function (err, respStr) {
 			if(err) {
-				alertBox("Problem sending feedback:  " + err.message);
+				alertBox("Problem sending feedback! Error: " + err.message + "\n");
+				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
 				throw err;
 			}
 			else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
-				alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (" + respStr + ")");
+				alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (it will be copied to clipboard) Error: " + respStr + "");
 				console.log("respStr=" + respStr);
+			
+				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
+
 			}
 			else {
 				alertBox('Thanks for your invaluable feedback! ' + 
