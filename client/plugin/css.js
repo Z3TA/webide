@@ -38,6 +38,8 @@
 		// Also include .scss (Sass)
 		if(file.fileExtension.toLowerCase().indexOf("css") != -1) {
 			
+			if(isCssFile) return;
+
 			isCssFile = true;
 
 			EDITOR.addPreRender(checkCssRules);
@@ -111,6 +113,8 @@
 		var word = "";
 		var inDoubleQuote = false;
 		var inSingleQuote = false;
+
+		console.log("checkCssRules: file.path=" + file.path);
 
 		//console.log("maxColumns=" + maxColumns);
 
