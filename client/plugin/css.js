@@ -121,7 +121,7 @@
 		for(var row=0; row<buffer.length; row++) {
 			//if(row == file.caret.row+bufferStartRow) continue;
 			
-			//console.log("============ row=" + row + " ===============");
+			console.log("============ row=" + row + " ===============");
 
 			if(col == maxColumns) {
 				// Assume proper line break when the line is cut off
@@ -147,24 +147,27 @@
 				else if(inComment) {
 					continue;
 				}
-				else if(char == '"') {
-					inDoubleQuote = true;
-				}
+
 				else if(char == '"' && inDoubleQuote && lastChar != "\\") {
 					inDoubleQuote = false;
+				}
+				else if(char == '"') {
+					inDoubleQuote = true;
 				}
 				else if(inDoubleQuote) {
 					continue;
 				}
-				else if(char == "'") {
-					inSingleQuote = true;
-				}
+
 				else if(char == "'" && inSingleQuote && lastChar != "\\") {
 					inSingleQuote = false;
+				}
+				else if(char == "'") {
+					inSingleQuote = true;
 				}
 				else if(inSingleQuote) {
 					continue;
 				}
+
 				else if(char == "{") {
 					inSelector = false;
 					//console.log("selector=" + word.trim());
@@ -186,7 +189,7 @@
 						}
 					}
 
-					//console.log("word=" + word);
+					console.log("word=" + word);
 
 					if(cssRule.indexOf( word.trim() ) == -1) {
 						for(var i=0; i<word.length && i < buffer[row].length; i++) {
@@ -211,7 +214,7 @@
 					word += char;
 				}
 				
-				//console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions + " word=" + word);
+				console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions + " word=" + word);
 
 			}
 		}
@@ -512,7 +515,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, false, function testCssParser(callback) {
+	EDITOR.addTest(false, function testCssParser(callback) {
 		EDITOR.openFile("testCssRuleWithComment.css", 'body {\n/* comment */\nborder: 1px solid red;\nlatcholajban: 3rem;\nbackground-image: url("data:image/svg+xml;base64,...");\n}\n', function (err, file) {
 			if(err) throw err;
 
@@ -530,6 +533,20 @@
 		});
 	});
 
+	EDITOR.addTest(1, false, function testCssParser2(callback) {
+		EDITOR.openFile("testCssParser2.css", 'body {\nfont-family: Arial,"Helvetica Neue",Helvetica,sans-serif;\ntjoflöjt: 1em;\n}\n', function (err, file) {
+			if(err) throw err;
+
+			var maxColumns = 100;
+			var startRow = 0;
+			var buffer = checkCssRules(file.grid, file, startRow, maxColumns);
+
+			if(buffer[2][0].wave !== true) throw new Error("Expected line 3 to have invalid CSS!\n" + JSON.stringify(buffer, null, 2));
+
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
 
 	// TEST-CODE-END
 
