@@ -36,6 +36,9 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Parsing error in ssg-build < inside string indentate ...
+
+
 -----------------------------------------------------------------------------------
 
 2020-09-02 (00:02:49) zeta: Searching file: /zpcdata/projects/webide/temp/release/npm/documentation/nodejs.htm (server_api.js:3047:12))

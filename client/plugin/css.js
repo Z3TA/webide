@@ -533,7 +533,7 @@
 		});
 	});
 
-	EDITOR.addTest(1, false, function testCssParser2(callback) {
+	EDITOR.addTest(false, function testCssParser2(callback) {
 		EDITOR.openFile("testCssParser2.css", 'body {\nfont-family: Arial,"Helvetica Neue",Helvetica,sans-serif;\ntjoflöjt: 1em;\n}\n', function (err, file) {
 			if(err) throw err;
 

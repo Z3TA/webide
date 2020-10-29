@@ -983,17 +983,21 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	}
 	else {
 		module_fs.readFile(filePath, function (err, data) {
-			
 			if (err) error(err);
 			
 			if(ERROR) return;
 			
+			if(data.length == 0) {
+				log("Empty file: " + filePath);
+				data = "";
+			}
+
 			// Detect encoding
-			var  enc = module_jschardet.detect(data);
+			var enc = module_jschardet.detect(data);
 			
 			//log("enc=" + JSON.stringify(enc) + " path=" + filePath);
 			
-			if(enc.encoding.toLowerCase() != "utf-8" && enc.encoding.toLowerCase() != "ascii" && enc.confidence == 1) {
+			if(enc.encoding == null || (enc.encoding.toLowerCase() != "utf-8" && enc.encoding.toLowerCase() != "ascii" && enc.confidence == 1)) {
 				log("Unknown encoding (" + enc.encoding + ") in file=" + filePath);
 				}
 			else {
@@ -1039,6 +1043,10 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	
 	function makeDocument(data, metaData)	{
 		
+		if(typeof data != "string") {
+			throw new Error("Expected data=" + data + " (" + (typeof data) + ") to be a string!");
+		}
+
 		// Do not evaluate here! Evaluate in the evaluate step!
 		
 		var arrLanguage = [];
