@@ -8,8 +8,8 @@
 	
 	var firstRunMsg = "";
 	var firstRunMsgDefault = "This program was started from the IDE\n" + 
-	"(that gives you inline console log's and Error message.)\n" + 
-	"But if there is a problem, try running the script from the Terminal instead. (Right click > Terminal emulator)\n";
+	"(that gives you inline console log's and error messages.)\n" + 
+	"But if there is a problem, try running the script from the Terminal emulator instead. (Right click > Terminal emulator)\n";
 	
 	var winMenuStartScript, winMenuStopScript;
 	
@@ -279,6 +279,11 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 	function runNodeJsScriptFromMenu() {
 		var file = EDITOR.currentFile;
 		
+		if(file == undefined) {
+			alertBox('<a title="Ctrl+O" href="JavaScript:EDITOR.mock(\'keydown\', {charCode: 79, ctrlKey: true});EDITOR.openDialogs[EDITOR.openDialogs.length-1].close();">Open the file</a> you want to run with Node.js!');
+			return;
+		} 
+
 		if(isNodejsScript(file)) runNodeJsScript(file);
 		else {
 			var fileName = UTIL.getFilenameFromPath(file.path);
