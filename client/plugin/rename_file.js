@@ -15,9 +15,9 @@
 			
 			EDITOR.on("ctxMenu", renameFileCtxmenuOption);
 			
-			winMenuItem = EDITOR.windowMenu.add(S("rename_file"), [S("File"), 5], renameFile);
+			winMenuItem = EDITOR.windowMenu.add(S("rename_file"), [S("File"), 5], renameCurrentFile);
 			
-			EDITOR.registerAltKey({char: "r", alt:3, label: S("rename_file"), fun: renameFile});
+			EDITOR.registerAltKey({char: "r", alt:3, label: S("rename_file"), fun: renameCurrentFile});
 			
 		},
 		unload: function unloadRenameFiles() {
@@ -26,6 +26,10 @@
 		}
 	});
 	
+	function renameCurrentFile() {
+		return renameFile(EDITOR.currentFile.path); 
+	}
+
 	function renameFileCtxmenuOption(file, combo, caret, target) {
 		if(target.className=="fileCanvas" && file) {
 			var filePath = file.path;

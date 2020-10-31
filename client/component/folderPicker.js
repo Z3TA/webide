@@ -5,8 +5,8 @@ function makeFolderPicker(inputPath, options) {
  var suggestedFolderButtons = {};
  var lastKeyDownCode = 0;
  
- if(typeof inputPath.nodeName == "undefined") throw new Error("First argument to makeFolderPicker needs to be a input element!"); 
- if(inputPath.nodeName != "INPUT" && inputPath.nodeName != "TEXTAREA") throw new Error("First argument to makeFolderPicker needs to be either an input or textarea element!"); 
+ if(inputPath == undefined || typeof inputPath.nodeName == "undefined") throw new Error("First argument to makeFolderPicker (inputPath=" + inputPath + ") needs to be a input element!"); 
+ if(inputPath.nodeName != "INPUT" && inputPath.nodeName != "TEXTAREA") throw new Error("First argument to makeFolderPicker needs to be either an input or textarea element! (inputPath.nodeName=" + inputPath.nodeName + ")"); 
  // Are there any other elements that allows text input !?
  
  if(options == undefined) options = {};
