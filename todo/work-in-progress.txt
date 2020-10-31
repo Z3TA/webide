@@ -3,7 +3,7 @@
 What I'm working on
 -------------------
 
-Can't compile a static site if there is an empty file!
+Issue with wrapping a block of JS code, it doesn't find the start and end of the block ... and complains about indentation on start row and end row not being the same!
 
 
 

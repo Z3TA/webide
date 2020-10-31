@@ -157,8 +157,10 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 		var rowsBefore = endRow - startRow + 1;
 		var indentationStart = file.grid[startRow].indentation;
 		
-		if(indentationStart != file.grid[endRow].indentation) throw new Error("Indentation on startRow=" + startRow + " and endRow=" + endRow + " is not the same!");
-		
+		if(indentationStart != file.grid[endRow].indentation) {
+			throw new Error("Indentation on startRow=" + startRow + " (" + file.grid[startRow].indentation + " = " + UTIL.lbChars(file.grid[startRow].indentationCharacters) + ") and endRow=" + endRow + " (" + file.grid[endRow].indentation + " = " + UTIL.lbChars(file.grid[endRow].indentationCharacters) + ") is not the same!");
+		}
+
 		settings.indent_level = indentationStart;
 		
 		var startIndex = file.grid[startRow].startIndex;
