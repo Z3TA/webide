@@ -488,10 +488,19 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			//else throw error; 
 		}
 		
+		// Some nodes will throw (in Firefox) Error: Permission denied to access property "nodeType"
+		try {
+			(baseNode.nodeType == Node.TEXT_NODE)
+		}
+		catch(err) {
+			console.error(err);
+			return;
+		}
+
 		if(baseNode.nodeType == Node.TEXT_NODE) {
 			var text = baseNode.parentNode.innerText
 		}
-		
+
 		var pos = getPos(baseNode, false);
 		
 		if (selection.rangeCount) {
@@ -2614,8 +2623,8 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	
 	function sanitize(html, LB) {
 		// Can not change the file in a fileChange event or it would create an endless loop
-		// Witch means we can not sanitize on source code changes,
-		// witch also means we can not sanitize on content-editable canges! WHY??!! It should work!
+		// Which means we can not sanitize on source code changes,
+		// which also means we can not sanitize on content-editable canges! WHY??!! It should work!?
 		// Also note that the location of the node the caret/cursor is in needs to be at the same place! Or it will not be able to replace the caret after the sanitiazion!
 		
 		html = insertLineBreaks(html, LB);
@@ -2632,7 +2641,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		// Make sure there are at least two line breaks between each p-tag <p>foo</p><p>bar</p>
 		
-		if(LB != "\n") throw new Error("Line break convention now supported: " + UTIL.lbChars(LB));
+		if(LB != "\n") throw new Error("Line break convention not supported: " + UTIL.lbChars(LB));
 		
 		html = html.replace(/<\/p><p/gi, "</p>" + LB + LB + "<p");
 		
@@ -2660,10 +2669,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		console.time("insertLineBreaks");
 		
 		// Remove space between tags
-		html = html.replace(/>\s*</gi, "><");
-		
+		//html = html.replace(/>\s*</gi, "><");
+		// hmm, why did we replace white-space between tags !?!?
+
 		// Remove space before tags
-		// problem: Some browsers (Firefox) adds a <br> when pusing space ... <p>abc <br> ... witch we dont want to trim
+		// problem: Some browsers (Firefox) adds a <br> when pushing keyb-space ... <p>abc <br> ... which we dont want to trim
 		//html = html.replace(/\s*</gi, "<");
 		
 		
