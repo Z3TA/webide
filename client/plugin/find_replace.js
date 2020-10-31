@@ -900,6 +900,10 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 
 		newString = newString.replace(/\\n/g, "\n"); // Allow inserting new-lines
 
+		if(useRegex === false) {
+			searchString = UTIL.escapeRegExp(searchString);
+		}
+
 		var re = new RegExp(searchString, flags);
 
 		file.reload(file.text.replace(re, newString));
@@ -959,22 +963,37 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 	});
 	*/
 	
-	EDITOR.addTest(testReplaceAll);
-	function testReplaceAll(callback) {
+	EDITOR.addTest(function testReplaceAll(callback) {
 		EDITOR.openFile("replaceAll.txt", "fooBar\nfooBar\nfooBar\nfooBar\n", function(err, file) {
 			var newString = "fooBarBaz";
 			var searchString = "fooBar";
 			replaceAll(newString, searchString, file);
-			
+
 			if(file.text != "fooBarBaz\nfooBarBaz\nfooBarBaz\nfooBarBaz\n") throw new Error("file.text=" + file.text);
-			
+
 			EDITOR.closeFile(file);
-			
+
 			callback(true);
-			
+
 		});
-	}
+	});
 	
+	EDITOR.addTest(1, function testReplaceAll2(callback) {
+		EDITOR.openFile("replaceAll2.js", 'log("foo")\nlog("bar")\n', function(err, file) {
+			var newString = "console.log(";
+			var searchString = "log(";
+			var useRegex = false;
+			replaceAll(newString, searchString, file, useRegex);
+
+			if(file.text != 'console.log("foo")\nconsole.log("bar")\n') throw new Error("file.text=" + file.text);
+
+			EDITOR.closeFile(file);
+
+			callback(true);
+		});
+	});
+
+
 	// TEST-CODE-END
 	
 })();
