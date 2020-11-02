@@ -39,7 +39,8 @@ function log(msg, lvl, noTrace) {
 				return CONSOLE_LOG_ORIGINAL(msg);
 			}
 
-			//CONSOLE_LOG_ORIGINAL("stack=" + stack);
+			CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
+
 			var dir = process.cwd();
 			var dir2 = dir.replace(/server$/, "");
 			//CONSOLE_LOG_ORIGINAL("dir=" + dir);
@@ -47,6 +48,7 @@ function log(msg, lvl, noTrace) {
 			var row = stack[2];
 			if(row.indexOf("at Console.console.log") != -1 || 
 			row.indexOf("at Console.console.warn") != -1 ||
+			row.indexOf("at Console.console.error") != -1 ||
 			row.indexOf("at Console.timeEnd") != -1) row = stack[3];
 			//CONSOLE_LOG_ORIGINAL("row=" + row);
 			var indexDir = row.indexOf(dir);
