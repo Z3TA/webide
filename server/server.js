@@ -4730,7 +4730,7 @@ spawnOptions.env.HOST = netnsIP;
 				console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
 				
 				createHttpEndpoint(username, folder, function(err, url) {
-					if(err) workerResp(err.message);
+					if(err) workerResp(err);
 					else workerResp(null, {url: url});
 				});
 			}
