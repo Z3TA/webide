@@ -6,6 +6,8 @@
 
 (function() {
 
+	"use strict";
+
 	var lastJump = {}; // {index, row, col}
 	var lastFile;
 	var winMenuMoveBack;
@@ -100,8 +102,6 @@
 				row: caret.row,
 				col: caret.col
 			};
-
-			lastRow = caret.row;
 
 			console.log("to_last_position: rememberCaretPosition: init! file.path=" + file.path + " lastJump=", lastJump[file.path]);
 

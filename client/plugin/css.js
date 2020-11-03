@@ -1,4 +1,6 @@
 (function() {
+	"use strict";
+
 	/*
 
 		Goal of this plugin:
