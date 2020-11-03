@@ -499,7 +499,7 @@ var didReadString = false;
 		
 	});
 	
-	EDITOR.addTest(function testHashOnSftp(callback) {
+	EDITOR.addTest(true, function testHashOnSftp(callback) {
 		
 		// Todo: Also test on FTP!
 		
