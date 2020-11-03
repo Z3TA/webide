@@ -39,7 +39,7 @@ function log(msg, lvl, noTrace) {
 				return CONSOLE_LOG_ORIGINAL(msg);
 			}
 
-			CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
+			//CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
 
 			var dir = process.cwd();
 			var dir2 = dir.replace(/server$/, "");

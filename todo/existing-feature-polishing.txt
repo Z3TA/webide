@@ -4,6 +4,12 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+I want a "back to where I was" before editing the current section, keep track of jumps in the code... 
+
+sugg: auto complete paths inside href="|"
+
+css: red circle if you forgot dot before non-semantic-html rule 
+
 When uploading an image in preview/WYSYWIG you need to re-preview.
 Instead detect if we are in preview/WYSYWIG and copy the image to the preview folder!
 

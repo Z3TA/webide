@@ -49,7 +49,7 @@
 		desc: "Format JS using js-beautify",
 		load: function loadJSbeautifyTextWrapper() {
 			
-			EDITOR.bindKey({desc: S("save_current_file"), key: "B", combo: CTRL + SHIFT, fun: beautify});
+			EDITOR.bindKey({desc: S("save_current_file"), key: "B", combo: ALT + CTRL + SHIFT, fun: beautify});
 			
 			EDITOR.bindKey({desc: "Paste beautified", key: "V", combo: CTRL + SHIFT, fun: pasteBeautified});
 			

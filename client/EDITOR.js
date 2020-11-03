@@ -91,7 +91,8 @@ EDITOR.settings = {
 		"details",
 		"menu",
 		"picture",
-		"figcaption"
+		"figcaption",
+		"dl"
 	],
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {
@@ -11474,12 +11475,22 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 		//console.log("keyPressed: file?" + !!file + " EDITOR.input=" + EDITOR.input + " preventDefault=" + preventDefault + " charCode=" + character.charCodeAt(0) + " ");
 		
 		if(file && EDITOR.input && !preventDefault) {
-			// Put character at current caret position:
 			
 			if(character.charCodeAt(0) < 32) {
 				// This will send a control character and the File will complain...
 				// Ask the user what he/she wanted to do
+				
 				var comboStr = comboSumToString(combo.sum);
+				
+				// I + SHIFT + CTRL brings up the developer console in most browsers!
+				// It seems we can only capture this when running in app mode!
+				if(keyPressEvent.key == "I" && comboStr == "SHIFT + CTRL") {
+					EDITOR.stat("shift_ctrl_i");
+					console.log("Showing developer console!?");
+					return;
+				}
+				//console.log("keyPressEvent.key=" + keyPressEvent.key + " comboStr=" + comboStr);
+
 				promptBox("Missing key-binding for " + keyPressEvent.key + " + " + comboStr + "  \nWhat would you like the editor to do?", 
 				{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
 				function(answer) {
@@ -11492,6 +11503,8 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				return;
 			}
 			
+
+			// Insert a character at current caret position:
 			
 			file.putCharacter(character);
 			
