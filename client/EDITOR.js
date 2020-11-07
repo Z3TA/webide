@@ -8055,12 +8055,12 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
-				var allowLink = '<a target="_blank" class="allowDefault" href="about/popups.htm">allow</a>';
+				var allowLink = '<a target="_blank" class="allowDefault" href="https://webide.se/about/popups.htm">allow</a>';
 				
 				var failText = 'The new window was most likely blocked by the browser. ' +
 				'(' + allowLink + ' window/popups from ' + document.domain + ' to get rid of this message)'
 
-				var errorText = "If the new window could not open, it was probably blocked by the browser (please allow " + window.location.host + " to open new windows)";
+				var errorText = "If the new window could not open, it was probably blocked by the browser (please " + allowLink + " " + window.location.host + " to open new windows)";
 
 			/*
 				// native confirm dialog did not enable the window!
