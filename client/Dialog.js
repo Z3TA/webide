@@ -94,7 +94,7 @@ function Dialog(msg, options) {
 	
 	div.style.zIndex = (--DIALOG_Z_INDEX);
 	
-	div.addEventListener("click", focusDefaultElement, false);
+	div.addEventListener("click", focusDefaultElement, true);
 	if(escapeAble) div.addEventListener("keydown", dialogKeyDown, false);
 	
 	div.appendChild(message);
@@ -191,9 +191,15 @@ function Dialog(msg, options) {
 		return true;
 	}
 	
-	function focusDefaultElement() {
+	function focusDefaultElement(ev) {
 		// Give focus to the element with attribute focus:true
 		
+		console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
+
+		if( ev && ev.target && ev.target.className == "allowDefault") return true;
+		if( EDITOR.lastElementWithFocus && EDITOR.lastElementWithFocus.className == "allowDefault") return true;
+		if( document.activeElement && document.activeElement.className == "allowDefault" ) return true;
+
 		var childElement = div.childNodes;
 		for (var i=0; i<childElement.length; i++) {
 			if(childElement[i].getAttribute("focus") == "true") {

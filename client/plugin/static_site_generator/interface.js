@@ -2569,8 +2569,12 @@ whenAllFilesReloaded();
 		return;
 		}
 		
-		// Prefer the index file in the folder we are in
-		var folder = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		// Prefer the index file in the folder we are in ...
+		
+		if(EDITOR.currentFile) var folder = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		else var folder = UTIL.getDirectoryFromPath(site.source);
+
+
 		var indexfile = UTIL.joinPaths(folder, "index.htm");
 		EDITOR.doesFileExist(indexfile, function(err, exists) {
 			if(err) throw err;

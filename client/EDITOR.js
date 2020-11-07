@@ -8055,11 +8055,13 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
-				var failText = "The new window was most likely blocked by the browser. " +
-				"(allow window/popups from " + document.domain + " to get rid of this message)"
-			
-			var errorText = "If the new window could not open, it was probably blocked by the browser (please allow " + window.location.host + " to open new windows)";
-			
+				var allowLink = '<a target="_blank" class="allowDefault" href="about/popups.htm">allow</a>';
+				
+				var failText = 'The new window was most likely blocked by the browser. ' +
+				'(' + allowLink + ' window/popups from ' + document.domain + ' to get rid of this message)'
+
+				var errorText = "If the new window could not open, it was probably blocked by the browser (please allow " + window.location.host + " to open new windows)";
+
 			/*
 				// native confirm dialog did not enable the window!
 				var tryAgain = confirm(failText);
@@ -9672,6 +9674,11 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	var target = contextMenuEvent.target;
 	var tag = target.tagName;
 	
+		if(target.className == "allowDefault") {
+			console.log("contextmenu: (target.className=allowDefault)");
+			return true;
+		}
+
 	if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
 	
 	contextMenuEvent.preventDefault();
@@ -12248,10 +12255,17 @@ function mouseDown(mouseDownEvent) {
 	
 	mouseDownEvent = mouseDownEvent || window.event;
 	
+
+		var lastFocused = EDITOR.lastElementWithFocus;
 	EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 	// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
 	
-	if(mouseDownEvent.type == "touchstart") {
+		if(EDITOR.lastElementWithFocus != lastFocused) {
+			console.warn("Changed focus from ", lastFocused, " to ", EDITOR.lastElementWithFocus);
+		}
+
+	
+		if(mouseDownEvent.type == "touchstart") {
 			if(!EDITOR.touchScreen) {
 				/*
 					Detected a touch device.
@@ -12298,7 +12312,11 @@ function mouseDown(mouseDownEvent) {
 	
 	console.log("mouseDown on target.className=" + target.className);
 	
-	if(target.className == "fileCanvas" || target.className == "content centerColumn") {
+		if(target.className == "allowDefault") {
+			console.log("mouseDown: (target.className=allowDefault)");
+			return true;
+		}
+	else if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 		
 		EDITOR.windowMenu.hide();
 		
@@ -12319,6 +12337,7 @@ function mouseDown(mouseDownEvent) {
 				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
+				console.log("Removing selection!");
 			window.getSelection().removeAllRanges();
 			
 			/*
@@ -12338,7 +12357,7 @@ function mouseDown(mouseDownEvent) {
 		}
 		else{
 			
-		console.log("mouseDown: Removing focus/input because the click was registered outside the canvas!");
+		console.log("mouseDown: Removing focus/input from the Editor because the click was registered outside the canvas!");
 		EDITOR.input = false;
 		
 		if(targetIsDashboard(target)) {
@@ -12479,17 +12498,19 @@ function mouseUp(mouseUpEvent) {
 	//console.log("Mouse up on class " + target.className + "!");
 	//console.log(mouseUpEvent);
 	
-	if(target.className == "fileCanvas") {
+		if(target.className == "allowDefault") {
+			console.log("mouseUp: (target.className=allowDefault)");
+			return true;
+		}
+		else if(target.className == "fileCanvas") {
 		
 		// Only get a caret if the click is on the canvas 
 		caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+
+			// Prevent whatever nasty thing the browser wants to do
+			// like zooming out etc.
+			mouseUpEvent.preventDefault();
 		
-	}
-	
-	if(target.className == "fileCanvas") {
-		// Prevent whatever nasty thing the browser wants to do
-		// like zooming out etc.
-		mouseUpEvent.preventDefault();
 	}
 	
 	console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
@@ -12739,6 +12760,7 @@ function dblclick(dblClickEvent) {
 				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
+				console.log("Removing selection!");
 			window.getSelection().removeAllRanges();
 			
 		}
@@ -13043,14 +13065,13 @@ function getFile(url, callback) {
 	}
 	
 	function clearSelection() {
+		console.log("Removing selection! (clearSelection)");
 		if ( document.selection ) {
 			document.selection.empty();
 		} else if ( window.getSelection ) {
 			window.getSelection().removeAllRanges();
 		}
 	}
-	
-	
 	
 	function fullScreenMenu(menu) {
 		// The menu will cover the whole screen
