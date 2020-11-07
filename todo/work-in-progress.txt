@@ -3,10 +3,6 @@
 What I'm working on
 -------------------
 
-When added to desktop and popups disallowed there is no where to allow popups from the Chromium UI!
-
-
----
 
 when saving a SSG index with code that is currently in preview, auto re-build and update the preview! 
 
