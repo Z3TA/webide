@@ -40,12 +40,14 @@
 
 	function reloadCurrentScript() {
 		
-		var head = document.getElementsByTagName("head")[0];
+		var head = document.getElementsByTagName("html")[0];
 		var scripts = head.getElementsByTagName("script");
 		var currentFile = EDITOR.currentFile;
 		
 		if(!currentFile) throw new Error("No current file");
 		
+		console.log("scripts: ", scripts);
+
 		// Fun fact: In Windows there are three slashes in file:/// but in Linux it's only two!
 		var currentScript = EDITOR.currentFile.path.replace(/\\/g, "/");
 		
@@ -54,7 +56,7 @@
 			alertBox("Unable to hot reload plugin! Current opened file is not in the plugin folder: " + currentScript);
 			return true;
 		}
-		currentScript = currentScript.slice(index);
+		currentScript = currentScript.slice(index+1); // Don't include the first slash (because we use relative paths)
 		
 		console.log("currentScript=" + currentScript);
 		
@@ -78,17 +80,16 @@ pluginDescription = EDITOR.plugins[i].desc;
 		// Find the script ...
 		var reloaded = false;
 		for(var i=0; i < scripts.length; i++) {
-			index = scripts[i].src.indexOf("/plugin/");
-			if(index == -1) {
+			if( scripts[i].src.indexOf("plugin/") == -1) {
 				console.log("Not a plugin: " + scripts[i].src);
 				continue;
 			}
 			var parent = scripts[i].parentNode;
 			
-			console.log("parent==head?" + (parent==head) + " " + currentScript + " in " + scripts[i].src + " ? " + (scripts[i].src.indexOf(currentScript) != -1));
+			console.log("parent==head?" + (parent==head) + " parent=" + parent + " " + currentScript + " in " + scripts[i].src + " ? " + (scripts[i].src.indexOf(currentScript) != -1));
 			
-			if(parent == head && scripts[i].src.indexOf(currentScript) != -1) {
-				reloaded = append(scripts[i]);
+			if(parent && scripts[i].src.indexOf(currentScript) != -1) {
+				reloaded = append(scripts[i], parent);
 				break;
 			}
 			}
@@ -100,12 +101,12 @@ pluginDescription = EDITOR.plugins[i].desc;
 		
 		return false;
 		
-		function append(script) {
+		function append(script, parent) {
 			console.log("Reloading script: " + currentScript);
 			
 			//EDITOR.disablePlugin(loadFunctionName);
 					
-					head.removeChild(script);
+			parent.removeChild(script);
 					
 					script = document.createElement("script");
 			script.src = currentScript; // Relative path
@@ -113,7 +114,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 					
 			var success = true;
 			try {
-				head.appendChild(script);
+				parent.appendChild(script);
 			}
 			catch(err) {
 				return err;
