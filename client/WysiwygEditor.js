@@ -874,7 +874,16 @@ console.warn("Unable to get caret position!");
 		
 		if(file == wysiwygEditor.sourceFile) wysiwygEditor.sourceFileIsSaved = true;
 		
-		if(wysiwygEditor.reloadAfterSave && wysiwygEditor.sourceFile == file) {
+		console.log("WysiwygEditor.anyFileSaved: knowsAboutIgnoreTransformNotYetImplemented=" + JSON.stringify(knowsAboutIgnoreTransformNotYetImplemented));
+		console.log("WysiwygEditor.anyFileSaved: wysiwygEditor.sourceFile.path=" + wysiwygEditor.sourceFile.path);
+
+		if(knowsAboutIgnoreTransformNotYetImplemented.indexOf(wysiwygEditor.sourceFile.path) != -1) {
+			wysiwygEditor.reload(function(err) {
+				return saveEventCallback(err);
+			});
+			return;
+		}
+		else if(wysiwygEditor.reloadAfterSave && wysiwygEditor.sourceFile == file) {
 			wysiwygEditor.reloadAfterSave = false;
 			
 			wysiwygEditor.reload(function(err) {
