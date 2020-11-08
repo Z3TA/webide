@@ -17,7 +17,7 @@
 	EDITOR.on("start", infoBubbles);
 	
 	var iconError; // Loaded when needed
-	
+	var iconWarning;
 	
 	function infoBubbles() {
 		EDITOR.addRender(infoRender, 5000);
@@ -119,6 +119,23 @@
 				
 				iconPadding = 25;
 			}
+			else if(comment.lvl == 2) {
+
+				var drawWarningIcon = function() {
+					console.log("render_info: Rendering warning.svg");
+					ctx.drawImage(iconWarning, x+textPadding, y + textHeight/2 - iconHeight/2 - 2 + textPadding, iconHeight,iconHeight);
+				}
+
+				if(iconWarning) drawWarningIcon();
+				else {
+					console.log("render_info: Loading error.svg ...");
+					iconWarning = new Image();
+					iconWarning.src = "gfx/warning.svg";
+					iconWarning.onload = drawWarningIcon;
+				}
+
+				iconPadding = 25;
+			}
 			else {
 				iconPadding = 0;
 			}
@@ -146,8 +163,9 @@
 		}
 		else if(lvl == 2) {
 			ctx.fillStyle="rgb(255, 255, 230)";
-ctx.strokeStyle="rgba(255,255,0, 0.5)";
+			ctx.strokeStyle="rgba(0,0,0, 0.5)";
 			ctx.lineWidth="1";
+			w += 20; // Due to the icon
 		}
 		else {
 			ctx.fillStyle="rgb(255, 255, 230)";
