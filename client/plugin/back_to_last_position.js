@@ -68,7 +68,7 @@
 			file.moveCaret(undefined, row);
 
 			file.scrollToCaret();
-			file.scrollTo(col, row - Math.round(EDITOR.view.visibleRows / 2));
+			file.scrollTo(0, row - Math.round(EDITOR.view.visibleRows / 2));
 
 			lastJump[file.path].col;
 
