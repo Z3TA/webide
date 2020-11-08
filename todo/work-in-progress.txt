@@ -4,8 +4,6 @@ What I'm working on
 -------------------
 
 
-when saving a SSG index with code that is currently in preview, auto re-build and update the preview! 
-
 
 ---
 
