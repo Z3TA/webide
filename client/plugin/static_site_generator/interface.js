@@ -2480,7 +2480,8 @@ whenAllFilesReloaded();
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
 		
-		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function WysiwygEditorDisabled() {
+		if(!wysiwygEnabled && previewWin) {
+			previewWin.disableEdit(function WysiwygEditorDisabled() {
 			
 			if(buttonWysiwyg) {
 				buttonWysiwyg.setAttribute("class", "button");
@@ -2490,6 +2491,8 @@ whenAllFilesReloaded();
 			}
 			
 		});
+			return false;
+		}
 		
 		// Witch file/page should we edit ?
 		// If we are previewing a file, then pick the file in preview
@@ -2502,7 +2505,8 @@ whenAllFilesReloaded();
 				console.log("Unable to get previewWin url: " + err.message);
 				// Unable to get the file currently being previewed.
 				// The preview window has probably been closed.
-				return pickFileToPreview(site, makeItEditable);
+				pickFileToPreview(site, makeItEditable);
+				return false;
 				// The current previewWin will be closed, and another opeened, when calling previewPage
 			}
 			

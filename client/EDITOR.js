@@ -11936,7 +11936,7 @@ function keyboardCatcherKey(keyEvent) {
 				console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
 			}
 			else if(funReturn !== true) {
-				throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
+					throw new Error("You must make an active choice whether to allow (return true) or prevent (return false) default (chromium) browser action,\
 				like typing in input boxes, tabbing between elements, etc. function called: " + UTIL.getFunctionName(binding.fun));
 			}
 		}
