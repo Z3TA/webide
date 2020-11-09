@@ -1745,7 +1745,7 @@ Folder.prototype.latest = function(limit) {
 
 
 function copyFile(source, target, cb) {
-	// Not used!
+	// Used for copying files when ssg-build.js is run via command line
 	var cbCalled = false;
 	var rdOpen = false;
 	var wrOpen = false;
@@ -1753,8 +1753,7 @@ function copyFile(source, target, cb) {
 	log("source=" + source);
 	log("target=" + target);
 	
-	// Make sure the target path exist!
-	
+	// Make sure the target path exist before copying!
 	
 	var rd = module_fs.createReadStream(source);
 	rd.on("error", function(err) {
@@ -1980,6 +1979,8 @@ if (require.main === module) {
 	main.pubFolder = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder
 	main.publish = !!process.argv[4];
 	
+	console.log("spawn: basePath=" + main.basePath + " pubFolder=" + main.pubFolder + " publish=" + main.publish );
+
 	var debug = !!process.argv[5];
 	var filesToCopy = 0;
 	var filesToSave = 0;
@@ -1987,16 +1988,27 @@ if (require.main === module) {
 	main.onMessage = function io(o) {
 		if(o.type == "copy") {
 			filesToCopy++;
-			copyFile(o.from, o.to, function(err) {
-				filesToCopy--;
+			// Make sure the path exist
+			module_fs.mkdir(o.to.slice(0, Math.max(o.to.lastIndexOf("/"), o.to.lastIndexOf("\\"))), { recursive: true }, function(err) {
 				if(err) throw err;
+
+				copyFile(o.from, o.to, function(err) {
+					filesToCopy--;
+					if(err) throw err;
+				});
+
 			});
 		}
 		else if(o.type == "file") {
 			filesToSave++;
-			module_fs.writeFile(o.path, o.text, "utf8", function(err) {
-				filesToSave--;
+			o.path = o.path.replace(/\/\//g, "/");
+			// Make sure the path exist
+			module_fs.mkdir(o.path.slice(0, Math.max(o.path.lastIndexOf("/"), o.path.lastIndexOf("\\"))), { recursive: true }, function(err) {
 				if(err) throw err;
+				module_fs.writeFile(o.path, o.text, "utf8", function(err) {
+					filesToSave--;
+					if(err) throw err;
+				});
 			});
 		}
 		else if(o.type == "debug") {
