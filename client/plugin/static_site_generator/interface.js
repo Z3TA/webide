@@ -300,11 +300,15 @@
 		EDITOR.unbindKey(publishSSG);
 		EDITOR.unbindKey(showSSG);
 		EDITOR.unbindKey(wysiwygSSG);
-		
+		EDITOR.unbindKey(diaryNewEntry);
+
+
 		CLIENT.removeEvent("ssgBuildMessage", ssgBuildMessage);
 		
 		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
+		EDITOR.windowMenu.remove(diaryWinMenu);
+
 		if(manager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(manager);
@@ -1375,7 +1379,30 @@ for(var i=0; i<options.length; i++) {
 						inputRepository.value = site.repository;
 						inputUrl.value = site.url;
 						
-						saveNewSite();
+						// Check if the path exist
+						EDITOR.folderExist(site.projectFolder, function(err, path) {
+
+							if(!err && path) return saveNewSite();
+
+							var path = UTIL.getDirectoryFromPath(cfgPath);
+
+							if(path.indexOf(site.projectFolder) != -1) throw new Error("Unexpected cfgPath=" + cfgPath + " site.projectFolder=" + site.projectFolder + " (does not exist!)");
+
+							var replace = "Yes, replace!";
+							var cancel = "Cancel";
+							confirmBox("The imported project folder (" + site.projectFolder + ") does not exist on your system. Do you want to replace it with " + path + " ?", [replace, cancel], function(answer) {
+								if(answer == replace) {
+									inputProjectFolder.value = site.projectFolder.replace(site.projectFolder, path);
+									inputSourceFolder.value = site.source.replace(site.projectFolder, path);
+									inputPreviewFolder.value = site.preview.replace(site.projectFolder, path);
+									inputPublishFolder.value = site.publish.replace(site.projectFolder, path);
+									inputTemplate.value = site.template.replace(site.projectFolder, path);
+									inputPubAuthKey.value = site.key.replace(site.projectFolder, path);
+
+									saveNewSite();
+								}
+							});
+						});
 						
 					} 
 				});
@@ -1410,7 +1437,7 @@ for(var i=0; i<options.length; i++) {
 		function save(folder) {
 			var path = UTIL.joinPaths([folder, fileName]);
 			EDITOR.saveToDisk(path, JSON.stringify(site, null, 2), function(err, path, hash) {
-				if(err) alertBox("Unable to save " + fileName + ": " + err.message);
+				if(err) alertBox("Unable to save yoyoyo " + fileName + ": " + err.message);
 			});
 		}
 	}
@@ -1527,7 +1554,7 @@ for(var i=0; i<options.length; i++) {
 	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
 		
 		if(site == undefined) {
-site = selectedSite;
+			site = selectedSite;
 		}
 		
 		if(!site) throw new Error("site=" + site);

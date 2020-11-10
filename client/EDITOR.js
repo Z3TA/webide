@@ -7502,6 +7502,20 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 	}
 	
+	EDITOR.folderExist = function(pathToFolder, callback) {
+		/*
+			Check if a folder/path exist
+			Note that it's not neccesary to check if a folder exist before creating it,
+			or check if a folder exist before opening a file in it (just open the file and check for (ENOENT) error)
+		*/
+		
+		var pathToParentFolder = UTIL.parentFolder(pathToFolder);
+		var folderName = UTIL.getFolderName(pathToFolder);
+
+		return EDITOR.folderExistIn(pathToParentFolder, folderName, callback);
+
+	}
+
 	EDITOR.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
 		console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
 		
