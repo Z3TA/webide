@@ -309,6 +309,8 @@
 		
 		EDITOR.windowMenu.remove(diaryWinMenu);
 
+		EDITOR.unregisterAltKey(showSSG);
+
 		if(manager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(manager);
@@ -1499,7 +1501,7 @@ for(var i=0; i<options.length; i++) {
 			}
 		}
 		
-		discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
 		
 		return false;
 	}
