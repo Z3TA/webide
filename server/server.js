@@ -4270,8 +4270,6 @@ setTimeout(function() {
 		
 		//console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
 		
-		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
-		
 		localFolder = module_path.resolve("../client/");
 		
 		//console.log("Serving from the webide client folder: " + localFolder);
@@ -4284,6 +4282,8 @@ setTimeout(function() {
 		
 	}
 	
+	if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+
 	//console.log("localFolder=" + localFolder);
 	//console.log("urlPath=" + urlPath);
 	

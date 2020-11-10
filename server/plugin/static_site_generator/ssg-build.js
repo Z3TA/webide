@@ -719,38 +719,15 @@ function compile(baseTree) {
 function makePathsRelative(html, depth) {
 	// Look for href and src that starts with / (root) and make them relative!
 	
-	
-	
-	
 	var relative = "";
 	for(var i=0; i<depth; i++) {
 		relative = relative + "../";
 	}
 	
-	// Replace href="" with href="index.htm" (Possible bug if linking to itself)
-	html = html.replace(/href.?=.?("|')\/["']/igm, "href=$1" + relative + "index.htm$1");
-	
+	html = html.replace(/href.?=.?("|')\/["']/igm, "href=$1" + (relative.length == 0 ? "./" : relative) + "$1");
 	
 	html = html.replace(/src.?=.?("|')\//igm, "src=$1"+relative);
 	html = html.replace(/href.?=.?("|')\//igm, "href=$1"+relative);
-	
-	
-	// 	replace all href="foo/" with href="foo/index.htm"
-	//html = html.replace(/href.?=.?("|')(.*\/)("|')/igm, "href=$1$2index.htm$1");
-	
-	var re = new RegExp("href.?=.?(\"|')(.*\\/)(\"|')", "img");
-	var str, arr;
-	while ((arr = re.exec(html)) !== null) {
-		//log("Found: " + JSON.stringify(arr));
-		
-		str = arr[0];
-		//log(str);
-		if(str.indexOf("://") == -1) {
-			html = html.replace(str, "href=" + arr[1] + arr[2] + "index.htm" + arr[1]);
-		}
-		
-	}
-	
 	
 	return html;
 }
