@@ -3,7 +3,7 @@
 What I'm working on
 -------------------
 
-
+Don't hide the caret when pressing space to indentate in for example a yml config file !
 
 ---
 

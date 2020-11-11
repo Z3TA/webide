@@ -1699,8 +1699,6 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	}
 	
 	WysiwygEditor.prototype.reload = function reload(reloadCallback) {
-		console.log("WysiwygEditor reload!");
-		
 		var wysiwygEditor = this;
 		
 		/*
