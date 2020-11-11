@@ -1646,7 +1646,7 @@ for(var i=0; i<options.length; i++) {
 			else if(matchAbsSrc) {
 				/*
 					The SSG worker replaces all absolute paths to relative paths.
-					And the WysiwygEditor.js will complain if there's a diff. eg <a href="/"> was replaced with <a href="../index.htm">
+					And the WysiwygEditor.js will complain if there's a diff. eg <a href="/"> was replaced with <a href="../">
 					solution: Try to fix it automatically
 				*/
 				
@@ -1659,7 +1659,9 @@ for(var i=0; i<options.length; i++) {
 					
 					var text = sourceFile.text; // Don't change file.text directly or we'll mess up the grid!
 					
-					text = text.replace(/(href\s?=\s?['"])\/(['"])/i, "$1" + relativePath + "index.htm$2");
+					// We do not want to replace / with /index.htm or we will screw up SEO (most web servers can translate / to index.htm)
+
+					//text = text.replace(/(href\s?=\s?['"])\/(['"])/i, "$1" + relativePath + "index.htm$2");
 					text = text.replace(/(href\s?=\s?['"])\//i, "$1" + relativePath);
 					text = text.replace(/(src\s?=\s?['"])\//i, "$1" + relativePath);
 					
