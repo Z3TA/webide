@@ -3,10 +3,6 @@
 What I'm working on
 -------------------
 
-Don't hide the caret when pressing space to indentate in for example a yml config file !
-
----
-
 Problems opening virtual desktop on iPhone! (can't access win.document of opened window)
 
 

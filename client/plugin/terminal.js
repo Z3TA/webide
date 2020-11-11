@@ -1454,6 +1454,8 @@ console.log(file.path + " is a terminal emulator file!");
 			
 		*/
 		
+		if(!file) return ALLOW_DEFAULT;
+
 		console.log("terminalKeyDown: file.path=" + file.path);
 		console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 		
@@ -1694,11 +1696,10 @@ console.log(file.path + " is a terminal emulator file!");
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		}
 
-		// Terminal event sare removed in the fileSHow event, 
+		// Terminal event are removed in the fileSHow event, 
 		// but if the terminal is the only file open, we will not get a fileshow event!
 	
-
-		if(terminalFiles.length == 0 && Object.keys(EDITOR.files).length == 0) removeTerminalEvents();
+		if(terminalFiles.length == 0 && Object.keys(EDITOR.files).length <= 1) removeTerminalEvents();
 
 	}
 	

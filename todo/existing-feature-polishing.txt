@@ -4,6 +4,8 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+todo: Don't hide the caret when pressing space to indentate in for example a yml config file !
+
 sugg: auto complete paths inside href="|"
 
 css: red circle if you forgot dot before non-semantic-html rule 
