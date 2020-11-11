@@ -11532,73 +11532,85 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 			// Optimization: Render only the row, instead of the whole screen (20x perf increase on Opera Mobile)
 			//EDITOR.renderNeeded();
 			EDITOR.renderRow();
-			if(EDITOR.touchScreen || !EDITOR.settings.caretAnimation) EDITOR.renderCaret(file.caret);
+			
 			
 			// Experiment: Hide the caret while typing !?
 			
-			if(!EDITOR.touchScreen && EDITOR.settings.caretAnimation) { // Hiding caret is annoying when typing using the virtual keyboard
+			// Hiding caret is annoying when typing using the virtual keyboard
+			// It's also annoying when using space to indentate a plain test file
+			var rowContent = file.text.slice(file.grid[file.caret.row].startIndex, file.caret.index);
+			var isIndentation = (charCode==32 && file.mode!="code" && rowContent.match(/^\s*$/) !== null);
+
+			//console.log("FadingCaret: rowContent=" + UTIL.lbChars(rowContent) + " (" + (rowContent.match(/^\s*$/) !== null) + ") isIndentation=" + isIndentation + " charCode=" + charCode + " (" + (charCode==32) + ") file.mode=" + file.mode + " (" + (file.mode!="code") + ") EDITOR.touchScreen=" + EDITOR.touchScreen + " EDITOR.settings.caretAnimation=" + EDITOR.settings.caretAnimation + " if(" + (  !EDITOR.touchScreen && EDITOR.settings.caretAnimation && !isIndentation  ) + ") ");
+
+			if(  !EDITOR.touchScreen && EDITOR.settings.caretAnimation && !isIndentation  ) {
 				
-			// First remove any old ones so they do not stop before the caret is fully filled
-			clearTimeout(renderCaretTimer);
-			EDITOR.removeAnimation(fadeInCaretAnimation);
+				// First remove any old ones so they do not stop before the caret is fully filled
+				clearTimeout(renderCaretTimer);
+				EDITOR.removeAnimation(fadeInCaretAnimation);
 			
-			/*
-				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) +
-				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) +
-				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
-			*/
+				/*
+					console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) +
+					" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) +
+					" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
+				*/
 			
-			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
-				//console.log("Rendering caret");
-				EDITOR.renderCaret(file.caret);
-				EDITOR.canvas.style.cursor = 'text';
+				if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
+					console.log("FadingCaret: Rendering caret!");
+					EDITOR.renderCaret(file.caret);
+					EDITOR.canvas.style.cursor = 'text';
 					cursorHidden = false;
-			}
-			else {
-				//console.log("Fading caret");
-				EDITOR.addAnimation(fadeInCaretAnimation);
+				}
+				else {
+					console.log("FadingCaret: Fading caret!");
+					
+					EDITOR.addAnimation(fadeInCaretAnimation);
 				
-				var caret = UTIL.canvasLocation(file.caret);
-				var mouse = {x: EDITOR.canvasMouseX, y: EDITOR.canvasMouseY};
-				var distanceX = caret.x - mouse.x;
-				var distanceY = caret.y - mouse.y;
-				//console.log("distanceX=" + distanceX + " Math.abs(distanceY)=" + Math.abs(distanceY) + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
-				var mouseCursorAhead = distanceX < 0 && Math.abs(distanceY) < EDITOR.settings.gridHeight*2;
-				var distanceToMouseCursor = Math.sqrt(Math.pow (distanceX, 2) + Math.pow (distanceY, 2));
+					var caret = UTIL.canvasLocation(file.caret);
+					var mouse = {x: EDITOR.canvasMouseX, y: EDITOR.canvasMouseY};
+					var distanceX = caret.x - mouse.x;
+					var distanceY = caret.y - mouse.y;
+					//console.log("distanceX=" + distanceX + " Math.abs(distanceY)=" + Math.abs(distanceY) + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
+					var mouseCursorAhead = distanceX < 0 && Math.abs(distanceY) < EDITOR.settings.gridHeight*2;
+					var distanceToMouseCursor = Math.sqrt(Math.pow (distanceX, 2) + Math.pow (distanceY, 2));
 				
-				//UTIL.drawCircle(ctx, caret.x, caret.y, "blue");
-				//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
+					//UTIL.drawCircle(ctx, caret.x, caret.y, "blue");
+					//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
 				
-				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
+					if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
 						EDITOR.canvas.style.cursor = 'none'; // Hide mouse pointer while typing
 						cursorHidden = true;
-				}
+					}
 				
-				renderCaretTimer = setTimeout(function() {
-					EDITOR.removeAnimation(fadeInCaretAnimation);
-					if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
-					EDITOR.canvas.style.cursor = 'text';
+					renderCaretTimer = setTimeout(function() {
+						EDITOR.removeAnimation(fadeInCaretAnimation);
+						if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
+						EDITOR.canvas.style.cursor = 'text';
 						cursorHidden = false;
-				}, 3000);
+					}, 3000);
+				}
+			}
+			else {
+				// Always render caret
+				EDITOR.renderCaret(file.caret);
 			}
 		}
-	}
 	
-	EDITOR.interact("keyPressed", keyPressEvent);
+		EDITOR.interact("keyPressed", keyPressEvent);
 	
-	// Prevent Firefox's quick search (/ slash)
-	if(EDITOR.input && charCode == 47) preventDefault = true;
+		// Prevent Firefox's quick search (/ slash)
+		if(EDITOR.input && charCode == 47) preventDefault = true;
 	
-	// Prevent Firefox's quick find (' single quote)
-	if(EDITOR.input && charCode == 39) preventDefault = true;
+		// Prevent Firefox's quick find (' single quote)
+		if(EDITOR.input && charCode == 39) preventDefault = true;
 	
-	// Prevent scrolling down when hitting space in Firefox
-	if(EDITOR.input && charCode == 32) preventDefault = true;
+		// Prevent scrolling down when hitting space in Firefox
+		if(EDITOR.input && charCode == 32) preventDefault = true;
 	
 		EDITOR.stat("key_press");
 		
-	if(preventDefault) {
-		console.log("keyPressed: Preventing default browser action!");
+		if(preventDefault) {
+			console.log("keyPressed: Preventing default browser action!");
 		if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
 		return false;
 	}
