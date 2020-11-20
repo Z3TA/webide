@@ -7,12 +7,14 @@
 		console.log("Hello from register_service_worker.js");
 		
 if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.register('/serviceWorker.js', {scope: '/'}).then(function(reg) {
-// registration worked
-console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
-		return reg.update();
+			var url = '/serviceWorker.js';
+			if(window.location.search) url = url + window.location.search;
+			navigator.serviceWorker.register(url, {scope: '/'}).then(function(reg) {
+				// registration worked
+				console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
+				return reg.update();
 		
-}).catch(function(error) {
+			}).catch(function(error) {
 // registration failed
 		console.log('ServiceWorker Registration failed with ' + error);
 });

@@ -68,34 +68,7 @@ var CACHE_FILES = [
 	//'/gfx/style.css',
 	// style.css' should be inlined in bundle.htm
 	
-	// Discovery bar icons
-	'/gfx/add-file.svg',
-	'/gfx/disk.svg',
-	'/gfx/data.svg',
-	'/gfx/multimedia.svg',
-	'/gfx/folder.svg',
-	'/gfx/board.svg',
-	'/gfx/icon/dropbox.svg',
-	'/gfx/cloud.svg',
-	'/gfx/docker.svg',
-	'/gfx/database.svg',
-	'/gfx/android.svg',
-	'/gfx/wireguard-vpn.svg',
-	'/gfx/treaty.svg',
-	'/gfx/website.svg',
 	
-	//'/gfx/share.svg',
-	//'/gfx/new-window.svg',
-	//'/gfx/upload.svg',
-	
-	
-	// Cache font
-'/gfx/font/ubuntu/ubuntu.css',
-	'/gfx/font/ubuntu/UbuntuMono-BI.ttf',
-	'/gfx/font/ubuntu/UbuntuMono-B.ttf',
-	'/gfx/font/ubuntu/UbuntuMono-RI.ttf',
-	'/gfx/font/ubuntu/UbuntuMono-R.ttf',
-
 	// Dialog icons
 	'/gfx/error.svg',
 	'/gfx/warning.svg',
@@ -145,7 +118,40 @@ var CACHE_FILES = [
 	// Cache other
 	"version.txt"
 	
-]
+];
+
+var CACHE_FONTS = [
+	// Cache font
+	'/gfx/font/ubuntu/ubuntu.css',
+	'/gfx/font/ubuntu/UbuntuMono-BI.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-B.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-RI.ttf',
+	'/gfx/font/ubuntu/UbuntuMono-R.ttf',
+];
+
+var CACHE_DISCOVERY_ICONS = [
+	// Discovery bar icons
+	'/gfx/add-file.svg',
+	'/gfx/disk.svg',
+	'/gfx/data.svg',
+	'/gfx/multimedia.svg',
+	'/gfx/folder.svg',
+	'/gfx/board.svg',
+	'/gfx/icon/dropbox.svg',
+	'/gfx/cloud.svg',
+	'/gfx/docker.svg',
+	'/gfx/database.svg',
+	'/gfx/android.svg',
+	'/gfx/wireguard-vpn.svg',
+	'/gfx/treaty.svg',
+	'/gfx/website.svg',
+
+	//'/gfx/share.svg',
+	//'/gfx/new-window.svg',
+	//'/gfx/upload.svg',
+
+];
+
 
 var haveRecivedMessage = false;
 self.addEventListener('message', function(msg) {
@@ -334,8 +340,41 @@ function sendToClients(msg) {
 	So there is no point in filling the cache on the install event. We have to wait for the activate event!
 */
 self.addEventListener('install', function serviceWorkerInstall(event) {
-	console.log("serviceWorker with current cache VERSION=" + VERSION + " got install event!");
+	console.log("serviceWorker with current cache VERSION=" + VERSION + " got install event! location.search=" + location.search);
 	
+	var qs = function () {
+		var query_string = {};
+		var query = location.search.substring(1);
+		var vars = query.split("&");
+		for (var i=0;i<vars.length;i++) {
+			var pair = vars[i].split("=");
+			// If first entry with this name
+			if (typeof query_string[pair[0]] === "undefined") {
+				query_string[pair[0]] = decodeURIComponent(pair[1]);
+				// If second entry with this name
+			} else if (typeof query_string[pair[0]] === "string") {
+				var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+				query_string[pair[0]] = arr;
+				// If third or later entry with this name
+			} else {
+				query_string[pair[0]].push(decodeURIComponent(pair[1]));
+			}
+		}
+		return query_string;
+	}();
+
+	console.log("serviceWorker qs=" + JSON.stringify(qs));
+
+	if(!qs["disable"] || qs["disable"].indexOf("font") == -1) {
+		console.log("serviceWorker adding fonts to cache list");
+		CACHE_FILES = CACHE_FILES.concat(CACHE_FONTS);
+	}
+
+	if(!qs["disable"] || qs["disable"].indexOf("discoveryBar") == -1) {
+		console.log("serviceWorker adding discovery bar icons to cache list");
+		CACHE_FILES = CACHE_FILES.concat(CACHE_DISCOVERY_ICONS);
+	}
+
 });
 
 
