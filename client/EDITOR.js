@@ -3643,6 +3643,35 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 		addIcon: function addDiscoveryIcon(imageSrc, position, title, captionText, whenclicked, whenConextMenuActivated) {
 			// Adds a standard item with an icon
 			
+			// Why was this not at the top before? Why was the icons added anyway!?
+			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
+				var disabledErrorMessage = "Discovery bar is disabled by query string!";
+
+				console.warn(disabledErrorMessage);
+
+				return {
+					disabled: true,
+					activate: function() {
+						console.error(disabledErrorMessage);
+					},
+					deactivate: function() {
+						console.error(disabledErrorMessage);
+					},
+					isActive: function() {
+						console.error(disabledErrorMessage);
+					},
+					classList: {
+						add: function() {
+							console.error(disabledErrorMessage);
+						},
+						remove: function() {
+							console.error(disabledErrorMessage);
+						}
+					}
+
+				};
+			}
+
 			var item = document.createElement("div");
 			item.onclick = function clickIcon(clickEvent) {
 				var file = EDITOR.currentFile;
@@ -3662,10 +3691,10 @@ throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (t
 			item.appendChild(image);
 			
 			var caption = document.createElement("figcaption");
-caption.classList.add("discoveryBarCaption");
+			caption.classList.add("discoveryBarCaption");
 			var span = document.createElement("span");
 			span.innerText = captionText;
-caption.appendChild(span);
+			caption.appendChild(span);
 			
 			if(!EDITOR.discoveryBar.captions) caption.classList.add("hidden");
 			item.appendChild(caption);
@@ -3679,6 +3708,29 @@ caption.appendChild(span);
 			
 			// Should we have icon captions? It will look ugly, and make the CSS complicated, and the text wont fit.
 			// But it's impossible to know what the icons do. User testing showed that the user had no idea how to create a new file, nor how to save it!
+
+
+			// Why was this not at the top before? Why was the icons added anyway!?
+			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
+				var disabledErrorMessage = "Discovery bar is disabled by query string!";
+
+				console.warn(disabledErrorMessage);
+
+				return {
+					disabled: true,
+					activate: function() {
+						console.error(disabledErrorMessage);
+					},
+					deactivate: function() {
+						console.error(disabledErrorMessage);
+					},
+					isActive: function() {
+						console.error(disabledErrorMessage);
+					}
+
+				};
+
+			}
 
 			if(position == undefined) throw new Error("Second argument: position need to be defined!");
 			
@@ -3707,26 +3759,7 @@ caption.appendChild(span);
 				//el.setAttribute("tabindex", ++discoveryBarTabIndex);
 			});
 			
-			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
-				var disabledErrorMessage = "Discovery bar is disabled by query string!";
-
-				console.warn(disabledErrorMessage);
-
-return {
-					disabled: true,
-activate: function() {
-						console.error(disabledErrorMessage);
-},
-deactivate: function() {
-						console.error(disabledErrorMessage);
-},
-isActive: function() {
-						console.error(disabledErrorMessage);
-}
-};
 			
-}
-
 			//EDITOR.discoveryBar.show();
 			
 			// Work like the windowMenu api
@@ -3770,7 +3803,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			}
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) {
-				console.error(new Error("discovery bar disabled via query string!"));
+				var error = new Error("discovery bar disabled via query string!")
+				console.error(error);
+				alertBox(error.message);
 				return;
 			}
 			

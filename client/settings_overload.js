@@ -139,6 +139,11 @@ if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will 
 }
 		}
 		
+		if( QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("font") != -1 ) {
+			console.warn("settings_overload: Not loading font because font is in the disable query string!");
+			return;
+		}
+
 		if(typeof loadFont != "function") {
 			console.log("settings_overload: No web font will be loaded!");
 			return;
