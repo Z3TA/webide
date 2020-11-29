@@ -36,6 +36,10 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+idea: Edit any project (static site page) on Github
+
+---
+
 Ctrl + B = Go back to where I was
 
 ---

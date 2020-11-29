@@ -2074,7 +2074,7 @@ console.log = function() {
 console.warn = function() {
 	var msg = arguments[0];
 	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(user.name + ": " + msg, 4);
+	log(user.name + ": " + msg, 4, 3);
 }
 
 // Overload console.error

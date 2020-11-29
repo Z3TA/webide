@@ -3,6 +3,18 @@
 What I'm working on
 -------------------
 
+
+
+---
+
+ACUTUALLY: The bug was that the module was not resolvable (was required from server folder)
+todo: Highlight unresolvable modules!
+
+var UTIL = require("./client/UTIL.js");
+var folderName = UTIL.getFol
+
+---
+
 Problems opening virtual desktop on iPhone! (can't access win.document of opened window)
 
 

@@ -118,10 +118,10 @@ var UTIL = {
 		}
 		else {
 			// It's assumed that all folder paths will end with a path delimiter, so no ending delimiter might result in a bug! (note: use UTIL.joinPaths instead of concateting)
-			console.warn("The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path='" + path + "'");
+			console.warn("getFolderName: The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path='" + path + "'");
 		}
 		
-		console.log("path=" + path);
+		console.log("getFolderName: path=" + path);
 		
 		var arr = path.split(delimiter);
 		

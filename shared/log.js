@@ -6,6 +6,35 @@ var LOGLEVEL = 7;
 var CONSOLE_LOG_ORIGINAL = console.log;
 var CONSOLE_WARN_ORIGINAL = console.warn;
 
+function tidyStack(row) {
+	var dir = process.cwd();
+	var dir2 = dir.replace(/server$/, "");
+	//CONSOLE_LOG_ORIGINAL("dir=" + dir);
+	//CONSOLE_LOG_ORIGINAL("dir2=" + dir2);
+
+	var indexDir = row.indexOf(dir);
+	var indexDir2 = row.indexOf(dir2);
+	//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
+	//CONSOLE_LOG_ORIGINAL("indexDir2=" + indexDir2);
+
+	if(indexDir == -1) {
+		indexDir = indexDir2;
+		dir = dir2;
+	}
+
+	if(indexDir != -1) {
+		var where = row.substring(indexDir + dir.length);
+	}
+	else {
+		var where = row.replace(dir, "").replace(dir2, "").trim();
+	}
+
+	if(where.charAt(0) == "/") where = where.substr(1);
+	if(where.charAt(where.length-1) == ")") where = where.slice(0, -1);
+
+	return where;
+}
+
 
 function log(msg, lvl, noTrace) {
 	
@@ -27,12 +56,36 @@ function log(msg, lvl, noTrace) {
 	var where = "";
 	
 	//CONSOLE_LOG_ORIGINAL("msg.length=" + msg.length);
-	
-	if(lvl <= LOGLEVEL) {
-		
-		if(!noTrace) {
+	//CONSOLE_LOG_ORIGINAL("arguments.length=" + arguments.length);
 
-			try { // Too see possible function responsible for RangeError: Maximum call stack size exceeded
+	if(lvl <= LOGLEVEL) {
+		// If third parameter is a number, show n levels of stack traces
+		if(typeof noTrace == "number") {
+			try {
+				var stack = (new Error().stack).split(/\r\n|\n/);
+			}
+			catch(err) {
+				return CONSOLE_LOG_ORIGINAL(msg);
+			}
+
+			//CONSOLE_LOG_ORIGINAL("stack.length=" + stack.length + " " + JSON.stringify(stack, null, 2));
+
+			for(var stackRow = 2; stackRow < stack.length && stackRow < noTrace+2; stackRow++) {
+				if(stack[stackRow].indexOf("at Console.console.log") != -1 ||
+				stack[stackRow].indexOf("at Console.console.warn") != -1 ||
+				stack[stackRow].indexOf("at Console.console.error") != -1 ||
+				stack[stackRow].indexOf("at Console.timeEnd") != -1) continue;
+				where = where + tidyStack(stack[stackRow]) + " <- ";
+			}
+
+			where = where.slice(0,-4);
+
+			where = "(" + where + ")";
+
+		}
+		else if(noTrace == undefined) {
+
+			try {
 				var stack = (new Error().stack).split(/\r\n|\n/);
 			}
 			catch(err) {
@@ -41,34 +94,14 @@ function log(msg, lvl, noTrace) {
 
 			//CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
 
-			var dir = process.cwd();
-			var dir2 = dir.replace(/server$/, "");
-			//CONSOLE_LOG_ORIGINAL("dir=" + dir);
-			//CONSOLE_LOG_ORIGINAL("dir2=" + dir2);
 			var row = stack[2];
 			if(row.indexOf("at Console.console.log") != -1 || 
 			row.indexOf("at Console.console.warn") != -1 ||
 			row.indexOf("at Console.console.error") != -1 ||
 			row.indexOf("at Console.timeEnd") != -1) row = stack[3];
 			//CONSOLE_LOG_ORIGINAL("row=" + row);
-			var indexDir = row.indexOf(dir);
-			var indexDir2 = row.indexOf(dir2);
-			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
-			//CONSOLE_LOG_ORIGINAL("indexDir2=" + indexDir2);
-
-			if(indexDir == -1) {
-				indexDir = indexDir2;
-				dir = dir2;
-			}
-
-			if(indexDir != -1) {
-				where = row.substring(indexDir + dir.length);
-			}
-			else {
-				where = row.replace(dir, "").replace(dir2, "").trim();
-			}
-
-			if(where.charAt(0) == "/") where = where.substr(1);
+			
+			where = tidyStack(row);
 
 			where = "(" + where + ")";
 
@@ -76,15 +109,12 @@ function log(msg, lvl, noTrace) {
 			
 		}
 
-
 		//CONSOLE_LOG_ORIGINAL("where=" + where);
-
-
 
 		if(typeof msg != "string") {
 			CONSOLE_LOG_ORIGINAL(where + ":");
 			CONSOLE_LOG_ORIGINAL(msg);
-			if(LOGFILE) throw new Error("Log message is not a stirng! msg:" + msg);
+			if(LOGFILE) throw new Error("Log message is not a string! msg:" + msg);
 		}
 		else {
 
