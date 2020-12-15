@@ -63,7 +63,7 @@ var suggestWord = null; // Used to prevent double lookups
 	function loadSpellchecker() {
 		
 		menuItem = EDITOR.ctxMenu.add(S("Spellcheck"), toggleSpellCheck, 10);
-		windowMenuSpellcheck = EDITOR.windowMenu.add(S("Spellcheck"), [S("Tools"), 2], toggleSpellCheck);
+		windowMenuSpellcheck = EDITOR.windowMenu.add(S("Spellcheck"), [S("Tools"), 30], toggleSpellCheck);
 		
 		CLIENT.on("loginSuccess", loadDictionaries);
 		

@@ -43,7 +43,7 @@
 			
 			EDITOR.on("soundAssist", checkSoundAssistStatus);
 			
-			winMenuSpeech = EDITOR.windowMenu.add(S("sound_assist"), [S("Tools"), 15], toggleSpeechAssistant);
+			winMenuSpeech = EDITOR.windowMenu.add(S("sound_assist"), [S("Tools"), 150], toggleSpeechAssistant);
 			
 			if(QUERY_STRING["voice"]) activateSpeechAssistant();
 			

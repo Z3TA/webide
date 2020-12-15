@@ -35,7 +35,7 @@
 			
 			EDITOR.registerAltKey({char: ")", alt:3, label: S("print"), fun: print2pdf});
 			
-			winMenuPrint = EDITOR.windowMenu.add(S("print_to_pdf"), [S("Tools"), 6], print2pdf);
+			winMenuPrint = EDITOR.windowMenu.add(S("print_to_pdf"), [S("Tools"), 160], print2pdf);
 			
 		},
 		unload: function unloadPrint2PdfSupport() {

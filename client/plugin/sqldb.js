@@ -56,7 +56,7 @@
 			
 			menuItem = EDITOR.ctxMenu.add("Database manager", showDbManager, 20);
 			
-			winMenuDbManager = EDITOR.windowMenu.add(S("database_manager"), [S("Tools"), 2], showDbManager);
+			winMenuDbManager = EDITOR.windowMenu.add(S("database_manager"), [S("Tools"), 180], showDbManager);
 			
 			EDITOR.on("fileOpen", sqlFileMaybe);
 			

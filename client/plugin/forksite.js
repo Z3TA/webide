@@ -10,7 +10,7 @@ EDITOR.plugin({
 			// Wait until logged in
 			CLIENT.on("loginSuccess", forkSiteAfterLoggedIn);
 			
-			winMenuForkWebsite = EDITOR.windowMenu.add(S("download_website"), [S("Tools"), 10], forkWebsite);
+			winMenuForkWebsite = EDITOR.windowMenu.add(S("download_website"), [S("Tools"), 70], forkWebsite);
 			
 			if(1==2) { // This will cause a security confirmation box, (which can be confused with install request), and thus not worth it.
 			if(typeof navigator == "object" && typeof navigator.registerProtocolHandler == "function") {

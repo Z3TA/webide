@@ -12,7 +12,7 @@
 	function loadLoremIpsum() {
 		// Bind to ctrl + L
 		EDITOR.bindKey({desc: S("insert_lorem_ipsum"), charCode: 76, combo: CTRL, fun: lorem});
-		winMenuLorem = EDITOR.windowMenu.add("Lorem ipsum", [S("Tools"), 20], lorem);
+		winMenuLorem = EDITOR.windowMenu.add("Lorem ipsum", [S("Tools"), 40], lorem);
 	}
 	
 	function unloadLoremIpsum() {

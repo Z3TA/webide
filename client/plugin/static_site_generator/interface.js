@@ -236,7 +236,7 @@
 		var SSG_label = S("ssg");
 		menuItem = EDITOR.ctxMenu.add(SSG_label, showSSG, 11);
 		
-		windowMenuSSG = EDITOR.windowMenu.add(SSG_label, [S("Tools"), 4], showSSG);
+		windowMenuSSG = EDITOR.windowMenu.add(SSG_label, [S("Tools"), 50], showSSG);
 		/*
 			EDITOR.windowMenu.add("New Page", [S("Tools"), SSG_label], newPage);
 			EDITOR.windowMenu.add("Preview", [S("Tools"), SSG_label], previewSSG);
@@ -247,7 +247,7 @@
 		*/
 		
 		EDITOR.bindKey({desc: "New diary entry", fun: diaryNewEntry, charCode: 68, combo: CTRL}); // D
-		diaryWinMenu = EDITOR.windowMenu.add(S("diary_new_entry"), [S("Tools"), 4], diaryNewEntry, diaryNewEntry);
+		diaryWinMenu = EDITOR.windowMenu.add(S("diary_new_entry"), [S("Tools"), 60], diaryNewEntry, diaryNewEntry);
 		
 		
 		EDITOR.on("fileShow", fileShow);

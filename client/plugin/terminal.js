@@ -52,7 +52,7 @@ todo: Run vttest
 			
 			menuItem = EDITOR.ctxMenu.add(S("terminal_emulator"), startTerminalFromMenu, 16);
 			
-			winMenuTerminal = EDITOR.windowMenu.add(S("terminal_emulator"), [S("Tools"), 10], startTerminalFromMenu);
+			winMenuTerminal = EDITOR.windowMenu.add(S("terminal_emulator"), [S("Tools"), 200], startTerminalFromMenu);
 			
 			CLIENT.on("terminal", terminalMessage);
 			

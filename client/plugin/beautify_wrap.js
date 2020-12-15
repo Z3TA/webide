@@ -53,7 +53,7 @@
 			
 			EDITOR.bindKey({desc: "Paste beautified", key: "V", combo: CTRL + SHIFT, fun: pasteBeautified});
 			
-			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 7], beautify);
+			winMenuBeautify = EDITOR.windowMenu.add(S("js_beautify"), [S("Tools"), 110], beautify);
 			
 			EDITOR.on("wrapText", wrapJavaScriptTool);
 			

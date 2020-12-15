@@ -6,7 +6,8 @@ LANG["en"] = {
 	add_to_home_screen: "Add to home screen",
 androidEmulator: "Android Emulator",
 	autocomplete: "autocomplete",
-	
+	auto_reload_url: "URL auto-reloader",
+
 	beginning_of_file: "Beginning of file",
 	beginning_of_line: "Beginning of line",
 	bigger_text: "Big text",

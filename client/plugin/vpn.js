@@ -32,7 +32,7 @@ EDITOR.plugin({
 desc: "Connect to VPN server",
 load: function loadVpnSupport() {
 			
-			winMenuItem = EDITOR.windowMenu.add("VPN", [S("tools"), 1], toggleVpnConnection);
+			winMenuItem = EDITOR.windowMenu.add("VPN", [S("tools"), 170], toggleVpnConnection);
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/wireguard-vpn.svg", 130,  "Virtual private network (VPN) IP tunnel", "VPN", toggleVpnConnection);
 			

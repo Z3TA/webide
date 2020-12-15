@@ -74,7 +74,7 @@
 		EDITOR.bindKey({desc: S("version_control_commit"), fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
 		EDITOR.bindKey({desc: S("version_control_diff_working_directory"), fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
 		
-		winMenuMercurial = EDITOR.windowMenu.add(S("version_control"), [S("Tools"), 2], toggleVersionControlWidget);
+		winMenuMercurial = EDITOR.windowMenu.add(S("version_control"), [S("Tools"), 190], toggleVersionControlWidget);
 		winMenuMercurial2 = EDITOR.windowMenu.add(S("show_command_bar"), [S("SCM"), 8, 1], toggleVersionControlWidget);
 		winMenuCommit = EDITOR.windowMenu.add(S("Commit"), ["SCM", 5], showCommitDialog);
 		winMenuDiffRevision = EDITOR.windowMenu.add(S("diff_revision"), [S("SCM"), 6], diffWorkingDirectory);

@@ -138,7 +138,7 @@
 			winMenuUndo = EDITOR.windowMenu.add(S("Undo"), [S("Edit"), 3], collabUndoViaMenu, collabUndo);
 			winMenuRedo = EDITOR.windowMenu.add(S("Redo"), [S("Edit"), 3], collabRedoViaMenu, collabRedo);
 			winMenuInvite = EDITOR.windowMenu.add(S("invite_collaborator"), [S("Editor"), 3], invite);
-			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 30], recordWidget.show);
+			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 100], recordWidget.show);
 			winMenuTutorials = EDITOR.windowMenu.add(S("first_intro"), [S("Editor"), S("Tutorials"), S("Intro"), 1], tutorialPlayFirstIntro);
 			
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/treaty.svg", 140, S("invite_collaborator"), "colab", inviteFromDiscoveryBar);

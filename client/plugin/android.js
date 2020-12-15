@@ -16,7 +16,7 @@ var windowMenu;
 	EDITOR.plugin({
 		desc: "Android support",
 		load: function loadAndroid() {
-			windowMenu = EDITOR.windowMenu.add(S("androidEmulator"), [S("tools"), 50], startEmulatorFromWindowMenu);
+			windowMenu = EDITOR.windowMenu.add(S("androidEmulator"), [S("tools"), 90], startEmulatorFromWindowMenu);
 
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/android.svg", 120, S("androidEmulator"), "AVD", emulatorFromDiscoveryBar);
 

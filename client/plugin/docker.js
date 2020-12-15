@@ -25,7 +25,7 @@ return;
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/docker.svg", 100,  "Docker daemon", "DOCKR", toggleDocker);
 			// Docker Icon by Icon Mafia https://iconscout.com 
 			
-			windowMenu = EDITOR.windowMenu.add(S("docker daemon"), [S("tools"), 1], toggleDocker);
+			windowMenu = EDITOR.windowMenu.add(S("docker daemon"), [S("tools"), 80], toggleDocker);
 			
 			//widget = EDITOR.createWidget(buildVpnWidget);
 			

@@ -4310,7 +4310,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		item.text.setAttribute("class", "label");
 		
 		item.text.innerText = label;
-		
+		item.text.innerText = item.order + " " + label;
+
 		item.text.onfocus = function() {
 			item.domElement.classList.add("hovering");
 		}
@@ -5025,6 +5026,7 @@ if(menuItem.parentMenu) {
 			var menuText = document.createElement("span");
 			menuText.setAttribute("class", "text");
 			menuText.innerHTML = options.text;
+			//menuText.innerHTML = options.order + " " + options.text;
 			
 			li.appendChild(menuText);
 			
