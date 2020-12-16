@@ -4310,7 +4310,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		item.text.setAttribute("class", "label");
 		
 		item.text.innerText = label;
-		item.text.innerText = item.order + " " + label;
+		//item.text.innerText = item.order + " " + label;
 
 		item.text.onfocus = function() {
 			item.domElement.classList.add("hovering");
