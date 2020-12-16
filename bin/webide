@@ -3,6 +3,11 @@
 /*
 	This script can be used in place of "editor".
 	
+	note: This script will be run if someone types npm webide.se ...
+	problem2: If no local GUI is available we only want to start the server!
+	problem2: We want to be able to provide server parameters to npx (for example -nat-type client)
+	solution: If process.argv have known server parameters, just start the server and pass the parameters!
+
 	webide [filepath]
 
 	or pipe to it:
@@ -48,18 +53,28 @@ var EDITOR_STARTED = false;
 
 var EDITOR_START_PROCESS; // If we end up running start.js this will be the start.js process
 
-//console.log("process.argv=" + process.argv);
+console.log("bin/webide process.argv=" + process.argv);
 
 function main() {
 
 	var args = process.argv;
 	args.shift(); // Remove the path to node
 	args.shift(); // Remove the path to this script
+	var argsArr = args;
 	args = args.join(" ").trim();
 	
 	if(args.length > 0) {
 		
-		
+		var serveraArgs = [
+			"user",
+			"username",
+			"ip",
+			"port",
+			"host",
+			"nat-type",
+			"nat-port"
+		];
+
 		if(args == "-v" || args == "--version") {
 			module_fs.readFile(module_path.resolve(__dirname, "../package.json"), function(err, data) {
 				if(err) throw err;
@@ -84,9 +99,15 @@ function main() {
 			return;
 		}
 		
+		// Check for server parameters
+		for (var i=0; i<serveraArgs.length; i++) {
+			if(args.indexOf("-" + serveraArgs[i]) != -1) return startServerOnly(argsArr);
+		}
+
 		// Asume args is a file path. Resolve the path
 		var workingDir = process.cwd();
 		var filePath = module_path.resolve(workingDir, args);
+		
 	}
 
 	var argsSent = false;
@@ -169,7 +190,7 @@ function main() {
 			if(err.code == "ECONNREFUSED") {
 				if(!secondTry) {
 					console.log("Attempting to start the editor ...");
-					startEditor(function editorStarted(err) {
+					startEditor(argsArr, function editorStarted(err) {
 						if(err) console.log("Failed to start editor: " + err.message);
 						else {
 							console.log("Editor started successfully");
@@ -189,7 +210,7 @@ console.error(err);
 		}
 		
 		function stdinChannelConnected() {
-			console.log("Connected to editor server stdin channel. pipeStdin=" + pipeStdin);
+			console.log("Connected to local editor server stdin channel on port " + STDIN_PORT + ". pipeStdin=" + pipeStdin);
 			
 			// When connecting we Must always send the arguments even if they are empty
 			var argsString = filePath || args;
@@ -244,7 +265,7 @@ console.error(err);
 	
 }
 
-function startEditor(callback) {
+function startEditor(argsArr, callback) {
 	
 	// start.js will start both the server and the client
 
@@ -256,7 +277,7 @@ function startEditor(callback) {
 		'"' + WEBIDE_LOCATION + pathDelimiter + 'start.js"',
 		"-local",
 		"--loglevel=" + DEBUG
-	] , {
+	].concat(argsArr) , {
 		env: process.env,
 		cwd: WEBIDE_LOCATION,
 		shell: true // Prevents start.js from closing the server on Windows when we exit
@@ -331,5 +352,54 @@ function startEditor(callback) {
 	}
 }
 
+function startServerOnly(argsArr) {
+
+	console.log("Starting only server because server parameters/arguments was detected...");
+
+	var debugLog = [];
+
+	var pathDelimiter = UTIL.getPathDelimiter(WEBIDE_LOCATION);
+
+	var server = require('child_process').spawn("node", [
+		'"' + WEBIDE_LOCATION + pathDelimiter + 'server' + pathDelimiter + 'server.js"',
+	].concat(argsArr) , {
+		env: process.env,
+		cwd: WEBIDE_LOCATION,
+		shell: true // Maybe needed on Windows !? to prevent early exist?
+	});
+
+	server.on("error", function serverError(err) {
+		console.log("Server error: " + err.message);
+		if(callback) {
+			callback( err );
+			callback = null;
+		}
+	});
+
+	server.on("close", function serverClosed(code) {
+		console.log("server.js closed. code=" + code);
+		
+		console.log("Exiting because server.js closed.")
+		process.exit(0); // Always exit (this script) when the server exit
+	});
+
+	server.stdout.on("data", function serverStdout(data) {
+		//console.log("server.js stdout: " + data);
+		serverLog(data);
+	});
+
+	server.stderr.on("data", function editorStderr(data) {
+		//console.log("server.js stderr: " + data);
+		serverLog(data);
+	});
+
+	function serverLog(data) {
+
+		if(typeof data == "object") data = data.toString();
+
+		log(data, DEBUG);
+
+	}
+}
 
 main();

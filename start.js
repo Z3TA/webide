@@ -44,6 +44,8 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+console.log("./start.js args=" + JSON.stringify(process.argv));
+
 var getArg = require("./shared/getArg.js");
 
 var LOG_LEVEL = getArg(["loglevel", "loglevel"]) || INFO;
@@ -204,7 +206,7 @@ function startNewServer() {
 	var serverPort = LOCAL_SERVER_PORT;
 	
 	var scriptPath = module_path.resolve(__dirname, "server/server.js");
-	var serverArg = [scriptPath, "--loglevel=" + LOG_LEVEL, "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
+	var serverArg = [scriptPath, "--loglevel=" + LOG_LEVEL, "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort];
 	
 	var serverOptions = {
 		stdio: "inherit"

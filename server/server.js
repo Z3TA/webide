@@ -11,6 +11,7 @@ sudo node server/server.js --hostname=webide-dev.se -pp 80
 
 */
 
+console.log("server.js process.argv=" + JSON.stringify(process.argv));
 
 var getArg = require("../shared/getArg.js");
 
@@ -140,7 +141,9 @@ var USERNAME = getArg(["user", "user", "username"]);
 var PASSWORD = getArg(["pw", "pw", "password"]);
 
 if(USERNAME && !PASSWORD) {
-	// Ask for password ...
+	// todo: Prompt/Ask for password ...
+	log("Please specify a --password=****** for USERNAME=" + USERNAME + " ", NOTICE);
+	process.exit(1);
 }
 
 
@@ -932,7 +935,7 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 			
 			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd", INFO);
 			
-			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system. Or use the -nochroot flag!");
+			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
 			error.code = "USER_NOT_FOUND";
 			// Add user account: sudo useradd -r -s /bin/false nameofuser
 		}
@@ -1594,8 +1597,9 @@ return;
 		
 		wsServer.installHandlers(HTTP_SERVER, {prefix:'/webide'});
 		
-		if(HTTP_IP == "127.0.0.1" && !USERNAME) openStdinChannel();
-			
+		if(HTTP_IP == "127.0.0.1" && process.getuid() != 0) openStdinChannel();
+		else log("Not opening stdin channel! HTTP_IP=" + " USERNAME=" + USERNAME + " process.getuid()=" + process.getuid(), DEBUG);
+
 			log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
 		
 		
@@ -1711,6 +1715,9 @@ function startX11vnc(username, displayId, windowId, x11vncPort) {
 }
 
 function openStdinChannel() {
+
+	log("Opening local stdin channel on port " + STDIN_PORT + " ...", DEBUG);
+
 	var env = process.env;
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
