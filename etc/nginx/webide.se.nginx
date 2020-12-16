@@ -65,6 +65,7 @@ server {
   location ~* \.(?:svg|png|ttf)$ {
     expires 20d;
     add_header Cache-Control "public";
+    root /srv/webide/client/;
   }
 
   location / {
