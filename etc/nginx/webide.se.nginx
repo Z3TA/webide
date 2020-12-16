@@ -44,17 +44,27 @@ server {
   ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
   gzip on;
-  gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json;
+  gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json font/ttf application/x-javascript text/html;
 
   # Upload limit
   client_max_body_size 16G;
 
   # Serve the bundle on request's to / (root)
   location = / {
+
+    # Tell browser to *only* access the app via httpS for one week
+    add_header Strict-Transport-Security: "max-age=604800";
+
     gzip_static on;
     alias /srv/webide/client/;
     try_files bundle.htm =404;
-    expires 0;
+    expires 300s;
+  }
+
+  # Cache static assets
+  location ~* \.(?:svg|png|ttf)$ {
+    expires 20d;
+    add_header Cache-Control "public";
   }
 
   location / {
@@ -66,7 +76,6 @@ server {
     
     # Allow the browser to read the Content-Length header
     add_header Access-Control-Expose-Headers "Content-Length";
-  
     
     # Dont cache!
     expires 0;
