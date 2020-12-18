@@ -275,6 +275,8 @@ function connectToNatServer() {
 	var decoder = new StringDecoder('utf8');
 	var strBuffer = "";
 
+	log("Connecting to NAT/reverse server NAT_HOST=" + NAT_HOST + " NAT_PORT=" + NAT_PORT + " ...", DEBUG);
+
 	var connection = module_net.createConnection({host: NAT_HOST, port: NAT_PORT});
 	connection.on("error", connectionError);
 	connection.on("connect", connectionConnected);
@@ -1238,6 +1240,7 @@ function main() {
 	
 	log("NAT_TYPE=" + NAT_TYPE + " NAT_HOST=" + NAT_HOST + " NAT_PORT=" + NAT_PORT, DEBUG);
 	if(NAT_PORT && NAT_HOST && (!NAT_TYPE || NAT_TYPE.indexOf("server") == -1)) connectToNatServer();
+	else log("Not connecting to NAT/reverse server!");
 
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
@@ -3461,6 +3464,15 @@ checkMountsReadyMaybe();
 					nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
 					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 					
+					if(DEFAULT.ipv4) {
+						nginxProfile = nginxProfile.replace(/listen 80/g, "listen " + DEFAULT.ipv4 + ":80");
+						nginxProfile = nginxProfile.replace(/listen 443/g, "listen " + DEFAULT.ipv4 + ":443");
+					}
+					if(DEFAULT.ipv6) {
+						nginxProfile = nginxProfile.replace(/listen [::]:80/g, "listen [" + DEFAULT.ipv6 + "]:80");
+						nginxProfile = nginxProfile.replace(/listen [::]:443/g, "listen [" + DEFAULT.ipv6 + "]:443");
+					}
+
 						module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 							if(err) throw err;
 							console.log("Nginx profile created!");
