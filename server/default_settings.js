@@ -19,11 +19,8 @@ module.exports = {
 
 	// Enable to host a webide server behind nat
 	nat_port: 8106,
-	nat_host: "webide.se", // Nat server/proxy
+	nat_host: "webide.se" // Nat server/proxy
 
-	// public ip adress of server (for the Nginx config)
-	ipv4: "5.9.139.7",
-	ipv6: "2a01:4f8:190:1303::2"
 }
 
 /*

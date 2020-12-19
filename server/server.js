@@ -3500,17 +3500,6 @@ checkMountsReadyMaybe();
 					nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
 					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 					
-					if(1==2) {
-						if(DEFAULT.ipv4) {
-							nginxProfile = nginxProfile.replace(/listen 80/g, "listen " + DEFAULT.ipv4 + ":80");
-							nginxProfile = nginxProfile.replace(/listen 443/g, "listen " + DEFAULT.ipv4 + ":443");
-						}
-						if(DEFAULT.ipv6) {
-							nginxProfile = nginxProfile.replace(/listen [::]:80/g, "listen [" + DEFAULT.ipv6 + "]:80");
-							nginxProfile = nginxProfile.replace(/listen [::]:443/g, "listen [" + DEFAULT.ipv6 + "]:443");
-						}
-					}
-
 					module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 							if(err) throw err;
 							console.log("Nginx profile created!");
