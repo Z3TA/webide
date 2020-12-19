@@ -21,7 +21,7 @@ module.exports = {
 	nat_port: 8106,
 	nat_host: "webide.se", // Nat server/proxy
 
-	// ip adress of server (for the Nginx config)
+	// public ip adress of server (for the Nginx config)
 	ipv4: "5.9.139.7",
 	ipv6: "2a01:4f8:190:1303::2"
 }
