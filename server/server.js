@@ -103,6 +103,42 @@ var INVITATIONS = {}; // Users can invite other users, which allows them to logi
 
 var PROXY = {}; // id: {proxy: http-proxy, startedBy: username}
 
+var EXEC_OPTIONS = {};
+
+if (require("fs").existsSync("/bin/dash")) {
+	EXEC_OPTIONS.shell = "/bin/dash";
+}
+else if(require("fs").existsSync("/bin/bash")) {
+	EXEC_OPTIONS.shell = "/bin/bash";
+}
+else {
+	(function() {
+		var module_path = require("path");
+		var module_fs = require("fs");
+		var path = process.env.PATH ? process.env.PATH.split(module_path.delimiter) : [];
+		for (var i=0; i<path.length; i++) {
+			var filePath = {
+				dash: module_path.join(path[i], "dash"),
+				bash: module_path.join(path[i], "bash")
+			}
+			//console.log("Checking ", filePath);
+			if(module_fs.existsSync(filePath.dash)) {
+				EXEC_OPTIONS.shell = filePath.dash;
+				break;
+			}
+			else if(module_fs.existsSync(filePath.bash)) {
+				EXEC_OPTIONS.shell = filePath.bash;
+				break;
+			}
+		}
+
+		if(!EXEC_OPTIONS.shell) throw new Error("Unable to determine what shell to run! Can't find dash nor bash in " + path);
+
+	})();
+}
+
+console.log(EXEC_OPTIONS)
+
 var EXEC_OPTIONS = {shell: "/bin/dash"};
 
 var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can stop a connection if the user disconnects)
