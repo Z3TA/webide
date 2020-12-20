@@ -3,6 +3,9 @@
 What I'm working on
 -------------------
 
+Feature detection before adding something in discovery/menu,
+or possible install on first use!?
+For example in AWS or Google shell
 
 
 

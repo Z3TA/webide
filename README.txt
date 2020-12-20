@@ -40,6 +40,8 @@ Replace the IP with your public IP-address.
 
 If you want to host many users you need to setup the editor as a [cloud IDE](#cloudIDE).
 
+If your computer/device is behind NAT, start the server with the flag *-nat-type client*
+ and you can access your server from https://webide.se/?nat_code=XXXXXXX
 
 
 
@@ -272,43 +274,30 @@ Login with your Google account.
 
 2. If the shell terminal didn't open by itself, click on the icon in the top right 
 that looks like >_ and says "Activate Google Cloud Shell"
-It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
-`curl https://www.webtigerteam.com/editor/download/`
+It will bring up a virtual pseudo-terminal at the bottom. 
 
-3. Take notice of the latest server release for webide. Then type:
-`wget https://www.webtigerteam.com/editor/download/webide-v1_alpha-3397-server.tar.gz`
-(replace the number 3397 with the latest webide server relase!)
-This will download the gzipped tar archive.
+3. Type the following command in the virtual terminal:
 
-(tip: Pressing tab in the terminal will auto-complete file paths)
+`npx webide.se --username=admin --password=admin -nat-type client`
 
-4. Then unpack the tarball:
-`tar xf webide-v1_alpha-3397-server.tar.gz`
+It will take some time to compile all dependencies, at the end of the output you will see a message:
 
-5. And go into it's folder:
-`cd webide-v1_alpha-3397-server`
+This backend/server can be reached from public url: http://webide.se/?nat_code=XXXXXXXXX
 
-6. Install dependencies:
-`npm install`
+Go to that URL and fill in the username and password specified in the npx command.
 
-7. cd into the server directory:
-`cd server`
 
-8. Start the nodejs server
-`node server.js --username=yourname --password=changeme --port=8080 --ip=127.0.0.1 -nochroot`
+Running the editor in AWS CloudShell
+====================================
 
-The server should now be listening to http port 8080 and ip 127.0.0.1
+1. Go to https://console.aws.amazon.com/cloudshell/home
+And login with your AWS account.
 
-If this was a normal shell you should have made it listen on the public IP 
-instead of 127.0.0.1 and open http://public-ip:8080/ in a browser.
-But in Google Cloud shell we have to run it via a proxy ...
+2. After a while you will see a virtual terminal...
 
-10. We want to "preview" the "app" ... (Click on any link in the Cloud API menu ...
-Clicking on any link will make some new icons pop up to the right top side of the terminal.)
-Click on the icon that looks like <> and say "Web preview". And select "Preview on port 8080"
-This will open a new browser tab, that will hopefully load the editor!
+Follow step 3 (from Google Cloud Shell) above. 
 
-Note that some things will be a bit slow as the Google proxy does not support websockets.
+
 
 
 How to update
