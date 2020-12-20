@@ -105,10 +105,12 @@ createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
 	chmodrSync(UTIL.joinPaths([user.homeDir, ".prod/"]), "770");
 	chownrDirSync(UTIL.joinPaths([user.homeDir, ".prod/"]), user.uid, user.gid);
 		
-		// Make sure www-data has access to wwwpub folder
+		// wwwpub folder should be public
 		try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, "wwwpub/"])); } catch(err) { console.log(err.message); }
-	run("chmod 2755 " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
-	run("chown -R " + user.name + ":www-data " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
+		run("chown -R " + user.name + ":www-data " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
+		run("chmod 2755 " + UTIL.joinPaths([user.homeDir, "wwwpub/"])); // New created files will get the same group as parent directory group
+		run("find " + UTIL.joinPaths([user.homeDir, "wwwpub/"]) + " -type f -exec chmod 744 {} +" ); // Files does not need execute permission
+		run("find " + UTIL.joinPaths([user.homeDir, "wwwpub/"]) + " -type d -exec chmod 2755 {} +" ); // Folders need execute permission for Nginx to list files. New created files will get the same group as parent directory group
 		
 		
 	

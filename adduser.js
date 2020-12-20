@@ -365,7 +365,13 @@ console.time("chownrSync " + homeDir);
 		
 		// Nginx (www-data) need -x permission on all folders in order to stat! sudo -u www-data stat /home/ltest1/wwwpub/
 		fs.chmodSync(homeDir, "751");
-		
+		// Give back read permission to all files ín wwwpub
+		run("chown -R " + username + ":www-data " + UTIL.joinPaths([homeDir, "wwwpub/"]));
+		run("chmod 2755 " + UTIL.joinPaths([homeDir, "wwwpub/"])); // New created files will get the same group as parent directory group
+		run("find " + UTIL.joinPaths([homeDir, "wwwpub/"]) + " -type f -exec chmod 744 {} +" ); // Files does not need execute permission
+		run("find " + UTIL.joinPaths([homeDir, "wwwpub/"]) + " -type d -exec chmod 2755 {} +" ); // Folders need execute permission for Nginx to list files. New created files will get the same group as parent directory group
+
+
 		// For DNS lookups to work !?
 		//chmodrSync(homeDir + "etc/", "444");
 		//chmodrSync(homeDir + "run/", "444");
@@ -642,5 +648,9 @@ function recursiveReplaceInFiles(dir, find, replace) {
 	console.timeEnd("recursiveReplace " + find + " in " + dir);
 }
 
+function run(cmd) {
+	var stdout = child_process.execSync(cmd).toString(ENCODING);
+	if(stdout.trim()) throw new Error(stdout);
+}
 
 
