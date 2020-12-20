@@ -3,37 +3,7 @@
 What I'm working on
 -------------------
 
-Running npx on WAS cloud shells try to create ip netns ...
 
-Some systems (AWS cloud shell) don't have /bin/dash ...
-
-I had not open the nat buster port in Hertzner firewall! LOL
-
-
-
-
-Nginx seem to have issues with usernames that have capital letters...
-and will return a 404...
-
-
-sed -i 's/listen 80/listen 5.9.139.7:80/g' *.nginx
-sed -i 's/listen 443/listen 5.9.139.7:443/g' *.nginx
-sed -i 's/listen \[::\]:80/listen [2a01:4f8:190:1303::2]:80/g' *.nginx
-sed -i 's/listen \[::\]:443/listen [2a01:4f8:190:1303::2]:443/g' *.nginx
-
-I configured all Nginx sites to listen on one IP, but it did not work
-so I had to rewert...
-
-sed -i 's/listen 5.9.139.7:80/listen 80/g' *.nginx
-sed -i 's/listen 5.9.139.7:443/listen 443/g' *.nginx
-sed -i 's/listen \[2a01:4f8:190:1303::2\]:80/listen [::]:80/g' *.nginx
-sed -i 's/listen \[2a01:4f8:190:1303::2\]:443/listen [::]:443/g' *.nginx
----
-
-todo: If the server is behind NAT it is also likely to only allow connecting to port 80 or 443!
-So we need to run a NAT server on port 443 and or 80!
-
-bug: 'UbuntuMono-RI.ttf doesn't get added to the release package!!!?
 
 
 ---
