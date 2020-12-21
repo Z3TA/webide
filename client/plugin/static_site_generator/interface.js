@@ -2400,6 +2400,12 @@ whenAllFilesReloaded();
 	
 	function publishSite(site) {
 		
+		/*
+			todo: Check if files that belongs to the site and is opened in the editor is actually saved, 
+			And ask to save before publishing
+		*/ 
+
+
 		if(site.repository) {
 			// First make sure it's synced
 			syncRepository(site, function repoSynced(em) {
