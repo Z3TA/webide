@@ -2482,10 +2482,11 @@ API.setWorkingDirectory = function setWorkingDirectory(user, json, callback) {
 	  
 	*/
 	
-	
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return callback(path);
-	
+
+	path = user.changeWorkingDir(path);
+
 	callback(null, {workingDirectory:path});
 	
 	/*

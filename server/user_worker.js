@@ -342,6 +342,8 @@ user.send = function send(msg, code) {
 
 user.changeWorkingDir = function changeWorkingDir(path) {
 	
+	//console.trace("Changed working directory to: path=" + path);
+
 	user.workingDirectory = path;
 	
 	return user.workingDirectory;
