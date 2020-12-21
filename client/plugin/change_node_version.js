@@ -105,7 +105,7 @@ switchToVersion(version);
 			});
 			
 			// Check which version is currently in use
-			CLIENT.cmd("run", {command: "node -v"}, function(err, resp) {
+			CLIENT.cmd("run", {command: "$(command -v node) -v"}, function(err, resp) {
 				if(err) throw new Error("Unable to get node version! Error: " + err.message + " err.code=" + err.code);
 				
 				var currentVersion = resp.stdout.trim().slice(1);
