@@ -3,11 +3,77 @@
 What I'm working on
 -------------------
 
+
+
+ Running command=node -v ... (at run (/srv/webide/server/server_api.js:3500:10)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) ilsbofiske: env={
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "USER": "ilsbofiske",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "username": "ilsbofiske",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "HOME": "/home/ilsbofiske/",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "gid": "1051",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "PORT": "/home/ilsbofiske/sock/test",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "NPM_PACKAGES": "/home/ilsbofiske/.npm-packages",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "uid": "1051",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "VISUAL": "webide",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "LOGNAME": "ilsbofiske",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "groups": "{}",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "PATH": "/home/ilsbofiske/.npm-packages/bin:/home/ilsbofiske/.local/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin/:/usr/bin:/bin:/sbin:",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "DISPLAY": "10.0.4.29:1051",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "HOST": "10.0.4.29",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "DOCKER_HOST": "tcp://10.2.4.29:2376",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "JAVA_HOME": "/home/ilsbofiske/Android/android-studio/jre/",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "PWD": "/srv/webide/server",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "ANDROID_HOME": "/home/ilsbofiske/Android/Sdk",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "USER_NAME": "ilsbofiske",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "tld": "webide.se",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "EDITOR": "webide",
+Dec 21 19:13:43 webide.se nodejs[28461]:                                               "NPM_CONFIG_PREFIX": "/home/ilsbofiske/.npm-packages"
+Dec 21 19:13:43 webide.se nodejs[28461]:                                             } (at run (/srv/webide/server/server_api.js:3501:10)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) ilsbofiske: node -v => err=spawn /bin/dash ENOENT stdout= stderr= (at /srv/webide/server/server_api.js:3504:11)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) ilsbofiske: err.code=ENOENT (at /srv/webide/server/server_api.js:3507:12)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) err.stack="Error: spawn /bin/dash ENOENT\n    at Process.ChildProcess._handle.onexit (internal/child_process.js:240:19)\n    at onErrorNT (internal/child_process.js:415:16)\n    at process._tickCallback (internal/process/next_tick.js:63:19)" (at ranApi (/srv/webide/server/user_worker.js:742:7)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) ilsbofiske: err.code=ENOENT (at ranApi (/srv/webide/server/user_worker.js:750:15)
+Dec 21 19:13:43 webide.se nodejs[28461]:                       
+Dec 21 19:13:43 webide.se nodejs[28461]: 2020-12-21 (19:13:43) 155.4.8.162(1) <= 28{"error":"API error: spawn /bin/dash ENOENT","errorCode":"ENOENT","id":28} (server.js:4739:4)
+Dec 21 19:13:43 webide.se nodejs[28461]: [142B blob data]
+
+
+
+---
+
+
+Terminal emulator doesn't work on AWS CloudShell
+
+
 Feature detection before adding something in discovery/menu,
 or possible install on first use!?
 For example in AWS or Google shell
 
+View > Local Desktop (xserver deps needed)
+View > Split scree/new window (wont work with nat-bust)
 
+File > Open in new window (wont work with nat-bust)
+
+File  > Share (needs wwwpub)
+
+Tools > Live/preview (wont work with nat-bust)
+
+Tools > Docker daemon (Unable to start the Docker daemon! Error: Server: API error: spawn /bin/dash ENOENT)
+
+Discovery bar > Invite collaborator 
+2020-12-21 (00:39:33) /home/cloudshell-user/.npm/_npx/1500/lib/node_modules/webide.se/server/server.js:3097
+                                                var password = module_generator.generate({
+                                                                                ^
+                      
+                      TypeError: Cannot read property 'generate' of undefined
+
+
+Discovery bar > Live preview / Run (wont work with nat-bust, but we can make it work! via webide.se http tunnel)
 
 ---
 

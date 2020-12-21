@@ -45,7 +45,44 @@ var FIND_FILES_IN_FLIGHT = 0;
 var FIND_IN_FILES_ABORTED = false;
 var ECHO_COUNTER = 0;
 
-var EXEC_OPTIONS = {shell: "/bin/dash"};
+var EXEC_OPTIONS = {};
+
+if (require("fs").existsSync("/bin/dash")) {
+	EXEC_OPTIONS.shell = "/bin/dash";
+}
+else if(require("fs").existsSync("/bin/bash")) {
+	EXEC_OPTIONS.shell = "/bin/bash";
+}
+else {
+	(function() {
+		var module_path = require("path");
+		var module_fs = require("fs");
+		var path = process.env.PATH ? process.env.PATH.split(module_path.delimiter) : [];
+		for (var i=0; i<path.length; i++) {
+			var filePath = {
+				dash: module_path.join(path[i], "dash"),
+				bash: module_path.join(path[i], "bash")
+			}
+			//console.log("Checking ", filePath);
+			if(module_fs.existsSync(filePath.dash)) {
+				EXEC_OPTIONS.shell = filePath.dash;
+				break;
+			}
+			else if(module_fs.existsSync(filePath.bash)) {
+				EXEC_OPTIONS.shell = filePath.bash;
+				break;
+			}
+		}
+
+		if(!EXEC_OPTIONS.shell) throw new Error("Unable to determine what shell to run! Can't find dash nor bash in " + path);
+
+	})();
+}
+
+console.log("EXEC_OPTIONS=" + JSON.stringify(EXEC_OPTIONS));
+
+
+
 
 var PROCESS = {}; // pid: spawned process
 
@@ -3497,14 +3534,15 @@ options.cwd = json.cwd;
 	
 	var command = json.command;
 	
-	console.log("Running command=" + command + " ...");
-	console.log("env=" + JSON.stringify(options.env, null, 2));
+	console.log("API.run: Running command=" + command + " ...");
+	console.log("API.run: env=" + JSON.stringify(options.env, null, 2));
 	exec(command, options, function (err, stdout, stderr) {
 		
-		console.log(command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
+		console.log("API.run: " + command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
 		
 		if(err) {
-			console.log("err.code=" + err.code);
+			console.log("API.run: err.code=" + err.code);
+			console.log("API.run: options=" + JSON.stringify(options, null, 2));
 			return callback(err);
 		}
 		else return callback(null, {stdout: stdout, stderr: stderr});

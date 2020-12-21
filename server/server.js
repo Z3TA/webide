@@ -137,9 +137,9 @@ else {
 	})();
 }
 
-console.log(EXEC_OPTIONS)
+console.log("EXEC_OPTIONS=" + JSON.stringify(EXEC_OPTIONS));
 
-var EXEC_OPTIONS = {shell: "/bin/dash"};
+
 
 var VPN = {}; // username: {type, conf} (Keep track of VPN tunnels so we can stop a connection if the user disconnects)
 
