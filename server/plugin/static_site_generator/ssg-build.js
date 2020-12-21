@@ -67,8 +67,6 @@
 
 "use strict";
 
-console.time("SSG: total time")
-
 /*
 if(require.main === module) {
 	// Script was spawned or called from command line
@@ -131,6 +129,8 @@ var main = {
 	nodeModulesPath: NODE_MODULES_PATH,
 	compile: function main(main_callback) {
 	
+		console.time("SSG: total time");
+
 	// Reset
 		ABORT = false;
 		
