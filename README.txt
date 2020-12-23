@@ -866,13 +866,52 @@ Always reboot after a system upgrade to check if the system boots with the new u
 You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
 
 
+Downgrade libvncserver on Ubuntu 18
+-----------------------------------
+In July 2020 Ubuntu 18 got a patch which broke protocol with all noVNC versions. 
+(Ubuntu 20 has a different version of libvncserver - it however only works with older versions of noVNC.)
+
+To remedy the situation you have to either downgrade libvncserver and ignore the security patch. Or upgrade to Ubuntu 20.
+Here's how to downgrate libvncserver on Ubuntu 18 (you need to do this after avery apt upgrade!)
+
+
+$ `dpkg -l | grep libvncserver`
+
+ii  libvncserver1:amd64                           0.9.11+dfsg-1ubuntu1                             amd64        API to write one's own VNC server
+
+
+$ `apt-cache madison libvncserver`
+
+libvncserver | 0.9.11+dfsg-1ubuntu1 | http://ubuntu.mirror.su.se/ubuntu bionic/main Sources
+libvncserver | 0.9.11+dfsg-1ubuntu1.2 | http://ubuntu.mirror.su.se/ubuntu bionic-security/main Sources
+libvncserver | 0.9.11+dfsg-1ubuntu1.2 | http://ubuntu.mirror.su.se/ubuntu bionic-updates/main Sources
+
+$ `sudo apt install libvncserver1=0.9.11+dfsg-1ubuntu1`
+
+And then use version v1.1.0 of noVNC (or earlier).
+
+Also if you have unattended upgrades enabled you have to disable them or it will be automatically "upgraded" to the non working version:
+```
+less /var/log/apt/history.log
+
+dpkg-reconfigure unattended-upgrades
+
+nano /etc/apt/apt.conf.d/20auto-upgrades
+```
+
+
+
+
+
 Regularly run zpool scrub
 -------------------------
 
 You want to check the hard drives from time to time:
+
 `sudo zpool scrub tank`
 
 Also install smartctl to monitor hdd errors:
+
 `sudo apt-get install smartmontools `
 
 See disk info:

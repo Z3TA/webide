@@ -83,12 +83,16 @@ function startEmulator() {
 			CLIENT.cmd("android.startEmulator", {}, startTimeout, function(err) {
 				if(err) {
 					// The emulator is a bit random if it starts or not...
-					var msg = "If you do not see the Android Emulator, try clicking on the Android icon again! Error: " + err.message;
+					var msg = "If you do not see the Android Emulator, you may try clicking on the Android icon again! Error: " + err.message;
+					
 					alertBox(msg);
 					
 					return;
 				}
-				
+				else {
+					console.log("Android emulator started successfully!?");
+				}
+
 				windowMenu.activate();
 				discoveryBarIcon.classList.add("active");
 

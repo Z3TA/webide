@@ -371,6 +371,22 @@ console.time("chownrSync " + homeDir);
 		run("find " + UTIL.joinPaths([homeDir, "wwwpub/"]) + " -type f -exec chmod 744 {} +" ); // Files does not need execute permission
 		run("find " + UTIL.joinPaths([homeDir, "wwwpub/"]) + " -type d -exec chmod 2755 {} +" ); // Folders need execute permission for Nginx to list files. New created files will get the same group as parent directory group
 
+		// There might be an old lingering nginx profile...
+		var url_user = UTIL.urlFriendly(username);
+		var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+		var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
+		console.log("Deleting " + nginxProfileSymlink);
+		try {
+			fs.unlinkSync(nginxProfileSymlink);
+			fs.unlinkSync(nginxProfile);
+		}
+		catch(err) {
+			if(err.code == "ENOENT") {
+				// There where no lingering nginx profile
+			}
+			else throw err;
+		}
+
 
 		// For DNS lookups to work !?
 		//chmodrSync(homeDir + "etc/", "444");

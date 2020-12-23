@@ -57,8 +57,20 @@ _emulator.kill();
 	}
 }
 
-function startAvd(username, avd, callback, recursion) {
+function startAvd(username, avd, realCallback, recursion) {
 	
+	// todo: Check if avd is already running!
+
+	var callback = function callback(err) {
+
+		if(err) {
+			console.error(err);
+		}
+
+		realCallback(err);
+		realCallback = null;
+	};
+
 	if(typeof avd == "function") {
 		callback = avd;
 		avd = undefined;
@@ -71,10 +83,25 @@ function startAvd(username, avd, callback, recursion) {
 		if(recursion) throw new Error("username=" + recursion + " avd=" + avd + " recursion=" + recursion);
 		
 		module_child_process.exec(bin + " -list-avds", function(err, stdout, stderr) {
-			if(err) return callback(err);
-			if(stderr) return callback(new Error(stderr));
-			if(!stdout) return callback(new Error("No installed AVD's!?"));
-			
+			if(err) {
+				log("Calling startAvd callback after list-avds because err=" + (err && err.message));
+				callback(err);
+				callback = null;
+				return;
+			}
+			if(stderr) {
+				log("Calling startAvd callback after list-avds because stderr=" + stderr);
+				callback(new Error(stderr));
+				callback = null;
+				return;
+			}
+			if(!stdout) {
+				log("Calling startAvd callback after list-avds because stdout=" + stdout + " (got notthing in stdout)");
+				callback(new Error("No installed AVD's!?"));
+				callback = null;
+				return;
+			}
+
 			var list = stdout.split("\n");
 			var avd = list[0];
 			
@@ -115,7 +142,14 @@ function startAvd(username, avd, callback, recursion) {
 		log(username + " emulator (avd=" + avd + ") close: code=" + code + " signal=" + signal, NOTICE);
 		
 		if(callback) {
-			var err = new Error(lastStderr);
+			if(lastStderr) {
+				var err = new Error(lastStderr);
+			}
+			else if(code != 0) {
+				var err = new Error("Emulator closed with exit code=" + code);
+			}
+
+			log("Calling startAvd callback after emulator.on close! code=" + code + " signal=" + signal + " lastStderr=" + lastStderr + " ");
 			callback(err);
 			callback = null;
 		}
@@ -130,6 +164,7 @@ function startAvd(username, avd, callback, recursion) {
 		log(username + " emulator (avd=" + avd + ") error: err.message=" + err.message, ERROR);
 		console.error(err);
 		if(callback) {
+			log("Calling startAvd callback after emulator.on error! err.message=" + err.message);
 callback(err);
 			callback = null;
 		}
@@ -165,9 +200,18 @@ callback(err);
 	
 	setTimeout(function() {
 		// It seems emulator.connected is always false... so use stdout/stderr to guess if it started or not
-		if((emulator.connected || lastStdout) && callback) {
+		if(lastStderr && !emulator.connected && callback) {
+			log("Calling startAvd callback after timeout because emulator.connected=" + emulator.connected + " lastStdout=" + lastStdout + " lastStderr=" + lastStderr);
+			callback(new Error(lastStderr));
+			callback = null;
+		}
+		else if((emulator.connected || lastStdout) && callback) {
+			log("Calling startAvd callback after timeout because emulator.connected=" + emulator.connected + " lastStdout=" + lastStdout);
 			callback(null);
 			callback = null;
+		}
+		else {
+			log("NOT callacing startAvd callback after timeout because emulator.connected=" + emulator.connected + " lastStdout=" + lastStdout + " lastStderr=" + lastStderr);
 		}
 		
 		log(username + " emulator (avd=" + avd + ") callback=" + (typeof callback) + " After timeout: lastStdout=" + lastStdout + " lastStderr=" + lastStderr + " emulator.connected=" + emulator.connected);
