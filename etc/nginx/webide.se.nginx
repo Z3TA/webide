@@ -58,7 +58,7 @@ server {
     gzip_static on;
     alias /srv/webide/client/;
     try_files bundle.htm =404;
-    expires 300s;
+    expires 4500s;
   }
 
   # Cache static assets

@@ -1,7 +1,22 @@
 (function() {
 	
-	EDITOR.on("start", registerServiceWorker);
+	EDITOR.on("start", registerServiceWorkerLater);
 	
+	function registerServiceWorkerLater() {
+		/*
+			problem: The service worker downloads the bundle and other files the client *already* downloaded!
+			it does not seem to fetch files from the browser cache (it only fetch some files from the browser cache)
+			soulition: Wait at least 5 minutes before activating the service worker
+
+			reasoning: The service worker is only good for repeating visitors,
+			most will however only try the editor for 10 seconds and then leave,
+			so downloading the files and extra time is extra unnecessary
+
+		*/
+
+		setTimeout(registerServiceWorker, 1000 * 60 * 5);
+	}
+
 	function registerServiceWorker() {
 		
 		console.log("Hello from register_service_worker.js");
