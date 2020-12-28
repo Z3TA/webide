@@ -119,6 +119,7 @@ var UTIL = {
 		else {
 			// It's assumed that all folder paths will end with a path delimiter, so no ending delimiter might result in a bug! (note: use UTIL.joinPaths instead of concateting)
 			console.warn("getFolderName: The last character=" + path.charAt(path.length) + " is not a delimiter=" + delimiter + " path='" + path + "'");
+			// You might be tempted to return getDirectoryFromPath here, but an waRNING here means we are likely dealing with a file name, not a path, and very likely have a bug!
 		}
 		
 		console.log("getFolderName: path=" + path);

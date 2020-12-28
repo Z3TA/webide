@@ -1231,7 +1231,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	var fileName = UTIL.getFilenameFromPath(filePath);
-	var folderName = UTIL.getFolderName(filePath);
+	var folderName = UTIL.getDirectoryFromPath(filePath);
 	npmOptions.cwd = directory;
 	
 	console.log("installNodejsModule: moduleName=" + moduleName + " saveType=" + saveType + " npmOptions=" + JSON.stringify(npmOptions)); 
