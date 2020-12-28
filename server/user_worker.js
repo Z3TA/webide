@@ -1768,8 +1768,8 @@ if(user.tld) {
 			
 			function sockEvent(eventType, filename) {
 				// filename is just the file name, not the whole path!
-				console.log("sockEvent: eventType=" + eventType + " filename=" + filename);
-				if(!filename) console.warn("sockEvent: eventType=" + eventType + " filename=" + filename);
+				console.log("runNodeJsScript:runIt:start:sockEvent: eventType=" + eventType + " filename=" + filename);
+				if(!filename) console.warn("runNodeJsScript:runIt:start:sockEvent: eventType=" + eventType + " filename=" + filename + " (file created in " + watchDir + " but fs watcher does not report a file name)");
 				else {
 					createdSockets.push(watchDir + filename);
 					// Always use http: just in case the SSL registration failed (even though it will result in an additional roundtrip)

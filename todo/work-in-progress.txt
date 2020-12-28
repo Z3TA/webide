@@ -3,9 +3,12 @@
 What I'm working on
 -------------------
 
+in URL-auto-reloader, check every time we save a file!
 
+---
 
-
+Should probably send an e-mail report if bad version of libvncserver is detected! when server is starting up
+eg. please downgrade to get VNC to work
 
 ---
 

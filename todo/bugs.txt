@@ -36,6 +36,36 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+
+---
+
+Problems parsing (in php file, text is on top) :
+
+class ACFAddOptionsPage {
+
+    function __construct() {
+        if ( function_exists('acf_add_options_page')) $this->acf_add_options_page();
+    }
+
+    function acf_add_options_page() {
+        // Add your options page here! See examples above.
+        acf_add_options_page(array(
+            'page_title'     => 'Theme General Settings',
+            'menu_title'    => 'Theme Settings',
+            'menu_slug'     => 'theme-general-settings',
+            'capability'    => 'edit_posts',
+            'redirect'        => false
+        ));
+    }
+} 
+
+---
+
+indentation in php files get messed up! (lots of white space characters are inserted)
+
+---
+
 Parsing error in ssg-build < inside string indentate ...
 
 

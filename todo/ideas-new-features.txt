@@ -36,6 +36,15 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+pivot into a GTK "native" app !?
+
+---
+
+monitor output from npm run commands and inline messages if a file path (currently open) is mentioned, for example:
+CssSyntaxError: /tank/johan/repo/mediroyal-webbutik/main.css:25:2: `@apply` cannot be used with `.md` 
+
+---
+
 idea: Edit any project (static site page) on Github
 
 ---
