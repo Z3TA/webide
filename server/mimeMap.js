@@ -9,6 +9,7 @@ var mimeMap = {
 	jpg: "image/jpeg",
 	jpeg: "image/jpeg",
 	js: "application/x-javascript",
+	json: "application/json",
 	midi: "audio/x-midi",
 	mp3: "audio/mpeg",
 	mpeg: "video/mpeg",
