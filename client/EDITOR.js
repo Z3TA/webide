@@ -9518,6 +9518,49 @@ Searches down towards the root, looking for file names
 		}
 	}
 	
+	// ## Eval worker
+	try {
+		var evalWorker = new Worker("safeEval.js");
+	}
+	catch(err) {
+		console.error(err);
+		var workerInitError = err;
+	}
+	var evalWorkerCounter = 0;
+	var evalWorkerCallbacks = {};
+	if(evalWorker) {
+		evalWorker.addEventListener('message', function(msg) {
+
+			var obj = msg.data;
+
+			console.log("from evalWorker: obj=", obj);
+
+			var id = obj.id;
+
+			if(!evalWorkerCallbacks.hasOwnProperty(id)) throw new Error("evalWorker: No callback for answer with id=" + id);
+
+			var callback = evalWorkerCallbacks[id];
+			callback(obj.error, obj.result);
+		});
+	}
+	EDITOR.eval = function evaluate(str, callback) {
+		if(!evalWorker) return callback(new Error("Web Workers not supported by browser=" + BROWSER + "! (" + workerInitError.message + ")"));
+
+		if(typeof callback != "function") throw new Error("Second argument to EDITOR.eval needs to be a callback function!");
+
+		var id = evalWorkerCounter++;
+
+		evalWorkerCallbacks[id] = callback;
+
+		evalWorker.postMessage({
+			id: id,
+			str: str
+		});
+
+	}
+
+
+
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();

@@ -3,6 +3,16 @@
 What I'm working on
 -------------------
 
+Inline assertion
+
+---
+
+Minecraft modding
+
+
+
+---
+
 in URL-auto-reloader, check every time we save a file!
 
 ---
