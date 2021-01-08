@@ -63,6 +63,8 @@
 
 		var comment = file.parsed.comments;
 
+		if(!comment) return;
+
 		for(var i=0; i<comment.length; i++) {
 
 			console.log("doCheck: ", comment[i]);
