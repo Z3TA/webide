@@ -155,18 +155,40 @@ var File; // File object is global
 		
 		console.log("fileExtension=" + file.fileExtension);
 		
-		file.parse = true; // Always parse new files by default
-		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
+		// Do we want to remove any parsed metadata when (re)setting the file extension!?
+		file.parsed = {};
 		
-if(file.name == "Makefile") file.mode = "text";
-		else if(EDITOR.parseFileExtensionAsCode.indexOf(file.fileExtension) != -1 || file.fileExtension == "") file.mode = "code"
+		/*
+			Should we determine if a file should be parsed here !?
+
+			But why should file.parse determine if a file should be parsed or not ?
+			Should it not be up to the file parser to choose if it want's to parse the file or not !?
+
+			problem: Plugins like text-mode-indentation.js wants to avoid files that are parsed
+			solution!?: Have them check Object.keys(file.parsed).length == 0
+		
+		*/
+
+		if(file.name == "Makefile") {
+			file.parse = true; // We do want to parse this file (makefile parser however not yet implemented)
+			file.mode = "text"; // Should we change this to "code" if there is a makefile parser !?
+		}
+		else if(EDITOR.parseFileExtensionAsCode.indexOf(file.fileExtension) != -1 || file.fileExtension == "") {
+			file.mode = "code";
+		}
 		else if(EDITOR.plainTextFileExtensions.indexOf(file.fileExtension) != -1 ) {
 file.mode = "text";
 			file.parse = false; // No need to parse the file if we *know* it's a plain text file
 		}
+		else if(file.fileExtension == "") {
+			// File without a file extension. Likely a "new file" (not yet saved)
+			file.parse = true; // We want to parse "new" files because it's likely a js,html,css etc file (that we want to parse) but have yet named
+			file.mode = "code"; // it's likely a js,html,css etc file so assume it's code
+		}
 		else {
 			console.warn("Unable to determine file mode for file.fileExtension=" + file.fileExtension + " assuming plain text");
 			file.mode = "text";
+			file.parse = false; // Let plugins like text-mode-indentation.js kick in for unknown files/languages that are not  parsed
 		}
 		
 	}

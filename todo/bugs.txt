@@ -36,6 +36,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+When both find and find-in-files are open and you click on the "use regexp" label on find-in-files, the "use regexp" checkbox on "find" is checked
+(expected the "use regexp" on find-in-files to be checked)
 
 
 ---

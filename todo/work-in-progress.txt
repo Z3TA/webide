@@ -3,7 +3,16 @@
 What I'm working on
 -------------------
 
+Was thinking about making a semi-auto indention for Python code
+"Colon, new line, indent. Statements, backspace dedent."
+Was testing what happens when indenting Python code
+however /client/plugin/text-mode-indentation.js plugin did not kick in!
+Trying to decide where it's decided wheter a file should be parsed or not
+(currently done in File.prototype.setFileExtension as well in File() isBig (which would cause a bug if a .isBig file was renamed)
+Parsers should probably call EDITOR.registerParser(fileExtension, parser) 
+and add the file extension to EDITOR.parseFileExtensionAsCode !?
 
+See File.prototype.setFileExtension
 
 ---
 
