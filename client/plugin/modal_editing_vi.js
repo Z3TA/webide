@@ -2766,9 +2766,8 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				confirmBox("The currently open file is in code-mode with automatic formatting, this might cause issues with Editor's Vim mode", [usePlainText, ok], {code: "VIM_MODE"}, function (answer) {
 					if(answer == usePlainText) {
 						file.reload(file.text,  {
-							mode: "text",
-							parse: false,
-							parsed: {}
+				disableParsing: true,
+				parsed: null
 						});
 					}
 				});

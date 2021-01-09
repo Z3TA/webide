@@ -1767,7 +1767,7 @@
 	function variableColors(buffer, file, bufferStartRow) {
 		"use strict";
 		
-		if(!file.parse) return buffer;
+		if(file.disableParsing) return buffer;
 		
 		var words = [];
 		var word = "";

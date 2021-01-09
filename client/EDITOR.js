@@ -1361,8 +1361,8 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 					problem 2: You might want to set properties to the file, that should be available when open-file-listeners are called
 					solution: Use state and state.props in parameters to populate state and properties
 					
-					problem 3: We keep forgetting about problem 2 and set file.parse etc after the file has been opened, 
-					resulting in files being parsed because by default file.parse is set to true
+					problem 3: We keep forgetting about problem 2 and set file.disableParsing etc after the file has been opened, 
+					resulting in files being parsed because by default file.disableParsing is set to true
 					solution: Add traps that will throw an error if some parameters are modified in the callback
 					
 				*/
@@ -1406,21 +1406,21 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				// Add bug traps
 				// We only have to do this for properties that fileOpen listeners might be particular interested in
-				// example: js_parser listens to fileOpen, but reopen_files used to set file.parse state in the EDITOR.openFile callback, 
+				// example: js_parser listens to fileOpen, but reopen_files used to set file.disableParsing state in the EDITOR.openFile callback, 
 				// resulting in js_parser parsing files that should not be parsed
 				
 				
-				var fileParse = file.parse;
-				if(fileParse !== undefined) Object.defineProperty(file, "parse", {get: function get() { return fileParse; }, set: function trap() { throw trapError }});
+				var disableParsing = file.disableParsing;
+				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw trapError }});
 
 				
 				// At last, call the function(s) to be run after the file has been opened
 				callCallbacks(null, file);
 				
 				// Remove bug traps
-				if(fileParse !== undefined) {
-				delete file.parse;
-				file.parse = fileParse;
+				if(disableParsing !== undefined) {
+					delete file.disableParsing;
+					file.disableParsing = disableParsing;
 }
 				
 			}

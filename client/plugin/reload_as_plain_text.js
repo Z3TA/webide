@@ -36,16 +36,14 @@
 	
 	function reloadAsPlainText(file) {
 		file.reload(file.text,  {
-			mode: "text", 
-			parse: false, 
-			parsed: {}
+			disableParsing: true, 
+			parsed: null
 		});
 	}
 	
 	function reloadAsCode(file) {
 		file.reload(file.text,  {
-			mode: "code",
-			parse: true
+			disableParsing: false
 		});
 	}
 	

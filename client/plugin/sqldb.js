@@ -1358,7 +1358,7 @@ callback(null, file);
 		}
 		else {
 			
-			EDITOR.openFile(fileName, initialText, {props: {parse: false}}, function dbQueryResultFileOpened(err, file) {
+			EDITOR.openFile(fileName, initialText, {props: {disableParsing: true}}, function dbQueryResultFileOpened(err, file) {
 				if(err) return callback(err);
 				
 				callback(null, file);

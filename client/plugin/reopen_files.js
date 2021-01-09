@@ -1051,7 +1051,7 @@
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
-		state.parse = file.parse;
+		state.disableParsing = file.disableParsing;
 		state.hash = file.hash;
 		
 		// For loading big files as streams

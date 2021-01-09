@@ -272,8 +272,8 @@
 	
 	function shouldParse(file) {
 		
-		if(file.parse === false) {
-			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.parse=" + file.parse);
+		if(file.disableParsing) {
+			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.disableParsing=" + file.disableParsing);
 			return false;
 		}
 		if(file.isBig) {

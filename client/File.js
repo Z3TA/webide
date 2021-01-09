@@ -53,7 +53,7 @@ var File; // File object is global
 			file.parsed == null
 
 			Forbid parsers from parsing a file:
-			file.parse = false
+			file.disableParsing = true
 
 			Check if the file has been auto-indentated:
 			file.fullAutoIndentation
@@ -61,10 +61,10 @@ var File; // File object is global
 		*/
 
 		file.fileExtension = UTIL.getFileExtension(file.path);
-		file.parse = (stateProps && stateProps.parse != undefined) ? stateProps.parse : true;
+		file.disableParsing = (stateProps && stateProps.disableParsing != undefined) ? stateProps.disableParsing : false;
 		file.fullAutoIndentation = false;
-		if(file.parse) {
-			console.log("File: file.parse=" + file.parse);
+		if(!file.disableParsing) {
+			console.log("File: file.disableParsing=" + file.disableParsing);
 			for(var i=0, canParseResult; i<EDITOR.parsers.length; i++) {
 				canParseResult = EDITOR.parsers[i].canParse(file);
 				console.log("File: Parser " + i + " () canParseResult=", canParseResult);
@@ -137,7 +137,7 @@ var File; // File object is global
 		
 		
 		if(file.isBig) {
-			file.parse = false; // Do not parse big files
+			file.disableParsing = true; // Do not parse big files
 			file.fullAutoIndentation = false; // Again, don't try to parse it
 			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				

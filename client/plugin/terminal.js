@@ -34,9 +34,8 @@ todo: Run vttest
 	var netnsIP;
 	var username;
 	var terminalFileStateProps = {
-		mode: "text",
 		lineBreak: "\n",
-		parse: false,
+		disableParsing: true,
 		noChangeEvents: true,
 		noCollaboration: true
 	};

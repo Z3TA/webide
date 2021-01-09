@@ -242,7 +242,7 @@
 		if(file == undefined) return ALLOW_DEFAULT;
 		
 		if(file.parsed!=null || !EDITOR.input) {
-			console.log("indentate:addindentation Not indentating! file.parsed=" + !!file.parsed + " EDITOR.input=" + EDITOR.input + " file.parse=" + file.parse + " file?" + (!!file) + " ");
+			console.log("indentate:addindentation Not indentating! file.parsed=" + !!file.parsed + " EDITOR.input=" + EDITOR.input + " file.disableParsing=" + file.disableParsing + " file?" + (!!file) + " ");
 			return ALLOW_DEFAULT;
 		}
 		
