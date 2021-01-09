@@ -124,6 +124,7 @@
 			"qml",
 			"qrc",
 			"c",
+			"cpp",
 			"gs", // Google Script
 			"swift"
 		]
