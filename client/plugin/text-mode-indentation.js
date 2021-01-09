@@ -52,11 +52,11 @@
 	});
 
 	function showWhiteSpaceMaybe(file, combo, caret, target) {
-console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.className=" + (target && target.className));
+		console.log("showWhiteSpaceMaybe: file.parsed=" + !!(file && file.parsed) + " file.fullAutoIndentation=" + file.fullAutoIndentation + " target.className=" + (target && target.className));
 		
 		if(target.className != "fileCanvas") return;
 		if(!file) return;
-		if(file.mode!="text") return;
+		if(file.fullAutoIndentation) return;
 		
 		var menuItem = EDITOR.ctxMenu.addTemp("Show white space", false, toggleShowWhiteSpace);
 		EDITOR.ctxMenu.update(menuItem, SHOW_WHITE_SPACE, "Show white space");
@@ -154,7 +154,7 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 	
 	function renderWhiteSpace(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		if(!SHOW_WHITE_SPACE || !file) return;
-		if(file.mode!="text") return renderWhiteSpaceInCode(ctx, buffer, file, startRow, containZeroWidthCharacters);
+		if(file.parsed!=null) return renderWhiteSpaceInCode(ctx, buffer, file, startRow, containZeroWidthCharacters);
 		
 		var transparencePercent = 20;
 		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, transparencePercent);
@@ -241,8 +241,8 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 	function addindentation(file) {
 		if(file == undefined) return ALLOW_DEFAULT;
 		
-		if(file.mode!="text" || !EDITOR.input || file.parse===true) {
-			console.log("indentate:addindentation Not indentating! file.mode=" + file.mode + " EDITOR.input=" + EDITOR.input + " file.parse=" + file.parse + " file?" + (!!file) + " ");
+		if(file.parsed!=null || !EDITOR.input) {
+			console.log("indentate:addindentation Not indentating! file.parsed=" + !!file.parsed + " EDITOR.input=" + EDITOR.input + " file.parse=" + file.parse + " file?" + (!!file) + " ");
 			return ALLOW_DEFAULT;
 		}
 		
@@ -302,8 +302,8 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 		
 		console.log("indentate: shift=" + shift);
 		
-		if(file.mode!="text") {
-			console.log("indentate: Not indentating because not plain text! file.mode=" + file.mode);
+		if(file.fullAutoIndentation) {
+			console.log("indentate: Not indentating because file.fullAutoIndentation=" + file.fullAutoIndentation);
 			return ALLOW_DEFAULT;
 		}
 		
@@ -329,7 +329,7 @@ console.log("showWhiteSpaceMaybe: file.mode=" + (file && file.mode) + " target.c
 		var selectedRows = getSelectedRowsStartindex(file);
 		
 		if(selectedRows.length == 0 && !shift && !beforeText) {
-			console.log("indentate: Not indentating because selectedRows.length=" + selectedRows.length + " shift=" + shift + " beforeText=" + beforeText + " file.mode=" + file.mode);
+			console.log("indentate: Not indentating because selectedRows.length=" + selectedRows.length + " shift=" + shift + " beforeText=" + beforeText + " ");
 			return ALLOW_DEFAULT;
 		}
 		

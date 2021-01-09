@@ -687,7 +687,7 @@
 		var stateprops = {};
 		
 		if(lastFileState.order !== undefined) stateprops.order = lastFileState.order;
-		if(lastFileState.mode !== undefined) stateprops.mode = lastFileState.mode;
+		if(lastFileState.parse !== undefined) stateprops.parse = lastFileState.parse;
 		if(lastFileState.savedAs !== undefined) stateprops.savedAs = lastFileState.savedAs;
 		if(lastFileState.hash !== undefined) stateprops.hash = lastFileState.hash;
 		
@@ -1051,7 +1051,7 @@
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
-		state.mode = file.mode;
+		state.parse = file.parse;
 		state.hash = file.hash;
 		
 		// For loading big files as streams

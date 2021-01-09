@@ -19,58 +19,88 @@
 		
 	*/
 	
-	EDITOR.on("start", xmlParserInit, 100);
-	
-	function xmlParserInit() {
-		
-		var isXmlFile = {}; // Cache result from isXml
-		
-		EDITOR.on("fileOpen", parseXmlOnFileOpen);
-		EDITOR.on("fileChange", parseXmlMaybe, 100);
-		EDITOR.on("fileClose", parseXmlOnFileClose);
-		
-		function parseXmlMaybe(file, type, character, index, row, col) {
-			// Called every time the file change
-			
-			if(file.text.length < 200) {
-				// Check every time
-				isXmlFile[file.path] = isXML(file);
-			}
-			else if(!isXmlFile.hasOwnProperty(file.path)) {
-				// Only check once if file is a XML file
-				isXmlFile[file.path] = isXML(file);
-			}
-			
-			if(isXmlFile[file.path] === true) {
-				var xml = parseXML(file);
-				file.haveParsed( xml );
-			}
-		}
-		
-		function parseXmlOnFileClose(file) {
-			delete isXmlFile[file];
-		}
-		
-		function parseXmlOnFileOpen(file) {
-			
-			isXmlFile[file] = isXML(file);
-			
-			if(isXmlFile[file]) {
-				
-				console.log("File is XML: " + file.path + " ...");
-				
-				var xml = parseXML(file);
-				
-				console.log("xml=" + JSON.stringify(xml));
-				
-				file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
-				
+	var parserControl = {
+		canParse: function xmlParserCanParse(file) {
+			if( isXML(file) ) {
+				return {fullAutoIndentation: true};
 			}
 			else {
-				console.log("File NOT XML: " + file.path);
+				return false;
 			}
-			
+		},
+		fileExtensions: [
+			"xml",
+			"svg"
+		]
+	};
+
+
+	var isXmlFile = {}; // Cache result from isXml
+
+	EDITOR.plugin({
+		desc: "Parse XML",
+		order: 200,
+		load:function xmlParserMain() {
+
+			EDITOR.on("fileOpen", parseXmlOnFileOpen);
+			EDITOR.on("fileChange", parseXmlMaybe, 200);
+			EDITOR.on("fileClose", parseXmlOnFileClose);
+
+			EDITOR.addParser(parserControl);
+
+		},
+		unload: function unloadXmlParser() {
+
+			EDITOR.removeEvent("fileOpen", parseXmlOnFileOpen);
+			EDITOR.removeEvent("fileChange", parseXmlMaybe);
+			EDITOR.removeEvent("fileClose", parseXmlOnFileClose);
+
+			EDITOR.removeParser(parserControl);
+
 		}
+	});
+
+	function parseXmlMaybe(file, type, character, index, row, col) {
+		// Called every time the file change
+
+		if(file.text.length < 200) {
+			// Check every time
+			isXmlFile[file.path] = isXML(file);
+		}
+		else if(!isXmlFile.hasOwnProperty(file.path)) {
+			// Only check once if file is a XML file
+			isXmlFile[file.path] = isXML(file);
+		}
+
+		if(isXmlFile[file.path] === true) {
+			var xml = parseXML(file);
+			file.haveParsed( xml );
+		}
+	}
+
+	function parseXmlOnFileClose(file) {
+		delete isXmlFile[file];
+	}
+
+	function parseXmlOnFileOpen(file) {
+
+		isXmlFile[file] = isXML(file);
+
+		if(isXmlFile[file]) {
+
+			console.log("File is XML: " + file.path + " ...");
+
+			var xml = parseXML(file);
+
+			console.log("xml=" + JSON.stringify(xml));
+
+			file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
+
+		}
+		else {
+			console.log("File NOT XML: " + file.path);
+		}
+
 	}
 	
 	

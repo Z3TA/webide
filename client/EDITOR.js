@@ -25,33 +25,11 @@ var usePseudoClipboard = undefined;
 var lastBufferStartRow = -1; // 
 var PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 
-// List of file extensions supported by the parser(s). Extensions Not in this list will be loaded in plain text mode.
-// Note: The file parsers should fill this list!
-// todo: make language plugins register the file extensions!?
-EDITOR.parseFileExtensionAsCode = [
-	"js",
-	"ts",
-	"jsx",
-	"tsx",
-	"java", 
-	"htm", 
-	"html", 
-	"php", 
-	"asp", 
-	"vbs",
-	"vb",
-	"xml", 
-	"json", 
-	"css",
-	"webmanifest",
-"qml",
-"qrc",
-"c",
-	"gs", // Google Script
-	"swift"
-];
+// List of file extensions supported by the parser(s).
+// Parsers will fill this list!
+EDITOR.parseFileExtensionAsCode = [];
 
-// These file extensions will be treated as plain text
+// File extensions that are supported natievely by the editor without parser plugins
 EDITOR.plainTextFileExtensions = [
 	"txt"
 ];
@@ -769,6 +747,51 @@ EDITOR.bindKey(b);
 	}
 	
 
+	EDITOR.parsers = [];
+	EDITOR.addParser = function addParser(parserController) {
+		for(var i=0; i<EDITOR.parsers; i++) {
+			if(EDITOR.parsers[i] == parserController) throw new Error("Parser already registered: ", parserController);
+		}
+
+		if(!parserController.hasOwnProperty("canParse")) throw new Error("Parser does not have a canParse method! ", parserController);
+
+		if(!parserController.fileExtensions) throw new Error("Parser do not support any file extensions! ", parserController);
+		else {
+			for(var i=0; i<parserController.fileExtensions.length; i++) {
+				if( EDITOR.parseFileExtensionAsCode.indexOf(  parserController.fileExtensions[i]  ) != -1 ) {
+					console.warn( parserController.fileExtensions[i] + " is already supported by a parser!");
+				}
+				EDITOR.parseFileExtensionAsCode.push(parserController.fileExtensions[i]);
+			}
+		}
+
+		EDITOR.parsers.push(parserController);
+	
+		if(parserController.onParse) {
+			EDITOR.eventListeners.parse.push(parserController.onParse);
+		}
+	}
+
+	EDITOR.removeParser = function removeParser(parserController) {
+		removeFrom(EDITOR.parsers, parserController);
+		if(parserController.onParse) {
+			removeFrom(EDITOR.eventListeners.parse, parserController.onParse);
+		}
+
+		for(var i=0; i<parserController.fileExtensions.length; i++) {
+
+			// If there are dublicates we only want to remove one of them
+			EDITOR.parseFileExtensionAsCode.splice( EDITOR.parseFileExtensionAsCode.indexOf(parserController.fileExtensions[i]) );
+
+			/*
+				if( EDITOR.parseFileExtensionAsCode.indexOf(  parserController.fileExtensions[i]  ) == -1 ) {
+				console.warn( parserController.fileExtensions[i] + " was only supported by this parser!");
+				}
+			*/
+
+		}
+
+	}
 	
 	EDITOR.putIntoClipboard = function putIntoClipboard(text, description, callback) {
 		
@@ -1287,7 +1310,7 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 				var newFile = new ImageFile(text, path, ++EDITOR.fileIndex, fileLoaded);
 			}
 			else {
-			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
+				var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, state && state.props, fileLoaded);
 			}
 			
 			if(hash) newFile.hash = hash;
@@ -1338,8 +1361,8 @@ var trapError = new Error("Bug trap: File properties need to be set using state.
 					problem 2: You might want to set properties to the file, that should be available when open-file-listeners are called
 					solution: Use state and state.props in parameters to populate state and properties
 					
-					problem 3: We keep forgetting about problem 2 and set file.mode etc after the file has been opened, 
-					resulting in files being parsed because the default mode is code
+					problem 3: We keep forgetting about problem 2 and set file.parse etc after the file has been opened, 
+					resulting in files being parsed because by default file.parse is set to true
 					solution: Add traps that will throw an error if some parameters are modified in the callback
 					
 				*/
@@ -1383,11 +1406,9 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				// Add bug traps
 				// We only have to do this for properties that fileOpen listeners might be particular interested in
-				// example: js_parser listens to fileOpen, but reopen_files used to set file.mode state in the EDITOR.openFile callback, resulting in js_parser parsing files that should not be parsed
+				// example: js_parser listens to fileOpen, but reopen_files used to set file.parse state in the EDITOR.openFile callback, 
+				// resulting in js_parser parsing files that should not be parsed
 				
-				
-				var fileMode = file.mode;
-				if(fileMode !== undefined) Object.defineProperty(file, "mode", {get: function get() { return fileMode; }, set: function trap() { throw trapError }});
 				
 				var fileParse = file.parse;
 				if(fileParse !== undefined) Object.defineProperty(file, "parse", {get: function get() { return fileParse; }, set: function trap() { throw trapError }});
@@ -1397,12 +1418,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				callCallbacks(null, file);
 				
 				// Remove bug traps
-				if(fileMode !== undefined) {
-delete file.mode;
-				file.mode = fileMode;
-				}
-
-if(fileParse !== undefined) {
+				if(fileParse !== undefined) {
 				delete file.parse;
 				file.parse = fileParse;
 }
@@ -8895,6 +8911,9 @@ EDITOR.unregisterAltKey = function unregisterAltKey(fun) {
 	}
 }
 
+
+
+
 EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
 	if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
 	var returns = [];
@@ -10557,8 +10576,7 @@ EDITOR.discoveryBar.show();
 			else testResults.push(fails + " of " + finished + " test failed:");
 			
 			EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
-				//file.parse = false;
-				//file.mode = "text";
+				
 			});
 			
 			testFirstTest = false; // Run only the first test the first time, and all tests after that.
@@ -11619,9 +11637,9 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 			// Hiding caret is annoying when typing using the virtual keyboard
 			// It's also annoying when using space to indentate a plain test file
 			var rowContent = file.text.slice(file.grid[file.caret.row].startIndex, file.caret.index);
-			var isIndentation = (charCode==32 && file.mode!="code" && rowContent.match(/^\s*$/) !== null);
+			var isIndentation = (charCode==32 && !file.fullAutoIndentation && rowContent.match(/^\s*$/) !== null);
 
-			//console.log("FadingCaret: rowContent=" + UTIL.lbChars(rowContent) + " (" + (rowContent.match(/^\s*$/) !== null) + ") isIndentation=" + isIndentation + " charCode=" + charCode + " (" + (charCode==32) + ") file.mode=" + file.mode + " (" + (file.mode!="code") + ") EDITOR.touchScreen=" + EDITOR.touchScreen + " EDITOR.settings.caretAnimation=" + EDITOR.settings.caretAnimation + " if(" + (  !EDITOR.touchScreen && EDITOR.settings.caretAnimation && !isIndentation  ) + ") ");
+			//console.log("FadingCaret: rowContent=" + UTIL.lbChars(rowContent) + " (" + (rowContent.match(/^\s*$/) !== null) + ") isIndentation=" + isIndentation + " charCode=" + charCode + " (" + (charCode==32) + ") file.fullAutoIndentation=" + file.fullAutoIndentation + " (" + (fullAutoIndentation) + ") EDITOR.touchScreen=" + EDITOR.touchScreen + " EDITOR.settings.caretAnimation=" + EDITOR.settings.caretAnimation + " if(" + (  !EDITOR.touchScreen && EDITOR.settings.caretAnimation && !isIndentation  ) + ") ");
 
 			if(  !EDITOR.touchScreen && EDITOR.settings.caretAnimation && !isIndentation  ) {
 				

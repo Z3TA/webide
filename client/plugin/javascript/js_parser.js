@@ -94,6 +94,42 @@
 	var parseRequestId = 0;
 	var parseWorkerCallbacks = {}; // id: callback-function
 	
+	var parserControl = {
+		canParse: function jsParserCanParse(file) {
+			if( shouldParse(file) ) {
+				return {fullAutoIndentation: true};
+			}
+			else {
+				return false;
+			}
+		},
+		onParse: parseRequest,
+		fileExtensions: [
+			"",
+			"js",
+			"ts",
+			"jsx",
+			"tsx",
+			"java",
+			"htm",
+			"html",
+			"php",
+			"asp",
+			"vbs", // Visual Basic Script
+			"vb", // Visual Basic
+			"xml",
+			"json",
+			"css",
+			"webmanifest",
+			"qml",
+			"qrc",
+			"c",
+			"gs", // Google Script
+			"swift"
+		]
+	};
+
+
 	EDITOR.plugin({
 		desc: "Parse JavaScript etc",
 		order: 100,
@@ -101,14 +137,19 @@
 			
 			EDITOR.on("fileOpen", onFileOpen);
 			EDITOR.on("fileChange", parseJsOnChange, 100);
-			EDITOR.on("parse", parseRequest);
+			
+			EDITOR.addParser(parserControl);
 			
 		},
 		unload: function unloadJsParser() {
 			
 			EDITOR.removeEvent("fileOpen", onFileOpen);
 			EDITOR.removeEvent("fileChange", parseJsOnChange);
-			EDITOR.removeEvent("parse", parseRequest);
+			
+			EDITOR.removeParser(parserControl);
+
+
+
 		}
 	});
 	
@@ -245,31 +286,8 @@
 			We could argue that PHP scripts should not include html, or JS, but most php scripts probably does.
 		*/
 		
-		if(file.mode == "code") {
-			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.mode=" + file.mode);
-			return true;
-		}
-
-		if( (file.fileExtension=="" && file.mode=="code") || 
-		file.fileExtension=="js" || 
-		file.fileExtension=="jsx" || 
-		file.fileExtension=="ts" || 
-		file.fileExtension=="tsx" || 
-		file.fileExtension=="php" || 
-		file.fileExtension=="asp" || 
-		file.fileExtension=="vbs" ||  // Visual Basic Script
-		file.fileExtension=="vb" ||   // Visual Basic
-		file.fileExtension=="json" || 
-		file.fileExtension=="webmanifest" || 
-		file.fileExtension=="css" || 
-		file.fileExtension=="htm" || 
-		file.fileExtension=="html" || 
-		file.fileExtension=="qml" || 
-		file.fileExtension=="qrc" || 
-		file.fileExtension=="c" || 
-		file.fileExtension=="swift" || 
-		file.fileExtension=="java") {
-			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and file.mode=" + file.mode);
+		if( parserControl.fileExtensions.indexOf( file.fileExtension ) != -1 ) {
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " ");
 			return true;
 		}
 		else if(file.fileExtension=="xml" && (file.text.indexOf("<?JS") != -1)) {

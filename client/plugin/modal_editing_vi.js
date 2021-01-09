@@ -2760,7 +2760,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			showMessage("(VIM*) NORMAL MODE");
 			
 /*
-if( file && file.mode == "code" ) {
+				if( file && file.fullAutoIndentation ) {
 				var usePlainText = "Reload file in plain text mode";
 				var ok = "OK";
 				confirmBox("The currently open file is in code-mode with automatic formatting, this might cause issues with Editor's Vim mode", [usePlainText, ok], {code: "VIM_MODE"}, function (answer) {

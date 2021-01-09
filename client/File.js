@@ -18,9 +18,14 @@ var File; // File object is global
 	function funMap(f){return f.fun}
 	
 	// Note: No var infront. Expose File object to global scope!
-	File = function File(text, path, fileIndex, bigFile, callback) { 
+	File = function File(text, path, fileIndex, bigFile, stateProps, callback) { 
 		var file = this;
 		
+		if(typeof stateProps == "function") {
+			callback = stateProps;
+			stateProps = undefined;
+		}
+
 		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
 		if(!UTIL.isString(path)) throw new Error("path is not a string! path=" + path);
@@ -43,23 +48,33 @@ var File; // File object is global
 		file.order = fileIndex; // For ordering files, in for example a tab list
 		file.name = UTIL.getFilenameFromPath(path);
 		
-		if(EDITOR.settings.devMode && 1==2) {
-			// Need to figure out where file mode is changed...
-			var _fileMode = "code";
-			Object.defineProperty(file, 'mode', {
-				get: function() { return _fileMode; },
-				set: function(newValue) {
-					console.warn("Set mode=" + newValue + " for file.path=" + file.path);
-					console.log(UTIL.getStack("Set mode=" + newValue + " for file.path=" + file.path + " to " + newValue));
-					_fileMode = newValue;
-				},
-				enumerable: true
-			});
+		/*
+			Check if a file has been parsed:
+			file.parsed == null
+
+			Forbid parsers from parsing a file:
+			file.parse = false
+
+			Check if the file has been auto-indentated:
+			file.fullAutoIndentation
+
+		*/
+
+		file.fileExtension = UTIL.getFileExtension(file.path);
+		file.parse = (stateProps && stateProps.parse != undefined) ? stateProps.parse : true;
+		file.fullAutoIndentation = false;
+		if(file.parse) {
+			console.log("File: file.parse=" + file.parse);
+			for(var i=0, canParseResult; i<EDITOR.parsers.length; i++) {
+				canParseResult = EDITOR.parsers[i].canParse(file);
+				console.log("File: Parser " + i + " () canParseResult=", canParseResult);
+				if(canParseResult && canParseResult.fullAutoIndentation) {
+					file.fullAutoIndentation = true;
+					break;
+				}
+			}
 		}
-		else {
-			file.mode = "code"; // text, code, or other, ... Not to be confused with EDITOR.mode
-		}
-		
+
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
 		
@@ -79,11 +94,11 @@ var File; // File object is global
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		
-		file.setFileExtension(); // Also sets file.mode = "code" || "text"
+		
 		
 		this.loadFilePartDialog = undefined; // To prevent many dialogs from loadFilePart
 		
-		if(file.mode == "code") {
+		if(file.fullAutoIndentation) {
 			// Don't let the file start or end with a tab
 			while(file.text.charAt(0) == "\t") file.text = file.text.slice(1);
 			while(file.text.charAt(file.text.length-1) == "\t") file.text = file.text.slice(0, file.text.length-1);
@@ -123,7 +138,7 @@ var File; // File object is global
 		
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
-			file.mode = "text"; // Again, don't try to parse it
+			file.fullAutoIndentation = false; // Again, don't try to parse it
 			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				
 				if(callback) callback(checkGridError || checkCaretError);
@@ -139,57 +154,7 @@ var File; // File object is global
 			
 		}
 		
-		console.log("new file Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
-		
-	}
-	
-	
-	
-	
-	
-	File.prototype.setFileExtension = function() {
-		// Set or update the file extension
-		var file = this;
-		
-		file.fileExtension = UTIL.getFileExtension(file.path);
-		
-		console.log("fileExtension=" + file.fileExtension);
-		
-		// Do we want to remove any parsed metadata when (re)setting the file extension!?
-		file.parsed = {};
-		
-		/*
-			Should we determine if a file should be parsed here !?
-
-			But why should file.parse determine if a file should be parsed or not ?
-			Should it not be up to the file parser to choose if it want's to parse the file or not !?
-
-			problem: Plugins like text-mode-indentation.js wants to avoid files that are parsed
-			solution!?: Have them check Object.keys(file.parsed).length == 0
-		
-		*/
-
-		if(file.name == "Makefile") {
-			file.parse = true; // We do want to parse this file (makefile parser however not yet implemented)
-			file.mode = "text"; // Should we change this to "code" if there is a makefile parser !?
-		}
-		else if(EDITOR.parseFileExtensionAsCode.indexOf(file.fileExtension) != -1 || file.fileExtension == "") {
-			file.mode = "code";
-		}
-		else if(EDITOR.plainTextFileExtensions.indexOf(file.fileExtension) != -1 ) {
-file.mode = "text";
-			file.parse = false; // No need to parse the file if we *know* it's a plain text file
-		}
-		else if(file.fileExtension == "") {
-			// File without a file extension. Likely a "new file" (not yet saved)
-			file.parse = true; // We want to parse "new" files because it's likely a js,html,css etc file (that we want to parse) but have yet named
-			file.mode = "code"; // it's likely a js,html,css etc file so assume it's code
-		}
-		else {
-			console.warn("Unable to determine file mode for file.fileExtension=" + file.fileExtension + " assuming plain text");
-			file.mode = "text";
-			file.parse = false; // Let plugins like text-mode-indentation.js kick in for unknown files/languages that are not  parsed
-		}
+		console.log("new file Reloading file.path=" + file.path + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.fileExtension=" + file.fileExtension);
 		
 	}
 	
@@ -574,7 +539,7 @@ file.mode = "text";
 		var lineBreakCharacters;
 		var index = 0;
 		
-		if(file.mode == "code") {
+		if(file.fullAutoIndentation) {
 			// Files ending up with a tab at the start or end is so common that we can't throw an error.
 			// It is for example used in some tests
 			// We do however want to figure out all the reasons why the file ends up with a tab at the end! (and fix them)
@@ -1366,13 +1331,13 @@ file.sanityCheck();
 		if(character == undefined) {
 			throw new Error("character is undefined!");
 		}
-		else if(file.mode == "code" && character.charCodeAt(0) == 10) {
+		else if(character.charCodeAt(0) == 10) {
 			throw new Error("Tried to insert a line feed character");
 		}
-		else if(file.mode == "code" && character.charCodeAt(0) == 13) {
+		else if(character.charCodeAt(0) == 13) {
 			throw new Error("Tried to insert a carriage return character");
 		}
-		else if(file.mode == "code" && EDITOR.mode == "default" && character.charCodeAt(0) == 9) {
+		else if(EDITOR.mode == "default" && character.charCodeAt(0) == 9) {
 			throw new Error("Tried to insert a tab character");
 		}
 		else if(character.charCodeAt(0) == 8) {
@@ -3443,7 +3408,7 @@ console.log("moveCaretDown: Stepping right!");
 		
 		var file = this;
 		
-		console.log("Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
+		console.log("Reloading file.path=" + file.path + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.fileExtension=" + file.fileExtension);
 		
 		if(text == undefined) throw new Error("No text!");
 		
@@ -3472,7 +3437,7 @@ console.log("moveCaretDown: Stepping right!");
 		
 		file.change("reload", text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount); // Fire events
 		
-		console.log("After Reloading file.path=" + file.path + " file.mode=" + file.mode + " file.fileExtension=" + file.fileExtension);
+		console.log("After Reloading file.path=" + file.path + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.fileExtension=" + file.fileExtension);
 	}
 	
 	File.prototype.addToGrid = function() {
@@ -3502,13 +3467,13 @@ console.log("moveCaretDown: Stepping right!");
 		inWord = false,
 		word,
 		lineNumber = 1,
-		tabulation = (file.mode=="code"),
+		tabulation = file.fullAutoIndentation,
 		j = 0,
 		codeBlockDepth = 0,
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " path=" + file.path + "...");	
+		console.log("Creating grid (text.length=" + text.length + ") fullAutoIndentation=" + file.fullAutoIndentation + " file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " path=" + file.path + "...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;
@@ -3540,7 +3505,7 @@ console.log("moveCaretDown: Stepping right!");
 		
 		//file.grid = grid;
 		
-		file.parsed = {}; // Reset the parsed data to force another parse after the grid has been (re)created
+		file.parsed = null; // Reset the parsed data to force another parse after the grid has been (re)created
 		
 		console.timeEnd("createGrid");
 		
@@ -3591,7 +3556,7 @@ console.log("moveCaretDown: Stepping right!");
 				
 				col = 0;
 				
-				if(file.mode == "code") tabulation = true;
+				if(file.fullAutoIndentation) tabulation = true;
 			}
 			else if((char == "\t" || char == " ") && tabulation) {
 				/*
@@ -4176,6 +4141,11 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 	}
 	
 	File.prototype.haveParsed = function(parseData) {
+		/*
+			Language persers need to call this function so that we can listen on the fileParse event
+
+		*/ 
+
 		var file = this;
 		
 		file.parsed = parseData; // After the file has been parsed, "file.parsed" property should hold the parsed data
@@ -4787,7 +4757,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		gridRow.owned = true;
 		
 		var char = "";
-		var tabulation = file.mode != "text";
+		var tabulation = file.fullAutoIndentation;
 		
 		for(var i=0; i<text.length; i++) {
 			char = text.charAt(i);

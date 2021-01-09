@@ -88,7 +88,7 @@
 			
 			//EDITOR.resize(true);
 			
-			if(file.mode == "text") {
+			if(file.parsed == null) {
 				// Increase top/bottom margin
 				var rowsPerPage = Math.floor(pageHeight / EDITOR.settings.gridHeight) - 7;
 				

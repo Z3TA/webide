@@ -11,7 +11,7 @@
 		
 		if(file.lineBreak == "\r\n") text = text.replace(/\n/, "\r\n");
 		
-		if(file.mode == "text") return text; // Don't remove spaces
+		if(!file.parse) return text; // Don't remove spaces
 		
 		//console.log("text=" + UTIL.lbChars(text));
 		

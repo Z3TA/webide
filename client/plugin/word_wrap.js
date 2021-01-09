@@ -139,11 +139,11 @@ var W = 87;
 		
 		// todo: Allow it to start and end with tags besides p if the tags are the same
 		
-		if(firstCharacter != "<" && secondCharacter != "p" && file.mode != "text") {
+		if(firstCharacter != "<" && secondCharacter != "p" && file.parsed != null) {
 			alertBox("The word wrapper is currently only supported inside HTML paragraphs or in plain text files");
 			console.log("firstCharacter=" + firstCharacter);
 			console.log("secondCharacter=" + secondCharacter);
-			console.log("file.mode=" + file.mode);
+			console.log("file.parsed=" + file.parsed);
 			console.log("startOfParagraph=" + startOfParagraph);
 			console.log("endOfParagraph=" + endOfParagraph);
 			console.log("text=" + UTIL.lbChars(text));

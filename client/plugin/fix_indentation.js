@@ -62,7 +62,7 @@
 	
 	function checkIndentationOnFileOpen(file) {
 		
-		if(file.mode != "code") return true; // Only check for files that are parsed
+		if(!file.fullAutoIndentation) return true; // Only check for files that are parsed
 		
 		// Asume the file has already been parsed!
 		if(!file.parsed) throw new Error("The file has not been parsed!");
@@ -114,7 +114,7 @@
 	
 	function checkIndentationOnBeforeParser(file, type, character, index, row, col) {
 		
-		if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		if(!file.fullAutoIndentation) return true; // Don't bother checking indentation of non code
 		
 		// Check the indentation of the surrounding rows BEFORE the parser updates the indentation
 		
@@ -155,7 +155,7 @@
 	}
 	
 	function takeOwnageOnChange(file, type, character, index, row, col) {
-	if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		if(!file.fullAutoIndentation) return true; // Don't bother checking indentation of non code
 		if(!file.parsed) return true; // Don't bother with files that has not been parsed
 		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return true; // Something is not right
 		
@@ -231,7 +231,7 @@
 	
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
-		if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		if(!filefullAutoIndentation) return true; // Don't bother checking indentation of non code
 		
 		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
 		if(!file.parsed) {

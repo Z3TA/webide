@@ -36,6 +36,60 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+---
+
+In Firefox function list items get selected and after a while deselected, which is annoying
+the orange color of the selected function and the orange scrollbar is also annoying in Firefox!
+
+---
+
+Another indexOf false posetive warning:
+
+EDITOR.setMode = function setMode(name) {
+		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
+		EDITOR.mode = name;
+		console.warn("Set EDITOR.mode=" + EDITOR.mode);
+	}
+
+
+---
+
+False posetive indexOf warning in js_parser
+
+if( file.fileExtension=="" || 
+		file.fileExtension=="js" || 
+		file.fileExtension=="jsx" || 
+		file.fileExtension=="ts" || 
+		file.fileExtension=="tsx" || 
+		file.fileExtension=="php" || 
+		file.fileExtension=="asp" || 
+		file.fileExtension=="vbs" ||  // Visual Basic Script
+		file.fileExtension=="vb" ||   // Visual Basic
+		file.fileExtension=="json" || 
+		file.fileExtension=="webmanifest" || 
+		file.fileExtension=="css" || 
+		file.fileExtension=="htm" || 
+		file.fileExtension=="html" || 
+		file.fileExtension=="qml" || 
+		file.fileExtension=="qrc" || 
+		file.fileExtension=="c" || 
+		file.fileExtension=="swift" || 
+		file.fileExtension=="java") {
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " ");
+			return true;
+		}
+		else if(file.fileExtension=="xml" && (file.text.indexOf("<?JS") != -1)) {
+			return true;
+			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and it contains <?JS ");
+		}
+		else {
+			console.log("js_parser: shouldParse? Not parsing " + file.path + " because else");
+			return false;
+		}
+
+
+---
+
 When both find and find-in-files are open and you click on the "use regexp" label on find-in-files, the "use regexp" checkbox on "find" is checked
 (expected the "use regexp" on find-in-files to be checked)
 
