@@ -4,6 +4,11 @@ What I'm working on
 -------------------
 
 
+./cloudide_install.js --hostname=1337.johan.webide.se --email=editor@webtigerteam.com
+
+Use a Ubuntu image in Docker to run the Cloud IDE
+
+Able to test/run the editor within the Cloud IDE itself
 
 
 ---

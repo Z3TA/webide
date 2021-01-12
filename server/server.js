@@ -4585,7 +4585,7 @@ if(DOMAIN) spawnOptions.env.tld = DOMAIN;
 		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
 spawnOptions.env.HOST = netnsIP;
 		spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
-		
+		spawnOptions.env.TLD = DOMAIN;
 		spawnOptions.shell = EXEC_OPTIONS.shell;
 		
 		spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker

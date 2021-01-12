@@ -36,6 +36,9 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Got connection error when awakening the Docker deamon,
+it however worked on second try
+
 ---
 
 In Firefox function list items get selected and after a while deselected, which is annoying

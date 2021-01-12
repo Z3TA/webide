@@ -17,7 +17,7 @@ if(process.platform == "win32") throw new Error("This install script only runs u
 // You might be able to figure out the steps needed by reading this file ...
 // While it's possible to run the server in Windows, we highly recommend running in a unix-like system like Linux (Ubuntu)'
 
-if(process.version.indexOf("v10.") != 0) throw new Error("The editor currently only supports nodejs version 10.");
+//if(process.version.indexOf("v10.") != 0) throw new Error("The editor currently only supports nodejs version 10. This system uses version " + process.version);
 // It will most likely also work with newer versions. But they have yet not been tested.
 
 var os = require("os");
@@ -30,7 +30,7 @@ if(info.uid !== 0) {
 var getArg = require("./shared/getArg.js");
 var fs = require("fs");
 var exec = require("child_process").execSync;
-//exec("apt update");
+exec("apt-get update");
 
 // Make sure we are inside the webide root folder ...
 // The following will crash the script if the files doesn't exist
@@ -40,6 +40,10 @@ exec("chmod +x adduser.js");
 
 // Enabled package forwarding, needed for Linux network namespace bridges
 exec("sysctl net.ipv4.ip_forward=1"); 
+
+
+// Install some dependencies usually found in Ubuntu
+exec("apt-get install software-properties-common");
 
 
 // ### WireGuard / VPN support
@@ -140,10 +144,20 @@ console.log("Installing Nginx");
 	exec("apt install nginx -y");
 	
 console.log("Installing " + HOSTNAME + ".nginx config");
-var webide_nginx = fs.readFileSync("etc/nginx/webide.se.nginx", ENCODING);
-webide_nginx = webide_nginx.replace(/webide\.se/g, HOSTNAME);
+if(TEST) {
+	// When testing the cloud editor
+	var webide_nginx = fs.readFileSync("etc/nginx/webide-dev.se.nginx", ENCODING);
+	webide_nginx = webide_nginx.replace(/webide-dev\.se/g, HOSTNAME);
+}
+else {
+	// Production
+	var webide_nginx = fs.readFileSync("etc/nginx/webide.se.nginx", ENCODING);
+	webide_nginx = webide_nginx.replace(/webide\.se/g, HOSTNAME);
+}
+
 fs.writeFileSync("/etc/nginx/sites-available/" + HOSTNAME + ".nginx", webide_nginx);
 execTry("ln -s /etc/nginx/sites-available/" + HOSTNAME + ".nginx  /etc/nginx/sites-enabled/" + HOSTNAME + "")
+
 
 console.log("Installing signup." + HOSTNAME + ".nginx config");
 var signup_nginx = fs.readFileSync("etc/nginx/signup.webide.se.nginx", ENCODING);

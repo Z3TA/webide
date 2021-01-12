@@ -1,0 +1,89 @@
+#
+# Used in dev for testing
+#
+server {
+
+	server_name webide-dev.se;
+	charset utf-8;
+
+	gzip on;
+	gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json;
+
+	# Upload limit
+	client_max_body_size 2G;
+
+	location / {
+
+		# Allow cross domain requests (always adds the header to all, even 400 errors!)
+		# Using always will create doublicates in 4xx errors
+		# So for 4xx errors, 5xx, and others, Access-Control-Allow-Origin * will have to be added manually
+		add_header Access-Control-Allow-Origin *;
+
+		# Allow the browser to read the Content-Length header
+		add_header Access-Control-Expose-Headers "Content-Length";
+
+
+		# Dont cache!
+		expires 0;
+
+		# Can not set proxy header inside if-statement
+		proxy_set_header        host              $http_host;
+		proxy_set_header        x-real-ip         $remote_addr;
+		proxy_set_header        x-forwarded-proto $scheme;
+		proxy_pass http://127.0.0.1:8099;
+
+	}
+
+	location @badgateway {
+		add_header Access-Control-Allow-Origin * always;
+		default_type text/plain;
+		return 502 "Editor not online ... Wait a few seconds and then refresh the browser.\n";
+	}
+
+	error_page 502 @badgateway;
+
+
+	location /webide {
+		# Upgrade to websocket
+
+		proxy_pass http://127.0.0.1:8099;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+
+		# SockJS already adds a Access-Control-Allow-Origin header. Adding two of them will cause the browser to fail loading the page!
+		#add_header 'Access-Control-Allow-Origin' '*';
+
+		# So that we will know the user IP
+		proxy_set_header x-real-ip $remote_addr;
+	}
+
+	location /nginx_status {
+		# Show whole server stats
+		# server accepts handled requests, x, y, z:
+		# x = Accepted connections
+		# y = Handled connections
+		# z = Handles requests
+
+		stub_status on;
+		access_log   off;
+		# only allow access from 127.0.01 #
+		#allow 127.0.01;
+		#deny all;
+	}
+
+
+	# x11vnc crashes when receiving a websocket over https (SSL/TSL), so we have to proxy over http
+	location ~/_vnc(\d*) {
+	# Upgrade to websocket
+
+	proxy_pass http://127.0.0.1:$1;
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+
+	#add_header 'Access-Control-Allow-Origin' '*';
+}
+
+}
+
