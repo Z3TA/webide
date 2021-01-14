@@ -21,7 +21,7 @@ RUN apt install nodejs npm nano -y
 
 WORKDIR /srv/webide/
 
-#RUN ./cloudide_install.js --hostname=${DOMAIN} --email=${EMAIL}
+#RUN ./cloudide_install.js --hostname=${DOMAIN} --email=${EMAIL} -test
 
 #RUN rm -rf /srv/webide
 # Will be mounted when running the container
