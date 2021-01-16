@@ -48,6 +48,9 @@ sysctl net.ipv4.ip_forward=1
 # Install some dependencies usually found in Ubuntu
 apt-get install software-properties-common -y
 
+# Some packages usually missing in Docker container
+apt-get install iptables iproute2 iputils-ping -y
+
 
 #### WireGuard / VPN support
 # Ubuntu 19.04 and earlier:
@@ -176,7 +179,7 @@ apt-get install xvfb x11vnc socat -y
 
 
 echo "#webide: Installing Mercurial"
-apt install mercurial -y
+apt-get install mercurial -y
 
 
 echo "#webide: Installing hggit for Mercruial"

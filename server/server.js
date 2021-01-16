@@ -53,6 +53,8 @@ var SMTP_PW = getArg(["smtp_pass", "smtp_pass"]) || "";
 
 var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 
+var IPTABLES = !getArg(["noiptables", "noiptables"]); // on my default, use -noiptables to disable
+
 var UTIL = require("../client/UTIL.js");
 
 var HTTP_ENDPOINTS = {};
@@ -256,6 +258,19 @@ if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) {
 		process.exit();
 	}
 }
+
+
+var INSIDE_DOCKER = getArg(["insidedocker", "insidedocker", "insidecontainer"]);
+
+if(INSIDE_DOCKER) {
+	NO_NETNS = true;
+	IPTABLES = false;
+}
+
+console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
+console.log("NO_NETNS ? " + !!NO_NETNS);
+console.log("IPTABLES ? " + !!IPTABLES);
+
 
 // # Polyfills in case you are using an older Node.js version
 if (!String.prototype.repeat) {
@@ -1300,6 +1315,7 @@ function main() {
 		});
 		
 		// Some other process might reset iptables, so also check if the nat:ing is enabled for user netns
+		if(IPTABLES) {
 		module_child_process.exec("iptables -S -t nat | grep -q -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
 			if(error) {
 				log("nat POSTROUTING does Not exist for user netns. Adding it...", DEBUG);
@@ -1312,9 +1328,10 @@ function main() {
 				log("nat POSTROUTING exist for user netns", DEBUG);
 			}
 		});
+		}
 	}
 	
-	if(info.uid == 0 && process.platform=="linux" && !CRAZY) {
+	if(info.uid == 0 && process.platform=="linux" && (!CRAZY && !INSIDE_DOCKER)) {
 		// Hide processes from other users
 		module_child_process.exec("mount -o remount,rw,hidepid=2 /proc", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) throw err;
