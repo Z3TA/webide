@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Only run this script if you want to install the editor as a cloud editor!
 
@@ -68,7 +68,8 @@ chmod +x /usr/local/bin/docker-compose
 mkdir -p /root/.ssh/
 # Create private key for accessing docker VM's
 apt-get install openssh-client -y
-yes '' | ssh-keygen -b 2048 -t rsa -f /root/.ssh/dockervm -q -N ""
+# Might give an error if this script is run a second time because the key already exist
+yes '' | ssh-keygen -b 2048 -t rsa -f /root/.ssh/dockervm -q -N "" || true
 chown root:root /root/.ssh/dockervm
 chmod 700 /root/.ssh/dockervm
 

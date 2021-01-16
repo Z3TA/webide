@@ -14,14 +14,14 @@
 
 FROM ubuntu:18.04
 
-RUN apt update
-RUN apt install nodejs npm nano -y
+RUN apt-get update
+RUN apt-get install nodejs npm nano -y
 
 #ADD . /srv/webide/
 
 WORKDIR /srv/webide/
 
-#RUN ./cloudide_install.js --hostname=${DOMAIN} --email=${EMAIL} -test
+#RUN ./cloudide_install.sh ${DOMAIN} ${EMAIL} -test
 
 #RUN rm -rf /srv/webide
 # Will be mounted when running the container

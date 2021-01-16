@@ -3,8 +3,9 @@
 What I'm working on
 -------------------
 
-
-./cloudide_install.js --hostname=1337.johan.webide.se --email=editor@webtigerteam.com -test
+docker build -t cloudide --build-arg DOMAIN=1337.johan.webide.se --build-arg EMAIL=editor@webtigerteam.com .
+docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ cloudide
+./cloudide_install.sh 1337.johan.webide.se editor@webtigerteam.com -test
 
 Use a Ubuntu image in Docker to run the Cloud IDE
 
