@@ -3,8 +3,16 @@
 # Only run this script if you want to install the editor as a cloud editor!
 
 
+# Change this to your timezone:
+TZ=Europe/Stockholm
+ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
 # exit when any command fails
 set -e
+
+# Don't ask questions in the pty
+DEBIAN_FRONTEND=noninteractive
 
 # Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 HOSTNAME=$1 
@@ -68,16 +76,20 @@ chmod +x /usr/local/bin/docker-compose
 mkdir -p /root/.ssh/
 # Create private key for accessing docker VM's
 apt-get install openssh-client -y
-# Might give an error if this script is run a second time because the key already exist
-yes '' | ssh-keygen -b 2048 -t rsa -f /root/.ssh/dockervm -q -N "" || true
+# We will age a "are you sure" prompt if the key already exist
+if [ ! -f /root/.ssh/dockervm ]; then
+  ssh-keygen -b 2048 -t rsa -f /root/.ssh/dockervm -q -N "" || true
+fi
 chown root:root /root/.ssh/dockervm
 chmod 700 /root/.ssh/dockervm
 
 
 
 echo "#webide: Editing defaults"
-sed -i "s/zeta@zetafiles.org/$ADMIN_EMAIL/g" ./server/default_settings.js
-sed -i "s/webide.se/$HOSTNAME/g" ./server/default_settings.js
+if [[ "$*" != *-test* ]]; then
+  sed -i "s/zeta@zetafiles.org/$ADMIN_EMAIL/g" ./server/default_settings.js
+  sed -i "s/webide.se/$HOSTNAME/g" ./server/default_settings.js
+fi
 
 
 
@@ -102,7 +114,7 @@ systemctl enable status-email-user@.service
 
 
 # Install the cloud-IDE service that runs server/server.js
-echo "#webide: Installing webide.service
+echo "#webide: Installing webide.service"
 cp etc/systemd/webide.service /etc/systemd/system/webide.service
 sed -i "s/webide.se/$HOSTNAME/g" /etc/systemd/system/webide.service
 sed -i "s/zeta@zetafiles.org/$ADMIN_EMAIL/g" /etc/systemd/system/webide.service
@@ -112,7 +124,7 @@ systemctl enable webide
 # Signup service to let users signup
 # If you enable automatic signup you probably also want to edit client/signup/signup.htm
 echo "#webide: Installing webide_signup.service"
-echo "#webide: Automatic signup available at: http://$HOSTNAME/signup/signup.htm
+echo "#webide: Automatic signup available at: http://$HOSTNAME/signup/signup.htm"
 cp etc/systemd/webide_signup.service /etc/systemd/system/webide_signup.service
 sed -i "s/webide.se/$HOSTNAME/g" /etc/systemd/system/webide_signup.service
 systemctl enable webide_signup
@@ -141,13 +153,14 @@ else
     sed -i "s/webide.se/$HOSTNAME/g" /etc/nginx/sites-available/$HOSTNAME.nginx
 fi
 
-ln -sf /etc/nginx/sites-available/" + HOSTNAME + ".nginx  /etc/nginx/sites-enabled/$HOSTNAME
+ln -sf /etc/nginx/sites-available/$HOSTNAME.nginx  /etc/nginx/sites-enabled/$HOSTNAME
 
-
-echo "#webide: Installing signup.$HOSTNAME.nginx config"
-cp etc/nginx/signup.webide.se.nginx /etc/nginx/sites-available/signup.$HOSTNAME.nginx
-sed -i "s/webide.se/$HOSTNAME/g" /etc/nginx/sites-available/signup.$HOSTNAME.nginx
-ln -sf /etc/nginx/sites-available/signup.$HOSTNAME.nginx  /etc/nginx/sites-enabled/signup.$HOSTNAME
+if [[ "$*" != *-test* ]]; then
+  echo "#webide: Installing signup.$HOSTNAME.nginx config"
+  cp etc/nginx/signup.webide.se.nginx /etc/nginx/sites-available/signup.$HOSTNAME.nginx
+  sed -i "s/webide.se/$HOSTNAME/g" /etc/nginx/sites-available/signup.$HOSTNAME.nginx
+  ln -sf /etc/nginx/sites-available/signup.$HOSTNAME.nginx  /etc/nginx/sites-enabled/signup.$HOSTNAME
+fi
 
 echo "#webide: Adding default Nginx config"
 cp etc/nginx/default.nginx /etc/nginx/sites-available/default
@@ -195,7 +208,7 @@ apt-get install mysql-server -y
 apt-get install mysql-client -y
 
 echo "#webide: Configuring MySQL server"
-sed  '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/my.cnf
+sed  '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/my.cnf
 
 
 # So that users cant list other user's files
