@@ -383,13 +383,20 @@ var buttonSaveAs = document.createElement("input");
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
-		EDITOR.checkPath(inputPath.value, "Do not save the file", save);
+		EDITOR.checkPath(inputPath.value, "Do not save the file", saveAfterCheckingIfPathExist);
 		
 		return false;
 		
-		function save(err, path) {
-			if(err && err.code != "CANCEL" && err.code != "EACCES") return alertBox(err.message);
-			else if(!err) EDITOR.saveFile(file, path, function fileSaved(err, path) {
+		function saveAfterCheckingIfPathExist(err, path) {
+			
+			if(err && err.code == "CANCEL") return;
+
+			// Might not have access to list files in /home/
+
+			if(err && err.code == "EACCES") path = inputPath.value;
+			else if(err) return alertBox(err.message + " (code=" + err.code + ")");
+			
+			EDITOR.saveFile(file, path, function fileSaved(err, path) {
 				if(err) {
 					// Most likely cause is that the folder does not exist!
 					
@@ -403,6 +410,7 @@ console.warn("The save was canceled: " + err.message);
 					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "FILE", "warning");
 					}
 				});
+			
 			
 			hideSaveDialog();
 		}

@@ -7587,7 +7587,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 				if(err.code != "ENOENT") {
 					var error = new Error("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
-					
+					error.code = err.code;
+
 					folderExistInCallback(error, undefined);
 				}
 				else {

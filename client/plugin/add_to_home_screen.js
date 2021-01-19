@@ -44,18 +44,16 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	window.addEventListener('appinstalled', appinstalled);
 	
 	var askInterval;
-	var lastAsked = null;
-
-	EDITOR.loadSettings("add_to_home_scree_last_asked", function connectionStatusSettingsLoaded(setting) {
+	
+	EDITOR.loadSettings("add_to_home_screen", function connectionStatusSettingsLoaded(settings) {
+		var twoDays = 1000*60*60*24*2;
+		if(settings == null || (new Date() - new Date(settings.lastAsked)) > twoDays) {
+			askInterval = setInterval(ask, 10000);
+		}
 	});
 
-
-	askInterval = setInterval(ask, 10000);
-	
 	var installed = false;
 	var windowMenuAdd2HS = null;
-	
-	
 	
 	
 	function addToHomeScreen() {
@@ -116,6 +114,8 @@ return;
 		var yes = "Yes, make it look like a native app!";
 		var no = "No, I prefer the browser";
 		
+		EDITOR.saveSettings( "add_to_home_screen", {lastAsked: new Date()} );
+
 		confirmBox("Do you want add WebIDE to your home screen/desktop ?\nIt will give the editor a more native feel.", [yes, no], function(answer) {
 			if(answer == yes) {
 				// Show the prompt
