@@ -44,6 +44,12 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	window.addEventListener('appinstalled', appinstalled);
 	
 	var askInterval;
+	var lastAsked = null;
+
+	EDITOR.loadSettings("add_to_home_scree_last_asked", function connectionStatusSettingsLoaded(setting) {
+	});
+
+
 	askInterval = setInterval(ask, 10000);
 	
 	var installed = false;

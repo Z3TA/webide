@@ -3401,7 +3401,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 					
 					// Undo/redo in colaboration mode
 					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert c
-					if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					if(file.text != "ab\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text) + " expected abLF (becode we undid the insertion of c)");
 					
 				}, function() {
 					

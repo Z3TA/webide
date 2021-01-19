@@ -4,18 +4,26 @@
 #
 # docker build -t cloudide --build-arg DOMAIN=d80.johan.webide.se --build-arg EMAIL=editor@webtigerteam.com .
 # 
-# docker start -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
-# docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ cloudide
+# docker run -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
+# docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
 # 
 # Inside the container:
 # cd /srv/webide/
 # npm install
 # ./adduser.js ltest1 123 -nozfs
-# node server/server.js --hostname=1337.johan.webide.se -noguest -insidedocker
-#
+# ip a
+# node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -pp 80 --port=80 -ip 172.17.0.2
+# Access from: https://d80.johan.webide.se/
 #
 
+# FROM must be the first instruction!
 FROM ubuntu:18.04
+
+ARG DOMAIN=d80.johan.webide.se
+ENV DOMAIN=${DOMAIN}
+
+ARG EMAIL=editor@webtigerteam.com
+ENV EMAIL=${EMAIL}
 
 RUN apt-get update
 RUN apt-get install nodejs npm nano -y
@@ -31,9 +39,9 @@ RUN rm -rf /srv/webide
 
 EXPOSE 80
 
+#CMD ["nginx", "-g", "daemon off;"]
 
-
-# The image has no entry-point/CMD, you have to run the image and start the server manually!
-
+# docker exec -it cloudide bash
+# docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
 
 

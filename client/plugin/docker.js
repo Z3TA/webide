@@ -61,7 +61,14 @@ return;
 		}
 		
 		CLIENT.cmd("dockerDaemon", {command: "status"}, function dockerStatus(err, status) {
-			if(err) alertBox("Unable to get Docker daemon status! Error: " + err.message);
+			if(err) {
+				if(err.code == "ENOSUPPORT") {
+					console.warn("Disabling Docker plugin");
+					EDITOR.disablePlugin("Docker", true);
+					return;
+				}
+				else alertBox("Unable to get Docker daemon status! Error: code=" + err.code + " message=" + err.message);
+			}
 			else {
 
 				if(status.hasOwnProperty("created")) deamonCreated = status.created;

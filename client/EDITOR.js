@@ -661,6 +661,12 @@ callback = value;
 	
 	EDITOR.loadSettings = function loadSettings(settings, defaults, callback) {
 		console.log("settings: load: settings=" + settings + " ...");
+
+		if(callback == undefined && typeof defaults == "function") {
+			callback = defaults;
+			defaults = null;
+		}
+
 		if(EDITOR.storage.ready()) loadSettingOnceStorageReady();
 		else EDITOR.once("storageReady", loadSettingOnceStorageReady);
 		
@@ -7635,8 +7641,12 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			var pathToCreate = folderPaths[folderPaths.length-1];
 			var folderName = UTIL.getFolderName(pathToCreate);
 			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(err, folderPath) {
-				if(err) return alertBox(err.message);
-				
+				if(err) {
+					if(callback) callback(err);
+					else alertBox(err.message);
+					return;
+				}
+
 				if(folderPath === false) {
 					
 					var create = "Create the path";
@@ -8334,7 +8344,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 		
 		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne) {
 			return alertBox("Make sure you are running the editor as a cloud IDE before running tests!\
-			(Working directory (" + EDITOR.workingDirectory + ") needs to be wwwroot/)");
+			(Working directory (" + EDITOR.workingDirectory + ") needs to be wwwpub/)");
 		}
 		
 		//if(!onlyOne) EDITOR.changeWorkingDir("/");
@@ -9514,6 +9524,8 @@ Searches down towards the root, looking for file names
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
+				console.log("findFileReverseRecursive: startDir=" + startDir + " currentFolder= " + currentFolder + " err=" + (err && err.message));
+
 				if(err) {
 					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
 					return callback(err);

@@ -388,7 +388,7 @@ var buttonSaveAs = document.createElement("input");
 		return false;
 		
 		function save(err, path) {
-			if(err && err.code != "CANCEL") return alertBox(err.message);
+			if(err && err.code != "CANCEL" && err.code != "EACCES") return alertBox(err.message);
 			else if(!err) EDITOR.saveFile(file, path, function fileSaved(err, path) {
 				if(err) {
 					// Most likely cause is that the folder does not exist!

@@ -69,7 +69,14 @@ return;
 }
 
 		CLIENT.cmd("vpn", {type: "wireguard", command: "status", conf: configPath}, function vpnStatus(err, status) {
-			if(err) alertBox(err.message);
+			if(err) {
+				if(err.code == "ENOSUPPORT") {
+					console.warn("Disabling VPN plugin");
+					EDITOR.disablePlugin("Connect to VPN server", true);
+					return;
+				}
+				else alertBox(err.message);
+			}
 			else {
 				if(status.indexOf("connected") == 0) {
 					connected = true;

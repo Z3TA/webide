@@ -52,6 +52,8 @@
 	});
 
 	function showWhiteSpaceMaybe(file, combo, caret, target) {
+		if(file == undefined) return; // There might be no file open
+
 		console.log("showWhiteSpaceMaybe: file.parsed=" + !!(file && file.parsed) + " file.fullAutoIndentation=" + file.fullAutoIndentation + " target.className=" + (target && target.className));
 		
 		if(target.className != "fileCanvas") return;

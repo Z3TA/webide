@@ -3302,15 +3302,18 @@ function checkMounts(options, checkMountsCallback) {
 	}
 	
 	
-	
-	// Make it possible to run Android emulator
-	module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
-		if(err) throw err;
-		if(stderr) log(stderr, NOTICE);
-		if(stdout) log(stdout, INFO);
+	if(INSIDE_DOCKER) {
 		kvmAccessGranted = true;
-	});
-	
+	}
+	else {
+		// Make it possible to run Android emulator
+		module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) throw err;
+			if(stderr) log(stderr, NOTICE);
+			if(stdout) log(stdout, INFO);
+			kvmAccessGranted = true;
+		});
+	}
 	
 	if(!createdNetworkNamespaces) {
 		
@@ -3638,6 +3641,13 @@ checkMountsReadyMaybe();
 	
 	function checkSslCert() {
 		// Check ssl certificate
+
+		if(INSIDE_DOCKER) {
+			sslCertChecked = true;
+			if(options.waitForSSL) checkMountsReadyMaybe();
+			return;
+		}
+
 		console.time("Check " + username + " SSL Cert");
 		var url_user = UTIL.urlFriendly(username);
 		var userDomain = url_user + "." + DOMAIN;
@@ -6511,6 +6521,12 @@ todo:  Check for netns /etc/netns/username/ first and send back an NONETNS error
 	
 	log("vpnAction: username=" + username + " homeDir=" + homeDir + " options=" + JSON.stringify(options), DEBUG);
 	
+	if(INSIDE_DOCKER) {
+		var error = new Error("VPN not available. Check server flags! Disabled by -insidedocker");
+		error.code = "ENOSUPPORT";
+		return callback(error);
+	}
+
 	if(options===true) options = {};
 	
 	if(typeof options != "object") throw new Error("options=" + options + " (" + (typeof options) + ")");
@@ -6610,6 +6626,12 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	
 	if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
 	
+	if(INSIDE_DOCKER) {
+		var error = new Error("Docker inside docker currently not supported! (disabled by -insidedocker server flag)");
+		error.code = "ENOSUPPORT";
+		return callback(error);
+	}
+
 	if(DOCKER_LOCK.hasOwnProperty(username)) {
 		return callback(new Error("Waiting for last command=" + DOCKER_LOCK[username]));
 	}

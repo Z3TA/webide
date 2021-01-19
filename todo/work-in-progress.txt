@@ -3,13 +3,14 @@
 What I'm working on
 -------------------
 
-docker build -t cloudide --build-arg DOMAIN=1337.johan.webide.se --build-arg EMAIL=editor@webtigerteam.com .
-docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ cloudide
-./cloudide_install.sh 1337.johan.webide.se editor@webtigerteam.com -test
+Message about adding 2 home screen is annoying...
 
-Use a Ubuntu image in Docker to run the Cloud IDE
+Trying to save a file when running the server inside Docker
 
-Able to test/run the editor within the Cloud IDE itself
+Having some weird timing issues when running tests when server runs in Docker container...
+Functions seem to run in the wrong order in the collaboration.js tests 
+
+Able to test/run the editor in Docker container (within the Cloud IDE itself)
 
 
 ---

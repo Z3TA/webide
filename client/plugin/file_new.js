@@ -124,7 +124,12 @@
 			
 			console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
 			
-			if(err) return alertBox(err.message);
+			if(err) {
+				// Probably an EACCESS because we try to look in  /home/ on the cloud IDE
+				//alertBox(err.message);
+				console.error(err);
+				return openFile();
+			}
 			if(!Array.isArray(files)) throw new Error("createNewFile: Not an array: files=" + JSON.stringify(files) + "");
 			
 			
