@@ -774,6 +774,7 @@ EDITOR.bindKey(b);
 		EDITOR.parsers.push(parserController);
 	
 		if(parserController.onParse) {
+			if(typeof parserController.onParse != "function") throw new Error("onParse needs to be a function!" + (typeof parserController.onParse));
 			EDITOR.eventListeners.parse.push(parserController.onParse);
 		}
 	}
@@ -8850,8 +8851,10 @@ else location.reload();
 		
 		if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
 		
-		var f = EDITOR.eventListeners.parse.map(funMap);
+		var f = EDITOR.eventListeners.parse.map(function(f) {return f});
 		for(var i=0, ret=false; i<f.length; i++) {
+			//console.log("parse: typeof f[" + i + "]=" + (typeof f[i]) + " (" + f[i] + ") f.length=" + f.length + " f=", f + " EDITOR.eventListeners.parse=", EDITOR.eventListeners.parse);
+
 			if(callback) ret = f[i](fileOrString, lang, path, parseDone); // async
 			else ret = f[i](fileOrString, lang, path); // sync
 			if(ret) return ret; // Only let one parser parse it
