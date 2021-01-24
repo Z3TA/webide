@@ -4,7 +4,9 @@
 #
 # docker build -t cloudide --build-arg DOMAIN=d80.johan.webide.se --build-arg EMAIL=editor@webtigerteam.com .
 # 
+# if we got Nginx to work:
 # docker run -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
+# Without Nginx (jush a bash shell)
 # docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
 # 
 # Inside the container:
@@ -42,6 +44,6 @@ EXPOSE 80
 #CMD ["nginx", "-g", "daemon off;"]
 
 # docker exec -it cloudide bash
+# or without Nginx:
 # docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
-
 

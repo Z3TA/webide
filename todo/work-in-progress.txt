@@ -3,7 +3,6 @@
 What I'm working on
 -------------------
 
-Message about adding 2 home screen is annoying...
 
 Trying to save a file when running the server inside Docker
 
