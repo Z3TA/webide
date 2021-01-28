@@ -14,7 +14,7 @@
 # npm install
 # ./adduser.js ltest1 123 -nozfs
 # ip a
-# node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -pp 80 --port=80 -ip 172.17.0.2
+# node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2
 # Access from: https://d80.johan.webide.se/
 #
 

@@ -53,6 +53,8 @@ var SMTP_PW = getArg(["smtp_pass", "smtp_pass"]) || "";
 
 var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 
+var SKIP_NGINX = getArg(["nonginx", "nonginx", "noNginx", "skipnginx", "skipNginx"]);
+
 var IPTABLES = !getArg(["noiptables", "noiptables"]); // on my default, use -noiptables to disable
 
 var UTIL = require("../client/UTIL.js");
@@ -3483,7 +3485,11 @@ checkMountsReadyMaybe();
 		});
 
 
-		
+	if(SKIP_NGINX) {
+		nginxProfileOK = true;
+		sslCertChecked = true;
+	}
+	else {
 		// Make sure nginx profile exist
 		var nginxSitesAvailable = "/etc/nginx/sites-available/"
 		// Allow Nginx not to be installed
@@ -3586,7 +3592,7 @@ checkMountsReadyMaybe();
 				
 			});
 		});
-		
+	}
 	
 	
 	
