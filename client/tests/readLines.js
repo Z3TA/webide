@@ -193,7 +193,7 @@
 	});
 	
 	
-	EDITOR.addTest(function testReadLines6(callback) {
+	EDITOR.addTest(true, function testReadLines6(callback) {
 		/*
 			write streams doesn't work on Node.JS <10 on Ubuntu 18!
 		*/

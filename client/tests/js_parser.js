@@ -645,7 +645,7 @@ EDITOR.addTest(function asyncFunction(callback) {
 	* Doesn't fit arbitrary line length? (Then you probably don't want to add extra indentation !?)
 	
 	
-	EDITOR.addTest(1, function parenthesesIndenting(callback) {
+	EDITOR.addTest(function parenthesesIndenting(callback) {
 	EDITOR.openFile("parenthesesIndenting.js", 'console.log("foo" +\n' +
 	'"bar" + \n' +
 	'"baz");\n' +

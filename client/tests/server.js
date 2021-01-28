@@ -4,7 +4,7 @@
 	/*
 		
 		
-		EDITOR.addTest(1, true, function createAndRenameSftpFolder(callback) {
+		EDITOR.addTest(true, function createAndRenameSftpFolder(callback) {
 		var protocol = "sftp";
 		var serverAddress = "ben.100m.se";
 		var testFolder = protocol + "://" + serverAddress + "/uploads/testRenameFolder/";
@@ -93,7 +93,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function installNodejsModule(callback) {
+	EDITOR.addTest(1, function installNodejsModule(callback) {
 		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testInstallNodejsModule/");
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {

@@ -4,7 +4,7 @@
 #
 # docker build -t cloudide --build-arg DOMAIN=d80.johan.webide.se --build-arg EMAIL=editor@webtigerteam.com .
 # 
-# if we got Nginx to work:
+# if we got Nginx to work: (would need dedicated IP inside clooud ide, todo: give each user their own IPv6 and allow tcp/udp)
 # docker run -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
 # Without Nginx (jush a bash shell)
 # docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide

@@ -978,7 +978,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		});
 	});
 	
-	EDITOR.addTest(1, function testReplaceAll2(callback) {
+	EDITOR.addTest(function testReplaceAll2(callback) {
 		EDITOR.openFile("replaceAll2.js", 'log("foo")\nlog("bar")\n', function(err, file) {
 			var newString = "console.log(";
 			var searchString = "log(";

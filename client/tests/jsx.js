@@ -128,7 +128,7 @@
 	
 	
 	/*
-		EDITOR.addTest(1, function JSX7(callback) {
+		EDITOR.addTest(function JSX7(callback) {
 		EDITOR.openFile("jsx7.js", 'if(x < y)\n\n\'<a \\n></a>\';\n\n">"\n// meh\n', function(err, file) {
 		
 		UTIL.assert(file.grid[5].indentation, 0);

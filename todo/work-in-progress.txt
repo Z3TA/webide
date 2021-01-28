@@ -8,7 +8,11 @@ todo: Code in plain text mode to improve it. So that you could theoretly use the
 
 ---
 
-Trying to save a file when running the server inside Docker
+Big file tests need to run sync!
+There have been a major regression when opening big file in dev mode! why?
+
+
+EDITOR.changeWorkingDir("/home/ltest1/wwwpub/");
 
 Having some weird timing issues when running tests when server runs in Docker container...
 Functions seem to run in the wrong order in the collaboration.js tests 

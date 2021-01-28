@@ -138,6 +138,14 @@ echo "#webide: Installing webide_nodejs_init.service"
 cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service
 systemctl enable webide_nodejs_init
 
+# Allow users to swtich between Node.js versions
+npm install -g n
+#chmod 700 /usr/lib/node_modules/n/bin/n
+n 10
+n 12
+n 13
+n 14
+
 
 # Install Nginx (needed to let users have their own home page under user.yourdomain.com)
 echo "#webide: Installing Nginx"

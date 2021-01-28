@@ -1889,7 +1889,7 @@ UTIL.assert(at.right, "az");
 		});
 	});
 	
-	EDITOR.addTest(function writeLines(callback) {
+	EDITOR.addTest(true, function writeLines(callback) {
 		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/bigFileWriteLines/");
 		var originalFilePath = UTIL.joinPaths(testFolder, "/writeLinesTest");
 		var testFiles = [];
@@ -2018,7 +2018,7 @@ UTIL.assert(at.right, "az");
 		}
 	});
 	
-	EDITOR.addTest(function editBigFile(callback) {
+	EDITOR.addTest(true, function editBigFile(callback) {
 		// note: Need to place the testfile.txt inside the user home dir!
 		
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
@@ -2095,7 +2095,7 @@ UTIL.assert(at.right, "az");
 		});
 	});
 	
-	EDITOR.addTest(function editBigFile2(callback) {
+	EDITOR.addTest(true, function editBigFile2(callback) {
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
 		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/editBigFileTest2.txt");
 		
