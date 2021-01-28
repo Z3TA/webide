@@ -3,6 +3,10 @@
 What I'm working on
 -------------------
 
+todo: Code in plain text mode to improve it. So that you could theoretly use the editor for unsupported languages
+
+
+---
 
 Trying to save a file when running the server inside Docker
 

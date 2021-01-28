@@ -229,7 +229,7 @@ var US = String.fromCharCode(31);
 // Enable to host a webide server behind nat
 var NAT_PORT = getArg(["nat-port", "nat-port"]);
 var NAT_HOST = getArg(["nat-host", "nat-host"]); // Hostname to connecto to or IP to listen on if running as a nat-server
-var NAT_TYPE = getArg(["nat-type", "nat-type"]); // "client" or "server"
+var NAT_TYPE = getArg(["nat-type", "nat-type", "nattype", "natType"]); // "client" or "server"
 var NAT_CODE = getArg(["nat-code", "nat-code"]); // A password or codename, must be unique, used to connect to a webide server behind NAT
 var NAT_BANNED_CODES = []; // If the code is already in use it will be banned and both old user and new user need to change code
 var NAT_SERVER_WEBSOCKET = {}; // id: connection (SockJS connections on the NAT server)

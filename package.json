@@ -1,6 +1,6 @@
 {
   "name": "webide.se",
-  "main": "client/index.htm",
+  "main": "main.js",
   "window": {
     "title": "WebIDE",
     "show": true,
