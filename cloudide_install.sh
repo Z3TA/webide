@@ -189,6 +189,7 @@ apt -f install -y
 # Yes, again, because of Python issues
 apt-get install python-pip -y
 pip install hg-git
+apt-get install python-brotli -y
 
 
 echo "#webide: Installing Letsencrypt's certbot"
