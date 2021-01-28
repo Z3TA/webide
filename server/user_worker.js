@@ -174,6 +174,8 @@ var npmOptions = {
 	}
 }
 
+var NPM_PATH; // We need the full path to npm-cli.js in order to fork
+
 var isRoot = process.getuid && process.getuid() === 0;
 //if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN)
 if(isRoot) throw new Error("Can not run worker process as superuser!")
@@ -1338,6 +1340,44 @@ function filterNpm(stderr, stdout) {
 function npm(arg, extraOptions, callback) {
 	// Run a NPM command
 	
+	if(process.platform == "win32") {
+		var npmPath = "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js";
+		/*
+			On Windows we might have to edit (as Administrator) C:\Program Files\nodejs\node_modules\npm\npmrc
+			And hardcore the prefix to C:\Program Files\nodejs\node_modules\npm
+			in order to prevent error: "Failed to replace env in config: ${APPDATA}"
+		*/
+	}
+	else {
+		// npm-cli.js can be placed on different locations depending on OS/distro
+		// most likely in /usr/lib or /usr/local/lub
+		if(NPM_PATH) {
+			var npmPath = NPM_PATH;
+		}
+		else {
+			console.log("Finding NPM path...");
+
+			module_child_process.exec("which npm", function(err, stdout, stderr) {
+				if(err || stderr) return callback(new Error("Unable to find npm path! Error: " + (err ? err.message : stderr)));
+				var link = stdout.trim();
+				console.log("npm link=" + link);
+				var fs = require("fs");
+				fs.readlink(link, function(err, target) {
+					if (err) return callback(new Error("Unable to follow npm link=" + link + " Error: " + err.message));
+
+					var linkFolder = UTIL.getDirectoryFromPath(link);
+					NPM_PATH = UTIL.resolvePath(linkFolder, target.trim());
+
+					console.log("Found npmPath=" + npmPath);
+
+					npm(arg, extraOptions, callback)
+
+				});
+			});
+			return;
+		}
+	}
+
 	if(typeof extraOptions == "function" && callback == undefined) {
 		callback = extraOptions;
 		extraOptions = undefined;
@@ -1363,19 +1403,6 @@ function npm(arg, extraOptions, callback) {
 	var stdout = "";
 	var stderr = "";
 	var npmError = null;
-	
-	// We hardcode the path because of Apparmor!?
-	if(process.platform == "win32") { 
-		var npmPath = "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js";
-		/*
-			On Windows we might have to edit (as Administrator) C:\Program Files\nodejs\node_modules\npm\npmrc
-			And hardcore the prefix to C:\Program Files\nodejs\node_modules\npm
-			in order to prevent error: "Failed to replace env in config: ${APPDATA}"
-		*/
-	}
-	else {
-		var npmPath = "/usr/lib/node_modules/npm/bin/npm-cli.js";
-	}
 	
 	console.log("Spawning npmPath=" + npmPath + " with arg=" + JSON.stringify(arg) + " npmOptions=" + JSON.stringify(npmOptions) + " ...");
 	npmPath = (npmPath + " ").trim();
