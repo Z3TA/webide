@@ -219,7 +219,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 var defaultDomain = DEFAULT.domain;
 var DOMAIN = getArg(["domain", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
 
-//console.log("DOMAIN=" + DOMAIN);
+console.log("DOMAIN=" + DOMAIN);
 //process.exit();
 
 var CHROMIUM_DEBUG_PORT = 9222;
@@ -239,6 +239,8 @@ var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connectio
 
 var NAT_CLIENTS = {}; // code : socket
 var NAT_WEBSOCKET_COUNTER = 0; // Increment for each NAT:ed SockJS connection
+
+console.log("NAT_TYPE=" + NAT_TYPE);
 
 if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("client") != -1 || NAT_CODE) {
 	if(!NAT_PORT) NAT_PORT = DEFAULT.nat_port;
@@ -1293,7 +1295,7 @@ function main() {
 	
 	log("NAT_TYPE=" + NAT_TYPE + " NAT_HOST=" + NAT_HOST + " NAT_PORT=" + NAT_PORT, DEBUG);
 	if(NAT_PORT && NAT_HOST && (!NAT_TYPE || NAT_TYPE.indexOf("server") == -1)) connectToNatServer();
-	else log("Not connecting to NAT/reverse server!");
+	else log("Not connecting to NAT/reverse server! NAT_PORT=" + NAT_PORT + " NAT_HOST=" + NAT_HOST + " NAT_TYPE=" + NAT_TYPE);
 
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
@@ -1537,8 +1539,10 @@ return;
 	}
 	
 	if(info.uid == 0 && process.platform=="linux") {
+		// Hardening for when running as a cloud IDE
+		// note: People testing the editor might run it in a container or VPS, that's why we don't exit if this script fails
 		module_child_process.exec("bash linux_harderning_after_reboot.sh", function(error, stdout, stderr) {
-			if(error) throw new Error("Hardening failed: " + error.message);
+			if(error) console.error( new Error("Hardening failed: (" + error.code + ") " + error.message) );
 			if(stdout) log(stdout, DEBUG);
 			if(stderr) log(stderr, NOTICE);
 		});
