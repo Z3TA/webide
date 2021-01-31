@@ -3,25 +3,16 @@
 
 Error.stackTraceLimit = 100;
 
-
-// Need to require non native modules here before we are chrooted
-
-console.log("Requiring module: iconv-lite");
-var module_iconv = require('iconv-lite');
-
-console.log("Requiring module: ftp");
-var module_ftp = require('ftp');
-
-console.log("Requiring module: ssh2");
-
-
 var UTIL = require("../client/UTIL.js");
 
 // Optional modules:
-
 try {
 	var module_ps = require("ps-node");
 	var module_ssh2 = require('ssh2'); // Issues in Node v4.2.6
+
+	// Tarball modules might not work on all platforms... !? or is it because of read-only fs!?
+	var module_iconv = require('iconv-lite');
+	var module_ftp = require('ftp');
 }
 catch(err) {
 	console.log("Unable to load optional module(s): " + err.message);
@@ -29,7 +20,8 @@ catch(err) {
 
 if(!module_ps) console.log("Unable to load module: ps-node");
 if(!module_ssh2) console.log("Unable to load module: ssh2");
-
+if(!module_iconv) console.log("Unable to load module: module_iconv");
+if(!module_ftp) console.log("Unable to load module: module_ftp");
 
 var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
 var ftpBusy = false;
@@ -392,9 +384,14 @@ callback(new Error("Too many redirects! redirects=" + redirects));
 			if(charset && !(charset == "utf-8" || charset == "utf8")) {
 				console.log("Detected charset=" + charset);
 				
+				if(module_iconv) {
 				console.log("iconv.encodingExists('" + charset + "')=" + module_iconv.encodingExists(charset));
-				
-				if(!module_iconv.encodingExists(charset)) {
+				}
+				else {
+					console.warn("module_iconv not loaded!");
+				}
+
+				if(!module_iconv || !module_iconv.encodingExists(charset)) {
 					gotError = true;
 					callback(new Error("Unable to decode charset=" + charset));
 					callback = null;
@@ -2229,6 +2226,10 @@ API.connect = function connect(user, json, callback) {
 	
 	if(protocol == "ftp" || protocol == "ftps") {
 		
+		if(!module_ftp) {
+			return callback( new Error("module_ftp not loaded!") );
+		}
+
 		if(ftpQueue.length > 0) {
 			console.warn("Removing " + ftpQueue.length + " items from the FTP queue");
 			ftpQueue.length = 0;
