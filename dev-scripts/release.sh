@@ -153,7 +153,7 @@ rm -rf temp/release/linux/dockervm/
 
 rm temp/release/linux/gcsf
 rm temp/release/linux/adduser.js
-rm temp/release/linux/cloudide_install.js
+rm temp/release/linux/cloudide_install.sh
 rm temp/release/linux/nodejs_init.js
 rm temp/release/linux/nodejs_init_worker.js
 rm temp/release/linux/removeuser.js
