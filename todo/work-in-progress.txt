@@ -10,6 +10,8 @@ todo: Code in plain text mode to improve it. So that you could theoretically use
 
 Allow running the editor on a read-only file system
 
+webideSe.run({username: "admin", password: "admin", nattype: "cleitn"});
+
 ---
 
 Big file tests need to run sync!

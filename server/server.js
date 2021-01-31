@@ -1338,7 +1338,7 @@ function main() {
 	if(info.uid == 0 && process.platform=="linux" && (!CRAZY && !INSIDE_DOCKER)) {
 		// Hide processes from other users
 		module_child_process.exec("mount -o remount,rw,hidepid=2 /proc", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) throw err;
+			if(err) console.error( err );
 			if(stderr) log(stderr, NOTICE);
 			if(stdout) log(stdout, INFO);
 		});
