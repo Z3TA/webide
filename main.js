@@ -18,7 +18,7 @@ var DEBUG = module_log.DEBUG;
 
 function startServer(options) {
 
-	if( Object.keys(options).length == 0 ) {
+	if( options == undefined || Object.keys(options).length == 0 ) {
 
 		throw new Error("No options given! Minimum options are username and password! (and probabably nattype: client)");
 
