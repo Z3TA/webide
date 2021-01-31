@@ -239,6 +239,9 @@ apt-get install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt
 # Don't let normal users see the guts
 chmod 771 /srv
 
+# Install tools for debugging
+apt-get install dnsutils -y
+
 
 echo "#webide: Finish!"
 

@@ -3,7 +3,7 @@
 What I'm working on
 -------------------
 
-todo: Code in plain text mode to improve it. So that you could theoretly use the editor for unsupported languages
+todo: Code in plain text mode to improve it. So that you could theoretically use the editor for unsupported languages
 
 
 ---

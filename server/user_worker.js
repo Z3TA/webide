@@ -1869,7 +1869,8 @@ if(user.tld) {
 				
 				// Ignore debugger messages
 				if(stderr == "Debugger attached.\n") return; 
-				if(stderr == "For help see https://nodejs.org/en/docs/inspector") return;
+				if(stderr == "For help see https://nodejs.org/en/docs/inspector") return; // node 8
+				if(stderr == "For help, see: https://nodejs.org/en/docs/inspector") return; // node 14
 
 				if(stderr == "Waiting for the debugger to disconnect...\n") {
 					if( user.runningNodeJsScripts[filePath].inspector ) user.runningNodeJsScripts[filePath].inspector.stop();
