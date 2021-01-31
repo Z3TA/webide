@@ -10,7 +10,10 @@ todo: Code in plain text mode to improve it. So that you could theoretically use
 
 Allow running the editor on a read-only file system
 
+https://npm.runkit.com/webide.se
+
 webideSe.run({username: "admin", password: "admin", nattype: "cleitn"});
+webideSe.run({username: "admin", password: "admin", nattype: "client", crazy: true});
 
 ---
 

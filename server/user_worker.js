@@ -83,6 +83,8 @@ var username = process.env.username;
 var uid = parseInt(process.env.uid);
 var gid = parseInt(process.env.gid);
 
+console.log("username=" + username + " uid=" + uid + " gid=" + gid + " process.env=" + JSON.stringify(process.env));
+
 	/* 
 	
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
@@ -98,6 +100,10 @@ var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: p
 
 if(info.uid==0) {
 	
+	if( isNaN(uid) ) {
+		console.warn("User worker is running as root, but no uid given!");
+	}
+	else {
 	var posix = require("posix");
 	
 	log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
@@ -162,7 +168,7 @@ if(info.uid==0) {
 	//if(gid) process.setgid(gid);
 	//if(uid) process.setuid(uid);
 	
-
+	}
 }
 
 var npmOptions = {
@@ -177,8 +183,9 @@ var npmOptions = {
 var NPM_PATH; // We need the full path to npm-cli.js in order to fork
 
 var isRoot = process.getuid && process.getuid() === 0;
-//if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN)
-if(isRoot) throw new Error("Can not run worker process as superuser!")
+// note: If the user is testing inside a container or VM the user is likely to be root!
+if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN);
+//if(isRoot) throw new Error("Can not run worker process as superuser!");
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
 
