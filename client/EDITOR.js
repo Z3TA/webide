@@ -128,7 +128,7 @@ colorWhite: "white"
 	insert: false,
 	useCliboardcatcher: false, // Some browsers (IE) can only capture clipboard events if a text element is focused
 	caretAnimation: true,
-	jsx: false,
+	jsx: false, // Needs to be set to true in order for JSX tests to pass!
 	publicUrl: "https://webide.se/" // When document.location.hostname is a private IP, use this address for public URL's
 };
 
