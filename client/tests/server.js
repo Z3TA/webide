@@ -93,7 +93,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function installNodejsModule(callback) {
+	EDITOR.addTest(function installNodejsModule(callback) {
 		var testFolder = UTIL.joinPaths(EDITOR.user.homeDir, "/testInstallNodejsModule/");
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {

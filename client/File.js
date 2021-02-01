@@ -62,18 +62,9 @@ var File; // File object is global
 
 		file.fileExtension = UTIL.getFileExtension(file.path);
 		file.disableParsing = (stateProps && stateProps.disableParsing != undefined) ? stateProps.disableParsing : false;
-		file.fullAutoIndentation = false;
-		if(!file.disableParsing) {
-			console.log("File: file.disableParsing=" + file.disableParsing);
-			for(var i=0, canParseResult; i<EDITOR.parsers.length; i++) {
-				canParseResult = EDITOR.parsers[i].canParse(file);
-				console.log("File: Parser " + i + " () canParseResult=", canParseResult);
-				if(canParseResult && canParseResult.fullAutoIndentation) {
-					file.fullAutoIndentation = true;
-					break;
-				}
-			}
-		}
+		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
+		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
+		file.fullAutoIndentation = fullAutoIndentation;
 
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
@@ -158,6 +149,28 @@ var File; // File object is global
 		
 	}
 	
+	File.prototype.checkFullAutoIndentationSupport = function() {
+		var file = this;
+
+		console.log("File: file.disableParsing=" + file.disableParsing);
+
+		var fullAutoIndentation = false;
+
+		if(!file.disableParsing) {
+			
+			for(var i=0, canParseResult; i<EDITOR.parsers.length; i++) {
+				canParseResult = EDITOR.parsers[i].canParse(file);
+				console.log("File: Parser " + i + " () canParseResult=", canParseResult);
+				if(canParseResult && canParseResult.fullAutoIndentation) {
+					fullAutoIndentation = true;
+					break;
+				}
+			}
+		}
+
+		return fullAutoIndentation;
+	}
+
 	File.prototype.rowText = function(row, includeIndentationCharacters) {
 		var file = this;
 		
@@ -3417,6 +3430,10 @@ console.log("moveCaretDown: Stepping right!");
 			else throw new Error("Unknown file property: " + prop);
 		}
 		
+		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
+		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
+		file.fullAutoIndentation = fullAutoIndentation;
+
 		var index = 0, row = 0, col = 0, startColIndentationCharCount = 0, 
 		endRowBeforeChange =  file.grid.length-1, 
 		endColBeforeChange = file.grid[endRowBeforeChange].length-1, 

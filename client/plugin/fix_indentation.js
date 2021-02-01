@@ -395,6 +395,8 @@
 			// Update index's for parsed data
 			var parsed = file.parsed;
 			
+			if(!parsed) throw new Error("Can not fix indentation in a file that has not been parsed! file.parsed=" + file.parsed + " file.fullAutoIndentation=" + file.fullAutoIndentation);
+
 			// return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
 			
 			// Update functions

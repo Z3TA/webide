@@ -37,6 +37,7 @@
 	function reloadAsPlainText(file) {
 		file.reload(file.text,  {
 			disableParsing: true, 
+			fullAutoIndentation: false,
 			parsed: null
 		});
 	}
@@ -47,5 +48,35 @@
 		});
 	}
 	
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function testPlainText(callback) {
+		EDITOR.openFile("testReloadAsPlainText.js", "{\n    //should be indentated\n}\n", function(err, file) {
+			if(err) throw err;
+
+			// Intermediate async to avoid mutation traps
+			setTimeout(function() {
+
+				UTIL.assert(file.grid[1].indentation,1);
+				UTIL.assert(file.grid[1].indentationCharacters,"    ");
+
+				reloadAsPlainText(file);
+
+				// Make sure the spaces are there
+				if( file.grid[1][0].char != " " ) throw new Error("file.grid[1][0].char=" + UTIL.lbChars(file.grid[1][0].char));
+
+				EDITOR.closeFile(file);
+
+				callback(true);
+
+			}, 100);
+
+		});
+
+	});
+
+
+	// TEST-CODE-END
 	
 })();

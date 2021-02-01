@@ -1104,7 +1104,7 @@ usePseudoClipboard = false;
 		*/
 		
 // Have the bug trap error created here in order to get a proper call stack for stached callbaks
-var trapError = new Error("Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!");
+		var trapErrorMsg = "Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!";
 
 		var file = null;
 		
@@ -1418,7 +1418,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				
 				var disableParsing = file.disableParsing;
-				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw trapError }});
+				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw new Error(trapErrorMsg) }});
 
 				
 				// At last, call the function(s) to be run after the file has been opened
