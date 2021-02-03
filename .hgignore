@@ -24,4 +24,4 @@ hosted_chrome_app/webide.zip
 guides/preview/*
 guides/ssgconf.json
 dropbox/*
-
+client/highlight.js/
