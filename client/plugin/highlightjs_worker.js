@@ -55,26 +55,120 @@ importScripts('../highlight.js/highlight.min.js');
 var reSpan = /<span class="([^"]*)">/;
 var reSpanEnd = /<\/span>/;
 
+
+var languageMap = {
+  apacheconf: 'apache',
+  as: 'actionscript',
+  atom: 'xml',
+  bat: 'dos',
+  b: 'brainfuck',
+  bf: 'brainfuck',
+  builder: 'ruby',
+  'c++': 'cpp',
+  clj: 'clojure',
+  'cmake.in': 'cmake',
+  cmd: 'dos',
+  coffee: 'coffeescript',
+  cson: 'coffescript',
+  diff: 'patch',
+  erl: 'erlang',
+  fs: 'fsharp',
+  gemspec: 'ruby',
+  gs: "javascript", // Google JavaScript (for scripting in Google Sheets)
+  gyp: 'python',
+  hbs: 'handlebars',
+  'h++': 'cpp',
+  hh: 'cpp',
+  hs: 'haskell',
+  htm: 'html',
+  'html.handlebars': 'handlebars',
+  'html.hbs': 'handlebars',
+  iced: 'coffescript',
+  icl: 'haskell',
+  jinja: 'django',
+  jsp: 'java',
+  mak: 'makefile',
+  md: 'markdown',
+  mkd: 'markdown',
+  mkdown: 'markdown',
+  mk: 'makefile',
+  ml: 'ocaml',
+  mm: 'objectivec',
+  m: 'objectivec',
+  nginxconf: 'nginx',
+  osacript: 'applescript',
+  php3: 'php',
+  php4: 'php',
+  php5: 'php',
+  php6: 'php',
+  plist: 'xml',
+  pl: 'perl',
+  podspec: 'ruby',
+  py: 'python',
+  rb: 'ruby',
+  rs: 'rust',
+  rss: 'xml',
+  sci: 'scilab',
+  sh: 'bash',
+  st: 'smalltalk',
+  'sublime-keymap': 'json',
+  'sublime_metrics': 'json',
+  'sublime-mousemap': 'json',
+  'sublime-project': 'json',
+  'sublime_session': 'json',
+  'sublime-settings': 'json',
+  'sublime-workspace': 'json',
+  thor: 'ruby',
+  vbs: 'vbscript',
+  vb: 'vbnet',
+  wsgi: 'python',
+  xhtml: 'html',
+  xsl: 'xml',
+  zsh: 'bash'
+}
+
+
 onmessage = function onmessage(ev) {
-  console.log("highlight:worker:onmessage: ev.data=", ev.data);
+  //console.log("highlight:worker:onmessage: ev.data=", ev.data);
 
   var obj = ev.data;
   
-  var result = self.hljs.highlightAuto(obj.text);
+  //var result = self.hljs.highlightAuto(obj.text);
 
+  var beforeFileExt = obj.path.lastIndexOf(".");
+  if( beforeFileExt == -1 ) beforeFileExt = obj.path.lastIndexOf("/");
+  if( beforeFileExt == -1 ) beforeFileExt = obj.path.lastIndexOf("\\");
+
+  var fileExt = obj.path.slice(beforeFileExt+1).toLowerCase();
+
+  if( languageMap.hasOwnProperty(fileExt) ) {
+    var language = languageMap[fileExt];
+  }
+  else {
+    var language = fileExt;
+  }
+
+  if( self.hljs.getLanguage(language) == undefined ) {
+    console.warn("highlight:worker: What language is this? language=" + language + " path=" + obj.path);
+    var result = self.hljs.highlightAuto(obj.text);
+  }
+  else {
+    var result = self.hljs.highlight(language, obj.text);
+  }
+  
   //console.log("highlight:worker:onmessage: result=", result);
 
   //console.log("highlight:worker:onmessage: rootNode=" + JSON.stringify(result.emitter.rootNode, null, 2));
 
   // Note: rootNode might get breaking changes so use the generated HTML instead!
 
-  console.log("highlight:worker:onmessage: html=" + result.value);
+  //console.log("highlight:worker:onmessage: html=" + result.value);
 
   var rows = result.value.split(/\r\n|\n/);
 
   var colors = [];
 
-  console.log("highlight:worker:onmessage: rows=" + JSON.stringify(rows, null, 2));
+  //console.log("highlight:worker:onmessage: rows=" + JSON.stringify(rows, null, 2));
   var grid = new Array(rows.length);
   var types = [];
   var col = 0;
@@ -91,23 +185,26 @@ onmessage = function onmessage(ev) {
 
     rows[row] = rows[row].replace(/&quot;/g, '"');
 
+    rows[row] = rows[row].replace(/&lt;/g, '<');
+    rows[row] = rows[row].replace(/&gt;/g, '>');
+
     walk(rows, row);
 
   }
 
   function walk(rows, row) {
     
-    console.log("highlight:worker:onmessage:walk: row=" + row + " col=" + col + " row:" + rows[row]);
+    //console.log("highlight:worker:onmessage:walk: row=" + row + " col=" + col + " row:" + rows[row]);
 
     var matchStart = rows[row].match(reSpan);
     var matchEnd = rows[row].match(reSpanEnd);
 
-    console.log("highlight:worker:onmessage: matchStart=", matchStart);
-    console.log("highlight:worker:onmessage: matchEnd=", matchEnd);
+    //console.log("highlight:worker:onmessage: matchStart=", matchStart);
+    //console.log("highlight:worker:onmessage: matchEnd=", matchEnd);
 
     if(matchStart && matchEnd && matchStart.index < matchEnd.index || matchStart && !matchEnd) {
       
-      console.log("highlight:worker:onmessage:walk: Found class=" + matchStart[1]);
+      //console.log("highlight:worker:onmessage:walk: Found class=" + matchStart[1]);
 
       classes.push(matchStart[1]);
       col += matchStart.index;
@@ -117,13 +214,13 @@ onmessage = function onmessage(ev) {
     else if(matchStart && matchEnd && matchStart.index > matchEnd.index || !matchStart && matchEnd) {
       var len = matchEnd.index;
       if(len > 0) {
-        console.log("highlight:worker:onmessage:walk: Added color on row=" + row + " col=" + col + " len=" + len + "");
+        //console.log("highlight:worker:onmessage:walk: Added color on row=" + row + " col=" + col + " len=" + len + "");
         colors.push(  { row:row, col:col, len:len, styles:classes.slice() }  );
       }
       col += matchEnd.index;
       
       var removedClass = classes.pop();
-      console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on col=" + col + " len=" + len);
+      //console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on col=" + col + " len=" + len);
       
       rows[row] = rows[row].slice(matchEnd.index + matchEnd[0].length);
     }
@@ -139,7 +236,7 @@ onmessage = function onmessage(ev) {
 
   }
 
-  console.log("highlight:worker:onmessage: colors=" + JSON.stringify(colors, null, 2));
+  //console.log("highlight:worker:onmessage: colors=" + JSON.stringify(colors, null, 2));
 
   postMessage({colors: colors, path: obj.path});
 }

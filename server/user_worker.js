@@ -769,7 +769,7 @@ process.on('message', function commandMessage(message) {
 				}
 				else {
 					if(!answer) {
-						console.warn("No data in answer from command=" + command + " json=" + JSON.stringify(json));
+						log("No data in answer from command=" + command + " json=" + JSON.stringify(json), WARN);
 						answer = {};
 					}
 					send({resp: answer});

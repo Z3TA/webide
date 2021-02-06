@@ -2782,7 +2782,7 @@ EDITOR.canvasContext = ctx;
 			// No prerender when rendering rows!?
 			
 			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
-				buffer = EDITOR.preRenderFunctions[i](buffer, file);
+				buffer = EDITOR.preRenderFunctions[i](buffer, file, row, maxColumns);
 			}
 			
 			/*
@@ -7697,6 +7697,17 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 	
+	EDITOR.checkFilePermission = function(fileOrPath, callback) {
+		if(fileOrPath instanceof File) var path = fileOrPath.path;
+		else if(typeof fileOrPath == "string") var path = fileOrPath;
+		else throw new Error("fileOrPath=" + fileOrPath + " does not seem to be a file nor a path!");
+
+		CLIENT.cmd("stat", {path: path}, function(err, stats) {
+
+		});
+
+	}
+
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
 		/*
 			Returns all files in a directory as an array. Each item is an object with these properties:
