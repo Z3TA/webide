@@ -128,17 +128,20 @@
 		
 		fileColors[obj.path] = obj.colors;
 		
+		if(obj.path == EDITOR.currentFile.path) EDITOR.renderNeeded();
 	}
 
 	function highlightPreRender(buffer, file, bufferStartRow, maxColumns) {
-		console.log("highlight: highlightPreRender! bufferStartRow=" + bufferStartRow + " buffer.length=" + buffer.length);
-
+		
 		var colors = fileColors[file.path];
+		
+		console.log("highlight: highlightPreRender! bufferStartRow=" + bufferStartRow + " buffer.length=" + buffer.length + " colors.length=" + (colors && colors.length));
 
 		if(colors == undefined) return buffer;
 
+
 		rowLoop: for (var i=0, row, style; i<colors.length; i++) {
-			console.log("highlight:highlightPreRender: rowLoop: i=" + i + " colors[" + i + "].row=" + colors[i].row );
+			//console.log("highlight:highlightPreRender: rowLoop: i=" + i + " colors[" + i + "].row=" + colors[i].row );
 			if( colors[i].row < bufferStartRow) continue rowLoop;
 			if( colors[i].row > bufferStartRow + buffer.length) break rowLoop;
 
@@ -148,11 +151,11 @@
 
 			colLoop: for(var col=colors[i].col; col < colors[i].col+colors[i].len && col < row.length; col++) {
 
-				console.log("highlight:highlightPreRender: colLoop: col=" + col + " colors[" + i + "].col=" + colors[i].col + " colors[" + i + "].len=" + colors[i].len);
+				//console.log("highlight:highlightPreRender: colLoop: col=" + col + " colors[" + i + "].col=" + colors[i].col + " colors[" + i + "].len=" + colors[i].len);
 
 				styleLoop: for(var k=0; k<colors[i].styles.length; k++) {
 
-					console.log("highlight:highlightPreRender: styleLoop: k=" + k + " ");
+					//console.log("highlight:highlightPreRender: styleLoop: k=" + k + " ");
 
 					style = theme[ colors[i].styles[k] ];
 
