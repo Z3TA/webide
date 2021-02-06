@@ -6,7 +6,6 @@ What I'm working on
 Code in plain text in order to feel the pain
 
 Code in plain text mode to improve it. So that you could theoretically use the editor for unsupported languages
-- Would be nice with some colors!
 - Code block insertion if(foo) {} does not insert correct white space!
 - Matching right {...} should deindent!
 - When pasting code we should trim it down so that we get the same indentation level!
