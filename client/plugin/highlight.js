@@ -10,7 +10,64 @@
 	var initiated = false;
 	var worker;
 	var html;
-	
+	var fileColors = {};
+
+
+	var styleGoogleCode = {
+		"hljs-comment": {color: "#800"},
+		"hljs-quote": {color: "#800"},
+
+		"hljs-keyword": {color: "#008"},
+		"hljs-selector-tag": {color: "#008"},
+		"hljs-section": {color: "#008"},
+		"hljs-title": {color: "#008"},
+		"hljs-name": {color: "#008"},
+
+		"hljs-variable": {color: "#660"},
+		"hljs-template-variable": {color: "#660"},
+
+		"hljs-string": {color: "#080"},
+		"hljs-selector-attr": {color: "#080"},
+		"hljs-selector-pseudo": {color: "#080"},
+		"hljs-regexp": {color: "#080"},
+
+		"hljs-literal": {color: "#066"},
+		"hljs-symbol": {color: "#066"},
+		"hljs-bullet": {color: "#066"},
+		"hljs-meta": {color: "#066"},
+		"hljs-number": {color: "#066"},
+		"hljs-link": {color: "#066"},
+
+		"hljs-title": {color: "#606"},
+		"hljs-doctag": {color: "#606"},
+		"hljs-type": {color: "#606"},
+		"hljs-attr": {color: "#606"},
+		"hljs-built_in": {color: "#606"},
+		"hljs-builtin-name": {color: "#606"},
+		"hljs-params": {color: "#606"},
+
+		"hljs-attribute": {color: "#000"},
+		"hljs-subst": {color: "#000"},
+
+		"hljs-formula": {bg: "#eee", italic: true},
+
+		"hljs-selector-id": {color: "#9B703F"},
+		"hljs-selector-class": {color: "#9B703F"},
+
+		"hljs-addition": {color: "#baeeba"},
+
+		"hljs-deletion": {bg: "#ffc8bd"},
+
+		"hljs-doctag": {bold: true},
+		"hljs-strong": {bold: true},
+
+		"hljs-emphasis": {italic: true}
+
+	};
+
+	var theme =styleGoogleCode;
+
+
 	EDITOR.plugin({
 		desc: "Code highlightning",
 		load: function loadHighlight() {
@@ -69,17 +126,46 @@
 		
 		console.log("highlight: obj=", obj);
 		
-		html = obj.html;
-		
-		console.log("highlight:highlightWorkerMessage: html=" + html);
+		fileColors[obj.path] = obj.colors;
 		
 	}
 
-	function highlightPreRender(buffer, file) {
-		
+	function highlightPreRender(buffer, file, bufferStartRow, maxColumns) {
+		console.log("highlight: highlightPreRender! bufferStartRow=" + bufferStartRow + " buffer.length=" + buffer.length);
+
+		var colors = fileColors[file.path];
+
+		if(colors == undefined) return buffer;
+
+		rowLoop: for (var i=0, row, style; i<colors.length; i++) {
+			console.log("highlight:highlightPreRender: rowLoop: i=" + i + " colors[" + i + "].row=" + colors[i].row );
+			if( colors[i].row < bufferStartRow) continue rowLoop;
+			if( colors[i].row > bufferStartRow + buffer.length) break rowLoop;
+
+			row = buffer[col=colors[i].row - bufferStartRow];
+
+			if(row == undefined) continue;
+
+			colLoop: for(var col=colors[i].col; col < colors[i].col+colors[i].len && col < row.length; col++) {
+
+				console.log("highlight:highlightPreRender: colLoop: col=" + col + " colors[" + i + "].col=" + colors[i].col + " colors[" + i + "].len=" + colors[i].len);
+
+				styleLoop: for(var k=0; k<colors[i].styles.length; k++) {
+
+					console.log("highlight:highlightPreRender: styleLoop: k=" + k + " ");
+
+					style = theme[ colors[i].styles[k] ];
+
+					for(var prop in style) {
+						if( row[col].hasOwnProperty(prop) ) row[col][prop] = style[prop];
+					}
+
+				}
+			}
+		}
+
 		return buffer;
 	}
 
 
-	
 })();
