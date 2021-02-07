@@ -6,6 +6,15 @@ var LOGLEVEL = 7;
 var CONSOLE_LOG_ORIGINAL = console.log;
 var CONSOLE_WARN_ORIGINAL = console.warn;
 
+//var _emerg = 0;
+//var _alert = 1;
+//var _crit = 2;
+//var _err = 3;
+var _warning = 4;
+var _notice = 5;
+var _info = 6;
+var _debug = 7;
+
 function tidyStack(row) {
 	var dir = process.cwd();
 	var dir2 = dir.replace(/server$/, "");
@@ -38,142 +47,133 @@ function tidyStack(row) {
 
 function log(msg, lvl, noTrace) {
 	
+	if(lvl == undefined) lvl = _info;
+	if(lvl > LOGLEVEL) return;
+	
 	var USE_COLORS = true;
 
 	if(global.LOGFILE) USE_COLORS = false;
 
-	//var _emerg = 0;
-	//var _alert = 1;
-	//var _crit = 2;
-	//var _err = 3;
-	var _warning = 4;
-	var _notice = 5;
-	var _info = 6;
-	var _debug = 7;
-
-	if(lvl == undefined) lvl = _info;
-	
 	var where = "";
 	
 	//CONSOLE_LOG_ORIGINAL("msg.length=" + msg.length);
 	//CONSOLE_LOG_ORIGINAL("arguments.length=" + arguments.length);
 
-	if(lvl <= LOGLEVEL) {
-		// If third parameter is a number, show n levels of stack traces
-		if(typeof noTrace == "number") {
-			try {
-				var stack = (new Error().stack).split(/\r\n|\n/);
-			}
-			catch(err) {
-				return CONSOLE_LOG_ORIGINAL(msg);
-			}
 
-			//CONSOLE_LOG_ORIGINAL("stack.length=" + stack.length + " " + JSON.stringify(stack, null, 2));
-
-			for(var stackRow = 2; stackRow < stack.length && stackRow < noTrace+2; stackRow++) {
-				if(stack[stackRow].indexOf("at Console.console.log") != -1 ||
-				stack[stackRow].indexOf("at Console.console.warn") != -1 ||
-				stack[stackRow].indexOf("at Console.console.error") != -1 ||
-				stack[stackRow].indexOf("at Console.timeEnd") != -1) continue;
-				where = where + tidyStack(stack[stackRow]) + " <- ";
-			}
-
-			where = where.slice(0,-4);
-
-			where = "(" + where + ")";
-
+	// If third parameter is a number, show n levels of stack traces
+	if(typeof noTrace == "number") {
+		try {
+			var stack = (new Error().stack).split(/\r\n|\n/);
 		}
-		else if(noTrace == undefined) {
-
-			try {
-				var stack = (new Error().stack).split(/\r\n|\n/);
-			}
-			catch(err) {
-				return CONSOLE_LOG_ORIGINAL(msg);
-			}
-
-			//CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
-
-			var row = stack[2];
-			if(row.indexOf("at Console.console.log") != -1 || 
-			row.indexOf("at Console.console.warn") != -1 ||
-			row.indexOf("at Console.console.error") != -1 ||
-			row.indexOf("at Console.timeEnd") != -1) row = stack[3];
-			//CONSOLE_LOG_ORIGINAL("row=" + row);
-			
-			where = tidyStack(row);
-
-			where = "(" + where + ")";
-
-			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
-			
+		catch(err) {
+			return CONSOLE_LOG_ORIGINAL(msg);
 		}
 
-		//CONSOLE_LOG_ORIGINAL("where=" + where);
+		//CONSOLE_LOG_ORIGINAL("stack.length=" + stack.length + " " + JSON.stringify(stack, null, 2));
 
-		if(typeof msg != "string") {
-			CONSOLE_LOG_ORIGINAL(where + ":");
-			CONSOLE_LOG_ORIGINAL(msg);
-			if(LOGFILE) throw new Error("Log message is not a string! msg:" + msg);
+		for(var stackRow = 2; stackRow < stack.length && stackRow < noTrace+2; stackRow++) {
+			if(stack[stackRow].indexOf("at Console.console.log") != -1 ||
+			stack[stackRow].indexOf("at Console.console.warn") != -1 ||
+			stack[stackRow].indexOf("at Console.console.error") != -1 ||
+			stack[stackRow].indexOf("at Console.timeEnd") != -1) continue;
+			where = where + tidyStack(stack[stackRow]) + " <- ";
+		}
+
+		where = where.slice(0,-4);
+
+		where = "(" + where + ")";
+
+	}
+	else if(noTrace == undefined) {
+
+		try {
+			var stack = (new Error().stack).split(/\r\n|\n/);
+		}
+		catch(err) {
+			return CONSOLE_LOG_ORIGINAL(msg);
+		}
+
+		//CONSOLE_LOG_ORIGINAL("log debug stack=" + JSON.stringify(stack.toString().split("    at"), null, 2));
+
+		var row = stack[2];
+		if(row.indexOf("at Console.console.log") != -1 || 
+		row.indexOf("at Console.console.warn") != -1 ||
+		row.indexOf("at Console.console.error") != -1 ||
+		row.indexOf("at Console.timeEnd") != -1) row = stack[3];
+		//CONSOLE_LOG_ORIGINAL("row=" + row);
+			
+		where = tidyStack(row);
+
+		where = "(" + where + ")";
+
+		//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
+			
+	}
+
+	//CONSOLE_LOG_ORIGINAL("where=" + where);
+
+	if(typeof msg != "string") {
+		CONSOLE_LOG_ORIGINAL(where + ":");
+		CONSOLE_LOG_ORIGINAL(msg);
+		if(LOGFILE) throw new Error("Log message is not a string! msg:" + msg);
+	}
+	else {
+
+		var dateString = myDate() + " ";
+		var dateInMsg = (msg.indexOf(dateString.slice(0, 12)) != -1); // 2018-09-12 (08:58:46) 
+		//CONSOLE_LOG_ORIGINAL("msg=" + msg);
+
+		if(msg.indexOf("\n") != -1) {
+			// Pad each line
+			var padding = " ".repeat(dateString.length);
+			msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
+		}
+
+		var colorDim = "\x1b[2m";
+		var colorReset = "\x1b[0m"
+		var colorBlink = "\x1b[5m";
+		var colorUnderscore = "\x1b[4m";
+
+		var msgString = "";
+
+		if(USE_COLORS) {
+			if(!dateInMsg) {
+				msgString = colorDim + dateString;
+
+				if(lvl <= 6) msgString += colorReset;
+			}
+			else if(lvl > 6) msgString += colorDim;
+
+			if(lvl == _warning) msgString += colorUnderscore;
+			//else if(lvl == _notice) msgString += colorUnderscore;
+
+			msgString += msg;
+
+			if(!dateInMsg) msgString += " " + colorDim + where;
+
+			msgString += colorReset;
 		}
 		else {
+			if(!dateInMsg) msgString = dateString + msg + " " + where;
+			else msgString = msg;
+		}
 
-			var dateString = myDate() + " ";
-			var dateInMsg = (msg.indexOf(dateString.slice(0, 12)) != -1); // 2018-09-12 (08:58:46) 
-			//CONSOLE_LOG_ORIGINAL("msg=" + msg);
-
-			if(msg.indexOf("\n") != -1) {
-				// Pad each line
-				var padding = " ".repeat(dateString.length);
-				msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
-			}
-
-			var colorDim = "\x1b[2m";
-			var colorReset = "\x1b[0m"
-			var colorBlink = "\x1b[5m";
-			var colorUnderscore = "\x1b[4m";
-
-			var msgString = "";
-
-			if(USE_COLORS) {
-				if(!dateInMsg) {
-					msgString = colorDim + dateString;
-
-					if(lvl <= 6) msgString += colorReset;
-				}
-				else if(lvl > 6) msgString += colorDim;
-
-				if(lvl == _warning) msgString += colorUnderscore;
-				//else if(lvl == _notice) msgString += colorUnderscore;
-
-				msgString += msg;
-
-				if(!dateInMsg) msgString += " " + colorDim + where;
-
-				msgString += colorReset;
-			}
-			else {
-				if(!dateInMsg) msgString = dateString + msg + " " + where;
-				else msgString = msg;
-			}
-
-			if(LOGFILE) {
-				var fs = require('fs');
-				var os = require("os");
-				fs.appendFileSync(LOGFILE, msgString + os.EOL);
-			}
-			else {
-				if(lvl <= _warning) CONSOLE_WARN_ORIGINAL(msgString);
-else CONSOLE_LOG_ORIGINAL(msgString);
-				//else process._rawDebug(msgString);
-				/*
-					process._rawDebug is faster then console.log
+		if(LOGFILE) {
+			var fs = require('fs');
+			var os = require("os");
+			fs.appendFileSync(LOGFILE, msgString + os.EOL);
+		}
+		else {
+			if(lvl <= _warning) CONSOLE_WARN_ORIGINAL(msgString);
+			else CONSOLE_LOG_ORIGINAL(msgString);
+			//else process._rawDebug(msgString);
+			/*
+				process._rawDebug is faster then console.log
 					
-				*/
-			}
+			*/
 		}
 	}
-	
+
 	return where;
 	
 	function myDate() {
