@@ -15,6 +15,9 @@
 	Disable other autocomplete plugins when testing:
 	?lsp=true&disable_nodejsautocomplete=true&disable_builtinjsautocomplete=true
 	
+
+	
+
 */
 
 (function() {
@@ -111,12 +114,12 @@
 	
 	function lspAutoComplete(file, wordToComplete, wordLength, gotOptions, autoCompleteCallback) {
 		
-		if(!trackedFiles.hasOwnProperty(file)) {
+		if(!trackedFiles.hasOwnProperty(file.path)) {
 			console.log("lspAutoComplete: not tracked: " + file.path);
 			return;
 		}
 		
-		var lsp = languageServers[trackedFiles[file].language];
+		var lsp = languageServers[trackedFiles[file.path].language];
 		
 		var row = file.caret.row;
 		var col = file.caret.col;
@@ -133,14 +136,14 @@
 		
 		lsp.req("textDocument/completion", {
 			textDocument: {
-				uri: trackedFiles[file].uri,
-				languageId: trackedFiles[file].language,
-				version: trackedFiles[file].version,
+				uri: trackedFiles[file.path].uri,
+				languageId: trackedFiles[file.path].language,
+				version: trackedFiles[file.path].version,
 			},
 			position: position
 		}, function(err, resp) {
 			if(err) {
-				alertBox("Language server for language=" + trackedFiles[file].language + " was unable to handle completion request! Error: " + err.message + " position=" + JSON.stringify(position));
+				alertBox("Language server for language=" + trackedFiles[file.path].language + " was unable to handle completion request! Error: " + err.message + " position=" + JSON.stringify(position));
 			}
 			
 			console.log("lspAutoComplete: textDocument/completion response: " + JSON.stringify(resp, null, 2));
@@ -231,7 +234,7 @@ delete languageServers[language];
 		
 		var lspOptions ={language: language};
 		if(lspServer) {
-			lspOptions.bin = lspServer.bin;
+			lspOptions.bin = UTIL.joinPaths(EDITOR.user.homeDir, lspServer.bin);
 			lspOptions.args = lspServer.args;
 		}
 		
@@ -268,32 +271,39 @@ delete languageServers[language];
 		});
 	}
 	
-	function lspFileChange(file, type, characters, caretIndex, row, col, colIndent, endRow, endCol, endColIndent) {
+	function lspFileChange(file, type, characters, caretIndex, row, col) { //  endRow, endCol
 		
+		if( file.parsed ) return; // Not using the language server for languages that has built in support in the client
+
 		if(file == undefined) throw new Error("Missing file (first argument) arguments=" + JSON.stringify(arguments));
 		if(type == undefined) throw new Error("Missing type (second argument) arguments=" + JSON.stringify(arguments));
 		if(characters == undefined) throw new Error("Missing characters (third argument) arguments=" + JSON.stringify(arguments));
 		if(caretIndex == undefined) throw new Error("Missing caretIndex (argument 4) arguments=" + JSON.stringify(arguments));
 if(row == undefined) throw new Error("Missing row (argument 5) arguments=" + JSON.stringify(arguments));
 if(col == undefined) throw new Error("Missing col (argument 6) arguments=" + JSON.stringify(arguments));
-if(colIndent == undefined) throw new Error("Missing colIndent (argument 7) arguments=" + JSON.stringify(arguments));
-if(endRow == undefined) throw new Error("Missing endRow (argument 8) arguments=" + JSON.stringify(arguments));
-if(endCol == undefined) throw new Error("Missing endCol (argument 9) arguments=" + JSON.stringify(arguments));
-if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10) arguments=" + JSON.stringify(arguments));
+
+		/*
+			if(endRow == undefined) throw new Error("Missing endRow (argument 7) arguments=" + JSON.stringify(arguments));
+			if(endCol == undefined) throw new Error("Missing endCol (argument 8) arguments=" + JSON.stringify(arguments));
+		*/
+
+		var endRow = row;
+		var endCol = col;
+
 		
-		if(!trackedFiles.hasOwnProperty(file)) {
+		if(!trackedFiles.hasOwnProperty(file.path)) {
 			console.log("lspFileChange: not tracked: " + file.path);
 			return;
 		}
 		
-		var lsp = languageServers[trackedFiles[file].language];
+		var lsp = languageServers[trackedFiles[file.path].language];
 		
-		trackedFiles[file].version++;
+		trackedFiles[file.path].version++;
 		
 		var text = "";
 		var rangeLength = 0;
 		var range = {
-			start: {line: row, character: col+colIndent}
+			start: {line: row, character: col}
 		};
 		
 		if(type == "removeRow") {
@@ -312,7 +322,7 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 			text = characters;
 		}
 		else if(type == "deleteTextRange") { // Deleted a bunch of text
-			range.end = {line: endRow, character: endCol+endColIndent};
+			range.end = {line: endRow, character: endCol};
 			rangeLength = characters.length;
 		}
 		else if(type == "linebreak") { // A line break was inserted
@@ -324,7 +334,7 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 			rangeLength = characters.length;
 		}
 		else if(type == "reload") { // The file was reloaded with new text
-			range.end = {line: endRow, character: endCol+endColIndent};
+			range.end = {line: endRow, character: endCol};
 			text = characters;
 		}
 		else {
@@ -332,7 +342,8 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 		}
 		
 		var serverSupportsIncrementalUpdates = false; // LOL
-		
+		//var serverSupportsIncrementalUpdates = true;
+
 		if(serverSupportsIncrementalUpdates) {
 			var change = {
 				range: range, // The range of the document that changed
@@ -348,39 +359,39 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 		
 		lsp.notify("textDocument/didChange", {
 			textDocument: {
-				uri: trackedFiles[file].uri,
-				languageId: trackedFiles[file].language,
-				version: trackedFiles[file].version,
+				uri: trackedFiles[file.path].uri,
+				languageId: trackedFiles[file.path].language,
+				version: trackedFiles[file.path].version,
 			},
 			contentChanges: [change]
 			
 		}, function(err, resp) {
 			if(err) {
-				alertBox("Language server for language=" + trackedFiles[file].language + " was unable to handle didChange request! Error: " + err.message + " change: type=" + type + " range=" + JSON.stringify(range, null, 2));
+				alertBox("Language server for language=" + trackedFiles[file.path].language + " was unable to handle didChange request! Error: " + err.message + " change: type=" + type + " range=" + JSON.stringify(range, null, 2));
 			}
-			console.log("textDocument/didOpen response: " + JSON.stringify(resp));
+			console.log("textDocument/didChange response: " + JSON.stringify(resp));
 		});
 		
 	}
 	
 	function lspFileClose(file) {
 		
-		if(!trackedFiles.hasOwnProperty(file)) return;
+		if(!trackedFiles.hasOwnProperty(file.path)) return;
 		
-		var lsp = languageServers[trackedFiles[file].language];
+		var lsp = languageServers[trackedFiles[file.path].language];
 		
 		lsp.notify("textDocument/didClose", {
 			textDocument: {
-				uri: trackedFiles[file].uri,
-				languageId: trackedFiles[file].language,
-				version: trackedFiles[file].version
+				uri: trackedFiles[file.path].uri,
+				languageId: trackedFiles[file.path].language,
+				version: trackedFiles[file.path].version
 			}
 		}, function(err, resp) {
 			if(err) throw err;
 			console.log("textDocument/didClose response: " + JSON.stringify(resp));
 		});
 		
-		delete trackedFiles[file];
+		delete trackedFiles[file.path];
 	}
 	
 	function lspFileOpen(file) {
@@ -399,10 +410,10 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 		}
 		
 		// LSP wants all files to have a version, which is incremented on all changes
-		trackedFiles[file] = {
+		trackedFiles[file.path] = {
 			uri: uriPath(file.path),
 			language: language,
-			version: 0
+			version: 1
 		};
 		
 		if(languageServers.indexOf(language) == -1) startLanguageServer(language, lspServerStarted);
@@ -412,16 +423,16 @@ if(endColIndent == undefined) throw new Error("Missing endColIndent (argument 10
 			if(err) {
 alertBox("Unable to start the language server for language=" + language + " Error: " + err.message);
 				
-				delete trackedFiles[file];
+				delete trackedFiles[file.path];
 				
 				return;
 			}
 			
 			lsp.notify("textDocument/didOpen", {
 				textDocument: {
-					uri: trackedFiles[file].uri,
-					languageId: trackedFiles[file].language,
-					version: trackedFiles[file].version,
+					uri: trackedFiles[file.path].uri,
+					languageId: trackedFiles[file.path].language,
+					version: trackedFiles[file.path].version,
 					text: file.text
 				}
 			}, function(err, resp) {

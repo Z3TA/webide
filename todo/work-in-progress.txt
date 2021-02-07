@@ -3,7 +3,6 @@
 What I'm working on
 -------------------
 
-Issue with chars in margin when scrolling x
 
 ---
 

@@ -27,6 +27,10 @@ var LSP = {
 
 		if(!json.language) return callback(new Error("No language specified!"));
 		
+		if(languageServers.hasOwnProperty(language)) {
+			return callback(new Error("Language server forlanguage=" + language + " already started or starting!"));
+		}
+
 		/*
 			The LSP will scan all files, so we don't want to set the root to the root
 		*/
@@ -160,7 +164,7 @@ var LSP = {
 		
 	},
 	
-	req: function(user, json, callback) {
+	req: function req(user, json, callback) {
 		
 		if(!json.language) return callback(new Error("No language specified!"));
 		if(!json.method) return callback(new Error("No method specified!"));
@@ -174,12 +178,14 @@ var LSP = {
 			return callback(error);
 		}
 		
+		console.log("request json=" + JSON.stringify(json));
+
 		connection.sendRequest(json.method, json.options).then(function(resp) {
-			//console.log("request resp: " + JSON.stringify(resp, null, 2));
+			console.log("request resp: " + JSON.stringify(resp, null, 2));
 			callback(null, resp);
 			
 		}).catch(function(err) {
-			//console.log("request error: " + err.message);
+			console.log("request error: " + err.message);
 			callback(err);
 		});
 	},
@@ -202,6 +208,9 @@ var LSP = {
 		
 		connection.sendNotification(notification, json.options);
 		
+		// The client expects a callback... does the LSP server give a resp/acknowledge? Then we could listen for that before calling back
+		callback(null, true);
+
 	}
 	
 }
