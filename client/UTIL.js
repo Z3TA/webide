@@ -2553,8 +2553,8 @@ else {
 			return "rgba(" + colorString.substring(4, colorString.indexOf(")")) + ", 0." + useTranspLvl + ")";
 		}
 		else {
-			console.warn("Unknown color: " + colorString);
-			return "rgba(255,0,0, 0.5)";
+			var colors = UTIL.parseColor(colorString);
+			return "rgba(" + colors[0] + "," + colors[1] + "," + colors[2] + ", 0." + useTranspLvl + ")";
 		}
 	},
 	
