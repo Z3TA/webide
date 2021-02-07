@@ -177,11 +177,13 @@ onmessage = function onmessage(ev) {
   
   var classes;
   var matchStart, matchEnd;
+  var classes = [];
+
   for (var row=0; row<rows.length; row++) {
     col = 0;
     lastLength = 0;
     nextLength = 0;
-    classes = [];
+    
 
     rows[row] = rows[row].replace(/&quot;/g, '"');
 
@@ -220,12 +222,15 @@ onmessage = function onmessage(ev) {
       col += matchEnd.index;
       
       var removedClass = classes.pop();
-      //console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on col=" + col + " len=" + len);
+      //console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on row=" + row + " col=" + col + " len=" + len);
       
       rows[row] = rows[row].slice(matchEnd.index + matchEnd[0].length);
     }
     else if(!matchStart && !matchEnd) {
-      // done
+      if(rows[row].length > 0) {
+        colors.push(  { row:row, col:0, len:rows[row].length, styles:classes.slice() }  );
+      }
+      //console.log("highlight:worker:onmessage:walk: No more spans. row=" + row + " classes=" + JSON.stringify(classes) + " rows[" + row + "]=" + rows[row]);
       return;
     }
     else {

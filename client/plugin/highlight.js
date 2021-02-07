@@ -133,9 +133,11 @@
 
 	function highlightPreRender(buffer, file, bufferStartRow, maxColumns) {
 		
+		if(file.parsed) return buffer; // We only use the highlighter for languages that do not have built-in support
+		
 		var colors = fileColors[file.path];
 		
-		console.log("highlight: highlightPreRender! bufferStartRow=" + bufferStartRow + " buffer.length=" + buffer.length + " colors.length=" + (colors && colors.length));
+		//console.log("highlight: highlightPreRender! bufferStartRow=" + bufferStartRow + " buffer.length=" + buffer.length + " colors.length=" + (colors && colors.length));
 
 		if(colors == undefined) return buffer;
 

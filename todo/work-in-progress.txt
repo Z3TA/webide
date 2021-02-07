@@ -3,6 +3,8 @@
 What I'm working on
 -------------------
 
+---
+
 Code in plain text in order to feel the pain
 
 Code in plain text mode to improve it. So that you could theoretically use the editor for unsupported languages
