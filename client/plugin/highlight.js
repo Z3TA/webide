@@ -77,6 +77,12 @@
 		},
 		unload: function unloadHighlight() {
 			
+			if(initiated) {
+				EDITOR.removeEvent("fileChange", highlightChangedFile);
+				
+				EDITOR.removePreRender(highlightPreRender);
+			}
+			
 		}
 	});
 	
@@ -84,7 +90,7 @@
 		
 		console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
 		
-		if(file.disableParsing) {
+		if(file.disableParsing && file.fileExtension != "txt") {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});

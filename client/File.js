@@ -60,7 +60,7 @@ var File; // File object is global
 
 		*/
 
-		file.fileExtension = UTIL.getFileExtension(file.path);
+		file.fileExtension = UTIL.getFileExtension(file.path); // Without the dot
 		file.disableParsing = (stateProps && stateProps.disableParsing != undefined) ? stateProps.disableParsing : false;
 		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
 		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
