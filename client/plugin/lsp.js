@@ -15,7 +15,13 @@
 	Disable other autocomplete plugins when testing:
 	?lsp=true&disable_nodejsautocomplete=true&disable_builtinjsautocomplete=true
 	
-
+	
+	
+	Python:
+	
+	pip install python-language-server
+	
+	
 	
 
 */
@@ -34,6 +40,10 @@
 		"typescript-language-server": {
 			bin: "/.npm-packages/bin/typescript-language-server",
 			args: ["--stdio"]
+		},
+		"pyls": {
+			bin: "/.local/bin/pyls",
+			args: []
 		}
 		/*
 			
@@ -44,7 +54,8 @@
 	}
 	
 	var languages = {
-		javascript: lspServers["typescript-language-server"]
+		javascript: lspServers["typescript-language-server"],
+		python: lspServers["pyls"],
 	}
 	
 	
@@ -402,7 +413,10 @@ if(col == undefined) throw new Error("Missing col (argument 6) arguments=" + JSO
 		var ext = UTIL.getFileExtension(file.path);
 		if(ext == "js") {
 			var language = "javascript";
-			
+		} 
+		else if(ext == "py") {
+			var language = "python";
+
 		}
 		else {
 			console.warn("Unknow lanugage: ext=" + ext + " path=" + file.path);
