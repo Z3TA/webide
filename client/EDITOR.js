@@ -5676,7 +5676,7 @@ if(EDITOR.user.domain) {
 			
 setTimeout(function winNeverLoaded() {
 					if(!winLoadedCalled) {
-						throw new Error("winLoaded event never called when opening desktop window!");
+						throw new Error("winLoaded event never called when opening desktop window! (likely stopped by popup blocker)");
 					}
 				}, 15000); // Window might get killed by popup stopper and we have to wait for the retry dialog...
 				
