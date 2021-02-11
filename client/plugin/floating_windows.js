@@ -92,7 +92,7 @@
 			height: height
 		}
 		
-		openInNewWindow(EDITOR.currentFile, options, function windowOpened(err, win) {
+		openInNewWindow(EDITOR.currentFile, options, function splitScreen(err, win) {
 			
 			//win.resizeTo(width2, height);
 			//win.moveTo(options.left, options.top);
@@ -149,7 +149,7 @@
 		
 		var thisEditor = window.EDITOR;
 		
-		EDITOR.createWindow(browserWindowOptions, function windowOpened(err, browserWindow) {
+		EDITOR.createWindow(browserWindowOptions, function floatingWin(err, browserWindow) {
 			if(err) throw err;
 			
 			// Load the file in the other window
