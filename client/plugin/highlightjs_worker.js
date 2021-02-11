@@ -127,7 +127,6 @@ var languageMap = {
   zsh: 'bash'
 }
 
-
 onmessage = function onmessage(ev) {
   //console.log("highlight:worker:onmessage: ev.data=", ev.data);
 
@@ -178,17 +177,19 @@ onmessage = function onmessage(ev) {
   var classes;
   var matchStart, matchEnd;
   var classes = [];
+  var htmlEntity;
 
   for (var row=0; row<rows.length; row++) {
     col = 0;
     lastLength = 0;
     nextLength = 0;
     
-
-    rows[row] = rows[row].replace(/&quot;/g, '"');
-
+    // highlight.js/src/lib/utils.js function escapeHTML
+    rows[row] = rows[row].replace(/&amp;/g, '"');
     rows[row] = rows[row].replace(/&lt;/g, '<');
     rows[row] = rows[row].replace(/&gt;/g, '>');
+    rows[row] = rows[row].replace(/&quot;/g, '"');
+    rows[row] = rows[row].replace(/&#x27;/g, "'");
 
     walk(rows, row);
 
