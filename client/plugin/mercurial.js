@@ -51,6 +51,9 @@
 	
 	var discoveryBarIcon;
 	
+	var _commitId;
+	var _showFile; // Show this file after cloning (will show README if undefined)
+
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
 		into: "/repo/test/",
@@ -273,14 +276,33 @@
 			Or should we just show the clone dialog with repo pre-filled !?
 			
 			Example url: https://webide.se/?repo=https://github.com/Z3TA/vumoviemaker.git
+
+
+			github2s.com : Able to add 2s to the github URL in order to show the file in the editor...
+			?clone=https://github.com/conwnet/github1s/blob/HEAD/docs/guide.md.git
+
+
 		*/
 		var repo = QUERY_STRING.repo || QUERY_STRING.clone;
 		if(repo) {
 			var folder = "/repo/";
 			
+			var matchGithubFile = repo.match(/github\.com\/(.*)\/(.*)\/blob\/([^/]*)\/(.*)\.git/);
+
+			if(matchGithubFile) {
+				repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
+				_commitId = matchGithubFile[3];
+				_showFile = matchGithubFile[4];
+			}
+			else {
+				_commitId = undefined;
+				_showFile = undefined;
+			}
+
 			var matchGit = repo.match(/\/([^/]*)\.git$/);
 			var matchUrl = repo.match(/\/([^/]*)$/);
 			
+
 			if(repo.slice(-1) == "/") folder += UTIL.getFolderName(repo) + "/";
 			else if(matchGit) folder += matchGit[1] + "/";
 			else if(matchUrl) folder += matchUrl[1] + "/";
@@ -1518,22 +1540,36 @@ var error = err.message;
 						// Show the files in file explorer
 						EDITOR.fileExplorer(resp.path);
 						
+						if(_showFile) {
+							EDITOR.openFile( UTIL.joinPaths(resp.path, _showFile), undefined, undefined, function(err) {
+								if(err) findReadme();
+							});
+						}
+						else {
+							findReadme();
+						}
+						
+						hideCloneDialog();
+						}
+
+					function findReadme() {
 						// Show readme if one exist ...
 						EDITOR.listFiles(resp.path, function(err, files) {
 							if(err) throw err;
-							
+
 							for(var i=0; i<files.length; i++) {
 								if( files[i].type == "-" && files[i].name.match(/readme/i) ) {
 									EDITOR.openFile(files[i].path);
 									return;
 								}
-}
+							}
+
 							// No readme found
 							alertBox("Successfully cloned to:\n" + resp.path);
+
 						});
-						
-						hideCloneDialog();
-						};
+					}
+
 					});
 			}
 		}
