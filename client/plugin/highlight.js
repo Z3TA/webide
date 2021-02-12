@@ -7,15 +7,17 @@
 (function() {
 	"use strict";
 	
+	return;
+
 	var initiated = false;
 	var worker;
 	var html;
 	var fileColors = {};
 
-
-	var styleGoogleCode = {
-		"hljs-comment": {color: "#800"},
-		"hljs-quote": {color: "#800"},
+var styleWebide = {
+		"hljs-tag": {color: EDITOR.settings.style.xmlTagColor},
+		"hljs-comment": {color: EDITOR.settings.style.commentColor},
+		"hljs-quote": {color: EDITOR.settings.style.quoteColor},
 
 		"hljs-keyword": {color: "#008"},
 		"hljs-selector-tag": {color: "#008"},
@@ -26,7 +28,7 @@
 		"hljs-variable": {color: "#660"},
 		"hljs-template-variable": {color: "#660"},
 
-		"hljs-string": {color: "#080"},
+		"hljs-string": {color: EDITOR.settings.style.quoteColor},
 		"hljs-selector-attr": {color: "#080"},
 		"hljs-selector-pseudo": {color: "#080"},
 		"hljs-regexp": {color: "#080"},
@@ -54,9 +56,9 @@
 		"hljs-selector-id": {color: "#9B703F"},
 		"hljs-selector-class": {color: "#9B703F"},
 
-		"hljs-addition": {color: "#baeeba"},
+		"hljs-addition": {color: EDITOR.settings.style.addedTextColor},
 
-		"hljs-deletion": {bg: "#ffc8bd"},
+		"hljs-deletion": {bg: EDITOR.settings.style.removedTextColor},
 
 		"hljs-doctag": {bold: true},
 		"hljs-strong": {bold: true},
@@ -64,8 +66,9 @@
 		"hljs-emphasis": {italic: true}
 
 	};
+	
 
-	var theme =styleGoogleCode;
+	var theme =styleWebide;
 
 
 	EDITOR.plugin({
