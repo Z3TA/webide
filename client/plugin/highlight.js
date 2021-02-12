@@ -7,8 +7,6 @@
 (function() {
 	"use strict";
 	
-	return;
-
 	var initiated = false;
 	var worker;
 	var html;

@@ -19,8 +19,8 @@
 	function applyDiffColors(buffer, file) {
 		if(file.path.slice(-5) != ".diff") return buffer;
 		
-		var colorNew = EDITOR.settings.style.removedTextColor; // green
-		var colorOld = EDITOR.settings.style.addedTextColor; // red
+		var colorNew = EDITOR.settings.style.addedTextColor; // green
+		var colorOld = EDITOR.settings.style.removedTextColor; // red
 		
 for(var row = 0; row<buffer.length; row++) {
 

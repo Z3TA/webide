@@ -3,8 +3,6 @@
 What I'm working on
 -------------------
 
-highlight.js theme
-erm, removed text color vs added text color, did I mix up !?
 
 ---
 
