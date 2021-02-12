@@ -219,6 +219,7 @@ onmessage = function onmessage(ev) {
       if(len > 0) {
         //console.log("highlight:worker:onmessage:walk: Added color on row=" + row + " col=" + col + " len=" + len + "");
         colors.push(  { row:row, col:col, len:len, styles:classes.slice() }  );
+        //console.log("highlight:worker:onmessage:walk: push color: " + JSON.stringify(colors[colors.length-1]));
       }
       col += matchEnd.index;
       
@@ -228,8 +229,9 @@ onmessage = function onmessage(ev) {
       rows[row] = rows[row].slice(matchEnd.index + matchEnd[0].length);
     }
     else if(!matchStart && !matchEnd) {
-      if(rows[row].length > 0) {
+      if(rows[row].length > 0 && classes.length > 0) {
         colors.push(  { row:row, col:0, len:rows[row].length, styles:classes.slice() }  );
+        //console.log("highlight:worker:onmessage:walk: push color:" + JSON.stringify(colors[colors.length-1]) + "rows[" + row + "]=" + rows[row]);
       }
       //console.log("highlight:worker:onmessage:walk: No more spans. row=" + row + " classes=" + JSON.stringify(classes) + " rows[" + row + "]=" + rows[row]);
       return;
