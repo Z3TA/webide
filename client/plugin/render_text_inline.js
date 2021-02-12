@@ -1,26 +1,26 @@
 (function() {
 
-"use strict";
+	"use strict";
 
-/*
+	/*
 
-Renders the grid
+		Renders the grid
 
-note: fillText is about 3 times faster then putImageData or drawImage on Windows!
+		note: fillText is about 3 times faster then putImageData or drawImage on Windows!
 
-*/
+	*/
 
-// Sanity check
-if(!EDITOR.settings.style.fontSize) {
-console.warn("No fontSize defined!");
-}
-if(!EDITOR.settings.style.font) {
-console.warn("No font defined!");
-}
+	// Sanity check
+	if(!EDITOR.settings.style.fontSize) {
+		console.warn("No fontSize defined!");
+	}
+	if(!EDITOR.settings.style.font) {
+		console.warn("No font defined!");
+	}
 
-EDITOR.addRender(textRender, 2100);
+	EDITOR.addRender(textRender, 2100);
 
-console.log("Loaded textRenderer");
+	console.log("Loaded textRenderer");
 	
 	
 	/*
@@ -36,41 +36,43 @@ console.log("Loaded textRenderer");
 		
 		Setting the font takes 1-2ms! Don't do it at every render!
 	*/
-function textRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
+	function textRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 
-//console.time("textRender");
+		//console.log("textRender!");
 
-//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		//console.time("textRender");
 
-if(startRow == undefined) startRow = 0;
+		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 
-var left = 0,
-top = 0,
-middle = 0,
-indentation = 0,
-indentationWidth = 0,
-bufferRowCol,
-x = 0,
-y = 0,
-characters = "",
+		if(startRow == undefined) startRow = 0;
+
+		var left = 0,
+		top = 0,
+		middle = 0,
+		indentation = 0,
+		indentationWidth = 0,
+		bufferRowCol,
+		x = 0,
+		y = 0,
+		characters = "",
 		oldStyle;
 
-//ctx.strokeStyle="rgba(0,255,0,0.5)"; // For rendering circles and waves
+		//ctx.strokeStyle="rgba(0,255,0,0.5)"; // For rendering circles and waves
 
-//ctx.fillStyle = oldStyle;
+		//ctx.fillStyle = oldStyle;
 
 		//ctx.beginPath(); // For rendering circles and waves - Reset all the paths!
 		
 
-var colStart = 0;
-var colStop = 0;
+		var colStart = 0;
+		var colStop = 0;
 
-var tabIndention = 0;
+		var tabIndention = 0;
 
-var tabColumnCounter = 0;
-var extraSpace = 0;
+		var tabColumnCounter = 0;
+		var extraSpace = 0;
 
-var tabSpace = 0;
+		var tabSpace = 0;
 
 		var transparentCharsLeft = Math.floor(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth - 2);
 		var transparentCharsRight = Math.floor(EDITOR.settings.rightMargin / EDITOR.settings.gridWidth);
@@ -94,27 +96,27 @@ var tabSpace = 0;
 		
 		var bufferRowCol;
 		
-for(var row = 0; row < buffer.length; row++) {
+		for(var row = 0; row < buffer.length; row++) {
 
-indentation = buffer[row].indentation;
+			indentation = buffer[row].indentation;
 
-indentationWidth = indentation * EDITOR.settings.tabSpace;
+			indentationWidth = indentation * EDITOR.settings.tabSpace;
 
-//console.log("textRender:indentation=" + indentation);
+			//console.log("textRender:indentation=" + indentation);
 
-top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
-middle = top + Math.floor(EDITOR.settings.gridHeight/2);
+			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
+			middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 
-//ctx.fillText(indentation, 15, top);
+			//ctx.fillText(indentation, 15, top);
 
-colStart = Math.max(0, file.startColumn - indentationWidth)
-colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth);
+			colStart = Math.max(0, file.startColumn - indentationWidth)
+			colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth);
 
 
-left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
+			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 
-//console.log("textRender:renderRow: row=" + row);
-//renderRow(ctx, buffer[row], colStart, colStop, left, middle);
+			//console.log("textRender:renderRow: row=" + row);
+			//renderRow(ctx, buffer[row], colStart, colStop, left, middle);
 
 			
 			gridRow = buffer[row];
@@ -163,7 +165,9 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				if( (walker.col + walker.extraSpace) < colStart && (walker.col + walker.extraSpace) >= start) {
 					// Chars in left margin
 					//console.log("paint: col=" + walker.col + " left margin");
+
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlLeft);
+					
 					transpLvlLeft += transpLvlStepLeft * walker.charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
 					ctx.fillText(walker.char, left, middle);
@@ -174,11 +178,13 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 					// Chars in right margin
 					
 					if(charBuffer.length > 0) {
+						//console.log("paint: col=" + walker.col + " charBuffer=" + charBuffer + " right margin");
 						ctx.fillText(charBuffer, charBufferPosLeft, middle);
 						charBuffer = "";
 					}
 					
-					//console.log("paint: col=" + walker.col + " right margin");
+					//console.log("paint: col=" + walker.col + " walker.char=" + walker.char + " right margin");
+					
 					ctx.fillStyle = oldStyle = UTIL.makeColorTransparent(bufferRowCol.color, transpLvlRight);
 					transpLvlRight -= transpLvlStepRight * walker.charWidth;
 					//ctx.fillStyle = oldStyle = "orange";
@@ -188,12 +194,14 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 					//console.log("paint: col=" + walker.col + " oldStyle=" + oldStyle + " bufferRowCol.color=" + bufferRowCol.color + "  ");
 					
 					if(charBuffer.length > 0) {
+						//console.log("paint: col=" + walker.col + " charBuffer=" + charBuffer + " ctx.fillStyle=" + ctx.fillStyle + " ???");
 						ctx.fillText(charBuffer, charBufferPosLeft, middle);
-						
+						charBuffer = "";
 					}
 					
 					ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb
 					if(walker.charWidth != 1) {
+						//console.log("paint: col=" + walker.col + " walker.char=" + walker.char + " ctx.fillStyle=" + ctx.fillStyle + " because walker.charWidth=" + walker.charWidth);
 						ctx.fillText(walker.char, left, middle);
 						charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
 					}
@@ -206,10 +214,12 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 				else if(  (walker.col + walker.extraSpace) >= start  ) {
 					if(walker.charWidth != 1) {
 						if(charBuffer.length > 0) {
+
+							//console.log("paint: charBuffer=" + charBuffer + " ctx.fillStyle=" + ctx.fillStyle + "");
 							ctx.fillText(charBuffer, charBufferPosLeft, middle);
 							charBuffer = "";
 						}
-						//console.log("paint: Painting walker.char=" + walker.char + " for col=" + walker.col + "");
+						//console.log("paint: Painting walker.char=" + walker.char + " for col=" + walker.col + " ctx.fillStyle=" + ctx.fillStyle + "");
 						ctx.fillText(walker.char, left, middle);
 						
 						charBufferPosLeft = left + EDITOR.settings.gridWidth * walker.charWidth;
@@ -235,46 +245,47 @@ left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startCol
 			//console.log("paint: Exit loop walker=" + JSON.stringify(walker));
 			
 			if(charBuffer.length > 0) {
+				//console.log("paint: charBuffer=" + charBuffer + "  ctx.fillStyle=" + ctx.fillStyle + "");
 				ctx.fillText(charBuffer, charBufferPosLeft, middle);
 			}
 			
-}
+		}
 
-//console.timeEnd("textRender");
+		//console.timeEnd("textRender");
 
-}
+	}
 
-function renderWave(ctx, top, left, charLength) {
-ctx.beginPath();
-ctx.strokeStyle="rgba(255,0,0,0.5)";
+	function renderWave(ctx, top, left, charLength) {
+		ctx.beginPath();
+		ctx.strokeStyle="rgba(255,0,0,0.5)";
 
-// simple line:
-//ctx.moveTo(left, top + EDITOR.settings.gridHeight);
-//ctx.lineTo(left + EDITOR.settings.gridWidth, top + EDITOR.settings.gridHeight);
+		// simple line:
+		//ctx.moveTo(left, top + EDITOR.settings.gridHeight);
+		//ctx.lineTo(left + EDITOR.settings.gridWidth, top + EDITOR.settings.gridHeight);
 
-var x = left + (charLength-1) * EDITOR.settings.gridWidth - 1;
-var y = top + EDITOR.settings.gridHeight - 3 + Math.sin(x);
+		var x = left + (charLength-1) * EDITOR.settings.gridWidth - 1;
+		var y = top + EDITOR.settings.gridHeight - 3 + Math.sin(x);
 
-ctx.moveTo(x, y);
+		ctx.moveTo(x, y);
 
-for(var x = x, y = y; x < (left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth); x++, y+=Math.sin(x+1)) {
-ctx.lineTo(x, y);
-}
+		for(var x = x, y = y; x < (left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth); x++, y+=Math.sin(x+1)) {
+			ctx.lineTo(x, y);
+		}
 
-ctx.stroke();
-}
+		ctx.stroke();
+	}
 
-function renderCircle(ctx, top, left, charLength) {
-// ### Circle
-var x = left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2;
-var y = top + EDITOR.settings.gridHeight / 2;
+	function renderCircle(ctx, top, left, charLength) {
+		// ### Circle
+		var x = left + (charLength-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2;
+		var y = top + EDITOR.settings.gridHeight / 2;
 
-ctx.strokeStyle="rgba(255,0,0,0.6)";
-ctx.lineWidth=4;
-ctx.beginPath();
-ctx.arc(x, y, EDITOR.settings.gridWidth * 2.2, 0, 2*Math.PI);
-ctx.stroke();
-}
+		ctx.strokeStyle="rgba(255,0,0,0.6)";
+		ctx.lineWidth=4;
+		ctx.beginPath();
+		ctx.arc(x, y, EDITOR.settings.gridWidth * 2.2, 0, 2*Math.PI);
+		ctx.stroke();
+	}
 
 
 
