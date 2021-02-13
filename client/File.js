@@ -66,10 +66,12 @@ var File; // File object is global
 		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
 		file.fullAutoIndentation = fullAutoIndentation;
 
-		// Use plain text mode in order to feel the pain
-		file.fullAutoIndentation = false;
-		file.disableParsing = true;
-
+		if( QUERY_STRING["plainTextOnly"] ) {
+			// Use plain text mode in order to feel the pain
+			file.fullAutoIndentation = false;
+			file.disableParsing = true;
+		}
+		
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
 		

@@ -91,7 +91,7 @@ var styleWebide = {
 		
 		console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
 		
-		if(file.disableParsing && file.fileExtension != "txt") {
+		if(!file.disableParsing && !file.fullAutoIndentation && file.fileExtension != "txt") {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});
@@ -135,7 +135,7 @@ var styleWebide = {
 		
 		fileColors[obj.path] = obj.colors;
 		
-		if(obj.path == EDITOR.currentFile.path) EDITOR.renderNeeded();
+		if(EDITOR.currentFile && obj.path == EDITOR.currentFile.path) EDITOR.renderNeeded();
 	}
 
 	function highlightPreRender(buffer, file, bufferStartRow, maxColumns) {
