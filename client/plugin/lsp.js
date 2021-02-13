@@ -18,10 +18,11 @@
 	
 	
 	Python:
-	
 	pip install python-language-server
 	
-	
+	TypeScript:
+	npm i -g typescript
+	npm install -g typescript-language-server
 	
 
 */
@@ -45,12 +46,6 @@
 			bin: "/.local/bin/pyls",
 			args: []
 		}
-		/*
-			
-			npm i -g typescript
-			npm install -g typescript-language-server
-			
-		*/
 	}
 	
 	var languages = {
