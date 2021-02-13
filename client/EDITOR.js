@@ -3471,13 +3471,23 @@ if(elements[i].style.display != "none") {
 		*/
 	}
 	
-	EDITOR.on = function(eventName, callback, order) {
+	EDITOR.on = function(eventName, order, callback) {
 		/*
 			lowest order nr will execute first!
 		*/
 		
+		if(typeof order == "function") {
+			callback = order;
+			order = undefined;
+		}
+		else if( typeof callback == "number" && typeof order == "function") {
+			var _order = callback;
+			callback = order;
+			order = _order;
+		}
+
 		if(typeof callback != "function") {
-throw new Error("Second argument to EDITOR.on: callback=" + callback + " (" + (typeof callback) + ") needs to be a function! Did you mean EDITOR.addEvent ?");
+throw new Error("Second or third argument to EDITOR.on: callback=" + callback + " (" + (typeof callback) + ") needs to be a function! Did you mean EDITOR.addEvent ?");
 		}
 		
 		var options = {fun: callback};
