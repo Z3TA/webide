@@ -102,10 +102,10 @@ return;
 	
 	function wakeup() {
 		var timeout = 60000;
-		var patientAlert;
+		var patientAlert = undefined;
 		CLIENT.cmd("dockerDaemon", {command: "start"}, timeout, function dockerDeamonAwakenMaybe(err, status) {
 			
-			if(patientAlert) patientAlert.close();
+			if(patientAlert && typeof patientAlert == "object" && typeof patientAlert.close == "function") patientAlert.close();
 
 			if(err) alertBox("Unable to start the Docker daemon! Error: " + err.message);
 			else {
