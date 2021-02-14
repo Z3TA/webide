@@ -60,7 +60,7 @@ windowMenu.hide();
 return;
 		}
 		
-		CLIENT.cmd("dockerDaemon", {command: "status"}, function dockerStatus(err, status) {
+		CLIENT.cmd("dockerDaemon", {command: "status"}, 30000, function dockerStatus(err, status) {
 			if(err) {
 				if(err.code == "ENOSUPPORT") {
 					console.warn("Disabling Docker plugin");
