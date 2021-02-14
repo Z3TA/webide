@@ -1381,6 +1381,84 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 	});
 }
 
+MERCURIAL.checkout = function hgcheckout(user, json, callback) {
+	// Update the repository's working directory to the specified changeset.
+
+	var directory = UTIL.trailingSlash(json.directory);
+
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+
+		var execFile = require('child_process').execFile;
+		execFile("hg", ["checkout", json.rev, "--verbose"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+
+			console.log("hg checkout stderr=" + stderr);
+			console.log("hg checkout stdout=" + stdout);
+
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+
+			// stdout: 4 files updated, 0 files merged, 6 files removed, 0 files unresolved
+
+			var updated = [];
+			var merged = [];
+			var removed = [];
+
+			stdout = stdout.trim();
+
+			if(stdout != "") {
+
+				/*
+					resolving manifests
+					removing .gitignore
+					removing dbo.js
+					removing package.json
+					getting README.md
+				*/
+
+				var respObj = {};
+
+				var reSummary = /(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/;
+				var matchSummary = stdout.match(reSummary);
+
+				if(!matchSummary) throw new Error("Unable to find reSummary=" + reSummary + " in stdout=" + stdout);
+
+				respObj.summary = {
+					updated: matchSummary[1],
+					merged:  matchSummary[2],
+					removed: matchSummary[3],
+					unresolved: matchSummary[4]
+				};
+
+				stdout = stdout.replace(matchSummary[0], "");
+
+				var actions = stdout.trim().split(/\n|\r\n/);
+
+				for (var i=0, action, index, filePath; i<actions.length; i++) {
+					
+					if( actions[i].charAt(0) == "(" ) continue;
+
+					index = actions[i].indexOf(" ")
+
+					if(index == -1) continue;
+
+					action = actions[i].slice(0,index);
+
+					if( !respObj.hasOwnProperty(action) ) respObj[action] = [];
+
+					filePath = actions[i].slice(index+1);
+					//filePath = user.toVirtualPath(rootDir + filePath);
+					respObj[action].push(filePath);
+
+				}
+			}
+
+			callback(null, respObj);
+
+		});
+	});
+}
+
 MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 	// Get all list of resolved and unresolved files
 	
@@ -2031,7 +2109,7 @@ function checkDir(user, virtualPath, callback) {
 		virtualPath can be a file path or a directory path
 	*/
 	
-	if(virtualPath == undefined) return callback(new Error("No path defined! path=" + virtualPath));
+	if(virtualPath == undefined) return callback(new Error("No directory defined! path=" + virtualPath));
 	
 	var localPath = user.translatePath(virtualPath);
 	if(localPath instanceof Error) return callback(localPath);

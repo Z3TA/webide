@@ -1470,7 +1470,7 @@ form.appendChild(labelSavePassword);
 							if(err.code == "ENOENT") {
 								var yes = "Create it";
 								var no = "Abort";
-								confirmBox(parentFolder + " does not exist!", [yes, no], function confirmCreate(answer) {
+								confirmBox("Folder " + parentFolder + " does not exist!", [yes, no], function confirmCreate(answer) {
 									if(answer == yes) {
 										CLIENT.cmd("createPath", {pathToCreate: parentFolder}, function folderCreated(err, json) {
 											if(err) return alertBox(err.message);
@@ -1526,7 +1526,7 @@ form.appendChild(labelSavePassword);
 					cloneButton.disabled = false;
 					
 					if(err) {
-var error = err.message;
+						var error = err.message;
 						
 						// For git+ssh to work you need both a username/password and a known public ssh key 
 						if( error.match(/permission denied/i) && repo.value.match(/^git@/) ) {
@@ -1540,20 +1540,39 @@ var error = err.message;
 						// Show the files in file explorer
 						EDITOR.fileExplorer(resp.path);
 						
-						if(_showFile) {
-							EDITOR.openFile( UTIL.joinPaths(resp.path, _showFile), undefined, undefined, function(err) {
-								if(err) findReadme();
+						if(_commitId) {
+							CLIENT.cmd("mercurial.checkout", {directory: resp.path, rev: _commitId}, function cloned(err, resp) {
+								if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
+
+								console.log("clone: mercurial.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
+
+								if(_showFile) showFile(_showFile);
+								else findReadme();
 							});
+						}
+						else if(_showFile) {
+							showFile(_showFile);
 						}
 						else {
 							findReadme();
 						}
-						
+
 						hideCloneDialog();
-						}
+					}
+
+					function showFile(filePathInRepo) {
+						console.log("clone: showFile: " + filePathInRepo);
+						EDITOR.openFile( UTIL.joinPaths(resp.path, filePathInRepo), undefined, undefined, function(err) {
+							if(err) {
+								console.log("clone: open file error: " + err.message);
+								findReadme();
+							}
+						});
+					}
 
 					function findReadme() {
 						// Show readme if one exist ...
+						console.log("clone: findReadme!");
 						EDITOR.listFiles(resp.path, function(err, files) {
 							if(err) throw err;
 
@@ -1565,6 +1584,9 @@ var error = err.message;
 							}
 
 							// No readme found
+
+							console.log("clone: no README file found in files=" + JSON.stringify(files));
+
 							alertBox("Successfully cloned to:\n" + resp.path);
 
 						});
