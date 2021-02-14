@@ -6893,7 +6893,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 		else if(typeof fileOrFilePath == "string") {
 			if(EDITOR.files.hasOwnProperty(fileOrFilePath)) {
-				var file = EDITOR.files[file];
+				var file = EDITOR.files[fileOrFilePath];
 			}
 			else {
 				throw new Error("File not open: fileOrFilePath=" + fileOrFilePath + " Open files are: " + JSON.stringify(Object.keys(EDITOR.files)));
@@ -6903,7 +6903,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			throw new Error("fileOrFilePath=" + fileOrFilePath + " is not a string nor an instance of File!");
 		}
 		
-		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
+		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);

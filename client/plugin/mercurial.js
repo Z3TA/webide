@@ -1567,6 +1567,9 @@ form.appendChild(labelSavePassword);
 								console.log("clone: open file error: " + err.message);
 								findReadme();
 							}
+							else {
+								EDITOR.dashboard.hide();
+							}
 						});
 					}
 
@@ -1579,6 +1582,7 @@ form.appendChild(labelSavePassword);
 							for(var i=0; i<files.length; i++) {
 								if( files[i].type == "-" && files[i].name.match(/readme/i) ) {
 									EDITOR.openFile(files[i].path);
+									EDITOR.dashboard.hide();
 									return;
 								}
 							}
