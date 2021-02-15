@@ -153,72 +153,80 @@
 			if(err) throw err;
 			
 			// Load the file in the other window
-			console.log("openInNewWindow: browserWindow.window=", browserWindow.window);
+			console.log("floatingWindow:openInNewWindow: browserWindow.window=", browserWindow.window);
 			var otherEditor = browserWindow.window.EDITOR;
 			
-			// Wait until logged in
-			otherEditor.on("storageReady", function openFileOnceConnected() {
+			console.log("floatingWindow: otherEditor=", otherEditor);
+
+			if(otherEditor == undefined) setTimeout(waitUntilLoggedIn, 300); // otherEditor is undefined here, but shows up in the console.log above! Slow browser!?
+			else waitUntilLoggedIn();
+
+			function waitUntilLoggedIn() {
+				otherEditor.on("storageReady", openFileOnceConnected);
+			}
+
+			function openFileOnceConnected() {
 				
 				otherEditor.openFile(filePath, text, openFileOptions, function(err, fileInOtherWindow) {
-				if(err) throw err;
+					if(err) throw err;
 				
 					if(line) fileInOtherWindow.gotoLine(line);
 				
-				otherEditor.on("fileClose", function fileClosed(closedFile) {
-					var openedFiles = Object.keys(otherEditor.files);
-					if(openedFiles.length == 1) {
-						browserWindow.close();
-						setTimeout(browserWindowClosed, 100);
+					otherEditor.on("fileClose", function fileClosed(closedFile) {
+						var openedFiles = Object.keys(otherEditor.files);
+						if(openedFiles.length == 1) {
+							browserWindow.close();
+							setTimeout(browserWindowClosed, 100);
+						}
+					});
+				
+				
+					var checkOpenInterval = setInterval(checkIfOpen, 1);
+					/*
+						Callbacks from the other window will refer to the other window!??!?
+						So we can't actually have any code here, as that code wont run here !?!?
+					*/
+				
+				
+					// Hide "collaborator leaved" message when window is closed ...
+					var checkCloseInterval = setInterval(checkIfClosed, 1000);
+				
+					setTimeout(function() {
+						// This callback function seem to run in this window context though !?!?
+						browserWindow.window.onbeforeunload = function() {
+							clearInterval(checkCloseInterval);
+							checkCloseInterval = setInterval(checkIfClosed, 1);
+							return undefined; // Will not warn about unsaved changes
+						}
+					}, 1000);
+				
+					if(typeof callback == "function") callback(null, browserWindow);
+				
+					EDITOR.stat("floating_window");
+				
+					function checkIfClosed() {
+						if(!browserWindow || browserWindow.closed) {
+							browserWindowClosed();
+						}
 					}
-				});
 				
+					function checkIfOpen() {
+						if(browserWindow && browserWindow.window.EDITOR) {
+							clearInterval(checkOpenInterval);
+							closeCollabDialogs();
+						}
+						//else console.log("File in other window not yet opened ... browserWindow? " + !!browserWindow + " browserWindow.window.EDITOR? " + !!browserWindow.window.EDITOR + " thisEditor.openDialogs.length=" + thisEditor.openDialogs.length + " ");
+					}
 				
-				var checkOpenInterval = setInterval(checkIfOpen, 1);
-				/*
-					Callbacks from the other window will refer to the other window!??!?
-					So we can't actually have any code here, as that code wont run here !?!?
-				*/
-				
-				
-				// Hide "collaborator leaved" message when window is closed ...
-				var checkCloseInterval = setInterval(checkIfClosed, 1000);
-				
-				setTimeout(function() {
-					// This callback function seem to run in this window context though !?!?
-					browserWindow.window.onbeforeunload = function() {
+					function browserWindowClosed() {
 						clearInterval(checkCloseInterval);
-						checkCloseInterval = setInterval(checkIfClosed, 1);
-						return undefined; // Will not warn about unsaved changes
-					}
-				}, 1000);
-				
-				if(typeof callback == "function") callback(null, browserWindow);
-				
-				EDITOR.stat("floating_window");
-				
-				function checkIfClosed() {
-					if(!browserWindow || browserWindow.closed) {
-						browserWindowClosed();
-					}
-				}
-				
-				function checkIfOpen() {
-					if(browserWindow && browserWindow.window.EDITOR) {
-						clearInterval(checkOpenInterval);
+					
 						closeCollabDialogs();
 					}
-					//else console.log("File in other window not yet opened ... browserWindow? " + !!browserWindow + " browserWindow.window.EDITOR? " + !!browserWindow.window.EDITOR + " thisEditor.openDialogs.length=" + thisEditor.openDialogs.length + " ");
-				}
-				
-				function browserWindowClosed() {
-					clearInterval(checkCloseInterval);
-					
-					closeCollabDialogs();
-					}
 				
 				
-			});
-			});
+				});
+			}
 			
 			function closeCollabDialogs() {
 				// Close dialog about collaboratior leaving
