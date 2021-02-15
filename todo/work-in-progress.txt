@@ -3,6 +3,12 @@
 What I'm working on
 -------------------
 
+highlight colors (bgColor)
+
+---
+
+Try to get code highlightning via language server
+test with pyls
 
 ---
 

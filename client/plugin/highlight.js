@@ -49,14 +49,14 @@ var styleWebide = {
 		"hljs-attribute": {color: "#000"},
 		"hljs-subst": {color: "#000"},
 
-		"hljs-formula": {bg: "#eee", italic: true},
+		"hljs-formula": {bgColor: "#eee", italic: true},
 
 		"hljs-selector-id": {color: "#9B703F"},
 		"hljs-selector-class": {color: "#9B703F"},
 
 		"hljs-addition": {color: EDITOR.settings.style.addedTextColor},
 
-		"hljs-deletion": {bg: EDITOR.settings.style.removedTextColor},
+		"hljs-deletion": {bgColor: EDITOR.settings.style.removedTextColor},
 
 		"hljs-doctag": {bold: true},
 		"hljs-strong": {bold: true},

@@ -99,7 +99,7 @@ EDITOR.settings = {
 		highlightMatchBackground: "rgb(255, 255, 230)",
 		textColor: "rgb(0,0,0)", // Should be in rgb(0,0,0) format because some functions like to convert and make darker/lighter/transparent
 		bgColor: "rgb(255,255,255)", // Studies say that black on white is the best for readability. todo: themes
-		altColors: ["pink", "green", "orange", "magenta", "cyan", "blue", "levander", "brown", "purple", "mint", "red", "olive", "teal"], // Colors that look good on the background, and are different
+		altColors: ["rgb(255, 192, 203)", "rgb(0, 128, 0)", "rgb(255, 165, 0)", "rgb(255, 0, 255)", "rgb(0, 255, 255)", "rgb(0, 0, 255)", "rgb(230, 230, 250)", "rgb(165, 42, 42)", "rgb(128, 0, 128)", "rgb(152, 255, 152)", "rgb(255, 0, 0)", "rgb(128, 128, 0)", "rgb(0, 128, 128)"], // Colors that look good on the (white) background, and are different
 		commentColor: "rgb(0, 119, 14)", // Please check on a LCD without IPS before changing these!
 		quoteColor: "rgb(0, 91, 91)",
 		xmlTagColor: "rgb(0, 21, 162)",
@@ -110,14 +110,14 @@ EDITOR.settings = {
 		highlightTextBg: "rgb(155, 255, 155)",    // For text highlighting
 
 // Colors for the terminal emulator
-colorBlack: "black",
-colorRed: "red",
-colorGreen: "green",
-colorYellow: "yellow",
-colorBlue: "blue",
-colorMagenta: "magenta",
-colorCyan: "cyan",
-colorWhite: "white"
+		colorBlack: "rgb(0, 0, 0)",
+		colorRed: "rgb(255, 0, 0)",
+		colorGreen: "rgb(0, 128, 0)",
+		colorYellow: "rgb(255, 255, 0)",
+		colorBlue: "rgb(0, 0, 255)",
+		colorMagenta: "rgb(255, 0, 255)",
+		colorCyan: "rgb(0, 255, 255)",
+		colorWhite: "rgb(255, 255, 255)"
 
 	},
 	scrollSpeedMultiplier: 1/17,
