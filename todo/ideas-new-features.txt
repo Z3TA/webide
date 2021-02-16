@@ -36,6 +36,17 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+---
+
+tab9 integration. AI-autocomplete
+
+---
+
+trim white-space
+option to automatically remove white space from empty lines when saving 
+
+---
+
 pivot into a GTK "native" app !?
 
 ---
