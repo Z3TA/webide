@@ -288,11 +288,16 @@
 			var folder = "/repo/";
 			
 			var matchGithubFile = repo.match(/github\.com\/(.*)\/(.*)\/blob\/([^/]*)\/(.*)\.git/);
+			var matchGithubBranch = repo.match(/github\.com\/(.*)\/(.*)\/tree\/([^/]*)\.git/);
 
 			if(matchGithubFile) {
 				repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
 				_commitId = matchGithubFile[3];
 				_showFile = matchGithubFile[4];
+			}
+			else if(matchGithubBranch) {
+				repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
+				_commitId = matchGithubFile[3];
 			}
 			else {
 				_commitId = undefined;
