@@ -2937,7 +2937,8 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 									rootPath: (VIRTUAL_ROOT && rootPath), 
 									homeDir: homeDir, 
 									id: uid, 
-									ip: HTTP_IP
+									ip: HTTP_IP,
+									version: EDITOR_VERSION
 								};
 								
 								// Only give tld when running as a cloud editor!

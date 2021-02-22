@@ -1,8 +1,6 @@
 
 LANG["en"] = {
 	
-	
-	
 	add_to_home_screen: "Add to home screen",
 androidEmulator: "Android Emulator",
 	autocomplete: "autocomplete",

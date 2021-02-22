@@ -142,12 +142,32 @@ var LSP = {
 			callback = null;
 		}
 		
+		var locale = json.locale;
+
+
 		connection.sendRequest("initialize", {
 			processId: process.pid,
+			clientInfo: {
+				name: "webide.se",
+				version: user.version
+			},
+			locale: locale,
 			rootPath: rootDir,
 			rootUri: "file://" + rootDir,
 			initializationOptions: {},
 			capabilities: {
+				workspace: {
+					applyEdit: true, // The client supports applying batch edits to the workspace by supporting the request 'workspace/applyEdit'
+					resourceOperations: ['create', 'rename', 'delete'], // The resource operations the client supports. Clients should at least support 'create', 'rename' and 'delete' files and folders.
+					symbol: {
+						symbolKind: {
+						},
+						tagSupport: {
+						}
+					}
+				},
+
+
 				completion: {
 					dynamicRegistration: true,
 					completionItem: {

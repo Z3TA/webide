@@ -3,12 +3,12 @@
 What I'm working on
 -------------------
 
-highlight colors (bgColor)
-
----
+working on LSP...
 
 Try to get code highlightning via language server
 test with pyls
+
+open, changed and close notifications)
 
 ---
 

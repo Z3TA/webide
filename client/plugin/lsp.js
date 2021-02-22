@@ -91,6 +91,8 @@
 	
 	function loadLSP() {
 		
+		// open, changed and close notifications are mandatory
+
 		EDITOR.on("fileOpen", lspFileOpen);
 		EDITOR.on("fileClose", lspFileClose);
 		
@@ -238,7 +240,10 @@ delete languageServers[language];
 			var lspServer = languages[language];
 		}
 		
-		var lspOptions ={language: language};
+		var lspOptions ={
+			language: language,
+			locale: LOCALE
+		};
 		if(lspServer) {
 			lspOptions.bin = UTIL.joinPaths(EDITOR.user.homeDir, lspServer.bin);
 			lspOptions.args = lspServer.args;
