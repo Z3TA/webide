@@ -22,6 +22,7 @@ var mimeMap = {
 	"tar.gz": "application/x-tar",
 	tgz: "application/x-tar",
 	txt: "text/plain",
+	wasm: "application/wasm",
 	wav: "audio/wav",
 	xls: "application/vnd.ms-excel",
 	xml: "application/xml",

@@ -53,6 +53,8 @@
   },
   "devDependencies": {
     "html-minifier": "^4.0.0",
+    "tree-sitter-cli": "^0.18.2",
+    "tree-sitter-javascript": "^0.16.0",
     "uglify-js": "^3.7.2",
     "uglifycss": "^0.0.29"
   },
