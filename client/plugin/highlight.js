@@ -54,9 +54,9 @@ var styleWebide = {
 		"hljs-selector-id": {color: "#9B703F"},
 		"hljs-selector-class": {color: "#9B703F"},
 
-		"hljs-addition": {color: EDITOR.settings.style.addedTextColor},
+		"hljs-addition": {bgColor: "#baeeba", color: EDITOR.settings.style.textColor},
 
-		"hljs-deletion": {bgColor: EDITOR.settings.style.removedTextColor},
+		"hljs-deletion": {bgColor: "#ffc8bd", color: EDITOR.settings.style.textColor},
 
 		"hljs-doctag": {bold: true},
 		"hljs-strong": {bold: true},

@@ -41,7 +41,8 @@
 		var oldBgColor = null;
 		var chars = 0;
 		var width = 0;
-		
+		var walker;
+
 		ctx.fillStyle=EDITOR.settings.style.highlightTextBg;
 	
 		for(var row = 0; row < buffer.length; row++) {
@@ -54,25 +55,30 @@
 			oldBgColor = null;
 			chars = 0;
 			
-			for(var col = 0; col < buffer[row].length; col++) {
-				//console.log("xxx col=" + col + " chars=" + chars);
-				if(buffer[row][col].bgColor != oldBgColor) {
+			walker = EDITOR.gridWalker(buffer[row]);
+
+
+			while(!walker.done) {
+				walker.next();
+
+				//console.log("textBgRender: walker.col=" + walker.col + " chars=" + chars);
+				if(buffer[row][walker.col].bgColor != oldBgColor) {
 					if(oldBgColor) {
 						
 						width = EDITOR.settings.gridWidth * chars;
 						
-					ctx.fillStyle = oldBgColor;
+						ctx.fillStyle = oldBgColor;
 						ctx.fillRect(left, top,	width, EDITOR.settings.gridHeight);
 						//console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width);
 						
-				}
+					}
 					
 					left += chars * EDITOR.settings.gridWidth;
-					oldBgColor = buffer[row][col].bgColor;
+					oldBgColor = buffer[row][walker.col].bgColor;
 					chars = 0;
 				}
 				
-				chars++;
+				chars += walker.charWidth;
 				
 			}
 			//console.log("yyy row=" + row);
@@ -84,7 +90,7 @@
 				ctx.fillRect(left, top,	width, EDITOR.settings.gridHeight);
 				//console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width + " EOL!");
 			}
-			}
+		}
 		
 		//ctx.stroke();
 		//console.timeEnd("textBgRender");
