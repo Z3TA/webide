@@ -89,6 +89,11 @@
 	
 	"use strict";
 	
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("js_parser") != -1) {
+		console.warn("js_parser disable by QUERY_STRING disable=" + QUERY_STRING["disable"]);
+		return;
+	}
+
 	var character = "";     // Keep track of what character was inserted before
 	var lastCharacter = "";
 	var parseRequestId = 0;
