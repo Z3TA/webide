@@ -12,7 +12,7 @@ var DIALOG_Z_INDEX = 256;
 var DIALOG_LAST_MSG = "";
 var MAX_OPEN_DIALOGS = 10;
 var CURRENTLY_OPEN_DIALOGS = 0;
-var FULL_SCRFEEN_DIALOG_COUNT = 0;
+var FULL_SCREEN_DIALOG_COUNT = 0;
 
 function Dialog(msg, options) {
 	var dialog = this;
@@ -148,7 +148,7 @@ function Dialog(msg, options) {
 		div.style.marginRight="0px";
 		div.style.maxWidth="none";
 		
-		FULL_SCRFEEN_DIALOG_COUNT++;
+		FULL_SCREEN_DIALOG_COUNT++;
 		EDITOR.scrollingEnabled = true;
 		
 		dialogDelay = 0;
@@ -237,13 +237,18 @@ CURRENTLY_OPEN_DIALOGS--;
 	else console.warn("Parent element does not exist for div=", dialog.div);
 	
 	if(dialog.fullScreen) {
-		FULL_SCRFEEN_DIALOG_COUNT--;
-		if(FULL_SCRFEEN_DIALOG_COUNT < 0) throw new Error("FULL_SCRFEEN_DIALOG_COUNT=" + FULL_SCRFEEN_DIALOG_COUNT);
-		if(FULL_SCRFEEN_DIALOG_COUNT == 0) {
+		FULL_SCREEN_DIALOG_COUNT--;
+		if(FULL_SCREEN_DIALOG_COUNT <= 0) {
 			EDITOR.scrollingEnabled = false;
 			
 			var wireframe = document.getElementById("wireframe");
 			wireframe.style.display = "block";
+		}
+
+		if(FULL_SCREEN_DIALOG_COUNT < 0) {
+			var negativeValue = FULL_SCREEN_DIALOG_COUNT;
+			FULL_SCREEN_DIALOG_COUNT = 0;
+			throw new Error("How did FULL_SCREEN_DIALOG_COUNT=" + negativeValue + " become negative!?");
 		}
 	}
 	
