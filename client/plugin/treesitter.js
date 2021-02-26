@@ -20,7 +20,7 @@
 	var langageIsLoading = {};
 	var languages = {};
 	var languageMap = {
-		JavaScript: "tree-sitter.wasm" 
+		JavaScript: "tree-sitter-javascript.wasm" 
 	};
 
 
@@ -95,7 +95,19 @@
 
 		var tree = parsers[file.path].parse(file.text);
 
-		console.log("tree-sitter:treeSitterFileOpen: tree=", tree);
+		console.log("tree-sitter:treeSitterFileOpen: tree=" + JSON.stringify(tree, null, 2) );
+
+		console.log("tree-sitter:treeSitterFileOpen: tree.rootNode=" + JSON.stringify(tree.rootNode, null, 2) );
+
+		console.log("tree-sitter:treeSitterFileOpen: tree.rootNode=", tree.rootNode );
+
+		console.log("tree-sitter:treeSitterFileOpen: tree.rootNode=" + tree.rootNode.toString() );
+
+
+		console.log("tree-sitter:treeSitterFileOpen: tree.walk()=",  tree.walk() );
+
+		console.log("tree-sitter:treeSitterFileOpen: tree.rootNode.walk()=", tree.rootNode.walk() );
+
 
 	}
 
