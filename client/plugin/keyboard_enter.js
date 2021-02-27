@@ -8,6 +8,18 @@
 		order: 100
 	});
 	
+	EDITOR.bindKey({
+		desc: "Also makes a line break",
+		charCode: 13,
+		combo: SHIFT,
+		fun: keyboard_enter2,
+		order: 10000
+	});
+
+	function keyboard_enter2(file) {
+		return keyboard_enter(file);
+	}
+
 	function keyboard_enter(file) {
 		
 		console.log("Pushed Enter");
