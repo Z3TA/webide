@@ -168,8 +168,10 @@ console.time = console.timeEnd = function() {};
 		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.ctxMenu.add("Editor debugmode", toggleDevMode, 18);
 		EDITOR.ctxMenu.update(toggleDevmodeMenuItem, true, "Editor debugmode");
 		
+		// TEST-CODE-START
 		runTestsMenuItem = EDITOR.ctxMenu.add("Run tests", runTests, 19);
-		
+		// TEST-CODE-END
+
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
 		
