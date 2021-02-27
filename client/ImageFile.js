@@ -9,7 +9,9 @@ var ImageFile;
 		file.hash = "";
 		file.path = path;
 		file.name = UTIL.getFilenameFromPath(path);
-		
+		file.fileExtension = UTIL.getFileExtension(file.path); // Without the dot
+		file.disableParsing = true;
+
 		file.changed = false; // If the file has changed from last save
 		file.isSaved = false; // file.isSaved is the opposit of file.changed, but can only be true if the file is also saved as!
 		file.savedAs = false;

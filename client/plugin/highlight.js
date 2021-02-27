@@ -91,6 +91,8 @@ var styleWebide = {
 		
 		console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
 		
+		if(!(file instanceof File)) return; // Can also be ImageFile
+
 		if(!file.disableParsing && !file.fullAutoIndentation && file.fileExtension != "txt") {
 			if(!initiated) init();
 			
