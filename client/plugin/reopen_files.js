@@ -569,7 +569,7 @@
 				
 				if(file) {
 					// Sanity check: In case EDITOR.openFile returns the wrong file
-					if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path);
+					if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 				}
 				
 				console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
