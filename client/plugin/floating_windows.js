@@ -142,7 +142,7 @@
 		EDITOR.ctxMenu.hide();
 		windowMenuNewWindow.hide();
 		
-		if(!browserWindowOptions.url) browserWindowOptions.url = "/?disable=collaboration_notice,reopen_files,trmb,file_tabs,discoveryBar,dashboard";
+		if(!browserWindowOptions.url) browserWindowOptions.url = "/?disable=collaboration_notice,reopen_files,trmb,discoveryBar,dashboard";
 		if(!browserWindowOptions.waitUntilLoaded) browserWindowOptions.waitUntilLoaded = true;
 		
 		if(QUERY_STRING["theme"]) browserWindowOptions.url += "&theme=" + QUERY_STRING["theme"];
