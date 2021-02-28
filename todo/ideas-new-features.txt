@@ -37,6 +37,13 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+---
+
+idea: spellcheck for :before :hover etc in CSS!
+
+---
+
+idea: Base64 encode / decode when working with SVG's in CSS 
 
 ---
 

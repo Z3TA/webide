@@ -4,6 +4,10 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+
+
+When opening files and there are too many folders, it says "12 more..." when you click there it should show "next page" of folders!
+
 todo: Don't hide the caret when pressing space to indentate in for example a yml config file !
 
 sugg: auto complete paths inside href="|"

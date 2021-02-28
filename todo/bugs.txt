@@ -36,6 +36,16 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+Line number is sometimes off. More likely if the OS has screen scaling...
+
+---
+
+Color picker on ImageFile does not work on Chromebook!
+Would be nice if you could move the image by dragging!
+
+---
+
 Got connection error when awakening the Docker deamon,
 it however worked on second try
 
