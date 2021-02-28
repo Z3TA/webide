@@ -158,11 +158,22 @@
 			
 			console.log("floatingWindow: otherEditor=", otherEditor);
 
+			var retryOpenCounter = 0;
+			var retryOpenMaxTries = 8;
+
 			if(otherEditor == undefined) setTimeout(waitUntilLoggedIn, 300); // otherEditor is undefined here, but shows up in the console.log above! Slow browser!?
 			else waitUntilLoggedIn();
 
 			function waitUntilLoggedIn() {
-				otherEditor.on("storageReady", openFileOnceConnected);
+				console.log("floatingWindow: waitUntilLoggedIn: retryOpenCounter=" + retryOpenCounter);
+				otherEditor = browserWindow.window.EDITOR;
+				if(otherEditor == undefined) {
+					if(++retryOpenCounter > retryOpenMaxTries) throw new Error("Unable to talk to other window (after " + retryOpenCounter + " attempts)"); // Prevent eternal loop
+					setTimeout(waitUntilLoggedIn, 1000);
+					return;
+				}
+				console.log("floatingWindow: typeof otherEditor=" + (typeof otherEditor) + " otherEditor=", otherEditor);
+				otherEditor.once("storageReady", openFileOnceConnected);
 			}
 
 			function openFileOnceConnected() {
