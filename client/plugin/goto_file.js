@@ -60,9 +60,12 @@
 		
 		var charP = 80;
 		var charO = 79;
-		
+		var char0 = 48;
+
 		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
 		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
+		EDITOR.bindKey({desc: S("open_file_by_searching"), charCode: char0, combo: CTRL, fun: show_gotoFileInput3}); // ctrl + 0
+
 		EDITOR.bindKey({desc: S("hide_goto_file_widget"), charCode: charEscape, fun: hide_gotoFileInput});
 		
 		// This doesn't work on Safari. It does however work on Chrome when added to home screen!
@@ -102,6 +105,7 @@ if(CHROMEBOOK) {
 		EDITOR.unbindKey(show_gotoFileInput);
 		EDITOR.unbindKey(mac_show_gotoFileInput);
 EDITOR.unbindKey(show_gotoFileInput2);
+		EDITOR.unbindKey(show_gotoFileInput3);
 		EDITOR.unbindKey(hide_gotoFileInput);
 		EDITOR.unbindKey(gotoFile_moveUp);
 		EDITOR.unbindKey(gotoFile_moveDown);
@@ -643,6 +647,10 @@ else throw err;
 		return show_gotoFileInput(file, combo);
 	}
 	
+	function show_gotoFileInput3(file, combo) {
+		return show_gotoFileInput(file, combo);
+	}
+
 	function openFileViaChromebookSearch(file, combo) {
 		return show_gotoFileInput(file, combo);
 	}
