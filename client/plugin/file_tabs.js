@@ -5,8 +5,6 @@
 		
 		This plugin should be "dumb". Let the editor or other plugins decide what file to open if one is closed
 		
-		Switch between last viewed file using Ctrl+T
-		
 		todo: Clean up global variables
 		
 		todo: Make into a plugin
@@ -62,10 +60,11 @@
 			// Ctrl+Shift+Tab doesn't work in Firefox
 			// Shift+Tab is used for deindention
 		// Alt+Backspace is the Del button on most programs
+		// Ctrl+Shift+left conflicts with stepping words when selecting left
 		
 		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL+SHIFT, fun: switchTab});
 		
-		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_ArrowLeft, combo: CTRL+SHIFT, fun: switchTab2});
+		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: CTRL+SHIFT, fun: switchTabCtrlShiftBackspace});
 		
 		
 		if(DISPLAY_MODE == "standalone" || CHROMEBOOK) {
@@ -245,12 +244,12 @@
 	
 	
 function switchTabInStandaloneMode() {
-return switchTab();
-}
+		return switchTab();
+	}
 
-function switchTab2() {
-return switchTab();
-}
+	function switchTabCtrlShiftBackspace() {
+		return switchTab();
+	}
 
 	function switchTab() {
 		// Open last file
@@ -260,7 +259,7 @@ return switchTab();
 		if(EDITOR.lastFileShowed) EDITOR.showFile(EDITOR.lastFileShowed);
 		else console.warn("No file to switch to!");
 		
-		return false;
+		return PREVENT_DEFAULT;
 		
 	}
 	
