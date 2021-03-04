@@ -499,8 +499,16 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		console.log("goto_file: trySearch: isSearching=" + isSearching + " text=" + text);
 		
-		if(lastSearchText == text) {
-			console.log(UTIL.getStack("trySearch repeated! text=" + text + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching));
+		var reText = text;
+		if(reText.indexOf("-") != -1 || reText.indexOf("_") != -1) {
+// Often forget if it was - or _ so search for both
+reText = reText.replace(/-/g, "[-_]");
+			reText = reText.replace(/_/g, "[-_]");
+			reText = reText.replace(/\[-\[-_\]\]/g, "[-_]");
+		}
+
+		if(lastSearchText == reText) {
+			console.log(UTIL.getStack("goto_file: trySearch repeated! reText=" + reText + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching));
 			//return;
 		}
 		
@@ -514,11 +522,11 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		EDITOR.resizeNeeded();
 		
 		
-		
 		// Search the cache first
 		var searchPath = inputFolder.value;
 		var toIgnore = [];
-		var reName = new RegExp(text, "ig");
+
+		var reName = new RegExp(reText, "ig");
 		for (var i=0, match; i<fileCache.length; i++) {
 			match = fileCache[i].match(reName);
 			if(match && fileCache[i].indexOf(searchPath) == 0) {
@@ -532,7 +540,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 					break;
 				}
 			}
-			console.log("goto_file: i=" + i + " " + fileCache[i] + " text=" + text + " match=" + match);
+			console.log("goto_file: i=" + i + " " + fileCache[i] + " reText=" + reText + " match=" + match);
 		}
 		
 		maxResults = defaultMaxResults - matchesFound;
@@ -542,7 +550,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		console.log("goto_file: isSearching=" + isSearching) 
 		
 		if(!isSearching) {
-			search(text, toIgnore);
+			search(reText, toIgnore);
 		}
 		else {
 			console.log("goto_file: abortFindFiles because: trySearch() isSearching=" + isSearching + " (is true)");
@@ -575,16 +583,16 @@ if(maxResults <= 0) {
 		console.time("goto_file: findFiles"); // Edit server's cuncurrencty setting to fine tune!
 		console.log("goto_file: Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + JSON.stringify(ignore));
 		lastSearchText = searchString;
-		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
+		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: true, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
 			
 			if(err) {
-if(err.code == "ETIMEDOUT") {
+				if(err.code == "ETIMEDOUT") {
 					// Does it matter if we timed out!?
-// Yes, we might not retry the search...
-// But is that imporant!??
-// todo: figure out what to do when search times out!
-}
-else throw err;
+					// Yes, we might not retry the search...
+					// But is that imporant!??
+					// todo: figure out what to do when search times out!
+				}
+				else throw err;
 			}
 			console.timeEnd("goto_file: findFiles");
 			
