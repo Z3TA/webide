@@ -177,6 +177,32 @@ var File; // File object is global
 		return fullAutoIndentation;
 	}
 
+	File.prototype.whiteSpaceOnRow = function(row) {
+		var file = this;
+
+		if(row == undefined) row = file.caret.row;
+
+		if(row < 0) throw new Error("row=" + row + " less then zero");
+		if(row >= file.grid.length) throw new Error("File.rowText: row=" + row + " can not be more or equal to file.grid.length=" + file.grid.length);
+
+		var whiteSpace = file.grid[row].indentationCharacters;
+
+		if(whiteSpace) return whiteSpace;
+
+		var start = file.grid[row].startIndex;
+		var end = start + file.grid[row].length;
+		var reSpace = /\s/;
+		for(var i=start; i<end ; i++) {
+
+			//console.log( "whiteSpaceOnRow: i=" + i + " text=" + UTIL.lbChars(file.text[i]) + " match?" + (!!file.text[i].match(reSpace)) );
+
+			if(file.text[i].match(reSpace)) whiteSpace += file.text[i];
+			else break;
+		}
+
+		return whiteSpace;
+	}
+
 	File.prototype.rowText = function(row, includeIndentationCharacters) {
 		var file = this;
 		
