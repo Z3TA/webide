@@ -52,6 +52,9 @@
 
 		var dialog = promptBox("Rename file:", {defaultValue: filePath}, pickedNewPath);
 		var inputElement = dialog.input;
+
+		if(inputElement == undefined) throw new Error("dialog.input=" + dialog.input + " dialog=" + dialog);
+		
 		var folderPicker = makeFolderPicker(inputElement);
 		
 		dialog.div.classList.add("wide");
