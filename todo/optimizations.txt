@@ -4,6 +4,8 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
+Optimization ? Don't show/render all files when the editor starts! (only the file that should be open)
+
 Optemize for large files,
 minified files are problematic, eg. files with one long line.
 
