@@ -3,27 +3,9 @@
 What I'm working on
 -------------------
 
+when selecting/stepping using ctrl stop at " double quote so you can select words withing a JS string
 
-
-
-2021-02-28 (02:52:20) Destro777: user.name=Destro777 serving folder=/home/ (user_worker.js:1029:10)
-Feb 28 02:52:20 webide.se nodejs[15576]:
-Feb 28 02:52:20 webide.se nodejs[15576]: 2021-02-28 (02:52:20) createHttpEndpoint: req.createHttpEndpoint.folder=/home/ folder=/home/ (server.js:4813:13)
-Feb 28 02:52:20 webide.se nodejs[15576]: 2021-02-28 (02:52:20) Creating HTTP endpoint to folder=/home/ ... (server.js:3941:2)
-Feb 28 02:52:20 webide.se nodejs[15576]: 2021-02-28 (02:52:20) Killing Dropbox daemon for username=guest959 (server.js:683:3)
-Feb 28 02:52:20 webide.se nodejs[15576]: 2021-02-28 (02:52:20) Program exit
-Feb 28 02:52:20 webide.se nodejs[15576]:
-Feb 28 02:52:20 webide.se nodejs[15576]:
-Feb 28 02:52:20 webide.se nodejs[15576]: /srv/webide/server/server.js:3944
-Feb 28 02:52:20 webide.se nodejs[15576]:                 if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" +
-Feb 28 02:52:20 webide.se nodejs[15576]:                                                               ^
-Feb 28 02:52:20 webide.se nodejs[15576]: Error: Can not create an http-endpoint outside HOME_DIR=/home/Destro777
-Feb 28 02:52:20 webide.se nodejs[15576]:     at createHttpEndpoint (/srv/webide/server/server.js:3944:55)
-Feb 28 02:52:20 webide.se nodejs[15576]:     at ChildProcess.messageFromWorker (/srv/webide/server/server.js:4815:5)
-
-
-
-
+---
 
 
 Tree-sitter support!
