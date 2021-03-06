@@ -37,6 +37,11 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+
+---
+
+Able to dublicate a file so that you have two views of the same file
+
 ---
 
 idea: spellcheck for :before :hover etc in CSS!
