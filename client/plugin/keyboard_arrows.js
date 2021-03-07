@@ -96,6 +96,8 @@ return keyboard_arrows_moveRight(file, combo);
 			var insideQuote = caretInsideQuote(file, file.caret);
 			var currentlyAt = file.text.charAt(file.caret.index);
 			var firstSelectedChar = file.selected.length == 0 ? "" : file.selected[0].char;
+			var lastSelectedChar = file.selected.length == 0 ? "" : file.selected[file.selected.length-1].char;
+			var rowText = file.rowText(file.caret.row, !file.parsed).slice(0, file.caret.col);
 
 			console.log("keyboard_arrows_moveRight: step to next word... selectedText=" + selectedText + " insideQuote=" + insideQuote + " currentlyAt=" + currentlyAt + " firstSelectedChar=" + firstSelectedChar);
 
@@ -111,20 +113,32 @@ return keyboard_arrows_moveRight(file, combo);
 					stepStop = i+1;
 					break;
 				}
+				else if( nextChar == '"' && rowText.indexOf('"') != -1 ) { // Stop after the " if there is a " left of the character on that row
+					stepStop = i+1;
+					break;
+				}
 				else if( nextChar == '"' && selectedText.indexOf('"') == -1 ) {
 					stepStop = i;
 					break;
 				}
-				else if( !insideQuote && nextChar == ")" && selectedText.indexOf('(') == -1 ) {
-					stepStop = i;
+				else if( !insideQuote && nextChar == ")" && (selectedText.indexOf('(') == -1 || firstSelectedChar=="(") ) {
+					stepStop = i+1;
 					break;
-				} 
-				else if( !insideQuote && nextChar == "]" && selectedText.indexOf('[') == -1 ) {
+				}
+				else if(  !insideQuote && nextChar == "("  ) {
 					stepStop = i;
 					break;
 				}
-				else if( !insideQuote && nextChar == "}" && selectedText.indexOf('{') == -1 ) {
+				else if( !insideQuote && nextChar == "(" && ( lastSelectedChar==")") ) {
 					stepStop = i;
+					break;
+				}
+				else if(  !insideQuote && nextChar == "]" && ( selectedText.indexOf('[') == -1 || firstSelectedChar=="[" )  ) {
+					stepStop = i+1;
+					break;
+				}
+				else if(  !insideQuote && nextChar == "}" && ( selectedText.indexOf('{') == -1 || firstSelectedChar=="{" )  ) {
+					stepStop = i+1;
 					break;
 				}
 			}
@@ -194,21 +208,57 @@ return keyboard_arrows_moveRight(file, combo);
 			var nextChar;
 			var selectedText = file.getSelectedText();
 			var insideQuote = caretInsideQuote(file, file.caret);
-			for(var i=stepStop-2; i>-1; i--) {
+			var currentlyAt = file.text.charAt(file.caret.index-1);
+			var firstSelectedChar = file.selected.length == 0 ? "" : file.selected[file.selected.length-1].char;
+			var rowText = file.rowText(file.caret.row, !file.parsed).slice(file.caret.col);
+
+			for(var i=stepStop-1; i>-1; i--) {
 				//char = file.text.charAt(i);
 				nextChar = file.text.charAt(i-1);
-				if( isWhiteSpace(nextChar)
-				|| (nextChar == '"' && selectedText.indexOf('"') == -1)
-				|| (!insideQuote && nextChar == "(" && selectedText.indexOf(')') == -1)
-				|| (!insideQuote && nextChar == "[" && selectedText.indexOf(']') == -1)
-				|| (!insideQuote && nextChar == "{" && selectedText.indexOf('}') == -1)
-				) {
+
+				if( isWhiteSpace(nextChar) ) {
+					stepStart = i+1;
+					break;
+				}
+				else if( (firstSelectedChar == '"' || currentlyAt == '"') && nextChar == '"' ) {
+					stepStart = i;
+					break;
+				}
+				else if( nextChar == '"' && file.selected.length == 0 && rowText.indexOf('"') == -1 ) { // Always stop before the " if there is nothing selected and the ext right of the caret does not contain a "
+					stepStart = i+1;
+					break;
+				}
+				else if( nextChar == '"' && selectedText.indexOf('"') == -1 ) {
+					stepStart = i;
+					break;
+				}
+				else if(  !insideQuote && nextChar == "(" && ( selectedText.indexOf(')') == -1 || firstSelectedChar==")" )  ) {
+					stepStart = i;
+					break;
+				}
+				else if(  !insideQuote && nextChar == "[" && ( selectedText.indexOf(']') == -1 || firstSelectedChar=="]" )  ) {
+					stepStart = i;
+					break;
+				}
+				else if(  !insideQuote && nextChar == "{" && ( selectedText.indexOf('}') == -1 || firstSelectedChar=="}" )  ) {
+					stepStart = i;
+					break;
+				}
+
+				/*
+					if( isWhiteSpace(nextChar)
+					|| (nextChar == '"' && selectedText.indexOf('"') == -1)
+					|| (!insideQuote && nextChar == "(" && selectedText.indexOf(')') == -1)
+					|| (!insideQuote && nextChar == "[" && selectedText.indexOf(']') == -1)
+					|| (!insideQuote && nextChar == "{" && selectedText.indexOf('}') == -1)
+					) {
 					stepStart = i+1;
 					//if(file.selected.length > 0) stepStart--;
 					break;
-				}
+					}
+				*/
+				
 			}
-
 
 			/*
 				for(var i=stepStop-2; i>-1; i--) {
@@ -437,4 +487,74 @@ return keyboard_arrows_moveRight(file, combo);
 		return (char == " " || char == "\n" || char == "\r");
 	}
 	
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(false, testStopAtQuote);
+
+
+	EDITOR.bindKey({desc: "Run keyboard arrow tests", charCode: key_RIGHT, combo: SHIFT + ALT, fun: runKeyboardArrowTests});
+
+	function runKeyboardArrowTests() {
+		var success = 0;
+		var fail = 0;
+		var total = 0;
+
+		var tests = [testStopAtQuote];
+		
+		tests.forEach(function(test) {
+			test(cb);
+		});
+
+		return PREVENT_DEFAULT;
+
+		function cb(ok) {
+			if(ok) success++;
+			else fail++;
+
+			total++;
+
+			if(total == tests.length) alertBox(success + " tests succeeded. " + fail + " tests failed");
+
+		}
+	}
+
+	function testStopAtQuote(callback) {
+		var ctrlCombo = {ctrl: true};
+		var ctrlSelect = {ctrl: true, shift: true};
+		EDITOR.openFile("testStopAtQuote.txt", 'var foo="bar";//comment', function (err, file) {
+			if(err) throw err;
+
+			// If there is a quote left of the caret it should stop after the quote
+			file.moveCaretToIndex(8);
+keyboard_arrows_moveRight(file, ctrlCombo)
+			UTIL.assert(file.caret.index, 13);
+
+			keyboard_arrows_moveLeft(file, ctrlCombo)
+			UTIL.assert(file.caret.index, 8);
+
+			// Should do the same thing when selecting
+			file.moveCaretToIndex(8);
+			keyboard_arrows_moveRight(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 13);
+			UTIL.assert(file.getSelectedText(), '"bar"');
+			file.deselect();
+			keyboard_arrows_moveLeft(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 8);
+			UTIL.assert(file.getSelectedText(), '"bar"', new Error());
+
+
+
+			EDITOR.closeFile(file);
+
+			callback(true);
+
+
+		});
+	}
+
+
+	// TEST-CODE-END
+
+
 })();
