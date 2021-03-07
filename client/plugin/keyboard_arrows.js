@@ -491,7 +491,7 @@ return keyboard_arrows_moveRight(file, combo);
 	// TEST-CODE-START
 
 	EDITOR.addTest(false, testStopAtQuote);
-
+	EDITOR.addTest(false, testStopBeforeQuoteWhenSelectingInsideQuote);
 
 	EDITOR.bindKey({desc: "Run keyboard arrow tests", charCode: key_RIGHT, combo: SHIFT + ALT, fun: runKeyboardArrowTests});
 
@@ -500,7 +500,7 @@ return keyboard_arrows_moveRight(file, combo);
 		var fail = 0;
 		var total = 0;
 
-		var tests = [testStopAtQuote];
+		var tests = [testStopAtQuote, testStopBeforeQuoteWhenSelectingInsideQuote];
 		
 		tests.forEach(function(test) {
 			test(cb);
@@ -517,6 +517,32 @@ return keyboard_arrows_moveRight(file, combo);
 			if(total == tests.length) alertBox(success + " tests succeeded. " + fail + " tests failed");
 
 		}
+	}
+
+	function testStopBeforeQuoteWhenSelectingInsideQuote(callback) {
+		var ctrlCombo = {ctrl: true};
+		var ctrlSelect = {ctrl: true, shift: true};
+		EDITOR.openFile("testStopBeforeQuoteWhenSelectingInsideQuote.txt", 'var foo="foo bar baz";\n', function (err, file) {
+			if(err) throw err;
+
+			// If there is a quote left of the caret it should stop after the quote
+			file.moveCaretToIndex(9);
+			keyboard_arrows_moveRight(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 12);
+			UTIL.assert(file.getSelectedText(), 'foo');
+			
+			keyboard_arrows_moveLeft(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 16);
+			UTIL.assert(file.getSelectedText(), 'foo bar', new Error());
+
+			keyboard_arrows_moveLeft(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 20);
+			UTIL.assert(file.getSelectedText(), 'foo bar baz', new Error());
+
+			EDITOR.closeFile(file);
+
+			callback(true);
+		});
 	}
 
 	function testStopAtQuote(callback) {
@@ -543,13 +569,9 @@ keyboard_arrows_moveRight(file, ctrlCombo)
 			UTIL.assert(file.caret.index, 8);
 			UTIL.assert(file.getSelectedText(), '"bar"', new Error());
 
-
-
 			EDITOR.closeFile(file);
 
 			callback(true);
-
-
 		});
 	}
 
