@@ -2131,10 +2131,18 @@ else {
 		return lastIndexOf;
 	},
 	
-	assert: function assert(x, y) {
+	assert: function assert(x, y, err) {
 		if(x !== y) {
 			if(y === undefined && (x === true || x === false)) throw new Error("assert takes two arguments and throws an error if they are not equal. Example: assert(42, 42)");
-			throw new Error("Result: '" + x + "'\nExpect: '" + y + "'");
+			
+			var msg = "Result: '" + x + "'\nExpect: '" + y + "'";
+			if(err) {
+				err.message = msg;
+			}
+			else {
+				err = new Error(msg);
+			}
+			throw err;
 		}
 	},
 	
