@@ -3,7 +3,16 @@
 What I'm working on
 -------------------
 
+currently working on: stepping left...
 when selecting/stepping using ctrl stop at " double quote so you can select words withing a JS string
+
+---
+
+False posetive indexOf warning: 
+else if( ( nextChar == '"' && (selectedText.indexOf('"') == -1 ) ) {
+
+}
+
 
 ---
 

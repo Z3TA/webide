@@ -29,7 +29,7 @@
 		return keyboard_arrows_moveRight(file, combo);
 	}
 	
-	EDITOR.bindKey({desc: "Moves caret right while selecting", charCode: key_RIGHT, combo: SHIFT+CTRL, fun: moveCaretOneWordRightAndSelect});
+	EDITOR.bindKey({desc: "Moves caret one word right while selecting", charCode: key_RIGHT, combo: SHIFT+CTRL, fun: moveCaretOneWordRightAndSelect});
 	function moveCaretOneWordRightAndSelect(file, combo) {
 return keyboard_arrows_moveRight(file, combo);
 }
@@ -56,6 +56,18 @@ return keyboard_arrows_moveRight(file, combo);
 		}
 	});
 	
+	function caretInsideQuote(file, caret) {
+		if(!file.parsed) return false;
+
+		var index = file.caret.index;
+		var quotes = file.parsed.quotes;
+		for(var i=0; i<quotes.length; i++) {
+			if(quotes[i].start >= index && quotes[i].end <= index) return true;
+		}
+
+		return false;
+	}
+
 	function keyboard_arrows_moveRight(file, combo) {
 		
 		if(!EDITOR.input) return true;
@@ -78,9 +90,40 @@ return keyboard_arrows_moveRight(file, combo);
 		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
-			console.log("keyboard_arrows_moveRight: step to next word");
+			
+			var nextChar;
+			var selectedText = file.getSelectedText();
+			var insideQuote = caretInsideQuote(file, file.caret);
+			var currentlyAt = file.text.charAt(file.caret.index);
+			var firstSelectedChar = file.selected.length == 0 ? "" : file.selected[0].char;
+
+			console.log("keyboard_arrows_moveRight: step to next word... selectedText=" + selectedText + " insideQuote=" + insideQuote + " currentlyAt=" + currentlyAt + " firstSelectedChar=" + firstSelectedChar);
+
 			for(var i=stepStart; i<file.text.length; i++) {
-				if(isWhiteSpace(file.text.charAt(i))) {
+				//char = file.text.charAt(i);
+				nextChar = file.text.charAt(i+1);
+				console.log("keyboard_arrows_moveRight: nextChar=" + nextChar);
+				if( isWhiteSpace(nextChar) ) {
+					stepStop = i;
+					break;
+				}
+				else if( (firstSelectedChar == '"' || currentlyAt == '"') && nextChar == '"' ) {
+					stepStop = i+1;
+					break;
+				}
+				else if( nextChar == '"' && selectedText.indexOf('"') == -1 ) {
+					stepStop = i;
+					break;
+				}
+				else if( !insideQuote && nextChar == ")" && selectedText.indexOf('(') == -1 ) {
+					stepStop = i;
+					break;
+				} 
+				else if( !insideQuote && nextChar == "]" && selectedText.indexOf('[') == -1 ) {
+					stepStop = i;
+					break;
+				}
+				else if( !insideQuote && nextChar == "}" && selectedText.indexOf('{') == -1 ) {
 					stepStop = i;
 					break;
 				}
@@ -147,15 +190,38 @@ return keyboard_arrows_moveRight(file, combo);
 		
 		if(combo.ctrl) {
 			// step to next word
+
+			var nextChar;
+			var selectedText = file.getSelectedText();
+			var insideQuote = caretInsideQuote(file, file.caret);
 			for(var i=stepStop-2; i>-1; i--) {
-				if(isWhiteSpace(file.text.charAt(i))) {
-					spacesFound++;
-					if(spacesFound==1) {
-						stepStart = i+2;
-						break;
-					}
+				//char = file.text.charAt(i);
+				nextChar = file.text.charAt(i-1);
+				if( isWhiteSpace(nextChar)
+				|| (nextChar == '"' && selectedText.indexOf('"') == -1)
+				|| (!insideQuote && nextChar == "(" && selectedText.indexOf(')') == -1)
+				|| (!insideQuote && nextChar == "[" && selectedText.indexOf(']') == -1)
+				|| (!insideQuote && nextChar == "{" && selectedText.indexOf('}') == -1)
+				) {
+					stepStart = i+1;
+					//if(file.selected.length > 0) stepStart--;
+					break;
 				}
 			}
+
+
+			/*
+				for(var i=stepStop-2; i>-1; i--) {
+				if(isWhiteSpace(file.text.charAt(i))) {
+				spacesFound++;
+				if(spacesFound==1) {
+				stepStart = i+2;
+				break;
+				}
+				}
+				}
+			*/
+			
 		}
 		
 		console.log("keyboard_arrows_moveLeft: stepStart=" + stepStart);
