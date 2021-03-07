@@ -3,9 +3,6 @@
 What I'm working on
 -------------------
 
-select words inside a JS string: "foo bar baz" should stop *before* the quote!
-
-
 ---
 
 False posetive indexOf warning: 

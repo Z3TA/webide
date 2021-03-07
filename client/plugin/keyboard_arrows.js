@@ -113,12 +113,12 @@ return keyboard_arrows_moveRight(file, combo);
 					stepStop = i+1;
 					break;
 				}
-				else if( nextChar == '"' && rowText.indexOf('"') != -1 ) { // Stop after the " if there is a " left of the character on that row
-					stepStop = i+1;
+				else if( nextChar == '"' && selectedText.indexOf('"') == -1 ) { // Stop before " when selecting text
+					stepStop = i;
 					break;
 				}
-				else if( nextChar == '"' && selectedText.indexOf('"') == -1 ) {
-					stepStop = i;
+				else if( nextChar == '"' && rowText.indexOf('"') != -1 ) { // Stop after the " if there is a " left of the character on that row
+					stepStop = i+1;
 					break;
 				}
 				else if( !insideQuote && nextChar == ")" && (selectedText.indexOf('(') == -1 || firstSelectedChar=="(") ) {
@@ -224,7 +224,12 @@ return keyboard_arrows_moveRight(file, combo);
 					stepStart = i;
 					break;
 				}
-				else if( nextChar == '"' && file.selected.length == 0 && rowText.indexOf('"') == -1 ) { // Always stop before the " if there is nothing selected and the ext right of the caret does not contain a "
+				else if(  nextChar=='"' && selectedText.indexOf('"')==-1  ) { // Stop before " when selecting text inside a string/quotes
+					stepStart = i+1;
+					break;
+				}
+				// Always stop before the " if there is nothing selected and the text right of the caret does not contain a "
+				else if( nextChar == '"' && file.selected.length == 0 && rowText.indexOf('"') == -1 ) {
 					stepStart = i+1;
 					break;
 				}
@@ -528,15 +533,23 @@ return keyboard_arrows_moveRight(file, combo);
 			// If there is a quote left of the caret it should stop after the quote
 			file.moveCaretToIndex(9);
 			keyboard_arrows_moveRight(file, ctrlSelect)
-			UTIL.assert(file.caret.index, 12);
-			UTIL.assert(file.getSelectedText(), 'foo');
+			UTIL.assert(file.caret.index, 12), new Error();
+			UTIL.assert(file.getSelectedText(), 'foo', new Error());
 			
-			keyboard_arrows_moveLeft(file, ctrlSelect)
-			UTIL.assert(file.caret.index, 16);
+			keyboard_arrows_moveRight(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 16, new Error());
 			UTIL.assert(file.getSelectedText(), 'foo bar', new Error());
 
-			keyboard_arrows_moveLeft(file, ctrlSelect)
-			UTIL.assert(file.caret.index, 20);
+			keyboard_arrows_moveRight(file, ctrlSelect)
+			UTIL.assert(file.caret.index, 20, new Error());
+			UTIL.assert(file.getSelectedText(), 'foo bar baz', new Error());
+
+			file.deselect();
+
+			keyboard_arrows_moveLeft(file, ctrlSelect);
+			keyboard_arrows_moveLeft(file, ctrlSelect);
+			keyboard_arrows_moveLeft(file, ctrlSelect);
+			UTIL.assert(file.caret.index, 9, new Error());
 			UTIL.assert(file.getSelectedText(), 'foo bar baz', new Error());
 
 			EDITOR.closeFile(file);
