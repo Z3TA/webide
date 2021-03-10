@@ -8576,8 +8576,17 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 				else if(ret !== PASS) console.warn("Function " + UTIL.getFunctionName(f[i]) + " did not return true or false!");;
 			}
 			
-			alertBox("No " + eventListenerName + " (" + f.length + " tools) handled the request!", 404, "warning");
-			
+			var fileName = UTIL.getFilenameFromPath(file.path);
+
+			var message = "Could not run \"" + eventListenerName + "\" on " + fileName + ". None of the " + f.length + " plugins listening for " + eventListenerName + " could handle the request!";
+
+			promptBox(message + "\nWhat would you like the editor to do?", {
+				placeholder: "I was expecting that running " + eventListenerName + " on " + fileName + " the editor should..."
+			}, function(answer) {
+				message = message + "\n\nFeedback: " + answer + "\n\nBROWSER=" + BROWSER;
+				EDITOR.sendFeedback(message, "No handler for " + eventListenerName, true);
+			});
+
 			EDITOR.statInfo("tool_" + eventListenerName + "_enoext", UTIL.getFileExtension(file.path));
 			
 			return ALLOW_DEFAULT;
@@ -9509,9 +9518,10 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 		return str;
 	}
 	
-	EDITOR.sendFeedback = function sendFeedback(feedback, subject) {
-		
+	EDITOR.sendFeedback = function sendFeedback(feedback, subject, silent) {
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback", robot: "42" }, function (err, respStr) {
+			if(silent) return;
+
 			if(err) {
 				alertBox("Problem sending feedback! Error: " + err.message + "\n");
 				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
@@ -9526,15 +9536,14 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 			}
 			else {
 				alertBox('Thanks for your invaluable feedback! ' + 
-' Don\'t hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
-' ');
+				' Don\'t hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
+				' ');
 			}
 		});
-		
 	}
 	
 	EDITOR.findFileReverseRecursive = function findFiles(names, startDir, callback) {
-/*
+		/*
 Searches down towards the root, looking for file names
 */
 		if(typeof names == "string") names = [names];
