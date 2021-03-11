@@ -67,7 +67,7 @@ var CACHE_FILES = [
 	
 	//'/gfx/style.css',
 	// style.css' should be inlined in bundle.htm
-	
+	"/gfx/dark-theme.css",
 	
 	// Dialog icons
 	'/gfx/error.svg',
