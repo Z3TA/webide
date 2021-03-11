@@ -4081,16 +4081,24 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		EDITOR.callEventListeners("afterSave", file, function allListenersCalled(errors) {
 			
 			if(errors.length > 0) console.warn("Some afterSave event listeners failed:");
+			// see error stacktraces in dev tools!
 			for (var i=0; i<errors.length; i++) {
 				console.error(errors[i]);
 			}
 			
-			if(errors) var err = new Error("Some afterSave event listeners failed! (see console log's in dev tools)");
-			
+			var err = null;
+
+			if(errors.length > 0) {
+				var errorStrings = errors.map(function mapError(err) {
+					return err.message;
+				}).join(" ");
+				var err = new Error("Errors: " + errorStrings);
+			}
+
 			if(callback) callback(err);
 		});
 		
-		}
+	}
 	
 	// Prevent setting file.saved = true
 	Object.defineProperty(File.prototype, "saved", {

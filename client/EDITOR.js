@@ -1804,7 +1804,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		
 		var trimmedPath = path.trim();
 		if(path != trimmedPath) {
-			console.warn("Path trimmed: " + UTIL.lbChars(path) + " => " + trimmedPath);
+			console.warn("EDITOR.saveFile: Path trimmed: " + UTIL.lbChars(path) + " => " + trimmedPath);
 			path = trimmedPath;
 		}
 		
@@ -1816,6 +1816,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			if(errors.length > 0) {
 				var errorMessages = [];
 				for (var i=0; i<errors.length; i++) {
+					console.log("EDITOR.saveFile: Error in beforeSave event listener! (see below)");
 					console.error(errors[i]);
 					errorMessages.push(errors[i].message);
 				}
@@ -1834,15 +1835,15 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			
 			for(var fName in returns) {
 				if( returns[fName] === PREVENT_DEFAULT ) {
-					console.warn(fName + " prevented file from being saved!");
-var error = new Error(fName + " prevented file from being saved!")
+					console.warn("EDITOR.saveFile: " + fName + " prevented file from being saved!");
+					var error = new Error("EDITOR.saveFile: \"beforeSave\" event listener " + fName + " prevented file from being saved!")
 error.code = fName;
 					if(callback) callback(error);
 					return;
 				}
 				else if ( returns[fName] !== ALLOW_DEFAULT ) {
-					var error = new Error(fName + " returned " + returns[fName] + ". Expected ALLOW_DEFAULT=" + ALLOW_DEFAULT + " or PREVENT_DEFAULT=" + PREVENT_DEFAULT + " !");
-					console.warn(error.message);
+					var error = new Error("EDITOR.saveFile: \"beforeSave\" event listener " + fName + " returned " + returns[fName] + ". Expected ALLOW_DEFAULT=" + ALLOW_DEFAULT + " or PREVENT_DEFAULT=" + PREVENT_DEFAULT + " !");
+					console.error(error);
 				}
 			}
 			
@@ -1850,11 +1851,11 @@ error.code = fName;
 		});
 		
 		function beginSaving() {
-			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
+			console.log("EDITOR.saveFile: beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
 			
 			if(file instanceof ImageFile) {
 				text = file.canvas.toDataURL("image/png");
-				if(text.indexOf("base64,") == -1) throw new Error("text does not contain base64, !! text=" + text);
+				if(text.indexOf("base64,") == -1) throw new Error("EDITOR.saveFile: text does not contain base64, !! text=" + text);
 				
 				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
 				
@@ -1888,7 +1889,7 @@ error.code = fName;
 									crypto.subtle.digest('SHA-256', text).then(function(hash) {
 										doneSaving(null, path, hash);
 									}, function(err) {
-										console.error(new Error("Failed to hash the text using crypty API after saving the file using native file system API"));
+										console.error(new Error("EDITOR.saveFile: Failed to hash the text using crypty API after saving the file using native file system API"));
 										doneSaving(null, path, null);
 									});;
 								}
@@ -1907,11 +1908,11 @@ error.code = fName;
 			
 			if(file.path != path || !file.savedAs) {
 				if(EDITOR.files.hasOwnProperty(path) && EDITOR.files[path] != file) {
-					var err = new Error("There is already a file open with path=" + path);
+					var err = new Error("EDITOR.saveFile: There is already a file open with path=" + path);
 					if(callback) return callback(err, path);
 					else throw err;
 				}
-				console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
+				console.warn("EDITOR.saveFile: File will be saved under another path; old=" + file.path + " new=" + path);
 				
 				// Check if the file exist on disk so we don't accidently overwrite it!
 				EDITOR.doesFileExist(path, function fileExist(err, exist) {
@@ -1931,7 +1932,7 @@ if(exist) {
 								return;
 							}
 							
-								var err = new Error("User canceled the save (as) to prevent overwriting existing file");
+							var err = new Error("EDITOR.saveFile: User canceled the save (as) to prevent overwriting existing file");
 								err.code = "CANCEL";
 								if(callback) callback(err);
 								else throw err;
@@ -1948,7 +1949,7 @@ if(exist) {
 				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
 					if(err) {
 						if(err.code == "ENOENT") {
-							console.warn("File did not exist on disk: " + file.path);
+							console.warn("EDITOR.saveFile: File did not exist on disk: " + file.path);
 						}
 else if(err.code == "ENETDOWN") {
 							if(callback) return callback(err);
@@ -1960,7 +1961,7 @@ else if(err.code == "ENETDOWN") {
 						}
 					}
 					else if(file.hash != hash) {
-						console.log("file.hash=" + file.hash + " hash=" + hash);
+						console.log("EDITOR.saveFile: file.hash=" + file.hash + " hash=" + hash);
 						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "FILE", "warning");
 						return;
 					}
@@ -1994,23 +1995,31 @@ else if(err.code == "ENETDOWN") {
 				else throw err;
 			}
 			
-			if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
+			if(file.savedAs && path != file.path) throw new Error("EDITOR.saveFile: Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
 			else if(path != file.path) {
-				console.warn("File path updated: old=" + file.path + " new=" + path);
+				console.warn("EDITOR.saveFile: File path updated: old=" + file.path + " new=" + path);
 				file.path = path;
 			}
 			
 			if(hash) file.hash = hash;
 			
-			console.log("Successfully saved " + file.path);
+			console.log("EDITOR.saveFile: Successfully saved " + file.path);
 			
 			// Change state to saved, and call afterSave listeners
 			file.saved(function updatedSavedState(err) {
 				
 				// Call back without an error even though some of the afterSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
-				if(callback) return callback(null, path);
+				// We however want to know if there are any failed listeners!
+
+				if(callback) callback(null, path);
 				
+				if(err) {
+					console.log("EDITOR.saveFile: Error in callback from file.saved(): ", err);
+					console.log("EDITOR.saveFile: typeof err=" + typeof err);
+					throw new Error("EDITOR.saveFile: " + file.path + " was successfully saved. Some \"afterSave\" event listeners (eg. one or more plugins listening for \"afterSave\" event) did however fail. This is not a critical error, but should be reported nonetheless... " + err.message );
+				}
+
 			}); 
 		}
 	}
@@ -2023,11 +2032,11 @@ else if(err.code == "ENETDOWN") {
 		// Only works with text files !
 		
 		if(path instanceof File) {
-			throw new Error("Did you mean to use EDITOR.saveFile ? EDITOR.saveToDisk is a lower level method for saving data to disk.");
+			throw new Error("EDITOR.saveToDisk: Did you mean to use EDITOR.saveFile ? EDITOR.saveToDisk is a lower level method for saving data to disk.");
 		}
 		
-		if(typeof path != "string") throw new Error("path=" + path + " is not a string!");
-		if(typeof text != "string") throw new Error("text=" + text + " is not a string!");
+		if(typeof path != "string") throw new Error("EDITOR.saveToDisk: path=" + path + " is not a string!");
+		if(typeof text != "string") throw new Error("EDITOR.saveToDisk: text=" + text + " is not a string!");
 		
 		if(typeof inputBuffer == "function" && saveToDiskCallback == undefined) {
 			saveToDiskCallback = inputBuffer;
@@ -2038,8 +2047,8 @@ else if(err.code == "ENETDOWN") {
 			encoding = undefined;
 		}
 		
-		if(inputBuffer != undefined && typeof inputBuffer != "boolean") throw new Error("Third argument inputBuffer need to be true,false or undefined!");
-		if(inputBuffer != undefined && typeof encoding != "string") throw new Error("Fourth argument encoding need to be a string or undefined!");
+		if(inputBuffer != undefined && typeof inputBuffer != "boolean") throw new Error("EDITOR.saveToDisk: Third argument inputBuffer need to be true,false or undefined!");
+		if(inputBuffer != undefined && typeof encoding != "string") throw new Error("EDITOR.saveToDisk: Fourth argument encoding need to be a string or undefined!");
 		
 		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
 		
@@ -8702,8 +8711,6 @@ EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCa
 		console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
 		if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
 		
-		
-		
 		function evCallback(err, ret) {
 			console.log("Got " + ev + " event callback from " + fName + " err=" + err);
 			if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
@@ -8733,7 +8740,7 @@ EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCa
 		if(++waitCounter >= maxWait) {
 			clearInterval(checkInterval);
 			errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
-			"And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
+			" And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
 			alreadyTooLate = true;
 			allListenersCalled(errors);
 		}

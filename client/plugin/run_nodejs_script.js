@@ -902,8 +902,9 @@ throw err;
 						else if(err) throw err;
 
 						console.log("Run nodejs script: pathPickerTool err=", err, " path=" + path)
-
+						console.time("Run nodejs script: saveFile");
 						EDITOR.saveFile(file, path, function(err, path) {
+							console.timeEnd("Run nodejs script: saveFile");
 							if(err) return alertBox(err.message);
 							if(answer == saveThenRun) prepare(path);
 						});
@@ -962,7 +963,9 @@ throw err;
 				EDITOR.files[stdOutFile].writeLineBreak();
 			}
 			
+			console.time("Run nodejs script: run_nodejs");
 			CLIENT.cmd("run_nodejs", json, function(err, json) {
+				console.timeEnd("Run nodejs script: run_nodejs");
 				if(err) throw err;
 				else {
 					

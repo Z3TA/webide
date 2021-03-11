@@ -44,7 +44,7 @@
 
 		console.log("checkForCommonJsErrors: match=" + match);
 
-		if(match === null) return;
+		if(match === null) return true;
 
 		console.log(match);
 
@@ -52,6 +52,7 @@
 
 		EDITOR.addInfo(pos.row, pos.col + match[0].length-1, "indexOf returns a number!", file, 2);
 
+		return true;
 	}
 
 })();
