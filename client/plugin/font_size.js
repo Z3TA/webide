@@ -73,7 +73,7 @@
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 13px ubuntu";
 			EDITOR.settings.style.fontSize = 13;
-			EDITOR.settings.gridHeight = 16;
+			EDITOR.settings.gridHeight = 16.5;
 			EDITOR.settings.gridWidth = 6.5;
 			EDITOR.settings.leftMargin = originalLeftMargin;
 			EDITOR.settings.tabSpace = originalTabSpace;
