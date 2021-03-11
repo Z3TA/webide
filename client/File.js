@@ -4065,8 +4065,11 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 	
 	File.prototype.saved = function(callback) {
 		/*
-			Only set state
-			Let the editor handle saving and loading from disk
+			Not to be confused with isSaved property
+
+			This method sets the state to saved and calls afterSave event listeners.
+			(Let the editor handle saving and loading from disk)
+
 			*/
 		var file = this;
 		

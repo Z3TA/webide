@@ -376,15 +376,15 @@ function alertBox(msg, code, icon, recursionCount) {
 	Example reason why you want to use custom confirm box:
 	* Native confirm box registers a keyPress if it was called on a keydown event
 */
-function confirmBox(msg, options, dialogOptions, callback, recursionCount) {
+function confirmBox(msg, userOptions, dialogSettings, callback, recursionCount) {
 	
-if(typeof dialogOptions == "function") {
-recursionCount = callback;
-callback = dialogOptions;
-dialogOptions = {};
-}
+	if(typeof dialogSettings == "function") {
+		recursionCount = callback;
+		callback = dialogSettings;
+		dialogSettings = {};
+	}
 
-	var dialog = new Dialog(msg, dialogOptions);
+	var dialog = new Dialog(msg, dialogSettings);
 	
 	if(!dialog.div) {
 		
@@ -396,29 +396,29 @@ dialogOptions = {};
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) console.warn("Unable to show confirmBox msg=" + msg + " options=" + JSON.stringify(options));
+			if(recursionCount > 4) console.warn("Unable to show confirmBox msg=" + msg + " userOptions=" + JSON.stringify(userOptions));
 			
-			confirmBox(msg, options, callback, recursionCount);
+			confirmBox(msg, userOptions, callback, recursionCount);
 		
 		}, 100);
 	}
 	
 	dialog.div.setAttribute("role", "alertdialog");
 	
-	for (var i=0; i<options.length; i++) {
+	for (var i=0; i<userOptions.length; i++) {
 		makeButton(i);
 	}
 	
 	return dialog;
 	
 	function makeButton(i) {
-		var txt = options[i];
+		var txt = userOptions[i];
 		var button = document.createElement("button");
 		button.setAttribute("class", "confirm");
 		button.setAttribute("tabindex", i+1);
 		
-		// The last button will be the default (get focus)
-		if(i == (options.length -1)) button.setAttribute("focus", "true");
+		if(dialogSettings.defaultOption == txt) button.setAttribute("focus", "true");
+		else if(i == (userOptions.length -1)) button.setAttribute("focus", "true"); // The last button will be the default (get focus)
 		
 		button.appendChild(document.createTextNode(txt));
 		

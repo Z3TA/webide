@@ -35,7 +35,7 @@
 		winMenuStopScript = EDITOR.windowMenu.add(S("stop_nodejs_script"), ["Node.js", 2], stopNodeJsScript);
 		
 		EDITOR.on("ctxMenu", showRunNodejsScriptMenuItem);
-		EDITOR.on("runScript", runNodeJsScriptMaybe);
+		EDITOR.on("runScript", runNodeJsScriptMaybe, 3000);
 		EDITOR.on("previewTool", runNodeJsScriptMaybe, 3000); // Run after Static Site generator and web_preview
 		
 		if(!UTIL.isPrivateIp(window.location.hostname) || EDITOR.settings.devMode) {
@@ -177,7 +177,9 @@ nodeJsBanner.hide();
 	function runNodeJsScriptMaybe(file, combo) {
 		var ext = UTIL.getFileExtension(file.path);
 		
-		if(ext == "js" || ext == "stdout") {
+		console.log("Run nodejs script: runNodeJsScriptMaybe: ext=" + ext + " isNodejsScript(file)=" + isNodejsScript(file));
+
+		if(ext == "js" || ext == "stdout" || isNodejsScript(file)) {
 			runNodeJsScript();
 			return HANDLED;
 		}
@@ -307,17 +309,17 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 	function isNodejsScript(file) {
 		if(!file) return false;
 		
-		if(UTIL.getFileExtension(file.name) != "js") return false;
-		
 		var text = file.text;
+
+		if(text.indexOf("console.log") != -1) return true;
+
+		if(UTIL.getFileExtension(file.name) != "js") return false;
 		
 		if(text.indexOf("document.getElementById") != -1) return false;
 		if(text.indexOf("window.onload") != -1) return false;
 		
-		
 		return true;
-		
-	}
+		}
 	
 	function nodejsMessage(msg) {
 		console.log("nodejsMessage: " + JSON.stringify(msg));
@@ -815,7 +817,7 @@ throw err;
 		nodeJsBanner.show();
 		
 		if(startStopButton) {
-startStopButton.classList.remove("start");
+			startStopButton.classList.remove("start");
 			startStopButton.innerText = "Stop";
 			startStopButton.onclick = stopNodeJsScript
 		}
@@ -826,7 +828,7 @@ startStopButton.classList.remove("start");
 		else console.warn("filePath=" + filePath + " not in runningScripts=" + JSON.stringify(runningScripts));
 		
 		if(startStopButton) {
-startStopButton.classList.add("start");
+			startStopButton.classList.add("start");
 			startStopButton.innerText = "Save & Restart Node.js script";
 			startStopButton.onclick = saveAndRun;
 		}
@@ -855,8 +857,8 @@ startStopButton.classList.add("start");
 			
 			scriptStopped(filePath);
 			
-				console.log("Stopped script: " + json.filePath);
-			});
+			console.log("Stopped script: " + json.filePath);
+		});
 		
 		return false;
 	}
@@ -867,7 +869,7 @@ startStopButton.classList.add("start");
 		EDITOR.ctxMenu.hide();
 		
 		if(!file) {
-alertBox("No file open!");
+			alertBox("No file open!");
 			return ALLOW_DEFAULT;
 		}
 		
@@ -875,23 +877,77 @@ alertBox("No file open!");
 		
 		console.log("Run nodejs script: " + filePath);
 		
-		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
-		
-		if(filePath == file.path && !file.savedAs) return alertBox("Save the file before running it!");
-		
-		var json = {filePath: filePath, debug: true};
-		
-		// Check if the file requires arguments
-		if(file.text.indexOf("process.argv") != -1) {
-			promptBox("Use these arguments (process.argv): ", {defaultValue: defaultArguments, dialogDelay: 0}, function(args) {
-				if(args==null) return;
-				json.args = args;
-				defaultArguments = args;
-				start(json);
-			});
+		if(filePath.substr(filePath.length-7) == ".stdout") {
+			filePath = filePath.substr(0, filePath.length-7);
+			file = EDITOR.files[filePath];
 		}
-		else start(json);
+
+		var fileName = UTIL.getFilenameFromPath(filePath);
+
+		console.log("Run nodejs script: fileName=" + fileName + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " filePath=" + filePath + " file.path=" + file.path + " ");
+
+		if(filePath == file.path && !file.savedAs) {
+
+			// work in progress! needs testing!
+
+			var message = fileName + " is not \"saved as\" (saved to disk). It needs to be saved to disk before running with Node.js!";
+			var saveThenRun = "Save to disk, then Run";
+			var saveButDontRun = "Save the file, but do not run";
+			var cancel = "Cancel";
+			return confirmBox(message, [saveThenRun, saveButDontRun, cancel], {defaultOption: saveThenRun}, function(answer) {
+				if(answer == cancel) return;
+				else if(answer == saveThenRun || answer == saveButDontRun) {
+					EDITOR.pathPickerTool({defaultPath: UTIL.joinPaths(EDITOR.user.homeDir, filePath)}, function(err, path) {
+						if(err && err.code == "CANCEL") return;
+						else if(err) throw err;
+
+						console.log("Run nodejs script: pathPickerTool err=", err, " path=" + path)
+
+						EDITOR.saveFile(file, path, function(err, path) {
+							if(err) return alertBox(err.message);
+							if(answer == saveThenRun) prepare(path);
+						});
+					});
+				}
+				else throw new Error("Unknown answer=" + answer);
+			});
+
+		}
+		else if(!file.isSaved) {
+			var message = fileName + " is not saved (it has unsaved changes). Do you want to save it before running? Or run the last saved version currently on disk (without new changes) ?";
+			var saveThenRun = "Save & Run";
+			var runOld = "Run without new changes";
+			var cancel = "Do not run";
+			return confirmBox(message, [saveThenRun, runOld, cancel], function(answer) {
+				if(answer == cancel) return;
+				else if(answer == runOld) prepare(filePath);
+				else if(answer == saveThenRun) {
+					EDITOR.saveFile(file, filePath, function(err, path) {
+						if(err) return alertBox(err.message);
+						prepare(path);
+					});
+				}
+				else throw new Error("Unknown answer=" + answer);
+			});
+
+		}
+		else prepare(filePath);
+
+		function prepare(filePath) {
+			var json = {filePath: filePath, debug: true};
 		
+			// Check if the file requires arguments
+			if(file.text.indexOf("process.argv") != -1) {
+				promptBox("Use these arguments (process.argv): ", {defaultValue: defaultArguments, dialogDelay: 0}, function(args) {
+					if(args==null) return;
+					json.args = args;
+					defaultArguments = args;
+					start(json);
+				});
+			}
+			else start(json);
+		}
+
 		return PREVENT_DEFAULT;
 		
 		function start(json) {
@@ -914,10 +970,10 @@ alertBox("No file open!");
 					
 					console.log("Started script: " + json.filePath);
 					EDITOR.stat("run_nodejs_script");
-					}
+				}
 			});
 		}
-		}
+	}
 	
 	function appendFile(file, msg) {
 		
@@ -999,18 +1055,18 @@ alertBox("No file open!");
 		for (var i=0; i<callFrames.length; i++) {
 			for(var path in EDITOR.files) {
 				if( UTIL.isSamePath(path, callFrames[i].url) || UTIL.isSamePath(  UTIL.joinPaths(EDITOR.user.homeDir, path), callFrames[i].url) ) {
-return {
+					return {
 						filePath: path,
 						file: EDITOR.files[path],
-					row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
-					col: callFrames[i].columnNumber
-				};
-			}
-else {
+						row: callFrames[i].lineNumber, // Node.js adds one LOC to each script, then the inspector tries to compensate!? but gets it wrong
+						col: callFrames[i].columnNumber
+					};
+				}
+				else {
 					console.log("findFile: Not the same: path=" + path + " callFrames[" + i + "].url=" + callFrames[i].url);
-}
+				}
+			}
 		}
-}
 		
 		return null;
 	}

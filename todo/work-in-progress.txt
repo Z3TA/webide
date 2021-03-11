@@ -3,9 +3,15 @@
 What I'm working on
 -------------------
 
+running a script takes very long time if it runs after being saved as!
+
 ---
 
-False posetive indexOf warning: 
+todo: highlightjs theme for dark theme!!!!!
+
+---
+
+False positive indexOf warning: 
 else if( ( nextChar == '"' && (selectedText.indexOf('"') == -1 ) ) {
 
 }

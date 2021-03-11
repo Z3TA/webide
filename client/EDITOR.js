@@ -77,6 +77,7 @@ EDITOR.settings = {
 		width: 1,
 		color: "rgb(0,0,0)"
 	},
+	defaultEventOrder: 1000,
 	showLineNumbers: true, // Can be used to toggle line-numbers on/off
 	leftMargin: 50,
 	rightMargin: 50,
@@ -3549,7 +3550,7 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 			}
 		}
 		
-		if(options.order == undefined) options.order = 1000;
+		if(options.order == undefined) options.order = EDITOR.settings.defaultEventOrder;
 		if(typeof options.fun != "function") {
 			throw new Error("There needs to be a function!");
 		}
@@ -8489,7 +8490,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	
 	EDITOR.pathPickerTool = function pathPicker(options, callback) {
 		// Show a tool for picking a file path, which will callback with the chosen path
-		
+		// If the user clicks cancel or Esc to close the dialog, first parameter in callback will be an error with code=CANCEL
 		console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
 		
 		if(typeof options == "function") {
