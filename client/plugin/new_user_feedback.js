@@ -5,24 +5,25 @@
 	*/
 	"use strict";
 	
-	var windowMenFeedbackPositive, windowMenFeedbackNegative, rootMenuItem;
+	var windowMenuFeedbackPositive, windowMenuFeedbackNegative, rootMenuItem;
 	var alreadySentFeedback = false;
 
 	EDITOR.plugin({
 		desc: "Get user feedback",
 		load: function loadUserFeedback() {
 
-			windowMenFeedbackPositive = EDITOR.windowMenu.add("☺", ["☺", 1], positive);
-			windowMenFeedbackNegative = EDITOR.windowMenu.add("☹", ["☺", 2], negative);
+			windowMenuFeedbackPositive = EDITOR.windowMenu.add("☺", ["☺", 1], positive);
+			windowMenuFeedbackNegative = EDITOR.windowMenu.add("☹", ["☺", 2], negative);
 			
-			//windowMenFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
+			//windowMenuFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
 			
-			rootMenuItem = windowMenFeedbackPositive.parentMenu.parentMenuItem;
-			var label = rootMenuItem.domElement.getElementsByTagName("a")[0];
-			label.setAttribute("title", "Send feedback");
+			rootMenuItem = windowMenuFeedbackPositive.parentMenu.parentMenuItem;
+
+			document.getElementById("menu_☺").title = "Send feedback, make a suggestion, or report a problem";;
 			
-			console.log("userFeedback: rootMenuItem=", rootMenuItem, " label=", label);
-			
+			windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
+			windowMenuFeedbackNegative.domElement.title = "Report a problem";
+
 			if(QUERY_STRING["embed"]) return;
 			
 			CLIENT.on("loginCounter", expectations, 2000);
@@ -32,9 +33,10 @@
 			
 			CLIENT.removeEvent("loginCounter", expectations);
 			
-			EDITOR.windowMenu.remove(windowMenFeedbackPositive);
-			EDITOR.windowMenu.remove(windowMenFeedbackNegative);
+			EDITOR.windowMenu.remove(windowMenuFeedbackPositive);
+			EDITOR.windowMenu.remove(windowMenuFeedbackNegative);
 			EDITOR.windowMenu.remove(rootMenuItem);
+
 		}
 	});
 	
@@ -47,7 +49,7 @@
 	function negative() {
 		EDITOR.stat("sad_face");
 		
-		askForFeedback("I'm so sorry! What happaned? ", {rows: 5, placeholder: "This happened... I was expecting... #$@&%*!?"}, "Feedback, sad face");
+		askForFeedback("What happaned? ", {rows: 5, placeholder: "This happened... I was expecting... #$@&%*!?"}, "Feedback, sad face");
 	}
 	
 	

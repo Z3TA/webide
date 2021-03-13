@@ -4301,6 +4301,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 	
 	function DropdownMenuItem(options) {
 		
+		console.log("DropdownMenuItem: options.label=" + options.label + " options.parentMenu=", options.parentMenu);
+
 		if(typeof options != "object") throw new Error("Expected an object: options=" + options);
 		
 		var item = this;
@@ -4338,6 +4340,11 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		item.domElement.setAttribute("id", "dropdownMenu_" + label);
 		item.domElement.setAttribute("role", "menuitem");
 		
+		if(options.parentMenu && options.parentMenu.parentMenu === null) {
+			// Make it easier to target
+			item.domElement.setAttribute("id", "menu_" + options.label);
+		}
+
 		
 		item.activated = false;
 		
