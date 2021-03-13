@@ -41,6 +41,14 @@
 	Problem 7: Service worker fetch directly from the server, and there seem to be no way to retrive a file from the cache from within the service-worker
 	Solution 7: fetch version.txt outside the service worker in order to get it from the service-worker cache. Then send a FORCE cache reload request to the service worker!
 	
+	Problem 8: Google page speed complains about too many files being downloaded,
+	Solution1: Skip documentation etc (users rarely look at them anyway)
+	Solution2: We now wait 5 minutes before fetching files for the offline cache... See problem below
+
+	Problem 9: The files fetched for the offline cache does not fetch from the browser cache!... And thus counts to the total download size, making the client download double!
+	Solution: Wait some time (five minutes) before registering the service worker
+
+
 	self.registration.unregister() !?
 	
 */
@@ -90,13 +98,11 @@ var CACHE_FILES = [
 	'/manifest.webmanifest', // Loaded at every page load, needed for "add to home screen" (A2HS)
 	'/gfx/android-chrome-192x192.png', // Chrome also downloads this icon on every page load
 	
-	/*
-		Google page speed complains about too many files being downloaded,
-		so skip documentation etc (users rarely look at them anyway)
-		
-		
+	
 	// About documentation etc
 	'/about/about.htm',
+	'/about/popups.htm',
+
 	'/gfx/doc.css',
 	'/gfx/clouds.js',
 	'/gfx/clouds/0.png',
@@ -110,7 +116,7 @@ var CACHE_FILES = [
 	// Signup
 	'/signup/signup.htm',
 		'/signup/signup.js',
-	*/
+	
 	
 	
 	// Cache VNC
