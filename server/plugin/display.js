@@ -550,7 +550,7 @@ function killProcess(command, callback) {
 		if(err) return error(err);
 		
 		if(resultList.length == 0) {
-			log("killProcess: Did not find command=" + command, DEBUG);
+			log("killProcess: Did not find a process with command=" + command, DEBUG);
 			callback(null, false); callback=null; return;
 		}
 		
