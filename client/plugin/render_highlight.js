@@ -14,7 +14,7 @@
 	}
 
 
-	EDITOR.addRender(highlightRender, 101);
+	EDITOR.addRender(highlightRender, 1915);
 	
 	console.log("Loaded highlightRender");
 	
