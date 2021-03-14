@@ -62,7 +62,6 @@ function Dialog(msg, options) {
 		}
 	}
 	
-	
 	var message = document.createElement("div");
 	message.setAttribute("class", "message");
 	message.innerHTML = msg; // Support HTML
@@ -353,19 +352,49 @@ function alertBox(msg, code, icon, recursionCount) {
 	
 	dialog.div.setAttribute("role", "alert");
 	
-	
 	var button = document.createElement("button");
 	button.setAttribute("class", "alert");
 	button.setAttribute("focus", "true");
 	button.appendChild(document.createTextNode("OK"));
-	
+
 	button.addEventListener("click", function(clickEvent) {
 		console.log("alertBox button click: EDITOR.input=" + ((typeof EDITOR != "undefined") && EDITOR.input) + "");
 		dialog.close(clickEvent);
 	}, false);
-	
+
 	dialog.div.appendChild(button);
-	
+
+
+	var feedback = document.createElement("aside");
+	feedback.classList.add("feedback");
+	feedback.appendChild( document.createTextNode("Is this message helpful? eg. do you understand what it means? ") );
+
+	var yes = document.createElement("a");
+	yes.classList.add("send");
+	yes.appendChild(document.createTextNode("Yes"));
+	yes.onclick= function helpful() {
+		feedback.style.display="none";
+		EDITOR.sendFeedback(dialog.div.innerText, "Helpful alert", true);
+	};
+
+	var no = document.createElement("a");
+	no.classList.add("send");
+	no.appendChild(document.createTextNode("No"));
+	no.onclick=function notHelpful() {
+		feedback.style.display="none";
+		EDITOR.sendFeedback(dialog.div.innerText, "Not helpful alert", true);
+	};
+
+	feedback.appendChild(yes);
+	feedback.appendChild( document.createTextNode(" ") );
+	feedback.appendChild(no);
+
+	//var dialogMessageDiv = dialog.div.getElementsByClassName("message")[0];
+	//dialogMessageDiv.appendChild(feedback);
+
+	dialog.div.appendChild(feedback);
+	dialog.div.appendChild(button);
+
 	return dialog;
 }
 

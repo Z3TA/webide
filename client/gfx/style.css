@@ -1589,6 +1589,21 @@ div.gotoFile li:hover {
 	cursor: pointer;
 }
 
+.dialog .feedback {
+	font-size: 11px;
+	display: inline;
+	width: 70%;
+	float: left;
+	text-align: left;
+	padding-left: 20px;
+	color: #888;
+}
+
+.dialog .feedback .send {
+	color: #4848a4;
+	text-decoration: underline;
+	cursor: pointer;
+}
 
 
 /* ############### Mercurial plugin widgets ############### */
@@ -2403,6 +2418,12 @@ margin-top: 20px;
 		margin-bottom: 10px;
 		font-size: 12px;
 	}
+
+	.dialog .feedback {
+		padding-left: 10px;
+		width: 60%;
+		font-size: 10px;
+	}
 	
 	.header .discoveryBar .discoveryItem {
 		max-width: 26px;
@@ -2512,8 +2533,17 @@ max-width: 40px;
 	
 	.dialog .message {
 		min-width: 80px;
-}
+	}
 	
+	.dialog .feedback {
+		width: 100%;
+		margin-bottom: 10px;
+	}
+
+	.dialog button.alert {
+		float: none!important; /* center the OK button on the alert modal */
+	}
+
 	.header .discoveryBar {
 		/* make it show on separate row */
 		float: none;

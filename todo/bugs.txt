@@ -1603,6 +1603,35 @@ Issues with Hg annotations after hot reloading the plugin!
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+
+
+---
+
+Stacktrace:
+Error: fName=showVersionControlWidget is not a unique function name among context menu items! Or there is still a reference to an old element!
+at Object.addItem (https://webide.se/:20:70959)
+at Object.addTempCtxMenuItem [as addTemp] (https://webide.se/:20:69162)
+at Object.hgstatus (https://webide.se/:84:28590)
+at v.serverMessage [as onmessage] (https://webide.se/:16:1470)
+at v.E.dispatchEvent (https://webide.se/:15:3543)
+at v._dispatchMessage (https://webide.se/:15:16458)
+at v._didMessage (https://webide.se/:15:17339)
+at WebSocket.n.ws.onmessage (https://webide.se/:15:19267)
+
+Current file: terminal1
+Browser: Mozilla/5.0 (X11; CrOS x86_64 13505.112.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.152 Safari/537.36 (Chrome)
+Version: 6285
+Dist: repo
+Last server msg: {
+"resp": {
+"modified": [],
+"added": [],
+"removed": [],
+"missing": [],
+"untracked": [],
+
+---
+
 When using the WysiwygEditor to preview, then saving *any* file it pops up a random? preview window.
 Even if the file you saved is not part of the SSG-site!
 

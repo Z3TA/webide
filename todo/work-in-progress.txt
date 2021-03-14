@@ -3,6 +3,16 @@
 What I'm working on
 -------------------
 
+User is confused by the different modals... dropdown menu, context menu, alertBoxes ... ...
+
+
+
+---
+
+custom domains. Able to (add to nginx) a domain name that points to myuser.webide.se or d80.myuser.webide.se or 8080.myuser.webide.se
+
+
+
 
 ---
 
