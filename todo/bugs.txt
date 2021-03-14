@@ -36,6 +36,9 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Open local desktop from Macbook. The VNC screen is too large. Able to zoom!? on Safari
+
+---
 
 Line number is sometimes off. More likely if the OS has screen scaling...
 

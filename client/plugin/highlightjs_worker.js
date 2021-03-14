@@ -179,6 +179,9 @@ onmessage = function onmessage(ev) {
   var classes = [];
   var htmlEntity;
 
+  var removedClass = "";
+  var len = 0;
+
   for (var row=0; row<rows.length; row++) {
     col = 0;
     lastLength = 0;
@@ -191,58 +194,55 @@ onmessage = function onmessage(ev) {
     rows[row] = rows[row].replace(/&quot;/g, '"');
     rows[row] = rows[row].replace(/&#x27;/g, "'");
 
-    walk(rows, row);
+    // A loop to avoid stack limit
+    walk: for(;;) {
+      //console.log("highlight:worker:onmessage:walk: row=" + row + " col=" + col + " row:" + rows[row]);
+
+      matchStart = rows[row].match(reSpan);
+      matchEnd = rows[row].match(reSpanEnd);
+
+      //console.log("highlight:worker:onmessage: matchStart=", matchStart);
+      //console.log("highlight:worker:onmessage: matchEnd=", matchEnd);
+
+      if(matchStart && matchEnd && matchStart.index < matchEnd.index || matchStart && !matchEnd) {
+
+        //console.log("highlight:worker:onmessage:walk: Found class=" + matchStart[1]);
+
+        classes.push(matchStart[1]);
+        col += matchStart.index;
+        rows[row] = rows[row].slice(matchStart.index + matchStart[0].length);
+        nextLength = matchStart[0].length;
+      }
+      else if(matchStart && matchEnd && matchStart.index > matchEnd.index || !matchStart && matchEnd) {
+        var len = matchEnd.index;
+        if(len > 0) {
+          //console.log("highlight:worker:onmessage:walk: Added color on row=" + row + " col=" + col + " len=" + len + "");
+          colors.push(  { row:row, col:col, len:len, styles:classes.slice() }  );
+          //console.log("highlight:worker:onmessage:walk: push color: " + JSON.stringify(colors[colors.length-1]));
+        }
+        col += matchEnd.index;
+
+        removedClass = classes.pop();
+        //console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on row=" + row + " col=" + col + " len=" + len);
+
+        rows[row] = rows[row].slice(matchEnd.index + matchEnd[0].length);
+      }
+      else if(!matchStart && !matchEnd) {
+        if(rows[row].length > 0 && classes.length > 0) {
+          colors.push(  { row:row, col:0, len:rows[row].length, styles:classes.slice() }  );
+          //console.log("highlight:worker:onmessage:walk: push color:" + JSON.stringify(colors[colors.length-1]) + "rows[" + row + "]=" + rows[row]);
+        }
+        //console.log("highlight:worker:onmessage:walk: No more spans. row=" + row + " classes=" + JSON.stringify(classes) + " rows[" + row + "]=" + rows[row]);
+        break walk;
+      }
+      else {
+        throw new Error( "matchStart=" + JSON.stringify(matchStart) + " matchEnd=" + JSON.stringify(matchEnd) );
+      }
+    }
 
   }
 
-  function walk(rows, row) {
-    
-    //console.log("highlight:worker:onmessage:walk: row=" + row + " col=" + col + " row:" + rows[row]);
-
-    var matchStart = rows[row].match(reSpan);
-    var matchEnd = rows[row].match(reSpanEnd);
-
-    //console.log("highlight:worker:onmessage: matchStart=", matchStart);
-    //console.log("highlight:worker:onmessage: matchEnd=", matchEnd);
-
-    if(matchStart && matchEnd && matchStart.index < matchEnd.index || matchStart && !matchEnd) {
-      
-      //console.log("highlight:worker:onmessage:walk: Found class=" + matchStart[1]);
-
-      classes.push(matchStart[1]);
-      col += matchStart.index;
-      rows[row] = rows[row].slice(matchStart.index + matchStart[0].length);
-      nextLength = matchStart[0].length;
-    }
-    else if(matchStart && matchEnd && matchStart.index > matchEnd.index || !matchStart && matchEnd) {
-      var len = matchEnd.index;
-      if(len > 0) {
-        //console.log("highlight:worker:onmessage:walk: Added color on row=" + row + " col=" + col + " len=" + len + "");
-        colors.push(  { row:row, col:col, len:len, styles:classes.slice() }  );
-        //console.log("highlight:worker:onmessage:walk: push color: " + JSON.stringify(colors[colors.length-1]));
-      }
-      col += matchEnd.index;
-      
-      var removedClass = classes.pop();
-      //console.log("highlight:worker:onmessage:walk: Ended class=" + removedClass + " on row=" + row + " col=" + col + " len=" + len);
-      
-      rows[row] = rows[row].slice(matchEnd.index + matchEnd[0].length);
-    }
-    else if(!matchStart && !matchEnd) {
-      if(rows[row].length > 0 && classes.length > 0) {
-        colors.push(  { row:row, col:0, len:rows[row].length, styles:classes.slice() }  );
-        //console.log("highlight:worker:onmessage:walk: push color:" + JSON.stringify(colors[colors.length-1]) + "rows[" + row + "]=" + rows[row]);
-      }
-      //console.log("highlight:worker:onmessage:walk: No more spans. row=" + row + " classes=" + JSON.stringify(classes) + " rows[" + row + "]=" + rows[row]);
-      return;
-    }
-    else {
-      throw new Error( "matchStart=" + JSON.stringify(matchStart) + " matchEnd=" + JSON.stringify(matchEnd) );
-    }
-
-    walk(rows, row);
-
-  }
+  
 
   //console.log("highlight:worker:onmessage: colors=" + JSON.stringify(colors, null, 2));
 
