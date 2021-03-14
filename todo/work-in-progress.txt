@@ -3,9 +3,13 @@
 What I'm working on
 -------------------
 
+There should be a login/wall/screen so that you can't do anything until you are logged in!
+
+
+Can't do anything, nothing will work, without logging in...
+
+
 User is confused by the different modals... dropdown menu, context menu, alertBoxes ... ...
-
-
 
 ---
 
