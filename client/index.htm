@@ -114,14 +114,37 @@
 
 
 <body id="body">
-<noscript>
-<div>
-	<p class="noscript">WebIDE is built with JavaScript<br />
-	(you need to enable JavaScript!)</p>
+
+<form id="loginScreen" style="position: absolute; width: 100%; height: 100%; z-index: 10;">
+	<center>
+	<img src="gfx/logo.svg" height="40%" style="max-height: 40vh; width: auto;" />
+	<br />
+
+	<noscript>
+	<div>
+		<p class="noscript">WebIDE is built with JavaScript<br />
+		(you need to enable JavaScript!)</p>
 	
-	<p class="noscript"><a href="about/about.htm">about</a> - <a href="signup/signup.htm">signup</a></p>
-</div>
-</noscript>
+	</div>
+	</noscript>
+
+	<div class="loginbox">
+		<label for="username">Username:</label><br />
+		<input class="input" type="text" id="username" placeholder="username" />
+		<br />
+		<label for="password">Password:</label><br />
+		<input class="input" type="password" id="password" placeholder="password" />
+	</div>
+	<br />
+	<button id="loginButton" type="submit" disabled>Login</button> 
+	<button id="loginAsGuest" disabled>Login as guest</button>
+	<br />
+	<br />
+	<p><a href="about/about.htm">about</a> - <a href="signup/signup.htm">signup</a></p>
+
+	</center>
+
+</form>
 
 <div id="wireframe" class="wireframe rows beforeload">
 	<div id="header" class="header beforeload" draggable="false">
@@ -163,7 +186,7 @@
 
 <ul id="contextmenu" class="contextmenu" aria-label="Context menu" role="navigation">
 	<li class="temp"><ul id="contextmenuTemp"></ul></li>
-<li class="general"><ul id="contextmenuGeneral"></ul></li>
+	<li class="general"><ul id="contextmenuGeneral"></ul></li>
 	<!--<li>First item</li>
 	<li class="sep">Separator</li>
 	<li>Second item</li>-->

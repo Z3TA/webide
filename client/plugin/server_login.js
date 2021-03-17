@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	return;
+
 	var DEFAULT_USERNAME = "admin";
 	var DEFAULT_PASSWORD = "admin";
 	

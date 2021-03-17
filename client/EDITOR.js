@@ -9853,66 +9853,148 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			return true;
 		}
 
-	if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
+		if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
 	
-	contextMenuEvent.preventDefault();
-	console.log("contextmenu prevented! tag=" + tag);
-	return false;
-}, false);
+		contextMenuEvent.preventDefault();
+		console.log("contextmenu prevented! tag=" + tag);
+		return false;
+	}, false);
 
 
-// Modern browsers. Note: 3rd argument is required for Firefox <= 6
-if (window.addEventListener) {
-	window.addEventListener('paste', paste, false);
-}
-// IE <= 8
-else {
-	window.attachEvent('onpaste', paste);
-}
+	// Modern browsers. Note: 3rd argument is required for Firefox <= 6
+	if (window.addEventListener) {
+		window.addEventListener('paste', paste, false);
+	}
+	// IE <= 8
+	else {
+		window.attachEvent('onpaste', paste);
+	}
 
-window.onpaste = function() {alert("paste window");};
+	window.onpaste = function() {alert("paste window");};
 
-window.addEventListener('copy', copy);
-//window.addEventListener('paste', paste);
-window.addEventListener('cut', cut);
+	window.addEventListener('copy', copy);
+	//window.addEventListener('paste', paste);
+	window.addEventListener('cut', cut);
 
-window.addEventListener("message", onMessage, false);
-
-
-// Fix annoying scrolling on Mobile
-window.addEventListener("scroll", preventMotion, false);
-//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
+	window.addEventListener("message", onMessage, false);
 
 
-
-function preventMotion(event) {
-	if(EDITOR.scrollingEnabled) return true;
-	//return true;
-	event.preventDefault();
-	event.stopPropagation();
-	window.scrollTo(0, 0);
-	console.log("Prevented scroll!");
-}
-
-// End: Annoying scrolling fix
+	// Fix annoying scrolling on Mobile
+	window.addEventListener("scroll", preventMotion, false);
+	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 
 
-function main() {
+
+	function preventMotion(event) {
+		if(EDITOR.scrollingEnabled) return true;
+		//return true;
+		event.preventDefault();
+		event.stopPropagation();
+		window.scrollTo(0, 0);
+		console.log("Prevented scroll!");
+	}
+
+	// End: Annoying scrolling fix
+
+
+	function main() {
 	
-	console.log("Starting the editor ...");
+		console.log("Starting the editor ...");
 	
 		window.name = "editor"; // For focus access
 	
-	//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
+		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 	
-	EDITOR.on("moveCaret", function clearInfoBubblesWhenCaretIsMoved(file, caret) {
-		// Clear info messages in this file
-		EDITOR.removeAllInfo(file);
+
+		EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser", "editorServerPw"], function gotLoginFromLocalStorage(err, stored) {
+			if(err) {
+				console.error(err);
+			}
+
+			var loginScreen = document.getElementById("loginScreen");
+			if(!loginScreen) {
+				console.warn("No loginScreen found!");
+				return;
+			}
+
+			var loginButton = document.getElementById("loginButton");
+			var loginAsGuest = document.getElementById("loginAsGuest");
+
+			loginScreen.onsubmit = function() {
+				if(loginButton.disabled) return false;
+
+				var elUser = document.getElementById("username");
+				var elPw = document.getElementById("password");
+				if(elUser && elPw) {
+					attemptLogin(elUser.value, elPw.value);
+				}
+				
+				return false;
+			}
+
+			loginAsGuest.onclick = function() {
+				attemptLogin("guest", "guest");
+			}
+
+			var url = stored.editorServerUrl;
+			if(url) var server = {url: url};
+
+			CLIENT.connect(server, function connectedToServer(err) {
+				if(err) return alertBox(err.message);
+
+				var nat_code = QUERY_STRING["nat_code"];
+				if(nat_code) {
+					// Send nat request before logging in
+					console.log("Seding NAT request after submitting form...");
+					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
+						console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
+						if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
+						loginMaybe();
+					});
+				}
+				else {
+					loginMaybe();
+				}
+
+				function loginMaybe() {
+					if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
+
+					username.focus();
+					loginButton.disabled = false;
+					loginAsGuest.disabled = false;
+
+				}
+			});
+
+			function attemptLogin(userValue, pwValue) {
+				
+				loginButton.disabled = true;
+				loginAsGuest.disabled = true;
+
+				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
+					if(err) {
+						console.error(err);
+						loginButton.disabled = false;
+						loginAsGuest.disabled = false;
+						alertBox(err.message);
+					}
+					else {
+						loginScreen.style.display='none';
+					}
+				});
+			}
+		});
 		
-		return true;
-	});
+		
+
+		EDITOR.on("moveCaret", function clearInfoBubblesWhenCaretIsMoved(file, caret) {
+			// Clear info messages in this file
+			EDITOR.removeAllInfo(file);
+		
+			return true;
+		});
 	
-	bootstrap();
+		bootstrap();
 	
 		var canvas = EDITOR.canvas = document.getElementById("editorCanvas");
 		
@@ -9924,7 +10006,7 @@ function main() {
 		
 		// Don't bother resetting the canvas context here, wait for the resize!
 	
-		
+		// TEST-CODE-START
 		setTimeout(debugCtx, 1);
 		setTimeout(debugCtx, 10);
 		setTimeout(debugCtx, 100);
@@ -9933,22 +10015,22 @@ function main() {
 		function debugCtx() {
 			console.log("DebugCtx: (interval) windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
 		}
+		// TEST-CODE-END
 		
-		
-	EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
+		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 	
-	EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
-	//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+		EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 	
-	EDITOR.windowMenu.add(S("Autocomplete"), [S("Edit"), 2], EDITOR.autoComplete);
+		EDITOR.windowMenu.add(S("Autocomplete"), [S("Edit"), 2], EDITOR.autoComplete);
 	
-	EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
+		EDITOR.bindKey({desc: "Show context menu", key: "ContextMenu", 
 			fun: function showContextMenu(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
-			EDITOR.input = false;
+				EDITOR.input = false;
 				EDITOR.ctxMenu.show(keyDownEvent);
-			return PREVENT_DEFAULT;
-		}
-	});
+				return PREVENT_DEFAULT;
+			}
+		});
 		
 		EDITOR.registerAltKey({
 			char: ";", alt:1, label: "☰", fun: function() {
@@ -9957,33 +10039,33 @@ function main() {
 		});
 		
 		EDITOR.registerAltKey({char: "space", alt:2, label: "Preview", fun:
-		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-			EDITOR.previewTool(file, someEvent);
-		}
-	});
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.previewTool(file, someEvent);
+			}
+		});
 	
 		EDITOR.windowMenu.add(S("live_preview"), [S("Tools"), 1], EDITOR.previewTool);
 	
 		EDITOR.registerAltKey({char: "Enter", alt:1, label: S("run"), fun:
-		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-			EDITOR.runScript(file, someEvent);
-		}
-	});
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.runScript(file, someEvent);
+			}
+		});
 	
 		EDITOR.registerAltKey({char: "Enter", alt:2, label: S("stop"), fun:
-		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-			EDITOR.stopScript(file, someEvent);
-		}
-	});
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.stopScript(file, someEvent);
+			}
+		});
 	
-	EDITOR.registerAltKey({char: "c", alt:1, label: "Commit", fun:
-		function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
-			EDITOR.commitTool(file);
-		}
-	});
+		EDITOR.registerAltKey({char: "c", alt:1, label: "Commit", fun:
+			function(file, combo, character, charCode, direction, targetElementClass, someEvent) {
+				EDITOR.commitTool(file);
+			}
+		});
 	
 	
-	window.onbeforeunload = confirmExit;
+		window.onbeforeunload = confirmExit;
 	
 		window.onblur = function() {
 			console.log("window.onblur!");
@@ -10001,221 +10083,221 @@ function main() {
 			EDITOR.windowGotFocus = true;
 		}
 		
-	if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
+		if(!EDITOR.lastElementWithFocus) EDITOR.lastElementWithFocus = canvas;
 	
 	
-	// Handle file save dialog
-	var fileSaveAs = document.getElementById("fileSaveAs");
-	if(fileSaveAs) {
-		fileSaveAs.addEventListener('change', chooseSaveAsPath, false);
-	}
-	else {
-		console.warn("No fileSaveAs dialog!");
-	}
-	
-	// Handle file open dialog
-	fileOpenHtmlElement = document.getElementById("fileInput");
-	fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
-	
-	// Handle directory dialog
-	directoryDialogHtmlElement = document.getElementById("directoryInput");
-	directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
-		
-		console.log("Directory selected ...");
-		
-		if(directoryDialogCallback == undefined) {
-			throw new Error("There is no listener for the open directory dialog!");
+		// Handle file save dialog
+		var fileSaveAs = document.getElementById("fileSaveAs");
+		if(fileSaveAs) {
+			fileSaveAs.addEventListener('change', chooseSaveAsPath, false);
 		}
-		
-		var file = changeEvent.target.files[0];
-		if (!file) {
-			throw new Error("No file selected from the open-file dialog.");
-			return;
+		else {
+			console.warn("No fileSaveAs dialog!");
 		}
-		
-		var fileName = file.name;
-		var filePath = file.path;
-		
-		console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
-		directoryDialogCallback(filePath);
-		directoryDialogCallback = undefined;
-		
-		directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
-		
-		
-	}, false);
 	
-	// Allow native keyboard on mobiles
-	var keyboardCatcher = document.getElementById("keyboardCatcher");
-	if(keyboardCatcher) {
-		// Some android devices can't listen for keypressed, so we have to use keydown or keyup'
-		keyboardCatcher.addEventListener("keyup",keyboardCatcherKey,false);  // captures
-		moveCursorToEnd(keyboardCatcher);
-	}
+		// Handle file open dialog
+		fileOpenHtmlElement = document.getElementById("fileInput");
+		fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
+	
+		// Handle directory dialog
+		directoryDialogHtmlElement = document.getElementById("directoryInput");
+		directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
+		
+			console.log("Directory selected ...");
+		
+			if(directoryDialogCallback == undefined) {
+				throw new Error("There is no listener for the open directory dialog!");
+			}
+		
+			var file = changeEvent.target.files[0];
+			if (!file) {
+				throw new Error("No file selected from the open-file dialog.");
+				return;
+			}
+		
+			var fileName = file.name;
+			var filePath = file.path;
+		
+			console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
+			directoryDialogCallback(filePath);
+			directoryDialogCallback = undefined;
+		
+			directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
+		
+		
+		}, false);
+	
+		// Allow native keyboard on mobiles
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		if(keyboardCatcher) {
+			// Some android devices can't listen for keypressed, so we have to use keydown or keyup'
+			keyboardCatcher.addEventListener("keyup",keyboardCatcherKey,false);  // captures
+			moveCursorToEnd(keyboardCatcher);
+		}
 	
 	
-	var body = document.getElementById('body');
+		var body = document.getElementById('body');
 	
-	// Attatch CLIENT listeners before plugins and start events load
-	CLIENT.on("loginSuccess", function loggedInToServer(login) {
-		EDITOR.user = {
-			name: login.user,
+		// Attatch CLIENT listeners before plugins and start events load
+		CLIENT.on("loginSuccess", function loggedInToServer(login) {
+			EDITOR.user = {
+				name: login.user,
 				homeDir: login.homeDir,
 				platform: login.platform,
-domain: login.tld && (login.user + "." + login.tld)
-		};
+				domain: login.tld && (login.user + "." + login.tld)
+			};
 
-if(login.netnsIP) EDITOR.user.netnsIP = login.netnsIP;
+			if(login.netnsIP) EDITOR.user.netnsIP = login.netnsIP;
 		
 			if(login.homeDir != "/") EDITOR.stat("nochroot");
 			
-		if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
+			if(!login.installDirectory) console.warn("Did not get install directory! login=" + JSON.stringify(login));
 		
-		EDITOR.installDirectory = login.installDirectory || "/";
-		//alertBox(JSON.stringify(login));
+			EDITOR.installDirectory = login.installDirectory || "/";
+			//alertBox(JSON.stringify(login));
 		
 			console.log("Logged in as user: " + EDITOR.user.name + " on a " + EDITOR.user.platform + " server");
 		
-		// Use servers working directory
-		CLIENT.cmd("workingDirectory", null, function(err, json) {
-			if(err) throw err;
-			else setWorkingDirectory(json.path);
-		});
+			// Use servers working directory
+			CLIENT.cmd("workingDirectory", null, function(err, json) {
+				if(err) throw err;
+				else setWorkingDirectory(json.path);
+			});
 		
-		// ### Populate EDITOR.storage (_serverStorage)
-		CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
-			if(err) throw err;
+			// ### Populate EDITOR.storage (_serverStorage)
+			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
+				if(err) throw err;
 			
-			if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
+				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
 			
-			if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
+				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
 			
-			_serverStorage = json.storage;
+				_serverStorage = json.storage;
 			
 				if(_serverStorage.showDiscoveryBar == "false") {
 					EDITOR.discoveryBar.hide();
 				}
-else if(_serverStorage.showDiscoveryBar == "true") {
-EDITOR.discoveryBar.show();
-}
+				else if(_serverStorage.showDiscoveryBar == "true") {
+					EDITOR.discoveryBar.show();
+				}
 				
 				if(_serverStorage.showDiscoveryBarCaptions) EDITOR.discoveryBar.toggleCaptions(_serverStorage.showDiscoveryBarCaptions);
 				
 				
-			// Many plugins depend on the storage being available ...
-			// They need to be refactored to start on EDITOR.on("storageReady" ... !!
+				// Many plugins depend on the storage being available ...
+				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
 				// Treat EDITOR.storage like window.localStorage! Eg. It's all strings so you have to JSON.parse !
 			
 				var f = EDITOR.eventListeners.storageReady.map(funMap);
 				for(var i=0; i<f.length; i++) {
 					f[i](_serverStorage);
-			}
-		});
+				}
+			});
 			
 			UTIL.setCookie("user", login.user, 999);
-	});
+		});
 	
 		CLIENT.on("workerClose", function() {
 			//alertBox("workerClose event!");
 			fileOpenExtraCallbacks.length = 0;
 			EDITOR.openFileQueue.length = 0;
-	});
+		});
 	
 		
-	var progressValue = 0;
-	var progressMax = 1;
-	CLIENT.on("progress", function handleProgress(increment) {
-		var progress = document.getElementById("progress");
+		var progressValue = 0;
+		var progressMax = 1;
+		CLIENT.on("progress", function handleProgress(increment) {
+			var progress = document.getElementById("progress");
 		
-		if(!Array.isArray(increment)) {
-			console.warn("Not an array: progress: " + JSON.stringify(increment));
-		};
+			if(!Array.isArray(increment)) {
+				console.warn("Not an array: progress: " + JSON.stringify(increment));
+			};
 		
-		if(progressValue == 0 && increment.length > 0) {
-			// First progress event, show the progress bar
-			progress.style.display="block";
-			EDITOR.resizeNeeded();
-		}
+			if(progressValue == 0 && increment.length > 0) {
+				// First progress event, show the progress bar
+				progress.style.display="block";
+				EDITOR.resizeNeeded();
+			}
 		
-		if(increment[0]) progressValue += increment[0];
-		if(increment[1]) progressMax += increment[1];
+			if(increment[0]) progressValue += increment[0];
+			if(increment[1]) progressMax += increment[1];
 		
-		if(increment[0] == 0 && increment[1] == 0) {
-			// Reset
-			progressValue = 0;
-			progressMax = 1;
-		}
+			if(increment[0] == 0 && increment[1] == 0) {
+				// Reset
+				progressValue = 0;
+				progressMax = 1;
+			}
 		
 			if(increment.length == 0) {
-			// Finish
-			progress.style.display="none";
-			EDITOR.resizeNeeded();
-			progressValue = 0;
-			progressMax = 1;
-		}
+				// Finish
+				progress.style.display="none";
+				EDITOR.resizeNeeded();
+				progressValue = 0;
+				progressMax = 1;
+			}
 		
-		progress.max = progressMax;
-		progress.value = progressValue;
+			progress.max = progressMax;
+			progress.value = progressValue;
 		
-		console.log("progress: value=" + progressValue + " max=" + progressMax);
+			console.log("progress: value=" + progressValue + " max=" + progressMax);
 		
-	});
+		});
 	
-	//console.log("main function loaded");
+		//console.log("main function loaded");
 	
 		
 		if(EDITOR.saveBandwith) alertBox("Some editor functionality has been turned off to save data/bandwith (data-saver in enabled on your device)");
 		
 		
-	/*		
-		// Sort and load the start events
-		// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
-		// The order of things should not matter!
-		// Some event listeners has high or low prio though ...
-		// Ex: some plugins only want to parse the file if no other parser have yet parsed it
-		// or some autocomplete functions only want to run if no other autocompletion has been found.
-	*/
+		/*		
+			// Sort and load the start events
+			// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
+			// The order of things should not matter!
+			// Some event listeners has high or low prio though ...
+			// Ex: some plugins only want to parse the file if no other parser have yet parsed it
+			// or some autocomplete functions only want to run if no other autocompletion has been found.
+		*/
 	
-	EDITOR.eventListeners.start.sort(function(a, b) {
-		if(a.order < b.order) {
-			return -1;
-		}
-		else if(a.order > b.order) {
-			return 1;
-		}
-		else {
-			return 0;
-		}
-	});
+		EDITOR.eventListeners.start.sort(function(a, b) {
+			if(a.order < b.order) {
+				return -1;
+			}
+			else if(a.order > b.order) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		});
 	
-	//for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
-	//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
-	//}
+		//for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+		//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
+		//}
 	
-	console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+		console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
 		var f = EDITOR.eventListeners.start.map(funMap);
 		for(var i=0; i<f.length; i++) {
 			//console.time("Start listener: " + UTIL.getFunctionName(f[i]));
 			f[i](); // Call function
 			//console.timeEnd("Start listener: " + UTIL.getFunctionName(f[i]));
-	}
-	calledStartListeners = true;
+		}
+		calledStartListeners = true;
 	
-	// Sort and load plugins
-	EDITOR.plugins.sort(function(a, b) {
-		if(a.order < b.order) {
-			return -1;
-		}
-		else if(a.order > b.order) {
-			return 1;
-		}
-		else {
-			return 0;
-		}
-	});
+		// Sort and load plugins
+		EDITOR.plugins.sort(function(a, b) {
+			if(a.order < b.order) {
+				return -1;
+			}
+			else if(a.order > b.order) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		});
 	
-	//console.log("plugins: ");
-	//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
+		//console.log("plugins: ");
+		//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
 	
 		var pluginLoaders = EDITOR.plugins.map(function(p) {return p.load});
 		console.log("Loading plugins (length=" + pluginLoaders.length + ")");
@@ -10223,52 +10305,52 @@ EDITOR.discoveryBar.show();
 			
 			//console.time("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
 			
-		if(EDITOR.settings.devMode) {
+			if(EDITOR.settings.devMode) {
 				pluginLoaders[i](EDITOR);
-		}
-		else {
-			// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
-			try {
+			}
+			else {
+				// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
+				try {
 					pluginLoaders[i](EDITOR); // Call function (and pass global objects!?)
-			}
-			catch(err) {
-				console.error(err.message);
-				console.log(err.stack);
+				}
+				catch(err) {
+					console.error(err.message);
+					console.log(err.stack);
 					alertBox('Failed to (fully) run:\n<i>"' + UTIL.getFunctionName(pluginLoaders[i]) + '"</i>\nError: ' + err.message);
+				}
 			}
-		}
 			
 			//console.timeEnd("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
-	}
-	
-	
-	console.log("Setting mainLoopInterval because first load!");
-	mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
-	
-	// note to self: Just temorary, dont forget to remove:
-	//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
-	
-	/*
-		// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
-		//setTimeout(display, 500);
-		//display();
-		
-		
-		// Prevent the void from ruling the earth the first 500ms
-		EDITOR.resizeNeeded();
-		EDITOR.resize();
-		EDITOR.renderNeeded();
-		EDITOR.render();
-		
-		
-		function display() {
-		
-		EDITOR.resizeNeeded();
-		EDITOR.resize(); // Will also force a render
-		
-		
 		}
-	*/
+	
+	
+		console.log("Setting mainLoopInterval because first load!");
+		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
+	
+		// note to self: Just temorary, dont forget to remove:
+		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
+	
+		/*
+			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
+			//setTimeout(display, 500);
+			//display();
+		
+		
+			// Prevent the void from ruling the earth the first 500ms
+			EDITOR.resizeNeeded();
+			EDITOR.resize();
+			EDITOR.renderNeeded();
+			EDITOR.render();
+		
+		
+			function display() {
+		
+			EDITOR.resizeNeeded();
+			EDITOR.resize(); // Will also force a render
+		
+		
+			}
+		*/
 		
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
 		showDisoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
