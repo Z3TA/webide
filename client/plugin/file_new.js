@@ -18,11 +18,6 @@
 			var key_N = 78;
 			var key_Enter = 13;
 			
-				// Ctrl+N is however protected by the browser
-				// What should we use isntead?
-				// https://defkey.com/search?irq=new+file
-				EDITOR.bindKey({desc: "Create new file", charCode: key_Enter, combo: CTRL, fun: newFileFromKeyboardCombo});
-			
 			console.log("createNewFile: DISPLAY_MODE=" + DISPLAY_MODE + " typeof Keyboard = " + (typeof Keyboard));
 			
 			if(DISPLAY_MODE == "standalone") {
@@ -37,6 +32,12 @@
 				}).catch(function(err) {
 					console.log("createNewFile: Not allowed to use KeyN! " + (err.message || err));
 				});
+			}
+			else {
+				// Ctrl+N is protected by the browser
+				// What should we use isntead?
+				// https://defkey.com/search?irq=new+file
+				EDITOR.bindKey({desc: "Create new file", charCode: key_Enter, combo: CTRL, fun: newFileFromKeyboardCombo});
 			}
 			
 			
