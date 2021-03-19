@@ -46,31 +46,39 @@ body {
 
 #loginScreen {
 	box-sizing: border-box;
-	background: #f3e032;
+	background: #ddedfa;
+}
+
+#loginScreen .content {
+	box-sizing: border-box;
+	margin: 2rem;
+	padding: 2rem;
+	background: #FFF;
+	width: 95%;
+	max-width: 700px; 
+	text-align: left;
+	border-radius: 5px;
+}
+
+#loginScreen .logo {
+	float: right;
+	
+}
+
+#loginScreen p {
+	max-width: 700px;
+	
 }
 
 #loginScreen label {
-	font-size: 12px;
+	box-shadow: none;
+	text-shadow: none;
+	color: #000;
+	font-weight: normal;
 }
 
 #loginScreen input[type="text"], #loginScreen input[type="password"] {
-	box-sizing: border-box;
-	border: 3px solid #999;
-	width: 100%;
-	padding: 10px;
-	margin: 0px;
 	margin-bottom: 12px;
-	box-shadow: none;
-	background-color: #eee;
-	color: #000;
-	font-weight: bold;
-}
-#loginScreen input[type="text"]:hover, 
-#loginScreen input[type="password"]:hover, 
-#loginScreen input[type="text"]:focus, 
-#loginScreen input[type="password"]:focus {
-	background: #deebf4;
-	outline: none;
 }
 
 #loginScreen .loginbox {
@@ -80,30 +88,10 @@ body {
 	margin-right: 6px;
 }
 #loginScreen button {
-	padding: 12px;
-	width: 100%;
-	max-width: 230px;
-	border-radius: 3px;
-	background: #383200;
-	color: #FFF;
-	font-weight: bold;
 	margin-bottom: 12px;
-	cursor: auto;
 }
 
-#loginScreen button:hover, 
-#loginScreen button:focus {
-	background: #10354b;
-	outline: none;
-	text-decoration: underline;
-}
 
-#loginScreen button:disabled,
-#loginScreen button[disabled] {
-	background-color: #cccccc;
-	color: #666666;
-	cursor: not-allowed;
-}
 
 .spinner {
 	display: inline-block;
@@ -609,7 +597,7 @@ li ul {
 	margin-left: 1em;
 }
 
-.footer label, .footer span, .footer p, .footer legend {
+label, .footer span, .footer p, .footer legend {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
 	font-weight: normal;

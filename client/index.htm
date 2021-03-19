@@ -117,30 +117,52 @@
 
 <form id="loginScreen" style="position: absolute; width: 100%; height: 100%; z-index: 10;">
 	<center>
-	<img src="gfx/logo.svg" height="40%" style="max-height: 40vh; width: auto;" />
-	<br />
-
-	<noscript>
-	<div>
-		<p class="noscript">WebIDE is built with JavaScript<br />
-		(you need to enable JavaScript!)</p>
 	
-	</div>
-	</noscript>
+	<div class="content">
+	
 
-	<div class="loginbox">
-		<label for="username">Username:</label><br />
-		<input class="input" type="text" id="username" placeholder="username" />
+		<noscript>
+		<div>
+			<p class="noscript">WebIDE is built with JavaScript<br />
+			(you need to enable JavaScript!)</p>
+	
+		</div>
+		</noscript>
+
+		
+		<p>Webide.se is a lightweight (1MB download size, 10 MB memory usage) web-based editor/IDE built in vanilla JavaScript, useful for editing web sites and web apps, as well as "native" web apps.<br>
+		Despite it's small size it has a lot of features, like built in terminal emulator, X11 desktop screen for testing native and Android apps, Docker support,
+		Mercurial SCM, built in static site generator with WYSIWYG etc.</p>
+
+		<br>
+
+		<img class="logo" src="gfx/logo.svg" height="150" />
+
+		
+		<br>
+		
+		<table class="loginbox" border="0">
+			<tr>
+				<td><label for="username">Username:</label></td>
+				<td><input class="inputtext" type="text" id="username" placeholder="username" /></td>
+			</tr>
+			<tr>
+				<td><label for="password">Password:</label></td>
+				<td><input type="password" id="password" placeholder="password" /></td>
+			</tr>
+		</table>
+
+		
+
 		<br />
-		<label for="password">Password:</label><br />
-		<input class="input" type="password" id="password" placeholder="password" />
+		<button id="loginButton" type="submit" class="button" disabled>Login</button> 
+		<button id="loginAsGuest" class="button" disabled>Login as guest</button>
+		<br />
+		<br />
+		
 	</div>
-	<br />
-	<button id="loginButton" type="submit" disabled>Login</button> 
-	<button id="loginAsGuest" disabled>Login as guest</button>
-	<br />
-	<br />
-	<p><a href="about/about.htm">about</a> - <a href="signup/signup.htm">signup</a></p>
+
+	<p><a href="about/about.htm">about</a> - <a href="signup/signup.htm">signup</a> - <a href="about/download_instructions.htm">run locally</a></p>
 
 	</center>
 
