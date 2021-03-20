@@ -9939,6 +9939,10 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			var url = stored.editorServerUrl;
 			if(url) var server = {url: url};
 
+			if(QUERY_STRING["skiplogin"]) return;
+
+			return;
+
 			CLIENT.connect(server, function connectedToServer(err) {
 				if(err) return alertBox(err.message);
 
@@ -9957,7 +9961,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				}
 
 				function loginMaybe() {
-					if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
+					//if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
 
 					username.focus();
 					loginButton.disabled = false;

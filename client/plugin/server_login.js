@@ -1,8 +1,6 @@
 (function() {
 	"use strict";
 	
-	return;
-
 	var DEFAULT_USERNAME = "admin";
 	var DEFAULT_PASSWORD = "admin";
 	
@@ -18,9 +16,11 @@
 	// Page speed score hack
 	if(navigator.userAgent.indexOf("Speed Insights") != -1) return; // Don't connect to server or show login screen
 	
+	var locally = window.location.hostname == "127.0.0.1" || window.location.hostname == "localhost";
+
 	
 	EDITOR.plugin({
-		desc: "Server login dialog",
+		desc: "auto login",
 		load: loadServerLogin,
 		unload: unloadServerLogin,
 		order: 100000 // We want to run after most other plugins, so the other plugins can deal with server connections too
@@ -136,8 +136,7 @@
 						userValue = obj["editorServerUser"] || userValue;
 						pwValue = obj["editorServerPw"] || pwValue;
 					}
-					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin &&
-					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost" && !userValue) {
+					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin && !locally && !userValue) {
 						
 						var alreadyHaveAccount = "I already Have an account ...";
 						var createAccount = "Create a New account";
@@ -180,8 +179,9 @@
 		}
 		
 		function attemptLogin() {
-			if(!userValue) {
-				console.log("Using default login because userValue=" + userValue);
+			console.trace("attemptLogin!");
+			if(!userValue && locally) {
+				console.log("Using default login because userValue=" + userValue + " and locally=" + locally);
 				userValue = DEFAULT_USERNAME;
 				pwValue = DEFAULT_PASSWORD;
 			}
@@ -221,18 +221,18 @@
 					if(err) {
 						console.error(err);
 
-						if(err.message.indexOf("Username specified in server arguments") != 0) {
-							alertBox("Login with the username/password specified in server command arguments! (admin/admin is default)");
+						if(err.message.indexOf("Username specified in server arguments") != -1) {
+							alertBox("Login with the username/password specified in server command arguments! (admin/admin is default)", "LOGIN_FAIL");
 						}
 						else if(userValue == DEFAULT_USERNAME) {
 							alertBox("Failed to automatically login as " + userValue + "." +
-							" Fill in your username and password below, or <a href='/signup/signup.htm'>Create a New account</a> !\n" +
-							"\n(" + err.message + ")");
+							" Fill in your username and password, or <a href='/signup/signup.htm'>Create a New account</a> !\n" +
+							"\n(" + err.message + ")", "LOGIN_FAIL");
 						}
 						else if( userValue.match(/^guest\d+$/) && pwValue != "guest" ) {
-							alertBox("Failed to login as " + userValue + ". It is likely that the guest account have been reset because of inactivity!");
+							alertBox("Failed to login as " + userValue + ". It is likely that the guest account have been reset because of inactivity!", "LOGIN_FAIL");
 						}
-						else alertBox(err.message);
+						else alertBox(err.message, "LOGIN_FAIL");
 
 						showLoginDialog();
 					}
@@ -272,11 +272,22 @@
 	}
 	
 	function showLoginDialog(options) {
+
+		if(loginScreen) {
+			var loginButton = document.getElementById("loginButton");
+			if(loginButton) loginButton.disabled = false;
+			
+			var loginAsGuest = document.getElementById("loginAsGuest");
+			if(loginAsGuest) loginAsGuest.disabled = false;
+
+		}
+
 		console.warn("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
-		
 		if(QUERY_STRING["skiplogin"]) {
+			
 			console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
 			return true;
+		
 		}
 		if(serverLoginDialog.visible) {
 			console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
@@ -289,6 +300,11 @@
 	
 	function hideLoginDialog() {
 		console.log("hideLoginDialog!");
+
+		if(typeof loginScreen == "object") {
+			loginScreen.style.display="none";
+		}
+
 		console.log(UTIL.getStack("hideLoginDialog"));
 		return serverLoginDialog.hide();
 	}

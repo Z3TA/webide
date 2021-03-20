@@ -45,8 +45,7 @@ body {
 }
 
 #loginScreen {
-	box-sizing: border-box;
-	background: #ddedfa;
+	
 }
 
 #loginScreen .content {
@@ -1651,6 +1650,13 @@ div.gotoFile li:hover {
 	color: #4848a4;
 	text-decoration: underline;
 	cursor: pointer;
+}
+
+.dialog .repeat {
+	float: left;
+	font-size: 11px;
+	padding-left: 20px;
+	margin-top: 10px;
 }
 
 

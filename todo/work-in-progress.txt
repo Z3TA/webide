@@ -3,6 +3,16 @@
 What I'm working on
 -------------------
 
+Manu users are from github2s.com, detect that they are coming from there, then make a shallow clone,
+so that when the user has logged in the files has already been downloaded.
+
+
+Download link for installing on your own computer (and info about natbust)
+
+Dark theme for the login screen
+
+Use the login screen as a "landing page" show some info about the editor !?
+
 Move functionality from server_login.js to EDITOR.js and only use server_login.js for re-login after connection lost!?
 
 There should be a login/wall/screen so that you can't do anything until you are logged in!

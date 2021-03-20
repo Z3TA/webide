@@ -321,9 +321,10 @@ Dialog.prototype.incrementRepeatCounter = function incrementRepeatCounter() {
 		dialog.repeatedTimesEl.innerText = dialog.repeatedTimes;
 		
 		var repeatDiv = document.createElement("div");
+		repeatDiv.classList.add("repeat");
 		repeatDiv.appendChild(document.createTextNode("Message repeated "));
 		repeatDiv.appendChild(dialog.repeatedTimesEl);
-		repeatDiv.appendChild(document.createTextNode(" times(s)"));
+		repeatDiv.appendChild(document.createTextNode(" time(s)"));
 		
 		dialog.div.appendChild(repeatDiv);
 	}
