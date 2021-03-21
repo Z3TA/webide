@@ -53,7 +53,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.inFlight = 0;
 	CLIENT.lastMsgFromServer = null; // Used for debugging
 	
-	var checkEditorInterval = setInterval(checkEditor);
+	var checkEditorInterval = setInterval(checkEditor, 2000);
 	
 	CLIENT.connect = function(server, callback) {
 		

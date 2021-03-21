@@ -35,7 +35,7 @@
 		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
-		CLIENT.on("connectionConnected", serverLoginOnConnected);
+		CLIENT.on("connectionConnected", serverReLoginOnConnected);
 		CLIENT.on("connectionLost", serverLoginOnConnectionLost);
 		CLIENT.on("loginNeeded", serverLoginLoginNeeded);
 		CLIENT.on("saveLogin", saveLogin);
@@ -48,22 +48,7 @@
 		
 		winMenuLogin = EDITOR.windowMenu.add(S("switch_server_user"), [S("Editor"), 2], loginDialogFromMenu);
 		
-		var server = undefined;
-		if(EDITOR.localStorage) {
-			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
-				var url = stored.editorServerUrl;
-				
-				if(url) {
-					url = url.replace(/jzedit/i, "webide"); // Automatically login after rebranding from jzedit to webide
-					server = {url: url};
-				}
-				
-				if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
-			});
-		} else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
-		
-		function connectedToServer(err) {
-		}
+		// Connecting to the server is done by EDITOR.js, we can however switch server using this plugin
 	}
 	
 	function loginDialogFromMenu() {
@@ -80,7 +65,7 @@
 		
 		CLIENT.removeEvent("loginFail", showLoginDialog);
 		CLIENT.removeEvent("loginSuccess", hideLoginDialog);
-		CLIENT.removeEvent("connectionConnected", serverLoginOnConnected);
+		CLIENT.removeEvent("connectionConnected", serverReLoginOnConnected);
 		CLIENT.removeEvent("connectionLost", serverLoginOnConnectionLost);
 		CLIENT.removeEvent("loginNeeded", serverLoginLoginNeeded);
 		CLIENT.removeEvent("saveLogin", saveLogin);
@@ -107,9 +92,18 @@
 		
 	}
 	
-	function serverLoginOnConnected(err) {
-		// ## Automaitcally logging in when connected to server
+	function serverReLoginOnConnected(err) {
+		// ## Automaitcally re-loggin when re-connected to server
 		
+		var loginScreen = document.getElementById("loginScreen");
+		if(loginScreen && loginScreen.style.display != "none") {
+			console.log("Not re-login if loginScreen is visible");
+			return;
+		}
+		else {
+			console.log("loginScreen=", loginScreen, " loginScreen.style.display=" + loginScreen.style.display);
+		}
+
 		if(loggingIn) return;
 			
 		console.log("Got connect callback! err=" + err);
@@ -136,36 +130,7 @@
 						userValue = obj["editorServerUser"] || userValue;
 						pwValue = obj["editorServerPw"] || pwValue;
 					}
-					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin && !locally && !userValue) {
-						
-						var alreadyHaveAccount = "I already Have an account ...";
-						var createAccount = "Create a New account";
-						var loginAsGuest = "Login as Guest";
-						
-						// Note: The title in index.htm will be the header in Google search, and the text below will be the description!
-						// Google will only show the first 150 characters ... webide.se
-						//                 .....................................................................................................................................................
-						return confirmBox("WebIDE is an editor/IDE for JavaScript: Create Web (PWA), Smartphone (React-Native), or Node.js apps. Database, Docker, FTP, Emulator, X11 desktop, static site generator built in...\n\nDo you want to create an account ?", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
-							if(answer == loginAsGuest) {
-								console.log("Logging in as guest because it's the first time using the editor and the user wanted to do so ...");
-								userValue = "guest";
-								pwValue = "guest";
-								attemptLogin();
-							}
-							else if(answer == createAccount) {
-								console.log("This is the first time using the editor, and the user wants to create an ccount");
-								window.onbeforeunload = null;
-								document.location = "/signup/signup.htm" + window.location.search;
-							}
-							else if(answer == alreadyHaveAccount) {
-								console.log("This is the first time using the editor, but the users sais he/she already have an account. It's possible that the user has reset browser data or are on a new machine.");
-								showLoginDialog();
-							}
-							else throw new Error("Unknown answer: " + answer);
-						});
-						
-						
-					}
+					
 					else {
 						console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);
 					}
@@ -241,30 +206,7 @@
 
 						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 
-						if( userValue.match(/^guest\d+$/) && EDITOR.startedCounter > 2 && QUERY_STRING["user"] != "guest") {
-							// User have logged in with a guest account
-							// It's Not the first time user logs in
-
-							var alreadyHaveAccount = "Login to Another account";
-							var createAccount = "Create a New account";
-							var loginAsGuest = "Keep me logged in as " + userValue;
-
-							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
-								if(answer == loginAsGuest) {
-									console.log("User wants to continue using the guest account.");
-								}
-								else if(answer == createAccount) {
-									console.log("The user is currently logged in with a guest account. But want to create a new account.");
-									window.onbeforeunload = null;
-									document.location = "/signup/signup.htm" + window.location.search;
-								}
-								else if(answer == alreadyHaveAccount) {
-									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
-									showLoginDialog();
-								}
-								else throw new Error("Unknown answer: " + answer);
-							});
-						}
+						
 					}
 				});
 			}

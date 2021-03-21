@@ -9919,6 +9919,11 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 			var loginButton = document.getElementById("loginButton");
 			var loginAsGuest = document.getElementById("loginAsGuest");
+			var loginMessage = document.getElementById("loginMessage");
+			var locally = window.location.hostname == "127.0.0.1" || window.location.hostname == "localhost";
+			var DEFAULT_USERNAME = "admin";
+			var DEFAULT_PASSWORD = "admin";
+
 
 			loginScreen.onsubmit = function() {
 				if(loginButton.disabled) return false;
@@ -9941,8 +9946,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 			if(QUERY_STRING["skiplogin"]) return;
 
-			return;
-
 			CLIENT.connect(server, function connectedToServer(err) {
 				if(err) return alertBox(err.message);
 
@@ -9961,7 +9964,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				}
 
 				function loginMaybe() {
-					//if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
+					if(QUERY_STRING.user && QUERY_STRING.pw) return attemptLogin(QUERY_STRING.user, QUERY_STRING.pw);
+					if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
 
 					username.focus();
 					loginButton.disabled = false;
@@ -9974,16 +9978,60 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				
 				loginButton.disabled = true;
 				loginAsGuest.disabled = true;
+				loginMessage.innerText = "";
 
 				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
 					if(err) {
 						console.error(err);
 						loginButton.disabled = false;
 						loginAsGuest.disabled = false;
-						alertBox(err.message);
+						
+						
+
+						if(err.message.indexOf("Username specified in server arguments") != -1) {
+							loginMessage.innerText = "Login with the username/password specified in server command arguments! (admin/admin is default)";
+						}
+						else if(userValue == DEFAULT_USERNAME) {
+							loginMessage.innerText = "Failed to automatically login as " + userValue + "." +
+							" Fill in your username and password, or Create a New account!\n" +
+							"\n(" + err.message + ")";
+						}
+						else if( userValue.match(/^guest\d+$/) && pwValue != "guest" ) {
+							loginMessage.innerText = "Failed to login as " + userValue + ". It is likely that the guest account have been reset because of inactivity!";
+						}
+						else {
+							loginMessage.innerText = err.message;
+						}
+
 					}
 					else {
 						loginScreen.style.display='none';
+
+						if( userValue.match(/^guest\d+$/) && EDITOR.startedCounter > 2 && QUERY_STRING["user"] != "guest") {
+							// User have logged in with a guest account
+							// It's Not the first time user logs in
+
+							var alreadyHaveAccount = "Login to Another account";
+							var createAccount = "Create a New account";
+							var loginAsGuest = "Keep me logged in as " + userValue;
+
+							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
+								if(answer == loginAsGuest) {
+									console.log("User wants to continue using the guest account.");
+								}
+								else if(answer == createAccount) {
+									console.log("The user is currently logged in with a guest account. But want to create a new account.");
+									window.onbeforeunload = null;
+									document.location = "/signup/signup.htm" + window.location.search;
+								}
+								else if(answer == alreadyHaveAccount) {
+									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
+									showLoginDialog();
+								}
+								else throw new Error("Unknown answer: " + answer);
+							});
+						}
+
 					}
 				});
 			}
