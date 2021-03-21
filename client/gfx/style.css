@@ -45,13 +45,14 @@ body {
 }
 
 #loginScreen {
-	
+	box-sizing: border-box;
 }
 
 #loginScreen .content {
 	box-sizing: border-box;
-	margin: 2rem;
-	padding: 2rem;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	padding: 1rem;
 	background: #FFF;
 	width: 95%;
 	max-width: 700px; 
@@ -60,7 +61,7 @@ body {
 }
 
 #loginScreen .logo {
-	float: right;
+	
 	
 }
 
@@ -77,19 +78,27 @@ body {
 }
 
 #loginScreen input[type="text"], #loginScreen input[type="password"] {
+	box-sizing: border-box;
+	width: 200px;
+	max-width: 100%;
+	margin: 0;
 	margin-bottom: 12px;
 }
 
 #loginScreen .loginbox {
 	max-width: 500px;
 	text-align: left;
-	margin-left: 6px;
-	margin-right: 6px;
+
+	
+	
 }
 #loginScreen button {
 	margin-bottom: 12px;
 }
 
+#loginScreen #loginMessage {
+	background: yellow;
+}
 
 
 .spinner {
