@@ -118,6 +118,8 @@
 <form id="loginScreen" style="position: absolute; width: 100%; height: 100%; z-index: 10; background: #edeff3;">
 	<center>
 	
+	<img class="logo" src="gfx/logo.svg" height="150" />
+
 	<div class="content">
 	
 
@@ -130,27 +132,21 @@
 		</noscript>
 
 		
-		<p>Webide.se is a editor/IDE built in vanilla JavaScript, useful for editing web sites and web apps.<br>
-		Some features: terminal emulator, X11 desktop screen for testing native and Android apps, Docker support,
-		Mercurial SCM, built in static site generator with WYSIWYG etc.</p>
-
+		<p>This is a an editor/IDE useful for building and editing web sites and web apps.<br>
+		It has a built in static site generator with WYSIWYG editing. And lots of other features such as:
+		Docker, terminal emulator, Android emulator, Mercurial SCM.</p>
+		
 		<br>
 
-		<img class="logo" src="gfx/logo.svg" height="150" />
+		
 
 		
 		<br>
 		
-		<table class="loginbox" border="0">
-			<tr>
-				<td><label for="username">Username:</label></td>
-				<td><input class="inputtext" type="text" id="username" placeholder="username" /></td>
-			</tr>
-			<tr>
-				<td><label for="password">Password:</label></td>
-				<td><input type="password" id="password" placeholder="password" /></td>
-			</tr>
-		</table>
+		<div class="loginbox">
+			<label for="username">Username: </label><input class="inputtext" type="text" id="username" placeholder="username" /><br />
+			<label for="password">Password: &nbsp;</label><input type="password" id="password" placeholder="password" />
+		</div>
 
 		
 
