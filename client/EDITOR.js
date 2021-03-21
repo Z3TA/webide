@@ -9939,6 +9939,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 			loginAsGuest.onclick = function() {
 				attemptLogin("guest", "guest");
+				return false;
 			}
 
 			var url = stored.editorServerUrl;
@@ -9947,7 +9948,12 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			if(QUERY_STRING["skiplogin"]) return;
 
 			CLIENT.connect(server, function connectedToServer(err) {
-				if(err) return alertBox(err.message);
+				if(err) {
+					loginMessage.innerText = err.message;
+					return;
+				}
+
+				loginMessage.innerText = "";
 
 				var nat_code = QUERY_STRING["nat_code"];
 				if(nat_code) {
@@ -10013,10 +10019,10 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 							var alreadyHaveAccount = "Login to Another account";
 							var createAccount = "Create a New account";
-							var loginAsGuest = "Keep me logged in as " + userValue;
+							var keeploginAsGuest = "Keep me logged in as " + userValue;
 
-							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, loginAsGuest], function(answer) {
-								if(answer == loginAsGuest) {
+							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, keeploginAsGuest], function(answer) {
+								if(answer == keeploginAsGuest) {
 									console.log("User wants to continue using the guest account.");
 								}
 								else if(answer == createAccount) {
