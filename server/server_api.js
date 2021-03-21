@@ -2865,7 +2865,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			
 			if(gotError) return; // If we have got an error, it means we have already called the callback
 			
-			if(err) {
+			if(err && err.code != "ENOENT") { // Might already have been deleted if it was a link
 				// Got an error when deleting a file or folder in the directory
 				gotError = err;
 				recursiveDeleteLocalDirCallback(err);

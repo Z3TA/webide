@@ -271,6 +271,9 @@ if(INSIDE_DOCKER) {
 	IPTABLES = false;
 }
 
+var GITHUB_GITCLONE = {}; // IP: path to files
+var GITHUB_CLONING = {}; // repo: true
+
 console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
 console.log("NO_NETNS ? " + !!NO_NETNS);
 console.log("IPTABLES ? " + !!IPTABLES);
@@ -603,6 +606,7 @@ var DOCKER_LOCK =  {}; // username: command (prevent running many commands at th
 
 // Declare modules here as a OPTIMIZATION
 var module_fs = require("fs");
+var module_chownr = require("chownr");
 var module_child_process = require('child_process');
 var module_path = require("path");
 var module_letsencrypt = require("../shared/letsencrypt.js");
@@ -2991,6 +2995,22 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 							log("User userConnectionName=" + userConnectionName + " sending loginSuccess to client!", DEBUG);
 							send({resp: {loginSuccess: userClientInfo}});
 							
+
+							if( GITHUB_GITCLONE.hasOwnProperty(IP) ) {
+								var tmpDir = GITHUB_GITCLONE.hasOwnProperty(IP);
+								var repoDir = UTIL.joinPaths(homeDir, "repo", UTIL.getFolderName(GITHUB_GITCLONE[IP]));
+								module_fs.rename(tmpDir, repoDir, function (err) {
+									if (err) throw err
+									
+									module_chownr(repoDir, uid, gid, function(err) {
+										if(err) throw err;
+
+										console.log("Moved files from tmpDir=" + tmpDir + " to repoDir=" + repoDir);
+
+									});
+								});
+							} 
+
 							
 							// Tell all clients that a new client has connected
 							var clientJoin = {
@@ -4065,9 +4085,24 @@ function handleHttpRequest(request, response) {
 		response.end('{"type": "rich", "provider_name": "' + DOMAIN + '", "provider_url": "' + protocol + '://' + DOMAIN + '/", "width": 800, "height": 500, "html": "<iframe width=\\\"800\\\" height=\\\"500\\\" src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
 		return;
 	}
-	else if(firstDir == "inspector") {
-		if(INSPECTOR.hasOwnProperty(secondDir)) {
-			if(request.url.indexOf("/json")) {
+		else if(firstDir == "github") {
+			/*
+				Service to clone a github repo...
+			*/
+		dirs.shift(); // removes first slash
+			dirs.shift(); // removes "github"
+			cloneGitRepo(dirs);
+			response.writeHead(302, {
+				'Location': '/?github=' + encodeURIComponent(dirs.join("/")),
+				'Content-Type': 'text/html; charset=utf-8'
+			});
+		response.end( 'Go to <a href="https://' + DOMAIN + '/?github=' + encodeURIComponent(dirs.join("/") + '">editor</a>') );
+
+		return;
+		}
+		else if(firstDir == "inspector") {
+			if(INSPECTOR.hasOwnProperty(secondDir)) {
+				if(request.url.indexOf("/json")) {
 				console.log("Proxying request to inspector " + secondDir + " using http? " + request.protocol);
 				INSPECTOR[secondDir].proxy.web(request, response);
 			}
@@ -4460,6 +4495,78 @@ setTimeout(function() {
 	
 }
 
+function cloneGitRepo(dirs, IP) {
+
+	/*
+		git clone --single-branch --branch <branchname> <remote-repo>
+
+		Example: Z3TA/dbo/blob/gh-pages/design1/style.css
+
+	*/
+		
+	if(dirs.indexOf("blob") == 2) {
+		var githubUser = dirs[0];
+		var githubRepoName = dirs[1];
+		var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".git";
+		var branch =  dirs[3];
+	}
+	else {
+		reportError("Unknown github url format: " + dirs.join("/"));
+		return;
+	}
+
+	if( GITHUB_CLONING.hasOwnProperty(repo) ) {
+		// The repo is currently being cloned...
+		return;
+	}
+
+	GITHUB_CLONING[repo] = true;
+
+	var gitCommand = "git clone --single-branch --branch " + branch + " " + repo;
+
+	var tmpDir = "/tmp/" + githubUser;
+	var tempDirRepo = tmpDir + "/" + githubRepoName;
+	var uid = 65534; // nobody
+	var gid = 65534;
+
+	GITHUB_GITCLONE[IP] = tempDirRepo;
+
+	module_fs.mkdir(tmpDir, {mode: 0o777}, function(err) {
+		if(err && err.code != "EEXIST") throw err;
+
+		module_fs.chown(tmpDir, uid, gid, function(err) {
+			if(err) throw err;
+
+			var execOptions = {
+				shell: EXEC_OPTIONS.shell,
+				cwd: tmpDir,
+				uid: uid,
+				gid: gid
+			};
+
+			var gitArg = ["clone", "--single-branch", "--branch", branch, repo, tempDirRepo];
+
+			module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+				console.log("git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+
+				if(stderr && stderr.indexOf("already exists") != -1) {
+					var gitArg = ["pull"];
+					execOptions.cwd = tempDirRepo;
+					module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+						console.log("git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+
+						delete GITHUB_CLONING[repo];
+
+					});
+				}
+				else {
+					delete GITHUB_CLONING[repo];
+				}
+
+			});
+		});
+	});
+}
 
 function makeUrl(endPoint) {
 	

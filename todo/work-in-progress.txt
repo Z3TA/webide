@@ -3,6 +3,14 @@
 What I'm working on
 -------------------
 
+re-login after re-connection gives "Already logged in as user" error
+
+username/passwords doesn't seem to be saved... because auto-login doesn't work
+
+Recursively delete repo dir (gives enoent errors)
+
+todo: client plugin for ?github in url
+
 Manu users are from github2s.com, detect that they are coming from there, then make a shallow clone,
 so that when the user has logged in the files has already been downloaded.
 
