@@ -122,7 +122,7 @@ var CLIENT = {}; // Client object is global
 			stopPing();
 			
 			if(callback) {
-				var err = new Error("Connection closed");
+				var err = new Error("Connection to the backend closed");
 				err.code = "CONNECTION_CLOSED";
 				callback(err);
 				callback = null;
