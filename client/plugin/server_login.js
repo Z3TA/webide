@@ -484,8 +484,9 @@
 					CLIENT.disconnect();
 					connectToServer();
 				}
-				else if(!EDITOR.user || EDITOR.user.name != user.value) login();
-				else alertBox("Already logged in as user=" + EDITOR.user.name + " on \n" + CLIENT.url);
+				else{
+					login();
+				}
 			}
 			else {
 				CLIENT.connect(server, function connectionOpen(errConnect) {
