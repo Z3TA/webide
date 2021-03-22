@@ -9945,7 +9945,14 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			var url = stored.editorServerUrl;
 			if(url) var server = {url: url};
 
-			if(QUERY_STRING["skiplogin"]) return;
+			if(QUERY_STRING["skiplogin"]) {
+				loginScreen.style.display='none';
+				return;
+			}
+
+			CLIENT.on("connectionConnected", function clearLoginMessage() {
+				if(typeof loginMessage == "object") loginMessage.innerText = "";
+			});
 
 			CLIENT.connect(server, function connectedToServer(err) {
 				if(err) {
