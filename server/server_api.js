@@ -5,6 +5,8 @@ Error.stackTraceLimit = 100;
 
 var UTIL = require("../client/UTIL.js");
 
+var module_rimraf = require("rimraf");
+
 // Optional modules:
 try {
 	var module_ps = require("ps-node");
@@ -2798,92 +2800,15 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	}
 	
 	function recursiveDeleteLocalDir(pathToFolder, recursiveDeleteLocalDirCallback) {
-		var fs = require("fs");
 		
 		if(pathToFolder.substr(pathToFolder.length-1) != "/" && pathToFolder.substr(pathToFolder.length-1) != "\\") {
 			return recursiveDeleteLocalDirCallback("pathToFolder=" + pathToFolder + " does not end with a trailing slash!");
 		}
 		
-		var gotError = false;
-		var filesToBeDeleted = 0;
-		var foldersToBeDeleted = 0;
-		var pathsToStat = 0;
-		
-		console.log("Local file-system recursive delete: pathToFolder=" + pathToFolder);
-		
-		fs.readdir(pathToFolder, function readdir(err, folderItems) {
-			
-			if(err) allFilesAndFoldersDeletedMaybe(err);
-			else {
-				for(var i=0, path=""; i<folderItems.length; i++) {
-				// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
-					path = pathToFolder + folderItems[i];
-					stat(path);
-					}
-				allFilesAndFoldersDeletedMaybe(null);
-			}
-			
-		});
-		
-		function stat(path) {
-			pathsToStat++;
-			fs.stat(path, function (err, stats) {
-				pathsToStat--;
-				
-				if(gotError) return; // If we have already got an error while deleting the content of this directory
-				
-				if(stats) {
-					
-					if(stats.isFile()) {
-						//console.log("It's a file! path=" + path);
-						filesToBeDeleted++;
-						fs.unlink(path, function localFileDeleted(err) {
-							filesToBeDeleted--;
-							allFilesAndFoldersDeletedMaybe(err);
-						});
-					}
-					else if(stats.isDirectory()) {
-						//console.log("It's a folder! path=" + path);
-						foldersToBeDeleted++;
-						path = UTIL.trailingSlash(path);
-						recursiveDeleteLocalDir(path, function (err) {
-							foldersToBeDeleted--;
-							allFilesAndFoldersDeletedMaybe(err);
-						});
-					}
-				}
-				
-				allFilesAndFoldersDeletedMaybe(err);
-				
-			});
-		}
-		
-	
-		function allFilesAndFoldersDeletedMaybe(err) {
-			
-			//console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " pathsToStat=" + pathsToStat + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
-			
-			if(gotError) return; // If we have got an error, it means we have already called the callback
-			
-			if(err && err.code != "ENOENT") { // Might already have been deleted if it was a link
-				// Got an error when deleting a file or folder in the directory
-				gotError = err;
-				recursiveDeleteLocalDirCallback(err);
-			}
-			else {
-				// Make sure the directory is emty before deleting it
-				if(filesToBeDeleted === 0 && foldersToBeDeleted === 0 && pathsToStat === 0) {
-					fs.rmdir(pathToFolder, function localFileDeleted(err) {
-					recursiveDeleteLocalDirCallback(err);
-					});
-					}
-			}
-		}
+		module_rimraf(pathToFolder, {disableGlob: true}, recursiveDeleteLocalDirCallback);
 	}
 	
 }
-
-
 
 API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFilesCallback) {
 	

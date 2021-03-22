@@ -3,10 +3,6 @@
 What I'm working on
 -------------------
 
-Getting "not empty" error when trying to delete a folder recursievely... need to take a closer look to make sure files and folders are deleted in order!
-
-Recursively delete repo dir (gives enoent errors)
-
 todo: client plugin for ?github in url
 
 Manu users are from github2s.com, detect that they are coming from there, then make a shallow clone,
