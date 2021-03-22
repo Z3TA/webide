@@ -299,7 +299,7 @@
 
 		if(!urlValue) urlValue = defaultUrl;
 		
-		if(!userValue) {
+		if(!userValue && locally) {
 			userValue = DEFAULT_USERNAME;
 			pwValue = DEFAULT_PASSWORD;
 		}

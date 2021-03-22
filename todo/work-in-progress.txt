@@ -3,9 +3,7 @@
 What I'm working on
 -------------------
 
-re-login after re-connection gives "Already logged in as user" error
-
-username/passwords doesn't seem to be saved... because auto-login doesn't work
+Getting "not empty" error when trying to delete a folder recursievely... need to take a closer look to make sure files and folders are deleted in order!
 
 Recursively delete repo dir (gives enoent errors)
 
