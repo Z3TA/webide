@@ -623,6 +623,8 @@ var module_mount = require("../shared/mount.js");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 
+var module_fs_extra = require("fs-extra");
+
 //var module_copyFile = require("../shared/copyFile.js");
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 //var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
@@ -2997,19 +2999,39 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 							
 
 							if( GITHUB_GITCLONE.hasOwnProperty(IP) ) {
-								var tmpDir = GITHUB_GITCLONE.hasOwnProperty(IP);
-								var repoDir = UTIL.joinPaths(homeDir, "repo", UTIL.getFolderName(GITHUB_GITCLONE[IP]));
-								module_fs.rename(tmpDir, repoDir, function (err) {
-									if (err) throw err
-									
-									module_chownr(repoDir, uid, gid, function(err) {
-										if(err) throw err;
+								var tmpDir = GITHUB_GITCLONE[IP];
+								var repoName = UTIL.getFolderName(tmpDir);
+								var repoDir = UTIL.joinPaths(homeDir, "repo");
 
-										console.log("Moved files from tmpDir=" + tmpDir + " to repoDir=" + repoDir);
 
+								console.log("github2s: Creating repoDir=" + repoDir);
+								module_fs.mkdir(repoDir, function(err) {
+									console.log("github2s: mkdir repoDir=" + repoDir + " err.message=" + (err && err.message));
+
+									if(!err) {
+										// We did not get a EEXIST so it's was the first time the fir was created!
+										module_chownr(repoDir, uid, gid, function(err) {
+											if(err) throw err;
+										});
+									}
+
+									repoDir = UTIL.joinPaths(repoDir, repoName);
+
+									console.log("github2s: Copying tmpDir=" + tmpDir + " to repoDir=" + repoDir);
+									module_fs_extra.copy(tmpDir, repoDir, function (err) {
+										if (err) throw err
+
+										module_chownr(repoDir, uid, gid, function(err) {
+											if(err) throw err;
+
+											console.log("github2s: Copied files from tmpDir=" + tmpDir + " to repoDir=" + repoDir);
+										});
 									});
 								});
-							} 
+							}
+							else {
+								console.log("github2s: No folder to move! IP=" + IP + " GITHUB_GITCLONE=" + JSON.stringify(GITHUB_GITCLONE));
+							}
 
 							
 							// Tell all clients that a new client has connected
@@ -3035,7 +3057,7 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 							
 							if(userConnectionName == USERNAME) {
 								if(stdinChannelBuffer) {
-send({stdin: stdinChannelBuffer, id: 0});
+									send({stdin: stdinChannelBuffer, id: 0});
 									stdinChannelBuffer = "";
 								}
 								
@@ -3046,9 +3068,9 @@ send({stdin: stdinChannelBuffer, id: 0});
 							}
 							else {
 								// Save last login date and update loginCounter
-							module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function createLastLoginFile(err) {
-								if(err && err.code == "ENOENT") {
-									// .webide/storage/ probably doesn't exist in the home dir!
+								module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function createLastLoginFile(err) {
+									if(err && err.code == "ENOENT") {
+										// .webide/storage/ probably doesn't exist in the home dir!
 										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"], {recursive: true}), function(err) {
 											if(err && err.code != "EEXIST") throw err;
 											
@@ -4091,14 +4113,15 @@ function handleHttpRequest(request, response) {
 			*/
 		dirs.shift(); // removes first slash
 			dirs.shift(); // removes "github"
-			cloneGitRepo(dirs);
+			cloneGitRepo(dirs, IP);
+
 			response.writeHead(302, {
 				'Location': '/?github=' + encodeURIComponent(dirs.join("/")),
 				'Content-Type': 'text/html; charset=utf-8'
 			});
 		response.end( 'Go to <a href="https://' + DOMAIN + '/?github=' + encodeURIComponent(dirs.join("/") + '">editor</a>') );
 
-		return;
+			return;
 		}
 		else if(firstDir == "inspector") {
 			if(INSPECTOR.hasOwnProperty(secondDir)) {
@@ -4500,42 +4523,63 @@ function cloneGitRepo(dirs, IP) {
 	/*
 		git clone --single-branch --branch <branchname> <remote-repo>
 
-		Example: Z3TA/dbo/blob/gh-pages/design1/style.css
+		Examples: 
+			Z3TA/dbo/blob/gh-pages/design1/style.css
+			https://github.com/Z3TA/dbo
+			https://github.com/Z3TA/dbo/tree/gh-pages
 
 	*/
-		
-	if(dirs.indexOf("blob") == 2) {
+		var branch = ""; // default no branch
+
+		if(dirs[2] == "blob") {
 		var githubUser = dirs[0];
 		var githubRepoName = dirs[1];
+			var branch =  dirs[3];
+		}
+		else if(dirs[2] == "tree") {
+			var githubUser = dirs[0];
+			var githubRepoName = dirs[1];
+			var branch =  dirs[3];
+		}
+		else if(dirs.length == 2) {
+			var githubUser = dirs[0];
+			var githubRepoName = dirs[1];
+		}
+		else {
+			reportError("Unknown github url format: " + dirs.join("/"));
+		return;
+	}
+
 		var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".git";
-		var branch =  dirs[3];
-	}
-	else {
-		reportError("Unknown github url format: " + dirs.join("/"));
-		return;
-	}
 
-	if( GITHUB_CLONING.hasOwnProperty(repo) ) {
-		// The repo is currently being cloned...
-		return;
-	}
+		var repoBranch = repo + "/" + branch
 
-	GITHUB_CLONING[repo] = true;
+		if( GITHUB_CLONING.hasOwnProperty(repoBranch) ) {
+			// The repo is currently being cloned...
+			return githubRepoName;
+		}
 
-	var gitCommand = "git clone --single-branch --branch " + branch + " " + repo;
+		GITHUB_CLONING[repoBranch] = true;
 
-	var tmpDir = "/tmp/" + githubUser;
-	var tempDirRepo = tmpDir + "/" + githubRepoName;
-	var uid = 65534; // nobody
-	var gid = 65534;
+		var tmpDir = "/tmp/" + githubUser;
+		var tempDirRepo = tmpDir + "/" + githubRepoName;
+		var uid = 65534; // nobody
+		var gid = 65534;
 
-	GITHUB_GITCLONE[IP] = tempDirRepo;
+		GITHUB_GITCLONE[IP] = tempDirRepo;
 
-	module_fs.mkdir(tmpDir, {mode: 0o777}, function(err) {
-		if(err && err.code != "EEXIST") throw err;
+		log("github2s: Cloning git(hub) repo=" + repo);
+
+
+		module_fs.mkdir(tmpDir, {mode: 0o777}, function(err) {
+			if(err && err.code != "EEXIST") throw err;
+
+			log("github2s: Created tmpDir=" + tmpDir);
 
 		module_fs.chown(tmpDir, uid, gid, function(err) {
 			if(err) throw err;
+
+				log("github2s: chowned tmpDir=" + tmpDir);
 
 			var execOptions = {
 				shell: EXEC_OPTIONS.shell,
@@ -4544,408 +4588,428 @@ function cloneGitRepo(dirs, IP) {
 				gid: gid
 			};
 
-			var gitArg = ["clone", "--single-branch", "--branch", branch, repo, tempDirRepo];
+				var gitArg = ["clone"];
 
-			module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
-				console.log("git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+				if(branch) {
+					gitArg = gitArg.concat( "--single-branch", "--branch", branch );
+				}
+
+				gitArg = gitArg.concat([repo, tempDirRepo]);
+
+				log("github2s: cloning gitArg=" + JSON.stringify(gitArg) );
+
+				module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+					log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+
+					if(stderr) {
 
 				if(stderr && stderr.indexOf("already exists") != -1) {
+							log("github2s: Pulling new commits ...");
 					var gitArg = ["pull"];
 					execOptions.cwd = tempDirRepo;
-					module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
-						console.log("git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+					return module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+								log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
 
-						delete GITHUB_CLONING[repo];
+								delete GITHUB_CLONING[repoBranch];
 
-					});
-				}
-				else {
-					delete GITHUB_CLONING[repo];
-				}
+							});
+						}
+						else if(stderr.indexOf("Already up to date") != -1) {
+							log("github2s: " + stderr);
+						}
+						else {
+							log("github2s: Unknown error" + stderr);
+							console.error(err);
+							reportError("Unknown git error: stderr=" + stderr);
+						}
+					}
 
+					delete GITHUB_CLONING[repoBranch];
+				});
 			});
 		});
-	});
-}
 
-function makeUrl(endPoint) {
-	
-	if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
-	if(!HTTP_SERVER.address) {
-		console.log(HTTP_SERVER);
-		throw new Error("HTTP_SERVER has no address property!");
+		return githubRepoName;
 	}
+
+	function makeUrl(endPoint) {
 	
-	var address = HTTP_SERVER.address();
-	
-	
-	var port = HTTP_PORT;
-	
-	if(address) { // Sanity check
-		if(address.port) {
-			if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
+		if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
+		if(!HTTP_SERVER.address) {
+			console.log(HTTP_SERVER);
+			throw new Error("HTTP_SERVER has no address property!");
 		}
+	
+		var address = HTTP_SERVER.address();
+	
+	
+		var port = HTTP_PORT;
+	
+		if(address) { // Sanity check
+			if(address.port) {
+				if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
+			}
 		
-	}
+		}
 	
 	
-	var ip = HTTP_IP;
-	if(ip == "0.0.0.0" || ip == "::") {
-		// Find servers IP
-		var ipList = [];
-		var ifaces = module_os.networkInterfaces();
-		log("Listening IP's:", 7);
-		Object.keys(ifaces).forEach(function (ifname) {
-			var alias = 0;
+		var ip = HTTP_IP;
+		if(ip == "0.0.0.0" || ip == "::") {
+			// Find servers IP
+			var ipList = [];
+			var ifaces = module_os.networkInterfaces();
+			log("Listening IP's:", 7);
+			Object.keys(ifaces).forEach(function (ifname) {
+				var alias = 0;
 			
-			ifaces[ifname].forEach(function (iface) {
-				if ('IPv4' !== iface.family || iface.internal !== false) {
-					// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-					log(ifname + "=" + iface.address + " (internal)", 7);
-					return;
-				}
+				ifaces[ifname].forEach(function (iface) {
+					if ('IPv4' !== iface.family || iface.internal !== false) {
+						// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+						log(ifname + "=" + iface.address + " (internal)", 7);
+						return;
+					}
 				
-				if (alias >= 1) {
-					// this single interface has multiple ipv4 addresses
-					log(ifname + '=' + alias + ", " + iface.address, 7);
-				} else {
-					// this interface has only one ipv4 adress
-					log(ifname + "=" + iface.address, 7);
-				}
-				++alias;
+					if (alias >= 1) {
+						// this single interface has multiple ipv4 addresses
+						log(ifname + '=' + alias + ", " + iface.address, 7);
+					} else {
+						// this interface has only one ipv4 adress
+						log(ifname + "=" + iface.address, 7);
+					}
+					++alias;
 				
-				ipList.push(iface.address);
+					ipList.push(iface.address);
 				
+				});
 			});
-		});
 		
-		ip = ipList[0];
+			ip = ipList[0];
+		}
+	
+		//console.log(address);
+		//console.log("ipList=" + JSON.stringify(ipList));
+	
+		var url = ""; // "http://";
+	
+		if(HOSTNAME) url += HOSTNAME;
+		else url += ip;
+	
+		if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
+	
+		url += "/";
+	
+		if(endPoint) url += endPoint + "/";
+	
+		return url;
 	}
-	
-	//console.log(address);
-	//console.log("ipList=" + JSON.stringify(ipList));
-	
-	var url = ""; // "http://";
-	
-	if(HOSTNAME) url += HOSTNAME;
-	else url += ip;
-	
-	if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
-	
-	url += "/";
-	
-	if(endPoint) url += endPoint + "/";
-	
-	return url;
-}
 
-function randomString(letters) {
+	function randomString(letters) {
 	
-	if(letters == undefined) letters = 5;
+		if(letters == undefined) letters = 5;
 	
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		var text = "";
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	
-	for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
+		for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
 	
-	return text;
-}
+		return text;
+	}
 
-function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
+	function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	
-	// You can have different group and user. Default is the user/group running the node process
-	var spawnOptions = {};
-	var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
-	var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
+		// You can have different group and user. Default is the user/group running the node process
+		var spawnOptions = {};
+		var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
+		var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
-	// Using spawn instead of fork to be able to use Linux network namespaces
+		// Using spawn instead of fork to be able to use Linux network namespaces
 	
-	spawnOptions.env = {
-		username: username,
-		HOME: homeDir,
-		USER: username,
-		LOGNAME: username,
-		USER_NAME: username,
-		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
-		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
-		ANDROID_HOME:  HOME_DIR + username + "/Android/Sdk",
-		EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
-		VISUAL: "webide"
-	}
+		spawnOptions.env = {
+			username: username,
+			HOME: homeDir,
+			USER: username,
+			LOGNAME: username,
+			USER_NAME: username,
+			//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
+			JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
+			ANDROID_HOME:  HOME_DIR + username + "/Android/Sdk",
+			EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
+			VISUAL: "webide"
+		}
 	
-	if(groups) {
-		// we have to manually serialize objects!
-		spawnOptions.env.groups = JSON.stringify(groups);
-	}
+		if(groups) {
+			// we have to manually serialize objects!
+			spawnOptions.env.groups = JSON.stringify(groups);
+		}
 	
-	// For forking when running in the Termux Android app
-	if(module_os.platform()=="android") {
-		spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
-	}
+		// For forking when running in the Termux Android app
+		if(module_os.platform()=="android") {
+			spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
+		}
 	
-if(DOMAIN) spawnOptions.env.tld = DOMAIN;
+		if(DOMAIN) spawnOptions.env.tld = DOMAIN;
 
-	// Need to start the worker as root if network namespaces are used!
-	if(NO_NETNS) {
-		log("Spawning with uid=" + uid + " and gid=" + gid + " ...", DEBUG);
-		if(uid != undefined) spawnOptions.uid = parseInt(uid);
-		if(gid != undefined) spawnOptions.gid = parseInt(gid);
+		// Need to start the worker as root if network namespaces are used!
+		if(NO_NETNS) {
+			log("Spawning with uid=" + uid + " and gid=" + gid + " ...", DEBUG);
+			if(uid != undefined) spawnOptions.uid = parseInt(uid);
+			if(gid != undefined) spawnOptions.gid = parseInt(gid);
 		
-		spawnOptions.env.PATH =  process.env.PATH;
-	}
-	else {
-		// Spawning as root
-		spawnOptions.env.uid = uid;
-		spawnOptions.env.gid = gid;
+			spawnOptions.env.PATH =  process.env.PATH;
+		}
+		else {
+			// Spawning as root
+			spawnOptions.env.uid = uid;
+			spawnOptions.env.gid = gid;
 		
-		// Assume unix like system
+			// Assume unix like system
 		
-		// The paths will be checked in order (so put local first)
-		spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin/:/usr/bin:/bin:/sbin:";
+			// The paths will be checked in order (so put local first)
+			spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin/:/usr/bin:/bin:/sbin:";
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 			spawnOptions.env.PORT = homeDir + "sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
 			spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";
 		
 		
-		spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
+			spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
 		
-	}
+		}
 	
-	if(uid == undefined || uid == -1) {
-		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
+		if(uid == undefined || uid == -1) {
+			log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 		
-		if(process.getuid) {
-			if(process.getuid() == 0 && !CRAZY) {
-				throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+			if(process.getuid) {
+				if(process.getuid() == 0 && !CRAZY) {
+					throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+				}
 			}
 		}
-	}
 	
-	var workerScript = module_path.resolve(__dirname, "./user_worker.js");
+		var workerScript = module_path.resolve(__dirname, "./user_worker.js");
 	
-	if(!NO_NETNS && uid && process.platform=="linux") {
-		var command = "/sbin/ip";
-		//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
-		var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
-		var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
-spawnOptions.env.HOST = netnsIP;
-		spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
-		spawnOptions.env.TLD = DOMAIN;
-		spawnOptions.shell = EXEC_OPTIONS.shell;
+		if(!NO_NETNS && uid && process.platform=="linux") {
+			var command = "/sbin/ip";
+			//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
+			var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
+			var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
+			spawnOptions.env.HOST = netnsIP;
+			spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
+			spawnOptions.env.TLD = DOMAIN;
+			spawnOptions.shell = EXEC_OPTIONS.shell;
 		
-		spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
-		// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
-		var stdioPipe = true;
-	}
-	else {
-		var command = workerNode;
-		var args = [workerScript].concat(workerArgs);
-		spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
-	}
-	
-	log("Spawning user worker process... username=" + username + " uid=" + uid + " gid=" + gid + " groups=" + JSON.stringify(groups), INFO);
-	log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
-	
-	//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
-	
-	
-	try {
-		var worker = module_child_process.spawn(command, args, spawnOptions);
-	}
-	catch(err) {
-		if(err.code == "EPERM") {
-			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
-			throw new Error("Unable to spawn worker! (" + err.message + ")");
+			spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
+			// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
+			var stdioPipe = true;
 		}
 		else {
-			console.log("args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
-			
-			throw err;
+			var command = workerNode;
+			var args = [workerScript].concat(workerArgs);
+			spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
 		}
-	}
 	
-	worker.on("message", messageFromWorker);
-	worker.on("close", workerCloseHandler);
+		log("Spawning user worker process... username=" + username + " uid=" + uid + " gid=" + gid + " groups=" + JSON.stringify(groups), INFO);
+		log("Spawning with spawnOptions=" + JSON.stringify(spawnOptions) + "", DEBUG);
 	
-	worker.on("disconnect", function workerDisconnect() {
-		console.log(username + " worker disconnect: worker.connected=" + worker.connected);
-		setTimeout(function() {
-			log("3 seconds after user worker (" + username + ") disconnect: worker.connected=" + worker.connected + " worker.exitCode=" + worker.exitCode + " (null means it's still running) worker.killed=" + worker.killed + " (if the worker have recieved a kill signal)    ");
-			
-		}, 3000);
-		
-	});
-	
-	worker.on("error", function workerError(err) {
-		console.log(username + " worker error: err.message=" + err.message);
-	});
-	
-	worker.on("exit", function workerExit(code, signal) {
-		console.log(username + " worker exit: code=" + code + " signal=" + signal);
-	});
-	
-	if(stdioPipe) {
-		
-		worker.stdout.on("data", function workerExit(data) {
-			log(data.toString());
-		});
-		
-		worker.stderr.on("data", function workerExit(data) {
-			log(data.toString());
-			
-			reportError(username + " worker process stderr: " + data);
-			
-		});
-
-	}
-	
-	log(username + " worker pid=" + worker.pid);
-	
-	USER_WORKERS[username] = worker;
+		//log"(process.env=" + JSON.stringify(process.env) + "", DEBUG)
 	
 	
-	
-	function workerCloseHandler(code, signal) {
-		log(username + " worker close: code=" + code + " signal=" + signal, INFO);
-		
-		if(!USER_CONNECTIONS.hasOwnProperty(username)) {
-			delete USER_WORKERS[username];
-			log("Not restarting worker process for " + username + " because there are no clients connected!", INFO);
-			return;
+		try {
+			var worker = module_child_process.spawn(command, args, spawnOptions);
 		}
-		
-		var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
-		
-		if(code !== 0) {
-			
-			log("Recreating user worker process for " + username);
-			var recreateUserProcessSleepTime = 0;
-			var timeSinceLastCrash = new Date() - USER_CONNECTIONS[username].lastUserWorkerCrash;
-			console.log("timeSinceLastCrash=" + timeSinceLastCrash);
-			if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
-			else recreateUserProcessSleepTime = 2000 + recreateUserProcessSleepTime * 2;
-			
-			USER_CONNECTIONS[username].lastUserWorkerCrash = new Date();
-			
-			msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted in " + recreateUserProcessSleepTime/1000 + " seconds ...)";
-			
-			console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
-			setTimeout(function restartWorkerProcess() {
-				
-				// note: User connections share the same worker!
-				var userWorkerInfo = {name: username, rootPath: rootPath, homeDir: homeDir, id: uid};
-				
-				createUserWorker(username, uid, gid, homeDir, groups, rootPath);
-				
-				USER_WORKERS[username].send({identify: userWorkerInfo});
-				
-			}, recreateUserProcessSleepTime);
-		}
-		
-		sendToAll(username, {msg: msg, code: "WORKER_CLOSE"});
-		
-	}
-	
-	function messageFromWorker(workerMessage, handle) {
-		//console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
-		
-		if(workerMessage.resp || workerMessage.error) {
-			
-			//log("workerMessage.id=" + workerMessage.id, DEBUG);
-			
-			if(typeof workerMessage.id == "string") {
-				var arr = workerMessage.id.split("|");
-				var userConnectionId = parseInt(arr[0]);
-				workerMessage.id = parseInt(arr[1]);
-			}
-			else throw new Error("Bad workerMessage.id=" + workerMessage.id + " typeof " + (typeof workerMessage.id));
-			
-			// Sanity check
-			if( workerMessage.hasOwnProperty("echo") && workerMessage.hasOwnProperty("id") ) throw new Error("echo with id=" + workerMessage.id + ": " + JSON.stringify(workerMessage.echo, null, 2));
-			
-			if(!workerMessage.id && workerMessage.hasOwnProperty("resp")) throw new Error("No id in workerMessage with resp! workerMessage=" + JSON.stringify(workerMessage));
-			if(!workerMessage.id && workerMessage.hasOwnProperty("error")) throw new Error("No id in workerMessage with error! workerMessage=" + JSON.stringify(workerMessage));
-			// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
-			
-			var str = JSON.stringify(workerMessage);
-			
-			if(!USER_CONNECTIONS.hasOwnProperty(username)) {
-				log("No clients for " + username + " connected. Unable to deliver resp=" + UTIL.shortString(str), WARN);
-				return;
-				// Should we buffer it !? If the client restarted it will not recognize the request id
-			}
-			
-			var conn = USER_CONNECTIONS[username].connections[userConnectionId];
-			if(conn == undefined) {
-				log("Unknown connection: userConnectionId=" + userConnectionId + " connections keys: " + Object.keys(USER_CONNECTIONS[username].connections) + " resp=" + UTIL.shortString(str), WARN);
-				return;
-			}
-			
-			log(getIp(conn) + "(" + userConnectionId + ") <= " + (workerMessage.id ? workerMessage.id : "") + UTIL.shortString(str, 256));
-			
-			conn.write(str);
-			
-		}
-		else if(workerMessage.message) {
-			log("Message from " + username + " worker: " + UTIL.shortString(JSON.stringify(workerMessage.message)), DEBUG);
-			if(USER_CONNECTIONS.hasOwnProperty(username)) {
-				sendToAll(username, workerMessage.message);
+		catch(err) {
+			if(err.code == "EPERM") {
+				if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
+				throw new Error("Unable to spawn worker! (" + err.message + ")");
 			}
 			else {
-				if(MESSAGE_BUFFER[username].length == MAX_MESSAGE_BUFFER) {
-					MESSAGE_BUFFER[username].skipped = 0;
-				}
-				
-				if(MESSAGE_BUFFER[username].length > MAX_MESSAGE_BUFFER) {
-					MESSAGE_BUFFER[username].skipped++;
-					log("MAX_MESSAGE_BUFFER=" + MAX_MESSAGE_BUFFER + " reached for " + username + ". Skipping message.", DEBUG)
-				}
-				else {
-					log("Buffering message", DEBUG);
-					MESSAGE_BUFFER[username].push(workerMessage.message);
-				}
+				console.log("args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
+			
+				throw err;
 			}
 		}
-		else if(workerMessage.request) {
-			// For special functionality ...
+	
+		worker.on("message", messageFromWorker);
+		worker.on("close", workerCloseHandler);
+	
+		worker.on("disconnect", function workerDisconnect() {
+			console.log(username + " worker disconnect: worker.connected=" + worker.connected);
+			setTimeout(function() {
+				log("3 seconds after user worker (" + username + ") disconnect: worker.connected=" + worker.connected + " worker.exitCode=" + worker.exitCode + " (null means it's still running) worker.killed=" + worker.killed + " (if the worker have recieved a kill signal)    ");
 			
-			var id = workerMessage.id;
-			var req = workerMessage.request;
+			}, 3000);
+		
+		});
+	
+		worker.on("error", function workerError(err) {
+			console.log(username + " worker error: err.message=" + err.message);
+		});
+	
+		worker.on("exit", function workerExit(code, signal) {
+			console.log(username + " worker exit: code=" + code + " signal=" + signal);
+		});
+	
+		if(stdioPipe) {
+		
+			worker.stdout.on("data", function workerExit(data) {
+				log(data.toString());
+			});
+		
+			worker.stderr.on("data", function workerExit(data) {
+				log(data.toString());
 			
-			if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+				reportError(username + " worker process stderr: " + data);
 			
-			if(req.createHttpEndpoint) {
-				
-				var folder = req.createHttpEndpoint.folder;
-				
-				console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
-				
-				createHttpEndpoint(username, folder, function(err, url) {
-					if(err) workerResp(err);
-					else workerResp(null, {url: url});
-				});
+			});
+
+		}
+	
+		log(username + " worker pid=" + worker.pid);
+	
+		USER_WORKERS[username] = worker;
+	
+	
+	
+		function workerCloseHandler(code, signal) {
+			log(username + " worker close: code=" + code + " signal=" + signal, INFO);
+		
+			if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+				delete USER_WORKERS[username];
+				log("Not restarting worker process for " + username + " because there are no clients connected!", INFO);
+				return;
 			}
-			else if(req.removeHttpEndpoint) {
+		
+			var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
+		
+			if(code !== 0) {
+			
+				log("Recreating user worker process for " + username);
+				var recreateUserProcessSleepTime = 0;
+				var timeSinceLastCrash = new Date() - USER_CONNECTIONS[username].lastUserWorkerCrash;
+				console.log("timeSinceLastCrash=" + timeSinceLastCrash);
+				if( timeSinceLastCrash > (10000 + recreateUserProcessSleepTime*2) ) recreateUserProcessSleepTime = 0;
+				else recreateUserProcessSleepTime = 2000 + recreateUserProcessSleepTime * 2;
+			
+				USER_CONNECTIONS[username].lastUserWorkerCrash = new Date();
+			
+				msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted in " + recreateUserProcessSleepTime/1000 + " seconds ...)";
+			
+				console.log("Waiting " + recreateUserProcessSleepTime/1000 + " seconds before restarting worker process for user " + username);
+				setTimeout(function restartWorkerProcess() {
 				
-				var folder = req.removeHttpEndpoint.folder;
+					// note: User connections share the same worker!
+					var userWorkerInfo = {name: username, rootPath: rootPath, homeDir: homeDir, id: uid};
 				
-				removeHttpEndpoint(username, folder, function(err, folder) {
-					//if(err) throw err;
-					workerResp(err, {folder: folder});
-				});
+					createUserWorker(username, uid, gid, homeDir, groups, rootPath);
+				
+					USER_WORKERS[username].send({identify: userWorkerInfo});
+				
+				}, recreateUserProcessSleepTime);
 			}
-			else if(req.debugInBrowserVnc) {
-				var url = req.debugInBrowserVnc.url;
-				startChromiumBrowserInVnc(username, uid, gid, url, function(err, resp) {
-					workerResp(err, resp);
-				});
+		
+			sendToAll(username, {msg: msg, code: "WORKER_CLOSE"});
+		
+		}
+	
+		function messageFromWorker(workerMessage, handle) {
+			//console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+		
+			if(workerMessage.resp || workerMessage.error) {
+			
+				//log("workerMessage.id=" + workerMessage.id, DEBUG);
+			
+				if(typeof workerMessage.id == "string") {
+					var arr = workerMessage.id.split("|");
+					var userConnectionId = parseInt(arr[0]);
+					workerMessage.id = parseInt(arr[1]);
+				}
+				else throw new Error("Bad workerMessage.id=" + workerMessage.id + " typeof " + (typeof workerMessage.id));
+			
+				// Sanity check
+				if( workerMessage.hasOwnProperty("echo") && workerMessage.hasOwnProperty("id") ) throw new Error("echo with id=" + workerMessage.id + ": " + JSON.stringify(workerMessage.echo, null, 2));
+			
+				if(!workerMessage.id && workerMessage.hasOwnProperty("resp")) throw new Error("No id in workerMessage with resp! workerMessage=" + JSON.stringify(workerMessage));
+				if(!workerMessage.id && workerMessage.hasOwnProperty("error")) throw new Error("No id in workerMessage with error! workerMessage=" + JSON.stringify(workerMessage));
+				// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
+			
+				var str = JSON.stringify(workerMessage);
+			
+				if(!USER_CONNECTIONS.hasOwnProperty(username)) {
+					log("No clients for " + username + " connected. Unable to deliver resp=" + UTIL.shortString(str), WARN);
+					return;
+					// Should we buffer it !? If the client restarted it will not recognize the request id
+				}
+			
+				var conn = USER_CONNECTIONS[username].connections[userConnectionId];
+				if(conn == undefined) {
+					log("Unknown connection: userConnectionId=" + userConnectionId + " connections keys: " + Object.keys(USER_CONNECTIONS[username].connections) + " resp=" + UTIL.shortString(str), WARN);
+					return;
+				}
+			
+				log(getIp(conn) + "(" + userConnectionId + ") <= " + (workerMessage.id ? workerMessage.id : "") + UTIL.shortString(str, 256));
+			
+				conn.write(str);
+			
 			}
-			else if(req.googleDrive) {
-				console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
-				if(req.googleDrive.code) {
-					if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
-					GCSF[username].enterCode(req.googleDrive.code, function(err, resp) {
+			else if(workerMessage.message) {
+				log("Message from " + username + " worker: " + UTIL.shortString(JSON.stringify(workerMessage.message)), DEBUG);
+				if(USER_CONNECTIONS.hasOwnProperty(username)) {
+					sendToAll(username, workerMessage.message);
+				}
+				else {
+					if(MESSAGE_BUFFER[username].length == MAX_MESSAGE_BUFFER) {
+						MESSAGE_BUFFER[username].skipped = 0;
+					}
+				
+					if(MESSAGE_BUFFER[username].length > MAX_MESSAGE_BUFFER) {
+						MESSAGE_BUFFER[username].skipped++;
+						log("MAX_MESSAGE_BUFFER=" + MAX_MESSAGE_BUFFER + " reached for " + username + ". Skipping message.", DEBUG)
+					}
+					else {
+						log("Buffering message", DEBUG);
+						MESSAGE_BUFFER[username].push(workerMessage.message);
+					}
+				}
+			}
+			else if(workerMessage.request) {
+				// For special functionality ...
+			
+				var id = workerMessage.id;
+				var req = workerMessage.request;
+			
+				if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+			
+				if(req.createHttpEndpoint) {
+				
+					var folder = req.createHttpEndpoint.folder;
+				
+					console.log("createHttpEndpoint: req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+				
+					createHttpEndpoint(username, folder, function(err, url) {
+						if(err) workerResp(err);
+						else workerResp(null, {url: url});
+					});
+				}
+				else if(req.removeHttpEndpoint) {
+				
+					var folder = req.removeHttpEndpoint.folder;
+				
+					removeHttpEndpoint(username, folder, function(err, folder) {
+						//if(err) throw err;
+						workerResp(err, {folder: folder});
+					});
+				}
+				else if(req.debugInBrowserVnc) {
+					var url = req.debugInBrowserVnc.url;
+					startChromiumBrowserInVnc(username, uid, gid, url, function(err, resp) {
 						workerResp(err, resp);
+					});
+				}
+				else if(req.googleDrive) {
+					console.log("req.googleDrive=" + JSON.stringify(req.googleDrive));
+					if(req.googleDrive.code) {
+						if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
+						GCSF[username].enterCode(req.googleDrive.code, function(err, resp) {
+							workerResp(err, resp);
 					});
 				}
 				else if(req.googleDrive.umount) {
