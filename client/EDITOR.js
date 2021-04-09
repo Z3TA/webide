@@ -9979,6 +9979,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				function loginMaybe() {
 					if(QUERY_STRING.user && QUERY_STRING.pw) return attemptLogin(QUERY_STRING.user, QUERY_STRING.pw);
 					if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
+					if(locally) return attemptLogin(DEFAULT_USERNAME, DEFAULT_PASSWORD);
 
 					username.focus();
 					loginButton.disabled = false;
@@ -9999,8 +10000,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 						loginButton.disabled = false;
 						loginAsGuest.disabled = false;
 						
-						
-
 						if(err.message.indexOf("Username specified in server arguments") != -1) {
 							loginMessage.innerText = "Login with the username/password specified in server command arguments! (admin/admin is default)";
 						}
