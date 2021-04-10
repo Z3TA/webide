@@ -2998,11 +2998,27 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 							send({resp: {loginSuccess: userClientInfo}});
 							
 
-							if( GITHUB_GITCLONE.hasOwnProperty(IP) ) {
-								var tmpDir = GITHUB_GITCLONE[IP];
+							var waitUntilClonedCounter = 0;
+							var waitUntilClonedTimeout = 200;
+							var waitUntilClonedMaxWait = 5 * 1000 / waitUntilClonedTimeout;
+
+							function waitUntilCloned() {
+								waitUntilClonedCounter++;
+								var repoBranch = GITHUB_GITCLONE[IP].repoBranch;
+								if(GITHUB_CLONING[repoBranch]) {
+									console.log("github2s: Still being cloned... repoBranch=" + repoBranch);
+
+									if( waitUntilClonedCounter >= waitUntilClonedMaxWait ) {
+										console.log("github2s: Max wait time reached! repoBranch=" + repoBranch + " waitUntilClonedCounter=" + waitUntilClonedCounter + " waitUntilClonedMaxWait=" + waitUntilClonedMaxWait);
+										return;
+									}
+
+									return setTimeout(waitUntilCloned, waitUntilClonedTimeout);
+								}
+								
+								var tmpDir = GITHUB_GITCLONE[IP].dir;
 								var repoName = UTIL.getFolderName(tmpDir);
 								var repoDir = UTIL.joinPaths(homeDir, "repo");
-
 
 								console.log("github2s: Creating repoDir=" + repoDir);
 								module_fs.mkdir(repoDir, function(err) {
@@ -3028,6 +3044,11 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 										});
 									});
 								});
+
+							}
+
+							if( GITHUB_GITCLONE.hasOwnProperty(IP) ) {
+								waitUntilCloned();
 							}
 							else {
 								console.log("github2s: No folder to move! IP=" + IP + " GITHUB_GITCLONE=" + JSON.stringify(GITHUB_GITCLONE));
@@ -4566,7 +4587,7 @@ function cloneGitRepo(dirs, IP) {
 		var uid = 65534; // nobody
 		var gid = 65534;
 
-		GITHUB_GITCLONE[IP] = tempDirRepo;
+		GITHUB_GITCLONE[IP] = {dir: tempDirRepo, repoBranch: repoBranch};
 
 		log("github2s: Cloning git(hub) repo=" + repo);
 
