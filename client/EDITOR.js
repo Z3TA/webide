@@ -110,7 +110,7 @@ EDITOR.settings = {
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)",    // For text highlighting
 
-// Colors for the terminal emulator
+// Colors for the terminal emulator (and highlighters)
 		colorBlack: "rgb(0, 0, 0)",
 		colorRed: "rgb(255, 0, 0)",
 		colorGreen: "rgb(0, 128, 0)",
@@ -118,7 +118,13 @@ EDITOR.settings = {
 		colorBlue: "rgb(0, 0, 255)",
 		colorMagenta: "rgb(255, 0, 255)",
 		colorCyan: "rgb(0, 255, 255)",
-		colorWhite: "rgb(255, 255, 255)"
+		colorWhite: "rgb(255, 255, 255)",
+
+		colorPurple: "rgb(102, 0, 102)",
+		colorGray: "rgb(238, 238, 238)",
+		colorOrange: "rgb(155, 112, 63)",
+
+
 
 	},
 	scrollSpeedMultiplier: 1/17,

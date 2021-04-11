@@ -415,6 +415,9 @@ color: rgb(223, 223, 223);
 	padding: 2px;
 }
 
+.dialog .feedback .send {
+	color: #E5E5E5; 
+}
 
 div.gotoFile li {
 	font-family: Helvetica, Arial, sans-serif;

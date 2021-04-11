@@ -103,19 +103,24 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		EDITOR.settings.style.xmlTagColor = "rgb(200, 241, 250)";
 		EDITOR.settings.style.lineNumberColor = "rgb(114, 114, 114)";
 		
-		EDITOR.settings.caret.color = "#ffffff";
+		EDITOR.settings.caret.color = "rgb(255, 255, 255)";
 		
 		
 		// Colors for the terminal emulator
 		EDITOR.settings.style.colorBlack = "rgb(235, 235, 229)";
-		EDITOR.settings.style.colorRed  = "#FFA8A8";
-		EDITOR.settings.style.colorGreen = "#00FA00";
-		EDITOR.settings.style.colorYellow = "#FFFF00";
-		EDITOR.settings.style.colorBlue = "#CCCCFF";
-		EDITOR.settings.style.colorMagenta = "#FF9EFF";
-		EDITOR.settings.style.colorCyan = "00FFFF";
-		EDITOR.settings.style.colorWhite = "black";
+		EDITOR.settings.style.colorRed  = "rgb(255, 168, 168)";
+		EDITOR.settings.style.colorGreen = "rgb(0, 250, 0)";
+		EDITOR.settings.style.colorYellow = "rgb(255, 255, 0)";
+		EDITOR.settings.style.colorBlue = "rgb(204, 204, 255)";
+		EDITOR.settings.style.colorMagenta = "rgb(255, 158, 255)";
+		EDITOR.settings.style.colorCyan = "rgb(0, 255, 255)";
+		EDITOR.settings.style.colorWhite = "rgb(0, 0, 0)";
 		
+
+		EDITOR.settings.style.colorPurple = "rgb(217, 110, 228)";
+		EDITOR.settings.style.colorGray = "rgb(154, 154, 154)";
+		EDITOR.settings.style.colorOrange = "rgb(220, 141, 69)";
+
 		// Experimenting
 		//EDITOR.settings.style.textColor = "rgb(221, 164, 99)"; // 
 		//EDITOR.settings.style.bgColor = "rgb(11, 12, 18)";

@@ -12,67 +12,71 @@
 	var html;
 	var fileColors = {};
 
-var styleWebide = {
-		"hljs-tag": {color: EDITOR.settings.style.xmlTagColor},
-		"hljs-comment": {color: EDITOR.settings.style.commentColor},
-		"hljs-quote": {color: EDITOR.settings.style.quoteColor},
+	function getThemeColors() {
 
-		"hljs-keyword": {color: "#008"},
-		"hljs-selector-tag": {color: "#008"},
-		"hljs-section": {color: "#008"},
-		"hljs-title": {color: "#008"},
-		"hljs-name": {color: "#008"},
+		return {
+			"hljs-tag": {color: EDITOR.settings.style.xmlTagColor},
+			"hljs-comment": {color: EDITOR.settings.style.commentColor},
+			"hljs-quote": {color: EDITOR.settings.style.quoteColor},
 
-		"hljs-variable": {color: "#660"},
-		"hljs-template-variable": {color: "#660"},
+			"hljs-keyword": {color: EDITOR.settings.style.colorBlue},
+			"hljs-selector-tag": {color: EDITOR.settings.style.colorBlue},
+			"hljs-section": {color: EDITOR.settings.style.colorBlue},
+			"hljs-title": {color: EDITOR.settings.style.colorBlue},
+			"hljs-name": {color: EDITOR.settings.style.colorBlue},
 
-		"hljs-string": {color: EDITOR.settings.style.quoteColor},
-		"hljs-selector-attr": {color: "#080"},
-		"hljs-selector-pseudo": {color: "#080"},
-		"hljs-regexp": {color: "#080"},
+			"hljs-variable": {color: EDITOR.settings.style.colorYellow},
+			"hljs-template-variable": {color: EDITOR.settings.style.colorYellow},
 
-		"hljs-literal": {color: "#066"},
-		"hljs-symbol": {color: "#066"},
-		"hljs-bullet": {color: "#066"},
-		"hljs-meta": {color: "#066"},
-		"hljs-number": {color: "#066"},
-		"hljs-link": {color: "#066"},
+			"hljs-string": {color: EDITOR.settings.style.quoteColor},
+			"hljs-selector-attr": {color: EDITOR.settings.style.colorGreen},
+			"hljs-selector-pseudo": {color: EDITOR.settings.style.colorGreen},
+			"hljs-regexp": {color: EDITOR.settings.style.colorGreen},
 
-		"hljs-title": {color: "#606"},
-		"hljs-doctag": {color: "#606"},
-		"hljs-type": {color: "#606"},
-		"hljs-attr": {color: "#606"},
-		"hljs-built_in": {color: "#606"},
-		"hljs-builtin-name": {color: "#606"},
-		"hljs-params": {color: "#606"},
+			"hljs-literal": {color: EDITOR.settings.style.colorCyan},
+			"hljs-symbol": {color: EDITOR.settings.style.colorCyan},
+			"hljs-bullet": {color: EDITOR.settings.style.colorCyan},
+			"hljs-meta": {color: EDITOR.settings.style.colorCyan},
+			"hljs-number": {color: EDITOR.settings.style.colorCyan},
+			"hljs-link": {color: EDITOR.settings.style.colorCyan},
 
-		"hljs-attribute": {color: "#000"},
-		"hljs-subst": {color: "#000"},
+			"hljs-title": {color: EDITOR.settings.style.colorPurple},
+			"hljs-doctag": {color: EDITOR.settings.style.colorPurple},
+			"hljs-type": {color: EDITOR.settings.style.colorPurple},
+			"hljs-attr": {color: EDITOR.settings.style.colorPurple},
+			"hljs-built_in": {color: EDITOR.settings.style.colorPurple},
+			"hljs-builtin-name": {color: EDITOR.settings.style.colorPurple},
+			"hljs-params": {color: EDITOR.settings.style.colorPurple},
 
-		"hljs-formula": {bgColor: "#eee", italic: true},
+			"hljs-attribute": {color: EDITOR.settings.style.colorBlack},
+			"hljs-subst": {color: EDITOR.settings.style.colorBlack},
 
-		"hljs-selector-id": {color: "#9B703F"},
-		"hljs-selector-class": {color: "#9B703F"},
+			"hljs-formula": {bgColor: EDITOR.settings.style.colorGray, italic: true},
 
-		"hljs-addition": {bgColor: "#baeeba", color: EDITOR.settings.style.textColor},
+			"hljs-selector-id": {color: EDITOR.settings.style.colorOrange},
+			"hljs-selector-class": {color: EDITOR.settings.style.colorOrange},
 
-		"hljs-deletion": {bgColor: "#ffc8bd", color: EDITOR.settings.style.textColor},
+			"hljs-addition": {bgColor: EDITOR.settings.style.colorGreen, color: EDITOR.settings.style.textColor},
 
-		"hljs-doctag": {bold: true},
-		"hljs-strong": {bold: true},
+			"hljs-deletion": {bgColor: EDITOR.settings.style.colorRed, color: EDITOR.settings.style.textColor},
 
-		"hljs-emphasis": {italic: true}
+			"hljs-doctag": {bold: true},
+			"hljs-strong": {bold: true},
 
-	};
+			"hljs-emphasis": {italic: true}
+
+		};
+	}
 	
 
-	var theme =styleWebide;
+	var theme = getThemeColors();
 
 
 	EDITOR.plugin({
 		desc: "Code highlightning",
 		load: function loadHighlight() {
 			
+			theme = getThemeColors();
 			EDITOR.on("fileOpen", highlightLazyLoad);
 			
 		},
