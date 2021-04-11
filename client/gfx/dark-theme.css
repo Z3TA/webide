@@ -5,6 +5,32 @@ body {
 	color: rgb(255,255,255);
 }
 
+#loginScreen {
+	background-color: #1d1f29!important;
+}
+
+#loginScreen .logo {
+	fill: #f3e032;
+}
+
+#loginScreen .logo path {
+	stroke: #e3e3e3;
+}
+
+#loginScreen .content {
+	background: #2d2d30;
+}
+
+#loginScreen label {
+	color: #FFF;
+}
+
+#loginScreen #loginMessage {
+	background: #000;
+	color: #FFF;
+}
+
+
 div.header {
 	background: none;
 	background-color: #29292b; /* sama as footer */

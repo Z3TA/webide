@@ -3,8 +3,6 @@
 What I'm working on
 -------------------
 
-Dark theme for the login screen
-
 Use the login screen as a "landing page" show some info about the editor !?
 
 Move functionality from server_login.js to EDITOR.js and only use server_login.js for re-login after connection lost!?
