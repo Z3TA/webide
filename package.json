@@ -35,6 +35,7 @@
     "mammoth": "^1.4.9",
     "marked": "^0.7.0",
     "ncp": "^2.0.0",
+    "readline-sync": "^1.4.10",
     "rimraf": "^3.0.2",
     "sockjs": "^0.3.20"
   },
@@ -64,6 +65,7 @@
   "scripts": {
     "start": "node ./start.js -local",
     "server": "node ./server/server.js --loglevel=6 --username=admin --password=admin --ip=127.0.0.1 --port=8099",
-    "webide-dev": "sudo node ./server/server.js --domain=webide-dev.se --host=webide-dev.se --ip=127.0.0.1 --port=8099"
+    "webide-dev": "sudo node ./server/server.js --domain=webide-dev.se --host=webide-dev.se --ip=127.0.0.1 --port=8099",
+    "behind-nat": "node ./server/server.js -nat-type client --username=$(whoami) -askforpw"
   }
 }

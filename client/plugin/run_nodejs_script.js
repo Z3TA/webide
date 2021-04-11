@@ -179,7 +179,7 @@ nodeJsBanner.hide();
 		
 		console.log("Run nodejs script: runNodeJsScriptMaybe: ext=" + ext + " isNodejsScript(file)=" + isNodejsScript(file));
 
-		if(ext == "js" || ext == "stdout" || isNodejsScript(file)) {
+		if( ext != "txt" && ext != "md" && (ext == "js" || ext == "stdout" || isNodejsScript(file))) {
 			runNodeJsScript();
 			return HANDLED;
 		}

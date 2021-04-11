@@ -1,7 +1,5 @@
-
-
 (function() {
-"use strict";
+	"use strict";
 
 	var markdownParser = "plugin/markdown_preview/showdown.js";
 	var markdownParserLoaded = false;
@@ -9,26 +7,29 @@
 	
 	var filesInPreview = {};
 	
-EDITOR.plugin({
-desc: "Markdown Preview",
-load: function loadMarkdownPreview() {
-EDITOR.on("previewTool", markdownPreview);
+	EDITOR.plugin({
+		desc: "Markdown Preview",
+		load: function loadMarkdownPreview() {
+			EDITOR.on("previewTool", markdownPreview);
 
-},
-unload: function unloadMarkdownPreview() {
+		},
+		unload: function unloadMarkdownPreview() {
 
-EDITOR.removeEvent("previewTool", markdownPreview); 
-}
-});
+			EDITOR.removeEvent("previewTool", markdownPreview); 
+		}
+	});
 
-function markdownPreview(file) {
+	function markdownPreview(file) {
 		if(!file) return false;
 		
 		var ext = UTIL.getFileExtension(file.path).toLowerCase();
 		
 		if(!(ext=="md" || ext=="txt" || ext=="markdown" || ext=="mdown" || ext=="mkdn" || ext=="mkd" || ext=="mdwn" 
-		|| ext=="mdtxt" || ext=="mdtext" || ext=="text" || ext=="rmd")) return false;
-		
+		|| ext=="mdtxt" || ext=="mdtext" || ext=="text" || ext=="rmd")) {
+			console.log("markdownPreview: Assuming that ext=" + ext + " is NOT a markdown file.");
+			return false;
+		}
+
 		filesInPreview[file.path] = {
 			file: file,
 			win: null,
@@ -43,7 +44,7 @@ function markdownPreview(file) {
 			
 			preview.win = win;
 			
-// Chrome needs the full URL to the stylesheet, it can't resolve relative path from about:blank
+			// Chrome needs the full URL to the stylesheet, it can't resolve relative path from about:blank
 			var l = window.location;
 			var baseUrl = l.protocol + "//" + l.host + l.pathname;
 			var cssUrl = baseUrl + "plugin/markdown_preview/github.css";

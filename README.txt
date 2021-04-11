@@ -23,25 +23,32 @@ Assuming you already have node.js installed. Open cmd or terminal:
 Then type `webide [path to file]` to edit any file.
 
 
-If you did not install globally
--------------------------------
-For example if you only want to run the server, but without setting it up as a cloud IDE:
+### Staring server/client manually on localhost
+
 ```
 cd node_modules/webide.se
 npm run server
 ```
 Then open the URL in your browser: http://127.0.0.1:8099/
 
-If you are on a remote server:
-```
-node server/server.js --ip=192.168.122.50 --username=admin --password=admin -nochroot
-```
-Replace the IP with your public IP-address.
+or run `./start.js` to start the client in a webview (recommended) 
 
-If you want to host many users you need to setup the editor as a [cloud IDE](#cloudIDE).
+### If you are on a remote server:
+```
+node server/server.js --ip=192.168.122.50 --username=admin --password=admin
+```
+Replace username and password, and the IP with your public IP-address.
 
-If your computer/device is behind NAT, start the server with the flag *-nat-type client*
- and you can access your server from https://webide.se/?nat_code=XXXXXXX
+(If you want to allow many users to signup/login you need to setup the editor as a [cloud IDE](#cloudIDE).)
+
+
+### Access behind NAT/firewall
+
+If your computer/device is behind a firewall or NAT, start the server with the following flag(s):
+```
+node server/server.js -nat-type client -nat-code XXXXXXX
+ ```
+Your server/editor can then be accessed from https://webide.se/?nat_code=XXXXXXX
 
 
 

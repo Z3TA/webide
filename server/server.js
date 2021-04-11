@@ -11,7 +11,51 @@ sudo node server/server.js --hostname=webide-dev.se -pp 80
 
 */
 
-console.log("server.js process.argv=" + JSON.stringify(process.argv));
+// Declare modules here as a OPTIMIZATION
+var module_fs = require("fs");
+var module_chownr = require("chownr");
+var module_child_process = require('child_process');
+var module_path = require("path");
+var module_letsencrypt = require("../shared/letsencrypt.js");
+var module_os = require("os");
+var module_sockJs = require("sockjs");
+var module_http = require("http");
+var module_https = require("https");
+var module_dns = require("dns");
+var module_dgram = require("dgram");
+var module_pwHash = require("./pwHash.js");
+var module_mimeMap = require("./mimeMap.js");
+
+var module_mount = require("../shared/mount.js");
+var module_string_decoder = require('string_decoder');
+var module_net = require("net");
+
+var module_fs_extra = require("fs-extra");
+
+var module_readlineSync = require('readline-sync');
+
+//var module_copyFile = require("../shared/copyFile.js");
+//var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
+//var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
+
+// Optional modules:
+try {
+	var module_generator = require('generate-password');
+	var module_httpProxy = require('http-proxy');
+
+	var module_nodemailer = require('nodemailer');
+	var module_smtpTransport = require('nodemailer-smtp-transport');
+	var module_ps = require('ps-node');
+	var module_mysql = require("mysql2");
+}
+catch(err) {
+	log("Unable to load optional module(s): " + err.message);
+}
+
+
+
+
+//console.log("server.js process.argv=" + JSON.stringify(process.argv));
 
 var getArg = require("../shared/getArg.js");
 
@@ -32,7 +76,7 @@ var log; // Using small caps because it looks and feels better
 
 var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
 var testedNodeVersions = [0,4,6,8,10];
-if(testedNodeVersions.indexOf(nodeVersion) == -1) log("The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version, WARN);
+if(testedNodeVersions.indexOf(nodeVersion) == -1) log("warn: The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version, WARN);
 
 var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
 var LAST_RELEASE_TIME = 0; // unix_timestamp populated by release script
@@ -141,7 +185,7 @@ else {
 	})();
 }
 
-console.log("EXEC_OPTIONS=" + JSON.stringify(EXEC_OPTIONS));
+log("EXEC_OPTIONS=" + JSON.stringify(EXEC_OPTIONS), DEBUG);
 
 
 
@@ -159,20 +203,19 @@ var USER_CLEANUP_TIMEOUT = [];
 	// Make sure we are in the server directory
 	var workingDirectory = process.cwd();
 	var serverDirectory = __dirname;
-	console.log('Working directory: ' + workingDirectory);
+	log('Working directory: ' + workingDirectory, DEBUG);
 	
 	if(workingDirectory != serverDirectory) {
 		try {
 			process.chdir(serverDirectory);
-			console.log('Changed working directory to ' + process.cwd());
+			log('Changed working directory to ' + process.cwd(), DEBUG);
 		}
 		catch (err) {
-			console.log('Unable to change working directory! chdir: ' + err);
+			log('Unable to change working directory! chdir: ' + err, WARN);
 		}
-		}
+	}
 	
 })();
-
 
 
 var CURRENT_USER = "ROOT";
@@ -180,8 +223,16 @@ var CURRENT_USER = "ROOT";
 var USERNAME = getArg(["user", "user", "username"]);
 var PASSWORD = getArg(["pw", "pw", "password"]);
 
+if(process.argv.indexOf("-askforpw") != -1) {
+	(function() {
+		log("You will login to the editor using USERNAME=" + USERNAME);
+		PASSWORD = module_readlineSync.question('Please specify a editor password: ', {
+			hideEchoBack: true // The typed text on screen is hidden by `*` (default).
+		});
+	})();
+}
+
 if(USERNAME && !PASSWORD) {
-	// todo: Prompt/Ask for password ...
 	log("Please specify a --password=****** for USERNAME=" + USERNAME + " ", NOTICE);
 	process.exit(1);
 }
@@ -274,9 +325,39 @@ if(INSIDE_DOCKER) {
 var GITHUB_GITCLONE = {}; // IP: path to files
 var GITHUB_CLONING = {}; // repo: true
 
-console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
-console.log("NO_NETNS ? " + !!NO_NETNS);
-console.log("IPTABLES ? " + !!IPTABLES);
+var PORTS_IN_USE = [HTTP_PORT];
+
+var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
+var GUEST_POOL = []; // Because it's a bit slow to create new users
+var CREATE_USER_LOCK = false; // Can only create one user at a time
+var ALLOW_GUESTS = true;
+var GUEST_POOL_MAX_LENGTH = 3;
+var IS_GUEST_USER_RECYCLING = false;
+
+if(getArg(["noguest", "noguests"])) ALLOW_GUESTS = false;
+if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
+//console.log("ALLOW_GUESTS=" + ALLOW_GUESTS + " " + getArg(["guest", "guest", "guests"]));
+
+
+var GCSF = {}; // username: GCSF session
+var DROPBOX = {}; // username: Dropbox daemon
+
+var DOCKER_LOCK =  {}; // username: command (prevent running many commands at the same time)
+
+var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
+
+var stdinChannelBuffer = "";
+var editorProcessArguments = "";
+var STDOUT_SOCKETS = [];
+
+var REMOTE_FILE_SOCKETS = {}; // username:fileName=socket
+var NO_REMOTE_FILES = getArg(["no-remote", "no-remote", "no-remote-files"]) || false;
+
+var mysqlConnection;
+
+//console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
+//console.log("NO_NETNS ? " + !!NO_NETNS);
+//console.log("IPTABLES ? " + !!IPTABLES);
 
 
 // # Polyfills in case you are using an older Node.js version
@@ -582,78 +663,6 @@ function natMessageFromClient(nat_client_secret, strBuffer) {
 	log(getIp(NAT_CLIENTS[nat_client_secret]) + " <= " + UTIL.shortString(message, 256));
 	NAT_SERVER_WEBSOCKET[nat_websocket_id].write(message);
 }
-
-
-var PORTS_IN_USE = [HTTP_PORT];
-
-var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
-var GUEST_POOL = []; // Because it's a bit slow to create new users
-var CREATE_USER_LOCK = false; // Can only create one user at a time
-var ALLOW_GUESTS = true;
-var GUEST_POOL_MAX_LENGTH = 3;
-var IS_GUEST_USER_RECYCLING = false;
-
-if(getArg(["noguest", "noguests"])) ALLOW_GUESTS = false;
-if( getArg(["guest", "guest", "guests"]) == "no") ALLOW_GUESTS = false;
-//console.log("ALLOW_GUESTS=" + ALLOW_GUESTS + " " + getArg(["guest", "guest", "guests"]));
-
-
-var GCSF = {}; // username: GCSF session
-var DROPBOX = {}; // username: Dropbox daemon
-
-var DOCKER_LOCK =  {}; // username: command (prevent running many commands at the same time)
-
-
-// Declare modules here as a OPTIMIZATION
-var module_fs = require("fs");
-var module_chownr = require("chownr");
-var module_child_process = require('child_process');
-var module_path = require("path");
-var module_letsencrypt = require("../shared/letsencrypt.js");
-var module_os = require("os");
-var module_sockJs = require("sockjs");
-var module_http = require("http");
-var module_https = require("https");
-var module_dns = require("dns");
-var module_dgram = require("dgram");
-var module_pwHash = require("./pwHash.js");
-var module_mimeMap = require("./mimeMap.js");
-
-var module_mount = require("../shared/mount.js");
-var module_string_decoder = require('string_decoder');
-var module_net = require("net");
-
-var module_fs_extra = require("fs-extra");
-
-//var module_copyFile = require("../shared/copyFile.js");
-//var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
-//var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
-
-// Optional modules:
-try {
-	var module_generator = require('generate-password');
-	var module_httpProxy = require('http-proxy');
-	
-	var module_nodemailer = require('nodemailer');
-	var module_smtpTransport = require('nodemailer-smtp-transport');
-	var module_ps = require('ps-node');
-	var module_mysql = require("mysql2");
-}
-catch(err) {
-	log("Unable to load optional module(s): " + err.message);
-}
-
-var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
-
-var stdinChannelBuffer = "";
-var editorProcessArguments = "";
-var STDOUT_SOCKETS = [];
-
-var REMOTE_FILE_SOCKETS = {}; // username:fileName=socket
-var NO_REMOTE_FILES = getArg(["no-remote", "no-remote", "no-remote-files"]) || false;
-
-var mysqlConnection;
-
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -3041,6 +3050,9 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 											if(err) throw err;
 
 											console.log("github2s: Copied files from tmpDir=" + tmpDir + " to repoDir=" + repoDir);
+
+											delete GITHUB_GITCLONE[IP];
+
 										});
 									});
 								});
@@ -4600,7 +4612,7 @@ function cloneGitRepo(dirs, IP) {
 		module_fs.chown(tmpDir, uid, gid, function(err) {
 			if(err) throw err;
 
-				log("github2s: chowned tmpDir=" + tmpDir);
+				log("github2s: chowned uid=" + uid + " gid=" + gid + " tmpDir=" + tmpDir);
 
 			var execOptions = {
 				shell: EXEC_OPTIONS.shell,
@@ -4612,8 +4624,11 @@ function cloneGitRepo(dirs, IP) {
 				var gitArg = ["clone"];
 
 				if(branch) {
-					gitArg = gitArg.concat( "--single-branch", "--branch", branch );
+					gitArg = gitArg.concat( ["--single-branch", "--branch", branch] );
 				}
+
+				// hopefully make cloning faster
+				gitArg = gitArg.concat( ["--depth", "1"] );
 
 				gitArg = gitArg.concat([repo, tempDirRepo]);
 
@@ -4624,11 +4639,11 @@ function cloneGitRepo(dirs, IP) {
 
 					if(stderr) {
 
-				if(stderr && stderr.indexOf("already exists") != -1) {
+						if(stderr && stderr.indexOf("already exists") != -1) {
 							log("github2s: Pulling new commits ...");
-					var gitArg = ["pull"];
-					execOptions.cwd = tempDirRepo;
-					return module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+							var gitArg = ["pull"];
+							execOptions.cwd = tempDirRepo;
+							return module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
 								log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
 
 								delete GITHUB_CLONING[repoBranch];
@@ -4639,7 +4654,7 @@ function cloneGitRepo(dirs, IP) {
 							log("github2s: " + stderr);
 						}
 						else {
-							log("github2s: Unknown error" + stderr);
+							log("github2s: Unknown error: " + stderr);
 							console.error(err);
 							reportError("Unknown git error: stderr=" + stderr);
 						}
