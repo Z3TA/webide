@@ -117,7 +117,7 @@ EDITOR.settings = {
 		colorYellow: "rgb(255, 255, 0)",
 		colorBlue: "rgb(0, 0, 255)",
 		colorMagenta: "rgb(255, 0, 255)",
-		colorCyan: "rgb(0, 255, 255)",
+		colorCyan: "rgb(0, 102, 102)",
 		colorWhite: "rgb(255, 255, 255)",
 
 		colorPurple: "rgb(102, 0, 102)",
@@ -9645,7 +9645,32 @@ Searches down towards the root, looking for file names
 
 	}
 
+	EDITOR.humanReadableNumber = function humanReadableNumber(n) {
+		var prefix;
 
+		if(n > 1000000000000) {n=n/1000000000000; prefix = "T"}
+		else if(n > 1000000000) {n=n/1000000000; prefix = "G"}
+		else if(n > 1000000) {n=n/1000000; prefix = "M"}
+		else if(n > 1000) {n=n/1000; prefix = "K"}
+		else prefix = "";
+
+		var decimals;
+
+		if(n > 100) decimals = 1;
+		else if(n > 10) decimals = 2;
+		else decimals = 3;
+
+		console.log("humanReadableNumber: n=" + n + " prefix=" + prefix + " decimals=" + decimals);
+
+		n = n.toFixed(decimals);
+
+		n = n.toString();
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+
+		return n + " " + prefix;
+	}
 
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		

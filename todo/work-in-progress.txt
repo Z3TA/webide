@@ -3,6 +3,10 @@
 What I'm working on
 -------------------
 
+Show file size when hovering a file tab
+
+todo: show file size on filetab hover, (and image drmanetions if it's an image)
+
 Use the login screen as a "landing page" show some info about the editor !?
 
 Move functionality from server_login.js to EDITOR.js and only use server_login.js for re-login after connection lost!?
@@ -24,7 +28,12 @@ custom domains. Able to (add to nginx) a domain name that points to myuser.webid
 
 ---
 
-todo: highlightjs theme for dark theme!!!!!
+todo: Test color/theme highlight colors (on dark theme)
+
+---
+
+todo: Test the terminal emulator using VTTEST (and make it VT500 compatible)
+
 
 ---
 

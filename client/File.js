@@ -2295,8 +2295,20 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 	}
 	
-	
-	
+	File.prototype.getFileSize = function size(humanReadable) {
+		var file = this;
+
+		if(typeof Blob == "undefined") {
+			console.warn("Unable to get file size of file.path=" + file.path + " typeof Blob=" + (typeof Blob));
+			return "";
+		}
+
+		var size = new Blob([file.text]).size; // byte size
+
+		if(!humanReadable) return size;
+		else return EDITOR.humanReadableNumber(size) + "B";
+	}
+
 	File.prototype.insertLineBreak = function(caret) {
 		// Inserts a line break at the file caret
 		var file = this;
