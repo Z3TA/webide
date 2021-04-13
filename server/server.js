@@ -159,6 +159,9 @@ if (require("fs").existsSync("/bin/dash")) {
 else if(require("fs").existsSync("/bin/bash")) {
 	EXEC_OPTIONS.shell = "/bin/bash";
 }
+else if(require("fs").existsSync("C:\\WINDOWS\\system32\\cmd.exe")) {
+	EXEC_OPTIONS.shell = "C:\\WINDOWS\\system32\\cmd.exe";
+}
 else {
 	(function() {
 		var module_path = require("path");
@@ -166,8 +169,9 @@ else {
 		var path = process.env.PATH ? process.env.PATH.split(module_path.delimiter) : [];
 		for (var i=0; i<path.length; i++) {
 			var filePath = {
-				dash: module_path.join(path[i], "dash"),
-				bash: module_path.join(path[i], "bash")
+				dash: module_path.join(path[i], "dash"), // Mac or Linux
+				bash: module_path.join(path[i], "bash"), // Linux
+				cmd: module_path.join(path[i], "cmd.exe")  // Windows
 			}
 			//console.log("Checking ", filePath);
 			if(module_fs.existsSync(filePath.dash)) {
@@ -176,6 +180,10 @@ else {
 			}
 			else if(module_fs.existsSync(filePath.bash)) {
 				EXEC_OPTIONS.shell = filePath.bash;
+				break;
+			}
+			else if(module_fs.existsSync(filePath.cmd)) {
+				EXEC_OPTIONS.shell = filePath.cmd;
 				break;
 			}
 		}
@@ -1674,7 +1682,7 @@ return;
 		
 		wsServer.installHandlers(HTTP_SERVER, {prefix:'/webide'});
 		
-		if(HTTP_IP == "127.0.0.1" && process.getuid() != 0) openStdinChannel();
+		if(HTTP_IP == "127.0.0.1" && (typeof process.getuid == "undefined" || process.getuid() != 0)) openStdinChannel();
 		else log("Not opening stdin channel! HTTP_IP=" + " USERNAME=" + USERNAME + " process.getuid()=" + process.getuid(), DEBUG);
 
 			log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
