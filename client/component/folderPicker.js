@@ -220,7 +220,16 @@ inputPath.value = path;
     suggestFolders(fullPath);
     if(options.focus !== false) inputPath.focus();
     
-    inputPath.dispatchEvent(new Event('change'));
+    try {
+     var evt = new Event('change');
+    }
+    catch(err) {
+     // IE 11
+     var evt = document.createEvent("HTMLEvents");
+     evt.initEvent("change", false, true);
+    }
+
+    inputPath.dispatchEvent(evt);
    }
    
    suggestedFolderButtons[fullPath] = button;
