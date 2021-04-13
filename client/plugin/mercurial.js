@@ -133,6 +133,7 @@
 		EDITOR.windowMenu.remove(winMenuMercurial2);
 		EDITOR.windowMenu.remove(winMenuCommit);
 		EDITOR.windowMenu.remove(winMenuDiffRevision);
+		EDITOR.windowMenu.remove(winMenuDiffFile);
 		EDITOR.windowMenu.remove(winMenuAnnotations);
 		EDITOR.windowMenu.remove(winMenuClone);
 		EDITOR.windowMenu.remove(winMenuPullRequest);
@@ -1126,7 +1127,14 @@ else var directory = EDITOR.workingDirectory;
 			if(err) {
 				if(callback) callback(err);
 				else {
-					alertBox("Mercurial was unable to get status of directory=" + directory + "!\n" + err.message);
+
+					var msg = "Mercurial was unable to get status of directory=" + directory + "!\n" + err.message;
+
+					if(err.code == "ENOENT") {
+						msg += '\nMercurial (source control management) can be downloaded from <a href="https://www.mercurial-scm.org/">mercurial-scm.org</a>.'
+					}
+
+					alertBox(msg);
 					hideMercurialWidgets();
 				}
 			}
@@ -1285,24 +1293,24 @@ else var directory = EDITOR.workingDirectory;
 		form.onsubmit = cloneRepo;
 		
 		/*
-		// ### SCM Type
-		var labelSCM = document.createElement("label");
-		labelSCM.setAttribute("for", "scm");
-		labelSCM.appendChild(document.createTextNode("Type: "));
-		form.appendChild(labelSCM);
+			// ### SCM Type
+			var labelSCM = document.createElement("label");
+			labelSCM.setAttribute("for", "scm");
+			labelSCM.appendChild(document.createTextNode("Type: "));
+			form.appendChild(labelSCM);
 		
 		
-		var scm = document.createElement("select");
-		scm.setAttribute("id", "scm");
-		scm.setAttribute("class", "select scm");
-		scm.setAttribute("title", "Select what type of software version control protocol to use");
+			var scm = document.createElement("select");
+			scm.setAttribute("id", "scm");
+			scm.setAttribute("class", "select scm");
+			scm.setAttribute("title", "Select what type of software version control protocol to use");
 		
 		
-		var optMercurial = document.createElement("option");
-		optMercurial.appendChild(document.createTextNode("Mercurial"));
+			var optMercurial = document.createElement("option");
+			optMercurial.appendChild(document.createTextNode("Mercurial"));
 		
-		scm.appendChild(optMercurial);
-		form.appendChild(scm);
+			scm.appendChild(optMercurial);
+			form.appendChild(scm);
 		*/
 		
 		// ### Remote repository
@@ -1324,10 +1332,10 @@ else var directory = EDITOR.workingDirectory;
 		repo.onchange = function() {
 			if(localDir.value == originalLocalDirValue || localDir.value == "") {
 				var matchRepoName = repo.value.match(/[/\\]([^/\\.]*)(\.git)?$/);
-if(matchRepoName && matchRepoName[1]) {
+				if(matchRepoName && matchRepoName[1]) {
 					if(EDITOR.user) localDir.value = UTIL.joinPaths(EDITOR.user.homeDir, "repo/" + matchRepoName[1] + "/")
 					else localDir.value = UTIL.homeDir(EDITOR.workingDirectory) + "repo/" + matchRepoName[1] + "/";
-}
+				}
 			}
 		}
 		
@@ -1397,10 +1405,10 @@ if(matchRepoName && matchRepoName[1]) {
 		savePassword.setAttribute("id", "savePassword");
 		savePassword.setAttribute("title", "Save user and password under [auth] in hgrc");
 		var labelSavePassword = document.createElement("label");
-labelSavePassword.setAttribute("for", "savePassword");
-labelSavePassword.appendChild(savePassword);
-labelSavePassword.appendChild(document.createTextNode("Save credentials"));
-form.appendChild(labelSavePassword);
+		labelSavePassword.setAttribute("for", "savePassword");
+		labelSavePassword.appendChild(savePassword);
+		labelSavePassword.appendChild(document.createTextNode("Save credentials"));
+		form.appendChild(labelSavePassword);
 		
 		
 		// ### SSH key button

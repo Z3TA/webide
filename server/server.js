@@ -4809,7 +4809,7 @@ function cloneGitRepo(dirs, IP) {
 			// Assume unix like system
 		
 			// The paths will be checked in order (so put local first)
-			spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin/:/usr/bin:/bin:/sbin:";
+		spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 			spawnOptions.env.PORT = homeDir + "sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
 			spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";

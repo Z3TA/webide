@@ -37,7 +37,8 @@
     "ncp": "^2.0.0",
     "readline-sync": "^1.4.10",
     "rimraf": "^3.0.2",
-    "sockjs": "^0.3.20"
+    "sockjs": "^0.3.20",
+    "which": "^2.0.2"
   },
   "optionalDependencies": {
     "nodemailer": "^2.6.4",

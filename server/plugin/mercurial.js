@@ -27,10 +27,26 @@
 
 "use strict";
 
+var module_which = require('which')
+
 var UTIL = require("../../client/UTIL.js");
 var CORE = require("../server_api.js");
 
 var MERCURIAL = {};
+
+var HG_PATH = "hg";
+
+module_which("hg", function(err, path) {
+	if(err) {
+
+		console.warn("Unable to find hg in process.env.HOME=" + process.env.HOME);
+
+		console.error(err);
+	}
+	else {
+		HG_PATH = path;
+	}
+});
 
 var execFileOptions = {
 	env: {
@@ -40,7 +56,12 @@ var execFileOptions = {
 	}
 }
 
-// PATH: "/usr/bin:/bin"
+if( process.platform == "win32" ) {
+	//execFileOptions.env.APPDATA = process.env.APPDATA;
+	execFileOptions.env = process.env;
+}
+
+console.log("execFileOptions=" + JSON.stringify(execFileOptions));
 
 MERCURIAL.clone = function hgclone(user, json, callback) {
 	// Clone a remote repository
@@ -114,7 +135,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		var parentFolder = UTIL.parentFolder(localPath);
 		var options = {env: execFileOptions.env, shell: false, cwd: parentFolder};
 		console.log("Spawning hg with arg=" + JSON.stringify(arg) + " and options=" + JSON.stringify(options));
-		var clone = spawn("hg", arg, options);
+		var clone = spawn(HG_PATH, arg, options);
 		var stdout = "";
 		var stderr = "";
 		
@@ -193,7 +214,7 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 			console.log("hg clone exitCode=" + exitCode);
 			console.log("hg clone exitCode != 0 ? " + (exitCode != 0) + " stderr ? " + !!stderr);
 			
-		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
+			//execFile(HG_PATH, arg, execFileOptions, function (err, stdout, stderr) {
 			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 			
 			if(arg.indexOf("--insecure") != -1) {
@@ -304,7 +325,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
-		console.log("hg.status checkDir answer: rootDir=" + rootDir);
+		console.log("hg.status HG_PATH=" + HG_PATH + " checkDir answer: rootDir=" + rootDir);
 		
 		if(err) return callback(err);
 		
@@ -316,9 +337,9 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 			args.push(json.rev);
 		}
 		
-		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
-				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
+			console.log("hg=" + HG_PATH + " status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " env=" + JSON.stringify(execFileOptions.env) + " cwd=" + localDirectory);
 				
 				if(err) return callback(err);
 				else if(stderr) return callback(stderr);
@@ -394,7 +415,7 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["add"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["add"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
 			else {
@@ -423,7 +444,7 @@ MERCURIAL.forget = function hgforget(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["forget"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["forget"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
 			else {
@@ -452,7 +473,7 @@ MERCURIAL.remove = function hgremove(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["remove", "--force"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["remove", "--force"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg remove stderr=" + stderr);
 			console.log("hg remove stdout=" + stdout);
@@ -482,7 +503,7 @@ MERCURIAL.init = function hginit(user, json, callback) {
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
 	var execFile = require('child_process').execFile;
-	execFile("hg", ["init"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+	execFile(HG_PATH, ["init"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
@@ -598,7 +619,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 			env: execFileOptions.env,
 		}
 		
-		execFile("hg", ["incoming", "--stat", "--noninteractive"].concat(config), execOptions, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["incoming", "--stat", "--noninteractive"].concat(config), execOptions, function (err, stdout, stderr) {
 			
 			console.log("localDirectory=" + localDirectory);
 			console.log("stdout=" + stdout);
@@ -738,8 +759,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 		var config = (hguser != undefined && pw != undefined) ? ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw] : [];
 		
 		var spawn = require('child_process').spawn;
-		var pull = spawn("hg", ["pull", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
-			var stdout = "";
+		var pull = spawn(HG_PATH, ["pull", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var stdout = "";
 			var stderr = "";
 			
 		var progressCounter = 0;
@@ -1046,7 +1067,7 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 			// hg push seem to return errorcode (err) when no changes are found !
 			
 			var spawn = require('child_process').spawn;
-		var push = spawn("hg", ["push", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var push = spawn(HG_PATH, ["push", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
 var stdout = "";
 var stderr = "";
 
@@ -1207,7 +1228,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 		
 		//execFile('hg', ['annotate', localPath], { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, function (err, stdout, stderr) {
 		
-		var annotate = spawn("hg", ['annotate', localPath, "--ignore-space-change"], {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var annotate = spawn(HG_PATH, ['annotate', localPath, "--ignore-space-change"], {cwd: rootDir, env: execFileOptions.env, shell: false});
 		var stdout = "";
 		var stderr = "";
 		
@@ -1390,7 +1411,7 @@ MERCURIAL.checkout = function hgcheckout(user, json, callback) {
 		if(err) return callback(err);
 
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["checkout", json.rev, "--verbose"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["checkout", json.rev, "--verbose"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 
 			console.log("hg checkout stderr=" + stderr);
 			console.log("hg checkout stdout=" + stdout);
@@ -1468,7 +1489,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["resolve", "--list"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["resolve", "--list"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --list stderr=" + stderr);
 			console.log("hg resolve --list stdout=" + stdout);
@@ -1525,7 +1546,7 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["resolve", "--mark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["resolve", "--mark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --mark stderr=" + stderr);
 			console.log("hg resolve --mark stdout=" + stdout);
@@ -1568,7 +1589,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["resolve", "--unmark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["resolve", "--unmark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --unmark stderr=" + stderr);
 			console.log("hg resolve --unmark stdout=" + stdout);
@@ -1598,7 +1619,7 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["heads"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["heads"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg heads stderr=" + stderr);
 			console.log("hg heads stdout=" + stdout);
@@ -1623,7 +1644,7 @@ MERCURIAL.head = function hghead(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["head", "--Tjson"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["head", "--Tjson"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg head stderr=" + stderr);
 			console.log("hg head stdout=" + stdout);
@@ -1652,7 +1673,7 @@ MERCURIAL.reponame = function reponame(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["path", "default"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["path", "default"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg path default stderr=" + stderr);
 			console.log("hg path default stdout=" + stdout);
@@ -1707,8 +1728,8 @@ args.push("--follow");
 		}
 		
 		var spawn = require('child_process').spawn;
-		var log = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
-			var stdout = "";
+		var log = spawn(HG_PATH, args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var stdout = "";
 			var stderr = "";
 			
 			log.stdout.on('data', function logStdout(data) {
@@ -1774,7 +1795,7 @@ args.push("-c " + json.changes);
 		
 		console.log("hg diff args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
 		
-		var diff = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var diff = spawn(HG_PATH, args, {cwd: rootDir, env: execFileOptions.env, shell: false});
 			var stdout = "";
 			var stderr = "";
 			
@@ -1835,7 +1856,7 @@ MERCURIAL.export = function hgexport(user, json, callback) {
 		
 		console.log("hg export args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
 		
-		var expo = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var expo = spawn(HG_PATH, args, {cwd: rootDir, env: execFileOptions.env, shell: false});
 		var stdout = "";
 		var stderr = "";
 		
@@ -1901,7 +1922,7 @@ MERCURIAL.cat = function hgcat(user, json, callback) {
 		
 	//console.log("hg cat args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
 	
-	var cat = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var cat = spawn(HG_PATH, args, {cwd: rootDir, env: execFileOptions.env, shell: false});
 	var stdout = "";
 	var stderr = "";
 	
@@ -1955,7 +1976,7 @@ MERCURIAL.summary = function hgsummary(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["summary"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["summary"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg summary stderr=" + stderr);
 			console.log("hg summary stdout=" + stdout);
@@ -1967,7 +1988,7 @@ MERCURIAL.summary = function hgsummary(user, json, callback) {
 			
 			callback(null, summary[0]);
 			
-			});
+		});
 	});
 }
 
@@ -1985,7 +2006,7 @@ MERCURIAL.revert = function hgrevert(user, json, callback) {
 		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["revert"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile(HG_PATH, ["revert"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg revert stderr=" + stderr);
 			console.log("hg revert stdout=" + stdout);
@@ -2054,7 +2075,7 @@ function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 	
 	var execFile = require('child_process').execFile;
 	
-	execFile("hg", ["root"], { cwd: directory, env: execFileOptions.env }, function (err, stdout, stderr) {
+	execFile(HG_PATH, ["root"], { cwd: directory, env: execFileOptions.env }, function (err, stdout, stderr) {
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 		
@@ -2180,7 +2201,7 @@ return findDotHgCallback(err);
 	
 	function hgRoot() {
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["root"], { cwd: localDirectory, env: execFileOptions.env }, function hgroot(err, stdout, stderr) {
+		execFile(HG_PATH, ["root"], { cwd: localDirectory, env: execFileOptions.env }, function hgroot(err, stdout, stderr) {
 			console.log("hg root (error=" + (!!err) + ") localDirectory=" + localDirectory + " stderr=" + stderr + " stdout=" + stdout);
 			
 			if(err) {

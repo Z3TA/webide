@@ -3,6 +3,9 @@
 What I'm working on
 -------------------
 
+todo: auto-relogin (using server_login module after connection lost have reconnected!)
+
+
 Show file size when hovering a file tab
 
 todo: show file size on filetab hover, (and image drmanetions if it's an image)
