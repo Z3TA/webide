@@ -296,8 +296,8 @@ function switchTabInStandaloneMode() {
 		// What will happen when the file is saved:
 		el.style.fontWeight = "normal";
 		
-		var fileSize = EDITOR.files[path] && EDITOR.files[path].getFileSize(true);
-		tabFileItem.setAttribute("title", path + " (" + fileSize + ")");
+		var fileSize = EDITOR.files[file.path] && EDITOR.files[file.path].getFileSize(true);
+		el.setAttribute("title", file.path + " (" + fileSize + ")");
 		
 		var closeFileButton = document.getElementById("close_" + file.path);
 		
@@ -417,7 +417,7 @@ function switchTabInStandaloneMode() {
 		
 		var tabFileItem = document.createElement("li");
 		
-		var fileSize = EDITOR.files[path] && EDITOR.files[path].getFileSize();
+		var fileSize = EDITOR.files[path] && EDITOR.files[path].getFileSize(true);
 
 		tabFileItem.setAttribute("class", "tabFileItem");
 		tabFileItem.setAttribute("title", path + " (" + fileSize + ")");
