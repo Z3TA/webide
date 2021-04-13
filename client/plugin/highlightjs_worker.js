@@ -1,5 +1,12 @@
-importScripts('../highlight.js/highlight.min.js');
 
+var es6 = true;
+try { eval('"use strict"; class foo {}'); } catch (e) { es6 = false; }
+
+if(es6) importScripts('../highlight.js/highlight.min.js');
+else {
+  importScripts('../highlight.js/babel-polyfill.min.js');
+  importScripts('../highlight.js/hljses5.js');
+}
 /*
 
 

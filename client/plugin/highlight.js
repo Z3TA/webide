@@ -40,8 +40,7 @@
 			"hljs-number": {color: EDITOR.settings.style.colorCyan},
 			"hljs-link": {color: EDITOR.settings.style.colorCyan},
 
-			"hljs-title": {color: EDITOR.settings.style.colorPurple},
-			"hljs-doctag": {color: EDITOR.settings.style.colorPurple},
+			"hljs-doctag": {color: EDITOR.settings.style.colorPurple, bold: true},
 			"hljs-type": {color: EDITOR.settings.style.colorPurple},
 			"hljs-attr": {color: EDITOR.settings.style.colorPurple},
 			"hljs-built_in": {color: EDITOR.settings.style.colorPurple},
@@ -60,7 +59,6 @@
 
 			"hljs-deletion": {bgColor: EDITOR.settings.style.colorRed, color: EDITOR.settings.style.textColor},
 
-			"hljs-doctag": {bold: true},
 			"hljs-strong": {bold: true},
 
 			"hljs-emphasis": {italic: true}
