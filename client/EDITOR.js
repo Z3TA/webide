@@ -114,7 +114,7 @@ EDITOR.settings = {
 		colorBlack: "rgb(0, 0, 0)",
 		colorRed: "rgb(255, 0, 0)",
 		colorGreen: "rgb(0, 128, 0)",
-		colorYellow: "rgb(255, 255, 0)",
+		colorYellow: "rgb(102, 102, 0)",
 		colorBlue: "rgb(0, 0, 255)",
 		colorMagenta: "rgb(255, 0, 255)",
 		colorCyan: "rgb(0, 102, 102)",
