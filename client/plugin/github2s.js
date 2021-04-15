@@ -17,6 +17,7 @@
 	"use strict";
 
 	EDITOR.plugin({
+		order: 3000, // Run after reopen_files.js so that the file opened will get focus
 		desc: "Open a github repo quickly by appending 2s behind github",
 		load: function loadGithub2s() {
 			CLIENT.on("loginSuccess", openGithubRepoMaybe);
