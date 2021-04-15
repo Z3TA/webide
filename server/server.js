@@ -4034,125 +4034,132 @@ function createHttpEndpoint(username, folder, callback) {
 		
 		for(var endPoint in HTTP_ENDPOINTS) {
 			if(HTTP_ENDPOINTS[endPoint] == folder) {
-				return callback(null, makeUrl(endPoint));
+					return callback(null, makeUrl(endPoint));
+				}
+			}
+		
+			var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
+		
+			HTTP_ENDPOINTS[endPoint] = folder;
+		
+			log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
+		
+			callback(null, makeUrl(endPoint));
+		
+		
+		});
+	
+	}
+
+	function removeHttpEndpoint(username, folder, callback) {
+	
+		log("Removing HTTP endpoint to folder=" + folder + " ...");
+	
+		if(HOME_DIR && !USERNAME) {
+			if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
+		}
+	
+		var endpointDeleted = false;
+		for(var endPoint in HTTP_ENDPOINTS) {
+			if(HTTP_ENDPOINTS[endPoint] == folder) {
+				delete HTTP_ENDPOINTS[endPoint];
+				endpointDeleted = true;
 			}
 		}
-		
-		var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
-		
-		HTTP_ENDPOINTS[endPoint] = folder;
-		
-		log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
-		
-		callback(null, makeUrl(endPoint));
-		
-		
-	});
 	
-}
-
-function removeHttpEndpoint(username, folder, callback) {
+		if(endpointDeleted) callback(null, folder);
+		else callback(new Error("Endpoint to folder=" + folder + " not found!"));
 	
-	log("Removing HTTP endpoint to folder=" + folder + " ...");
-	
-	if(HOME_DIR && !USERNAME) {
-		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
-	
-	var endpointDeleted = false;
-	for(var endPoint in HTTP_ENDPOINTS) {
-		if(HTTP_ENDPOINTS[endPoint] == folder) {
-			delete HTTP_ENDPOINTS[endPoint];
-			endpointDeleted = true;
-		}
-	}
-	
-	if(endpointDeleted) callback(null, folder);
-	else callback(new Error("Endpoint to folder=" + folder + " not found!"));
-	
-}
 
-function handleHttpRequest(request, response) {
+	function handleHttpRequest(request, response) {
 	
-	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
-	var protocol = request.headers["x-forwarded-proto"] || "https";
+		var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+		var protocol = request.headers["x-forwarded-proto"] || "https";
 	
-	var urlPath = UTIL.getPathFromUrl(request.url);
+		var urlPath = UTIL.getPathFromUrl(request.url);
 	
-	var dirs = urlPath.split("/");
+		var dirs = urlPath.split("/");
 	
-	var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
-	var secondDir = dirs[1] ? dirs[2] : dirs[1];
+		var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
+		var secondDir = dirs[1] ? dirs[2] : dirs[1];
 	
-	var folder;
-	var localFolder;
+		var folder;
+		var localFolder;
 	
-	/*
-		var authHeader = request.headers["authorization"] || "";
-		var authToken = authHeader.split(/\s+/).pop() || "";
-		var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
-		var authParts = authBuffer.split(/:/);
-		var username=authParts[0];
-		var password=authParts[1];
-	*/
+		/*
+			var authHeader = request.headers["authorization"] || "";
+			var authToken = authHeader.split(/\s+/).pop() || "";
+			var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
+			var authParts = authBuffer.split(/:/);
+			var username=authParts[0];
+			var password=authParts[1];
+		*/
 	
-	log("HTTP-req " + IP + ": " + request.url);
+		log("HTTP-req " + IP + ": " + request.url);
 	
-	//log("HTTP-req IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host + " firstDir=" + firstDir + " secondDir=" + secondDir);
+		//log("HTTP-req IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host + " firstDir=" + firstDir + " secondDir=" + secondDir);
 	
-	/*
-		http "endpoints" needs to pass same origin policy!
-	*/
+		/*
+			http "endpoints" needs to pass same origin policy!
+		*/
 	
-	var responseHeaders = {
-		'Content-Type': 'text/plain; charset=utf-8', 
-		"Cache-Control": "no-cache, must-revalidate",
-		"Pragma": "no-cache",
-		"Expires": "Sat, 1 Jan 2005 00:00:00 GMT"
-	};
+		var responseHeaders = {
+			'Content-Type': 'text/plain; charset=utf-8', 
+			"Cache-Control": "no-cache, must-revalidate",
+			"Pragma": "no-cache",
+			"Expires": "Sat, 1 Jan 2005 00:00:00 GMT"
+		};
 	
-	//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
+		//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
 	
-	/*
+		/*
 		
-	if(firstDir == "vnc" && secondDir) {
+			if(firstDir == "vnc" && secondDir) {
 		
-		if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
+			if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
 			
 			console.log("Proxying request to VNC channel: " + secondDir);
 			
 			VNC_CHANNEL[secondDir].proxy.web(request, response);
 			
-		}
-		else {
+			}
+			else {
 			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 			response.end("VNC channel not found: " + secondDir);
 			
-		}
+			}
 		
-		return;
-	}
-	*/
-	if(firstDir == "oembed") {
-		/*
-			https://embed.ly/providers/validate/oembed
-			
-			https://iframely.com/embed
+			return;
+			}
 		*/
+		if(firstDir == "oembed") {
+			/*
+				https://embed.ly/providers/validate/oembed
+			
+				https://iframely.com/embed
+			*/
 		
-		var url = JSON.stringify( request.url.replace("oembed/", "") ).slice(1,-1);
-		if(url.indexOf("?") == -1) url += "?embed=true";
-		else url += "&embed=true";
+			var url = JSON.stringify( request.url.replace("oembed/", "") ).slice(1,-1);
+			if(url.indexOf("?") == -1) url += "?embed=true";
+			else url += "&embed=true";
 		
-		response.writeHead(200, "OK", {'Content-Type': 'application/json; charset=utf-8'});
-		response.end('{"type": "rich", "provider_name": "' + DOMAIN + '", "provider_url": "' + protocol + '://' + DOMAIN + '/", "width": 800, "height": 500, "html": "<iframe width=\\\"800\\\" height=\\\"500\\\" src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
-		return;
-	}
+			response.writeHead(200, "OK", {'Content-Type': 'application/json; charset=utf-8'});
+			response.end('{"type": "rich", "provider_name": "' + DOMAIN + '", "provider_url": "' + protocol + '://' + DOMAIN + '/", "width": 800, "height": 500, "html": "<iframe width=\\\"800\\\" height=\\\"500\\\" src=\\\"' + protocol + '://' + DOMAIN + url + '\\\"></iframe>"}\n');
+			return;
+		}
 		else if(firstDir == "github") {
 			/*
 				Service to clone a github repo...
 			*/
-		dirs.shift(); // removes first slash
+
+			if(secondDir == "robots.txt" || secondDir == "favicon.ico") {
+				response.writeHead(404, {'Content-Type': 'text/html; charset=utf-8'});
+				response.end("These aren't the droids you're looking for");
+				return;
+			}
+
+			dirs.shift(); // removes first slash
 			dirs.shift(); // removes "github"
 			cloneGitRepo(dirs, IP);
 
@@ -4647,7 +4654,10 @@ function cloneGitRepo(dirs, IP) {
 
 					if(stderr) {
 
-						if(stderr && stderr.indexOf("already exists") != -1) {
+						stderr = stderr.replace("Cloning into '" + tempDirRepo + "'...", "").trim();
+						stderr = stderr.replace("warning: unable to access '/root/.config/git/attributes': Permission denied", "").trim();
+
+						if(stderr.indexOf("already exists") != -1) {
 							log("github2s: Pulling new commits ...");
 							var gitArg = ["pull"];
 							execOptions.cwd = tempDirRepo;
@@ -4661,7 +4671,8 @@ function cloneGitRepo(dirs, IP) {
 						else if(stderr.indexOf("Already up to date") != -1) {
 							log("github2s: " + stderr);
 						}
-						else {
+						else if(stderr) {
+
 							log("github2s: Unknown error: " + stderr);
 							console.error(err);
 							reportError("Unknown git error: stderr=" + stderr);

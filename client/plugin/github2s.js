@@ -91,11 +91,24 @@
 			});
 		}
 
-		function findReadme() {
+		function findReadme(retry) {
+			if(retry == undefined) retry = 0;
+			var maxRetry = 10;
+
 			// Show readme if one exist ...
-			console.log("github2s: findReadme!");
+			console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
 			EDITOR.listFiles(folder, function(err, files) {
 				if(err) {
+
+					if(err.code == "ENOENT") {
+						// It might take a while to clone...
+						if(retry < maxRetry) return setTimeout(function() {
+							findReadme(++retry);
+						}, 1000);
+					}
+
+					EDITOR.sendFeedback("Unable to read folder=" + folder + " after retry=" + retry, "github2s", true);
+
 					console.error(err);
 					return alertBox(err.message);
 				}
