@@ -43,6 +43,9 @@ server {
   ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
   ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
+  rewrite ^/jzedit(.*)$ /webide$1 permanent;
+
+
   gzip on;
   gzip_types text/plain text/javascript application/json image/svg+xml text/css application/manifest+json font/ttf application/x-javascript text/html application/octet-stream;
 

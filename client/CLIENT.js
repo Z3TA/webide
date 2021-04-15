@@ -115,14 +115,14 @@ var CLIENT = {}; // Client object is global
 		
 		
 		connection.onclose = function serverDisconnected() {
-			console.log("CLIENT: connection closed");
+			console.log("CLIENT: connection closed! url=" + url);
 			CLIENT.connected = false;
 			CLIENT.url = null;
 			
 			stopPing();
 			
 			if(callback) {
-				var err = new Error("Connection to the backend closed");
+				var err = new Error("Connection to the backend closed! url=" + url);
 				err.code = "CONNECTION_CLOSED";
 				callback(err);
 				callback = null;

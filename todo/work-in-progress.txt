@@ -3,6 +3,10 @@
 What I'm working on
 -------------------
 
+getting "connection to backend closed" on devices that I have logged in from before (works in inknognito)
+seems like /jzedit is cahced!?!? 
+Show which server you are connecting to (when it can't connect to)
+
 ---
 
 Or do we need a VPS anyway if we want to test the webide itself within the webide !?
