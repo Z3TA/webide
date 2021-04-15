@@ -3,26 +3,27 @@
 What I'm working on
 -------------------
 
-todo: auto-relogin (using server_login module after connection lost have reconnected!)
-
-
-Show file size when hovering a file tab
-
-todo: show file size on filetab hover, (and image drmanetions if it's an image)
-
-Use the login screen as a "landing page" show some info about the editor !?
-
-Move functionality from server_login.js to EDITOR.js and only use server_login.js for re-login after connection lost!?
-
-There should be a login/wall/screen so that you can't do anything until you are logged in!
-
-
-Can't do anything, nothing will work, without logging in...
-
-
-User is confused by the different modals... dropdown menu, context menu, alertBoxes ... ...
-
 ---
+
+Or do we need a VPS anyway if we want to test the webide itself within the webide !?
+
+.domainmap.txt ???
+
+mydomain.com docker:8080 /
+mydomain.com netns:8080 /
+mydomain.com wwwpub /folder
+
+
+mydomain.com docker:8080 /
+
+server {
+  server_name mydomain.com;
+  
+    access_log %HOMEDIR%log/access.log %USERNAME%;
+    
+    
+}
+
 
 custom domains. Able to (add to nginx) a domain name that points to myuser.webide.se or d80.myuser.webide.se or 8080.myuser.webide.se
 
