@@ -158,6 +158,11 @@ iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
 ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
 iptables -A OUTPUT -p tcp --dport 25 -j REJECT
 
+# Block crypto miners
+# mine.c3pool.com
+iptables -A OUTPUT -p tcp -d 18.130.178.39 -j REJECT
+ip6tables -A OUTPUT -p tcp -d 18.130.178.39 -j REJECT
+
 
 
 # Reject all incoming
