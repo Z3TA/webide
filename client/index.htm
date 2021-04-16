@@ -168,9 +168,23 @@
 		<button id="loginButton" type="submit" class="button" disabled>Login</button> 
 		<button id="loginAsGuest" class="button" disabled>Login as guest</button>
 		<br />
-		<br />
 		
 		<div id="loginMessage">Connecting to backend...</div>
+
+		<details>
+			<summary>
+			Show connection options...
+			</summary>
+
+			<label for="backend_url">Backend URL: </label>
+			<input type="text" class="inputtext" id="backend_url" placeholder="https://webide.se/webide" /><br />
+
+			<label for="nat_code">"NAT"-code: </label>
+			<input type="text" class="inputtext" id="nat_code" placeholder="D7KJ9LL15C" /><br />
+
+			<button id="connectButton" type="button" class="button">Connect to backend</button> 
+
+		</details>
 
 	</div>
 

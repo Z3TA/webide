@@ -99,7 +99,7 @@ var CLIENT = {}; // Client object is global
 			console.log("CLIENT: connection.onopen: connection.readyState=" + connection.readyState);
 			// readyState when using xhr !? Wait for readyState !?
 			
-			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
+			if(callback) callback(null, url); // Don't wait for login, just callback and say we successfully connected
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
 			
 			CLIENT.fireEvent("connectionConnected");

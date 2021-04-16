@@ -9951,10 +9951,21 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			var loginButton = document.getElementById("loginButton");
 			var loginAsGuest = document.getElementById("loginAsGuest");
 			var loginMessage = document.getElementById("loginMessage");
+			var elUrl = document.getElementById("backend_url");
+			var elCode = document.getElementById("nat_code");
+			var connect = document.getElementById("connectButton");
 			var locally = window.location.hostname == "127.0.0.1" || window.location.hostname == "localhost";
 			var DEFAULT_USERNAME = "admin";
 			var DEFAULT_PASSWORD = "admin";
 
+			var url = stored.editorServerUrl;
+
+			if(url) var server = {url: url};
+
+			var nat_code = QUERY_STRING["nat_code"];
+
+			elUrl.value = url || "";
+			elCode.value = nat_code || "";
 
 			loginScreen.onsubmit = function() {
 				if(loginButton.disabled) return false;
@@ -9973,8 +9984,18 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				return false;
 			}
 
-			var url = stored.editorServerUrl;
-			if(url) var server = {url: url};
+			connect.onclick = function() {
+
+				url = elUrl.value;
+				nat_code = elCode.value;
+
+				loginMessage.innerText = "Connecting to " + url + " ...";
+
+				if(url) server = {url: url};
+
+				connectToBackend(server, nat_code);
+				return false;
+			}
 
 			if(QUERY_STRING["skiplogin"]) {
 				loginScreen.style.display='none';
@@ -9985,39 +10006,45 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				if(typeof loginMessage == "object") loginMessage.innerText = "";
 			});
 
-			CLIENT.connect(server, function connectedToServer(err) {
-				if(err) {
-					loginMessage.innerText = err.message;
-					return;
-				}
+			connectToBackend(server, nat_code);
 
-				loginMessage.innerText = "";
+			function connectToBackend(server, nat_code) {
+				console.log("Connecting to backend server=" + JSON.stringify(server) + " ...");
+				CLIENT.connect(server, function connectedToServer(err, url) {
+					if(err) {
+						loginMessage.innerText = err.message;
+						return;
+					}
 
-				var nat_code = QUERY_STRING["nat_code"];
-				if(nat_code) {
-					// Send nat request before logging in
-					console.log("Seding NAT request after submitting form...");
-					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
-						console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
-						if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
+					loginMessage.innerText = "";
+
+					elUrl.value = url;
+					
+					if(nat_code) {
+						// Send nat request before logging in
+						console.log("Seding NAT request after submitting form...");
+						CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
+							console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
+							if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
+							loginMaybe();
+						});
+					}
+					else {
 						loginMaybe();
-					});
-				}
-				else {
-					loginMaybe();
-				}
+					}
 
-				function loginMaybe() {
-					if(QUERY_STRING.user && QUERY_STRING.pw) return attemptLogin(QUERY_STRING.user, QUERY_STRING.pw);
-					if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
-					if(locally) return attemptLogin(DEFAULT_USERNAME, DEFAULT_PASSWORD);
+					function loginMaybe() {
+						if(QUERY_STRING.user && QUERY_STRING.pw) return attemptLogin(QUERY_STRING.user, QUERY_STRING.pw);
+						if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
+						if(locally) return attemptLogin(DEFAULT_USERNAME, DEFAULT_PASSWORD);
 
-					username.focus();
-					loginButton.disabled = false;
-					loginAsGuest.disabled = false;
+						username.focus();
+						loginButton.disabled = false;
+						loginAsGuest.disabled = false;
 
-				}
-			});
+					}
+				});
+			}
 
 			function attemptLogin(userValue, pwValue) {
 				
