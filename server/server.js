@@ -47,6 +47,7 @@ try {
 	var module_smtpTransport = require('nodemailer-smtp-transport');
 	var module_ps = require('ps-node');
 	var module_mysql = require("mysql2");
+	var module_psList = require("ps-list");
 }
 catch(err) {
 	log("Unable to load optional module(s): " + err.message);
@@ -1571,6 +1572,47 @@ return;
 		});
 	}
 	
+	if(info.uid == 0) {
+		/*
+			Some users install crypto miners on the free shared backend...
+
+		*/
+
+		var highCpuUsage = {}; // pid: counter 
+
+		setTimeout(checkCpuUsage, 1000);
+	}
+
+	function checkCpuUsage() {
+		module_psList().then(processList).catch(error);
+
+		function error(err) {
+			console.error(err);
+			return;
+		}
+
+		function processList(p) {
+
+			var p = p.sort(function(a, b) {
+				if(a.cpu > b.cpu) return -1;
+				else return 1;
+			});
+
+			for(var i=0; i<p.length; i++) {
+
+				if(p[i].cpu > 10) {
+					if(! highCpuUsage.hasOwnProperty(p[i].pid) ) highCpuUsage[p[i].pid] = Object.assign(p[i]); 
+				}
+				else break;
+			}
+
+			// todo: Send report of pids with high cpu, and use cpulimit or kill the process
+
+
+			setTimeout(checkCpuUsage, 10000);
+		}
+	}
+
 	if(info.uid > 0 && !USERNAME && CURRENT_USER) {
 		var passwordFile = UTIL.joinPaths(HOME_DIR, CURRENT_USER, ".webide/", "password");
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {

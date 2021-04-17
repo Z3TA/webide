@@ -23,7 +23,6 @@
   "version": "1.0.0",
   "author": "Johan Zetterberg <zeta@zetafiles.org>",
   "dependencies": {
-    "@babel/cli": "^7.13.14",
     "busboy": "^0.3.1",
     "chownr": "^2.0.0",
     "dirname": "https://github.com/Z3TA/nwjs_dirname/tarball/master",
@@ -47,6 +46,7 @@
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",
     "ps-node": "^0.1.6",
+    "ps-list": "^7.2.0",
     "node-pty": "^0.9.0",
     "ssh2": "^0.8.9",
     "vscode-jsonrpc": "^4.0.0",
