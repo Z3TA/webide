@@ -4167,15 +4167,21 @@ function createHttpEndpoint(username, folder, callback) {
 
 			dirs.shift(); // removes first slash
 			dirs.shift(); // removes "github"
-			cloneGitRepo(dirs, IP);
+			
+			console.log("github2s: dirs.length=" + dirs.length + " dirs=" + JSON.stringify(dirs));
+
+			if(dirs.length > 1) {
+				cloneGitRepo(dirs, IP);
+			}
 
 			response.writeHead(302, {
 				'Location': '/?github=' + encodeURIComponent(dirs.join("/")),
 				'Content-Type': 'text/html; charset=utf-8'
 			});
-		response.end( 'Go to <a href="https://' + DOMAIN + '/?github=' + encodeURIComponent(dirs.join("/") + '">editor</a>') );
-
+			response.end( 'Go to <a href="https://' + DOMAIN + '/?github=' + encodeURIComponent(dirs.join("/")) + '">editor</a>' );
+			
 			return;
+			
 		}
 		else if(firstDir == "inspector") {
 			if(INSPECTOR.hasOwnProperty(secondDir)) {
