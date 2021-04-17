@@ -1576,6 +1576,10 @@ return;
 		/*
 			Some users install crypto miners on the free shared backend...
 
+			sudo apt install cgroup-tools
+
+
+
 		*/
 
 		var highCpuUsage = {}; // pid: counter 
@@ -1598,17 +1602,49 @@ return;
 				else return 1;
 			});
 
+			var pArr, cpuWarn = [];
+			for(var pid in highCpuUsage) {
+				pArr = p.filter(function(obj) {
+					return obj.pid == pid;
+				});
+
+				if(pArr.length == 0) {
+					delete highCpuUsage[pid];
+					continue;
+				}
+
+				if( highCpuUsage[pid].cpuHistory.length > 10 ) {
+					cpuWarn.push(highCpuUsage[pid]);
+				}
+			}
+
 			for(var i=0; i<p.length; i++) {
 
 				if(p[i].cpu > 10) {
-					if(! highCpuUsage.hasOwnProperty(p[i].pid) ) highCpuUsage[p[i].pid] = Object.assign(p[i]); 
+					
+					if(! highCpuUsage.hasOwnProperty(p[i].pid) ) highCpuUsage[p[i].pid] = Object.assign({cpuHistory: [p[i].cpu]}, p[i]); 
+					else highCpuUsage[p[i].pid].cpuHistory.push( p[i].cpu );
+
+					log("checkCpuUsage: " + p[i].name + " uses " + p[i].cpu + " CPU", DEBUG);
+
 				}
 				else break;
 			}
 
-			// todo: Send report of pids with high cpu, and use cpulimit or kill the process
+			// todo: use cgroups to limit CPU !?
 
+			if(cpuWarn.length > 0) {
+				var msg = "The following processes use a lot of CPU: " + JSON.stringify(cpuWarn, null, 2);
 
+				reportError(msg);
+			
+				log(msg, WARN);
+
+				cpuWarn.forEach(function(p) {
+					p.cpuHistory.length = 0;
+				}); 
+			}
+			
 			setTimeout(checkCpuUsage, 10000);
 		}
 	}
