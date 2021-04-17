@@ -4610,6 +4610,8 @@ function cloneGitRepo(dirs, IP) {
 		return;
 	}
 
+		if(branch == "HEAD") branch = "";
+
 		var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".git";
 
 		var repoBranch = repo + "/" + branch
@@ -4687,7 +4689,7 @@ function cloneGitRepo(dirs, IP) {
 
 							log("github2s: Unknown error: " + stderr);
 							console.error(err);
-							reportError("Unknown git error: stderr=" + stderr);
+							reportError( "Unknown git error: stderr=" + stderr + " gitArg=" + JSON.stringify(gitArg) + " dirs=" + JSON.stringify(dirs) );
 						}
 					}
 
@@ -4832,7 +4834,7 @@ function cloneGitRepo(dirs, IP) {
 			// Assume unix like system
 		
 			// The paths will be checked in order (so put local first)
-		spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
+			spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
 			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 			spawnOptions.env.PORT = homeDir + "sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
 			spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";

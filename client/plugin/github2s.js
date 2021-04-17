@@ -41,8 +41,8 @@
 		var repoName = dirs[1];
 		var folder = EDITOR.user.homeDir + "repo/" + repoName;
 
-		var matchGithubFile = str.match(/\/(.*)\/(.*)\/blob\/([^/]*)\/(.*)\.git/);
-		var matchGithubBranch = str.match(/\/(.*)\/(.*)\/tree\/([^/]*)\.git/);
+		var matchGithubFile = str.match(/(.*)\/(.*)\/blob\/([^/]*)\/(.*)/);
+		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
 
 		console.log("github2s: matchGithubFile=", matchGithubFile);
 		console.log("github2s: matchGithubBranch=", matchGithubBranch);
@@ -60,7 +60,7 @@
 		// Show the files in file explorer
 		EDITOR.fileExplorer(folder);
 
-		if(_commitId) {
+		if(_commitId && _commitId != "HEAD") {
 			CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
 				if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 

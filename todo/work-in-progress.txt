@@ -3,6 +3,10 @@
 What I'm working on
 -------------------
 
+Problems with crypto miners...
+todo: Check for processes that use a lot of CPU, then if they are still running after 1 minute, drasticly limit cpu usage using cpulimit
+
+
 getting "connection to backend closed" on devices that I have logged in from before (works in inknognito)
 seems like /jzedit is cahced!?!? 
 Show which server you are connecting to (when it can't connect to)
