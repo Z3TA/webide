@@ -1584,7 +1584,7 @@ return;
 
 		var highCpuUsage = {}; // pid: counter 
 
-		setTimeout(checkCpuUsage, 1000);
+		setTimeout(checkCpuUsage, 10000);
 	}
 
 	function checkCpuUsage() {
@@ -1602,6 +1602,9 @@ return;
 				else return 1;
 			});
 
+			var checkInterval = 10000; // milliseconds
+			var maxEntires = 30*60 / checkInterval * 1000; // Items in cpuHistory before reporting
+
 			var pArr, cpuWarn = [];
 			for(var pid in highCpuUsage) {
 				pArr = p.filter(function(obj) {
@@ -1612,8 +1615,7 @@ return;
 					delete highCpuUsage[pid];
 					continue;
 				}
-
-				if( highCpuUsage[pid].cpuHistory.length > 10 ) {
+				if( highCpuUsage[pid].cpuHistory.length > maxEntires ) {
 					cpuWarn.push(highCpuUsage[pid]);
 				}
 			}
@@ -1645,7 +1647,7 @@ return;
 				}); 
 			}
 			
-			setTimeout(checkCpuUsage, 10000);
+			setTimeout(checkCpuUsage, checkInterval);
 		}
 	}
 
