@@ -43,8 +43,21 @@ console.warn("encoding_converter.js currently do not suppor unsaved files!");
 		function problemFound(i) {
 			EDITOR.resizeNeeded(); // Just in case, to prevent weird look
 			EDITOR.renderNeeded(); // Render so the user can make a better decision whether to convert or not
-			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + 
-			" ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
+			
+			var yes = "Try to convert";
+			var no = "It looks good";
+
+			//var msg = file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + " ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!"
+
+			var msg = "The file just opened (" + file.path + ") might not have the correct encoding " +  
+			"(for example char code " + file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + ") " +
+			"Does it look correct ? If not we could try converting it";
+
+			//'(if it looks bad/worse after converting - right click and "reload from disk")';
+
+			confirmBox(msg, [yes, no], function(answer) {
+				if(answer != yes) return;
+
 				if(file.savedAs) EDITOR.readFromDisk(file.path, false, "binary", fileRead);
 				else {
 					var byteArr = stringToBytes(file.text);
@@ -52,8 +65,9 @@ console.warn("encoding_converter.js currently do not suppor unsaved files!");
 					var text = decodeBytes(buffer, "cp1252"); // or cp1251
 					file.reload(text);
 				}
-			}
-			
+
+			})
+
 			function fileRead(err, path, buffer) {
 				// Todo: Detect the right encoding ... (probably impossibe)
 				if(err) throw err;
