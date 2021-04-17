@@ -32,7 +32,7 @@ var CLIENT = {}; // Client object is global
 	var pingCounter = 0;
 	var nextPingTimer;
 	var pingTimeout;
-	var requestThatDontCallBack = ["stdout", "log", "echo", "ping", "quit"];
+	var requestThatDontCallBack = ["stdout", "log", "echo", "ping", "logout"];
 	var GS = String.fromCharCode(29);
 	var WEBSOCK_OPEN = 1;
 	

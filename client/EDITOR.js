@@ -6880,7 +6880,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
 				
 				if(CLIENT.connected) {
-					CLIENT.cmd("quit", {});
+					CLIENT.cmd("logout", {});
 				}
 				
 				self.close();
@@ -10096,7 +10096,12 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 								}
 								else if(answer == alreadyHaveAccount) {
 									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
-									showLoginDialog();
+									loginScreen.style.display='block';
+									loginButton.disabled = false;
+									loginAsGuest.disabled = false;
+
+									CLIENT.cmd("logout", {});
+
 								}
 								else throw new Error("Unknown answer: " + answer);
 							});

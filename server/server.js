@@ -2503,7 +2503,8 @@ function sockJsConnection(connection) {
 	
 	function sockJsClose() {
 		
-		// Thankfully users are not disconnected "right away", there are some tolerence for unstable networks
+		// Thankfully users are not disconnected "right away", sockJs has some tolerence for unstable networks
+		// So if we get a sockJsClose the users has been disconnected for a while...
 		
 		log("Closed client connection (protocol=" + protocol + ") from " + IP);
 		
@@ -3218,8 +3219,13 @@ var loginCounter = 0;
 				
 				
 			}
-			else if(command == "quit") {
+			else if(command == "logout") {
 				userCleanup();
+
+				userConnectionName = null;
+				commandQueue.length = 0;
+				connectionAuthorized = false;
+			
 			}
 			else {
 				
