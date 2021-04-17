@@ -1776,7 +1776,7 @@ console.log(file.path + " is a terminal emulator file!");
 						
 						setTimeout(function() {
 							EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
-						}, 3000);
+						}, 10000);
 						
 						callback(true);
 					}

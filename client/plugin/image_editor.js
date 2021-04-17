@@ -137,7 +137,9 @@ unload: function unloadImageEditor() {
 			var items = pasteEvent.clipboardData.items;
 		}
 		else {
-			throw new Error("Unable to get clipboard data! BROWSER=" + BROWSER);
+			console.error("Unable to get clipboard data! BROWSER=" + BROWSER);
+			return alertBox('You pasted data into the editor, but the image-editor plugin was unable to read it. ' +
+			'You might have to allow <b>Clipboard</b> in <i>site settings</i> in your browser (' + BROWSER + ')', "ERRPASTE");
 		}
 		
 		if(items) {

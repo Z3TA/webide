@@ -311,7 +311,7 @@ callback(true);
 		
 	});
 	
-	EDITOR.addTest(function testConnect(callback) {
+	EDITOR.addTest(function testFtpConnect(callback) {
 		
 		var connJson = {protocol: "ftp", serverAddress: "ftp.sunet.se", user: "anonymous", passw: ""};
 		

@@ -566,6 +566,18 @@
 				data: 'if(1==2) {\nconsole.log("hi");\n}\n'
 			}));
 			
+			// Chrome browser wont let us parse, thus failing the test ...
+			if(file.text.indexOf("console.log") == -1) {
+				// Text failed to parse
+				EDITOR.closeAllDialogs("ERRPASTE");
+
+				EDITOR.closeFile(file);
+
+				callback(true);
+				return;
+			}
+
+
 			// Note: The actual bug was that the *text saved to disk* was not formatted!
 			
 			EDITOR.deleteFile(file.path, function() {

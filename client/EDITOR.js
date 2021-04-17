@@ -11602,13 +11602,13 @@ function paste(pasteEvent) {
 		var text = pasteEvent.clipboardData.getData('text/plain');
 		}
 	else {
-		alertBox("Unable to get platform/OS clipboard data!");
-	}
+			alertBox("Unable to get platform/OS clipboard data!", "ERRPASTE");
+		}
 	
-	var file = EDITOR.currentFile;
+		var file = EDITOR.currentFile;
 	
-	if(text && text.length > EDITOR.settings.bigFileSize) {
-		var yes = "Save the file";
+		if(text && text.length > EDITOR.settings.bigFileSize) {
+			var yes = "Save the file";
 		var no = "Never mind";
 		
 		confirmBox("The current buffer limit is " + EDITOR.settings.bigFileSize + " characters. " + 

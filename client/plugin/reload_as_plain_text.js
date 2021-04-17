@@ -51,7 +51,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, function testPlainText(callback) {
+	EDITOR.addTest(function testPlainText(callback) {
 		EDITOR.openFile("testReloadAsPlainText.js", "{\n    //should be indentated\n}\n", function(err, file) {
 			if(err) throw err;
 

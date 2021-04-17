@@ -137,11 +137,15 @@ if(err) throw err;
 								setTimeout(function disconnectFromSftp() {
 									CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}, function(err, json) {
 										
+										setTimeout(function() {
+											EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE")
+										}, 10000);
+
 									});
 								}, 10000);
 							}
 						});
-});
+					});
 				});
 			}
 		});

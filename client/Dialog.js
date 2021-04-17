@@ -98,6 +98,13 @@ function Dialog(msg, options) {
 	
 	div.appendChild(message);
 	
+	if(EDITOR.settings.devMode) {
+		var errCode = document.createElement("div");
+		errCode.classList.add("errCode");
+		errCode.appendChild( document.createTextNode("code=" + dialog.code) );
+		div.appendChild( errCode );
+	}
+
 	body.appendChild(div);
 	
 	dialog.openedDate = new Date();
