@@ -4679,6 +4679,10 @@ function cloneGitRepo(dirs, IP) {
 			var githubRepoName = dirs[1];
 			var branch =  dirs[3];
 		}
+		else if(dirs[2] == "compare") {
+			var githubUser = dirs[0];
+			var githubRepoName = dirs[1];
+		}
 		else if(dirs.length == 2) {
 			var githubUser = dirs[0];
 			var githubRepoName = dirs[1];
