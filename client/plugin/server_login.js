@@ -501,7 +501,7 @@
 								//var loc = UTIL.getLocation(server.url);
 								//var port = loc.port;
 								
-								var msg = 'Try this if you have problems connecting to the server (' + JSON.stringify(server) + '):\n\n<ul>';
+								var msg = 'Try this if you have problems connecting ... ( current config: ' + JSON.stringify(server) + '):\n\n<ul>';
 								//if(BROWSER == "MSIE" && port) msg += '<li>* Try starting the server on port 80 instead of port ' + port + '!.</li>\n';
 								msg += '<li>* Click two times on "Use default URL" then click the Login button again.</li>\n'; // It might say host:wrong port and clicking on use default will change to the correct port
 								msg += '<li>* In the top menu choose: Editor > Unregister service worker.</li>\n';
