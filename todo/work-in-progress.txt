@@ -3,6 +3,8 @@
 What I'm working on
 -------------------
 
+magick -density 256x256 -background transparent logo.svg -define icon:auto-resize -colors 256 logo10.ico
+
 node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
 
 Maybe the font is set into font size module !?
