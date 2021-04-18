@@ -3,6 +3,8 @@
 What I'm working on
 -------------------
 
+todo: Detect if a font failed to load by making a new canvas and printing text with unknown font, then printing it with the EDITOR.settings.style.font
+and if they are the same it probably means something...
 
 ubunto font loaded on Windows on Chrome, but did not download!
 
