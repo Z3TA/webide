@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
 		
+	<path stroke="#7d7d9d" stroke-width="1" fill="#efefef" d="
+	M 11,12
+	C 0 17  2 16  5 24
+	C -3 48  8 35  7 47
+	C -2 62  -2 61  11 69
+	C 7 78  3 99  35 89
+	C 67 115  50 83  75 96
+	C 89 97  102 66  96 62
+	C 92 59  101 41  89 41
+	C 92 35  98 13  82 21
+	C 80 2  79 3  67 11
+	C 64 2  56 0  37 3
+	C 24 12  24 -8  11 12
+	" />
+
 		<path stroke="#000000" stroke-width="3" fill="none" d="M 10,40 
 			 C 6 22  23 23  23 19
 				C 20 15  25 5  32 14
