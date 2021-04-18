@@ -11,6 +11,7 @@ ubunto font loaded on Windows on Chrome, but did not download!
 When trying to commit after a merge it says (mercurial) "We need to reslove the merge conflict manually." 
 when clicking "check for problems" it says "you need to commit" ...
 
+I could however commit via command line! hg commit -m "merge??"
 
 
 ---
