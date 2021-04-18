@@ -1,6 +1,17 @@
 
 (function() {
 
+	/*
+
+		todo: Make sure the system supports the font before switching to it!
+
+		problem: Switched to the ubuntu font on Windows, but it was never loaded by settings_overload,
+		how to check if the font is loaded!?
+
+
+
+	*/
+	
 	var winMenu = {};
 	var originalFont, originalHighlightMatchFont, originalFontSize, originalGridHeight, originalGridWidth, originalLeftMargin, originalTabSpace;
 	
