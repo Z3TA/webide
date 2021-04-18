@@ -3,6 +3,10 @@
 What I'm working on
 -------------------
 
+node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
+
+Maybe the font is set into font size module !?
+
 todo: Detect if a font failed to load by making a new canvas and printing text with unknown font, then printing it with the EDITOR.settings.style.font
 and if they are the same it probably means something...
 
