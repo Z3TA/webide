@@ -113,6 +113,11 @@
 					return alertBox(err.message);
 				}
 
+				if(retry > 0) {
+					// The folder is not listed because the file explored opened before it existed... so re-open the file explorer
+					EDITOR.fileExplorer(folder);
+				}
+
 				for(var i=0; i<files.length; i++) {
 					if( files[i].type == "-" && files[i].name.match(/readme/i) ) {
 						EDITOR.openFile(files[i].path);
