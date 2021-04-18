@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
 		
-	<path stroke="#7d7d9d" stroke-width="1" fill="#efefef" d="
+	<path stroke="#7d7d9d" stroke-width="1" fill="yellow" d="
 	M 11,12
 	C 0 17  2 16  5 24
 	C -3 48  8 35  7 47
