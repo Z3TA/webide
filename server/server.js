@@ -268,7 +268,7 @@ var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 
 // On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
 var HTTP_PORT = getArg(["port", "port"]) || DEFAULT.editor_http_port; 
-if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
+//if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
 // For generating URL's
 var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
