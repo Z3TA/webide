@@ -77,9 +77,8 @@ console.log("settings_overload: loaded settings_overload.js");
 	
 	// note: The css file is loaded in the window.onload event.
 	function cssLoadedMaybe(err) {
-		
 		if(err) {
-console.error(err);
+			console.error(err);
 			loadCSS_error = err;
 			return makeGlyphWidthDetector();
 		}
@@ -309,26 +308,13 @@ EDITOR.settings.style.font = "LiberationMono";
 				EDITOR.settings.gridHeight = 22;
 				EDITOR.settings.gridWidth = 8.433;
 			};
-			
 		}
-
 		else {
-			
 			// We choose Ubuntu Mono as standard because it looks good with both CLD, GrayScale, *and* without Antialias! 
 			
 			webFontLoading = "ubuntu";
 			loadFont = function() {
-				try {
-					UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css", cssLoadedMaybe);
-				}
-				catch(err) {
-					if(err) {
-						debug("Failed to load font (" + webFontLoading + ")  error: " + err.message);
-
-						webFontLoading = null;
-						loadCSS_error = err;
-					}
-				}
+				UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css", cssLoadedMaybe);
 			};
 			whenFontLoaded = function() {
 				if(webFontLoading == "ubuntu") {
@@ -365,15 +351,8 @@ var isAndroid = /(android)/i.test(navigator.userAgent);
 				
 webFontLoading = "DejaVuSansMono";
 			loadFont = function() {
-			try {
 				UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css", cssLoadedMaybe);
-			}
-			catch(err) {
-				if(err) {
-					debug("Failed to load font: " + err.message);
-				}
-			}
-			};
+				};
 			whenFontLoaded = function() {
 			if(webFontLoading == "DejaVuSansMono") {
 				EDITOR.settings.style.font = "DejaVuSansMono";

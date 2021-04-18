@@ -2213,18 +2213,44 @@ else {
 		var link  = document.createElement('link');
 		link.onerror = function() {
 			// It seems we can't get the real error event from the browser
-			var error = new Error(url + " failed to load! Check the dev tools console for info.");
-			if(callback) callback(error);
+			var error = new Error(url + " failed to load! (link.onerror) Check the dev tools console for info.");
+			if(callback) {
+				callback(error);
+				callback = null;
+			}
 		};
 		link.onload = function() {
-			if(callback) callback(null);
+			if(callback) {
+				callback(null);
+				callback = null;
+			}
 		};
 		//link.id   = cssId;
 		link.rel  = 'stylesheet';
 		link.type = 'text/css';
-		link.href = url;
 		link.media = 'all';
-		head.appendChild(link);
+		try {
+			link.href = url;
+		}
+		catch (err) {
+			var error = new Error(url + " failed to load! (link.href) Check the dev tools console for info.");
+			if(callback) {
+				callback(error);
+				callback = null;
+			}
+		}
+
+		try {
+			head.appendChild(link);
+		}
+		catch (err) {
+			var error = new Error(url + " failed to load! (head.appendChild) Check the dev tools console for info.");
+			if(callback) {
+				callback(error);
+				callback = null;
+			}
+		}
+		
 	},
 	
 	checkBrowser: function checkBrowser(userAgent) {
